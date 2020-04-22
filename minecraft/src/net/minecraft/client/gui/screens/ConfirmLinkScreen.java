@@ -1,26 +1,28 @@
 package net.minecraft.client.gui.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class ConfirmLinkScreen extends ConfirmScreen {
-	private final String warning;
-	private final String copyButton;
+	private final Component warning;
+	private final Component copyButton;
 	private final String url;
 	private final boolean showWarning;
 
 	public ConfirmLinkScreen(BooleanConsumer booleanConsumer, String string, boolean bl) {
 		super(booleanConsumer, new TranslatableComponent(bl ? "chat.link.confirmTrusted" : "chat.link.confirm"), new TextComponent(string));
-		this.yesButton = I18n.get(bl ? "chat.link.open" : "gui.yes");
-		this.noButton = I18n.get(bl ? "gui.cancel" : "gui.no");
-		this.copyButton = I18n.get("chat.copy");
-		this.warning = I18n.get("chat.link.warning");
+		this.yesButton = (Component)(bl ? new TranslatableComponent("chat.link.open") : CommonComponents.GUI_YES);
+		this.noButton = bl ? CommonComponents.GUI_CANCEL : CommonComponents.GUI_NO;
+		this.copyButton = new TranslatableComponent("chat.copy");
+		this.warning = new TranslatableComponent("chat.link.warning");
 		this.showWarning = !bl;
 		this.url = string;
 	}
@@ -43,10 +45,10 @@ public class ConfirmLinkScreen extends ConfirmScreen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		super.render(i, j, f);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		super.render(poseStack, i, j, f);
 		if (this.showWarning) {
-			this.drawCenteredString(this.font, this.warning, this.width / 2, 110, 16764108);
+			this.drawCenteredString(poseStack, this.font, this.warning, this.width / 2, 110, 16764108);
 		}
 	}
 }

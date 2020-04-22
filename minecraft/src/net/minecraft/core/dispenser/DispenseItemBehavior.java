@@ -548,7 +548,7 @@ public interface DispenseItemBehavior {
 				}
 			}
 		);
-		DispenserBlock.registerBehavior(Items.GLOWSTONE, new DefaultDispenseItemBehavior() {
+		DispenserBlock.registerBehavior(Items.GLOWSTONE, new OptionalDispenseItemBehavior() {
 			@Override
 			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
 				Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
@@ -559,6 +559,8 @@ public interface DispenseItemBehavior {
 					if ((Integer)blockState.getValue(RespawnAnchorBlock.CHARGE) != 4) {
 						RespawnAnchorBlock.charge(level, blockPos, blockState);
 						itemStack.shrink(1);
+					} else {
+						this.success = false;
 					}
 
 					return itemStack;

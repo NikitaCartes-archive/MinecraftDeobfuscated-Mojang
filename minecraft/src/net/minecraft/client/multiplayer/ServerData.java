@@ -1,24 +1,27 @@
 package net.minecraft.client.multiplayer;
 
+import java.util.Collections;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class ServerData {
 	public String name;
 	public String ip;
-	public String status;
-	public String motd;
+	public Component status;
+	public Component motd;
 	public long ping;
 	public int protocol = SharedConstants.getCurrentVersion().getProtocolVersion();
-	public String version = SharedConstants.getCurrentVersion().getName();
+	public Component version = new TextComponent(SharedConstants.getCurrentVersion().getName());
 	public boolean pinged;
-	public String playerList;
+	public List<Component> playerList = Collections.emptyList();
 	private ServerData.ServerPackStatus packStatus = ServerData.ServerPackStatus.PROMPT;
 	private String iconB64;
 	private boolean lan;

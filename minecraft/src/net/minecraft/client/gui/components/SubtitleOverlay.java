@@ -2,6 +2,7 @@ package net.minecraft.client.gui.components;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Iterator;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -12,6 +13,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.SoundEventListener;
 import net.minecraft.client.sounds.WeighedSoundEvents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
@@ -25,7 +27,7 @@ public class SubtitleOverlay extends GuiComponent implements SoundEventListener 
 		this.minecraft = minecraft;
 	}
 
-	public void render() {
+	public void render(PoseStack poseStack) {
 		if (!this.isListening && this.minecraft.options.showSubtitles) {
 			this.minecraft.getSoundManager().addListener(this);
 			this.isListening = true;
@@ -63,7 +65,7 @@ public class SubtitleOverlay extends GuiComponent implements SoundEventListener 
 
 			for (SubtitleOverlay.Subtitle subtitle : this.subtitles) {
 				int k = 255;
-				String string = subtitle.getText();
+				Component component = subtitle.getText();
 				Vec3 vec35 = subtitle.getLocation().subtract(vec3).normalize();
 				double d = -vec34.dot(vec35);
 				double e = -vec32.dot(vec35);
@@ -72,7 +74,7 @@ public class SubtitleOverlay extends GuiComponent implements SoundEventListener 
 				int m = 9;
 				int n = m / 2;
 				float f = 1.0F;
-				int o = this.minecraft.font.width(string);
+				int o = this.minecraft.font.width(component);
 				int p = Mth.floor(Mth.clampedLerp(255.0, 75.0, (double)((float)(Util.getMillis() - subtitle.getTime()) / 3000.0F)));
 				int q = p << 16 | p << 8 | p;
 				RenderSystem.pushMatrix();
@@ -82,17 +84,17 @@ public class SubtitleOverlay extends GuiComponent implements SoundEventListener 
 					0.0F
 				);
 				RenderSystem.scalef(1.0F, 1.0F, 1.0F);
-				fill(-l - 1, -n - 1, l + 1, n + 1, this.minecraft.options.getBackgroundColor(0.8F));
+				fill(poseStack, -l - 1, -n - 1, l + 1, n + 1, this.minecraft.options.getBackgroundColor(0.8F));
 				RenderSystem.enableBlend();
 				if (!bl) {
 					if (d > 0.0) {
-						this.minecraft.font.draw(">", (float)(l - this.minecraft.font.width(">")), (float)(-n), q + -16777216);
+						this.minecraft.font.draw(poseStack, ">", (float)(l - this.minecraft.font.width(">")), (float)(-n), q + -16777216);
 					} else if (d < 0.0) {
-						this.minecraft.font.draw("<", (float)(-l), (float)(-n), q + -16777216);
+						this.minecraft.font.draw(poseStack, "<", (float)(-l), (float)(-n), q + -16777216);
 					}
 				}
 
-				this.minecraft.font.draw(string, (float)(-o / 2), (float)(-n), q + -16777216);
+				this.minecraft.font.draw(poseStack, component, (float)(-o / 2), (float)(-n), q + -16777216);
 				RenderSystem.popMatrix();
 				i++;
 			}
@@ -105,33 +107,34 @@ public class SubtitleOverlay extends GuiComponent implements SoundEventListener 
 	@Override
 	public void onPlaySound(SoundInstance soundInstance, WeighedSoundEvents weighedSoundEvents) {
 		if (weighedSoundEvents.getSubtitle() != null) {
-			String string = weighedSoundEvents.getSubtitle().getColoredString();
+			Component component = weighedSoundEvents.getSubtitle();
 			if (!this.subtitles.isEmpty()) {
 				for (SubtitleOverlay.Subtitle subtitle : this.subtitles) {
-					if (subtitle.getText().equals(string)) {
+					if (subtitle.getText().equals(component)) {
 						subtitle.refresh(new Vec3((double)soundInstance.getX(), (double)soundInstance.getY(), (double)soundInstance.getZ()));
 						return;
 					}
 				}
 			}
 
-			this.subtitles.add(new SubtitleOverlay.Subtitle(string, new Vec3((double)soundInstance.getX(), (double)soundInstance.getY(), (double)soundInstance.getZ())));
+			this.subtitles
+				.add(new SubtitleOverlay.Subtitle(component, new Vec3((double)soundInstance.getX(), (double)soundInstance.getY(), (double)soundInstance.getZ())));
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
 	public class Subtitle {
-		private final String text;
+		private final Component text;
 		private long time;
 		private Vec3 location;
 
-		public Subtitle(String string, Vec3 vec3) {
-			this.text = string;
+		public Subtitle(Component component, Vec3 vec3) {
+			this.text = component;
 			this.location = vec3;
 			this.time = Util.getMillis();
 		}
 
-		public String getText() {
+		public Component getText() {
 			return this.text;
 		}
 

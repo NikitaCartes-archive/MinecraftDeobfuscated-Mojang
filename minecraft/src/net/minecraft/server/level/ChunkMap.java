@@ -82,6 +82,7 @@ import net.minecraft.world.level.chunk.storage.ChunkStorage;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.logging.log4j.LogManager;
@@ -118,7 +119,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 
 	public ChunkMap(
 		ServerLevel serverLevel,
-		File file,
+		LevelStorageSource.LevelStorageAccess levelStorageAccess,
 		DataFixer dataFixer,
 		StructureManager structureManager,
 		Executor executor,
@@ -130,9 +131,9 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		int i,
 		boolean bl
 	) {
-		super(new File(serverLevel.getDimension().getType().getStorageFolder(file), "region"), dataFixer, bl);
+		super(new File(levelStorageAccess.getDimensionPath(serverLevel.getDimension().getType()), "region"), dataFixer, bl);
 		this.structureManager = structureManager;
-		this.storageFolder = serverLevel.getDimension().getType().getStorageFolder(file);
+		this.storageFolder = levelStorageAccess.getDimensionPath(serverLevel.getDimension().getType());
 		this.level = serverLevel;
 		this.generator = chunkGenerator;
 		this.mainThreadExecutor = blockableEventLoop;
@@ -951,7 +952,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		if (!(entity instanceof EnderDragonPart)) {
 			if (!(entity instanceof LightningBolt)) {
 				EntityType<?> entityType = entity.getType();
-				int i = entityType.chunkRange() * 16;
+				int i = entityType.clientTrackingRange() * 16;
 				int j = entityType.updateInterval();
 				if (this.entityMap.containsKey(entity.getId())) {
 					throw (IllegalStateException)Util.pauseInIde(new IllegalStateException("Entity is already tracked!"));
@@ -1176,7 +1177,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 			int i = this.range;
 
 			for (Entity entity : collection) {
-				int j = entity.getType().chunkRange() * 16;
+				int j = entity.getType().clientTrackingRange() * 16;
 				if (j > i) {
 					i = j;
 				}

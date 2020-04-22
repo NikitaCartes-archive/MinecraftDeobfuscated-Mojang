@@ -13,29 +13,30 @@ import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import java.lang.reflect.Type;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.GsonHelper;
 import org.apache.commons.lang3.StringUtils;
 
 public class BlockEntitySignTextStrictJsonFix extends NamedEntityFix {
 	public static final Gson GSON = new GsonBuilder().registerTypeAdapter(Component.class, new JsonDeserializer<Component>() {
-		public Component deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+		public MutableComponent deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 			if (jsonElement.isJsonPrimitive()) {
 				return new TextComponent(jsonElement.getAsString());
 			} else if (jsonElement.isJsonArray()) {
 				JsonArray jsonArray = jsonElement.getAsJsonArray();
-				Component component = null;
+				MutableComponent mutableComponent = null;
 
 				for (JsonElement jsonElement2 : jsonArray) {
-					Component component2 = this.deserialize(jsonElement2, jsonElement2.getClass(), jsonDeserializationContext);
-					if (component == null) {
-						component = component2;
+					MutableComponent mutableComponent2 = this.deserialize(jsonElement2, jsonElement2.getClass(), jsonDeserializationContext);
+					if (mutableComponent == null) {
+						mutableComponent = mutableComponent2;
 					} else {
-						component.append(component2);
+						mutableComponent.append(mutableComponent2);
 					}
 				}
 
-				return component;
+				return mutableComponent;
 			} else {
 				throw new JsonParseException("Don't know how to turn " + jsonElement + " into a Component");
 			}
@@ -54,7 +55,7 @@ public class BlockEntitySignTextStrictJsonFix extends NamedEntityFix {
 				try {
 					component = GsonHelper.fromJson(GSON, string2, Component.class, true);
 					if (component == null) {
-						component = new TextComponent("");
+						component = TextComponent.EMPTY;
 					}
 				} catch (JsonParseException var8) {
 				}
@@ -80,7 +81,7 @@ public class BlockEntitySignTextStrictJsonFix extends NamedEntityFix {
 				component = new TextComponent(string2);
 			}
 		} else {
-			component = new TextComponent("");
+			component = TextComponent.EMPTY;
 		}
 
 		return dynamic.set(string, dynamic.createString(Component.Serializer.toJson(component)));

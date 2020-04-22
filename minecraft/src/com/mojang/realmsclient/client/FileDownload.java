@@ -23,6 +23,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -334,7 +335,7 @@ public class FileDownload {
 
 			try (LevelStorageSource.LevelStorageAccess levelStorageAccess2 = levelStorageSource.createAccess(string2)) {
 				levelStorageAccess2.renameLevel(string2.trim());
-				Path path2 = levelStorageAccess2.getLevelPath().resolve("level.dat");
+				Path path2 = levelStorageAccess2.getLevelPath(LevelResource.LEVEL_DATA_FILE);
 				deletePlayerTag(path2.toFile());
 			} catch (IOException var124) {
 				LOGGER.error("Failed to rename unpacked realms level {}", string2, var124);

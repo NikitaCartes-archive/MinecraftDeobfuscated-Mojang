@@ -8,14 +8,18 @@ import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelSimulatedRW;
-import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 
 public class BlobFoliagePlacer extends FoliagePlacer {
-	private final int height;
+	protected final int height;
+
+	protected BlobFoliagePlacer(int i, int j, int k, int l, int m, FoliagePlacerType<?> foliagePlacerType) {
+		super(i, j, k, l, foliagePlacerType);
+		this.height = m;
+	}
 
 	public BlobFoliagePlacer(int i, int j, int k, int l, int m) {
-		super(i, j, k, l, FoliagePlacerType.BLOB_FOLIAGE_PLACER);
-		this.height = m;
+		this(i, j, k, l, m, FoliagePlacerType.BLOB_FOLIAGE_PLACER);
 	}
 
 	public <T> BlobFoliagePlacer(Dynamic<T> dynamic) {
@@ -29,35 +33,31 @@ public class BlobFoliagePlacer extends FoliagePlacer {
 	}
 
 	@Override
-	public void createFoliage(
-		LevelSimulatedRW levelSimulatedRW, Random random, SmallTreeConfiguration smallTreeConfiguration, int i, BlockPos blockPos, int j, int k, Set<BlockPos> set
+	protected void createFoliage(
+		LevelSimulatedRW levelSimulatedRW,
+		Random random,
+		TreeConfiguration treeConfiguration,
+		int i,
+		FoliagePlacer.FoliageAttachment foliageAttachment,
+		int j,
+		int k,
+		Set<BlockPos> set,
+		int l
 	) {
-		int l = this.offset + random.nextInt(this.offsetRandom + 1);
-
-		for (int m = j + l; m >= l; m--) {
-			int n = Math.max(k - 1 - (m - j) / 2, 0);
-			this.placeLeavesRow(levelSimulatedRW, random, smallTreeConfiguration, blockPos, j, m, n, set);
+		for (int m = l; m >= l - j; m--) {
+			int n = Math.max(k + foliageAttachment.radiusOffset() - 1 - m / 2, 0);
+			this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, foliageAttachment.foliagePos(), n, set, m, foliageAttachment.doubleTrunk());
 		}
 	}
 
 	@Override
-	public int foliageRadius(Random random, int i, SmallTreeConfiguration smallTreeConfiguration) {
-		return this.radius + random.nextInt(this.radiusRandom + 1);
-	}
-
-	@Override
-	public int foliageHeight(Random random, int i) {
+	public int foliageHeight(Random random, int i, TreeConfiguration treeConfiguration) {
 		return this.height;
 	}
 
 	@Override
-	protected boolean shouldSkipLocation(Random random, int i, int j, int k, int l, int m) {
-		return Math.abs(j) == m && Math.abs(l) == m && (random.nextInt(2) == 0 || k == i);
-	}
-
-	@Override
-	public int getTreeRadiusForHeight(int i, int j, int k) {
-		return k == 0 ? 0 : 1;
+	protected boolean shouldSkipLocation(Random random, int i, int j, int k, int l, boolean bl) {
+		return i == l && k == l && (random.nextInt(2) == 0 || j == 0);
 	}
 
 	@Override

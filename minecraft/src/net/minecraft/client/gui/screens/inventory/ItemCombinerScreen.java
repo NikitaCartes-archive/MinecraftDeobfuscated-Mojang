@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
@@ -38,27 +39,27 @@ public class ItemCombinerScreen<T extends ItemCombinerMenu> extends AbstractCont
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
-		super.render(i, j, f);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		super.render(poseStack, i, j, f);
 		RenderSystem.disableBlend();
-		this.renderFg(i, j, f);
-		this.renderTooltip(i, j);
+		this.renderFg(poseStack, i, j, f);
+		this.renderTooltip(poseStack, i, j);
 	}
 
-	protected void renderFg(int i, int j, float f) {
+	protected void renderFg(PoseStack poseStack, int i, int j, float f) {
 	}
 
 	@Override
-	protected void renderBg(float f, int i, int j) {
+	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.minecraft.getTextureManager().bind(this.menuResource);
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
-		this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
-		this.blit(k + 59, l + 20, 0, this.imageHeight + (this.menu.getSlot(0).hasItem() ? 0 : 16), 110, 16);
+		this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
+		this.blit(poseStack, k + 59, l + 20, 0, this.imageHeight + (this.menu.getSlot(0).hasItem() ? 0 : 16), 110, 16);
 		if ((this.menu.getSlot(0).hasItem() || this.menu.getSlot(1).hasItem()) && !this.menu.getSlot(2).hasItem()) {
-			this.blit(k + 99, l + 45, this.imageWidth, 0, 28, 21);
+			this.blit(poseStack, k + 99, l + 45, this.imageWidth, 0, 28, 21);
 		}
 	}
 

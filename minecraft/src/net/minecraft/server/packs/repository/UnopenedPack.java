@@ -129,9 +129,9 @@ public class UnopenedPack implements AutoCloseable {
 	public Component getChatLink(boolean bl) {
 		return ComponentUtils.wrapInSquareBrackets(new TextComponent(this.id))
 			.withStyle(
-				style -> style.setColor(bl ? ChatFormatting.GREEN : ChatFormatting.RED)
-						.setInsertion(StringArgumentType.escapeIfRequired(this.id))
-						.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("").append(this.title).append("\n").append(this.description)))
+				style -> style.withColor(bl ? ChatFormatting.GREEN : ChatFormatting.RED)
+						.withInsertion(StringArgumentType.escapeIfRequired(this.id))
+						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("").append(this.title).append("\n").append(this.description)))
 			);
 	}
 

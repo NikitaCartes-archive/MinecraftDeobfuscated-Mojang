@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.screens.resourcepacks.lists;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -35,16 +36,11 @@ public abstract class ResourcePackList extends ObjectSelectionList<ResourcePackL
 	}
 
 	@Override
-	protected void renderHeader(int i, int j, Tesselator tesselator) {
+	protected void renderHeader(PoseStack poseStack, int i, int j, Tesselator tesselator) {
 		Component component = new TextComponent("").append(this.title).withStyle(ChatFormatting.UNDERLINE, ChatFormatting.BOLD);
 		this.minecraft
 			.font
-			.draw(
-				component.getColoredString(),
-				(float)(i + this.width / 2 - this.minecraft.font.width(component.getColoredString()) / 2),
-				(float)Math.min(this.y0 + 3, j),
-				16777215
-			);
+			.draw(poseStack, component, (float)(i + this.width / 2 - this.minecraft.font.width(component) / 2), (float)Math.min(this.y0 + 3, j), 16777215);
 	}
 
 	@Override
@@ -93,85 +89,80 @@ public abstract class ResourcePackList extends ObjectSelectionList<ResourcePackL
 			return this.resourcePack.getCompatibility();
 		}
 
-		protected String getDescription() {
-			return this.resourcePack.getDescription().getColoredString();
-		}
-
-		protected String getName() {
-			return this.resourcePack.getTitle().getColoredString();
-		}
-
 		public UnopenedResourcePack getResourcePack() {
 			return this.resourcePack;
 		}
 
 		@Override
-		public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			PackCompatibility packCompatibility = this.getCompatibility();
 			if (!packCompatibility.isCompatible()) {
 				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-				GuiComponent.fill(k - 1, j - 1, k + l - 9, j + m + 1, -8978432);
+				GuiComponent.fill(poseStack, k - 1, j - 1, k + l - 9, j + m + 1, -8978432);
 			}
 
 			this.bindToIcon();
 			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			GuiComponent.blit(k, j, 0.0F, 0.0F, 32, 32, 32, 32);
-			String string = this.getName();
-			String string2 = this.getDescription();
+			GuiComponent.blit(poseStack, k, j, 0.0F, 0.0F, 32, 32, 32, 32);
+			Component component = this.resourcePack.getTitle();
+			Component component2 = this.resourcePack.getDescription();
 			if (this.showHoverOverlay() && (this.minecraft.options.touchscreen || bl)) {
 				this.minecraft.getTextureManager().bind(ResourcePackList.ICON_OVERLAY_LOCATION);
-				GuiComponent.fill(k, j, k + 32, j + 32, -1601138544);
+				GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
 				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 				int p = n - k;
 				int q = o - j;
 				if (!packCompatibility.isCompatible()) {
-					string = ResourcePackList.INCOMPATIBLE_TITLE.getColoredString();
-					string2 = packCompatibility.getDescription().getColoredString();
+					component = ResourcePackList.INCOMPATIBLE_TITLE;
+					component2 = packCompatibility.getDescription();
 				}
 
 				if (this.canMoveRight()) {
 					if (p < 32) {
-						GuiComponent.blit(k, j, 0.0F, 32.0F, 32, 32, 256, 256);
+						GuiComponent.blit(poseStack, k, j, 0.0F, 32.0F, 32, 32, 256, 256);
 					} else {
-						GuiComponent.blit(k, j, 0.0F, 0.0F, 32, 32, 256, 256);
+						GuiComponent.blit(poseStack, k, j, 0.0F, 0.0F, 32, 32, 256, 256);
 					}
 				} else {
 					if (this.canMoveLeft()) {
 						if (p < 16) {
-							GuiComponent.blit(k, j, 32.0F, 32.0F, 32, 32, 256, 256);
+							GuiComponent.blit(poseStack, k, j, 32.0F, 32.0F, 32, 32, 256, 256);
 						} else {
-							GuiComponent.blit(k, j, 32.0F, 0.0F, 32, 32, 256, 256);
+							GuiComponent.blit(poseStack, k, j, 32.0F, 0.0F, 32, 32, 256, 256);
 						}
 					}
 
 					if (this.canMoveUp()) {
 						if (p < 32 && p > 16 && q < 16) {
-							GuiComponent.blit(k, j, 96.0F, 32.0F, 32, 32, 256, 256);
+							GuiComponent.blit(poseStack, k, j, 96.0F, 32.0F, 32, 32, 256, 256);
 						} else {
-							GuiComponent.blit(k, j, 96.0F, 0.0F, 32, 32, 256, 256);
+							GuiComponent.blit(poseStack, k, j, 96.0F, 0.0F, 32, 32, 256, 256);
 						}
 					}
 
 					if (this.canMoveDown()) {
 						if (p < 32 && p > 16 && q > 16) {
-							GuiComponent.blit(k, j, 64.0F, 32.0F, 32, 32, 256, 256);
+							GuiComponent.blit(poseStack, k, j, 64.0F, 32.0F, 32, 32, 256, 256);
 						} else {
-							GuiComponent.blit(k, j, 64.0F, 0.0F, 32, 32, 256, 256);
+							GuiComponent.blit(poseStack, k, j, 64.0F, 0.0F, 32, 32, 256, 256);
 						}
 					}
 				}
 			}
 
-			int px = this.minecraft.font.width(string);
+			int px = this.minecraft.font.width(component);
 			if (px > 157) {
-				string = this.minecraft.font.substrByWidth(string, 157 - this.minecraft.font.width("...")) + "...";
+				Component component3 = this.minecraft.font.substrByWidth(component, 157 - this.minecraft.font.width("...")).append("...");
+				this.minecraft.font.drawShadow(poseStack, component3, (float)(k + 32 + 2), (float)(j + 1), 16777215);
+			} else {
+				this.minecraft.font.drawShadow(poseStack, component, (float)(k + 32 + 2), (float)(j + 1), 16777215);
 			}
 
-			this.minecraft.font.drawShadow(string, (float)(k + 32 + 2), (float)(j + 1), 16777215);
-			List<String> list = this.minecraft.font.split(string2, 157);
+			this.minecraft.font.drawShadow(poseStack, component, (float)(k + 32 + 2), (float)(j + 1), 16777215);
+			List<Component> list = this.minecraft.font.split(component2, 157);
 
 			for (int r = 0; r < 2 && r < list.size(); r++) {
-				this.minecraft.font.drawShadow((String)list.get(r), (float)(k + 32 + 2), (float)(j + 12 + 10 * r), 8421504);
+				this.minecraft.font.drawShadow(poseStack, (Component)list.get(r), (float)(k + 32 + 2), (float)(j + 12 + 10 * r), 8421504);
 			}
 		}
 

@@ -3697,7 +3697,7 @@ public class BlockModelGenerators {
 		this.createSimpleFlatItemModel(Blocks.LADDER);
 		this.createNonTemplateHorizontalBlock(Blocks.LECTERN);
 		this.createNormalTorch(Blocks.TORCH, Blocks.WALL_TORCH);
-		this.createNormalTorch(Blocks.SOUL_FIRE_TORCH, Blocks.SOUL_FIRE_WALL_TORCH);
+		this.createNormalTorch(Blocks.SOUL_TORCH, Blocks.SOUL_WALL_TORCH);
 		this.createCraftingTableLike(Blocks.CRAFTING_TABLE, Blocks.OAK_PLANKS, TextureMapping::craftingTable);
 		this.createCraftingTableLike(Blocks.FLETCHING_TABLE, Blocks.BIRCH_PLANKS, TextureMapping::fletchingTable);
 		this.createNyliumBlock(Blocks.CRIMSON_NYLIUM);
@@ -3705,7 +3705,7 @@ public class BlockModelGenerators {
 		this.createDispenserBlock(Blocks.DISPENSER);
 		this.createDispenserBlock(Blocks.DROPPER);
 		this.createLantern(Blocks.LANTERN);
-		this.createLantern(Blocks.SOUL_FIRE_LANTERN);
+		this.createLantern(Blocks.SOUL_LANTERN);
 		this.createAxisAlignedPillarBlock(Blocks.BASALT, TexturedModel.COLUMN);
 		this.createAxisAlignedPillarBlock(Blocks.POLISHED_BASALT, TexturedModel.COLUMN);
 		this.createAxisAlignedPillarBlock(Blocks.BONE_BLOCK, TexturedModel.COLUMN);

@@ -1,6 +1,8 @@
 package com.mojang.realmsclient.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.RealmsWorldOptions;
 import com.mojang.realmsclient.util.RealmsTextureManager;
@@ -13,7 +15,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.TickableWidget;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
@@ -25,14 +29,14 @@ public class RealmsWorldSlotButton extends Button implements TickableWidget {
 	public static final ResourceLocation DEFAULT_WORLD_SLOT_2 = new ResourceLocation("minecraft", "textures/gui/title/background/panorama_2.png");
 	public static final ResourceLocation DEFAULT_WORLD_SLOT_3 = new ResourceLocation("minecraft", "textures/gui/title/background/panorama_3.png");
 	private final Supplier<RealmsServer> serverDataProvider;
-	private final Consumer<String> toolTipSetter;
+	private final Consumer<Component> toolTipSetter;
 	private final int slotIndex;
 	private int animTick;
 	@Nullable
 	private RealmsWorldSlotButton.State state;
 
-	public RealmsWorldSlotButton(int i, int j, int k, int l, Supplier<RealmsServer> supplier, Consumer<String> consumer, int m, Button.OnPress onPress) {
-		super(i, j, k, l, "", onPress);
+	public RealmsWorldSlotButton(int i, int j, int k, int l, Supplier<RealmsServer> supplier, Consumer<Component> consumer, int m, Button.OnPress onPress) {
+		super(i, j, k, l, TextComponent.EMPTY, onPress);
 		this.serverDataProvider = supplier;
 		this.slotIndex = m;
 		this.toolTipSetter = consumer;
@@ -69,49 +73,65 @@ public class RealmsWorldSlotButton extends Button implements TickableWidget {
 				bl3 = realmsWorldOptions.empty;
 			}
 
-			RealmsWorldSlotButton.Action action = RealmsWorldSlotButton.Action.NOTHING;
-			String string3 = null;
-			if (bl2) {
-				if (!realmsServer.expired && realmsServer.state != RealmsServer.State.UNINITIALIZED) {
-					action = RealmsWorldSlotButton.Action.JOIN;
-					string3 = I18n.get("mco.configure.world.slot.tooltip.active");
-				}
-			} else if (bl) {
-				if (!realmsServer.expired) {
-					action = RealmsWorldSlotButton.Action.SWITCH_SLOT;
-					string3 = I18n.get("mco.configure.world.slot.tooltip.minigame");
-				}
-			} else {
-				action = RealmsWorldSlotButton.Action.SWITCH_SLOT;
-				string3 = I18n.get("mco.configure.world.slot.tooltip");
-			}
-
-			this.state = new RealmsWorldSlotButton.State(bl2, string, l, string2, bl3, bl, action, string3);
-			this.handleNarration(realmsServer, this.state.slotName, this.state.empty, this.state.minigame, this.state.action, this.state.actionPrompt);
+			RealmsWorldSlotButton.Action action = getAction(realmsServer, bl2, bl);
+			Pair<Component, Component> pair = this.getTooltipAndNarration(realmsServer, string, bl3, bl, action);
+			this.state = new RealmsWorldSlotButton.State(bl2, string, l, string2, bl3, bl, action, pair.getFirst());
+			this.setMessage(pair.getSecond());
 		}
 	}
 
-	public void handleNarration(RealmsServer realmsServer, String string, boolean bl, boolean bl2, RealmsWorldSlotButton.Action action, String string2) {
-		String string3;
-		if (action == RealmsWorldSlotButton.Action.NOTHING) {
-			string3 = string;
-		} else if (bl2) {
-			if (bl) {
-				string3 = string2;
-			} else {
-				string3 = string2 + " " + string + " " + realmsServer.minigameName;
+	private static RealmsWorldSlotButton.Action getAction(RealmsServer realmsServer, boolean bl, boolean bl2) {
+		if (bl) {
+			if (!realmsServer.expired && realmsServer.state != RealmsServer.State.UNINITIALIZED) {
+				return RealmsWorldSlotButton.Action.JOIN;
 			}
 		} else {
-			string3 = string2 + " " + string;
+			if (!bl2) {
+				return RealmsWorldSlotButton.Action.SWITCH_SLOT;
+			}
+
+			if (!realmsServer.expired) {
+				return RealmsWorldSlotButton.Action.SWITCH_SLOT;
+			}
 		}
 
-		this.setMessage(string3);
+		return RealmsWorldSlotButton.Action.NOTHING;
+	}
+
+	private Pair<Component, Component> getTooltipAndNarration(
+		RealmsServer realmsServer, String string, boolean bl, boolean bl2, RealmsWorldSlotButton.Action action
+	) {
+		if (action == RealmsWorldSlotButton.Action.NOTHING) {
+			return Pair.of(null, new TextComponent(string));
+		} else {
+			Component component;
+			if (bl2) {
+				if (bl) {
+					component = TextComponent.EMPTY;
+				} else {
+					component = new TextComponent(" ").append(string).append(" ").append(realmsServer.minigameName);
+				}
+			} else {
+				component = new TextComponent(" ").append(string);
+			}
+
+			Component component2;
+			if (action == RealmsWorldSlotButton.Action.JOIN) {
+				component2 = new TranslatableComponent("mco.configure.world.slot.tooltip.active");
+			} else {
+				component2 = bl2 ? new TranslatableComponent("mco.configure.world.slot.tooltip.minigame") : new TranslatableComponent("mco.configure.world.slot.tooltip");
+			}
+
+			Component component3 = component2.mutableCopy().append(component);
+			return Pair.of(component2, component3);
+		}
 	}
 
 	@Override
-	public void renderButton(int i, int j, float f) {
+	public void renderButton(PoseStack poseStack, int i, int j, float f) {
 		if (this.state != null) {
 			this.drawSlotFrame(
+				poseStack,
 				this.x,
 				this.y,
 				i,
@@ -130,6 +150,7 @@ public class RealmsWorldSlotButton extends Button implements TickableWidget {
 	}
 
 	private void drawSlotFrame(
+		PoseStack poseStack,
 		int i,
 		int j,
 		int k,
@@ -142,11 +163,11 @@ public class RealmsWorldSlotButton extends Button implements TickableWidget {
 		boolean bl2,
 		boolean bl3,
 		RealmsWorldSlotButton.Action action,
-		@Nullable String string3
+		@Nullable Component component
 	) {
 		boolean bl4 = this.isHovered();
-		if (this.isMouseOver((double)k, (double)l) && string3 != null) {
-			this.toolTipSetter.accept(string3);
+		if (this.isMouseOver((double)k, (double)l) && component != null) {
+			this.toolTipSetter.accept(component);
 		}
 
 		Minecraft minecraft = Minecraft.getInstance();
@@ -172,7 +193,7 @@ public class RealmsWorldSlotButton extends Button implements TickableWidget {
 			RenderSystem.color4f(0.56F, 0.56F, 0.56F, 1.0F);
 		}
 
-		blit(i + 3, j + 3, 0.0F, 0.0F, 74, 74, 74, 74);
+		blit(poseStack, i + 3, j + 3, 0.0F, 0.0F, 74, 74, 74, 74);
 		textureManager.bind(SLOT_FRAME_LOCATION);
 		boolean bl5 = bl4 && action != RealmsWorldSlotButton.Action.NOTHING;
 		if (bl5) {
@@ -183,8 +204,8 @@ public class RealmsWorldSlotButton extends Button implements TickableWidget {
 			RenderSystem.color4f(0.56F, 0.56F, 0.56F, 1.0F);
 		}
 
-		blit(i, j, 0.0F, 0.0F, 80, 80, 80, 80);
-		this.drawCenteredString(minecraft.font, string, i + 40, j + 66, 16777215);
+		blit(poseStack, i, j, 0.0F, 0.0F, 80, 80, 80, 80);
+		this.drawCenteredString(poseStack, minecraft.font, string, i + 40, j + 66, 16777215);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -203,9 +224,12 @@ public class RealmsWorldSlotButton extends Button implements TickableWidget {
 		public final boolean empty;
 		public final boolean minigame;
 		public final RealmsWorldSlotButton.Action action;
-		private final String actionPrompt;
+		@Nullable
+		private final Component actionPrompt;
 
-		State(boolean bl, String string, long l, @Nullable String string2, boolean bl2, boolean bl3, RealmsWorldSlotButton.Action action, @Nullable String string3) {
+		State(
+			boolean bl, String string, long l, @Nullable String string2, boolean bl2, boolean bl3, RealmsWorldSlotButton.Action action, @Nullable Component component
+		) {
 			this.isCurrentlyActiveSlot = bl;
 			this.slotName = string;
 			this.imageId = l;
@@ -213,7 +237,7 @@ public class RealmsWorldSlotButton extends Button implements TickableWidget {
 			this.empty = bl2;
 			this.minigame = bl3;
 			this.action = action;
-			this.actionPrompt = string3;
+			this.actionPrompt = component;
 		}
 	}
 }

@@ -44,6 +44,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.LevelStorageSource;
 
 public class ServerChunkCache extends ChunkSource {
 	private static final int MAGIC_NUMBER = (int)Math.pow(17.0, 2.0);
@@ -65,7 +66,7 @@ public class ServerChunkCache extends ChunkSource {
 
 	public ServerChunkCache(
 		ServerLevel serverLevel,
-		File file,
+		LevelStorageSource.LevelStorageAccess levelStorageAccess,
 		DataFixer dataFixer,
 		StructureManager structureManager,
 		Executor executor,
@@ -79,12 +80,23 @@ public class ServerChunkCache extends ChunkSource {
 		this.mainThreadProcessor = new ServerChunkCache.MainThreadExecutor(serverLevel);
 		this.generator = chunkGenerator;
 		this.mainThread = Thread.currentThread();
-		File file2 = serverLevel.getDimension().getType().getStorageFolder(file);
-		File file3 = new File(file2, "data");
-		file3.mkdirs();
-		this.dataStorage = new DimensionDataStorage(file3, dataFixer);
+		File file = levelStorageAccess.getDimensionPath(serverLevel.getDimension().getType());
+		File file2 = new File(file, "data");
+		file2.mkdirs();
+		this.dataStorage = new DimensionDataStorage(file2, dataFixer);
 		this.chunkMap = new ChunkMap(
-			serverLevel, file, dataFixer, structureManager, executor, this.mainThreadProcessor, this, this.getGenerator(), chunkProgressListener, supplier, i, bl
+			serverLevel,
+			levelStorageAccess,
+			dataFixer,
+			structureManager,
+			executor,
+			this.mainThreadProcessor,
+			this,
+			this.getGenerator(),
+			chunkProgressListener,
+			supplier,
+			i,
+			bl
 		);
 		this.lightEngine = this.chunkMap.getLightEngine();
 		this.distanceManager = this.chunkMap.getDistanceManager();

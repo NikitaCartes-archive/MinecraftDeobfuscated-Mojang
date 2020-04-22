@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.screens.advancements;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiComponent;
@@ -31,7 +32,7 @@ enum AdvancementTabType {
 		return this.max;
 	}
 
-	public void draw(GuiComponent guiComponent, int i, int j, boolean bl, int k) {
+	public void draw(PoseStack poseStack, GuiComponent guiComponent, int i, int j, boolean bl, int k) {
 		int l = this.textureX;
 		if (k > 0) {
 			l += this.width;
@@ -42,7 +43,7 @@ enum AdvancementTabType {
 		}
 
 		int m = bl ? this.textureY + this.height : this.textureY;
-		guiComponent.blit(i + this.getX(k), j + this.getY(k), l, m, this.width, this.height);
+		guiComponent.blit(poseStack, i + this.getX(k), j + this.getY(k), l, m, this.width, this.height);
 	}
 
 	public void drawIcon(int i, int j, int k, ItemRenderer itemRenderer, ItemStack itemStack) {

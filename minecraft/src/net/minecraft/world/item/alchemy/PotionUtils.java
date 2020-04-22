@@ -14,6 +14,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -155,7 +156,7 @@ public class PotionUtils {
 			list.add(new TranslatableComponent("effect.none").withStyle(ChatFormatting.GRAY));
 		} else {
 			for (MobEffectInstance mobEffectInstance : list2) {
-				Component component = new TranslatableComponent(mobEffectInstance.getDescriptionId());
+				MutableComponent mutableComponent = new TranslatableComponent(mobEffectInstance.getDescriptionId());
 				MobEffect mobEffect = mobEffectInstance.getEffect();
 				Map<Attribute, AttributeModifier> map = mobEffect.getAttributeModifiers();
 				if (!map.isEmpty()) {
@@ -169,19 +170,19 @@ public class PotionUtils {
 				}
 
 				if (mobEffectInstance.getAmplifier() > 0) {
-					component.append(" ").append(new TranslatableComponent("potion.potency." + mobEffectInstance.getAmplifier()));
+					mutableComponent.append(" ").append(new TranslatableComponent("potion.potency." + mobEffectInstance.getAmplifier()));
 				}
 
 				if (mobEffectInstance.getDuration() > 20) {
-					component.append(" (").append(MobEffectUtil.formatDuration(mobEffectInstance, f)).append(")");
+					mutableComponent.append(" (").append(MobEffectUtil.formatDuration(mobEffectInstance, f)).append(")");
 				}
 
-				list.add(component.withStyle(mobEffect.getCategory().getTooltipFormatting()));
+				list.add(mutableComponent.withStyle(mobEffect.getCategory().getTooltipFormatting()));
 			}
 		}
 
 		if (!list3.isEmpty()) {
-			list.add(new TextComponent(""));
+			list.add(TextComponent.EMPTY);
 			list.add(new TranslatableComponent("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
 
 			for (Pair<Attribute, AttributeModifier> pair : list3) {

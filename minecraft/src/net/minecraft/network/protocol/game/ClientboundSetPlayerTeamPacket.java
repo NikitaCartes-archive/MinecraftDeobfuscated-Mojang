@@ -15,9 +15,9 @@ import net.minecraft.world.scores.Team;
 
 public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketListener> {
 	private String name = "";
-	private Component displayName = new TextComponent("");
-	private Component playerPrefix = new TextComponent("");
-	private Component playerSuffix = new TextComponent("");
+	private Component displayName = TextComponent.EMPTY;
+	private Component playerPrefix = TextComponent.EMPTY;
+	private Component playerSuffix = TextComponent.EMPTY;
 	private String nametagVisibility = Team.Visibility.ALWAYS.name;
 	private String collisionRule = Team.CollisionRule.ALWAYS.name;
 	private ChatFormatting color = ChatFormatting.RESET;

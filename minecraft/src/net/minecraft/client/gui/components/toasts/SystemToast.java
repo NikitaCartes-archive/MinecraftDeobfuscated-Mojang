@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.components.toasts;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -24,7 +25,7 @@ public class SystemToast implements Toast {
 	}
 
 	@Override
-	public Toast.Visibility render(ToastComponent toastComponent, long l) {
+	public Toast.Visibility render(PoseStack poseStack, ToastComponent toastComponent, long l) {
 		if (this.changed) {
 			this.lastChanged = l;
 			this.changed = false;
@@ -32,12 +33,12 @@ public class SystemToast implements Toast {
 
 		toastComponent.getMinecraft().getTextureManager().bind(TEXTURE);
 		RenderSystem.color3f(1.0F, 1.0F, 1.0F);
-		toastComponent.blit(0, 0, 0, 64, 160, 32);
+		toastComponent.blit(poseStack, 0, 0, 0, 64, 160, 32);
 		if (this.message == null) {
-			toastComponent.getMinecraft().font.draw(this.title, 18.0F, 12.0F, -256);
+			toastComponent.getMinecraft().font.draw(poseStack, this.title, 18.0F, 12.0F, -256);
 		} else {
-			toastComponent.getMinecraft().font.draw(this.title, 18.0F, 7.0F, -256);
-			toastComponent.getMinecraft().font.draw(this.message, 18.0F, 18.0F, -1);
+			toastComponent.getMinecraft().font.draw(poseStack, this.title, 18.0F, 7.0F, -256);
+			toastComponent.getMinecraft().font.draw(poseStack, this.message, 18.0F, 18.0F, -1);
 		}
 
 		return l - this.lastChanged < 5000L ? Toast.Visibility.SHOW : Toast.Visibility.HIDE;

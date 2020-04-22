@@ -3,11 +3,12 @@ package net.minecraft.client;
 import com.mojang.blaze3d.platform.Window;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.ChatComponent;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.ChatVisiblity;
 
@@ -19,9 +20,9 @@ public abstract class Option {
 			Minecraft.getInstance().levelRenderer.allChanged();
 		}, (options, progressOption) -> {
 			double d = progressOption.get(options);
-			String string = progressOption.getCaption();
+			MutableComponent mutableComponent = progressOption.createCaption();
 			int i = (int)d * 2 + 1;
-			return string + I18n.get("options.biomeBlendRadius." + i);
+			return mutableComponent.append(new TranslatableComponent("options.biomeBlendRadius." + i));
 		}
 	);
 	public static final ProgressOption CHAT_HEIGHT_FOCUSED = new ProgressOption(
@@ -30,7 +31,7 @@ public abstract class Option {
 			Minecraft.getInstance().gui.getChat().rescaleChat();
 		}, (options, progressOption) -> {
 			double d = progressOption.toPct(progressOption.get(options));
-			return progressOption.getCaption() + ChatComponent.getHeight(d) + "px";
+			return progressOption.createCaption().append(ChatComponent.getHeight(d) + "px");
 		}
 	);
 	public static final ProgressOption CHAT_HEIGHT_UNFOCUSED = new ProgressOption(
@@ -39,7 +40,7 @@ public abstract class Option {
 			Minecraft.getInstance().gui.getChat().rescaleChat();
 		}, (options, progressOption) -> {
 			double d = progressOption.toPct(progressOption.get(options));
-			return progressOption.getCaption() + ChatComponent.getHeight(d) + "px";
+			return progressOption.createCaption().append(ChatComponent.getHeight(d) + "px");
 		}
 	);
 	public static final ProgressOption CHAT_OPACITY = new ProgressOption(
@@ -48,7 +49,7 @@ public abstract class Option {
 			Minecraft.getInstance().gui.getChat().rescaleChat();
 		}, (options, progressOption) -> {
 			double d = progressOption.toPct(progressOption.get(options));
-			return progressOption.getCaption() + (int)(d * 90.0 + 10.0) + "%";
+			return progressOption.createCaption().append((int)(d * 90.0 + 10.0) + "%");
 		}
 	);
 	public static final ProgressOption CHAT_SCALE = new ProgressOption("options.chat.scale", 0.0, 1.0, 0.0F, options -> options.chatScale, (options, double_) -> {
@@ -56,15 +57,15 @@ public abstract class Option {
 		Minecraft.getInstance().gui.getChat().rescaleChat();
 	}, (options, progressOption) -> {
 		double d = progressOption.toPct(progressOption.get(options));
-		String string = progressOption.getCaption();
-		return d == 0.0 ? string + I18n.get("options.off") : string + (int)(d * 100.0) + "%";
+		MutableComponent mutableComponent = progressOption.createCaption();
+		return d == 0.0 ? mutableComponent.append(CommonComponents.OPTION_OFF) : mutableComponent.append((int)(d * 100.0) + "%");
 	});
 	public static final ProgressOption CHAT_WIDTH = new ProgressOption("options.chat.width", 0.0, 1.0, 0.0F, options -> options.chatWidth, (options, double_) -> {
 		options.chatWidth = double_;
 		Minecraft.getInstance().gui.getChat().rescaleChat();
 	}, (options, progressOption) -> {
 		double d = progressOption.toPct(progressOption.get(options));
-		return progressOption.getCaption() + ChatComponent.getWidth(d) + "px";
+		return progressOption.createCaption().append(ChatComponent.getWidth(d) + "px");
 	});
 	public static final ProgressOption CHAT_LINE_SPACING = new ProgressOption(
 		"options.chat.line_spacing",
@@ -73,43 +74,59 @@ public abstract class Option {
 		0.0F,
 		options -> options.chatLineSpacing,
 		(options, double_) -> options.chatLineSpacing = double_,
-		(options, progressOption) -> progressOption.getCaption() + (int)(progressOption.toPct(progressOption.get(options)) * 100.0) + "%"
+		(options, progressOption) -> progressOption.createCaption().append((int)(progressOption.toPct(progressOption.get(options)) * 100.0) + "%")
 	);
 	public static final ProgressOption CHAT_DELAY = new ProgressOption(
 		"options.chat.delay_instant", 0.0, 6.0, 0.1F, options -> options.chatDelay, (options, double_) -> options.chatDelay = double_, (options, progressOption) -> {
 			double d = progressOption.get(options);
-			return d <= 0.0 ? I18n.get("options.chat.delay_none") : I18n.get("options.chat.delay", String.format("%.1f", d));
+			return d <= 0.0 ? new TranslatableComponent("options.chat.delay_none") : new TranslatableComponent("options.chat.delay", String.format("%.1f", d));
 		}
 	);
 	public static final ProgressOption FOV = new ProgressOption(
-		"options.fov", 30.0, 110.0, 1.0F, options -> options.fov, (options, double_) -> options.fov = double_, (options, progressOption) -> {
+		"options.fov",
+		30.0,
+		110.0,
+		1.0F,
+		options -> options.fov,
+		(options, double_) -> options.fov = double_,
+		(options, progressOption) -> {
 			double d = progressOption.get(options);
-			String string = progressOption.getCaption();
+			MutableComponent mutableComponent = progressOption.createCaption();
 			if (d == 70.0) {
-				return string + I18n.get("options.fov.min");
+				return mutableComponent.append(new TranslatableComponent("options.fov.min"));
 			} else {
-				return d == progressOption.getMaxValue() ? string + I18n.get("options.fov.max") : string + (int)d;
+				return d == progressOption.getMaxValue()
+					? mutableComponent.append(new TranslatableComponent("options.fov.max"))
+					: mutableComponent.append(Integer.toString((int)d));
 			}
 		}
 	);
 	public static final ProgressOption FRAMERATE_LIMIT = new ProgressOption(
-		"options.framerateLimit", 10.0, 260.0, 10.0F, options -> (double)options.framerateLimit, (options, double_) -> {
+		"options.framerateLimit",
+		10.0,
+		260.0,
+		10.0F,
+		options -> (double)options.framerateLimit,
+		(options, double_) -> {
 			options.framerateLimit = (int)double_.doubleValue();
 			Minecraft.getInstance().getWindow().setFramerateLimit(options.framerateLimit);
-		}, (options, progressOption) -> {
+		},
+		(options, progressOption) -> {
 			double d = progressOption.get(options);
-			String string = progressOption.getCaption();
-			return d == progressOption.getMaxValue() ? string + I18n.get("options.framerateLimit.max") : string + I18n.get("options.framerate", (int)d);
+			MutableComponent mutableComponent = progressOption.createCaption();
+			return d == progressOption.getMaxValue()
+				? mutableComponent.append(new TranslatableComponent("options.framerateLimit.max"))
+				: mutableComponent.append(new TranslatableComponent("options.framerate", (int)d));
 		}
 	);
 	public static final ProgressOption GAMMA = new ProgressOption(
 		"options.gamma", 0.0, 1.0, 0.0F, options -> options.gamma, (options, double_) -> options.gamma = double_, (options, progressOption) -> {
 			double d = progressOption.toPct(progressOption.get(options));
-			String string = progressOption.getCaption();
+			MutableComponent mutableComponent = progressOption.createCaption();
 			if (d == 0.0) {
-				return string + I18n.get("options.gamma.min");
+				return mutableComponent.append(new TranslatableComponent("options.gamma.min"));
 			} else {
-				return d == 1.0 ? string + I18n.get("options.gamma.max") : string + "+" + (int)(d * 100.0) + "%";
+				return d == 1.0 ? mutableComponent.append(new TranslatableComponent("options.gamma.max")) : mutableComponent.append("+" + (int)(d * 100.0) + "%");
 			}
 		}
 	);
@@ -122,8 +139,8 @@ public abstract class Option {
 		(options, double_) -> options.mipmapLevels = (int)double_.doubleValue(),
 		(options, progressOption) -> {
 			double d = progressOption.get(options);
-			String string = progressOption.getCaption();
-			return d == 0.0 ? string + I18n.get("options.off") : string + (int)d;
+			MutableComponent mutableComponent = progressOption.createCaption();
+			return d == 0.0 ? mutableComponent.append(CommonComponents.OPTION_OFF) : mutableComponent.append(Integer.toString((int)d));
 		}
 	);
 	public static final ProgressOption MOUSE_WHEEL_SENSITIVITY = new LogaritmicProgressOption(
@@ -135,7 +152,7 @@ public abstract class Option {
 		(options, double_) -> options.mouseWheelSensitivity = double_,
 		(options, progressOption) -> {
 			double d = progressOption.toPct(progressOption.get(options));
-			return progressOption.getCaption() + String.format("%.2f", progressOption.toValue(d));
+			return progressOption.createCaption().append(String.format("%.2f", progressOption.toValue(d)));
 		}
 	);
 	public static final BooleanOption RAW_MOUSE_INPUT = new BooleanOption("options.rawMouseInput", options -> options.rawMouseInput, (options, boolean_) -> {
@@ -151,17 +168,29 @@ public abstract class Option {
 			Minecraft.getInstance().levelRenderer.needsUpdate();
 		}, (options, progressOption) -> {
 			double d = progressOption.get(options);
-			return progressOption.getCaption() + I18n.get("options.chunks", (int)d);
+			return progressOption.createCaption().append(new TranslatableComponent("options.chunks", (int)d));
+		}
+	);
+	public static final ProgressOption ENTITY_DISTANCE_SCALING = new ProgressOption(
+		"options.entityDistanceScaling",
+		0.5,
+		5.0,
+		0.25F,
+		options -> (double)options.entityDistanceScaling,
+		(options, double_) -> options.entityDistanceScaling = (float)double_.doubleValue(),
+		(options, progressOption) -> {
+			double d = progressOption.get(options);
+			return progressOption.createCaption().append(new TranslatableComponent("options.entityDistancePercent", (int)(d * 100.0)));
 		}
 	);
 	public static final ProgressOption SENSITIVITY = new ProgressOption(
 		"options.sensitivity", 0.0, 1.0, 0.0F, options -> options.sensitivity, (options, double_) -> options.sensitivity = double_, (options, progressOption) -> {
 			double d = progressOption.toPct(progressOption.get(options));
-			String string = progressOption.getCaption();
+			MutableComponent mutableComponent = progressOption.createCaption();
 			if (d == 0.0) {
-				return string + I18n.get("options.sensitivity.min");
+				return mutableComponent.append(new TranslatableComponent("options.sensitivity.min"));
 			} else {
-				return d == 1.0 ? string + I18n.get("options.sensitivity.max") : string + (int)(d * 200.0) + "%";
+				return d == 1.0 ? mutableComponent.append(new TranslatableComponent("options.sensitivity.max")) : mutableComponent.append((int)(d * 200.0) + "%");
 			}
 		}
 	);
@@ -169,21 +198,21 @@ public abstract class Option {
 		"options.accessibility.text_background_opacity", 0.0, 1.0, 0.0F, options -> options.textBackgroundOpacity, (options, double_) -> {
 			options.textBackgroundOpacity = double_;
 			Minecraft.getInstance().gui.getChat().rescaleChat();
-		}, (options, progressOption) -> progressOption.getCaption() + (int)(progressOption.toPct(progressOption.get(options)) * 100.0) + "%"
+		}, (options, progressOption) -> progressOption.createCaption().append((int)(progressOption.toPct(progressOption.get(options)) * 100.0) + "%")
 	);
 	public static final CycleOption AMBIENT_OCCLUSION = new CycleOption("options.ao", (options, integer) -> {
 		options.ambientOcclusion = AmbientOcclusionStatus.byId(options.ambientOcclusion.getId() + integer);
 		Minecraft.getInstance().levelRenderer.allChanged();
-	}, (options, cycleOption) -> cycleOption.getCaption() + I18n.get(options.ambientOcclusion.getKey()));
+	}, (options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.ambientOcclusion.getKey())));
 	public static final CycleOption ATTACK_INDICATOR = new CycleOption(
 		"options.attackIndicator",
 		(options, integer) -> options.attackIndicator = AttackIndicatorStatus.byId(options.attackIndicator.getId() + integer),
-		(options, cycleOption) -> cycleOption.getCaption() + I18n.get(options.attackIndicator.getKey())
+		(options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.attackIndicator.getKey()))
 	);
 	public static final CycleOption CHAT_VISIBILITY = new CycleOption(
 		"options.chat.visibility",
 		(options, integer) -> options.chatVisibility = ChatVisiblity.byId((options.chatVisibility.getId() + integer) % 3),
-		(options, cycleOption) -> cycleOption.getCaption() + I18n.get(options.chatVisibility.getKey())
+		(options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.chatVisibility.getKey()))
 	);
 	public static final CycleOption GRAPHICS = new CycleOption(
 		"options.graphics",
@@ -192,20 +221,25 @@ public abstract class Option {
 			Minecraft.getInstance().levelRenderer.allChanged();
 		},
 		(options, cycleOption) -> options.fancyGraphics
-				? cycleOption.getCaption() + I18n.get("options.graphics.fancy")
-				: cycleOption.getCaption() + I18n.get("options.graphics.fast")
+				? cycleOption.createCaption().append(new TranslatableComponent("options.graphics.fancy"))
+				: cycleOption.createCaption().append(new TranslatableComponent("options.graphics.fast"))
 	);
 	public static final CycleOption GUI_SCALE = new CycleOption(
 		"options.guiScale",
 		(options, integer) -> options.guiScale = Integer.remainderUnsigned(
 				options.guiScale + integer, Minecraft.getInstance().getWindow().calculateScale(0, Minecraft.getInstance().isEnforceUnicode()) + 1
 			),
-		(options, cycleOption) -> cycleOption.getCaption() + (options.guiScale == 0 ? I18n.get("options.guiScale.auto") : options.guiScale)
+		(options, cycleOption) -> {
+			MutableComponent mutableComponent = cycleOption.createCaption();
+			return options.guiScale == 0
+				? mutableComponent.append(new TranslatableComponent("options.guiScale.auto"))
+				: mutableComponent.append(Integer.toString(options.guiScale));
+		}
 	);
 	public static final CycleOption MAIN_HAND = new CycleOption(
 		"options.mainHand",
 		(options, integer) -> options.mainHand = options.mainHand.getOpposite(),
-		(options, cycleOption) -> cycleOption.getCaption() + options.mainHand
+		(options, cycleOption) -> cycleOption.createCaption().append(options.mainHand.getName())
 	);
 	public static final CycleOption NARRATOR = new CycleOption(
 		"options.narrator",
@@ -219,24 +253,28 @@ public abstract class Option {
 			NarratorChatListener.INSTANCE.updateNarratorStatus(options.narratorStatus);
 		},
 		(options, cycleOption) -> NarratorChatListener.INSTANCE.isActive()
-				? cycleOption.getCaption() + I18n.get(options.narratorStatus.getKey())
-				: cycleOption.getCaption() + I18n.get("options.narrator.notavailable")
+				? cycleOption.createCaption().append(options.narratorStatus.getName())
+				: cycleOption.createCaption().append(new TranslatableComponent("options.narrator.notavailable"))
 	);
 	public static final CycleOption PARTICLES = new CycleOption(
 		"options.particles",
 		(options, integer) -> options.particles = ParticleStatus.byId(options.particles.getId() + integer),
-		(options, cycleOption) -> cycleOption.getCaption() + I18n.get(options.particles.getKey())
+		(options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.particles.getKey()))
 	);
 	public static final CycleOption RENDER_CLOUDS = new CycleOption(
 		"options.renderClouds",
 		(options, integer) -> options.renderClouds = CloudStatus.byId(options.renderClouds.getId() + integer),
-		(options, cycleOption) -> cycleOption.getCaption() + I18n.get(options.renderClouds.getKey())
+		(options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.renderClouds.getKey()))
 	);
 	public static final CycleOption TEXT_BACKGROUND = new CycleOption(
 		"options.accessibility.text_background",
 		(options, integer) -> options.backgroundForChatOnly = !options.backgroundForChatOnly,
-		(options, cycleOption) -> cycleOption.getCaption()
-				+ I18n.get(options.backgroundForChatOnly ? "options.accessibility.text_background.chat" : "options.accessibility.text_background.everywhere")
+		(options, cycleOption) -> cycleOption.createCaption()
+				.append(
+					new TranslatableComponent(
+						options.backgroundForChatOnly ? "options.accessibility.text_background.chat" : "options.accessibility.text_background.everywhere"
+					)
+				)
 	);
 	public static final BooleanOption AUTO_JUMP = new BooleanOption(
 		"options.autoJump", options -> options.autoJump, (options, boolean_) -> options.autoJump = boolean_
@@ -269,8 +307,8 @@ public abstract class Option {
 		"options.forceUnicodeFont", options -> options.forceUnicodeFont, (options, boolean_) -> {
 			options.forceUnicodeFont = boolean_;
 			Minecraft minecraft = Minecraft.getInstance();
-			if (minecraft.getFontManager() != null) {
-				minecraft.getFontManager().setForceUnicode(options.forceUnicodeFont, Util.backgroundExecutor(), minecraft);
+			if (minecraft.getWindow() != null) {
+				minecraft.selectMainFont(boolean_);
 			}
 		}
 	);
@@ -295,12 +333,12 @@ public abstract class Option {
 	public static final CycleOption TOGGLE_CROUCH = new CycleOption(
 		"key.sneak",
 		(options, integer) -> options.toggleCrouch = !options.toggleCrouch,
-		(options, cycleOption) -> cycleOption.getCaption() + I18n.get(options.toggleCrouch ? "options.key.toggle" : "options.key.hold")
+		(options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.toggleCrouch ? "options.key.toggle" : "options.key.hold"))
 	);
 	public static final CycleOption TOGGLE_SPRINT = new CycleOption(
 		"key.sprint",
 		(options, integer) -> options.toggleSprint = !options.toggleSprint,
-		(options, cycleOption) -> cycleOption.getCaption() + I18n.get(options.toggleSprint ? "options.key.toggle" : "options.key.hold")
+		(options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.toggleSprint ? "options.key.toggle" : "options.key.hold"))
 	);
 	public static final BooleanOption TOUCHSCREEN = new BooleanOption(
 		"options.touchscreen", options -> options.touchscreen, (options, boolean_) -> options.touchscreen = boolean_
@@ -324,7 +362,7 @@ public abstract class Option {
 
 	public abstract AbstractWidget createButton(Options options, int i, int j, int k);
 
-	public String getCaption() {
-		return I18n.get(this.captionId) + ": ";
+	public MutableComponent createCaption() {
+		return new TranslatableComponent(this.captionId).append(": ");
 	}
 }

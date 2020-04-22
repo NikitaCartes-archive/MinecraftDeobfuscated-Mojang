@@ -1,5 +1,6 @@
 package net.minecraft.world.level.levelgen.feature;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.Dynamic;
 import java.util.Random;
 import java.util.function.Function;
@@ -16,6 +17,19 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.ColumnFeatureConfiguration;
 
 public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
+	private static final ImmutableList<Block> CANNOT_PLACE_ON = ImmutableList.of(
+		Blocks.LAVA,
+		Blocks.BEDROCK,
+		Blocks.MAGMA_BLOCK,
+		Blocks.SOUL_SAND,
+		Blocks.NETHER_BRICKS,
+		Blocks.NETHER_BRICK_FENCE,
+		Blocks.NETHER_BRICK_STAIRS,
+		Blocks.NETHER_WART,
+		Blocks.CHEST,
+		Blocks.SPAWNER
+	);
+
 	public BasaltColumnsFeature(Function<Dynamic<?>, ? extends ColumnFeatureConfiguration> function) {
 		super(function);
 	}
@@ -91,8 +105,7 @@ public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
 			if (isAirOrLavaOcean(levelAccessor, i, mutableBlockPos)) {
 				BlockState blockState = levelAccessor.getBlockState(mutableBlockPos.move(Direction.DOWN));
 				mutableBlockPos.move(Direction.UP);
-				Block block = blockState.getBlock();
-				if (block != Blocks.LAVA && block != Blocks.BEDROCK && block != Blocks.MAGMA_BLOCK && !blockState.isAir()) {
+				if (!blockState.isAir() && !CANNOT_PLACE_ON.contains(blockState.getBlock())) {
 					return mutableBlockPos;
 				}
 			}
@@ -107,7 +120,12 @@ public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
 	private static BlockPos findAir(LevelAccessor levelAccessor, BlockPos.MutableBlockPos mutableBlockPos, int i) {
 		while (mutableBlockPos.getY() < levelAccessor.getMaxBuildHeight() && i > 0) {
 			i--;
-			if (levelAccessor.getBlockState(mutableBlockPos).isAir()) {
+			BlockState blockState = levelAccessor.getBlockState(mutableBlockPos);
+			if (CANNOT_PLACE_ON.contains(blockState.getBlock())) {
+				return null;
+			}
+
+			if (blockState.isAir()) {
 				return mutableBlockPos;
 			}
 

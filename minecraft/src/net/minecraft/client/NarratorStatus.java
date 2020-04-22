@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
@@ -17,19 +19,19 @@ public enum NarratorStatus {
 		.sorted(Comparator.comparingInt(NarratorStatus::getId))
 		.toArray(NarratorStatus[]::new);
 	private final int id;
-	private final String key;
+	private final Component name;
 
 	private NarratorStatus(int j, String string2) {
 		this.id = j;
-		this.key = string2;
+		this.name = new TranslatableComponent(string2);
 	}
 
 	public int getId() {
 		return this.id;
 	}
 
-	public String getKey() {
-		return this.key;
+	public Component getName() {
+		return this.name;
 	}
 
 	public static NarratorStatus byId(int i) {

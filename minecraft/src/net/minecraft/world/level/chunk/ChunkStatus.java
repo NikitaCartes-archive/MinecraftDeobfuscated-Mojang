@@ -46,7 +46,7 @@ public class ChunkStatus {
 		ChunkStatus.ChunkType.PROTOCHUNK,
 		(chunkStatus, serverLevel, chunkGenerator, structureManager, threadedLevelLightEngine, function, list, chunkAccess) -> {
 			if (!chunkAccess.getStatus().isOrAfter(chunkStatus)) {
-				if (serverLevel.getLevelData().isGenerateMapFeatures()) {
+				if (serverLevel.getLevelData().shouldGenerateMapFeatures()) {
 					chunkGenerator.createStructures(
 						serverLevel.structureFeatureManager(),
 						serverLevel.getBiomeManager().withDifferentSource(chunkGenerator.getBiomeSource()),

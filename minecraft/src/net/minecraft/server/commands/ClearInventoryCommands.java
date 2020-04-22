@@ -71,7 +71,7 @@ public class ClearInventoryCommands {
 
 		if (j == 0) {
 			if (collection.size() == 1) {
-				throw ERROR_SINGLE.create(((ServerPlayer)collection.iterator().next()).getName().getColoredString());
+				throw ERROR_SINGLE.create(((ServerPlayer)collection.iterator().next()).getName());
 			} else {
 				throw ERROR_MULTIPLE.create(collection.size());
 			}

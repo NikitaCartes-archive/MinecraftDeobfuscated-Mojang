@@ -133,6 +133,11 @@ public class SoundEvents {
 	public static final SoundEvent CAT_HURT = register("entity.cat.hurt");
 	public static final SoundEvent CAT_PURR = register("entity.cat.purr");
 	public static final SoundEvent CAT_PURREOW = register("entity.cat.purreow");
+	public static final SoundEvent CHAIN_BREAK = register("block.chain.break");
+	public static final SoundEvent CHAIN_FALL = register("block.chain.fall");
+	public static final SoundEvent CHAIN_HIT = register("block.chain.hit");
+	public static final SoundEvent CHAIN_PLACE = register("block.chain.place");
+	public static final SoundEvent CHAIN_STEP = register("block.chain.step");
 	public static final SoundEvent CHEST_CLOSE = register("block.chest.close");
 	public static final SoundEvent CHEST_LOCKED = register("block.chest.locked");
 	public static final SoundEvent CHEST_OPEN = register("block.chest.open");
@@ -306,6 +311,11 @@ public class SoundEvents {
 	public static final SoundEvent GHAST_SCREAM = register("entity.ghast.scream");
 	public static final SoundEvent GHAST_SHOOT = register("entity.ghast.shoot");
 	public static final SoundEvent GHAST_WARN = register("entity.ghast.warn");
+	public static final SoundEvent GILDED_BLACKSTONE_BREAK = register("block.gilded_blackstone.break");
+	public static final SoundEvent GILDED_BLACKSTONE_FALL = register("block.gilded_blackstone.fall");
+	public static final SoundEvent GILDED_BLACKSTONE_HIT = register("block.gilded_blackstone.hit");
+	public static final SoundEvent GILDED_BLACKSTONE_PLACE = register("block.gilded_blackstone.place");
+	public static final SoundEvent GILDED_BLACKSTONE_STEP = register("block.gilded_blackstone.step");
 	public static final SoundEvent GLASS_BREAK = register("block.glass.break");
 	public static final SoundEvent GLASS_FALL = register("block.glass.fall");
 	public static final SoundEvent GLASS_HIT = register("block.glass.hit");
@@ -668,6 +678,11 @@ public class SoundEvents {
 	public static final SoundEvent RAVAGER_STEP = register("entity.ravager.step");
 	public static final SoundEvent RAVAGER_STUNNED = register("entity.ravager.stunned");
 	public static final SoundEvent RAVAGER_ROAR = register("entity.ravager.roar");
+	public static final SoundEvent NETHER_GOLD_ORE_BREAK = register("block.nether_gold_ore.break");
+	public static final SoundEvent NETHER_GOLD_ORE_FALL = register("block.nether_gold_ore.fall");
+	public static final SoundEvent NETHER_GOLD_ORE_HIT = register("block.nether_gold_ore.hit");
+	public static final SoundEvent NETHER_GOLD_ORE_PLACE = register("block.nether_gold_ore.place");
+	public static final SoundEvent NETHER_GOLD_ORE_STEP = register("block.nether_gold_ore.step");
 	public static final SoundEvent NETHER_ORE_BREAK = register("block.nether_ore.break");
 	public static final SoundEvent NETHER_ORE_FALL = register("block.nether_ore.fall");
 	public static final SoundEvent NETHER_ORE_HIT = register("block.nether_ore.hit");

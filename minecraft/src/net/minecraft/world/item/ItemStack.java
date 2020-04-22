@@ -33,6 +33,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -73,13 +74,14 @@ public final class ItemStack {
 	public static final DecimalFormat ATTRIBUTE_MODIFIER_FORMAT = Util.make(
 		new DecimalFormat("#.##"), decimalFormat -> decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT))
 	);
+	private static final Style LORE_STYLE = Style.EMPTY.withColor(ChatFormatting.DARK_PURPLE).withItalic(true);
 	private int count;
 	private int popTime;
 	@Deprecated
 	private final Item item;
 	private CompoundTag tag;
 	private boolean emptyCacheFlag;
-	private ItemFrame frame;
+	private Entity entityRepresentation;
 	private BlockInWorld cachedBreakBlock;
 	private boolean cachedBreakBlockResult;
 	private BlockInWorld cachedPlaceBlock;
@@ -498,12 +500,12 @@ public final class ItemStack {
 	@Environment(EnvType.CLIENT)
 	public List<Component> getTooltipLines(@Nullable Player player, TooltipFlag tooltipFlag) {
 		List<Component> list = Lists.<Component>newArrayList();
-		Component component = new TextComponent("").append(this.getHoverName()).withStyle(this.getRarity().color);
+		MutableComponent mutableComponent = new TextComponent("").append(this.getHoverName()).withStyle(this.getRarity().color);
 		if (this.hasCustomHoverName()) {
-			component.withStyle(ChatFormatting.ITALIC);
+			mutableComponent.withStyle(ChatFormatting.ITALIC);
 		}
 
-		list.add(component);
+		list.add(mutableComponent);
 		if (!tooltipFlag.isAdvanced() && !this.hasCustomHoverName() && this.getItem() == Items.FILLED_MAP) {
 			list.add(new TextComponent("#" + MapItem.getMapId(this)).withStyle(ChatFormatting.GRAY));
 		}
@@ -539,9 +541,9 @@ public final class ItemStack {
 						String string = listTag.getString(j);
 
 						try {
-							Component component2 = Component.Serializer.fromJson(string);
-							if (component2 != null) {
-								list.add(ComponentUtils.mergeStyles(component2, new Style().setColor(ChatFormatting.DARK_PURPLE).setItalic(true)));
+							MutableComponent mutableComponent2 = Component.Serializer.fromJson(string);
+							if (mutableComponent2 != null) {
+								list.add(ComponentUtils.mergeStyles(mutableComponent2, LORE_STYLE));
 							}
 						} catch (JsonParseException var19) {
 							compoundTag.remove("Lore");
@@ -554,7 +556,7 @@ public final class ItemStack {
 		for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
 			Multimap<Attribute, AttributeModifier> multimap = this.getAttributeModifiers(equipmentSlot);
 			if (!multimap.isEmpty() && (i & 2) == 0) {
-				list.add(new TextComponent(""));
+				list.add(TextComponent.EMPTY);
 				list.add(new TranslatableComponent("item.modifiers." + equipmentSlot.getName()).withStyle(ChatFormatting.GRAY));
 
 				for (Entry<Attribute, AttributeModifier> entry : multimap.entries()) {
@@ -625,7 +627,7 @@ public final class ItemStack {
 		if (this.hasTag() && this.tag.contains("CanDestroy", 9) && (i & 8) == 0) {
 			ListTag listTag2 = this.tag.getList("CanDestroy", 8);
 			if (!listTag2.isEmpty()) {
-				list.add(new TextComponent(""));
+				list.add(TextComponent.EMPTY);
 				list.add(new TranslatableComponent("item.canBreak").withStyle(ChatFormatting.GRAY));
 
 				for (int k = 0; k < listTag2.size(); k++) {
@@ -637,7 +639,7 @@ public final class ItemStack {
 		if (this.hasTag() && this.tag.contains("CanPlaceOn", 9) && (i & 16) == 0) {
 			ListTag listTag2 = this.tag.getList("CanPlaceOn", 8);
 			if (!listTag2.isEmpty()) {
-				list.add(new TextComponent(""));
+				list.add(TextComponent.EMPTY);
 				list.add(new TranslatableComponent("item.canPlace").withStyle(ChatFormatting.GRAY));
 
 				for (int k = 0; k < listTag2.size(); k++) {
@@ -689,7 +691,7 @@ public final class ItemStack {
 					if (!collection.isEmpty()) {
 						return (Collection<Component>)collection.stream()
 							.map(Block::getName)
-							.map(component -> component.withStyle(ChatFormatting.DARK_GRAY))
+							.map(mutableComponent -> mutableComponent.withStyle(ChatFormatting.DARK_GRAY))
 							.collect(Collectors.toList());
 					}
 				}
@@ -734,16 +736,21 @@ public final class ItemStack {
 	}
 
 	public boolean isFramed() {
-		return this.frame != null;
+		return this.entityRepresentation instanceof ItemFrame;
 	}
 
-	public void setFramed(@Nullable ItemFrame itemFrame) {
-		this.frame = itemFrame;
+	public void setEntityRepresentation(@Nullable Entity entity) {
+		this.entityRepresentation = entity;
 	}
 
 	@Nullable
 	public ItemFrame getFrame() {
-		return this.emptyCacheFlag ? null : this.frame;
+		return this.entityRepresentation instanceof ItemFrame ? (ItemFrame)this.getEntityRepresentation() : null;
+	}
+
+	@Nullable
+	public Entity getEntityRepresentation() {
+		return !this.emptyCacheFlag ? this.entityRepresentation : null;
 	}
 
 	public int getBaseRepairCost() {
@@ -796,19 +803,18 @@ public final class ItemStack {
 	}
 
 	public Component getDisplayName() {
-		Component component = new TextComponent("").append(this.getHoverName());
+		MutableComponent mutableComponent = new TextComponent("").append(this.getHoverName());
 		if (this.hasCustomHoverName()) {
-			component.withStyle(ChatFormatting.ITALIC);
+			mutableComponent.withStyle(ChatFormatting.ITALIC);
 		}
 
-		Component component2 = ComponentUtils.wrapInSquareBrackets(component);
+		MutableComponent mutableComponent2 = ComponentUtils.wrapInSquareBrackets(mutableComponent);
 		if (!this.emptyCacheFlag) {
-			CompoundTag compoundTag = this.save(new CompoundTag());
-			component2.withStyle(this.getRarity().color)
-				.withStyle(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new TextComponent(compoundTag.toString()))));
+			mutableComponent2.withStyle(this.getRarity().color)
+				.withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(this))));
 		}
 
-		return component2;
+		return mutableComponent2;
 	}
 
 	private static boolean areSameBlocks(BlockInWorld blockInWorld, @Nullable BlockInWorld blockInWorld2) {

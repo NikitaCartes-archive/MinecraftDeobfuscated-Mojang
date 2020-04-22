@@ -17,158 +17,103 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.minecraft.ChatFormatting;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.LowerCaseEnumTypeAdapterFactory;
+import net.minecraft.util.Unit;
 
-public interface Component extends Message, Iterable<Component> {
-	Component setStyle(Style style);
+public interface Component extends Message {
+	Optional<Unit> STOP_ITERATION = Optional.of(Unit.INSTANCE);
 
 	Style getStyle();
-
-	default Component append(String string) {
-		return this.append(new TextComponent(string));
-	}
-
-	Component append(Component component);
 
 	String getContents();
 
 	@Override
 	default String getString() {
 		StringBuilder stringBuilder = new StringBuilder();
-		this.stream().forEach(component -> stringBuilder.append(component.getContents()));
+		this.visit(string -> {
+			stringBuilder.append(string);
+			return Optional.empty();
+		});
 		return stringBuilder.toString();
 	}
 
 	default String getString(int i) {
 		StringBuilder stringBuilder = new StringBuilder();
-		Iterator<Component> iterator = this.stream().iterator();
-
-		while (iterator.hasNext()) {
+		this.visit(string -> {
 			int j = i - stringBuilder.length();
 			if (j <= 0) {
-				break;
+				return STOP_ITERATION;
+			} else {
+				stringBuilder.append(string.length() <= j ? string : string.substring(0, j));
+				return Optional.empty();
 			}
-
-			String string = ((Component)iterator.next()).getContents();
-			stringBuilder.append(string.length() <= j ? string : string.substring(0, j));
-		}
-
-		return stringBuilder.toString();
-	}
-
-	default String getColoredString() {
-		StringBuilder stringBuilder = new StringBuilder();
-		String string = "";
-		Iterator<Component> iterator = this.stream().iterator();
-
-		while (iterator.hasNext()) {
-			Component component = (Component)iterator.next();
-			String string2 = component.getContents();
-			if (!string2.isEmpty()) {
-				String string3 = component.getStyle().getLegacyFormatCodes();
-				if (!string3.equals(string)) {
-					if (!string.isEmpty()) {
-						stringBuilder.append(ChatFormatting.RESET);
-					}
-
-					stringBuilder.append(string3);
-					string = string3;
-				}
-
-				stringBuilder.append(string2);
-			}
-		}
-
-		if (!string.isEmpty()) {
-			stringBuilder.append(ChatFormatting.RESET);
-		}
-
+		});
 		return stringBuilder.toString();
 	}
 
 	List<Component> getSiblings();
 
-	Stream<Component> stream();
+	MutableComponent toMutable();
 
-	default Stream<Component> flatStream() {
-		return this.stream().map(Component::flattenStyle);
-	}
+	MutableComponent mutableCopy();
 
-	default Iterator<Component> iterator() {
-		return this.flatStream().iterator();
-	}
-
-	Component copy();
-
-	default Component deepCopy() {
-		Component component = this.copy();
-		component.setStyle(this.getStyle().copy());
-
-		for (Component component2 : this.getSiblings()) {
-			component.append(component2.deepCopy());
-		}
-
-		return component;
-	}
-
-	default Component withStyle(Consumer<Style> consumer) {
-		consumer.accept(this.getStyle());
-		return this;
-	}
-
-	default Component withStyle(ChatFormatting... chatFormattings) {
-		for (ChatFormatting chatFormatting : chatFormattings) {
-			this.withStyle(chatFormatting);
-		}
-
-		return this;
-	}
-
-	default Component withStyle(ChatFormatting chatFormatting) {
-		Style style = this.getStyle();
-		if (chatFormatting.isColor()) {
-			style.setColor(chatFormatting);
-		}
-
-		if (chatFormatting.isFormat()) {
-			switch (chatFormatting) {
-				case OBFUSCATED:
-					style.setObfuscated(true);
-					break;
-				case BOLD:
-					style.setBold(true);
-					break;
-				case STRIKETHROUGH:
-					style.setStrikethrough(true);
-					break;
-				case UNDERLINE:
-					style.setUnderlined(true);
-					break;
-				case ITALIC:
-					style.setItalic(true);
+	@Environment(EnvType.CLIENT)
+	default <T> Optional<T> visit(Component.StyledContentConsumer<T> styledContentConsumer, Style style) {
+		Style style2 = this.getStyle().applyTo(style);
+		Optional<T> optional = this.visitSelf(styledContentConsumer, style2);
+		if (optional.isPresent()) {
+			return optional;
+		} else {
+			for (Component component : this.getSiblings()) {
+				Optional<T> optional2 = component.visit(styledContentConsumer, style2);
+				if (optional2.isPresent()) {
+					return optional2;
+				}
 			}
+
+			return Optional.empty();
 		}
-
-		return this;
 	}
 
-	static Component flattenStyle(Component component) {
-		Component component2 = component.copy();
-		component2.setStyle(component.getStyle().flatCopy());
-		return component2;
+	default <T> Optional<T> visit(Component.ContentConsumer<T> contentConsumer) {
+		Optional<T> optional = this.visitSelf(contentConsumer);
+		if (optional.isPresent()) {
+			return optional;
+		} else {
+			for (Component component : this.getSiblings()) {
+				Optional<T> optional2 = component.visit(contentConsumer);
+				if (optional2.isPresent()) {
+					return optional2;
+				}
+			}
+
+			return Optional.empty();
+		}
 	}
 
-	public static class Serializer implements JsonDeserializer<Component>, JsonSerializer<Component> {
+	@Environment(EnvType.CLIENT)
+	default <T> Optional<T> visitSelf(Component.StyledContentConsumer<T> styledContentConsumer, Style style) {
+		return styledContentConsumer.accept(style, this.getContents());
+	}
+
+	default <T> Optional<T> visitSelf(Component.ContentConsumer<T> contentConsumer) {
+		return contentConsumer.accept(this.getContents());
+	}
+
+	public interface ContentConsumer<T> {
+		Optional<T> accept(String string);
+	}
+
+	public static class Serializer implements JsonDeserializer<MutableComponent>, JsonSerializer<Component> {
 		private static final Gson GSON = Util.make(() -> {
 			GsonBuilder gsonBuilder = new GsonBuilder();
 			gsonBuilder.disableHtmlEscaping();
@@ -198,32 +143,32 @@ public interface Component extends Message, Iterable<Component> {
 			}
 		});
 
-		public Component deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+		public MutableComponent deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 			if (jsonElement.isJsonPrimitive()) {
 				return new TextComponent(jsonElement.getAsString());
 			} else if (!jsonElement.isJsonObject()) {
 				if (jsonElement.isJsonArray()) {
 					JsonArray jsonArray3 = jsonElement.getAsJsonArray();
-					Component component = null;
+					MutableComponent mutableComponent = null;
 
 					for (JsonElement jsonElement2 : jsonArray3) {
-						Component component2 = this.deserialize(jsonElement2, jsonElement2.getClass(), jsonDeserializationContext);
-						if (component == null) {
-							component = component2;
+						MutableComponent mutableComponent2 = this.deserialize(jsonElement2, jsonElement2.getClass(), jsonDeserializationContext);
+						if (mutableComponent == null) {
+							mutableComponent = mutableComponent2;
 						} else {
-							component.append(component2);
+							mutableComponent.append(mutableComponent2);
 						}
 					}
 
-					return component;
+					return mutableComponent;
 				} else {
 					throw new JsonParseException("Don't know how to turn " + jsonElement + " into a Component");
 				}
 			} else {
 				JsonObject jsonObject = jsonElement.getAsJsonObject();
-				Component component;
+				MutableComponent mutableComponent;
 				if (jsonObject.has("text")) {
-					component = new TextComponent(GsonHelper.getAsString(jsonObject, "text"));
+					mutableComponent = new TextComponent(GsonHelper.getAsString(jsonObject, "text"));
 				} else if (jsonObject.has("translate")) {
 					String string = GsonHelper.getAsString(jsonObject, "translate");
 					if (jsonObject.has("with")) {
@@ -240,9 +185,9 @@ public interface Component extends Message, Iterable<Component> {
 							}
 						}
 
-						component = new TranslatableComponent(string, objects);
+						mutableComponent = new TranslatableComponent(string, objects);
 					} else {
-						component = new TranslatableComponent(string);
+						mutableComponent = new TranslatableComponent(string);
 					}
 				} else if (jsonObject.has("score")) {
 					JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "score");
@@ -250,14 +195,11 @@ public interface Component extends Message, Iterable<Component> {
 						throw new JsonParseException("A score component needs a least a name and an objective");
 					}
 
-					component = new ScoreComponent(GsonHelper.getAsString(jsonObject2, "name"), GsonHelper.getAsString(jsonObject2, "objective"));
-					if (jsonObject2.has("value")) {
-						((ScoreComponent)component).setValue(GsonHelper.getAsString(jsonObject2, "value"));
-					}
+					mutableComponent = new ScoreComponent(GsonHelper.getAsString(jsonObject2, "name"), GsonHelper.getAsString(jsonObject2, "objective"));
 				} else if (jsonObject.has("selector")) {
-					component = new SelectorComponent(GsonHelper.getAsString(jsonObject, "selector"));
+					mutableComponent = new SelectorComponent(GsonHelper.getAsString(jsonObject, "selector"));
 				} else if (jsonObject.has("keybind")) {
-					component = new KeybindComponent(GsonHelper.getAsString(jsonObject, "keybind"));
+					mutableComponent = new KeybindComponent(GsonHelper.getAsString(jsonObject, "keybind"));
 				} else {
 					if (!jsonObject.has("nbt")) {
 						throw new JsonParseException("Don't know how to turn " + jsonElement + " into a Component");
@@ -266,15 +208,15 @@ public interface Component extends Message, Iterable<Component> {
 					String string = GsonHelper.getAsString(jsonObject, "nbt");
 					boolean bl = GsonHelper.getAsBoolean(jsonObject, "interpret", false);
 					if (jsonObject.has("block")) {
-						component = new NbtComponent.BlockNbtComponent(string, bl, GsonHelper.getAsString(jsonObject, "block"));
+						mutableComponent = new NbtComponent.BlockNbtComponent(string, bl, GsonHelper.getAsString(jsonObject, "block"));
 					} else if (jsonObject.has("entity")) {
-						component = new NbtComponent.EntityNbtComponent(string, bl, GsonHelper.getAsString(jsonObject, "entity"));
+						mutableComponent = new NbtComponent.EntityNbtComponent(string, bl, GsonHelper.getAsString(jsonObject, "entity"));
 					} else {
 						if (!jsonObject.has("storage")) {
 							throw new JsonParseException("Don't know how to turn " + jsonElement + " into a Component");
 						}
 
-						component = new NbtComponent.StorageNbtComponent(string, bl, new ResourceLocation(GsonHelper.getAsString(jsonObject, "storage")));
+						mutableComponent = new NbtComponent.StorageNbtComponent(string, bl, new ResourceLocation(GsonHelper.getAsString(jsonObject, "storage")));
 					}
 				}
 
@@ -285,12 +227,12 @@ public interface Component extends Message, Iterable<Component> {
 					}
 
 					for (int j = 0; j < jsonArray2.size(); j++) {
-						component.append(this.deserialize(jsonArray2.get(j), type, jsonDeserializationContext));
+						mutableComponent.append(this.deserialize(jsonArray2.get(j), type, jsonDeserializationContext));
 					}
 				}
 
-				component.setStyle(jsonDeserializationContext.deserialize(jsonElement, Style.class));
-				return component;
+				mutableComponent.setStyle(jsonDeserializationContext.deserialize(jsonElement, Style.class));
+				return mutableComponent;
 			}
 		}
 
@@ -344,7 +286,6 @@ public interface Component extends Message, Iterable<Component> {
 				JsonObject jsonObject2 = new JsonObject();
 				jsonObject2.addProperty("name", scoreComponent.getName());
 				jsonObject2.addProperty("objective", scoreComponent.getObjective());
-				jsonObject2.addProperty("value", scoreComponent.getContents());
 				jsonObject.add("score", jsonObject2);
 			} else if (component instanceof SelectorComponent) {
 				SelectorComponent selectorComponent = (SelectorComponent)component;
@@ -388,27 +329,27 @@ public interface Component extends Message, Iterable<Component> {
 		}
 
 		@Nullable
-		public static Component fromJson(String string) {
-			return GsonHelper.fromJson(GSON, string, Component.class, false);
+		public static MutableComponent fromJson(String string) {
+			return GsonHelper.fromJson(GSON, string, MutableComponent.class, false);
 		}
 
 		@Nullable
-		public static Component fromJson(JsonElement jsonElement) {
-			return GSON.fromJson(jsonElement, Component.class);
+		public static MutableComponent fromJson(JsonElement jsonElement) {
+			return GSON.fromJson(jsonElement, MutableComponent.class);
 		}
 
 		@Nullable
-		public static Component fromJsonLenient(String string) {
-			return GsonHelper.fromJson(GSON, string, Component.class, true);
+		public static MutableComponent fromJsonLenient(String string) {
+			return GsonHelper.fromJson(GSON, string, MutableComponent.class, true);
 		}
 
-		public static Component fromJson(com.mojang.brigadier.StringReader stringReader) {
+		public static MutableComponent fromJson(com.mojang.brigadier.StringReader stringReader) {
 			try {
 				JsonReader jsonReader = new JsonReader(new StringReader(stringReader.getRemaining()));
 				jsonReader.setLenient(false);
-				Component component = GSON.<Component>getAdapter(Component.class).read(jsonReader);
+				MutableComponent mutableComponent = GSON.<MutableComponent>getAdapter(MutableComponent.class).read(jsonReader);
 				stringReader.setCursor(stringReader.getCursor() + getPos(jsonReader));
-				return component;
+				return mutableComponent;
 			} catch (StackOverflowError | IOException var3) {
 				throw new JsonParseException(var3);
 			}
@@ -421,5 +362,10 @@ public interface Component extends Message, Iterable<Component> {
 				throw new IllegalStateException("Couldn't read position of JsonReader", var2);
 			}
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public interface StyledContentConsumer<T> {
+		Optional<T> accept(Style style, String string);
 	}
 }

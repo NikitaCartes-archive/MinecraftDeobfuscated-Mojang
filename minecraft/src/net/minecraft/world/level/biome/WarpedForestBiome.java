@@ -2,6 +2,7 @@ package net.minecraft.world.level.biome;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.Musics;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -12,7 +13,6 @@ import net.minecraft.world.level.levelgen.feature.BastionPieces;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.RuinedPortalFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.CountRangeDecoratorConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.MultiJigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
@@ -46,10 +46,11 @@ public class WarpedForestBiome extends Biome {
 						.ambientLoopSound(SoundEvents.AMBIENT_WARPED_FOREST_LOOP)
 						.ambientMoodSound(new AmbientMoodSettings(SoundEvents.AMBIENT_WARPED_FOREST_MOOD, 6000, 8, 2.0))
 						.ambientAdditionsSound(new AmbientAdditionsSettings(SoundEvents.AMBIENT_WARPED_FOREST_ADDITIONS, 0.0111))
+						.backgroundMusic(Musics.createGameMusic(SoundEvents.MUSIC_BIOME_WARPED_FOREST))
 						.build()
 				)
 				.parent(null)
-				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.0F, 0.5F, 0.0F, 0.0F, 1.0F)))
+				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.0F, 0.7F, 0.0F, 0.0F, 0.7F)))
 		);
 		this.addStructureStart(Feature.NETHER_BRIDGE.configured(FeatureConfiguration.NONE));
 		this.addStructureStart(Feature.BASTION_REMNANT.configured(new MultiJigsawConfiguration(BastionPieces.POOLS)));
@@ -63,15 +64,9 @@ public class WarpedForestBiome extends Biome {
 				.decorated(FeatureDecorator.COUNT_VERY_BIASED_RANGE.configured(new CountRangeDecoratorConfiguration(20, 8, 16, 256)))
 		);
 		BiomeDefaultFeatures.addDefaultMushrooms(this);
+		this.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.NETHER_BRIDGE.configured(FeatureConfiguration.NONE));
 		this.addFeature(
-			GenerationStep.Decoration.UNDERGROUND_DECORATION,
-			Feature.NETHER_BRIDGE.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE))
-		);
-		this.addFeature(
-			GenerationStep.Decoration.UNDERGROUND_DECORATION,
-			Feature.RUINED_PORTAL
-				.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.NETHER))
-				.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE))
+			GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.NETHER))
 		);
 		this.addFeature(
 			GenerationStep.Decoration.UNDERGROUND_DECORATION,

@@ -17,6 +17,7 @@ import net.minecraft.core.IdMapper;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
@@ -326,7 +327,7 @@ public class Block extends BlockBehaviour implements ItemLike {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public Component getName() {
+	public MutableComponent getName() {
 		return new TranslatableComponent(this.getDescriptionId());
 	}
 

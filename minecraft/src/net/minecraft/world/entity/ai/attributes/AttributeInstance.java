@@ -104,6 +104,16 @@ public class AttributeInstance {
 		}
 	}
 
+	public boolean removePermanentModifier(UUID uUID) {
+		AttributeModifier attributeModifier = this.getModifier(uUID);
+		if (attributeModifier != null && this.permanentModifiers.contains(attributeModifier)) {
+			this.removeModifier(attributeModifier);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	@Environment(EnvType.CLIENT)
 	public void removeModifiers() {
 		for (AttributeModifier attributeModifier : this.getModifiers()) {

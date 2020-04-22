@@ -7,6 +7,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.Level;
@@ -49,16 +50,16 @@ public class FireworkStarItem extends Item {
 	}
 
 	@Environment(EnvType.CLIENT)
-	private static Component appendColors(Component component, int[] is) {
+	private static Component appendColors(MutableComponent mutableComponent, int[] is) {
 		for (int i = 0; i < is.length; i++) {
 			if (i > 0) {
-				component.append(", ");
+				mutableComponent.append(", ");
 			}
 
-			component.append(getColorName(is[i]));
+			mutableComponent.append(getColorName(is[i]));
 		}
 
-		return component;
+		return mutableComponent;
 	}
 
 	@Environment(EnvType.CLIENT)

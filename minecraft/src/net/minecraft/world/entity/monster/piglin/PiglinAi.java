@@ -393,6 +393,8 @@ public class PiglinAi {
 			return false;
 		} else if (isAdmiringDisabled(piglin) && piglin.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)) {
 			return false;
+		} else if (isBarterCurrency(item)) {
+			return isNotHoldingLovedItemInOffHand(piglin);
 		} else {
 			boolean bl = piglin.canAddToInventory(itemStack);
 			if (item == Items.GOLD_NUGGET) {

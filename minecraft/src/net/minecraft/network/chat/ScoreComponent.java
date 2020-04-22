@@ -9,7 +9,6 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Score;
@@ -20,20 +19,24 @@ public class ScoreComponent extends BaseComponent implements ContextAwareCompone
 	@Nullable
 	private final EntitySelector selector;
 	private final String objective;
-	private String value = "";
+
+	@Nullable
+	private static EntitySelector parseSelector(String string) {
+		try {
+			return new EntitySelectorParser(new StringReader(string)).parse();
+		} catch (CommandSyntaxException var2) {
+			return null;
+		}
+	}
 
 	public ScoreComponent(String string, String string2) {
+		this(string, parseSelector(string), string2);
+	}
+
+	private ScoreComponent(String string, @Nullable EntitySelector entitySelector, String string2) {
 		this.name = string;
-		this.objective = string2;
-		EntitySelector entitySelector = null;
-
-		try {
-			EntitySelectorParser entitySelectorParser = new EntitySelectorParser(new StringReader(string));
-			entitySelector = entitySelectorParser.parse();
-		} catch (CommandSyntaxException var5) {
-		}
-
 		this.selector = entitySelector;
+		this.objective = string2;
 	}
 
 	public String getName() {
@@ -44,61 +47,47 @@ public class ScoreComponent extends BaseComponent implements ContextAwareCompone
 		return this.objective;
 	}
 
-	public void setValue(String string) {
-		this.value = string;
-	}
+	private String findTargetName(CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+		if (this.selector != null) {
+			List<? extends Entity> list = this.selector.findEntities(commandSourceStack);
+			if (!list.isEmpty()) {
+				if (list.size() != 1) {
+					throw EntityArgument.ERROR_NOT_SINGLE_ENTITY.create();
+				}
 
-	@Override
-	public String getContents() {
-		return this.value;
-	}
-
-	private void resolve(CommandSourceStack commandSourceStack) {
-		MinecraftServer minecraftServer = commandSourceStack.getServer();
-		if (minecraftServer != null && StringUtil.isNullOrEmpty(this.value)) {
-			Scoreboard scoreboard = minecraftServer.getScoreboard();
-			Objective objective = scoreboard.getObjective(this.objective);
-			if (scoreboard.hasPlayerScore(this.name, objective)) {
-				Score score = scoreboard.getOrCreatePlayerScore(this.name, objective);
-				this.setValue(String.format("%d", score.getScore()));
-			} else {
-				this.value = "";
+				return ((Entity)list.get(0)).getScoreboardName();
 			}
 		}
+
+		return this.name;
 	}
 
-	public ScoreComponent copy() {
-		ScoreComponent scoreComponent = new ScoreComponent(this.name, this.objective);
-		scoreComponent.setValue(this.value);
-		return scoreComponent;
+	private String getScore(String string, CommandSourceStack commandSourceStack) {
+		MinecraftServer minecraftServer = commandSourceStack.getServer();
+		if (minecraftServer != null) {
+			Scoreboard scoreboard = minecraftServer.getScoreboard();
+			Objective objective = scoreboard.getObjective(this.objective);
+			if (scoreboard.hasPlayerScore(string, objective)) {
+				Score score = scoreboard.getOrCreatePlayerScore(string, objective);
+				return Integer.toString(score.getScore());
+			}
+		}
+
+		return "";
+	}
+
+	public ScoreComponent toMutable() {
+		return new ScoreComponent(this.name, this.selector, this.objective);
 	}
 
 	@Override
-	public Component resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
+	public MutableComponent resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
 		if (commandSourceStack == null) {
-			return this.copy();
+			return new TextComponent("");
 		} else {
-			String string;
-			if (this.selector != null) {
-				List<? extends Entity> list = this.selector.findEntities(commandSourceStack);
-				if (list.isEmpty()) {
-					string = this.name;
-				} else {
-					if (list.size() != 1) {
-						throw EntityArgument.ERROR_NOT_SINGLE_ENTITY.create();
-					}
-
-					string = ((Entity)list.get(0)).getScoreboardName();
-				}
-			} else {
-				string = this.name;
-			}
-
+			String string = this.findTargetName(commandSourceStack);
 			String string2 = entity != null && string.equals("*") ? entity.getScoreboardName() : string;
-			ScoreComponent scoreComponent = new ScoreComponent(string2, this.objective);
-			scoreComponent.setValue(this.value);
-			scoreComponent.resolve(commandSourceStack);
-			return scoreComponent;
+			return new TextComponent(this.getScore(string2, commandSourceStack));
 		}
 	}
 

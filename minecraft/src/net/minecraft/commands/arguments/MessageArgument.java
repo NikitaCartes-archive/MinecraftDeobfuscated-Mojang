@@ -13,6 +13,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 
 public class MessageArgument implements ArgumentType<MessageArgument.Message> {
@@ -47,27 +48,27 @@ public class MessageArgument implements ArgumentType<MessageArgument.Message> {
 
 		public Component toComponent(CommandSourceStack commandSourceStack, boolean bl) throws CommandSyntaxException {
 			if (this.parts.length != 0 && bl) {
-				Component component = new TextComponent(this.text.substring(0, this.parts[0].getStart()));
+				MutableComponent mutableComponent = new TextComponent(this.text.substring(0, this.parts[0].getStart()));
 				int i = this.parts[0].getStart();
 
 				for (MessageArgument.Part part : this.parts) {
-					Component component2 = part.toComponent(commandSourceStack);
+					Component component = part.toComponent(commandSourceStack);
 					if (i < part.getStart()) {
-						component.append(this.text.substring(i, part.getStart()));
+						mutableComponent.append(this.text.substring(i, part.getStart()));
 					}
 
-					if (component2 != null) {
-						component.append(component2);
+					if (component != null) {
+						mutableComponent.append(component);
 					}
 
 					i = part.getEnd();
 				}
 
 				if (i < this.text.length()) {
-					component.append(this.text.substring(i, this.text.length()));
+					mutableComponent.append(this.text.substring(i, this.text.length()));
 				}
 
-				return component;
+				return mutableComponent;
 			} else {
 				return new TextComponent(this.text);
 			}

@@ -76,9 +76,9 @@ public class CustomBossEvent extends ServerBossEvent {
 	public final Component getDisplayName() {
 		return ComponentUtils.wrapInSquareBrackets(this.getName())
 			.withStyle(
-				style -> style.setColor(this.getColor().getFormatting())
-						.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(this.getTextId().toString())))
-						.setInsertion(this.getTextId().toString())
+				style -> style.withColor(this.getColor().getFormatting())
+						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(this.getTextId().toString())))
+						.withInsertion(this.getTextId().toString())
 			);
 	}
 

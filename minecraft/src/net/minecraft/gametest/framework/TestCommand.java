@@ -172,11 +172,11 @@ public class TestCommand {
 			String string3 = structureBlockEntity.getStructurePath();
 			Component component = new TextComponent(string2)
 				.setStyle(
-					new Style()
-						.setBold(true)
-						.setColor(ChatFormatting.GREEN)
-						.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to copy to clipboard")))
-						.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "final BlockPos " + string + " = new BlockPos(" + string2 + ");"))
+					Style.EMPTY
+						.withBold(true)
+						.withColor(ChatFormatting.GREEN)
+						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to copy to clipboard")))
+						.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "final BlockPos " + string + " = new BlockPos(" + string2 + ");"))
 				);
 			commandSourceStack.sendSuccess(new TextComponent("Position relative to " + string3 + ": ").append(component), false);
 			DebugPackets.sendGameTestAddMarker(serverLevel, new BlockPos(blockPos), string2, -2147418368, 10000);

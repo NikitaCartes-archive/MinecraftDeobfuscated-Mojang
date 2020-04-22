@@ -26,25 +26,25 @@ public class CartographyTableScreen extends AbstractContainerScreen<CartographyT
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		super.render(i, j, f);
-		this.renderTooltip(i, j);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		super.render(poseStack, i, j, f);
+		this.renderTooltip(poseStack, i, j);
 	}
 
 	@Override
-	protected void renderLabels(int i, int j) {
-		this.font.draw(this.title.getColoredString(), 8.0F, 4.0F, 4210752);
-		this.font.draw(this.inventory.getDisplayName().getColoredString(), 8.0F, (float)(this.imageHeight - 96 + 2), 4210752);
+	protected void renderLabels(PoseStack poseStack, int i, int j) {
+		this.font.draw(poseStack, this.title, 8.0F, 4.0F, 4210752);
+		this.font.draw(poseStack, this.inventory.getDisplayName(), 8.0F, (float)(this.imageHeight - 96 + 2), 4210752);
 	}
 
 	@Override
-	protected void renderBg(float f, int i, int j) {
-		this.renderBackground();
+	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
+		this.renderBackground(poseStack);
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.minecraft.getTextureManager().bind(BG_LOCATION);
 		int k = this.leftPos;
 		int l = this.topPos;
-		this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
+		this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
 		Item item = this.menu.getSlot(1).getItem().getItem();
 		boolean bl = item == Items.MAP;
 		boolean bl2 = item == Items.PAPER;
@@ -58,47 +58,47 @@ public class CartographyTableScreen extends AbstractContainerScreen<CartographyT
 				if (mapItemSavedData.locked) {
 					bl4 = true;
 					if (bl2 || bl3) {
-						this.blit(k + 35, l + 31, this.imageWidth + 50, 132, 28, 21);
+						this.blit(poseStack, k + 35, l + 31, this.imageWidth + 50, 132, 28, 21);
 					}
 				}
 
 				if (bl2 && mapItemSavedData.scale >= 4) {
 					bl4 = true;
-					this.blit(k + 35, l + 31, this.imageWidth + 50, 132, 28, 21);
+					this.blit(poseStack, k + 35, l + 31, this.imageWidth + 50, 132, 28, 21);
 				}
 			}
 		} else {
 			mapItemSavedData = null;
 		}
 
-		this.renderResultingMap(mapItemSavedData, bl, bl2, bl3, bl4);
+		this.renderResultingMap(poseStack, mapItemSavedData, bl, bl2, bl3, bl4);
 	}
 
-	private void renderResultingMap(@Nullable MapItemSavedData mapItemSavedData, boolean bl, boolean bl2, boolean bl3, boolean bl4) {
+	private void renderResultingMap(PoseStack poseStack, @Nullable MapItemSavedData mapItemSavedData, boolean bl, boolean bl2, boolean bl3, boolean bl4) {
 		int i = this.leftPos;
 		int j = this.topPos;
 		if (bl2 && !bl4) {
-			this.blit(i + 67, j + 13, this.imageWidth, 66, 66, 66);
+			this.blit(poseStack, i + 67, j + 13, this.imageWidth, 66, 66, 66);
 			this.renderMap(mapItemSavedData, i + 85, j + 31, 0.226F);
 		} else if (bl) {
-			this.blit(i + 67 + 16, j + 13, this.imageWidth, 132, 50, 66);
+			this.blit(poseStack, i + 67 + 16, j + 13, this.imageWidth, 132, 50, 66);
 			this.renderMap(mapItemSavedData, i + 86, j + 16, 0.34F);
 			this.minecraft.getTextureManager().bind(BG_LOCATION);
 			RenderSystem.pushMatrix();
 			RenderSystem.translatef(0.0F, 0.0F, 1.0F);
-			this.blit(i + 67, j + 13 + 16, this.imageWidth, 132, 50, 66);
+			this.blit(poseStack, i + 67, j + 13 + 16, this.imageWidth, 132, 50, 66);
 			this.renderMap(mapItemSavedData, i + 70, j + 32, 0.34F);
 			RenderSystem.popMatrix();
 		} else if (bl3) {
-			this.blit(i + 67, j + 13, this.imageWidth, 0, 66, 66);
+			this.blit(poseStack, i + 67, j + 13, this.imageWidth, 0, 66, 66);
 			this.renderMap(mapItemSavedData, i + 71, j + 17, 0.45F);
 			this.minecraft.getTextureManager().bind(BG_LOCATION);
 			RenderSystem.pushMatrix();
 			RenderSystem.translatef(0.0F, 0.0F, 1.0F);
-			this.blit(i + 66, j + 12, 0, this.imageHeight, 66, 66);
+			this.blit(poseStack, i + 66, j + 12, 0, this.imageHeight, 66, 66);
 			RenderSystem.popMatrix();
 		} else {
-			this.blit(i + 67, j + 13, this.imageWidth, 0, 66, 66);
+			this.blit(poseStack, i + 67, j + 13, this.imageWidth, 0, 66, 66);
 			this.renderMap(mapItemSavedData, i + 71, j + 17, 0.45F);
 		}
 	}

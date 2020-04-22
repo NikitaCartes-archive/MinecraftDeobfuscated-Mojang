@@ -2,6 +2,7 @@ package net.minecraft.client.gui.screens;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
@@ -41,7 +42,7 @@ public class LoadingOverlay extends Overlay {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
+	public void render(PoseStack poseStack, int i, int j, float f) {
 		int k = this.minecraft.getWindow().getGuiScaledWidth();
 		int l = this.minecraft.getWindow().getGuiScaledHeight();
 		long m = Util.getMillis();
@@ -54,22 +55,22 @@ public class LoadingOverlay extends Overlay {
 		float o;
 		if (g >= 1.0F) {
 			if (this.minecraft.screen != null) {
-				this.minecraft.screen.render(0, 0, f);
+				this.minecraft.screen.render(poseStack, 0, 0, f);
 			}
 
 			int n = Mth.ceil((1.0F - Mth.clamp(g - 1.0F, 0.0F, 1.0F)) * 255.0F);
-			fill(0, 0, k, l, 16777215 | n << 24);
+			fill(poseStack, 0, 0, k, l, 16777215 | n << 24);
 			o = 1.0F - Mth.clamp(g - 1.0F, 0.0F, 1.0F);
 		} else if (this.fadeIn) {
 			if (this.minecraft.screen != null && h < 1.0F) {
-				this.minecraft.screen.render(i, j, f);
+				this.minecraft.screen.render(poseStack, i, j, f);
 			}
 
 			int n = Mth.ceil(Mth.clamp((double)h, 0.15, 1.0) * 255.0);
-			fill(0, 0, k, l, 16777215 | n << 24);
+			fill(poseStack, 0, 0, k, l, 16777215 | n << 24);
 			o = Mth.clamp(h, 0.0F, 1.0F);
 		} else {
-			fill(0, 0, k, l, -1);
+			fill(poseStack, 0, 0, k, l, -1);
 			o = 1.0F;
 		}
 
@@ -78,11 +79,11 @@ public class LoadingOverlay extends Overlay {
 		this.minecraft.getTextureManager().bind(MOJANG_LOGO_LOCATION);
 		RenderSystem.enableBlend();
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, o);
-		this.blit(n, p, 0, 0, 256, 256);
+		this.blit(poseStack, n, p, 0, 0, 256, 256);
 		float q = this.reload.getActualProgress();
 		this.currentProgress = Mth.clamp(this.currentProgress * 0.95F + q * 0.050000012F, 0.0F, 1.0F);
 		if (g < 1.0F) {
-			this.drawProgressBar(k / 2 - 150, l / 4 * 3, k / 2 + 150, l / 4 * 3 + 10, 1.0F - Mth.clamp(g, 0.0F, 1.0F));
+			this.drawProgressBar(poseStack, k / 2 - 150, l / 4 * 3, k / 2 + 150, l / 4 * 3 + 10, 1.0F - Mth.clamp(g, 0.0F, 1.0F));
 		}
 
 		if (g >= 2.0F) {
@@ -93,8 +94,8 @@ public class LoadingOverlay extends Overlay {
 			try {
 				this.reload.checkExceptions();
 				this.onFinish.accept(Optional.empty());
-			} catch (Throwable var15) {
-				this.onFinish.accept(Optional.of(var15));
+			} catch (Throwable var16) {
+				this.onFinish.accept(Optional.of(var16));
 			}
 
 			this.fadeOutStart = Util.getMillis();
@@ -104,11 +105,19 @@ public class LoadingOverlay extends Overlay {
 		}
 	}
 
-	private void drawProgressBar(int i, int j, int k, int l, float f) {
+	private void drawProgressBar(PoseStack poseStack, int i, int j, int k, int l, float f) {
 		int m = Mth.ceil((float)(k - i - 1) * this.currentProgress);
-		fill(i - 1, j - 1, k + 1, l + 1, 0xFF000000 | Math.round((1.0F - f) * 255.0F) << 16 | Math.round((1.0F - f) * 255.0F) << 8 | Math.round((1.0F - f) * 255.0F));
-		fill(i, j, k, l, -1);
 		fill(
+			poseStack,
+			i - 1,
+			j - 1,
+			k + 1,
+			l + 1,
+			0xFF000000 | Math.round((1.0F - f) * 255.0F) << 16 | Math.round((1.0F - f) * 255.0F) << 8 | Math.round((1.0F - f) * 255.0F)
+		);
+		fill(poseStack, i, j, k, l, -1);
+		fill(
+			poseStack,
 			i + 1,
 			j + 1,
 			i + m,

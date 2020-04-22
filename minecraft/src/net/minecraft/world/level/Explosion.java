@@ -176,7 +176,7 @@ public class Explosion {
 				double x = (double)(Mth.sqrt(entity.distanceToSqr(vec3)) / r);
 				if (x <= 1.0) {
 					double y = entity.getX() - this.x;
-					double z = entity.getEyeY() - this.y;
+					double z = (entity instanceof PrimedTnt ? entity.getY() : entity.getEyeY()) - this.y;
 					double aa = entity.getZ() - this.z;
 					double ab = (double)Mth.sqrt(y * y + z * z + aa * aa);
 					if (ab != 0.0) {

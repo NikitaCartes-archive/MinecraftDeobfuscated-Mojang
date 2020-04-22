@@ -53,7 +53,7 @@ public class RespawnAnchorBlock extends Block {
 			return InteractionResult.SUCCESS;
 		} else if ((Integer)blockState.getValue(CHARGE) == 0) {
 			return InteractionResult.PASS;
-		} else if (level.dimension.getType() != DimensionType.NETHER) {
+		} else if (!canSetSpawn(level)) {
 			if (!level.isClientSide) {
 				level.removeBlock(blockPos, false);
 				level.explode(
@@ -90,6 +90,10 @@ public class RespawnAnchorBlock extends Block {
 
 			return blockState.getValue(CHARGE) < 4 ? InteractionResult.PASS : InteractionResult.CONSUME;
 		}
+	}
+
+	public static boolean canSetSpawn(Level level) {
+		return level.dimension.getType() == DimensionType.NETHER;
 	}
 
 	public static void charge(Level level, BlockPos blockPos, BlockState blockState) {

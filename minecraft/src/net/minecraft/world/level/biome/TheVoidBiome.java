@@ -2,9 +2,7 @@ package net.minecraft.world.level.biome;
 
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 
 public final class TheVoidBiome extends Biome {
@@ -28,9 +26,6 @@ public final class TheVoidBiome extends Biome {
 				)
 				.parent(null)
 		);
-		this.addFeature(
-			GenerationStep.Decoration.TOP_LAYER_MODIFICATION,
-			Feature.VOID_START_PLATFORM.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE))
-		);
+		this.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, Feature.VOID_START_PLATFORM.configured(FeatureConfiguration.NONE));
 	}
 }

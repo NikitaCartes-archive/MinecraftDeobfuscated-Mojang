@@ -19,8 +19,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.dimension.Dimension;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec3;
 
@@ -36,50 +39,64 @@ public class CompassItem extends Item implements Vanishable {
 				@Environment(EnvType.CLIENT)
 				@Override
 				public float call(ItemStack itemStack, @Nullable Level level, @Nullable LivingEntity livingEntity) {
-					if (livingEntity == null && !itemStack.isFramed()) {
+					Entity entity = (Entity)(livingEntity != null ? livingEntity : itemStack.getEntityRepresentation());
+					if (entity == null) {
 						return 0.0F;
 					} else {
-						boolean bl = livingEntity != null;
-						Entity entity = (Entity)(bl ? livingEntity : itemStack.getFrame());
 						if (level == null) {
 							level = entity.level;
 						}
 
-						CompoundTag compoundTag = itemStack.getOrCreateTag();
-						BlockPos blockPos = CompassItem.hasLodestoneData(compoundTag)
-							? CompassItem.this.getLodestonePosition(level, compoundTag)
+						BlockPos blockPos = CompassItem.isLodestoneCompass(itemStack)
+							? CompassItem.this.getLodestonePosition(level, itemStack.getOrCreateTag())
 							: CompassItem.this.getSpawnPosition(level);
-						double g;
-						if (blockPos != null) {
-							double d = bl ? (double)entity.yRot : CompassItem.getFrameRotation((ItemFrame)entity);
-							d = Mth.positiveModulo(d / 360.0, 1.0);
-							double e = 0.5 - (d - 0.25);
-							boolean bl2 = !bl && entity.getDirection().getAxis().isVertical();
-							boolean bl3 = bl2 && entity.getDirection() == Direction.UP;
-							double f = CompassItem.getAngleTo(Vec3.atCenterOf(blockPos), entity) / (float) (Math.PI * 2) * (double)(bl3 ? -1 : 1);
-							g = 0.5 - (d - 0.25 - f) * (double)(bl2 ? -1 : 1);
+						long l = level.getGameTime();
+						if (blockPos != null && !(entity.position().distanceToSqr((double)blockPos.getX() + 0.5, entity.position().y(), (double)blockPos.getZ() + 0.5) < 1.0E-5F)
+							)
+						 {
+							boolean bl = livingEntity instanceof Player && ((Player)livingEntity).isLocalPlayer();
+							double e = 0.0;
 							if (bl) {
-								this.wobble.update(level, e);
-								g -= e - this.wobble.getRotation();
+								e = (double)livingEntity.yRot;
+							} else if (entity instanceof ItemFrame) {
+								e = CompassItem.getFrameRotation((ItemFrame)entity);
+							} else if (entity instanceof ItemEntity) {
+								e = (double)(180.0F - ((ItemEntity)entity).getSpin(0.5F) / (float) (Math.PI * 2) * 360.0F);
+							} else if (livingEntity != null) {
+								e = (double)livingEntity.yBodyRot;
 							}
-						} else {
-							this.wobbleRandom.update(level, Math.random());
-							g = this.wobbleRandom.getRotation();
-						}
 
-						return Mth.positiveModulo((float)g, 1.0F);
+							e = Mth.positiveModulo(e / 360.0, 1.0);
+							double f = CompassItem.getAngleTo(Vec3.atCenterOf(blockPos), entity) / (float) (Math.PI * 2);
+							double g;
+							if (bl) {
+								if (this.wobble.shouldUpdate(l)) {
+									this.wobble.update(l, 0.5 - (e - 0.25));
+								}
+
+								g = f + this.wobble.rotation;
+							} else {
+								g = 0.5 - (e - 0.25 - f);
+							}
+
+							return Mth.positiveModulo((float)g, 1.0F);
+						} else {
+							if (this.wobbleRandom.shouldUpdate(l)) {
+								this.wobbleRandom.update(l, Math.random());
+							}
+
+							double d = this.wobbleRandom.rotation + (double)((float)itemStack.hashCode() / 2.1474836E9F);
+							return Mth.positiveModulo((float)d, 1.0F);
+						}
 					}
 				}
 			}
 		);
 	}
 
-	private static boolean hasLodestoneData(CompoundTag compoundTag) {
-		return compoundTag.contains("LodestoneDimension") || compoundTag.contains("LodestonePos");
-	}
-
 	private static boolean isLodestoneCompass(ItemStack itemStack) {
-		return hasLodestoneData(itemStack.getOrCreateTag());
+		CompoundTag compoundTag = itemStack.getTag();
+		return compoundTag != null && (compoundTag.contains("LodestoneDimension") || compoundTag.contains("LodestonePos"));
 	}
 
 	@Override
@@ -113,24 +130,11 @@ public class CompassItem extends Item implements Vanishable {
 		return null;
 	}
 
-	@Environment(EnvType.CLIENT)
-	private static double getFrameRotation(ItemFrame itemFrame) {
-		Direction direction = itemFrame.getDirection();
-		return direction.getAxis().isVertical()
-			? (double)Mth.wrapDegrees(itemFrame.getRotation() * -45)
-			: (double)Mth.wrapDegrees(180 + itemFrame.getDirection().get2DDataValue() * 90 + itemFrame.getRotation() * 45);
-	}
-
-	@Environment(EnvType.CLIENT)
-	private static double getAngleTo(Vec3 vec3, Entity entity) {
-		return Math.atan2(vec3.z() - entity.getZ(), vec3.x() - entity.getX());
-	}
-
 	@Override
 	public void inventoryTick(ItemStack itemStack, Level level, Entity entity, int i, boolean bl) {
 		if (!level.isClientSide) {
-			CompoundTag compoundTag = itemStack.getOrCreateTag();
-			if (hasLodestoneData(compoundTag)) {
+			if (isLodestoneCompass(itemStack)) {
+				CompoundTag compoundTag = itemStack.getOrCreateTag();
 				if (compoundTag.contains("LodestoneTracked") && !compoundTag.getBoolean("LodestoneTracked")) {
 					return;
 				}
@@ -149,21 +153,52 @@ public class CompassItem extends Item implements Vanishable {
 	@Override
 	public InteractionResult useOn(UseOnContext useOnContext) {
 		BlockPos blockPos = useOnContext.hitResult.getBlockPos();
-		if (useOnContext.level.getBlockState(blockPos).getBlock() == Blocks.LODESTONE) {
-			useOnContext.level.playSound(null, blockPos, SoundEvents.LODESTONE_COMPASS_LOCK, SoundSource.PLAYERS, 1.0F, 1.0F);
-			CompoundTag compoundTag = useOnContext.itemStack.getOrCreateTag();
-			compoundTag.put("LodestonePos", NbtUtils.writeBlockPos(blockPos));
-			compoundTag.putString("LodestoneDimension", DimensionType.getName(useOnContext.level.dimension.getType()).toString());
-			compoundTag.putBoolean("LodestoneTracked", true);
-			return InteractionResult.SUCCESS;
-		} else {
+		if (useOnContext.level.getBlockState(blockPos).getBlock() != Blocks.LODESTONE) {
 			return super.useOn(useOnContext);
+		} else {
+			useOnContext.level.playSound(null, blockPos, SoundEvents.LODESTONE_COMPASS_LOCK, SoundSource.PLAYERS, 1.0F, 1.0F);
+			boolean bl = !useOnContext.player.abilities.instabuild && useOnContext.itemStack.getCount() == 1;
+			if (bl) {
+				this.addLodestoneTags(useOnContext.level.dimension, blockPos, useOnContext.itemStack.getOrCreateTag());
+			} else {
+				ItemStack itemStack = new ItemStack(Items.COMPASS, 1);
+				CompoundTag compoundTag = useOnContext.itemStack.hasTag() ? useOnContext.itemStack.getTag().copy() : new CompoundTag();
+				itemStack.setTag(compoundTag);
+				if (!useOnContext.player.abilities.instabuild) {
+					useOnContext.itemStack.shrink(1);
+				}
+
+				this.addLodestoneTags(useOnContext.level.dimension, blockPos, compoundTag);
+				if (!useOnContext.player.inventory.add(itemStack)) {
+					useOnContext.player.drop(itemStack, false);
+				}
+			}
+
+			return InteractionResult.SUCCESS;
 		}
+	}
+
+	private void addLodestoneTags(Dimension dimension, BlockPos blockPos, CompoundTag compoundTag) {
+		compoundTag.put("LodestonePos", NbtUtils.writeBlockPos(blockPos));
+		compoundTag.putString("LodestoneDimension", DimensionType.getName(dimension.getType()).toString());
+		compoundTag.putBoolean("LodestoneTracked", true);
 	}
 
 	@Override
 	public String getDescriptionId(ItemStack itemStack) {
 		return isLodestoneCompass(itemStack) ? "item.minecraft.lodestone_compass" : super.getDescriptionId(itemStack);
+	}
+
+	@Environment(EnvType.CLIENT)
+	private static double getFrameRotation(ItemFrame itemFrame) {
+		Direction direction = itemFrame.getDirection();
+		int i = direction.getAxis().isVertical() ? 90 * direction.getAxisDirection().getStep() : 0;
+		return (double)Mth.wrapDegrees(180 + direction.get2DDataValue() * 90 + itemFrame.getRotation() * 45 + i);
+	}
+
+	@Environment(EnvType.CLIENT)
+	private static double getAngleTo(Vec3 vec3, Entity entity) {
+		return Math.atan2(vec3.z() - entity.getZ(), vec3.x() - entity.getX());
 	}
 
 	static class CompassWobble {
@@ -178,20 +213,18 @@ public class CompassItem extends Item implements Vanishable {
 		}
 
 		@Environment(EnvType.CLIENT)
-		public double getRotation() {
-			return this.rotation;
+		private boolean shouldUpdate(long l) {
+			return this.lastUpdateTick != l;
 		}
 
 		@Environment(EnvType.CLIENT)
-		private void update(Level level, double d) {
-			if (level.getGameTime() != this.lastUpdateTick) {
-				this.lastUpdateTick = level.getGameTime();
-				double e = d - this.rotation;
-				e = Mth.positiveModulo(e + 0.5, 1.0) - 0.5;
-				this.deltaRotation += e * 0.1;
-				this.deltaRotation *= 0.8;
-				this.rotation = Mth.positiveModulo(this.rotation + this.deltaRotation, 1.0);
-			}
+		private void update(long l, double d) {
+			this.lastUpdateTick = l;
+			double e = d - this.rotation;
+			e = Mth.positiveModulo(e + 0.5, 1.0) - 0.5;
+			this.deltaRotation += e * 0.1;
+			this.deltaRotation *= 0.8;
+			this.rotation = Mth.positiveModulo(this.rotation + this.deltaRotation, 1.0);
 		}
 	}
 }

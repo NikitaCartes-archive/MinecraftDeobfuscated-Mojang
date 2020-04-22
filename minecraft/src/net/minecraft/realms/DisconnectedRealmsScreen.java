@@ -1,19 +1,23 @@
 package net.minecraft.realms;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class DisconnectedRealmsScreen extends RealmsScreen {
 	private final String title;
 	private final Component reason;
-	private List<String> lines;
+	@Nullable
+	private List<Component> lines;
 	private final Screen parent;
 	private int textHeight;
 
@@ -29,12 +33,10 @@ public class DisconnectedRealmsScreen extends RealmsScreen {
 		minecraft.setConnectedToRealms(false);
 		minecraft.getClientPackSource().clearServerPack();
 		NarrationHelper.now(this.title + ": " + this.reason.getString());
-		this.lines = this.font.split(this.reason.getColoredString(), this.width - 50);
+		this.lines = this.font.split(this.reason, this.width - 50);
 		this.textHeight = this.lines.size() * 9;
 		this.addButton(
-			new Button(
-				this.width / 2 - 100, this.height / 2 + this.textHeight / 2 + 9, 200, 20, I18n.get("gui.back"), button -> Minecraft.getInstance().setScreen(this.parent)
-			)
+			new Button(this.width / 2 - 100, this.height / 2 + this.textHeight / 2 + 9, 200, 20, CommonComponents.GUI_BACK, button -> minecraft.setScreen(this.parent))
 		);
 	}
 
@@ -49,17 +51,17 @@ public class DisconnectedRealmsScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
-		this.drawCenteredString(this.font, this.title, this.width / 2, this.height / 2 - this.textHeight / 2 - 9 * 2, 11184810);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, this.height / 2 - this.textHeight / 2 - 9 * 2, 11184810);
 		int k = this.height / 2 - this.textHeight / 2;
 		if (this.lines != null) {
-			for (String string : this.lines) {
-				this.drawCenteredString(this.font, string, this.width / 2, k, 16777215);
+			for (Component component : this.lines) {
+				this.drawCenteredString(poseStack, this.font, component, this.width / 2, k, 16777215);
 				k += 9;
 			}
 		}
 
-		super.render(i, j, f);
+		super.render(poseStack, i, j, f);
 	}
 }

@@ -37,6 +37,7 @@ import net.minecraft.commands.arguments.ScoreboardSlotArgument;
 import net.minecraft.commands.arguments.SlotArgument;
 import net.minecraft.commands.arguments.TeamArgument;
 import net.minecraft.commands.arguments.TimeArgument;
+import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
@@ -112,6 +113,7 @@ public class ArgumentTypes {
 		register("entity_summon", EntitySummonArgument.class, new EmptyArgumentSerializer(EntitySummonArgument::id));
 		register("dimension", DimensionTypeArgument.class, new EmptyArgumentSerializer(DimensionTypeArgument::dimension));
 		register("time", TimeArgument.class, new EmptyArgumentSerializer(TimeArgument::time));
+		register("uuid", UuidArgument.class, new EmptyArgumentSerializer(UuidArgument::uuid));
 		if (SharedConstants.IS_RUNNING_IN_IDE) {
 			register("test_argument", TestFunctionArgument.class, new EmptyArgumentSerializer(TestFunctionArgument::testFunctionArgument));
 			register("test_class", TestClassNameArgument.class, new EmptyArgumentSerializer(TestClassNameArgument::testClassName));

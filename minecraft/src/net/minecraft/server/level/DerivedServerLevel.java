@@ -6,18 +6,25 @@ import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.DerivedLevelData;
-import net.minecraft.world.level.storage.LevelStorage;
+import net.minecraft.world.level.storage.LevelStorageSource;
 
 public class DerivedServerLevel extends ServerLevel {
 	public DerivedServerLevel(
 		ServerLevel serverLevel,
 		MinecraftServer minecraftServer,
 		Executor executor,
-		LevelStorage levelStorage,
+		LevelStorageSource.LevelStorageAccess levelStorageAccess,
 		DimensionType dimensionType,
 		ChunkProgressListener chunkProgressListener
 	) {
-		super(minecraftServer, executor, levelStorage, new DerivedLevelData(serverLevel.getLevelData()), dimensionType, chunkProgressListener);
+		super(
+			minecraftServer,
+			executor,
+			levelStorageAccess,
+			new DerivedLevelData(dimensionType, minecraftServer.getWorldData(), serverLevel.getLevelData()),
+			dimensionType,
+			chunkProgressListener
+		);
 		serverLevel.getWorldBorder().addListener(new BorderChangeListener.DelegateBorderChangeListener(this.getWorldBorder()));
 	}
 

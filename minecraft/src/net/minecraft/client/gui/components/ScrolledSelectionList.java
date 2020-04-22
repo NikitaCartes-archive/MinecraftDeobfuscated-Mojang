@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import java.util.Collections;
 import java.util.List;
@@ -71,7 +72,7 @@ public abstract class ScrolledSelectionList extends AbstractContainerEventHandle
 	protected void updateItemPosition(int i, int j, int k, float f) {
 	}
 
-	protected abstract void renderItem(int i, int j, int k, int l, int m, int n, float f);
+	protected abstract void renderItem(PoseStack poseStack, int i, int j, int k, int l, int m, int n, float f);
 
 	protected void renderHeader(int i, int j, Tesselator tesselator) {
 	}
@@ -103,7 +104,7 @@ public abstract class ScrolledSelectionList extends AbstractContainerEventHandle
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
+	public void render(PoseStack poseStack, int i, int j, float f) {
 		if (this.visible) {
 			this.renderBackground();
 			int k = this.getScrollbarPosition();
@@ -138,7 +139,7 @@ public abstract class ScrolledSelectionList extends AbstractContainerEventHandle
 				this.renderHeader(m, n, tesselator);
 			}
 
-			this.renderList(m, n, i, j, f);
+			this.renderList(poseStack, m, n, i, j, f);
 			RenderSystem.disableDepthTest();
 			this.renderHoleBackground(0, this.y0, 255, 255);
 			this.renderHoleBackground(this.y1, this.height, 255, 255);
@@ -311,7 +312,7 @@ public abstract class ScrolledSelectionList extends AbstractContainerEventHandle
 		return 220;
 	}
 
-	protected void renderList(int i, int j, int k, int l, float f) {
+	protected void renderList(PoseStack poseStack, int i, int j, int k, int l, float f) {
 		int m = this.getItemCount();
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -345,7 +346,7 @@ public abstract class ScrolledSelectionList extends AbstractContainerEventHandle
 				RenderSystem.enableTexture();
 			}
 
-			this.renderItem(n, i, o, p, k, l, f);
+			this.renderItem(poseStack, n, i, o, p, k, l, f);
 		}
 	}
 

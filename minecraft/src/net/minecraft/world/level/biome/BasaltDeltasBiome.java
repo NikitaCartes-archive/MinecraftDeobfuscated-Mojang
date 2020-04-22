@@ -2,6 +2,7 @@ package net.minecraft.world.level.biome;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.Musics;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -12,7 +13,6 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.RuinedPortalFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.ChanceRangeDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.CountRangeDecoratorConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
@@ -49,17 +49,22 @@ public class BasaltDeltasBiome extends Biome {
 						.ambientLoopSound(SoundEvents.AMBIENT_BASALT_DELTAS_LOOP)
 						.ambientMoodSound(new AmbientMoodSettings(SoundEvents.AMBIENT_BASALT_DELTAS_MOOD, 6000, 8, 2.0))
 						.ambientAdditionsSound(new AmbientAdditionsSettings(SoundEvents.AMBIENT_BASALT_DELTAS_ADDITIONS, 0.0111))
+						.backgroundMusic(Musics.createGameMusic(SoundEvents.MUSIC_BIOME_BASALT_DELTAS))
 						.build()
 				)
 				.parent(null)
-				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.5F, 0.0F, 0.0F, 0.0F, 1.0F)))
+				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(-0.7F, 0.0F, 0.0F, 0.0F, 0.3F)))
 		);
 		this.addStructureStart(Feature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.NETHER)));
+		this.addFeature(
+			GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.NETHER))
+		);
 		this.addCarver(GenerationStep.Carving.AIR, makeCarver(WorldCarver.NETHER_CAVE, new ProbabilityFeatureConfiguration(0.2F)));
 		this.addStructureStart(Feature.NETHER_BRIDGE.configured(FeatureConfiguration.NONE));
+		this.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.NETHER_BRIDGE.configured(FeatureConfiguration.NONE));
 		BiomeDefaultFeatures.addStructureFeaturePlacement(this);
 		this.addFeature(
-			GenerationStep.Decoration.LOCAL_MODIFICATIONS,
+			GenerationStep.Decoration.SURFACE_STRUCTURES,
 			Feature.DELTA_FEATURE
 				.configured(BiomeDefaultFeatures.BASALT_DELTA_FEATURE_CONFIG)
 				.decorated(FeatureDecorator.COUNT_HEIGHTMAP.configured(new FrequencyDecoratorConfiguration(40)))
@@ -71,13 +76,13 @@ public class BasaltDeltasBiome extends Biome {
 				.decorated(FeatureDecorator.COUNT_VERY_BIASED_RANGE.configured(new CountRangeDecoratorConfiguration(40, 8, 16, 256)))
 		);
 		this.addFeature(
-			GenerationStep.Decoration.UNDERGROUND_DECORATION,
+			GenerationStep.Decoration.SURFACE_STRUCTURES,
 			Feature.BASALT_COLUMNS
 				.configured(BiomeDefaultFeatures.SMALL_BASALT_COLUMN_FEATURE_CONFIG)
 				.decorated(FeatureDecorator.COUNT_HEIGHTMAP.configured(new FrequencyDecoratorConfiguration(4)))
 		);
 		this.addFeature(
-			GenerationStep.Decoration.UNDERGROUND_DECORATION,
+			GenerationStep.Decoration.SURFACE_STRUCTURES,
 			Feature.BASALT_COLUMNS
 				.configured(BiomeDefaultFeatures.LARGE_BASALT_COLUMN_FEATURE_CONFIG)
 				.decorated(FeatureDecorator.COUNT_HEIGHTMAP.configured(new FrequencyDecoratorConfiguration(2)))
@@ -93,16 +98,6 @@ public class BasaltDeltasBiome extends Biome {
 			Feature.REPLACE_BLOBS
 				.configured(BiomeDefaultFeatures.BLACKSTONE_BLOBS_FEATURE_CONFIG)
 				.decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(25, 0, 0, 128)))
-		);
-		this.addFeature(
-			GenerationStep.Decoration.UNDERGROUND_DECORATION,
-			Feature.NETHER_BRIDGE.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE))
-		);
-		this.addFeature(
-			GenerationStep.Decoration.UNDERGROUND_DECORATION,
-			Feature.RUINED_PORTAL
-				.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.NETHER))
-				.decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE))
 		);
 		this.addFeature(
 			GenerationStep.Decoration.UNDERGROUND_DECORATION,

@@ -18,6 +18,7 @@ import net.minecraft.util.datafix.fixes.BedBlockEntityInjecter;
 import net.minecraft.util.datafix.fixes.BedItemColorFix;
 import net.minecraft.util.datafix.fixes.BeehivePoiRenameFix;
 import net.minecraft.util.datafix.fixes.BiomeFix;
+import net.minecraft.util.datafix.fixes.BitStorageAlignFix;
 import net.minecraft.util.datafix.fixes.BlockEntityBannerColorFix;
 import net.minecraft.util.datafix.fixes.BlockEntityBlockStateFix;
 import net.minecraft.util.datafix.fixes.BlockEntityCustomNameToComponentFix;
@@ -623,5 +624,31 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new AddNewChoices(schema112, "Added Zoglin", References.ENTITY));
 		Schema schema113 = dataFixerBuilder.addSchema(2523, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new AttributesRename(schema113));
+		Schema schema114 = dataFixerBuilder.addSchema(2527, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new BitStorageAlignFix(schema114));
+		Schema schema115 = dataFixerBuilder.addSchema(2528, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(
+			ItemRenameFix.create(
+				schema115,
+				"Rename soul fire torch and soul fire lantern",
+				string -> ImmutableMap.of("minecraft:soul_fire_torch", "minecraft:soul_torch", "minecraft:soul_fire_lantern", "minecraft:soul_lantern")
+						.getOrDefault(string, string)
+			)
+		);
+		dataFixerBuilder.addFixer(
+			BlockRenameFix.create(
+				schema115,
+				"Rename soul fire torch and soul fire lantern",
+				string -> ImmutableMap.of(
+							"minecraft:soul_fire_torch",
+							"minecraft:soul_torch",
+							"minecraft:soul_fire_wall_torch",
+							"minecraft:soul_wall_torch",
+							"minecraft:soul_fire_lantern",
+							"minecraft:soul_lantern"
+						)
+						.getOrDefault(string, string)
+			)
+		);
 	}
 }

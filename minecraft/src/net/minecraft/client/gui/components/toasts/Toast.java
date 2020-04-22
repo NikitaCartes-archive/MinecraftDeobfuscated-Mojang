@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.components.toasts;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -13,7 +14,7 @@ public interface Toast {
 	ResourceLocation TEXTURE = new ResourceLocation("textures/gui/toasts.png");
 	Object NO_TOKEN = new Object();
 
-	Toast.Visibility render(ToastComponent toastComponent, long l);
+	Toast.Visibility render(PoseStack poseStack, ToastComponent toastComponent, long l);
 
 	default Object getToken() {
 		return NO_TOKEN;

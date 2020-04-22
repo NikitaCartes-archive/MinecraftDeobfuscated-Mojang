@@ -1,6 +1,7 @@
 package net.minecraft.network.chat;
 
 public class TextComponent extends BaseComponent {
+	public static final Component EMPTY = new TextComponent("");
 	private final String text;
 
 	public TextComponent(String string) {
@@ -16,7 +17,7 @@ public class TextComponent extends BaseComponent {
 		return this.text;
 	}
 
-	public TextComponent copy() {
+	public TextComponent toMutable() {
 		return new TextComponent(this.text);
 	}
 

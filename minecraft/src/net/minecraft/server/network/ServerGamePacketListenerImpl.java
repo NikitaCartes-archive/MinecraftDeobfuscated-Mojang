@@ -189,7 +189,7 @@ public class ServerGamePacketListenerImpl implements ServerGamePacketListener {
 		this.player.absMoveTo(this.firstGoodX, this.firstGoodY, this.firstGoodZ, this.player.yRot, this.player.xRot);
 		this.tickCount++;
 		this.knownMovePacketCount = this.receivedMovePacketCount;
-		if (this.clientIsFloating) {
+		if (this.clientIsFloating && !this.player.isSleeping()) {
 			if (++this.aboveGroundTickCount > 80) {
 				LOGGER.warn("{} was kicked for floating too long!", this.player.getName().getString());
 				this.disconnect(new TranslatableComponent("multiplayer.disconnect.flying"));

@@ -15,10 +15,10 @@ import net.minecraft.world.level.levelgen.feature.configurations.TreeConfigurati
 
 public abstract class AbstractTreeGrower {
 	@Nullable
-	protected abstract ConfiguredFeature<? extends TreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl);
+	protected abstract ConfiguredFeature<TreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl);
 
 	public boolean growTree(ServerLevel serverLevel, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockState blockState, Random random) {
-		ConfiguredFeature<? extends TreeConfiguration, ?> configuredFeature = this.getConfiguredFeature(random, this.hasFlowers(serverLevel, blockPos));
+		ConfiguredFeature<TreeConfiguration, ?> configuredFeature = this.getConfiguredFeature(random, this.hasFlowers(serverLevel, blockPos));
 		if (configuredFeature == null) {
 			return false;
 		} else {

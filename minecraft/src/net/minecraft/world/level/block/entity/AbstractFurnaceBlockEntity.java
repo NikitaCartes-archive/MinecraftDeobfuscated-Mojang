@@ -31,9 +31,11 @@ import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 public abstract class AbstractFurnaceBlockEntity
 	extends BaseContainerBlockEntity
@@ -449,24 +451,29 @@ public abstract class AbstractFurnaceBlockEntity
 	}
 
 	@Override
-	public void awardAndReset(Player player) {
+	public void awardUsedRecipes(Player player) {
 	}
 
-	public void awardResetAndExperience(Player player) {
-		List<Recipe<?>> list = Lists.<Recipe<?>>newArrayList();
-
-		for (Entry<ResourceLocation> entry : this.recipesUsed.object2IntEntrySet()) {
-			player.level.getRecipeManager().byKey((ResourceLocation)entry.getKey()).ifPresent(recipe -> {
-				list.add(recipe);
-				createExperience(player, entry.getIntValue(), ((AbstractCookingRecipe)recipe).getExperience());
-			});
-		}
-
+	public void awardUsedRecipesAndPopExperience(Player player) {
+		List<Recipe<?>> list = this.getRecipesToAwardAndPopExperience(player.level, player.position());
 		player.awardRecipes(list);
 		this.recipesUsed.clear();
 	}
 
-	private static void createExperience(Player player, int i, float f) {
+	public List<Recipe<?>> getRecipesToAwardAndPopExperience(Level level, Vec3 vec3) {
+		List<Recipe<?>> list = Lists.<Recipe<?>>newArrayList();
+
+		for (Entry<ResourceLocation> entry : this.recipesUsed.object2IntEntrySet()) {
+			level.getRecipeManager().byKey((ResourceLocation)entry.getKey()).ifPresent(recipe -> {
+				list.add(recipe);
+				createExperience(level, vec3, entry.getIntValue(), ((AbstractCookingRecipe)recipe).getExperience());
+			});
+		}
+
+		return list;
+	}
+
+	private static void createExperience(Level level, Vec3 vec3, int i, float f) {
 		int j = Mth.floor((float)i * f);
 		float g = Mth.frac((float)i * f);
 		if (g != 0.0F && Math.random() < (double)g) {
@@ -476,7 +483,7 @@ public abstract class AbstractFurnaceBlockEntity
 		while (j > 0) {
 			int k = ExperienceOrb.getExperienceValue(j);
 			j -= k;
-			player.level.addFreshEntity(new ExperienceOrb(player.level, player.getX(), player.getY() + 0.5, player.getZ() + 0.5, k));
+			level.addFreshEntity(new ExperienceOrb(level, vec3.x, vec3.y, vec3.z, k));
 		}
 	}
 

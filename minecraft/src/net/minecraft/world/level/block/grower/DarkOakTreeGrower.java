@@ -10,13 +10,13 @@ import net.minecraft.world.level.levelgen.feature.configurations.TreeConfigurati
 public class DarkOakTreeGrower extends AbstractMegaTreeGrower {
 	@Nullable
 	@Override
-	protected ConfiguredFeature<? extends TreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl) {
+	protected ConfiguredFeature<TreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl) {
 		return null;
 	}
 
 	@Nullable
 	@Override
-	protected ConfiguredFeature<? extends TreeConfiguration, ?> getConfiguredMegaFeature(Random random) {
-		return Feature.DARK_OAK_TREE.configured(BiomeDefaultFeatures.DARK_OAK_TREE_CONFIG);
+	protected ConfiguredFeature<TreeConfiguration, ?> getConfiguredMegaFeature(Random random) {
+		return Feature.TREE.configured(BiomeDefaultFeatures.DARK_OAK_TREE_CONFIG);
 	}
 }

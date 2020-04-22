@@ -201,7 +201,8 @@ public class Rabbit extends Animal {
 	}
 
 	@Override
-	public void updateSprintingState() {
+	public boolean canSpawnSprintParticle() {
+		return false;
 	}
 
 	private void facePoint(double d, double e) {
@@ -388,7 +389,7 @@ public class Rabbit extends Animal {
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 1) {
-			this.doSprintParticleEffect();
+			this.spawnSprintParticle();
 			this.jumpDuration = 10;
 			this.jumpTicks = 0;
 		} else {

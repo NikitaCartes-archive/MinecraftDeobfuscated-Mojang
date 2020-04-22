@@ -456,11 +456,10 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 			int j = (int)(
 				this.minecraft.mouseHandler.ypos() * (double)this.minecraft.getWindow().getGuiScaledHeight() / (double)this.minecraft.getWindow().getScreenHeight()
 			);
-			PoseStack poseStack = new PoseStack();
 			RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
 			if (bl && this.minecraft.level != null) {
 				this.minecraft.getProfiler().push("level");
-				this.renderLevel(f, l, poseStack);
+				this.renderLevel(f, l, new PoseStack());
 				if (this.minecraft.hasSingleplayerServer() && this.lastScreenshotAttempt < Util.getMillis() - 1000L) {
 					this.lastScreenshotAttempt = Util.getMillis();
 					if (!this.minecraft.getSingleplayerServer().hasWorldScreenshot()) {
@@ -493,12 +492,13 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 			RenderSystem.loadIdentity();
 			RenderSystem.translatef(0.0F, 0.0F, -2000.0F);
 			Lighting.setupFor3DItems();
+			PoseStack poseStack = new PoseStack();
 			if (bl && this.minecraft.level != null) {
 				this.minecraft.getProfiler().popPush("gui");
 				if (!this.minecraft.options.hideGui || this.minecraft.screen != null) {
 					RenderSystem.defaultAlphaFunc();
 					this.renderItemActivationAnimation(this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight(), f);
-					this.minecraft.gui.render(f);
+					this.minecraft.gui.render(poseStack, f);
 					RenderSystem.clear(256, Minecraft.ON_OSX);
 				}
 
@@ -507,7 +507,7 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 
 			if (this.minecraft.overlay != null) {
 				try {
-					this.minecraft.overlay.render(i, j, this.minecraft.getDeltaFrameTime());
+					this.minecraft.overlay.render(poseStack, i, j, this.minecraft.getDeltaFrameTime());
 				} catch (Throwable var13) {
 					CrashReport crashReport = CrashReport.forThrowable(var13, "Rendering overlay");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Overlay render details");
@@ -516,7 +516,7 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 				}
 			} else if (this.minecraft.screen != null) {
 				try {
-					this.minecraft.screen.render(i, j, this.minecraft.getDeltaFrameTime());
+					this.minecraft.screen.render(poseStack, i, j, this.minecraft.getDeltaFrameTime());
 				} catch (Throwable var12) {
 					CrashReport crashReport = CrashReport.forThrowable(var12, "Rendering screen");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Screen render details");

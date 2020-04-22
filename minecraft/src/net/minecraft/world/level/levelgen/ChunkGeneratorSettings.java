@@ -24,10 +24,10 @@ public class ChunkGeneratorSettings {
 	protected final int rareNetherStructureSpacing = 24;
 	protected final int rareNetherStructureSeparation = 4;
 	protected final int rareNetherStructureSalt = 30084232;
-	protected int ruinedPortalOverworldSpacing = 25;
-	protected final int ruinedPortalOverworldSeparation = 10;
-	protected int ruinedPortalNetherSpacing = 15;
-	protected final int ruinedPortalNetherSeparation = 7;
+	protected int ruinedPortalOverworldSpacing = 40;
+	protected final int ruinedPortalOverworldSeparation = 15;
+	protected int ruinedPortalNetherSpacing = 25;
+	protected final int ruinedPortalNetherSeparation = 10;
 	protected BlockState defaultBlock = Blocks.STONE.defaultBlockState();
 	protected BlockState defaultFluid = Blocks.WATER.defaultBlockState();
 
@@ -116,7 +116,7 @@ public class ChunkGeneratorSettings {
 	}
 
 	public int getRuinedPortalSeparation(boolean bl) {
-		return bl ? 7 : 10;
+		return bl ? 10 : 15;
 	}
 
 	public BlockState getDefaultBlock() {

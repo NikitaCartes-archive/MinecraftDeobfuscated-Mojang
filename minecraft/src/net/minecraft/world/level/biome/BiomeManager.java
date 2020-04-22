@@ -33,6 +33,14 @@ public class BiomeManager {
 	}
 
 	@Environment(EnvType.CLIENT)
+	public Biome getNoiseBiomeAtPosition(BlockPos blockPos) {
+		int i = blockPos.getX() >> 2;
+		int j = blockPos.getY() >> 2;
+		int k = blockPos.getZ() >> 2;
+		return this.getNoiseBiomeAtQuart(i, j, k);
+	}
+
+	@Environment(EnvType.CLIENT)
 	public Biome getNoiseBiomeAtQuart(int i, int j, int k) {
 		return this.noiseBiomeSource.getNoiseBiome(i, j, k);
 	}

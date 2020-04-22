@@ -1,6 +1,7 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.gui.RealmsDataFetcher;
@@ -87,15 +88,15 @@ public class RealmsNotificationsScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
+	public void render(PoseStack poseStack, int i, int j, float f) {
 		if (validClient) {
-			this.drawIcons(i, j);
+			this.drawIcons(poseStack, i, j);
 		}
 
-		super.render(i, j, f);
+		super.render(poseStack, i, j, f);
 	}
 
-	private void drawIcons(int i, int j) {
+	private void drawIcons(PoseStack poseStack, int i, int j) {
 		int k = this.numberOfPendingInvites;
 		int l = 24;
 		int m = this.height / 4 + 48;
@@ -107,7 +108,7 @@ public class RealmsNotificationsScreen extends RealmsScreen {
 			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			RenderSystem.pushMatrix();
 			RenderSystem.scalef(0.4F, 0.4F, 0.4F);
-			GuiComponent.blit((int)((double)(n + 2 - p) * 2.5), (int)((double)o * 2.5), 0.0F, 0.0F, 40, 40, 40, 40);
+			GuiComponent.blit(poseStack, (int)((double)(n + 2 - p) * 2.5), (int)((double)o * 2.5), 0.0F, 0.0F, 40, 40, 40, 40);
 			RenderSystem.popMatrix();
 			p += 14;
 		}
@@ -115,7 +116,7 @@ public class RealmsNotificationsScreen extends RealmsScreen {
 		if (k != 0) {
 			this.minecraft.getTextureManager().bind(INVITE_ICON_LOCATION);
 			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-			GuiComponent.blit(n - p, o - 6, 0.0F, 0.0F, 15, 25, 31, 25);
+			GuiComponent.blit(poseStack, n - p, o - 6, 0.0F, 0.0F, 15, 25, 31, 25);
 			p += 16;
 		}
 
@@ -127,7 +128,7 @@ public class RealmsNotificationsScreen extends RealmsScreen {
 				q = 8;
 			}
 
-			GuiComponent.blit(n + 4 - p, o + 4, 0.0F, (float)q, 8, 8, 8, 16);
+			GuiComponent.blit(poseStack, n + 4 - p, o + 4, 0.0F, (float)q, 8, 8, 8, 16);
 		}
 	}
 

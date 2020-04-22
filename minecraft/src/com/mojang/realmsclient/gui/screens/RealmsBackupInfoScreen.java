@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.realmsclient.dto.Backup;
 import java.util.List;
@@ -17,7 +18,9 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ScrolledSelectionList;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.util.Mth;
 
@@ -46,7 +49,7 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 	public void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		this.addButton(
-			new Button(this.width / 2 - 100, this.height / 4 + 120 + 24, 200, 20, I18n.get("gui.back"), button -> this.minecraft.setScreen(this.lastScreen))
+			new Button(this.width / 2 - 100, this.height / 4 + 120 + 24, 200, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen))
 		);
 		this.backupInfoList = new RealmsBackupInfoScreen.BackupInfoList(this.minecraft);
 		this.addWidget(this.backupInfoList);
@@ -69,35 +72,35 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
-		this.drawCenteredString(this.font, "Changes from last backup", this.width / 2, 10, 16777215);
-		this.backupInfoList.render(i, j, f);
-		super.render(i, j, f);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		this.drawCenteredString(poseStack, this.font, "Changes from last backup", this.width / 2, 10, 16777215);
+		this.backupInfoList.render(poseStack, i, j, f);
+		super.render(poseStack, i, j, f);
 	}
 
-	private String checkForSpecificMetadata(String string, String string2) {
+	private Component checkForSpecificMetadata(String string, String string2) {
 		String string3 = string.toLowerCase(Locale.ROOT);
 		if (string3.contains("game") && string3.contains("mode")) {
 			return this.gameModeMetadata(string2);
 		} else {
-			return string3.contains("game") && string3.contains("difficulty") ? this.gameDifficultyMetadata(string2) : string2;
+			return (Component)(string3.contains("game") && string3.contains("difficulty") ? this.gameDifficultyMetadata(string2) : new TextComponent(string2));
 		}
 	}
 
-	private String gameDifficultyMetadata(String string) {
+	private Component gameDifficultyMetadata(String string) {
 		try {
-			return I18n.get(RealmsSlotOptionsScreen.DIFFICULTIES[Integer.parseInt(string)]);
+			return RealmsSlotOptionsScreen.DIFFICULTIES[Integer.parseInt(string)];
 		} catch (Exception var3) {
-			return "UNKNOWN";
+			return new TextComponent("UNKNOWN");
 		}
 	}
 
-	private String gameModeMetadata(String string) {
+	private Component gameModeMetadata(String string) {
 		try {
-			return I18n.get(RealmsSlotOptionsScreen.GAME_MODES[Integer.parseInt(string)]);
+			return RealmsSlotOptionsScreen.GAME_MODES[Integer.parseInt(string)];
 		} catch (Exception var3) {
-			return "UNKNOWN";
+			return new TextComponent("UNKNOWN");
 		}
 	}
 
@@ -113,12 +116,12 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 		}
 
 		@Override
-		protected void renderItem(int i, int j, int k, int l, int m, int n, float f) {
+		protected void renderItem(PoseStack poseStack, int i, int j, int k, int l, int m, int n, float f) {
 			String string = (String)RealmsBackupInfoScreen.this.keys.get(i);
 			Font font = this.minecraft.font;
-			this.drawString(font, string, this.width / 2 - 40, k, 10526880);
+			this.drawString(poseStack, font, string, this.width / 2 - 40, k, 10526880);
 			String string2 = (String)RealmsBackupInfoScreen.this.backup.changeList.get(string);
-			this.drawString(font, RealmsBackupInfoScreen.this.checkForSpecificMetadata(string, string2), this.width / 2 - 40, k + 12, 16777215);
+			this.drawString(poseStack, font, RealmsBackupInfoScreen.this.checkForSpecificMetadata(string, string2), this.width / 2 - 40, k + 12, 16777215);
 		}
 
 		@Override
@@ -131,7 +134,7 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void render(int i, int j, float f) {
+		public void render(PoseStack poseStack, int i, int j, float f) {
 			if (this.visible) {
 				this.renderBackground();
 				int k = this.getScrollbarPosition();
@@ -146,7 +149,7 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 					this.renderHeader(m, n, tesselator);
 				}
 
-				this.renderList(m, n, i, j, f);
+				this.renderList(poseStack, m, n, i, j, f);
 				RenderSystem.disableDepthTest();
 				this.renderHoleBackground(0, this.y0, 255, 255);
 				this.renderHoleBackground(this.y1, this.height, 255, 255);

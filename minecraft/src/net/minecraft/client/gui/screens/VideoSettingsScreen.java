@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.FullscreenResolutionProgressOption;
@@ -7,7 +8,7 @@ import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.OptionsList;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
@@ -27,7 +28,8 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 		Option.USE_FULLSCREEN,
 		Option.PARTICLES,
 		Option.MIPMAP_LEVELS,
-		Option.ENTITY_SHADOWS
+		Option.ENTITY_SHADOWS,
+		Option.ENTITY_DISTANCE_SCALING
 	};
 	private int oldMipmaps;
 
@@ -43,7 +45,7 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 		this.list.addBig(Option.BIOME_BLEND_RADIUS);
 		this.list.addSmall(OPTIONS);
 		this.children.add(this.list);
-		this.addButton(new Button(this.width / 2 - 100, this.height - 27, 200, 20, I18n.get("gui.done"), button -> {
+		this.addButton(new Button(this.width / 2 - 100, this.height - 27, 200, 20, CommonComponents.GUI_DONE, button -> {
 			this.minecraft.options.save();
 			this.minecraft.getWindow().changeFullscreenVideoMode();
 			this.minecraft.setScreen(this.lastScreen);
@@ -91,10 +93,10 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
-		this.list.render(i, j, f);
-		this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 5, 16777215);
-		super.render(i, j, f);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		this.list.render(poseStack, i, j, f);
+		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 5, 16777215);
+		super.render(poseStack, i, j, f);
 	}
 }

@@ -1,10 +1,13 @@
 package com.mojang.realmsclient.gui.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsScreen;
 
 @Environment(EnvType.CLIENT)
@@ -19,23 +22,22 @@ public class RealmsClientOutdatedScreen extends RealmsScreen {
 
 	@Override
 	public void init() {
-		this.addButton(new Button(this.width / 2 - 100, row(12), 200, 20, I18n.get("gui.back"), button -> this.minecraft.setScreen(this.lastScreen)));
+		this.addButton(new Button(this.width / 2 - 100, row(12), 200, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)));
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
-		String string = I18n.get(this.outdated ? "mco.client.outdated.title" : "mco.client.incompatible.title");
-		this.drawCenteredString(this.font, string, this.width / 2, row(3), 16711680);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		Component component = new TranslatableComponent(this.outdated ? "mco.client.outdated.title" : "mco.client.incompatible.title");
+		this.drawCenteredString(poseStack, this.font, component, this.width / 2, row(3), 16711680);
 		int k = this.outdated ? 2 : 3;
 
 		for (int l = 0; l < k; l++) {
-			String string2 = (this.outdated ? "mco.client.outdated.msg.line" : "mco.client.incompatible.msg.line") + (l + 1);
-			String string3 = I18n.get(string2);
-			this.drawCenteredString(this.font, string3, this.width / 2, row(5) + l * 12, 16777215);
+			String string = (this.outdated ? "mco.client.outdated.msg.line" : "mco.client.incompatible.msg.line") + (l + 1);
+			this.drawCenteredString(poseStack, this.font, new TranslatableComponent(string), this.width / 2, row(5) + l * 12, 16777215);
 		}
 
-		super.render(i, j, f);
+		super.render(poseStack, i, j, f);
 	}
 
 	@Override

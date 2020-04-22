@@ -38,7 +38,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -377,7 +377,10 @@ public abstract class Entity implements Nameable, CommandSource {
 		this.xRotO = this.xRot;
 		this.yRotO = this.yRot;
 		this.handleNetherPortal();
-		this.updateSprintingState();
+		if (this.canSpawnSprintParticle()) {
+			this.spawnSprintParticle();
+		}
+
 		this.updateInWaterStateAndDoFluidPushing();
 		this.updateUnderWaterState();
 		this.updateSwimming();
@@ -567,7 +570,8 @@ public abstract class Entity implements Nameable, CommandSource {
 				throw new ReportedException(crashReport);
 			}
 
-			this.setDeltaMovement(this.getDeltaMovement().multiply((double)this.getBlockSpeedFactor(), 1.0, (double)this.getBlockSpeedFactor()));
+			float i = this.getBlockSpeedFactor();
+			this.setDeltaMovement(this.getDeltaMovement().multiply((double)i, 1.0, (double)i));
 			if (!this.level.containsFireBlock(this.getBoundingBox().deflate(0.001)) && this.remainingFireTicks <= 0) {
 				this.remainingFireTicks = -this.getFireImmuneTicks();
 			}
@@ -1016,13 +1020,11 @@ public abstract class Entity implements Nameable, CommandSource {
 		return this.level.getBlockState(this.getOnPos());
 	}
 
-	public void updateSprintingState() {
-		if (this.isSprinting() && !this.isInWater()) {
-			this.doSprintParticleEffect();
-		}
+	public boolean canSpawnSprintParticle() {
+		return this.isSprinting() && !this.isInWater() && !this.isSpectator() && !this.isCrouching() && !this.isInLava() && this.isAlive();
 	}
 
-	protected void doSprintParticleEffect() {
+	protected void spawnSprintParticle() {
 		int i = Mth.floor(this.getX());
 		int j = Mth.floor(this.getY() - 0.2F);
 		int k = Mth.floor(this.getZ());
@@ -1600,6 +1602,7 @@ public abstract class Entity implements Nameable, CommandSource {
 				this.stopRiding();
 			}
 
+			this.setPose(Pose.STANDING);
 			this.vehicle = entity;
 			this.vehicle.addPassenger(this);
 			return true;
@@ -1995,20 +1998,20 @@ public abstract class Entity implements Nameable, CommandSource {
 		this.stuckSpeedMultiplier = vec3;
 	}
 
-	private static void removeAction(Component component) {
-		component.withStyle(style -> style.setClickEvent(null)).getSiblings().forEach(Entity::removeAction);
+	private static Component removeAction(Component component) {
+		MutableComponent mutableComponent = component.mutableCopy().withStyle(style -> style.withClickEvent(null));
+
+		for (Component component2 : component.getSiblings()) {
+			mutableComponent.append(removeAction(component2));
+		}
+
+		return mutableComponent;
 	}
 
 	@Override
 	public Component getName() {
 		Component component = this.getCustomName();
-		if (component != null) {
-			Component component2 = component.deepCopy();
-			removeAction(component2);
-			return component2;
-		} else {
-			return this.getTypeName();
-		}
+		return component != null ? removeAction(component) : this.getTypeName();
 	}
 
 	protected Component getTypeName() {
@@ -2231,7 +2234,7 @@ public abstract class Entity implements Nameable, CommandSource {
 	@Override
 	public Component getDisplayName() {
 		return PlayerTeam.formatNameForTeam(this.getTeam(), this.getName())
-			.withStyle(style -> style.setHoverEvent(this.createHoverEvent()).setInsertion(this.getStringUUID()));
+			.withStyle(style -> style.withHoverEvent(this.createHoverEvent()).withInsertion(this.getStringUUID()));
 	}
 
 	public void setCustomName(@Nullable Component component) {
@@ -2328,15 +2331,7 @@ public abstract class Entity implements Nameable, CommandSource {
 	}
 
 	protected HoverEvent createHoverEvent() {
-		CompoundTag compoundTag = new CompoundTag();
-		ResourceLocation resourceLocation = EntityType.getKey(this.getType());
-		compoundTag.putString("id", this.getStringUUID());
-		if (resourceLocation != null) {
-			compoundTag.putString("type", resourceLocation.toString());
-		}
-
-		compoundTag.putString("name", Component.Serializer.toJson(this.getName()));
-		return new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new TextComponent(compoundTag.toString()));
+		return new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new HoverEvent.EntityTooltipInfo(this.getType(), this.getUUID(), this.getName()));
 	}
 
 	public boolean broadcastToPlayer(ServerPlayer serverPlayer) {

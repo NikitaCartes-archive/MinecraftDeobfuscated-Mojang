@@ -1,7 +1,9 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.google.common.collect.Sets;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.exception.RealmsDefaultUncaughtExceptionHandler;
+import com.mojang.realmsclient.gui.ErrorCallback;
 import com.mojang.realmsclient.util.task.LongRunningTask;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
@@ -9,19 +11,20 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
-public class RealmsLongRunningMcoTaskScreen extends RealmsScreen {
+public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements ErrorCallback {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final Screen lastScreen;
 	private volatile String title = "";
 	private volatile boolean error;
-	private volatile String errorMessage;
+	private volatile Component errorMessage;
 	private volatile boolean aborted;
 	private int animTicks;
 	private final LongRunningTask task;
@@ -79,7 +82,7 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen {
 	@Override
 	public void init() {
 		this.task.init();
-		this.addButton(new Button(this.width / 2 - 106, row(12), 212, 20, I18n.get("gui.cancel"), button -> this.cancelOrBackButtonClicked()));
+		this.addButton(new Button(this.width / 2 - 106, row(12), 212, 20, CommonComponents.GUI_CANCEL, button -> this.cancelOrBackButtonClicked()));
 	}
 
 	private void cancelOrBackButtonClicked() {
@@ -89,26 +92,27 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
-		this.drawCenteredString(this.font, this.title, this.width / 2, row(3), 16777215);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, row(3), 16777215);
 		if (!this.error) {
-			this.drawCenteredString(this.font, SYMBOLS[this.animTicks % SYMBOLS.length], this.width / 2, row(8), 8421504);
+			this.drawCenteredString(poseStack, this.font, SYMBOLS[this.animTicks % SYMBOLS.length], this.width / 2, row(8), 8421504);
 		}
 
 		if (this.error) {
-			this.drawCenteredString(this.font, this.errorMessage, this.width / 2, row(8), 16711680);
+			this.drawCenteredString(poseStack, this.font, this.errorMessage, this.width / 2, row(8), 16711680);
 		}
 
-		super.render(i, j, f);
+		super.render(poseStack, i, j, f);
 	}
 
-	public void error(String string) {
+	@Override
+	public void error(Component component) {
 		this.error = true;
-		this.errorMessage = string;
-		NarrationHelper.now(string);
+		this.errorMessage = component;
+		NarrationHelper.now(component.getString());
 		this.buttonsClear();
-		this.addButton(new Button(this.width / 2 - 106, this.height / 4 + 120 + 12, 200, 20, I18n.get("gui.back"), button -> this.cancelOrBackButtonClicked()));
+		this.addButton(new Button(this.width / 2 - 106, this.height / 4 + 120 + 12, 200, 20, CommonComponents.GUI_BACK, button -> this.cancelOrBackButtonClicked()));
 	}
 
 	public void buttonsClear() {

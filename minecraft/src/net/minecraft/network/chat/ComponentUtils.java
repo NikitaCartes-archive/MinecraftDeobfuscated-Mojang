@@ -13,29 +13,46 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.world.entity.Entity;
 
 public class ComponentUtils {
-	public static Component mergeStyles(Component component, Style style) {
+	public static MutableComponent mergeStyles(MutableComponent mutableComponent, Style style) {
 		if (style.isEmpty()) {
-			return component;
+			return mutableComponent;
 		} else {
-			return component.getStyle().isEmpty() ? component.setStyle(style.copy()) : new TextComponent("").append(component).setStyle(style.copy());
+			Style style2 = mutableComponent.getStyle();
+			if (style2.isEmpty()) {
+				return mutableComponent.setStyle(style);
+			} else {
+				return style2.equals(style) ? mutableComponent : new TextComponent("").append(mutableComponent).setStyle(style);
+			}
 		}
 	}
 
-	public static Component updateForEntity(@Nullable CommandSourceStack commandSourceStack, Component component, @Nullable Entity entity, int i) throws CommandSyntaxException {
+	public static MutableComponent updateForEntity(@Nullable CommandSourceStack commandSourceStack, Component component, @Nullable Entity entity, int i) throws CommandSyntaxException {
 		if (i > 100) {
-			return component;
+			return component.mutableCopy();
 		} else {
-			i++;
-			Component component2 = component instanceof ContextAwareComponent
-				? ((ContextAwareComponent)component).resolve(commandSourceStack, entity, i)
-				: component.copy();
+			MutableComponent mutableComponent = component instanceof ContextAwareComponent
+				? ((ContextAwareComponent)component).resolve(commandSourceStack, entity, i + 1)
+				: component.toMutable();
 
-			for (Component component3 : component.getSiblings()) {
-				component2.append(updateForEntity(commandSourceStack, component3, entity, i));
+			for (Component component2 : component.getSiblings()) {
+				mutableComponent.append(updateForEntity(commandSourceStack, component2, entity, i + 1));
 			}
 
-			return mergeStyles(component2, component.getStyle());
+			return mergeStyles(mutableComponent, resolveStyle(commandSourceStack, component.getStyle(), entity, i));
 		}
+	}
+
+	private static Style resolveStyle(@Nullable CommandSourceStack commandSourceStack, Style style, @Nullable Entity entity, int i) throws CommandSyntaxException {
+		HoverEvent hoverEvent = style.getHoverEvent();
+		if (hoverEvent != null) {
+			Component component = hoverEvent.getValue(HoverEvent.Action.SHOW_TEXT);
+			if (component != null) {
+				HoverEvent hoverEvent2 = new HoverEvent(HoverEvent.Action.SHOW_TEXT, updateForEntity(commandSourceStack, component, entity, i + 1));
+				return style.withHoverEvent(hoverEvent2);
+			}
+		}
+
+		return style;
 	}
 
 	public static Component getDisplayName(GameProfile gameProfile) {
@@ -52,7 +69,7 @@ public class ComponentUtils {
 
 	public static <T extends Comparable<T>> Component formatAndSortList(Collection<T> collection, Function<T, Component> function) {
 		if (collection.isEmpty()) {
-			return new TextComponent("");
+			return TextComponent.EMPTY;
 		} else if (collection.size() == 1) {
 			return (Component)function.apply(collection.iterator().next());
 		} else {
@@ -62,29 +79,29 @@ public class ComponentUtils {
 		}
 	}
 
-	public static <T> Component formatList(Collection<T> collection, Function<T, Component> function) {
+	public static <T> MutableComponent formatList(Collection<T> collection, Function<T, Component> function) {
 		if (collection.isEmpty()) {
 			return new TextComponent("");
 		} else if (collection.size() == 1) {
-			return (Component)function.apply(collection.iterator().next());
+			return ((Component)function.apply(collection.iterator().next())).mutableCopy();
 		} else {
-			Component component = new TextComponent("");
+			MutableComponent mutableComponent = new TextComponent("");
 			boolean bl = true;
 
 			for (T object : collection) {
 				if (!bl) {
-					component.append(new TextComponent(", ").withStyle(ChatFormatting.GRAY));
+					mutableComponent.append(new TextComponent(", ").withStyle(ChatFormatting.GRAY));
 				}
 
-				component.append((Component)function.apply(object));
+				mutableComponent.append((Component)function.apply(object));
 				bl = false;
 			}
 
-			return component;
+			return mutableComponent;
 		}
 	}
 
-	public static Component wrapInSquareBrackets(Component component) {
+	public static MutableComponent wrapInSquareBrackets(Component component) {
 		return new TextComponent("[").append(component).append("]");
 	}
 

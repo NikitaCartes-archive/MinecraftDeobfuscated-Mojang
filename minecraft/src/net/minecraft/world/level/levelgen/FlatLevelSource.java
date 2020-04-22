@@ -24,12 +24,9 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
-import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.surfacebuilders.ConfiguredSurfaceBuilder;
 
 public class FlatLevelSource extends ChunkGenerator<FlatLevelGeneratorSettings> {
@@ -62,9 +59,8 @@ public class FlatLevelSource extends ChunkGenerator<FlatLevelGeneratorSettings> 
 			if (configuredFeatures != null) {
 				for (ConfiguredFeature<?, ?> configuredFeature : configuredFeatures) {
 					flatLevelBiomeWrapper.addFeature((GenerationStep.Decoration)FlatLevelGeneratorSettings.STRUCTURE_FEATURES_STEP.get(configuredFeature), configuredFeature);
-					ConfiguredFeature<?, ?> configuredFeature2 = ((DecoratedFeatureConfiguration)configuredFeature.config).feature;
-					if (configuredFeature2.feature instanceof StructureFeature) {
-						StructureFeature<FeatureConfiguration> structureFeature = (StructureFeature<FeatureConfiguration>)configuredFeature2.feature;
+					if (configuredFeature.feature instanceof StructureFeature) {
+						StructureFeature<FeatureConfiguration> structureFeature = (StructureFeature<FeatureConfiguration>)configuredFeature.feature;
 						FeatureConfiguration featureConfiguration = biome.getStructureConfiguration(structureFeature);
 						FeatureConfiguration featureConfiguration2 = featureConfiguration != null
 							? featureConfiguration
@@ -96,10 +92,7 @@ public class FlatLevelSource extends ChunkGenerator<FlatLevelGeneratorSettings> 
 			BlockState blockState = blockStates[i];
 			if (blockState != null && !Heightmap.Types.MOTION_BLOCKING.isOpaque().test(blockState)) {
 				this.settings.deleteLayer(i);
-				flatLevelBiomeWrapper.addFeature(
-					GenerationStep.Decoration.TOP_LAYER_MODIFICATION,
-					Feature.FILL_LAYER.configured(new LayerConfiguration(i, blockState)).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE))
-				);
+				flatLevelBiomeWrapper.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, Feature.FILL_LAYER.configured(new LayerConfiguration(i, blockState)));
 			}
 		}
 
@@ -119,6 +112,11 @@ public class FlatLevelSource extends ChunkGenerator<FlatLevelGeneratorSettings> 
 	@Override
 	protected Biome getCarvingOrDecorationBiome(BiomeManager biomeManager, BlockPos blockPos) {
 		return this.biomeWrapper;
+	}
+
+	@Override
+	public boolean canGenerateStructure(StructureFeature<?> structureFeature) {
+		return this.biomeWrapper.isValidStart(structureFeature);
 	}
 
 	@Override

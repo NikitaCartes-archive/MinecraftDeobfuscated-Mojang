@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import java.util.AbstractList;
 import java.util.Collection;
@@ -141,18 +142,18 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 	protected void clickedHeader(int i, int j) {
 	}
 
-	protected void renderHeader(int i, int j, Tesselator tesselator) {
+	protected void renderHeader(PoseStack poseStack, int i, int j, Tesselator tesselator) {
 	}
 
-	protected void renderBackground() {
+	protected void renderBackground(PoseStack poseStack) {
 	}
 
-	protected void renderDecorations(int i, int j) {
+	protected void renderDecorations(PoseStack poseStack, int i, int j) {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
 		int k = this.getScrollbarPosition();
 		int l = k + 6;
 		Tesselator tesselator = Tesselator.getInstance();
@@ -181,10 +182,10 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		int m = this.getRowLeft();
 		int n = this.y0 + 4 - (int)this.getScrollAmount();
 		if (this.renderHeader) {
-			this.renderHeader(m, n, tesselator);
+			this.renderHeader(poseStack, m, n, tesselator);
 		}
 
-		this.renderList(m, n, i, j, f);
+		this.renderList(poseStack, m, n, i, j, f);
 		RenderSystem.disableDepthTest();
 		this.renderHoleBackground(0, this.y0, 255, 255);
 		this.renderHoleBackground(this.y1, this.height, 255, 255);
@@ -237,7 +238,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 			tesselator.end();
 		}
 
-		this.renderDecorations(i, j);
+		this.renderDecorations(poseStack, i, j);
 		RenderSystem.enableTexture();
 		RenderSystem.shadeModel(7424);
 		RenderSystem.enableAlphaTest();
@@ -376,7 +377,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		return e >= (double)this.y0 && e <= (double)this.y1 && d >= (double)this.x0 && d <= (double)this.x1;
 	}
 
-	protected void renderList(int i, int j, int k, int l, float f) {
+	protected void renderList(PoseStack poseStack, int i, int j, int k, int l, float f) {
 		int m = this.getItemCount();
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
@@ -412,7 +413,9 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 				}
 
 				int t = this.getRowLeft();
-				entry.render(n, o, t, s, r, k, l, this.isMouseOver((double)k, (double)l) && Objects.equals(this.getEntryAtPosition((double)k, (double)l), entry), f);
+				entry.render(
+					poseStack, n, o, t, s, r, k, l, this.isMouseOver((double)k, (double)l) && Objects.equals(this.getEntryAtPosition((double)k, (double)l), entry), f
+				);
 			}
 		}
 	}
@@ -466,7 +469,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		@Deprecated
 		AbstractSelectionList<E> list;
 
-		public abstract void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f);
+		public abstract void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f);
 
 		@Override
 		public boolean isMouseOver(double d, double e) {

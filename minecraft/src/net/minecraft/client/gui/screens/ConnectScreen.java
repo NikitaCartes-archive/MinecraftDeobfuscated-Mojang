@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,9 +14,9 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.client.multiplayer.ServerAddress;
 import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
@@ -124,7 +125,7 @@ public class ConnectScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 12, 200, 20, I18n.get("gui.cancel"), button -> {
+		this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 12, 200, 20, CommonComponents.GUI_CANCEL, button -> {
 			this.aborted = true;
 			if (this.connection != null) {
 				this.connection.disconnect(new TranslatableComponent("connect.aborted"));
@@ -135,15 +136,15 @@ public class ConnectScreen extends Screen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
 		long l = Util.getMillis();
 		if (l - this.lastNarration > 2000L) {
 			this.lastNarration = l;
 			NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.joining").getString());
 		}
 
-		this.drawCenteredString(this.font, this.status.getColoredString(), this.width / 2, this.height / 2 - 50, 16777215);
-		super.render(i, j, f);
+		this.drawCenteredString(poseStack, this.font, this.status, this.width / 2, this.height / 2 - 50, 16777215);
+		super.render(poseStack, i, j, f);
 	}
 }

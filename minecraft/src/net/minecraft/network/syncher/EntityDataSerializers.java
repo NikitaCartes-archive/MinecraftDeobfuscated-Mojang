@@ -84,7 +84,7 @@ public class EntityDataSerializers {
 		}
 
 		public Component copy(Component component) {
-			return component.deepCopy();
+			return component;
 		}
 	};
 	public static final EntityDataSerializer<Optional<Component>> OPTIONAL_COMPONENT = new EntityDataSerializer<Optional<Component>>() {
@@ -102,7 +102,7 @@ public class EntityDataSerializers {
 		}
 
 		public Optional<Component> copy(Optional<Component> optional) {
-			return optional.isPresent() ? Optional.of(((Component)optional.get()).deepCopy()) : Optional.empty();
+			return optional;
 		}
 	};
 	public static final EntityDataSerializer<ItemStack> ITEM_STACK = new EntityDataSerializer<ItemStack>() {

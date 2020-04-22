@@ -23,10 +23,12 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
 import net.minecraft.server.commands.AdvancementCommands;
+import net.minecraft.server.commands.AttributeCommand;
 import net.minecraft.server.commands.BanIpCommands;
 import net.minecraft.server.commands.BanListCommands;
 import net.minecraft.server.commands.BanPlayerCommands;
@@ -104,6 +106,7 @@ public class Commands {
 
 	public Commands(boolean bl) {
 		AdvancementCommands.register(this.dispatcher);
+		AttributeCommand.register(this.dispatcher);
 		ExecuteCommand.register(this.dispatcher);
 		BossBarCommands.register(this.dispatcher);
 		ClearInventoryCommands.register(this.dispatcher);
@@ -205,32 +208,32 @@ public class Commands {
 			commandSourceStack.sendFailure(ComponentUtils.fromMessage(var14.getRawMessage()));
 			if (var14.getInput() != null && var14.getCursor() >= 0) {
 				int i = Math.min(var14.getInput().length(), var14.getCursor());
-				Component component = new TextComponent("")
+				MutableComponent mutableComponent = new TextComponent("")
 					.withStyle(ChatFormatting.GRAY)
-					.withStyle(style -> style.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, string)));
+					.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, string)));
 				if (i > 10) {
-					component.append("...");
+					mutableComponent.append("...");
 				}
 
-				component.append(var14.getInput().substring(Math.max(0, i - 10), i));
+				mutableComponent.append(var14.getInput().substring(Math.max(0, i - 10), i));
 				if (i < var14.getInput().length()) {
-					Component component2 = new TextComponent(var14.getInput().substring(i)).withStyle(new ChatFormatting[]{ChatFormatting.RED, ChatFormatting.UNDERLINE});
-					component.append(component2);
+					Component component = new TextComponent(var14.getInput().substring(i)).withStyle(new ChatFormatting[]{ChatFormatting.RED, ChatFormatting.UNDERLINE});
+					mutableComponent.append(component);
 				}
 
-				component.append(new TranslatableComponent("command.context.here").withStyle(new ChatFormatting[]{ChatFormatting.RED, ChatFormatting.ITALIC}));
-				commandSourceStack.sendFailure(component);
+				mutableComponent.append(new TranslatableComponent("command.context.here").withStyle(new ChatFormatting[]{ChatFormatting.RED, ChatFormatting.ITALIC}));
+				commandSourceStack.sendFailure(mutableComponent);
 			}
 
 			return 0;
 		} catch (Exception var15) {
-			Component component3 = new TextComponent(var15.getMessage() == null ? var15.getClass().getName() : var15.getMessage());
+			MutableComponent mutableComponent2 = new TextComponent(var15.getMessage() == null ? var15.getClass().getName() : var15.getMessage());
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.error("Command exception: {}", string, var15);
 				StackTraceElement[] stackTraceElements = var15.getStackTrace();
 
 				for (int j = 0; j < Math.min(stackTraceElements.length, 3); j++) {
-					component3.append("\n\n")
+					mutableComponent2.append("\n\n")
 						.append(stackTraceElements[j].getMethodName())
 						.append("\n ")
 						.append(stackTraceElements[j].getFileName())
@@ -240,7 +243,7 @@ public class Commands {
 			}
 
 			commandSourceStack.sendFailure(
-				new TranslatableComponent("command.failed").withStyle(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component3)))
+				new TranslatableComponent("command.failed").withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, mutableComponent2)))
 			);
 			if (SharedConstants.IS_RUNNING_IN_IDE) {
 				commandSourceStack.sendFailure(new TextComponent(Util.describeError(var15)));

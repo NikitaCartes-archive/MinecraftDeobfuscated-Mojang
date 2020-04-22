@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LightLayer;
@@ -55,7 +56,7 @@ public abstract class EntityRenderer<T extends Entity> {
 
 	public void render(T entity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		if (this.shouldShowName(entity)) {
-			this.renderNameTag(entity, entity.getDisplayName().getColoredString(), poseStack, multiBufferSource, i);
+			this.renderNameTag(entity, entity.getDisplayName(), poseStack, multiBufferSource, i);
 		}
 	}
 
@@ -69,12 +70,12 @@ public abstract class EntityRenderer<T extends Entity> {
 		return this.entityRenderDispatcher.getFont();
 	}
 
-	protected void renderNameTag(T entity, String string, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+	protected void renderNameTag(T entity, Component component, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		double d = this.entityRenderDispatcher.distanceToSqr(entity);
 		if (!(d > 4096.0)) {
 			boolean bl = !entity.isDiscrete();
 			float f = entity.getBbHeight() + 0.5F;
-			int j = "deadmau5".equals(string) ? -10 : 0;
+			int j = "deadmau5".equals(component.getString()) ? -10 : 0;
 			poseStack.pushPose();
 			poseStack.translate(0.0, (double)f, 0.0);
 			poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
@@ -83,10 +84,10 @@ public abstract class EntityRenderer<T extends Entity> {
 			float g = Minecraft.getInstance().options.getBackgroundOpacity(0.25F);
 			int k = (int)(g * 255.0F) << 24;
 			Font font = this.getFont();
-			float h = (float)(-font.width(string) / 2);
-			font.drawInBatch(string, h, (float)j, 553648127, false, matrix4f, multiBufferSource, bl, k, i);
+			float h = (float)(-font.width(component) / 2);
+			font.drawInBatch(component, h, (float)j, 553648127, false, matrix4f, multiBufferSource, bl, k, i);
 			if (bl) {
-				font.drawInBatch(string, h, (float)j, -1, false, matrix4f, multiBufferSource, false, 0, i);
+				font.drawInBatch(component, h, (float)j, -1, false, matrix4f, multiBufferSource, false, 0, i);
 			}
 
 			poseStack.popPose();

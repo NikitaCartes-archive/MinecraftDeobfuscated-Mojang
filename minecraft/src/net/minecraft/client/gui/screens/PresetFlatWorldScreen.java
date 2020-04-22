@@ -3,6 +3,7 @@ package net.minecraft.client.gui.screens;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -15,7 +16,8 @@ import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -32,8 +34,8 @@ import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 public class PresetFlatWorldScreen extends Screen {
 	private static final List<PresetFlatWorldScreen.PresetInfo> PRESETS = Lists.<PresetFlatWorldScreen.PresetInfo>newArrayList();
 	private final CreateFlatWorldScreen parent;
-	private String shareText;
-	private String listText;
+	private Component shareText;
+	private Component listText;
 	private PresetFlatWorldScreen.PresetsList list;
 	private Button selectButton;
 	private EditBox export;
@@ -46,19 +48,21 @@ public class PresetFlatWorldScreen extends Screen {
 	@Override
 	protected void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		this.shareText = I18n.get("createWorld.customize.presets.share");
-		this.listText = I18n.get("createWorld.customize.presets.list");
+		this.shareText = new TranslatableComponent("createWorld.customize.presets.share");
+		this.listText = new TranslatableComponent("createWorld.customize.presets.list");
 		this.export = new EditBox(this.font, 50, 40, this.width - 100, 20, this.shareText);
 		this.export.setMaxLength(1230);
 		this.export.setValue(this.parent.saveLayerString());
 		this.children.add(this.export);
 		this.list = new PresetFlatWorldScreen.PresetsList();
 		this.children.add(this.list);
-		this.selectButton = this.addButton(new Button(this.width / 2 - 155, this.height - 28, 150, 20, I18n.get("createWorld.customize.presets.select"), button -> {
-			this.parent.loadLayers(this.export.getValue());
-			this.minecraft.setScreen(this.parent);
-		}));
-		this.addButton(new Button(this.width / 2 + 5, this.height - 28, 150, 20, I18n.get("gui.cancel"), button -> this.minecraft.setScreen(this.parent)));
+		this.selectButton = this.addButton(
+			new Button(this.width / 2 - 155, this.height - 28, 150, 20, new TranslatableComponent("createWorld.customize.presets.select"), button -> {
+				this.parent.loadLayers(this.export.getValue());
+				this.minecraft.setScreen(this.parent);
+			})
+		);
+		this.addButton(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.parent)));
 		this.updateButtonValidity(this.list.getSelected() != null);
 	}
 
@@ -85,17 +89,17 @@ public class PresetFlatWorldScreen extends Screen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
-		this.list.render(i, j, f);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		this.list.render(poseStack, i, j, f);
 		RenderSystem.pushMatrix();
 		RenderSystem.translatef(0.0F, 0.0F, 400.0F);
-		this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 8, 16777215);
-		this.drawString(this.font, this.shareText, 50, 30, 10526880);
-		this.drawString(this.font, this.listText, 50, 70, 10526880);
+		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 16777215);
+		this.drawString(poseStack, this.font, this.shareText, 50, 30, 10526880);
+		this.drawString(poseStack, this.font, this.listText, 50, 70, 10526880);
 		RenderSystem.popMatrix();
-		this.export.render(i, j, f);
-		super.render(i, j, f);
+		this.export.render(poseStack, i, j, f);
+		super.render(poseStack, i, j, f);
 	}
 
 	@Override
@@ -108,7 +112,7 @@ public class PresetFlatWorldScreen extends Screen {
 		this.selectButton.active = bl || this.export.getValue().length() > 1;
 	}
 
-	private static void preset(String string, ItemLike itemLike, Biome biome, List<String> list, FlatLayerInfo... flatLayerInfos) {
+	private static void preset(Component component, ItemLike itemLike, Biome biome, List<String> list, FlatLayerInfo... flatLayerInfos) {
 		FlatLevelGeneratorSettings flatLevelGeneratorSettings = ChunkGeneratorType.FLAT.createSettings();
 
 		for (int i = flatLayerInfos.length - 1; i >= 0; i--) {
@@ -118,16 +122,16 @@ public class PresetFlatWorldScreen extends Screen {
 		flatLevelGeneratorSettings.setBiome(biome);
 		flatLevelGeneratorSettings.updateLayers();
 
-		for (String string2 : list) {
-			flatLevelGeneratorSettings.getStructuresOptions().put(string2, Maps.newHashMap());
+		for (String string : list) {
+			flatLevelGeneratorSettings.getStructuresOptions().put(string, Maps.newHashMap());
 		}
 
-		PRESETS.add(new PresetFlatWorldScreen.PresetInfo(itemLike.asItem(), string, flatLevelGeneratorSettings.toString()));
+		PRESETS.add(new PresetFlatWorldScreen.PresetInfo(itemLike.asItem(), component, flatLevelGeneratorSettings.toString()));
 	}
 
 	static {
 		preset(
-			I18n.get("createWorld.customize.preset.classic_flat"),
+			new TranslatableComponent("createWorld.customize.preset.classic_flat"),
 			Blocks.GRASS_BLOCK,
 			Biomes.PLAINS,
 			Arrays.asList("village"),
@@ -136,7 +140,7 @@ public class PresetFlatWorldScreen extends Screen {
 			new FlatLayerInfo(1, Blocks.BEDROCK)
 		);
 		preset(
-			I18n.get("createWorld.customize.preset.tunnelers_dream"),
+			new TranslatableComponent("createWorld.customize.preset.tunnelers_dream"),
 			Blocks.STONE,
 			Biomes.MOUNTAINS,
 			Arrays.asList("biome_1", "dungeon", "decoration", "stronghold", "mineshaft"),
@@ -146,7 +150,7 @@ public class PresetFlatWorldScreen extends Screen {
 			new FlatLayerInfo(1, Blocks.BEDROCK)
 		);
 		preset(
-			I18n.get("createWorld.customize.preset.water_world"),
+			new TranslatableComponent("createWorld.customize.preset.water_world"),
 			Items.WATER_BUCKET,
 			Biomes.DEEP_OCEAN,
 			Arrays.asList("biome_1", "oceanmonument"),
@@ -157,7 +161,7 @@ public class PresetFlatWorldScreen extends Screen {
 			new FlatLayerInfo(1, Blocks.BEDROCK)
 		);
 		preset(
-			I18n.get("createWorld.customize.preset.overworld"),
+			new TranslatableComponent("createWorld.customize.preset.overworld"),
 			Blocks.GRASS,
 			Biomes.PLAINS,
 			Arrays.asList("village", "biome_1", "decoration", "stronghold", "mineshaft", "dungeon", "lake", "lava_lake", "pillager_outpost", "ruined_portal"),
@@ -167,7 +171,7 @@ public class PresetFlatWorldScreen extends Screen {
 			new FlatLayerInfo(1, Blocks.BEDROCK)
 		);
 		preset(
-			I18n.get("createWorld.customize.preset.snowy_kingdom"),
+			new TranslatableComponent("createWorld.customize.preset.snowy_kingdom"),
 			Blocks.SNOW,
 			Biomes.SNOWY_TUNDRA,
 			Arrays.asList("village", "biome_1"),
@@ -178,7 +182,7 @@ public class PresetFlatWorldScreen extends Screen {
 			new FlatLayerInfo(1, Blocks.BEDROCK)
 		);
 		preset(
-			I18n.get("createWorld.customize.preset.bottomless_pit"),
+			new TranslatableComponent("createWorld.customize.preset.bottomless_pit"),
 			Items.FEATHER,
 			Biomes.PLAINS,
 			Arrays.asList("village", "biome_1"),
@@ -187,7 +191,7 @@ public class PresetFlatWorldScreen extends Screen {
 			new FlatLayerInfo(2, Blocks.COBBLESTONE)
 		);
 		preset(
-			I18n.get("createWorld.customize.preset.desert"),
+			new TranslatableComponent("createWorld.customize.preset.desert"),
 			Blocks.SAND,
 			Biomes.DESERT,
 			Arrays.asList("village", "biome_1", "decoration", "stronghold", "mineshaft", "dungeon"),
@@ -197,7 +201,7 @@ public class PresetFlatWorldScreen extends Screen {
 			new FlatLayerInfo(1, Blocks.BEDROCK)
 		);
 		preset(
-			I18n.get("createWorld.customize.preset.redstone_ready"),
+			new TranslatableComponent("createWorld.customize.preset.redstone_ready"),
 			Items.REDSTONE,
 			Biomes.DESERT,
 			Collections.emptyList(),
@@ -205,19 +209,29 @@ public class PresetFlatWorldScreen extends Screen {
 			new FlatLayerInfo(3, Blocks.STONE),
 			new FlatLayerInfo(1, Blocks.BEDROCK)
 		);
-		preset(I18n.get("createWorld.customize.preset.the_void"), Blocks.BARRIER, Biomes.THE_VOID, Arrays.asList("decoration"), new FlatLayerInfo(1, Blocks.AIR));
+		preset(
+			new TranslatableComponent("createWorld.customize.preset.the_void"),
+			Blocks.BARRIER,
+			Biomes.THE_VOID,
+			Arrays.asList("decoration"),
+			new FlatLayerInfo(1, Blocks.AIR)
+		);
 	}
 
 	@Environment(EnvType.CLIENT)
 	static class PresetInfo {
 		public final Item icon;
-		public final String name;
+		public final Component name;
 		public final String value;
 
-		public PresetInfo(Item item, String string, String string2) {
+		public PresetInfo(Item item, Component component, String string) {
 			this.icon = item;
-			this.name = string;
-			this.value = string2;
+			this.name = component;
+			this.value = string;
+		}
+
+		public Component getName() {
+			return this.name;
 		}
 	}
 
@@ -238,7 +252,9 @@ public class PresetFlatWorldScreen extends Screen {
 			if (entry != null) {
 				NarratorChatListener.INSTANCE
 					.sayNow(
-						new TranslatableComponent("narrator.select", ((PresetFlatWorldScreen.PresetInfo)PresetFlatWorldScreen.PRESETS.get(this.children().indexOf(entry))).name)
+						new TranslatableComponent(
+								"narrator.select", ((PresetFlatWorldScreen.PresetInfo)PresetFlatWorldScreen.PRESETS.get(this.children().indexOf(entry))).getName()
+							)
 							.getString()
 					);
 			}
@@ -271,10 +287,10 @@ public class PresetFlatWorldScreen extends Screen {
 		@Environment(EnvType.CLIENT)
 		public class Entry extends ObjectSelectionList.Entry<PresetFlatWorldScreen.PresetsList.Entry> {
 			@Override
-			public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 				PresetFlatWorldScreen.PresetInfo presetInfo = (PresetFlatWorldScreen.PresetInfo)PresetFlatWorldScreen.PRESETS.get(i);
-				this.blitSlot(k, j, presetInfo.icon);
-				PresetFlatWorldScreen.this.font.draw(presetInfo.name, (float)(k + 18 + 5), (float)(j + 6), 16777215);
+				this.blitSlot(poseStack, k, j, presetInfo.icon);
+				PresetFlatWorldScreen.this.font.draw(poseStack, presetInfo.name, (float)(k + 18 + 5), (float)(j + 6), 16777215);
 			}
 
 			@Override
@@ -294,17 +310,17 @@ public class PresetFlatWorldScreen extends Screen {
 				PresetFlatWorldScreen.this.export.moveCursorToStart();
 			}
 
-			private void blitSlot(int i, int j, Item item) {
-				this.blitSlotBg(i + 1, j + 1);
+			private void blitSlot(PoseStack poseStack, int i, int j, Item item) {
+				this.blitSlotBg(poseStack, i + 1, j + 1);
 				RenderSystem.enableRescaleNormal();
 				PresetFlatWorldScreen.this.itemRenderer.renderGuiItem(new ItemStack(item), i + 2, j + 2);
 				RenderSystem.disableRescaleNormal();
 			}
 
-			private void blitSlotBg(int i, int j) {
+			private void blitSlotBg(PoseStack poseStack, int i, int j) {
 				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 				PresetsList.this.minecraft.getTextureManager().bind(GuiComponent.STATS_ICON_LOCATION);
-				GuiComponent.blit(i, j, PresetFlatWorldScreen.this.getBlitOffset(), 0.0F, 0.0F, 18, 18, 128, 128);
+				GuiComponent.blit(poseStack, i, j, PresetFlatWorldScreen.this.getBlitOffset(), 0.0F, 0.0F, 18, 18, 128, 128);
 			}
 		}
 	}

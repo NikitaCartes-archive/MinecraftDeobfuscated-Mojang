@@ -1,12 +1,14 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.sounds.SoundEvents;
 
 @Environment(EnvType.CLIENT)
@@ -15,13 +17,13 @@ public class PageButton extends Button {
 	private final boolean playTurnSound;
 
 	public PageButton(int i, int j, boolean bl, Button.OnPress onPress, boolean bl2) {
-		super(i, j, 23, 13, "", onPress);
+		super(i, j, 23, 13, TextComponent.EMPTY, onPress);
 		this.isForward = bl;
 		this.playTurnSound = bl2;
 	}
 
 	@Override
-	public void renderButton(int i, int j, float f) {
+	public void renderButton(PoseStack poseStack, int i, int j, float f) {
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		Minecraft.getInstance().getTextureManager().bind(BookViewScreen.BOOK_LOCATION);
 		int k = 0;
@@ -34,7 +36,7 @@ public class PageButton extends Button {
 			l += 13;
 		}
 
-		this.blit(this.x, this.y, k, l, 23, 13);
+		this.blit(poseStack, this.x, this.y, k, l, 23, 13);
 	}
 
 	@Override

@@ -68,30 +68,6 @@ public enum ChatFormatting {
 		this.toString = "§" + c;
 	}
 
-	@Environment(EnvType.CLIENT)
-	public static String getLastColors(String string) {
-		StringBuilder stringBuilder = new StringBuilder();
-		int i = -1;
-		int j = string.length();
-
-		while ((i = string.indexOf(167, i + 1)) != -1) {
-			if (i < j - 1) {
-				ChatFormatting chatFormatting = getByCode(string.charAt(i + 1));
-				if (chatFormatting != null) {
-					if (chatFormatting.shouldReset()) {
-						stringBuilder.setLength(0);
-					}
-
-					if (chatFormatting != RESET) {
-						stringBuilder.append(chatFormatting);
-					}
-				}
-			}
-		}
-
-		return stringBuilder.toString();
-	}
-
 	public int getId() {
 		return this.id;
 	}
@@ -105,14 +81,8 @@ public enum ChatFormatting {
 	}
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public Integer getColor() {
 		return this.color;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public boolean shouldReset() {
-		return !this.isFormat;
 	}
 
 	public String getName() {

@@ -87,7 +87,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 				}
 			}
 
-			if (!level.dimension.mayRespawn() || level.getBiome(blockPos) == Biomes.NETHER_WASTES) {
+			if (!canSetSpawn(level, blockPos)) {
 				level.removeBlock(blockPos, false);
 				BlockPos blockPos2 = blockPos.relative(((Direction)blockState.getValue(FACING)).getOpposite());
 				if (level.getBlockState(blockPos2).getBlock() == this) {
@@ -120,6 +120,10 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 				return InteractionResult.SUCCESS;
 			}
 		}
+	}
+
+	public static boolean canSetSpawn(Level level, BlockPos blockPos) {
+		return level.dimension.mayRespawn() && level.getBiome(blockPos) != Biomes.NETHER_WASTES;
 	}
 
 	private boolean kickVillagerOutOfBed(Level level, BlockPos blockPos) {

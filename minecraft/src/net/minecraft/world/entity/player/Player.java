@@ -26,6 +26,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
@@ -924,6 +925,11 @@ public abstract class Player extends LivingEntity {
 		}
 	}
 
+	@Override
+	protected boolean onSoulSpeedBlock() {
+		return !this.abilities.flying && super.onSoulSpeedBlock();
+	}
+
 	public void openTextEdit(SignBlockEntity signBlockEntity) {
 	}
 
@@ -1295,7 +1301,7 @@ public abstract class Player extends LivingEntity {
 	public static Optional<Vec3> findRespawnPositionAndUseSpawnBlock(ServerLevel serverLevel, BlockPos blockPos, boolean bl, boolean bl2) {
 		BlockState blockState = serverLevel.getBlockState(blockPos);
 		Block block = blockState.getBlock();
-		if (block instanceof RespawnAnchorBlock && (Integer)blockState.getValue(RespawnAnchorBlock.CHARGE) > 0) {
+		if (block instanceof RespawnAnchorBlock && (Integer)blockState.getValue(RespawnAnchorBlock.CHARGE) > 0 && RespawnAnchorBlock.canSetSpawn(serverLevel)) {
 			Optional<Vec3> optional = RespawnAnchorBlock.findStandUpPosition(EntityType.PLAYER, serverLevel, blockPos);
 			if (!bl2 && optional.isPresent()) {
 				serverLevel.setBlock(
@@ -1304,7 +1310,7 @@ public abstract class Player extends LivingEntity {
 			}
 
 			return optional;
-		} else if (block instanceof BedBlock) {
+		} else if (block instanceof BedBlock && BedBlock.canSetSpawn(serverLevel, blockPos)) {
 			return BedBlock.findStandUpPosition(EntityType.PLAYER, serverLevel, blockPos, 0);
 		} else if (!bl) {
 			return Optional.empty();
@@ -1775,20 +1781,20 @@ public abstract class Player extends LivingEntity {
 
 	@Override
 	public Component getDisplayName() {
-		Component component = PlayerTeam.formatNameForTeam(this.getTeam(), this.getName());
-		return this.decorateDisplayNameComponent(component);
+		MutableComponent mutableComponent = PlayerTeam.formatNameForTeam(this.getTeam(), this.getName());
+		return this.decorateDisplayNameComponent(mutableComponent);
 	}
 
 	public Component getDisplayNameWithUuid() {
 		return new TextComponent("").append(this.getName()).append(" (").append(this.gameProfile.getId().toString()).append(")");
 	}
 
-	private Component decorateDisplayNameComponent(Component component) {
+	private MutableComponent decorateDisplayNameComponent(MutableComponent mutableComponent) {
 		String string = this.getGameProfile().getName();
-		return component.withStyle(
-			style -> style.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tell " + string + " "))
-					.setHoverEvent(this.createHoverEvent())
-					.setInsertion(string)
+		return mutableComponent.withStyle(
+			style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tell " + string + " "))
+					.withHoverEvent(this.createHoverEvent())
+					.withInsertion(string)
 		);
 	}
 

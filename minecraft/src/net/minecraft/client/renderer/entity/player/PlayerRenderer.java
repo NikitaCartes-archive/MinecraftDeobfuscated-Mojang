@@ -23,6 +23,8 @@ import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.client.renderer.entity.layers.ParrotOnShoulderLayer;
 import net.minecraft.client.renderer.entity.layers.SpinAttackEffectLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -139,7 +141,7 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		poseStack.scale(0.9375F, 0.9375F, 0.9375F);
 	}
 
-	protected void renderNameTag(AbstractClientPlayer abstractClientPlayer, String string, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+	protected void renderNameTag(AbstractClientPlayer abstractClientPlayer, Component component, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		double d = this.entityRenderDispatcher.distanceToSqr(abstractClientPlayer);
 		poseStack.pushPose();
 		if (d < 100.0) {
@@ -147,12 +149,18 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			Objective objective = scoreboard.getDisplayObjective(2);
 			if (objective != null) {
 				Score score = scoreboard.getOrCreatePlayerScore(abstractClientPlayer.getScoreboardName(), objective);
-				super.renderNameTag(abstractClientPlayer, score.getScore() + " " + objective.getDisplayName().getColoredString(), poseStack, multiBufferSource, i);
+				super.renderNameTag(
+					abstractClientPlayer,
+					new TextComponent(Integer.toString(score.getScore())).append(" ").append(objective.getDisplayName()),
+					poseStack,
+					multiBufferSource,
+					i
+				);
 				poseStack.translate(0.0, (double)(9.0F * 1.15F * 0.025F), 0.0);
 			}
 		}
 
-		super.renderNameTag(abstractClientPlayer, string, poseStack, multiBufferSource, i);
+		super.renderNameTag(abstractClientPlayer, component, poseStack, multiBufferSource, i);
 		poseStack.popPose();
 	}
 

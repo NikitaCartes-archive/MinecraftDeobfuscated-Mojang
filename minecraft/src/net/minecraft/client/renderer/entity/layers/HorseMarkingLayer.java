@@ -32,7 +32,7 @@ public class HorseMarkingLayer extends RenderLayer<Horse, HorseModel<Horse>> {
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Horse horse, float f, float g, float h, float j, float k, float l) {
 		ResourceLocation resourceLocation = (ResourceLocation)LOCATION_BY_MARKINGS.get(horse.getMarkings());
-		if (resourceLocation != null) {
+		if (resourceLocation != null && !horse.isInvisible()) {
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityTranslucent(resourceLocation));
 			this.getParentModel().renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(horse, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
 		}

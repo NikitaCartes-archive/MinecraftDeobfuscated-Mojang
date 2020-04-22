@@ -262,6 +262,11 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 				Blocks.CRIMSON_PRESSURE_PLATE,
 				Blocks.WARPED_PRESSURE_PLATE
 			);
+		this.tag(BlockTags.STONE_PRESSURE_PLATES).add(Blocks.STONE_PRESSURE_PLATE, Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE);
+		this.tag(BlockTags.PRESSURE_PLATES)
+			.add(Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE)
+			.addTag(BlockTags.WOODEN_PRESSURE_PLATES)
+			.addTag(BlockTags.STONE_PRESSURE_PLATES);
 		this.tag(BlockTags.STAIRS)
 			.add(
 				Blocks.OAK_STAIRS,
@@ -513,14 +518,18 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 		this.tag(BlockTags.WART_BLOCKS).add(Blocks.NETHER_WART_BLOCK, Blocks.WARPED_WART_BLOCK);
 		this.tag(BlockTags.BEACON_BASE_BLOCKS).add(Blocks.NETHERITE_BLOCK, Blocks.EMERALD_BLOCK, Blocks.DIAMOND_BLOCK, Blocks.GOLD_BLOCK, Blocks.IRON_BLOCK);
 		this.tag(BlockTags.SOUL_SPEED_BLOCKS).add(Blocks.SOUL_SAND, Blocks.SOUL_SOIL);
-		this.tag(BlockTags.WALL_POST_OVERRIDE).add(Blocks.TORCH, Blocks.SOUL_FIRE_TORCH, Blocks.REDSTONE_TORCH, Blocks.TRIPWIRE).addTag(BlockTags.SIGNS);
+		this.tag(BlockTags.WALL_POST_OVERRIDE)
+			.add(Blocks.TORCH, Blocks.SOUL_TORCH, Blocks.REDSTONE_TORCH, Blocks.TRIPWIRE)
+			.addTag(BlockTags.SIGNS)
+			.addTag(BlockTags.BANNERS)
+			.addTag(BlockTags.PRESSURE_PLATES);
 		this.tag(BlockTags.CLIMBABLE)
 			.add(Blocks.LADDER, Blocks.VINE, Blocks.SCAFFOLDING, Blocks.WEEPING_VINES, Blocks.WEEPING_VINES_PLANT, Blocks.TWISTING_VINES, Blocks.TWISTING_VINES_PLANT);
 		this.tag(BlockTags.PIGLIN_REPELLENTS)
 			.add(Blocks.SOUL_FIRE)
-			.add(Blocks.SOUL_FIRE_TORCH)
-			.add(Blocks.SOUL_FIRE_LANTERN)
-			.add(Blocks.SOUL_FIRE_WALL_TORCH)
+			.add(Blocks.SOUL_TORCH)
+			.add(Blocks.SOUL_LANTERN)
+			.add(Blocks.SOUL_WALL_TORCH)
 			.add(Blocks.SOUL_CAMPFIRE);
 		this.tag(BlockTags.HOGLIN_REPELLENTS).add(Blocks.WARPED_FUNGUS).add(Blocks.POTTED_WARPED_FUNGUS).add(Blocks.NETHER_PORTAL).add(Blocks.RESPAWN_ANCHOR);
 		this.tag(BlockTags.GOLD_ORES).add(Blocks.GOLD_ORE, Blocks.NETHER_GOLD_ORE);

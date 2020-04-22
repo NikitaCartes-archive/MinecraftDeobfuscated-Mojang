@@ -10,9 +10,9 @@ import net.minecraft.world.level.levelgen.feature.configurations.TreeConfigurati
 public class OakTreeGrower extends AbstractTreeGrower {
 	@Nullable
 	@Override
-	protected ConfiguredFeature<? extends TreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl) {
+	protected ConfiguredFeature<TreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl) {
 		return random.nextInt(10) == 0
-			? Feature.FANCY_TREE.configured(bl ? BiomeDefaultFeatures.FANCY_TREE_WITH_BEES_005_CONFIG : BiomeDefaultFeatures.FANCY_TREE_CONFIG)
-			: Feature.NORMAL_TREE.configured(bl ? BiomeDefaultFeatures.NORMAL_TREE_WITH_BEES_005_CONFIG : BiomeDefaultFeatures.NORMAL_TREE_CONFIG);
+			? Feature.TREE.configured(bl ? BiomeDefaultFeatures.FANCY_TREE_WITH_BEES_005_CONFIG : BiomeDefaultFeatures.FANCY_TREE_CONFIG)
+			: Feature.TREE.configured(bl ? BiomeDefaultFeatures.NORMAL_TREE_WITH_BEES_005_CONFIG : BiomeDefaultFeatures.NORMAL_TREE_CONFIG);
 	}
 }

@@ -20,6 +20,7 @@ public class EmptyMapItem extends ComplexItem {
 			itemStack2.shrink(1);
 		}
 
+		player.awardStat(Stats.ITEM_USED.get(this));
 		if (itemStack2.isEmpty()) {
 			return InteractionResultHolder.success(itemStack);
 		} else {
@@ -27,7 +28,6 @@ public class EmptyMapItem extends ComplexItem {
 				player.drop(itemStack, false);
 			}
 
-			player.awardStat(Stats.ITEM_USED.get(this));
 			return InteractionResultHolder.success(itemStack2);
 		}
 	}

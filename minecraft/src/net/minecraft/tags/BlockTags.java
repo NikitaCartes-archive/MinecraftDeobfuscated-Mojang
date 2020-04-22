@@ -16,7 +16,9 @@ public class BlockTags {
 	public static final Tag.Named<Block> WOODEN_STAIRS = bind("wooden_stairs");
 	public static final Tag.Named<Block> WOODEN_SLABS = bind("wooden_slabs");
 	public static final Tag.Named<Block> WOODEN_FENCES = bind("wooden_fences");
+	public static final Tag.Named<Block> PRESSURE_PLATES = bind("pressure_plates");
 	public static final Tag.Named<Block> WOODEN_PRESSURE_PLATES = bind("wooden_pressure_plates");
+	public static final Tag.Named<Block> STONE_PRESSURE_PLATES = bind("stone_pressure_plates");
 	public static final Tag.Named<Block> WOODEN_TRAPDOORS = bind("wooden_trapdoors");
 	public static final Tag.Named<Block> DOORS = bind("doors");
 	public static final Tag.Named<Block> SAPLINGS = bind("saplings");

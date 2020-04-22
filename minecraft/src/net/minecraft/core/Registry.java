@@ -55,6 +55,7 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.feature.blockplacers.BlockPlacerType;
+import net.minecraft.world.level.levelgen.feature.featuresize.FeatureSizeType;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerType;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProviderType;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElementType;
@@ -96,6 +97,7 @@ public abstract class Registry<T> implements IdMap<T> {
 	public static final Registry<FoliagePlacerType<?>> FOLIAGE_PLACER_TYPES = registerSimple("foliage_placer_type", () -> FoliagePlacerType.BLOB_FOLIAGE_PLACER);
 	public static final Registry<TrunkPlacerType<?>> TRUNK_PLACER_TYPES = registerSimple("trunk_placer_type", () -> TrunkPlacerType.STRAIGHT_TRUNK_PLACER);
 	public static final Registry<TreeDecoratorType<?>> TREE_DECORATOR_TYPES = registerSimple("tree_decorator_type", () -> TreeDecoratorType.LEAVE_VINE);
+	public static final Registry<FeatureSizeType<?>> FEATURE_SIZE_TYPES = registerSimple("feature_size_type", () -> FeatureSizeType.TWO_LAYERS_FEATURE_SIZE);
 	public static final Registry<ParticleType<? extends ParticleOptions>> PARTICLE_TYPE = registerSimple("particle_type", () -> ParticleTypes.BLOCK);
 	public static final Registry<BiomeSourceType<?, ?>> BIOME_SOURCE_TYPE = registerSimple("biome_source_type", () -> BiomeSourceType.VANILLA_LAYERED);
 	public static final Registry<BlockEntityType<?>> BLOCK_ENTITY_TYPE = registerSimple("block_entity_type", () -> BlockEntityType.FURNACE);

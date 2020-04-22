@@ -8,7 +8,6 @@ import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.ComponentRenderUtils;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -17,6 +16,8 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.StandingSignBlock;
@@ -67,15 +68,16 @@ public class SignRenderer extends BlockEntityRenderer<SignBlockEntity> {
 		int n = (int)((double)NativeImage.getG(l) * 0.4);
 		int o = (int)((double)NativeImage.getB(l) * 0.4);
 		int p = NativeImage.combine(0, o, n, m);
+		int q = 20;
 
-		for (int q = 0; q < 4; q++) {
-			String string = signBlockEntity.getRenderMessage(q, component -> {
-				List<Component> list = ComponentRenderUtils.wrapComponents(component, 90, font, false, true);
-				return list.isEmpty() ? "" : ((Component)list.get(0)).getColoredString();
+		for (int r = 0; r < 4; r++) {
+			Component component = signBlockEntity.getRenderMessage(r, componentx -> {
+				List<Component> list = font.getSplitter().splitLines(componentx, 90, Style.EMPTY, true);
+				return list.isEmpty() ? TextComponent.EMPTY : (Component)list.get(0);
 			});
-			if (string != null) {
-				float r = (float)(-font.width(string) / 2);
-				font.drawInBatch(string, r, (float)(q * 10 - signBlockEntity.messages.length * 5), p, false, poseStack.last().pose(), multiBufferSource, false, 0, i);
+			if (component != null) {
+				float s = (float)(-font.width(component) / 2);
+				font.drawInBatch(component, s, (float)(r * 10 - 20), p, false, poseStack.last().pose(), multiBufferSource, false, 0, i);
 			}
 		}
 

@@ -5,6 +5,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class LogaritmicProgressOption extends ProgressOption {
@@ -15,7 +16,7 @@ public class LogaritmicProgressOption extends ProgressOption {
 		float f,
 		Function<Options, Double> function,
 		BiConsumer<Options, Double> biConsumer,
-		BiFunction<Options, ProgressOption, String> biFunction
+		BiFunction<Options, ProgressOption, Component> biFunction
 	) {
 		super(string, d, e, f, function, biConsumer, biFunction);
 	}

@@ -31,7 +31,7 @@ public class ItemWrittenBookPagesStrictJsonFix extends DataFix {
 								try {
 									component = GsonHelper.fromJson(BlockEntitySignTextStrictJsonFix.GSON, string, Component.class, true);
 									if (component == null) {
-										component = new TextComponent("");
+										component = TextComponent.EMPTY;
 									}
 								} catch (JsonParseException var6) {
 								}
@@ -57,7 +57,7 @@ public class ItemWrittenBookPagesStrictJsonFix extends DataFix {
 								component = new TextComponent(string);
 							}
 						} else {
-							component = new TextComponent("");
+							component = TextComponent.EMPTY;
 						}
 
 						return dynamicxx.createString(Component.Serializer.toJson(component));

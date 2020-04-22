@@ -22,6 +22,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.storage.LevelResource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -426,7 +427,7 @@ public class OldUsersConverter {
 	}
 
 	private static File getWorldPlayersDirectory(MinecraftServer minecraftServer) {
-		return minecraftServer.getWorldPath().resolve("players").toFile();
+		return minecraftServer.getWorldPath(LevelResource.PLAYER_OLD_DATA_DIR).toFile();
 	}
 
 	private static void renameOldFile(File file) {

@@ -3,6 +3,7 @@ package net.minecraft.client.gui.screens.inventory;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
@@ -68,13 +69,13 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
+	public void render(PoseStack poseStack, int i, int j, float f) {
 		int k = this.leftPos;
 		int l = this.topPos;
-		this.renderBg(f, i, j);
+		this.renderBg(poseStack, f, i, j);
 		RenderSystem.disableRescaleNormal();
 		RenderSystem.disableDepthTest();
-		super.render(i, j, f);
+		super.render(poseStack, i, j, f);
 		RenderSystem.pushMatrix();
 		RenderSystem.translatef((float)k, (float)l, 0.0F);
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -88,7 +89,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		for (int o = 0; o < this.menu.slots.size(); o++) {
 			Slot slot = (Slot)this.menu.slots.get(o);
 			if (slot.isActive()) {
-				this.renderSlot(slot);
+				this.renderSlot(poseStack, slot);
 			}
 
 			if (this.isHovering(slot, (double)i, (double)j) && slot.isActive()) {
@@ -97,13 +98,13 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 				int p = slot.x;
 				int q = slot.y;
 				RenderSystem.colorMask(true, true, true, false);
-				this.fillGradient(p, q, p + 16, q + 16, -2130706433, -2130706433);
+				this.fillGradient(poseStack, p, q, p + 16, q + 16, -2130706433, -2130706433);
 				RenderSystem.colorMask(true, true, true, true);
 				RenderSystem.enableDepthTest();
 			}
 		}
 
-		this.renderLabels(i, j);
+		this.renderLabels(poseStack, i, j);
 		Inventory inventory = this.minecraft.player.inventory;
 		ItemStack itemStack = this.draggingItem.isEmpty() ? inventory.getCarried() : this.draggingItem;
 		if (!itemStack.isEmpty()) {
@@ -142,9 +143,9 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		RenderSystem.enableDepthTest();
 	}
 
-	protected void renderTooltip(int i, int j) {
+	protected void renderTooltip(PoseStack poseStack, int i, int j) {
 		if (this.minecraft.player.inventory.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
-			this.renderTooltip(this.hoveredSlot.getItem(), i, j);
+			this.renderTooltip(poseStack, this.hoveredSlot.getItem(), i, j);
 		}
 	}
 
@@ -158,12 +159,12 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		this.itemRenderer.blitOffset = 0.0F;
 	}
 
-	protected void renderLabels(int i, int j) {
+	protected void renderLabels(PoseStack poseStack, int i, int j) {
 	}
 
-	protected abstract void renderBg(float f, int i, int j);
+	protected abstract void renderBg(PoseStack poseStack, float f, int i, int j);
 
-	private void renderSlot(Slot slot) {
+	private void renderSlot(PoseStack poseStack, Slot slot) {
 		int i = slot.x;
 		int j = slot.y;
 		ItemStack itemStack = slot.getItem();
@@ -203,14 +204,14 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 			if (pair != null) {
 				TextureAtlasSprite textureAtlasSprite = (TextureAtlasSprite)this.minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
 				this.minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
-				blit(i, j, this.getBlitOffset(), 16, 16, textureAtlasSprite);
+				blit(poseStack, i, j, this.getBlitOffset(), 16, 16, textureAtlasSprite);
 				bl2 = true;
 			}
 		}
 
 		if (!bl2) {
 			if (bl) {
-				fill(i, j, i + 16, j + 16, -2130706433);
+				fill(poseStack, i, j, i + 16, j + 16, -2130706433);
 			}
 
 			RenderSystem.enableDepthTest();

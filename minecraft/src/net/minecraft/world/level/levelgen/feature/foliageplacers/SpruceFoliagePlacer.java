@@ -8,7 +8,7 @@ import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelSimulatedRW;
-import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 
 public class SpruceFoliagePlacer extends FoliagePlacer {
 	private final int trunkHeight;
@@ -32,20 +32,28 @@ public class SpruceFoliagePlacer extends FoliagePlacer {
 	}
 
 	@Override
-	public void createFoliage(
-		LevelSimulatedRW levelSimulatedRW, Random random, SmallTreeConfiguration smallTreeConfiguration, int i, BlockPos blockPos, int j, int k, Set<BlockPos> set
+	protected void createFoliage(
+		LevelSimulatedRW levelSimulatedRW,
+		Random random,
+		TreeConfiguration treeConfiguration,
+		int i,
+		FoliagePlacer.FoliageAttachment foliageAttachment,
+		int j,
+		int k,
+		Set<BlockPos> set,
+		int l
 	) {
-		int l = this.offset + random.nextInt(this.offsetRandom + 1);
+		BlockPos blockPos = foliageAttachment.foliagePos();
 		int m = random.nextInt(2);
 		int n = 1;
 		int o = 0;
 
-		for (int p = j + l; p >= 0; p--) {
-			this.placeLeavesRow(levelSimulatedRW, random, smallTreeConfiguration, blockPos, j, p, m, set);
+		for (int p = l; p >= -j; p--) {
+			this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, m, set, p, foliageAttachment.doubleTrunk());
 			if (m >= n) {
 				m = o;
 				o = 1;
-				n = Math.min(n + 1, k);
+				n = Math.min(n + 1, k + foliageAttachment.radiusOffset());
 			} else {
 				m++;
 			}
@@ -53,23 +61,13 @@ public class SpruceFoliagePlacer extends FoliagePlacer {
 	}
 
 	@Override
-	public int foliageRadius(Random random, int i, SmallTreeConfiguration smallTreeConfiguration) {
-		return this.radius + random.nextInt(this.radiusRandom + 1);
-	}
-
-	@Override
-	public int foliageHeight(Random random, int i) {
+	public int foliageHeight(Random random, int i, TreeConfiguration treeConfiguration) {
 		return i - this.trunkHeight - random.nextInt(this.trunkHeightRandom + 1);
 	}
 
 	@Override
-	protected boolean shouldSkipLocation(Random random, int i, int j, int k, int l, int m) {
-		return Math.abs(j) == m && Math.abs(l) == m && m > 0;
-	}
-
-	@Override
-	public int getTreeRadiusForHeight(int i, int j, int k) {
-		return k <= 1 ? 0 : 2;
+	protected boolean shouldSkipLocation(Random random, int i, int j, int k, int l, boolean bl) {
+		return i == l && k == l && l > 0;
 	}
 
 	@Override

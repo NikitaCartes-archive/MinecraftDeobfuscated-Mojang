@@ -1,5 +1,6 @@
 package com.mojang.realmsclient.gui.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.Subscription;
@@ -15,6 +16,9 @@ import net.minecraft.Util;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
@@ -55,7 +59,7 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 				row(6),
 				200,
 				20,
-				I18n.get("mco.configure.world.subscription.extend"),
+				new TranslatableComponent("mco.configure.world.subscription.extend"),
 				button -> {
 					String string = "https://aka.ms/ExtendJavaRealms?subscriptionId="
 						+ this.serverData.remoteSubscriptionId
@@ -66,12 +70,12 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 				}
 			)
 		);
-		this.addButton(new Button(this.width / 2 - 100, row(12), 200, 20, I18n.get("gui.back"), button -> this.minecraft.setScreen(this.lastScreen)));
+		this.addButton(new Button(this.width / 2 - 100, row(12), 200, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)));
 		if (this.serverData.expired) {
-			this.addButton(new Button(this.width / 2 - 100, row(10), 200, 20, I18n.get("mco.configure.world.delete.button"), button -> {
-				String string = I18n.get("mco.configure.world.delete.question.line1");
-				String string2 = I18n.get("mco.configure.world.delete.question.line2");
-				this.minecraft.setScreen(new RealmsLongConfirmationScreen(this::deleteRealm, RealmsLongConfirmationScreen.Type.Warning, string, string2, true));
+			this.addButton(new Button(this.width / 2 - 100, row(10), 200, 20, new TranslatableComponent("mco.configure.world.delete.button"), button -> {
+				Component component = new TranslatableComponent("mco.configure.world.delete.question.line1");
+				Component component2 = new TranslatableComponent("mco.configure.world.delete.question.line2");
+				this.minecraft.setScreen(new RealmsLongConfirmationScreen(this::deleteRealm, RealmsLongConfirmationScreen.Type.Warning, component, component2, true));
 			}));
 		}
 	}
@@ -134,20 +138,20 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
 		int k = this.width / 2 - 100;
-		this.drawCenteredString(this.font, this.subscriptionTitle, this.width / 2, 17, 16777215);
-		this.font.draw(this.subscriptionStartLabelText, (float)k, (float)row(0), 10526880);
-		this.font.draw(this.startDate, (float)k, (float)row(1), 16777215);
+		this.drawCenteredString(poseStack, this.font, this.subscriptionTitle, this.width / 2, 17, 16777215);
+		this.font.draw(poseStack, this.subscriptionStartLabelText, (float)k, (float)row(0), 10526880);
+		this.font.draw(poseStack, this.startDate, (float)k, (float)row(1), 16777215);
 		if (this.type == Subscription.SubscriptionType.NORMAL) {
-			this.font.draw(this.timeLeftLabelText, (float)k, (float)row(3), 10526880);
+			this.font.draw(poseStack, this.timeLeftLabelText, (float)k, (float)row(3), 10526880);
 		} else if (this.type == Subscription.SubscriptionType.RECURRING) {
-			this.font.draw(this.daysLeftLabelText, (float)k, (float)row(3), 10526880);
+			this.font.draw(poseStack, this.daysLeftLabelText, (float)k, (float)row(3), 10526880);
 		}
 
-		this.font.draw(this.daysLeftPresentation(this.daysLeft), (float)k, (float)row(4), 16777215);
-		super.render(i, j, f);
+		this.font.draw(poseStack, this.daysLeftPresentation(this.daysLeft), (float)k, (float)row(4), 16777215);
+		super.render(poseStack, i, j, f);
 	}
 
 	private String daysLeftPresentation(int i) {

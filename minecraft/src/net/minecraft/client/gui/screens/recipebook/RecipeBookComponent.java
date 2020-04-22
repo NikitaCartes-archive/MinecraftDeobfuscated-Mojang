@@ -2,6 +2,7 @@ package net.minecraft.client.gui.screens.recipebook;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.Iterator;
@@ -19,10 +20,11 @@ import net.minecraft.client.gui.components.StateSwitchingButton;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.language.Language;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.client.searchtree.SearchRegistry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookUpdatePacket;
 import net.minecraft.recipebook.PlaceRecipe;
 import net.minecraft.resources.ResourceLocation;
@@ -76,7 +78,7 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 		this.minecraft.player.inventory.fillStackedContents(this.stackedContents);
 		this.menu.fillCraftSlotsStackedContents(this.stackedContents);
 		String string = this.searchBox != null ? this.searchBox.getValue() : "";
-		this.searchBox = new EditBox(this.minecraft.font, i + 25, j + 14, 80, 9 + 5, I18n.get("itemGroup.search"));
+		this.searchBox = new EditBox(this.minecraft.font, i + 25, j + 14, 80, 9 + 5, new TranslatableComponent("itemGroup.search"));
 		this.searchBox.setMaxLength(50);
 		this.searchBox.setBordered(false);
 		this.searchBox.setVisible(true);
@@ -217,7 +219,7 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
+	public void render(PoseStack poseStack, int i, int j, float f) {
 		if (this.isVisible()) {
 			RenderSystem.pushMatrix();
 			RenderSystem.translatef(0.0F, 0.0F, 100.0F);
@@ -225,38 +227,38 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			int k = (this.width - 147) / 2 - this.xOffset;
 			int l = (this.height - 166) / 2;
-			this.blit(k, l, 1, 1, 147, 166);
-			this.searchBox.render(i, j, f);
+			this.blit(poseStack, k, l, 1, 1, 147, 166);
+			this.searchBox.render(poseStack, i, j, f);
 
 			for (RecipeBookTabButton recipeBookTabButton : this.tabButtons) {
-				recipeBookTabButton.render(i, j, f);
+				recipeBookTabButton.render(poseStack, i, j, f);
 			}
 
-			this.filterButton.render(i, j, f);
-			this.recipeBookPage.render(k, l, i, j, f);
+			this.filterButton.render(poseStack, i, j, f);
+			this.recipeBookPage.render(poseStack, k, l, i, j, f);
 			RenderSystem.popMatrix();
 		}
 	}
 
-	public void renderTooltip(int i, int j, int k, int l) {
+	public void renderTooltip(PoseStack poseStack, int i, int j, int k, int l) {
 		if (this.isVisible()) {
-			this.recipeBookPage.renderTooltip(k, l);
+			this.recipeBookPage.renderTooltip(poseStack, k, l);
 			if (this.filterButton.isHovered()) {
-				String string = this.getFilterButtonTooltip();
+				Component component = this.getFilterButtonTooltip();
 				if (this.minecraft.screen != null) {
-					this.minecraft.screen.renderTooltip(string, k, l);
+					this.minecraft.screen.renderTooltip(poseStack, component, k, l);
 				}
 			}
 
-			this.renderGhostRecipeTooltip(i, j, k, l);
+			this.renderGhostRecipeTooltip(poseStack, i, j, k, l);
 		}
 	}
 
-	protected String getFilterButtonTooltip() {
-		return I18n.get(this.filterButton.isStateTriggered() ? "gui.recipebook.toggleRecipes.craftable" : "gui.recipebook.toggleRecipes.all");
+	protected Component getFilterButtonTooltip() {
+		return new TranslatableComponent(this.filterButton.isStateTriggered() ? "gui.recipebook.toggleRecipes.craftable" : "gui.recipebook.toggleRecipes.all");
 	}
 
-	private void renderGhostRecipeTooltip(int i, int j, int k, int l) {
+	private void renderGhostRecipeTooltip(PoseStack poseStack, int i, int j, int k, int l) {
 		ItemStack itemStack = null;
 
 		for (int m = 0; m < this.ghostRecipe.size(); m++) {
@@ -269,12 +271,12 @@ public class RecipeBookComponent extends GuiComponent implements Widget, GuiEven
 		}
 
 		if (itemStack != null && this.minecraft.screen != null) {
-			this.minecraft.screen.renderTooltip(this.minecraft.screen.getTooltipFromItem(itemStack), k, l);
+			this.minecraft.screen.renderTooltip(poseStack, this.minecraft.screen.getTooltipFromItem(itemStack), k, l);
 		}
 	}
 
-	public void renderGhostRecipe(int i, int j, boolean bl, float f) {
-		this.ghostRecipe.render(this.minecraft, i, j, bl, f);
+	public void renderGhostRecipe(PoseStack poseStack, int i, int j, boolean bl, float f) {
+		this.ghostRecipe.render(poseStack, this.minecraft, i, j, bl, f);
 	}
 
 	@Override

@@ -1,19 +1,22 @@
 package net.minecraft.client.gui.components;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractSliderButton extends AbstractWidget {
 	protected double value;
 
-	public AbstractSliderButton(int i, int j, int k, int l, String string, double d) {
-		super(i, j, k, l, string);
+	public AbstractSliderButton(int i, int j, int k, int l, Component component, double d) {
+		super(i, j, k, l, component);
 		this.value = d;
 	}
 
@@ -23,17 +26,17 @@ public abstract class AbstractSliderButton extends AbstractWidget {
 	}
 
 	@Override
-	protected String getNarrationMessage() {
-		return I18n.get("gui.narrate.slider", this.getMessage());
+	protected MutableComponent createNarrationMessage() {
+		return new TranslatableComponent("gui.narrate.slider", this.getMessage());
 	}
 
 	@Override
-	protected void renderBg(Minecraft minecraft, int i, int j) {
+	protected void renderBg(PoseStack poseStack, Minecraft minecraft, int i, int j) {
 		minecraft.getTextureManager().bind(WIDGETS_LOCATION);
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		int k = (this.isHovered() ? 2 : 1) * 20;
-		this.blit(this.x + (int)(this.value * (double)(this.width - 8)), this.y, 0, 46 + k, 4, 20);
-		this.blit(this.x + (int)(this.value * (double)(this.width - 8)) + 4, this.y, 196, 46 + k, 4, 20);
+		this.blit(poseStack, this.x + (int)(this.value * (double)(this.width - 8)), this.y, 0, 46 + k, 4, 20);
+		this.blit(poseStack, this.x + (int)(this.value * (double)(this.width - 8)) + 4, this.y, 196, 46 + k, 4, 20);
 	}
 
 	@Override

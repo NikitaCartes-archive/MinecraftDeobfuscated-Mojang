@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.screens.resourcepacks;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collections;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -15,6 +16,7 @@ import net.minecraft.client.gui.screens.resourcepacks.lists.ResourcePackList;
 import net.minecraft.client.gui.screens.resourcepacks.lists.SelectedResourcePackList;
 import net.minecraft.client.resources.UnopenedResourcePack;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.packs.repository.PackRepository;
 
@@ -36,11 +38,11 @@ public class ResourcePackSelectScreen extends OptionsSubScreen {
 				this.height - 48,
 				150,
 				20,
-				I18n.get("resourcePack.openFolder"),
+				new TranslatableComponent("resourcePack.openFolder"),
 				button -> Util.getPlatform().openFile(this.minecraft.getResourcePackDirectory())
 			)
 		);
-		this.addButton(new Button(this.width / 2 + 4, this.height - 48, 150, 20, I18n.get("gui.done"), button -> {
+		this.addButton(new Button(this.width / 2 + 4, this.height - 48, 150, 20, CommonComponents.GUI_DONE, button -> {
 			if (this.changed) {
 				List<UnopenedResourcePack> listx = Lists.<UnopenedResourcePack>newArrayList();
 
@@ -123,13 +125,13 @@ public class ResourcePackSelectScreen extends OptionsSubScreen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
+	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderDirtBackground(0);
-		this.availableResourcePackList.render(i, j, f);
-		this.selectedResourcePackList.render(i, j, f);
-		this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 16, 16777215);
-		this.drawCenteredString(this.font, I18n.get("resourcePack.folderInfo"), this.width / 2 - 77, this.height - 26, 8421504);
-		super.render(i, j, f);
+		this.availableResourcePackList.render(poseStack, i, j, f);
+		this.selectedResourcePackList.render(poseStack, i, j, f);
+		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 16, 16777215);
+		this.drawCenteredString(poseStack, this.font, I18n.get("resourcePack.folderInfo"), this.width / 2 - 77, this.height - 26, 8421504);
+		super.render(poseStack, i, j, f);
 	}
 
 	public void setChanged() {

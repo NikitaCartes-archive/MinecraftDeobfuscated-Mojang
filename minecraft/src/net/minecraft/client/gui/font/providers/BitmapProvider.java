@@ -7,8 +7,10 @@ import com.google.gson.JsonParseException;
 import com.mojang.blaze3d.font.GlyphProvider;
 import com.mojang.blaze3d.font.RawGlyph;
 import com.mojang.blaze3d.platform.NativeImage;
-import it.unimi.dsi.fastutil.chars.Char2ObjectMap;
-import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.ints.IntSets;
 import java.io.IOException;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -25,11 +27,11 @@ import org.apache.logging.log4j.Logger;
 public class BitmapProvider implements GlyphProvider {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final NativeImage image;
-	private final Char2ObjectMap<BitmapProvider.Glyph> glyphs;
+	private final Int2ObjectMap<BitmapProvider.Glyph> glyphs;
 
-	public BitmapProvider(NativeImage nativeImage, Char2ObjectMap<BitmapProvider.Glyph> char2ObjectMap) {
+	private BitmapProvider(NativeImage nativeImage, Int2ObjectMap<BitmapProvider.Glyph> int2ObjectMap) {
 		this.image = nativeImage;
-		this.glyphs = char2ObjectMap;
+		this.glyphs = int2ObjectMap;
 	}
 
 	@Override
@@ -39,18 +41,23 @@ public class BitmapProvider implements GlyphProvider {
 
 	@Nullable
 	@Override
-	public RawGlyph getGlyph(char c) {
-		return this.glyphs.get(c);
+	public RawGlyph getGlyph(int i) {
+		return this.glyphs.get(i);
+	}
+
+	@Override
+	public IntSet getSupportedGlyphs() {
+		return IntSets.unmodifiable(this.glyphs.keySet());
 	}
 
 	@Environment(EnvType.CLIENT)
 	public static class Builder implements GlyphProviderBuilder {
 		private final ResourceLocation texture;
-		private final List<String> chars;
+		private final List<int[]> chars;
 		private final int height;
 		private final int ascent;
 
-		public Builder(ResourceLocation resourceLocation, int i, int j, List<String> list) {
+		public Builder(ResourceLocation resourceLocation, int i, int j, List<int[]> list) {
 			this.texture = new ResourceLocation(resourceLocation.getNamespace(), "textures/" + resourceLocation.getPath());
 			this.chars = list;
 			this.height = i;
@@ -63,23 +70,23 @@ public class BitmapProvider implements GlyphProvider {
 			if (j > i) {
 				throw new JsonParseException("Ascent " + j + " higher than height " + i);
 			} else {
-				List<String> list = Lists.<String>newArrayList();
+				List<int[]> list = Lists.<int[]>newArrayList();
 				JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "chars");
 
 				for (int k = 0; k < jsonArray.size(); k++) {
 					String string = GsonHelper.convertToString(jsonArray.get(k), "chars[" + k + "]");
+					int[] is = string.codePoints().toArray();
 					if (k > 0) {
-						int l = string.length();
-						int m = ((String)list.get(0)).length();
-						if (l != m) {
-							throw new JsonParseException("Elements of chars have to be the same length (found: " + l + ", expected: " + m + "), pad with space or \\u0000");
+						int l = ((int[])list.get(0)).length;
+						if (is.length != l) {
+							throw new JsonParseException("Elements of chars have to be the same length (found: " + is.length + ", expected: " + l + "), pad with space or \\u0000");
 						}
 					}
 
-					list.add(string);
+					list.add(is);
 				}
 
-				if (!list.isEmpty() && !((String)list.get(0)).isEmpty()) {
+				if (!list.isEmpty() && ((int[])list.get(0)).length != 0) {
 					return new BitmapProvider.Builder(new ResourceLocation(GsonHelper.getAsString(jsonObject, "file")), i, j, list);
 				} else {
 					throw new JsonParseException("Expected to find data in chars, found none.");
@@ -94,44 +101,44 @@ public class BitmapProvider implements GlyphProvider {
 				Resource resource = resourceManager.getResource(this.texture);
 				Throwable var3 = null;
 
-				BitmapProvider var28;
+				BitmapProvider var31;
 				try {
 					NativeImage nativeImage = NativeImage.read(NativeImage.Format.RGBA, resource.getInputStream());
 					int i = nativeImage.getWidth();
 					int j = nativeImage.getHeight();
-					int k = i / ((String)this.chars.get(0)).length();
+					int k = i / ((int[])this.chars.get(0)).length;
 					int l = j / this.chars.size();
 					float f = (float)this.height / (float)l;
-					Char2ObjectMap<BitmapProvider.Glyph> char2ObjectMap = new Char2ObjectOpenHashMap<>();
+					Int2ObjectMap<BitmapProvider.Glyph> int2ObjectMap = new Int2ObjectOpenHashMap<>();
 
 					for (int m = 0; m < this.chars.size(); m++) {
-						String string = (String)this.chars.get(m);
+						int n = 0;
 
-						for (int n = 0; n < string.length(); n++) {
-							char c = string.charAt(n);
-							if (c != 0 && c != ' ') {
-								int o = this.getActualGlyphWidth(nativeImage, k, l, n, m);
-								BitmapProvider.Glyph glyph = char2ObjectMap.put(
-									c, new BitmapProvider.Glyph(f, nativeImage, n * k, m * l, k, l, (int)(0.5 + (double)((float)o * f)) + 1, this.ascent)
+						for (int o : (int[])this.chars.get(m)) {
+							int p = n++;
+							if (o != 0 && o != 32) {
+								int q = this.getActualGlyphWidth(nativeImage, k, l, p, m);
+								BitmapProvider.Glyph glyph = int2ObjectMap.put(
+									o, new BitmapProvider.Glyph(f, nativeImage, p * k, m * l, k, l, (int)(0.5 + (double)((float)q * f)) + 1, this.ascent)
 								);
 								if (glyph != null) {
-									BitmapProvider.LOGGER.warn("Codepoint '{}' declared multiple times in {}", Integer.toHexString(c), this.texture);
+									BitmapProvider.LOGGER.warn("Codepoint '{}' declared multiple times in {}", Integer.toHexString(o), this.texture);
 								}
 							}
 						}
 					}
 
-					var28 = new BitmapProvider(nativeImage, char2ObjectMap);
-				} catch (Throwable var25) {
-					var3 = var25;
-					throw var25;
+					var31 = new BitmapProvider(nativeImage, int2ObjectMap);
+				} catch (Throwable var28) {
+					var3 = var28;
+					throw var28;
 				} finally {
 					if (resource != null) {
 						if (var3 != null) {
 							try {
 								resource.close();
-							} catch (Throwable var24) {
-								var3.addSuppressed(var24);
+							} catch (Throwable var27) {
+								var3.addSuppressed(var27);
 							}
 						} else {
 							resource.close();
@@ -139,9 +146,9 @@ public class BitmapProvider implements GlyphProvider {
 					}
 				}
 
-				return var28;
-			} catch (IOException var27) {
-				throw new RuntimeException(var27.getMessage());
+				return var31;
+			} catch (IOException var30) {
+				throw new RuntimeException(var30.getMessage());
 			}
 		}
 

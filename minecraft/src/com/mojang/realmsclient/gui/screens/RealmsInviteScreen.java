@@ -1,5 +1,6 @@
 package com.mojang.realmsclient.gui.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
 import net.fabricmc.api.EnvType;
@@ -8,6 +9,8 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
@@ -37,11 +40,13 @@ public class RealmsInviteScreen extends RealmsScreen {
 	@Override
 	public void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		this.profileName = new EditBox(this.minecraft.font, this.width / 2 - 100, row(2), 200, 20, null, I18n.get("mco.configure.world.invite.profile.name"));
+		this.profileName = new EditBox(
+			this.minecraft.font, this.width / 2 - 100, row(2), 200, 20, null, new TranslatableComponent("mco.configure.world.invite.profile.name")
+		);
 		this.addWidget(this.profileName);
 		this.setInitialFocus(this.profileName);
-		this.addButton(new Button(this.width / 2 - 100, row(10), 200, 20, I18n.get("mco.configure.world.buttons.invite"), button -> this.onInvite()));
-		this.addButton(new Button(this.width / 2 - 100, row(12), 200, 20, I18n.get("gui.cancel"), button -> this.minecraft.setScreen(this.lastScreen)));
+		this.addButton(new Button(this.width / 2 - 100, row(10), 200, 20, new TranslatableComponent("mco.configure.world.buttons.invite"), button -> this.onInvite()));
+		this.addButton(new Button(this.width / 2 - 100, row(12), 200, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)));
 	}
 
 	@Override
@@ -86,14 +91,14 @@ public class RealmsInviteScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
-		this.font.draw(I18n.get("mco.configure.world.invite.profile.name"), (float)(this.width / 2 - 100), (float)row(1), 10526880);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		this.font.draw(poseStack, I18n.get("mco.configure.world.invite.profile.name"), (float)(this.width / 2 - 100), (float)row(1), 10526880);
 		if (this.showError) {
-			this.drawCenteredString(this.font, this.errorMsg, this.width / 2, row(5), 16711680);
+			this.drawCenteredString(poseStack, this.font, this.errorMsg, this.width / 2, row(5), 16711680);
 		}
 
-		this.profileName.render(i, j, f);
-		super.render(i, j, f);
+		this.profileName.render(poseStack, i, j, f);
+		super.render(poseStack, i, j, f);
 	}
 }

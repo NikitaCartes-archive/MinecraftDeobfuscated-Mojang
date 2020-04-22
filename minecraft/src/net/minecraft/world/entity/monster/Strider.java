@@ -352,7 +352,18 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	@Override
 	public boolean mobInteract(Player player, InteractionHand interactionHand) {
 		boolean bl = this.isFood(player.getItemInHand(interactionHand));
-		if (super.mobInteract(player, interactionHand)) {
+		if (!super.mobInteract(player, interactionHand)) {
+			if (this.isSaddled() && !this.isVehicle() && !this.isBaby()) {
+				if (!this.level.isClientSide) {
+					player.startRiding(this);
+				}
+
+				return true;
+			} else {
+				ItemStack itemStack = player.getItemInHand(interactionHand);
+				return itemStack.getItem() == Items.SADDLE && itemStack.interactEnemy(player, this, interactionHand);
+			}
+		} else {
 			if (bl && !this.isSilent()) {
 				this.level
 					.playSound(
@@ -368,20 +379,6 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 			}
 
 			return false;
-		} else {
-			ItemStack itemStack = player.getItemInHand(interactionHand);
-			if (itemStack.getItem() == Items.NAME_TAG) {
-				itemStack.interactEnemy(player, this, interactionHand);
-				return true;
-			} else if (this.isSaddled() && !this.isVehicle() && !this.isBaby()) {
-				if (!this.level.isClientSide) {
-					player.startRiding(this);
-				}
-
-				return true;
-			} else {
-				return itemStack.getItem() == Items.SADDLE && itemStack.interactEnemy(player, this, interactionHand);
-			}
 		}
 	}
 

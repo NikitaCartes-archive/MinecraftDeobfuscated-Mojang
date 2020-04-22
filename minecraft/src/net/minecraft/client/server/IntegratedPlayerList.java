@@ -9,13 +9,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.level.storage.PlayerDataStorage;
 
 @Environment(EnvType.CLIENT)
 public class IntegratedPlayerList extends PlayerList {
 	private CompoundTag playerData;
 
-	public IntegratedPlayerList(IntegratedServer integratedServer) {
-		super(integratedServer, 8);
+	public IntegratedPlayerList(IntegratedServer integratedServer, PlayerDataStorage playerDataStorage) {
+		super(integratedServer, playerDataStorage, 8);
 		this.setViewDistance(10);
 	}
 

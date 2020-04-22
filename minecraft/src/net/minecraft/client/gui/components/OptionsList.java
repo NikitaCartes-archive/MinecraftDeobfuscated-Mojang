@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.components;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -61,10 +62,10 @@ public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry>
 		}
 
 		@Override
-		public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			this.children.forEach(abstractWidget -> {
 				abstractWidget.y = j;
-				abstractWidget.render(n, o, f);
+				abstractWidget.render(poseStack, n, o, f);
 			});
 		}
 

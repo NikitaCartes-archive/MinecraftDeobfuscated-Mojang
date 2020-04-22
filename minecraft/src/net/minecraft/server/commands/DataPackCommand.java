@@ -15,8 +15,7 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.UnopenedPack;
-import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.WorldData;
 
 public class DataPackCommand {
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_PACK = new DynamicCommandExceptionType(
@@ -112,10 +111,10 @@ public class DataPackCommand {
 		List<UnopenedPack> list = Lists.<UnopenedPack>newArrayList(packRepository.getSelected());
 		inserter.apply(list, unopenedPack);
 		packRepository.setSelected(list);
-		LevelData levelData = commandSourceStack.getServer().getLevel(DimensionType.OVERWORLD).getLevelData();
-		levelData.getEnabledDataPacks().clear();
-		packRepository.getSelected().forEach(unopenedPackx -> levelData.getEnabledDataPacks().add(unopenedPackx.getId()));
-		levelData.getDisabledDataPacks().remove(unopenedPack.getId());
+		WorldData worldData = commandSourceStack.getServer().getWorldData();
+		worldData.getEnabledDataPacks().clear();
+		packRepository.getSelected().forEach(unopenedPackx -> worldData.getEnabledDataPacks().add(unopenedPackx.getId()));
+		worldData.getDisabledDataPacks().remove(unopenedPack.getId());
 		commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.enable.success", unopenedPack.getChatLink(true)), true);
 		commandSourceStack.getServer().reloadResources();
 		return packRepository.getSelected().size();
@@ -126,10 +125,10 @@ public class DataPackCommand {
 		List<UnopenedPack> list = Lists.<UnopenedPack>newArrayList(packRepository.getSelected());
 		list.remove(unopenedPack);
 		packRepository.setSelected(list);
-		LevelData levelData = commandSourceStack.getServer().getLevel(DimensionType.OVERWORLD).getLevelData();
-		levelData.getEnabledDataPacks().clear();
-		packRepository.getSelected().forEach(unopenedPackx -> levelData.getEnabledDataPacks().add(unopenedPackx.getId()));
-		levelData.getDisabledDataPacks().add(unopenedPack.getId());
+		WorldData worldData = commandSourceStack.getServer().getWorldData();
+		worldData.getEnabledDataPacks().clear();
+		packRepository.getSelected().forEach(unopenedPackx -> worldData.getEnabledDataPacks().add(unopenedPackx.getId()));
+		worldData.getDisabledDataPacks().add(unopenedPack.getId());
 		commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.disable.success", unopenedPack.getChatLink(true)), true);
 		commandSourceStack.getServer().reloadResources();
 		return packRepository.getSelected().size();

@@ -14,7 +14,7 @@ public interface RecipeHolder {
 	@Nullable
 	Recipe<?> getRecipeUsed();
 
-	default void awardAndReset(Player player) {
+	default void awardUsedRecipes(Player player) {
 		Recipe<?> recipe = this.getRecipeUsed();
 		if (recipe != null && !recipe.isSpecial()) {
 			player.awardRecipes(Collections.singleton(recipe));

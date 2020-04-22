@@ -6,8 +6,6 @@ import com.mojang.datafixers.types.constant.NamespacedStringType;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.ResourceLeakDetector.Level;
 import java.time.Duration;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.commands.BrigadierExceptions;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
@@ -29,25 +27,6 @@ public class SharedConstants {
 			if (isAllowedChatCharacter(c)) {
 				stringBuilder.append(c);
 			}
-		}
-
-		return stringBuilder.toString();
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static String filterUnicodeSupplementary(String string) {
-		StringBuilder stringBuilder = new StringBuilder();
-		int i = 0;
-
-		while (i < string.length()) {
-			int j = string.codePointAt(i);
-			if (!Character.isSupplementaryCodePoint(j)) {
-				stringBuilder.appendCodePoint(j);
-			} else {
-				stringBuilder.append('�');
-			}
-
-			i = string.offsetByCodePoints(i, 1);
 		}
 
 		return stringBuilder.toString();

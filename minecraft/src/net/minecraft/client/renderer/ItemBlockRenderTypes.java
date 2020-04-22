@@ -81,8 +81,8 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.RED_MUSHROOM, renderType2);
 		hashMap.put(Blocks.TORCH, renderType2);
 		hashMap.put(Blocks.WALL_TORCH, renderType2);
-		hashMap.put(Blocks.SOUL_FIRE_TORCH, renderType2);
-		hashMap.put(Blocks.SOUL_FIRE_WALL_TORCH, renderType2);
+		hashMap.put(Blocks.SOUL_TORCH, renderType2);
+		hashMap.put(Blocks.SOUL_WALL_TORCH, renderType2);
 		hashMap.put(Blocks.FIRE, renderType2);
 		hashMap.put(Blocks.SOUL_FIRE, renderType2);
 		hashMap.put(Blocks.SPAWNER, renderType2);
@@ -201,7 +201,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.SCAFFOLDING, renderType2);
 		hashMap.put(Blocks.STONECUTTER, renderType2);
 		hashMap.put(Blocks.LANTERN, renderType2);
-		hashMap.put(Blocks.SOUL_FIRE_LANTERN, renderType2);
+		hashMap.put(Blocks.SOUL_LANTERN, renderType2);
 		hashMap.put(Blocks.CAMPFIRE, renderType2);
 		hashMap.put(Blocks.SOUL_CAMPFIRE, renderType2);
 		hashMap.put(Blocks.SWEET_BERRY_BUSH, renderType2);

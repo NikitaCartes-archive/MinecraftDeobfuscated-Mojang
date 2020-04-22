@@ -1,7 +1,7 @@
 package net.minecraft.world.level.block.entity;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -23,10 +23,10 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
 public class SignBlockEntity extends BlockEntity {
-	public final Component[] messages = new Component[]{new TextComponent(""), new TextComponent(""), new TextComponent(""), new TextComponent("")};
+	private final Component[] messages = new Component[]{TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY};
 	private boolean isEditable = true;
 	private Player playerWhoMayEdit;
-	private final String[] renderMessages = new String[4];
+	private final Component[] renderMessages = new Component[4];
 	private DyeColor color = DyeColor.BLACK;
 
 	public SignBlockEntity() {
@@ -81,9 +81,9 @@ public class SignBlockEntity extends BlockEntity {
 
 	@Nullable
 	@Environment(EnvType.CLIENT)
-	public String getRenderMessage(int i, Function<Component, String> function) {
+	public Component getRenderMessage(int i, UnaryOperator<Component> unaryOperator) {
 		if (this.renderMessages[i] == null && this.messages[i] != null) {
-			this.renderMessages[i] = (String)function.apply(this.messages[i]);
+			this.renderMessages[i] = (Component)unaryOperator.apply(this.messages[i]);
 		}
 
 		return this.renderMessages[i];

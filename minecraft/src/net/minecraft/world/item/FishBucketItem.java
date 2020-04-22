@@ -8,6 +8,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -67,13 +68,13 @@ public class FishBucketItem extends BucketItem {
 				}
 
 				list.add(new TranslatableComponent(TropicalFish.getFishTypeName(i)).withStyle(chatFormattings));
-				Component component = new TranslatableComponent(string);
+				MutableComponent mutableComponent = new TranslatableComponent(string);
 				if (!string.equals(string2)) {
-					component.append(", ").append(new TranslatableComponent(string2));
+					mutableComponent.append(", ").append(new TranslatableComponent(string2));
 				}
 
-				component.withStyle(chatFormattings);
-				list.add(component);
+				mutableComponent.withStyle(chatFormattings);
+				list.add(mutableComponent);
 			}
 		}
 	}

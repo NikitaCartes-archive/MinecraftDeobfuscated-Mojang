@@ -54,7 +54,6 @@ import net.minecraft.world.level.EmptyTickList;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.biome.Biome;
@@ -92,13 +91,13 @@ public class ClientLevel extends Level {
 
 	public ClientLevel(
 		ClientPacketListener clientPacketListener,
-		LevelSettings levelSettings,
+		LevelData levelData,
 		DimensionType dimensionType,
 		int i,
 		Supplier<ProfilerFiller> supplier,
 		LevelRenderer levelRenderer
 	) {
-		super(new LevelData(levelSettings, "MpServer"), dimensionType, (level, dimension) -> new ClientChunkCache((ClientLevel)level, i), supplier, true);
+		super(levelData, dimensionType, (level, dimension) -> new ClientChunkCache((ClientLevel)level, i), supplier, true);
 		this.connection = clientPacketListener;
 		this.levelRenderer = levelRenderer;
 		this.setDefaultSpawnPos(new BlockPos(8, 64, 8));

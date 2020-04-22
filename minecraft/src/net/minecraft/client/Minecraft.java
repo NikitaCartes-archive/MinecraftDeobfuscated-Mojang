@@ -1,5 +1,6 @@
 package net.minecraft.client;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Queues;
 import com.mojang.authlib.AuthenticationService;
 import com.mojang.authlib.GameProfile;
@@ -15,6 +16,7 @@ import com.mojang.blaze3d.platform.WindowEventHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.datafixers.DataFixer;
 import java.io.File;
@@ -152,6 +154,8 @@ import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleReloadableResourceManager;
 import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.sounds.Music;
+import net.minecraft.sounds.Musics;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.FrameTimer;
 import net.minecraft.util.Mth;
@@ -164,7 +168,6 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.profiling.ResultField;
 import net.minecraft.util.profiling.SingleTickProfiler;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.Snooper;
@@ -189,17 +192,15 @@ import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.dimension.NetherDimension;
 import net.minecraft.world.level.dimension.end.TheEndDimension;
-import net.minecraft.world.level.storage.LevelData;
-import net.minecraft.world.level.storage.LevelStorage;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.PrimaryLevelData;
+import net.minecraft.world.level.storage.WorldData;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -212,6 +213,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final boolean ON_OSX = Util.getPlatform() == Util.OS.OSX;
 	public static final ResourceLocation DEFAULT_FONT = new ResourceLocation("default");
+	public static final ResourceLocation UNIFORM_FONT = new ResourceLocation("uniform");
 	public static final ResourceLocation ALT_FONT = new ResourceLocation("alt");
 	private static final CompletableFuture<Unit> RESOURCE_RELOAD_INITIAL_TASK = CompletableFuture.completedFuture(Unit.INSTANCE);
 	private final File resourcePackDirectory;
@@ -353,7 +355,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 		Bootstrap.bootStrap();
 		Bootstrap.validate();
-		KeybindComponent.keyResolver = KeyMapping::createNameSupplier;
+		KeybindComponent.setKeyResolver(KeyMapping::createNameSupplier);
 		this.fixerUpper = DataFixers.getDataFixer();
 		this.toast = new ToastComponent(this);
 		this.tutorial = new Tutorial(this);
@@ -410,76 +412,71 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.splashManager = new SplashManager(this.user);
 		this.resourceManager.registerReloadListener(this.splashManager);
 		this.musicManager = new MusicManager(this);
-		this.fontManager = new FontManager(this.textureManager, this.isEnforceUnicode());
+		this.fontManager = new FontManager(this.textureManager);
+		this.font = this.fontManager.createFont();
 		this.resourceManager.registerReloadListener(this.fontManager.getReloadListener());
-		Font font = this.fontManager.get(DEFAULT_FONT);
-		if (font == null) {
-			throw new IllegalStateException("Default font is null");
-		} else {
-			this.font = font;
-			this.font.setBidirectional(this.languageManager.isBidirectional());
-			this.resourceManager.registerReloadListener(new GrassColorReloadListener());
-			this.resourceManager.registerReloadListener(new FoliageColorReloadListener());
-			this.window.setErrorSection("Startup");
-			RenderSystem.setupDefaultState(0, 0, this.window.getWidth(), this.window.getHeight());
-			this.window.setErrorSection("Post startup");
-			this.blockColors = BlockColors.createDefault();
-			this.itemColors = ItemColors.createDefault(this.blockColors);
-			this.modelManager = new ModelManager(this.textureManager, this.blockColors, this.options.mipmapLevels);
-			this.resourceManager.registerReloadListener(this.modelManager);
-			this.itemRenderer = new ItemRenderer(this.textureManager, this.modelManager, this.itemColors);
-			this.entityRenderDispatcher = new EntityRenderDispatcher(this.textureManager, this.itemRenderer, this.resourceManager, this.font, this.options);
-			this.itemInHandRenderer = new ItemInHandRenderer(this);
-			this.resourceManager.registerReloadListener(this.itemRenderer);
-			this.renderBuffers = new RenderBuffers();
-			this.gameRenderer = new GameRenderer(this, this.resourceManager, this.renderBuffers);
-			this.resourceManager.registerReloadListener(this.gameRenderer);
-			this.blockRenderer = new BlockRenderDispatcher(this.modelManager.getBlockModelShaper(), this.blockColors);
-			this.resourceManager.registerReloadListener(this.blockRenderer);
-			this.levelRenderer = new LevelRenderer(this, this.renderBuffers);
-			this.resourceManager.registerReloadListener(this.levelRenderer);
-			this.createSearchTrees();
-			this.resourceManager.registerReloadListener(this.searchRegistry);
-			this.particleEngine = new ParticleEngine(this.level, this.textureManager);
-			this.resourceManager.registerReloadListener(this.particleEngine);
-			this.paintingTextures = new PaintingTextureManager(this.textureManager);
-			this.resourceManager.registerReloadListener(this.paintingTextures);
-			this.mobEffectTextures = new MobEffectTextureManager(this.textureManager);
-			this.resourceManager.registerReloadListener(this.mobEffectTextures);
-			this.gui = new Gui(this);
-			this.debugRenderer = new DebugRenderer(this);
-			RenderSystem.setErrorCallback(this::onFullscreenError);
-			if (this.options.fullscreen && !this.window.isFullscreen()) {
-				this.window.toggleFullScreen();
-				this.options.fullscreen = this.window.isFullscreen();
-			}
-
-			this.window.updateVsync(this.options.enableVsync);
-			this.window.updateRawMouseInput(this.options.rawMouseInput);
-			this.window.setDefaultErrorCallback();
-			this.resizeDisplay();
-			if (string != null) {
-				this.setScreen(new ConnectScreen(new TitleScreen(), this, string, i));
-			} else {
-				this.setScreen(new TitleScreen(true));
-			}
-
-			LoadingOverlay.registerTextures(this);
-			List<Pack> list = (List<Pack>)this.resourcePackRepository.getSelected().stream().map(UnopenedPack::open).collect(Collectors.toList());
-			this.setOverlay(
-				new LoadingOverlay(
-					this,
-					this.resourceManager.createFullReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list),
-					optional -> Util.ifElse(optional, this::rollbackResourcePacks, () -> {
-							this.languageManager.reload(list);
-							if (SharedConstants.IS_RUNNING_IN_IDE) {
-								this.selfTest();
-							}
-						}),
-					false
-				)
-			);
+		this.selectMainFont(this.isEnforceUnicode());
+		this.resourceManager.registerReloadListener(new GrassColorReloadListener());
+		this.resourceManager.registerReloadListener(new FoliageColorReloadListener());
+		this.window.setErrorSection("Startup");
+		RenderSystem.setupDefaultState(0, 0, this.window.getWidth(), this.window.getHeight());
+		this.window.setErrorSection("Post startup");
+		this.blockColors = BlockColors.createDefault();
+		this.itemColors = ItemColors.createDefault(this.blockColors);
+		this.modelManager = new ModelManager(this.textureManager, this.blockColors, this.options.mipmapLevels);
+		this.resourceManager.registerReloadListener(this.modelManager);
+		this.itemRenderer = new ItemRenderer(this.textureManager, this.modelManager, this.itemColors);
+		this.entityRenderDispatcher = new EntityRenderDispatcher(this.textureManager, this.itemRenderer, this.resourceManager, this.font, this.options);
+		this.itemInHandRenderer = new ItemInHandRenderer(this);
+		this.resourceManager.registerReloadListener(this.itemRenderer);
+		this.renderBuffers = new RenderBuffers();
+		this.gameRenderer = new GameRenderer(this, this.resourceManager, this.renderBuffers);
+		this.resourceManager.registerReloadListener(this.gameRenderer);
+		this.blockRenderer = new BlockRenderDispatcher(this.modelManager.getBlockModelShaper(), this.blockColors);
+		this.resourceManager.registerReloadListener(this.blockRenderer);
+		this.levelRenderer = new LevelRenderer(this, this.renderBuffers);
+		this.resourceManager.registerReloadListener(this.levelRenderer);
+		this.createSearchTrees();
+		this.resourceManager.registerReloadListener(this.searchRegistry);
+		this.particleEngine = new ParticleEngine(this.level, this.textureManager);
+		this.resourceManager.registerReloadListener(this.particleEngine);
+		this.paintingTextures = new PaintingTextureManager(this.textureManager);
+		this.resourceManager.registerReloadListener(this.paintingTextures);
+		this.mobEffectTextures = new MobEffectTextureManager(this.textureManager);
+		this.resourceManager.registerReloadListener(this.mobEffectTextures);
+		this.gui = new Gui(this);
+		this.debugRenderer = new DebugRenderer(this);
+		RenderSystem.setErrorCallback(this::onFullscreenError);
+		if (this.options.fullscreen && !this.window.isFullscreen()) {
+			this.window.toggleFullScreen();
+			this.options.fullscreen = this.window.isFullscreen();
 		}
+
+		this.window.updateVsync(this.options.enableVsync);
+		this.window.updateRawMouseInput(this.options.rawMouseInput);
+		this.window.setDefaultErrorCallback();
+		this.resizeDisplay();
+		if (string != null) {
+			this.setScreen(new ConnectScreen(new TitleScreen(), this, string, i));
+		} else {
+			this.setScreen(new TitleScreen(true));
+		}
+
+		LoadingOverlay.registerTextures(this);
+		List<Pack> list = (List<Pack>)this.resourcePackRepository.getSelected().stream().map(UnopenedPack::open).collect(Collectors.toList());
+		this.setOverlay(
+			new LoadingOverlay(
+				this,
+				this.resourceManager.createFullReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list),
+				optional -> Util.ifElse(optional, this::rollbackResourcePacks, () -> {
+						this.languageManager.reload(list);
+						if (SharedConstants.IS_RUNNING_IN_IDE) {
+							this.selfTest();
+						}
+					}),
+				false
+			)
+		);
 	}
 
 	public void updateTitle() {
@@ -581,6 +578,11 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.emergencySave();
 			crash(crashReport);
 		}
+	}
+
+	void selectMainFont(boolean bl) {
+		this.fontManager.setRenames(bl ? ImmutableMap.of(DEFAULT_FONT, UNIFORM_FONT) : ImmutableMap.of());
+		this.font.setBidirectional(this.languageManager.isBidirectional());
 	}
 
 	private void createSearchTrees() {
@@ -913,13 +915,13 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.profiler.popPush("gameRenderer");
 			this.gameRenderer.render(this.pause ? this.pausePartialTick : this.timer.partialTick, l, bl);
 			this.profiler.popPush("toasts");
-			this.toast.render();
+			this.toast.render(new PoseStack());
 			this.profiler.pop();
 		}
 
 		if (this.fpsPieResults != null) {
 			this.profiler.push("fpsPie");
-			this.renderFpsMeter(this.fpsPieResults);
+			this.renderFpsMeter(new PoseStack(), this.fpsPieResults);
 			this.profiler.pop();
 		}
 
@@ -1078,7 +1080,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}
 	}
 
-	private void renderFpsMeter(ProfileResults profileResults) {
+	private void renderFpsMeter(PoseStack poseStack, ProfileResults profileResults) {
 		List<ResultField> list = profileResults.getTimes(this.debugPath);
 		ResultField resultField = (ResultField)list.remove(0);
 		RenderSystem.clear(256, ON_OSX);
@@ -1154,9 +1156,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}
 
 		int m = 16777215;
-		this.font.drawShadow(string2, (float)(j - 160), (float)(k - 80 - 16), 16777215);
+		this.font.drawShadow(poseStack, string2, (float)(j - 160), (float)(k - 80 - 16), 16777215);
 		string2 = decimalFormat.format(resultField.globalPercentage) + "%";
-		this.font.drawShadow(string2, (float)(j + 160 - this.font.width(string2)), (float)(k - 80 - 16), 16777215);
+		this.font.drawShadow(poseStack, string2, (float)(j + 160 - this.font.width(string2)), (float)(k - 80 - 16), 16777215);
 
 		for (int r = 0; r < list.size(); r++) {
 			ResultField resultField3 = (ResultField)list.get(r);
@@ -1168,11 +1170,11 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			}
 
 			String string3 = stringBuilder.append(resultField3.name).toString();
-			this.font.drawShadow(string3, (float)(j - 160), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
+			this.font.drawShadow(poseStack, string3, (float)(j - 160), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
 			string3 = decimalFormat.format(resultField3.percentage) + "%";
-			this.font.drawShadow(string3, (float)(j + 160 - 50 - this.font.width(string3)), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
+			this.font.drawShadow(poseStack, string3, (float)(j + 160 - 50 - this.font.width(string3)), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
 			string3 = decimalFormat.format(resultField3.globalPercentage) + "%";
-			this.font.drawShadow(string3, (float)(j + 160 - this.font.width(string3)), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
+			this.font.drawShadow(poseStack, string3, (float)(j + 160 - this.font.width(string3)), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
 		}
 	}
 
@@ -1402,7 +1404,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.soundManager.tick(this.pause);
 		if (this.level != null) {
 			if (!this.pause) {
-				this.level.setSpawnSettings(this.level.getDifficulty() != Difficulty.PEACEFUL, true);
 				this.tutorial.tick();
 
 				try {
@@ -1543,28 +1544,31 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.continueAttack(this.screen == null && this.options.keyAttack.isDown() && this.mouseHandler.isMouseGrabbed());
 	}
 
-	public void selectLevel(String string, String string2, @Nullable LevelSettings levelSettings) {
+	public void selectLevel(String string, @Nullable LevelSettings levelSettings) {
 		this.clearLevel();
 
 		LevelStorageSource.LevelStorageAccess levelStorageAccess;
 		try {
 			levelStorageAccess = this.levelSource.createAccess(string);
-		} catch (IOException var13) {
-			LOGGER.warn("Failed to read level {} data", string, var13);
+		} catch (IOException var12) {
+			LOGGER.warn("Failed to read level {} data", string, var12);
 			SystemToast.onWorldAccessFailure(this, string);
 			this.setScreen(null);
 			return;
 		}
 
-		LevelStorage levelStorage = levelStorageAccess.selectLevel(null);
-		LevelData levelData = levelStorage.prepareLevel();
-		if (levelData == null && levelSettings != null) {
-			levelData = new LevelData(levelSettings, string);
-			levelStorage.saveLevelData(levelData);
-		}
+		WorldData worldData = levelStorageAccess.getDataTag();
+		String string2;
+		if (worldData == null) {
+			if (levelSettings == null) {
+				throw new IllegalStateException("Requested world creation without any settings");
+			}
 
-		if (levelSettings == null) {
-			levelSettings = new LevelSettings(levelData);
+			worldData = new PrimaryLevelData(levelSettings);
+			string2 = levelSettings.getLevelName();
+			levelStorageAccess.saveDataTag(worldData);
+		} else {
+			string2 = worldData.getLevelName();
 		}
 
 		this.progressListener.set(null);
@@ -1577,18 +1581,16 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			SkullBlockEntity.setProfileCache(gameProfileCache);
 			SkullBlockEntity.setSessionService(minecraftSessionService);
 			GameProfileCache.setUsesAuthentication(false);
-			this.singleplayerServer = new IntegratedServer(
-				this, levelStorageAccess, string2, levelSettings, minecraftSessionService, gameProfileRepository, gameProfileCache, i -> {
-					StoringChunkProgressListener storingChunkProgressListener = new StoringChunkProgressListener(i + 0);
-					storingChunkProgressListener.start();
-					this.progressListener.set(storingChunkProgressListener);
-					return new ProcessorChunkProgressListener(storingChunkProgressListener, this.progressTasks::add);
-				}
-			);
+			this.singleplayerServer = new IntegratedServer(this, levelStorageAccess, worldData, minecraftSessionService, gameProfileRepository, gameProfileCache, i -> {
+				StoringChunkProgressListener storingChunkProgressListener = new StoringChunkProgressListener(i + 0);
+				storingChunkProgressListener.start();
+				this.progressListener.set(storingChunkProgressListener);
+				return new ProcessorChunkProgressListener(storingChunkProgressListener, this.progressTasks::add);
+			});
 			this.singleplayerServer.forkAndRun();
 			this.isLocalServer = true;
-		} catch (Throwable var12) {
-			CrashReport crashReport = CrashReport.forThrowable(var12, "Starting integrated server");
+		} catch (Throwable var11) {
+			CrashReport crashReport = CrashReport.forThrowable(var11, "Starting integrated server");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Starting integrated server");
 			crashReportCategory.setDetail("Level ID", string);
 			crashReportCategory.setDetail("Level Name", string2);
@@ -1609,7 +1611,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 			try {
 				Thread.sleep(16L);
-			} catch (InterruptedException var11) {
+			} catch (InterruptedException var10) {
 			}
 
 			if (this.delayedCrash != null) {
@@ -2035,50 +2037,25 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		return this.soundManager;
 	}
 
-	public MusicManager.Music getSituationalMusic() {
+	public Music getSituationalMusic() {
 		if (this.screen instanceof WinScreen) {
-			return MusicManager.Music.CREDITS;
-		} else if (this.player == null) {
-			return MusicManager.Music.MENU;
-		} else {
-			if (this.player.level.dimension instanceof NetherDimension) {
-				Biome biome = this.player.level.getBiomeManager().getNoiseBiomeAtPosition(this.player.getX(), this.player.getY(), this.player.getZ());
-				if (biome == Biomes.BASALT_DELTAS) {
-					return MusicManager.Music.BASALT_DELTAS;
-				}
-
-				if (biome == Biomes.NETHER_WASTES) {
-					return MusicManager.Music.NETHER_WASTES;
-				}
-
-				if (biome == Biomes.SOUL_SAND_VALLEY) {
-					return MusicManager.Music.SOUL_SAND_VALLEY;
-				}
-
-				if (biome == Biomes.CRIMSON_FOREST) {
-					return MusicManager.Music.CRIMSON_FOREST;
-				}
-
-				if (biome == Biomes.WARPED_FOREST) {
-					return MusicManager.Music.WARPED_FOREST;
-				}
-			}
-
+			return Musics.CREDITS;
+		} else if (this.player != null) {
 			if (this.player.level.dimension instanceof TheEndDimension) {
-				return this.gui.getBossOverlay().shouldPlayMusic() ? MusicManager.Music.END_BOSS : MusicManager.Music.END;
+				return this.gui.getBossOverlay().shouldPlayMusic() ? Musics.END_BOSS : Musics.END;
 			} else {
 				Biome.BiomeCategory biomeCategory = this.player.level.getBiome(this.player.blockPosition()).getBiomeCategory();
-				if (!this.musicManager.isPlayingMusic(MusicManager.Music.UNDER_WATER)
-					&& (
-						!this.player.isUnderWater()
-							|| this.musicManager.isPlayingMusic(MusicManager.Music.GAME)
-							|| biomeCategory != Biome.BiomeCategory.OCEAN && biomeCategory != Biome.BiomeCategory.RIVER
-					)) {
-					return this.player.abilities.instabuild && this.player.abilities.mayfly ? MusicManager.Music.CREATIVE : MusicManager.Music.GAME;
+				if (!this.musicManager.isPlayingMusic(Musics.UNDER_WATER)
+					&& (!this.player.isUnderWater() || biomeCategory != Biome.BiomeCategory.OCEAN && biomeCategory != Biome.BiomeCategory.RIVER)) {
+					return this.player.abilities.instabuild && this.player.abilities.mayfly
+						? Musics.CREATIVE
+						: (Music)this.level.getBiomeManager().getNoiseBiomeAtPosition(this.player.blockPosition()).getBackgroundMusic().orElse(Musics.GAME);
 				} else {
-					return MusicManager.Music.UNDER_WATER;
+					return Musics.UNDER_WATER;
 				}
 			}
+		} else {
+			return Musics.MENU;
 		}
 	}
 
@@ -2190,10 +2167,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public ModelManager getModelManager() {
 		return this.modelManager;
-	}
-
-	public FontManager getFontManager() {
-		return this.fontManager;
 	}
 
 	public PaintingTextureManager getPaintingTextures() {

@@ -13,11 +13,13 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.LevelWriter;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
@@ -36,7 +38,6 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureRadiusCo
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.MegaTreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.MultiJigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
@@ -54,7 +55,6 @@ import net.minecraft.world.level.levelgen.feature.configurations.SeagrassFeature
 import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleRandomFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
@@ -103,14 +103,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 		"bastion_remnant", new BastionFeature(MultiJigsawConfiguration::deserialize)
 	);
 	public static final Feature<NoneFeatureConfiguration> NO_OP = register("no_op", new NoOpFeature(NoneFeatureConfiguration::deserialize));
-	public static final Feature<SmallTreeConfiguration> NORMAL_TREE = register("normal_tree", new TreeFeature(SmallTreeConfiguration::deserialize));
-	public static final Feature<SmallTreeConfiguration> FANCY_TREE = register("fancy_tree", new FancyTreeFeature(SmallTreeConfiguration::deserialize));
-	public static final Feature<TreeConfiguration> JUNGLE_GROUND_BUSH = register("jungle_ground_bush", new GroundBushFeature(TreeConfiguration::deserialize));
-	public static final Feature<MegaTreeConfiguration> DARK_OAK_TREE = register("dark_oak_tree", new DarkOakFeature(MegaTreeConfiguration::deserialize));
-	public static final Feature<MegaTreeConfiguration> MEGA_JUNGLE_TREE = register(
-		"mega_jungle_tree", new MegaJungleTreeFeature(MegaTreeConfiguration::deserialize)
-	);
-	public static final Feature<MegaTreeConfiguration> MEGA_SPRUCE_TREE = register("mega_spruce_tree", new MegaPineTreeFeature(MegaTreeConfiguration::deserialize));
+	public static final Feature<TreeConfiguration> TREE = register("tree", new TreeFeature(TreeConfiguration::deserialize));
 	public static final AbstractFlowerFeature<RandomPatchConfiguration> FLOWER = register(
 		"flower", new DefaultFlowerFeature(RandomPatchConfiguration::deserialize)
 	);
@@ -256,7 +249,15 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 		return block == Blocks.STONE || block == Blocks.GRANITE || block == Blocks.DIORITE || block == Blocks.ANDESITE;
 	}
 
-	protected static boolean isDirt(Block block) {
+	public static boolean isDirt(Block block) {
 		return block == Blocks.DIRT || block == Blocks.GRASS_BLOCK || block == Blocks.PODZOL || block == Blocks.COARSE_DIRT || block == Blocks.MYCELIUM;
+	}
+
+	public static boolean isGrassOrDirt(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
+		return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> isDirt(blockState.getBlock()));
+	}
+
+	public static boolean isAir(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
+		return levelSimulatedReader.isStateAtPosition(blockPos, BlockBehaviour.BlockStateBase::isAir);
 	}
 }

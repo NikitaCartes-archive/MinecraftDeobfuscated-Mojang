@@ -459,12 +459,14 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 
 	@Override
 	protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2) {
-		if (PiglinAi.isLovedItem(itemStack2.getItem())) {
-			return false;
-		} else if (this.isAdult() && itemStack2.getItem() == Items.CROSSBOW) {
+		if (PiglinAi.isLovedItem(itemStack.getItem()) && PiglinAi.isLovedItem(itemStack2.getItem())) {
+			return super.canReplaceEqualItem(itemStack, itemStack2);
+		} else if (PiglinAi.isLovedItem(itemStack.getItem())) {
+			return true;
+		} else if (PiglinAi.isLovedItem(itemStack2.getItem())) {
 			return false;
 		} else {
-			return PiglinAi.isLovedItem(itemStack.getItem()) ? true : super.canReplaceCurrentItem(itemStack, itemStack2);
+			return this.isAdult() && itemStack2.getItem() == Items.CROSSBOW ? false : super.canReplaceCurrentItem(itemStack, itemStack2);
 		}
 	}
 

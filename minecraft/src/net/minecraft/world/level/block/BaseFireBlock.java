@@ -131,7 +131,7 @@ public abstract class BaseFireBlock extends Block {
 
 	@Override
 	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-		if (!entity.fireImmune() && (!(entity instanceof LivingEntity) || !EnchantmentHelper.hasFrostWalker((LivingEntity)entity)) && !entity.isInWaterOrRain()) {
+		if (!entity.fireImmune() && (!(entity instanceof LivingEntity) || !EnchantmentHelper.hasFrostWalker((LivingEntity)entity))) {
 			entity.setRemainingFireTicks(entity.getRemainingFireTicks() + 1);
 			if (entity.getRemainingFireTicks() == 0) {
 				entity.setSecondsOnFire(8);

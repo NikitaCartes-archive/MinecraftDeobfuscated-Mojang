@@ -13,13 +13,13 @@ import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.BookModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
@@ -47,9 +47,9 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 	}
 
 	@Override
-	protected void renderLabels(int i, int j) {
-		this.font.draw(this.title.getColoredString(), 12.0F, 5.0F, 4210752);
-		this.font.draw(this.inventory.getDisplayName().getColoredString(), 8.0F, (float)(this.imageHeight - 96 + 2), 4210752);
+	protected void renderLabels(PoseStack poseStack, int i, int j) {
+		this.font.draw(poseStack, this.title, 12.0F, 5.0F, 4210752);
+		this.font.draw(poseStack, this.inventory.getDisplayName(), 8.0F, (float)(this.imageHeight - 96 + 2), 4210752);
 	}
 
 	@Override
@@ -76,13 +76,13 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 	}
 
 	@Override
-	protected void renderBg(float f, int i, int j) {
+	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
 		Lighting.setupForFlatItems();
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.minecraft.getTextureManager().bind(ENCHANTING_TABLE_LOCATION);
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
-		this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
+		this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
 		RenderSystem.matrixMode(5889);
 		RenderSystem.pushMatrix();
 		RenderSystem.loadIdentity();
@@ -91,7 +91,6 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 		RenderSystem.translatef(-0.34F, 0.23F, 0.0F);
 		RenderSystem.multMatrix(Matrix4f.perspective(90.0, 1.3333334F, 9.0F, 80.0F));
 		RenderSystem.matrixMode(5888);
-		PoseStack poseStack = new PoseStack();
 		poseStack.pushPose();
 		PoseStack.Pose pose = poseStack.last();
 		pose.pose().setIdentity();
@@ -150,45 +149,43 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 			int u = this.menu.costs[r];
 			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			if (u == 0) {
-				this.blit(s, l + 14 + 19 * r, 0, 185, 108, 19);
+				this.blit(poseStack, s, l + 14 + 19 * r, 0, 185, 108, 19);
 			} else {
 				String string = "" + u;
 				int v = 86 - this.font.width(string);
-				String string2 = EnchantmentNames.getInstance().getRandomName(this.font, v);
-				Font font = this.minecraft.getFontManager().get(Minecraft.ALT_FONT);
+				Component component = EnchantmentNames.getInstance().getRandomName(this.font, v);
 				int w = 6839882;
 				if ((q < r + 1 || this.minecraft.player.experienceLevel < u) && !this.minecraft.player.abilities.instabuild) {
-					this.blit(s, l + 14 + 19 * r, 0, 185, 108, 19);
-					this.blit(s + 1, l + 15 + 19 * r, 16 * r, 239, 16, 16);
-					font.drawWordWrap(string2, t, l + 16 + 19 * r, v, (w & 16711422) >> 1);
+					this.blit(poseStack, s, l + 14 + 19 * r, 0, 185, 108, 19);
+					this.blit(poseStack, s + 1, l + 15 + 19 * r, 16 * r, 239, 16, 16);
+					this.font.drawWordWrap(component, t, l + 16 + 19 * r, v, (w & 16711422) >> 1);
 					w = 4226832;
 				} else {
 					int x = i - (k + 60);
 					int y = j - (l + 14 + 19 * r);
 					if (x >= 0 && y >= 0 && x < 108 && y < 19) {
-						this.blit(s, l + 14 + 19 * r, 0, 204, 108, 19);
+						this.blit(poseStack, s, l + 14 + 19 * r, 0, 204, 108, 19);
 						w = 16777088;
 					} else {
-						this.blit(s, l + 14 + 19 * r, 0, 166, 108, 19);
+						this.blit(poseStack, s, l + 14 + 19 * r, 0, 166, 108, 19);
 					}
 
-					this.blit(s + 1, l + 15 + 19 * r, 16 * r, 223, 16, 16);
-					font.drawWordWrap(string2, t, l + 16 + 19 * r, v, w);
+					this.blit(poseStack, s + 1, l + 15 + 19 * r, 16 * r, 223, 16, 16);
+					this.font.drawWordWrap(component, t, l + 16 + 19 * r, v, w);
 					w = 8453920;
 				}
 
-				font = this.minecraft.font;
-				font.drawShadow(string, (float)(t + 86 - font.width(string)), (float)(l + 16 + 19 * r + 7), w);
+				this.font.drawShadow(poseStack, string, (float)(t + 86 - this.font.width(string)), (float)(l + 16 + 19 * r + 7), w);
 			}
 		}
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
+	public void render(PoseStack poseStack, int i, int j, float f) {
 		f = this.minecraft.getFrameTime();
-		this.renderBackground();
-		super.render(i, j, f);
-		this.renderTooltip(i, j);
+		this.renderBackground(poseStack);
+		super.render(poseStack, i, j, f);
+		this.renderTooltip(poseStack, i, j);
 		boolean bl = this.minecraft.player.abilities.instabuild;
 		int k = this.menu.getGoldCount();
 
@@ -198,33 +195,36 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 			int n = this.menu.levelClue[l];
 			int o = l + 1;
 			if (this.isHovering(60, 14 + 19 * l, 108, 17, (double)i, (double)j) && m > 0 && n >= 0 && enchantment != null) {
-				List<String> list = Lists.<String>newArrayList();
-				list.add("" + ChatFormatting.WHITE + ChatFormatting.ITALIC + I18n.get("container.enchant.clue", enchantment.getFullname(n).getColoredString()));
+				List<Component> list = Lists.<Component>newArrayList();
+				list.add(
+					new TranslatableComponent("container.enchant.clue", enchantment.getFullname(n))
+						.withStyle(new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.ITALIC})
+				);
 				if (!bl) {
-					list.add("");
+					list.add(TextComponent.EMPTY);
 					if (this.minecraft.player.experienceLevel < m) {
-						list.add(ChatFormatting.RED + I18n.get("container.enchant.level.requirement", this.menu.costs[l]));
+						list.add(new TranslatableComponent("container.enchant.level.requirement", this.menu.costs[l]).withStyle(ChatFormatting.RED));
 					} else {
-						String string;
+						MutableComponent mutableComponent;
 						if (o == 1) {
-							string = I18n.get("container.enchant.lapis.one");
+							mutableComponent = new TranslatableComponent("container.enchant.lapis.one");
 						} else {
-							string = I18n.get("container.enchant.lapis.many", o);
+							mutableComponent = new TranslatableComponent("container.enchant.lapis.many", o);
 						}
 
-						ChatFormatting chatFormatting = k >= o ? ChatFormatting.GRAY : ChatFormatting.RED;
-						list.add(chatFormatting + "" + string);
+						list.add(mutableComponent.withStyle(k >= o ? ChatFormatting.GRAY : ChatFormatting.RED));
+						MutableComponent mutableComponent2;
 						if (o == 1) {
-							string = I18n.get("container.enchant.level.one");
+							mutableComponent2 = new TranslatableComponent("container.enchant.level.one");
 						} else {
-							string = I18n.get("container.enchant.level.many", o);
+							mutableComponent2 = new TranslatableComponent("container.enchant.level.many", o);
 						}
 
-						list.add(ChatFormatting.GRAY + "" + string);
+						list.add(mutableComponent2.withStyle(ChatFormatting.GRAY));
 					}
 				}
 
-				this.renderTooltip(list, i, j);
+				this.renderTooltip(poseStack, list, i, j);
 				break;
 			}
 		}

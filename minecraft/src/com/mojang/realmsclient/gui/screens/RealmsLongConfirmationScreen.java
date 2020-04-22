@@ -1,43 +1,42 @@
 package com.mojang.realmsclient.gui.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
 
 @Environment(EnvType.CLIENT)
 public class RealmsLongConfirmationScreen extends RealmsScreen {
 	private final RealmsLongConfirmationScreen.Type type;
-	private final String line2;
-	private final String line3;
+	private final Component line2;
+	private final Component line3;
 	protected final BooleanConsumer callback;
-	protected final String yesButton;
-	protected final String noButton;
-	private final String okButton;
 	private final boolean yesNoQuestion;
 
-	public RealmsLongConfirmationScreen(BooleanConsumer booleanConsumer, RealmsLongConfirmationScreen.Type type, String string, String string2, boolean bl) {
+	public RealmsLongConfirmationScreen(
+		BooleanConsumer booleanConsumer, RealmsLongConfirmationScreen.Type type, Component component, Component component2, boolean bl
+	) {
 		this.callback = booleanConsumer;
 		this.type = type;
-		this.line2 = string;
-		this.line3 = string2;
+		this.line2 = component;
+		this.line3 = component2;
 		this.yesNoQuestion = bl;
-		this.yesButton = I18n.get("gui.yes");
-		this.noButton = I18n.get("gui.no");
-		this.okButton = I18n.get("mco.gui.ok");
 	}
 
 	@Override
 	public void init() {
-		NarrationHelper.now(this.type.text, this.line2, this.line3);
+		NarrationHelper.now(this.type.text, this.line2.getString(), this.line3.getString());
 		if (this.yesNoQuestion) {
-			this.addButton(new Button(this.width / 2 - 105, row(8), 100, 20, this.yesButton, button -> this.callback.accept(true)));
-			this.addButton(new Button(this.width / 2 + 5, row(8), 100, 20, this.noButton, button -> this.callback.accept(false)));
+			this.addButton(new Button(this.width / 2 - 105, row(8), 100, 20, CommonComponents.GUI_YES, button -> this.callback.accept(true)));
+			this.addButton(new Button(this.width / 2 + 5, row(8), 100, 20, CommonComponents.GUI_NO, button -> this.callback.accept(false)));
 		} else {
-			this.addButton(new Button(this.width / 2 - 50, row(8), 100, 20, this.okButton, button -> this.callback.accept(true)));
+			this.addButton(new Button(this.width / 2 - 50, row(8), 100, 20, new TranslatableComponent("mco.gui.ok"), button -> this.callback.accept(true)));
 		}
 	}
 
@@ -52,12 +51,12 @@ public class RealmsLongConfirmationScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
-		this.drawCenteredString(this.font, this.type.text, this.width / 2, row(2), this.type.colorCode);
-		this.drawCenteredString(this.font, this.line2, this.width / 2, row(4), 16777215);
-		this.drawCenteredString(this.font, this.line3, this.width / 2, row(6), 16777215);
-		super.render(i, j, f);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		this.drawCenteredString(poseStack, this.font, this.type.text, this.width / 2, row(2), this.type.colorCode);
+		this.drawCenteredString(poseStack, this.font, this.line2, this.width / 2, row(4), 16777215);
+		this.drawCenteredString(poseStack, this.font, this.line3, this.width / 2, row(6), 16777215);
+		super.render(poseStack, i, j, f);
 	}
 
 	@Environment(EnvType.CLIENT)

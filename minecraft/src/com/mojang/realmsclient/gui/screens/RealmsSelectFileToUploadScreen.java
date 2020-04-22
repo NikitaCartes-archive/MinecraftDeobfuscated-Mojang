@@ -1,6 +1,7 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -14,6 +15,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsObjectSelectionList;
@@ -70,20 +74,24 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 			this.loadLevelList();
 		} catch (Exception var2) {
 			LOGGER.error("Couldn't load level list", (Throwable)var2);
-			this.minecraft.setScreen(new RealmsGenericErrorScreen("Unable to load worlds", var2.getMessage(), this.lastScreen));
+			this.minecraft.setScreen(new RealmsGenericErrorScreen(new TextComponent("Unable to load worlds"), new TextComponent(var2.getMessage()), this.lastScreen));
 			return;
 		}
 
 		this.worldLang = I18n.get("selectWorld.world");
 		this.conversionLang = I18n.get("selectWorld.conversion");
 		this.addWidget(this.worldSelectionList);
-		this.uploadButton = this.addButton(new Button(this.width / 2 - 154, this.height - 32, 153, 20, I18n.get("mco.upload.button.name"), button -> this.upload()));
+		this.uploadButton = this.addButton(
+			new Button(this.width / 2 - 154, this.height - 32, 153, 20, new TranslatableComponent("mco.upload.button.name"), button -> this.upload())
+		);
 		this.uploadButton.active = this.selectedWorld >= 0 && this.selectedWorld < this.levelList.size();
-		this.addButton(new Button(this.width / 2 + 6, this.height - 32, 153, 20, I18n.get("gui.back"), button -> this.minecraft.setScreen(this.lastScreen)));
-		this.titleLabel = this.addWidget(new RealmsLabel(I18n.get("mco.upload.select.world.title"), this.width / 2, 13, 16777215));
-		this.subtitleLabel = this.addWidget(new RealmsLabel(I18n.get("mco.upload.select.world.subtitle"), this.width / 2, row(-1), 10526880));
+		this.addButton(new Button(this.width / 2 + 6, this.height - 32, 153, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)));
+		this.titleLabel = this.addWidget(new RealmsLabel(new TranslatableComponent("mco.upload.select.world.title"), this.width / 2, 13, 16777215));
+		this.subtitleLabel = this.addWidget(new RealmsLabel(new TranslatableComponent("mco.upload.select.world.subtitle"), this.width / 2, row(-1), 10526880));
 		if (this.levelList.isEmpty()) {
-			this.noWorldsLabel = this.addWidget(new RealmsLabel(I18n.get("mco.upload.select.world.none"), this.width / 2, this.height / 2 - 20, 16777215));
+			this.noWorldsLabel = this.addWidget(
+				new RealmsLabel(new TranslatableComponent("mco.upload.select.world.none"), this.width / 2, this.height / 2 - 20, 16777215)
+			);
 		} else {
 			this.noWorldsLabel = null;
 		}
@@ -104,16 +112,16 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
-		this.worldSelectionList.render(i, j, f);
-		this.titleLabel.render(this);
-		this.subtitleLabel.render(this);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		this.worldSelectionList.render(poseStack, i, j, f);
+		this.titleLabel.render(this, poseStack);
+		this.subtitleLabel.render(this, poseStack);
 		if (this.noWorldsLabel != null) {
-			this.noWorldsLabel.render(this);
+			this.noWorldsLabel.render(this, poseStack);
 		}
 
-		super.render(i, j, f);
+		super.render(poseStack, i, j, f);
 	}
 
 	@Override
@@ -143,8 +151,8 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			this.renderItem(this.levelSummary, i, k, j);
+		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			this.renderItem(poseStack, this.levelSummary, i, k, j);
 		}
 
 		@Override
@@ -153,7 +161,7 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 			return true;
 		}
 
-		protected void renderItem(LevelSummary levelSummary, int i, int j, int k) {
+		protected void renderItem(PoseStack poseStack, LevelSummary levelSummary, int i, int j, int k) {
 			String string = levelSummary.getLevelName();
 			if (string == null || string.isEmpty()) {
 				string = RealmsSelectFileToUploadScreen.this.worldLang + " " + (i + 1);
@@ -176,9 +184,9 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 				}
 			}
 
-			RealmsSelectFileToUploadScreen.this.font.draw(string, (float)(j + 2), (float)(k + 1), 16777215);
-			RealmsSelectFileToUploadScreen.this.font.draw(string2, (float)(j + 2), (float)(k + 12), 8421504);
-			RealmsSelectFileToUploadScreen.this.font.draw(string3, (float)(j + 2), (float)(k + 12 + 10), 8421504);
+			RealmsSelectFileToUploadScreen.this.font.draw(poseStack, string, (float)(j + 2), (float)(k + 1), 16777215);
+			RealmsSelectFileToUploadScreen.this.font.draw(poseStack, string2, (float)(j + 2), (float)(k + 12), 8421504);
+			RealmsSelectFileToUploadScreen.this.font.draw(poseStack, string3, (float)(j + 2), (float)(k + 12 + 10), 8421504);
 		}
 	}
 
@@ -209,8 +217,8 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 		}
 
 		@Override
-		public void renderBackground() {
-			RealmsSelectFileToUploadScreen.this.renderBackground();
+		public void renderBackground(PoseStack poseStack) {
+			RealmsSelectFileToUploadScreen.this.renderBackground(poseStack);
 		}
 
 		@Override

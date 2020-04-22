@@ -609,7 +609,7 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropSelf(Blocks.SOUL_SOIL);
 		this.dropSelf(Blocks.BASALT);
 		this.dropSelf(Blocks.POLISHED_BASALT);
-		this.dropSelf(Blocks.SOUL_FIRE_TORCH);
+		this.dropSelf(Blocks.SOUL_TORCH);
 		this.dropSelf(Blocks.CARVED_PUMPKIN);
 		this.dropSelf(Blocks.JACK_O_LANTERN);
 		this.dropSelf(Blocks.REPEATER);
@@ -1102,7 +1102,7 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.add(Blocks.STONECUTTER, BlockLoot::createNameableBlockEntityTable);
 		this.add(Blocks.BELL, BlockLoot::createSingleItemTable);
 		this.add(Blocks.LANTERN, BlockLoot::createSingleItemTable);
-		this.add(Blocks.SOUL_FIRE_LANTERN, BlockLoot::createSingleItemTable);
+		this.add(Blocks.SOUL_LANTERN, BlockLoot::createSingleItemTable);
 		this.add(Blocks.SHULKER_BOX, BlockLoot::createShulkerBoxDrop);
 		this.add(Blocks.BLACK_SHULKER_BOX, BlockLoot::createShulkerBoxDrop);
 		this.add(Blocks.BLUE_SHULKER_BOX, BlockLoot::createShulkerBoxDrop);

@@ -1,9 +1,10 @@
 package net.minecraft.client.gui.components;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Queues;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.math.Matrix4f;
-import java.util.ArrayDeque;
+import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -14,7 +15,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.ChatVisiblity;
@@ -28,7 +28,7 @@ public class ChatComponent extends GuiComponent {
 	private final List<String> recentChat = Lists.<String>newArrayList();
 	private final List<GuiMessage> allMessages = Lists.<GuiMessage>newArrayList();
 	private final List<GuiMessage> trimmedMessages = Lists.<GuiMessage>newArrayList();
-	private final ArrayDeque<Component> chatQueue = new ArrayDeque();
+	private final Deque<Component> chatQueue = Queues.<Component>newArrayDeque();
 	private int chatScrollbarPos;
 	private boolean newMessageSinceScroll;
 	private long lastMessage = 0L;
@@ -37,8 +37,8 @@ public class ChatComponent extends GuiComponent {
 		this.minecraft = minecraft;
 	}
 
-	public void render(int i) {
-		if (this.isChatVisible()) {
+	public void render(PoseStack poseStack, int i) {
+		if (!this.isChatHidden()) {
 			this.processPendingMessages();
 			int j = this.getLinesPerPage();
 			int k = this.trimmedMessages.size();
@@ -58,7 +58,8 @@ public class ChatComponent extends GuiComponent {
 				double g = 9.0 * (this.minecraft.options.chatLineSpacing + 1.0);
 				double h = -8.0 * (this.minecraft.options.chatLineSpacing + 1.0) + 4.0 * this.minecraft.options.chatLineSpacing;
 				int m = 0;
-				Matrix4f matrix4f = Matrix4f.createTranslateMatrix(0.0F, 0.0F, -100.0F);
+				poseStack.pushPose();
+				poseStack.translate(0.0, 0.0, -100.0);
 
 				for (int n = 0; n + this.chatScrollbarPos < this.trimmedMessages.size() && n < j; n++) {
 					GuiMessage guiMessage = (GuiMessage)this.trimmedMessages.get(n + this.chatScrollbarPos);
@@ -72,10 +73,9 @@ public class ChatComponent extends GuiComponent {
 							if (q > 3) {
 								int s = 0;
 								double t = (double)(-n) * g;
-								fill(matrix4f, -2, (int)(t - g), 0 + l + 4, (int)t, r << 24);
-								String string = guiMessage.getMessage().getColoredString();
+								fill(poseStack, -2, (int)(t - g), 0 + l + 4, (int)t, r << 24);
 								RenderSystem.enableBlend();
-								this.minecraft.font.drawShadow(string, 0.0F, (float)((int)(t + h)), 16777215 + (q << 24));
+								this.minecraft.font.drawShadow(poseStack, guiMessage.getMessage(), 0.0F, (float)((int)(t + h)), 16777215 + (q << 24));
 								RenderSystem.disableAlphaTest();
 								RenderSystem.disableBlend();
 							}
@@ -86,14 +86,14 @@ public class ChatComponent extends GuiComponent {
 				if (!this.chatQueue.isEmpty()) {
 					int nx = (int)(128.0 * e);
 					int u = (int)(255.0 * f);
-					fill(matrix4f, -2, 0, l + 4, 9, u << 24);
-					String string2 = new TranslatableComponent("chat.queue", this.chatQueue.size()).getColoredString();
+					fill(poseStack, -2, 0, l + 4, 9, u << 24);
 					RenderSystem.enableBlend();
-					this.minecraft.font.drawShadow(string2, 0.0F, 1.0F, 16777215 + (nx << 24));
+					this.minecraft.font.drawShadow(poseStack, new TranslatableComponent("chat.queue", this.chatQueue.size()), 0.0F, 1.0F, 16777215 + (nx << 24));
 					RenderSystem.disableAlphaTest();
 					RenderSystem.disableBlend();
 				}
 
+				poseStack.popPose();
 				if (bl) {
 					int nx = 9;
 					RenderSystem.translatef(-3.0F, 0.0F, 0.0F);
@@ -104,8 +104,8 @@ public class ChatComponent extends GuiComponent {
 					if (u != o) {
 						int q = v > 0 ? 170 : 96;
 						int r = this.newMessageSinceScroll ? 13382451 : 3355562;
-						fill(0, -v, 2, -v - w, r + (q << 24));
-						fill(2, -v, 1, -v - w, 13421772 + (q << 24));
+						fill(poseStack, 0, -v, 2, -v - w, r + (q << 24));
+						fill(poseStack, 2, -v, 1, -v - w, 13421772 + (q << 24));
 					}
 				}
 
@@ -114,8 +114,8 @@ public class ChatComponent extends GuiComponent {
 		}
 	}
 
-	private boolean isChatVisible() {
-		return this.minecraft.options.chatVisibility != ChatVisiblity.HIDDEN;
+	private boolean isChatHidden() {
+		return this.minecraft.options.chatVisibility == ChatVisiblity.HIDDEN;
 	}
 
 	private static double getTimeFactor(int i) {
@@ -149,7 +149,7 @@ public class ChatComponent extends GuiComponent {
 		}
 
 		int k = Mth.floor((double)this.getWidth() / this.getScale());
-		List<Component> list = ComponentRenderUtils.wrapComponents(component, k, this.minecraft.font, false, false);
+		List<Component> list = ComponentRenderUtils.wrapComponents(component, k, this.minecraft.font);
 		boolean bl2 = this.isChatFocused();
 
 		for (Component component2 : list) {
@@ -213,7 +213,7 @@ public class ChatComponent extends GuiComponent {
 	}
 
 	public boolean handleChatQueueClicked(double d, double e) {
-		if (this.isChatFocused() && !this.minecraft.options.hideGui && this.isChatVisible() && !this.chatQueue.isEmpty()) {
+		if (this.isChatFocused() && !this.minecraft.options.hideGui && !this.isChatHidden() && !this.chatQueue.isEmpty()) {
 			double f = d - 2.0;
 			double g = (double)this.minecraft.getWindow().getGuiScaledHeight() - e - 40.0;
 			if (f <= (double)Mth.floor((double)this.getWidth() / this.getScale()) && g < 0.0 && g > (double)Mth.floor(-9.0 * this.getScale())) {
@@ -230,7 +230,7 @@ public class ChatComponent extends GuiComponent {
 
 	@Nullable
 	public Component getClickedComponentAt(double d, double e) {
-		if (this.isChatFocused() && !this.minecraft.options.hideGui && this.isChatVisible()) {
+		if (this.isChatFocused() && !this.minecraft.options.hideGui && !this.isChatHidden()) {
 			double f = d - 2.0;
 			double g = (double)this.minecraft.getWindow().getGuiScaledHeight() - e - 40.0;
 			f = (double)Mth.floor(f / this.getScale());
@@ -241,22 +241,11 @@ public class ChatComponent extends GuiComponent {
 					int j = (int)(g / 9.0 + (double)this.chatScrollbarPos);
 					if (j >= 0 && j < this.trimmedMessages.size()) {
 						GuiMessage guiMessage = (GuiMessage)this.trimmedMessages.get(j);
-						int k = 0;
-
-						for (Component component : guiMessage.getMessage()) {
-							if (component instanceof TextComponent) {
-								k += this.minecraft.font.width(ComponentRenderUtils.stripColor(((TextComponent)component).getText(), false));
-								if ((double)k > f) {
-									return component;
-								}
-							}
-						}
+						return this.minecraft.font.getSplitter().componentAtWidth(guiMessage.getMessage(), (int)f);
 					}
-
-					return null;
-				} else {
-					return null;
 				}
+
+				return null;
 			} else {
 				return null;
 			}

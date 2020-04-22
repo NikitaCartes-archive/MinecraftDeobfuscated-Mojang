@@ -4,7 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 
 @Environment(EnvType.CLIENT)
@@ -16,7 +16,9 @@ public class InBedChatScreen extends ChatScreen {
 	@Override
 	protected void init() {
 		super.init();
-		this.addButton(new Button(this.width / 2 - 100, this.height - 40, 200, 20, I18n.get("multiplayer.stopSleeping"), button -> this.sendWakeUp()));
+		this.addButton(
+			new Button(this.width / 2 - 100, this.height - 40, 200, 20, new TranslatableComponent("multiplayer.stopSleeping"), button -> this.sendWakeUp())
+		);
 	}
 
 	@Override

@@ -35,8 +35,8 @@ public class SelectorComponent extends BaseComponent implements ContextAwareComp
 	}
 
 	@Override
-	public Component resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
-		return (Component)(commandSourceStack != null && this.selector != null
+	public MutableComponent resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
+		return (MutableComponent)(commandSourceStack != null && this.selector != null
 			? EntitySelector.joinNames(this.selector.findEntities(commandSourceStack))
 			: new TextComponent(""));
 	}
@@ -46,7 +46,7 @@ public class SelectorComponent extends BaseComponent implements ContextAwareComp
 		return this.pattern;
 	}
 
-	public SelectorComponent copy() {
+	public SelectorComponent toMutable() {
 		return new SelectorComponent(this.pattern);
 	}
 

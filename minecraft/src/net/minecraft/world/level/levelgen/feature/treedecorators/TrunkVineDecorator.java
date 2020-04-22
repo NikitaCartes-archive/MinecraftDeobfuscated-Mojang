@@ -10,7 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.VineBlock;
-import net.minecraft.world.level.levelgen.feature.AbstractTreeFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class TrunkVineDecorator extends TreeDecorator {
@@ -27,28 +27,28 @@ public class TrunkVineDecorator extends TreeDecorator {
 		list.forEach(blockPos -> {
 			if (random.nextInt(3) > 0) {
 				BlockPos blockPos2 = blockPos.west();
-				if (AbstractTreeFeature.isAir(levelAccessor, blockPos2)) {
+				if (Feature.isAir(levelAccessor, blockPos2)) {
 					this.placeVine(levelAccessor, blockPos2, VineBlock.EAST, set, boundingBox);
 				}
 			}
 
 			if (random.nextInt(3) > 0) {
 				BlockPos blockPos2 = blockPos.east();
-				if (AbstractTreeFeature.isAir(levelAccessor, blockPos2)) {
+				if (Feature.isAir(levelAccessor, blockPos2)) {
 					this.placeVine(levelAccessor, blockPos2, VineBlock.WEST, set, boundingBox);
 				}
 			}
 
 			if (random.nextInt(3) > 0) {
 				BlockPos blockPos2 = blockPos.north();
-				if (AbstractTreeFeature.isAir(levelAccessor, blockPos2)) {
+				if (Feature.isAir(levelAccessor, blockPos2)) {
 					this.placeVine(levelAccessor, blockPos2, VineBlock.SOUTH, set, boundingBox);
 				}
 			}
 
 			if (random.nextInt(3) > 0) {
 				BlockPos blockPos2 = blockPos.south();
-				if (AbstractTreeFeature.isAir(levelAccessor, blockPos2)) {
+				if (Feature.isAir(levelAccessor, blockPos2)) {
 					this.placeVine(levelAccessor, blockPos2, VineBlock.NORTH, set, boundingBox);
 				}
 			}

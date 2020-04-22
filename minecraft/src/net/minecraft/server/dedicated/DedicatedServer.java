@@ -2,13 +2,10 @@ package net.minecraft.server.dedicated;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.JsonOps;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,7 +16,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
@@ -44,10 +40,8 @@ import net.minecraft.server.rcon.RconConsoleSource;
 import net.minecraft.server.rcon.thread.QueryThreadGs4;
 import net.minecraft.server.rcon.thread.RconThread;
 import net.minecraft.util.Crypt;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.util.monitoring.jmx.MinecraftServerStatistics;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.Snooper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
@@ -55,11 +49,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.WorldData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -71,12 +64,12 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	private final RconConsoleSource rconConsoleSource;
 	private RconThread rconThread;
 	private final DedicatedServerSettings settings;
-	private GameType gameType;
 	@Nullable
 	private MinecraftServerGui gui;
 
 	public DedicatedServer(
 		LevelStorageSource.LevelStorageAccess levelStorageAccess,
+		WorldData worldData,
 		DedicatedServerSettings dedicatedServerSettings,
 		DataFixer dataFixer,
 		MinecraftSessionService minecraftSessionService,
@@ -86,6 +79,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	) {
 		super(
 			levelStorageAccess,
+			worldData,
 			Proxy.NO_PROXY,
 			dataFixer,
 			new Commands(true),
@@ -148,8 +142,6 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 			this.setLocalIp(dedicatedServerProperties.serverIp);
 		}
 
-		this.setAnimals(dedicatedServerProperties.spawnAnimals);
-		this.setNpcsEnabled(dedicatedServerProperties.spawnNpcs);
 		this.setPvpAllowed(dedicatedServerProperties.pvp);
 		this.setFlightAllowed(dedicatedServerProperties.allowFlight);
 		this.setResourcePack(dedicatedServerProperties.resourcePack, this.getPackHash());
@@ -157,8 +149,8 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 		this.setForceGameType(dedicatedServerProperties.forceGameMode);
 		super.setPlayerIdleTimeout(dedicatedServerProperties.playerIdleTimeout.get());
 		this.setEnforceWhitelist(dedicatedServerProperties.enforceWhitelist);
-		this.gameType = dedicatedServerProperties.gamemode;
-		LOGGER.info("Default game type: {}", this.gameType);
+		this.worldData.setGameType(dedicatedServerProperties.gamemode);
+		LOGGER.info("Default game type: {}", dedicatedServerProperties.gamemode);
 		InetAddress inetAddress = null;
 		if (!this.getLocalIp().isEmpty()) {
 			inetAddress = InetAddress.getByName(this.getLocalIp());
@@ -174,9 +166,9 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 
 		try {
 			this.getConnection().startTcpServerListener(inetAddress, this.getPort());
-		} catch (IOException var18) {
+		} catch (IOException var10) {
 			LOGGER.warn("**** FAILED TO BIND TO PORT!");
-			LOGGER.warn("The exception was: {}", var18.toString());
+			LOGGER.warn("The exception was: {}", var10.toString());
 			LOGGER.warn("Perhaps a server is already running on that port?");
 			return false;
 		}
@@ -197,34 +189,17 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 		if (!OldUsersConverter.serverReadyAfterUserconversion(this)) {
 			return false;
 		} else {
-			this.setPlayerList(new DedicatedPlayerList(this));
+			this.setPlayerList(new DedicatedPlayerList(this, this.playerDataStorage));
 			long l = Util.getNanos();
-			String string = dedicatedServerProperties.levelSeed;
-			String string2 = dedicatedServerProperties.generatorSettings;
-			long m = new Random().nextLong();
-			if (!string.isEmpty()) {
-				try {
-					long n = Long.parseLong(string);
-					if (n != 0L) {
-						m = n;
-					}
-				} catch (NumberFormatException var17) {
-					m = (long)string.hashCode();
-				}
-			}
-
-			LevelType levelType = dedicatedServerProperties.levelType;
 			this.setMaxBuildHeight(dedicatedServerProperties.maxBuildHeight);
 			SkullBlockEntity.setProfileCache(this.getProfileCache());
 			SkullBlockEntity.setSessionService(this.getSessionService());
 			GameProfileCache.setUsesAuthentication(this.usesAuthentication());
 			LOGGER.info("Preparing level \"{}\"", this.getLevelIdName());
-			JsonObject jsonObject = !string2.isEmpty() ? GsonHelper.parse(string2) : new JsonObject();
-			ChunkGeneratorProvider chunkGeneratorProvider = levelType.createProvider(new Dynamic<>(JsonOps.INSTANCE, jsonObject));
-			this.loadLevel(this.storageSource.getLevelId(), m, chunkGeneratorProvider);
-			long o = Util.getNanos() - l;
-			String string3 = String.format(Locale.ROOT, "%.3fs", (double)o / 1.0E9);
-			LOGGER.info("Done ({})! For help, type \"help\"", string3);
+			this.loadLevel();
+			long m = Util.getNanos() - l;
+			String string = String.format(Locale.ROOT, "%.3fs", (double)m / 1.0E9);
+			LOGGER.info("Done ({})! For help, type \"help\"", string);
 			if (dedicatedServerProperties.announcePlayerAchievements != null) {
 				this.getGameRules().getRule(GameRules.RULE_ANNOUNCE_ADVANCEMENTS).set(dedicatedServerProperties.announcePlayerAchievements, this);
 			}
@@ -258,6 +233,21 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 		}
 	}
 
+	@Override
+	public boolean isSpawningAnimals() {
+		return this.getProperties().spawnAnimals && super.isSpawningAnimals();
+	}
+
+	@Override
+	public boolean isSpawningMonsters() {
+		return this.settings.getProperties().spawnMonsters && super.isSpawningMonsters();
+	}
+
+	@Override
+	public boolean areNpcsEnabled() {
+		return this.settings.getProperties().spawnNpcs && super.areNpcsEnabled();
+	}
+
 	public String getPackHash() {
 		DedicatedServerProperties dedicatedServerProperties = this.settings.getProperties();
 		String string;
@@ -285,29 +275,13 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	}
 
 	@Override
-	public void setDefaultGameMode(GameType gameType) {
-		super.setDefaultGameMode(gameType);
-		this.gameType = gameType;
-	}
-
-	@Override
 	public DedicatedServerProperties getProperties() {
 		return this.settings.getProperties();
 	}
 
 	@Override
-	public boolean canGenerateStructures() {
-		return this.getProperties().generateStructures;
-	}
-
-	@Override
-	public GameType getDefaultGameType() {
-		return this.gameType;
-	}
-
-	@Override
-	public Difficulty getDefaultDifficulty() {
-		return this.getProperties().difficulty;
+	public void forceDifficulty() {
+		this.setDifficulty(this.getProperties().difficulty, true);
 	}
 
 	@Override
@@ -353,11 +327,6 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	@Override
 	public boolean isNetherEnabled() {
 		return this.getProperties().allowNether;
-	}
-
-	@Override
-	public boolean getSpawnMonsters() {
-		return this.getProperties().spawnMonsters;
 	}
 
 	@Override

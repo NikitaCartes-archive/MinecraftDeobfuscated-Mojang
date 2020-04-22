@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.screens.worldselection;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,12 +16,14 @@ import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.WorldData;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,25 +50,27 @@ public class EditWorldScreen extends Screen {
 	@Override
 	protected void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		Button button = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 24 + 5, 200, 20, I18n.get("selectWorld.edit.resetIcon"), buttonx -> {
-			FileUtils.deleteQuietly(this.levelAccess.getIconFile());
-			buttonx.active = false;
-		}));
+		Button button = this.addButton(
+			new Button(this.width / 2 - 100, this.height / 4 + 24 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.resetIcon"), buttonx -> {
+				FileUtils.deleteQuietly(this.levelAccess.getIconFile());
+				buttonx.active = false;
+			})
+		);
 		this.addButton(
 			new Button(
 				this.width / 2 - 100,
 				this.height / 4 + 48 + 5,
 				200,
 				20,
-				I18n.get("selectWorld.edit.openFolder"),
-				buttonx -> Util.getPlatform().openFile(this.levelAccess.getLevelPath().toFile())
+				new TranslatableComponent("selectWorld.edit.openFolder"),
+				buttonx -> Util.getPlatform().openFile(this.levelAccess.getLevelPath(LevelResource.ROOT).toFile())
 			)
 		);
-		this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 72 + 5, 200, 20, I18n.get("selectWorld.edit.backup"), buttonx -> {
+		this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 72 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.backup"), buttonx -> {
 			boolean bl = makeBackupAndShowToast(this.levelAccess);
 			this.callback.accept(!bl);
 		}));
-		this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 96 + 5, 200, 20, I18n.get("selectWorld.edit.backupFolder"), buttonx -> {
+		this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 96 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.backupFolder"), buttonx -> {
 			LevelStorageSource levelStorageSource = this.minecraft.getLevelSource();
 			Path path = levelStorageSource.getBackupPath();
 
@@ -83,7 +88,7 @@ public class EditWorldScreen extends Screen {
 				this.height / 4 + 120 + 5,
 				200,
 				20,
-				I18n.get("selectWorld.edit.optimize"),
+				new TranslatableComponent("selectWorld.edit.optimize"),
 				buttonx -> this.minecraft.setScreen(new BackupConfirmScreen(this, (bl, bl2) -> {
 						if (bl) {
 							makeBackupAndShowToast(this.levelAccess);
@@ -94,13 +99,13 @@ public class EditWorldScreen extends Screen {
 			)
 		);
 		this.renameButton = this.addButton(
-			new Button(this.width / 2 - 100, this.height / 4 + 144 + 5, 98, 20, I18n.get("selectWorld.edit.save"), buttonx -> this.onRename())
+			new Button(this.width / 2 - 100, this.height / 4 + 144 + 5, 98, 20, new TranslatableComponent("selectWorld.edit.save"), buttonx -> this.onRename())
 		);
-		this.addButton(new Button(this.width / 2 + 2, this.height / 4 + 144 + 5, 98, 20, I18n.get("gui.cancel"), buttonx -> this.callback.accept(false)));
+		this.addButton(new Button(this.width / 2 + 2, this.height / 4 + 144 + 5, 98, 20, CommonComponents.GUI_CANCEL, buttonx -> this.callback.accept(false)));
 		button.active = this.levelAccess.getIconFile().isFile();
-		LevelData levelData = this.levelAccess.getDataTag();
-		String string = levelData == null ? "" : levelData.getLevelName();
-		this.nameEdit = new EditBox(this.font, this.width / 2 - 100, 53, 200, 20, I18n.get("selectWorld.enterName"));
+		WorldData worldData = this.levelAccess.getDataTag();
+		String string = worldData == null ? "" : worldData.getLevelName();
+		this.nameEdit = new EditBox(this.font, this.width / 2 - 100, 53, 200, 20, new TranslatableComponent("selectWorld.enterName"));
 		this.nameEdit.setValue(string);
 		this.nameEdit.setResponder(stringx -> this.renameButton.active = !stringx.trim().isEmpty());
 		this.children.add(this.nameEdit);
@@ -159,11 +164,11 @@ public class EditWorldScreen extends Screen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
-		this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 20, 16777215);
-		this.drawString(this.font, I18n.get("selectWorld.enterName"), this.width / 2 - 100, 40, 10526880);
-		this.nameEdit.render(i, j, f);
-		super.render(i, j, f);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 16777215);
+		this.drawString(poseStack, this.font, I18n.get("selectWorld.enterName"), this.width / 2 - 100, 40, 10526880);
+		this.nameEdit.render(poseStack, i, j, f);
+		super.render(poseStack, i, j, f);
 	}
 }

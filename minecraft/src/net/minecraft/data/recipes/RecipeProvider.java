@@ -2132,7 +2132,7 @@ public class RecipeProvider implements DataProvider {
 			.pattern("#")
 			.unlockedBy("has_stone_pickaxe", has(Items.STONE_PICKAXE))
 			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.SOUL_FIRE_TORCH, 4)
+		ShapedRecipeBuilder.shaped(Blocks.SOUL_TORCH, 4)
 			.define('X', Ingredient.of(Items.COAL, Items.CHARCOAL))
 			.define('#', Items.STICK)
 			.define('S', ItemTags.SOUL_FIRE_BASE_BLOCKS)
@@ -2150,13 +2150,13 @@ public class RecipeProvider implements DataProvider {
 			.unlockedBy("has_iron_nugget", has(Items.IRON_NUGGET))
 			.unlockedBy("has_iron_ingot", has(Items.IRON_INGOT))
 			.save(consumer);
-		ShapedRecipeBuilder.shaped(Blocks.SOUL_FIRE_LANTERN)
-			.define('#', Items.SOUL_FIRE_TORCH)
+		ShapedRecipeBuilder.shaped(Blocks.SOUL_LANTERN)
+			.define('#', Items.SOUL_TORCH)
 			.define('X', Items.IRON_NUGGET)
 			.pattern("XXX")
 			.pattern("X#X")
 			.pattern("XXX")
-			.unlockedBy("has_soul_fire_torch", has(Items.SOUL_FIRE_TORCH))
+			.unlockedBy("has_soul_torch", has(Items.SOUL_TORCH))
 			.save(consumer);
 		ShapelessRecipeBuilder.shapeless(Blocks.TRAPPED_CHEST)
 			.requires(Blocks.CHEST)

@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.mojang.datafixers.DataFixer;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatMaps;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenCustomHashMap;
@@ -28,9 +29,8 @@ import net.minecraft.world.level.chunk.storage.ChunkStorage;
 import net.minecraft.world.level.chunk.storage.RegionFile;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.DimensionDataStorage;
-import net.minecraft.world.level.storage.LevelData;
-import net.minecraft.world.level.storage.LevelStorage;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.WorldData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,9 +39,9 @@ public class WorldUpgrader {
 	private static final ThreadFactory THREAD_FACTORY = new ThreadFactoryBuilder().setDaemon(true).build();
 	private final String levelName;
 	private final boolean eraseCache;
-	private final LevelStorage levelStorage;
+	private final LevelStorageSource.LevelStorageAccess levelStorage;
 	private final Thread thread;
-	private final File pathToWorld;
+	private final DataFixer dataFixer;
 	private volatile boolean running = true;
 	private volatile boolean finished;
 	private volatile float progress;
@@ -53,15 +53,13 @@ public class WorldUpgrader {
 	private static final Pattern REGEX = Pattern.compile("^r\\.(-?[0-9]+)\\.(-?[0-9]+)\\.mca$");
 	private final DimensionDataStorage overworldDataStorage;
 
-	public WorldUpgrader(LevelStorageSource.LevelStorageAccess levelStorageAccess, LevelData levelData, boolean bl) {
-		this.levelName = levelData.getLevelName();
+	public WorldUpgrader(LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, WorldData worldData, boolean bl) {
+		this.levelName = worldData.getLevelName();
 		this.eraseCache = bl;
-		this.levelStorage = levelStorageAccess.selectLevel(null);
-		this.levelStorage.saveLevelData(levelData);
-		this.overworldDataStorage = new DimensionDataStorage(
-			new File(DimensionType.OVERWORLD.getStorageFolder(this.levelStorage.getFolder()), "data"), this.levelStorage.getFixerUpper()
-		);
-		this.pathToWorld = this.levelStorage.getFolder();
+		this.dataFixer = dataFixer;
+		this.levelStorage = levelStorageAccess;
+		levelStorageAccess.saveDataTag(worldData);
+		this.overworldDataStorage = new DimensionDataStorage(new File(this.levelStorage.getDimensionPath(DimensionType.OVERWORLD), "data"), dataFixer);
 		this.thread = THREAD_FACTORY.newThread(this::work);
 		this.thread.setUncaughtExceptionHandler((thread, throwable) -> {
 			LOGGER.error("Error upgrading world", throwable);
@@ -81,7 +79,6 @@ public class WorldUpgrader {
 	}
 
 	private void work() {
-		File file = this.levelStorage.getFolder();
 		this.totalChunks = 0;
 		Builder<DimensionType, ListIterator<ChunkPos>> builder = ImmutableMap.builder();
 
@@ -99,8 +96,8 @@ public class WorldUpgrader {
 			Builder<DimensionType, ChunkStorage> builder2 = ImmutableMap.builder();
 
 			for (DimensionType dimensionType2 : DimensionType.getAllTypes()) {
-				File file2 = dimensionType2.getStorageFolder(file);
-				builder2.put(dimensionType2, new ChunkStorage(new File(file2, "region"), this.levelStorage.getFixerUpper(), true));
+				File file = this.levelStorage.getDimensionPath(dimensionType2);
+				builder2.put(dimensionType2, new ChunkStorage(new File(file, "region"), this.dataFixer, true));
 			}
 
 			ImmutableMap<DimensionType, ChunkStorage> immutableMap2 = builder2.build();
@@ -142,15 +139,15 @@ public class WorldUpgrader {
 									bl2 = true;
 								}
 							}
-						} catch (ReportedException var24) {
-							Throwable throwable = var24.getCause();
+						} catch (ReportedException var23) {
+							Throwable throwable = var23.getCause();
 							if (!(throwable instanceof IOException)) {
-								throw var24;
+								throw var23;
 							}
 
 							LOGGER.error("Error upgrading chunk {}", chunkPos, throwable);
-						} catch (IOException var25) {
-							LOGGER.error("Error upgrading chunk {}", chunkPos, var25);
+						} catch (IOException var24) {
+							LOGGER.error("Error upgrading chunk {}", chunkPos, var24);
 						}
 
 						if (bl2) {
@@ -178,8 +175,8 @@ public class WorldUpgrader {
 			for (ChunkStorage chunkStorage2 : immutableMap2.values()) {
 				try {
 					chunkStorage2.close();
-				} catch (IOException var23) {
-					LOGGER.error("Error upgrading chunk", (Throwable)var23);
+				} catch (IOException var22) {
+					LOGGER.error("Error upgrading chunk", (Throwable)var22);
 				}
 			}
 
@@ -191,7 +188,7 @@ public class WorldUpgrader {
 	}
 
 	private List<ChunkPos> getAllChunkPos(DimensionType dimensionType) {
-		File file = dimensionType.getStorageFolder(this.pathToWorld);
+		File file = this.levelStorage.getDimensionPath(dimensionType);
 		File file2 = new File(file, "region");
 		File[] files = file2.listFiles((filex, string) -> string.endsWith(".mca"));
 		if (files == null) {

@@ -2,6 +2,7 @@ package net.minecraft.client.gui.spectator;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -26,11 +27,11 @@ public class SpectatorMenu {
 
 		@Override
 		public Component getName() {
-			return new TextComponent("");
+			return TextComponent.EMPTY;
 		}
 
 		@Override
-		public void renderIcon(float f, int i) {
+		public void renderIcon(PoseStack poseStack, float f, int i) {
 		}
 
 		@Override
@@ -126,9 +127,9 @@ public class SpectatorMenu {
 		}
 
 		@Override
-		public void renderIcon(float f, int i) {
+		public void renderIcon(PoseStack poseStack, float f, int i) {
 			Minecraft.getInstance().getTextureManager().bind(SpectatorGui.SPECTATOR_LOCATION);
-			GuiComponent.blit(0, 0, 128.0F, 0.0F, 16, 16, 256, 256);
+			GuiComponent.blit(poseStack, 0, 0, 128.0F, 0.0F, 16, 16, 256, 256);
 		}
 
 		@Override
@@ -158,12 +159,12 @@ public class SpectatorMenu {
 		}
 
 		@Override
-		public void renderIcon(float f, int i) {
+		public void renderIcon(PoseStack poseStack, float f, int i) {
 			Minecraft.getInstance().getTextureManager().bind(SpectatorGui.SPECTATOR_LOCATION);
 			if (this.direction < 0) {
-				GuiComponent.blit(0, 0, 144.0F, 0.0F, 16, 16, 256, 256);
+				GuiComponent.blit(poseStack, 0, 0, 144.0F, 0.0F, 16, 16, 256, 256);
 			} else {
-				GuiComponent.blit(0, 0, 160.0F, 0.0F, 16, 16, 256, 256);
+				GuiComponent.blit(poseStack, 0, 0, 160.0F, 0.0F, 16, 16, 256, 256);
 			}
 		}
 

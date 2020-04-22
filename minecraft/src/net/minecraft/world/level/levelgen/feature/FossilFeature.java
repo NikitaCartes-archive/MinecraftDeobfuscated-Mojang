@@ -59,7 +59,7 @@ public class FossilFeature extends Feature<NoneFeatureConfiguration> {
 		Random random2 = levelAccessor.getRandom();
 		Rotation rotation = Rotation.getRandom(random2);
 		int i = random2.nextInt(fossils.length);
-		StructureManager structureManager = ((ServerLevel)levelAccessor.getLevel()).getLevelStorage().getStructureManager();
+		StructureManager structureManager = ((ServerLevel)levelAccessor.getLevel()).getServer().getStructureManager();
 		StructureTemplate structureTemplate = structureManager.getOrCreate(fossils[i]);
 		StructureTemplate structureTemplate2 = structureManager.getOrCreate(fossilsCoal[i]);
 		ChunkPos chunkPos = new ChunkPos(blockPos);

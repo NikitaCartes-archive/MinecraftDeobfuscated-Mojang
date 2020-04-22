@@ -1,6 +1,7 @@
 package net.minecraft.world.level.storage;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.mojang.datafixers.DataFixer;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -20,21 +21,23 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.SignStyle;
 import java.time.temporal.ChronoField;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.FileUtil;
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DirectoryLock;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -95,17 +98,17 @@ public class LevelStorageSource {
 						continue;
 					}
 
-					LevelData levelData = this.getLevelData(file);
-					if (levelData != null && (levelData.getVersion() == 19132 || levelData.getVersion() == 19133)) {
-						boolean bl2 = levelData.getVersion() != this.getStorageVersion();
-						String string2 = levelData.getLevelName();
+					WorldData worldData = this.getLevelData(file);
+					if (worldData != null && (worldData.getVersion() == 19132 || worldData.getVersion() == 19133)) {
+						boolean bl2 = worldData.getVersion() != this.getStorageVersion();
+						String string2 = worldData.getLevelName();
 						if (StringUtils.isEmpty(string2)) {
 							string2 = string;
 						}
 
 						long l = 0L;
 						File file2 = new File(file, "icon.png");
-						list.add(new LevelSummary(levelData, string, string2, 0L, bl2, bl, file2));
+						list.add(new LevelSummary(worldData, string, string2, 0L, bl2, bl, file2));
 					}
 				}
 			}
@@ -119,15 +122,15 @@ public class LevelStorageSource {
 	}
 
 	@Nullable
-	private LevelData getLevelData(File file) {
+	private WorldData getLevelData(File file) {
 		if (!file.exists()) {
 			return null;
 		} else {
 			File file2 = new File(file, "level.dat");
 			if (file2.exists()) {
-				LevelData levelData = getLevelData(file2, this.fixerUpper);
-				if (levelData != null) {
-					return levelData;
+				WorldData worldData = getLevelData(file2, this.fixerUpper);
+				if (worldData != null) {
+					return worldData;
 				}
 			}
 
@@ -137,14 +140,14 @@ public class LevelStorageSource {
 	}
 
 	@Nullable
-	public static LevelData getLevelData(File file, DataFixer dataFixer) {
+	public static WorldData getLevelData(File file, DataFixer dataFixer) {
 		try {
 			CompoundTag compoundTag = NbtIo.readCompressed(new FileInputStream(file));
 			CompoundTag compoundTag2 = compoundTag.getCompound("Data");
 			CompoundTag compoundTag3 = compoundTag2.contains("Player", 10) ? compoundTag2.getCompound("Player") : null;
 			compoundTag2.remove("Player");
 			int i = compoundTag2.contains("DataVersion", 99) ? compoundTag2.getInt("DataVersion") : -1;
-			return new LevelData(NbtUtils.update(dataFixer, DataFixTypes.LEVEL, compoundTag2, i), dataFixer, i, compoundTag3);
+			return new PrimaryLevelData(NbtUtils.update(dataFixer, DataFixTypes.LEVEL, compoundTag2, i), dataFixer, i, compoundTag3);
 		} catch (Exception var6) {
 			LOGGER.error("Exception reading {}", file, var6);
 			return null;
@@ -186,6 +189,7 @@ public class LevelStorageSource {
 		private final DirectoryLock lock;
 		private final Path levelPath;
 		private final String levelId;
+		private final Map<LevelResource, Path> resources = Maps.<LevelResource, Path>newHashMap();
 
 		public LevelStorageAccess(String string) throws IOException {
 			this.levelId = string;
@@ -197,8 +201,12 @@ public class LevelStorageSource {
 			return this.levelId;
 		}
 
-		public Path getLevelPath() {
-			return this.levelPath;
+		public Path getLevelPath(LevelResource levelResource) {
+			return (Path)this.resources.computeIfAbsent(levelResource, levelResourcex -> this.levelPath.resolve(levelResourcex.getId()));
+		}
+
+		public File getDimensionPath(DimensionType dimensionType) {
+			return dimensionType.getStorageFolder(this.levelPath.toFile());
 		}
 
 		private void checkLock() {
@@ -207,14 +215,14 @@ public class LevelStorageSource {
 			}
 		}
 
-		public LevelStorage selectLevel(@Nullable MinecraftServer minecraftServer) {
+		public PlayerDataStorage createPlayerStorage() {
 			this.checkLock();
-			return new LevelStorage(LevelStorageSource.this.baseDir.toFile(), this.levelId, minecraftServer, LevelStorageSource.this.fixerUpper);
+			return new PlayerDataStorage(this, LevelStorageSource.this.fixerUpper);
 		}
 
 		public boolean requiresConversion() {
-			LevelData levelData = this.getDataTag();
-			return levelData != null && levelData.getVersion() != LevelStorageSource.this.getStorageVersion();
+			WorldData worldData = this.getDataTag();
+			return worldData != null && worldData.getVersion() != LevelStorageSource.this.getStorageVersion();
 		}
 
 		public boolean convertLevel(ProgressListener progressListener) {
@@ -223,9 +231,30 @@ public class LevelStorageSource {
 		}
 
 		@Nullable
-		public LevelData getDataTag() {
+		public WorldData getDataTag() {
 			this.checkLock();
 			return LevelStorageSource.this.getLevelData(this.levelPath.toFile());
+		}
+
+		public void saveDataTag(WorldData worldData) {
+			this.saveDataTag(worldData, null);
+		}
+
+		public void saveDataTag(WorldData worldData, @Nullable CompoundTag compoundTag) {
+			File file = this.levelPath.toFile();
+			CompoundTag compoundTag2 = worldData.createTag(compoundTag);
+			CompoundTag compoundTag3 = new CompoundTag();
+			compoundTag3.put("Data", compoundTag2);
+
+			try {
+				File file2 = File.createTempFile("level", ".dat", file);
+				NbtIo.writeCompressed(compoundTag3, new FileOutputStream(file2));
+				File file3 = new File(file, "level.dat_old");
+				File file4 = new File(file, "level.dat");
+				Util.safeReplaceFile(file4, file2, file3);
+			} catch (Exception var9) {
+				LevelStorageSource.LOGGER.error("Failed to save level {}", file, var9);
+			}
 		}
 
 		public File getIconFile() {
@@ -300,28 +329,27 @@ public class LevelStorageSource {
 		@Environment(EnvType.CLIENT)
 		public long makeWorldBackup() throws IOException {
 			this.checkLock();
-			final Path path = this.getLevelPath();
 			String string = LocalDateTime.now().format(LevelStorageSource.FORMATTER) + "_" + this.levelId;
-			Path path2 = LevelStorageSource.this.getBackupPath();
+			Path path = LevelStorageSource.this.getBackupPath();
 
 			try {
-				Files.createDirectories(Files.exists(path2, new LinkOption[0]) ? path2.toRealPath() : path2);
-			} catch (IOException var17) {
-				throw new RuntimeException(var17);
+				Files.createDirectories(Files.exists(path, new LinkOption[0]) ? path.toRealPath() : path);
+			} catch (IOException var16) {
+				throw new RuntimeException(var16);
 			}
 
-			Path path3 = path2.resolve(FileUtil.findAvailableName(path2, string, ".zip"));
-			final ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(path3)));
-			Throwable var6 = null;
+			Path path2 = path.resolve(FileUtil.findAvailableName(path, string, ".zip"));
+			final ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(path2)));
+			Throwable var5 = null;
 
 			try {
-				final Path path4 = Paths.get(this.levelId);
-				Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+				final Path path3 = Paths.get(this.levelId);
+				Files.walkFileTree(this.levelPath, new SimpleFileVisitor<Path>() {
 					public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
 						if (path.endsWith("session.lock")) {
 							return FileVisitResult.CONTINUE;
 						} else {
-							String string = path4.resolve(path.relativize(path)).toString().replace('\\', '/');
+							String string = path3.resolve(LevelStorageAccess.this.levelPath.relativize(path)).toString().replace('\\', '/');
 							ZipEntry zipEntry = new ZipEntry(string);
 							zipOutputStream.putNextEntry(zipEntry);
 							com.google.common.io.Files.asByteSource(path.toFile()).copyTo(zipOutputStream);
@@ -330,16 +358,16 @@ public class LevelStorageSource {
 						}
 					}
 				});
-			} catch (Throwable var16) {
-				var6 = var16;
-				throw var16;
+			} catch (Throwable var15) {
+				var5 = var15;
+				throw var15;
 			} finally {
 				if (zipOutputStream != null) {
-					if (var6 != null) {
+					if (var5 != null) {
 						try {
 							zipOutputStream.close();
-						} catch (Throwable var15) {
-							var6.addSuppressed(var15);
+						} catch (Throwable var14) {
+							var5.addSuppressed(var14);
 						}
 					} else {
 						zipOutputStream.close();
@@ -347,7 +375,7 @@ public class LevelStorageSource {
 				}
 			}
 
-			return Files.size(path3);
+			return Files.size(path2);
 		}
 
 		public void close() throws IOException {

@@ -3,6 +3,7 @@ package net.minecraft.client.gui.screens.inventory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -11,13 +12,14 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.ComponentRenderUtils;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -37,7 +39,7 @@ public class BookViewScreen extends Screen {
 
 		@Override
 		public Component getPageRaw(int i) {
-			return new TextComponent("");
+			return TextComponent.EMPTY;
 		}
 	};
 	public static final ResourceLocation BOOK_LOCATION = new ResourceLocation("textures/gui/book.png");
@@ -93,7 +95,7 @@ public class BookViewScreen extends Screen {
 	}
 
 	protected void createMenuControls() {
-		this.addButton(new Button(this.width / 2 - 100, 196, 200, 20, I18n.get("gui.done"), button -> this.minecraft.setScreen(null)));
+		this.addButton(new Button(this.width / 2 - 100, 196, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(null)));
 	}
 
 	protected void createPageControlButtons() {
@@ -148,35 +150,35 @@ public class BookViewScreen extends Screen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.minecraft.getTextureManager().bind(BOOK_LOCATION);
 		int k = (this.width - 192) / 2;
 		int l = 2;
-		this.blit(k, 2, 0, 0, 192, 192);
+		this.blit(poseStack, k, 2, 0, 0, 192, 192);
 		String string = I18n.get("book.pageIndicator", this.currentPage + 1, Math.max(this.getNumPages(), 1));
 		if (this.cachedPage != this.currentPage) {
 			Component component = this.bookAccess.getPage(this.currentPage);
-			this.cachedPageComponents = ComponentRenderUtils.wrapComponents(component, 114, this.font, true, true);
+			this.cachedPageComponents = this.font.getSplitter().splitLines(component, 114, Style.EMPTY, false);
 		}
 
 		this.cachedPage = this.currentPage;
 		int m = this.strWidth(string);
-		this.font.draw(string, (float)(k - m + 192 - 44), 18.0F, 0);
+		this.font.draw(poseStack, string, (float)(k - m + 192 - 44), 18.0F, 0);
 		int n = Math.min(128 / 9, this.cachedPageComponents.size());
 
 		for (int o = 0; o < n; o++) {
 			Component component2 = (Component)this.cachedPageComponents.get(o);
-			this.font.draw(component2.getColoredString(), (float)(k + 36), (float)(32 + o * 9), 0);
+			this.font.draw(poseStack, component2, (float)(k + 36), (float)(32 + o * 9), 0);
 		}
 
 		Component component3 = this.getClickedComponentAt((double)i, (double)j);
 		if (component3 != null) {
-			this.renderComponentHoverEffect(component3, i, j);
+			this.renderComponentHoverEffect(poseStack, component3, i, j);
 		}
 
-		super.render(i, j, f);
+		super.render(poseStack, i, j, f);
 	}
 
 	private int strWidth(String string) {
@@ -232,19 +234,10 @@ public class BookViewScreen extends Screen {
 					int l = j / 9;
 					if (l >= 0 && l < this.cachedPageComponents.size()) {
 						Component component = (Component)this.cachedPageComponents.get(l);
-						int m = 0;
-
-						for (Component component2 : component) {
-							if (component2 instanceof TextComponent) {
-								m += this.minecraft.font.width(component2.getColoredString());
-								if (m > i) {
-									return component2;
-								}
-							}
-						}
+						return this.minecraft.font.getSplitter().componentAtWidth(component, i);
+					} else {
+						return null;
 					}
-
-					return null;
 				} else {
 					return null;
 				}
@@ -272,7 +265,7 @@ public class BookViewScreen extends Screen {
 		Component getPageRaw(int i);
 
 		default Component getPage(int i) {
-			return (Component)(i >= 0 && i < this.getPageCount() ? this.getPageRaw(i) : new TextComponent(""));
+			return i >= 0 && i < this.getPageCount() ? this.getPageRaw(i) : TextComponent.EMPTY;
 		}
 
 		static BookViewScreen.BookAccess fromItem(ItemStack itemStack) {
@@ -321,7 +314,7 @@ public class BookViewScreen extends Screen {
 			CompoundTag compoundTag = itemStack.getTag();
 			return (List<String>)(compoundTag != null && WrittenBookItem.makeSureTagIsValid(compoundTag)
 				? BookViewScreen.convertPages(compoundTag)
-				: ImmutableList.of(new TranslatableComponent("book.invalid.tag").withStyle(ChatFormatting.DARK_RED).getColoredString()));
+				: ImmutableList.of(Component.Serializer.toJson(new TranslatableComponent("book.invalid.tag").withStyle(ChatFormatting.DARK_RED))));
 		}
 
 		@Override

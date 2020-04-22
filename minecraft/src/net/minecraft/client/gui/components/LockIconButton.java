@@ -1,24 +1,30 @@
 package net.minecraft.client.gui.components;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class LockIconButton extends Button {
 	private boolean locked;
 
 	public LockIconButton(int i, int j, Button.OnPress onPress) {
-		super(i, j, 20, 20, I18n.get("narrator.button.difficulty_lock"), onPress);
+		super(i, j, 20, 20, new TranslatableComponent("narrator.button.difficulty_lock"), onPress);
 	}
 
 	@Override
-	protected String getNarrationMessage() {
-		return super.getNarrationMessage()
-			+ ". "
-			+ (this.isLocked() ? I18n.get("narrator.button.difficulty_lock.locked") : I18n.get("narrator.button.difficulty_lock.unlocked"));
+	protected MutableComponent createNarrationMessage() {
+		return super.createNarrationMessage()
+			.append(". ")
+			.append(
+				this.isLocked()
+					? new TranslatableComponent("narrator.button.difficulty_lock.locked")
+					: new TranslatableComponent("narrator.button.difficulty_lock.unlocked")
+			);
 	}
 
 	public boolean isLocked() {
@@ -30,7 +36,7 @@ public class LockIconButton extends Button {
 	}
 
 	@Override
-	public void renderButton(int i, int j, float f) {
+	public void renderButton(PoseStack poseStack, int i, int j, float f) {
 		Minecraft.getInstance().getTextureManager().bind(Button.WIDGETS_LOCATION);
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		LockIconButton.Icon icon;
@@ -42,7 +48,7 @@ public class LockIconButton extends Button {
 			icon = this.locked ? LockIconButton.Icon.LOCKED : LockIconButton.Icon.UNLOCKED;
 		}
 
-		this.blit(this.x, this.y, icon.getX(), icon.getY(), this.width, this.height);
+		this.blit(poseStack, this.x, this.y, icon.getX(), icon.getY(), this.width, this.height);
 	}
 
 	@Environment(EnvType.CLIENT)

@@ -1,12 +1,14 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -29,7 +31,7 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		int i = (this.width - this.imageWidth) / 2;
 		int j = (this.height - this.imageHeight) / 2;
-		this.name = new EditBox(this.font, i + 62, j + 24, 103, 12, I18n.get("container.repair"));
+		this.name = new EditBox(this.font, i + 62, j + 24, 103, 12, new TranslatableComponent("container.repair"));
 		this.name.setCanLoseFocus(false);
 		this.name.setTextColor(-1);
 		this.name.setTextColorUneditable(-1);
@@ -76,9 +78,9 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 	}
 
 	@Override
-	protected void renderLabels(int i, int j) {
+	protected void renderLabels(PoseStack poseStack, int i, int j) {
 		RenderSystem.disableBlend();
-		this.font.draw(this.title.getColoredString(), 60.0F, 6.0F, 4210752);
+		this.font.draw(poseStack, this.title, 60.0F, 6.0F, 4210752);
 		int k = this.menu.getCost();
 		if (k > 0) {
 			int l = 8453920;
@@ -96,15 +98,15 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 			if (bl) {
 				int m = this.imageWidth - 8 - this.font.width(string) - 2;
 				int n = 69;
-				fill(m - 2, 67, this.imageWidth - 8, 79, 1325400064);
-				this.font.drawShadow(string, (float)m, 69.0F, l);
+				fill(poseStack, m - 2, 67, this.imageWidth - 8, 79, 1325400064);
+				this.font.drawShadow(poseStack, string, (float)m, 69.0F, l);
 			}
 		}
 	}
 
 	@Override
-	public void renderFg(int i, int j, float f) {
-		this.name.render(i, j, f);
+	public void renderFg(PoseStack poseStack, int i, int j, float f) {
+		this.name.render(poseStack, i, j, f);
 	}
 
 	@Override
