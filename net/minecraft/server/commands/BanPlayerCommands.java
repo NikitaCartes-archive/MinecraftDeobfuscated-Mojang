@@ -23,7 +23,7 @@ import net.minecraft.server.players.UserBanListEntry;
 import org.jetbrains.annotations.Nullable;
 
 public class BanPlayerCommands {
-    private static final SimpleCommandExceptionType ERROR_ALREADY_BANNED = new SimpleCommandExceptionType(new TranslatableComponent("commands.ban.failed", new Object[0]));
+    private static final SimpleCommandExceptionType ERROR_ALREADY_BANNED = new SimpleCommandExceptionType(new TranslatableComponent("commands.ban.failed"));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("ban").requires(commandSourceStack -> commandSourceStack.getServer().getPlayerList().getBans().isEnabled() && commandSourceStack.hasPermission(3))).then(((RequiredArgumentBuilder)Commands.argument("targets", GameProfileArgument.gameProfile()).executes(commandContext -> BanPlayerCommands.banPlayers((CommandSourceStack)commandContext.getSource(), GameProfileArgument.getGameProfiles(commandContext, "targets"), null))).then(Commands.argument("reason", MessageArgument.message()).executes(commandContext -> BanPlayerCommands.banPlayers((CommandSourceStack)commandContext.getSource(), GameProfileArgument.getGameProfiles(commandContext, "targets"), MessageArgument.getMessage(commandContext, "reason"))))));
@@ -40,7 +40,7 @@ public class BanPlayerCommands {
             commandSourceStack.sendSuccess(new TranslatableComponent("commands.ban.success", ComponentUtils.getDisplayName(gameProfile), userBanListEntry.getReason()), true);
             ServerPlayer serverPlayer = commandSourceStack.getServer().getPlayerList().getPlayer(gameProfile.getId());
             if (serverPlayer == null) continue;
-            serverPlayer.connection.disconnect(new TranslatableComponent("multiplayer.disconnect.banned", new Object[0]));
+            serverPlayer.connection.disconnect(new TranslatableComponent("multiplayer.disconnect.banned"));
         }
         if (i == 0) {
             throw ERROR_ALREADY_BANNED.create();

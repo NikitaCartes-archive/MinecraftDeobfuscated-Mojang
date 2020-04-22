@@ -4,6 +4,7 @@
 package com.mojang.blaze3d.font;
 
 import com.mojang.blaze3d.font.RawGlyph;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import java.io.Closeable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -17,8 +18,10 @@ extends Closeable {
     }
 
     @Nullable
-    default public RawGlyph getGlyph(char c) {
+    default public RawGlyph getGlyph(int i) {
         return null;
     }
+
+    public IntSet getSupportedGlyphs();
 }
 

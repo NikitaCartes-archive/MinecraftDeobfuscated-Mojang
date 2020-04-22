@@ -67,7 +67,7 @@ implements ServerLoginPacketListener {
             this.delayedAcceptPlayer = null;
         }
         if (this.tick++ == 600) {
-            this.disconnect(new TranslatableComponent("multiplayer.disconnect.slow_login", new Object[0]));
+            this.disconnect(new TranslatableComponent("multiplayer.disconnect.slow_login"));
         }
     }
 
@@ -159,7 +159,7 @@ implements ServerLoginPacketListener {
                         ServerLoginPacketListenerImpl.this.gameProfile = ServerLoginPacketListenerImpl.this.createFakeProfile(gameProfile);
                         ServerLoginPacketListenerImpl.this.state = State.READY_TO_ACCEPT;
                     } else {
-                        ServerLoginPacketListenerImpl.this.disconnect(new TranslatableComponent("multiplayer.disconnect.unverified_username", new Object[0]));
+                        ServerLoginPacketListenerImpl.this.disconnect(new TranslatableComponent("multiplayer.disconnect.unverified_username"));
                         LOGGER.error("Username '{}' tried to join with an invalid session", (Object)gameProfile.getName());
                     }
                 } catch (AuthenticationUnavailableException authenticationUnavailableException) {
@@ -168,7 +168,7 @@ implements ServerLoginPacketListener {
                         ServerLoginPacketListenerImpl.this.gameProfile = ServerLoginPacketListenerImpl.this.createFakeProfile(gameProfile);
                         ServerLoginPacketListenerImpl.this.state = State.READY_TO_ACCEPT;
                     }
-                    ServerLoginPacketListenerImpl.this.disconnect(new TranslatableComponent("multiplayer.disconnect.authservers_down", new Object[0]));
+                    ServerLoginPacketListenerImpl.this.disconnect(new TranslatableComponent("multiplayer.disconnect.authservers_down"));
                     LOGGER.error("Couldn't verify username because servers are unavailable");
                 }
             }
@@ -185,7 +185,7 @@ implements ServerLoginPacketListener {
 
     @Override
     public void handleCustomQueryPacket(ServerboundCustomQueryPacket serverboundCustomQueryPacket) {
-        this.disconnect(new TranslatableComponent("multiplayer.disconnect.unexpected_query_response", new Object[0]));
+        this.disconnect(new TranslatableComponent("multiplayer.disconnect.unexpected_query_response"));
     }
 
     protected GameProfile createFakeProfile(GameProfile gameProfile) {

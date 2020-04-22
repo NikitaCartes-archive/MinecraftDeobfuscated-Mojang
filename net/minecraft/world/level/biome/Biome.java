@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
@@ -25,6 +26,7 @@ import net.minecraft.core.IdMapper;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.WeighedRandom;
@@ -269,7 +271,7 @@ public abstract class Biome {
                 configuredFeature.place(levelAccessor, structureFeatureManager, chunkGenerator, worldgenRandom, blockPos);
             } catch (Exception exception) {
                 CrashReport crashReport = CrashReport.forThrowable(exception, "Feature placement");
-                crashReport.addCategory("Feature").setDetail("Id", Registry.FEATURE.getKey((Feature<?>)configuredFeature.feature)).setDetail("Description", () -> configuredFeature.feature.toString());
+                crashReport.addCategory("Feature").setDetail("Id", Registry.FEATURE.getKey((Feature<?>)configuredFeature.feature)).setDetail("Config", configuredFeature.config).setDetail("Description", () -> configuredFeature.feature.toString());
                 throw new ReportedException(crashReport);
             }
             ++i;
@@ -322,7 +324,7 @@ public abstract class Biome {
     }
 
     public Component getName() {
-        return new TranslatableComponent(this.getDescriptionId(), new Object[0]);
+        return new TranslatableComponent(this.getDescriptionId());
     }
 
     public String getDescriptionId() {
@@ -374,6 +376,11 @@ public abstract class Biome {
         return this.specialEffects.getAmbientAdditionsSettings();
     }
 
+    @Environment(value=EnvType.CLIENT)
+    public Optional<Music> getBackgroundMusic() {
+        return this.specialEffects.getBackgroundMusic();
+    }
+
     public final BiomeCategory getBiomeCategory() {
         return this.biomeCategory;
     }
@@ -386,8 +393,8 @@ public abstract class Biome {
         return this.surfaceBuilder.getSurfaceBuilderConfiguration();
     }
 
-    public float getFitness(ClimateParameters climateParameters) {
-        return this.optimalParameters.stream().map(climateParameters2 -> Float.valueOf(climateParameters2.fitness(climateParameters))).min(Float::compare).orElse(Float.valueOf(Float.POSITIVE_INFINITY)).floatValue();
+    public Stream<ClimateParameters> optimalParameters() {
+        return this.optimalParameters.stream();
     }
 
     @Nullable
@@ -400,14 +407,14 @@ public abstract class Biome {
         private final float humidity;
         private final float altitude;
         private final float weirdness;
-        private final float weight;
+        private final float offset;
 
         public ClimateParameters(float f, float g, float h, float i, float j) {
             this.temperature = f;
             this.humidity = g;
             this.altitude = h;
             this.weirdness = i;
-            this.weight = j;
+            this.offset = j;
         }
 
         public boolean equals(Object object) {
@@ -439,7 +446,7 @@ public abstract class Biome {
         }
 
         public float fitness(ClimateParameters climateParameters) {
-            return (this.temperature - climateParameters.temperature) * (this.temperature - climateParameters.temperature) + (this.humidity - climateParameters.humidity) * (this.humidity - climateParameters.humidity) + (this.altitude - climateParameters.altitude) * (this.altitude - climateParameters.altitude) + (this.weirdness - climateParameters.weirdness) * (this.weirdness - climateParameters.weirdness) - (this.weight - climateParameters.weight) * (this.weight - climateParameters.weight);
+            return (this.temperature - climateParameters.temperature) * (this.temperature - climateParameters.temperature) + (this.humidity - climateParameters.humidity) * (this.humidity - climateParameters.humidity) + (this.altitude - climateParameters.altitude) * (this.altitude - climateParameters.altitude) + (this.weirdness - climateParameters.weirdness) * (this.weirdness - climateParameters.weirdness) + (this.offset - climateParameters.offset) * (this.offset - climateParameters.offset);
         }
     }
 

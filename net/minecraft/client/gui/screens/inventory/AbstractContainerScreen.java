@@ -6,6 +6,7 @@ package net.minecraft.client.gui.screens.inventory;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
@@ -74,16 +75,16 @@ implements MenuAccess<T> {
     }
 
     @Override
-    public void render(int i, int j, float f) {
+    public void render(PoseStack poseStack, int i, int j, float f) {
         ItemStack itemStack;
         int q;
         int p;
         int k = this.leftPos;
         int l = this.topPos;
-        this.renderBg(f, i, j);
+        this.renderBg(poseStack, f, i, j);
         RenderSystem.disableRescaleNormal();
         RenderSystem.disableDepthTest();
-        super.render(i, j, f);
+        super.render(poseStack, i, j, f);
         RenderSystem.pushMatrix();
         RenderSystem.translatef(k, l, 0.0f);
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -96,7 +97,7 @@ implements MenuAccess<T> {
         for (int o = 0; o < ((AbstractContainerMenu)this.menu).slots.size(); ++o) {
             Slot slot = ((AbstractContainerMenu)this.menu).slots.get(o);
             if (slot.isActive()) {
-                this.renderSlot(slot);
+                this.renderSlot(poseStack, slot);
             }
             if (!this.isHovering(slot, i, j) || !slot.isActive()) continue;
             this.hoveredSlot = slot;
@@ -104,11 +105,11 @@ implements MenuAccess<T> {
             p = slot.x;
             q = slot.y;
             RenderSystem.colorMask(true, true, true, false);
-            this.fillGradient(p, q, p + 16, q + 16, -2130706433, -2130706433);
+            this.fillGradient(poseStack, p, q, p + 16, q + 16, -2130706433, -2130706433);
             RenderSystem.colorMask(true, true, true, true);
             RenderSystem.enableDepthTest();
         }
-        this.renderLabels(i, j);
+        this.renderLabels(poseStack, i, j);
         Inventory inventory = this.minecraft.player.inventory;
         ItemStack itemStack2 = itemStack = this.draggingItem.isEmpty() ? inventory.getCarried() : this.draggingItem;
         if (!itemStack.isEmpty()) {
@@ -143,9 +144,9 @@ implements MenuAccess<T> {
         RenderSystem.enableDepthTest();
     }
 
-    protected void renderTooltip(int i, int j) {
+    protected void renderTooltip(PoseStack poseStack, int i, int j) {
         if (this.minecraft.player.inventory.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
-            this.renderTooltip(this.hoveredSlot.getItem(), i, j);
+            this.renderTooltip(poseStack, this.hoveredSlot.getItem(), i, j);
         }
     }
 
@@ -159,12 +160,12 @@ implements MenuAccess<T> {
         this.itemRenderer.blitOffset = 0.0f;
     }
 
-    protected void renderLabels(int i, int j) {
+    protected void renderLabels(PoseStack poseStack, int i, int j) {
     }
 
-    protected abstract void renderBg(float var1, int var2, int var3);
+    protected abstract void renderBg(PoseStack var1, float var2, int var3, int var4);
 
-    private void renderSlot(Slot slot) {
+    private void renderSlot(PoseStack poseStack, Slot slot) {
         Pair<ResourceLocation, ResourceLocation> pair;
         int i = slot.x;
         int j = slot.y;
@@ -199,12 +200,12 @@ implements MenuAccess<T> {
         if (itemStack.isEmpty() && slot.isActive() && (pair = slot.getNoItemIcon()) != null) {
             TextureAtlasSprite textureAtlasSprite = this.minecraft.getTextureAtlas(pair.getFirst()).apply(pair.getSecond());
             this.minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
-            AbstractContainerScreen.blit(i, j, this.getBlitOffset(), 16, 16, textureAtlasSprite);
+            AbstractContainerScreen.blit(poseStack, i, j, this.getBlitOffset(), 16, 16, textureAtlasSprite);
             bl2 = true;
         }
         if (!bl2) {
             if (bl) {
-                AbstractContainerScreen.fill(i, j, i + 16, j + 16, -2130706433);
+                AbstractContainerScreen.fill(poseStack, i, j, i + 16, j + 16, -2130706433);
             }
             RenderSystem.enableDepthTest();
             this.itemRenderer.renderAndDecorateItem(this.minecraft.player, itemStack, i, j);

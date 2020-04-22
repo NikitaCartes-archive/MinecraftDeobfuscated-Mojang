@@ -15,6 +15,7 @@ import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -123,15 +124,15 @@ extends CollectionTag<IntTag> {
 
     @Override
     public Component getPrettyDisplay(String string, int i) {
-        Component component = new TextComponent("I").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
-        Component component2 = new TextComponent("[").append(component).append(";");
+        MutableComponent component = new TextComponent("I").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
+        MutableComponent mutableComponent = new TextComponent("[").append(component).append(";");
         for (int j = 0; j < this.data.length; ++j) {
-            component2.append(" ").append(new TextComponent(String.valueOf(this.data[j])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER));
+            mutableComponent.append(" ").append(new TextComponent(String.valueOf(this.data[j])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER));
             if (j == this.data.length - 1) continue;
-            component2.append(",");
+            mutableComponent.append(",");
         }
-        component2.append("]");
-        return component2;
+        mutableComponent.append("]");
+        return mutableComponent;
     }
 
     @Override

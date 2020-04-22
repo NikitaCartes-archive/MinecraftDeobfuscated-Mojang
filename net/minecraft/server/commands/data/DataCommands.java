@@ -39,10 +39,10 @@ import net.minecraft.server.commands.data.StorageDataAccessor;
 import net.minecraft.util.Mth;
 
 public class DataCommands {
-    private static final SimpleCommandExceptionType ERROR_MERGE_UNCHANGED = new SimpleCommandExceptionType(new TranslatableComponent("commands.data.merge.failed", new Object[0]));
+    private static final SimpleCommandExceptionType ERROR_MERGE_UNCHANGED = new SimpleCommandExceptionType(new TranslatableComponent("commands.data.merge.failed"));
     private static final DynamicCommandExceptionType ERROR_GET_NOT_NUMBER = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.data.get.invalid", object));
     private static final DynamicCommandExceptionType ERROR_GET_NON_EXISTENT = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.data.get.unknown", object));
-    private static final SimpleCommandExceptionType ERROR_MULTIPLE_TAGS = new SimpleCommandExceptionType(new TranslatableComponent("commands.data.get.multiple", new Object[0]));
+    private static final SimpleCommandExceptionType ERROR_MULTIPLE_TAGS = new SimpleCommandExceptionType(new TranslatableComponent("commands.data.get.multiple"));
     private static final DynamicCommandExceptionType ERROR_EXPECTED_LIST = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.data.modify.expected_list", object));
     private static final DynamicCommandExceptionType ERROR_EXPECTED_OBJECT = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.data.modify.expected_object", object));
     private static final DynamicCommandExceptionType ERROR_INVALID_INDEX = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.data.modify.invalid_index", object));

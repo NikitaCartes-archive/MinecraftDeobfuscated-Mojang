@@ -21,7 +21,7 @@ import net.minecraft.world.phys.BlockHitResult;
 
 public class SmithingTableBlock
 extends CraftingTableBlock {
-    private static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.upgrade", new Object[0]);
+    private static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.upgrade");
 
     protected SmithingTableBlock(BlockBehaviour.Properties properties) {
         super(properties);

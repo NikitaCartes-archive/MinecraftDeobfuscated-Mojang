@@ -63,6 +63,7 @@ public class Options {
     private static final Splitter OPTION_SPLITTER = Splitter.on(':').limit(2);
     public double sensitivity = 0.5;
     public int renderDistance = -1;
+    public float entityDistanceScaling = 1.0f;
     public int framerateLimit = 120;
     public CloudStatus renderClouds = CloudStatus.FANCY;
     public boolean fancyGraphics = true;
@@ -297,6 +298,9 @@ public class Options {
                     if ("renderDistance".equals(string2)) {
                         this.renderDistance = Integer.parseInt(string22);
                     }
+                    if ("entityDistanceScaling".equals(string2)) {
+                        this.entityDistanceScaling = Float.parseFloat(string22);
+                    }
                     if ("guiScale".equals(string2)) {
                         this.guiScale = Integer.parseInt(string22);
                     }
@@ -497,6 +501,7 @@ public class Options {
             printWriter.println("fov:" + (this.fov - 70.0) / 40.0);
             printWriter.println("gamma:" + this.gamma);
             printWriter.println("renderDistance:" + this.renderDistance);
+            printWriter.println("entityDistanceScaling:" + this.entityDistanceScaling);
             printWriter.println("guiScale:" + this.guiScale);
             printWriter.println("particles:" + this.particles.getId());
             printWriter.println("maxFps:" + this.framerateLimit);

@@ -22,7 +22,9 @@ public class BlockTags {
     public static final Tag.Named<Block> WOODEN_STAIRS = BlockTags.bind("wooden_stairs");
     public static final Tag.Named<Block> WOODEN_SLABS = BlockTags.bind("wooden_slabs");
     public static final Tag.Named<Block> WOODEN_FENCES = BlockTags.bind("wooden_fences");
+    public static final Tag.Named<Block> PRESSURE_PLATES = BlockTags.bind("pressure_plates");
     public static final Tag.Named<Block> WOODEN_PRESSURE_PLATES = BlockTags.bind("wooden_pressure_plates");
+    public static final Tag.Named<Block> STONE_PRESSURE_PLATES = BlockTags.bind("stone_pressure_plates");
     public static final Tag.Named<Block> WOODEN_TRAPDOORS = BlockTags.bind("wooden_trapdoors");
     public static final Tag.Named<Block> DOORS = BlockTags.bind("doors");
     public static final Tag.Named<Block> SAPLINGS = BlockTags.bind("saplings");

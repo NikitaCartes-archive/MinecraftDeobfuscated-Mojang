@@ -55,6 +55,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.LevelStorageSource;
 import org.jetbrains.annotations.Nullable;
 
 public class ServerChunkCache
@@ -76,16 +77,16 @@ extends ChunkSource {
     private final ChunkStatus[] lastChunkStatus = new ChunkStatus[4];
     private final ChunkAccess[] lastChunk = new ChunkAccess[4];
 
-    public ServerChunkCache(ServerLevel serverLevel, File file, DataFixer dataFixer, StructureManager structureManager, Executor executor, ChunkGenerator<?> chunkGenerator, int i, boolean bl, ChunkProgressListener chunkProgressListener, Supplier<DimensionDataStorage> supplier) {
+    public ServerChunkCache(ServerLevel serverLevel, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, StructureManager structureManager, Executor executor, ChunkGenerator<?> chunkGenerator, int i, boolean bl, ChunkProgressListener chunkProgressListener, Supplier<DimensionDataStorage> supplier) {
         this.level = serverLevel;
         this.mainThreadProcessor = new MainThreadExecutor(serverLevel);
         this.generator = chunkGenerator;
         this.mainThread = Thread.currentThread();
-        File file2 = serverLevel.getDimension().getType().getStorageFolder(file);
-        File file3 = new File(file2, "data");
-        file3.mkdirs();
-        this.dataStorage = new DimensionDataStorage(file3, dataFixer);
-        this.chunkMap = new ChunkMap(serverLevel, file, dataFixer, structureManager, executor, this.mainThreadProcessor, this, this.getGenerator(), chunkProgressListener, supplier, i, bl);
+        File file = levelStorageAccess.getDimensionPath(serverLevel.getDimension().getType());
+        File file2 = new File(file, "data");
+        file2.mkdirs();
+        this.dataStorage = new DimensionDataStorage(file2, dataFixer);
+        this.chunkMap = new ChunkMap(serverLevel, levelStorageAccess, dataFixer, structureManager, executor, this.mainThreadProcessor, this, this.getGenerator(), chunkProgressListener, supplier, i, bl);
         this.lightEngine = this.chunkMap.getLightEngine();
         this.distanceManager = this.chunkMap.getDistanceManager();
         this.clearCache();

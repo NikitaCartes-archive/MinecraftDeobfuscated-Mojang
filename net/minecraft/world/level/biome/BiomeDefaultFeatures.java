@@ -6,6 +6,7 @@ package net.minecraft.world.level.biome;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import java.util.OptionalInt;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
@@ -34,7 +35,6 @@ import net.minecraft.world.level.levelgen.feature.configurations.DiskConfigurati
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.MegaTreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.MultiJigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoiseDependantDecoratorConfiguration;
@@ -51,11 +51,17 @@ import net.minecraft.world.level.levelgen.feature.configurations.RuinedPortalCon
 import net.minecraft.world.level.levelgen.feature.configurations.SeagrassFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.featuresize.ThreeLayersFeatureSize;
+import net.minecraft.world.level.levelgen.feature.featuresize.TwoLayersFeatureSize;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.AcaciaFoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.BlobFoliagePlacer;
+import net.minecraft.world.level.levelgen.feature.foliageplacers.BushFoliagePlacer;
+import net.minecraft.world.level.levelgen.feature.foliageplacers.DarkOakFoliagePlacer;
+import net.minecraft.world.level.levelgen.feature.foliageplacers.FancyFoliagePlacer;
+import net.minecraft.world.level.levelgen.feature.foliageplacers.MegaJungleFoliagePlacer;
+import net.minecraft.world.level.levelgen.feature.foliageplacers.MegaPineFoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.PineFoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.SpruceFoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.stateproviders.ForestFlowerProvider;
@@ -68,7 +74,11 @@ import net.minecraft.world.level.levelgen.feature.treedecorators.BeehiveDecorato
 import net.minecraft.world.level.levelgen.feature.treedecorators.CocoaDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.LeaveVineDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TrunkVineDecorator;
+import net.minecraft.world.level.levelgen.feature.trunkplacers.DarkOakTrunkPlacer;
+import net.minecraft.world.level.levelgen.feature.trunkplacers.FancyTrunkPlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.ForkingTrunkPlacer;
+import net.minecraft.world.level.levelgen.feature.trunkplacers.GiantTrunkPlacer;
+import net.minecraft.world.level.levelgen.feature.trunkplacers.MegaJungleTrunkPlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.StraightTrunkPlacer;
 import net.minecraft.world.level.levelgen.placement.CarvingMaskDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.ChanceDecoratorConfiguration;
@@ -157,30 +167,33 @@ public class BiomeDefaultFeatures {
     private static final BlockState NETHER_WART_BLOCK = Blocks.NETHER_WART_BLOCK.defaultBlockState();
     private static final BlockState CRIMSON_STEM = Blocks.CRIMSON_STEM.defaultBlockState();
     private static final BlockState SHROOMLIGHT = Blocks.SHROOMLIGHT.defaultBlockState();
-    public static final SmallTreeConfiguration NORMAL_TREE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(4, 2, 0)).ignoreVines().build();
-    public static final SmallTreeConfiguration JUNGLE_TREE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(new SimpleStateProvider(JUNGLE_LOG), new SimpleStateProvider(JUNGLE_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(4, 8, 0)).decorators(ImmutableList.of(new CocoaDecorator(0.2f), new TrunkVineDecorator(), new LeaveVineDecorator())).ignoreVines().build();
-    public static final SmallTreeConfiguration JUNGLE_TREE_NOVINE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(new SimpleStateProvider(JUNGLE_LOG), new SimpleStateProvider(JUNGLE_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(4, 8, 0)).ignoreVines().build();
-    public static final SmallTreeConfiguration PINE_TREE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(new SimpleStateProvider(SPRUCE_LOG), new SimpleStateProvider(SPRUCE_LEAVES), new PineFoliagePlacer(1, 0, 1, 0, 3, 1), new StraightTrunkPlacer(6, 4, 0)).ignoreVines().build();
-    public static final SmallTreeConfiguration SPRUCE_TREE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(new SimpleStateProvider(SPRUCE_LOG), new SimpleStateProvider(SPRUCE_LEAVES), new SpruceFoliagePlacer(2, 1, 0, 2, 1, 1), new StraightTrunkPlacer(4, 3, 2)).ignoreVines().build();
-    public static final SmallTreeConfiguration ACACIA_TREE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(new SimpleStateProvider(ACACIA_LOG), new SimpleStateProvider(ACACIA_LEAVES), new AcaciaFoliagePlacer(2, 0, 0, 0), new ForkingTrunkPlacer(5, 2, 2)).ignoreVines().build();
-    public static final SmallTreeConfiguration BIRCH_TREE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(5, 2, 0)).ignoreVines().build();
-    public static final SmallTreeConfiguration BIRCH_TREE_WITH_BEES_0002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(5, 2, 0)).ignoreVines().decorators(ImmutableList.of(new BeehiveDecorator(0.002f))).build();
-    public static final SmallTreeConfiguration SUPER_BIRCH_TREE_WITH_BEES_0002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(5, 2, 6)).ignoreVines().decorators(ImmutableList.of(new BeehiveDecorator(0.002f))).build();
-    public static final SmallTreeConfiguration SWAMP_TREE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(3, 0, 0, 0, 3), new StraightTrunkPlacer(5, 3, 0)).maxWaterDepth(1).decorators(ImmutableList.of(new LeaveVineDecorator())).build();
-    public static final SmallTreeConfiguration FANCY_TREE_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(0, 0, 0, 0, 0), new StraightTrunkPlacer(0, 0, 0)).build();
-    public static final SmallTreeConfiguration NORMAL_TREE_WITH_BEES_005_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(4, 2, 0)).ignoreVines().decorators(ImmutableList.of(new BeehiveDecorator(0.05f))).build();
-    public static final SmallTreeConfiguration FANCY_TREE_WITH_BEES_0002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(0, 0, 0, 0, 0), new StraightTrunkPlacer(0, 0, 0)).decorators(ImmutableList.of(new BeehiveDecorator(0.002f))).build();
-    public static final SmallTreeConfiguration FANCY_TREE_WITH_BEES_005_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(0, 0, 0, 0, 0), new StraightTrunkPlacer(0, 0, 0)).decorators(ImmutableList.of(new BeehiveDecorator(0.05f))).build();
-    public static final SmallTreeConfiguration NORMAL_TREE_WITH_BEES_0002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(4, 2, 0)).ignoreVines().decorators(ImmutableList.of(new BeehiveDecorator(0.002f))).build();
-    public static final SmallTreeConfiguration NORMAL_TREE_WITH_BEES_002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(4, 2, 0)).ignoreVines().decorators(ImmutableList.of(new BeehiveDecorator(0.02f))).build();
-    public static final SmallTreeConfiguration FANCY_TREE_WITH_BEES_002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(0, 0, 0, 0, 0), new StraightTrunkPlacer(0, 0, 0)).decorators(ImmutableList.of(new BeehiveDecorator(0.02f))).build();
-    public static final SmallTreeConfiguration BIRCH_TREE_WITH_BEES_002_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(5, 2, 0)).ignoreVines().decorators(ImmutableList.of(new BeehiveDecorator(0.02f))).build();
-    public static final SmallTreeConfiguration BIRCH_TREE_WITH_BEES_005_CONFIG = new SmallTreeConfiguration.SmallTreeConfigurationBuilder(new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(5, 2, 0)).ignoreVines().decorators(ImmutableList.of(new BeehiveDecorator(0.05f))).build();
-    public static final TreeConfiguration JUNGLE_BUSH_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(JUNGLE_LOG), new SimpleStateProvider(OAK_LEAVES)).baseHeight(4).build();
-    public static final MegaTreeConfiguration DARK_OAK_TREE_CONFIG = new MegaTreeConfiguration.MegaTreeConfigurationBuilder(new SimpleStateProvider(DARK_OAK_LOG), new SimpleStateProvider(DARK_OAK_LEAVES)).baseHeight(6).build();
-    public static final MegaTreeConfiguration MEGA_SPRUCE_TREE_CONFIG = new MegaTreeConfiguration.MegaTreeConfigurationBuilder(new SimpleStateProvider(SPRUCE_LOG), new SimpleStateProvider(SPRUCE_LEAVES)).baseHeight(13).heightInterval(15).crownHeight(13).decorators(ImmutableList.of(new AlterGroundDecorator(new SimpleStateProvider(PODZOL)))).build();
-    public static final MegaTreeConfiguration MEGA_PINE_TREE_CONFIG = new MegaTreeConfiguration.MegaTreeConfigurationBuilder(new SimpleStateProvider(SPRUCE_LOG), new SimpleStateProvider(SPRUCE_LEAVES)).baseHeight(13).heightInterval(15).crownHeight(3).decorators(ImmutableList.of(new AlterGroundDecorator(new SimpleStateProvider(PODZOL)))).build();
-    public static final MegaTreeConfiguration MEGA_JUNGLE_TREE_CONFIG = new MegaTreeConfiguration.MegaTreeConfigurationBuilder(new SimpleStateProvider(JUNGLE_LOG), new SimpleStateProvider(JUNGLE_LEAVES)).baseHeight(10).heightInterval(20).decorators(ImmutableList.of(new TrunkVineDecorator(), new LeaveVineDecorator())).build();
+    public static final TreeConfiguration NORMAL_TREE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(4, 2, 0), new TwoLayersFeatureSize(1, 0, 1)).ignoreVines().build();
+    private static final BeehiveDecorator BEEHIVE_0002 = new BeehiveDecorator(0.002f);
+    private static final BeehiveDecorator BEEHIVE_002 = new BeehiveDecorator(0.02f);
+    private static final BeehiveDecorator BEEHIVE_005 = new BeehiveDecorator(0.05f);
+    public static final TreeConfiguration NORMAL_TREE_WITH_BEES_0002_CONFIG = NORMAL_TREE_CONFIG.withDecorators(ImmutableList.of(BEEHIVE_0002));
+    public static final TreeConfiguration NORMAL_TREE_WITH_BEES_002_CONFIG = NORMAL_TREE_CONFIG.withDecorators(ImmutableList.of(BEEHIVE_002));
+    public static final TreeConfiguration NORMAL_TREE_WITH_BEES_005_CONFIG = NORMAL_TREE_CONFIG.withDecorators(ImmutableList.of(BEEHIVE_005));
+    public static final TreeConfiguration JUNGLE_TREE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(JUNGLE_LOG), new SimpleStateProvider(JUNGLE_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(4, 8, 0), new TwoLayersFeatureSize(1, 0, 1)).decorators(ImmutableList.of(new CocoaDecorator(0.2f), new TrunkVineDecorator(), new LeaveVineDecorator())).ignoreVines().build();
+    public static final TreeConfiguration JUNGLE_TREE_NOVINE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(JUNGLE_LOG), new SimpleStateProvider(JUNGLE_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(4, 8, 0), new TwoLayersFeatureSize(1, 0, 1)).ignoreVines().build();
+    public static final TreeConfiguration PINE_TREE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(SPRUCE_LOG), new SimpleStateProvider(SPRUCE_LEAVES), new PineFoliagePlacer(1, 0, 1, 0, 3, 1), new StraightTrunkPlacer(6, 4, 0), new TwoLayersFeatureSize(2, 0, 2)).ignoreVines().build();
+    public static final TreeConfiguration SPRUCE_TREE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(SPRUCE_LOG), new SimpleStateProvider(SPRUCE_LEAVES), new SpruceFoliagePlacer(2, 1, 0, 2, 1, 1), new StraightTrunkPlacer(4, 3, 2), new TwoLayersFeatureSize(2, 0, 2)).ignoreVines().build();
+    public static final TreeConfiguration ACACIA_TREE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(ACACIA_LOG), new SimpleStateProvider(ACACIA_LEAVES), new AcaciaFoliagePlacer(2, 0, 0, 0), new ForkingTrunkPlacer(5, 2, 2), new TwoLayersFeatureSize(1, 0, 2)).ignoreVines().build();
+    public static final TreeConfiguration BIRCH_TREE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(5, 2, 0), new TwoLayersFeatureSize(1, 0, 1)).ignoreVines().build();
+    public static final TreeConfiguration BIRCH_TREE_WITH_BEES_0002_CONFIG = BIRCH_TREE_CONFIG.withDecorators(ImmutableList.of(BEEHIVE_0002));
+    public static final TreeConfiguration BIRCH_TREE_WITH_BEES_002_CONFIG = BIRCH_TREE_CONFIG.withDecorators(ImmutableList.of(BEEHIVE_002));
+    public static final TreeConfiguration BIRCH_TREE_WITH_BEES_005_CONFIG = BIRCH_TREE_CONFIG.withDecorators(ImmutableList.of(BEEHIVE_005));
+    public static final TreeConfiguration SUPER_BIRCH_TREE_WITH_BEES_0002_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(5, 2, 6), new TwoLayersFeatureSize(1, 0, 1)).ignoreVines().decorators(ImmutableList.of(BEEHIVE_0002)).build();
+    public static final TreeConfiguration SWAMP_TREE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new BlobFoliagePlacer(3, 0, 0, 0, 3), new StraightTrunkPlacer(5, 3, 0), new TwoLayersFeatureSize(1, 0, 1)).maxWaterDepth(1).decorators(ImmutableList.of(new LeaveVineDecorator())).build();
+    public static final TreeConfiguration FANCY_TREE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(OAK_LOG), new SimpleStateProvider(OAK_LEAVES), new FancyFoliagePlacer(2, 0, 4, 0, 4), new FancyTrunkPlacer(3, 11, 0), new TwoLayersFeatureSize(0, 0, 0, OptionalInt.of(4))).ignoreVines().heightmap(Heightmap.Types.MOTION_BLOCKING).build();
+    public static final TreeConfiguration FANCY_TREE_WITH_BEES_0002_CONFIG = FANCY_TREE_CONFIG.withDecorators(ImmutableList.of(BEEHIVE_0002));
+    public static final TreeConfiguration FANCY_TREE_WITH_BEES_002_CONFIG = FANCY_TREE_CONFIG.withDecorators(ImmutableList.of(BEEHIVE_002));
+    public static final TreeConfiguration FANCY_TREE_WITH_BEES_005_CONFIG = FANCY_TREE_CONFIG.withDecorators(ImmutableList.of(BEEHIVE_005));
+    public static final TreeConfiguration JUNGLE_BUSH_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(JUNGLE_LOG), new SimpleStateProvider(OAK_LEAVES), new BushFoliagePlacer(2, 0, 1, 0, 2), new StraightTrunkPlacer(1, 0, 0), new TwoLayersFeatureSize(0, 0, 0)).heightmap(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES).build();
+    public static final TreeConfiguration DARK_OAK_TREE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(DARK_OAK_LOG), new SimpleStateProvider(DARK_OAK_LEAVES), new DarkOakFoliagePlacer(0, 0, 0, 0), new DarkOakTrunkPlacer(6, 2, 1), new ThreeLayersFeatureSize(1, 1, 0, 1, 2, OptionalInt.empty())).maxWaterDepth(Integer.MAX_VALUE).heightmap(Heightmap.Types.MOTION_BLOCKING).ignoreVines().build();
+    public static final TreeConfiguration MEGA_SPRUCE_TREE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(SPRUCE_LOG), new SimpleStateProvider(SPRUCE_LEAVES), new MegaPineFoliagePlacer(0, 0, 0, 0, 4, 13), new GiantTrunkPlacer(13, 2, 14), new TwoLayersFeatureSize(1, 1, 2)).decorators(ImmutableList.of(new AlterGroundDecorator(new SimpleStateProvider(PODZOL)))).build();
+    public static final TreeConfiguration MEGA_PINE_TREE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(SPRUCE_LOG), new SimpleStateProvider(SPRUCE_LEAVES), new MegaPineFoliagePlacer(0, 0, 0, 0, 4, 3), new GiantTrunkPlacer(13, 2, 14), new TwoLayersFeatureSize(1, 1, 2)).decorators(ImmutableList.of(new AlterGroundDecorator(new SimpleStateProvider(PODZOL)))).build();
+    public static final TreeConfiguration MEGA_JUNGLE_TREE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(JUNGLE_LOG), new SimpleStateProvider(JUNGLE_LEAVES), new MegaJungleFoliagePlacer(2, 0, 0, 0, 2), new MegaJungleTrunkPlacer(10, 2, 19), new TwoLayersFeatureSize(1, 1, 2)).decorators(ImmutableList.of(new TrunkVineDecorator(), new LeaveVineDecorator())).build();
     public static final RandomPatchConfiguration DEFAULT_GRASS_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(new SimpleStateProvider(GRASS), new SimpleBlockPlacer()).tries(32).build();
     public static final RandomPatchConfiguration TAIGA_GRASS_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(new WeightedStateProvider().add(GRASS, 1).add(FERN, 4), new SimpleBlockPlacer()).tries(32).build();
     public static final RandomPatchConfiguration JUNGLE_GRASS_CONFIG = new RandomPatchConfiguration.GrassConfigurationBuilder(new WeightedStateProvider().add(GRASS, 3).add(FERN, 1), new SimpleBlockPlacer()).blacklist(ImmutableSet.of(PODZOL)).tries(32).build();
@@ -245,21 +258,21 @@ public class BiomeDefaultFeatures {
     }
 
     public static void addStructureFeaturePlacement(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.UNDERGROUND_STRUCTURES, Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004f, MineshaftFeature.Type.NORMAL)).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
-        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.PILLAGER_OUTPOST.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
-        biome.addFeature(GenerationStep.Decoration.UNDERGROUND_STRUCTURES, Feature.STRONGHOLD.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
-        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.SWAMP_HUT.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
-        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.DESERT_PYRAMID.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
-        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.JUNGLE_TEMPLE.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
-        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.IGLOO.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
-        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.RUINED_PORTAL.configured(new RuinedPortalConfiguration()).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
-        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.SHIPWRECK.configured(new ShipwreckConfiguration(false)).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
-        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.OCEAN_MONUMENT.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
-        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.WOODLAND_MANSION.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
-        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.OCEAN_RUIN.configured(new OceanRuinConfiguration(OceanRuinFeature.Type.COLD, 0.3f, 0.9f)).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
-        biome.addFeature(GenerationStep.Decoration.UNDERGROUND_STRUCTURES, Feature.BURIED_TREASURE.configured(new BuriedTreasureConfiguration(0.01f)).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
-        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.VILLAGE.configured(new JigsawConfiguration("village/plains/town_centers", 6)).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
-        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.BASTION_REMNANT.configured(new MultiJigsawConfiguration(BastionPieces.POOLS)).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
+        biome.addFeature(GenerationStep.Decoration.UNDERGROUND_STRUCTURES, Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004f, MineshaftFeature.Type.NORMAL)));
+        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.PILLAGER_OUTPOST.configured(FeatureConfiguration.NONE));
+        biome.addFeature(GenerationStep.Decoration.UNDERGROUND_STRUCTURES, Feature.STRONGHOLD.configured(FeatureConfiguration.NONE));
+        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.SWAMP_HUT.configured(FeatureConfiguration.NONE));
+        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.DESERT_PYRAMID.configured(FeatureConfiguration.NONE));
+        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.JUNGLE_TEMPLE.configured(FeatureConfiguration.NONE));
+        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.IGLOO.configured(FeatureConfiguration.NONE));
+        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.RUINED_PORTAL.configured(new RuinedPortalConfiguration()));
+        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.SHIPWRECK.configured(new ShipwreckConfiguration(false)));
+        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.OCEAN_MONUMENT.configured(FeatureConfiguration.NONE));
+        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.WOODLAND_MANSION.configured(FeatureConfiguration.NONE));
+        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.OCEAN_RUIN.configured(new OceanRuinConfiguration(OceanRuinFeature.Type.COLD, 0.3f, 0.9f)));
+        biome.addFeature(GenerationStep.Decoration.UNDERGROUND_STRUCTURES, Feature.BURIED_TREASURE.configured(new BuriedTreasureConfiguration(0.01f)));
+        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.VILLAGE.configured(new JigsawConfiguration("village/plains/town_centers", 6)));
+        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.BASTION_REMNANT.configured(new MultiJigsawConfiguration(BastionPieces.POOLS)));
     }
 
     public static void addDefaultLakes(Biome biome) {
@@ -336,67 +349,67 @@ public class BiomeDefaultFeatures {
 
     public static void addBambooVegetation(Biome biome) {
         biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.BAMBOO.configured(new ProbabilityFeatureConfiguration(0.2f)).decorated(FeatureDecorator.TOP_SOLID_HEIGHTMAP_NOISE_BIASED.configured(new NoiseCountFactorDecoratorConfiguration(160, 80.0, 0.3, Heightmap.Types.WORLD_SURFACE_WG))));
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.FANCY_TREE.configured(FANCY_TREE_CONFIG).weighted(0.05f), Feature.JUNGLE_GROUND_BUSH.configured(JUNGLE_BUSH_CONFIG).weighted(0.15f), Feature.MEGA_JUNGLE_TREE.configured(MEGA_JUNGLE_TREE_CONFIG).weighted(0.7f)), Feature.RANDOM_PATCH.configured(JUNGLE_GRASS_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(30, 0.1f, 1))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.TREE.configured(FANCY_TREE_CONFIG).weighted(0.05f), Feature.TREE.configured(JUNGLE_BUSH_CONFIG).weighted(0.15f), Feature.TREE.configured(MEGA_JUNGLE_TREE_CONFIG).weighted(0.7f)), Feature.RANDOM_PATCH.configured(JUNGLE_GRASS_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(30, 0.1f, 1))));
     }
 
     public static void addTaigaTrees(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.NORMAL_TREE.configured(PINE_TREE_CONFIG).weighted(0.33333334f)), Feature.NORMAL_TREE.configured(SPRUCE_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1f, 1))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.TREE.configured(PINE_TREE_CONFIG).weighted(0.33333334f)), Feature.TREE.configured(SPRUCE_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1f, 1))));
     }
 
     public static void addWaterTrees(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.FANCY_TREE.configured(FANCY_TREE_CONFIG).weighted(0.1f)), Feature.NORMAL_TREE.configured(NORMAL_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(0, 0.1f, 1))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.TREE.configured(FANCY_TREE_CONFIG).weighted(0.1f)), Feature.TREE.configured(NORMAL_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(0, 0.1f, 1))));
     }
 
     public static void addBirchTrees(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.NORMAL_TREE.configured(BIRCH_TREE_WITH_BEES_0002_CONFIG).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1f, 1))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.TREE.configured(BIRCH_TREE_WITH_BEES_0002_CONFIG).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1f, 1))));
     }
 
     public static void addOtherBirchTrees(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.NORMAL_TREE.configured(BIRCH_TREE_WITH_BEES_0002_CONFIG).weighted(0.2f), Feature.FANCY_TREE.configured(FANCY_TREE_WITH_BEES_0002_CONFIG).weighted(0.1f)), Feature.NORMAL_TREE.configured(NORMAL_TREE_WITH_BEES_0002_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1f, 1))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.TREE.configured(BIRCH_TREE_WITH_BEES_0002_CONFIG).weighted(0.2f), Feature.TREE.configured(FANCY_TREE_WITH_BEES_0002_CONFIG).weighted(0.1f)), Feature.TREE.configured(NORMAL_TREE_WITH_BEES_0002_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1f, 1))));
     }
 
     public static void addTallBirchTrees(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.NORMAL_TREE.configured(SUPER_BIRCH_TREE_WITH_BEES_0002_CONFIG).weighted(0.5f)), Feature.NORMAL_TREE.configured(BIRCH_TREE_WITH_BEES_0002_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1f, 1))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.TREE.configured(SUPER_BIRCH_TREE_WITH_BEES_0002_CONFIG).weighted(0.5f)), Feature.TREE.configured(BIRCH_TREE_WITH_BEES_0002_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1f, 1))));
     }
 
     public static void addSavannaTrees(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.NORMAL_TREE.configured(ACACIA_TREE_CONFIG).weighted(0.8f)), Feature.NORMAL_TREE.configured(NORMAL_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(1, 0.1f, 1))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.TREE.configured(ACACIA_TREE_CONFIG).weighted(0.8f)), Feature.TREE.configured(NORMAL_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(1, 0.1f, 1))));
     }
 
     public static void addShatteredSavannaTrees(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.NORMAL_TREE.configured(ACACIA_TREE_CONFIG).weighted(0.8f)), Feature.NORMAL_TREE.configured(NORMAL_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(2, 0.1f, 1))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.TREE.configured(ACACIA_TREE_CONFIG).weighted(0.8f)), Feature.TREE.configured(NORMAL_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(2, 0.1f, 1))));
     }
 
     public static void addMountainTrees(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.NORMAL_TREE.configured(SPRUCE_TREE_CONFIG).weighted(0.666f), Feature.FANCY_TREE.configured(FANCY_TREE_CONFIG).weighted(0.1f)), Feature.NORMAL_TREE.configured(NORMAL_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(0, 0.1f, 1))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.TREE.configured(SPRUCE_TREE_CONFIG).weighted(0.666f), Feature.TREE.configured(FANCY_TREE_CONFIG).weighted(0.1f)), Feature.TREE.configured(NORMAL_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(0, 0.1f, 1))));
     }
 
     public static void addMountainEdgeTrees(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.NORMAL_TREE.configured(SPRUCE_TREE_CONFIG).weighted(0.666f), Feature.FANCY_TREE.configured(FANCY_TREE_CONFIG).weighted(0.1f)), Feature.NORMAL_TREE.configured(NORMAL_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(3, 0.1f, 1))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.TREE.configured(SPRUCE_TREE_CONFIG).weighted(0.666f), Feature.TREE.configured(FANCY_TREE_CONFIG).weighted(0.1f)), Feature.TREE.configured(NORMAL_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(3, 0.1f, 1))));
     }
 
     public static void addJungleTrees(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.FANCY_TREE.configured(FANCY_TREE_CONFIG).weighted(0.1f), Feature.JUNGLE_GROUND_BUSH.configured(JUNGLE_BUSH_CONFIG).weighted(0.5f), Feature.MEGA_JUNGLE_TREE.configured(MEGA_JUNGLE_TREE_CONFIG).weighted(0.33333334f)), Feature.NORMAL_TREE.configured(JUNGLE_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(50, 0.1f, 1))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.TREE.configured(FANCY_TREE_CONFIG).weighted(0.1f), Feature.TREE.configured(JUNGLE_BUSH_CONFIG).weighted(0.5f), Feature.TREE.configured(MEGA_JUNGLE_TREE_CONFIG).weighted(0.33333334f)), Feature.TREE.configured(JUNGLE_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(50, 0.1f, 1))));
     }
 
     public static void addJungleEdgeTrees(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.FANCY_TREE.configured(FANCY_TREE_CONFIG).weighted(0.1f), Feature.JUNGLE_GROUND_BUSH.configured(JUNGLE_BUSH_CONFIG).weighted(0.5f)), Feature.NORMAL_TREE.configured(JUNGLE_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(2, 0.1f, 1))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.TREE.configured(FANCY_TREE_CONFIG).weighted(0.1f), Feature.TREE.configured(JUNGLE_BUSH_CONFIG).weighted(0.5f)), Feature.TREE.configured(JUNGLE_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(2, 0.1f, 1))));
     }
 
     public static void addBadlandsTrees(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.NORMAL_TREE.configured(NORMAL_TREE_CONFIG).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(5, 0.1f, 1))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.TREE.configured(NORMAL_TREE_CONFIG).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(5, 0.1f, 1))));
     }
 
     public static void addSnowyTrees(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.NORMAL_TREE.configured(SPRUCE_TREE_CONFIG).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(0, 0.1f, 1))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.TREE.configured(SPRUCE_TREE_CONFIG).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(0, 0.1f, 1))));
     }
 
     public static void addGiantSpruceTrees(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.MEGA_SPRUCE_TREE.configured(MEGA_SPRUCE_TREE_CONFIG).weighted(0.33333334f), Feature.NORMAL_TREE.configured(PINE_TREE_CONFIG).weighted(0.33333334f)), Feature.NORMAL_TREE.configured(SPRUCE_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1f, 1))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.TREE.configured(MEGA_SPRUCE_TREE_CONFIG).weighted(0.33333334f), Feature.TREE.configured(PINE_TREE_CONFIG).weighted(0.33333334f)), Feature.TREE.configured(SPRUCE_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1f, 1))));
     }
 
     public static void addGiantTrees(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.MEGA_SPRUCE_TREE.configured(MEGA_SPRUCE_TREE_CONFIG).weighted(0.025641026f), Feature.MEGA_SPRUCE_TREE.configured(MEGA_PINE_TREE_CONFIG).weighted(0.30769232f), Feature.NORMAL_TREE.configured(PINE_TREE_CONFIG).weighted(0.33333334f)), Feature.NORMAL_TREE.configured(SPRUCE_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1f, 1))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.TREE.configured(MEGA_SPRUCE_TREE_CONFIG).weighted(0.025641026f), Feature.TREE.configured(MEGA_PINE_TREE_CONFIG).weighted(0.30769232f), Feature.TREE.configured(PINE_TREE_CONFIG).weighted(0.33333334f)), Feature.TREE.configured(SPRUCE_TREE_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1f, 1))));
     }
 
     public static void addJungleGrass(Biome biome) {
@@ -429,7 +442,7 @@ public class BiomeDefaultFeatures {
     }
 
     public static void addSwampVegetation(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.NORMAL_TREE.configured(SWAMP_TREE_CONFIG).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(2, 0.1f, 1))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.TREE.configured(SWAMP_TREE_CONFIG).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(2, 0.1f, 1))));
         biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.FLOWER.configured(SwAMP_FLOWER_CONFIG).decorated(FeatureDecorator.COUNT_HEIGHTMAP_32.configured(new FrequencyDecoratorConfiguration(1))));
         biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_PATCH.configured(DEFAULT_GRASS_CONFIG).decorated(FeatureDecorator.COUNT_HEIGHTMAP_DOUBLE.configured(new FrequencyDecoratorConfiguration(5))));
         biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_PATCH.configured(DEAD_BUSH_CONFIG).decorated(FeatureDecorator.COUNT_HEIGHTMAP_DOUBLE.configured(new FrequencyDecoratorConfiguration(1))));
@@ -445,7 +458,7 @@ public class BiomeDefaultFeatures {
     }
 
     public static void addPlainVegetation(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.FANCY_TREE.configured(FANCY_TREE_WITH_BEES_005_CONFIG).weighted(0.33333334f)), Feature.NORMAL_TREE.configured(NORMAL_TREE_WITH_BEES_005_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(0, 0.05f, 1))));
+        biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.TREE.configured(FANCY_TREE_WITH_BEES_005_CONFIG).weighted(0.33333334f)), Feature.TREE.configured(NORMAL_TREE_WITH_BEES_005_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(0, 0.05f, 1))));
         biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.FLOWER.configured(PLAIN_FLOWER_CONFIG).decorated(FeatureDecorator.NOISE_HEIGHTMAP_32.configured(new NoiseDependantDecoratorConfiguration(-0.8, 15, 4))));
         biome.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_PATCH.configured(DEFAULT_GRASS_CONFIG).decorated(FeatureDecorator.NOISE_HEIGHTMAP_DOUBLE.configured(new NoiseDependantDecoratorConfiguration(-0.8, 5, 10))));
     }
@@ -559,11 +572,11 @@ public class BiomeDefaultFeatures {
     }
 
     public static void addSurfaceFreezing(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, Feature.FREEZE_TOP_LAYER.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
+        biome.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, Feature.FREEZE_TOP_LAYER.configured(FeatureConfiguration.NONE));
     }
 
     public static void addEndCity(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.END_CITY.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
+        biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.END_CITY.configured(FeatureConfiguration.NONE));
     }
 
     public static void addNetherDefaultOres(Biome biome) {

@@ -39,11 +39,11 @@ import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 public class ScoreboardCommand {
-    private static final SimpleCommandExceptionType ERROR_OBJECTIVE_ALREADY_EXISTS = new SimpleCommandExceptionType(new TranslatableComponent("commands.scoreboard.objectives.add.duplicate", new Object[0]));
-    private static final SimpleCommandExceptionType ERROR_DISPLAY_SLOT_ALREADY_EMPTY = new SimpleCommandExceptionType(new TranslatableComponent("commands.scoreboard.objectives.display.alreadyEmpty", new Object[0]));
-    private static final SimpleCommandExceptionType ERROR_DISPLAY_SLOT_ALREADY_SET = new SimpleCommandExceptionType(new TranslatableComponent("commands.scoreboard.objectives.display.alreadySet", new Object[0]));
-    private static final SimpleCommandExceptionType ERROR_TRIGGER_ALREADY_ENABLED = new SimpleCommandExceptionType(new TranslatableComponent("commands.scoreboard.players.enable.failed", new Object[0]));
-    private static final SimpleCommandExceptionType ERROR_NOT_TRIGGER = new SimpleCommandExceptionType(new TranslatableComponent("commands.scoreboard.players.enable.invalid", new Object[0]));
+    private static final SimpleCommandExceptionType ERROR_OBJECTIVE_ALREADY_EXISTS = new SimpleCommandExceptionType(new TranslatableComponent("commands.scoreboard.objectives.add.duplicate"));
+    private static final SimpleCommandExceptionType ERROR_DISPLAY_SLOT_ALREADY_EMPTY = new SimpleCommandExceptionType(new TranslatableComponent("commands.scoreboard.objectives.display.alreadyEmpty"));
+    private static final SimpleCommandExceptionType ERROR_DISPLAY_SLOT_ALREADY_SET = new SimpleCommandExceptionType(new TranslatableComponent("commands.scoreboard.objectives.display.alreadySet"));
+    private static final SimpleCommandExceptionType ERROR_TRIGGER_ALREADY_ENABLED = new SimpleCommandExceptionType(new TranslatableComponent("commands.scoreboard.players.enable.failed"));
+    private static final SimpleCommandExceptionType ERROR_NOT_TRIGGER = new SimpleCommandExceptionType(new TranslatableComponent("commands.scoreboard.players.enable.invalid"));
     private static final Dynamic2CommandExceptionType ERROR_NO_VALUE = new Dynamic2CommandExceptionType((object, object2) -> new TranslatableComponent("commands.scoreboard.players.get.null", object, object2));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
@@ -202,7 +202,7 @@ public class ScoreboardCommand {
     private static int listTrackedPlayers(CommandSourceStack commandSourceStack) {
         Collection<String> collection = commandSourceStack.getServer().getScoreboard().getTrackedPlayers();
         if (collection.isEmpty()) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.scoreboard.players.list.empty", new Object[0]), false);
+            commandSourceStack.sendSuccess(new TranslatableComponent("commands.scoreboard.players.list.empty"), false);
         } else {
             commandSourceStack.sendSuccess(new TranslatableComponent("commands.scoreboard.players.list.success", collection.size(), ComponentUtils.formatList(collection)), false);
         }
@@ -282,7 +282,7 @@ public class ScoreboardCommand {
     private static int listObjectives(CommandSourceStack commandSourceStack) {
         Collection<Objective> collection = commandSourceStack.getServer().getScoreboard().getObjectives();
         if (collection.isEmpty()) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.scoreboard.objectives.list.empty", new Object[0]), false);
+            commandSourceStack.sendSuccess(new TranslatableComponent("commands.scoreboard.objectives.list.empty"), false);
         } else {
             commandSourceStack.sendSuccess(new TranslatableComponent("commands.scoreboard.objectives.list.success", collection.size(), ComponentUtils.formatList(collection, Objective::getFormattedDisplayName)), false);
         }

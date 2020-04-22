@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.CompoundTag;
@@ -29,55 +31,63 @@ import org.jetbrains.annotations.Nullable;
 public class GameRules {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Map<Key<?>, Type<?>> GAME_RULE_TYPES = Maps.newTreeMap(Comparator.comparing(key -> Key.method_20772(key)));
-    public static final Key<BooleanValue> RULE_DOFIRETICK = GameRules.register("doFireTick", BooleanValue.method_20755(true));
-    public static final Key<BooleanValue> RULE_MOBGRIEFING = GameRules.register("mobGriefing", BooleanValue.method_20755(true));
-    public static final Key<BooleanValue> RULE_KEEPINVENTORY = GameRules.register("keepInventory", BooleanValue.method_20755(false));
-    public static final Key<BooleanValue> RULE_DOMOBSPAWNING = GameRules.register("doMobSpawning", BooleanValue.method_20755(true));
-    public static final Key<BooleanValue> RULE_DOMOBLOOT = GameRules.register("doMobLoot", BooleanValue.method_20755(true));
-    public static final Key<BooleanValue> RULE_DOBLOCKDROPS = GameRules.register("doTileDrops", BooleanValue.method_20755(true));
-    public static final Key<BooleanValue> RULE_DOENTITYDROPS = GameRules.register("doEntityDrops", BooleanValue.method_20755(true));
-    public static final Key<BooleanValue> RULE_COMMANDBLOCKOUTPUT = GameRules.register("commandBlockOutput", BooleanValue.method_20755(true));
-    public static final Key<BooleanValue> RULE_NATURAL_REGENERATION = GameRules.register("naturalRegeneration", BooleanValue.method_20755(true));
-    public static final Key<BooleanValue> RULE_DAYLIGHT = GameRules.register("doDaylightCycle", BooleanValue.method_20755(true));
-    public static final Key<BooleanValue> RULE_LOGADMINCOMMANDS = GameRules.register("logAdminCommands", BooleanValue.method_20755(true));
-    public static final Key<BooleanValue> RULE_SHOWDEATHMESSAGES = GameRules.register("showDeathMessages", BooleanValue.method_20755(true));
-    public static final Key<IntegerValue> RULE_RANDOMTICKING = GameRules.register("randomTickSpeed", IntegerValue.method_20764(3));
-    public static final Key<BooleanValue> RULE_SENDCOMMANDFEEDBACK = GameRules.register("sendCommandFeedback", BooleanValue.method_20755(true));
-    public static final Key<BooleanValue> RULE_REDUCEDDEBUGINFO = GameRules.register("reducedDebugInfo", BooleanValue.method_20757(false, (minecraftServer, booleanValue) -> {
+    public static final Key<BooleanValue> RULE_DOFIRETICK = GameRules.register("doFireTick", Category.UPDATES, BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_MOBGRIEFING = GameRules.register("mobGriefing", Category.MOBS, BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_KEEPINVENTORY = GameRules.register("keepInventory", Category.PLAYER, BooleanValue.method_20755(false));
+    public static final Key<BooleanValue> RULE_DOMOBSPAWNING = GameRules.register("doMobSpawning", Category.SPAWNING, BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_DOMOBLOOT = GameRules.register("doMobLoot", Category.DROPS, BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_DOBLOCKDROPS = GameRules.register("doTileDrops", Category.DROPS, BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_DOENTITYDROPS = GameRules.register("doEntityDrops", Category.DROPS, BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_COMMANDBLOCKOUTPUT = GameRules.register("commandBlockOutput", Category.CHAT, BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_NATURAL_REGENERATION = GameRules.register("naturalRegeneration", Category.PLAYER, BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_DAYLIGHT = GameRules.register("doDaylightCycle", Category.UPDATES, BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_LOGADMINCOMMANDS = GameRules.register("logAdminCommands", Category.CHAT, BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_SHOWDEATHMESSAGES = GameRules.register("showDeathMessages", Category.CHAT, BooleanValue.method_20755(true));
+    public static final Key<IntegerValue> RULE_RANDOMTICKING = GameRules.register("randomTickSpeed", Category.UPDATES, IntegerValue.method_20764(3));
+    public static final Key<BooleanValue> RULE_SENDCOMMANDFEEDBACK = GameRules.register("sendCommandFeedback", Category.CHAT, BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_REDUCEDDEBUGINFO = GameRules.register("reducedDebugInfo", Category.MISC, BooleanValue.method_20757(false, (minecraftServer, booleanValue) -> {
         byte b = booleanValue.get() ? (byte)22 : (byte)23;
         for (ServerPlayer serverPlayer : minecraftServer.getPlayerList().getPlayers()) {
             serverPlayer.connection.send(new ClientboundEntityEventPacket(serverPlayer, b));
         }
     }));
-    public static final Key<BooleanValue> RULE_SPECTATORSGENERATECHUNKS = GameRules.register("spectatorsGenerateChunks", BooleanValue.method_20755(true));
-    public static final Key<IntegerValue> RULE_SPAWN_RADIUS = GameRules.register("spawnRadius", IntegerValue.method_20764(10));
-    public static final Key<BooleanValue> RULE_DISABLE_ELYTRA_MOVEMENT_CHECK = GameRules.register("disableElytraMovementCheck", BooleanValue.method_20755(false));
-    public static final Key<IntegerValue> RULE_MAX_ENTITY_CRAMMING = GameRules.register("maxEntityCramming", IntegerValue.method_20764(24));
-    public static final Key<BooleanValue> RULE_WEATHER_CYCLE = GameRules.register("doWeatherCycle", BooleanValue.method_20755(true));
-    public static final Key<BooleanValue> RULE_LIMITED_CRAFTING = GameRules.register("doLimitedCrafting", BooleanValue.method_20755(false));
-    public static final Key<IntegerValue> RULE_MAX_COMMAND_CHAIN_LENGTH = GameRules.register("maxCommandChainLength", IntegerValue.method_20764(65536));
-    public static final Key<BooleanValue> RULE_ANNOUNCE_ADVANCEMENTS = GameRules.register("announceAdvancements", BooleanValue.method_20755(true));
-    public static final Key<BooleanValue> RULE_DISABLE_RAIDS = GameRules.register("disableRaids", BooleanValue.method_20755(false));
-    public static final Key<BooleanValue> RULE_DOINSOMNIA = GameRules.register("doInsomnia", BooleanValue.method_20755(true));
-    public static final Key<BooleanValue> RULE_DO_IMMEDIATE_RESPAWN = GameRules.register("doImmediateRespawn", BooleanValue.method_20757(false, (minecraftServer, booleanValue) -> {
+    public static final Key<BooleanValue> RULE_SPECTATORSGENERATECHUNKS = GameRules.register("spectatorsGenerateChunks", Category.PLAYER, BooleanValue.method_20755(true));
+    public static final Key<IntegerValue> RULE_SPAWN_RADIUS = GameRules.register("spawnRadius", Category.PLAYER, IntegerValue.method_20764(10));
+    public static final Key<BooleanValue> RULE_DISABLE_ELYTRA_MOVEMENT_CHECK = GameRules.register("disableElytraMovementCheck", Category.PLAYER, BooleanValue.method_20755(false));
+    public static final Key<IntegerValue> RULE_MAX_ENTITY_CRAMMING = GameRules.register("maxEntityCramming", Category.MOBS, IntegerValue.method_20764(24));
+    public static final Key<BooleanValue> RULE_WEATHER_CYCLE = GameRules.register("doWeatherCycle", Category.UPDATES, BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_LIMITED_CRAFTING = GameRules.register("doLimitedCrafting", Category.PLAYER, BooleanValue.method_20755(false));
+    public static final Key<IntegerValue> RULE_MAX_COMMAND_CHAIN_LENGTH = GameRules.register("maxCommandChainLength", Category.MISC, IntegerValue.method_20764(65536));
+    public static final Key<BooleanValue> RULE_ANNOUNCE_ADVANCEMENTS = GameRules.register("announceAdvancements", Category.CHAT, BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_DISABLE_RAIDS = GameRules.register("disableRaids", Category.MOBS, BooleanValue.method_20755(false));
+    public static final Key<BooleanValue> RULE_DOINSOMNIA = GameRules.register("doInsomnia", Category.SPAWNING, BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_DO_IMMEDIATE_RESPAWN = GameRules.register("doImmediateRespawn", Category.PLAYER, BooleanValue.method_20757(false, (minecraftServer, booleanValue) -> {
         for (ServerPlayer serverPlayer : minecraftServer.getPlayerList().getPlayers()) {
             serverPlayer.connection.send(new ClientboundGameEventPacket(11, booleanValue.get() ? 1.0f : 0.0f));
         }
     }));
-    public static final Key<BooleanValue> RULE_DROWNING_DAMAGE = GameRules.register("drowningDamage", BooleanValue.method_20755(true));
-    public static final Key<BooleanValue> RULE_FALL_DAMAGE = GameRules.register("fallDamage", BooleanValue.method_20755(true));
-    public static final Key<BooleanValue> RULE_FIRE_DAMAGE = GameRules.register("fireDamage", BooleanValue.method_20755(true));
-    public static final Key<BooleanValue> RULE_DO_PATROL_SPAWNING = GameRules.register("doPatrolSpawning", BooleanValue.method_20755(true));
-    public static final Key<BooleanValue> RULE_DO_TRADER_SPAWNING = GameRules.register("doTraderSpawning", BooleanValue.method_20755(true));
-    private final Map<Key<?>, Value<?>> rules = GAME_RULE_TYPES.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, entry -> ((Type)entry.getValue()).createRule()));
+    public static final Key<BooleanValue> RULE_DROWNING_DAMAGE = GameRules.register("drowningDamage", Category.PLAYER, BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_FALL_DAMAGE = GameRules.register("fallDamage", Category.PLAYER, BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_FIRE_DAMAGE = GameRules.register("fireDamage", Category.PLAYER, BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_DO_PATROL_SPAWNING = GameRules.register("doPatrolSpawning", Category.SPAWNING, BooleanValue.method_20755(true));
+    public static final Key<BooleanValue> RULE_DO_TRADER_SPAWNING = GameRules.register("doTraderSpawning", Category.SPAWNING, BooleanValue.method_20755(true));
+    private final Map<Key<?>, Value<?>> rules;
 
-    private static <T extends Value<T>> Key<T> register(String string, Type<T> type) {
-        Key key = new Key(string);
+    private static <T extends Value<T>> Key<T> register(String string, Category category, Type<T> type) {
+        Key key = new Key(string, category);
         Type<T> type2 = GAME_RULE_TYPES.put(key, type);
         if (type2 != null) {
             throw new IllegalStateException("Duplicate game rule registration for " + string);
         }
         return key;
+    }
+
+    public GameRules() {
+        this.rules = GAME_RULE_TYPES.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, entry -> ((Type)entry.getValue()).createRule()));
+    }
+
+    private GameRules(Map<Key<?>, Value<?>> map) {
+        this.rules = map;
     }
 
     public <T extends Value<T>> T getRule(Key<T> key) {
@@ -98,14 +108,28 @@ public class GameRules {
         });
     }
 
-    public static void visitGameRuleTypes(GameRuleTypeVisitor gameRuleTypeVisitor) {
-        GAME_RULE_TYPES.forEach((key, type) -> GameRules.cap(gameRuleTypeVisitor, key, type));
+    public GameRules copy() {
+        return new GameRules((Map)this.rules.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, entry -> ((Value)entry.getValue()).copy())));
     }
 
-    private static <T extends Value<T>> void cap(GameRuleTypeVisitor gameRuleTypeVisitor, Key<?> key, Type<?> type) {
+    public static void visitGameRuleTypes(GameRuleTypeVisitor gameRuleTypeVisitor) {
+        GAME_RULE_TYPES.forEach((key, type) -> GameRules.callVisitorCap(gameRuleTypeVisitor, key, type));
+    }
+
+    private static <T extends Value<T>> void callVisitorCap(GameRuleTypeVisitor gameRuleTypeVisitor, Key<?> key, Type<?> type) {
         Key<?> key2 = key;
         Type<?> type2 = type;
         gameRuleTypeVisitor.visit(key2, type2);
+        type2.callVisitor(gameRuleTypeVisitor, key2);
+    }
+
+    public void assignFrom(GameRules gameRules, @Nullable MinecraftServer minecraftServer) {
+        gameRules.rules.keySet().forEach(key -> this.assignCap((Key)key, gameRules, minecraftServer));
+    }
+
+    private <T extends Value<T>> void assignCap(Key<T> key, GameRules gameRules, @Nullable MinecraftServer minecraftServer) {
+        T value = gameRules.getRule(key);
+        ((Value)this.getRule(key)).setFrom(value, minecraftServer);
     }
 
     public boolean getBoolean(Key<BooleanValue> key) {
@@ -121,7 +145,7 @@ public class GameRules {
         private boolean value;
 
         private static Type<BooleanValue> create(boolean bl, BiConsumer<MinecraftServer, BooleanValue> biConsumer) {
-            return new Type<BooleanValue>(BoolArgumentType::bool, type -> new BooleanValue((Type<BooleanValue>)type, bl), biConsumer);
+            return new Type<BooleanValue>(BoolArgumentType::bool, type -> new BooleanValue((Type<BooleanValue>)type, bl), biConsumer, GameRuleTypeVisitor::visitBoolean);
         }
 
         private static Type<BooleanValue> create(boolean bl) {
@@ -148,7 +172,7 @@ public class GameRules {
         }
 
         @Override
-        protected String serialize() {
+        public String serialize() {
             return Boolean.toString(this.value);
         }
 
@@ -165,6 +189,22 @@ public class GameRules {
         @Override
         protected BooleanValue getSelf() {
             return this;
+        }
+
+        @Override
+        protected BooleanValue copy() {
+            return new BooleanValue(this.type, this.value);
+        }
+
+        @Override
+        public void setFrom(BooleanValue booleanValue, @Nullable MinecraftServer minecraftServer) {
+            this.value = booleanValue.value;
+            this.onChanged(minecraftServer);
+        }
+
+        @Override
+        protected /* synthetic */ Value copy() {
+            return this.copy();
         }
 
         @Override
@@ -186,7 +226,7 @@ public class GameRules {
         private int value;
 
         private static Type<IntegerValue> create(int i, BiConsumer<MinecraftServer, IntegerValue> biConsumer) {
-            return new Type<IntegerValue>(IntegerArgumentType::integer, type -> new IntegerValue((Type<IntegerValue>)type, i), biConsumer);
+            return new Type<IntegerValue>(IntegerArgumentType::integer, type -> new IntegerValue((Type<IntegerValue>)type, i), biConsumer, GameRuleTypeVisitor::visitInteger);
         }
 
         private static Type<IntegerValue> create(int i) {
@@ -208,13 +248,23 @@ public class GameRules {
         }
 
         @Override
-        protected String serialize() {
+        public String serialize() {
             return Integer.toString(this.value);
         }
 
         @Override
         protected void deserialize(String string) {
             this.value = IntegerValue.safeParse(string);
+        }
+
+        @Environment(value=EnvType.CLIENT)
+        public boolean tryDeserialize(String string) {
+            try {
+                this.value = Integer.parseInt(string);
+                return true;
+            } catch (NumberFormatException numberFormatException) {
+                return false;
+            }
         }
 
         private static int safeParse(String string) {
@@ -239,6 +289,22 @@ public class GameRules {
         }
 
         @Override
+        protected IntegerValue copy() {
+            return new IntegerValue(this.type, this.value);
+        }
+
+        @Override
+        public void setFrom(IntegerValue integerValue, @Nullable MinecraftServer minecraftServer) {
+            this.value = integerValue.value;
+            this.onChanged(minecraftServer);
+        }
+
+        @Override
+        protected /* synthetic */ Value copy() {
+            return this.copy();
+        }
+
+        @Override
         protected /* synthetic */ Value getSelf() {
             return this.getSelf();
         }
@@ -249,7 +315,7 @@ public class GameRules {
     }
 
     public static abstract class Value<T extends Value<T>> {
-        private final Type<T> type;
+        protected final Type<T> type;
 
         public Value(Type<T> type) {
             this.type = type;
@@ -270,7 +336,7 @@ public class GameRules {
 
         protected abstract void deserialize(String var1);
 
-        protected abstract String serialize();
+        public abstract String serialize();
 
         public String toString() {
             return this.serialize();
@@ -279,17 +345,23 @@ public class GameRules {
         public abstract int getCommandResult();
 
         protected abstract T getSelf();
+
+        protected abstract T copy();
+
+        public abstract void setFrom(T var1, @Nullable MinecraftServer var2);
     }
 
     public static class Type<T extends Value<T>> {
         private final Supplier<ArgumentType<?>> argument;
         private final Function<Type<T>, T> constructor;
         private final BiConsumer<MinecraftServer, T> callback;
+        private final VisitorCaller<T> visitorCaller;
 
-        private Type(Supplier<ArgumentType<?>> supplier, Function<Type<T>, T> function, BiConsumer<MinecraftServer, T> biConsumer) {
+        private Type(Supplier<ArgumentType<?>> supplier, Function<Type<T>, T> function, BiConsumer<MinecraftServer, T> biConsumer, VisitorCaller<T> visitorCaller) {
             this.argument = supplier;
             this.constructor = function;
             this.callback = biConsumer;
+            this.visitorCaller = visitorCaller;
         }
 
         public RequiredArgumentBuilder<CommandSourceStack, ?> createArgument(String string) {
@@ -299,13 +371,19 @@ public class GameRules {
         public T createRule() {
             return (T)((Value)this.constructor.apply(this));
         }
+
+        public void callVisitor(GameRuleTypeVisitor gameRuleTypeVisitor, Key<T> key) {
+            this.visitorCaller.call(gameRuleTypeVisitor, key, this);
+        }
     }
 
     public static final class Key<T extends Value<T>> {
         private final String id;
+        private final Category category;
 
-        public Key(String string) {
+        public Key(String string, Category category) {
             this.id = string;
+            this.category = category;
         }
 
         public String toString() {
@@ -326,11 +404,51 @@ public class GameRules {
         public String getId() {
             return this.id;
         }
+
+        public String getDescriptionId() {
+            return "gamerule." + this.id;
+        }
+
+        @Environment(value=EnvType.CLIENT)
+        public Category getCategory() {
+            return this.category;
+        }
     }
 
-    @FunctionalInterface
     public static interface GameRuleTypeVisitor {
-        public <T extends Value<T>> void visit(Key<T> var1, Type<T> var2);
+        default public <T extends Value<T>> void visit(Key<T> key, Type<T> type) {
+        }
+
+        default public void visitBoolean(Key<BooleanValue> key, Type<BooleanValue> type) {
+        }
+
+        default public void visitInteger(Key<IntegerValue> key, Type<IntegerValue> type) {
+        }
+    }
+
+    static interface VisitorCaller<T extends Value<T>> {
+        public void call(GameRuleTypeVisitor var1, Key<T> var2, Type<T> var3);
+    }
+
+    public static enum Category {
+        PLAYER("gamerule.category.player"),
+        MOBS("gamerule.category.mobs"),
+        SPAWNING("gamerule.category.spawning"),
+        DROPS("gamerule.category.drops"),
+        UPDATES("gamerule.category.updates"),
+        CHAT("gamerule.category.chat"),
+        MISC("gamerule.category.misc");
+
+        private final String descriptionId;
+
+        private Category(String string2) {
+            this.descriptionId = string2;
+        }
+
+        @Environment(value=EnvType.CLIENT)
+        public String getDescriptionId() {
+            return this.descriptionId;
+        }
     }
 }
 

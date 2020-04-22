@@ -154,10 +154,7 @@ extends AbstractHorse {
         if (!itemStack.isEmpty()) {
             boolean bl = this.handleEating(player, itemStack);
             if (!bl) {
-                if (!this.isTamed() || itemStack.getItem() == Items.NAME_TAG) {
-                    if (itemStack.interactEnemy(player, this, interactionHand)) {
-                        return true;
-                    }
+                if (!this.isTamed()) {
                     this.makeMad();
                     return true;
                 }

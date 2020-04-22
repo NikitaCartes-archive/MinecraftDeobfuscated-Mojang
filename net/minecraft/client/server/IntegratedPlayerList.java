@@ -14,14 +14,15 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.level.storage.PlayerDataStorage;
 
 @Environment(value=EnvType.CLIENT)
 public class IntegratedPlayerList
 extends PlayerList {
     private CompoundTag playerData;
 
-    public IntegratedPlayerList(IntegratedServer integratedServer) {
-        super(integratedServer, 8);
+    public IntegratedPlayerList(IntegratedServer integratedServer, PlayerDataStorage playerDataStorage) {
+        super(integratedServer, playerDataStorage, 8);
         this.setViewDistance(10);
     }
 
@@ -36,7 +37,7 @@ extends PlayerList {
     @Override
     public Component canPlayerLogin(SocketAddress socketAddress, GameProfile gameProfile) {
         if (gameProfile.getName().equalsIgnoreCase(this.getServer().getSingleplayerName()) && this.getPlayerByName(gameProfile.getName()) != null) {
-            return new TranslatableComponent("multiplayer.disconnect.name_taken", new Object[0]);
+            return new TranslatableComponent("multiplayer.disconnect.name_taken");
         }
         return super.canPlayerLogin(socketAddress, gameProfile);
     }

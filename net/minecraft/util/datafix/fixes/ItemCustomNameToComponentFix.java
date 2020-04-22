@@ -32,7 +32,7 @@ extends DataFix {
             } else {
                 Optional<String> optional3 = dynamic2.get("LocName").asString();
                 if (optional3.isPresent()) {
-                    dynamic2 = dynamic2.set("Name", dynamic2.createString(Component.Serializer.toJson(new TranslatableComponent(optional3.get(), new Object[0]))));
+                    dynamic2 = dynamic2.set("Name", dynamic2.createString(Component.Serializer.toJson(new TranslatableComponent(optional3.get()))));
                     dynamic2 = dynamic2.remove("LocName");
                 }
             }

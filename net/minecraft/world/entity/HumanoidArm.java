@@ -9,8 +9,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
 public enum HumanoidArm {
-    LEFT(new TranslatableComponent("options.mainHand.left", new Object[0])),
-    RIGHT(new TranslatableComponent("options.mainHand.right", new Object[0]));
+    LEFT(new TranslatableComponent("options.mainHand.left")),
+    RIGHT(new TranslatableComponent("options.mainHand.right"));
 
     private final Component name;
 
@@ -28,6 +28,11 @@ public enum HumanoidArm {
 
     public String toString() {
         return this.name.getString();
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public Component getName() {
+        return this.name;
     }
 }
 

@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens.controls;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -16,7 +17,10 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.controls.ControlsScreen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.apache.commons.lang3.ArrayUtils;
 
 @Environment(value=EnvType.CLIENT)
@@ -32,16 +36,17 @@ extends ContainerObjectSelectionList<Entry> {
         Arrays.sort(keyMappings);
         String string = null;
         for (Object keyMapping : keyMappings) {
+            TranslatableComponent component;
             int i;
             String string2 = ((KeyMapping)keyMapping).getCategory();
             if (!string2.equals(string)) {
                 string = string2;
-                this.addEntry(new CategoryEntry(string2));
+                this.addEntry(new CategoryEntry(new TranslatableComponent(string2)));
             }
-            if ((i = minecraft.font.width(I18n.get(((KeyMapping)keyMapping).getName(), new Object[0]))) > this.maxNameWidth) {
+            if ((i = minecraft.font.width(component = new TranslatableComponent(((KeyMapping)keyMapping).getName()))) > this.maxNameWidth) {
                 this.maxNameWidth = i;
             }
-            this.addEntry(new KeyEntry((KeyMapping)keyMapping));
+            this.addEntry(new KeyEntry((KeyMapping)keyMapping, component));
         }
     }
 
@@ -59,45 +64,45 @@ extends ContainerObjectSelectionList<Entry> {
     public class KeyEntry
     extends Entry {
         private final KeyMapping key;
-        private final String name;
+        private final Component name;
         private final Button changeButton;
         private final Button resetButton;
 
-        private KeyEntry(final KeyMapping keyMapping) {
+        private KeyEntry(final KeyMapping keyMapping, final Component component) {
             this.key = keyMapping;
-            this.name = I18n.get(keyMapping.getName(), new Object[0]);
-            this.changeButton = new Button(0, 0, 75, 20, this.name, button -> {
+            this.name = component;
+            this.changeButton = new Button(0, 0, 75, 20, component, button -> {
                 ((ControlList)ControlList.this).controlsScreen.selectedKey = keyMapping;
             }){
 
                 @Override
-                protected String getNarrationMessage() {
+                protected MutableComponent createNarrationMessage() {
                     if (keyMapping.isUnbound()) {
-                        return I18n.get("narrator.controls.unbound", KeyEntry.this.name);
+                        return new TranslatableComponent("narrator.controls.unbound", component);
                     }
-                    return I18n.get("narrator.controls.bound", KeyEntry.this.name, super.getNarrationMessage());
+                    return new TranslatableComponent("narrator.controls.bound", component, super.createNarrationMessage());
                 }
             };
-            this.resetButton = new Button(0, 0, 50, 20, I18n.get("controls.reset", new Object[0]), button -> {
+            this.resetButton = new Button(0, 0, 50, 20, new TranslatableComponent("controls.reset"), button -> {
                 ((ControlList)ControlList.this).minecraft.options.setKey(keyMapping, keyMapping.getDefaultKey());
                 KeyMapping.resetMapping();
             }){
 
                 @Override
-                protected String getNarrationMessage() {
-                    return I18n.get("narrator.controls.reset", KeyEntry.this.name);
+                protected MutableComponent createNarrationMessage() {
+                    return new TranslatableComponent("narrator.controls.reset", component);
                 }
             };
         }
 
         @Override
-        public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+        public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
             boolean bl2 = ((ControlList)ControlList.this).controlsScreen.selectedKey == this.key;
-            ((ControlList)ControlList.this).minecraft.font.draw(this.name, k + 90 - ControlList.this.maxNameWidth, j + m / 2 - ((ControlList)ControlList.this).minecraft.font.lineHeight / 2, 0xFFFFFF);
+            ((ControlList)ControlList.this).minecraft.font.draw(poseStack, this.name, (float)(k + 90 - ControlList.this.maxNameWidth), (float)(j + m / 2 - ((ControlList)ControlList.this).minecraft.font.lineHeight / 2), 0xFFFFFF);
             this.resetButton.x = k + 190;
             this.resetButton.y = j;
             this.resetButton.active = !this.key.isDefault();
-            this.resetButton.render(n, o, f);
+            this.resetButton.render(poseStack, n, o, f);
             this.changeButton.x = k + 105;
             this.changeButton.y = j;
             this.changeButton.setMessage(this.key.getTranslatedKeyMessage());
@@ -110,11 +115,11 @@ extends ContainerObjectSelectionList<Entry> {
                 }
             }
             if (bl2) {
-                this.changeButton.setMessage((Object)((Object)ChatFormatting.WHITE) + "> " + (Object)((Object)ChatFormatting.YELLOW) + this.changeButton.getMessage() + (Object)((Object)ChatFormatting.WHITE) + " <");
+                this.changeButton.setMessage(new TextComponent("> ").append(this.changeButton.getMessage().mutableCopy().withStyle(ChatFormatting.YELLOW)).append(" <").withStyle(ChatFormatting.YELLOW));
             } else if (bl3) {
-                this.changeButton.setMessage((Object)((Object)ChatFormatting.RED) + this.changeButton.getMessage());
+                this.changeButton.setMessage(this.changeButton.getMessage().mutableCopy().withStyle(ChatFormatting.RED));
             }
-            this.changeButton.render(n, o, f);
+            this.changeButton.render(poseStack, n, o, f);
         }
 
         @Override
@@ -139,17 +144,17 @@ extends ContainerObjectSelectionList<Entry> {
     @Environment(value=EnvType.CLIENT)
     public class CategoryEntry
     extends Entry {
-        private final String name;
+        private final Component name;
         private final int width;
 
-        public CategoryEntry(String string) {
-            this.name = I18n.get(string, new Object[0]);
+        public CategoryEntry(Component component) {
+            this.name = component;
             this.width = ((ControlList)ControlList.this).minecraft.font.width(this.name);
         }
 
         @Override
-        public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            ((ControlList)ControlList.this).minecraft.font.draw(this.name, ((ControlList)ControlList.this).minecraft.screen.width / 2 - this.width / 2, j + m - ((ControlList)ControlList.this).minecraft.font.lineHeight - 1, 0xFFFFFF);
+        public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+            ((ControlList)ControlList.this).minecraft.font.draw(poseStack, this.name, (float)(((ControlList)ControlList.this).minecraft.screen.width / 2 - this.width / 2), (float)(j + m - ((ControlList)ControlList.this).minecraft.font.lineHeight - 1), 0xFFFFFF);
         }
 
         @Override

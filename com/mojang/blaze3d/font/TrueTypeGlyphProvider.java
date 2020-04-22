@@ -6,10 +6,13 @@ package com.mojang.blaze3d.font;
 import com.mojang.blaze3d.font.GlyphProvider;
 import com.mojang.blaze3d.font.RawGlyph;
 import com.mojang.blaze3d.platform.NativeImage;
-import it.unimi.dsi.fastutil.chars.CharArraySet;
-import it.unimi.dsi.fastutil.chars.CharSet;
+import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.ints.IntCollection;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.stream.IntStream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.Nullable;
@@ -24,19 +27,19 @@ implements GlyphProvider {
     private final ByteBuffer fontMemory;
     private final STBTTFontinfo font;
     private final float oversample;
-    private final CharSet skip = new CharArraySet();
+    private final IntSet skip = new IntArraySet();
     private final float shiftX;
     private final float shiftY;
     private final float pointScale;
     private final float ascent;
 
-    public TrueTypeGlyphProvider(ByteBuffer byteBuffer, STBTTFontinfo sTBTTFontinfo, float f, float g, float h, float i2, String string) {
+    public TrueTypeGlyphProvider(ByteBuffer byteBuffer, STBTTFontinfo sTBTTFontinfo, float f, float g, float h, float i, String string) {
         this.fontMemory = byteBuffer;
         this.font = sTBTTFontinfo;
         this.oversample = g;
-        string.chars().forEach(i -> this.skip.add((char)(i & 0xFFFF)));
+        string.codePoints().forEach(this.skip::add);
         this.shiftX = h * g;
-        this.shiftY = i2 * g;
+        this.shiftY = i * g;
         this.pointScale = STBTruetype.stbtt_ScaleForPixelHeight(sTBTTFontinfo, f * g);
         try (MemoryStack memoryStack = MemoryStack.stackPush();){
             IntBuffer intBuffer = memoryStack.mallocInt(1);
@@ -49,8 +52,8 @@ implements GlyphProvider {
 
     @Override
     @Nullable
-    public Glyph getGlyph(char c) {
-        if (this.skip.contains(c)) {
+    public Glyph getGlyph(int i) {
+        if (this.skip.contains(i)) {
             return null;
         }
         try (MemoryStack memoryStack = MemoryStack.stackPush();){
@@ -58,22 +61,22 @@ implements GlyphProvider {
             IntBuffer intBuffer2 = memoryStack.mallocInt(1);
             IntBuffer intBuffer3 = memoryStack.mallocInt(1);
             IntBuffer intBuffer4 = memoryStack.mallocInt(1);
-            int i = STBTruetype.stbtt_FindGlyphIndex(this.font, c);
-            if (i == 0) {
+            int j = STBTruetype.stbtt_FindGlyphIndex(this.font, i);
+            if (j == 0) {
                 Glyph glyph = null;
                 return glyph;
             }
-            STBTruetype.stbtt_GetGlyphBitmapBoxSubpixel(this.font, i, this.pointScale, this.pointScale, this.shiftX, this.shiftY, intBuffer, intBuffer2, intBuffer3, intBuffer4);
-            int j = intBuffer3.get(0) - intBuffer.get(0);
-            int k = intBuffer4.get(0) - intBuffer2.get(0);
-            if (j == 0 || k == 0) {
+            STBTruetype.stbtt_GetGlyphBitmapBoxSubpixel(this.font, j, this.pointScale, this.pointScale, this.shiftX, this.shiftY, intBuffer, intBuffer2, intBuffer3, intBuffer4);
+            int k = intBuffer3.get(0) - intBuffer.get(0);
+            int l = intBuffer4.get(0) - intBuffer2.get(0);
+            if (k == 0 || l == 0) {
                 Glyph glyph = null;
                 return glyph;
             }
             IntBuffer intBuffer5 = memoryStack.mallocInt(1);
             IntBuffer intBuffer6 = memoryStack.mallocInt(1);
-            STBTruetype.stbtt_GetGlyphHMetrics(this.font, i, intBuffer5, intBuffer6);
-            Glyph glyph = new Glyph(intBuffer.get(0), intBuffer3.get(0), -intBuffer2.get(0), -intBuffer4.get(0), (float)intBuffer5.get(0) * this.pointScale, (float)intBuffer6.get(0) * this.pointScale, i);
+            STBTruetype.stbtt_GetGlyphHMetrics(this.font, j, intBuffer5, intBuffer6);
+            Glyph glyph = new Glyph(intBuffer.get(0), intBuffer3.get(0), -intBuffer2.get(0), -intBuffer4.get(0), (float)intBuffer5.get(0) * this.pointScale, (float)intBuffer6.get(0) * this.pointScale, j);
             return glyph;
         }
     }
@@ -85,9 +88,14 @@ implements GlyphProvider {
     }
 
     @Override
+    public IntSet getSupportedGlyphs() {
+        return IntStream.range(0, 65535).filter(i -> !this.skip.contains(i)).collect(IntOpenHashSet::new, IntCollection::add, IntCollection::addAll);
+    }
+
+    @Override
     @Nullable
-    public /* synthetic */ RawGlyph getGlyph(char c) {
-        return this.getGlyph(c);
+    public /* synthetic */ RawGlyph getGlyph(int i) {
+        return this.getGlyph(i);
     }
 
     @Environment(value=EnvType.CLIENT)

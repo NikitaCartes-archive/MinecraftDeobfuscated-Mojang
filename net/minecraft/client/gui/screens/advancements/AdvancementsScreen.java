@@ -5,6 +5,7 @@ package net.minecraft.client.gui.screens.advancements;
 
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -83,13 +84,13 @@ implements ClientAdvancements.Listener {
     }
 
     @Override
-    public void render(int i, int j, float f) {
+    public void render(PoseStack poseStack, int i, int j, float f) {
         int k = (this.width - 252) / 2;
         int l = (this.height - 140) / 2;
-        this.renderBackground();
-        this.renderInside(i, j, k, l);
-        this.renderWindow(k, l);
-        this.renderTooltips(i, j, k, l);
+        this.renderBackground(poseStack);
+        this.renderInside(poseStack, i, j, k, l);
+        this.renderWindow(poseStack, k, l);
+        this.renderTooltips(poseStack, i, j, k, l);
     }
 
     @Override
@@ -106,33 +107,33 @@ implements ClientAdvancements.Listener {
         return true;
     }
 
-    private void renderInside(int i, int j, int k, int l) {
+    private void renderInside(PoseStack poseStack, int i, int j, int k, int l) {
         AdvancementTab advancementTab = this.selectedTab;
         if (advancementTab == null) {
-            AdvancementsScreen.fill(k + 9, l + 18, k + 9 + 234, l + 18 + 113, -16777216);
+            AdvancementsScreen.fill(poseStack, k + 9, l + 18, k + 9 + 234, l + 18 + 113, -16777216);
             String string = I18n.get("advancements.empty", new Object[0]);
             int m = this.font.width(string);
-            this.font.draw(string, k + 9 + 117 - m / 2, l + 18 + 56 - this.font.lineHeight / 2, -1);
-            this.font.draw(":(", k + 9 + 117 - this.font.width(":(") / 2, l + 18 + 113 - this.font.lineHeight, -1);
+            this.font.draw(poseStack, string, (float)(k + 9 + 117 - m / 2), (float)(l + 18 + 56 - this.font.lineHeight / 2), -1);
+            this.font.draw(poseStack, ":(", (float)(k + 9 + 117 - this.font.width(":(") / 2), (float)(l + 18 + 113 - this.font.lineHeight), -1);
             return;
         }
         RenderSystem.pushMatrix();
         RenderSystem.translatef(k + 9, l + 18, 0.0f);
-        advancementTab.drawContents();
+        advancementTab.drawContents(poseStack);
         RenderSystem.popMatrix();
         RenderSystem.depthFunc(515);
         RenderSystem.disableDepthTest();
     }
 
-    public void renderWindow(int i, int j) {
+    public void renderWindow(PoseStack poseStack, int i, int j) {
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.enableBlend();
         this.minecraft.getTextureManager().bind(WINDOW_LOCATION);
-        this.blit(i, j, 0, 0, 252, 140);
+        this.blit(poseStack, i, j, 0, 0, 252, 140);
         if (this.tabs.size() > 1) {
             this.minecraft.getTextureManager().bind(TABS_LOCATION);
             for (AdvancementTab advancementTab : this.tabs.values()) {
-                advancementTab.drawTab(i, j, advancementTab == this.selectedTab);
+                advancementTab.drawTab(poseStack, i, j, advancementTab == this.selectedTab);
             }
             RenderSystem.enableRescaleNormal();
             RenderSystem.defaultBlendFunc();
@@ -141,23 +142,23 @@ implements ClientAdvancements.Listener {
             }
             RenderSystem.disableBlend();
         }
-        this.font.draw(I18n.get("gui.advancements", new Object[0]), i + 8, j + 6, 0x404040);
+        this.font.draw(poseStack, I18n.get("gui.advancements", new Object[0]), (float)(i + 8), (float)(j + 6), 0x404040);
     }
 
-    private void renderTooltips(int i, int j, int k, int l) {
+    private void renderTooltips(PoseStack poseStack, int i, int j, int k, int l) {
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         if (this.selectedTab != null) {
             RenderSystem.pushMatrix();
             RenderSystem.enableDepthTest();
             RenderSystem.translatef(k + 9, l + 18, 400.0f);
-            this.selectedTab.drawTooltips(i - k - 9, j - l - 18, k, l);
+            this.selectedTab.drawTooltips(poseStack, i - k - 9, j - l - 18, k, l);
             RenderSystem.disableDepthTest();
             RenderSystem.popMatrix();
         }
         if (this.tabs.size() > 1) {
             for (AdvancementTab advancementTab : this.tabs.values()) {
                 if (!advancementTab.isMouseOver(k, l, i, j)) continue;
-                this.renderTooltip(advancementTab.getTitle(), i, j);
+                this.renderTooltip(poseStack, advancementTab.getTitle(), i, j);
             }
         }
     }

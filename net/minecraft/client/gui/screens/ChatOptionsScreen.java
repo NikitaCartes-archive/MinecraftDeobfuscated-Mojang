@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.gui.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Option;
@@ -12,7 +13,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
@@ -22,7 +23,7 @@ extends OptionsSubScreen {
     private AbstractWidget narratorButton;
 
     public ChatOptionsScreen(Screen screen, Options options) {
-        super(screen, options, new TranslatableComponent("options.chat.title", new Object[0]));
+        super(screen, options, new TranslatableComponent("options.chat.title"));
     }
 
     @Override
@@ -38,14 +39,14 @@ extends OptionsSubScreen {
             }
             ++i;
         }
-        this.addButton(new Button(this.width / 2 - 100, this.height / 6 + 24 * (i + 1) / 2, 200, 20, I18n.get("gui.done", new Object[0]), button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addButton(new Button(this.width / 2 - 100, this.height / 6 + 24 * (i + 1) / 2, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        this.renderBackground();
-        this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 20, 0xFFFFFF);
-        super.render(i, j, f);
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        this.renderBackground(poseStack);
+        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 0xFFFFFF);
+        super.render(poseStack, i, j, f);
     }
 
     public void updateNarratorButton() {

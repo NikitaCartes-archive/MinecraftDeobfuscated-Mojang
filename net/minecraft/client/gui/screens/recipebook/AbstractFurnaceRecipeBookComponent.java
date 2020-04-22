@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens.recipebook;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -12,8 +13,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -65,11 +67,11 @@ extends RecipeBookComponent {
     }
 
     @Override
-    protected String getFilterButtonTooltip() {
-        return I18n.get(this.filterButton.isStateTriggered() ? this.getRecipeFilterName() : "gui.recipebook.toggleRecipes.all", new Object[0]);
+    protected Component getFilterButtonTooltip() {
+        return this.filterButton.isStateTriggered() ? this.getRecipeFilterName() : new TranslatableComponent("gui.recipebook.toggleRecipes.all");
     }
 
-    protected abstract String getRecipeFilterName();
+    protected abstract Component getRecipeFilterName();
 
     @Override
     public void slotClicked(@Nullable Slot slot) {
@@ -106,8 +108,8 @@ extends RecipeBookComponent {
     protected abstract Set<Item> getFuelItems();
 
     @Override
-    public void renderGhostRecipe(int i, int j, boolean bl, float f) {
-        super.renderGhostRecipe(i, j, bl, f);
+    public void renderGhostRecipe(PoseStack poseStack, int i, int j, boolean bl, float f) {
+        super.renderGhostRecipe(poseStack, i, j, bl, f);
         if (this.fuelSlot == null) {
             return;
         }
@@ -116,10 +118,10 @@ extends RecipeBookComponent {
         }
         int k = this.fuelSlot.x + i;
         int l = this.fuelSlot.y + j;
-        GuiComponent.fill(k, l, k + 16, l + 16, 0x30FF0000);
+        GuiComponent.fill(poseStack, k, l, k + 16, l + 16, 0x30FF0000);
         this.minecraft.getItemRenderer().renderAndDecorateItem(this.minecraft.player, this.getFuel().getDefaultInstance(), k, l);
         RenderSystem.depthFunc(516);
-        GuiComponent.fill(k, l, k + 16, l + 16, 0x30FFFFFF);
+        GuiComponent.fill(poseStack, k, l, k + 16, l + 16, 0x30FFFFFF);
         RenderSystem.depthFunc(515);
     }
 

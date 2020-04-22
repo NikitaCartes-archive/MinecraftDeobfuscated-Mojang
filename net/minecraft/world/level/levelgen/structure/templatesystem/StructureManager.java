@@ -5,7 +5,6 @@ package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.DataFixer;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -29,6 +28,8 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.level.storage.LevelStorageSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -41,10 +42,10 @@ implements ResourceManagerReloadListener {
     private final MinecraftServer server;
     private final Path generatedDir;
 
-    public StructureManager(MinecraftServer minecraftServer, File file, DataFixer dataFixer) {
+    public StructureManager(MinecraftServer minecraftServer, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer) {
         this.server = minecraftServer;
         this.fixerUpper = dataFixer;
-        this.generatedDir = file.toPath().resolve("generated").normalize();
+        this.generatedDir = levelStorageAccess.getLevelPath(LevelResource.GENERATED_DIR).normalize();
         minecraftServer.getResources().registerReloadListener(this);
     }
 

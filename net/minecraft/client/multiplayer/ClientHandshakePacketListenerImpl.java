@@ -62,7 +62,7 @@ implements ClientLoginPacketListener {
         PublicKey publicKey = clientboundHelloPacket.getPublicKey();
         String string = new BigInteger(Crypt.digestData(clientboundHelloPacket.getServerId(), publicKey, secretKey)).toString(16);
         ServerboundKeyPacket serverboundKeyPacket = new ServerboundKeyPacket(secretKey, publicKey, clientboundHelloPacket.getNonce());
-        this.updateStatus.accept(new TranslatableComponent("connect.authorizing", new Object[0]));
+        this.updateStatus.accept(new TranslatableComponent("connect.authorizing"));
         HttpUtil.DOWNLOAD_EXECUTOR.submit(() -> {
             Component component = this.authenticateServer(string);
             if (component != null) {
@@ -73,7 +73,7 @@ implements ClientLoginPacketListener {
                     return;
                 }
             }
-            this.updateStatus.accept(new TranslatableComponent("connect.encrypting", new Object[0]));
+            this.updateStatus.accept(new TranslatableComponent("connect.encrypting"));
             this.connection.send(serverboundKeyPacket, future -> this.connection.setEncryptionKey(secretKey));
         });
     }
@@ -83,9 +83,9 @@ implements ClientLoginPacketListener {
         try {
             this.getMinecraftSessionService().joinServer(this.minecraft.getUser().getGameProfile(), this.minecraft.getUser().getAccessToken(), string);
         } catch (AuthenticationUnavailableException authenticationUnavailableException) {
-            return new TranslatableComponent("disconnect.loginFailedInfo", new TranslatableComponent("disconnect.loginFailedInfo.serversUnavailable", new Object[0]));
+            return new TranslatableComponent("disconnect.loginFailedInfo", new TranslatableComponent("disconnect.loginFailedInfo.serversUnavailable"));
         } catch (InvalidCredentialsException invalidCredentialsException) {
-            return new TranslatableComponent("disconnect.loginFailedInfo", new TranslatableComponent("disconnect.loginFailedInfo.invalidSession", new Object[0]));
+            return new TranslatableComponent("disconnect.loginFailedInfo", new TranslatableComponent("disconnect.loginFailedInfo.invalidSession"));
         } catch (AuthenticationException authenticationException) {
             return new TranslatableComponent("disconnect.loginFailedInfo", authenticationException.getMessage());
         }
@@ -98,7 +98,7 @@ implements ClientLoginPacketListener {
 
     @Override
     public void handleGameProfile(ClientboundGameProfilePacket clientboundGameProfilePacket) {
-        this.updateStatus.accept(new TranslatableComponent("connect.joining", new Object[0]));
+        this.updateStatus.accept(new TranslatableComponent("connect.joining"));
         this.localGameProfile = clientboundGameProfilePacket.getGameProfile();
         this.connection.setProtocol(ConnectionProtocol.PLAY);
         this.connection.setListener(new ClientPacketListener(this.minecraft, this.parent, this.connection, this.localGameProfile));
@@ -132,7 +132,7 @@ implements ClientLoginPacketListener {
 
     @Override
     public void handleCustomQuery(ClientboundCustomQueryPacket clientboundCustomQueryPacket) {
-        this.updateStatus.accept(new TranslatableComponent("connect.negotiating", new Object[0]));
+        this.updateStatus.accept(new TranslatableComponent("connect.negotiating"));
         this.connection.send(new ServerboundCustomQueryPacket(clientboundCustomQueryPacket.getTransactionId(), null));
     }
 }

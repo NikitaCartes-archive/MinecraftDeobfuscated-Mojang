@@ -39,7 +39,7 @@ extends Biome {
         BiomeDefaultFeatures.addDefaultUndergroundVariety(this);
         BiomeDefaultFeatures.addDefaultOres(this);
         BiomeDefaultFeatures.addDefaultSoftDisks(this);
-        this.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.BIRCH_TREE_WITH_BEES_002_CONFIG).weighted(0.2f), Feature.FANCY_TREE.configured(BiomeDefaultFeatures.FANCY_TREE_WITH_BEES_002_CONFIG).weighted(0.1f)), Feature.NORMAL_TREE.configured(BiomeDefaultFeatures.NORMAL_TREE_WITH_BEES_002_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(6, 0.1f, 1))));
+        this.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.RANDOM_SELECTOR.configured(new RandomFeatureConfiguration(ImmutableList.of(Feature.TREE.configured(BiomeDefaultFeatures.BIRCH_TREE_WITH_BEES_002_CONFIG).weighted(0.2f), Feature.TREE.configured(BiomeDefaultFeatures.FANCY_TREE_WITH_BEES_002_CONFIG).weighted(0.1f)), Feature.TREE.configured(BiomeDefaultFeatures.NORMAL_TREE_WITH_BEES_002_CONFIG))).decorated(FeatureDecorator.COUNT_EXTRA_HEIGHTMAP.configured(new FrequencyWithExtraChanceDecoratorConfiguration(6, 0.1f, 1))));
         this.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.FLOWER.configured(BiomeDefaultFeatures.FOREST_FLOWER_CONFIG).decorated(FeatureDecorator.COUNT_HEIGHTMAP_32.configured(new FrequencyDecoratorConfiguration(100))));
         BiomeDefaultFeatures.addDefaultGrass(this);
         BiomeDefaultFeatures.addDefaultMushrooms(this);

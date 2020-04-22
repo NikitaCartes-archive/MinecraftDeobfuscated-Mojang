@@ -3,23 +3,33 @@
  */
 package net.minecraft.network.chat;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.BaseComponent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
 
 public class KeybindComponent
 extends BaseComponent {
-    public static Function<String, Supplier<String>> keyResolver = string -> () -> string;
+    private static Function<String, Supplier<Component>> keyResolver = string -> () -> new TextComponent((String)string);
     private final String name;
-    private Supplier<String> nameResolver;
+    private Supplier<Component> nameResolver;
 
     public KeybindComponent(String string) {
         this.name = string;
     }
 
-    @Override
-    public String getContents() {
+    @Environment(value=EnvType.CLIENT)
+    public static void setKeyResolver(Function<String, Supplier<Component>> function) {
+        keyResolver = function;
+    }
+
+    private Component getNestedComponent() {
         if (this.nameResolver == null) {
             this.nameResolver = keyResolver.apply(this.name);
         }
@@ -27,7 +37,18 @@ extends BaseComponent {
     }
 
     @Override
-    public KeybindComponent copy() {
+    public <T> Optional<T> visitSelf(Component.ContentConsumer<T> contentConsumer) {
+        return this.getNestedComponent().visit(contentConsumer);
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public <T> Optional<T> visitSelf(Component.StyledContentConsumer<T> styledContentConsumer, Style style) {
+        return this.getNestedComponent().visit(styledContentConsumer, style);
+    }
+
+    @Override
+    public KeybindComponent toMutable() {
         return new KeybindComponent(this.name);
     }
 
@@ -53,8 +74,13 @@ extends BaseComponent {
     }
 
     @Override
-    public /* synthetic */ Component copy() {
-        return this.copy();
+    public /* synthetic */ BaseComponent toMutable() {
+        return this.toMutable();
+    }
+
+    @Override
+    public /* synthetic */ MutableComponent toMutable() {
+        return this.toMutable();
     }
 }
 

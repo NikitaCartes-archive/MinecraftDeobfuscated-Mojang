@@ -38,7 +38,7 @@ extends RenderLayer<Horse, HorseModel<Horse>> {
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Horse horse, float f, float g, float h, float j, float k, float l) {
         ResourceLocation resourceLocation = LOCATION_BY_MARKINGS.get((Object)horse.getMarkings());
-        if (resourceLocation == null) {
+        if (resourceLocation == null || horse.isInvisible()) {
             return;
         }
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityTranslucent(resourceLocation));

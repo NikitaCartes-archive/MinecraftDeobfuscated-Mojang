@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -24,38 +25,38 @@ extends AbstractContainerScreen<BrewingStandMenu> {
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        this.renderBackground();
-        super.render(i, j, f);
-        this.renderTooltip(i, j);
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        this.renderBackground(poseStack);
+        super.render(poseStack, i, j, f);
+        this.renderTooltip(poseStack, i, j);
     }
 
     @Override
-    protected void renderLabels(int i, int j) {
-        this.font.draw(this.title.getColoredString(), this.imageWidth / 2 - this.font.width(this.title.getColoredString()) / 2, 6.0f, 0x404040);
-        this.font.draw(this.inventory.getDisplayName().getColoredString(), 8.0f, this.imageHeight - 96 + 2, 0x404040);
+    protected void renderLabels(PoseStack poseStack, int i, int j) {
+        this.font.draw(poseStack, this.title, (float)(this.imageWidth / 2 - this.font.width(this.title) / 2), 6.0f, 0x404040);
+        this.font.draw(poseStack, this.inventory.getDisplayName(), 8.0f, (float)(this.imageHeight - 96 + 2), 0x404040);
     }
 
     @Override
-    protected void renderBg(float f, int i, int j) {
+    protected void renderBg(PoseStack poseStack, float f, int i, int j) {
         int o;
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bind(BREWING_STAND_LOCATION);
         int k = (this.width - this.imageWidth) / 2;
         int l = (this.height - this.imageHeight) / 2;
-        this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
+        this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
         int m = ((BrewingStandMenu)this.menu).getFuel();
         int n = Mth.clamp((18 * m + 20 - 1) / 20, 0, 18);
         if (n > 0) {
-            this.blit(k + 60, l + 44, 176, 29, n, 4);
+            this.blit(poseStack, k + 60, l + 44, 176, 29, n, 4);
         }
         if ((o = ((BrewingStandMenu)this.menu).getBrewingTicks()) > 0) {
             int p = (int)(28.0f * (1.0f - (float)o / 400.0f));
             if (p > 0) {
-                this.blit(k + 97, l + 16, 176, 0, 9, p);
+                this.blit(poseStack, k + 97, l + 16, 176, 0, 9, p);
             }
             if ((p = BUBBLELENGTHS[o / 2 % 7]) > 0) {
-                this.blit(k + 63, l + 14 + 29 - p, 185, 29 - p, 12, p);
+                this.blit(poseStack, k + 63, l + 14 + 29 - p, 185, 29 - p, 12, p);
             }
         }
     }

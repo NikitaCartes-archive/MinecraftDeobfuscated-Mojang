@@ -83,22 +83,22 @@ implements ArgumentType<Message> {
             if (this.parts.length == 0 || !bl) {
                 return new TextComponent(this.text);
             }
-            TextComponent component = new TextComponent(this.text.substring(0, this.parts[0].getStart()));
+            TextComponent mutableComponent = new TextComponent(this.text.substring(0, this.parts[0].getStart()));
             int i = this.parts[0].getStart();
             for (Part part : this.parts) {
-                Component component2 = part.toComponent(commandSourceStack);
+                Component component = part.toComponent(commandSourceStack);
                 if (i < part.getStart()) {
-                    component.append(this.text.substring(i, part.getStart()));
+                    mutableComponent.append(this.text.substring(i, part.getStart()));
                 }
-                if (component2 != null) {
-                    component.append(component2);
+                if (component != null) {
+                    mutableComponent.append(component);
                 }
                 i = part.getEnd();
             }
             if (i < this.text.length()) {
-                component.append(this.text.substring(i, this.text.length()));
+                mutableComponent.append(this.text.substring(i, this.text.length()));
             }
-            return component;
+            return mutableComponent;
         }
 
         public static Message parseText(StringReader stringReader, boolean bl) throws CommandSyntaxException {

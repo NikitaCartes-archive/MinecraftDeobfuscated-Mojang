@@ -7,6 +7,7 @@ import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Comparator;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -19,6 +20,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
@@ -48,9 +50,13 @@ extends GuiComponent {
 
     public Component getNameForDisplay(PlayerInfo playerInfo) {
         if (playerInfo.getTabListDisplayName() != null) {
-            return playerInfo.getTabListDisplayName();
+            return this.decorateName(playerInfo, playerInfo.getTabListDisplayName().mutableCopy());
         }
-        return PlayerTeam.formatNameForTeam(playerInfo.getTeam(), new TextComponent(playerInfo.getProfile().getName()));
+        return this.decorateName(playerInfo, PlayerTeam.formatNameForTeam(playerInfo.getTeam(), new TextComponent(playerInfo.getProfile().getName())));
+    }
+
+    private Component decorateName(PlayerInfo playerInfo, MutableComponent mutableComponent) {
+        return playerInfo.getGameMode() == GameType.SPECTATOR ? mutableComponent.withStyle(ChatFormatting.ITALIC) : mutableComponent;
     }
 
     public void setVisible(boolean bl) {
@@ -60,7 +66,7 @@ extends GuiComponent {
         this.visible = bl;
     }
 
-    public void render(int i, Scoreboard scoreboard, @Nullable Objective objective) {
+    public void render(PoseStack poseStack, int i, Scoreboard scoreboard, @Nullable Objective objective) {
         int w;
         int t;
         boolean bl;
@@ -71,7 +77,7 @@ extends GuiComponent {
         int j = 0;
         int k = 0;
         for (PlayerInfo playerInfo : list) {
-            l = this.minecraft.font.width(this.getNameForDisplay(playerInfo).getColoredString());
+            l = this.minecraft.font.width(this.getNameForDisplay(playerInfo));
             j = Math.max(j, l);
             if (objective == null || objective.getRenderType() == ObjectiveCriteria.RenderType.HEARTS) continue;
             l = this.minecraft.font.width(" " + scoreboard.getOrCreatePlayerScore(playerInfo.getProfile().getName(), objective).getScore());
@@ -89,39 +95,39 @@ extends GuiComponent {
         int q = i / 2 - (p * l + (l - 1) * 5) / 2;
         int r = 10;
         int s = p * l + (l - 1) * 5;
-        List<String> list2 = null;
+        List<Component> list2 = null;
         if (this.header != null) {
-            list2 = this.minecraft.font.split(this.header.getColoredString(), i - 50);
-            for (String string : list2) {
-                s = Math.max(s, this.minecraft.font.width(string));
+            list2 = this.minecraft.font.split(this.header, i - 50);
+            for (Component component : list2) {
+                s = Math.max(s, this.minecraft.font.width(component));
             }
         }
-        List<String> list3 = null;
+        List<Component> list3 = null;
         if (this.footer != null) {
-            list3 = this.minecraft.font.split(this.footer.getColoredString(), i - 50);
-            for (String string2 : list3) {
-                s = Math.max(s, this.minecraft.font.width(string2));
+            list3 = this.minecraft.font.split(this.footer, i - 50);
+            for (Component component2 : list3) {
+                s = Math.max(s, this.minecraft.font.width(component2));
             }
         }
         if (list2 != null) {
-            PlayerTabOverlay.fill(i / 2 - s / 2 - 1, r - 1, i / 2 + s / 2 + 1, r + list2.size() * this.minecraft.font.lineHeight, Integer.MIN_VALUE);
-            for (String string2 : list2) {
-                t = this.minecraft.font.width(string2);
-                this.minecraft.font.drawShadow(string2, i / 2 - t / 2, r, -1);
+            PlayerTabOverlay.fill(poseStack, i / 2 - s / 2 - 1, r - 1, i / 2 + s / 2 + 1, r + list2.size() * this.minecraft.font.lineHeight, Integer.MIN_VALUE);
+            for (Component component2 : list2) {
+                t = this.minecraft.font.width(component2);
+                this.minecraft.font.drawShadow(poseStack, component2, (float)(i / 2 - t / 2), (float)r, -1);
                 r += this.minecraft.font.lineHeight;
             }
             ++r;
         }
-        PlayerTabOverlay.fill(i / 2 - s / 2 - 1, r - 1, i / 2 + s / 2 + 1, r + n * 9, Integer.MIN_VALUE);
+        PlayerTabOverlay.fill(poseStack, i / 2 - s / 2 - 1, r - 1, i / 2 + s / 2 + 1, r + n * 9, Integer.MIN_VALUE);
         int n2 = this.minecraft.options.getBackgroundColor(0x20FFFFFF);
         for (int v = 0; v < m; ++v) {
             int ad;
-            int z;
+            int ae;
             t = v / n;
             w = v % n;
             int x = q + t * p + t * 5;
             int y = r + w * 9;
-            PlayerTabOverlay.fill(x, y, x + p, y + 8, n2);
+            PlayerTabOverlay.fill(poseStack, x, y, x + p, y + 8, n2);
             RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
             RenderSystem.enableAlphaTest();
             RenderSystem.enableBlend();
@@ -133,48 +139,43 @@ extends GuiComponent {
                 Player player = this.minecraft.level.getPlayerByUUID(gameProfile.getId());
                 boolean bl22 = player != null && player.isModelPartShown(PlayerModelPart.CAPE) && ("Dinnerbone".equals(gameProfile.getName()) || "Grumm".equals(gameProfile.getName()));
                 this.minecraft.getTextureManager().bind(playerInfo2.getSkinLocation());
-                z = 8 + (bl22 ? 8 : 0);
+                int z = 8 + (bl22 ? 8 : 0);
                 int aa = 8 * (bl22 ? -1 : 1);
-                GuiComponent.blit(x, y, 8, 8, 8.0f, z, 8, aa, 64, 64);
+                GuiComponent.blit(poseStack, x, y, 8, 8, 8.0f, z, 8, aa, 64, 64);
                 if (player != null && player.isModelPartShown(PlayerModelPart.HAT)) {
                     int ab = 8 + (bl22 ? 8 : 0);
                     int ac = 8 * (bl22 ? -1 : 1);
-                    GuiComponent.blit(x, y, 8, 8, 40.0f, ab, 8, ac, 64, 64);
+                    GuiComponent.blit(poseStack, x, y, 8, 8, 40.0f, ab, 8, ac, 64, 64);
                 }
                 x += 9;
             }
-            String string3 = this.getNameForDisplay(playerInfo2).getColoredString();
-            if (playerInfo2.getGameMode() == GameType.SPECTATOR) {
-                this.minecraft.font.drawShadow((Object)((Object)ChatFormatting.ITALIC) + string3, x, y, -1862270977);
-            } else {
-                this.minecraft.font.drawShadow(string3, x, y, -1);
+            this.minecraft.font.drawShadow(poseStack, this.getNameForDisplay(playerInfo2), (float)x, (float)y, -1862270977);
+            if (objective != null && playerInfo2.getGameMode() != GameType.SPECTATOR && (ae = (ad = x + j + 1) + o) - ad > 5) {
+                this.renderTablistScore(objective, y, gameProfile.getName(), ad, ae, playerInfo2, poseStack);
             }
-            if (objective != null && playerInfo2.getGameMode() != GameType.SPECTATOR && (z = (ad = x + j + 1) + o) - ad > 5) {
-                this.renderTablistScore(objective, y, gameProfile.getName(), ad, z, playerInfo2);
-            }
-            this.renderPingIcon(p, x - (bl ? 9 : 0), y, playerInfo2);
+            this.renderPingIcon(poseStack, p, x - (bl ? 9 : 0), y, playerInfo2);
         }
         if (list3 != null) {
-            PlayerTabOverlay.fill(i / 2 - s / 2 - 1, (r += n * 9 + 1) - 1, i / 2 + s / 2 + 1, r + list3.size() * this.minecraft.font.lineHeight, Integer.MIN_VALUE);
-            for (String string4 : list3) {
-                w = this.minecraft.font.width(string4);
-                this.minecraft.font.drawShadow(string4, i / 2 - w / 2, r, -1);
+            PlayerTabOverlay.fill(poseStack, i / 2 - s / 2 - 1, (r += n * 9 + 1) - 1, i / 2 + s / 2 + 1, r + list3.size() * this.minecraft.font.lineHeight, Integer.MIN_VALUE);
+            for (Component component3 : list3) {
+                w = this.minecraft.font.width(component3);
+                this.minecraft.font.drawShadow(poseStack, component3, (float)(i / 2 - w / 2), (float)r, -1);
                 r += this.minecraft.font.lineHeight;
             }
         }
     }
 
-    protected void renderPingIcon(int i, int j, int k, PlayerInfo playerInfo) {
+    protected void renderPingIcon(PoseStack poseStack, int i, int j, int k, PlayerInfo playerInfo) {
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bind(GUI_ICONS_LOCATION);
         boolean l = false;
         int m = playerInfo.getLatency() < 0 ? 5 : (playerInfo.getLatency() < 150 ? 0 : (playerInfo.getLatency() < 300 ? 1 : (playerInfo.getLatency() < 600 ? 2 : (playerInfo.getLatency() < 1000 ? 3 : 4))));
         this.setBlitOffset(this.getBlitOffset() + 100);
-        this.blit(j + i - 11, k, 0, 176 + m * 8, 10, 8);
+        this.blit(poseStack, j + i - 11, k, 0, 176 + m * 8, 10, 8);
         this.setBlitOffset(this.getBlitOffset() - 100);
     }
 
-    private void renderTablistScore(Objective objective, int i, String string, int j, int k, PlayerInfo playerInfo) {
+    private void renderTablistScore(Objective objective, int i, String string, int j, int k, PlayerInfo playerInfo, PoseStack poseStack) {
         int l = objective.getScoreboard().getOrCreatePlayerScore(string, objective).getScore();
         if (objective.getRenderType() == ObjectiveCriteria.RenderType.HEARTS) {
             boolean bl;
@@ -204,23 +205,23 @@ extends GuiComponent {
                 if (p > 3) {
                     int q;
                     for (q = n; q < o; ++q) {
-                        this.blit(j + q * p, i, bl ? 25 : 16, 0, 9, 9);
+                        this.blit(poseStack, j + q * p, i, bl ? 25 : 16, 0, 9, 9);
                     }
                     for (q = 0; q < n; ++q) {
-                        this.blit(j + q * p, i, bl ? 25 : 16, 0, 9, 9);
+                        this.blit(poseStack, j + q * p, i, bl ? 25 : 16, 0, 9, 9);
                         if (bl) {
                             if (q * 2 + 1 < playerInfo.getDisplayHealth()) {
-                                this.blit(j + q * p, i, 70, 0, 9, 9);
+                                this.blit(poseStack, j + q * p, i, 70, 0, 9, 9);
                             }
                             if (q * 2 + 1 == playerInfo.getDisplayHealth()) {
-                                this.blit(j + q * p, i, 79, 0, 9, 9);
+                                this.blit(poseStack, j + q * p, i, 79, 0, 9, 9);
                             }
                         }
                         if (q * 2 + 1 < l) {
-                            this.blit(j + q * p, i, q >= 10 ? 160 : 52, 0, 9, 9);
+                            this.blit(poseStack, j + q * p, i, q >= 10 ? 160 : 52, 0, 9, 9);
                         }
                         if (q * 2 + 1 != l) continue;
-                        this.blit(j + q * p, i, q >= 10 ? 169 : 61, 0, 9, 9);
+                        this.blit(poseStack, j + q * p, i, q >= 10 ? 169 : 61, 0, 9, 9);
                     }
                 } else {
                     float f = Mth.clamp((float)l / 20.0f, 0.0f, 1.0f);
@@ -229,12 +230,12 @@ extends GuiComponent {
                     if (k - this.minecraft.font.width(string2 + "hp") >= j) {
                         string2 = string2 + "hp";
                     }
-                    this.minecraft.font.drawShadow(string2, (k + j) / 2 - this.minecraft.font.width(string2) / 2, i, r);
+                    this.minecraft.font.drawShadow(poseStack, string2, (float)((k + j) / 2 - this.minecraft.font.width(string2) / 2), (float)i, r);
                 }
             }
         } else {
             String string3 = (Object)((Object)ChatFormatting.YELLOW) + "" + l;
-            this.minecraft.font.drawShadow(string3, k - this.minecraft.font.width(string3), i, 0xFFFFFF);
+            this.minecraft.font.drawShadow(poseStack, string3, (float)(k - this.minecraft.font.width(string3)), (float)i, 0xFFFFFF);
         }
     }
 

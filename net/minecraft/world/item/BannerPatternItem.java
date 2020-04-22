@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -36,8 +37,8 @@ extends Item {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public Component getDisplayName() {
-        return new TranslatableComponent(this.getDescriptionId() + ".desc", new Object[0]);
+    public MutableComponent getDisplayName() {
+        return new TranslatableComponent(this.getDescriptionId() + ".desc");
     }
 }
 

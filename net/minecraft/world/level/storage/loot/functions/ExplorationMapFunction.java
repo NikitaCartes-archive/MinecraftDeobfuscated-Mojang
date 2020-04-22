@@ -65,7 +65,7 @@ extends LootItemConditionalFunction {
             ItemStack itemStack2 = MapItem.create(serverLevel, blockPos2.getX(), blockPos2.getZ(), this.zoom, true, true);
             MapItem.renderBiomePreviewMap(serverLevel, itemStack2);
             MapItemSavedData.addTargetDecoration(itemStack2, blockPos2, "+", this.mapDecoration);
-            itemStack2.setHoverName(new TranslatableComponent("filled_map." + this.destination.toLowerCase(Locale.ROOT), new Object[0]));
+            itemStack2.setHoverName(new TranslatableComponent("filled_map." + this.destination.toLowerCase(Locale.ROOT)));
             return itemStack2;
         }
         return itemStack;

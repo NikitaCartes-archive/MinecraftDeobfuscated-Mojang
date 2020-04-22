@@ -16,7 +16,7 @@ import net.minecraft.world.level.GameType;
 @Environment(value=EnvType.CLIENT)
 public class OpenInventoryTutorialStep
 implements TutorialStepInstance {
-    private static final Component TITLE = new TranslatableComponent("tutorial.open_inventory.title", new Object[0]);
+    private static final Component TITLE = new TranslatableComponent("tutorial.open_inventory.title");
     private static final Component DESCRIPTION = new TranslatableComponent("tutorial.open_inventory.description", Tutorial.key("inventory"));
     private final Tutorial tutorial;
     private TutorialToast toast;

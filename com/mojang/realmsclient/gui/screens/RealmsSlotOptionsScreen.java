@@ -3,6 +3,7 @@
  */
 package com.mojang.realmsclient.gui.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.RealmsWorldOptions;
 import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
@@ -12,6 +13,10 @@ import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.util.Mth;
@@ -19,8 +24,10 @@ import net.minecraft.util.Mth;
 @Environment(value=EnvType.CLIENT)
 public class RealmsSlotOptionsScreen
 extends RealmsScreen {
-    public static final String[] DIFFICULTIES = new String[]{"options.difficulty.peaceful", "options.difficulty.easy", "options.difficulty.normal", "options.difficulty.hard"};
-    public static final String[] GAME_MODES = new String[]{"selectWorld.gameMode.survival", "selectWorld.gameMode.creative", "selectWorld.gameMode.adventure"};
+    public static final Component[] DIFFICULTIES = new Component[]{new TranslatableComponent("options.difficulty.peaceful"), new TranslatableComponent("options.difficulty.easy"), new TranslatableComponent("options.difficulty.normal"), new TranslatableComponent("options.difficulty.hard")};
+    public static final Component[] GAME_MODES = new Component[]{new TranslatableComponent("selectWorld.gameMode.survival"), new TranslatableComponent("selectWorld.gameMode.creative"), new TranslatableComponent("selectWorld.gameMode.adventure")};
+    private static final TranslatableComponent TEXT_ON = new TranslatableComponent("mco.configure.world.on");
+    private static final TranslatableComponent TEXT_OFF = new TranslatableComponent("mco.configure.world.off");
     private EditBox nameEdit;
     protected final RealmsConfigureWorldScreen parent;
     private int column1X;
@@ -90,8 +97,8 @@ extends RealmsScreen {
             this.spawnNPCs = this.options.spawnNPCs;
             this.commandBlocks = this.options.commandBlocks;
         } else {
-            String string = this.worldType == RealmsServer.WorldType.ADVENTUREMAP ? I18n.get("mco.configure.world.edit.subscreen.adventuremap", new Object[0]) : (this.worldType == RealmsServer.WorldType.INSPIRATION ? I18n.get("mco.configure.world.edit.subscreen.inspiration", new Object[0]) : I18n.get("mco.configure.world.edit.subscreen.experience", new Object[0]));
-            this.warningLabel = new RealmsLabel(string, this.width / 2, 26, 0xFF0000);
+            TranslatableComponent component = this.worldType == RealmsServer.WorldType.ADVENTUREMAP ? new TranslatableComponent("mco.configure.world.edit.subscreen.adventuremap") : (this.worldType == RealmsServer.WorldType.INSPIRATION ? new TranslatableComponent("mco.configure.world.edit.subscreen.inspiration") : new TranslatableComponent("mco.configure.world.edit.subscreen.experience"));
+            this.warningLabel = new RealmsLabel(component, this.width / 2, 26, 0xFF0000);
             this.pvp = true;
             this.spawnProtection = 0;
             this.forceGameMode = false;
@@ -100,7 +107,7 @@ extends RealmsScreen {
             this.spawnNPCs = true;
             this.commandBlocks = true;
         }
-        this.nameEdit = new EditBox(this.minecraft.font, this.column1X + 2, RealmsSlotOptionsScreen.row(1), this.columnWidth - 4, 20, null, I18n.get("mco.configure.world.edit.slot.name", new Object[0]));
+        this.nameEdit = new EditBox(this.minecraft.font, this.column1X + 2, RealmsSlotOptionsScreen.row(1), this.columnWidth - 4, 20, null, new TranslatableComponent("mco.configure.world.edit.slot.name"));
         this.nameEdit.setMaxLength(10);
         this.nameEdit.setValue(this.options.getSlotName(this.activeSlot));
         this.magicalSpecialHackyFocus(this.nameEdit);
@@ -153,66 +160,66 @@ extends RealmsScreen {
         if (this.difficulty == 0) {
             this.spawnMonstersButton.active = false;
         }
-        this.addButton(new Button(this.column1X, RealmsSlotOptionsScreen.row(13), this.columnWidth, 20, I18n.get("mco.configure.world.buttons.done", new Object[0]), button -> this.saveSettings()));
-        this.addButton(new Button(this.column2X, RealmsSlotOptionsScreen.row(13), this.columnWidth, 20, I18n.get("gui.cancel", new Object[0]), button -> this.minecraft.setScreen(this.parent)));
+        this.addButton(new Button(this.column1X, RealmsSlotOptionsScreen.row(13), this.columnWidth, 20, new TranslatableComponent("mco.configure.world.buttons.done"), button -> this.saveSettings()));
+        this.addButton(new Button(this.column2X, RealmsSlotOptionsScreen.row(13), this.columnWidth, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.parent)));
         this.addWidget(this.nameEdit);
-        this.titleLabel = this.addWidget(new RealmsLabel(I18n.get("mco.configure.world.buttons.options", new Object[0]), this.width / 2, 17, 0xFFFFFF));
+        this.titleLabel = this.addWidget(new RealmsLabel(new TranslatableComponent("mco.configure.world.buttons.options"), this.width / 2, 17, 0xFFFFFF));
         if (this.warningLabel != null) {
             this.addWidget(this.warningLabel);
         }
         this.narrateLabels();
     }
 
-    private String difficultyTitle() {
-        return I18n.get("options.difficulty", new Object[0]) + ": " + I18n.get(DIFFICULTIES[this.difficulty], new Object[0]);
+    private Component difficultyTitle() {
+        return new TranslatableComponent("options.difficulty").append(": ").append(DIFFICULTIES[this.difficulty]);
     }
 
-    private String gameModeTitle() {
-        return I18n.get("selectWorld.gameMode", new Object[0]) + ": " + I18n.get(GAME_MODES[this.gameMode], new Object[0]);
+    private Component gameModeTitle() {
+        return new TranslatableComponent("selectWorld.gameMode").append(": ").append(GAME_MODES[this.gameMode]);
     }
 
-    private String pvpTitle() {
-        return I18n.get("mco.configure.world.pvp", new Object[0]) + ": " + RealmsSlotOptionsScreen.getOnOff(this.pvp);
+    private Component pvpTitle() {
+        return new TranslatableComponent("mco.configure.world.pvp").append(": ").append(RealmsSlotOptionsScreen.getOnOff(this.pvp));
     }
 
-    private String spawnAnimalsTitle() {
-        return I18n.get("mco.configure.world.spawnAnimals", new Object[0]) + ": " + RealmsSlotOptionsScreen.getOnOff(this.spawnAnimals);
+    private Component spawnAnimalsTitle() {
+        return new TranslatableComponent("mco.configure.world.spawnAnimals").append(": ").append(RealmsSlotOptionsScreen.getOnOff(this.spawnAnimals));
     }
 
-    private String spawnMonstersTitle() {
+    private Component spawnMonstersTitle() {
         if (this.difficulty == 0) {
-            return I18n.get("mco.configure.world.spawnMonsters", new Object[0]) + ": " + I18n.get("mco.configure.world.off", new Object[0]);
+            return new TranslatableComponent("mco.configure.world.spawnMonsters").append(": ").append(new TranslatableComponent("mco.configure.world.off"));
         }
-        return I18n.get("mco.configure.world.spawnMonsters", new Object[0]) + ": " + RealmsSlotOptionsScreen.getOnOff(this.spawnMonsters);
+        return new TranslatableComponent("mco.configure.world.spawnMonsters").append(": ").append(RealmsSlotOptionsScreen.getOnOff(this.spawnMonsters));
     }
 
-    private String spawnNPCsTitle() {
-        return I18n.get("mco.configure.world.spawnNPCs", new Object[0]) + ": " + RealmsSlotOptionsScreen.getOnOff(this.spawnNPCs);
+    private Component spawnNPCsTitle() {
+        return new TranslatableComponent("mco.configure.world.spawnNPCs").append(": ").append(RealmsSlotOptionsScreen.getOnOff(this.spawnNPCs));
     }
 
-    private String commandBlocksTitle() {
-        return I18n.get("mco.configure.world.commandBlocks", new Object[0]) + ": " + RealmsSlotOptionsScreen.getOnOff(this.commandBlocks);
+    private Component commandBlocksTitle() {
+        return new TranslatableComponent("mco.configure.world.commandBlocks").append(": ").append(RealmsSlotOptionsScreen.getOnOff(this.commandBlocks));
     }
 
-    private String forceGameModeTitle() {
-        return I18n.get("mco.configure.world.forceGameMode", new Object[0]) + ": " + RealmsSlotOptionsScreen.getOnOff(this.forceGameMode);
+    private Component forceGameModeTitle() {
+        return new TranslatableComponent("mco.configure.world.forceGameMode").append(": ").append(RealmsSlotOptionsScreen.getOnOff(this.forceGameMode));
     }
 
-    private static String getOnOff(boolean bl) {
-        return I18n.get(bl ? "mco.configure.world.on" : "mco.configure.world.off", new Object[0]);
+    private static Component getOnOff(boolean bl) {
+        return bl ? TEXT_ON : TEXT_OFF;
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        this.renderBackground();
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        this.renderBackground(poseStack);
         String string = I18n.get("mco.configure.world.edit.slot.name", new Object[0]);
-        this.font.draw(string, this.column1X + this.columnWidth / 2 - this.font.width(string) / 2, RealmsSlotOptionsScreen.row(0) - 5, 0xFFFFFF);
-        this.titleLabel.render(this);
+        this.font.draw(poseStack, string, (float)(this.column1X + this.columnWidth / 2 - this.font.width(string) / 2), (float)(RealmsSlotOptionsScreen.row(0) - 5), 0xFFFFFF);
+        this.titleLabel.render(this, poseStack);
         if (this.warningLabel != null) {
-            this.warningLabel.render(this);
+            this.warningLabel.render(this, poseStack);
         }
-        this.nameEdit.render(i, j, f);
-        super.render(i, j, f);
+        this.nameEdit.render(poseStack, i, j, f);
+        super.render(poseStack, i, j, f);
     }
 
     private String getSlotName() {
@@ -237,7 +244,7 @@ extends RealmsScreen {
         private final double maxValue;
 
         public SettingsSlider(int i, int j, int k, int l, float f, float g) {
-            super(i, j, k, 20, "", 0.0);
+            super(i, j, k, 20, TextComponent.EMPTY, 0.0);
             this.minValue = f;
             this.maxValue = g;
             this.value = (Mth.clamp((float)l, f, g) - f) / (g - f);
@@ -254,7 +261,7 @@ extends RealmsScreen {
 
         @Override
         protected void updateMessage() {
-            this.setMessage(I18n.get("mco.configure.world.spawnProtection", new Object[0]) + ": " + (RealmsSlotOptionsScreen.this.spawnProtection == 0 ? I18n.get("mco.configure.world.off", new Object[0]) : RealmsSlotOptionsScreen.this.spawnProtection));
+            this.setMessage(new TranslatableComponent("mco.configure.world.spawnProtection").append(": ").append(RealmsSlotOptionsScreen.this.spawnProtection == 0 ? new TranslatableComponent("mco.configure.world.off") : new TextComponent(String.valueOf(RealmsSlotOptionsScreen.this.spawnProtection))));
         }
 
         @Override

@@ -10,6 +10,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.LazyLoadedValue;
 import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +35,9 @@ public class LevelType {
     private final LazyLoadedValue<ChunkGeneratorProvider> defaultProvider;
     private boolean selectable;
     private boolean replacement;
+    private final Component description;
     private boolean hasHelpText;
+    private final Component helpText;
     private boolean hasCustomOptions;
 
     private LevelType(int i, String string, BiFunction<LevelType, Dynamic<?>, ChunkGeneratorProvider> biFunction) {
@@ -53,6 +57,8 @@ public class LevelType {
         this.selectable = true;
         this.id = i;
         LevelType.LEVEL_TYPES[i] = this;
+        this.description = new TranslatableComponent("generator." + string);
+        this.helpText = new TranslatableComponent("generator." + string + ".info");
     }
 
     public String getName() {
@@ -64,13 +70,13 @@ public class LevelType {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public String getDescriptionId() {
-        return "generator." + this.generatorName;
+    public Component getDescription() {
+        return this.description;
     }
 
     @Environment(value=EnvType.CLIENT)
-    public String getHelpTextId() {
-        return this.getDescriptionId() + ".info";
+    public Component getHelpText() {
+        return this.helpText;
     }
 
     public int getVersion() {

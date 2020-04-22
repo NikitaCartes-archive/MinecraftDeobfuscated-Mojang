@@ -3,6 +3,7 @@
  */
 package com.mojang.realmsclient.gui.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTaskScreen;
@@ -13,6 +14,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsScreen;
 
@@ -44,15 +47,15 @@ extends RealmsScreen {
     @Override
     public void init() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-        this.createButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 17, 97, 20, I18n.get("mco.create.world", new Object[0]), button -> this.createWorld()));
-        this.addButton(new Button(this.width / 2 + 5, this.height / 4 + 120 + 17, 95, 20, I18n.get("gui.cancel", new Object[0]), button -> this.minecraft.setScreen(this.lastScreen)));
+        this.createButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 17, 97, 20, new TranslatableComponent("mco.create.world"), button -> this.createWorld()));
+        this.addButton(new Button(this.width / 2 + 5, this.height / 4 + 120 + 17, 95, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)));
         this.createButton.active = false;
-        this.nameBox = new EditBox(this.minecraft.font, this.width / 2 - 100, 65, 200, 20, null, I18n.get("mco.configure.world.name", new Object[0]));
+        this.nameBox = new EditBox(this.minecraft.font, this.width / 2 - 100, 65, 200, 20, null, new TranslatableComponent("mco.configure.world.name"));
         this.addWidget(this.nameBox);
         this.setInitialFocus(this.nameBox);
-        this.descriptionBox = new EditBox(this.minecraft.font, this.width / 2 - 100, 115, 200, 20, null, I18n.get("mco.configure.world.description", new Object[0]));
+        this.descriptionBox = new EditBox(this.minecraft.font, this.width / 2 - 100, 115, 200, 20, null, new TranslatableComponent("mco.configure.world.description"));
         this.addWidget(this.descriptionBox);
-        this.createRealmLabel = new RealmsLabel(I18n.get("mco.selectServer.create", new Object[0]), this.width / 2, 11, 0xFFFFFF);
+        this.createRealmLabel = new RealmsLabel(new TranslatableComponent("mco.selectServer.create"), this.width / 2, 11, 0xFFFFFF);
         this.addWidget(this.createRealmLabel);
         this.narrateLabels();
     }
@@ -82,7 +85,7 @@ extends RealmsScreen {
 
     private void createWorld() {
         if (this.valid()) {
-            RealmsResetWorldScreen realmsResetWorldScreen = new RealmsResetWorldScreen(this.lastScreen, this.server, I18n.get("mco.selectServer.create", new Object[0]), I18n.get("mco.create.world.subtitle", new Object[0]), 0xA0A0A0, I18n.get("mco.create.world.skip", new Object[0]), () -> this.minecraft.setScreen(this.lastScreen.newScreen()), () -> this.minecraft.setScreen(this.lastScreen.newScreen()));
+            RealmsResetWorldScreen realmsResetWorldScreen = new RealmsResetWorldScreen(this.lastScreen, this.server, new TranslatableComponent("mco.selectServer.create"), new TranslatableComponent("mco.create.world.subtitle"), 0xA0A0A0, new TranslatableComponent("mco.create.world.skip"), () -> this.minecraft.setScreen(this.lastScreen.newScreen()), () -> this.minecraft.setScreen(this.lastScreen.newScreen()));
             realmsResetWorldScreen.setResetTitle(I18n.get("mco.create.world.reset.title", new Object[0]));
             this.minecraft.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new WorldCreationTask(this.server.id, this.nameBox.getValue(), this.descriptionBox.getValue(), realmsResetWorldScreen)));
         }
@@ -93,18 +96,18 @@ extends RealmsScreen {
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        this.renderBackground();
-        this.createRealmLabel.render(this);
-        this.font.draw(I18n.get("mco.configure.world.name", new Object[0]), this.width / 2 - 100, 52.0f, 0xA0A0A0);
-        this.font.draw(I18n.get("mco.configure.world.description", new Object[0]), this.width / 2 - 100, 102.0f, 0xA0A0A0);
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        this.renderBackground(poseStack);
+        this.createRealmLabel.render(this, poseStack);
+        this.font.draw(poseStack, I18n.get("mco.configure.world.name", new Object[0]), (float)(this.width / 2 - 100), 52.0f, 0xA0A0A0);
+        this.font.draw(poseStack, I18n.get("mco.configure.world.description", new Object[0]), (float)(this.width / 2 - 100), 102.0f, 0xA0A0A0);
         if (this.nameBox != null) {
-            this.nameBox.render(i, j, f);
+            this.nameBox.render(poseStack, i, j, f);
         }
         if (this.descriptionBox != null) {
-            this.descriptionBox.render(i, j, f);
+            this.descriptionBox.render(poseStack, i, j, f);
         }
-        super.render(i, j, f);
+        super.render(poseStack, i, j, f);
     }
 }
 

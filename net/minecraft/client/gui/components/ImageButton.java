@@ -4,10 +4,13 @@
 package net.minecraft.client.gui.components;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 
 @Environment(value=EnvType.CLIENT)
@@ -25,11 +28,11 @@ extends Button {
     }
 
     public ImageButton(int i, int j, int k, int l, int m, int n, int o, ResourceLocation resourceLocation, int p, int q, Button.OnPress onPress) {
-        this(i, j, k, l, m, n, o, resourceLocation, p, q, onPress, "");
+        this(i, j, k, l, m, n, o, resourceLocation, p, q, onPress, TextComponent.EMPTY);
     }
 
-    public ImageButton(int i, int j, int k, int l, int m, int n, int o, ResourceLocation resourceLocation, int p, int q, Button.OnPress onPress, String string) {
-        super(i, j, k, l, string, onPress);
+    public ImageButton(int i, int j, int k, int l, int m, int n, int o, ResourceLocation resourceLocation, int p, int q, Button.OnPress onPress, Component component) {
+        super(i, j, k, l, component, onPress);
         this.textureWidth = p;
         this.textureHeight = q;
         this.xTexStart = m;
@@ -44,7 +47,7 @@ extends Button {
     }
 
     @Override
-    public void renderButton(int i, int j, float f) {
+    public void renderButton(PoseStack poseStack, int i, int j, float f) {
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.getTextureManager().bind(this.resourceLocation);
         RenderSystem.disableDepthTest();
@@ -52,7 +55,7 @@ extends Button {
         if (this.isHovered()) {
             k += this.yDiffTex;
         }
-        ImageButton.blit(this.x, this.y, this.xTexStart, k, this.width, this.height, this.textureWidth, this.textureHeight);
+        ImageButton.blit(poseStack, this.x, this.y, this.xTexStart, k, this.width, this.height, this.textureWidth, this.textureHeight);
         RenderSystem.enableDepthTest();
     }
 }

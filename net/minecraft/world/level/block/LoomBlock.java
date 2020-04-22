@@ -24,7 +24,7 @@ import net.minecraft.world.phys.BlockHitResult;
 
 public class LoomBlock
 extends HorizontalDirectionalBlock {
-    private static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.loom", new Object[0]);
+    private static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.loom");
 
     protected LoomBlock(BlockBehaviour.Properties properties) {
         super(properties);

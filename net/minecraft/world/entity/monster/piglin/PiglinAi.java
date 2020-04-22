@@ -288,6 +288,9 @@ public class PiglinAi {
         if (PiglinAi.isAdmiringDisabled(piglin) && piglin.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)) {
             return false;
         }
+        if (PiglinAi.isBarterCurrency(item)) {
+            return PiglinAi.isNotHoldingLovedItemInOffHand(piglin);
+        }
         boolean bl = piglin.canAddToInventory(itemStack);
         if (item == Items.GOLD_NUGGET) {
             return bl;

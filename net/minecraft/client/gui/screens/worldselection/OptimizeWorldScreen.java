@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.gui.screens.worldselection;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
@@ -12,12 +13,13 @@ import net.minecraft.Util;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.WorldData;
 
 @Environment(value=EnvType.CLIENT)
 public class OptimizeWorldScreen
@@ -32,20 +34,20 @@ extends Screen {
     private final WorldUpgrader upgrader;
 
     public static OptimizeWorldScreen create(BooleanConsumer booleanConsumer, LevelStorageSource.LevelStorageAccess levelStorageAccess, boolean bl) {
-        LevelData levelData = levelStorageAccess.getDataTag();
-        return new OptimizeWorldScreen(booleanConsumer, levelStorageAccess, levelData, bl);
+        WorldData worldData = levelStorageAccess.getDataTag();
+        return new OptimizeWorldScreen(booleanConsumer, levelStorageAccess, worldData, bl);
     }
 
-    private OptimizeWorldScreen(BooleanConsumer booleanConsumer, LevelStorageSource.LevelStorageAccess levelStorageAccess, LevelData levelData, boolean bl) {
-        super(new TranslatableComponent("optimizeWorld.title", levelData.getLevelName()));
+    private OptimizeWorldScreen(BooleanConsumer booleanConsumer, LevelStorageSource.LevelStorageAccess levelStorageAccess, WorldData worldData, boolean bl) {
+        super(new TranslatableComponent("optimizeWorld.title", worldData.getLevelName()));
         this.callback = booleanConsumer;
-        this.upgrader = new WorldUpgrader(levelStorageAccess, levelData, bl);
+        this.upgrader = new WorldUpgrader(levelStorageAccess, this.minecraft.getFixerUpper(), worldData, bl);
     }
 
     @Override
     protected void init() {
         super.init();
-        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 150, 200, 20, I18n.get("gui.cancel", new Object[0]), button -> {
+        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 150, 200, 20, CommonComponents.GUI_CANCEL, button -> {
             this.upgrader.cancel();
             this.callback.accept(false);
         }));
@@ -69,30 +71,30 @@ extends Screen {
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        this.renderBackground();
-        this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 20, 0xFFFFFF);
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        this.renderBackground(poseStack);
+        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 0xFFFFFF);
         int k = this.width / 2 - 150;
         int l = this.width / 2 + 150;
         int m = this.height / 4 + 100;
         int n = m + 10;
-        this.drawCenteredString(this.font, this.upgrader.getStatus().getColoredString(), this.width / 2, m - this.font.lineHeight - 2, 0xA0A0A0);
+        this.drawCenteredString(poseStack, this.font, this.upgrader.getStatus(), this.width / 2, m - this.font.lineHeight - 2, 0xA0A0A0);
         if (this.upgrader.getTotalChunks() > 0) {
-            OptimizeWorldScreen.fill(k - 1, m - 1, l + 1, n + 1, -16777216);
-            this.drawString(this.font, I18n.get("optimizeWorld.info.converted", this.upgrader.getConverted()), k, 40, 0xA0A0A0);
-            this.drawString(this.font, I18n.get("optimizeWorld.info.skipped", this.upgrader.getSkipped()), k, 40 + this.font.lineHeight + 3, 0xA0A0A0);
-            this.drawString(this.font, I18n.get("optimizeWorld.info.total", this.upgrader.getTotalChunks()), k, 40 + (this.font.lineHeight + 3) * 2, 0xA0A0A0);
+            OptimizeWorldScreen.fill(poseStack, k - 1, m - 1, l + 1, n + 1, -16777216);
+            this.drawString(poseStack, this.font, I18n.get("optimizeWorld.info.converted", this.upgrader.getConverted()), k, 40, 0xA0A0A0);
+            this.drawString(poseStack, this.font, I18n.get("optimizeWorld.info.skipped", this.upgrader.getSkipped()), k, 40 + this.font.lineHeight + 3, 0xA0A0A0);
+            this.drawString(poseStack, this.font, I18n.get("optimizeWorld.info.total", this.upgrader.getTotalChunks()), k, 40 + (this.font.lineHeight + 3) * 2, 0xA0A0A0);
             int o = 0;
             for (DimensionType dimensionType : DimensionType.getAllTypes()) {
                 int p = Mth.floor(this.upgrader.dimensionProgress(dimensionType) * (float)(l - k));
-                OptimizeWorldScreen.fill(k + o, m, k + o + p, n, DIMENSION_COLORS.getInt(dimensionType));
+                OptimizeWorldScreen.fill(poseStack, k + o, m, k + o + p, n, DIMENSION_COLORS.getInt(dimensionType));
                 o += p;
             }
             int q = this.upgrader.getConverted() + this.upgrader.getSkipped();
-            this.drawCenteredString(this.font, q + " / " + this.upgrader.getTotalChunks(), this.width / 2, m + 2 * this.font.lineHeight + 2, 0xA0A0A0);
-            this.drawCenteredString(this.font, Mth.floor(this.upgrader.getProgress() * 100.0f) + "%", this.width / 2, m + (n - m) / 2 - this.font.lineHeight / 2, 0xA0A0A0);
+            this.drawCenteredString(poseStack, this.font, q + " / " + this.upgrader.getTotalChunks(), this.width / 2, m + 2 * this.font.lineHeight + 2, 0xA0A0A0);
+            this.drawCenteredString(poseStack, this.font, Mth.floor(this.upgrader.getProgress() * 100.0f) + "%", this.width / 2, m + (n - m) / 2 - this.font.lineHeight / 2, 0xA0A0A0);
         }
-        super.render(i, j, f);
+        super.render(poseStack, i, j, f);
     }
 }
 

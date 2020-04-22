@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.gui.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.fabricmc.api.EnvType;
@@ -10,7 +11,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.progress.StoringChunkProgressListener;
 import net.minecraft.util.Mth;
@@ -50,12 +50,12 @@ extends Screen {
 
     @Override
     public void removed() {
-        NarratorChatListener.INSTANCE.sayNow(I18n.get("narrator.loading.done", new Object[0]));
+        NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.loading.done").getString());
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        this.renderBackground();
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        this.renderBackground(poseStack);
         String string = Mth.clamp(this.progressListener.getProgress(), 0, 100) + "%";
         long l = Util.getMillis();
         if (l - this.lastNarration > 2000L) {
@@ -65,11 +65,11 @@ extends Screen {
         int k = this.width / 2;
         int m = this.height / 2;
         int n = 30;
-        LevelLoadingScreen.renderChunks(this.progressListener, k, m + 30, 2, 0);
-        this.drawCenteredString(this.font, string, k, m - this.font.lineHeight / 2 - 30, 0xFFFFFF);
+        LevelLoadingScreen.renderChunks(poseStack, this.progressListener, k, m + 30, 2, 0);
+        this.drawCenteredString(poseStack, this.font, string, k, m - this.font.lineHeight / 2 - 30, 0xFFFFFF);
     }
 
-    public static void renderChunks(StoringChunkProgressListener storingChunkProgressListener, int i, int j, int k, int l) {
+    public static void renderChunks(PoseStack poseStack, StoringChunkProgressListener storingChunkProgressListener, int i, int j, int k, int l) {
         int m = k + l;
         int n = storingChunkProgressListener.getFullDiameter();
         int o = n * m - l;
@@ -80,17 +80,17 @@ extends Screen {
         int t = o / 2 + 1;
         int u = -16772609;
         if (l != 0) {
-            LevelLoadingScreen.fill(i - t, j - t, i - t + 1, j + t, -16772609);
-            LevelLoadingScreen.fill(i + t - 1, j - t, i + t, j + t, -16772609);
-            LevelLoadingScreen.fill(i - t, j - t, i + t, j - t + 1, -16772609);
-            LevelLoadingScreen.fill(i - t, j + t - 1, i + t, j + t, -16772609);
+            LevelLoadingScreen.fill(poseStack, i - t, j - t, i - t + 1, j + t, -16772609);
+            LevelLoadingScreen.fill(poseStack, i + t - 1, j - t, i + t, j + t, -16772609);
+            LevelLoadingScreen.fill(poseStack, i - t, j - t, i + t, j - t + 1, -16772609);
+            LevelLoadingScreen.fill(poseStack, i - t, j + t - 1, i + t, j + t, -16772609);
         }
         for (int v = 0; v < p; ++v) {
             for (int w = 0; w < p; ++w) {
                 ChunkStatus chunkStatus = storingChunkProgressListener.getStatus(v, w);
                 int x = r + v * m;
                 int y = s + w * m;
-                LevelLoadingScreen.fill(x, y, x + k, y + k, COLORS.getInt(chunkStatus) | 0xFF000000);
+                LevelLoadingScreen.fill(poseStack, x, y, x + k, y + k, COLORS.getInt(chunkStatus) | 0xFF000000);
             }
         }
     }

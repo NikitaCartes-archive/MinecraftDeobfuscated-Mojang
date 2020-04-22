@@ -44,7 +44,7 @@ extends Feature<C> {
 
     @Override
     public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, C featureConfiguration) {
-        if (!levelAccessor.getLevelData().isGenerateMapFeatures()) {
+        if (!levelAccessor.getLevelData().shouldGenerateMapFeatures()) {
             return false;
         }
         int i = blockPos.getX() >> 4;
@@ -71,7 +71,7 @@ extends Feature<C> {
 
     @Nullable
     public BlockPos getNearestGeneratedFeature(ServerLevel serverLevel, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, BlockPos blockPos, int i, boolean bl) {
-        if (!chunkGenerator.getBiomeSource().canGenerateStructure(this)) {
+        if (!chunkGenerator.canGenerateStructure(this)) {
             return null;
         }
         StructureFeatureManager structureFeatureManager = serverLevel.structureFeatureManager();

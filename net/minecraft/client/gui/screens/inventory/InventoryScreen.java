@@ -39,7 +39,7 @@ implements RecipeUpdateListener {
     private boolean buttonClicked;
 
     public InventoryScreen(Player player) {
-        super(player.inventoryMenu, player.inventory, new TranslatableComponent("container.crafting", new Object[0]));
+        super(player.inventoryMenu, player.inventory, new TranslatableComponent("container.crafting"));
         this.passEvents = true;
     }
 
@@ -75,36 +75,35 @@ implements RecipeUpdateListener {
     }
 
     @Override
-    protected void renderLabels(int i, int j) {
-        this.font.draw(this.title.getColoredString(), 97.0f, 8.0f, 0x404040);
+    protected void renderLabels(PoseStack poseStack, int i, int j) {
+        this.font.draw(poseStack, this.title, 97.0f, 8.0f, 0x404040);
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        this.renderBackground();
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        this.renderBackground(poseStack);
         boolean bl = this.doRenderEffects = !this.recipeBookComponent.isVisible();
         if (this.recipeBookComponent.isVisible() && this.widthTooNarrow) {
-            this.renderBg(f, i, j);
-            this.recipeBookComponent.render(i, j, f);
+            this.renderBg(poseStack, f, i, j);
+            this.recipeBookComponent.render(poseStack, i, j, f);
         } else {
-            this.recipeBookComponent.render(i, j, f);
-            super.render(i, j, f);
-            this.recipeBookComponent.renderGhostRecipe(this.leftPos, this.topPos, false, f);
+            this.recipeBookComponent.render(poseStack, i, j, f);
+            super.render(poseStack, i, j, f);
+            this.recipeBookComponent.renderGhostRecipe(poseStack, this.leftPos, this.topPos, false, f);
         }
-        this.renderTooltip(i, j);
-        this.recipeBookComponent.renderTooltip(this.leftPos, this.topPos, i, j);
+        this.renderTooltip(poseStack, i, j);
+        this.recipeBookComponent.renderTooltip(poseStack, this.leftPos, this.topPos, i, j);
         this.xMouse = i;
         this.yMouse = j;
-        this.magicalSpecialHackyFocus(this.recipeBookComponent);
     }
 
     @Override
-    protected void renderBg(float f, int i, int j) {
+    protected void renderBg(PoseStack poseStack, float f, int i, int j) {
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bind(INVENTORY_LOCATION);
         int k = this.leftPos;
         int l = this.topPos;
-        this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
+        this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
         InventoryScreen.renderEntityInInventory(k + 51, l + 75, 30, (float)(k + 51) - this.xMouse, (float)(l + 75 - 50) - this.yMouse, this.minecraft.player);
     }
 

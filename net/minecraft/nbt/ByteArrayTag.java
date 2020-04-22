@@ -15,6 +15,7 @@ import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -115,16 +116,16 @@ extends CollectionTag<ByteTag> {
 
     @Override
     public Component getPrettyDisplay(String string, int i) {
-        Component component = new TextComponent("B").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
-        Component component2 = new TextComponent("[").append(component).append(";");
+        MutableComponent component = new TextComponent("B").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
+        MutableComponent mutableComponent = new TextComponent("[").append(component).append(";");
         for (int j = 0; j < this.data.length; ++j) {
-            Component component3 = new TextComponent(String.valueOf(this.data[j])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
-            component2.append(" ").append(component3).append(component);
+            MutableComponent mutableComponent2 = new TextComponent(String.valueOf(this.data[j])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER);
+            mutableComponent.append(" ").append(mutableComponent2).append(component);
             if (j == this.data.length - 1) continue;
-            component2.append(",");
+            mutableComponent.append(",");
         }
-        component2.append("]");
-        return component2;
+        mutableComponent.append("]");
+        return mutableComponent;
     }
 
     public byte[] getAsByteArray() {

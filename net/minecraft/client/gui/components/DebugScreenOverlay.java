@@ -10,6 +10,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.datafixers.DataFixUtils;
 import com.mojang.math.Matrix4f;
@@ -91,27 +92,27 @@ extends GuiComponent {
         this.clientChunk = null;
     }
 
-    public void render() {
+    public void render(PoseStack poseStack) {
         this.minecraft.getProfiler().push("debug");
         RenderSystem.pushMatrix();
         Entity entity = this.minecraft.getCameraEntity();
         this.block = entity.pick(20.0, 0.0f, false);
         this.liquid = entity.pick(20.0, 0.0f, true);
-        this.drawGameInformation();
-        this.drawSystemInformation();
+        this.drawGameInformation(poseStack);
+        this.drawSystemInformation(poseStack);
         RenderSystem.popMatrix();
         if (this.minecraft.options.renderFpsChart) {
             int i = this.minecraft.getWindow().getGuiScaledWidth();
-            this.drawChart(this.minecraft.getFrameTimer(), 0, i / 2, true);
+            this.drawChart(poseStack, this.minecraft.getFrameTimer(), 0, i / 2, true);
             IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
             if (integratedServer != null) {
-                this.drawChart(integratedServer.getFrameTimer(), i - Math.min(i / 2, 240), i / 2, false);
+                this.drawChart(poseStack, integratedServer.getFrameTimer(), i - Math.min(i / 2, 240), i / 2, false);
             }
         }
         this.minecraft.getProfiler().pop();
     }
 
-    protected void drawGameInformation() {
+    protected void drawGameInformation(PoseStack poseStack) {
         List<String> list = this.getGameInformation();
         list.add("");
         boolean bl = this.minecraft.getSingleplayerServer() != null;
@@ -124,12 +125,12 @@ extends GuiComponent {
             int k = this.font.width(string);
             int l = 2;
             int m = 2 + j * i;
-            DebugScreenOverlay.fill(1, m - 1, 2 + k + 1, m + j - 1, -1873784752);
-            this.font.draw(string, 2.0f, m, 0xE0E0E0);
+            DebugScreenOverlay.fill(poseStack, 1, m - 1, 2 + k + 1, m + j - 1, -1873784752);
+            this.font.draw(poseStack, string, 2.0f, (float)m, 0xE0E0E0);
         }
     }
 
-    protected void drawSystemInformation() {
+    protected void drawSystemInformation(PoseStack poseStack) {
         List<String> list = this.getSystemInformation();
         for (int i = 0; i < list.size(); ++i) {
             String string = list.get(i);
@@ -138,8 +139,8 @@ extends GuiComponent {
             int k = this.font.width(string);
             int l = this.minecraft.getWindow().getGuiScaledWidth() - 2 - k;
             int m = 2 + j * i;
-            DebugScreenOverlay.fill(l - 1, m - 1, l + k + 1, m + j - 1, -1873784752);
-            this.font.draw(string, l, m, 0xE0E0E0);
+            DebugScreenOverlay.fill(poseStack, l - 1, m - 1, l + k + 1, m + j - 1, -1873784752);
+            this.font.draw(poseStack, string, (float)l, (float)m, 0xE0E0E0);
         }
     }
 
@@ -357,7 +358,7 @@ extends GuiComponent {
         return property.getName() + ": " + string;
     }
 
-    private void drawChart(FrameTimer frameTimer, int i, int j, boolean bl) {
+    private void drawChart(PoseStack poseStack, FrameTimer frameTimer, int i, int j, boolean bl) {
         int t;
         RenderSystem.disableDepthTest();
         int k = frameTimer.getLogStart();
@@ -378,7 +379,7 @@ extends GuiComponent {
             q += (long)u;
         }
         t = this.minecraft.getWindow().getGuiScaledHeight();
-        DebugScreenOverlay.fill(i, t - 60, i + p, t, -1873784752);
+        DebugScreenOverlay.fill(poseStack, i, t - 60, i + p, t, -1873784752);
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         RenderSystem.enableBlend();
         RenderSystem.disableTexture();
@@ -405,29 +406,29 @@ extends GuiComponent {
         RenderSystem.enableTexture();
         RenderSystem.disableBlend();
         if (bl) {
-            DebugScreenOverlay.fill(i + 1, t - 30 + 1, i + 14, t - 30 + 10, -1873784752);
-            this.font.draw("60 FPS", i + 2, t - 30 + 2, 0xE0E0E0);
-            this.hLine(i, i + p - 1, t - 30, -1);
-            DebugScreenOverlay.fill(i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
-            this.font.draw("30 FPS", i + 2, t - 60 + 2, 0xE0E0E0);
-            this.hLine(i, i + p - 1, t - 60, -1);
+            DebugScreenOverlay.fill(poseStack, i + 1, t - 30 + 1, i + 14, t - 30 + 10, -1873784752);
+            this.font.draw(poseStack, "60 FPS", (float)(i + 2), (float)(t - 30 + 2), 0xE0E0E0);
+            this.hLine(poseStack, i, i + p - 1, t - 30, -1);
+            DebugScreenOverlay.fill(poseStack, i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
+            this.font.draw(poseStack, "30 FPS", (float)(i + 2), (float)(t - 60 + 2), 0xE0E0E0);
+            this.hLine(poseStack, i, i + p - 1, t - 60, -1);
         } else {
-            DebugScreenOverlay.fill(i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
-            this.font.draw("20 TPS", i + 2, t - 60 + 2, 0xE0E0E0);
-            this.hLine(i, i + p - 1, t - 60, -1);
+            DebugScreenOverlay.fill(poseStack, i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
+            this.font.draw(poseStack, "20 TPS", (float)(i + 2), (float)(t - 60 + 2), 0xE0E0E0);
+            this.hLine(poseStack, i, i + p - 1, t - 60, -1);
         }
-        this.hLine(i, i + p - 1, t - 1, -1);
-        this.vLine(i, t - 60, t, -1);
-        this.vLine(i + p - 1, t - 60, t, -1);
+        this.hLine(poseStack, i, i + p - 1, t - 1, -1);
+        this.vLine(poseStack, i, t - 60, t, -1);
+        this.vLine(poseStack, i + p - 1, t - 60, t, -1);
         if (bl && this.minecraft.options.framerateLimit > 0 && this.minecraft.options.framerateLimit <= 250) {
-            this.hLine(i, i + p - 1, t - 1 - (int)(1800.0 / (double)this.minecraft.options.framerateLimit), -16711681);
+            this.hLine(poseStack, i, i + p - 1, t - 1 - (int)(1800.0 / (double)this.minecraft.options.framerateLimit), -16711681);
         }
         String string = r + " ms min";
         String string2 = q / (long)p + " ms avg";
         String string3 = s + " ms max";
-        this.font.drawShadow(string, i + 2, t - 60 - this.font.lineHeight, 0xE0E0E0);
-        this.font.drawShadow(string2, i + p / 2 - this.font.width(string2) / 2, t - 60 - this.font.lineHeight, 0xE0E0E0);
-        this.font.drawShadow(string3, i + p - this.font.width(string3), t - 60 - this.font.lineHeight, 0xE0E0E0);
+        this.font.drawShadow(poseStack, string, (float)(i + 2), (float)(t - 60 - this.font.lineHeight), 0xE0E0E0);
+        this.font.drawShadow(poseStack, string2, (float)(i + p / 2 - this.font.width(string2) / 2), (float)(t - 60 - this.font.lineHeight), 0xE0E0E0);
+        this.font.drawShadow(poseStack, string3, (float)(i + p - this.font.width(string3)), (float)(t - 60 - this.font.lineHeight), 0xE0E0E0);
         RenderSystem.enableDepthTest();
     }
 

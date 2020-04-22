@@ -27,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 public class UnopenedPack
 implements AutoCloseable {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final PackMetadataSection BROKEN_ASSETS_FALLBACK = new PackMetadataSection(new TranslatableComponent("resourcePack.broken_assets", new Object[0]).withStyle(ChatFormatting.RED, ChatFormatting.ITALIC), SharedConstants.getCurrentVersion().getPackVersion());
+    private static final PackMetadataSection BROKEN_ASSETS_FALLBACK = new PackMetadataSection(new TranslatableComponent("resourcePack.broken_assets").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC), SharedConstants.getCurrentVersion().getPackVersion());
     private final String id;
     private final Supplier<Pack> supplier;
     private final Component title;
@@ -88,7 +88,7 @@ implements AutoCloseable {
     }
 
     public Component getChatLink(boolean bl) {
-        return ComponentUtils.wrapInSquareBrackets(new TextComponent(this.id)).withStyle(style -> style.setColor(bl ? ChatFormatting.GREEN : ChatFormatting.RED).setInsertion(StringArgumentType.escapeIfRequired(this.id)).setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("").append(this.title).append("\n").append(this.description))));
+        return ComponentUtils.wrapInSquareBrackets(new TextComponent(this.id)).withStyle(style -> style.withColor(bl ? ChatFormatting.GREEN : ChatFormatting.RED).withInsertion(StringArgumentType.escapeIfRequired(this.id)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("").append(this.title).append("\n").append(this.description))));
     }
 
     public PackCompatibility getCompatibility() {

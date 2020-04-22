@@ -10,8 +10,10 @@ import com.google.gson.JsonParseException;
 import com.mojang.blaze3d.font.GlyphProvider;
 import com.mojang.blaze3d.font.RawGlyph;
 import com.mojang.blaze3d.platform.NativeImage;
-import it.unimi.dsi.fastutil.chars.Char2ObjectMap;
-import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.ints.IntSets;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +33,11 @@ public class BitmapProvider
 implements GlyphProvider {
     private static final Logger LOGGER = LogManager.getLogger();
     private final NativeImage image;
-    private final Char2ObjectMap<Glyph> glyphs;
+    private final Int2ObjectMap<Glyph> glyphs;
 
-    public BitmapProvider(NativeImage nativeImage, Char2ObjectMap<Glyph> char2ObjectMap) {
+    private BitmapProvider(NativeImage nativeImage, Int2ObjectMap<Glyph> int2ObjectMap) {
         this.image = nativeImage;
-        this.glyphs = char2ObjectMap;
+        this.glyphs = int2ObjectMap;
     }
 
     @Override
@@ -45,8 +47,13 @@ implements GlyphProvider {
 
     @Override
     @Nullable
-    public RawGlyph getGlyph(char c) {
-        return (RawGlyph)this.glyphs.get(c);
+    public RawGlyph getGlyph(int i) {
+        return (RawGlyph)this.glyphs.get(i);
+    }
+
+    @Override
+    public IntSet getSupportedGlyphs() {
+        return IntSets.unmodifiable(this.glyphs.keySet());
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -112,11 +119,11 @@ implements GlyphProvider {
     public static class Builder
     implements GlyphProviderBuilder {
         private final ResourceLocation texture;
-        private final List<String> chars;
+        private final List<int[]> chars;
         private final int height;
         private final int ascent;
 
-        public Builder(ResourceLocation resourceLocation, int i, int j, List<String> list) {
+        public Builder(ResourceLocation resourceLocation, int i, int j, List<int[]> list) {
             this.texture = new ResourceLocation(resourceLocation.getNamespace(), "textures/" + resourceLocation.getPath());
             this.chars = list;
             this.height = i;
@@ -129,18 +136,18 @@ implements GlyphProvider {
             if (j > i) {
                 throw new JsonParseException("Ascent " + j + " higher than height " + i);
             }
-            ArrayList<String> list = Lists.newArrayList();
+            ArrayList<int[]> list = Lists.newArrayList();
             JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "chars");
             for (int k = 0; k < jsonArray.size(); ++k) {
-                int m;
                 int l;
                 String string = GsonHelper.convertToString(jsonArray.get(k), "chars[" + k + "]");
-                if (k > 0 && (l = string.length()) != (m = ((String)list.get(0)).length())) {
-                    throw new JsonParseException("Elements of chars have to be the same length (found: " + l + ", expected: " + m + "), pad with space or \\u0000");
+                int[] is = string.codePoints().toArray();
+                if (k > 0 && is.length != (l = ((int[])list.get(0)).length)) {
+                    throw new JsonParseException("Elements of chars have to be the same length (found: " + is.length + ", expected: " + l + "), pad with space or \\u0000");
                 }
-                list.add(string);
+                list.add(is);
             }
-            if (list.isEmpty() || ((String)list.get(0)).isEmpty()) {
+            if (list.isEmpty() || ((int[])list.get(0)).length == 0) {
                 throw new JsonParseException("Expected to find data in chars, found none.");
             }
             return new Builder(new ResourceLocation(GsonHelper.getAsString(jsonObject, "file")), i, j, list);
@@ -158,25 +165,30 @@ implements GlyphProvider {
                 NativeImage nativeImage = NativeImage.read(NativeImage.Format.RGBA, resource.getInputStream());
                 int i = nativeImage.getWidth();
                 int j = nativeImage.getHeight();
-                int k = i / this.chars.get(0).length();
+                int k = i / this.chars.get(0).length;
                 int l = j / this.chars.size();
                 float f = (float)this.height / (float)l;
-                Char2ObjectOpenHashMap<Glyph> char2ObjectMap = new Char2ObjectOpenHashMap<Glyph>();
+                Int2ObjectOpenHashMap<Glyph> int2ObjectMap = new Int2ObjectOpenHashMap<Glyph>();
                 int m = 0;
                 while (true) {
-                    String string;
+                    int n;
+                    int[] nArray;
+                    int n2;
                     if (m < this.chars.size()) {
-                        string = this.chars.get(m);
+                        n2 = 0;
+                        nArray = this.chars.get(m);
+                        n = nArray.length;
                     } else {
-                        BitmapProvider bitmapProvider = new BitmapProvider(nativeImage, char2ObjectMap);
+                        BitmapProvider bitmapProvider = new BitmapProvider(nativeImage, int2ObjectMap);
                         return bitmapProvider;
                     }
-                    for (int n = 0; n < string.length(); ++n) {
-                        int o;
+                    for (int i2 = 0; i2 < n; ++i2) {
+                        int q;
                         Glyph glyph;
-                        char c = string.charAt(n);
-                        if (c == '\u0000' || c == ' ' || (glyph = char2ObjectMap.put(c, new Glyph(f, nativeImage, n * k, m * l, k, l, (int)(0.5 + (double)((float)(o = this.getActualGlyphWidth(nativeImage, k, l, n, m)) * f)) + 1, this.ascent))) == null) continue;
-                        LOGGER.warn("Codepoint '{}' declared multiple times in {}", (Object)Integer.toHexString(c), (Object)this.texture);
+                        int o = nArray[i2];
+                        int p = n2++;
+                        if (o == 0 || o == 32 || (glyph = int2ObjectMap.put(o, new Glyph(f, nativeImage, p * k, m * l, k, l, (int)(0.5 + (double)((float)(q = this.getActualGlyphWidth(nativeImage, k, l, p, m)) * f)) + 1, this.ascent))) == null) continue;
+                        LOGGER.warn("Codepoint '{}' declared multiple times in {}", (Object)Integer.toHexString(o), (Object)this.texture);
                     }
                     ++m;
                 }

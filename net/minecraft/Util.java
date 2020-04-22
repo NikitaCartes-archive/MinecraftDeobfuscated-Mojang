@@ -292,6 +292,37 @@ public class Util {
         return is[random.nextInt(is.length)];
     }
 
+    public static void safeReplaceFile(File file, File file2, File file3) {
+        if (file3.exists()) {
+            file3.delete();
+        }
+        file.renameTo(file3);
+        if (file.exists()) {
+            file.delete();
+        }
+        file2.renameTo(file);
+        if (file2.exists()) {
+            file2.delete();
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static int offsetByCodepoints(String string, int i, int j) {
+        int k = string.length();
+        if (j >= 0) {
+            for (int l = 0; i < k && l < j; ++l) {
+                if (!Character.isHighSurrogate(string.charAt(i++)) || i >= k || !Character.isLowSurrogate(string.charAt(i))) continue;
+                ++i;
+            }
+        } else {
+            for (int l = j; i > 0 && l < 0; ++l) {
+                if (!Character.isLowSurrogate(string.charAt(--i)) || i <= 0 || !Character.isHighSurrogate(string.charAt(i - 1))) continue;
+                --i;
+            }
+        }
+        return i;
+    }
+
     static enum IdentityStrategy implements Hash.Strategy<Object>
     {
         INSTANCE;

@@ -22,8 +22,7 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.UnopenedPack;
-import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.WorldData;
 
 public class DataPackCommand {
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_PACK = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.datapack.unknown", object));
@@ -41,10 +40,10 @@ public class DataPackCommand {
         ArrayList<UnopenedPack> list = Lists.newArrayList(packRepository.getSelected());
         inserter.apply(list, unopenedPack2);
         packRepository.setSelected(list);
-        LevelData levelData = commandSourceStack.getServer().getLevel(DimensionType.OVERWORLD).getLevelData();
-        levelData.getEnabledDataPacks().clear();
-        packRepository.getSelected().forEach(unopenedPack -> levelData.getEnabledDataPacks().add(unopenedPack.getId()));
-        levelData.getDisabledDataPacks().remove(unopenedPack2.getId());
+        WorldData worldData = commandSourceStack.getServer().getWorldData();
+        worldData.getEnabledDataPacks().clear();
+        packRepository.getSelected().forEach(unopenedPack -> worldData.getEnabledDataPacks().add(unopenedPack.getId()));
+        worldData.getDisabledDataPacks().remove(unopenedPack2.getId());
         commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.enable.success", unopenedPack2.getChatLink(true)), true);
         commandSourceStack.getServer().reloadResources();
         return packRepository.getSelected().size();
@@ -55,10 +54,10 @@ public class DataPackCommand {
         ArrayList<UnopenedPack> list = Lists.newArrayList(packRepository.getSelected());
         list.remove(unopenedPack2);
         packRepository.setSelected(list);
-        LevelData levelData = commandSourceStack.getServer().getLevel(DimensionType.OVERWORLD).getLevelData();
-        levelData.getEnabledDataPacks().clear();
-        packRepository.getSelected().forEach(unopenedPack -> levelData.getEnabledDataPacks().add(unopenedPack.getId()));
-        levelData.getDisabledDataPacks().add(unopenedPack2.getId());
+        WorldData worldData = commandSourceStack.getServer().getWorldData();
+        worldData.getEnabledDataPacks().clear();
+        packRepository.getSelected().forEach(unopenedPack -> worldData.getEnabledDataPacks().add(unopenedPack.getId()));
+        worldData.getDisabledDataPacks().add(unopenedPack2.getId());
         commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.disable.success", unopenedPack2.getChatLink(true)), true);
         commandSourceStack.getServer().reloadResources();
         return packRepository.getSelected().size();
@@ -71,7 +70,7 @@ public class DataPackCommand {
     private static int listAvailablePacks(CommandSourceStack commandSourceStack) {
         PackRepository<UnopenedPack> packRepository = commandSourceStack.getServer().getPackRepository();
         if (packRepository.getUnselected().isEmpty()) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.list.available.none", new Object[0]), false);
+            commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.list.available.none"), false);
         } else {
             commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.list.available.success", packRepository.getUnselected().size(), ComponentUtils.formatList(packRepository.getUnselected(), unopenedPack -> unopenedPack.getChatLink(false))), false);
         }
@@ -81,7 +80,7 @@ public class DataPackCommand {
     private static int listEnabledPacks(CommandSourceStack commandSourceStack) {
         PackRepository<UnopenedPack> packRepository = commandSourceStack.getServer().getPackRepository();
         if (packRepository.getSelected().isEmpty()) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.list.enabled.none", new Object[0]), false);
+            commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.list.enabled.none"), false);
         } else {
             commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.list.enabled.success", packRepository.getSelected().size(), ComponentUtils.formatList(packRepository.getSelected(), unopenedPack -> unopenedPack.getChatLink(true))), false);
         }

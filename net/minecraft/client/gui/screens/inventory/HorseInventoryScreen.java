@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -30,42 +31,42 @@ extends AbstractContainerScreen<HorseInventoryMenu> {
     }
 
     @Override
-    protected void renderLabels(int i, int j) {
-        this.font.draw(this.title.getColoredString(), 8.0f, 6.0f, 0x404040);
-        this.font.draw(this.inventory.getDisplayName().getColoredString(), 8.0f, this.imageHeight - 96 + 2, 0x404040);
+    protected void renderLabels(PoseStack poseStack, int i, int j) {
+        this.font.draw(poseStack, this.title, 8.0f, 6.0f, 0x404040);
+        this.font.draw(poseStack, this.inventory.getDisplayName(), 8.0f, (float)(this.imageHeight - 96 + 2), 0x404040);
     }
 
     @Override
-    protected void renderBg(float f, int i, int j) {
+    protected void renderBg(PoseStack poseStack, float f, int i, int j) {
         AbstractChestedHorse abstractChestedHorse;
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bind(HORSE_INVENTORY_LOCATION);
         int k = (this.width - this.imageWidth) / 2;
         int l = (this.height - this.imageHeight) / 2;
-        this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
+        this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
         if (this.horse instanceof AbstractChestedHorse && (abstractChestedHorse = (AbstractChestedHorse)this.horse).hasChest()) {
-            this.blit(k + 79, l + 17, 0, this.imageHeight, abstractChestedHorse.getInventoryColumns() * 18, 54);
+            this.blit(poseStack, k + 79, l + 17, 0, this.imageHeight, abstractChestedHorse.getInventoryColumns() * 18, 54);
         }
         if (this.horse.isSaddleable()) {
-            this.blit(k + 7, l + 35 - 18, 18, this.imageHeight + 54, 18, 18);
+            this.blit(poseStack, k + 7, l + 35 - 18, 18, this.imageHeight + 54, 18, 18);
         }
         if (this.horse.canWearArmor()) {
             if (this.horse instanceof Llama) {
-                this.blit(k + 7, l + 35, 36, this.imageHeight + 54, 18, 18);
+                this.blit(poseStack, k + 7, l + 35, 36, this.imageHeight + 54, 18, 18);
             } else {
-                this.blit(k + 7, l + 35, 0, this.imageHeight + 54, 18, 18);
+                this.blit(poseStack, k + 7, l + 35, 0, this.imageHeight + 54, 18, 18);
             }
         }
         InventoryScreen.renderEntityInInventory(k + 51, l + 60, 17, (float)(k + 51) - this.xMouse, (float)(l + 75 - 50) - this.yMouse, this.horse);
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        this.renderBackground();
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        this.renderBackground(poseStack);
         this.xMouse = i;
         this.yMouse = j;
-        super.render(i, j, f);
-        this.renderTooltip(i, j);
+        super.render(poseStack, i, j, f);
+        this.renderTooltip(poseStack, i, j);
     }
 }
 

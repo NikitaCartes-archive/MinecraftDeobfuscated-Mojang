@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -33,37 +34,37 @@ extends AbstractContainerScreen<StonecutterMenu> {
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        super.render(i, j, f);
-        this.renderTooltip(i, j);
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        super.render(poseStack, i, j, f);
+        this.renderTooltip(poseStack, i, j);
     }
 
     @Override
-    protected void renderLabels(int i, int j) {
-        this.font.draw(this.title.getColoredString(), 8.0f, 4.0f, 0x404040);
-        this.font.draw(this.inventory.getDisplayName().getColoredString(), 8.0f, this.imageHeight - 94, 0x404040);
+    protected void renderLabels(PoseStack poseStack, int i, int j) {
+        this.font.draw(poseStack, this.title, 8.0f, 4.0f, 0x404040);
+        this.font.draw(poseStack, this.inventory.getDisplayName(), 8.0f, (float)(this.imageHeight - 94), 0x404040);
     }
 
     @Override
-    protected void renderBg(float f, int i, int j) {
-        this.renderBackground();
+    protected void renderBg(PoseStack poseStack, float f, int i, int j) {
+        this.renderBackground(poseStack);
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bind(BG_LOCATION);
         int k = this.leftPos;
         int l = this.topPos;
-        this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
+        this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
         int m = (int)(41.0f * this.scrollOffs);
-        this.blit(k + 119, l + 15 + m, 176 + (this.isScrollBarActive() ? 0 : 12), 0, 12, 15);
+        this.blit(poseStack, k + 119, l + 15 + m, 176 + (this.isScrollBarActive() ? 0 : 12), 0, 12, 15);
         int n = this.leftPos + 52;
         int o = this.topPos + 14;
         int p = this.startIndex + 12;
-        this.renderButtons(i, j, n, o, p);
+        this.renderButtons(poseStack, i, j, n, o, p);
         this.renderRecipes(n, o, p);
     }
 
     @Override
-    protected void renderTooltip(int i, int j) {
-        super.renderTooltip(i, j);
+    protected void renderTooltip(PoseStack poseStack, int i, int j) {
+        super.renderTooltip(poseStack, i, j);
         if (this.displayRecipes) {
             int k = this.leftPos + 52;
             int l = this.topPos + 14;
@@ -74,12 +75,12 @@ extends AbstractContainerScreen<StonecutterMenu> {
                 int p = k + o % 4 * 16;
                 int q = l + o / 4 * 18 + 2;
                 if (i < p || i >= p + 16 || j < q || j >= q + 18) continue;
-                this.renderTooltip(list.get(n).getResultItem(), i, j);
+                this.renderTooltip(poseStack, list.get(n).getResultItem(), i, j);
             }
         }
     }
 
-    private void renderButtons(int i, int j, int k, int l, int m) {
+    private void renderButtons(PoseStack poseStack, int i, int j, int k, int l, int m) {
         for (int n = this.startIndex; n < m && n < ((StonecutterMenu)this.menu).getNumRecipes(); ++n) {
             int o = n - this.startIndex;
             int p = k + o % 4 * 16;
@@ -91,7 +92,7 @@ extends AbstractContainerScreen<StonecutterMenu> {
             } else if (i >= p && j >= r && i < p + 16 && j < r + 18) {
                 s += 36;
             }
-            this.blit(p, r - 1, 0, s, 16, 18);
+            this.blit(poseStack, p, r - 1, 0, s, 16, 18);
         }
     }
 

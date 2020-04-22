@@ -30,7 +30,7 @@ extends AbstractTreeGrower {
     }
 
     @Nullable
-    protected abstract ConfiguredFeature<? extends TreeConfiguration, ?> getConfiguredMegaFeature(Random var1);
+    protected abstract ConfiguredFeature<TreeConfiguration, ?> getConfiguredMegaFeature(Random var1);
 
     public boolean placeMega(ServerLevel serverLevel, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockState blockState, Random random, int i, int j) {
         ConfiguredFeature<TreeConfiguration, ?> configuredFeature = this.getConfiguredMegaFeature(random);

@@ -13,7 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.VineBlock;
-import net.minecraft.world.level.levelgen.feature.AbstractTreeFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -32,16 +32,16 @@ extends TreeDecorator {
     public void place(LevelAccessor levelAccessor, Random random, List<BlockPos> list, List<BlockPos> list2, Set<BlockPos> set, BoundingBox boundingBox) {
         list.forEach(blockPos -> {
             BlockPos blockPos2;
-            if (random.nextInt(3) > 0 && AbstractTreeFeature.isAir(levelAccessor, blockPos2 = blockPos.west())) {
+            if (random.nextInt(3) > 0 && Feature.isAir(levelAccessor, blockPos2 = blockPos.west())) {
                 this.placeVine(levelAccessor, blockPos2, VineBlock.EAST, set, boundingBox);
             }
-            if (random.nextInt(3) > 0 && AbstractTreeFeature.isAir(levelAccessor, blockPos2 = blockPos.east())) {
+            if (random.nextInt(3) > 0 && Feature.isAir(levelAccessor, blockPos2 = blockPos.east())) {
                 this.placeVine(levelAccessor, blockPos2, VineBlock.WEST, set, boundingBox);
             }
-            if (random.nextInt(3) > 0 && AbstractTreeFeature.isAir(levelAccessor, blockPos2 = blockPos.north())) {
+            if (random.nextInt(3) > 0 && Feature.isAir(levelAccessor, blockPos2 = blockPos.north())) {
                 this.placeVine(levelAccessor, blockPos2, VineBlock.SOUTH, set, boundingBox);
             }
-            if (random.nextInt(3) > 0 && AbstractTreeFeature.isAir(levelAccessor, blockPos2 = blockPos.south())) {
+            if (random.nextInt(3) > 0 && Feature.isAir(levelAccessor, blockPos2 = blockPos.south())) {
                 this.placeVine(levelAccessor, blockPos2, VineBlock.NORTH, set, boundingBox);
             }
         });

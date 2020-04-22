@@ -99,16 +99,16 @@ public abstract class Enchantment {
     }
 
     public Component getFullname(int i) {
-        TranslatableComponent component = new TranslatableComponent(this.getDescriptionId(), new Object[0]);
+        TranslatableComponent mutableComponent = new TranslatableComponent(this.getDescriptionId());
         if (this.isCurse()) {
-            component.withStyle(ChatFormatting.RED);
+            mutableComponent.withStyle(ChatFormatting.RED);
         } else {
-            component.withStyle(ChatFormatting.GRAY);
+            mutableComponent.withStyle(ChatFormatting.GRAY);
         }
         if (i != 1 || this.getMaxLevel() != 1) {
-            component.append(" ").append(new TranslatableComponent("enchantment.level." + i, new Object[0]));
+            mutableComponent.append(" ").append(new TranslatableComponent("enchantment.level." + i));
         }
-        return component;
+        return mutableComponent;
     }
 
     public boolean canEnchant(ItemStack itemStack) {

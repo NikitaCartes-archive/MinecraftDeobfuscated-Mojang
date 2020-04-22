@@ -19,7 +19,7 @@ import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.Nullable;
 
 public class SpectateCommand {
-    private static final SimpleCommandExceptionType ERROR_SELF = new SimpleCommandExceptionType(new TranslatableComponent("commands.spectate.self", new Object[0]));
+    private static final SimpleCommandExceptionType ERROR_SELF = new SimpleCommandExceptionType(new TranslatableComponent("commands.spectate.self"));
     private static final DynamicCommandExceptionType ERROR_NOT_SPECTATOR = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.spectate.not_spectator", object));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
@@ -37,7 +37,7 @@ public class SpectateCommand {
         if (entity != null) {
             commandSourceStack.sendSuccess(new TranslatableComponent("commands.spectate.success.started", entity.getDisplayName()), false);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.spectate.success.stopped", new Object[0]), false);
+            commandSourceStack.sendSuccess(new TranslatableComponent("commands.spectate.success.stopped"), false);
         }
         return 1;
     }

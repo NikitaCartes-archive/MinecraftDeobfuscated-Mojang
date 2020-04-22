@@ -23,6 +23,7 @@ import net.minecraft.network.chat.BaseComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.ContextAwareComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -62,11 +63,6 @@ implements ContextAwareComponent {
 
     protected abstract Stream<CompoundTag> getData(CommandSourceStack var1) throws CommandSyntaxException;
 
-    @Override
-    public String getContents() {
-        return "";
-    }
-
     public String getNbtPath() {
         return this.nbtPathPattern;
     }
@@ -76,7 +72,7 @@ implements ContextAwareComponent {
     }
 
     @Override
-    public Component resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
+    public MutableComponent resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
         if (commandSourceStack == null || this.compiledNbtPath == null) {
             return new TextComponent("");
         }
@@ -90,13 +86,13 @@ implements ContextAwareComponent {
         if (this.interpreting) {
             return stream.flatMap(string -> {
                 try {
-                    Component component = Component.Serializer.fromJson(string);
-                    return Stream.of(ComponentUtils.updateForEntity(commandSourceStack, component, entity, i));
+                    MutableComponent mutableComponent = Component.Serializer.fromJson(string);
+                    return Stream.of(ComponentUtils.updateForEntity(commandSourceStack, mutableComponent, entity, i));
                 } catch (Exception exception) {
                     LOGGER.warn("Failed to parse component: " + string, (Throwable)exception);
-                    return Stream.of(new Component[0]);
+                    return Stream.of(new MutableComponent[0]);
                 }
-            }).reduce((component, component2) -> component.append(", ").append((Component)component2)).orElse(new TextComponent(""));
+            }).reduce((mutableComponent, mutableComponent2) -> mutableComponent.append(", ").append((Component)mutableComponent2)).orElse(new TextComponent(""));
         }
         return new TextComponent(Joiner.on(", ").join(stream.iterator()));
     }
@@ -120,7 +116,7 @@ implements ContextAwareComponent {
         }
 
         @Override
-        public Component copy() {
+        public StorageNbtComponent toMutable() {
             return new StorageNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.id);
         }
 
@@ -145,6 +141,16 @@ implements ContextAwareComponent {
         @Override
         public String toString() {
             return "StorageNbtComponent{id='" + this.id + '\'' + "path='" + this.nbtPathPattern + '\'' + ", siblings=" + this.siblings + ", style=" + this.getStyle() + '}';
+        }
+
+        @Override
+        public /* synthetic */ BaseComponent toMutable() {
+            return this.toMutable();
+        }
+
+        @Override
+        public /* synthetic */ MutableComponent toMutable() {
+            return this.toMutable();
         }
     }
 
@@ -181,7 +187,7 @@ implements ContextAwareComponent {
         }
 
         @Override
-        public Component copy() {
+        public BlockNbtComponent toMutable() {
             return new BlockNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.posPattern, this.compiledPos);
         }
 
@@ -211,6 +217,16 @@ implements ContextAwareComponent {
         @Override
         public String toString() {
             return "BlockPosArgument{pos='" + this.posPattern + '\'' + "path='" + this.nbtPathPattern + '\'' + ", siblings=" + this.siblings + ", style=" + this.getStyle() + '}';
+        }
+
+        @Override
+        public /* synthetic */ BaseComponent toMutable() {
+            return this.toMutable();
+        }
+
+        @Override
+        public /* synthetic */ MutableComponent toMutable() {
+            return this.toMutable();
         }
     }
 
@@ -247,7 +263,7 @@ implements ContextAwareComponent {
         }
 
         @Override
-        public Component copy() {
+        public EntityNbtComponent toMutable() {
             return new EntityNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.selectorPattern, this.compiledSelector);
         }
 
@@ -275,6 +291,16 @@ implements ContextAwareComponent {
         @Override
         public String toString() {
             return "EntityNbtComponent{selector='" + this.selectorPattern + '\'' + "path='" + this.nbtPathPattern + '\'' + ", siblings=" + this.siblings + ", style=" + this.getStyle() + '}';
+        }
+
+        @Override
+        public /* synthetic */ BaseComponent toMutable() {
+            return this.toMutable();
+        }
+
+        @Override
+        public /* synthetic */ MutableComponent toMutable() {
+            return this.toMutable();
         }
     }
 }

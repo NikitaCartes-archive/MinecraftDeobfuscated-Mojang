@@ -145,17 +145,13 @@ Saddleable {
     @Override
     public boolean mobInteract(Player player, InteractionHand interactionHand) {
         if (!super.mobInteract(player, interactionHand)) {
-            ItemStack itemStack = player.getItemInHand(interactionHand);
-            if (itemStack.getItem() == Items.NAME_TAG) {
-                itemStack.interactEnemy(player, this, interactionHand);
-                return true;
-            }
             if (this.isSaddled() && !this.isVehicle()) {
                 if (!this.level.isClientSide) {
                     player.startRiding(this);
                 }
                 return true;
             }
+            ItemStack itemStack = player.getItemInHand(interactionHand);
             return itemStack.getItem() == Items.SADDLE && itemStack.interactEnemy(player, this, interactionHand);
         }
         return true;

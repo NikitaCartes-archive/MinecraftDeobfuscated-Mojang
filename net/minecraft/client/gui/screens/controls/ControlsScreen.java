@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens.controls;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -15,7 +16,7 @@ import net.minecraft.client.gui.screens.MouseSettingsScreen;
 import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.controls.ControlList;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
@@ -27,22 +28,22 @@ extends OptionsSubScreen {
     private Button resetButton;
 
     public ControlsScreen(Screen screen, Options options) {
-        super(screen, options, new TranslatableComponent("controls.title", new Object[0]));
+        super(screen, options, new TranslatableComponent("controls.title"));
     }
 
     @Override
     protected void init() {
-        this.addButton(new Button(this.width / 2 - 155, 18, 150, 20, I18n.get("options.mouse_settings", new Object[0]), button -> this.minecraft.setScreen(new MouseSettingsScreen(this, this.options))));
+        this.addButton(new Button(this.width / 2 - 155, 18, 150, 20, new TranslatableComponent("options.mouse_settings"), button -> this.minecraft.setScreen(new MouseSettingsScreen(this, this.options))));
         this.addButton(Option.AUTO_JUMP.createButton(this.options, this.width / 2 - 155 + 160, 18, 150));
         this.controlList = new ControlList(this, this.minecraft);
         this.children.add(this.controlList);
-        this.resetButton = this.addButton(new Button(this.width / 2 - 155, this.height - 29, 150, 20, I18n.get("controls.resetAll", new Object[0]), button -> {
+        this.resetButton = this.addButton(new Button(this.width / 2 - 155, this.height - 29, 150, 20, new TranslatableComponent("controls.resetAll"), button -> {
             for (KeyMapping keyMapping : this.options.keyMappings) {
                 keyMapping.setKey(keyMapping.getDefaultKey());
             }
             KeyMapping.resetMapping();
         }));
-        this.addButton(new Button(this.width / 2 - 155 + 160, this.height - 29, 150, 20, I18n.get("gui.done", new Object[0]), button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addButton(new Button(this.width / 2 - 155 + 160, this.height - 29, 150, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
     }
 
     @Override
@@ -73,10 +74,10 @@ extends OptionsSubScreen {
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        this.renderBackground();
-        this.controlList.render(i, j, f);
-        this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 8, 0xFFFFFF);
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        this.renderBackground(poseStack);
+        this.controlList.render(poseStack, i, j, f);
+        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 0xFFFFFF);
         boolean bl = false;
         for (KeyMapping keyMapping : this.options.keyMappings) {
             if (keyMapping.isDefault()) continue;
@@ -84,7 +85,7 @@ extends OptionsSubScreen {
             break;
         }
         this.resetButton.active = bl;
-        super.render(i, j, f);
+        super.render(poseStack, i, j, f);
     }
 }
 

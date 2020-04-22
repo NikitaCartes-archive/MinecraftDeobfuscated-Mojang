@@ -239,7 +239,7 @@ extends HangingEntity {
             mapItemSavedData.removedFromFrame(this.pos, this.getId());
             mapItemSavedData.setDirty(true);
         }
-        itemStack.setFramed(null);
+        itemStack.setEntityRepresentation(null);
     }
 
     public ItemStack getItem() {
@@ -254,7 +254,7 @@ extends HangingEntity {
         if (!itemStack.isEmpty()) {
             itemStack = itemStack.copy();
             itemStack.setCount(1);
-            itemStack.setFramed(this);
+            itemStack.setEntityRepresentation(this);
         }
         this.getEntityData().set(DATA_ITEM, itemStack);
         if (!itemStack.isEmpty()) {
@@ -278,7 +278,7 @@ extends HangingEntity {
     public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
         ItemStack itemStack;
         if (entityDataAccessor.equals(DATA_ITEM) && !(itemStack = this.getItem()).isEmpty() && itemStack.getFrame() != this) {
-            itemStack.setFramed(this);
+            itemStack.setEntityRepresentation(this);
         }
     }
 

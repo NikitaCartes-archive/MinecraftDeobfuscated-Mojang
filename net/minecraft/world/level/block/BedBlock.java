@@ -91,7 +91,7 @@ implements EntityBlock {
         if (blockState.getValue(PART) != BedPart.HEAD && (blockState = level.getBlockState(blockPos = blockPos.relative(blockState.getValue(FACING)))).getBlock() != this) {
             return InteractionResult.CONSUME;
         }
-        if (!level.dimension.mayRespawn() || level.getBiome(blockPos) == Biomes.NETHER_WASTES) {
+        if (!BedBlock.canSetSpawn(level, blockPos)) {
             level.removeBlock(blockPos, false);
             BlockPos blockPos2 = blockPos.relative(blockState.getValue(FACING).getOpposite());
             if (level.getBlockState(blockPos2).getBlock() == this) {
@@ -102,7 +102,7 @@ implements EntityBlock {
         }
         if (blockState.getValue(OCCUPIED).booleanValue()) {
             if (!this.kickVillagerOutOfBed(level, blockPos)) {
-                player.displayClientMessage(new TranslatableComponent("block.minecraft.bed.occupied", new Object[0]), true);
+                player.displayClientMessage(new TranslatableComponent("block.minecraft.bed.occupied"), true);
             }
             return InteractionResult.SUCCESS;
         }
@@ -112,6 +112,10 @@ implements EntityBlock {
             }
         });
         return InteractionResult.SUCCESS;
+    }
+
+    public static boolean canSetSpawn(Level level, BlockPos blockPos) {
+        return level.dimension.mayRespawn() && level.getBiome(blockPos) != Biomes.NETHER_WASTES;
     }
 
     private boolean kickVillagerOutOfBed(Level level, BlockPos blockPos) {

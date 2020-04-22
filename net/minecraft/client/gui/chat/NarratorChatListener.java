@@ -22,7 +22,7 @@ import org.apache.logging.log4j.Logger;
 @Environment(value=EnvType.CLIENT)
 public class NarratorChatListener
 implements ChatListener {
-    public static final Component NO_TITLE = new TextComponent("");
+    public static final Component NO_TITLE = TextComponent.EMPTY;
     private static final Logger LOGGER = LogManager.getLogger();
     public static final NarratorChatListener INSTANCE = new NarratorChatListener();
     private final Narrator narrator = Narrator.getNarrator();
@@ -60,16 +60,16 @@ implements ChatListener {
 
     public void updateNarratorStatus(NarratorStatus narratorStatus) {
         this.clear();
-        this.narrator.say(new TranslatableComponent("options.narrator", new Object[0]).getString() + " : " + new TranslatableComponent(narratorStatus.getKey(), new Object[0]).getString(), true);
+        this.narrator.say(new TranslatableComponent("options.narrator").append(" : ").append(narratorStatus.getName()).getString(), true);
         ToastComponent toastComponent = Minecraft.getInstance().getToasts();
         if (this.narrator.active()) {
             if (narratorStatus == NarratorStatus.OFF) {
-                SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.NARRATOR_TOGGLE, new TranslatableComponent("narrator.toast.disabled", new Object[0]), null);
+                SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.NARRATOR_TOGGLE, new TranslatableComponent("narrator.toast.disabled"), null);
             } else {
-                SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.NARRATOR_TOGGLE, new TranslatableComponent("narrator.toast.enabled", new Object[0]), new TranslatableComponent(narratorStatus.getKey(), new Object[0]));
+                SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.NARRATOR_TOGGLE, new TranslatableComponent("narrator.toast.enabled"), narratorStatus.getName());
             }
         } else {
-            SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.NARRATOR_TOGGLE, new TranslatableComponent("narrator.toast.disabled", new Object[0]), new TranslatableComponent("options.narrator.notavailable", new Object[0]));
+            SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.NARRATOR_TOGGLE, new TranslatableComponent("narrator.toast.disabled"), new TranslatableComponent("options.narrator.notavailable"));
         }
     }
 

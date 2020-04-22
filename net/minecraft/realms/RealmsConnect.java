@@ -88,7 +88,7 @@ public class RealmsConnect {
     public void abort() {
         this.aborted = true;
         if (this.connection != null && this.connection.isConnected()) {
-            this.connection.disconnect(new TranslatableComponent("disconnect.genericReason", new Object[0]));
+            this.connection.disconnect(new TranslatableComponent("disconnect.genericReason"));
             this.connection.handleDisconnection();
         }
     }

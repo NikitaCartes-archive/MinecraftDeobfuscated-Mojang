@@ -208,7 +208,7 @@ TickableBlockEntity {
 
     @Override
     protected Component getDefaultName() {
-        return new TranslatableComponent("container.shulkerBox", new Object[0]);
+        return new TranslatableComponent("container.shulkerBox");
     }
 
     @Override

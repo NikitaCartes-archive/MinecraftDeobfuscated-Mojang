@@ -18,7 +18,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 public class SwizzleArgument
 implements ArgumentType<EnumSet<Direction.Axis>> {
     private static final Collection<String> EXAMPLES = Arrays.asList("xyz", "x");
-    private static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(new TranslatableComponent("arguments.swizzle.invalid", new Object[0]));
+    private static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(new TranslatableComponent("arguments.swizzle.invalid"));
 
     public static SwizzleArgument swizzle() {
         return new SwizzleArgument();

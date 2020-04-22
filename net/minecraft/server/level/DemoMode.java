@@ -47,7 +47,7 @@ extends ServerPlayerGameMode {
                 if (m == 6L) {
                     this.player.connection.send(new ClientboundGameEventPacket(5, 104.0f));
                 } else {
-                    this.player.sendMessage(new TranslatableComponent("demo.day." + m, new Object[0]));
+                    this.player.sendMessage(new TranslatableComponent("demo.day." + m));
                 }
             }
         } else if (m == 1L) {
@@ -59,13 +59,13 @@ extends ServerPlayerGameMode {
                 this.player.connection.send(new ClientboundGameEventPacket(5, 103.0f));
             }
         } else if (m == 5L && l % 24000L == 22000L) {
-            this.player.sendMessage(new TranslatableComponent("demo.day.warning", new Object[0]));
+            this.player.sendMessage(new TranslatableComponent("demo.day.warning"));
         }
     }
 
     private void outputDemoReminder() {
         if (this.demoEndedReminder > 100) {
-            this.player.sendMessage(new TranslatableComponent("demo.reminder", new Object[0]));
+            this.player.sendMessage(new TranslatableComponent("demo.reminder"));
             this.demoEndedReminder = 0;
         }
     }

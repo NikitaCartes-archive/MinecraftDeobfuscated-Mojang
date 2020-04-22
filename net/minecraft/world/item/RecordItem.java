@@ -11,6 +11,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
@@ -71,8 +72,8 @@ extends Item {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public Component getDisplayName() {
-        return new TranslatableComponent(this.getDescriptionId() + ".desc", new Object[0]);
+    public MutableComponent getDisplayName() {
+        return new TranslatableComponent(this.getDescriptionId() + ".desc");
     }
 
     @Nullable

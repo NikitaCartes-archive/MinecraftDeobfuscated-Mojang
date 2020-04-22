@@ -5,6 +5,7 @@ package net.minecraft.client.gui.screens.recipebook;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -26,10 +27,11 @@ import net.minecraft.client.gui.screens.recipebook.RecipeBookPage;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookTabButton;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
 import net.minecraft.client.gui.screens.recipebook.RecipeShownListener;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.language.Language;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.client.searchtree.SearchRegistry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookUpdatePacket;
 import net.minecraft.recipebook.PlaceRecipe;
 import net.minecraft.resources.ResourceLocation;
@@ -88,7 +90,7 @@ PlaceRecipe<Ingredient> {
         this.minecraft.player.inventory.fillStackedContents(this.stackedContents);
         this.menu.fillCraftSlotsStackedContents(this.stackedContents);
         String string = this.searchBox != null ? this.searchBox.getValue() : "";
-        this.searchBox = new EditBox(this.minecraft.font, i + 25, j + 14, 80, this.minecraft.font.lineHeight + 5, I18n.get("itemGroup.search", new Object[0]));
+        this.searchBox = new EditBox(this.minecraft.font, i + 25, j + 14, 80, this.minecraft.font.lineHeight + 5, new TranslatableComponent("itemGroup.search"));
         this.searchBox.setMaxLength(50);
         this.searchBox.setBordered(false);
         this.searchBox.setVisible(true);
@@ -211,7 +213,7 @@ PlaceRecipe<Ingredient> {
     }
 
     @Override
-    public void render(int i, int j, float f) {
+    public void render(PoseStack poseStack, int i, int j, float f) {
         if (!this.isVisible()) {
             return;
         }
@@ -221,35 +223,35 @@ PlaceRecipe<Ingredient> {
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         int k = (this.width - 147) / 2 - this.xOffset;
         int l = (this.height - 166) / 2;
-        this.blit(k, l, 1, 1, 147, 166);
-        this.searchBox.render(i, j, f);
+        this.blit(poseStack, k, l, 1, 1, 147, 166);
+        this.searchBox.render(poseStack, i, j, f);
         for (RecipeBookTabButton recipeBookTabButton : this.tabButtons) {
-            recipeBookTabButton.render(i, j, f);
+            recipeBookTabButton.render(poseStack, i, j, f);
         }
-        this.filterButton.render(i, j, f);
-        this.recipeBookPage.render(k, l, i, j, f);
+        this.filterButton.render(poseStack, i, j, f);
+        this.recipeBookPage.render(poseStack, k, l, i, j, f);
         RenderSystem.popMatrix();
     }
 
-    public void renderTooltip(int i, int j, int k, int l) {
+    public void renderTooltip(PoseStack poseStack, int i, int j, int k, int l) {
         if (!this.isVisible()) {
             return;
         }
-        this.recipeBookPage.renderTooltip(k, l);
+        this.recipeBookPage.renderTooltip(poseStack, k, l);
         if (this.filterButton.isHovered()) {
-            String string = this.getFilterButtonTooltip();
+            Component component = this.getFilterButtonTooltip();
             if (this.minecraft.screen != null) {
-                this.minecraft.screen.renderTooltip(string, k, l);
+                this.minecraft.screen.renderTooltip(poseStack, component, k, l);
             }
         }
-        this.renderGhostRecipeTooltip(i, j, k, l);
+        this.renderGhostRecipeTooltip(poseStack, i, j, k, l);
     }
 
-    protected String getFilterButtonTooltip() {
-        return I18n.get(this.filterButton.isStateTriggered() ? "gui.recipebook.toggleRecipes.craftable" : "gui.recipebook.toggleRecipes.all", new Object[0]);
+    protected Component getFilterButtonTooltip() {
+        return new TranslatableComponent(this.filterButton.isStateTriggered() ? "gui.recipebook.toggleRecipes.craftable" : "gui.recipebook.toggleRecipes.all");
     }
 
-    private void renderGhostRecipeTooltip(int i, int j, int k, int l) {
+    private void renderGhostRecipeTooltip(PoseStack poseStack, int i, int j, int k, int l) {
         ItemStack itemStack = null;
         for (int m = 0; m < this.ghostRecipe.size(); ++m) {
             GhostRecipe.GhostIngredient ghostIngredient = this.ghostRecipe.get(m);
@@ -259,12 +261,12 @@ PlaceRecipe<Ingredient> {
             itemStack = ghostIngredient.getItem();
         }
         if (itemStack != null && this.minecraft.screen != null) {
-            this.minecraft.screen.renderTooltip(this.minecraft.screen.getTooltipFromItem(itemStack), k, l);
+            this.minecraft.screen.renderTooltip(poseStack, this.minecraft.screen.getTooltipFromItem(itemStack), k, l);
         }
     }
 
-    public void renderGhostRecipe(int i, int j, boolean bl, float f) {
-        this.ghostRecipe.render(this.minecraft, i, j, bl, f);
+    public void renderGhostRecipe(PoseStack poseStack, int i, int j, boolean bl, float f) {
+        this.ghostRecipe.render(poseStack, this.minecraft, i, j, bl, f);
     }
 
     @Override

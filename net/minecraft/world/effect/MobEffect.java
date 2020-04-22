@@ -126,7 +126,7 @@ public class MobEffect {
     }
 
     public Component getDisplayName() {
-        return new TranslatableComponent(this.getDescriptionId(), new Object[0]);
+        return new TranslatableComponent(this.getDescriptionId());
     }
 
     @Environment(value=EnvType.CLIENT)

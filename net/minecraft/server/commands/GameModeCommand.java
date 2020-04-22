@@ -27,7 +27,7 @@ public class GameModeCommand {
     }
 
     private static void logGamemodeChange(CommandSourceStack commandSourceStack, ServerPlayer serverPlayer, GameType gameType) {
-        TranslatableComponent component = new TranslatableComponent("gameMode." + gameType.getName(), new Object[0]);
+        TranslatableComponent component = new TranslatableComponent("gameMode." + gameType.getName());
         if (commandSourceStack.getEntity() == serverPlayer) {
             commandSourceStack.sendSuccess(new TranslatableComponent("commands.gamemode.success.self", component), true);
         } else {

@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ResourceLocation
 implements Comparable<ResourceLocation> {
-    private static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(new TranslatableComponent("argument.id.invalid", new Object[0]));
+    private static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(new TranslatableComponent("argument.id.invalid"));
     protected final String namespace;
     protected final String path;
 

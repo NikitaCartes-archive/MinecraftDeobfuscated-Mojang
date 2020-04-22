@@ -15,7 +15,7 @@ import net.minecraft.server.MinecraftServer;
 
 public class ServerStatusPacketListenerImpl
 implements ServerStatusPacketListener {
-    private static final Component DISCONNECT_REASON = new TranslatableComponent("multiplayer.status.request_handled", new Object[0]);
+    private static final Component DISCONNECT_REASON = new TranslatableComponent("multiplayer.status.request_handled");
     private final MinecraftServer server;
     private final Connection connection;
     private boolean hasRequestedStatus;

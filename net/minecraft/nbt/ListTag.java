@@ -279,34 +279,34 @@ extends CollectionTag<Tag> {
         }
         if (INLINE_ELEMENT_TYPES.contains(this.type) && this.size() <= 8) {
             String string2 = ", ";
-            TextComponent component = new TextComponent("[");
+            TextComponent mutableComponent = new TextComponent("[");
             for (int j = 0; j < this.list.size(); ++j) {
                 if (j != 0) {
-                    component.append(", ");
+                    mutableComponent.append(", ");
                 }
-                component.append(this.list.get(j).getPrettyDisplay());
+                mutableComponent.append(this.list.get(j).getPrettyDisplay());
             }
-            component.append("]");
-            return component;
+            mutableComponent.append("]");
+            return mutableComponent;
         }
-        TextComponent component2 = new TextComponent("[");
+        TextComponent mutableComponent2 = new TextComponent("[");
         if (!string.isEmpty()) {
-            component2.append("\n");
+            mutableComponent2.append("\n");
         }
         String string3 = String.valueOf(',');
         for (int j = 0; j < this.list.size(); ++j) {
-            TextComponent component3 = new TextComponent(Strings.repeat(string, i + 1));
-            component3.append(this.list.get(j).getPrettyDisplay(string, i + 1));
+            TextComponent mutableComponent3 = new TextComponent(Strings.repeat(string, i + 1));
+            mutableComponent3.append(this.list.get(j).getPrettyDisplay(string, i + 1));
             if (j != this.list.size() - 1) {
-                component3.append(string3).append(string.isEmpty() ? " " : "\n");
+                mutableComponent3.append(string3).append(string.isEmpty() ? " " : "\n");
             }
-            component2.append(component3);
+            mutableComponent2.append(mutableComponent3);
         }
         if (!string.isEmpty()) {
-            component2.append("\n").append(Strings.repeat(string, i));
+            mutableComponent2.append("\n").append(Strings.repeat(string, i));
         }
-        component2.append("]");
-        return component2;
+        mutableComponent2.append("]");
+        return mutableComponent2;
     }
 
     public int getElementType() {

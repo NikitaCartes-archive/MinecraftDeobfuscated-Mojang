@@ -194,7 +194,7 @@ implements ItemLike {
 
     @Environment(value=EnvType.CLIENT)
     public Component getDescription() {
-        return new TranslatableComponent(this.getDescriptionId(), new Object[0]);
+        return new TranslatableComponent(this.getDescriptionId());
     }
 
     public String toString() {
@@ -258,7 +258,7 @@ implements ItemLike {
     }
 
     public Component getName(ItemStack itemStack) {
-        return new TranslatableComponent(this.getDescriptionId(itemStack), new Object[0]);
+        return new TranslatableComponent(this.getDescriptionId(itemStack));
     }
 
     public boolean isFoil(ItemStack itemStack) {

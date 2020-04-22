@@ -42,7 +42,7 @@ implements ArgumentType<Result> {
         return entitySelectorParser.fillSuggestions(suggestionsBuilder2, suggestionsBuilder -> SharedSuggestionProvider.suggest(((CommandSourceStack)commandContext.getSource()).getOnlinePlayerNames(), suggestionsBuilder));
     };
     private static final Collection<String> EXAMPLES = Arrays.asList("Player", "0123", "*", "@e");
-    private static final SimpleCommandExceptionType ERROR_NO_RESULTS = new SimpleCommandExceptionType(new TranslatableComponent("argument.scoreHolder.empty", new Object[0]));
+    private static final SimpleCommandExceptionType ERROR_NO_RESULTS = new SimpleCommandExceptionType(new TranslatableComponent("argument.scoreHolder.empty"));
     private final boolean multiple;
 
     public ScoreHolderArgument(boolean bl) {

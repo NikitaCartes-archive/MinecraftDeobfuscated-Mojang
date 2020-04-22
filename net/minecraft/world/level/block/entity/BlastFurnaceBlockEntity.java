@@ -21,7 +21,7 @@ extends AbstractFurnaceBlockEntity {
 
     @Override
     protected Component getDefaultName() {
-        return new TranslatableComponent("container.blast_furnace", new Object[0]);
+        return new TranslatableComponent("container.blast_furnace");
     }
 
     @Override

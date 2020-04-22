@@ -64,7 +64,7 @@ import org.jetbrains.annotations.Nullable;
 public class EndDragonFight {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Predicate<Entity> VALID_PLAYER = EntitySelector.ENTITY_STILL_ALIVE.and(EntitySelector.withinDistance(0.0, 128.0, 0.0, 192.0));
-    private final ServerBossEvent dragonEvent = (ServerBossEvent)new ServerBossEvent(new TranslatableComponent("entity.minecraft.ender_dragon", new Object[0]), BossEvent.BossBarColor.PINK, BossEvent.BossBarOverlay.PROGRESS).setPlayBossMusic(true).setCreateWorldFog(true);
+    private final ServerBossEvent dragonEvent = (ServerBossEvent)new ServerBossEvent(new TranslatableComponent("entity.minecraft.ender_dragon"), BossEvent.BossBarColor.PINK, BossEvent.BossBarOverlay.PROGRESS).setPlayBossMusic(true).setCreateWorldFog(true);
     private final ServerLevel level;
     private final List<Integer> gateways = Lists.newArrayList();
     private final BlockPattern exitPortalPattern;

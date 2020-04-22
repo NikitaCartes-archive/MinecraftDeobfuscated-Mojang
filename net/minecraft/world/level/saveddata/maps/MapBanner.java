@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
@@ -30,7 +31,7 @@ public class MapBanner {
     public static MapBanner load(CompoundTag compoundTag) {
         BlockPos blockPos = NbtUtils.readBlockPos(compoundTag.getCompound("Pos"));
         DyeColor dyeColor = DyeColor.byName(compoundTag.getString("Color"), DyeColor.WHITE);
-        Component component = compoundTag.contains("Name") ? Component.Serializer.fromJson(compoundTag.getString("Name")) : null;
+        MutableComponent component = compoundTag.contains("Name") ? Component.Serializer.fromJson(compoundTag.getString("Name")) : null;
         return new MapBanner(blockPos, dyeColor, component);
     }
 

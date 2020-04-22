@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
@@ -55,14 +56,14 @@ extends SavedData {
         for (int i = 0; i < listTag.size(); ++i) {
             Team.CollisionRule collisionRule;
             Team.Visibility visibility;
-            Component component2;
+            MutableComponent component2;
             CompoundTag compoundTag = listTag.getCompound(i);
             String string = compoundTag.getString("Name");
             if (string.length() > 16) {
                 string = string.substring(0, 16);
             }
             PlayerTeam playerTeam = this.scoreboard.addPlayerTeam(string);
-            Component component = Component.Serializer.fromJson(compoundTag.getString("DisplayName"));
+            MutableComponent component = Component.Serializer.fromJson(compoundTag.getString("DisplayName"));
             if (component != null) {
                 playerTeam.setDisplayName(component);
             }
@@ -117,7 +118,7 @@ extends SavedData {
                 if (string.length() > 16) {
                     string = string.substring(0, 16);
                 }
-                Component component = Component.Serializer.fromJson(compoundTag.getString("DisplayName"));
+                MutableComponent component = Component.Serializer.fromJson(compoundTag.getString("DisplayName"));
                 ObjectiveCriteria.RenderType renderType = ObjectiveCriteria.RenderType.byId(compoundTag.getString("RenderType"));
                 this.scoreboard.addObjective(string, (ObjectiveCriteria)objectiveCriteria, component, renderType);
             });

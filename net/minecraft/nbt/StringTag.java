@@ -11,6 +11,7 @@ import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 
 public class StringTag
@@ -104,7 +105,7 @@ implements Tag {
     public Component getPrettyDisplay(String string, int i) {
         String string2 = StringTag.quoteAndEscape(this.data);
         String string3 = string2.substring(0, 1);
-        Component component = new TextComponent(string2.substring(1, string2.length() - 1)).withStyle(SYNTAX_HIGHLIGHTING_STRING);
+        MutableComponent component = new TextComponent(string2.substring(1, string2.length() - 1)).withStyle(SYNTAX_HIGHLIGHTING_STRING);
         return new TextComponent(string3).append(component).append(string3);
     }
 

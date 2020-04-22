@@ -64,7 +64,7 @@ extends EntityRenderer<ItemEntity> {
         float l = Mth.sin(((float)itemEntity.getAge() + g) / 10.0f + itemEntity.bobOffs) * 0.1f + 0.1f;
         float m = bakedModel.getTransforms().getTransform((ItemTransforms.TransformType)ItemTransforms.TransformType.GROUND).scale.y();
         poseStack.translate(0.0, l + 0.25f * m, 0.0);
-        float n = ((float)itemEntity.getAge() + g) / 20.0f + itemEntity.bobOffs;
+        float n = itemEntity.getSpin(g);
         poseStack.mulPose(Vector3f.YP.rotation(n));
         float o = bakedModel.getTransforms().ground.scale.x();
         float p = bakedModel.getTransforms().ground.scale.y();

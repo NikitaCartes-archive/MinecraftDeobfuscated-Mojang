@@ -20,14 +20,14 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
-import net.minecraft.ChatFormatting;
+import java.util.Optional;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.network.chat.KeybindComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.NbtComponent;
 import net.minecraft.network.chat.ScoreComponent;
 import net.minecraft.network.chat.SelectorComponent;
@@ -37,141 +37,85 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.LowerCaseEnumTypeAdapterFactory;
+import net.minecraft.util.Unit;
 import org.jetbrains.annotations.Nullable;
 
 public interface Component
-extends Message,
-Iterable<Component> {
-    public Component setStyle(Style var1);
+extends Message {
+    public static final Optional<Unit> STOP_ITERATION = Optional.of(Unit.INSTANCE);
 
     public Style getStyle();
-
-    default public Component append(String string) {
-        return this.append(new TextComponent(string));
-    }
-
-    public Component append(Component var1);
 
     public String getContents();
 
     @Override
     default public String getString() {
         StringBuilder stringBuilder = new StringBuilder();
-        this.stream().forEach(component -> stringBuilder.append(component.getContents()));
+        this.visit(string -> {
+            stringBuilder.append(string);
+            return Optional.empty();
+        });
         return stringBuilder.toString();
     }
 
     default public String getString(int i) {
-        int j;
         StringBuilder stringBuilder = new StringBuilder();
-        Iterator iterator = this.stream().iterator();
-        while (iterator.hasNext() && (j = i - stringBuilder.length()) > 0) {
-            String string = ((Component)iterator.next()).getContents();
-            stringBuilder.append(string.length() <= j ? string : string.substring(0, j));
-        }
-        return stringBuilder.toString();
-    }
-
-    default public String getColoredString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        String string = "";
-        Iterator iterator = this.stream().iterator();
-        while (iterator.hasNext()) {
-            Component component = (Component)iterator.next();
-            String string2 = component.getContents();
-            if (string2.isEmpty()) continue;
-            String string3 = component.getStyle().getLegacyFormatCodes();
-            if (!string3.equals(string)) {
-                if (!string.isEmpty()) {
-                    stringBuilder.append((Object)ChatFormatting.RESET);
-                }
-                stringBuilder.append(string3);
-                string = string3;
+        this.visit(string -> {
+            int j = i - stringBuilder.length();
+            if (j <= 0) {
+                return STOP_ITERATION;
             }
-            stringBuilder.append(string2);
-        }
-        if (!string.isEmpty()) {
-            stringBuilder.append((Object)ChatFormatting.RESET);
-        }
+            stringBuilder.append(string.length() <= j ? string : string.substring(0, j));
+            return Optional.empty();
+        });
         return stringBuilder.toString();
     }
 
     public List<Component> getSiblings();
 
-    public Stream<Component> stream();
+    public MutableComponent toMutable();
 
-    default public Stream<Component> flatStream() {
-        return this.stream().map(Component::flattenStyle);
-    }
+    public MutableComponent mutableCopy();
 
-    @Override
-    default public Iterator<Component> iterator() {
-        return this.flatStream().iterator();
-    }
-
-    public Component copy();
-
-    default public Component deepCopy() {
-        Component component = this.copy();
-        component.setStyle(this.getStyle().copy());
-        for (Component component2 : this.getSiblings()) {
-            component.append(component2.deepCopy());
+    @Environment(value=EnvType.CLIENT)
+    default public <T> Optional<T> visit(StyledContentConsumer<T> styledContentConsumer, Style style) {
+        Style style2 = this.getStyle().applyTo(style);
+        Optional<T> optional = this.visitSelf(styledContentConsumer, style2);
+        if (optional.isPresent()) {
+            return optional;
         }
-        return component;
-    }
-
-    default public Component withStyle(Consumer<Style> consumer) {
-        consumer.accept(this.getStyle());
-        return this;
-    }
-
-    default public Component withStyle(ChatFormatting ... chatFormattings) {
-        for (ChatFormatting chatFormatting : chatFormattings) {
-            this.withStyle(chatFormatting);
+        for (Component component : this.getSiblings()) {
+            Optional<T> optional2 = component.visit(styledContentConsumer, style2);
+            if (!optional2.isPresent()) continue;
+            return optional2;
         }
-        return this;
+        return Optional.empty();
     }
 
-    default public Component withStyle(ChatFormatting chatFormatting) {
-        Style style = this.getStyle();
-        if (chatFormatting.isColor()) {
-            style.setColor(chatFormatting);
+    default public <T> Optional<T> visit(ContentConsumer<T> contentConsumer) {
+        Optional<T> optional = this.visitSelf(contentConsumer);
+        if (optional.isPresent()) {
+            return optional;
         }
-        if (chatFormatting.isFormat()) {
-            switch (chatFormatting) {
-                case OBFUSCATED: {
-                    style.setObfuscated(true);
-                    break;
-                }
-                case BOLD: {
-                    style.setBold(true);
-                    break;
-                }
-                case STRIKETHROUGH: {
-                    style.setStrikethrough(true);
-                    break;
-                }
-                case UNDERLINE: {
-                    style.setUnderlined(true);
-                    break;
-                }
-                case ITALIC: {
-                    style.setItalic(true);
-                    break;
-                }
-            }
+        for (Component component : this.getSiblings()) {
+            Optional<T> optional2 = component.visit(contentConsumer);
+            if (!optional2.isPresent()) continue;
+            return optional2;
         }
-        return this;
+        return Optional.empty();
     }
 
-    public static Component flattenStyle(Component component) {
-        Component component2 = component.copy();
-        component2.setStyle(component.getStyle().flatCopy());
-        return component2;
+    @Environment(value=EnvType.CLIENT)
+    default public <T> Optional<T> visitSelf(StyledContentConsumer<T> styledContentConsumer, Style style) {
+        return styledContentConsumer.accept(style, this.getContents());
+    }
+
+    default public <T> Optional<T> visitSelf(ContentConsumer<T> contentConsumer) {
+        return contentConsumer.accept(this.getContents());
     }
 
     public static class Serializer
-    implements JsonDeserializer<Component>,
+    implements JsonDeserializer<MutableComponent>,
     JsonSerializer<Component> {
         private static final Gson GSON = Util.make(() -> {
             GsonBuilder gsonBuilder = new GsonBuilder();
@@ -208,7 +152,7 @@ Iterable<Component> {
          * Lifted jumps to return sites
          */
         @Override
-        public Component deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+        public MutableComponent deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             void var5_19;
             if (jsonElement.isJsonPrimitive()) {
                 return new TextComponent(jsonElement.getAsString());
@@ -232,15 +176,12 @@ Iterable<Component> {
                         }
                         TranslatableComponent translatableComponent = new TranslatableComponent(string, objects);
                     } else {
-                        TranslatableComponent translatableComponent = new TranslatableComponent(string, new Object[0]);
+                        TranslatableComponent translatableComponent = new TranslatableComponent(string);
                     }
                 } else if (jsonObject.has("score")) {
                     JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "score");
                     if (!jsonObject2.has("name") || !jsonObject2.has("objective")) throw new JsonParseException("A score component needs a least a name and an objective");
                     ScoreComponent scoreComponent = new ScoreComponent(GsonHelper.getAsString(jsonObject2, "name"), GsonHelper.getAsString(jsonObject2, "objective"));
-                    if (jsonObject2.has("value")) {
-                        scoreComponent.setValue(GsonHelper.getAsString(jsonObject2, "value"));
-                    }
                 } else if (jsonObject.has("selector")) {
                     SelectorComponent selectorComponent = new SelectorComponent(GsonHelper.getAsString(jsonObject, "selector"));
                 } else if (jsonObject.has("keybind")) {
@@ -272,12 +213,12 @@ Iterable<Component> {
             JsonArray jsonArray3 = jsonElement.getAsJsonArray();
             Object var5_18 = null;
             for (JsonElement jsonElement2 : jsonArray3) {
-                Component component2 = this.deserialize(jsonElement2, jsonElement2.getClass(), jsonDeserializationContext);
+                MutableComponent mutableComponent2 = this.deserialize(jsonElement2, jsonElement2.getClass(), jsonDeserializationContext);
                 if (var5_19 == null) {
-                    Component component = component2;
+                    MutableComponent mutableComponent = mutableComponent2;
                     continue;
                 }
-                var5_19.append(component2);
+                var5_19.append(mutableComponent2);
             }
             return var5_19;
         }
@@ -331,7 +272,6 @@ Iterable<Component> {
                 JsonObject jsonObject2 = new JsonObject();
                 jsonObject2.addProperty("name", scoreComponent.getName());
                 jsonObject2.addProperty("objective", scoreComponent.getObjective());
-                jsonObject2.addProperty("value", scoreComponent.getContents());
                 jsonObject.add("score", jsonObject2);
                 return jsonObject;
             } else if (component instanceof SelectorComponent) {
@@ -373,27 +313,27 @@ Iterable<Component> {
         }
 
         @Nullable
-        public static Component fromJson(String string) {
-            return GsonHelper.fromJson(GSON, string, Component.class, false);
+        public static MutableComponent fromJson(String string) {
+            return GsonHelper.fromJson(GSON, string, MutableComponent.class, false);
         }
 
         @Nullable
-        public static Component fromJson(JsonElement jsonElement) {
-            return GSON.fromJson(jsonElement, Component.class);
+        public static MutableComponent fromJson(JsonElement jsonElement) {
+            return GSON.fromJson(jsonElement, MutableComponent.class);
         }
 
         @Nullable
-        public static Component fromJsonLenient(String string) {
-            return GsonHelper.fromJson(GSON, string, Component.class, true);
+        public static MutableComponent fromJsonLenient(String string) {
+            return GsonHelper.fromJson(GSON, string, MutableComponent.class, true);
         }
 
-        public static Component fromJson(com.mojang.brigadier.StringReader stringReader) {
+        public static MutableComponent fromJson(com.mojang.brigadier.StringReader stringReader) {
             try {
                 JsonReader jsonReader = new JsonReader(new StringReader(stringReader.getRemaining()));
                 jsonReader.setLenient(false);
-                Component component = GSON.getAdapter(Component.class).read(jsonReader);
+                MutableComponent mutableComponent = GSON.getAdapter(MutableComponent.class).read(jsonReader);
                 stringReader.setCursor(stringReader.getCursor() + Serializer.getPos(jsonReader));
-                return component;
+                return mutableComponent;
             } catch (IOException | StackOverflowError throwable) {
                 throw new JsonParseException(throwable);
             }
@@ -416,6 +356,15 @@ Iterable<Component> {
         public /* synthetic */ Object deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             return this.deserialize(jsonElement, type, jsonDeserializationContext);
         }
+    }
+
+    public static interface ContentConsumer<T> {
+        public Optional<T> accept(String var1);
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static interface StyledContentConsumer<T> {
+        public Optional<T> accept(Style var1, String var2);
     }
 }
 

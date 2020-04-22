@@ -21,10 +21,10 @@ import net.minecraft.server.players.UserWhiteList;
 import net.minecraft.server.players.UserWhiteListEntry;
 
 public class WhitelistCommand {
-    private static final SimpleCommandExceptionType ERROR_ALREADY_ENABLED = new SimpleCommandExceptionType(new TranslatableComponent("commands.whitelist.alreadyOn", new Object[0]));
-    private static final SimpleCommandExceptionType ERROR_ALREADY_DISABLED = new SimpleCommandExceptionType(new TranslatableComponent("commands.whitelist.alreadyOff", new Object[0]));
-    private static final SimpleCommandExceptionType ERROR_ALREADY_WHITELISTED = new SimpleCommandExceptionType(new TranslatableComponent("commands.whitelist.add.failed", new Object[0]));
-    private static final SimpleCommandExceptionType ERROR_NOT_WHITELISTED = new SimpleCommandExceptionType(new TranslatableComponent("commands.whitelist.remove.failed", new Object[0]));
+    private static final SimpleCommandExceptionType ERROR_ALREADY_ENABLED = new SimpleCommandExceptionType(new TranslatableComponent("commands.whitelist.alreadyOn"));
+    private static final SimpleCommandExceptionType ERROR_ALREADY_DISABLED = new SimpleCommandExceptionType(new TranslatableComponent("commands.whitelist.alreadyOff"));
+    private static final SimpleCommandExceptionType ERROR_ALREADY_WHITELISTED = new SimpleCommandExceptionType(new TranslatableComponent("commands.whitelist.add.failed"));
+    private static final SimpleCommandExceptionType ERROR_NOT_WHITELISTED = new SimpleCommandExceptionType(new TranslatableComponent("commands.whitelist.remove.failed"));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("whitelist").requires(commandSourceStack -> commandSourceStack.hasPermission(3))).then(Commands.literal("on").executes(commandContext -> WhitelistCommand.enableWhitelist((CommandSourceStack)commandContext.getSource())))).then(Commands.literal("off").executes(commandContext -> WhitelistCommand.disableWhitelist((CommandSourceStack)commandContext.getSource())))).then(Commands.literal("list").executes(commandContext -> WhitelistCommand.showList((CommandSourceStack)commandContext.getSource())))).then(Commands.literal("add").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("targets", GameProfileArgument.gameProfile()).suggests((commandContext, suggestionsBuilder) -> {
@@ -35,7 +35,7 @@ public class WhitelistCommand {
 
     private static int reload(CommandSourceStack commandSourceStack) {
         commandSourceStack.getServer().getPlayerList().reloadWhiteList();
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.whitelist.reloaded", new Object[0]), true);
+        commandSourceStack.sendSuccess(new TranslatableComponent("commands.whitelist.reloaded"), true);
         commandSourceStack.getServer().kickUnlistedPlayers(commandSourceStack);
         return 1;
     }
@@ -79,7 +79,7 @@ public class WhitelistCommand {
             throw ERROR_ALREADY_ENABLED.create();
         }
         playerList.setUsingWhiteList(true);
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.whitelist.enabled", new Object[0]), true);
+        commandSourceStack.sendSuccess(new TranslatableComponent("commands.whitelist.enabled"), true);
         commandSourceStack.getServer().kickUnlistedPlayers(commandSourceStack);
         return 1;
     }
@@ -90,14 +90,14 @@ public class WhitelistCommand {
             throw ERROR_ALREADY_DISABLED.create();
         }
         playerList.setUsingWhiteList(false);
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.whitelist.disabled", new Object[0]), true);
+        commandSourceStack.sendSuccess(new TranslatableComponent("commands.whitelist.disabled"), true);
         return 1;
     }
 
     private static int showList(CommandSourceStack commandSourceStack) {
         CharSequence[] strings = commandSourceStack.getServer().getPlayerList().getWhiteListNames();
         if (strings.length == 0) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.whitelist.none", new Object[0]), false);
+            commandSourceStack.sendSuccess(new TranslatableComponent("commands.whitelist.none"), false);
         } else {
             commandSourceStack.sendSuccess(new TranslatableComponent("commands.whitelist.list", strings.length, String.join((CharSequence)", ", strings)), false);
         }

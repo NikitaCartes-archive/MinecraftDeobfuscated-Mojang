@@ -128,7 +128,7 @@ public class EntityDataSerializers {
 
         @Override
         public Component copy(Component component) {
-            return component.deepCopy();
+            return component;
         }
 
         @Override
@@ -155,7 +155,7 @@ public class EntityDataSerializers {
 
         @Override
         public Optional<Component> copy(Optional<Component> optional) {
-            return optional.isPresent() ? Optional.of(optional.get().deepCopy()) : Optional.empty();
+            return optional;
         }
 
         @Override

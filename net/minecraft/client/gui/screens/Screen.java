@@ -5,26 +5,22 @@ package net.minecraft.client.gui.screens;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.math.Matrix4f;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -38,8 +34,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
@@ -80,9 +74,9 @@ implements Widget {
     }
 
     @Override
-    public void render(int i, int j, float f) {
+    public void render(PoseStack poseStack, int i, int j, float f) {
         for (int k = 0; k < this.buttons.size(); ++k) {
-            this.buttons.get(k).render(i, j, f);
+            this.buttons.get(k).render(poseStack, i, j, f);
         }
     }
 
@@ -121,24 +115,19 @@ implements Widget {
         return guiEventListener;
     }
 
-    protected void renderTooltip(ItemStack itemStack, int i, int j) {
-        this.renderTooltip(this.getTooltipFromItem(itemStack), i, j);
+    protected void renderTooltip(PoseStack poseStack, ItemStack itemStack, int i, int j) {
+        this.renderTooltip(poseStack, this.getTooltipFromItem(itemStack), i, j);
     }
 
-    public List<String> getTooltipFromItem(ItemStack itemStack) {
-        List<Component> list = itemStack.getTooltipLines(this.minecraft.player, this.minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
-        ArrayList<String> list2 = Lists.newArrayList();
-        for (Component component : list) {
-            list2.add(component.getColoredString());
-        }
-        return list2;
+    public List<Component> getTooltipFromItem(ItemStack itemStack) {
+        return itemStack.getTooltipLines(this.minecraft.player, this.minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
     }
 
-    public void renderTooltip(String string, int i, int j) {
-        this.renderTooltip(Arrays.asList(string), i, j);
+    public void renderTooltip(PoseStack poseStack, Component component, int i, int j) {
+        this.renderTooltip(poseStack, Arrays.asList(component), i, j);
     }
 
-    public void renderTooltip(List<String> list, int i, int j) {
+    public void renderTooltip(PoseStack poseStack, List<Component> list, int i, int j) {
         int l;
         if (list.isEmpty()) {
             return;
@@ -146,8 +135,8 @@ implements Widget {
         RenderSystem.disableRescaleNormal();
         RenderSystem.disableDepthTest();
         int k = 0;
-        for (String string : list) {
-            l = this.font.width(string);
+        for (Component component : list) {
+            l = this.font.width(component);
             if (l <= k) continue;
             k = l;
         }
@@ -167,25 +156,24 @@ implements Widget {
         this.setBlitOffset(300);
         this.itemRenderer.blitOffset = 300.0f;
         int p = -267386864;
-        this.fillGradient(m - 3, n - 4, m + l + 3, n - 3, -267386864, -267386864);
-        this.fillGradient(m - 3, n + o + 3, m + l + 3, n + o + 4, -267386864, -267386864);
-        this.fillGradient(m - 3, n - 3, m + l + 3, n + o + 3, -267386864, -267386864);
-        this.fillGradient(m - 4, n - 3, m - 3, n + o + 3, -267386864, -267386864);
-        this.fillGradient(m + l + 3, n - 3, m + l + 4, n + o + 3, -267386864, -267386864);
+        this.fillGradient(poseStack, m - 3, n - 4, m + l + 3, n - 3, -267386864, -267386864);
+        this.fillGradient(poseStack, m - 3, n + o + 3, m + l + 3, n + o + 4, -267386864, -267386864);
+        this.fillGradient(poseStack, m - 3, n - 3, m + l + 3, n + o + 3, -267386864, -267386864);
+        this.fillGradient(poseStack, m - 4, n - 3, m - 3, n + o + 3, -267386864, -267386864);
+        this.fillGradient(poseStack, m + l + 3, n - 3, m + l + 4, n + o + 3, -267386864, -267386864);
         int q = 0x505000FF;
         int r = 1344798847;
-        this.fillGradient(m - 3, n - 3 + 1, m - 3 + 1, n + o + 3 - 1, 0x505000FF, 1344798847);
-        this.fillGradient(m + l + 2, n - 3 + 1, m + l + 3, n + o + 3 - 1, 0x505000FF, 1344798847);
-        this.fillGradient(m - 3, n - 3, m + l + 3, n - 3 + 1, 0x505000FF, 0x505000FF);
-        this.fillGradient(m - 3, n + o + 2, m + l + 3, n + o + 3, 1344798847, 1344798847);
-        PoseStack poseStack = new PoseStack();
+        this.fillGradient(poseStack, m - 3, n - 3 + 1, m - 3 + 1, n + o + 3 - 1, 0x505000FF, 1344798847);
+        this.fillGradient(poseStack, m + l + 2, n - 3 + 1, m + l + 3, n + o + 3 - 1, 0x505000FF, 1344798847);
+        this.fillGradient(poseStack, m - 3, n - 3, m + l + 3, n - 3 + 1, 0x505000FF, 0x505000FF);
+        this.fillGradient(poseStack, m - 3, n + o + 2, m + l + 3, n + o + 3, 1344798847, 1344798847);
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         poseStack.translate(0.0, 0.0, this.itemRenderer.blitOffset);
         Matrix4f matrix4f = poseStack.last().pose();
         for (int s = 0; s < list.size(); ++s) {
-            String string2 = list.get(s);
-            if (string2 != null) {
-                this.font.drawInBatch(string2, m, n, -1, true, matrix4f, bufferSource, false, 0, 0xF000F0);
+            Component component2 = list.get(s);
+            if (component2 != null) {
+                this.font.drawInBatch(component2, (float)m, (float)n, -1, true, matrix4f, (MultiBufferSource)bufferSource, false, 0, 0xF000F0);
             }
             if (s == 0) {
                 n += 2;
@@ -199,47 +187,26 @@ implements Widget {
         RenderSystem.enableRescaleNormal();
     }
 
-    protected void renderComponentHoverEffect(Component component, int i, int j) {
+    protected void renderComponentHoverEffect(PoseStack poseStack, @Nullable Component component, int i, int j) {
         if (component == null || component.getStyle().getHoverEvent() == null) {
             return;
         }
         HoverEvent hoverEvent = component.getStyle().getHoverEvent();
-        if (hoverEvent.getAction() == HoverEvent.Action.SHOW_ITEM) {
-            ItemStack itemStack = ItemStack.EMPTY;
-            try {
-                CompoundTag tag = TagParser.parseTag(hoverEvent.getValue().getString());
-                if (tag instanceof CompoundTag) {
-                    itemStack = ItemStack.of(tag);
+        HoverEvent.ItemStackInfo itemStackInfo = hoverEvent.getValue(HoverEvent.Action.SHOW_ITEM);
+        if (itemStackInfo != null) {
+            this.renderTooltip(poseStack, itemStackInfo.getItemStack(), i, j);
+        } else {
+            HoverEvent.EntityTooltipInfo entityTooltipInfo = hoverEvent.getValue(HoverEvent.Action.SHOW_ENTITY);
+            if (entityTooltipInfo != null) {
+                if (this.minecraft.options.advancedItemTooltips) {
+                    this.renderTooltip(poseStack, entityTooltipInfo.getTooltipLines(), i, j);
                 }
-            } catch (CommandSyntaxException tag) {
-                // empty catch block
-            }
-            if (itemStack.isEmpty()) {
-                this.renderTooltip((Object)((Object)ChatFormatting.RED) + "Invalid Item!", i, j);
             } else {
-                this.renderTooltip(itemStack, i, j);
-            }
-        } else if (hoverEvent.getAction() == HoverEvent.Action.SHOW_ENTITY) {
-            if (this.minecraft.options.advancedItemTooltips) {
-                try {
-                    CompoundTag compoundTag = TagParser.parseTag(hoverEvent.getValue().getString());
-                    ArrayList<String> list = Lists.newArrayList();
-                    Component component2 = Component.Serializer.fromJson(compoundTag.getString("name"));
-                    if (component2 != null) {
-                        list.add(component2.getColoredString());
-                    }
-                    if (compoundTag.contains("type", 8)) {
-                        String string = compoundTag.getString("type");
-                        list.add("Type: " + string);
-                    }
-                    list.add(compoundTag.getString("id"));
-                    this.renderTooltip(list, i, j);
-                } catch (JsonSyntaxException | CommandSyntaxException exception) {
-                    this.renderTooltip((Object)((Object)ChatFormatting.RED) + "Invalid Entity!", i, j);
+                Component component2 = hoverEvent.getValue(HoverEvent.Action.SHOW_TEXT);
+                if (component2 != null) {
+                    this.renderTooltip(poseStack, this.minecraft.font.split(component2, Math.max(this.width / 2, 200)), i, j);
                 }
             }
-        } else if (hoverEvent.getAction() == HoverEvent.Action.SHOW_TEXT) {
-            this.renderTooltip(this.minecraft.font.split(hoverEvent.getValue().getColoredString(), Math.max(this.width / 2, 200)), i, j);
         }
     }
 
@@ -334,13 +301,13 @@ implements Widget {
     public void removed() {
     }
 
-    public void renderBackground() {
-        this.renderBackground(0);
+    public void renderBackground(PoseStack poseStack) {
+        this.renderBackground(poseStack, 0);
     }
 
-    public void renderBackground(int i) {
+    public void renderBackground(PoseStack poseStack, int i) {
         if (this.minecraft.level != null) {
-            this.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
+            this.fillGradient(poseStack, 0, 0, this.width, this.height, -1072689136, -804253680);
         } else {
             this.renderDirtBackground(i);
         }

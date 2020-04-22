@@ -4,12 +4,12 @@
 package net.minecraft.client.gui.screens;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.ComponentRenderUtils;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -29,7 +29,7 @@ extends Screen {
     private final boolean hardcore;
 
     public DeathScreen(@Nullable Component component, boolean bl) {
-        super(new TranslatableComponent(bl ? "deathScreen.title.hardcore" : "deathScreen.title", new Object[0]));
+        super(new TranslatableComponent(bl ? "deathScreen.title.hardcore" : "deathScreen.title"));
         this.causeOfDeath = component;
         this.hardcore = bl;
     }
@@ -37,16 +37,16 @@ extends Screen {
     @Override
     protected void init() {
         this.delayTicker = 0;
-        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 72, 200, 20, this.hardcore ? I18n.get("deathScreen.spectate", new Object[0]) : I18n.get("deathScreen.respawn", new Object[0]), button -> {
+        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 72, 200, 20, this.hardcore ? new TranslatableComponent("deathScreen.spectate") : new TranslatableComponent("deathScreen.respawn"), button -> {
             this.minecraft.player.respawn();
             this.minecraft.setScreen(null);
         }));
-        Button button2 = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 96, 200, 20, I18n.get("deathScreen.titleScreen", new Object[0]), button -> {
+        Button button2 = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 96, 200, 20, new TranslatableComponent("deathScreen.titleScreen"), button -> {
             if (this.hardcore) {
                 this.exitToTitleScreen();
                 return;
             }
-            ConfirmScreen confirmScreen = new ConfirmScreen(this::confirmResult, new TranslatableComponent("deathScreen.quit.confirm", new Object[0]), new TextComponent(""), I18n.get("deathScreen.titleScreen", new Object[0]), I18n.get("deathScreen.respawn", new Object[0]));
+            ConfirmScreen confirmScreen = new ConfirmScreen(this::confirmResult, new TranslatableComponent("deathScreen.quit.confirm"), TextComponent.EMPTY, new TranslatableComponent("deathScreen.titleScreen"), new TranslatableComponent("deathScreen.respawn"));
             this.minecraft.setScreen(confirmScreen);
             confirmScreen.setDelay(20);
         }));
@@ -76,26 +76,26 @@ extends Screen {
         if (this.minecraft.level != null) {
             this.minecraft.level.disconnect();
         }
-        this.minecraft.clearLevel(new GenericDirtMessageScreen(new TranslatableComponent("menu.savingLevel", new Object[0])));
+        this.minecraft.clearLevel(new GenericDirtMessageScreen(new TranslatableComponent("menu.savingLevel")));
         this.minecraft.setScreen(new TitleScreen());
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        Component component;
-        this.fillGradient(0, 0, this.width, this.height, 0x60500000, -1602211792);
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        this.fillGradient(poseStack, 0, 0, this.width, this.height, 0x60500000, -1602211792);
         RenderSystem.pushMatrix();
         RenderSystem.scalef(2.0f, 2.0f, 2.0f);
-        this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2 / 2, 30, 0xFFFFFF);
+        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2 / 2, 30, 0xFFFFFF);
         RenderSystem.popMatrix();
         if (this.causeOfDeath != null) {
-            this.drawCenteredString(this.font, this.causeOfDeath.getColoredString(), this.width / 2, 85, 0xFFFFFF);
+            this.drawCenteredString(poseStack, this.font, this.causeOfDeath, this.width / 2, 85, 0xFFFFFF);
         }
-        this.drawCenteredString(this.font, I18n.get("deathScreen.score", new Object[0]) + ": " + (Object)((Object)ChatFormatting.YELLOW) + this.minecraft.player.getScore(), this.width / 2, 100, 0xFFFFFF);
-        if (this.causeOfDeath != null && j > 85 && j < 85 + this.font.lineHeight && (component = this.getClickedComponentAt(i)) != null && component.getStyle().getHoverEvent() != null) {
-            this.renderComponentHoverEffect(component, i, j);
+        this.drawCenteredString(poseStack, this.font, I18n.get("deathScreen.score", new Object[0]) + ": " + (Object)((Object)ChatFormatting.YELLOW) + this.minecraft.player.getScore(), this.width / 2, 100, 0xFFFFFF);
+        if (this.causeOfDeath != null && j > 85 && j < 85 + this.font.lineHeight) {
+            Component component = this.getClickedComponentAt(i);
+            this.renderComponentHoverEffect(poseStack, component, i, j);
         }
-        super.render(i, j, f);
+        super.render(poseStack, i, j, f);
     }
 
     @Nullable
@@ -103,18 +103,13 @@ extends Screen {
         if (this.causeOfDeath == null) {
             return null;
         }
-        int j = this.minecraft.font.width(this.causeOfDeath.getColoredString());
+        int j = this.minecraft.font.width(this.causeOfDeath);
         int k = this.width / 2 - j / 2;
         int l = this.width / 2 + j / 2;
-        int m = k;
         if (i < k || i > l) {
             return null;
         }
-        for (Component component : this.causeOfDeath) {
-            if ((m += this.minecraft.font.width(ComponentRenderUtils.stripColor(component.getContents(), false))) <= i) continue;
-            return component;
-        }
-        return null;
+        return this.minecraft.font.getSplitter().componentAtWidth(this.causeOfDeath, i - k);
     }
 
     @Override

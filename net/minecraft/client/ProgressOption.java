@@ -12,6 +12,7 @@ import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.SliderButton;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
 @Environment(value=EnvType.CLIENT)
@@ -22,9 +23,9 @@ extends Option {
     protected double maxValue;
     private final Function<Options, Double> getter;
     private final BiConsumer<Options, Double> setter;
-    private final BiFunction<Options, ProgressOption, String> toString;
+    private final BiFunction<Options, ProgressOption, Component> toString;
 
-    public ProgressOption(String string, double d, double e, float f, Function<Options, Double> function, BiConsumer<Options, Double> biConsumer, BiFunction<Options, ProgressOption, String> biFunction) {
+    public ProgressOption(String string, double d, double e, float f, Function<Options, Double> function, BiConsumer<Options, Double> biConsumer, BiFunction<Options, ProgressOption, Component> biFunction) {
         super(string);
         this.minValue = d;
         this.maxValue = e;
@@ -74,7 +75,7 @@ extends Option {
         return this.getter.apply(options);
     }
 
-    public String getMessage(Options options) {
+    public Component getMessage(Options options) {
         return this.toString.apply(options, this);
     }
 }

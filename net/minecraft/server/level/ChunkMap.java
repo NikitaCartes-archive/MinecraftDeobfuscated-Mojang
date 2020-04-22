@@ -95,6 +95,7 @@ import net.minecraft.world.level.chunk.storage.ChunkStorage;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.logging.log4j.LogManager;
@@ -132,10 +133,10 @@ implements ChunkHolder.PlayerProvider {
     private final Queue<Runnable> unloadQueue = Queues.newConcurrentLinkedQueue();
     private int viewDistance;
 
-    public ChunkMap(ServerLevel serverLevel, File file, DataFixer dataFixer, StructureManager structureManager, Executor executor, BlockableEventLoop<Runnable> blockableEventLoop, LightChunkGetter lightChunkGetter, ChunkGenerator<?> chunkGenerator, ChunkProgressListener chunkProgressListener, Supplier<DimensionDataStorage> supplier, int i, boolean bl) {
-        super(new File(serverLevel.getDimension().getType().getStorageFolder(file), "region"), dataFixer, bl);
+    public ChunkMap(ServerLevel serverLevel, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, StructureManager structureManager, Executor executor, BlockableEventLoop<Runnable> blockableEventLoop, LightChunkGetter lightChunkGetter, ChunkGenerator<?> chunkGenerator, ChunkProgressListener chunkProgressListener, Supplier<DimensionDataStorage> supplier, int i, boolean bl) {
+        super(new File(levelStorageAccess.getDimensionPath(serverLevel.getDimension().getType()), "region"), dataFixer, bl);
         this.structureManager = structureManager;
-        this.storageFolder = serverLevel.getDimension().getType().getStorageFolder(file);
+        this.storageFolder = levelStorageAccess.getDimensionPath(serverLevel.getDimension().getType());
         this.level = serverLevel;
         this.generator = chunkGenerator;
         this.mainThreadExecutor = blockableEventLoop;
@@ -846,7 +847,7 @@ implements ChunkHolder.PlayerProvider {
             return;
         }
         EntityType<?> entityType = entity.getType();
-        int i = entityType.chunkRange() * 16;
+        int i = entityType.clientTrackingRange() * 16;
         int j = entityType.updateInterval();
         if (this.entityMap.containsKey(entity.getId())) {
             throw Util.pauseInIde(new IllegalStateException("Entity is already tracked!"));
@@ -1031,7 +1032,7 @@ implements ChunkHolder.PlayerProvider {
             Collection<Entity> collection = this.entity.getIndirectPassengers();
             int i = this.range;
             for (Entity entity : collection) {
-                int j = entity.getType().chunkRange() * 16;
+                int j = entity.getType().clientTrackingRange() * 16;
                 if (j <= i) continue;
                 i = j;
             }

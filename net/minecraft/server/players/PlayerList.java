@@ -81,7 +81,8 @@ import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.LevelData;
-import net.minecraft.world.level.storage.PlayerIO;
+import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.level.storage.PlayerDataStorage;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
@@ -106,7 +107,7 @@ public abstract class PlayerList {
     private final UserWhiteList whitelist = new UserWhiteList(WHITELIST_FILE);
     private final Map<UUID, ServerStatsCounter> stats = Maps.newHashMap();
     private final Map<UUID, PlayerAdvancements> advancements = Maps.newHashMap();
-    private PlayerIO playerIo;
+    private final PlayerDataStorage playerIo;
     private boolean doWhiteList;
     protected final int maxPlayers;
     private int viewDistance;
@@ -114,9 +115,10 @@ public abstract class PlayerList {
     private boolean allowCheatsForAllPlayers;
     private int sendAllPlayerInfoIn;
 
-    public PlayerList(MinecraftServer minecraftServer, int i) {
+    public PlayerList(MinecraftServer minecraftServer, PlayerDataStorage playerDataStorage, int i) {
         this.server = minecraftServer;
         this.maxPlayers = i;
+        this.playerIo = playerDataStorage;
         this.getBans().setEnabled(true);
         this.getIpBans().setEnabled(true);
     }
@@ -156,8 +158,8 @@ public abstract class PlayerList {
         serverPlayer.getRecipeBook().sendInitialRecipeBook(serverPlayer);
         this.updateEntireScoreboard(serverLevel.getScoreboard(), serverPlayer);
         this.server.invalidateStatus();
-        TranslatableComponent component = serverPlayer.getGameProfile().getName().equalsIgnoreCase(string) ? new TranslatableComponent("multiplayer.player.joined", serverPlayer.getDisplayName()) : new TranslatableComponent("multiplayer.player.joined.renamed", serverPlayer.getDisplayName(), string);
-        this.broadcastMessage(component.withStyle(ChatFormatting.YELLOW));
+        TranslatableComponent mutableComponent = serverPlayer.getGameProfile().getName().equalsIgnoreCase(string) ? new TranslatableComponent("multiplayer.player.joined", serverPlayer.getDisplayName()) : new TranslatableComponent("multiplayer.player.joined.renamed", serverPlayer.getDisplayName(), string);
+        this.broadcastMessage(mutableComponent.withStyle(ChatFormatting.YELLOW));
         serverGamePacketListenerImpl.teleport(serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), serverPlayer.yRot, serverPlayer.xRot);
         this.players.add(serverPlayer);
         this.playersByUUID.put(serverPlayer.getUUID(), serverPlayer);
@@ -218,7 +220,6 @@ public abstract class PlayerList {
     }
 
     public void setLevel(ServerLevel serverLevel) {
-        this.playerIo = serverLevel.getLevelStorage();
         serverLevel.getWorldBorder().addListener(new BorderChangeListener(){
 
             @Override
@@ -259,7 +260,7 @@ public abstract class PlayerList {
     @Nullable
     public CompoundTag load(ServerPlayer serverPlayer) {
         CompoundTag compoundTag2;
-        CompoundTag compoundTag = this.server.getLevel(DimensionType.OVERWORLD).getLevelData().getLoadedPlayerTag();
+        CompoundTag compoundTag = this.server.getWorldData().getLoadedPlayerTag();
         if (serverPlayer.getName().getString().equals(this.server.getSingleplayerName()) && compoundTag != null) {
             compoundTag2 = compoundTag;
             serverPlayer.load(compoundTag2);
@@ -317,25 +318,25 @@ public abstract class PlayerList {
     public Component canPlayerLogin(SocketAddress socketAddress, GameProfile gameProfile) {
         if (this.bans.isBanned(gameProfile)) {
             UserBanListEntry userBanListEntry = (UserBanListEntry)this.bans.get(gameProfile);
-            TranslatableComponent component = new TranslatableComponent("multiplayer.disconnect.banned.reason", userBanListEntry.getReason());
+            TranslatableComponent mutableComponent = new TranslatableComponent("multiplayer.disconnect.banned.reason", userBanListEntry.getReason());
             if (userBanListEntry.getExpires() != null) {
-                component.append(new TranslatableComponent("multiplayer.disconnect.banned.expiration", BAN_DATE_FORMAT.format(userBanListEntry.getExpires())));
+                mutableComponent.append(new TranslatableComponent("multiplayer.disconnect.banned.expiration", BAN_DATE_FORMAT.format(userBanListEntry.getExpires())));
             }
-            return component;
+            return mutableComponent;
         }
         if (!this.isWhiteListed(gameProfile)) {
-            return new TranslatableComponent("multiplayer.disconnect.not_whitelisted", new Object[0]);
+            return new TranslatableComponent("multiplayer.disconnect.not_whitelisted");
         }
         if (this.ipBans.isBanned(socketAddress)) {
             IpBanListEntry ipBanListEntry = this.ipBans.get(socketAddress);
-            TranslatableComponent component = new TranslatableComponent("multiplayer.disconnect.banned_ip.reason", ipBanListEntry.getReason());
+            TranslatableComponent mutableComponent = new TranslatableComponent("multiplayer.disconnect.banned_ip.reason", ipBanListEntry.getReason());
             if (ipBanListEntry.getExpires() != null) {
-                component.append(new TranslatableComponent("multiplayer.disconnect.banned_ip.expiration", BAN_DATE_FORMAT.format(ipBanListEntry.getExpires())));
+                mutableComponent.append(new TranslatableComponent("multiplayer.disconnect.banned_ip.expiration", BAN_DATE_FORMAT.format(ipBanListEntry.getExpires())));
             }
-            return component;
+            return mutableComponent;
         }
         if (this.players.size() >= this.maxPlayers && !this.canBypassPlayerLimit(gameProfile)) {
-            return new TranslatableComponent("multiplayer.disconnect.server_full", new Object[0]);
+            return new TranslatableComponent("multiplayer.disconnect.server_full");
         }
         return null;
     }
@@ -353,7 +354,7 @@ public abstract class PlayerList {
             list.add(serverPlayer2);
         }
         for (ServerPlayer serverPlayer : list) {
-            serverPlayer.connection.disconnect(new TranslatableComponent("multiplayer.disconnect.duplicate_login", new Object[0]));
+            serverPlayer.connection.disconnect(new TranslatableComponent("multiplayer.disconnect.duplicate_login"));
         }
         ServerPlayerGameMode serverPlayerGameMode = this.server.isDemo() ? new DemoMode(this.server.getLevel(DimensionType.OVERWORLD)) : new ServerPlayerGameMode(this.server.getLevel(DimensionType.OVERWORLD));
         return new ServerPlayer(this.server, this.server.getLevel(DimensionType.OVERWORLD), gameProfile, serverPlayerGameMode);
@@ -630,7 +631,7 @@ public abstract class PlayerList {
 
     public void removeAll() {
         for (int i = 0; i < this.players.size(); ++i) {
-            this.players.get((int)i).connection.disconnect(new TranslatableComponent("multiplayer.disconnect.server_shutdown", new Object[0]));
+            this.players.get((int)i).connection.disconnect(new TranslatableComponent("multiplayer.disconnect.server_shutdown"));
         }
     }
 
@@ -650,7 +651,7 @@ public abstract class PlayerList {
         ServerStatsCounter serverStatsCounter2 = serverStatsCounter = uUID == null ? null : this.stats.get(uUID);
         if (serverStatsCounter == null) {
             File file3;
-            File file = new File(this.server.getLevel(DimensionType.OVERWORLD).getLevelStorage().getFolder(), "stats");
+            File file = this.server.getWorldPath(LevelResource.PLAYER_STATS_DIR).toFile();
             File file2 = new File(file, uUID + ".json");
             if (!file2.exists() && (file3 = new File(file, player.getName().getString() + ".json")).exists() && file3.isFile()) {
                 file3.renameTo(file2);
@@ -665,7 +666,7 @@ public abstract class PlayerList {
         UUID uUID = serverPlayer.getUUID();
         PlayerAdvancements playerAdvancements = this.advancements.get(uUID);
         if (playerAdvancements == null) {
-            File file = new File(this.server.getLevel(DimensionType.OVERWORLD).getLevelStorage().getFolder(), "advancements");
+            File file = this.server.getWorldPath(LevelResource.PLAYER_ADVANCEMENTS_DIR).toFile();
             File file2 = new File(file, uUID + ".json");
             playerAdvancements = new PlayerAdvancements(this.server, file2, serverPlayer);
             this.advancements.put(uUID, playerAdvancements);

@@ -5,6 +5,7 @@ package net.minecraft.client.gui.components.toasts;
 
 import com.google.common.collect.Queues;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Arrays;
 import java.util.Deque;
 import net.fabricmc.api.EnvType;
@@ -27,13 +28,13 @@ extends GuiComponent {
         this.minecraft = minecraft;
     }
 
-    public void render() {
+    public void render(PoseStack poseStack) {
         if (this.minecraft.options.hideGui) {
             return;
         }
         for (int i = 0; i < this.visible.length; ++i) {
             ToastInstance<?> toastInstance = this.visible[i];
-            if (toastInstance != null && toastInstance.render(this.minecraft.getWindow().getGuiScaledWidth(), i)) {
+            if (toastInstance != null && toastInstance.render(this.minecraft.getWindow().getGuiScaledWidth(), i, poseStack)) {
                 this.visible[i] = null;
             }
             if (this.visible[i] != null || this.queued.isEmpty()) continue;
@@ -93,7 +94,7 @@ extends GuiComponent {
             return f;
         }
 
-        public boolean render(int i, int j) {
+        public boolean render(int i, int j, PoseStack poseStack) {
             long l = Util.getMillis();
             if (this.animationTime == -1L) {
                 this.animationTime = l;
@@ -104,7 +105,7 @@ extends GuiComponent {
             }
             RenderSystem.pushMatrix();
             RenderSystem.translatef((float)i - 160.0f * this.getVisibility(l), j * 32, 800 + j);
-            Toast.Visibility visibility = this.toast.render(this.field_2245, l - this.visibleTime);
+            Toast.Visibility visibility = this.toast.render(poseStack, this.field_2245, l - this.visibleTime);
             RenderSystem.popMatrix();
             if (visibility != this.visibility) {
                 this.animationTime = l - (long)((int)((1.0f - this.getVisibility(l)) * 600.0f));

@@ -191,7 +191,7 @@ implements ResourceManagerReloadListener {
     }
 
     public CommandSourceStack getCompilationContext() {
-        return new CommandSourceStack(CommandSource.NULL, Vec3.ZERO, Vec2.ZERO, null, this.server.getFunctionCompilationLevel(), "", new TextComponent(""), this.server, null);
+        return new CommandSourceStack(CommandSource.NULL, Vec3.ZERO, Vec2.ZERO, null, this.server.getFunctionCompilationLevel(), "", TextComponent.EMPTY, this.server, null);
     }
 
     public TagCollection<CommandFunction> getTags() {

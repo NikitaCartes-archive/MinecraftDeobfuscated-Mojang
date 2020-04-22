@@ -9,8 +9,8 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.network.chat.BaseComponent;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ContextAwareComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.Entity;
 import org.apache.logging.log4j.LogManager;
@@ -42,7 +42,7 @@ implements ContextAwareComponent {
     }
 
     @Override
-    public Component resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
+    public MutableComponent resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
         if (commandSourceStack == null || this.selector == null) {
             return new TextComponent("");
         }
@@ -55,7 +55,7 @@ implements ContextAwareComponent {
     }
 
     @Override
-    public SelectorComponent copy() {
+    public SelectorComponent toMutable() {
         return new SelectorComponent(this.pattern);
     }
 
@@ -77,8 +77,13 @@ implements ContextAwareComponent {
     }
 
     @Override
-    public /* synthetic */ Component copy() {
-        return this.copy();
+    public /* synthetic */ BaseComponent toMutable() {
+        return this.toMutable();
+    }
+
+    @Override
+    public /* synthetic */ MutableComponent toMutable() {
+        return this.toMutable();
     }
 }
 

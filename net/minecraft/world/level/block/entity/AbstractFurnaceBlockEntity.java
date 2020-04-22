@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -34,12 +35,14 @@ import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.TickableBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractFurnaceBlockEntity
@@ -444,22 +447,27 @@ TickableBlockEntity {
     }
 
     @Override
-    public void awardAndReset(Player player) {
+    public void awardUsedRecipes(Player player) {
     }
 
-    public void awardResetAndExperience(Player player) {
-        ArrayList<Recipe<?>> list = Lists.newArrayList();
-        for (Object2IntMap.Entry entry : this.recipesUsed.object2IntEntrySet()) {
-            player.level.getRecipeManager().byKey((ResourceLocation)entry.getKey()).ifPresent(recipe -> {
-                list.add((Recipe<?>)recipe);
-                AbstractFurnaceBlockEntity.createExperience(player, entry.getIntValue(), ((AbstractCookingRecipe)recipe).getExperience());
-            });
-        }
+    public void awardUsedRecipesAndPopExperience(Player player) {
+        List<Recipe<?>> list = this.getRecipesToAwardAndPopExperience(player.level, player.position());
         player.awardRecipes(list);
         this.recipesUsed.clear();
     }
 
-    private static void createExperience(Player player, int i, float f) {
+    public List<Recipe<?>> getRecipesToAwardAndPopExperience(Level level, Vec3 vec3) {
+        ArrayList<Recipe<?>> list = Lists.newArrayList();
+        for (Object2IntMap.Entry entry : this.recipesUsed.object2IntEntrySet()) {
+            level.getRecipeManager().byKey((ResourceLocation)entry.getKey()).ifPresent(recipe -> {
+                list.add((Recipe<?>)recipe);
+                AbstractFurnaceBlockEntity.createExperience(level, vec3, entry.getIntValue(), ((AbstractCookingRecipe)recipe).getExperience());
+            });
+        }
+        return list;
+    }
+
+    private static void createExperience(Level level, Vec3 vec3, int i, float f) {
         int j = Mth.floor((float)i * f);
         float g = Mth.frac((float)i * f);
         if (g != 0.0f && Math.random() < (double)g) {
@@ -468,7 +476,7 @@ TickableBlockEntity {
         while (j > 0) {
             int k = ExperienceOrb.getExperienceValue(j);
             j -= k;
-            player.level.addFreshEntity(new ExperienceOrb(player.level, player.getX(), player.getY() + 0.5, player.getZ() + 0.5, k));
+            level.addFreshEntity(new ExperienceOrb(level, vec3.x, vec3.y, vec3.z, k));
         }
     }
 

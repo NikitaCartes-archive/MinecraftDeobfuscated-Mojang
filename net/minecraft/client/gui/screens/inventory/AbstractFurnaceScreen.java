@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.ImageButton;
@@ -55,41 +56,40 @@ implements RecipeUpdateListener {
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        this.renderBackground();
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        this.renderBackground(poseStack);
         if (this.recipeBookComponent.isVisible() && this.widthTooNarrow) {
-            this.renderBg(f, i, j);
-            this.recipeBookComponent.render(i, j, f);
+            this.renderBg(poseStack, f, i, j);
+            this.recipeBookComponent.render(poseStack, i, j, f);
         } else {
-            this.recipeBookComponent.render(i, j, f);
-            super.render(i, j, f);
-            this.recipeBookComponent.renderGhostRecipe(this.leftPos, this.topPos, true, f);
+            this.recipeBookComponent.render(poseStack, i, j, f);
+            super.render(poseStack, i, j, f);
+            this.recipeBookComponent.renderGhostRecipe(poseStack, this.leftPos, this.topPos, true, f);
         }
-        this.renderTooltip(i, j);
-        this.recipeBookComponent.renderTooltip(this.leftPos, this.topPos, i, j);
+        this.renderTooltip(poseStack, i, j);
+        this.recipeBookComponent.renderTooltip(poseStack, this.leftPos, this.topPos, i, j);
     }
 
     @Override
-    protected void renderLabels(int i, int j) {
-        String string = this.title.getColoredString();
-        this.font.draw(string, this.imageWidth / 2 - this.font.width(string) / 2, 6.0f, 0x404040);
-        this.font.draw(this.inventory.getDisplayName().getColoredString(), 8.0f, this.imageHeight - 96 + 2, 0x404040);
+    protected void renderLabels(PoseStack poseStack, int i, int j) {
+        this.font.draw(poseStack, this.title, (float)(this.imageWidth / 2 - this.font.width(this.title) / 2), 6.0f, 0x404040);
+        this.font.draw(poseStack, this.inventory.getDisplayName(), 8.0f, (float)(this.imageHeight - 96 + 2), 0x404040);
     }
 
     @Override
-    protected void renderBg(float f, int i, int j) {
+    protected void renderBg(PoseStack poseStack, float f, int i, int j) {
         int m;
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bind(this.texture);
         int k = this.leftPos;
         int l = this.topPos;
-        this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
+        this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
         if (((AbstractFurnaceMenu)this.menu).isLit()) {
             m = ((AbstractFurnaceMenu)this.menu).getLitProgress();
-            this.blit(k + 56, l + 36 + 12 - m, 176, 12 - m, 14, m + 1);
+            this.blit(poseStack, k + 56, l + 36 + 12 - m, 176, 12 - m, 14, m + 1);
         }
         m = ((AbstractFurnaceMenu)this.menu).getBurnProgress();
-        this.blit(k + 79, l + 34, 176, 14, m + 1, 16);
+        this.blit(poseStack, k + 79, l + 34, 176, 14, m + 1, 16);
     }
 
     @Override

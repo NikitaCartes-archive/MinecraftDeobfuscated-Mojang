@@ -222,26 +222,20 @@ VillagerDataHolder {
 
     @Override
     public boolean mobInteract(Player player, InteractionHand interactionHand) {
-        boolean bl;
         ItemStack itemStack = player.getItemInHand(interactionHand);
-        boolean bl2 = bl = itemStack.getItem() == Items.NAME_TAG;
-        if (bl) {
-            itemStack.interactEnemy(player, this, interactionHand);
-            return true;
-        }
         if (itemStack.getItem() != Items.VILLAGER_SPAWN_EGG && this.isAlive() && !this.isTrading() && !this.isSleeping()) {
             if (this.isBaby()) {
                 this.setUnhappy();
                 return super.mobInteract(player, interactionHand);
             }
-            boolean bl22 = this.getOffers().isEmpty();
+            boolean bl = this.getOffers().isEmpty();
             if (interactionHand == InteractionHand.MAIN_HAND) {
-                if (bl22 && !this.level.isClientSide) {
+                if (bl && !this.level.isClientSide) {
                     this.setUnhappy();
                 }
                 player.awardStat(Stats.TALKED_TO_VILLAGER);
             }
-            if (bl22) {
+            if (bl) {
                 return super.mobInteract(player, interactionHand);
             }
             if (!this.level.isClientSide && !this.offers.isEmpty()) {
@@ -581,7 +575,7 @@ VillagerDataHolder {
 
     @Override
     protected Component getTypeName() {
-        return new TranslatableComponent(this.getType().getDescriptionId() + '.' + Registry.VILLAGER_PROFESSION.getKey(this.getVillagerData().getProfession()).getPath(), new Object[0]);
+        return new TranslatableComponent(this.getType().getDescriptionId() + '.' + Registry.VILLAGER_PROFESSION.getKey(this.getVillagerData().getProfession()).getPath());
     }
 
     @Override

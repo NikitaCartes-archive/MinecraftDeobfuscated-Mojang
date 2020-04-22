@@ -6,6 +6,7 @@ package net.minecraft.client.gui.spectator.categories;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collection;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -47,7 +48,7 @@ SpectatorMenuItem {
 
     @Override
     public Component getPrompt() {
-        return new TranslatableComponent("spectatorMenu.teleport.prompt", new Object[0]);
+        return new TranslatableComponent("spectatorMenu.teleport.prompt");
     }
 
     @Override
@@ -57,13 +58,13 @@ SpectatorMenuItem {
 
     @Override
     public Component getName() {
-        return new TranslatableComponent("spectatorMenu.teleport", new Object[0]);
+        return new TranslatableComponent("spectatorMenu.teleport");
     }
 
     @Override
-    public void renderIcon(float f, int i) {
+    public void renderIcon(PoseStack poseStack, float f, int i) {
         Minecraft.getInstance().getTextureManager().bind(SpectatorGui.SPECTATOR_LOCATION);
-        GuiComponent.blit(0, 0, 0.0f, 0.0f, 16, 16, 256, 256);
+        GuiComponent.blit(poseStack, 0, 0, 0.0f, 0.0f, 16, 16, 256, 256);
     }
 
     @Override

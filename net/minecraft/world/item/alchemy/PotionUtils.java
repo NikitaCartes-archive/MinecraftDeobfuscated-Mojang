@@ -148,10 +148,10 @@ public class PotionUtils {
         List<MobEffectInstance> list2 = PotionUtils.getMobEffects(itemStack);
         ArrayList<Pair<Attribute, AttributeModifier>> list3 = Lists.newArrayList();
         if (list2.isEmpty()) {
-            list.add(new TranslatableComponent("effect.none", new Object[0]).withStyle(ChatFormatting.GRAY));
+            list.add(new TranslatableComponent("effect.none").withStyle(ChatFormatting.GRAY));
         } else {
             for (MobEffectInstance mobEffectInstance : list2) {
-                TranslatableComponent component = new TranslatableComponent(mobEffectInstance.getDescriptionId(), new Object[0]);
+                TranslatableComponent mutableComponent = new TranslatableComponent(mobEffectInstance.getDescriptionId());
                 MobEffect mobEffect = mobEffectInstance.getEffect();
                 Map<Attribute, AttributeModifier> map = mobEffect.getAttributeModifiers();
                 if (!map.isEmpty()) {
@@ -162,27 +162,27 @@ public class PotionUtils {
                     }
                 }
                 if (mobEffectInstance.getAmplifier() > 0) {
-                    component.append(" ").append(new TranslatableComponent("potion.potency." + mobEffectInstance.getAmplifier(), new Object[0]));
+                    mutableComponent.append(" ").append(new TranslatableComponent("potion.potency." + mobEffectInstance.getAmplifier()));
                 }
                 if (mobEffectInstance.getDuration() > 20) {
-                    component.append(" (").append(MobEffectUtil.formatDuration(mobEffectInstance, f)).append(")");
+                    mutableComponent.append(" (").append(MobEffectUtil.formatDuration(mobEffectInstance, f)).append(")");
                 }
-                list.add(component.withStyle(mobEffect.getCategory().getTooltipFormatting()));
+                list.add(mutableComponent.withStyle(mobEffect.getCategory().getTooltipFormatting()));
             }
         }
         if (!list3.isEmpty()) {
-            list.add(new TextComponent(""));
-            list.add(new TranslatableComponent("potion.whenDrank", new Object[0]).withStyle(ChatFormatting.DARK_PURPLE));
+            list.add(TextComponent.EMPTY);
+            list.add(new TranslatableComponent("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
             for (Pair pair : list3) {
                 AttributeModifier attributeModifier3 = (AttributeModifier)pair.getSecond();
                 double d = attributeModifier3.getAmount();
                 double e = attributeModifier3.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE || attributeModifier3.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL ? attributeModifier3.getAmount() * 100.0 : attributeModifier3.getAmount();
                 if (d > 0.0) {
-                    list.add(new TranslatableComponent("attribute.modifier.plus." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e), new TranslatableComponent(((Attribute)pair.getFirst()).getDescriptionId(), new Object[0])).withStyle(ChatFormatting.BLUE));
+                    list.add(new TranslatableComponent("attribute.modifier.plus." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e), new TranslatableComponent(((Attribute)pair.getFirst()).getDescriptionId())).withStyle(ChatFormatting.BLUE));
                     continue;
                 }
                 if (!(d < 0.0)) continue;
-                list.add(new TranslatableComponent("attribute.modifier.take." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e *= -1.0), new TranslatableComponent(((Attribute)pair.getFirst()).getDescriptionId(), new Object[0])).withStyle(ChatFormatting.RED));
+                list.add(new TranslatableComponent("attribute.modifier.take." + attributeModifier3.getOperation().toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e *= -1.0), new TranslatableComponent(((Attribute)pair.getFirst()).getDescriptionId())).withStyle(ChatFormatting.RED));
             }
         }
     }

@@ -15,14 +15,14 @@ public class DarkOakTreeGrower
 extends AbstractMegaTreeGrower {
     @Override
     @Nullable
-    protected ConfiguredFeature<? extends TreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl) {
+    protected ConfiguredFeature<TreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl) {
         return null;
     }
 
     @Override
     @Nullable
-    protected ConfiguredFeature<? extends TreeConfiguration, ?> getConfiguredMegaFeature(Random random) {
-        return Feature.DARK_OAK_TREE.configured(BiomeDefaultFeatures.DARK_OAK_TREE_CONFIG);
+    protected ConfiguredFeature<TreeConfiguration, ?> getConfiguredMegaFeature(Random random) {
+        return Feature.TREE.configured(BiomeDefaultFeatures.DARK_OAK_TREE_CONFIG);
     }
 }
 

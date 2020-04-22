@@ -3,11 +3,14 @@
  */
 package net.minecraft.client.multiplayer;
 
+import java.util.Collections;
+import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,13 +18,13 @@ import org.jetbrains.annotations.Nullable;
 public class ServerData {
     public String name;
     public String ip;
-    public String status;
-    public String motd;
+    public Component status;
+    public Component motd;
     public long ping;
     public int protocol = SharedConstants.getCurrentVersion().getProtocolVersion();
-    public String version = SharedConstants.getCurrentVersion().getName();
+    public Component version = new TextComponent(SharedConstants.getCurrentVersion().getName());
     public boolean pinged;
-    public String playerList;
+    public List<Component> playerList = Collections.emptyList();
     private ServerPackStatus packStatus = ServerPackStatus.PROMPT;
     private String iconB64;
     private boolean lan;
@@ -102,7 +105,7 @@ public class ServerData {
         private final Component name;
 
         private ServerPackStatus(String string2) {
-            this.name = new TranslatableComponent("addServer.resourcePack." + string2, new Object[0]);
+            this.name = new TranslatableComponent("addServer.resourcePack." + string2);
         }
 
         public Component getName() {

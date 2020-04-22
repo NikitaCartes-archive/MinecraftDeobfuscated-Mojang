@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.inventory.ItemCombinerScreen;
@@ -22,9 +23,9 @@ extends ItemCombinerScreen<SmithingMenu> {
     }
 
     @Override
-    protected void renderLabels(int i, int j) {
+    protected void renderLabels(PoseStack poseStack, int i, int j) {
         RenderSystem.disableBlend();
-        this.font.draw(this.title.getColoredString(), 40.0f, 20.0f, 0x404040);
+        this.font.draw(poseStack, this.title, 60.0f, 20.0f, 0x404040);
     }
 }
 

@@ -4,7 +4,7 @@
 package net.minecraft.world.level.block.entity;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.commands.CommandSource;
@@ -13,6 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -29,10 +30,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class SignBlockEntity
 extends BlockEntity {
-    public final Component[] messages = new Component[]{new TextComponent(""), new TextComponent(""), new TextComponent(""), new TextComponent("")};
+    private final Component[] messages = new Component[]{TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY};
     private boolean isEditable = true;
     private Player playerWhoMayEdit;
-    private final String[] renderMessages = new String[4];
+    private final Component[] renderMessages = new Component[4];
     private DyeColor color = DyeColor.BLACK;
 
     public SignBlockEntity() {
@@ -57,7 +58,7 @@ extends BlockEntity {
         this.color = DyeColor.byName(compoundTag.getString("Color"), DyeColor.BLACK);
         for (int i = 0; i < 4; ++i) {
             String string = compoundTag.getString("Text" + (i + 1));
-            Component component = Component.Serializer.fromJson(string.isEmpty() ? "\"\"" : string);
+            MutableComponent component = Component.Serializer.fromJson(string.isEmpty() ? "\"\"" : string);
             if (this.level instanceof ServerLevel) {
                 try {
                     this.messages[i] = ComponentUtils.updateForEntity(this.createCommandSourceStack(null), component, null, 0);
@@ -83,9 +84,9 @@ extends BlockEntity {
 
     @Nullable
     @Environment(value=EnvType.CLIENT)
-    public String getRenderMessage(int i, Function<Component, String> function) {
+    public Component getRenderMessage(int i, UnaryOperator<Component> unaryOperator) {
         if (this.renderMessages[i] == null && this.messages[i] != null) {
-            this.renderMessages[i] = function.apply(this.messages[i]);
+            this.renderMessages[i] = (Component)unaryOperator.apply(this.messages[i]);
         }
         return this.renderMessages[i];
     }

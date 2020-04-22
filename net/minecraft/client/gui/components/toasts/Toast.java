@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.gui.components.toasts;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
@@ -17,7 +18,7 @@ public interface Toast {
     public static final ResourceLocation TEXTURE = new ResourceLocation("textures/gui/toasts.png");
     public static final Object NO_TOKEN = new Object();
 
-    public Visibility render(ToastComponent var1, long var2);
+    public Visibility render(PoseStack var1, ToastComponent var2, long var3);
 
     default public Object getToken() {
         return NO_TOKEN;

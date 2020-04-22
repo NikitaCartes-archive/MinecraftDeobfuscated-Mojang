@@ -66,7 +66,6 @@ import net.minecraft.client.renderer.debug.BrainDebugRenderer;
 import net.minecraft.client.renderer.debug.GoalSelectorDebugRenderer;
 import net.minecraft.client.renderer.debug.NeighborsUpdateRenderer;
 import net.minecraft.client.renderer.debug.WorldGenAttemptRenderer;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.BeeAggressiveSoundInstance;
 import net.minecraft.client.resources.sounds.BeeFlyingSoundInstance;
 import net.minecraft.client.resources.sounds.BeeSoundInstance;
@@ -87,6 +86,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketUtils;
@@ -202,6 +202,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagManager;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.effect.MobEffect;
@@ -298,6 +299,8 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraft.world.level.storage.PrimaryLevelData;
+import net.minecraft.world.level.storage.WorldData;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
@@ -318,6 +321,7 @@ implements ClientGamePacketListener {
     private final Screen callbackScreen;
     private Minecraft minecraft;
     private ClientLevel level;
+    private WorldData worldData;
     private boolean started;
     private final Map<UUID, PlayerInfo> playerInfoMap = Maps.newHashMap();
     private final ClientAdvancements advancements;
@@ -362,7 +366,9 @@ implements ClientGamePacketListener {
             EntityTypeTags.resetToEmpty();
         }
         this.serverChunkRadius = clientboundLoginPacket.getChunkRadius();
-        this.level = new ClientLevel(this, new LevelSettings(clientboundLoginPacket.getSeed(), clientboundLoginPacket.getGameType(), false, clientboundLoginPacket.isHardcore(), clientboundLoginPacket.getLevelType().getDefaultProvider()), clientboundLoginPacket.getDimension(), this.serverChunkRadius, this.minecraft::getProfiler, this.minecraft.levelRenderer);
+        PrimaryLevelData primaryLevelData = new PrimaryLevelData(new LevelSettings("MpServer", clientboundLoginPacket.getSeed(), clientboundLoginPacket.getGameType(), false, clientboundLoginPacket.isHardcore(), Difficulty.NORMAL, clientboundLoginPacket.getLevelType().getDefaultProvider()));
+        this.worldData = primaryLevelData;
+        this.level = new ClientLevel(this, primaryLevelData, clientboundLoginPacket.getDimension(), this.serverChunkRadius, this.minecraft::getProfiler, this.minecraft.levelRenderer);
         this.minecraft.setLevel(this.level);
         if (this.minecraft.player == null) {
             this.minecraft.player = this.minecraft.gameMode.createPlayer(this.level, new StatsCounter(), new ClientRecipeBook(this.level.getRecipeManager()));
@@ -854,7 +860,7 @@ implements ClientGamePacketListener {
             if (entity2 == null) continue;
             entity2.startRiding(entity, true);
             if (entity2 != this.minecraft.player || bl) continue;
-            this.minecraft.gui.setOverlayMessage(I18n.get("mount.onboard", this.minecraft.options.keyShift.getTranslatedKeyMessage()), false);
+            this.minecraft.gui.setOverlayMessage(new TranslatableComponent("mount.onboard", this.minecraft.options.keyShift.getTranslatedKeyMessage()), false);
         }
     }
 
@@ -919,7 +925,9 @@ implements ClientGamePacketListener {
         this.started = false;
         if (dimensionType != localPlayer.dimension) {
             Scoreboard scoreboard = this.level.getScoreboard();
-            this.level = new ClientLevel(this, new LevelSettings(clientboundRespawnPacket.getSeed(), clientboundRespawnPacket.getPlayerGameType(), false, this.minecraft.level.getLevelData().isHardcore(), clientboundRespawnPacket.getLevelType().getDefaultProvider()), clientboundRespawnPacket.getDimension(), this.serverChunkRadius, this.minecraft::getProfiler, this.minecraft.levelRenderer);
+            PrimaryLevelData primaryLevelData = new PrimaryLevelData(new LevelSettings("MpServer", clientboundRespawnPacket.getSeed(), clientboundRespawnPacket.getPlayerGameType(), false, this.worldData.isHardcore(), this.worldData.getDifficulty(), clientboundRespawnPacket.getLevelType().getDefaultProvider()));
+            this.worldData = primaryLevelData;
+            this.level = new ClientLevel(this, primaryLevelData, clientboundRespawnPacket.getDimension(), this.serverChunkRadius, this.minecraft::getProfiler, this.minecraft.levelRenderer);
             this.level.setScoreboard(scoreboard);
             this.minecraft.setLevel(this.level);
             this.minecraft.setScreen(new ReceivingLevelScreen());
@@ -1104,7 +1112,7 @@ implements ClientGamePacketListener {
         float f = clientboundGameEventPacket.getParam();
         int j = Mth.floor(f + 0.5f);
         if (i >= 0 && i < ClientboundGameEventPacket.EVENT_LANGUAGE_ID.length && ClientboundGameEventPacket.EVENT_LANGUAGE_ID[i] != null) {
-            ((Player)player).displayClientMessage(new TranslatableComponent(ClientboundGameEventPacket.EVENT_LANGUAGE_ID[i], new Object[0]), false);
+            ((Player)player).displayClientMessage(new TranslatableComponent(ClientboundGameEventPacket.EVENT_LANGUAGE_ID[i]), false);
         }
         if (i == 1) {
             this.level.getLevelData().setRaining(true);
@@ -1346,8 +1354,8 @@ implements ClientGamePacketListener {
     @Override
     public void handleChangeDifficulty(ClientboundChangeDifficultyPacket clientboundChangeDifficultyPacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundChangeDifficultyPacket, this, this.minecraft);
-        this.minecraft.level.getLevelData().setDifficulty(clientboundChangeDifficultyPacket.getDifficulty());
-        this.minecraft.level.getLevelData().setDifficultyLocked(clientboundChangeDifficultyPacket.isLocked());
+        this.worldData.setDifficulty(clientboundChangeDifficultyPacket.getDifficulty());
+        this.worldData.setDifficultyLocked(clientboundChangeDifficultyPacket.isLocked());
     }
 
     @Override
@@ -1369,35 +1377,35 @@ implements ClientGamePacketListener {
     public void handleSetTitles(ClientboundSetTitlesPacket clientboundSetTitlesPacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundSetTitlesPacket, this, this.minecraft);
         ClientboundSetTitlesPacket.Type type = clientboundSetTitlesPacket.getType();
-        String string = null;
-        String string2 = null;
-        String string3 = clientboundSetTitlesPacket.getText() != null ? clientboundSetTitlesPacket.getText().getColoredString() : "";
+        Component component = null;
+        Component component2 = null;
+        Component component3 = clientboundSetTitlesPacket.getText() != null ? clientboundSetTitlesPacket.getText() : TextComponent.EMPTY;
         switch (type) {
             case TITLE: {
-                string = string3;
+                component = component3;
                 break;
             }
             case SUBTITLE: {
-                string2 = string3;
+                component2 = component3;
                 break;
             }
             case ACTIONBAR: {
-                this.minecraft.gui.setOverlayMessage(string3, false);
+                this.minecraft.gui.setOverlayMessage(component3, false);
                 return;
             }
             case RESET: {
-                this.minecraft.gui.setTitles("", "", -1, -1, -1);
+                this.minecraft.gui.setTitles(null, null, -1, -1, -1);
                 this.minecraft.gui.resetTitleTimes();
                 return;
             }
         }
-        this.minecraft.gui.setTitles(string, string2, clientboundSetTitlesPacket.getFadeInTime(), clientboundSetTitlesPacket.getStayTime(), clientboundSetTitlesPacket.getFadeOutTime());
+        this.minecraft.gui.setTitles(component, component2, clientboundSetTitlesPacket.getFadeInTime(), clientboundSetTitlesPacket.getStayTime(), clientboundSetTitlesPacket.getFadeOutTime());
     }
 
     @Override
     public void handleTabListCustomisation(ClientboundTabListPacket clientboundTabListPacket) {
-        this.minecraft.gui.getTabList().setHeader(clientboundTabListPacket.getHeader().getColoredString().isEmpty() ? null : clientboundTabListPacket.getHeader());
-        this.minecraft.gui.getTabList().setFooter(clientboundTabListPacket.getFooter().getColoredString().isEmpty() ? null : clientboundTabListPacket.getFooter());
+        this.minecraft.gui.getTabList().setHeader(clientboundTabListPacket.getHeader().getString().isEmpty() ? null : clientboundTabListPacket.getHeader());
+        this.minecraft.gui.getTabList().setFooter(clientboundTabListPacket.getFooter().getString().isEmpty() ? null : clientboundTabListPacket.getFooter());
     }
 
     @Override
@@ -1530,7 +1538,7 @@ implements ClientGamePacketListener {
                 }
                 ServerList.saveSingleServer(serverData);
                 this.minecraft.setScreen(null);
-            }, new TranslatableComponent("multiplayer.texturePrompt.line1", new Object[0]), new TranslatableComponent("multiplayer.texturePrompt.line2", new Object[0]))));
+            }, new TranslatableComponent("multiplayer.texturePrompt.line1"), new TranslatableComponent("multiplayer.texturePrompt.line2"))));
         } else {
             this.send(ServerboundResourcePackPacket.Action.DECLINED);
         }

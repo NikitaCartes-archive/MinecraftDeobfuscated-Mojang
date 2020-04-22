@@ -30,7 +30,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class ReplaceItemCommand {
-    public static final SimpleCommandExceptionType ERROR_NOT_A_CONTAINER = new SimpleCommandExceptionType(new TranslatableComponent("commands.replaceitem.block.failed", new Object[0]));
+    public static final SimpleCommandExceptionType ERROR_NOT_A_CONTAINER = new SimpleCommandExceptionType(new TranslatableComponent("commands.replaceitem.block.failed"));
     public static final DynamicCommandExceptionType ERROR_INAPPLICABLE_SLOT = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.replaceitem.slot.inapplicable", object));
     public static final Dynamic2CommandExceptionType ERROR_ENTITY_SLOT = new Dynamic2CommandExceptionType((object, object2) -> new TranslatableComponent("commands.replaceitem.entity.failed", object, object2));
 

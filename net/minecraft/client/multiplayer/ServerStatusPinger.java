@@ -21,6 +21,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -30,10 +31,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.multiplayer.ServerAddress;
 import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.status.ClientStatusPacketListener;
@@ -57,7 +58,7 @@ public class ServerStatusPinger {
         ServerAddress serverAddress = ServerAddress.parseString(serverData.ip);
         final Connection connection = Connection.connectToServer(InetAddress.getByName(serverAddress.getHost()), serverAddress.getPort(), false);
         this.connections.add(connection);
-        serverData.motd = I18n.get("multiplayer.status.pinging", new Object[0]);
+        serverData.motd = new TranslatableComponent("multiplayer.status.pinging");
         serverData.ping = -1L;
         serverData.playerList = null;
         connection.setListener(new ClientStatusPacketListener(){
@@ -68,39 +69,33 @@ public class ServerStatusPinger {
             @Override
             public void handleStatusResponse(ClientboundStatusResponsePacket clientboundStatusResponsePacket) {
                 if (this.receivedPing) {
-                    connection.disconnect(new TranslatableComponent("multiplayer.status.unrequested", new Object[0]));
+                    connection.disconnect(new TranslatableComponent("multiplayer.status.unrequested"));
                     return;
                 }
                 this.receivedPing = true;
                 ServerStatus serverStatus = clientboundStatusResponsePacket.getStatus();
-                serverData.motd = serverStatus.getDescription() != null ? serverStatus.getDescription().getColoredString() : "";
+                serverData.motd = serverStatus.getDescription() != null ? serverStatus.getDescription() : TextComponent.EMPTY;
                 if (serverStatus.getVersion() != null) {
-                    serverData.version = serverStatus.getVersion().getName();
+                    serverData.version = new TextComponent(serverStatus.getVersion().getName());
                     serverData.protocol = serverStatus.getVersion().getProtocol();
                 } else {
-                    serverData.version = I18n.get("multiplayer.status.old", new Object[0]);
+                    serverData.version = new TranslatableComponent("multiplayer.status.old");
                     serverData.protocol = 0;
                 }
                 if (serverStatus.getPlayers() != null) {
-                    serverData.status = (Object)((Object)ChatFormatting.GRAY) + "" + serverStatus.getPlayers().getNumPlayers() + "" + (Object)((Object)ChatFormatting.DARK_GRAY) + "/" + (Object)((Object)ChatFormatting.GRAY) + serverStatus.getPlayers().getMaxPlayers();
+                    serverData.status = ServerStatusPinger.formatPlayerCount(serverStatus.getPlayers().getNumPlayers(), serverStatus.getPlayers().getMaxPlayers());
+                    ArrayList<Component> list = Lists.newArrayList();
                     if (ArrayUtils.isNotEmpty(serverStatus.getPlayers().getSample())) {
-                        StringBuilder stringBuilder = new StringBuilder();
                         for (GameProfile gameProfile : serverStatus.getPlayers().getSample()) {
-                            if (stringBuilder.length() > 0) {
-                                stringBuilder.append("\n");
-                            }
-                            stringBuilder.append(gameProfile.getName());
+                            list.add(new TextComponent(gameProfile.getName()));
                         }
                         if (serverStatus.getPlayers().getSample().length < serverStatus.getPlayers().getNumPlayers()) {
-                            if (stringBuilder.length() > 0) {
-                                stringBuilder.append("\n");
-                            }
-                            stringBuilder.append(I18n.get("multiplayer.status.and_more", serverStatus.getPlayers().getNumPlayers() - serverStatus.getPlayers().getSample().length));
+                            list.add(new TranslatableComponent("multiplayer.status.and_more", serverStatus.getPlayers().getNumPlayers() - serverStatus.getPlayers().getSample().length));
                         }
-                        serverData.playerList = stringBuilder.toString();
+                        serverData.playerList = list;
                     }
                 } else {
-                    serverData.status = (Object)((Object)ChatFormatting.DARK_GRAY) + I18n.get("multiplayer.status.unknown", new Object[0]);
+                    serverData.status = new TranslatableComponent("multiplayer.status.unknown").withStyle(ChatFormatting.DARK_GRAY);
                 }
                 if (serverStatus.getFavicon() != null) {
                     String string = serverStatus.getFavicon();
@@ -122,15 +117,15 @@ public class ServerStatusPinger {
                 long l = this.pingStart;
                 long m = Util.getMillis();
                 serverData.ping = m - l;
-                connection.disconnect(new TranslatableComponent("multiplayer.status.finished", new Object[0]));
+                connection.disconnect(new TranslatableComponent("multiplayer.status.finished"));
             }
 
             @Override
             public void onDisconnect(Component component) {
                 if (!this.success) {
                     LOGGER.error("Can't ping {}: {}", (Object)serverData.ip, (Object)component.getString());
-                    serverData.motd = (Object)((Object)ChatFormatting.DARK_RED) + I18n.get("multiplayer.status.cannot_connect", new Object[0]);
-                    serverData.status = "";
+                    serverData.motd = new TranslatableComponent("multiplayer.status.cannot_connect").withStyle(ChatFormatting.DARK_RED);
+                    serverData.status = TextComponent.EMPTY;
                     ServerStatusPinger.this.pingLegacyServer(serverData);
                 }
             }
@@ -204,9 +199,9 @@ public class ServerStatusPinger {
                                 int j = Mth.getInt(strings[4], -1);
                                 int k = Mth.getInt(strings[5], -1);
                                 serverData.protocol = -1;
-                                serverData.version = string2;
-                                serverData.motd = string3;
-                                serverData.status = (Object)((Object)ChatFormatting.GRAY) + "" + j + "" + (Object)((Object)ChatFormatting.DARK_GRAY) + "/" + (Object)((Object)ChatFormatting.GRAY) + k;
+                                serverData.version = new TextComponent(string2);
+                                serverData.motd = new TextComponent(string3);
+                                serverData.status = ServerStatusPinger.formatPlayerCount(j, k);
                             }
                         }
                         channelHandlerContext.close();
@@ -224,6 +219,10 @@ public class ServerStatusPinger {
                 });
             }
         })).channel(NioSocketChannel.class)).connect(serverAddress.getHost(), serverAddress.getPort());
+    }
+
+    private static Component formatPlayerCount(int i, int j) {
+        return new TextComponent(Integer.toString(i)).append(new TextComponent("/").withStyle(ChatFormatting.DARK_GRAY)).append(Integer.toString(j)).withStyle(ChatFormatting.GRAY);
     }
 
     /*
@@ -256,7 +255,7 @@ public class ServerStatusPinger {
                 Connection connection = iterator.next();
                 if (!connection.isConnected()) continue;
                 iterator.remove();
-                connection.disconnect(new TranslatableComponent("multiplayer.status.cancelled", new Object[0]));
+                connection.disconnect(new TranslatableComponent("multiplayer.status.cancelled"));
             }
         }
     }

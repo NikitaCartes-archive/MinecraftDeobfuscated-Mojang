@@ -27,6 +27,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
@@ -446,7 +447,7 @@ implements ContainerListener {
                     int i = 256;
                     String string = component.getString(256);
                     TranslatableComponent component2 = new TranslatableComponent("death.attack.message_too_long", new TextComponent(string).withStyle(ChatFormatting.YELLOW));
-                    Component component3 = new TranslatableComponent("death.attack.even_more_magic", this.getDisplayName()).withStyle(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component2)));
+                    MutableComponent component3 = new TranslatableComponent("death.attack.even_more_magic", this.getDisplayName()).withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component2)));
                     this.connection.send(new ClientboundPlayerCombatPacket(this.getCombatTracker(), ClientboundPlayerCombatPacket.Event.ENTITY_DIED, component3));
                 }
             });
@@ -819,7 +820,7 @@ implements ContainerListener {
         AbstractContainerMenu abstractContainerMenu = menuProvider.createMenu(this.containerCounter, this.inventory, this);
         if (abstractContainerMenu == null) {
             if (this.isSpectator()) {
-                this.displayClientMessage(new TranslatableComponent("container.spectatorCantOpen", new Object[0]).withStyle(ChatFormatting.RED), true);
+                this.displayClientMessage(new TranslatableComponent("container.spectatorCantOpen").withStyle(ChatFormatting.RED), true);
             }
             return OptionalInt.empty();
         }
@@ -1129,7 +1130,7 @@ implements ContainerListener {
             if (!(future.isSuccess() || chatType != ChatType.GAME_INFO && chatType != ChatType.SYSTEM)) {
                 int i = 256;
                 String string = component.getString(256);
-                Component component2 = new TextComponent(string).withStyle(ChatFormatting.YELLOW);
+                MutableComponent component2 = new TextComponent(string).withStyle(ChatFormatting.YELLOW);
                 this.connection.send(new ClientboundChatPacket(new TranslatableComponent("multiplayer.message_not_delivered", component2).withStyle(ChatFormatting.RED), ChatType.SYSTEM));
             }
         });
@@ -1296,7 +1297,7 @@ implements ContainerListener {
             boolean bl3;
             boolean bl4 = bl3 = blockPos.equals(this.respawnPosition) && dimensionType.equals(this.respawnDimension);
             if (bl2 && !bl3) {
-                this.sendMessage(new TranslatableComponent("block.minecraft.set_spawn", new Object[0]));
+                this.sendMessage(new TranslatableComponent("block.minecraft.set_spawn"));
             }
             this.respawnPosition = blockPos;
             this.respawnDimension = dimensionType;

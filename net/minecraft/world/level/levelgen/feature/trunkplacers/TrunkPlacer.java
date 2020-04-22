@@ -6,13 +6,21 @@ package net.minecraft.world.level.levelgen.feature.trunkplacers;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.types.DynamicOps;
-import java.util.Map;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.LevelSimulatedRW;
-import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfiguration;
+import net.minecraft.world.level.LevelSimulatedReader;
+import net.minecraft.world.level.LevelWriter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.TreeFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
@@ -29,14 +37,43 @@ public abstract class TrunkPlacer {
         this.type = trunkPlacerType;
     }
 
-    public abstract Map<BlockPos, Integer> placeTrunk(LevelSimulatedRW var1, Random var2, int var3, BlockPos var4, int var5, Set<BlockPos> var6, BoundingBox var7, SmallTreeConfiguration var8);
+    public abstract List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedRW var1, Random var2, int var3, BlockPos var4, Set<BlockPos> var5, BoundingBox var6, TreeConfiguration var7);
 
-    public int getBaseHeight() {
-        return this.baseHeight;
+    public int getTreeHeight(Random random) {
+        return this.baseHeight + random.nextInt(this.heightRandA + 1) + random.nextInt(this.heightRandB + 1);
     }
 
-    public int getTreeHeight(Random random, SmallTreeConfiguration smallTreeConfiguration) {
-        return this.baseHeight + random.nextInt(this.heightRandA + 1) + random.nextInt(this.heightRandB + 1);
+    protected static void setBlock(LevelWriter levelWriter, BlockPos blockPos, BlockState blockState, BoundingBox boundingBox) {
+        TreeFeature.setBlockKnownShape(levelWriter, blockPos, blockState);
+        boundingBox.expand(new BoundingBox(blockPos, blockPos));
+    }
+
+    private static boolean isDirt(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
+        return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> {
+            Block block = blockState.getBlock();
+            return Feature.isDirt(block) && block != Blocks.GRASS_BLOCK && block != Blocks.MYCELIUM;
+        });
+    }
+
+    protected static void setDirtAt(LevelSimulatedRW levelSimulatedRW, BlockPos blockPos) {
+        if (!TrunkPlacer.isDirt(levelSimulatedRW, blockPos)) {
+            TreeFeature.setBlockKnownShape(levelSimulatedRW, blockPos, Blocks.DIRT.defaultBlockState());
+        }
+    }
+
+    protected static boolean placeLog(LevelSimulatedRW levelSimulatedRW, Random random, BlockPos blockPos, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration) {
+        if (TreeFeature.validTreePos(levelSimulatedRW, blockPos)) {
+            TrunkPlacer.setBlock(levelSimulatedRW, blockPos, treeConfiguration.trunkProvider.getState(random, blockPos), boundingBox);
+            set.add(blockPos.immutable());
+            return true;
+        }
+        return false;
+    }
+
+    protected static void placeLogIfFree(LevelSimulatedRW levelSimulatedRW, Random random, BlockPos.MutableBlockPos mutableBlockPos, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration) {
+        if (TreeFeature.isFree(levelSimulatedRW, mutableBlockPos)) {
+            TrunkPlacer.placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, treeConfiguration);
+        }
     }
 
     public <T> T serialize(DynamicOps<T> dynamicOps) {

@@ -3,6 +3,7 @@
  */
 package com.mojang.realmsclient.gui;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -23,17 +24,17 @@ public abstract class RowButton {
         this.yOffset = l;
     }
 
-    public void drawForRowAt(int i, int j, int k, int l) {
+    public void drawForRowAt(PoseStack poseStack, int i, int j, int k, int l) {
         int m = i + this.xOffset;
         int n = j + this.yOffset;
         boolean bl = false;
         if (k >= m && k <= m + this.width && l >= n && l <= n + this.height) {
             bl = true;
         }
-        this.draw(m, n, bl);
+        this.draw(poseStack, m, n, bl);
     }
 
-    protected abstract void draw(int var1, int var2, boolean var3);
+    protected abstract void draw(PoseStack var1, int var2, int var3, boolean var4);
 
     public int getRight() {
         return this.xOffset + this.width;
@@ -45,10 +46,10 @@ public abstract class RowButton {
 
     public abstract void onClick(int var1);
 
-    public static void drawButtonsInRow(List<RowButton> list, RealmsObjectSelectionList<?> realmsObjectSelectionList, int i, int j, int k, int l) {
+    public static void drawButtonsInRow(PoseStack poseStack, List<RowButton> list, RealmsObjectSelectionList<?> realmsObjectSelectionList, int i, int j, int k, int l) {
         for (RowButton rowButton : list) {
             if (realmsObjectSelectionList.getRowWidth() <= rowButton.getRight()) continue;
-            rowButton.drawForRowAt(i, j, k, l);
+            rowButton.drawForRowAt(poseStack, i, j, k, l);
         }
     }
 

@@ -27,13 +27,13 @@ extends ComplexItem {
         if (!player.abilities.instabuild) {
             itemStack2.shrink(1);
         }
+        player.awardStat(Stats.ITEM_USED.get(this));
         if (itemStack2.isEmpty()) {
             return InteractionResultHolder.success(itemStack);
         }
         if (!player.inventory.add(itemStack.copy())) {
             player.drop(itemStack, false);
         }
-        player.awardStat(Stats.ITEM_USED.get(this));
         return InteractionResultHolder.success(itemStack2);
     }
 }

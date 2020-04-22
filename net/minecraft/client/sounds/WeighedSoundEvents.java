@@ -28,7 +28,7 @@ implements Weighted<Sound> {
 
     public WeighedSoundEvents(ResourceLocation resourceLocation, @Nullable String string) {
         this.location = resourceLocation;
-        this.subtitle = string == null ? null : new TranslatableComponent(string, new Object[0]);
+        this.subtitle = string == null ? null : new TranslatableComponent(string);
     }
 
     @Override

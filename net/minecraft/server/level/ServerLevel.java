@@ -77,7 +77,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.util.Unit;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -108,7 +107,6 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.PortalForcer;
 import net.minecraft.world.level.ServerTickList;
@@ -141,7 +139,7 @@ import net.minecraft.world.level.saveddata.maps.MapIndex;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelData;
-import net.minecraft.world.level.storage.LevelStorage;
+import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
@@ -163,7 +161,6 @@ extends Level {
     private final List<ServerPlayer> players = Lists.newArrayList();
     boolean tickingEntities;
     private final MinecraftServer server;
-    private final LevelStorage levelStorage;
     public boolean noSave;
     private boolean allPlayersSleeping;
     private int emptyTime;
@@ -178,9 +175,8 @@ extends Level {
     private final WanderingTraderSpawner wanderingTraderSpawner;
     private final StructureFeatureManager structureFeatureManager = new StructureFeatureManager();
 
-    public ServerLevel(MinecraftServer minecraftServer, Executor executor, LevelStorage levelStorage, LevelData levelData, DimensionType dimensionType, ChunkProgressListener chunkProgressListener) {
-        super(levelData, dimensionType, (level, dimension) -> new ServerChunkCache((ServerLevel)level, levelStorage.getFolder(), levelStorage.getFixerUpper(), levelStorage.getStructureManager(), executor, dimension.createRandomLevelGenerator(), minecraftServer.getPlayerList().getViewDistance(), minecraftServer.forceSynchronousWrites(), chunkProgressListener, () -> minecraftServer.getLevel(DimensionType.OVERWORLD).getDataStorage()), minecraftServer::getProfiler, false);
-        this.levelStorage = levelStorage;
+    public ServerLevel(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, LevelData levelData, DimensionType dimensionType, ChunkProgressListener chunkProgressListener) {
+        super(levelData, dimensionType, (level, dimension) -> new ServerChunkCache((ServerLevel)level, levelStorageAccess, minecraftServer.getFixerUpper(), minecraftServer.getStructureManager(), executor, dimension.createRandomLevelGenerator(), minecraftServer.getPlayerList().getViewDistance(), minecraftServer.forceSynchronousWrites(), chunkProgressListener, () -> minecraftServer.getLevel(DimensionType.OVERWORLD).getDataStorage()), minecraftServer::getProfiler, false);
         this.server = minecraftServer;
         this.portalForcer = new PortalForcer(this);
         this.updateSkyBrightness();
@@ -268,9 +264,6 @@ extends Level {
             this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(7, this.rainLevel));
             this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(8, this.thunderLevel));
         }
-        if (this.getLevelData().isHardcore() && this.getDifficulty() != Difficulty.HARD) {
-            this.getLevelData().setDifficulty(Difficulty.HARD);
-        }
         if (this.allPlayersSleeping && this.players.stream().noneMatch(serverPlayer -> !serverPlayer.isSpectator() && !serverPlayer.isSleepingLongEnough())) {
             this.allPlayersSleeping = false;
             if (this.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
@@ -324,10 +317,10 @@ extends Level {
                 Int2ObjectMap.Entry entry = (Int2ObjectMap.Entry)objectIterator.next();
                 Entity entity22 = (Entity)entry.getValue();
                 Entity entity3 = entity22.getVehicle();
-                if (!this.server.isAnimals() && (entity22 instanceof Animal || entity22 instanceof WaterAnimal)) {
+                if (!this.server.isSpawningAnimals() && (entity22 instanceof Animal || entity22 instanceof WaterAnimal)) {
                     entity22.remove();
                 }
-                if (!this.server.isNpcsEnabled() && entity22 instanceof Npc) {
+                if (!this.server.areNpcsEnabled() && entity22 instanceof Npc) {
                     entity22.remove();
                 }
                 profilerFiller.push("checkDespawn");
@@ -562,7 +555,7 @@ extends Level {
         return !this.server.isUnderSpawnProtection(this, blockPos, player) && this.getWorldBorder().isWithinBounds(blockPos);
     }
 
-    public void setInitialSpawn(LevelSettings levelSettings) {
+    public void setInitialSpawn(boolean bl) {
         ChunkPos chunkPos;
         if (!this.dimension.mayRespawn()) {
             this.levelData.setSpawn(BlockPos.ZERO.above(this.getChunkSource().getGenerator().getSpawnHeight()));
@@ -580,10 +573,10 @@ extends Level {
         if (blockPos == null) {
             LOGGER.warn("Unable to find spawn biome");
         }
-        boolean bl = false;
+        boolean bl2 = false;
         for (Block block : BlockTags.VALID_SPAWN.getValues()) {
             if (!biomeSource.getSurfaceBlocks().contains(block.defaultBlockState())) continue;
-            bl = true;
+            bl2 = true;
             break;
         }
         this.levelData.setSpawn(chunkPos.getWorldPosition().offset(8, this.getChunkSource().getGenerator().getSpawnHeight(), 8));
@@ -594,7 +587,7 @@ extends Level {
         int m = 32;
         for (int n = 0; n < 1024; ++n) {
             BlockPos blockPos2;
-            if (i > -16 && i <= 16 && j > -16 && j <= 16 && (blockPos2 = this.dimension.getSpawnPosInChunk(new ChunkPos(chunkPos.x + i, chunkPos.z + j), bl)) != null) {
+            if (i > -16 && i <= 16 && j > -16 && j <= 16 && (blockPos2 = this.dimension.getSpawnPosInChunk(new ChunkPos(chunkPos.x + i, chunkPos.z + j), bl2)) != null) {
                 this.levelData.setSpawn(blockPos2);
                 break;
             }
@@ -606,7 +599,7 @@ extends Level {
             i += k;
             j += l;
         }
-        if (levelSettings.hasStartingBonusItems()) {
+        if (bl) {
             this.generateBonusItemsNearSpawn();
         }
     }
@@ -627,11 +620,11 @@ extends Level {
             return;
         }
         if (progressListener != null) {
-            progressListener.progressStartNoAbort(new TranslatableComponent("menu.savingLevel", new Object[0]));
+            progressListener.progressStartNoAbort(new TranslatableComponent("menu.savingLevel"));
         }
         this.saveLevelData();
         if (progressListener != null) {
-            progressListener.progressStage(new TranslatableComponent("menu.savingChunks", new Object[0]));
+            progressListener.progressStage(new TranslatableComponent("menu.savingChunks"));
         }
         serverChunkCache.save(bl);
     }
@@ -964,7 +957,7 @@ extends Level {
     }
 
     public StructureManager getStructureManager() {
-        return this.levelStorage.getStructureManager();
+        return this.server.getStructureManager();
     }
 
     public <T extends ParticleOptions> int sendParticles(T particleOptions, double d, double e, double f, int i, double g, double h, double j, double k) {
@@ -1008,6 +1001,9 @@ extends Level {
 
     @Nullable
     public BlockPos findNearestMapFeature(String string, BlockPos blockPos, int i, boolean bl) {
+        if (!this.levelData.shouldGenerateMapFeatures()) {
+            return null;
+        }
         return this.getChunkSource().getGenerator().findNearestMapFeature(this, string, blockPos, i, bl);
     }
 
@@ -1035,10 +1031,6 @@ extends Level {
     @Override
     public boolean noSave() {
         return this.noSave;
-    }
-
-    public LevelStorage getLevelStorage() {
-        return this.levelStorage;
     }
 
     public DimensionDataStorage getDataStorage() {

@@ -24,7 +24,7 @@ public class BanListCommands {
 
     private static int showList(CommandSourceStack commandSourceStack, Collection<? extends BanListEntry<?>> collection) {
         if (collection.isEmpty()) {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.banlist.none", new Object[0]), false);
+            commandSourceStack.sendSuccess(new TranslatableComponent("commands.banlist.none"), false);
         } else {
             commandSourceStack.sendSuccess(new TranslatableComponent("commands.banlist.list", collection.size()), false);
             for (BanListEntry<?> banListEntry : collection) {

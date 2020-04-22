@@ -4,10 +4,12 @@
 package net.minecraft.client.gui.components;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 
 @Environment(value=EnvType.CLIENT)
@@ -21,7 +23,7 @@ extends AbstractWidget {
     protected int yDiffTex;
 
     public StateSwitchingButton(int i, int j, int k, int l, boolean bl) {
-        super(i, j, k, l, "");
+        super(i, j, k, l, TextComponent.EMPTY);
         this.isStateTriggered = bl;
     }
 
@@ -47,7 +49,7 @@ extends AbstractWidget {
     }
 
     @Override
-    public void renderButton(int i, int j, float f) {
+    public void renderButton(PoseStack poseStack, int i, int j, float f) {
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.getTextureManager().bind(this.resourceLocation);
         RenderSystem.disableDepthTest();
@@ -59,7 +61,7 @@ extends AbstractWidget {
         if (this.isHovered()) {
             l += this.yDiffTex;
         }
-        this.blit(this.x, this.y, k, l, this.width, this.height);
+        this.blit(poseStack, this.x, this.y, k, l, this.width, this.height);
         RenderSystem.enableDepthTest();
     }
 }

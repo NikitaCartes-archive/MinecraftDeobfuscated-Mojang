@@ -10,11 +10,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Options;
 import net.minecraft.client.ProgressOption;
+import net.minecraft.network.chat.Component;
 
 @Environment(value=EnvType.CLIENT)
 public class LogaritmicProgressOption
 extends ProgressOption {
-    public LogaritmicProgressOption(String string, double d, double e, float f, Function<Options, Double> function, BiConsumer<Options, Double> biConsumer, BiFunction<Options, ProgressOption, String> biFunction) {
+    public LogaritmicProgressOption(String string, double d, double e, float f, Function<Options, Double> function, BiConsumer<Options, Double> biConsumer, BiFunction<Options, ProgressOption, Component> biFunction) {
         super(string, d, e, f, function, biConsumer, biFunction);
     }
 

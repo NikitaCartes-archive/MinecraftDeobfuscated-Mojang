@@ -11,11 +11,11 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.network.chat.BaseComponent;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ContextAwareComponent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
-import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Score;
@@ -28,19 +28,24 @@ implements ContextAwareComponent {
     @Nullable
     private final EntitySelector selector;
     private final String objective;
-    private String value = "";
+
+    @Nullable
+    private static EntitySelector parseSelector(String string) {
+        try {
+            return new EntitySelectorParser(new StringReader(string)).parse();
+        } catch (CommandSyntaxException commandSyntaxException) {
+            return null;
+        }
+    }
 
     public ScoreComponent(String string, String string2) {
+        this(string, ScoreComponent.parseSelector(string), string2);
+    }
+
+    private ScoreComponent(String string, @Nullable EntitySelector entitySelector, String string2) {
         this.name = string;
-        this.objective = string2;
-        EntitySelector entitySelector = null;
-        try {
-            EntitySelectorParser entitySelectorParser = new EntitySelectorParser(new StringReader(string));
-            entitySelector = entitySelectorParser.parse();
-        } catch (CommandSyntaxException commandSyntaxException) {
-            // empty catch block
-        }
         this.selector = entitySelector;
+        this.objective = string2;
     }
 
     public String getName() {
@@ -51,62 +56,41 @@ implements ContextAwareComponent {
         return this.objective;
     }
 
-    public void setValue(String string) {
-        this.value = string;
+    private String findTargetName(CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+        List<? extends Entity> list;
+        if (this.selector != null && !(list = this.selector.findEntities(commandSourceStack)).isEmpty()) {
+            if (list.size() != 1) {
+                throw EntityArgument.ERROR_NOT_SINGLE_ENTITY.create();
+            }
+            return list.get(0).getScoreboardName();
+        }
+        return this.name;
     }
 
-    @Override
-    public String getContents() {
-        return this.value;
-    }
-
-    private void resolve(CommandSourceStack commandSourceStack) {
+    private String getScore(String string, CommandSourceStack commandSourceStack) {
+        Objective objective;
+        ServerScoreboard scoreboard;
         MinecraftServer minecraftServer = commandSourceStack.getServer();
-        if (minecraftServer != null && StringUtil.isNullOrEmpty(this.value)) {
-            Objective objective;
-            ServerScoreboard scoreboard = minecraftServer.getScoreboard();
-            if (scoreboard.hasPlayerScore(this.name, objective = scoreboard.getObjective(this.objective))) {
-                Score score = scoreboard.getOrCreatePlayerScore(this.name, objective);
-                this.setValue(String.format("%d", score.getScore()));
-            } else {
-                this.value = "";
-            }
+        if (minecraftServer != null && (scoreboard = minecraftServer.getScoreboard()).hasPlayerScore(string, objective = scoreboard.getObjective(this.objective))) {
+            Score score = scoreboard.getOrCreatePlayerScore(string, objective);
+            return Integer.toString(score.getScore());
         }
+        return "";
     }
 
     @Override
-    public ScoreComponent copy() {
-        ScoreComponent scoreComponent = new ScoreComponent(this.name, this.objective);
-        scoreComponent.setValue(this.value);
-        return scoreComponent;
+    public ScoreComponent toMutable() {
+        return new ScoreComponent(this.name, this.selector, this.objective);
     }
 
-    /*
-     * Enabled force condition propagation
-     * Lifted jumps to return sites
-     */
     @Override
-    public Component resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
-        String string;
+    public MutableComponent resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
         if (commandSourceStack == null) {
-            return this.copy();
+            return new TextComponent("");
         }
-        if (this.selector != null) {
-            List<? extends Entity> list = this.selector.findEntities(commandSourceStack);
-            if (list.isEmpty()) {
-                string = this.name;
-            } else {
-                if (list.size() != 1) throw EntityArgument.ERROR_NOT_SINGLE_ENTITY.create();
-                string = list.get(0).getScoreboardName();
-            }
-        } else {
-            string = this.name;
-        }
+        String string = this.findTargetName(commandSourceStack);
         String string2 = entity != null && string.equals("*") ? entity.getScoreboardName() : string;
-        ScoreComponent scoreComponent = new ScoreComponent(string2, this.objective);
-        scoreComponent.setValue(this.value);
-        scoreComponent.resolve(commandSourceStack);
-        return scoreComponent;
+        return new TextComponent(this.getScore(string2, commandSourceStack));
     }
 
     @Override
@@ -127,8 +111,13 @@ implements ContextAwareComponent {
     }
 
     @Override
-    public /* synthetic */ Component copy() {
-        return this.copy();
+    public /* synthetic */ BaseComponent toMutable() {
+        return this.toMutable();
+    }
+
+    @Override
+    public /* synthetic */ MutableComponent toMutable() {
+        return this.toMutable();
     }
 }
 

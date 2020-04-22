@@ -3,22 +3,22 @@
  */
 package net.minecraft.network.chat;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Streams;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.Arrays;
-import java.util.IllegalFormatException;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.BaseComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.ContextAwareComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableFormatException;
@@ -29,44 +29,33 @@ public class TranslatableComponent
 extends BaseComponent
 implements ContextAwareComponent {
     private static final Language DEFAULT_LANGUAGE = new Language();
+    private static final Object[] NO_ARGS = new Object[0];
     private static final Language LANGUAGE = Language.getInstance();
+    private static final TextComponent TEXT_PERCENT = new TextComponent("%");
+    private static final TextComponent TEXT_NULL = new TextComponent("null");
     private final String key;
     private final Object[] args;
-    private final Object decomposeLock = new Object();
     private long decomposedLanguageTime = -1L;
-    protected final List<Component> decomposedParts = Lists.newArrayList();
-    public static final Pattern FORMAT_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
+    private final List<Component> decomposedParts = Lists.newArrayList();
+    private static final Pattern FORMAT_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
+
+    public TranslatableComponent(String string) {
+        this.key = string;
+        this.args = NO_ARGS;
+    }
 
     public TranslatableComponent(String string, Object ... objects) {
         this.key = string;
         this.args = objects;
-        for (int i = 0; i < objects.length; ++i) {
-            Object object = objects[i];
-            if (object instanceof Component) {
-                Component component = ((Component)object).deepCopy();
-                this.args[i] = component;
-                component.getStyle().inheritFrom(this.getStyle());
-                continue;
-            }
-            if (object != null) continue;
-            this.args[i] = "null";
-        }
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
-    @VisibleForTesting
-    synchronized void decompose() {
-        Object object = this.decomposeLock;
-        synchronized (object) {
-            long l = LANGUAGE.getLastUpdateTime();
-            if (l == this.decomposedLanguageTime) {
-                return;
-            }
-            this.decomposedLanguageTime = l;
-            this.decomposedParts.clear();
+    private synchronized void decompose() {
+        long l = LANGUAGE.getLastUpdateTime();
+        if (l == this.decomposedLanguageTime) {
+            return;
         }
+        this.decomposedLanguageTime = l;
+        this.decomposedParts.clear();
         String string = LANGUAGE.getElement(this.key);
         try {
             this.decomposeTemplate(string);
@@ -76,25 +65,26 @@ implements ContextAwareComponent {
         }
     }
 
-    protected void decomposeTemplate(String string) {
+    private void decomposeTemplate(String string) {
         Matcher matcher = FORMAT_PATTERN.matcher(string);
         try {
             int i = 0;
             int j = 0;
             while (matcher.find(j)) {
+                String string2;
                 int k = matcher.start();
                 int l = matcher.end();
                 if (k > j) {
-                    TextComponent component = new TextComponent(String.format(string.substring(j, k), new Object[0]));
-                    component.getStyle().inheritFrom(this.getStyle());
-                    this.decomposedParts.add(component);
+                    string2 = string.substring(j, k);
+                    if (string2.indexOf(37) != -1) {
+                        throw new IllegalArgumentException();
+                    }
+                    this.decomposedParts.add(new TextComponent(string2));
                 }
-                String string2 = matcher.group(2);
+                string2 = matcher.group(2);
                 String string3 = string.substring(k, l);
                 if ("%".equals(string2) && "%%".equals(string3)) {
-                    TextComponent component2 = new TextComponent("%");
-                    component2.getStyle().inheritFrom(this.getStyle());
-                    this.decomposedParts.add(component2);
+                    this.decomposedParts.add(TEXT_PERCENT);
                 } else if ("s".equals(string2)) {
                     int m;
                     String string4 = matcher.group(1);
@@ -108,72 +98,56 @@ implements ContextAwareComponent {
                 j = l;
             }
             if (j < string.length()) {
-                TextComponent component3 = new TextComponent(String.format(string.substring(j), new Object[0]));
-                component3.getStyle().inheritFrom(this.getStyle());
-                this.decomposedParts.add(component3);
+                String string5 = string.substring(j);
+                if (string5.indexOf(37) != -1) {
+                    throw new IllegalArgumentException();
+                }
+                this.decomposedParts.add(new TextComponent(string5));
             }
-        } catch (IllegalFormatException illegalFormatException) {
-            throw new TranslatableFormatException(this, (Throwable)illegalFormatException);
+        } catch (IllegalArgumentException illegalArgumentException) {
+            throw new TranslatableFormatException(this, (Throwable)illegalArgumentException);
         }
     }
 
     private Component getComponent(int i) {
-        Component component;
         if (i >= this.args.length) {
             throw new TranslatableFormatException(this, i);
         }
         Object object = this.args[i];
-        if (object instanceof Component) {
-            component = (Component)object;
-        } else {
-            component = new TextComponent(object == null ? "null" : object.toString());
-            component.getStyle().inheritFrom(this.getStyle());
-        }
+        Component component = object instanceof Component ? (Component)object : (object == null ? TEXT_NULL : new TextComponent(object.toString()));
         return component;
     }
 
     @Override
-    public Component setStyle(Style style) {
-        super.setStyle(style);
-        for (Object object : this.args) {
-            if (!(object instanceof Component)) continue;
-            ((Component)object).getStyle().inheritFrom(this.getStyle());
-        }
-        if (this.decomposedLanguageTime > -1L) {
-            for (Component component : this.decomposedParts) {
-                component.getStyle().inheritFrom(style);
-            }
-        }
-        return this;
+    public TranslatableComponent toMutable() {
+        return new TranslatableComponent(this.key, this.args);
     }
 
     @Override
-    public Stream<Component> stream() {
+    @Environment(value=EnvType.CLIENT)
+    public <T> Optional<T> visitSelf(Component.StyledContentConsumer<T> styledContentConsumer, Style style) {
         this.decompose();
-        return Streams.concat(this.decomposedParts.stream(), this.siblings.stream()).flatMap(Component::stream);
-    }
-
-    @Override
-    public String getContents() {
-        this.decompose();
-        StringBuilder stringBuilder = new StringBuilder();
         for (Component component : this.decomposedParts) {
-            stringBuilder.append(component.getContents());
+            Optional<T> optional = component.visit(styledContentConsumer, style);
+            if (!optional.isPresent()) continue;
+            return optional;
         }
-        return stringBuilder.toString();
+        return Optional.empty();
     }
 
     @Override
-    public TranslatableComponent copy() {
-        Object[] objects = new Object[this.args.length];
-        for (int i = 0; i < this.args.length; ++i) {
-            objects[i] = this.args[i] instanceof Component ? ((Component)this.args[i]).deepCopy() : this.args[i];
+    public <T> Optional<T> visitSelf(Component.ContentConsumer<T> contentConsumer) {
+        this.decompose();
+        for (Component component : this.decomposedParts) {
+            Optional<T> optional = component.visit(contentConsumer);
+            if (!optional.isPresent()) continue;
+            return optional;
         }
-        return new TranslatableComponent(this.key, objects);
+        return Optional.empty();
     }
 
     @Override
-    public Component resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
+    public MutableComponent resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
         Object[] objects = new Object[this.args.length];
         for (int j = 0; j < objects.length; ++j) {
             Object object = this.args[j];
@@ -216,8 +190,13 @@ implements ContextAwareComponent {
     }
 
     @Override
-    public /* synthetic */ Component copy() {
-        return this.copy();
+    public /* synthetic */ BaseComponent toMutable() {
+        return this.toMutable();
+    }
+
+    @Override
+    public /* synthetic */ MutableComponent toMutable() {
+        return this.toMutable();
     }
 }
 

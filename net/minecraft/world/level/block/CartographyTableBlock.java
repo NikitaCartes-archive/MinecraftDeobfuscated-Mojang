@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class CartographyTableBlock
 extends Block {
-    private static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.cartography_table", new Object[0]);
+    private static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.cartography_table");
 
     protected CartographyTableBlock(BlockBehaviour.Properties properties) {
         super(properties);

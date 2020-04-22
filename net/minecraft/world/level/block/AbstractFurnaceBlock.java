@@ -30,6 +30,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 public abstract class AbstractFurnaceBlock
 extends BaseEntityBlock {
@@ -73,6 +74,7 @@ extends BaseEntityBlock {
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (blockEntity instanceof AbstractFurnaceBlockEntity) {
             Containers.dropContents(level, blockPos, (Container)((AbstractFurnaceBlockEntity)blockEntity));
+            ((AbstractFurnaceBlockEntity)blockEntity).getRecipesToAwardAndPopExperience(level, Vec3.atCenterOf(blockPos));
             level.updateNeighbourForOutputSignal(blockPos, this);
         }
         super.onRemove(blockState, level, blockPos, blockState2, bl);

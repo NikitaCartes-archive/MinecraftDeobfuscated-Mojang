@@ -5,6 +5,7 @@ package net.minecraft.client.gui.screens.recipebook;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -51,7 +52,7 @@ public class GhostRecipe {
         this.recipe = recipe;
     }
 
-    public void render(Minecraft minecraft, int i, int j, boolean bl, float f) {
+    public void render(PoseStack poseStack, Minecraft minecraft, int i, int j, boolean bl, float f) {
         if (!Screen.hasControlDown()) {
             this.time += f;
         }
@@ -60,15 +61,15 @@ public class GhostRecipe {
             int l = ghostIngredient.getX() + i;
             int m = ghostIngredient.getY() + j;
             if (k == 0 && bl) {
-                GuiComponent.fill(l - 4, m - 4, l + 20, m + 20, 0x30FF0000);
+                GuiComponent.fill(poseStack, l - 4, m - 4, l + 20, m + 20, 0x30FF0000);
             } else {
-                GuiComponent.fill(l, m, l + 16, m + 16, 0x30FF0000);
+                GuiComponent.fill(poseStack, l, m, l + 16, m + 16, 0x30FF0000);
             }
             ItemStack itemStack = ghostIngredient.getItem();
             ItemRenderer itemRenderer = minecraft.getItemRenderer();
             itemRenderer.renderAndDecorateItem(minecraft.player, itemStack, l, m);
             RenderSystem.depthFunc(516);
-            GuiComponent.fill(l, m, l + 16, m + 16, 0x30FFFFFF);
+            GuiComponent.fill(poseStack, l, m, l + 16, m + 16, 0x30FFFFFF);
             RenderSystem.depthFunc(515);
             if (k != 0) continue;
             itemRenderer.renderGuiItemDecorations(minecraft.font, itemStack, l, m);

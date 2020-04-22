@@ -4,23 +4,26 @@
 package net.minecraft.network.chat;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Streams;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 
 public abstract class BaseComponent
-implements Component {
+implements MutableComponent {
     protected final List<Component> siblings = Lists.newArrayList();
-    private Style style;
+    private Style style = Style.EMPTY;
 
     @Override
-    public Component append(Component component) {
-        component.getStyle().inheritFrom(this.getStyle());
+    public MutableComponent append(Component component) {
         this.siblings.add(component);
         return this;
+    }
+
+    @Override
+    public String getContents() {
+        return "";
     }
 
     @Override
@@ -29,28 +32,25 @@ implements Component {
     }
 
     @Override
-    public Component setStyle(Style style) {
+    public MutableComponent setStyle(Style style) {
         this.style = style;
-        for (Component component : this.siblings) {
-            component.getStyle().inheritFrom(this.getStyle());
-        }
         return this;
     }
 
     @Override
     public Style getStyle() {
-        if (this.style == null) {
-            this.style = new Style();
-            for (Component component : this.siblings) {
-                component.getStyle().inheritFrom(this.style);
-            }
-        }
         return this.style;
     }
 
     @Override
-    public Stream<Component> stream() {
-        return Streams.concat(Stream.of(this), this.siblings.stream().flatMap(Component::stream));
+    public abstract BaseComponent toMutable();
+
+    @Override
+    public final MutableComponent mutableCopy() {
+        BaseComponent baseComponent = this.toMutable();
+        baseComponent.siblings.addAll(this.siblings);
+        baseComponent.setStyle(this.style);
+        return baseComponent;
     }
 
     public boolean equals(Object object) {
@@ -59,7 +59,7 @@ implements Component {
         }
         if (object instanceof BaseComponent) {
             BaseComponent baseComponent = (BaseComponent)object;
-            return this.siblings.equals(baseComponent.siblings) && this.getStyle().equals(baseComponent.getStyle());
+            return this.siblings.equals(baseComponent.siblings) && Objects.equals(this.getStyle(), baseComponent.getStyle());
         }
         return false;
     }
@@ -70,6 +70,11 @@ implements Component {
 
     public String toString() {
         return "BaseComponent{style=" + this.style + ", siblings=" + this.siblings + '}';
+    }
+
+    @Override
+    public /* synthetic */ MutableComponent toMutable() {
+        return this.toMutable();
     }
 }
 

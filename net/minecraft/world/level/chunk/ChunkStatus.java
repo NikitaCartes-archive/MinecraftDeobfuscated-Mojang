@@ -41,7 +41,7 @@ public class ChunkStatus {
     public static final ChunkStatus EMPTY = ChunkStatus.registerSimple("empty", null, -1, PRE_FEATURES, ChunkType.PROTOCHUNK, (serverLevel, chunkGenerator, list, chunkAccess) -> {});
     public static final ChunkStatus STRUCTURE_STARTS = ChunkStatus.register("structure_starts", EMPTY, 0, PRE_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, structureManager, threadedLevelLightEngine, function, list, chunkAccess) -> {
         if (!chunkAccess.getStatus().isOrAfter(chunkStatus)) {
-            if (serverLevel.getLevelData().isGenerateMapFeatures()) {
+            if (serverLevel.getLevelData().shouldGenerateMapFeatures()) {
                 chunkGenerator.createStructures(serverLevel.structureFeatureManager(), serverLevel.getBiomeManager().withDifferentSource(chunkGenerator.getBiomeSource()), chunkAccess, chunkGenerator, structureManager);
             }
             if (chunkAccess instanceof ProtoChunk) {

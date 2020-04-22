@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.gui.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
@@ -21,10 +22,10 @@ extends Screen {
     }
 
     @Override
-    public void render(int i, int j, float f) {
+    public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderDirtBackground(0);
-        this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 70, 0xFFFFFF);
-        super.render(i, j, f);
+        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 70, 0xFFFFFF);
+        super.render(poseStack, i, j, f);
     }
 }
 

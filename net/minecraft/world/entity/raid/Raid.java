@@ -61,11 +61,11 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class Raid {
-    private static final TranslatableComponent RAID_NAME_COMPONENT = new TranslatableComponent("event.minecraft.raid", new Object[0]);
-    private static final TranslatableComponent VICTORY = new TranslatableComponent("event.minecraft.raid.victory", new Object[0]);
-    private static final TranslatableComponent DEFEAT = new TranslatableComponent("event.minecraft.raid.defeat", new Object[0]);
-    private static final Component RAID_BAR_VICTORY_COMPONENT = RAID_NAME_COMPONENT.copy().append(" - ").append(VICTORY);
-    private static final Component RAID_BAR_DEFEAT_COMPONENT = RAID_NAME_COMPONENT.copy().append(" - ").append(DEFEAT);
+    private static final TranslatableComponent RAID_NAME_COMPONENT = new TranslatableComponent("event.minecraft.raid");
+    private static final TranslatableComponent VICTORY = new TranslatableComponent("event.minecraft.raid.victory");
+    private static final TranslatableComponent DEFEAT = new TranslatableComponent("event.minecraft.raid.defeat");
+    private static final Component RAID_BAR_VICTORY_COMPONENT = RAID_NAME_COMPONENT.mutableCopy().append(" - ").append(VICTORY);
+    private static final Component RAID_BAR_DEFEAT_COMPONENT = RAID_NAME_COMPONENT.mutableCopy().append(" - ").append(DEFEAT);
     private final Map<Integer, Raider> groupToLeaderMap = Maps.newHashMap();
     private final Map<Integer, Set<Raider>> groupRaiderMap = Maps.newHashMap();
     private final Set<UUID> heroesOfTheVillage = Sets.newHashSet();
@@ -266,7 +266,7 @@ public class Raid {
                 this.updateRaiders();
                 if (i > 0) {
                     if (i <= 2) {
-                        this.raidEvent.setName(RAID_NAME_COMPONENT.copy().append(" - ").append(new TranslatableComponent("event.minecraft.raid.raiders_remaining", i)));
+                        this.raidEvent.setName(RAID_NAME_COMPONENT.mutableCopy().append(" - ").append(new TranslatableComponent("event.minecraft.raid.raiders_remaining", i)));
                     } else {
                         this.raidEvent.setName(RAID_NAME_COMPONENT);
                     }
@@ -508,7 +508,7 @@ public class Raid {
         ListTag listTag = new BannerPattern.Builder().addPattern(BannerPattern.RHOMBUS_MIDDLE, DyeColor.CYAN).addPattern(BannerPattern.STRIPE_BOTTOM, DyeColor.LIGHT_GRAY).addPattern(BannerPattern.STRIPE_CENTER, DyeColor.GRAY).addPattern(BannerPattern.BORDER, DyeColor.LIGHT_GRAY).addPattern(BannerPattern.STRIPE_MIDDLE, DyeColor.BLACK).addPattern(BannerPattern.HALF_HORIZONTAL, DyeColor.LIGHT_GRAY).addPattern(BannerPattern.CIRCLE_MIDDLE, DyeColor.LIGHT_GRAY).addPattern(BannerPattern.BORDER, DyeColor.BLACK).toListTag();
         compoundTag.put("Patterns", listTag);
         itemStack.getOrCreateTag().putInt("HideFlags", 32);
-        itemStack.setHoverName(new TranslatableComponent("block.minecraft.ominous_banner", new Object[0]).withStyle(ChatFormatting.GOLD));
+        itemStack.setHoverName(new TranslatableComponent("block.minecraft.ominous_banner").withStyle(ChatFormatting.GOLD));
         return itemStack;
     }
 

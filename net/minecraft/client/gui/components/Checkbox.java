@@ -5,11 +5,13 @@ package net.minecraft.client.gui.components;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
@@ -17,11 +19,17 @@ import net.minecraft.util.Mth;
 public class Checkbox
 extends AbstractButton {
     private static final ResourceLocation TEXTURE = new ResourceLocation("textures/gui/checkbox.png");
-    boolean selected;
+    private boolean selected;
+    private final boolean showLabel;
 
-    public Checkbox(int i, int j, int k, int l, String string, boolean bl) {
-        super(i, j, k, l, string);
+    public Checkbox(int i, int j, int k, int l, Component component, boolean bl) {
+        this(i, j, k, l, component, bl, true);
+    }
+
+    public Checkbox(int i, int j, int k, int l, Component component, boolean bl, boolean bl2) {
+        super(i, j, k, l, component);
         this.selected = bl;
+        this.showLabel = bl2;
     }
 
     @Override
@@ -34,7 +42,7 @@ extends AbstractButton {
     }
 
     @Override
-    public void renderButton(int i, int j, float f) {
+    public void renderButton(PoseStack poseStack, int i, int j, float f) {
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.getTextureManager().bind(TEXTURE);
         RenderSystem.enableDepthTest();
@@ -43,10 +51,11 @@ extends AbstractButton {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        Checkbox.blit(this.x, this.y, 0.0f, this.selected ? 20.0f : 0.0f, 20, this.height, 32, 64);
-        this.renderBg(minecraft, i, j);
-        int k = 0xE0E0E0;
-        this.drawString(font, this.getMessage(), this.x + 24, this.y + (this.height - 8) / 2, 0xE0E0E0 | Mth.ceil(this.alpha * 255.0f) << 24);
+        Checkbox.blit(poseStack, this.x, this.y, this.isFocused() ? 20.0f : 0.0f, this.selected ? 20.0f : 0.0f, 20, this.height, 64, 64);
+        this.renderBg(poseStack, minecraft, i, j);
+        if (this.showLabel) {
+            this.drawString(poseStack, font, this.getMessage(), this.x + 24, this.y + (this.height - 8) / 2, 0xE0E0E0 | Mth.ceil(this.alpha * 255.0f) << 24);
+        }
     }
 }
 

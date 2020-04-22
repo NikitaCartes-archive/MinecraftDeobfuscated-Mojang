@@ -16,6 +16,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.packs.resources.SimpleResource;
@@ -48,7 +49,7 @@ public class Screenshot {
         SimpleResource.IO_EXECUTOR.execute(() -> {
             try {
                 nativeImage.writeToFile(file3);
-                Component component = new TextComponent(file3.getName()).withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file3.getAbsolutePath())));
+                MutableComponent component = new TextComponent(file3.getName()).withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file3.getAbsolutePath())));
                 consumer.accept(new TranslatableComponent("screenshot.success", component));
             } catch (Exception exception) {
                 LOGGER.warn("Couldn't save screenshot", (Throwable)exception);

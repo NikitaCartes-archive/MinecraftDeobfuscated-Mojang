@@ -11,14 +11,15 @@ import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.OptionButton;
+import net.minecraft.network.chat.Component;
 
 @Environment(value=EnvType.CLIENT)
 public class CycleOption
 extends Option {
     private final BiConsumer<Options, Integer> setter;
-    private final BiFunction<Options, CycleOption, String> toString;
+    private final BiFunction<Options, CycleOption, Component> toString;
 
-    public CycleOption(String string, BiConsumer<Options, Integer> biConsumer, BiFunction<Options, CycleOption, String> biFunction) {
+    public CycleOption(String string, BiConsumer<Options, Integer> biConsumer, BiFunction<Options, CycleOption, Component> biFunction) {
         super(string);
         this.setter = biConsumer;
         this.toString = biFunction;
@@ -37,7 +38,7 @@ extends Option {
         });
     }
 
-    public String getMessage(Options options) {
+    public Component getMessage(Options options) {
         return this.toString.apply(options, this);
     }
 }

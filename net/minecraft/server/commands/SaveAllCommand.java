@@ -13,21 +13,21 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 
 public class SaveAllCommand {
-    private static final SimpleCommandExceptionType ERROR_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.save.failed", new Object[0]));
+    private static final SimpleCommandExceptionType ERROR_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.save.failed"));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("save-all").requires(commandSourceStack -> commandSourceStack.hasPermission(4))).executes(commandContext -> SaveAllCommand.saveAll((CommandSourceStack)commandContext.getSource(), false))).then(Commands.literal("flush").executes(commandContext -> SaveAllCommand.saveAll((CommandSourceStack)commandContext.getSource(), true))));
     }
 
     private static int saveAll(CommandSourceStack commandSourceStack, boolean bl) throws CommandSyntaxException {
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.save.saving", new Object[0]), false);
+        commandSourceStack.sendSuccess(new TranslatableComponent("commands.save.saving"), false);
         MinecraftServer minecraftServer = commandSourceStack.getServer();
         minecraftServer.getPlayerList().saveAll();
         boolean bl2 = minecraftServer.saveAllChunks(true, bl, true);
         if (!bl2) {
             throw ERROR_FAILED.create();
         }
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.save.success", new Object[0]), true);
+        commandSourceStack.sendSuccess(new TranslatableComponent("commands.save.success"), true);
         return 1;
     }
 }

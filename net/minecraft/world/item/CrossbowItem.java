@@ -350,7 +350,7 @@ implements Vanishable {
             return;
         }
         ItemStack itemStack2 = list2.get(0);
-        list.add(new TranslatableComponent("item.minecraft.crossbow.projectile", new Object[0]).append(" ").append(itemStack2.getDisplayName()));
+        list.add(new TranslatableComponent("item.minecraft.crossbow.projectile").append(" ").append(itemStack2.getDisplayName()));
         if (tooltipFlag.isAdvanced() && itemStack2.getItem() == Items.FIREWORK_ROCKET) {
             ArrayList<Component> list3 = Lists.newArrayList();
             Items.FIREWORK_ROCKET.appendHoverText(itemStack2, level, list3, tooltipFlag);

@@ -6,14 +6,18 @@ package net.minecraft.world.level.storage;
 import java.io.File;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelType;
-import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.storage.WorldData;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class LevelSummary
@@ -32,22 +36,24 @@ implements Comparable<LevelSummary> {
     private final LevelType generatorType;
     private final boolean locked;
     private final File icon;
+    @Nullable
+    private Component info;
 
-    public LevelSummary(LevelData levelData, String string, String string2, long l, boolean bl, boolean bl2, File file) {
+    public LevelSummary(WorldData worldData, String string, String string2, long l, boolean bl, boolean bl2, File file) {
         this.levelId = string;
         this.levelName = string2;
         this.locked = bl2;
         this.icon = file;
-        this.lastPlayed = levelData.getLastPlayed();
+        this.lastPlayed = worldData.getLastPlayed();
         this.sizeOnDisk = l;
-        this.gameMode = levelData.getGameType();
+        this.gameMode = worldData.getGameType();
         this.requiresConversion = bl;
-        this.hardcore = levelData.isHardcore();
-        this.hasCheats = levelData.getAllowCommands();
-        this.worldVersionName = levelData.getMinecraftVersionName();
-        this.worldVersion = levelData.getMinecraftVersion();
-        this.snapshot = levelData.isSnapshot();
-        this.generatorType = levelData.getGeneratorType();
+        this.hardcore = worldData.isHardcore();
+        this.hasCheats = worldData.getAllowCommands();
+        this.worldVersionName = worldData.getMinecraftVersionName();
+        this.worldVersion = worldData.getMinecraftVersion();
+        this.snapshot = worldData.isSnapshot();
+        this.generatorType = worldData.getLevelData(DimensionType.OVERWORLD).getGeneratorType();
     }
 
     public String getLevelId() {
@@ -93,9 +99,9 @@ implements Comparable<LevelSummary> {
         return this.hasCheats;
     }
 
-    public Component getWorldVersionName() {
+    public MutableComponent getWorldVersionName() {
         if (StringUtil.isNullOrEmpty(this.worldVersionName)) {
-            return new TranslatableComponent("selectWorld.versionUnknown", new Object[0]);
+            return new TranslatableComponent("selectWorld.versionUnknown");
         }
         return new TextComponent(this.worldVersionName);
     }
@@ -118,6 +124,36 @@ implements Comparable<LevelSummary> {
 
     public boolean isLocked() {
         return this.locked;
+    }
+
+    public Component getInfo() {
+        if (this.info == null) {
+            this.info = this.createInfo();
+        }
+        return this.info;
+    }
+
+    private Component createInfo() {
+        MutableComponent mutableComponent;
+        if (this.isLocked()) {
+            return new TranslatableComponent("selectWorld.locked").withStyle(ChatFormatting.RED);
+        }
+        if (this.isRequiresConversion()) {
+            return new TranslatableComponent("selectWorld.conversion");
+        }
+        MutableComponent mutableComponent2 = mutableComponent = this.isHardcore() ? new TextComponent("").append(new TranslatableComponent("gameMode.hardcore").withStyle(ChatFormatting.DARK_RED)) : new TranslatableComponent("gameMode." + this.getGameMode().getName());
+        if (this.hasCheats()) {
+            mutableComponent.append(", ").append(new TranslatableComponent("selectWorld.cheats"));
+        }
+        MutableComponent mutableComponent22 = this.getWorldVersionName();
+        MutableComponent mutableComponent3 = new TextComponent(", ").append(new TranslatableComponent("selectWorld.version")).append(" ");
+        if (this.markVersionInList()) {
+            mutableComponent3.append(mutableComponent22.withStyle(this.askToOpenWorld() ? ChatFormatting.RED : ChatFormatting.ITALIC));
+        } else {
+            mutableComponent3.append(mutableComponent22);
+        }
+        mutableComponent.append(mutableComponent3);
+        return mutableComponent;
     }
 
     @Override

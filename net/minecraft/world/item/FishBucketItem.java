@@ -67,16 +67,16 @@ extends BucketItem {
             String string2 = "color.minecraft." + TropicalFish.getPatternColor(i);
             for (int j = 0; j < TropicalFish.COMMON_VARIANTS.length; ++j) {
                 if (i != TropicalFish.COMMON_VARIANTS[j]) continue;
-                list.add(new TranslatableComponent(TropicalFish.getPredefinedName(j), new Object[0]).withStyle(chatFormattings));
+                list.add(new TranslatableComponent(TropicalFish.getPredefinedName(j)).withStyle(chatFormattings));
                 return;
             }
-            list.add(new TranslatableComponent(TropicalFish.getFishTypeName(i), new Object[0]).withStyle(chatFormattings));
-            TranslatableComponent component = new TranslatableComponent(string, new Object[0]);
+            list.add(new TranslatableComponent(TropicalFish.getFishTypeName(i)).withStyle(chatFormattings));
+            TranslatableComponent mutableComponent = new TranslatableComponent(string);
             if (!string.equals(string2)) {
-                component.append(", ").append(new TranslatableComponent(string2, new Object[0]));
+                mutableComponent.append(", ").append(new TranslatableComponent(string2));
             }
-            component.withStyle(chatFormattings);
-            list.add(component);
+            mutableComponent.withStyle(chatFormattings);
+            list.add(mutableComponent);
         }
     }
 }

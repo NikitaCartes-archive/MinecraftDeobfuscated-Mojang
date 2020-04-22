@@ -43,7 +43,7 @@ public class StopSoundCommand {
         } else if (resourceLocation != null) {
             commandSourceStack.sendSuccess(new TranslatableComponent("commands.stopsound.success.sourceless.sound", resourceLocation), true);
         } else {
-            commandSourceStack.sendSuccess(new TranslatableComponent("commands.stopsound.success.sourceless.any", new Object[0]), true);
+            commandSourceStack.sendSuccess(new TranslatableComponent("commands.stopsound.success.sourceless.any"), true);
         }
         return collection.size();
     }

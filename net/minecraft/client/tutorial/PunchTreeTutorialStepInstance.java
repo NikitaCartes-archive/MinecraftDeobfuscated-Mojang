@@ -24,7 +24,7 @@ import net.minecraft.world.level.block.state.BlockState;
 @Environment(value=EnvType.CLIENT)
 public class PunchTreeTutorialStepInstance
 implements TutorialStepInstance {
-    private static final Component TITLE = new TranslatableComponent("tutorial.punch_tree.title", new Object[0]);
+    private static final Component TITLE = new TranslatableComponent("tutorial.punch_tree.title");
     private static final Component DESCRIPTION = new TranslatableComponent("tutorial.punch_tree.description", Tutorial.key("attack"));
     private final Tutorial tutorial;
     private TutorialToast toast;

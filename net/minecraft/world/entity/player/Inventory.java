@@ -465,7 +465,7 @@ Nameable {
 
     @Override
     public Component getName() {
-        return new TranslatableComponent("container.inventory", new Object[0]);
+        return new TranslatableComponent("container.inventory");
     }
 
     public boolean canDestroy(BlockState blockState) {

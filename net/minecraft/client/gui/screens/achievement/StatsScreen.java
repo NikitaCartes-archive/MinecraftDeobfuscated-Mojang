@@ -6,6 +6,7 @@ package net.minecraft.client.gui.screens.achievement;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Comparator;
@@ -23,7 +24,9 @@ import net.minecraft.client.gui.screens.achievement.StatsUpdateListener;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.Registry;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -54,7 +57,7 @@ implements StatsUpdateListener {
     private boolean isLoading = true;
 
     public StatsScreen(Screen screen, StatsCounter statsCounter) {
-        super(new TranslatableComponent("gui.stats", new Object[0]));
+        super(new TranslatableComponent("gui.stats"));
         this.lastScreen = screen;
         this.stats = statsCounter;
     }
@@ -72,10 +75,10 @@ implements StatsUpdateListener {
     }
 
     public void initButtons() {
-        this.addButton(new Button(this.width / 2 - 120, this.height - 52, 80, 20, I18n.get("stat.generalButton", new Object[0]), button -> this.setActiveList(this.statsList)));
-        Button button2 = this.addButton(new Button(this.width / 2 - 40, this.height - 52, 80, 20, I18n.get("stat.itemsButton", new Object[0]), button -> this.setActiveList(this.itemStatsList)));
-        Button button22 = this.addButton(new Button(this.width / 2 + 40, this.height - 52, 80, 20, I18n.get("stat.mobsButton", new Object[0]), button -> this.setActiveList(this.mobsStatsList)));
-        this.addButton(new Button(this.width / 2 - 100, this.height - 28, 200, 20, I18n.get("gui.done", new Object[0]), button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addButton(new Button(this.width / 2 - 120, this.height - 52, 80, 20, new TranslatableComponent("stat.generalButton"), button -> this.setActiveList(this.statsList)));
+        Button button2 = this.addButton(new Button(this.width / 2 - 40, this.height - 52, 80, 20, new TranslatableComponent("stat.itemsButton"), button -> this.setActiveList(this.itemStatsList)));
+        Button button22 = this.addButton(new Button(this.width / 2 + 40, this.height - 52, 80, 20, new TranslatableComponent("stat.mobsButton"), button -> this.setActiveList(this.mobsStatsList)));
+        this.addButton(new Button(this.width / 2 - 100, this.height - 28, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
         if (this.itemStatsList.children().isEmpty()) {
             button2.active = false;
         }
@@ -85,15 +88,15 @@ implements StatsUpdateListener {
     }
 
     @Override
-    public void render(int i, int j, float f) {
+    public void render(PoseStack poseStack, int i, int j, float f) {
         if (this.isLoading) {
-            this.renderBackground();
-            this.drawCenteredString(this.font, I18n.get("multiplayer.downloadingStats", new Object[0]), this.width / 2, this.height / 2, 0xFFFFFF);
-            this.drawCenteredString(this.font, LOADING_SYMBOLS[(int)(Util.getMillis() / 150L % (long)LOADING_SYMBOLS.length)], this.width / 2, this.height / 2 + this.font.lineHeight * 2, 0xFFFFFF);
+            this.renderBackground(poseStack);
+            this.drawCenteredString(poseStack, this.font, I18n.get("multiplayer.downloadingStats", new Object[0]), this.width / 2, this.height / 2, 0xFFFFFF);
+            this.drawCenteredString(poseStack, this.font, LOADING_SYMBOLS[(int)(Util.getMillis() / 150L % (long)LOADING_SYMBOLS.length)], this.width / 2, this.height / 2 + this.font.lineHeight * 2, 0xFFFFFF);
         } else {
-            this.getActiveList().render(i, j, f);
-            this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 20, 0xFFFFFF);
-            super.render(i, j, f);
+            this.getActiveList().render(poseStack, i, j, f);
+            this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 0xFFFFFF);
+            super.render(poseStack, i, j, f);
         }
     }
 
@@ -135,17 +138,17 @@ implements StatsUpdateListener {
         return 115 + 40 * i;
     }
 
-    private void blitSlot(int i, int j, Item item) {
-        this.blitSlotIcon(i + 1, j + 1, 0, 0);
+    private void blitSlot(PoseStack poseStack, int i, int j, Item item) {
+        this.blitSlotIcon(poseStack, i + 1, j + 1, 0, 0);
         RenderSystem.enableRescaleNormal();
         this.itemRenderer.renderGuiItem(item.getDefaultInstance(), i + 2, j + 2);
         RenderSystem.disableRescaleNormal();
     }
 
-    private void blitSlotIcon(int i, int j, int k, int l) {
+    private void blitSlotIcon(PoseStack poseStack, int i, int j, int k, int l) {
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bind(STATS_ICON_LOCATION);
-        StatsScreen.blit(i, j, this.getBlitOffset(), k, l, 18, 18, 128, 128);
+        StatsScreen.blit(poseStack, i, j, this.getBlitOffset(), k, l, 18, 18, 128, 128);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -160,8 +163,8 @@ implements StatsUpdateListener {
         }
 
         @Override
-        protected void renderBackground() {
-            StatsScreen.this.renderBackground();
+        protected void renderBackground(PoseStack poseStack) {
+            StatsScreen.this.renderBackground(poseStack);
         }
 
         @Environment(value=EnvType.CLIENT)
@@ -174,13 +177,13 @@ implements StatsUpdateListener {
             }
 
             @Override
-            public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+            public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
                 String string = I18n.get(Util.makeDescriptionId("entity", EntityType.getKey(this.type)), new Object[0]);
                 int p = StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED.get(this.type));
                 int q = StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED_BY.get(this.type));
-                MobsStatisticsList.this.drawString(StatsScreen.this.font, string, k + 2, j + 1, 0xFFFFFF);
-                MobsStatisticsList.this.drawString(StatsScreen.this.font, this.killsMessage(string, p), k + 2 + 10, j + 1 + ((StatsScreen)StatsScreen.this).font.lineHeight, p == 0 ? 0x606060 : 0x909090);
-                MobsStatisticsList.this.drawString(StatsScreen.this.font, this.killedByMessage(string, q), k + 2 + 10, j + 1 + ((StatsScreen)StatsScreen.this).font.lineHeight * 2, q == 0 ? 0x606060 : 0x909090);
+                MobsStatisticsList.this.drawString(poseStack, StatsScreen.this.font, string, k + 2, j + 1, 0xFFFFFF);
+                MobsStatisticsList.this.drawString(poseStack, StatsScreen.this.font, this.killsMessage(string, p), k + 2 + 10, j + 1 + ((StatsScreen)StatsScreen.this).font.lineHeight, p == 0 ? 0x606060 : 0x909090);
+                MobsStatisticsList.this.drawString(poseStack, StatsScreen.this.font, this.killedByMessage(string, q), k + 2 + 10, j + 1 + ((StatsScreen)StatsScreen.this).font.lineHeight * 2, q == 0 ? 0x606060 : 0x909090);
             }
 
             private String killsMessage(String string, int i) {
@@ -251,23 +254,23 @@ implements StatsUpdateListener {
         }
 
         @Override
-        protected void renderHeader(int i, int j, Tesselator tesselator) {
+        protected void renderHeader(PoseStack poseStack, int i, int j, Tesselator tesselator) {
             int l;
             int k;
             if (!this.minecraft.mouseHandler.isLeftPressed()) {
                 this.headerPressed = -1;
             }
             for (k = 0; k < this.iconOffsets.length; ++k) {
-                StatsScreen.this.blitSlotIcon(i + StatsScreen.this.getColumnX(k) - 18, j + 1, 0, this.headerPressed == k ? 0 : 18);
+                StatsScreen.this.blitSlotIcon(poseStack, i + StatsScreen.this.getColumnX(k) - 18, j + 1, 0, this.headerPressed == k ? 0 : 18);
             }
             if (this.sortColumn != null) {
                 k = StatsScreen.this.getColumnX(this.getColumnIndex(this.sortColumn)) - 36;
                 l = this.sortOrder == 1 ? 2 : 1;
-                StatsScreen.this.blitSlotIcon(i + k, j + 1, 18 * l, 0);
+                StatsScreen.this.blitSlotIcon(poseStack, i + k, j + 1, 18 * l, 0);
             }
             for (k = 0; k < this.iconOffsets.length; ++k) {
                 l = this.headerPressed == k ? 1 : 0;
-                StatsScreen.this.blitSlotIcon(i + StatsScreen.this.getColumnX(k) - 18 + l, j + 1 + l, 18 * this.iconOffsets[k], 18);
+                StatsScreen.this.blitSlotIcon(poseStack, i + StatsScreen.this.getColumnX(k) - 18 + l, j + 1 + l, 18 * this.iconOffsets[k], 18);
             }
         }
 
@@ -282,8 +285,8 @@ implements StatsUpdateListener {
         }
 
         @Override
-        protected void renderBackground() {
-            StatsScreen.this.renderBackground();
+        protected void renderBackground(PoseStack poseStack) {
+            StatsScreen.this.renderBackground(poseStack);
         }
 
         @Override
@@ -318,7 +321,7 @@ implements StatsUpdateListener {
         }
 
         @Override
-        protected void renderDecorations(int i, int j) {
+        protected void renderDecorations(PoseStack poseStack, int i, int j) {
             if (j < this.y0 || j > this.y1) {
                 return;
             }
@@ -329,32 +332,31 @@ implements StatsUpdateListener {
                     return;
                 }
                 Item item = this.statItemList.get(this.children().indexOf(itemRow));
-                this.renderMousehoverTooltip(this.getString(item), i, j);
+                this.renderMousehoverTooltip(poseStack, this.getString(item), i, j);
             } else {
                 TranslatableComponent component = null;
                 int l = i - k;
                 for (int m = 0; m < this.iconOffsets.length; ++m) {
                     int n = StatsScreen.this.getColumnX(m);
                     if (l < n - 18 || l > n) continue;
-                    component = new TranslatableComponent(this.getColumn(m).getTranslationKey(), new Object[0]);
+                    component = new TranslatableComponent(this.getColumn(m).getTranslationKey());
                     break;
                 }
-                this.renderMousehoverTooltip(component, i, j);
+                this.renderMousehoverTooltip(poseStack, component, i, j);
             }
         }
 
-        protected void renderMousehoverTooltip(@Nullable Component component, int i, int j) {
+        protected void renderMousehoverTooltip(PoseStack poseStack, @Nullable Component component, int i, int j) {
             if (component == null) {
                 return;
             }
-            String string = component.getColoredString();
             int k = i + 12;
             int l = j - 12;
-            int m = StatsScreen.this.font.width(string);
-            this.fillGradient(k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
+            int m = StatsScreen.this.font.width(component);
+            this.fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
             RenderSystem.pushMatrix();
             RenderSystem.translatef(0.0f, 0.0f, 400.0f);
-            StatsScreen.this.font.drawShadow(string, k, l, -1);
+            StatsScreen.this.font.drawShadow(poseStack, component, (float)k, (float)l, -1);
             RenderSystem.popMatrix();
         }
 
@@ -382,22 +384,22 @@ implements StatsUpdateListener {
             }
 
             @Override
-            public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+            public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
                 int p;
                 Item item = ((StatsScreen)StatsScreen.this).itemStatsList.statItemList.get(i);
-                StatsScreen.this.blitSlot(k + 40, j, item);
+                StatsScreen.this.blitSlot(poseStack, k + 40, j, item);
                 for (p = 0; p < ((StatsScreen)StatsScreen.this).itemStatsList.blockColumns.size(); ++p) {
                     Stat<Block> stat = item instanceof BlockItem ? ((StatsScreen)StatsScreen.this).itemStatsList.blockColumns.get(p).get(((BlockItem)item).getBlock()) : null;
-                    this.renderStat(stat, k + StatsScreen.this.getColumnX(p), j, i % 2 == 0);
+                    this.renderStat(poseStack, stat, k + StatsScreen.this.getColumnX(p), j, i % 2 == 0);
                 }
                 for (p = 0; p < ((StatsScreen)StatsScreen.this).itemStatsList.itemColumns.size(); ++p) {
-                    this.renderStat(((StatsScreen)StatsScreen.this).itemStatsList.itemColumns.get(p).get(item), k + StatsScreen.this.getColumnX(p + ((StatsScreen)StatsScreen.this).itemStatsList.blockColumns.size()), j, i % 2 == 0);
+                    this.renderStat(poseStack, ((StatsScreen)StatsScreen.this).itemStatsList.itemColumns.get(p).get(item), k + StatsScreen.this.getColumnX(p + ((StatsScreen)StatsScreen.this).itemStatsList.blockColumns.size()), j, i % 2 == 0);
                 }
             }
 
-            protected void renderStat(@Nullable Stat<?> stat, int i, int j, boolean bl) {
+            protected void renderStat(PoseStack poseStack, @Nullable Stat<?> stat, int i, int j, boolean bl) {
                 String string = stat == null ? "-" : stat.format(StatsScreen.this.stats.getValue(stat));
-                ItemStatisticsList.this.drawString(StatsScreen.this.font, string, i - StatsScreen.this.font.width(string), j + 5, bl ? 0xFFFFFF : 0x909090);
+                ItemStatisticsList.this.drawString(poseStack, StatsScreen.this.font, string, i - StatsScreen.this.font.width(string), j + 5, bl ? 0xFFFFFF : 0x909090);
             }
         }
 
@@ -449,8 +451,8 @@ implements StatsUpdateListener {
         }
 
         @Override
-        protected void renderBackground() {
-            StatsScreen.this.renderBackground();
+        protected void renderBackground(PoseStack poseStack) {
+            StatsScreen.this.renderBackground(poseStack);
         }
 
         @Environment(value=EnvType.CLIENT)
@@ -463,11 +465,11 @@ implements StatsUpdateListener {
             }
 
             @Override
-            public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-                Component component = new TranslatableComponent(StatsScreen.getTranslationKey(this.stat), new Object[0]).withStyle(ChatFormatting.GRAY);
-                GeneralStatisticsList.this.drawString(StatsScreen.this.font, component.getString(), k + 2, j + 1, i % 2 == 0 ? 0xFFFFFF : 0x909090);
+            public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+                MutableComponent component = new TranslatableComponent(StatsScreen.getTranslationKey(this.stat)).withStyle(ChatFormatting.GRAY);
+                GeneralStatisticsList.this.drawString(poseStack, StatsScreen.this.font, component.getString(), k + 2, j + 1, i % 2 == 0 ? 0xFFFFFF : 0x909090);
                 String string = this.stat.format(StatsScreen.this.stats.getValue(this.stat));
-                GeneralStatisticsList.this.drawString(StatsScreen.this.font, string, k + 2 + 213 - StatsScreen.this.font.width(string), j + 1, i % 2 == 0 ? 0xFFFFFF : 0x909090);
+                GeneralStatisticsList.this.drawString(poseStack, StatsScreen.this.font, string, k + 2 + 213 - StatsScreen.this.font.width(string), j + 1, i % 2 == 0 ? 0xFFFFFF : 0x909090);
             }
         }
     }

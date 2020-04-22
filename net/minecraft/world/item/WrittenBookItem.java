@@ -14,6 +14,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stats;
@@ -81,7 +82,7 @@ extends Item {
             if (!StringUtil.isNullOrEmpty(string)) {
                 list.add(new TranslatableComponent("book.byAuthor", string).withStyle(ChatFormatting.GRAY));
             }
-            list.add(new TranslatableComponent("book.generation." + compoundTag.getInt("generation"), new Object[0]).withStyle(ChatFormatting.GRAY));
+            list.add(new TranslatableComponent("book.generation." + compoundTag.getInt("generation")).withStyle(ChatFormatting.GRAY));
         }
     }
 
@@ -115,7 +116,7 @@ extends Item {
         }
         ListTag listTag = compoundTag.getList("pages", 8);
         for (int i = 0; i < listTag.size(); ++i) {
-            Component component;
+            MutableComponent component;
             String string = listTag.getString(i);
             try {
                 component = Component.Serializer.fromJsonLenient(string);

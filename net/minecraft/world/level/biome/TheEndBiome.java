@@ -14,16 +14,14 @@ import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfiguration;
-import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 
 public final class TheEndBiome
 extends Biome {
     public TheEndBiome() {
         super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.DEFAULT, SurfaceBuilder.CONFIG_THEEND).precipitation(Biome.Precipitation.NONE).biomeCategory(Biome.BiomeCategory.THEEND).depth(0.1f).scale(0.2f).temperature(0.5f).downfall(0.5f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(0xA080A0).ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS).build()).parent(null));
-        this.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.END_SPIKE.configured(new SpikeConfiguration(false, ImmutableList.of(), null)).decorated(FeatureDecorator.NOPE.configured(DecoratorConfiguration.NONE)));
+        this.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.END_SPIKE.configured(new SpikeConfiguration(false, ImmutableList.of(), null)));
         BiomeDefaultFeatures.addEndCity(this);
         this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.ENDERMAN, 10, 4, 4));
     }

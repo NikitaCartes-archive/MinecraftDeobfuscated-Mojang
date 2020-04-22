@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens.recipebook;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -86,26 +87,26 @@ public class RecipeBookPage {
         this.backButton.visible = this.totalPages > 1 && this.currentPage > 0;
     }
 
-    public void render(int i, int j, int k, int l, float f) {
+    public void render(PoseStack poseStack, int i, int j, int k, int l, float f) {
         if (this.totalPages > 1) {
             String string = this.currentPage + 1 + "/" + this.totalPages;
             int m = this.minecraft.font.width(string);
-            this.minecraft.font.draw(string, i - m / 2 + 73, j + 141, -1);
+            this.minecraft.font.draw(poseStack, string, (float)(i - m / 2 + 73), (float)(j + 141), -1);
         }
         this.hoveredButton = null;
         for (RecipeButton recipeButton : this.buttons) {
-            recipeButton.render(k, l, f);
+            recipeButton.render(poseStack, k, l, f);
             if (!recipeButton.visible || !recipeButton.isHovered()) continue;
             this.hoveredButton = recipeButton;
         }
-        this.backButton.render(k, l, f);
-        this.forwardButton.render(k, l, f);
-        this.overlay.render(k, l, f);
+        this.backButton.render(poseStack, k, l, f);
+        this.forwardButton.render(poseStack, k, l, f);
+        this.overlay.render(poseStack, k, l, f);
     }
 
-    public void renderTooltip(int i, int j) {
+    public void renderTooltip(PoseStack poseStack, int i, int j) {
         if (this.minecraft.screen != null && this.hoveredButton != null && !this.overlay.isVisible()) {
-            this.minecraft.screen.renderTooltip(this.hoveredButton.getTooltipText(this.minecraft.screen), i, j);
+            this.minecraft.screen.renderTooltip(poseStack, this.hoveredButton.getTooltipText(this.minecraft.screen), i, j);
         }
     }
 

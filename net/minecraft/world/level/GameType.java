@@ -31,7 +31,7 @@ public enum GameType {
     }
 
     public Component getDisplayName() {
-        return new TranslatableComponent("gameMode." + this.name, new Object[0]);
+        return new TranslatableComponent("gameMode." + this.name);
     }
 
     public void updatePlayerAbilities(Abilities abilities) {

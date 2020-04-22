@@ -16,7 +16,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CocoaBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.AbstractTreeFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -44,7 +44,7 @@ extends TreeDecorator {
             for (Direction direction : Direction.Plane.HORIZONTAL) {
                 Direction direction2;
                 BlockPos blockPos2;
-                if (!(random.nextFloat() <= 0.25f) || !AbstractTreeFeature.isAir(levelAccessor, blockPos2 = blockPos.offset((direction2 = direction.getOpposite()).getStepX(), 0, direction2.getStepZ()))) continue;
+                if (!(random.nextFloat() <= 0.25f) || !Feature.isAir(levelAccessor, blockPos2 = blockPos.offset((direction2 = direction.getOpposite()).getStepX(), 0, direction2.getStepZ()))) continue;
                 BlockState blockState = (BlockState)((BlockState)Blocks.COCOA.defaultBlockState().setValue(CocoaBlock.AGE, random.nextInt(3))).setValue(CocoaBlock.FACING, direction);
                 this.setBlock(levelAccessor, blockPos2, blockState, set, boundingBox);
             }

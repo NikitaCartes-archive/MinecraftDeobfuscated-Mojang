@@ -4,6 +4,7 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
@@ -32,6 +33,10 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,7 +50,7 @@ extends RealmsScreenWithCallback {
     private static final ResourceLocation OFF_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/off_icon.png");
     private static final ResourceLocation EXPIRED_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/expired_icon.png");
     private static final ResourceLocation EXPIRES_SOON_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/expires_soon_icon.png");
-    private String toolTip;
+    private Component toolTip;
     private final RealmsMainScreen lastScreen;
     @Nullable
     private RealmsServer serverData;
@@ -76,21 +81,21 @@ extends RealmsScreenWithCallback {
         this.leftX = this.width / 2 - 187;
         this.rightX = this.width / 2 + 190;
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-        this.playersButton = this.addButton(new Button(this.centerButton(0, 3), RealmsConfigureWorldScreen.row(0), 100, 20, I18n.get("mco.configure.world.buttons.players", new Object[0]), button -> this.minecraft.setScreen(new RealmsPlayerScreen(this, this.serverData))));
-        this.settingsButton = this.addButton(new Button(this.centerButton(1, 3), RealmsConfigureWorldScreen.row(0), 100, 20, I18n.get("mco.configure.world.buttons.settings", new Object[0]), button -> this.minecraft.setScreen(new RealmsSettingsScreen(this, this.serverData.clone()))));
-        this.subscriptionButton = this.addButton(new Button(this.centerButton(2, 3), RealmsConfigureWorldScreen.row(0), 100, 20, I18n.get("mco.configure.world.buttons.subscription", new Object[0]), button -> this.minecraft.setScreen(new RealmsSubscriptionInfoScreen(this, this.serverData.clone(), this.lastScreen))));
+        this.playersButton = this.addButton(new Button(this.centerButton(0, 3), RealmsConfigureWorldScreen.row(0), 100, 20, new TranslatableComponent("mco.configure.world.buttons.players"), button -> this.minecraft.setScreen(new RealmsPlayerScreen(this, this.serverData))));
+        this.settingsButton = this.addButton(new Button(this.centerButton(1, 3), RealmsConfigureWorldScreen.row(0), 100, 20, new TranslatableComponent("mco.configure.world.buttons.settings"), button -> this.minecraft.setScreen(new RealmsSettingsScreen(this, this.serverData.clone()))));
+        this.subscriptionButton = this.addButton(new Button(this.centerButton(2, 3), RealmsConfigureWorldScreen.row(0), 100, 20, new TranslatableComponent("mco.configure.world.buttons.subscription"), button -> this.minecraft.setScreen(new RealmsSubscriptionInfoScreen(this, this.serverData.clone(), this.lastScreen))));
         for (int i = 1; i < 5; ++i) {
             this.addSlotButton(i);
         }
-        this.switchMinigameButton = this.addButton(new Button(this.leftButton(0), RealmsConfigureWorldScreen.row(13) - 5, 100, 20, I18n.get("mco.configure.world.buttons.switchminigame", new Object[0]), button -> {
+        this.switchMinigameButton = this.addButton(new Button(this.leftButton(0), RealmsConfigureWorldScreen.row(13) - 5, 100, 20, new TranslatableComponent("mco.configure.world.buttons.switchminigame"), button -> {
             RealmsSelectWorldTemplateScreen realmsSelectWorldTemplateScreen = new RealmsSelectWorldTemplateScreen(this, RealmsServer.WorldType.MINIGAME);
-            realmsSelectWorldTemplateScreen.setTitle(I18n.get("mco.template.title.minigame", new Object[0]));
+            realmsSelectWorldTemplateScreen.setTitle(new TranslatableComponent("mco.template.title.minigame"));
             this.minecraft.setScreen(realmsSelectWorldTemplateScreen);
         }));
-        this.optionsButton = this.addButton(new Button(this.leftButton(0), RealmsConfigureWorldScreen.row(13) - 5, 90, 20, I18n.get("mco.configure.world.buttons.options", new Object[0]), button -> this.minecraft.setScreen(new RealmsSlotOptionsScreen(this, this.serverData.slots.get(this.serverData.activeSlot).clone(), this.serverData.worldType, this.serverData.activeSlot))));
-        this.backupButton = this.addButton(new Button(this.leftButton(1), RealmsConfigureWorldScreen.row(13) - 5, 90, 20, I18n.get("mco.configure.world.backup", new Object[0]), button -> this.minecraft.setScreen(new RealmsBackupScreen(this, this.serverData.clone(), this.serverData.activeSlot))));
-        this.resetWorldButton = this.addButton(new Button(this.leftButton(2), RealmsConfigureWorldScreen.row(13) - 5, 90, 20, I18n.get("mco.configure.world.buttons.resetworld", new Object[0]), button -> this.minecraft.setScreen(new RealmsResetWorldScreen(this, this.serverData.clone(), () -> this.minecraft.setScreen(this.getNewScreen()), () -> this.minecraft.setScreen(this.getNewScreen())))));
-        this.addButton(new Button(this.rightX - 80 + 8, RealmsConfigureWorldScreen.row(13) - 5, 70, 20, I18n.get("gui.back", new Object[0]), button -> this.backButtonClicked()));
+        this.optionsButton = this.addButton(new Button(this.leftButton(0), RealmsConfigureWorldScreen.row(13) - 5, 90, 20, new TranslatableComponent("mco.configure.world.buttons.options"), button -> this.minecraft.setScreen(new RealmsSlotOptionsScreen(this, this.serverData.slots.get(this.serverData.activeSlot).clone(), this.serverData.worldType, this.serverData.activeSlot))));
+        this.backupButton = this.addButton(new Button(this.leftButton(1), RealmsConfigureWorldScreen.row(13) - 5, 90, 20, new TranslatableComponent("mco.configure.world.backup"), button -> this.minecraft.setScreen(new RealmsBackupScreen(this, this.serverData.clone(), this.serverData.activeSlot))));
+        this.resetWorldButton = this.addButton(new Button(this.leftButton(2), RealmsConfigureWorldScreen.row(13) - 5, 90, 20, new TranslatableComponent("mco.configure.world.buttons.resetworld"), button -> this.minecraft.setScreen(new RealmsResetWorldScreen(this, this.serverData.clone(), () -> this.minecraft.setScreen(this.getNewScreen()), () -> this.minecraft.setScreen(this.getNewScreen())))));
+        this.addButton(new Button(this.rightX - 80 + 8, RealmsConfigureWorldScreen.row(13) - 5, 70, 20, CommonComponents.GUI_BACK, button -> this.backButtonClicked()));
         this.backupButton.active = true;
         if (this.serverData == null) {
             this.hideMinigameButtons();
@@ -111,8 +116,8 @@ extends RealmsScreenWithCallback {
     private void addSlotButton(int i) {
         int j = this.frame(i);
         int k = RealmsConfigureWorldScreen.row(5) + 5;
-        RealmsWorldSlotButton realmsWorldSlotButton = new RealmsWorldSlotButton(j, k, 80, 80, () -> this.serverData, string -> {
-            this.toolTip = string;
+        RealmsWorldSlotButton realmsWorldSlotButton = new RealmsWorldSlotButton(j, k, 80, 80, () -> this.serverData, component -> {
+            this.toolTip = component;
         }, i, button -> {
             RealmsWorldSlotButton.State state = ((RealmsWorldSlotButton)button).getState();
             if (state != null) {
@@ -164,28 +169,28 @@ extends RealmsScreenWithCallback {
     }
 
     @Override
-    public void render(int i, int j, float f) {
+    public void render(PoseStack poseStack, int i, int j, float f) {
         this.toolTip = null;
-        this.renderBackground();
-        this.drawCenteredString(this.font, I18n.get("mco.configure.worlds.title", new Object[0]), this.width / 2, RealmsConfigureWorldScreen.row(4), 0xFFFFFF);
-        super.render(i, j, f);
+        this.renderBackground(poseStack);
+        this.drawCenteredString(poseStack, this.font, I18n.get("mco.configure.worlds.title", new Object[0]), this.width / 2, RealmsConfigureWorldScreen.row(4), 0xFFFFFF);
+        super.render(poseStack, i, j, f);
         if (this.serverData == null) {
-            this.drawCenteredString(this.font, I18n.get("mco.configure.world.title", new Object[0]), this.width / 2, 17, 0xFFFFFF);
+            this.drawCenteredString(poseStack, this.font, I18n.get("mco.configure.world.title", new Object[0]), this.width / 2, 17, 0xFFFFFF);
             return;
         }
         String string = this.serverData.getName();
         int k = this.font.width(string);
         int l = this.serverData.state == RealmsServer.State.CLOSED ? 0xA0A0A0 : 0x7FFF7F;
         int m = this.font.width(I18n.get("mco.configure.world.title", new Object[0]));
-        this.drawCenteredString(this.font, I18n.get("mco.configure.world.title", new Object[0]), this.width / 2, 12, 0xFFFFFF);
-        this.drawCenteredString(this.font, string, this.width / 2, 24, l);
+        this.drawCenteredString(poseStack, this.font, I18n.get("mco.configure.world.title", new Object[0]), this.width / 2, 12, 0xFFFFFF);
+        this.drawCenteredString(poseStack, this.font, string, this.width / 2, 24, l);
         int n = Math.min(this.centerButton(2, 3) + 80 - 11, this.width / 2 + k / 2 + m / 2 + 10);
-        this.drawServerStatus(n, 7, i, j);
+        this.drawServerStatus(poseStack, n, 7, i, j);
         if (this.isMinigame()) {
-            this.font.draw(I18n.get("mco.configure.current.minigame", new Object[0]) + ": " + this.serverData.getMinigameName(), this.leftX + 80 + 20 + 10, RealmsConfigureWorldScreen.row(13), 0xFFFFFF);
+            this.font.draw(poseStack, I18n.get("mco.configure.current.minigame", new Object[0]) + ": " + this.serverData.getMinigameName(), (float)(this.leftX + 80 + 20 + 10), (float)RealmsConfigureWorldScreen.row(13), 0xFFFFFF);
         }
         if (this.toolTip != null) {
-            this.renderMousehoverTooltip(this.toolTip, i, j);
+            this.renderMousehoverTooltip(poseStack, this.toolTip, i, j);
         }
     }
 
@@ -229,7 +234,7 @@ extends RealmsScreenWithCallback {
                 }
             } catch (RealmsServiceException realmsServiceException) {
                 LOGGER.error("Couldn't get own world");
-                this.minecraft.execute(() -> this.minecraft.setScreen(new RealmsGenericErrorScreen(realmsServiceException.getMessage(), (Screen)this.lastScreen)));
+                this.minecraft.execute(() -> this.minecraft.setScreen(new RealmsGenericErrorScreen(new TextComponent(realmsServiceException.getMessage()), (Screen)this.lastScreen)));
             }
         }).start();
     }
@@ -253,100 +258,100 @@ extends RealmsScreenWithCallback {
 
     private void switchToMinigame() {
         RealmsSelectWorldTemplateScreen realmsSelectWorldTemplateScreen = new RealmsSelectWorldTemplateScreen(this, RealmsServer.WorldType.MINIGAME);
-        realmsSelectWorldTemplateScreen.setTitle(I18n.get("mco.template.title.minigame", new Object[0]));
-        realmsSelectWorldTemplateScreen.setWarning(I18n.get("mco.minigame.world.info.line1", new Object[0]) + "\\n" + I18n.get("mco.minigame.world.info.line2", new Object[0]));
+        realmsSelectWorldTemplateScreen.setTitle(new TranslatableComponent("mco.template.title.minigame"));
+        realmsSelectWorldTemplateScreen.setWarning(new TranslatableComponent("mco.minigame.world.info.line1"), new TranslatableComponent("mco.minigame.world.info.line2"));
         this.minecraft.setScreen(realmsSelectWorldTemplateScreen);
     }
 
     private void switchToFullSlot(int i, RealmsServer realmsServer) {
-        String string = I18n.get("mco.configure.world.slot.switch.question.line1", new Object[0]);
-        String string2 = I18n.get("mco.configure.world.slot.switch.question.line2", new Object[0]);
+        TranslatableComponent component = new TranslatableComponent("mco.configure.world.slot.switch.question.line1");
+        TranslatableComponent component2 = new TranslatableComponent("mco.configure.world.slot.switch.question.line2");
         this.minecraft.setScreen(new RealmsLongConfirmationScreen(bl -> {
             if (bl) {
                 this.minecraft.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new SwitchSlotTask(realmsServer.id, i, () -> this.minecraft.setScreen(this.getNewScreen()))));
             } else {
                 this.minecraft.setScreen(this);
             }
-        }, RealmsLongConfirmationScreen.Type.Info, string, string2, true));
+        }, RealmsLongConfirmationScreen.Type.Info, component, component2, true));
     }
 
     private void switchToEmptySlot(int i, RealmsServer realmsServer) {
-        String string = I18n.get("mco.configure.world.slot.switch.question.line1", new Object[0]);
-        String string2 = I18n.get("mco.configure.world.slot.switch.question.line2", new Object[0]);
+        TranslatableComponent component = new TranslatableComponent("mco.configure.world.slot.switch.question.line1");
+        TranslatableComponent component2 = new TranslatableComponent("mco.configure.world.slot.switch.question.line2");
         this.minecraft.setScreen(new RealmsLongConfirmationScreen(bl -> {
             if (bl) {
-                RealmsResetWorldScreen realmsResetWorldScreen = new RealmsResetWorldScreen(this, realmsServer, I18n.get("mco.configure.world.switch.slot", new Object[0]), I18n.get("mco.configure.world.switch.slot.subtitle", new Object[0]), 0xA0A0A0, I18n.get("gui.cancel", new Object[0]), () -> this.minecraft.setScreen(this.getNewScreen()), () -> this.minecraft.setScreen(this.getNewScreen()));
+                RealmsResetWorldScreen realmsResetWorldScreen = new RealmsResetWorldScreen(this, realmsServer, new TranslatableComponent("mco.configure.world.switch.slot"), new TranslatableComponent("mco.configure.world.switch.slot.subtitle"), 0xA0A0A0, CommonComponents.GUI_CANCEL, () -> this.minecraft.setScreen(this.getNewScreen()), () -> this.minecraft.setScreen(this.getNewScreen()));
                 realmsResetWorldScreen.setSlot(i);
                 realmsResetWorldScreen.setResetTitle(I18n.get("mco.create.world.reset.title", new Object[0]));
                 this.minecraft.setScreen(realmsResetWorldScreen);
             } else {
                 this.minecraft.setScreen(this);
             }
-        }, RealmsLongConfirmationScreen.Type.Info, string, string2, true));
+        }, RealmsLongConfirmationScreen.Type.Info, component, component2, true));
     }
 
-    protected void renderMousehoverTooltip(String string, int i, int j) {
+    protected void renderMousehoverTooltip(PoseStack poseStack, Component component, int i, int j) {
         int k = i + 12;
         int l = j - 12;
-        int m = this.font.width(string);
+        int m = this.font.width(component);
         if (k + m + 3 > this.rightX) {
             k = k - m - 20;
         }
-        this.fillGradient(k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
-        this.font.drawShadow(string, k, l, 0xFFFFFF);
+        this.fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
+        this.font.drawShadow(poseStack, component, (float)k, (float)l, 0xFFFFFF);
     }
 
-    private void drawServerStatus(int i, int j, int k, int l) {
+    private void drawServerStatus(PoseStack poseStack, int i, int j, int k, int l) {
         if (this.serverData.expired) {
-            this.drawExpired(i, j, k, l);
+            this.drawExpired(poseStack, i, j, k, l);
         } else if (this.serverData.state == RealmsServer.State.CLOSED) {
-            this.drawClose(i, j, k, l);
+            this.drawClose(poseStack, i, j, k, l);
         } else if (this.serverData.state == RealmsServer.State.OPEN) {
             if (this.serverData.daysLeft < 7) {
-                this.drawExpiring(i, j, k, l, this.serverData.daysLeft);
+                this.drawExpiring(poseStack, i, j, k, l, this.serverData.daysLeft);
             } else {
-                this.drawOpen(i, j, k, l);
+                this.drawOpen(poseStack, i, j, k, l);
             }
         }
     }
 
-    private void drawExpired(int i, int j, int k, int l) {
+    private void drawExpired(PoseStack poseStack, int i, int j, int k, int l) {
         this.minecraft.getTextureManager().bind(EXPIRED_ICON_LOCATION);
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GuiComponent.blit(i, j, 0.0f, 0.0f, 10, 28, 10, 28);
+        GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 10, 28, 10, 28);
         if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
-            this.toolTip = I18n.get("mco.selectServer.expired", new Object[0]);
+            this.toolTip = new TranslatableComponent("mco.selectServer.expired");
         }
     }
 
-    private void drawExpiring(int i, int j, int k, int l, int m) {
+    private void drawExpiring(PoseStack poseStack, int i, int j, int k, int l, int m) {
         this.minecraft.getTextureManager().bind(EXPIRES_SOON_ICON_LOCATION);
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         if (this.animTick % 20 < 10) {
-            GuiComponent.blit(i, j, 0.0f, 0.0f, 10, 28, 20, 28);
+            GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 10, 28, 20, 28);
         } else {
-            GuiComponent.blit(i, j, 10.0f, 0.0f, 10, 28, 20, 28);
+            GuiComponent.blit(poseStack, i, j, 10.0f, 0.0f, 10, 28, 20, 28);
         }
         if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
-            this.toolTip = m <= 0 ? I18n.get("mco.selectServer.expires.soon", new Object[0]) : (m == 1 ? I18n.get("mco.selectServer.expires.day", new Object[0]) : I18n.get("mco.selectServer.expires.days", m));
+            this.toolTip = m <= 0 ? new TranslatableComponent("mco.selectServer.expires.soon") : (m == 1 ? new TranslatableComponent("mco.selectServer.expires.day") : new TranslatableComponent("mco.selectServer.expires.days", m));
         }
     }
 
-    private void drawOpen(int i, int j, int k, int l) {
+    private void drawOpen(PoseStack poseStack, int i, int j, int k, int l) {
         this.minecraft.getTextureManager().bind(ON_ICON_LOCATION);
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GuiComponent.blit(i, j, 0.0f, 0.0f, 10, 28, 10, 28);
+        GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 10, 28, 10, 28);
         if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
-            this.toolTip = I18n.get("mco.selectServer.open", new Object[0]);
+            this.toolTip = new TranslatableComponent("mco.selectServer.open");
         }
     }
 
-    private void drawClose(int i, int j, int k, int l) {
+    private void drawClose(PoseStack poseStack, int i, int j, int k, int l) {
         this.minecraft.getTextureManager().bind(OFF_ICON_LOCATION);
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        GuiComponent.blit(i, j, 0.0f, 0.0f, 10, 28, 10, 28);
+        GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 10, 28, 10, 28);
         if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
-            this.toolTip = I18n.get("mco.selectServer.closed", new Object[0]);
+            this.toolTip = new TranslatableComponent("mco.selectServer.closed");
         }
     }
 

@@ -48,7 +48,7 @@ extends FallingBlock {
     private static final VoxelShape Z_TOP = Block.box(3.0, 10.0, 0.0, 13.0, 16.0, 16.0);
     private static final VoxelShape X_AXIS_AABB = Shapes.or(BASE, X_LEG1, X_LEG2, X_TOP);
     private static final VoxelShape Z_AXIS_AABB = Shapes.or(BASE, Z_LEG1, Z_LEG2, Z_TOP);
-    private static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.repair", new Object[0]);
+    private static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.repair");
 
     public AnvilBlock(BlockBehaviour.Properties properties) {
         super(properties);

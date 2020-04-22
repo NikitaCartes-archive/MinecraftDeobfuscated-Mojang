@@ -54,7 +54,7 @@ extends Slot {
             itemStack.onCraftedBy(this.player.level, this.player, this.removeCount);
         }
         if (this.container instanceof RecipeHolder) {
-            ((RecipeHolder)((Object)this.container)).awardAndReset(this.player);
+            ((RecipeHolder)((Object)this.container)).awardUsedRecipes(this.player);
         }
         this.removeCount = 0;
     }

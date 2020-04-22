@@ -8,9 +8,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.BookViewScreen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
@@ -72,8 +73,8 @@ implements MenuAccess<LecternMenu> {
     @Override
     protected void createMenuControls() {
         if (this.minecraft.player.mayBuild()) {
-            this.addButton(new Button(this.width / 2 - 100, 196, 98, 20, I18n.get("gui.done", new Object[0]), button -> this.minecraft.setScreen(null)));
-            this.addButton(new Button(this.width / 2 + 2, 196, 98, 20, I18n.get("lectern.take_book", new Object[0]), button -> this.sendButtonClick(3)));
+            this.addButton(new Button(this.width / 2 - 100, 196, 98, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(null)));
+            this.addButton(new Button(this.width / 2 + 2, 196, 98, 20, new TranslatableComponent("lectern.take_book"), button -> this.sendButtonClick(3)));
         } else {
             super.createMenuControls();
         }

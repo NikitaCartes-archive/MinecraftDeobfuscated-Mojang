@@ -25,8 +25,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class BanIpCommands {
     public static final Pattern IP_ADDRESS_PATTERN = Pattern.compile("^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
-    private static final SimpleCommandExceptionType ERROR_INVALID_IP = new SimpleCommandExceptionType(new TranslatableComponent("commands.banip.invalid", new Object[0]));
-    private static final SimpleCommandExceptionType ERROR_ALREADY_BANNED = new SimpleCommandExceptionType(new TranslatableComponent("commands.banip.failed", new Object[0]));
+    private static final SimpleCommandExceptionType ERROR_INVALID_IP = new SimpleCommandExceptionType(new TranslatableComponent("commands.banip.invalid"));
+    private static final SimpleCommandExceptionType ERROR_ALREADY_BANNED = new SimpleCommandExceptionType(new TranslatableComponent("commands.banip.failed"));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("ban-ip").requires(commandSourceStack -> commandSourceStack.getServer().getPlayerList().getIpBans().isEnabled() && commandSourceStack.hasPermission(3))).then(((RequiredArgumentBuilder)Commands.argument("target", StringArgumentType.word()).executes(commandContext -> BanIpCommands.banIpOrName((CommandSourceStack)commandContext.getSource(), StringArgumentType.getString(commandContext, "target"), null))).then(Commands.argument("reason", MessageArgument.message()).executes(commandContext -> BanIpCommands.banIpOrName((CommandSourceStack)commandContext.getSource(), StringArgumentType.getString(commandContext, "target"), MessageArgument.getMessage(commandContext, "reason"))))));
@@ -57,7 +57,7 @@ public class BanIpCommands {
             commandSourceStack.sendSuccess(new TranslatableComponent("commands.banip.info", list.size(), EntitySelector.joinNames(list)), true);
         }
         for (ServerPlayer serverPlayer : list) {
-            serverPlayer.connection.disconnect(new TranslatableComponent("multiplayer.disconnect.ip_banned", new Object[0]));
+            serverPlayer.connection.disconnect(new TranslatableComponent("multiplayer.disconnect.ip_banned"));
         }
         return list.size();
     }

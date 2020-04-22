@@ -312,7 +312,7 @@ TickableBlockEntity {
 
     @Override
     public Component getDisplayName() {
-        return this.name != null ? this.name : new TranslatableComponent("container.beacon", new Object[0]);
+        return this.name != null ? this.name : new TranslatableComponent("container.beacon");
     }
 
     public static class BeaconBeamSection {

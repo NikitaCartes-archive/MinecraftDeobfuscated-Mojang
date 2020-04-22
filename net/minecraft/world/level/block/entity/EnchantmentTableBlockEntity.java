@@ -108,7 +108,7 @@ TickableBlockEntity {
         if (this.name != null) {
             return this.name;
         }
-        return new TranslatableComponent("container.enchant", new Object[0]);
+        return new TranslatableComponent("container.enchant");
     }
 
     public void setCustomName(@Nullable Component component) {

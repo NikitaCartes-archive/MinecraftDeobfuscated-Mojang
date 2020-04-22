@@ -57,7 +57,6 @@ import net.minecraft.world.level.EmptyTickList;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.biome.Biome;
@@ -96,8 +95,8 @@ extends Level {
         object2ObjectArrayMap.put(BiomeColors.WATER_COLOR_RESOLVER, new BlockTintCache());
     });
 
-    public ClientLevel(ClientPacketListener clientPacketListener, LevelSettings levelSettings, DimensionType dimensionType, int i, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer) {
-        super(new LevelData(levelSettings, "MpServer"), dimensionType, (level, dimension) -> new ClientChunkCache((ClientLevel)level, i), supplier, true);
+    public ClientLevel(ClientPacketListener clientPacketListener, LevelData levelData, DimensionType dimensionType, int i, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer) {
+        super(levelData, dimensionType, (level, dimension) -> new ClientChunkCache((ClientLevel)level, i), supplier, true);
         this.connection = clientPacketListener;
         this.levelRenderer = levelRenderer;
         this.setDefaultSpawnPos(new BlockPos(8, 64, 8));
@@ -294,7 +293,7 @@ extends Level {
 
     @Override
     public void disconnect() {
-        this.connection.getConnection().disconnect(new TranslatableComponent("multiplayer.status.quitting", new Object[0]));
+        this.connection.getConnection().disconnect(new TranslatableComponent("multiplayer.status.quitting"));
     }
 
     public void animateTick(int i, int j, int k) {

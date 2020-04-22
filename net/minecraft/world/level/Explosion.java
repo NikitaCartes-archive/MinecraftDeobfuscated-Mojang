@@ -177,7 +177,7 @@ public class Explosion {
             double ab;
             double x;
             Entity entity = list.get(w);
-            if (entity.ignoreExplosion() || !((x = (double)(Mth.sqrt(entity.distanceToSqr(vec3)) / r)) <= 1.0) || (ab = (double)Mth.sqrt((y = entity.getX() - this.x) * y + (z = entity.getEyeY() - this.y) * z + (aa = entity.getZ() - this.z) * aa)) == 0.0) continue;
+            if (entity.ignoreExplosion() || !((x = (double)(Mth.sqrt(entity.distanceToSqr(vec3)) / r)) <= 1.0) || (ab = (double)Mth.sqrt((y = entity.getX() - this.x) * y + (z = (entity instanceof PrimedTnt ? entity.getY() : entity.getEyeY()) - this.y) * z + (aa = entity.getZ() - this.z) * aa)) == 0.0) continue;
             y /= ab;
             z /= ab;
             aa /= ab;

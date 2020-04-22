@@ -14,31 +14,47 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ContextAwareComponent;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
 public class ComponentUtils {
-    public static Component mergeStyles(Component component, Style style) {
+    public static MutableComponent mergeStyles(MutableComponent mutableComponent, Style style) {
         if (style.isEmpty()) {
-            return component;
+            return mutableComponent;
         }
-        if (component.getStyle().isEmpty()) {
-            return component.setStyle(style.copy());
+        Style style2 = mutableComponent.getStyle();
+        if (style2.isEmpty()) {
+            return mutableComponent.setStyle(style);
         }
-        return new TextComponent("").append(component).setStyle(style.copy());
+        if (style2.equals(style)) {
+            return mutableComponent;
+        }
+        return new TextComponent("").append(mutableComponent).setStyle(style);
     }
 
-    public static Component updateForEntity(@Nullable CommandSourceStack commandSourceStack, Component component, @Nullable Entity entity, int i) throws CommandSyntaxException {
+    public static MutableComponent updateForEntity(@Nullable CommandSourceStack commandSourceStack, Component component, @Nullable Entity entity, int i) throws CommandSyntaxException {
         if (i > 100) {
-            return component;
+            return component.mutableCopy();
         }
-        Component component2 = component instanceof ContextAwareComponent ? ((ContextAwareComponent)((Object)component)).resolve(commandSourceStack, entity, ++i) : component.copy();
-        for (Component component3 : component.getSiblings()) {
-            component2.append(ComponentUtils.updateForEntity(commandSourceStack, component3, entity, i));
+        MutableComponent mutableComponent = component instanceof ContextAwareComponent ? ((ContextAwareComponent)((Object)component)).resolve(commandSourceStack, entity, i + 1) : component.toMutable();
+        for (Component component2 : component.getSiblings()) {
+            mutableComponent.append(ComponentUtils.updateForEntity(commandSourceStack, component2, entity, i + 1));
         }
-        return ComponentUtils.mergeStyles(component2, component.getStyle());
+        return ComponentUtils.mergeStyles(mutableComponent, ComponentUtils.resolveStyle(commandSourceStack, component.getStyle(), entity, i));
+    }
+
+    private static Style resolveStyle(@Nullable CommandSourceStack commandSourceStack, Style style, @Nullable Entity entity, int i) throws CommandSyntaxException {
+        Component component;
+        HoverEvent hoverEvent = style.getHoverEvent();
+        if (hoverEvent != null && (component = hoverEvent.getValue(HoverEvent.Action.SHOW_TEXT)) != null) {
+            HoverEvent hoverEvent2 = new HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentUtils.updateForEntity(commandSourceStack, component, entity, i + 1));
+            return style.withHoverEvent(hoverEvent2);
+        }
+        return style;
     }
 
     public static Component getDisplayName(GameProfile gameProfile) {
@@ -57,7 +73,7 @@ public class ComponentUtils {
 
     public static <T extends Comparable<T>> Component formatAndSortList(Collection<T> collection, Function<T, Component> function) {
         if (collection.isEmpty()) {
-            return new TextComponent("");
+            return TextComponent.EMPTY;
         }
         if (collection.size() == 1) {
             return function.apply(collection.iterator().next());
@@ -67,26 +83,26 @@ public class ComponentUtils {
         return ComponentUtils.formatList(list, function);
     }
 
-    public static <T> Component formatList(Collection<T> collection, Function<T, Component> function) {
+    public static <T> MutableComponent formatList(Collection<T> collection, Function<T, Component> function) {
         if (collection.isEmpty()) {
             return new TextComponent("");
         }
         if (collection.size() == 1) {
-            return function.apply(collection.iterator().next());
+            return function.apply(collection.iterator().next()).mutableCopy();
         }
-        TextComponent component = new TextComponent("");
+        TextComponent mutableComponent = new TextComponent("");
         boolean bl = true;
         for (T object : collection) {
             if (!bl) {
-                component.append(new TextComponent(", ").withStyle(ChatFormatting.GRAY));
+                mutableComponent.append(new TextComponent(", ").withStyle(ChatFormatting.GRAY));
             }
-            component.append(function.apply(object));
+            mutableComponent.append(function.apply(object));
             bl = false;
         }
-        return component;
+        return mutableComponent;
     }
 
-    public static Component wrapInSquareBrackets(Component component) {
+    public static MutableComponent wrapInSquareBrackets(Component component) {
         return new TextComponent("[").append(component).append("]");
     }
 

@@ -49,7 +49,7 @@ extends Slot {
     protected void checkTakeAchievements(ItemStack itemStack) {
         itemStack.onCraftedBy(this.player.level, this.player, this.removeCount);
         if (!this.player.level.isClientSide && this.container instanceof AbstractFurnaceBlockEntity) {
-            ((AbstractFurnaceBlockEntity)this.container).awardResetAndExperience(this.player);
+            ((AbstractFurnaceBlockEntity)this.container).awardUsedRecipesAndPopExperience(this.player);
         }
         this.removeCount = 0;
     }

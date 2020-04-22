@@ -210,7 +210,7 @@ implements RepositorySource {
             return Util.failedFuture(new RuntimeException(String.format("Invalid resourcepack at %s: %s", file, string)));
         }
         LOGGER.info("Applying server pack {}", (Object)file);
-        this.serverPack = new UnopenedResourcePack("server", true, () -> new FileResourcePack(file), new TranslatableComponent("resourcePack.server.name", new Object[0]), packMetadataSection.getDescription(), PackCompatibility.forFormat(packMetadataSection.getPackFormat()), UnopenedPack.Position.TOP, true, nativeImage);
+        this.serverPack = new UnopenedResourcePack("server", true, () -> new FileResourcePack(file), new TranslatableComponent("resourcePack.server.name"), packMetadataSection.getDescription(), PackCompatibility.forFormat(packMetadataSection.getPackFormat()), UnopenedPack.Position.TOP, true, nativeImage);
         return Minecraft.getInstance().delayTextureReload();
     }
 

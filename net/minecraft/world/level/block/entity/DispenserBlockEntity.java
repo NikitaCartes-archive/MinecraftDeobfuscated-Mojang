@@ -57,7 +57,7 @@ extends RandomizableContainerBlockEntity {
 
     @Override
     protected Component getDefaultName() {
-        return new TranslatableComponent("container.dispenser", new Object[0]);
+        return new TranslatableComponent("container.dispenser");
     }
 
     @Override

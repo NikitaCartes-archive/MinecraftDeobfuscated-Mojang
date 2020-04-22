@@ -16,7 +16,7 @@ extends DispenserBlockEntity {
 
     @Override
     protected Component getDefaultName() {
-        return new TranslatableComponent("container.dropper", new Object[0]);
+        return new TranslatableComponent("container.dropper");
     }
 }
 

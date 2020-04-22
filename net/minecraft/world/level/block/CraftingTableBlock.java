@@ -22,7 +22,7 @@ import net.minecraft.world.phys.BlockHitResult;
 
 public class CraftingTableBlock
 extends Block {
-    private static final Component CONTAINER_TITLE = new TranslatableComponent("container.crafting", new Object[0]);
+    private static final Component CONTAINER_TITLE = new TranslatableComponent("container.crafting");
 
     protected CraftingTableBlock(BlockBehaviour.Properties properties) {
         super(properties);

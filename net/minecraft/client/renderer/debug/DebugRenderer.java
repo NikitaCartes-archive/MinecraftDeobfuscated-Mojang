@@ -210,7 +210,7 @@ public class DebugRenderer {
         float m = bl ? (float)(-font.width(string)) / 2.0f : 0.0f;
         RenderSystem.enableAlphaTest();
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        font.drawInBatch(string, m -= h / g, 0.0f, i, false, Transformation.identity().getMatrix(), bufferSource, bl2, 0, 0xF000F0);
+        font.drawInBatch(string, m -= h / g, 0.0f, i, false, Transformation.identity().getMatrix(), (MultiBufferSource)bufferSource, bl2, 0, 0xF000F0);
         bufferSource.endBatch();
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.enableDepthTest();

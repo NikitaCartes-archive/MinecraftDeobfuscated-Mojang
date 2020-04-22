@@ -6,14 +6,15 @@ package net.minecraft.client.gui.components;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.network.chat.Component;
 
 @Environment(value=EnvType.CLIENT)
 public class Button
 extends AbstractButton {
     protected final OnPress onPress;
 
-    public Button(int i, int j, int k, int l, String string, OnPress onPress) {
-        super(i, j, k, l, string);
+    public Button(int i, int j, int k, int l, Component component, OnPress onPress) {
+        super(i, j, k, l, component);
         this.onPress = onPress;
     }
 

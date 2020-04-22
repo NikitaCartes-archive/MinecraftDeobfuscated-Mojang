@@ -26,7 +26,7 @@ extends Biome {
         super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.BADLANDS, SurfaceBuilder.CONFIG_BADLANDS).precipitation(Biome.Precipitation.NONE).biomeCategory(Biome.BiomeCategory.MESA).depth(0.1f).scale(0.2f).temperature(2.0f).downfall(0.0f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(4159204).waterFogColor(329011).fogColor(12638463).ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS).build()).parent(null).optimalParameters(ImmutableList.of(new Biome.ClimateParameters(-0.25f, -0.5f, 0.5f, 0.2f, 1.0f))));
         this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.MESA)));
         this.addStructureStart(Feature.STRONGHOLD.configured(FeatureConfiguration.NONE));
-        this.addStructureStart(Feature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.MOUNTAIN)));
+        this.addStructureStart(Feature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.STANDARD)));
         BiomeDefaultFeatures.addDefaultCarvers(this);
         BiomeDefaultFeatures.addStructureFeaturePlacement(this);
         BiomeDefaultFeatures.addDefaultLakes(this);

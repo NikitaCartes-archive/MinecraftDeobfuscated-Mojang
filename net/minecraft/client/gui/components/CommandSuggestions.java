@@ -5,6 +5,7 @@ package net.minecraft.client.gui.components;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.ParseResults;
@@ -268,15 +269,15 @@ public class CommandSuggestions {
         return stringBuilder.toString();
     }
 
-    public void render(int i, int j) {
+    public void render(PoseStack poseStack, int i, int j) {
         if (this.suggestions != null) {
-            this.suggestions.render(i, j);
+            this.suggestions.render(poseStack, i, j);
         } else {
             int k = 0;
             for (String string : this.commandUsage) {
                 int l = this.anchorToBottom ? this.screen.height - 14 - 13 - 12 * k : 72 + 12 * k;
-                GuiComponent.fill(this.commandUsagePosition - 1, l, this.commandUsagePosition + this.commandUsageWidth + 1, l + 12, this.fillColor);
-                this.font.drawShadow(string, this.commandUsagePosition, l + 2, -1);
+                GuiComponent.fill(poseStack, this.commandUsagePosition - 1, l, this.commandUsagePosition + this.commandUsageWidth + 1, l + 12, this.fillColor);
+                this.font.drawShadow(poseStack, string, (float)this.commandUsagePosition, (float)(l + 2), -1);
                 ++k;
             }
         }
@@ -310,7 +311,7 @@ public class CommandSuggestions {
             this.select(0);
         }
 
-        public void render(int i, int j) {
+        public void render(PoseStack poseStack, int i, int j) {
             Message message;
             boolean bl4;
             int k = Math.min(this.suggestions.getList().size(), CommandSuggestions.this.suggestionLineLimit);
@@ -324,35 +325,35 @@ public class CommandSuggestions {
             }
             if (bl3) {
                 int m;
-                GuiComponent.fill(this.rect.getX(), this.rect.getY() - 1, this.rect.getX() + this.rect.getWidth(), this.rect.getY(), CommandSuggestions.this.fillColor);
-                GuiComponent.fill(this.rect.getX(), this.rect.getY() + this.rect.getHeight(), this.rect.getX() + this.rect.getWidth(), this.rect.getY() + this.rect.getHeight() + 1, CommandSuggestions.this.fillColor);
+                GuiComponent.fill(poseStack, this.rect.getX(), this.rect.getY() - 1, this.rect.getX() + this.rect.getWidth(), this.rect.getY(), CommandSuggestions.this.fillColor);
+                GuiComponent.fill(poseStack, this.rect.getX(), this.rect.getY() + this.rect.getHeight(), this.rect.getX() + this.rect.getWidth(), this.rect.getY() + this.rect.getHeight() + 1, CommandSuggestions.this.fillColor);
                 if (bl) {
                     for (m = 0; m < this.rect.getWidth(); ++m) {
                         if (m % 2 != 0) continue;
-                        GuiComponent.fill(this.rect.getX() + m, this.rect.getY() - 1, this.rect.getX() + m + 1, this.rect.getY(), -1);
+                        GuiComponent.fill(poseStack, this.rect.getX() + m, this.rect.getY() - 1, this.rect.getX() + m + 1, this.rect.getY(), -1);
                     }
                 }
                 if (bl2) {
                     for (m = 0; m < this.rect.getWidth(); ++m) {
                         if (m % 2 != 0) continue;
-                        GuiComponent.fill(this.rect.getX() + m, this.rect.getY() + this.rect.getHeight(), this.rect.getX() + m + 1, this.rect.getY() + this.rect.getHeight() + 1, -1);
+                        GuiComponent.fill(poseStack, this.rect.getX() + m, this.rect.getY() + this.rect.getHeight(), this.rect.getX() + m + 1, this.rect.getY() + this.rect.getHeight() + 1, -1);
                     }
                 }
             }
             boolean bl52 = false;
             for (int n = 0; n < k; ++n) {
                 Suggestion suggestion = this.suggestions.getList().get(n + this.offset);
-                GuiComponent.fill(this.rect.getX(), this.rect.getY() + 12 * n, this.rect.getX() + this.rect.getWidth(), this.rect.getY() + 12 * n + 12, CommandSuggestions.this.fillColor);
+                GuiComponent.fill(poseStack, this.rect.getX(), this.rect.getY() + 12 * n, this.rect.getX() + this.rect.getWidth(), this.rect.getY() + 12 * n + 12, CommandSuggestions.this.fillColor);
                 if (i > this.rect.getX() && i < this.rect.getX() + this.rect.getWidth() && j > this.rect.getY() + 12 * n && j < this.rect.getY() + 12 * n + 12) {
                     if (bl4) {
                         this.select(n + this.offset);
                     }
                     bl52 = true;
                 }
-                CommandSuggestions.this.font.drawShadow(suggestion.getText(), this.rect.getX() + 1, this.rect.getY() + 2 + 12 * n, n + this.offset == this.current ? -256 : -5592406);
+                CommandSuggestions.this.font.drawShadow(poseStack, suggestion.getText(), (float)(this.rect.getX() + 1), (float)(this.rect.getY() + 2 + 12 * n), n + this.offset == this.current ? -256 : -5592406);
             }
             if (bl52 && (message = this.suggestions.getList().get(this.current).getTooltip()) != null) {
-                CommandSuggestions.this.screen.renderTooltip(ComponentUtils.fromMessage(message).getColoredString(), i, j);
+                CommandSuggestions.this.screen.renderTooltip(poseStack, ComponentUtils.fromMessage(message), i, j);
             }
         }
 

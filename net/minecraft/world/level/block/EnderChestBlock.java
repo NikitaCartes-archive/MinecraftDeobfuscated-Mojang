@@ -53,7 +53,7 @@ implements SimpleWaterloggedBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     protected static final VoxelShape SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 14.0, 15.0);
-    public static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.enderchest", new Object[0]);
+    public static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.enderchest");
 
     protected EnderChestBlock(BlockBehaviour.Properties properties) {
         super(properties, () -> BlockEntityType.ENDER_CHEST);

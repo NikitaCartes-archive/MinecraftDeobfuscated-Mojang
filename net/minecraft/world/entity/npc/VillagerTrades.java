@@ -133,7 +133,7 @@ public class VillagerTrades {
                 ItemStack itemStack = MapItem.create(serverLevel, blockPos.getX(), blockPos.getZ(), (byte)2, true, true);
                 MapItem.renderBiomePreviewMap(serverLevel, itemStack);
                 MapItemSavedData.addTargetDecoration(itemStack, blockPos, "+", this.destinationType);
-                itemStack.setHoverName(new TranslatableComponent("filled_map." + this.destination.toLowerCase(Locale.ROOT), new Object[0]));
+                itemStack.setHoverName(new TranslatableComponent("filled_map." + this.destination.toLowerCase(Locale.ROOT)));
                 return new MerchantOffer(new ItemStack(Items.EMERALD, this.emeraldCost), new ItemStack(Items.COMPASS), itemStack, this.maxUses, this.villagerXp, 0.2f);
             }
             return null;

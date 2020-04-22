@@ -5,6 +5,7 @@ package net.minecraft.client.gui.components.toasts;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -26,7 +27,7 @@ implements Toast {
     }
 
     @Override
-    public Toast.Visibility render(ToastComponent toastComponent, long l) {
+    public Toast.Visibility render(PoseStack poseStack, ToastComponent toastComponent, long l) {
         if (this.changed) {
             this.lastChanged = l;
             this.changed = false;
@@ -36,10 +37,10 @@ implements Toast {
         }
         toastComponent.getMinecraft().getTextureManager().bind(TEXTURE);
         RenderSystem.color3f(1.0f, 1.0f, 1.0f);
-        toastComponent.blit(0, 0, 0, 32, 160, 32);
-        toastComponent.getMinecraft().font.draw(I18n.get("recipe.toast.title", new Object[0]), 30.0f, 7.0f, -11534256);
-        toastComponent.getMinecraft().font.draw(I18n.get("recipe.toast.description", new Object[0]), 30.0f, 18.0f, -16777216);
-        Recipe<?> recipe = this.recipes.get((int)(l / (5000L / (long)this.recipes.size()) % (long)this.recipes.size()));
+        toastComponent.blit(poseStack, 0, 0, 0, 32, 160, 32);
+        toastComponent.getMinecraft().font.draw(poseStack, I18n.get("recipe.toast.title", new Object[0]), 30.0f, 7.0f, -11534256);
+        toastComponent.getMinecraft().font.draw(poseStack, I18n.get("recipe.toast.description", new Object[0]), 30.0f, 18.0f, -16777216);
+        Recipe<?> recipe = this.recipes.get((int)(l / Math.max(1L, 5000L / (long)this.recipes.size()) % (long)this.recipes.size()));
         ItemStack itemStack = recipe.getToastSymbol();
         RenderSystem.pushMatrix();
         RenderSystem.scalef(0.6f, 0.6f, 1.0f);

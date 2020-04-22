@@ -13,7 +13,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 public class AvailableResourcePackList
 extends ResourcePackList {
     public AvailableResourcePackList(Minecraft minecraft, int i, int j) {
-        super(minecraft, i, j, new TranslatableComponent("resourcePack.available.title", new Object[0]));
+        super(minecraft, i, j, new TranslatableComponent("resourcePack.available.title"));
     }
 }
 

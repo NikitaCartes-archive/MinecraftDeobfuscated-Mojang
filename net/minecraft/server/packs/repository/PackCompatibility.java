@@ -18,8 +18,8 @@ public enum PackCompatibility {
     private final Component confirmation;
 
     private PackCompatibility(String string2) {
-        this.description = new TranslatableComponent("resourcePack.incompatible." + string2, new Object[0]);
-        this.confirmation = new TranslatableComponent("resourcePack.incompatible.confirm." + string2, new Object[0]);
+        this.description = new TranslatableComponent("resourcePack.incompatible." + string2);
+        this.confirmation = new TranslatableComponent("resourcePack.incompatible.confirm." + string2);
     }
 
     public boolean isCompatible() {

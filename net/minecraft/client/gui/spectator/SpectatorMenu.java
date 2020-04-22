@@ -5,6 +5,7 @@ package net.minecraft.client.gui.spectator;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -35,11 +36,11 @@ public class SpectatorMenu {
 
         @Override
         public Component getName() {
-            return new TextComponent("");
+            return TextComponent.EMPTY;
         }
 
         @Override
-        public void renderIcon(float f, int i) {
+        public void renderIcon(PoseStack poseStack, float f, int i) {
         }
 
         @Override
@@ -142,18 +143,18 @@ public class SpectatorMenu {
         @Override
         public Component getName() {
             if (this.direction < 0) {
-                return new TranslatableComponent("spectatorMenu.previous_page", new Object[0]);
+                return new TranslatableComponent("spectatorMenu.previous_page");
             }
-            return new TranslatableComponent("spectatorMenu.next_page", new Object[0]);
+            return new TranslatableComponent("spectatorMenu.next_page");
         }
 
         @Override
-        public void renderIcon(float f, int i) {
+        public void renderIcon(PoseStack poseStack, float f, int i) {
             Minecraft.getInstance().getTextureManager().bind(SpectatorGui.SPECTATOR_LOCATION);
             if (this.direction < 0) {
-                GuiComponent.blit(0, 0, 144.0f, 0.0f, 16, 16, 256, 256);
+                GuiComponent.blit(poseStack, 0, 0, 144.0f, 0.0f, 16, 16, 256, 256);
             } else {
-                GuiComponent.blit(0, 0, 160.0f, 0.0f, 16, 16, 256, 256);
+                GuiComponent.blit(poseStack, 0, 0, 160.0f, 0.0f, 16, 16, 256, 256);
             }
         }
 
@@ -176,13 +177,13 @@ public class SpectatorMenu {
 
         @Override
         public Component getName() {
-            return new TranslatableComponent("spectatorMenu.close", new Object[0]);
+            return new TranslatableComponent("spectatorMenu.close");
         }
 
         @Override
-        public void renderIcon(float f, int i) {
+        public void renderIcon(PoseStack poseStack, float f, int i) {
             Minecraft.getInstance().getTextureManager().bind(SpectatorGui.SPECTATOR_LOCATION);
-            GuiComponent.blit(0, 0, 128.0f, 0.0f, 16, 16, 256, 256);
+            GuiComponent.blit(poseStack, 0, 0, 128.0f, 0.0f, 16, 16, 256, 256);
         }
 
         @Override

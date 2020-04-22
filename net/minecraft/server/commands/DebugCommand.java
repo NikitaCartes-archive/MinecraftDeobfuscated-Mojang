@@ -31,8 +31,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class DebugCommand {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final SimpleCommandExceptionType ERROR_NOT_RUNNING = new SimpleCommandExceptionType(new TranslatableComponent("commands.debug.notRunning", new Object[0]));
-    private static final SimpleCommandExceptionType ERROR_ALREADY_RUNNING = new SimpleCommandExceptionType(new TranslatableComponent("commands.debug.alreadyRunning", new Object[0]));
+    private static final SimpleCommandExceptionType ERROR_NOT_RUNNING = new SimpleCommandExceptionType(new TranslatableComponent("commands.debug.notRunning"));
+    private static final SimpleCommandExceptionType ERROR_ALREADY_RUNNING = new SimpleCommandExceptionType(new TranslatableComponent("commands.debug.alreadyRunning"));
     @Nullable
     private static final FileSystemProvider ZIP_FS_PROVIDER = FileSystemProvider.installedProviders().stream().filter(fileSystemProvider -> fileSystemProvider.getScheme().equalsIgnoreCase("jar")).findFirst().orElse(null);
 
@@ -83,7 +83,7 @@ public class DebugCommand {
             return 1;
         } catch (IOException iOException) {
             LOGGER.error("Failed to save debug dump", (Throwable)iOException);
-            commandSourceStack.sendFailure(new TranslatableComponent("commands.debug.reportFailed", new Object[0]));
+            commandSourceStack.sendFailure(new TranslatableComponent("commands.debug.reportFailed"));
             return 0;
         }
     }

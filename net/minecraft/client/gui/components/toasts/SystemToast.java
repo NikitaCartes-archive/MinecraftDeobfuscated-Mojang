@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.components.toasts;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -30,19 +31,19 @@ implements Toast {
     }
 
     @Override
-    public Toast.Visibility render(ToastComponent toastComponent, long l) {
+    public Toast.Visibility render(PoseStack poseStack, ToastComponent toastComponent, long l) {
         if (this.changed) {
             this.lastChanged = l;
             this.changed = false;
         }
         toastComponent.getMinecraft().getTextureManager().bind(TEXTURE);
         RenderSystem.color3f(1.0f, 1.0f, 1.0f);
-        toastComponent.blit(0, 0, 0, 64, 160, 32);
+        toastComponent.blit(poseStack, 0, 0, 0, 64, 160, 32);
         if (this.message == null) {
-            toastComponent.getMinecraft().font.draw(this.title, 18.0f, 12.0f, -256);
+            toastComponent.getMinecraft().font.draw(poseStack, this.title, 18.0f, 12.0f, -256);
         } else {
-            toastComponent.getMinecraft().font.draw(this.title, 18.0f, 7.0f, -256);
-            toastComponent.getMinecraft().font.draw(this.message, 18.0f, 18.0f, -1);
+            toastComponent.getMinecraft().font.draw(poseStack, this.title, 18.0f, 7.0f, -256);
+            toastComponent.getMinecraft().font.draw(poseStack, this.message, 18.0f, 18.0f, -1);
         }
         return l - this.lastChanged < 5000L ? Toast.Visibility.SHOW : Toast.Visibility.HIDE;
     }
@@ -71,11 +72,11 @@ implements Toast {
     }
 
     public static void onWorldAccessFailure(Minecraft minecraft, String string) {
-        SystemToast.add(minecraft.getToasts(), SystemToastIds.WORLD_ACCESS_FAILURE, new TranslatableComponent("selectWorld.access_failure", new Object[0]), new TextComponent(string));
+        SystemToast.add(minecraft.getToasts(), SystemToastIds.WORLD_ACCESS_FAILURE, new TranslatableComponent("selectWorld.access_failure"), new TextComponent(string));
     }
 
     public static void onWorldDeleteFailure(Minecraft minecraft, String string) {
-        SystemToast.add(minecraft.getToasts(), SystemToastIds.WORLD_ACCESS_FAILURE, new TranslatableComponent("selectWorld.delete_failure", new Object[0]), new TextComponent(string));
+        SystemToast.add(minecraft.getToasts(), SystemToastIds.WORLD_ACCESS_FAILURE, new TranslatableComponent("selectWorld.delete_failure"), new TextComponent(string));
     }
 
     @Override

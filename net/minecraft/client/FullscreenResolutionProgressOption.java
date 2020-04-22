@@ -11,7 +11,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Options;
 import net.minecraft.client.ProgressOption;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -39,14 +40,14 @@ extends ProgressOption {
             }
         }, (options, progressOption) -> {
             if (monitor == null) {
-                return I18n.get("options.fullscreen.unavailable", new Object[0]);
+                return new TranslatableComponent("options.fullscreen.unavailable");
             }
             double d = progressOption.get((Options)options);
-            String string = progressOption.getCaption();
+            MutableComponent mutableComponent = progressOption.createCaption();
             if (d == -1.0) {
-                return string + I18n.get("options.fullscreen.current", new Object[0]);
+                return mutableComponent.append(new TranslatableComponent("options.fullscreen.current"));
             }
-            return monitor.getMode((int)d).toString();
+            return mutableComponent.append(monitor.getMode((int)d).toString());
         });
     }
 }

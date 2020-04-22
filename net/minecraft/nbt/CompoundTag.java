@@ -41,6 +41,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagType;
 import net.minecraft.nbt.TagTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -470,7 +471,7 @@ implements Tag {
         }
         String string2 = StringTag.quoteAndEscape(string);
         String string3 = string2.substring(0, 1);
-        Component component = new TextComponent(string2.substring(1, string2.length() - 1)).withStyle(SYNTAX_HIGHLIGHTING_KEY);
+        MutableComponent component = new TextComponent(string2.substring(1, string2.length() - 1)).withStyle(SYNTAX_HIGHLIGHTING_KEY);
         return new TextComponent(string3).append(component).append(string3);
     }
 
@@ -479,7 +480,7 @@ implements Tag {
         if (this.tags.isEmpty()) {
             return new TextComponent("{}");
         }
-        TextComponent component = new TextComponent("{");
+        TextComponent mutableComponent = new TextComponent("{");
         Collection<String> collection = this.tags.keySet();
         if (LOGGER.isDebugEnabled()) {
             ArrayList<String> list = Lists.newArrayList(this.tags.keySet());
@@ -487,22 +488,22 @@ implements Tag {
             collection = list;
         }
         if (!string.isEmpty()) {
-            component.append("\n");
+            mutableComponent.append("\n");
         }
         Iterator iterator = collection.iterator();
         while (iterator.hasNext()) {
             String string2 = (String)iterator.next();
-            Component component2 = new TextComponent(Strings.repeat(string, i + 1)).append(CompoundTag.handleEscapePretty(string2)).append(String.valueOf(':')).append(" ").append(this.tags.get(string2).getPrettyDisplay(string, i + 1));
+            MutableComponent mutableComponent2 = new TextComponent(Strings.repeat(string, i + 1)).append(CompoundTag.handleEscapePretty(string2)).append(String.valueOf(':')).append(" ").append(this.tags.get(string2).getPrettyDisplay(string, i + 1));
             if (iterator.hasNext()) {
-                component2.append(String.valueOf(',')).append(string.isEmpty() ? " " : "\n");
+                mutableComponent2.append(String.valueOf(',')).append(string.isEmpty() ? " " : "\n");
             }
-            component.append(component2);
+            mutableComponent.append(mutableComponent2);
         }
         if (!string.isEmpty()) {
-            component.append("\n").append(Strings.repeat(string, i));
+            mutableComponent.append("\n").append(Strings.repeat(string, i));
         }
-        component.append("}");
-        return component;
+        mutableComponent.append("}");
+        return mutableComponent;
     }
 
     @Override

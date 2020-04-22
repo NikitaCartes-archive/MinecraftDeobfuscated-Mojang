@@ -24,6 +24,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class GetServerDetailsTask
@@ -82,27 +84,23 @@ extends LongRunningTask {
             GetServerDetailsTask.setScreen(new RealmsTermsScreen(this.lastScreen, this.mainScreen, this.server));
         } else if (bl4) {
             if (this.server.ownerUUID.equals(Minecraft.getInstance().getUser().getUuid())) {
-                RealmsBrokenWorldScreen realmsBrokenWorldScreen = new RealmsBrokenWorldScreen(this.lastScreen, this.mainScreen, this.server.id);
-                if (this.server.worldType == RealmsServer.WorldType.MINIGAME) {
-                    realmsBrokenWorldScreen.setTitle(I18n.get("mco.brokenworld.minigame.title", new Object[0]));
-                }
-                GetServerDetailsTask.setScreen(realmsBrokenWorldScreen);
+                GetServerDetailsTask.setScreen(new RealmsBrokenWorldScreen(this.lastScreen, this.mainScreen, this.server.id, this.server.worldType == RealmsServer.WorldType.MINIGAME));
             } else {
-                GetServerDetailsTask.setScreen(new RealmsGenericErrorScreen(I18n.get("mco.brokenworld.nonowner.title", new Object[0]), I18n.get("mco.brokenworld.nonowner.error", new Object[0]), this.lastScreen));
+                GetServerDetailsTask.setScreen(new RealmsGenericErrorScreen(new TranslatableComponent("mco.brokenworld.nonowner.title"), new TranslatableComponent("mco.brokenworld.nonowner.error"), this.lastScreen));
             }
         } else if (!this.aborted() && !bl22) {
             if (bl2) {
                 RealmsServerAddress realmsServerAddress2 = realmsServerAddress;
                 if (realmsServerAddress2.resourcePackUrl != null && realmsServerAddress2.resourcePackHash != null) {
-                    String string = I18n.get("mco.configure.world.resourcepack.question.line1", new Object[0]);
-                    String string2 = I18n.get("mco.configure.world.resourcepack.question.line2", new Object[0]);
+                    TranslatableComponent component = new TranslatableComponent("mco.configure.world.resourcepack.question.line1");
+                    TranslatableComponent component2 = new TranslatableComponent("mco.configure.world.resourcepack.question.line2");
                     GetServerDetailsTask.setScreen(new RealmsLongConfirmationScreen(bl -> {
                         try {
                             if (bl) {
                                 Function<Throwable, Void> function = throwable -> {
                                     Minecraft.getInstance().getClientPackSource().clearServerPack();
                                     LOGGER.error(throwable);
-                                    GetServerDetailsTask.setScreen(new RealmsGenericErrorScreen("Failed to download resource pack!", this.lastScreen));
+                                    GetServerDetailsTask.setScreen(new RealmsGenericErrorScreen(new TextComponent("Failed to download resource pack!"), this.lastScreen));
                                     return null;
                                 };
                                 try {
@@ -118,12 +116,12 @@ extends LongRunningTask {
                                 this.connectLock.unlock();
                             }
                         }
-                    }, RealmsLongConfirmationScreen.Type.Info, string, string2, true));
+                    }, RealmsLongConfirmationScreen.Type.Info, component, component2, true));
                 } else {
                     this.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new ConnectTask(this.lastScreen, realmsServerAddress2)));
                 }
             } else {
-                this.error(I18n.get("mco.errorMessage.connectionFailure", new Object[0]));
+                this.error(new TranslatableComponent("mco.errorMessage.connectionFailure"));
             }
         }
     }

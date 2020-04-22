@@ -3,6 +3,7 @@
  */
 package com.mojang.realmsclient.gui.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.Subscription;
@@ -19,6 +20,8 @@ import net.minecraft.Util;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
@@ -54,17 +57,17 @@ extends RealmsScreen {
         this.getSubscription(this.serverData.id);
         NarrationHelper.now(this.subscriptionTitle, this.subscriptionStartLabelText, this.startDate, this.timeLeftLabelText, this.daysLeftPresentation(this.daysLeft));
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-        this.addButton(new Button(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(6), 200, 20, I18n.get("mco.configure.world.subscription.extend", new Object[0]), button -> {
+        this.addButton(new Button(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(6), 200, 20, new TranslatableComponent("mco.configure.world.subscription.extend"), button -> {
             String string = "https://aka.ms/ExtendJavaRealms?subscriptionId=" + this.serverData.remoteSubscriptionId + "&profileId=" + this.minecraft.getUser().getUuid();
             this.minecraft.keyboardHandler.setClipboard(string);
             Util.getPlatform().openUri(string);
         }));
-        this.addButton(new Button(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(12), 200, 20, I18n.get("gui.back", new Object[0]), button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addButton(new Button(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(12), 200, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)));
         if (this.serverData.expired) {
-            this.addButton(new Button(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(10), 200, 20, I18n.get("mco.configure.world.delete.button", new Object[0]), button -> {
-                String string = I18n.get("mco.configure.world.delete.question.line1", new Object[0]);
-                String string2 = I18n.get("mco.configure.world.delete.question.line2", new Object[0]);
-                this.minecraft.setScreen(new RealmsLongConfirmationScreen(this::deleteRealm, RealmsLongConfirmationScreen.Type.Warning, string, string2, true));
+            this.addButton(new Button(this.width / 2 - 100, RealmsSubscriptionInfoScreen.row(10), 200, 20, new TranslatableComponent("mco.configure.world.delete.button"), button -> {
+                TranslatableComponent component = new TranslatableComponent("mco.configure.world.delete.question.line1");
+                TranslatableComponent component2 = new TranslatableComponent("mco.configure.world.delete.question.line2");
+                this.minecraft.setScreen(new RealmsLongConfirmationScreen(this::deleteRealm, RealmsLongConfirmationScreen.Type.Warning, component, component2, true));
             }));
         }
     }
@@ -123,19 +126,19 @@ extends RealmsScreen {
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        this.renderBackground();
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        this.renderBackground(poseStack);
         int k = this.width / 2 - 100;
-        this.drawCenteredString(this.font, this.subscriptionTitle, this.width / 2, 17, 0xFFFFFF);
-        this.font.draw(this.subscriptionStartLabelText, k, RealmsSubscriptionInfoScreen.row(0), 0xA0A0A0);
-        this.font.draw(this.startDate, k, RealmsSubscriptionInfoScreen.row(1), 0xFFFFFF);
+        this.drawCenteredString(poseStack, this.font, this.subscriptionTitle, this.width / 2, 17, 0xFFFFFF);
+        this.font.draw(poseStack, this.subscriptionStartLabelText, (float)k, (float)RealmsSubscriptionInfoScreen.row(0), 0xA0A0A0);
+        this.font.draw(poseStack, this.startDate, (float)k, (float)RealmsSubscriptionInfoScreen.row(1), 0xFFFFFF);
         if (this.type == Subscription.SubscriptionType.NORMAL) {
-            this.font.draw(this.timeLeftLabelText, k, RealmsSubscriptionInfoScreen.row(3), 0xA0A0A0);
+            this.font.draw(poseStack, this.timeLeftLabelText, (float)k, (float)RealmsSubscriptionInfoScreen.row(3), 0xA0A0A0);
         } else if (this.type == Subscription.SubscriptionType.RECURRING) {
-            this.font.draw(this.daysLeftLabelText, k, RealmsSubscriptionInfoScreen.row(3), 0xA0A0A0);
+            this.font.draw(poseStack, this.daysLeftLabelText, (float)k, (float)RealmsSubscriptionInfoScreen.row(3), 0xA0A0A0);
         }
-        this.font.draw(this.daysLeftPresentation(this.daysLeft), k, RealmsSubscriptionInfoScreen.row(4), 0xFFFFFF);
-        super.render(i, j, f);
+        this.font.draw(poseStack, this.daysLeftPresentation(this.daysLeft), (float)k, (float)RealmsSubscriptionInfoScreen.row(4), 0xFFFFFF);
+        super.render(poseStack, i, j, f);
     }
 
     private String daysLeftPresentation(int i) {

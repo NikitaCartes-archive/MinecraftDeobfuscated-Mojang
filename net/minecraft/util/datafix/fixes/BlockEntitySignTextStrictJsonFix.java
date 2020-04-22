@@ -16,6 +16,7 @@ import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import java.lang.reflect.Type;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.datafix.fixes.NamedEntityFix;
@@ -27,22 +28,22 @@ extends NamedEntityFix {
     public static final Gson GSON = new GsonBuilder().registerTypeAdapter((Type)((Object)Component.class), new JsonDeserializer<Component>(){
 
         @Override
-        public Component deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+        public MutableComponent deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             if (jsonElement.isJsonPrimitive()) {
                 return new TextComponent(jsonElement.getAsString());
             }
             if (jsonElement.isJsonArray()) {
                 JsonArray jsonArray = jsonElement.getAsJsonArray();
-                Component component = null;
+                MutableComponent mutableComponent = null;
                 for (JsonElement jsonElement2 : jsonArray) {
-                    Component component2 = this.deserialize(jsonElement2, jsonElement2.getClass(), jsonDeserializationContext);
-                    if (component == null) {
-                        component = component2;
+                    MutableComponent mutableComponent2 = this.deserialize(jsonElement2, jsonElement2.getClass(), jsonDeserializationContext);
+                    if (mutableComponent == null) {
+                        mutableComponent = mutableComponent2;
                         continue;
                     }
-                    component.append(component2);
+                    mutableComponent.append(mutableComponent2);
                 }
-                return component;
+                return mutableComponent;
             }
             throw new JsonParseException("Don't know how to turn " + jsonElement + " into a Component");
         }
@@ -61,12 +62,12 @@ extends NamedEntityFix {
         String string2 = dynamic.get(string).asString("");
         Component component = null;
         if ("null".equals(string2) || StringUtils.isEmpty(string2)) {
-            component = new TextComponent("");
+            component = TextComponent.EMPTY;
         } else if (string2.charAt(0) == '\"' && string2.charAt(string2.length() - 1) == '\"' || string2.charAt(0) == '{' && string2.charAt(string2.length() - 1) == '}') {
             try {
                 component = GsonHelper.fromJson(GSON, string2, Component.class, true);
                 if (component == null) {
-                    component = new TextComponent("");
+                    component = TextComponent.EMPTY;
                 }
             } catch (JsonParseException jsonParseException) {
                 // empty catch block

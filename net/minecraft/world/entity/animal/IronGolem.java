@@ -150,7 +150,7 @@ extends AbstractGolem {
         this.attackAnimationTick = 10;
         this.level.broadcastEntityEvent(this, (byte)4);
         float f = this.getAttackDamage();
-        float g = f > 0.0f ? f / 2.0f + (float)this.random.nextInt((int)f) : 0.0f;
+        float g = (int)f > 0 ? f / 2.0f + (float)this.random.nextInt((int)f) : f;
         boolean bl = entity.hurt(DamageSource.mobAttack(this), g);
         if (bl) {
             entity.setDeltaMovement(entity.getDeltaMovement().add(0.0, 0.4f, 0.0));

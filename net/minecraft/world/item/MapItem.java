@@ -348,7 +348,7 @@ extends ComplexItem {
                 list.add(new TranslatableComponent("filled_map.scale", 1 << mapItemSavedData.scale).withStyle(ChatFormatting.GRAY));
                 list.add(new TranslatableComponent("filled_map.level", mapItemSavedData.scale, 4).withStyle(ChatFormatting.GRAY));
             } else {
-                list.add(new TranslatableComponent("filled_map.unknown", new Object[0]).withStyle(ChatFormatting.GRAY));
+                list.add(new TranslatableComponent("filled_map.unknown").withStyle(ChatFormatting.GRAY));
             }
         }
     }

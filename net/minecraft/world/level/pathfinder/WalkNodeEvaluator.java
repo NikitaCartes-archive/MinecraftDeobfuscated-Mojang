@@ -417,6 +417,9 @@ extends NodeEvaluator {
         if (block.is(BlockTags.FENCES) || block.is(BlockTags.WALLS) || block instanceof FenceGateBlock && !blockState.getValue(FenceGateBlock.OPEN).booleanValue()) {
             return BlockPathTypes.FENCE;
         }
+        if (!blockState.isPathfindable(blockGetter, blockPos, PathComputationType.LAND)) {
+            return BlockPathTypes.BLOCKED;
+        }
         FluidState fluidState = blockGetter.getFluidState(blockPos);
         if (fluidState.is(FluidTags.WATER)) {
             return BlockPathTypes.WATER;
@@ -424,10 +427,7 @@ extends NodeEvaluator {
         if (fluidState.is(FluidTags.LAVA)) {
             return BlockPathTypes.LAVA;
         }
-        if (blockState.isPathfindable(blockGetter, blockPos, PathComputationType.LAND)) {
-            return BlockPathTypes.OPEN;
-        }
-        return BlockPathTypes.BLOCKED;
+        return BlockPathTypes.OPEN;
     }
 
     private static boolean isBurningBlock(BlockState blockState) {

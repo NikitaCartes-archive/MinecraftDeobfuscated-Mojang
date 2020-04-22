@@ -34,7 +34,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class StonecutterBlock
 extends Block {
-    private static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.stonecutter", new Object[0]);
+    private static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.stonecutter");
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 9.0, 16.0);
 

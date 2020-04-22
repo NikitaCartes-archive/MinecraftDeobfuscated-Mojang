@@ -5,6 +5,7 @@ package net.minecraft.client.gui.components;
 
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
@@ -12,6 +13,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.LerpingBossEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.BossEvent;
@@ -27,7 +29,7 @@ extends GuiComponent {
         this.minecraft = minecraft;
     }
 
-    public void render() {
+    public void render(PoseStack poseStack) {
         if (this.events.isEmpty()) {
             return;
         }
@@ -38,27 +40,27 @@ extends GuiComponent {
             int l = j;
             RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
             this.minecraft.getTextureManager().bind(GUI_BARS_LOCATION);
-            this.drawBar(k, l, lerpingBossEvent);
-            String string = lerpingBossEvent.getName().getColoredString();
-            int m = this.minecraft.font.width(string);
+            this.drawBar(poseStack, k, l, lerpingBossEvent);
+            Component component = lerpingBossEvent.getName();
+            int m = this.minecraft.font.width(component);
             int n = i / 2 - m / 2;
             int o = l - 9;
-            this.minecraft.font.drawShadow(string, n, o, 0xFFFFFF);
+            this.minecraft.font.drawShadow(poseStack, component, (float)n, (float)o, 0xFFFFFF);
             if ((j += 10 + this.minecraft.font.lineHeight) < this.minecraft.getWindow().getGuiScaledHeight() / 3) continue;
             break;
         }
     }
 
-    private void drawBar(int i, int j, BossEvent bossEvent) {
+    private void drawBar(PoseStack poseStack, int i, int j, BossEvent bossEvent) {
         int k;
-        this.blit(i, j, 0, bossEvent.getColor().ordinal() * 5 * 2, 182, 5);
+        this.blit(poseStack, i, j, 0, bossEvent.getColor().ordinal() * 5 * 2, 182, 5);
         if (bossEvent.getOverlay() != BossEvent.BossBarOverlay.PROGRESS) {
-            this.blit(i, j, 0, 80 + (bossEvent.getOverlay().ordinal() - 1) * 5 * 2, 182, 5);
+            this.blit(poseStack, i, j, 0, 80 + (bossEvent.getOverlay().ordinal() - 1) * 5 * 2, 182, 5);
         }
         if ((k = (int)(bossEvent.getPercent() * 183.0f)) > 0) {
-            this.blit(i, j, 0, bossEvent.getColor().ordinal() * 5 * 2 + 5, k, 5);
+            this.blit(poseStack, i, j, 0, bossEvent.getColor().ordinal() * 5 * 2 + 5, k, 5);
             if (bossEvent.getOverlay() != BossEvent.BossBarOverlay.PROGRESS) {
-                this.blit(i, j, 0, 80 + (bossEvent.getOverlay().ordinal() - 1) * 5 * 2 + 5, k, 5);
+                this.blit(poseStack, i, j, 0, 80 + (bossEvent.getOverlay().ordinal() - 1) * 5 * 2 + 5, k, 5);
             }
         }
     }

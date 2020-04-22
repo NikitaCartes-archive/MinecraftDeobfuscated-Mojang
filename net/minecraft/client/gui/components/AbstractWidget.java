@@ -5,6 +5,7 @@ package net.minecraft.client.gui.components;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,9 +16,11 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -32,7 +35,7 @@ GuiEventListener {
     protected int height;
     public int x;
     public int y;
-    private String message;
+    private Component message;
     private boolean wasHovered;
     protected boolean isHovered;
     public boolean active = true;
@@ -41,12 +44,12 @@ GuiEventListener {
     protected long nextNarration = Long.MAX_VALUE;
     private boolean focused;
 
-    public AbstractWidget(int i, int j, int k, int l, String string) {
+    public AbstractWidget(int i, int j, int k, int l, Component component) {
         this.x = i;
         this.y = j;
         this.width = k;
         this.height = l;
-        this.message = string;
+        this.message = component;
     }
 
     public int getHeight() {
@@ -64,7 +67,7 @@ GuiEventListener {
     }
 
     @Override
-    public void render(int i, int j, float f) {
+    public void render(PoseStack poseStack, int i, int j, float f) {
         if (!this.visible) {
             return;
         }
@@ -81,7 +84,7 @@ GuiEventListener {
             }
         }
         if (this.visible) {
-            this.renderButton(i, j, f);
+            this.renderButton(poseStack, i, j, f);
         }
         this.narrate();
         this.wasHovered = this.isHovered();
@@ -89,20 +92,17 @@ GuiEventListener {
 
     protected void narrate() {
         String string;
-        if (this.active && this.isHovered() && Util.getMillis() > this.nextNarration && !(string = this.getNarrationMessage()).isEmpty()) {
+        if (this.active && this.isHovered() && Util.getMillis() > this.nextNarration && !(string = this.createNarrationMessage().getString()).isEmpty()) {
             NarratorChatListener.INSTANCE.sayNow(string);
             this.nextNarration = Long.MAX_VALUE;
         }
     }
 
-    protected String getNarrationMessage() {
-        if (this.getMessage().isEmpty()) {
-            return "";
-        }
-        return I18n.get("gui.narrate.button", this.getMessage());
+    protected MutableComponent createNarrationMessage() {
+        return new TranslatableComponent("gui.narrate.button", this.getMessage());
     }
 
-    public void renderButton(int i, int j, float f) {
+    public void renderButton(PoseStack poseStack, int i, int j, float f) {
         Minecraft minecraft = Minecraft.getInstance();
         Font font = minecraft.font;
         minecraft.getTextureManager().bind(WIDGETS_LOCATION);
@@ -111,14 +111,14 @@ GuiEventListener {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        this.blit(this.x, this.y, 0, 46 + k * 20, this.width / 2, this.height);
-        this.blit(this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + k * 20, this.width / 2, this.height);
-        this.renderBg(minecraft, i, j);
+        this.blit(poseStack, this.x, this.y, 0, 46 + k * 20, this.width / 2, this.height);
+        this.blit(poseStack, this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + k * 20, this.width / 2, this.height);
+        this.renderBg(poseStack, minecraft, i, j);
         int l = this.active ? 0xFFFFFF : 0xA0A0A0;
-        this.drawCenteredString(font, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, l | Mth.ceil(this.alpha * 255.0f) << 24);
+        this.drawCenteredString(poseStack, font, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, l | Mth.ceil(this.alpha * 255.0f) << 24);
     }
 
-    protected void renderBg(Minecraft minecraft, int i, int j) {
+    protected void renderBg(PoseStack poseStack, Minecraft minecraft, int i, int j) {
     }
 
     public void onClick(double d, double e) {
@@ -192,7 +192,7 @@ GuiEventListener {
         return this.active && this.visible && d >= (double)this.x && e >= (double)this.y && d < (double)(this.x + this.width) && e < (double)(this.y + this.height);
     }
 
-    public void renderToolTip(int i, int j) {
+    public void renderToolTip(PoseStack poseStack, int i, int j) {
     }
 
     public void playDownSound(SoundManager soundManager) {
@@ -211,18 +211,18 @@ GuiEventListener {
         this.alpha = f;
     }
 
-    public void setMessage(String string) {
-        if (!Objects.equals(string, this.message)) {
+    public void setMessage(Component component) {
+        if (!Objects.equals(component, this.message)) {
             this.queueNarration(250);
         }
-        this.message = string;
+        this.message = component;
     }
 
     public void queueNarration(int i) {
         this.nextNarration = Util.getMillis() + (long)i;
     }
 
-    public String getMessage() {
+    public Component getMessage() {
         return this.message;
     }
 

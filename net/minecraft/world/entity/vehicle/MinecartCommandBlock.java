@@ -42,7 +42,7 @@ extends AbstractMinecart {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.getEntityData().define(DATA_ID_COMMAND_NAME, "");
-        this.getEntityData().define(DATA_ID_LAST_OUTPUT, new TextComponent(""));
+        this.getEntityData().define(DATA_ID_LAST_OUTPUT, TextComponent.EMPTY);
     }
 
     @Override

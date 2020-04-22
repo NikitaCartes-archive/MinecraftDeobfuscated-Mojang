@@ -11,8 +11,13 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.LazyLoadedValue;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWCharModsCallbackI;
@@ -81,16 +86,6 @@ public class InputConstants {
         }
     }
 
-    @Nullable
-    public static String translateKeyCode(int i) {
-        return GLFW.glfwGetKeyName(i, -1);
-    }
-
-    @Nullable
-    public static String translateScanCode(int i) {
-        return GLFW.glfwGetKeyName(-1, i);
-    }
-
     static {
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         MethodType methodType = MethodType.methodType(Boolean.TYPE);
@@ -114,12 +109,14 @@ public class InputConstants {
         private final String name;
         private final Type type;
         private final int value;
+        private final LazyLoadedValue<Component> displayName;
         private static final Map<String, Key> NAME_MAP = Maps.newHashMap();
 
         private Key(String string, Type type, int i) {
             this.name = string;
             this.type = type;
             this.value = i;
+            this.displayName = new LazyLoadedValue<Component>(() -> (Component)type.displayTextSupplier.apply(i, string));
             NAME_MAP.put(string, this);
         }
 
@@ -133,6 +130,10 @@ public class InputConstants {
 
         public String getName() {
             return this.name;
+        }
+
+        public Component getDisplayName() {
+            return this.displayName.get();
         }
 
         public boolean equals(Object object) {
@@ -157,35 +158,39 @@ public class InputConstants {
 
     @Environment(value=EnvType.CLIENT)
     public static enum Type {
-        KEYSYM("key.keyboard"),
-        SCANCODE("scancode"),
-        MOUSE("key.mouse");
+        KEYSYM("key.keyboard", (integer, string) -> {
+            String string2 = GLFW.glfwGetKeyName(integer, -1);
+            return string2 != null ? new TextComponent(string2) : new TranslatableComponent((String)string);
+        }),
+        SCANCODE("scancode", (integer, string) -> {
+            String string2 = GLFW.glfwGetKeyName(-1, integer);
+            return string2 != null ? new TextComponent(string2) : new TranslatableComponent((String)string);
+        }),
+        MOUSE("key.mouse", (integer, string) -> new TranslatableComponent((String)string));
 
-        private static final String[] MOUSE_BUTTON_NAMES;
         private final Int2ObjectMap<Key> map = new Int2ObjectOpenHashMap<Key>();
         private final String defaultPrefix;
+        private final BiFunction<Integer, String, Component> displayTextSupplier;
 
         private static void addKey(Type type, String string, int i) {
             Key key = new Key(string, type, i);
             type.map.put(i, key);
         }
 
-        private Type(String string2) {
+        private Type(String string2, BiFunction<Integer, String, Component> biFunction) {
             this.defaultPrefix = string2;
+            this.displayTextSupplier = biFunction;
         }
 
-        public Key getOrCreate(int i) {
-            if (this.map.containsKey(i)) {
-                return (Key)this.map.get(i);
-            }
-            String string = this == MOUSE ? (i <= 2 ? "." + MOUSE_BUTTON_NAMES[i] : "." + (i + 1)) : "." + i;
-            Key key = new Key(this.defaultPrefix + string, this, i);
-            this.map.put(i, key);
-            return key;
-        }
-
-        public String getDefaultPrefix() {
-            return this.defaultPrefix;
+        public Key getOrCreate(int i2) {
+            return this.map.computeIfAbsent(i2, i -> {
+                int j = i;
+                if (this == MOUSE) {
+                    ++j;
+                }
+                String string = this.defaultPrefix + "." + j;
+                return new Key(string, this, i);
+            });
         }
 
         static {
@@ -318,7 +323,6 @@ public class InputConstants {
             Type.addKey(KEYSYM, "key.keyboard.print.screen", 283);
             Type.addKey(KEYSYM, "key.keyboard.world.1", 161);
             Type.addKey(KEYSYM, "key.keyboard.world.2", 162);
-            MOUSE_BUTTON_NAMES = new String[]{"left", "middle", "right"};
         }
     }
 }

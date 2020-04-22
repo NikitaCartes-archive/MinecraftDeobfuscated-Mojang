@@ -35,11 +35,11 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class EntitySelectorParser {
-    public static final SimpleCommandExceptionType ERROR_INVALID_NAME_OR_UUID = new SimpleCommandExceptionType(new TranslatableComponent("argument.entity.invalid", new Object[0]));
+    public static final SimpleCommandExceptionType ERROR_INVALID_NAME_OR_UUID = new SimpleCommandExceptionType(new TranslatableComponent("argument.entity.invalid"));
     public static final DynamicCommandExceptionType ERROR_UNKNOWN_SELECTOR_TYPE = new DynamicCommandExceptionType(object -> new TranslatableComponent("argument.entity.selector.unknown", object));
-    public static final SimpleCommandExceptionType ERROR_SELECTORS_NOT_ALLOWED = new SimpleCommandExceptionType(new TranslatableComponent("argument.entity.selector.not_allowed", new Object[0]));
-    public static final SimpleCommandExceptionType ERROR_MISSING_SELECTOR_TYPE = new SimpleCommandExceptionType(new TranslatableComponent("argument.entity.selector.missing", new Object[0]));
-    public static final SimpleCommandExceptionType ERROR_EXPECTED_END_OF_OPTIONS = new SimpleCommandExceptionType(new TranslatableComponent("argument.entity.options.unterminated", new Object[0]));
+    public static final SimpleCommandExceptionType ERROR_SELECTORS_NOT_ALLOWED = new SimpleCommandExceptionType(new TranslatableComponent("argument.entity.selector.not_allowed"));
+    public static final SimpleCommandExceptionType ERROR_MISSING_SELECTOR_TYPE = new SimpleCommandExceptionType(new TranslatableComponent("argument.entity.selector.missing"));
+    public static final SimpleCommandExceptionType ERROR_EXPECTED_END_OF_OPTIONS = new SimpleCommandExceptionType(new TranslatableComponent("argument.entity.options.unterminated"));
     public static final DynamicCommandExceptionType ERROR_EXPECTED_OPTION_VALUE = new DynamicCommandExceptionType(object -> new TranslatableComponent("argument.entity.options.valueless", object));
     public static final BiConsumer<Vec3, List<? extends Entity>> ORDER_ARBITRARY = (vec3, list) -> {};
     public static final BiConsumer<Vec3, List<? extends Entity>> ORDER_NEAREST = (vec3, list) -> list.sort((entity, entity2) -> Doubles.compare(entity.distanceToSqr((Vec3)vec3), entity2.distanceToSqr((Vec3)vec3)));
@@ -402,11 +402,11 @@ public class EntitySelectorParser {
     }
 
     private static void fillSelectorSuggestions(SuggestionsBuilder suggestionsBuilder) {
-        suggestionsBuilder.suggest("@p", (Message)new TranslatableComponent("argument.entity.selector.nearestPlayer", new Object[0]));
-        suggestionsBuilder.suggest("@a", (Message)new TranslatableComponent("argument.entity.selector.allPlayers", new Object[0]));
-        suggestionsBuilder.suggest("@r", (Message)new TranslatableComponent("argument.entity.selector.randomPlayer", new Object[0]));
-        suggestionsBuilder.suggest("@s", (Message)new TranslatableComponent("argument.entity.selector.self", new Object[0]));
-        suggestionsBuilder.suggest("@e", (Message)new TranslatableComponent("argument.entity.selector.allEntities", new Object[0]));
+        suggestionsBuilder.suggest("@p", (Message)new TranslatableComponent("argument.entity.selector.nearestPlayer"));
+        suggestionsBuilder.suggest("@a", (Message)new TranslatableComponent("argument.entity.selector.allPlayers"));
+        suggestionsBuilder.suggest("@r", (Message)new TranslatableComponent("argument.entity.selector.randomPlayer"));
+        suggestionsBuilder.suggest("@s", (Message)new TranslatableComponent("argument.entity.selector.self"));
+        suggestionsBuilder.suggest("@e", (Message)new TranslatableComponent("argument.entity.selector.allEntities"));
     }
 
     private CompletableFuture<Suggestions> suggestNameOrSelector(SuggestionsBuilder suggestionsBuilder, Consumer<SuggestionsBuilder> consumer) {

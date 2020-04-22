@@ -11,7 +11,6 @@ import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.ComponentRenderUtils;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -21,6 +20,8 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.StandingSignBlock;
@@ -73,14 +74,15 @@ extends BlockEntityRenderer<SignBlockEntity> {
         int n = (int)((double)NativeImage.getG(l) * 0.4);
         int o = (int)((double)NativeImage.getB(l) * 0.4);
         int p = NativeImage.combine(0, o, n, m);
-        for (int q = 0; q < 4; ++q) {
-            String string = signBlockEntity.getRenderMessage(q, component -> {
-                List<Component> list = ComponentRenderUtils.wrapComponents(component, 90, font, false, true);
-                return list.isEmpty() ? "" : list.get(0).getColoredString();
+        int q = 20;
+        for (int r = 0; r < 4; ++r) {
+            Component component2 = signBlockEntity.getRenderMessage(r, component -> {
+                List<Component> list = font.getSplitter().splitLines((Component)component, 90, Style.EMPTY, true);
+                return list.isEmpty() ? TextComponent.EMPTY : list.get(0);
             });
-            if (string == null) continue;
-            float r = -font.width(string) / 2;
-            font.drawInBatch(string, r, q * 10 - signBlockEntity.messages.length * 5, p, false, poseStack.last().pose(), multiBufferSource, false, 0, i);
+            if (component2 == null) continue;
+            float s = -font.width(component2) / 2;
+            font.drawInBatch(component2, s, (float)(r * 10 - 20), p, false, poseStack.last().pose(), multiBufferSource, false, 0, i);
         }
         poseStack.popPose();
     }

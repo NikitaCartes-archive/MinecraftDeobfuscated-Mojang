@@ -24,7 +24,7 @@ implements Packet<ClientGamePacketListener> {
     }
 
     public ClientboundPlayerCombatPacket(CombatTracker combatTracker, Event event) {
-        this(combatTracker, event, new TextComponent(""));
+        this(combatTracker, event, TextComponent.EMPTY);
     }
 
     public ClientboundPlayerCombatPacket(CombatTracker combatTracker, Event event, Component component) {

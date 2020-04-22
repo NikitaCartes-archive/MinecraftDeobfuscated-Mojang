@@ -236,7 +236,7 @@ MenuProvider {
 
     @Override
     public Component getDisplayName() {
-        return new TranslatableComponent("container.lectern", new Object[0]);
+        return new TranslatableComponent("container.lectern");
     }
 }
 

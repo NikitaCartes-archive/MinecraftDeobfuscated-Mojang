@@ -12,8 +12,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.storage.loot.PredicateManager;
@@ -25,6 +27,7 @@ implements ArgumentType<ResourceLocation> {
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_ADVANCEMENT = new DynamicCommandExceptionType(object -> new TranslatableComponent("advancement.advancementNotFound", object));
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_RECIPE = new DynamicCommandExceptionType(object -> new TranslatableComponent("recipe.notFound", object));
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_PREDICATE = new DynamicCommandExceptionType(object -> new TranslatableComponent("predicate.unknown", object));
+    private static final DynamicCommandExceptionType ERROR_UNKNOWN_ATTRIBUTE = new DynamicCommandExceptionType(object -> new TranslatableComponent("attribute.unknown", object));
 
     public static ResourceLocationArgument id() {
         return new ResourceLocationArgument();
@@ -53,6 +56,11 @@ implements ArgumentType<ResourceLocation> {
             throw ERROR_UNKNOWN_PREDICATE.create(resourceLocation);
         }
         return lootItemCondition;
+    }
+
+    public static Attribute getAttribute(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
+        ResourceLocation resourceLocation = commandContext.getArgument(string, ResourceLocation.class);
+        return Registry.ATTRIBUTES.getOptional(resourceLocation).orElseThrow(() -> ERROR_UNKNOWN_ATTRIBUTE.create(resourceLocation));
     }
 
     public static ResourceLocation getId(CommandContext<CommandSourceStack> commandContext, String string) {

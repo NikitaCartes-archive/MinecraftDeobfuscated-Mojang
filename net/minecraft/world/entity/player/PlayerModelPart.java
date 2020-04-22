@@ -27,7 +27,7 @@ public enum PlayerModelPart {
         this.bit = j;
         this.mask = 1 << j;
         this.id = string2;
-        this.name = new TranslatableComponent("options.modelPart." + string2, new Object[0]);
+        this.name = new TranslatableComponent("options.modelPart." + string2);
     }
 
     public int getMask() {

@@ -31,7 +31,7 @@ implements SpectatorMenuCategory {
 
     @Override
     public Component getPrompt() {
-        return new TranslatableComponent("spectatorMenu.root.prompt", new Object[0]);
+        return new TranslatableComponent("spectatorMenu.root.prompt");
     }
 }
 

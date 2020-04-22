@@ -15,7 +15,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.HttpUtil;
 
 public class PublishCommand {
-    private static final SimpleCommandExceptionType ERROR_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.publish.failed", new Object[0]));
+    private static final SimpleCommandExceptionType ERROR_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.publish.failed"));
     private static final DynamicCommandExceptionType ERROR_ALREADY_PUBLISHED = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.publish.alreadyPublished", object));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {

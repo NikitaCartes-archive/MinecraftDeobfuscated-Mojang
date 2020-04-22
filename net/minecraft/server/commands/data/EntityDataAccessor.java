@@ -26,7 +26,7 @@ import net.minecraft.world.entity.player.Player;
 
 public class EntityDataAccessor
 implements DataAccessor {
-    private static final SimpleCommandExceptionType ERROR_NO_PLAYERS = new SimpleCommandExceptionType(new TranslatableComponent("commands.data.entity.invalid", new Object[0]));
+    private static final SimpleCommandExceptionType ERROR_NO_PLAYERS = new SimpleCommandExceptionType(new TranslatableComponent("commands.data.entity.invalid"));
     public static final Function<String, DataCommands.DataProvider> PROVIDER = string -> new DataCommands.DataProvider((String)string){
         final /* synthetic */ String val$arg;
         {

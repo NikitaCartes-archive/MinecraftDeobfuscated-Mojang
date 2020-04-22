@@ -31,7 +31,7 @@ import net.minecraft.world.level.timers.FunctionTagCallback;
 import net.minecraft.world.level.timers.TimerQueue;
 
 public class ScheduleCommand {
-    private static final SimpleCommandExceptionType ERROR_SAME_TICK = new SimpleCommandExceptionType(new TranslatableComponent("commands.schedule.same_tick", new Object[0]));
+    private static final SimpleCommandExceptionType ERROR_SAME_TICK = new SimpleCommandExceptionType(new TranslatableComponent("commands.schedule.same_tick"));
     private static final DynamicCommandExceptionType ERROR_CANT_REMOVE = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.schedule.cleared.failure", object));
     private static final SuggestionProvider<CommandSourceStack> SUGGEST_SCHEDULE = (commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggest(((CommandSourceStack)commandContext.getSource()).getLevel().getLevelData().getScheduledEvents().getEventsIds(), suggestionsBuilder);
 

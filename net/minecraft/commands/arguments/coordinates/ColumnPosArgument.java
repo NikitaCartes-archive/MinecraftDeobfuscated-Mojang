@@ -27,7 +27,7 @@ import net.minecraft.server.level.ColumnPos;
 public class ColumnPosArgument
 implements ArgumentType<Coordinates> {
     private static final Collection<String> EXAMPLES = Arrays.asList("0 0", "~ ~", "~1 ~-2", "^ ^", "^-1 ^0");
-    public static final SimpleCommandExceptionType ERROR_NOT_COMPLETE = new SimpleCommandExceptionType(new TranslatableComponent("argument.pos2d.incomplete", new Object[0]));
+    public static final SimpleCommandExceptionType ERROR_NOT_COMPLETE = new SimpleCommandExceptionType(new TranslatableComponent("argument.pos2d.incomplete"));
 
     public static ColumnPosArgument columnPos() {
         return new ColumnPosArgument();

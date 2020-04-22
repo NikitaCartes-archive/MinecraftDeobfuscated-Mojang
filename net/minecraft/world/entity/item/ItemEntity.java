@@ -294,7 +294,7 @@ extends Entity {
         if (component != null) {
             return component;
         }
-        return new TranslatableComponent(this.getItem().getDescriptionId(), new Object[0]);
+        return new TranslatableComponent(this.getItem().getDescriptionId());
     }
 
     @Override
@@ -318,6 +318,14 @@ extends Entity {
 
     public void setItem(ItemStack itemStack) {
         this.getEntityData().set(DATA_ITEM, itemStack);
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
+        super.onSyncedDataUpdated(entityDataAccessor);
+        if (DATA_ITEM.equals(entityDataAccessor)) {
+            this.getItem().setEntityRepresentation(this);
+        }
     }
 
     @Nullable
@@ -370,6 +378,11 @@ extends Entity {
     public void makeFakeItem() {
         this.setNeverPickUp();
         this.age = 5999;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public float getSpin(float f) {
+        return ((float)this.getAge() + f) / 20.0f + this.bobOffs;
     }
 
     @Override

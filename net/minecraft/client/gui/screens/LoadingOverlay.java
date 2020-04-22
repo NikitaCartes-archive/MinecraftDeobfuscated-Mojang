@@ -5,6 +5,7 @@ package net.minecraft.client.gui.screens;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
@@ -46,7 +47,7 @@ extends Overlay {
     }
 
     @Override
-    public void render(int i, int j, float f) {
+    public void render(PoseStack poseStack, int i, int j, float f) {
         float o;
         int n;
         float h;
@@ -60,20 +61,20 @@ extends Overlay {
         float f2 = h = this.fadeInStart > -1L ? (float)(m - this.fadeInStart) / 500.0f : -1.0f;
         if (g >= 1.0f) {
             if (this.minecraft.screen != null) {
-                this.minecraft.screen.render(0, 0, f);
+                this.minecraft.screen.render(poseStack, 0, 0, f);
             }
             n = Mth.ceil((1.0f - Mth.clamp(g - 1.0f, 0.0f, 1.0f)) * 255.0f);
-            LoadingOverlay.fill(0, 0, k, l, 0xFFFFFF | n << 24);
+            LoadingOverlay.fill(poseStack, 0, 0, k, l, 0xFFFFFF | n << 24);
             o = 1.0f - Mth.clamp(g - 1.0f, 0.0f, 1.0f);
         } else if (this.fadeIn) {
             if (this.minecraft.screen != null && h < 1.0f) {
-                this.minecraft.screen.render(i, j, f);
+                this.minecraft.screen.render(poseStack, i, j, f);
             }
             n = Mth.ceil(Mth.clamp((double)h, 0.15, 1.0) * 255.0);
-            LoadingOverlay.fill(0, 0, k, l, 0xFFFFFF | n << 24);
+            LoadingOverlay.fill(poseStack, 0, 0, k, l, 0xFFFFFF | n << 24);
             o = Mth.clamp(h, 0.0f, 1.0f);
         } else {
-            LoadingOverlay.fill(0, 0, k, l, -1);
+            LoadingOverlay.fill(poseStack, 0, 0, k, l, -1);
             o = 1.0f;
         }
         n = (this.minecraft.getWindow().getGuiScaledWidth() - 256) / 2;
@@ -81,11 +82,11 @@ extends Overlay {
         this.minecraft.getTextureManager().bind(MOJANG_LOGO_LOCATION);
         RenderSystem.enableBlend();
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, o);
-        this.blit(n, p, 0, 0, 256, 256);
+        this.blit(poseStack, n, p, 0, 0, 256, 256);
         float q = this.reload.getActualProgress();
         this.currentProgress = Mth.clamp(this.currentProgress * 0.95f + q * 0.050000012f, 0.0f, 1.0f);
         if (g < 1.0f) {
-            this.drawProgressBar(k / 2 - 150, l / 4 * 3, k / 2 + 150, l / 4 * 3 + 10, 1.0f - Mth.clamp(g, 0.0f, 1.0f));
+            this.drawProgressBar(poseStack, k / 2 - 150, l / 4 * 3, k / 2 + 150, l / 4 * 3 + 10, 1.0f - Mth.clamp(g, 0.0f, 1.0f));
         }
         if (g >= 2.0f) {
             this.minecraft.setOverlay(null);
@@ -104,11 +105,11 @@ extends Overlay {
         }
     }
 
-    private void drawProgressBar(int i, int j, int k, int l, float f) {
+    private void drawProgressBar(PoseStack poseStack, int i, int j, int k, int l, float f) {
         int m = Mth.ceil((float)(k - i - 1) * this.currentProgress);
-        LoadingOverlay.fill(i - 1, j - 1, k + 1, l + 1, 0xFF000000 | Math.round((1.0f - f) * 255.0f) << 16 | Math.round((1.0f - f) * 255.0f) << 8 | Math.round((1.0f - f) * 255.0f));
-        LoadingOverlay.fill(i, j, k, l, -1);
-        LoadingOverlay.fill(i + 1, j + 1, i + m, l - 1, 0xFF000000 | (int)Mth.lerp(1.0f - f, 226.0f, 255.0f) << 16 | (int)Mth.lerp(1.0f - f, 40.0f, 255.0f) << 8 | (int)Mth.lerp(1.0f - f, 55.0f, 255.0f));
+        LoadingOverlay.fill(poseStack, i - 1, j - 1, k + 1, l + 1, 0xFF000000 | Math.round((1.0f - f) * 255.0f) << 16 | Math.round((1.0f - f) * 255.0f) << 8 | Math.round((1.0f - f) * 255.0f));
+        LoadingOverlay.fill(poseStack, i, j, k, l, -1);
+        LoadingOverlay.fill(poseStack, i + 1, j + 1, i + m, l - 1, 0xFF000000 | (int)Mth.lerp(1.0f - f, 226.0f, 255.0f) << 16 | (int)Mth.lerp(1.0f - f, 40.0f, 255.0f) << 8 | (int)Mth.lerp(1.0f - f, 55.0f, 255.0f));
     }
 
     @Override

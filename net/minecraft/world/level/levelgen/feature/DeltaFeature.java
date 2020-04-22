@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.Dynamic;
 import java.util.Random;
 import java.util.function.Function;
@@ -21,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class DeltaFeature
 extends Feature<DeltaFeatureConfiguration> {
+    private static final ImmutableList<Block> CANNOT_REPLACE = ImmutableList.of(Blocks.BEDROCK, Blocks.NETHER_BRICKS, Blocks.NETHER_BRICK_FENCE, Blocks.NETHER_BRICK_STAIRS, Blocks.NETHER_WART, Blocks.CHEST, Blocks.SPAWNER);
     private static final Direction[] DIRECTIONS = Direction.values();
 
     private static int calculateRadius(Random random, DeltaFeatureConfiguration deltaFeatureConfiguration) {
@@ -65,7 +67,11 @@ extends Feature<DeltaFeatureConfiguration> {
     }
 
     private static boolean isClear(LevelAccessor levelAccessor, BlockPos blockPos, DeltaFeatureConfiguration deltaFeatureConfiguration) {
-        if (levelAccessor.getBlockState(blockPos).getBlock() == deltaFeatureConfiguration.contents.getBlock()) {
+        Block block = levelAccessor.getBlockState(blockPos).getBlock();
+        if (block == deltaFeatureConfiguration.contents.getBlock()) {
+            return false;
+        }
+        if (CANNOT_REPLACE.contains(block)) {
             return false;
         }
         for (Direction direction : DIRECTIONS) {

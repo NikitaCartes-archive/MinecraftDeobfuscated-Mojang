@@ -5,9 +5,11 @@ package net.minecraft.network.chat;
 
 import net.minecraft.network.chat.BaseComponent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 public class TextComponent
 extends BaseComponent {
+    public static final Component EMPTY = new TextComponent("");
     private final String text;
 
     public TextComponent(String string) {
@@ -24,7 +26,7 @@ extends BaseComponent {
     }
 
     @Override
-    public TextComponent copy() {
+    public TextComponent toMutable() {
         return new TextComponent(this.text);
     }
 
@@ -46,8 +48,13 @@ extends BaseComponent {
     }
 
     @Override
-    public /* synthetic */ Component copy() {
-        return this.copy();
+    public /* synthetic */ BaseComponent toMutable() {
+        return this.toMutable();
+    }
+
+    @Override
+    public /* synthetic */ MutableComponent toMutable() {
+        return this.toMutable();
     }
 }
 

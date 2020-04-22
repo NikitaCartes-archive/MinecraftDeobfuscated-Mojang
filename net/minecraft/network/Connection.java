@@ -111,7 +111,7 @@ extends SimpleChannelInboundHandler<Packet<?>> {
 
     @Override
     public void channelInactive(ChannelHandlerContext channelHandlerContext) throws Exception {
-        this.disconnect(new TranslatableComponent("disconnect.endOfStream", new Object[0]));
+        this.disconnect(new TranslatableComponent("disconnect.endOfStream"));
     }
 
     @Override
@@ -127,7 +127,7 @@ extends SimpleChannelInboundHandler<Packet<?>> {
         }
         if (throwable instanceof TimeoutException) {
             LOGGER.debug("Timeout", throwable);
-            this.disconnect(new TranslatableComponent("disconnect.timeout", new Object[0]));
+            this.disconnect(new TranslatableComponent("disconnect.timeout"));
         } else {
             TranslatableComponent component = new TranslatableComponent("disconnect.genericReason", "Internal Exception: " + throwable);
             if (bl) {
@@ -362,7 +362,7 @@ extends SimpleChannelInboundHandler<Packet<?>> {
             if (this.getDisconnectedReason() != null) {
                 this.getPacketListener().onDisconnect(this.getDisconnectedReason());
             } else if (this.getPacketListener() != null) {
-                this.getPacketListener().onDisconnect(new TranslatableComponent("multiplayer.disconnect.generic", new Object[0]));
+                this.getPacketListener().onDisconnect(new TranslatableComponent("multiplayer.disconnect.generic"));
             }
         }
     }

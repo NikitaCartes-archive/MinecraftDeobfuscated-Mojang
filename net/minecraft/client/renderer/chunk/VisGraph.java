@@ -64,10 +64,6 @@ public class VisGraph {
         return visibilitySet;
     }
 
-    public Set<Direction> floodFill(BlockPos blockPos) {
-        return this.floodFill(VisGraph.getIndex(blockPos));
-    }
-
     private Set<Direction> floodFill(int i) {
         EnumSet<Direction> set = EnumSet.noneOf(Direction.class);
         IntArrayFIFOQueue intPriorityQueue = new IntArrayFIFOQueue();

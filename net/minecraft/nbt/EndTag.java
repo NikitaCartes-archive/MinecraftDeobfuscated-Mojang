@@ -72,7 +72,7 @@ implements Tag {
 
     @Override
     public Component getPrettyDisplay(String string, int i) {
-        return new TextComponent("");
+        return TextComponent.EMPTY;
     }
 
     @Override

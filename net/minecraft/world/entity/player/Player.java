@@ -28,6 +28,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
@@ -822,6 +823,11 @@ extends LivingEntity {
         }
     }
 
+    @Override
+    protected boolean onSoulSpeedBlock() {
+        return !this.abilities.flying && super.onSoulSpeedBlock();
+    }
+
     public void openTextEdit(SignBlockEntity signBlockEntity) {
     }
 
@@ -1137,14 +1143,14 @@ extends LivingEntity {
     public static Optional<Vec3> findRespawnPositionAndUseSpawnBlock(ServerLevel serverLevel, BlockPos blockPos, boolean bl, boolean bl2) {
         BlockState blockState = serverLevel.getBlockState(blockPos);
         Block block = blockState.getBlock();
-        if (block instanceof RespawnAnchorBlock && blockState.getValue(RespawnAnchorBlock.CHARGE) > 0) {
+        if (block instanceof RespawnAnchorBlock && blockState.getValue(RespawnAnchorBlock.CHARGE) > 0 && RespawnAnchorBlock.canSetSpawn(serverLevel)) {
             Optional<Vec3> optional = RespawnAnchorBlock.findStandUpPosition(EntityType.PLAYER, serverLevel, blockPos);
             if (!bl2 && optional.isPresent()) {
                 serverLevel.setBlock(blockPos, (BlockState)blockState.setValue(RespawnAnchorBlock.CHARGE, blockState.getValue(RespawnAnchorBlock.CHARGE) - 1), 3);
             }
             return optional;
         }
-        if (block instanceof BedBlock) {
+        if (block instanceof BedBlock && BedBlock.canSetSpawn(serverLevel, blockPos)) {
             return BedBlock.findStandUpPosition(EntityType.PLAYER, serverLevel, blockPos, 0);
         }
         if (!bl) {
@@ -1618,17 +1624,17 @@ extends LivingEntity {
 
     @Override
     public Component getDisplayName() {
-        Component component = PlayerTeam.formatNameForTeam(this.getTeam(), this.getName());
-        return this.decorateDisplayNameComponent(component);
+        MutableComponent mutableComponent = PlayerTeam.formatNameForTeam(this.getTeam(), this.getName());
+        return this.decorateDisplayNameComponent(mutableComponent);
     }
 
     public Component getDisplayNameWithUuid() {
         return new TextComponent("").append(this.getName()).append(" (").append(this.gameProfile.getId().toString()).append(")");
     }
 
-    private Component decorateDisplayNameComponent(Component component) {
+    private MutableComponent decorateDisplayNameComponent(MutableComponent mutableComponent) {
         String string = this.getGameProfile().getName();
-        return component.withStyle(style -> style.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tell " + string + " ")).setHoverEvent(this.createHoverEvent()).setInsertion(string));
+        return mutableComponent.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tell " + string + " ")).withHoverEvent(this.createHoverEvent()).withInsertion(string));
     }
 
     @Override
@@ -1823,11 +1829,11 @@ extends LivingEntity {
 
     public static enum BedSleepingProblem {
         NOT_POSSIBLE_HERE,
-        NOT_POSSIBLE_NOW(new TranslatableComponent("block.minecraft.bed.no_sleep", new Object[0])),
-        TOO_FAR_AWAY(new TranslatableComponent("block.minecraft.bed.too_far_away", new Object[0])),
-        OBSTRUCTED(new TranslatableComponent("block.minecraft.bed.obstructed", new Object[0])),
+        NOT_POSSIBLE_NOW(new TranslatableComponent("block.minecraft.bed.no_sleep")),
+        TOO_FAR_AWAY(new TranslatableComponent("block.minecraft.bed.too_far_away")),
+        OBSTRUCTED(new TranslatableComponent("block.minecraft.bed.obstructed")),
         OTHER_PROBLEM,
-        NOT_SAFE(new TranslatableComponent("block.minecraft.bed.not_safe", new Object[0]));
+        NOT_SAFE(new TranslatableComponent("block.minecraft.bed.not_safe"));
 
         @Nullable
         private final Component message;

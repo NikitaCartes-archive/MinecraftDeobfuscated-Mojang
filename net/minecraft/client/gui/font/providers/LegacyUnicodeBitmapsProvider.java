@@ -8,6 +8,8 @@ import com.google.gson.JsonObject;
 import com.mojang.blaze3d.font.GlyphProvider;
 import com.mojang.blaze3d.font.RawGlyph;
 import com.mojang.blaze3d.platform.NativeImage;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
@@ -37,22 +39,22 @@ implements GlyphProvider {
         this.sizes = bs;
         this.texturePattern = string;
         for (int i = 0; i < 256; ++i) {
-            char c = (char)(i * 256);
-            ResourceLocation resourceLocation = this.getSheetLocation(c);
+            int j = i * 256;
+            ResourceLocation resourceLocation = this.getSheetLocation(j);
             try (Resource resource = this.resourceManager.getResource(resourceLocation);
                  NativeImage nativeImage = NativeImage.read(NativeImage.Format.RGBA, resource.getInputStream());){
                 if (nativeImage.getWidth() == 256 && nativeImage.getHeight() == 256) {
-                    for (int j = 0; j < 256; ++j) {
-                        byte b = bs[c + j];
+                    for (int k = 0; k < 256; ++k) {
+                        byte b = bs[j + k];
                         if (b == 0 || LegacyUnicodeBitmapsProvider.getLeft(b) <= LegacyUnicodeBitmapsProvider.getRight(b)) continue;
-                        bs[c + j] = 0;
+                        bs[j + k] = 0;
                     }
                     continue;
                 }
             } catch (IOException iOException) {
                 // empty catch block
             }
-            Arrays.fill(bs, (int)c, c + 256, (byte)0);
+            Arrays.fill(bs, j, j + 256, (byte)0);
         }
     }
 
@@ -61,21 +63,34 @@ implements GlyphProvider {
         this.textures.values().forEach(NativeImage::close);
     }
 
-    private ResourceLocation getSheetLocation(char c) {
-        ResourceLocation resourceLocation = new ResourceLocation(String.format(this.texturePattern, String.format("%02x", c / 256)));
+    private ResourceLocation getSheetLocation(int i) {
+        ResourceLocation resourceLocation = new ResourceLocation(String.format(this.texturePattern, String.format("%02x", i / 256)));
         return new ResourceLocation(resourceLocation.getNamespace(), "textures/" + resourceLocation.getPath());
     }
 
     @Override
     @Nullable
-    public RawGlyph getGlyph(char c) {
+    public RawGlyph getGlyph(int i) {
         NativeImage nativeImage;
-        byte b = this.sizes[c];
-        if (b != 0 && (nativeImage = this.textures.computeIfAbsent(this.getSheetLocation(c), this::loadTexture)) != null) {
-            int i = LegacyUnicodeBitmapsProvider.getLeft(b);
-            return new Glyph(c % 16 * 16 + i, (c & 0xFF) / 16 * 16, LegacyUnicodeBitmapsProvider.getRight(b) - i, 16, nativeImage);
+        if (i < 0 || i > 65535) {
+            return null;
+        }
+        byte b = this.sizes[i];
+        if (b != 0 && (nativeImage = this.textures.computeIfAbsent(this.getSheetLocation(i), this::loadTexture)) != null) {
+            int j = LegacyUnicodeBitmapsProvider.getLeft(b);
+            return new Glyph(i % 16 * 16 + j, (i & 0xFF) / 16 * 16, LegacyUnicodeBitmapsProvider.getRight(b) - j, 16, nativeImage);
         }
         return null;
+    }
+
+    @Override
+    public IntSet getSupportedGlyphs() {
+        IntOpenHashSet intSet = new IntOpenHashSet();
+        for (int i = 0; i < 65535; ++i) {
+            if (this.sizes[i] == 0) continue;
+            intSet.add(i);
+        }
+        return intSet;
     }
 
     /*

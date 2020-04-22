@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class WrappedMinMaxBounds {
     public static final WrappedMinMaxBounds ANY = new WrappedMinMaxBounds(null, null);
-    public static final SimpleCommandExceptionType ERROR_INTS_ONLY = new SimpleCommandExceptionType(new TranslatableComponent("argument.range.ints", new Object[0]));
+    public static final SimpleCommandExceptionType ERROR_INTS_ONLY = new SimpleCommandExceptionType(new TranslatableComponent("argument.range.ints"));
     private final Float min;
     private final Float max;
 

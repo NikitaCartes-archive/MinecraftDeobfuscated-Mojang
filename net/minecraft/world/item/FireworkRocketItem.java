@@ -75,7 +75,7 @@ extends Item {
             return;
         }
         if (compoundTag.contains("Flight", 99)) {
-            list.add(new TranslatableComponent("item.minecraft.firework_rocket.flight", new Object[0]).append(" ").append(String.valueOf(compoundTag.getByte("Flight"))).withStyle(ChatFormatting.GRAY));
+            list.add(new TranslatableComponent("item.minecraft.firework_rocket.flight").append(" ").append(String.valueOf(compoundTag.getByte("Flight"))).withStyle(ChatFormatting.GRAY));
         }
         if (!(listTag = compoundTag.getList("Explosions", 10)).isEmpty()) {
             for (int i = 0; i < listTag.size(); ++i) {

@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens.recipebook;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -46,7 +47,7 @@ extends StateSwitchingButton {
     }
 
     @Override
-    public void renderButton(int i, int j, float f) {
+    public void renderButton(PoseStack poseStack, int i, int j, float f) {
         if (this.animationTime > 0.0f) {
             float g = 1.0f + 0.1f * (float)Math.sin(this.animationTime / 15.0f * (float)Math.PI);
             RenderSystem.pushMatrix();
@@ -70,7 +71,7 @@ extends StateSwitchingButton {
             m -= 2;
         }
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        this.blit(m, this.y, k, l, this.width, this.height);
+        this.blit(poseStack, m, this.y, k, l, this.width, this.height);
         RenderSystem.enableDepthTest();
         this.renderIcon(minecraft.getItemRenderer());
         if (this.animationTime > 0.0f) {

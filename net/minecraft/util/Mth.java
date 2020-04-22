@@ -277,7 +277,7 @@ public class Mth {
         return j + 1;
     }
 
-    private static boolean isPowerOfTwo(int i) {
+    public static boolean isPowerOfTwo(int i) {
         return i != 0 && (i & i - 1) == 0;
     }
 
@@ -288,23 +288,6 @@ public class Mth {
 
     public static int log2(int i) {
         return Mth.ceillog2(i) - (Mth.isPowerOfTwo(i) ? 0 : 1);
-    }
-
-    public static int roundUp(int i, int j) {
-        int k;
-        if (j == 0) {
-            return 0;
-        }
-        if (i == 0) {
-            return j;
-        }
-        if (i < 0) {
-            j *= -1;
-        }
-        if ((k = i % j) == 0) {
-            return i;
-        }
-        return i + j - k;
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -564,6 +547,10 @@ public class Mth {
     @Environment(value=EnvType.CLIENT)
     public static float triangleWave(float f, float g) {
         return (Math.abs(f % g - g * 0.5f) - g * 0.25f) / (g * 0.25f);
+    }
+
+    public static float square(float f) {
+        return f * f;
     }
 
     static {

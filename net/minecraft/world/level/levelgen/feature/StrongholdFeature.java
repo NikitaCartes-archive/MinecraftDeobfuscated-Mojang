@@ -84,7 +84,7 @@ extends StructureFeature<NoneFeatureConfiguration> {
     @Override
     @Nullable
     public BlockPos getNearestGeneratedFeature(ServerLevel serverLevel, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, BlockPos blockPos, int i, boolean bl) {
-        if (!chunkGenerator.getBiomeSource().canGenerateStructure(this)) {
+        if (!chunkGenerator.canGenerateStructure(this)) {
             return null;
         }
         if (this.currentSeed != serverLevel.getSeed()) {

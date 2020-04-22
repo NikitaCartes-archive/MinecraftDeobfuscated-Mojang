@@ -11,6 +11,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,7 +25,7 @@ public abstract class Team {
 
     public abstract String getName();
 
-    public abstract Component getFormattedName(Component var1);
+    public abstract MutableComponent getFormattedName(Component var1);
 
     @Environment(value=EnvType.CLIENT)
     public abstract boolean canSeeFriendlyInvisibles();
@@ -64,7 +65,7 @@ public abstract class Team {
         }
 
         public Component getDisplayName() {
-            return new TranslatableComponent("team.collision." + this.name, new Object[0]);
+            return new TranslatableComponent("team.collision." + this.name);
         }
 
         static {
@@ -93,7 +94,7 @@ public abstract class Team {
         }
 
         public Component getDisplayName() {
-            return new TranslatableComponent("team.visibility." + this.name, new Object[0]);
+            return new TranslatableComponent("team.visibility." + this.name);
         }
 
         static {

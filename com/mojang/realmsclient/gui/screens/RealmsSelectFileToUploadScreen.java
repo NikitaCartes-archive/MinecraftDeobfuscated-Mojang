@@ -4,6 +4,7 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.gui.screens.RealmsGenericErrorScreen;
 import com.mojang.realmsclient.gui.screens.RealmsResetWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsUploadScreen;
@@ -19,6 +20,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsObjectSelectionList;
@@ -77,18 +81,18 @@ extends RealmsScreen {
             this.loadLevelList();
         } catch (Exception exception) {
             LOGGER.error("Couldn't load level list", (Throwable)exception);
-            this.minecraft.setScreen(new RealmsGenericErrorScreen("Unable to load worlds", exception.getMessage(), this.lastScreen));
+            this.minecraft.setScreen(new RealmsGenericErrorScreen(new TextComponent("Unable to load worlds"), new TextComponent(exception.getMessage()), this.lastScreen));
             return;
         }
         this.worldLang = I18n.get("selectWorld.world", new Object[0]);
         this.conversionLang = I18n.get("selectWorld.conversion", new Object[0]);
         this.addWidget(this.worldSelectionList);
-        this.uploadButton = this.addButton(new Button(this.width / 2 - 154, this.height - 32, 153, 20, I18n.get("mco.upload.button.name", new Object[0]), button -> this.upload()));
+        this.uploadButton = this.addButton(new Button(this.width / 2 - 154, this.height - 32, 153, 20, new TranslatableComponent("mco.upload.button.name"), button -> this.upload()));
         this.uploadButton.active = this.selectedWorld >= 0 && this.selectedWorld < this.levelList.size();
-        this.addButton(new Button(this.width / 2 + 6, this.height - 32, 153, 20, I18n.get("gui.back", new Object[0]), button -> this.minecraft.setScreen(this.lastScreen)));
-        this.titleLabel = this.addWidget(new RealmsLabel(I18n.get("mco.upload.select.world.title", new Object[0]), this.width / 2, 13, 0xFFFFFF));
-        this.subtitleLabel = this.addWidget(new RealmsLabel(I18n.get("mco.upload.select.world.subtitle", new Object[0]), this.width / 2, RealmsSelectFileToUploadScreen.row(-1), 0xA0A0A0));
-        this.noWorldsLabel = this.levelList.isEmpty() ? this.addWidget(new RealmsLabel(I18n.get("mco.upload.select.world.none", new Object[0]), this.width / 2, this.height / 2 - 20, 0xFFFFFF)) : null;
+        this.addButton(new Button(this.width / 2 + 6, this.height - 32, 153, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)));
+        this.titleLabel = this.addWidget(new RealmsLabel(new TranslatableComponent("mco.upload.select.world.title"), this.width / 2, 13, 0xFFFFFF));
+        this.subtitleLabel = this.addWidget(new RealmsLabel(new TranslatableComponent("mco.upload.select.world.subtitle"), this.width / 2, RealmsSelectFileToUploadScreen.row(-1), 0xA0A0A0));
+        this.noWorldsLabel = this.levelList.isEmpty() ? this.addWidget(new RealmsLabel(new TranslatableComponent("mco.upload.select.world.none"), this.width / 2, this.height / 2 - 20, 0xFFFFFF)) : null;
         this.narrateLabels();
     }
 
@@ -105,15 +109,15 @@ extends RealmsScreen {
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        this.renderBackground();
-        this.worldSelectionList.render(i, j, f);
-        this.titleLabel.render(this);
-        this.subtitleLabel.render(this);
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        this.renderBackground(poseStack);
+        this.worldSelectionList.render(poseStack, i, j, f);
+        this.titleLabel.render(this, poseStack);
+        this.subtitleLabel.render(this, poseStack);
         if (this.noWorldsLabel != null) {
-            this.noWorldsLabel.render(this);
+            this.noWorldsLabel.render(this, poseStack);
         }
-        super.render(i, j, f);
+        super.render(poseStack, i, j, f);
     }
 
     @Override
@@ -143,8 +147,8 @@ extends RealmsScreen {
         }
 
         @Override
-        public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            this.renderItem(this.levelSummary, i, k, j);
+        public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+            this.renderItem(poseStack, this.levelSummary, i, k, j);
         }
 
         @Override
@@ -153,7 +157,7 @@ extends RealmsScreen {
             return true;
         }
 
-        protected void renderItem(LevelSummary levelSummary, int i, int j, int k) {
+        protected void renderItem(PoseStack poseStack, LevelSummary levelSummary, int i, int j, int k) {
             String string = levelSummary.getLevelName();
             if (string == null || string.isEmpty()) {
                 string = RealmsSelectFileToUploadScreen.this.worldLang + " " + (i + 1);
@@ -173,9 +177,9 @@ extends RealmsScreen {
                     string3 = string3 + ", " + I18n.get("selectWorld.cheats", new Object[0]);
                 }
             }
-            RealmsSelectFileToUploadScreen.this.font.draw(string, j + 2, k + 1, 0xFFFFFF);
-            RealmsSelectFileToUploadScreen.this.font.draw(string2, j + 2, k + 12, 0x808080);
-            RealmsSelectFileToUploadScreen.this.font.draw(string3, j + 2, k + 12 + 10, 0x808080);
+            RealmsSelectFileToUploadScreen.this.font.draw(poseStack, string, (float)(j + 2), (float)(k + 1), 0xFFFFFF);
+            RealmsSelectFileToUploadScreen.this.font.draw(poseStack, string2, (float)(j + 2), (float)(k + 12), 0x808080);
+            RealmsSelectFileToUploadScreen.this.font.draw(poseStack, string3, (float)(j + 2), (float)(k + 12 + 10), 0x808080);
         }
     }
 
@@ -201,8 +205,8 @@ extends RealmsScreen {
         }
 
         @Override
-        public void renderBackground() {
-            RealmsSelectFileToUploadScreen.this.renderBackground();
+        public void renderBackground(PoseStack poseStack) {
+            RealmsSelectFileToUploadScreen.this.renderBackground(poseStack);
         }
 
         @Override

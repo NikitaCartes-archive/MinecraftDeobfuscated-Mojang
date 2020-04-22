@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractTreeGrower {
     @Nullable
-    protected abstract ConfiguredFeature<? extends TreeConfiguration, ?> getConfiguredFeature(Random var1, boolean var2);
+    protected abstract ConfiguredFeature<TreeConfiguration, ?> getConfiguredFeature(Random var1, boolean var2);
 
     public boolean growTree(ServerLevel serverLevel, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockState blockState, Random random) {
         ConfiguredFeature<TreeConfiguration, ?> configuredFeature = this.getConfiguredFeature(random, this.hasFlowers(serverLevel, blockPos));

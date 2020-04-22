@@ -19,8 +19,8 @@ public class MovementTutorialStepInstance
 implements TutorialStepInstance {
     private static final Component MOVE_TITLE = new TranslatableComponent("tutorial.move.title", Tutorial.key("forward"), Tutorial.key("left"), Tutorial.key("back"), Tutorial.key("right"));
     private static final Component MOVE_DESCRIPTION = new TranslatableComponent("tutorial.move.description", Tutorial.key("jump"));
-    private static final Component LOOK_TITLE = new TranslatableComponent("tutorial.look.title", new Object[0]);
-    private static final Component LOOK_DESCRIPTION = new TranslatableComponent("tutorial.look.description", new Object[0]);
+    private static final Component LOOK_TITLE = new TranslatableComponent("tutorial.look.title");
+    private static final Component LOOK_DESCRIPTION = new TranslatableComponent("tutorial.look.description");
     private final Tutorial tutorial;
     private TutorialToast moveToast;
     private TutorialToast lookToast;

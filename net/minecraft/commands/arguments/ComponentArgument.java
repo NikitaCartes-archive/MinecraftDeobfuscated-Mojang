@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
 public class ComponentArgument
@@ -34,7 +35,7 @@ implements ArgumentType<Component> {
     @Override
     public Component parse(StringReader stringReader) throws CommandSyntaxException {
         try {
-            Component component = Component.Serializer.fromJson(stringReader);
+            MutableComponent component = Component.Serializer.fromJson(stringReader);
             if (component == null) {
                 throw ERROR_INVALID_JSON.createWithContext(stringReader, "empty");
             }

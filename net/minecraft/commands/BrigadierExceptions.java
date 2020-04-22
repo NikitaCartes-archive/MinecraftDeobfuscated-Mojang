@@ -20,23 +20,23 @@ implements BuiltInExceptionProvider {
     private static final Dynamic2CommandExceptionType LONG_TOO_SMALL = new Dynamic2CommandExceptionType((object, object2) -> new TranslatableComponent("argument.long.low", object2, object));
     private static final Dynamic2CommandExceptionType LONG_TOO_BIG = new Dynamic2CommandExceptionType((object, object2) -> new TranslatableComponent("argument.long.big", object2, object));
     private static final DynamicCommandExceptionType LITERAL_INCORRECT = new DynamicCommandExceptionType(object -> new TranslatableComponent("argument.literal.incorrect", object));
-    private static final SimpleCommandExceptionType READER_EXPECTED_START_OF_QUOTE = new SimpleCommandExceptionType(new TranslatableComponent("parsing.quote.expected.start", new Object[0]));
-    private static final SimpleCommandExceptionType READER_EXPECTED_END_OF_QUOTE = new SimpleCommandExceptionType(new TranslatableComponent("parsing.quote.expected.end", new Object[0]));
+    private static final SimpleCommandExceptionType READER_EXPECTED_START_OF_QUOTE = new SimpleCommandExceptionType(new TranslatableComponent("parsing.quote.expected.start"));
+    private static final SimpleCommandExceptionType READER_EXPECTED_END_OF_QUOTE = new SimpleCommandExceptionType(new TranslatableComponent("parsing.quote.expected.end"));
     private static final DynamicCommandExceptionType READER_INVALID_ESCAPE = new DynamicCommandExceptionType(object -> new TranslatableComponent("parsing.quote.escape", object));
     private static final DynamicCommandExceptionType READER_INVALID_BOOL = new DynamicCommandExceptionType(object -> new TranslatableComponent("parsing.bool.invalid", object));
     private static final DynamicCommandExceptionType READER_INVALID_INT = new DynamicCommandExceptionType(object -> new TranslatableComponent("parsing.int.invalid", object));
-    private static final SimpleCommandExceptionType READER_EXPECTED_INT = new SimpleCommandExceptionType(new TranslatableComponent("parsing.int.expected", new Object[0]));
+    private static final SimpleCommandExceptionType READER_EXPECTED_INT = new SimpleCommandExceptionType(new TranslatableComponent("parsing.int.expected"));
     private static final DynamicCommandExceptionType READER_INVALID_LONG = new DynamicCommandExceptionType(object -> new TranslatableComponent("parsing.long.invalid", object));
-    private static final SimpleCommandExceptionType READER_EXPECTED_LONG = new SimpleCommandExceptionType(new TranslatableComponent("parsing.long.expected", new Object[0]));
+    private static final SimpleCommandExceptionType READER_EXPECTED_LONG = new SimpleCommandExceptionType(new TranslatableComponent("parsing.long.expected"));
     private static final DynamicCommandExceptionType READER_INVALID_DOUBLE = new DynamicCommandExceptionType(object -> new TranslatableComponent("parsing.double.invalid", object));
-    private static final SimpleCommandExceptionType READER_EXPECTED_DOUBLE = new SimpleCommandExceptionType(new TranslatableComponent("parsing.double.expected", new Object[0]));
+    private static final SimpleCommandExceptionType READER_EXPECTED_DOUBLE = new SimpleCommandExceptionType(new TranslatableComponent("parsing.double.expected"));
     private static final DynamicCommandExceptionType READER_INVALID_FLOAT = new DynamicCommandExceptionType(object -> new TranslatableComponent("parsing.float.invalid", object));
-    private static final SimpleCommandExceptionType READER_EXPECTED_FLOAT = new SimpleCommandExceptionType(new TranslatableComponent("parsing.float.expected", new Object[0]));
-    private static final SimpleCommandExceptionType READER_EXPECTED_BOOL = new SimpleCommandExceptionType(new TranslatableComponent("parsing.bool.expected", new Object[0]));
+    private static final SimpleCommandExceptionType READER_EXPECTED_FLOAT = new SimpleCommandExceptionType(new TranslatableComponent("parsing.float.expected"));
+    private static final SimpleCommandExceptionType READER_EXPECTED_BOOL = new SimpleCommandExceptionType(new TranslatableComponent("parsing.bool.expected"));
     private static final DynamicCommandExceptionType READER_EXPECTED_SYMBOL = new DynamicCommandExceptionType(object -> new TranslatableComponent("parsing.expected", object));
-    private static final SimpleCommandExceptionType DISPATCHER_UNKNOWN_COMMAND = new SimpleCommandExceptionType(new TranslatableComponent("command.unknown.command", new Object[0]));
-    private static final SimpleCommandExceptionType DISPATCHER_UNKNOWN_ARGUMENT = new SimpleCommandExceptionType(new TranslatableComponent("command.unknown.argument", new Object[0]));
-    private static final SimpleCommandExceptionType DISPATCHER_EXPECTED_ARGUMENT_SEPARATOR = new SimpleCommandExceptionType(new TranslatableComponent("command.expected.separator", new Object[0]));
+    private static final SimpleCommandExceptionType DISPATCHER_UNKNOWN_COMMAND = new SimpleCommandExceptionType(new TranslatableComponent("command.unknown.command"));
+    private static final SimpleCommandExceptionType DISPATCHER_UNKNOWN_ARGUMENT = new SimpleCommandExceptionType(new TranslatableComponent("command.unknown.argument"));
+    private static final SimpleCommandExceptionType DISPATCHER_EXPECTED_ARGUMENT_SEPARATOR = new SimpleCommandExceptionType(new TranslatableComponent("command.expected.separator"));
     private static final DynamicCommandExceptionType DISPATCHER_PARSE_EXCEPTION = new DynamicCommandExceptionType(object -> new TranslatableComponent("command.exception", object));
 
     @Override

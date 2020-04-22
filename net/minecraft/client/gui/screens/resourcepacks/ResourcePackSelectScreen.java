@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens.resourcepacks;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
 import java.util.Collections;
 import net.fabricmc.api.EnvType;
@@ -18,6 +19,7 @@ import net.minecraft.client.gui.screens.resourcepacks.lists.ResourcePackList;
 import net.minecraft.client.gui.screens.resourcepacks.lists.SelectedResourcePackList;
 import net.minecraft.client.resources.UnopenedResourcePack;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.packs.repository.PackRepository;
 
@@ -29,13 +31,13 @@ extends OptionsSubScreen {
     private boolean changed;
 
     public ResourcePackSelectScreen(Screen screen, Options options) {
-        super(screen, options, new TranslatableComponent("resourcePack.title", new Object[0]));
+        super(screen, options, new TranslatableComponent("resourcePack.title"));
     }
 
     @Override
     protected void init() {
-        this.addButton(new Button(this.width / 2 - 154, this.height - 48, 150, 20, I18n.get("resourcePack.openFolder", new Object[0]), button -> Util.getPlatform().openFile(this.minecraft.getResourcePackDirectory())));
-        this.addButton(new Button(this.width / 2 + 4, this.height - 48, 150, 20, I18n.get("gui.done", new Object[0]), button -> {
+        this.addButton(new Button(this.width / 2 - 154, this.height - 48, 150, 20, new TranslatableComponent("resourcePack.openFolder"), button -> Util.getPlatform().openFile(this.minecraft.getResourcePackDirectory())));
+        this.addButton(new Button(this.width / 2 + 4, this.height - 48, 150, 20, CommonComponents.GUI_DONE, button -> {
             if (this.changed) {
                 ArrayList<UnopenedResourcePack> list = Lists.newArrayList();
                 for (ResourcePackList.ResourcePackEntry resourcePackEntry : this.selectedResourcePackList.children()) {
@@ -108,13 +110,13 @@ extends OptionsSubScreen {
     }
 
     @Override
-    public void render(int i, int j, float f) {
+    public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderDirtBackground(0);
-        this.availableResourcePackList.render(i, j, f);
-        this.selectedResourcePackList.render(i, j, f);
-        this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 16, 0xFFFFFF);
-        this.drawCenteredString(this.font, I18n.get("resourcePack.folderInfo", new Object[0]), this.width / 2 - 77, this.height - 26, 0x808080);
-        super.render(i, j, f);
+        this.availableResourcePackList.render(poseStack, i, j, f);
+        this.selectedResourcePackList.render(poseStack, i, j, f);
+        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 16, 0xFFFFFF);
+        this.drawCenteredString(poseStack, this.font, I18n.get("resourcePack.folderInfo", new Object[0]), this.width / 2 - 77, this.height - 26, 0x808080);
+        super.render(poseStack, i, j, f);
     }
 
     public void setChanged() {

@@ -13,7 +13,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.dimension.DimensionType;
 
 public class DifficultyCommand {
     private static final DynamicCommandExceptionType ERROR_ALREADY_DIFFICULT = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.difficulty.failure", object));
@@ -32,7 +31,7 @@ public class DifficultyCommand {
 
     public static int setDifficulty(CommandSourceStack commandSourceStack, Difficulty difficulty) throws CommandSyntaxException {
         MinecraftServer minecraftServer = commandSourceStack.getServer();
-        if (minecraftServer.getLevel(DimensionType.OVERWORLD).getDifficulty() == difficulty) {
+        if (minecraftServer.getWorldData().getDifficulty() == difficulty) {
             throw ERROR_ALREADY_DIFFICULT.create(difficulty.getKey());
         }
         minecraftServer.setDifficulty(difficulty, true);

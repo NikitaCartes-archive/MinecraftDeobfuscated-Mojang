@@ -123,7 +123,7 @@ implements SimpleWaterloggedBlock {
                     if (chestBlockEntity2.hasCustomName()) {
                         return chestBlockEntity2.getDisplayName();
                     }
-                    return new TranslatableComponent("container.chestDouble", new Object[0]);
+                    return new TranslatableComponent("container.chestDouble");
                 }
             });
         }

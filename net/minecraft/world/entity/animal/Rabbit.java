@@ -201,7 +201,8 @@ extends Animal {
     }
 
     @Override
-    public void updateSprintingState() {
+    public boolean canSpawnSprintParticle() {
+        return false;
     }
 
     private void facePoint(double d, double e) {
@@ -328,7 +329,7 @@ extends Animal {
             this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<Player>((Mob)this, Player.class, true));
             this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<Wolf>((Mob)this, Wolf.class, true));
             if (!this.hasCustomName()) {
-                this.setCustomName(new TranslatableComponent(Util.makeDescriptionId("entity", KILLER_BUNNY), new Object[0]));
+                this.setCustomName(new TranslatableComponent(Util.makeDescriptionId("entity", KILLER_BUNNY)));
             }
         }
         this.entityData.set(DATA_TYPE_ID, i);
@@ -372,7 +373,7 @@ extends Animal {
     @Environment(value=EnvType.CLIENT)
     public void handleEntityEvent(byte b) {
         if (b == 1) {
-            this.doSprintParticleEffect();
+            this.spawnSprintParticle();
             this.jumpDuration = 10;
             this.jumpTicks = 0;
         } else {

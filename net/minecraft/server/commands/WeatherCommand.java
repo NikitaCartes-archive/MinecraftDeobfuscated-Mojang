@@ -21,7 +21,7 @@ public class WeatherCommand {
         commandSourceStack.getLevel().getLevelData().setThunderTime(0);
         commandSourceStack.getLevel().getLevelData().setRaining(false);
         commandSourceStack.getLevel().getLevelData().setThundering(false);
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.weather.set.clear", new Object[0]), true);
+        commandSourceStack.sendSuccess(new TranslatableComponent("commands.weather.set.clear"), true);
         return i;
     }
 
@@ -31,7 +31,7 @@ public class WeatherCommand {
         commandSourceStack.getLevel().getLevelData().setThunderTime(i);
         commandSourceStack.getLevel().getLevelData().setRaining(true);
         commandSourceStack.getLevel().getLevelData().setThundering(false);
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.weather.set.rain", new Object[0]), true);
+        commandSourceStack.sendSuccess(new TranslatableComponent("commands.weather.set.rain"), true);
         return i;
     }
 
@@ -41,7 +41,7 @@ public class WeatherCommand {
         commandSourceStack.getLevel().getLevelData().setThunderTime(i);
         commandSourceStack.getLevel().getLevelData().setRaining(true);
         commandSourceStack.getLevel().getLevelData().setThundering(true);
-        commandSourceStack.sendSuccess(new TranslatableComponent("commands.weather.set.thunder", new Object[0]), true);
+        commandSourceStack.sendSuccess(new TranslatableComponent("commands.weather.set.thunder"), true);
         return i;
     }
 }

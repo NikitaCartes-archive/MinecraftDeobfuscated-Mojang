@@ -399,14 +399,17 @@ implements CrossbowAttackMob {
 
     @Override
     protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2) {
+        if (PiglinAi.isLovedItem(itemStack.getItem()) && PiglinAi.isLovedItem(itemStack2.getItem())) {
+            return super.canReplaceEqualItem(itemStack, itemStack2);
+        }
+        if (PiglinAi.isLovedItem(itemStack.getItem())) {
+            return true;
+        }
         if (PiglinAi.isLovedItem(itemStack2.getItem())) {
             return false;
         }
         if (this.isAdult() && itemStack2.getItem() == Items.CROSSBOW) {
             return false;
-        }
-        if (PiglinAi.isLovedItem(itemStack.getItem())) {
-            return true;
         }
         return super.canReplaceCurrentItem(itemStack, itemStack2);
     }

@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.gui.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Option;
@@ -12,7 +13,7 @@ import net.minecraft.client.gui.components.OptionButton;
 import net.minecraft.client.gui.components.VolumeSlider;
 import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundSource;
 
@@ -20,7 +21,7 @@ import net.minecraft.sounds.SoundSource;
 public class SoundOptionsScreen
 extends OptionsSubScreen {
     public SoundOptionsScreen(Screen screen, Options options) {
-        super(screen, options, new TranslatableComponent("options.sounds.title", new Object[0]));
+        super(screen, options, new TranslatableComponent("options.sounds.title"));
     }
 
     @Override
@@ -38,14 +39,14 @@ extends OptionsSubScreen {
             button.setMessage(Option.SHOW_SUBTITLES.getMessage(this.minecraft.options));
             this.minecraft.options.save();
         }));
-        this.addButton(new Button(this.width / 2 - 100, this.height / 6 + 168, 200, 20, I18n.get("gui.done", new Object[0]), button -> this.minecraft.setScreen(this.lastScreen)));
+        this.addButton(new Button(this.width / 2 - 100, this.height / 6 + 168, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        this.renderBackground();
-        this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 15, 0xFFFFFF);
-        super.render(i, j, f);
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        this.renderBackground(poseStack);
+        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 0xFFFFFF);
+        super.render(poseStack, i, j, f);
     }
 }
 

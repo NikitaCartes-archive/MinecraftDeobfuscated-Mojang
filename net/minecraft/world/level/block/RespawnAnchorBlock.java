@@ -58,7 +58,7 @@ extends Block {
         if (blockState.getValue(CHARGE) == 0) {
             return InteractionResult.PASS;
         }
-        if (level.dimension.getType() == DimensionType.NETHER) {
+        if (RespawnAnchorBlock.canSetSpawn(level)) {
             ServerPlayer serverPlayer;
             if (!(level.isClientSide || (serverPlayer = (ServerPlayer)player).getRespawnDimension() == level.dimension.getType() && serverPlayer.getRespawnPosition().equals(blockPos))) {
                 serverPlayer.setRespawnPosition(level.dimension.getType(), blockPos, false, true);
@@ -72,6 +72,10 @@ extends Block {
             level.explode(null, DamageSource.badRespawnPointExplosion(), (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 5.0f, true, Explosion.BlockInteraction.DESTROY);
         }
         return InteractionResult.SUCCESS;
+    }
+
+    public static boolean canSetSpawn(Level level) {
+        return level.dimension.getType() == DimensionType.NETHER;
     }
 
     public static void charge(Level level, BlockPos blockPos, BlockState blockState) {

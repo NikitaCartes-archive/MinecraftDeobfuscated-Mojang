@@ -3,15 +3,15 @@
  */
 package net.minecraft.world.level.levelgen.feature.trunkplacers;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.Dynamic;
-import java.util.Map;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelSimulatedRW;
-import net.minecraft.world.level.levelgen.feature.AbstractTreeFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacer;
 import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -27,11 +27,12 @@ extends TrunkPlacer {
     }
 
     @Override
-    public Map<BlockPos, Integer> placeTrunk(LevelSimulatedRW levelSimulatedRW, Random random, int i, BlockPos blockPos, int j, Set<BlockPos> set, BoundingBox boundingBox, SmallTreeConfiguration smallTreeConfiguration) {
-        for (int k = 0; k < i; ++k) {
-            AbstractTreeFeature.placeLog(levelSimulatedRW, random, blockPos.above(k), set, boundingBox, smallTreeConfiguration);
+    public List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedRW levelSimulatedRW, Random random, int i, BlockPos blockPos, Set<BlockPos> set, BoundingBox boundingBox, TreeConfiguration treeConfiguration) {
+        StraightTrunkPlacer.setDirtAt(levelSimulatedRW, blockPos.below());
+        for (int j = 0; j < i; ++j) {
+            StraightTrunkPlacer.placeLog(levelSimulatedRW, random, blockPos.above(j), set, boundingBox, treeConfiguration);
         }
-        return ImmutableMap.of(blockPos.above(i), j);
+        return ImmutableList.of(new FoliagePlacer.FoliageAttachment(blockPos.above(i), 0, false));
     }
 }
 

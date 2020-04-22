@@ -41,8 +41,8 @@ import net.minecraft.gametest.framework.TestFunctionArgument;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.game.DebugPackets;
@@ -98,7 +98,7 @@ public class TestCommand {
         BlockPos blockPos2 = blockPos.subtract(optional.get());
         String string2 = blockPos2.getX() + ", " + blockPos2.getY() + ", " + blockPos2.getZ();
         String string3 = structureBlockEntity.getStructurePath();
-        Component component = new TextComponent(string2).setStyle(new Style().setBold(true).setColor(ChatFormatting.GREEN).setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to copy to clipboard"))).setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "final BlockPos " + string + " = new BlockPos(" + string2 + ");")));
+        MutableComponent component = new TextComponent(string2).setStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.GREEN).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to copy to clipboard"))).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "final BlockPos " + string + " = new BlockPos(" + string2 + ");")));
         commandSourceStack.sendSuccess(new TextComponent("Position relative to " + string3 + ": ").append(component), false);
         DebugPackets.sendGameTestAddMarker(serverLevel, new BlockPos(blockPos), string2, -2147418368, 10000);
         return 1;

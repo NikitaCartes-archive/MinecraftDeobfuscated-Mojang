@@ -14,7 +14,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelSimulatedRW;
-import net.minecraft.world.level.levelgen.feature.AbstractTreeFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecoratorType;
@@ -63,11 +63,11 @@ extends TreeDecorator {
     private void placeBlockAt(LevelSimulatedRW levelSimulatedRW, Random random, BlockPos blockPos) {
         for (int i = 2; i >= -3; --i) {
             BlockPos blockPos2 = blockPos.above(i);
-            if (AbstractTreeFeature.isGrassOrDirt(levelSimulatedRW, blockPos2)) {
+            if (Feature.isGrassOrDirt(levelSimulatedRW, blockPos2)) {
                 levelSimulatedRW.setBlock(blockPos2, this.provider.getState(random, blockPos), 19);
                 break;
             }
-            if (!AbstractTreeFeature.isAir(levelSimulatedRW, blockPos2) && i < 0) break;
+            if (!Feature.isAir(levelSimulatedRW, blockPos2) && i < 0) break;
         }
     }
 

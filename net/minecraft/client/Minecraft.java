@@ -3,6 +3,7 @@
  */
 package net.minecraft.client;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Queues;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
@@ -17,6 +18,7 @@ import com.mojang.blaze3d.platform.WindowEventHandler;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.datafixers.DataFixer;
 import java.io.File;
@@ -163,6 +165,8 @@ import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleReloadableResourceManager;
 import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.sounds.Music;
+import net.minecraft.sounds.Musics;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.FrameTimer;
 import net.minecraft.util.Mth;
@@ -175,7 +179,6 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.profiling.ResultField;
 import net.minecraft.util.profiling.SingleTickProfiler;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.Snooper;
@@ -200,17 +203,15 @@ import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.dimension.NetherDimension;
 import net.minecraft.world.level.dimension.end.TheEndDimension;
-import net.minecraft.world.level.storage.LevelData;
-import net.minecraft.world.level.storage.LevelStorage;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.PrimaryLevelData;
+import net.minecraft.world.level.storage.WorldData;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -227,6 +228,7 @@ WindowEventHandler {
     private static final Logger LOGGER;
     public static final boolean ON_OSX;
     public static final ResourceLocation DEFAULT_FONT;
+    public static final ResourceLocation UNIFORM_FONT;
     public static final ResourceLocation ALT_FONT;
     private static final CompletableFuture<Unit> RESOURCE_RELOAD_INITIAL_TASK;
     private final File resourcePackDirectory;
@@ -367,7 +369,7 @@ WindowEventHandler {
         }
         Bootstrap.bootStrap();
         Bootstrap.validate();
-        KeybindComponent.keyResolver = KeyMapping::createNameSupplier;
+        KeybindComponent.setKeyResolver(KeyMapping::createNameSupplier);
         this.fixerUpper = DataFixers.getDataFixer();
         this.toast = new ToastComponent(this);
         this.tutorial = new Tutorial(this);
@@ -410,14 +412,10 @@ WindowEventHandler {
         this.splashManager = new SplashManager(this.user);
         this.resourceManager.registerReloadListener(this.splashManager);
         this.musicManager = new MusicManager(this);
-        this.fontManager = new FontManager(this.textureManager, this.isEnforceUnicode());
+        this.fontManager = new FontManager(this.textureManager);
+        this.font = this.fontManager.createFont();
         this.resourceManager.registerReloadListener(this.fontManager.getReloadListener());
-        Font font = this.fontManager.get(DEFAULT_FONT);
-        if (font == null) {
-            throw new IllegalStateException("Default font is null");
-        }
-        this.font = font;
-        this.font.setBidirectional(this.languageManager.isBidirectional());
+        this.selectMainFont(this.isEnforceUnicode());
         this.resourceManager.registerReloadListener(new GrassColorReloadListener());
         this.resourceManager.registerReloadListener(new FoliageColorReloadListener());
         this.window.setErrorSection("Startup");
@@ -513,7 +511,7 @@ WindowEventHandler {
             this.options.save();
             this.reloadResourcePacks().thenRun(() -> {
                 ToastComponent toastComponent = this.getToasts();
-                SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.PACK_LOAD_FAILURE, new TranslatableComponent("resourcePack.load_fail", new Object[0]), component);
+                SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.PACK_LOAD_FAILURE, new TranslatableComponent("resourcePack.load_fail"), component);
             });
         } else {
             Util.throwAsRuntime(throwable);
@@ -559,6 +557,11 @@ WindowEventHandler {
             this.emergencySave();
             Minecraft.crash(crashReport);
         }
+    }
+
+    void selectMainFont(boolean bl) {
+        this.fontManager.setRenames(bl ? ImmutableMap.of(DEFAULT_FONT, UNIFORM_FONT) : ImmutableMap.of());
+        this.font.setBidirectional(this.languageManager.isBidirectional());
     }
 
     private void createSearchTrees() {
@@ -692,7 +695,7 @@ WindowEventHandler {
             item.fillItemCategory(CreativeModeTab.TAB_SEARCH, nonNullList);
             for (ItemStack itemStack : nonNullList) {
                 String string = itemStack.getDescriptionId();
-                String string2 = new TranslatableComponent(string, new Object[0]).getString();
+                String string2 = new TranslatableComponent(string).getString();
                 if (!string2.toLowerCase(Locale.ROOT).equals(item.getDescriptionId())) continue;
                 LOGGER.debug("Missing translation for: {} {} {}", (Object)itemStack, (Object)string, (Object)itemStack.getItem());
             }
@@ -839,12 +842,12 @@ WindowEventHandler {
             this.profiler.popPush("gameRenderer");
             this.gameRenderer.render(this.pause ? this.pausePartialTick : this.timer.partialTick, l, bl);
             this.profiler.popPush("toasts");
-            this.toast.render();
+            this.toast.render(new PoseStack());
             this.profiler.pop();
         }
         if (this.fpsPieResults != null) {
             this.profiler.push("fpsPie");
-            this.renderFpsMeter(this.fpsPieResults);
+            this.renderFpsMeter(new PoseStack(), this.fpsPieResults);
             this.profiler.pop();
         }
         this.profiler.push("blit");
@@ -953,7 +956,7 @@ WindowEventHandler {
             if (this.isLocalServer && this.singleplayerServer != null) {
                 this.singleplayerServer.halt(true);
             }
-            this.clearLevel(new GenericDirtMessageScreen(new TranslatableComponent("menu.savingLevel", new Object[0])));
+            this.clearLevel(new GenericDirtMessageScreen(new TranslatableComponent("menu.savingLevel")));
         } catch (Throwable throwable) {
             // empty catch block
         }
@@ -982,7 +985,7 @@ WindowEventHandler {
         }
     }
 
-    private void renderFpsMeter(ProfileResults profileResults) {
+    private void renderFpsMeter(PoseStack poseStack, ProfileResults profileResults) {
         int m;
         List<ResultField> list = profileResults.getTimes(this.debugPath);
         ResultField resultField = list.remove(0);
@@ -1050,9 +1053,9 @@ WindowEventHandler {
         }
         string2 = string.isEmpty() ? string2 + "ROOT " : string2 + string + ' ';
         m = 0xFFFFFF;
-        this.font.drawShadow(string2, j - 160, k - 80 - 16, 0xFFFFFF);
+        this.font.drawShadow(poseStack, string2, (float)(j - 160), (float)(k - 80 - 16), 0xFFFFFF);
         string2 = decimalFormat.format(resultField.globalPercentage) + "%";
-        this.font.drawShadow(string2, j + 160 - this.font.width(string2), k - 80 - 16, 0xFFFFFF);
+        this.font.drawShadow(poseStack, string2, (float)(j + 160 - this.font.width(string2)), (float)(k - 80 - 16), 0xFFFFFF);
         for (int r = 0; r < list.size(); ++r) {
             ResultField resultField3 = list.get(r);
             StringBuilder stringBuilder = new StringBuilder();
@@ -1062,11 +1065,11 @@ WindowEventHandler {
                 stringBuilder.append("[").append(r + 1).append("] ");
             }
             String string3 = stringBuilder.append(resultField3.name).toString();
-            this.font.drawShadow(string3, j - 160, k + 80 + r * 8 + 20, resultField3.getColor());
+            this.font.drawShadow(poseStack, string3, (float)(j - 160), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
             string3 = decimalFormat.format(resultField3.percentage) + "%";
-            this.font.drawShadow(string3, j + 160 - 50 - this.font.width(string3), k + 80 + r * 8 + 20, resultField3.getColor());
+            this.font.drawShadow(poseStack, string3, (float)(j + 160 - 50 - this.font.width(string3)), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
             string3 = decimalFormat.format(resultField3.globalPercentage) + "%";
-            this.font.drawShadow(string3, j + 160 - this.font.width(string3), k + 80 + r * 8 + 20, resultField3.getColor());
+            this.font.drawShadow(poseStack, string3, (float)(j + 160 - this.font.width(string3)), (float)(k + 80 + r * 8 + 20), resultField3.getColor());
         }
     }
 
@@ -1278,7 +1281,6 @@ WindowEventHandler {
         this.soundManager.tick(this.pause);
         if (this.level != null) {
             if (!this.pause) {
-                this.level.setSpawnSettings(this.level.getDifficulty() != Difficulty.PEACEFUL, true);
                 this.tutorial.tick();
                 try {
                     this.level.tick(() -> true);
@@ -1396,7 +1398,8 @@ WindowEventHandler {
         this.continueAttack(this.screen == null && this.options.keyAttack.isDown() && this.mouseHandler.isMouseGrabbed());
     }
 
-    public void selectLevel(String string, String string2, @Nullable LevelSettings levelSettings) {
+    public void selectLevel(String string, @Nullable LevelSettings levelSettings) {
+        String string2;
         LevelStorageSource.LevelStorageAccess levelStorageAccess;
         this.clearLevel();
         try {
@@ -1407,14 +1410,16 @@ WindowEventHandler {
             this.setScreen(null);
             return;
         }
-        LevelStorage levelStorage = levelStorageAccess.selectLevel(null);
-        LevelData levelData = levelStorage.prepareLevel();
-        if (levelData == null && levelSettings != null) {
-            levelData = new LevelData(levelSettings, string);
-            levelStorage.saveLevelData(levelData);
-        }
-        if (levelSettings == null) {
-            levelSettings = new LevelSettings(levelData);
+        WorldData worldData = levelStorageAccess.getDataTag();
+        if (worldData == null) {
+            if (levelSettings == null) {
+                throw new IllegalStateException("Requested world creation without any settings");
+            }
+            worldData = new PrimaryLevelData(levelSettings);
+            string2 = levelSettings.getLevelName();
+            levelStorageAccess.saveDataTag(worldData);
+        } else {
+            string2 = worldData.getLevelName();
         }
         this.progressListener.set(null);
         try {
@@ -1425,7 +1430,7 @@ WindowEventHandler {
             SkullBlockEntity.setProfileCache(gameProfileCache);
             SkullBlockEntity.setSessionService(minecraftSessionService);
             GameProfileCache.setUsesAuthentication(false);
-            this.singleplayerServer = new IntegratedServer(this, levelStorageAccess, string2, levelSettings, minecraftSessionService, gameProfileRepository, gameProfileCache, i -> {
+            this.singleplayerServer = new IntegratedServer(this, levelStorageAccess, worldData, minecraftSessionService, gameProfileRepository, gameProfileCache, i -> {
                 StoringChunkProgressListener storingChunkProgressListener = new StoringChunkProgressListener(i + 0);
                 storingChunkProgressListener.start();
                 this.progressListener.set(storingChunkProgressListener);
@@ -1469,7 +1474,7 @@ WindowEventHandler {
 
     public void setLevel(ClientLevel clientLevel) {
         ProgressScreen progressScreen = new ProgressScreen();
-        progressScreen.progressStartNoAbort(new TranslatableComponent("connect.joining", new Object[0]));
+        progressScreen.progressStartNoAbort(new TranslatableComponent("connect.joining"));
         this.updateScreenAndTick(progressScreen);
         this.level = clientLevel;
         this.updateLevelInEngines(clientLevel);
@@ -1854,45 +1859,27 @@ WindowEventHandler {
         return this.soundManager;
     }
 
-    public MusicManager.Music getSituationalMusic() {
+    public Music getSituationalMusic() {
         if (this.screen instanceof WinScreen) {
-            return MusicManager.Music.CREDITS;
+            return Musics.CREDITS;
         }
         if (this.player != null) {
-            if (this.player.level.dimension instanceof NetherDimension) {
-                Biome biome = this.player.level.getBiomeManager().getNoiseBiomeAtPosition(this.player.getX(), this.player.getY(), this.player.getZ());
-                if (biome == Biomes.BASALT_DELTAS) {
-                    return MusicManager.Music.BASALT_DELTAS;
-                }
-                if (biome == Biomes.NETHER_WASTES) {
-                    return MusicManager.Music.NETHER_WASTES;
-                }
-                if (biome == Biomes.SOUL_SAND_VALLEY) {
-                    return MusicManager.Music.SOUL_SAND_VALLEY;
-                }
-                if (biome == Biomes.CRIMSON_FOREST) {
-                    return MusicManager.Music.CRIMSON_FOREST;
-                }
-                if (biome == Biomes.WARPED_FOREST) {
-                    return MusicManager.Music.WARPED_FOREST;
-                }
-            }
             if (this.player.level.dimension instanceof TheEndDimension) {
                 if (this.gui.getBossOverlay().shouldPlayMusic()) {
-                    return MusicManager.Music.END_BOSS;
+                    return Musics.END_BOSS;
                 }
-                return MusicManager.Music.END;
+                return Musics.END;
             }
             Biome.BiomeCategory biomeCategory = this.player.level.getBiome(this.player.blockPosition()).getBiomeCategory();
-            if (this.musicManager.isPlayingMusic(MusicManager.Music.UNDER_WATER) || this.player.isUnderWater() && !this.musicManager.isPlayingMusic(MusicManager.Music.GAME) && (biomeCategory == Biome.BiomeCategory.OCEAN || biomeCategory == Biome.BiomeCategory.RIVER)) {
-                return MusicManager.Music.UNDER_WATER;
+            if (this.musicManager.isPlayingMusic(Musics.UNDER_WATER) || this.player.isUnderWater() && (biomeCategory == Biome.BiomeCategory.OCEAN || biomeCategory == Biome.BiomeCategory.RIVER)) {
+                return Musics.UNDER_WATER;
             }
             if (this.player.abilities.instabuild && this.player.abilities.mayfly) {
-                return MusicManager.Music.CREATIVE;
+                return Musics.CREATIVE;
             }
-            return MusicManager.Music.GAME;
+            return this.level.getBiomeManager().getNoiseBiomeAtPosition(this.player.blockPosition()).getBackgroundMusic().orElse(Musics.GAME);
         }
-        return MusicManager.Music.MENU;
+        return Musics.MENU;
     }
 
     public MinecraftSessionService getMinecraftSessionService() {
@@ -2004,10 +1991,6 @@ WindowEventHandler {
         return this.modelManager;
     }
 
-    public FontManager getFontManager() {
-        return this.fontManager;
-    }
-
     public PaintingTextureManager getPaintingTextures() {
         return this.paintingTextures;
     }
@@ -2078,6 +2061,7 @@ WindowEventHandler {
         LOGGER = LogManager.getLogger();
         ON_OSX = Util.getPlatform() == Util.OS.OSX;
         DEFAULT_FONT = new ResourceLocation("default");
+        UNIFORM_FONT = new ResourceLocation("uniform");
         ALT_FONT = new ResourceLocation("alt");
         RESOURCE_RELOAD_INITIAL_TASK = CompletableFuture.completedFuture(Unit.INSTANCE);
         reserve = new byte[0xA00000];

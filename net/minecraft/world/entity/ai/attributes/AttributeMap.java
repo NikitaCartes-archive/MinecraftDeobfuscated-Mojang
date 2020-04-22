@@ -9,6 +9,7 @@ import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -54,6 +55,15 @@ public class AttributeMap {
         return this.attributes.computeIfAbsent(attribute2, attribute -> this.supplier.createInstance(this::onAttributeModified, (Attribute)attribute));
     }
 
+    public boolean hasAttribute(Attribute attribute) {
+        return this.attributes.get(attribute) != null || this.supplier.hasAttribute(attribute);
+    }
+
+    public boolean hasModifier(Attribute attribute, UUID uUID) {
+        AttributeInstance attributeInstance = this.attributes.get(attribute);
+        return attributeInstance != null ? attributeInstance.getModifier(uUID) != null : this.supplier.hasModifier(attribute, uUID);
+    }
+
     public double getValue(Attribute attribute) {
         AttributeInstance attributeInstance = this.attributes.get(attribute);
         return attributeInstance != null ? attributeInstance.getValue() : this.supplier.getValue(attribute);
@@ -62,6 +72,11 @@ public class AttributeMap {
     public double getBaseValue(Attribute attribute) {
         AttributeInstance attributeInstance = this.attributes.get(attribute);
         return attributeInstance != null ? attributeInstance.getBaseValue() : this.supplier.getBaseValue(attribute);
+    }
+
+    public double getModifierValue(Attribute attribute, UUID uUID) {
+        AttributeInstance attributeInstance = this.attributes.get(attribute);
+        return attributeInstance != null ? attributeInstance.getModifier(uUID).getAmount() : this.supplier.getModifierValue(attribute, uUID);
     }
 
     public void removeAttributeModifiers(Multimap<Attribute, AttributeModifier> multimap) {

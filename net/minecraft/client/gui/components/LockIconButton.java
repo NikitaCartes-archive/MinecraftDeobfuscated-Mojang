@@ -4,11 +4,13 @@
 package net.minecraft.client.gui.components;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class LockIconButton
@@ -16,12 +18,12 @@ extends Button {
     private boolean locked;
 
     public LockIconButton(int i, int j, Button.OnPress onPress) {
-        super(i, j, 20, 20, I18n.get("narrator.button.difficulty_lock", new Object[0]), onPress);
+        super(i, j, 20, 20, new TranslatableComponent("narrator.button.difficulty_lock"), onPress);
     }
 
     @Override
-    protected String getNarrationMessage() {
-        return super.getNarrationMessage() + ". " + (this.isLocked() ? I18n.get("narrator.button.difficulty_lock.locked", new Object[0]) : I18n.get("narrator.button.difficulty_lock.unlocked", new Object[0]));
+    protected MutableComponent createNarrationMessage() {
+        return super.createNarrationMessage().append(". ").append(this.isLocked() ? new TranslatableComponent("narrator.button.difficulty_lock.locked") : new TranslatableComponent("narrator.button.difficulty_lock.unlocked"));
     }
 
     public boolean isLocked() {
@@ -33,11 +35,11 @@ extends Button {
     }
 
     @Override
-    public void renderButton(int i, int j, float f) {
+    public void renderButton(PoseStack poseStack, int i, int j, float f) {
         Minecraft.getInstance().getTextureManager().bind(Button.WIDGETS_LOCATION);
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         Icon icon = !this.active ? (this.locked ? Icon.LOCKED_DISABLED : Icon.UNLOCKED_DISABLED) : (this.isHovered() ? (this.locked ? Icon.LOCKED_HOVER : Icon.UNLOCKED_HOVER) : (this.locked ? Icon.LOCKED : Icon.UNLOCKED));
-        this.blit(this.x, this.y, icon.getX(), icon.getY(), this.width, this.height);
+        this.blit(poseStack, this.x, this.y, icon.getX(), icon.getY(), this.width, this.height);
     }
 
     @Environment(value=EnvType.CLIENT)

@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.gui.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -12,6 +13,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
@@ -24,7 +26,7 @@ extends Screen {
     private final Screen lastScreen;
 
     public DirectJoinServerScreen(Screen screen, BooleanConsumer booleanConsumer, ServerData serverData) {
-        super(new TranslatableComponent("selectServer.direct", new Object[0]));
+        super(new TranslatableComponent("selectServer.direct"));
         this.lastScreen = screen;
         this.serverData = serverData;
         this.callback = booleanConsumer;
@@ -47,9 +49,9 @@ extends Screen {
     @Override
     protected void init() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-        this.selectButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 96 + 12, 200, 20, I18n.get("selectServer.select", new Object[0]), button -> this.onSelect()));
-        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 12, 200, 20, I18n.get("gui.cancel", new Object[0]), button -> this.callback.accept(false)));
-        this.ipEdit = new EditBox(this.font, this.width / 2 - 100, 116, 200, 20, I18n.get("addServer.enterIp", new Object[0]));
+        this.selectButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 96 + 12, 200, 20, new TranslatableComponent("selectServer.select"), button -> this.onSelect()));
+        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 12, 200, 20, CommonComponents.GUI_CANCEL, button -> this.callback.accept(false)));
+        this.ipEdit = new EditBox(this.font, this.width / 2 - 100, 116, 200, 20, new TranslatableComponent("addServer.enterIp"));
         this.ipEdit.setMaxLength(128);
         this.ipEdit.setFocus(true);
         this.ipEdit.setValue(this.minecraft.options.lastMpIp);
@@ -89,12 +91,12 @@ extends Screen {
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        this.renderBackground();
-        this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 20, 0xFFFFFF);
-        this.drawString(this.font, I18n.get("addServer.enterIp", new Object[0]), this.width / 2 - 100, 100, 0xA0A0A0);
-        this.ipEdit.render(i, j, f);
-        super.render(i, j, f);
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        this.renderBackground(poseStack);
+        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 0xFFFFFF);
+        this.drawString(poseStack, this.font, I18n.get("addServer.enterIp", new Object[0]), this.width / 2 - 100, 100, 0xA0A0A0);
+        this.ipEdit.render(poseStack, i, j, f);
+        super.render(poseStack, i, j, f);
     }
 }
 

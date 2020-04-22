@@ -564,7 +564,7 @@ extends LivingEntity {
         return false;
     }
 
-    private boolean canReplaceEqualItem(ItemStack itemStack, ItemStack itemStack2) {
+    public boolean canReplaceEqualItem(ItemStack itemStack, ItemStack itemStack2) {
         if (itemStack.getDamageValue() < itemStack2.getDamageValue() || itemStack.hasTag() && !itemStack2.hasTag()) {
             return true;
         }
@@ -994,6 +994,10 @@ extends LivingEntity {
         if (itemStack.getItem() == Items.LEAD && this.canBeLeashed(player)) {
             this.setLeashedTo(player, true);
             itemStack.shrink(1);
+            return true;
+        }
+        if (itemStack.getItem() == Items.NAME_TAG) {
+            itemStack.interactEnemy(player, this, interactionHand);
             return true;
         }
         if (this.mobInteract(player, interactionHand)) {

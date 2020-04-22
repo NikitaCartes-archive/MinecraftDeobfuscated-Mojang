@@ -7,7 +7,10 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractOptionSliderButton;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundSource;
 
 @Environment(value=EnvType.CLIENT)
@@ -23,8 +26,8 @@ extends AbstractOptionSliderButton {
 
     @Override
     protected void updateMessage() {
-        String string = (float)this.value == (float)this.getYImage(false) ? I18n.get("options.off", new Object[0]) : (int)((float)this.value * 100.0f) + "%";
-        this.setMessage(I18n.get("soundCategory." + this.source.getName(), new Object[0]) + ": " + string);
+        Component component = (float)this.value == (float)this.getYImage(false) ? CommonComponents.OPTION_OFF : new TextComponent((int)(this.value * 100.0) + "%");
+        this.setMessage(new TranslatableComponent("soundCategory." + this.source.getName()).append(": ").append(component));
     }
 
     @Override

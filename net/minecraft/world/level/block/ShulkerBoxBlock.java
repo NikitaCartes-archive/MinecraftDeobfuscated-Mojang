@@ -12,6 +12,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -88,9 +89,15 @@ extends BaseEntityBlock {
         }
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (blockEntity instanceof ShulkerBoxBlockEntity) {
-            Direction direction = blockState.getValue(FACING);
+            boolean bl;
             ShulkerBoxBlockEntity shulkerBoxBlockEntity = (ShulkerBoxBlockEntity)blockEntity;
-            if (shulkerBoxBlockEntity.getAnimationStatus() == ShulkerBoxBlockEntity.AnimationStatus.CLOSED && level.noCollision(ShulkerSharedHelper.openBoundingBox(blockPos, direction))) {
+            if (shulkerBoxBlockEntity.getAnimationStatus() == ShulkerBoxBlockEntity.AnimationStatus.CLOSED) {
+                Direction direction = blockState.getValue(FACING);
+                bl = level.noCollision(ShulkerSharedHelper.openBoundingBox(blockPos, direction));
+            } else {
+                bl = true;
+            }
+            if (bl) {
                 player.openMenu(shulkerBoxBlockEntity);
                 player.awardStat(Stats.OPEN_SHULKER_BOX);
                 PiglinAi.angerNearbyPiglinsThatSee(player);
@@ -187,9 +194,9 @@ extends BaseEntityBlock {
                     ++j;
                     if (i > 4) continue;
                     ++i;
-                    Component component = itemStack2.getHoverName().deepCopy();
-                    component.append(" x").append(String.valueOf(itemStack2.getCount()));
-                    list.add(component);
+                    MutableComponent mutableComponent = itemStack2.getHoverName().mutableCopy();
+                    mutableComponent.append(" x").append(String.valueOf(itemStack2.getCount()));
+                    list.add(mutableComponent);
                 }
                 if (j - i > 0) {
                     list.add(new TranslatableComponent("container.shulkerBox.more", j - i).withStyle(ChatFormatting.ITALIC));

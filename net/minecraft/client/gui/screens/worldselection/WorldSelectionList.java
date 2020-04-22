@@ -6,11 +6,13 @@ package net.minecraft.client.gui.screens.worldselection;
 import com.google.common.hash.Hashing;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -39,14 +41,17 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelStorageException;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
+import net.minecraft.world.level.storage.WorldData;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
@@ -81,10 +86,14 @@ extends ObjectSelectionList<WorldListEntry> {
                 this.cachedList = levelStorageSource.getLevelList();
             } catch (LevelStorageException levelStorageException) {
                 LOGGER.error("Couldn't load level list", (Throwable)levelStorageException);
-                this.minecraft.setScreen(new ErrorScreen(new TranslatableComponent("selectWorld.unable_to_load", new Object[0]), levelStorageException.getMessage()));
+                this.minecraft.setScreen(new ErrorScreen(new TranslatableComponent("selectWorld.unable_to_load"), new TextComponent(levelStorageException.getMessage())));
                 return;
             }
             Collections.sort(this.cachedList);
+        }
+        if (this.cachedList.isEmpty()) {
+            this.minecraft.setScreen(new CreateWorldScreen(null));
+            return;
         }
         String string = supplier.get().toLowerCase(Locale.ROOT);
         for (LevelSummary levelSummary : this.cachedList) {
@@ -113,7 +122,7 @@ extends ObjectSelectionList<WorldListEntry> {
         super.setSelected(worldListEntry);
         if (worldListEntry != null) {
             LevelSummary levelSummary = worldListEntry.summary;
-            NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", new TranslatableComponent("narrator.select.world", levelSummary.getLevelName(), new Date(levelSummary.getLastPlayed()), levelSummary.isHardcore() ? I18n.get("gameMode.hardcore", new Object[0]) : I18n.get("gameMode." + levelSummary.getGameMode().getName(), new Object[0]), levelSummary.hasCheats() ? I18n.get("selectWorld.cheats", new Object[0]) : "", levelSummary.getWorldVersionName())).getString());
+            NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", new TranslatableComponent("narrator.select.world", levelSummary.getLevelName(), new Date(levelSummary.getLastPlayed()), levelSummary.isHardcore() ? new TranslatableComponent("gameMode.hardcore") : new TranslatableComponent("gameMode." + levelSummary.getGameMode().getName()), levelSummary.hasCheats() ? new TranslatableComponent("selectWorld.cheats") : TextComponent.EMPTY, levelSummary.getWorldVersionName())).getString());
         }
     }
 
@@ -157,68 +166,55 @@ extends ObjectSelectionList<WorldListEntry> {
         }
 
         @Override
-        public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            String string3;
+        public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
             String string = this.summary.getLevelName();
             String string2 = this.summary.getLevelId() + " (" + DATE_FORMAT.format(new Date(this.summary.getLastPlayed())) + ")";
             if (StringUtils.isEmpty(string)) {
                 string = I18n.get("selectWorld.world", new Object[0]) + " " + (i + 1);
             }
-            if (this.summary.isLocked()) {
-                string3 = (Object)((Object)ChatFormatting.DARK_RED) + I18n.get("selectWorld.locked", new Object[0]) + (Object)((Object)ChatFormatting.RESET);
-            } else if (this.summary.isRequiresConversion()) {
-                string3 = I18n.get("selectWorld.conversion", new Object[0]);
-            } else {
-                string3 = this.summary.isHardcore() ? (Object)((Object)ChatFormatting.DARK_RED) + I18n.get("gameMode.hardcore", new Object[0]) + (Object)((Object)ChatFormatting.RESET) : I18n.get("gameMode." + this.summary.getGameMode().getName(), new Object[0]);
-                if (this.summary.hasCheats()) {
-                    string3 = string3 + ", " + I18n.get("selectWorld.cheats", new Object[0]);
-                }
-                String string4 = this.summary.getWorldVersionName().getColoredString();
-                string3 = this.summary.markVersionInList() ? (this.summary.askToOpenWorld() ? string3 + ", " + I18n.get("selectWorld.version", new Object[0]) + " " + (Object)((Object)ChatFormatting.RED) + string4 + (Object)((Object)ChatFormatting.RESET) : string3 + ", " + I18n.get("selectWorld.version", new Object[0]) + " " + (Object)((Object)ChatFormatting.ITALIC) + string4 + (Object)((Object)ChatFormatting.RESET)) : string3 + ", " + I18n.get("selectWorld.version", new Object[0]) + " " + string4;
-            }
-            this.minecraft.font.draw(string, k + 32 + 3, j + 1, 0xFFFFFF);
-            this.minecraft.font.draw(string2, k + 32 + 3, j + this.minecraft.font.lineHeight + 3, 0x808080);
-            this.minecraft.font.draw(string3, k + 32 + 3, j + this.minecraft.font.lineHeight + this.minecraft.font.lineHeight + 3, 0x808080);
+            Component component = this.summary.getInfo();
+            this.minecraft.font.draw(poseStack, string, (float)(k + 32 + 3), (float)(j + 1), 0xFFFFFF);
+            this.minecraft.font.draw(poseStack, string2, (float)(k + 32 + 3), (float)(j + this.minecraft.font.lineHeight + 3), 0x808080);
+            this.minecraft.font.draw(poseStack, component, (float)(k + 32 + 3), (float)(j + this.minecraft.font.lineHeight + this.minecraft.font.lineHeight + 3), 0x808080);
             RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
             this.minecraft.getTextureManager().bind(this.icon != null ? this.iconLocation : ICON_MISSING);
             RenderSystem.enableBlend();
-            GuiComponent.blit(k, j, 0.0f, 0.0f, 32, 32, 32, 32);
+            GuiComponent.blit(poseStack, k, j, 0.0f, 0.0f, 32, 32, 32, 32);
             RenderSystem.disableBlend();
             if (this.minecraft.options.touchscreen || bl) {
                 int q;
                 this.minecraft.getTextureManager().bind(ICON_OVERLAY_LOCATION);
-                GuiComponent.fill(k, j, k + 32, j + 32, -1601138544);
+                GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
                 RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
                 int p = n - k;
                 boolean bl2 = p < 32;
                 int n2 = q = bl2 ? 32 : 0;
                 if (this.summary.isLocked()) {
-                    GuiComponent.blit(k, j, 96.0f, q, 32, 32, 256, 256);
+                    GuiComponent.blit(poseStack, k, j, 96.0f, q, 32, 32, 256, 256);
                     if (bl2) {
-                        Component component = new TranslatableComponent("selectWorld.locked", new Object[0]).withStyle(ChatFormatting.RED);
-                        this.screen.setToolTip(this.minecraft.font.insertLineBreaks(component.getColoredString(), 175));
+                        MutableComponent component2 = new TranslatableComponent("selectWorld.locked").withStyle(ChatFormatting.RED);
+                        this.screen.setToolTip(this.minecraft.font.split(component2, 175));
                     }
                 } else if (this.summary.markVersionInList()) {
-                    GuiComponent.blit(k, j, 32.0f, q, 32, 32, 256, 256);
                     if (this.summary.isOldCustomizedWorld()) {
-                        GuiComponent.blit(k, j, 96.0f, q, 32, 32, 256, 256);
+                        GuiComponent.blit(poseStack, k, j, 96.0f, q, 32, 32, 256, 256);
                         if (bl2) {
-                            Component component = new TranslatableComponent("selectWorld.tooltip.unsupported", this.summary.getWorldVersionName()).withStyle(ChatFormatting.RED);
-                            this.screen.setToolTip(this.minecraft.font.insertLineBreaks(component.getColoredString(), 175));
+                            MutableComponent component2 = new TranslatableComponent("selectWorld.tooltip.unsupported", this.summary.getWorldVersionName()).withStyle(ChatFormatting.RED);
+                            this.screen.setToolTip(this.minecraft.font.split(component2, 175));
                         }
                     } else if (this.summary.askToOpenWorld()) {
-                        GuiComponent.blit(k, j, 96.0f, q, 32, 32, 256, 256);
+                        GuiComponent.blit(poseStack, k, j, 96.0f, q, 32, 32, 256, 256);
                         if (bl2) {
-                            this.screen.setToolTip((Object)((Object)ChatFormatting.RED) + I18n.get("selectWorld.tooltip.fromNewerVersion1", new Object[0]) + "\n" + (Object)((Object)ChatFormatting.RED) + I18n.get("selectWorld.tooltip.fromNewerVersion2", new Object[0]));
+                            this.screen.setToolTip(Arrays.asList(new TranslatableComponent("selectWorld.tooltip.fromNewerVersion1").withStyle(ChatFormatting.RED), new TranslatableComponent("selectWorld.tooltip.fromNewerVersion2").withStyle(ChatFormatting.RED)));
                         }
                     } else if (!SharedConstants.getCurrentVersion().isStable()) {
-                        GuiComponent.blit(k, j, 64.0f, q, 32, 32, 256, 256);
+                        GuiComponent.blit(poseStack, k, j, 64.0f, q, 32, 32, 256, 256);
                         if (bl2) {
-                            this.screen.setToolTip((Object)((Object)ChatFormatting.GOLD) + I18n.get("selectWorld.tooltip.snapshot1", new Object[0]) + "\n" + (Object)((Object)ChatFormatting.GOLD) + I18n.get("selectWorld.tooltip.snapshot2", new Object[0]));
+                            this.screen.setToolTip(Arrays.asList(new TranslatableComponent("selectWorld.tooltip.snapshot1").withStyle(ChatFormatting.GOLD), new TranslatableComponent("selectWorld.tooltip.snapshot2").withStyle(ChatFormatting.GOLD)));
                         }
                     }
                 } else {
-                    GuiComponent.blit(k, j, 0.0f, q, 32, 32, 256, 256);
+                    GuiComponent.blit(poseStack, k, j, 0.0f, q, 32, 32, 256, 256);
                 }
             }
         }
@@ -247,11 +243,11 @@ extends ObjectSelectionList<WorldListEntry> {
                 return;
             }
             if (this.summary.shouldBackup() || this.summary.isOldCustomizedWorld()) {
-                TranslatableComponent component = new TranslatableComponent("selectWorld.backupQuestion", new Object[0]);
-                TranslatableComponent component2 = new TranslatableComponent("selectWorld.backupWarning", this.summary.getWorldVersionName().getColoredString(), SharedConstants.getCurrentVersion().getName());
+                TranslatableComponent component = new TranslatableComponent("selectWorld.backupQuestion");
+                TranslatableComponent component2 = new TranslatableComponent("selectWorld.backupWarning", this.summary.getWorldVersionName(), SharedConstants.getCurrentVersion().getName());
                 if (this.summary.isOldCustomizedWorld()) {
-                    component = new TranslatableComponent("selectWorld.backupQuestion.customized", new Object[0]);
-                    component2 = new TranslatableComponent("selectWorld.backupWarning.customized", new Object[0]);
+                    component = new TranslatableComponent("selectWorld.backupQuestion.customized");
+                    component2 = new TranslatableComponent("selectWorld.backupWarning.customized");
                 }
                 this.minecraft.setScreen(new BackupConfirmScreen(this.screen, (bl, bl2) -> {
                     if (bl) {
@@ -272,12 +268,12 @@ extends ObjectSelectionList<WorldListEntry> {
                             this.loadWorld();
                         } catch (Exception exception) {
                             LOGGER.error("Failure to open 'future world'", (Throwable)exception);
-                            this.minecraft.setScreen(new AlertScreen(() -> this.minecraft.setScreen(this.screen), new TranslatableComponent("selectWorld.futureworld.error.title", new Object[0]), new TranslatableComponent("selectWorld.futureworld.error.text", new Object[0])));
+                            this.minecraft.setScreen(new AlertScreen(() -> this.minecraft.setScreen(this.screen), new TranslatableComponent("selectWorld.futureworld.error.title"), new TranslatableComponent("selectWorld.futureworld.error.text")));
                         }
                     } else {
                         this.minecraft.setScreen(this.screen);
                     }
-                }, new TranslatableComponent("selectWorld.versionQuestion", new Object[0]), new TranslatableComponent("selectWorld.versionWarning", this.summary.getWorldVersionName().getColoredString()), I18n.get("selectWorld.versionJoinButton", new Object[0]), I18n.get("gui.cancel", new Object[0])));
+                }, new TranslatableComponent("selectWorld.versionQuestion"), new TranslatableComponent("selectWorld.versionWarning", this.summary.getWorldVersionName(), new TranslatableComponent("selectWorld.versionJoinButton"), CommonComponents.GUI_CANCEL)));
             } else {
                 this.loadWorld();
             }
@@ -298,7 +294,7 @@ extends ObjectSelectionList<WorldListEntry> {
                     WorldSelectionList.this.refreshList(() -> this.screen.searchBox.getValue(), true);
                 }
                 this.minecraft.setScreen(this.screen);
-            }, new TranslatableComponent("selectWorld.deleteQuestion", new Object[0]), new TranslatableComponent("selectWorld.deleteWarning", this.summary.getLevelName()), I18n.get("selectWorld.deleteButton", new Object[0]), I18n.get("gui.cancel", new Object[0])));
+            }, new TranslatableComponent("selectWorld.deleteQuestion"), new TranslatableComponent("selectWorld.deleteWarning", this.summary.getLevelName()), new TranslatableComponent("selectWorld.deleteButton"), CommonComponents.GUI_CANCEL));
         }
 
         public void editWorld() {
@@ -328,11 +324,11 @@ extends ObjectSelectionList<WorldListEntry> {
                 this.minecraft.setScreen(new ProgressScreen());
                 CreateWorldScreen createWorldScreen = new CreateWorldScreen(this.screen);
                 try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(this.summary.getLevelId());){
-                    LevelData levelData = levelStorageAccess.selectLevel(null).prepareLevel();
-                    if (levelData != null) {
-                        createWorldScreen.copyFromWorld(levelData);
+                    WorldData worldData = levelStorageAccess.getDataTag();
+                    if (worldData != null) {
+                        createWorldScreen.copyFromWorld(worldData);
                         if (this.summary.isOldCustomizedWorld()) {
-                            this.minecraft.setScreen(new ConfirmScreen(bl -> this.minecraft.setScreen(bl ? createWorldScreen : this.screen), new TranslatableComponent("selectWorld.recreate.customized.title", new Object[0]), new TranslatableComponent("selectWorld.recreate.customized.text", new Object[0]), I18n.get("gui.proceed", new Object[0]), I18n.get("gui.cancel", new Object[0])));
+                            this.minecraft.setScreen(new ConfirmScreen(bl -> this.minecraft.setScreen(bl ? createWorldScreen : this.screen), new TranslatableComponent("selectWorld.recreate.customized.title"), new TranslatableComponent("selectWorld.recreate.customized.text"), CommonComponents.GUI_PROCEED, CommonComponents.GUI_CANCEL));
                         } else {
                             this.minecraft.setScreen(createWorldScreen);
                         }
@@ -340,14 +336,14 @@ extends ObjectSelectionList<WorldListEntry> {
                 }
             } catch (Exception exception) {
                 LOGGER.error("Unable to recreate world", (Throwable)exception);
-                this.minecraft.setScreen(new AlertScreen(() -> this.minecraft.setScreen(this.screen), new TranslatableComponent("selectWorld.recreate.error.title", new Object[0]), new TranslatableComponent("selectWorld.recreate.error.text", new Object[0])));
+                this.minecraft.setScreen(new AlertScreen(() -> this.minecraft.setScreen(this.screen), new TranslatableComponent("selectWorld.recreate.error.title"), new TranslatableComponent("selectWorld.recreate.error.text")));
             }
         }
 
         private void loadWorld() {
             this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
             if (this.minecraft.getLevelSource().levelExists(this.summary.getLevelId())) {
-                this.minecraft.selectLevel(this.summary.getLevelId(), this.summary.getLevelName(), null);
+                this.minecraft.selectLevel(this.summary.getLevelId(), null);
             }
         }
 

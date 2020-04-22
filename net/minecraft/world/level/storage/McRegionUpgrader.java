@@ -26,9 +26,9 @@ import net.minecraft.world.level.biome.OverworldBiomeSourceSettings;
 import net.minecraft.world.level.chunk.storage.OldChunkStorage;
 import net.minecraft.world.level.chunk.storage.RegionFile;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.storage.LevelData;
-import net.minecraft.world.level.storage.LevelStorage;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.WorldData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,9 +40,9 @@ public class McRegionUpgrader {
         ArrayList<File> list = Lists.newArrayList();
         ArrayList<File> list2 = Lists.newArrayList();
         ArrayList<File> list3 = Lists.newArrayList();
-        File file = levelStorageAccess.getLevelPath().toFile();
-        File file2 = DimensionType.NETHER.getStorageFolder(file);
-        File file3 = DimensionType.THE_END.getStorageFolder(file);
+        File file = levelStorageAccess.getDimensionPath(DimensionType.OVERWORLD);
+        File file2 = levelStorageAccess.getDimensionPath(DimensionType.NETHER);
+        File file3 = levelStorageAccess.getDimensionPath(DimensionType.THE_END);
         LOGGER.info("Scanning folders...");
         McRegionUpgrader.addRegionFiles(file, list);
         if (file2.exists()) {
@@ -53,36 +53,27 @@ public class McRegionUpgrader {
         }
         int i = list.size() + list2.size() + list3.size();
         LOGGER.info("Total conversion count is {}", (Object)i);
-        LevelData levelData = levelStorageAccess.getDataTag();
-        long l = levelData != null ? levelData.getSeed() : 0L;
+        WorldData worldData = levelStorageAccess.getDataTag();
+        long l = worldData != null ? worldData.getSeed() : 0L;
         BiomeSourceType<FixedBiomeSourceSettings, FixedBiomeSource> biomeSourceType = BiomeSourceType.FIXED;
         BiomeSourceType<OverworldBiomeSourceSettings, OverworldBiomeSource> biomeSourceType2 = BiomeSourceType.VANILLA_LAYERED;
-        BiomeSource biomeSource = levelData != null && levelData.getGeneratorType() == LevelType.FLAT ? biomeSourceType.create(biomeSourceType.createSettings(levelData.getSeed()).setBiome(Biomes.PLAINS)) : biomeSourceType2.create(biomeSourceType2.createSettings(l));
+        BiomeSource biomeSource = worldData != null && worldData.getLevelData(DimensionType.OVERWORLD).getGeneratorType() == LevelType.FLAT ? biomeSourceType.create(biomeSourceType.createSettings(worldData.getSeed()).setBiome(Biomes.PLAINS)) : biomeSourceType2.create(biomeSourceType2.createSettings(l));
         McRegionUpgrader.convertRegions(new File(file, "region"), list, biomeSource, 0, i, progressListener);
         McRegionUpgrader.convertRegions(new File(file2, "region"), list2, biomeSourceType.create(biomeSourceType.createSettings(l).setBiome(Biomes.NETHER_WASTES)), list.size(), i, progressListener);
         McRegionUpgrader.convertRegions(new File(file3, "region"), list3, biomeSourceType.create(biomeSourceType.createSettings(l).setBiome(Biomes.THE_END)), list.size() + list2.size(), i, progressListener);
-        levelData.setVersion(19133);
-        if (levelData.getGeneratorType() == LevelType.NORMAL_1_1) {
-            levelData.setGeneratorProvider(LevelType.NORMAL.getDefaultProvider());
-        }
-        McRegionUpgrader.makeMcrLevelDatBackup(file);
-        LevelStorage levelStorage = levelStorageAccess.selectLevel(null);
-        levelStorage.saveLevelData(levelData);
+        McRegionUpgrader.makeMcrLevelDatBackup(levelStorageAccess);
+        levelStorageAccess.saveDataTag(worldData);
         return true;
     }
 
-    private static void makeMcrLevelDatBackup(File file) {
+    private static void makeMcrLevelDatBackup(LevelStorageSource.LevelStorageAccess levelStorageAccess) {
+        File file = levelStorageAccess.getLevelPath(LevelResource.LEVEL_DATA_FILE).toFile();
         if (!file.exists()) {
             LOGGER.warn("Unable to create level.dat_mcr backup");
             return;
         }
-        File file2 = new File(file, "level.dat");
-        if (!file2.exists()) {
-            LOGGER.warn("Unable to create level.dat_mcr backup");
-            return;
-        }
-        File file3 = new File(file, "level.dat_mcr");
-        if (!file2.renameTo(file3)) {
+        File file2 = new File(file.getParent(), "level.dat_mcr");
+        if (!file.renameTo(file2)) {
             LOGGER.warn("Unable to create level.dat_mcr backup");
         }
     }

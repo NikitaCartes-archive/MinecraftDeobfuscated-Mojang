@@ -13,6 +13,7 @@ import java.util.function.UnaryOperator;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
@@ -86,7 +87,7 @@ extends LootItemConditionalFunction {
 
         @Override
         public SetNameFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            Component component = Component.Serializer.fromJson(jsonObject.get("name"));
+            MutableComponent component = Component.Serializer.fromJson(jsonObject.get("name"));
             LootContext.EntityTarget entityTarget = GsonHelper.getAsObject(jsonObject, "entity", null, jsonDeserializationContext, LootContext.EntityTarget.class);
             return new SetNameFunction(lootItemConditions, component, entityTarget);
         }

@@ -7,6 +7,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -23,7 +24,9 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,12 +53,12 @@ GuiEventListener {
     private Predicate<String> filter = Objects::nonNull;
     private BiFunction<String, Integer, String> formatter = (string, integer) -> string;
 
-    public EditBox(Font font, int i, int j, int k, int l, String string) {
-        this(font, i, j, k, l, null, string);
+    public EditBox(Font font, int i, int j, int k, int l, Component component) {
+        this(font, i, j, k, l, null, component);
     }
 
-    public EditBox(Font font, int i, int j, int k, int l, @Nullable EditBox editBox, String string2) {
-        super(i, j, k, l, string2);
+    public EditBox(Font font, int i, int j, int k, int l, @Nullable EditBox editBox, Component component) {
+        super(i, j, k, l, component);
         this.font = font;
         if (editBox != null) {
             this.setValue(editBox.getValue());
@@ -75,12 +78,9 @@ GuiEventListener {
     }
 
     @Override
-    protected String getNarrationMessage() {
-        String string = this.getMessage();
-        if (string.isEmpty()) {
-            return "";
-        }
-        return I18n.get("gui.narrate.editBox", string, this.value);
+    protected MutableComponent createNarrationMessage() {
+        Component component = this.getMessage();
+        return new TranslatableComponent("gui.narrate.editBox", component, this.value);
     }
 
     public void setValue(String string) {
@@ -108,29 +108,20 @@ GuiEventListener {
     }
 
     public void insertText(String string) {
+        String string3;
+        String string2;
         int l;
-        String string2 = "";
-        String string3 = SharedConstants.filterText(string);
         int i = this.cursorPos < this.highlightPos ? this.cursorPos : this.highlightPos;
         int j = this.cursorPos < this.highlightPos ? this.highlightPos : this.cursorPos;
         int k = this.maxLength - this.value.length() - (i - j);
-        if (!this.value.isEmpty()) {
-            string2 = string2 + this.value.substring(0, i);
-        }
-        if (k < string3.length()) {
-            string2 = string2 + string3.substring(0, k);
+        if (k < (l = (string2 = SharedConstants.filterText(string)).length())) {
+            string2 = string2.substring(0, k);
             l = k;
-        } else {
-            string2 = string2 + string3;
-            l = string3.length();
         }
-        if (!this.value.isEmpty() && j < this.value.length()) {
-            string2 = string2 + this.value.substring(j);
-        }
-        if (!this.filter.test(string2)) {
+        if (!this.filter.test(string3 = new StringBuilder(this.value).replace(i, j, string2).toString())) {
             return;
         }
-        this.value = string2;
+        this.value = string3;
         this.setCursorPosition(i + l);
         this.setHighlightPos(this.cursorPos);
         this.onValueChange(this.value);
@@ -163,6 +154,7 @@ GuiEventListener {
     }
 
     public void deleteChars(int i) {
+        int l;
         if (this.value.isEmpty()) {
             return;
         }
@@ -170,24 +162,17 @@ GuiEventListener {
             this.insertText("");
             return;
         }
-        boolean bl = i < 0;
-        int j = bl ? this.cursorPos + i : this.cursorPos;
-        int k = bl ? this.cursorPos : this.cursorPos + i;
-        String string = "";
-        if (j >= 0) {
-            string = this.value.substring(0, j);
+        int j = this.getCursorPos(i);
+        int k = Math.min(j, this.cursorPos);
+        if (k == (l = Math.max(j, this.cursorPos))) {
+            return;
         }
-        if (k < this.value.length()) {
-            string = string + this.value.substring(k);
-        }
+        String string = new StringBuilder(this.value).delete(k, l).toString();
         if (!this.filter.test(string)) {
             return;
         }
         this.value = string;
-        if (bl) {
-            this.moveCursor(i);
-        }
-        this.onValueChange(this.value);
+        this.moveCursorTo(k);
     }
 
     public int getWordPosition(int i) {
@@ -225,7 +210,11 @@ GuiEventListener {
     }
 
     public void moveCursor(int i) {
-        this.moveCursorTo(this.cursorPos + i);
+        this.moveCursorTo(this.getCursorPos(i));
+    }
+
+    private int getCursorPos(int i) {
+        return Util.offsetByCodepoints(this.value, this.cursorPos, i);
     }
 
     public void moveCursorTo(int i) {
@@ -354,8 +343,8 @@ GuiEventListener {
             if (this.bordered) {
                 j -= 4;
             }
-            String string = this.font.substrByWidth(this.value.substring(this.displayPos), this.getInnerWidth());
-            this.moveCursorTo(this.font.substrByWidth(string, j).length() + this.displayPos);
+            String string = this.font.plainSubstrByWidth(this.value.substring(this.displayPos), this.getInnerWidth());
+            this.moveCursorTo(this.font.plainSubstrByWidth(string, j).length() + this.displayPos);
             return true;
         }
         return false;
@@ -366,18 +355,20 @@ GuiEventListener {
     }
 
     @Override
-    public void renderButton(int i, int j, float f) {
+    public void renderButton(PoseStack poseStack, int i, int j, float f) {
+        int k;
         if (!this.isVisible()) {
             return;
         }
         if (this.isBordered()) {
-            EditBox.fill(this.x - 1, this.y - 1, this.x + this.width + 1, this.y + this.height + 1, -6250336);
-            EditBox.fill(this.x, this.y, this.x + this.width, this.y + this.height, -16777216);
+            k = this.isFocused() ? -1 : -6250336;
+            EditBox.fill(poseStack, this.x - 1, this.y - 1, this.x + this.width + 1, this.y + this.height + 1, k);
+            EditBox.fill(poseStack, this.x, this.y, this.x + this.width, this.y + this.height, -16777216);
         }
-        int k = this.isEditable ? this.textColor : this.textColorUneditable;
+        k = this.isEditable ? this.textColor : this.textColorUneditable;
         int l = this.cursorPos - this.displayPos;
         int m = this.highlightPos - this.displayPos;
-        String string = this.font.substrByWidth(this.value.substring(this.displayPos), this.getInnerWidth());
+        String string = this.font.plainSubstrByWidth(this.value.substring(this.displayPos), this.getInnerWidth());
         boolean bl = l >= 0 && l <= string.length();
         boolean bl2 = this.isFocused() && this.frame / 6 % 2 == 0 && bl;
         int n = this.bordered ? this.x + 4 : this.x;
@@ -388,7 +379,7 @@ GuiEventListener {
         }
         if (!string.isEmpty()) {
             String string2 = bl ? string.substring(0, l) : string;
-            p = this.font.drawShadow(this.formatter.apply(string2, this.displayPos), p, o, k);
+            p = this.font.drawShadow(poseStack, this.formatter.apply(string2, this.displayPos), (float)p, (float)o, k);
         }
         boolean bl3 = this.cursorPos < this.value.length() || this.value.length() >= this.getMaxLength();
         int q = p;
@@ -399,16 +390,16 @@ GuiEventListener {
             --p;
         }
         if (!string.isEmpty() && bl && l < string.length()) {
-            this.font.drawShadow(this.formatter.apply(string.substring(l), this.cursorPos), p, o, k);
+            this.font.drawShadow(poseStack, this.formatter.apply(string.substring(l), this.cursorPos), (float)p, (float)o, k);
         }
         if (!bl3 && this.suggestion != null) {
-            this.font.drawShadow(this.suggestion, q - 1, o, -8355712);
+            this.font.drawShadow(poseStack, this.suggestion, (float)(q - 1), (float)o, -8355712);
         }
         if (bl2) {
             if (bl3) {
-                GuiComponent.fill(q, o - 1, q + 1, o + 1 + this.font.lineHeight, -3092272);
+                GuiComponent.fill(poseStack, q, o - 1, q + 1, o + 1 + this.font.lineHeight, -3092272);
             } else {
-                this.font.drawShadow("_", q, o, k);
+                this.font.drawShadow(poseStack, "_", (float)q, (float)o, k);
             }
         }
         if (m != l) {
@@ -523,10 +514,10 @@ GuiEventListener {
                 this.displayPos = j;
             }
             int k = this.getInnerWidth();
-            String string = this.font.substrByWidth(this.value.substring(this.displayPos), k);
+            String string = this.font.plainSubstrByWidth(this.value.substring(this.displayPos), k);
             int l = string.length() + this.displayPos;
             if (this.highlightPos == this.displayPos) {
-                this.displayPos -= this.font.substrByWidth(this.value, k, true).length();
+                this.displayPos -= this.font.plainSubstrByWidth(this.value, k, true).length();
             }
             if (this.highlightPos > l) {
                 this.displayPos += this.highlightPos - l;

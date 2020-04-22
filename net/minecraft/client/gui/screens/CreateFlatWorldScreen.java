@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.screens;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -16,6 +17,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -34,13 +37,13 @@ public class CreateFlatWorldScreen
 extends Screen {
     private final CreateWorldScreen parent;
     private FlatLevelGeneratorSettings generator = FlatLevelGeneratorSettings.getDefault();
-    private String columnType;
-    private String columnHeight;
+    private Component columnType;
+    private Component columnHeight;
     private DetailsList list;
     private Button deleteLayerButton;
 
     public CreateFlatWorldScreen(CreateWorldScreen createWorldScreen, ChunkGeneratorProvider chunkGeneratorProvider) {
-        super(new TranslatableComponent("createWorld.customize.flat.title", new Object[0]));
+        super(new TranslatableComponent("createWorld.customize.flat.title"));
         this.parent = createWorldScreen;
         if (chunkGeneratorProvider.getType() == LevelType.FLAT) {
             this.generator = FlatLevelGeneratorSettings.fromObject(chunkGeneratorProvider.getSettings());
@@ -57,11 +60,11 @@ extends Screen {
 
     @Override
     protected void init() {
-        this.columnType = I18n.get("createWorld.customize.flat.tile", new Object[0]);
-        this.columnHeight = I18n.get("createWorld.customize.flat.height", new Object[0]);
+        this.columnType = new TranslatableComponent("createWorld.customize.flat.tile");
+        this.columnHeight = new TranslatableComponent("createWorld.customize.flat.height");
         this.list = new DetailsList();
         this.children.add(this.list);
-        this.deleteLayerButton = this.addButton(new Button(this.width / 2 - 155, this.height - 52, 150, 20, I18n.get("createWorld.customize.flat.removeLayer", new Object[0]), button -> {
+        this.deleteLayerButton = this.addButton(new Button(this.width / 2 - 155, this.height - 52, 150, 20, new TranslatableComponent("createWorld.customize.flat.removeLayer"), button -> {
             if (!this.hasValidSelection()) {
                 return;
             }
@@ -73,18 +76,18 @@ extends Screen {
             this.generator.updateLayers();
             this.updateButtonValidity();
         }));
-        this.addButton(new Button(this.width / 2 + 5, this.height - 52, 150, 20, I18n.get("createWorld.customize.presets", new Object[0]), button -> {
+        this.addButton(new Button(this.width / 2 + 5, this.height - 52, 150, 20, new TranslatableComponent("createWorld.customize.presets"), button -> {
             this.minecraft.setScreen(new PresetFlatWorldScreen(this));
             this.generator.updateLayers();
             this.updateButtonValidity();
         }));
-        this.addButton(new Button(this.width / 2 - 155, this.height - 28, 150, 20, I18n.get("gui.done", new Object[0]), button -> {
+        this.addButton(new Button(this.width / 2 - 155, this.height - 28, 150, 20, CommonComponents.GUI_DONE, button -> {
             this.parent.levelTypeOptions = LevelType.FLAT.createProvider(this.generator.toObject(NbtOps.INSTANCE));
             this.minecraft.setScreen(this.parent);
             this.generator.updateLayers();
             this.updateButtonValidity();
         }));
-        this.addButton(new Button(this.width / 2 + 5, this.height - 28, 150, 20, I18n.get("gui.cancel", new Object[0]), button -> {
+        this.addButton(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
             this.minecraft.setScreen(this.parent);
             this.generator.updateLayers();
             this.updateButtonValidity();
@@ -108,14 +111,14 @@ extends Screen {
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        this.renderBackground();
-        this.list.render(i, j, f);
-        this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 8, 0xFFFFFF);
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        this.renderBackground(poseStack);
+        this.list.render(poseStack, i, j, f);
+        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 0xFFFFFF);
         int k = this.width / 2 - 92 - 16;
-        this.drawString(this.font, this.columnType, k, 32, 0xFFFFFF);
-        this.drawString(this.font, this.columnHeight, k + 2 + 213 - this.font.width(this.columnHeight), 32, 0xFFFFFF);
-        super.render(i, j, f);
+        this.drawString(poseStack, this.font, this.columnType, k, 32, 0xFFFFFF);
+        this.drawString(poseStack, this.font, this.columnHeight, k + 2 + 213 - this.font.width(this.columnHeight), 32, 0xFFFFFF);
+        super.render(poseStack, i, j, f);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -173,7 +176,7 @@ extends Screen {
             }
 
             @Override
-            public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+            public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
                 FlatLayerInfo flatLayerInfo = CreateFlatWorldScreen.this.generator.getLayersInfo().get(CreateFlatWorldScreen.this.generator.getLayersInfo().size() - i - 1);
                 BlockState blockState = flatLayerInfo.getBlockState();
                 Block block = blockState.getBlock();
@@ -186,11 +189,10 @@ extends Screen {
                     }
                 }
                 ItemStack itemStack = new ItemStack(item);
-                String string = item.getName(itemStack).getColoredString();
-                this.blitSlot(k, j, itemStack);
-                CreateFlatWorldScreen.this.font.draw(string, k + 18 + 5, j + 3, 0xFFFFFF);
-                String string2 = i == 0 ? I18n.get("createWorld.customize.flat.layer.top", flatLayerInfo.getHeight()) : (i == CreateFlatWorldScreen.this.generator.getLayersInfo().size() - 1 ? I18n.get("createWorld.customize.flat.layer.bottom", flatLayerInfo.getHeight()) : I18n.get("createWorld.customize.flat.layer", flatLayerInfo.getHeight()));
-                CreateFlatWorldScreen.this.font.draw(string2, k + 2 + 213 - CreateFlatWorldScreen.this.font.width(string2), j + 3, 0xFFFFFF);
+                this.blitSlot(poseStack, k, j, itemStack);
+                CreateFlatWorldScreen.this.font.draw(poseStack, item.getName(itemStack), (float)(k + 18 + 5), (float)(j + 3), 0xFFFFFF);
+                String string = i == 0 ? I18n.get("createWorld.customize.flat.layer.top", flatLayerInfo.getHeight()) : (i == CreateFlatWorldScreen.this.generator.getLayersInfo().size() - 1 ? I18n.get("createWorld.customize.flat.layer.bottom", flatLayerInfo.getHeight()) : I18n.get("createWorld.customize.flat.layer", flatLayerInfo.getHeight()));
+                CreateFlatWorldScreen.this.font.draw(poseStack, string, (float)(k + 2 + 213 - CreateFlatWorldScreen.this.font.width(string)), (float)(j + 3), 0xFFFFFF);
             }
 
             @Override
@@ -203,8 +205,8 @@ extends Screen {
                 return false;
             }
 
-            private void blitSlot(int i, int j, ItemStack itemStack) {
-                this.blitSlotBg(i + 1, j + 1);
+            private void blitSlot(PoseStack poseStack, int i, int j, ItemStack itemStack) {
+                this.blitSlotBg(poseStack, i + 1, j + 1);
                 RenderSystem.enableRescaleNormal();
                 if (!itemStack.isEmpty()) {
                     CreateFlatWorldScreen.this.itemRenderer.renderGuiItem(itemStack, i + 2, j + 2);
@@ -212,10 +214,10 @@ extends Screen {
                 RenderSystem.disableRescaleNormal();
             }
 
-            private void blitSlotBg(int i, int j) {
+            private void blitSlotBg(PoseStack poseStack, int i, int j) {
                 RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
                 DetailsList.this.minecraft.getTextureManager().bind(GuiComponent.STATS_ICON_LOCATION);
-                GuiComponent.blit(i, j, CreateFlatWorldScreen.this.getBlitOffset(), 0.0f, 0.0f, 18, 18, 128, 128);
+                GuiComponent.blit(poseStack, i, j, CreateFlatWorldScreen.this.getBlitOffset(), 0.0f, 0.0f, 18, 18, 128, 128);
             }
         }
     }

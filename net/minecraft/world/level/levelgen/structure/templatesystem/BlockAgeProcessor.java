@@ -60,7 +60,7 @@ extends StructureProcessor {
 
     @Nullable
     private BlockState maybeReplaceFullStoneBlock(Random random) {
-        if (random.nextFloat() < 0.5f) {
+        if (random.nextFloat() >= 0.5f) {
             return null;
         }
         BlockState[] blockStates = new BlockState[]{Blocks.CRACKED_STONE_BRICKS.defaultBlockState(), BlockAgeProcessor.getRandomFacingStairs(random, Blocks.STONE_BRICK_STAIRS)};
@@ -72,7 +72,7 @@ extends StructureProcessor {
     private BlockState maybeReplaceStairs(Random random, BlockState blockState) {
         Direction direction = blockState.getValue(StairBlock.FACING);
         Half half = blockState.getValue(StairBlock.HALF);
-        if (random.nextFloat() < 0.5f) {
+        if (random.nextFloat() >= 0.5f) {
             return null;
         }
         BlockState[] blockStates = new BlockState[]{Blocks.STONE_SLAB.defaultBlockState(), Blocks.STONE_BRICK_SLAB.defaultBlockState()};
@@ -98,7 +98,7 @@ extends StructureProcessor {
 
     @Nullable
     private BlockState maybeReplaceObsidian(Random random) {
-        if ((double)random.nextFloat() < 0.2) {
+        if (random.nextFloat() < 0.15f) {
             return Blocks.CRYING_OBSIDIAN.defaultBlockState();
         }
         return null;
