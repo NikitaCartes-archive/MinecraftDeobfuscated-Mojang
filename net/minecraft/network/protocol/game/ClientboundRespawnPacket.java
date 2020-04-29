@@ -19,15 +19,17 @@ implements Packet<ClientGamePacketListener> {
     private long seed;
     private GameType playerGameType;
     private LevelType levelType;
+    private boolean keepAllPlayerData;
 
     public ClientboundRespawnPacket() {
     }
 
-    public ClientboundRespawnPacket(DimensionType dimensionType, long l, LevelType levelType, GameType gameType) {
+    public ClientboundRespawnPacket(DimensionType dimensionType, long l, LevelType levelType, GameType gameType, boolean bl) {
         this.dimension = dimensionType;
         this.seed = l;
         this.playerGameType = gameType;
         this.levelType = levelType;
+        this.keepAllPlayerData = bl;
     }
 
     @Override
@@ -44,6 +46,7 @@ implements Packet<ClientGamePacketListener> {
         if (this.levelType == null) {
             this.levelType = LevelType.NORMAL;
         }
+        this.keepAllPlayerData = friendlyByteBuf.readBoolean();
     }
 
     @Override
@@ -52,6 +55,7 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf.writeLong(this.seed);
         friendlyByteBuf.writeByte(this.playerGameType.getId());
         friendlyByteBuf.writeUtf(this.levelType.getName());
+        friendlyByteBuf.writeBoolean(this.keepAllPlayerData);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -72,6 +76,11 @@ implements Packet<ClientGamePacketListener> {
     @Environment(value=EnvType.CLIENT)
     public LevelType getLevelType() {
         return this.levelType;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public boolean shouldKeepAllPlayerData() {
+        return this.keepAllPlayerData;
     }
 }
 

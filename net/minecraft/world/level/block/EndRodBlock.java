@@ -63,7 +63,7 @@ extends DirectionalBlock {
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
         Direction direction = blockPlaceContext.getClickedFace();
         BlockState blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos().relative(direction.getOpposite()));
-        if (blockState.getBlock() == this && blockState.getValue(FACING) == direction) {
+        if (blockState.is(this) && blockState.getValue(FACING) == direction) {
             return (BlockState)this.defaultBlockState().setValue(FACING, direction.getOpposite());
         }
         return (BlockState)this.defaultBlockState().setValue(FACING, direction);

@@ -74,7 +74,7 @@ extends AgableMob {
 
     @Override
     public float getWalkTargetValue(BlockPos blockPos, LevelReader levelReader) {
-        if (levelReader.getBlockState(blockPos.below()).getBlock() == Blocks.GRASS_BLOCK) {
+        if (levelReader.getBlockState(blockPos.below()).is(Blocks.GRASS_BLOCK)) {
             return 10.0f;
         }
         return levelReader.getBrightness(blockPos) - 0.5f;
@@ -102,7 +102,7 @@ extends AgableMob {
     }
 
     public static boolean checkAnimalSpawnRules(EntityType<? extends Animal> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
-        return levelAccessor.getBlockState(blockPos.below()).getBlock() == Blocks.GRASS_BLOCK && levelAccessor.getRawBrightness(blockPos, 0) > 8;
+        return levelAccessor.getBlockState(blockPos.below()).is(Blocks.GRASS_BLOCK) && levelAccessor.getRawBrightness(blockPos, 0) > 8;
     }
 
     @Override

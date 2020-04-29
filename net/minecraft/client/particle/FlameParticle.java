@@ -5,6 +5,7 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -12,13 +13,12 @@ import net.minecraft.client.particle.RisingParticle;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
 public class FlameParticle
 extends RisingParticle {
-    private FlameParticle(Level level, double d, double e, double f, double g, double h, double i) {
-        super(level, d, e, f, g, h, i);
+    private FlameParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+        super(clientLevel, d, e, f, g, h, i);
     }
 
     @Override
@@ -61,8 +61,8 @@ extends RisingParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            FlameParticle flameParticle = new FlameParticle(level, d, e, f, g, h, i);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            FlameParticle flameParticle = new FlameParticle(clientLevel, d, e, f, g, h, i);
             flameParticle.pickSprite(this.sprite);
             return flameParticle;
         }

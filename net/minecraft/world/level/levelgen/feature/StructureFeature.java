@@ -44,7 +44,7 @@ extends Feature<C> {
 
     @Override
     public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, C featureConfiguration) {
-        if (!levelAccessor.getLevelData().shouldGenerateMapFeatures()) {
+        if (!structureFeatureManager.shouldGenerateFeatures()) {
             return false;
         }
         int i = blockPos.getX() >> 4;

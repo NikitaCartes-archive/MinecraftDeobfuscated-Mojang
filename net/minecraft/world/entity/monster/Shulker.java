@@ -204,7 +204,7 @@ implements Enemy {
             Direction direction;
             BlockState blockState = this.level.getBlockState(blockPos);
             if (!blockState.isAir()) {
-                if (blockState.getBlock() == Blocks.MOVING_PISTON) {
+                if (blockState.is(Blocks.MOVING_PISTON)) {
                     direction = blockState.getValue(PistonBaseBlock.FACING);
                     if (this.level.isEmptyBlock(blockPos.relative(direction))) {
                         blockPos = blockPos.relative(direction);
@@ -212,7 +212,7 @@ implements Enemy {
                     } else {
                         this.teleportSomewhere();
                     }
-                } else if (blockState.getBlock() == Blocks.PISTON_HEAD) {
+                } else if (blockState.is(Blocks.PISTON_HEAD)) {
                     direction = blockState.getValue(PistonHeadBlock.FACING);
                     if (this.level.isEmptyBlock(blockPos.relative(direction))) {
                         blockPos = blockPos.relative(direction);

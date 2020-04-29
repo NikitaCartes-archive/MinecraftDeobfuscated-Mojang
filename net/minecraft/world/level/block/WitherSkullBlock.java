@@ -55,8 +55,8 @@ extends SkullBlock {
         if (level.isClientSide) {
             return;
         }
-        Block block = skullBlockEntity.getBlockState().getBlock();
-        boolean bl2 = bl = block == Blocks.WITHER_SKELETON_SKULL || block == Blocks.WITHER_SKELETON_WALL_SKULL;
+        BlockState blockState = skullBlockEntity.getBlockState();
+        boolean bl2 = bl = blockState.is(Blocks.WITHER_SKELETON_SKULL) || blockState.is(Blocks.WITHER_SKELETON_WALL_SKULL);
         if (!bl || blockPos.getY() < 2 || level.getDifficulty() == Difficulty.PEACEFUL) {
             return;
         }

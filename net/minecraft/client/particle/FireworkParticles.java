@@ -9,6 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.NoRenderParticle;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
@@ -27,7 +28,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.FireworkRocketItem;
-import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -43,8 +43,8 @@ public class FireworkParticles {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            SparkParticle sparkParticle = new SparkParticle(level, d, e, f, g, h, i, Minecraft.getInstance().particleEngine, this.sprites);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            SparkParticle sparkParticle = new SparkParticle(clientLevel, d, e, f, g, h, i, Minecraft.getInstance().particleEngine, this.sprites);
             sparkParticle.setAlpha(0.99f);
             return sparkParticle;
         }
@@ -60,8 +60,8 @@ public class FireworkParticles {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            OverlayParticle overlayParticle = new OverlayParticle(level, d, e, f);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            OverlayParticle overlayParticle = new OverlayParticle(clientLevel, d, e, f);
             overlayParticle.pickSprite(this.sprite);
             return overlayParticle;
         }
@@ -70,8 +70,8 @@ public class FireworkParticles {
     @Environment(value=EnvType.CLIENT)
     public static class OverlayParticle
     extends TextureSheetParticle {
-        private OverlayParticle(Level level, double d, double e, double f) {
-            super(level, d, e, f);
+        private OverlayParticle(ClientLevel clientLevel, double d, double e, double f) {
+            super(clientLevel, d, e, f);
             this.lifetime = 4;
         }
 
@@ -103,8 +103,8 @@ public class FireworkParticles {
         private float fadeB;
         private boolean hasFade;
 
-        private SparkParticle(Level level, double d, double e, double f, double g, double h, double i, ParticleEngine particleEngine, SpriteSet spriteSet) {
-            super(level, d, e, f, spriteSet, -0.004f);
+        private SparkParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, ParticleEngine particleEngine, SpriteSet spriteSet) {
+            super(clientLevel, d, e, f, spriteSet, -0.004f);
             this.xd = g;
             this.yd = h;
             this.zd = i;
@@ -157,8 +157,8 @@ public class FireworkParticles {
         private ListTag explosions;
         private boolean twinkleDelay;
 
-        public Starter(Level level, double d, double e, double f, double g, double h, double i, ParticleEngine particleEngine, @Nullable CompoundTag compoundTag) {
-            super(level, d, e, f);
+        public Starter(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, ParticleEngine particleEngine, @Nullable CompoundTag compoundTag) {
+            super(clientLevel, d, e, f);
             this.xd = g;
             this.yd = h;
             this.zd = i;

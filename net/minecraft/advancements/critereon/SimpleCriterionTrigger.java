@@ -7,15 +7,21 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.CriterionTriggerInstance;
+import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
+import net.minecraft.advancements.critereon.DeserializationContext;
+import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.server.PlayerAdvancements;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.storage.loot.LootContext;
 
-public abstract class SimpleCriterionTrigger<T extends CriterionTriggerInstance>
+public abstract class SimpleCriterionTrigger<T extends AbstractCriterionTriggerInstance>
 implements CriterionTrigger<T> {
     private final Map<PlayerAdvancements, Set<CriterionTrigger.Listener<T>>> players = Maps.newIdentityHashMap();
 
@@ -40,14 +46,25 @@ implements CriterionTrigger<T> {
         this.players.remove(playerAdvancements);
     }
 
-    protected void trigger(PlayerAdvancements playerAdvancements, Predicate<T> predicate) {
+    protected abstract T createInstance(JsonObject var1, EntityPredicate.Composite var2, DeserializationContext var3);
+
+    @Override
+    public final T createInstance(JsonObject jsonObject, DeserializationContext deserializationContext) {
+        EntityPredicate.Composite composite = EntityPredicate.Composite.fromJson(jsonObject, "player", deserializationContext);
+        return this.createInstance(jsonObject, composite, deserializationContext);
+    }
+
+    protected void trigger(ServerPlayer serverPlayer, Predicate<T> predicate) {
+        PlayerAdvancements playerAdvancements = serverPlayer.getAdvancements();
         Set<CriterionTrigger.Listener<T>> set = this.players.get(playerAdvancements);
         if (set == null) {
             return;
         }
+        LootContext lootContext = EntityPredicate.createContext(serverPlayer, serverPlayer);
         ArrayList<CriterionTrigger.Listener<T>> list = null;
         for (CriterionTrigger.Listener<T> listener : set) {
-            if (!predicate.test(listener.getTriggerInstance())) continue;
+            AbstractCriterionTriggerInstance abstractCriterionTriggerInstance = (AbstractCriterionTriggerInstance)listener.getTriggerInstance();
+            if (!abstractCriterionTriggerInstance.getPlayerPredicate().matches(lootContext) || !predicate.test(abstractCriterionTriggerInstance)) continue;
             if (list == null) {
                 list = Lists.newArrayList();
             }
@@ -67,6 +84,11 @@ implements CriterionTrigger<T> {
                 listener.run(playerAdvancements);
             }
         }
+    }
+
+    @Override
+    public /* synthetic */ CriterionTriggerInstance createInstance(JsonObject jsonObject, DeserializationContext deserializationContext) {
+        return this.createInstance(jsonObject, deserializationContext);
     }
 }
 

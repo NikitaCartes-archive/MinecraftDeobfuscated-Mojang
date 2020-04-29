@@ -11,7 +11,6 @@ import net.minecraft.Util;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
@@ -54,10 +53,10 @@ extends Screen {
         int l = (this.height - 166) / 2 + 8;
         this.font.draw(poseStack, this.title, (float)k, (float)l, 0x1F1F1F);
         Options options = this.minecraft.options;
-        this.font.draw(poseStack, I18n.get("demo.help.movementShort", options.keyUp.getTranslatedKeyMessage(), options.keyLeft.getTranslatedKeyMessage(), options.keyDown.getTranslatedKeyMessage(), options.keyRight.getTranslatedKeyMessage()), (float)k, (float)(l += 12), 0x4F4F4F);
-        this.font.draw(poseStack, I18n.get("demo.help.movementMouse", new Object[0]), (float)k, (float)(l + 12), 0x4F4F4F);
-        this.font.draw(poseStack, I18n.get("demo.help.jump", options.keyJump.getTranslatedKeyMessage()), (float)k, (float)(l + 24), 0x4F4F4F);
-        this.font.draw(poseStack, I18n.get("demo.help.inventory", options.keyInventory.getTranslatedKeyMessage()), (float)k, (float)(l + 36), 0x4F4F4F);
+        this.font.draw(poseStack, new TranslatableComponent("demo.help.movementShort", options.keyUp.getTranslatedKeyMessage(), options.keyLeft.getTranslatedKeyMessage(), options.keyDown.getTranslatedKeyMessage(), options.keyRight.getTranslatedKeyMessage()), (float)k, (float)(l += 12), 0x4F4F4F);
+        this.font.draw(poseStack, new TranslatableComponent("demo.help.movementMouse"), (float)k, (float)(l + 12), 0x4F4F4F);
+        this.font.draw(poseStack, new TranslatableComponent("demo.help.jump", options.keyJump.getTranslatedKeyMessage()), (float)k, (float)(l + 24), 0x4F4F4F);
+        this.font.draw(poseStack, new TranslatableComponent("demo.help.inventory", options.keyInventory.getTranslatedKeyMessage()), (float)k, (float)(l + 36), 0x4F4F4F);
         this.font.drawWordWrap(new TranslatableComponent("demo.help.fullWrapped"), k, l + 68, 218, 0x1F1F1F);
         super.render(poseStack, i, j, f);
     }

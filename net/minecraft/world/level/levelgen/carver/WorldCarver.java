@@ -106,7 +106,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
         mutableBlockPos.set(l, o, m);
         BlockState blockState = chunkAccess.getBlockState(mutableBlockPos);
         BlockState blockState2 = chunkAccess.getBlockState(mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.UP));
-        if (blockState.getBlock() == Blocks.GRASS_BLOCK || blockState.getBlock() == Blocks.MYCELIUM) {
+        if (blockState.is(Blocks.GRASS_BLOCK) || blockState.is(Blocks.MYCELIUM)) {
             atomicBoolean.set(true);
         }
         if (!this.canReplaceBlock(blockState, blockState2)) {
@@ -118,7 +118,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
             chunkAccess.setBlockState(mutableBlockPos, CAVE_AIR, false);
             if (atomicBoolean.get()) {
                 mutableBlockPos3.setWithOffset(mutableBlockPos, Direction.DOWN);
-                if (chunkAccess.getBlockState(mutableBlockPos3).getBlock() == Blocks.DIRT) {
+                if (chunkAccess.getBlockState(mutableBlockPos3).is(Blocks.DIRT)) {
                     chunkAccess.setBlockState(mutableBlockPos3, function.apply(mutableBlockPos).getSurfaceBuilderConfig().getTopMaterial(), false);
                 }
             }
@@ -135,8 +135,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
     }
 
     protected boolean canReplaceBlock(BlockState blockState, BlockState blockState2) {
-        Block block = blockState.getBlock();
-        return this.canReplaceBlock(blockState) || (block == Blocks.SAND || block == Blocks.GRAVEL) && !blockState2.getFluidState().is(FluidTags.WATER);
+        return this.canReplaceBlock(blockState) || (blockState.is(Blocks.SAND) || blockState.is(Blocks.GRAVEL)) && !blockState2.getFluidState().is(FluidTags.WATER);
     }
 
     protected boolean hasWater(ChunkAccess chunkAccess, int i, int j, int k, int l, int m, int n, int o, int p) {

@@ -159,7 +159,7 @@ HoglinBase {
     }
 
     public static boolean checkHoglinSpawnRules(EntityType<Hoglin> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
-        return levelAccessor.getBlockState(blockPos.below()).getBlock() != Blocks.NETHER_WART_BLOCK;
+        return !levelAccessor.getBlockState(blockPos.below()).is(Blocks.NETHER_WART_BLOCK);
     }
 
     @Override
@@ -181,7 +181,7 @@ HoglinBase {
         if (HoglinAi.isPosNearNearestRepellent(this, blockPos)) {
             return -1.0f;
         }
-        if (levelReader.getBlockState(blockPos.below()).getBlock() == Blocks.CRIMSON_NYLIUM) {
+        if (levelReader.getBlockState(blockPos.below()).is(Blocks.CRIMSON_NYLIUM)) {
             return 10.0f;
         }
         return 0.0f;

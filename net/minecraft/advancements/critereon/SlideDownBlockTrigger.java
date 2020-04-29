@@ -3,12 +3,12 @@
  */
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
+import net.minecraft.advancements.critereon.DeserializationContext;
+import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.Registry;
@@ -29,7 +29,7 @@ extends SimpleCriterionTrigger<TriggerInstance> {
     }
 
     @Override
-    public TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+    public TriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
         Block block = SlideDownBlockTrigger.deserializeBlock(jsonObject);
         StatePropertiesPredicate statePropertiesPredicate = StatePropertiesPredicate.fromJson(jsonObject.get("state"));
         if (block != null) {
@@ -37,7 +37,7 @@ extends SimpleCriterionTrigger<TriggerInstance> {
                 throw new JsonSyntaxException("Block " + block + " has no property " + string);
             });
         }
-        return new TriggerInstance(block, statePropertiesPredicate);
+        return new TriggerInstance(composite, block, statePropertiesPredicate);
     }
 
     @Nullable
@@ -50,12 +50,12 @@ extends SimpleCriterionTrigger<TriggerInstance> {
     }
 
     public void trigger(ServerPlayer serverPlayer, BlockState blockState) {
-        this.trigger(serverPlayer.getAdvancements(), (T triggerInstance) -> triggerInstance.matches(blockState));
+        this.trigger(serverPlayer, (T triggerInstance) -> triggerInstance.matches(blockState));
     }
 
     @Override
-    public /* synthetic */ CriterionTriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-        return this.createInstance(jsonObject, jsonDeserializationContext);
+    public /* synthetic */ AbstractCriterionTriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
+        return this.createInstance(jsonObject, composite, deserializationContext);
     }
 
     public static class TriggerInstance
@@ -63,19 +63,19 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         private final Block block;
         private final StatePropertiesPredicate state;
 
-        public TriggerInstance(@Nullable Block block, StatePropertiesPredicate statePropertiesPredicate) {
-            super(ID);
+        public TriggerInstance(EntityPredicate.Composite composite, @Nullable Block block, StatePropertiesPredicate statePropertiesPredicate) {
+            super(ID, composite);
             this.block = block;
             this.state = statePropertiesPredicate;
         }
 
         public static TriggerInstance slidesDownBlock(Block block) {
-            return new TriggerInstance(block, StatePropertiesPredicate.ANY);
+            return new TriggerInstance(EntityPredicate.Composite.ANY, block, StatePropertiesPredicate.ANY);
         }
 
         @Override
-        public JsonElement serializeToJson() {
-            JsonObject jsonObject = new JsonObject();
+        public JsonObject serializeToJson(SerializationContext serializationContext) {
+            JsonObject jsonObject = super.serializeToJson(serializationContext);
             if (this.block != null) {
                 jsonObject.addProperty("block", Registry.BLOCK.getKey(this.block).toString());
             }
@@ -84,7 +84,7 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         }
 
         public boolean matches(BlockState blockState) {
-            if (this.block != null && blockState.getBlock() != this.block) {
+            if (this.block != null && !blockState.is(this.block)) {
                 return false;
             }
             return this.state.matches(blockState);

@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -137,7 +138,7 @@ public abstract class BlockBehaviour {
 
     @Deprecated
     public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        if (this.isEntityBlock() && blockState.getBlock() != blockState2.getBlock()) {
+        if (this.isEntityBlock() && !blockState.is(blockState2.getBlock())) {
             level.removeBlockEntity(blockPos);
         }
     }
@@ -682,6 +683,14 @@ public abstract class BlockBehaviour {
             return this.getBlock().is(tag);
         }
 
+        public boolean is(Tag<Block> tag, Predicate<BlockStateBase> predicate) {
+            return this.getBlock().is(tag) && predicate.test(this);
+        }
+
+        public boolean is(Block block) {
+            return this.getBlock().is(block);
+        }
+
         public FluidState getFluidState() {
             return this.getBlock().getFluidState(this.asState());
         }
@@ -775,7 +784,7 @@ public abstract class BlockBehaviour {
         private boolean canOcclude = true;
         private boolean isAir;
         private StateArgumentPredicate<EntityType<?>> isValidSpawn = (blockState, blockGetter, blockPos, entityType) -> blockState.isFaceSturdy(blockGetter, blockPos, Direction.UP) && blockState.getLightEmission() < 14;
-        private StatePredicate isRedstoneConductor = (blockState, blockGetter, blockPos) -> blockState.getMaterial().isSolidBlocking() && blockState.isCollisionShapeFullBlock(blockGetter, blockPos) && !blockState.isSignalSource();
+        private StatePredicate isRedstoneConductor = (blockState, blockGetter, blockPos) -> blockState.getMaterial().isSolidBlocking() && blockState.isCollisionShapeFullBlock(blockGetter, blockPos);
         private StatePredicate isSuffocating;
         private StatePredicate isViewBlocking = this.isSuffocating = (blockState, blockGetter, blockPos) -> this.material.blocksMotion() && blockState.isCollisionShapeFullBlock(blockGetter, blockPos);
         private StatePredicate hasPostProcess = (blockState, blockGetter, blockPos) -> false;

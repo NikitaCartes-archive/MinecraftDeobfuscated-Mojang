@@ -11,6 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.client.resources.model.BakedModel;
@@ -20,7 +21,6 @@ import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -48,11 +48,11 @@ public class ItemOverrides {
     }
 
     @Nullable
-    public BakedModel resolve(BakedModel bakedModel, ItemStack itemStack, @Nullable Level level, @Nullable LivingEntity livingEntity) {
+    public BakedModel resolve(BakedModel bakedModel, ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity) {
         if (!this.overrides.isEmpty()) {
             for (int i = 0; i < this.overrides.size(); ++i) {
                 ItemOverride itemOverride = this.overrides.get(i);
-                if (!itemOverride.test(itemStack, level, livingEntity)) continue;
+                if (!itemOverride.test(itemStack, clientLevel, livingEntity)) continue;
                 BakedModel bakedModel2 = this.overrideModels.get(i);
                 if (bakedModel2 == null) {
                     return bakedModel;

@@ -49,7 +49,7 @@ extends BushBlock {
 
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
-        if (blockState2.getBlock() != this.fruit && direction == blockState.getValue(FACING)) {
+        if (!blockState2.is(this.fruit) && direction == blockState.getValue(FACING)) {
             return (BlockState)this.fruit.getStem().defaultBlockState().setValue(StemBlock.AGE, 7);
         }
         return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
@@ -57,7 +57,7 @@ extends BushBlock {
 
     @Override
     protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-        return blockState.getBlock() == Blocks.FARMLAND;
+        return blockState.is(Blocks.FARMLAND);
     }
 
     @Environment(value=EnvType.CLIENT)

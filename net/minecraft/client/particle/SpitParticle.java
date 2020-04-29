@@ -5,18 +5,18 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ExplodeParticle;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
 public class SpitParticle
 extends ExplodeParticle {
-    private SpitParticle(Level level, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
-        super(level, d, e, f, g, h, i, spriteSet);
+    private SpitParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
+        super(clientLevel, d, e, f, g, h, i, spriteSet);
         this.gravity = 0.5f;
     }
 
@@ -36,8 +36,8 @@ extends ExplodeParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            return new SpitParticle(level, d, e, f, g, h, i, this.sprites);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return new SpitParticle(clientLevel, d, e, f, g, h, i, this.sprites);
         }
     }
 }

@@ -159,13 +159,12 @@ extends LivingEntity {
     @Nullable
     public FishingHook fishing;
 
-    public Player(Level level, GameProfile gameProfile) {
+    public Player(Level level, BlockPos blockPos, GameProfile gameProfile) {
         super((EntityType<? extends LivingEntity>)EntityType.PLAYER, level);
         this.setUUID(Player.createPlayerUUID(gameProfile));
         this.gameProfile = gameProfile;
         this.inventoryMenu = new InventoryMenu(this.inventory, !level.isClientSide, this);
         this.containerMenu = this.inventoryMenu;
-        BlockPos blockPos = level.getSharedSpawnPos();
         this.moveTo((double)blockPos.getX() + 0.5, blockPos.getY() + 1, (double)blockPos.getZ() + 0.5, 0.0f, 0.0f);
         this.rotOffs = 180.0f;
     }

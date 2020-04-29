@@ -51,22 +51,17 @@ extends NodeEvaluator {
     @Override
     public Node getStart() {
         BlockPos blockPos;
-        int i;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        if (this.canFloat() && this.mob.isInWater()) {
-            i = Mth.floor(this.mob.getY());
-            BlockState blockState = this.level.getBlockState(mutableBlockPos.set(this.mob.getX(), (double)i, this.mob.getZ()));
-            while (blockState.getBlock() == Blocks.WATER || blockState.getFluidState() == Fluids.WATER.getSource(false)) {
+        int i = Mth.floor(this.mob.getY());
+        BlockState blockState = this.level.getBlockState(mutableBlockPos.set(this.mob.getX(), (double)i, this.mob.getZ()));
+        if (this.mob.canStandOnFluid(blockState.getFluidState().getType())) {
+            while (this.mob.canStandOnFluid(blockState.getFluidState().getType())) {
                 blockState = this.level.getBlockState(mutableBlockPos.set(this.mob.getX(), (double)(++i), this.mob.getZ()));
             }
             --i;
-        } else if (this.mob.isInLava() && this.mob.canFloatInLava()) {
-            i = Mth.floor(this.mob.getY());
-            BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos(this.mob.getX(), (double)i, this.mob.getZ());
-            BlockState blockState2 = this.level.getBlockState(mutableBlockPos2);
-            while (blockState2.getBlock() == Blocks.LAVA || blockState2.getFluidState() == Fluids.LAVA.getSource(false)) {
-                mutableBlockPos2.set(this.mob.getX(), (double)(++i), this.mob.getZ());
-                blockState2 = this.level.getBlockState(mutableBlockPos2);
+        } else if (this.canFloat() && this.mob.isInWater()) {
+            while (blockState.getBlock() == Blocks.WATER || blockState.getFluidState() == Fluids.WATER.getSource(false)) {
+                blockState = this.level.getBlockState(mutableBlockPos.set(this.mob.getX(), (double)(++i), this.mob.getZ()));
             }
             --i;
         } else if (this.mob.isOnGround()) {
@@ -82,9 +77,9 @@ extends NodeEvaluator {
         BlockPathTypes blockPathTypes = this.getBlockPathType(this.mob, blockPos.getX(), i, blockPos.getZ());
         if (this.mob.getPathfindingMalus(blockPathTypes) < 0.0f) {
             AABB aABB = this.mob.getBoundingBox();
-            BlockPos.MutableBlockPos mutableBlockPos3 = mutableBlockPos;
-            if (this.hasPositiveMalus(mutableBlockPos3.set(aABB.minX, (double)i, aABB.minZ)) || this.hasPositiveMalus(mutableBlockPos3.set(aABB.minX, (double)i, aABB.maxZ)) || this.hasPositiveMalus(mutableBlockPos3.set(aABB.maxX, (double)i, aABB.minZ)) || this.hasPositiveMalus(mutableBlockPos3.set(aABB.maxX, (double)i, aABB.maxZ))) {
-                return this.getNode(mutableBlockPos3);
+            BlockPos.MutableBlockPos mutableBlockPos2 = mutableBlockPos;
+            if (this.hasPositiveMalus(mutableBlockPos2.set(aABB.minX, (double)i, aABB.minZ)) || this.hasPositiveMalus(mutableBlockPos2.set(aABB.minX, (double)i, aABB.maxZ)) || this.hasPositiveMalus(mutableBlockPos2.set(aABB.maxX, (double)i, aABB.minZ)) || this.hasPositiveMalus(mutableBlockPos2.set(aABB.maxX, (double)i, aABB.maxZ))) {
+                return this.getNode(mutableBlockPos2);
             }
         }
         return this.getNode(blockPos.getX(), i, blockPos.getZ());
@@ -357,12 +352,11 @@ extends NodeEvaluator {
                     if (l == 0 && n == 0) continue;
                     mutableBlockPos.set(l + i, m + j, n + k);
                     BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
-                    Block block = blockState.getBlock();
-                    if (block == Blocks.CACTUS) {
+                    if (blockState.is(Blocks.CACTUS)) {
                         blockPathTypes = BlockPathTypes.DANGER_CACTUS;
                         continue;
                     }
-                    if (block == Blocks.SWEET_BERRY_BUSH) {
+                    if (blockState.is(Blocks.SWEET_BERRY_BUSH)) {
                         blockPathTypes = BlockPathTypes.DANGER_OTHER;
                         continue;
                     }
@@ -381,19 +375,19 @@ extends NodeEvaluator {
         if (blockState.isAir()) {
             return BlockPathTypes.OPEN;
         }
-        if (block.is(BlockTags.TRAPDOORS) || block == Blocks.LILY_PAD) {
+        if (blockState.is(BlockTags.TRAPDOORS) || blockState.is(Blocks.LILY_PAD)) {
             return BlockPathTypes.TRAPDOOR;
         }
-        if (block == Blocks.CACTUS) {
+        if (blockState.is(Blocks.CACTUS)) {
             return BlockPathTypes.DAMAGE_CACTUS;
         }
-        if (block == Blocks.SWEET_BERRY_BUSH) {
+        if (blockState.is(Blocks.SWEET_BERRY_BUSH)) {
             return BlockPathTypes.DAMAGE_OTHER;
         }
-        if (block == Blocks.HONEY_BLOCK) {
+        if (blockState.is(Blocks.HONEY_BLOCK)) {
             return BlockPathTypes.STICKY_HONEY;
         }
-        if (block == Blocks.COCOA) {
+        if (blockState.is(Blocks.COCOA)) {
             return BlockPathTypes.COCOA;
         }
         if (WalkNodeEvaluator.isBurningBlock(blockState)) {
@@ -431,8 +425,7 @@ extends NodeEvaluator {
     }
 
     private static boolean isBurningBlock(BlockState blockState) {
-        Block block = blockState.getBlock();
-        return block.is(BlockTags.FIRE) || block == Blocks.LAVA || block == Blocks.MAGMA_BLOCK || CampfireBlock.isLitCampfire(blockState);
+        return blockState.is(BlockTags.FIRE) || blockState.is(Blocks.LAVA) || blockState.is(Blocks.MAGMA_BLOCK) || CampfireBlock.isLitCampfire(blockState);
     }
 }
 

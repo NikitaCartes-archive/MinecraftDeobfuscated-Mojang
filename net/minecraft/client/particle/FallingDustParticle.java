@@ -6,6 +6,7 @@ package net.minecraft.client.particle;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -14,7 +15,6 @@ import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,8 +26,8 @@ extends TextureSheetParticle {
     private final float rotSpeed;
     private final SpriteSet sprites;
 
-    private FallingDustParticle(Level level, double d, double e, double f, float g, float h, float i, SpriteSet spriteSet) {
-        super(level, d, e, f);
+    private FallingDustParticle(ClientLevel clientLevel, double d, double e, double f, float g, float h, float i, SpriteSet spriteSet) {
+        super(clientLevel, d, e, f);
         this.sprites = spriteSet;
         this.rCol = g;
         this.gCol = h;
@@ -83,20 +83,20 @@ extends TextureSheetParticle {
 
         @Override
         @Nullable
-        public Particle createParticle(BlockParticleOption blockParticleOption, Level level, double d, double e, double f, double g, double h, double i) {
+        public Particle createParticle(BlockParticleOption blockParticleOption, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
             BlockState blockState = blockParticleOption.getState();
             if (!blockState.isAir() && blockState.getRenderShape() == RenderShape.INVISIBLE) {
                 return null;
             }
             BlockPos blockPos = new BlockPos(d, e, f);
-            int j = Minecraft.getInstance().getBlockColors().getColor(blockState, level, blockPos);
+            int j = Minecraft.getInstance().getBlockColors().getColor(blockState, clientLevel, blockPos);
             if (blockState.getBlock() instanceof FallingBlock) {
-                j = ((FallingBlock)blockState.getBlock()).getDustColor(blockState, level, blockPos);
+                j = ((FallingBlock)blockState.getBlock()).getDustColor(blockState, clientLevel, blockPos);
             }
             float k = (float)(j >> 16 & 0xFF) / 255.0f;
             float l = (float)(j >> 8 & 0xFF) / 255.0f;
             float m = (float)(j & 0xFF) / 255.0f;
-            return new FallingDustParticle(level, d, e, f, k, l, m, this.sprite);
+            return new FallingDustParticle(clientLevel, d, e, f, k, l, m, this.sprite);
         }
     }
 }

@@ -131,7 +131,7 @@ implements SimpleWaterloggedBlock {
 
     @Override
     public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        if (blockState.getBlock() == blockState.getBlock()) {
+        if (blockState.is(blockState.getBlock())) {
             return;
         }
         this.baseState.neighborChanged(level, blockPos, Blocks.AIR, blockPos, false);
@@ -140,7 +140,7 @@ implements SimpleWaterloggedBlock {
 
     @Override
     public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        if (blockState.getBlock() == blockState2.getBlock()) {
+        if (blockState.is(blockState2.getBlock())) {
             return;
         }
         this.baseState.onRemove(level, blockPos, blockState2, bl);

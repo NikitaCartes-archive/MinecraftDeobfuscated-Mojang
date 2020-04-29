@@ -44,6 +44,7 @@ implements BucketPickup {
     public static final IntegerProperty LEVEL = BlockStateProperties.LEVEL;
     protected final FlowingFluid fluid;
     private final List<FluidState> stateCache;
+    public static final VoxelShape STABLE_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 8.0, 16.0);
 
     protected LiquidBlock(FlowingFluid flowingFluid, BlockBehaviour.Properties properties) {
         super(properties);
@@ -55,6 +56,14 @@ implements BucketPickup {
         }
         this.stateCache.add(flowingFluid.getFlowing(8, true));
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(LEVEL, 0));
+    }
+
+    @Override
+    public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+        if (collisionContext.isAbove(STABLE_SHAPE, blockPos, true) && blockState.getValue(LEVEL) == 0 && collisionContext.canStandOnFluid(blockGetter.getFluidState(blockPos.above()), this.fluid)) {
+            return STABLE_SHAPE;
+        }
+        return Shapes.empty();
     }
 
     @Override
@@ -128,7 +137,7 @@ implements BucketPickup {
 
     private boolean shouldSpreadLiquid(Level level, BlockPos blockPos, BlockState blockState) {
         if (this.fluid.is(FluidTags.LAVA)) {
-            boolean bl = level.getBlockState(blockPos.below()).getBlock() == Blocks.SOUL_SOIL;
+            boolean bl = level.getBlockState(blockPos.below()).is(Blocks.SOUL_SOIL);
             for (Direction direction : Direction.values()) {
                 if (direction == Direction.DOWN) continue;
                 BlockPos blockPos2 = blockPos.relative(direction);
@@ -138,7 +147,7 @@ implements BucketPickup {
                     this.fizz(level, blockPos);
                     return false;
                 }
-                if (!bl || level.getBlockState(blockPos2).getBlock() != Blocks.BLUE_ICE) continue;
+                if (!bl || !level.getBlockState(blockPos2).is(Blocks.BLUE_ICE)) continue;
                 level.setBlockAndUpdate(blockPos, Blocks.BASALT.defaultBlockState());
                 this.fizz(level, blockPos);
                 return false;

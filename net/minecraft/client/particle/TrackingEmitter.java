@@ -5,10 +5,10 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.NoRenderParticle;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 @Environment(value=EnvType.CLIENT)
@@ -19,16 +19,16 @@ extends NoRenderParticle {
     private final int lifeTime;
     private final ParticleOptions particleType;
 
-    public TrackingEmitter(Level level, Entity entity, ParticleOptions particleOptions) {
-        this(level, entity, particleOptions, 3);
+    public TrackingEmitter(ClientLevel clientLevel, Entity entity, ParticleOptions particleOptions) {
+        this(clientLevel, entity, particleOptions, 3);
     }
 
-    public TrackingEmitter(Level level, Entity entity, ParticleOptions particleOptions, int i) {
-        this(level, entity, particleOptions, i, entity.getDeltaMovement());
+    public TrackingEmitter(ClientLevel clientLevel, Entity entity, ParticleOptions particleOptions, int i) {
+        this(clientLevel, entity, particleOptions, i, entity.getDeltaMovement());
     }
 
-    private TrackingEmitter(Level level, Entity entity, ParticleOptions particleOptions, int i, Vec3 vec3) {
-        super(level, entity.getX(), entity.getY(0.5), entity.getZ(), vec3.x, vec3.y, vec3.z);
+    private TrackingEmitter(ClientLevel clientLevel, Entity entity, ParticleOptions particleOptions, int i, Vec3 vec3) {
+        super(clientLevel, entity.getX(), entity.getY(0.5), entity.getZ(), vec3.x, vec3.y, vec3.z);
         this.entity = entity;
         this.lifeTime = i;
         this.particleType = particleOptions;

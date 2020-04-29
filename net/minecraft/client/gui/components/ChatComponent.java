@@ -70,8 +70,6 @@ extends GuiComponent {
         double g = 9.0 * (this.minecraft.options.chatLineSpacing + 1.0);
         double h = -8.0 * (this.minecraft.options.chatLineSpacing + 1.0) + 4.0 * this.minecraft.options.chatLineSpacing;
         int m = 0;
-        poseStack.pushPose();
-        poseStack.translate(0.0, 0.0, -100.0);
         for (n = 0; n + this.chatScrollbarPos < this.trimmedMessages.size() && n < j; ++n) {
             GuiMessage guiMessage = this.trimmedMessages.get(n + this.chatScrollbarPos);
             if (guiMessage == null || (o = i - guiMessage.getAddedTime()) >= 200 && !bl) continue;
@@ -82,22 +80,29 @@ extends GuiComponent {
             if (q <= 3) continue;
             boolean s = false;
             double t = (double)(-n) * g;
+            poseStack.pushPose();
+            poseStack.translate(0.0, 0.0, 50.0);
             ChatComponent.fill(poseStack, -2, (int)(t - g), 0 + l + 4, (int)t, r << 24);
             RenderSystem.enableBlend();
+            poseStack.translate(0.0, 0.0, 50.0);
             this.minecraft.font.drawShadow(poseStack, guiMessage.getMessage(), 0.0f, (float)((int)(t + h)), 0xFFFFFF + (q << 24));
             RenderSystem.disableAlphaTest();
             RenderSystem.disableBlend();
+            poseStack.popPose();
         }
         if (!this.chatQueue.isEmpty()) {
             n = (int)(128.0 * e);
             int u = (int)(255.0 * f);
+            poseStack.pushPose();
+            poseStack.translate(0.0, 0.0, 50.0);
             ChatComponent.fill(poseStack, -2, 0, l + 4, 9, u << 24);
             RenderSystem.enableBlend();
+            poseStack.translate(0.0, 0.0, 50.0);
             this.minecraft.font.drawShadow(poseStack, new TranslatableComponent("chat.queue", this.chatQueue.size()), 0.0f, 1.0f, 0xFFFFFF + (n << 24));
+            poseStack.popPose();
             RenderSystem.disableAlphaTest();
             RenderSystem.disableBlend();
         }
-        poseStack.popPose();
         if (bl) {
             n = this.minecraft.font.lineHeight;
             RenderSystem.translatef(-3.0f, 0.0f, 0.0f);

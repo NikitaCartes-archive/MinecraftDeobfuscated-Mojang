@@ -29,12 +29,12 @@ extends Feature<NoneFeatureConfiguration> {
         int i = 0;
         int j = levelAccessor.getHeight(Heightmap.Types.OCEAN_FLOOR, blockPos.getX(), blockPos.getZ());
         BlockPos blockPos2 = new BlockPos(blockPos.getX(), j, blockPos.getZ());
-        if (levelAccessor.getBlockState(blockPos2).getBlock() == Blocks.WATER) {
+        if (levelAccessor.getBlockState(blockPos2).is(Blocks.WATER)) {
             BlockState blockState = Blocks.KELP.defaultBlockState();
             BlockState blockState2 = Blocks.KELP_PLANT.defaultBlockState();
             int k = 1 + random.nextInt(10);
             for (int l = 0; l <= k; ++l) {
-                if (levelAccessor.getBlockState(blockPos2).getBlock() == Blocks.WATER && levelAccessor.getBlockState(blockPos2.above()).getBlock() == Blocks.WATER && blockState2.canSurvive(levelAccessor, blockPos2)) {
+                if (levelAccessor.getBlockState(blockPos2).is(Blocks.WATER) && levelAccessor.getBlockState(blockPos2.above()).is(Blocks.WATER) && blockState2.canSurvive(levelAccessor, blockPos2)) {
                     if (l == k) {
                         levelAccessor.setBlock(blockPos2, (BlockState)blockState.setValue(KelpBlock.AGE, random.nextInt(4) + 20), 2);
                         ++i;
@@ -43,7 +43,7 @@ extends Feature<NoneFeatureConfiguration> {
                     }
                 } else if (l > 0) {
                     BlockPos blockPos3 = blockPos2.below();
-                    if (!blockState.canSurvive(levelAccessor, blockPos3) || levelAccessor.getBlockState(blockPos3.below()).getBlock() == Blocks.KELP) break;
+                    if (!blockState.canSurvive(levelAccessor, blockPos3) || levelAccessor.getBlockState(blockPos3.below()).is(Blocks.KELP)) break;
                     levelAccessor.setBlock(blockPos3, (BlockState)blockState.setValue(KelpBlock.AGE, random.nextInt(4) + 20), 2);
                     ++i;
                     break;

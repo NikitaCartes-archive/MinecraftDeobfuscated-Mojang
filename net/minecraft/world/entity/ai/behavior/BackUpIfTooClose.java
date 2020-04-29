@@ -32,7 +32,7 @@ extends Behavior<E> {
 
     @Override
     protected void start(ServerLevel serverLevel, E mob, long l) {
-        ((LivingEntity)mob).getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(this.getTarget(mob)));
+        ((LivingEntity)mob).getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(this.getTarget(mob), true));
         ((Mob)mob).getMoveControl().strafe(-this.strafeSpeed, 0.0f);
         ((Mob)mob).yRot = Mth.rotateIfNecessary(((Mob)mob).yRot, ((Mob)mob).yHeadRot, 0.0f);
     }

@@ -159,14 +159,14 @@ extends BlockEntity {
     }
 
     public Mode getMode() {
-        Block block = this.getBlockState().getBlock();
-        if (block == Blocks.COMMAND_BLOCK) {
+        BlockState blockState = this.getBlockState();
+        if (blockState.is(Blocks.COMMAND_BLOCK)) {
             return Mode.REDSTONE;
         }
-        if (block == Blocks.REPEATING_COMMAND_BLOCK) {
+        if (blockState.is(Blocks.REPEATING_COMMAND_BLOCK)) {
             return Mode.AUTO;
         }
-        if (block == Blocks.CHAIN_COMMAND_BLOCK) {
+        if (blockState.is(Blocks.CHAIN_COMMAND_BLOCK)) {
             return Mode.SEQUENCE;
         }
         return Mode.REDSTONE;

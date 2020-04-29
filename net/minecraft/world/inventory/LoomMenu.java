@@ -145,7 +145,7 @@ extends AbstractContainerMenu {
         ItemStack itemStack2 = this.dyeSlot.getItem();
         ItemStack itemStack3 = this.patternSlot.getItem();
         ItemStack itemStack4 = this.resultSlot.getItem();
-        if (!itemStack4.isEmpty() && (itemStack.isEmpty() || itemStack2.isEmpty() || this.selectedBannerPatternIndex.get() <= 0 || this.selectedBannerPatternIndex.get() >= BannerPattern.COUNT - 5 && itemStack3.isEmpty())) {
+        if (!itemStack4.isEmpty() && (itemStack.isEmpty() || itemStack2.isEmpty() || this.selectedBannerPatternIndex.get() <= 0 || this.selectedBannerPatternIndex.get() >= BannerPattern.COUNT - BannerPattern.PATTERN_ITEM_COUNT && itemStack3.isEmpty())) {
             this.resultSlot.set(ItemStack.EMPTY);
             this.selectedBannerPatternIndex.set(0);
         } else if (!itemStack3.isEmpty() && itemStack3.getItem() instanceof BannerPatternItem) {

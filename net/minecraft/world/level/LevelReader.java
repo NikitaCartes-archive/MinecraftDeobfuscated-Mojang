@@ -62,6 +62,7 @@ BiomeManager.NoiseBiomeSource {
 
     public boolean isClientSide();
 
+    @Deprecated
     public int getSeaLevel();
 
     public Dimension getDimension();

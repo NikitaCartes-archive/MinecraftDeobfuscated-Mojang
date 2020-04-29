@@ -103,7 +103,7 @@ implements TickableBlockEntity {
 
     private BlockState getCollisionRelatedBlockState() {
         if (!this.isExtending() && this.isSourcePiston() && this.movedState.getBlock() instanceof PistonBaseBlock) {
-            return (BlockState)((BlockState)((BlockState)Blocks.PISTON_HEAD.defaultBlockState().setValue(PistonHeadBlock.SHORT, this.progress > 0.25f)).setValue(PistonHeadBlock.TYPE, this.movedState.getBlock() == Blocks.STICKY_PISTON ? PistonType.STICKY : PistonType.DEFAULT)).setValue(PistonHeadBlock.FACING, this.movedState.getValue(PistonBaseBlock.FACING));
+            return (BlockState)((BlockState)((BlockState)Blocks.PISTON_HEAD.defaultBlockState().setValue(PistonHeadBlock.SHORT, this.progress > 0.25f)).setValue(PistonHeadBlock.TYPE, this.movedState.is(Blocks.STICKY_PISTON) ? PistonType.STICKY : PistonType.DEFAULT)).setValue(PistonHeadBlock.FACING, this.movedState.getValue(PistonBaseBlock.FACING));
         }
         return this.movedState;
     }
@@ -121,7 +121,7 @@ implements TickableBlockEntity {
             return;
         }
         List<AABB> list2 = voxelShape.toAabbs();
-        boolean bl = this.movedState.getBlock() == Blocks.SLIME_BLOCK;
+        boolean bl = this.movedState.is(Blocks.SLIME_BLOCK);
         for (Entity entity : list) {
             AABB aABB4;
             AABB aABB2;
@@ -190,7 +190,7 @@ implements TickableBlockEntity {
     }
 
     private boolean isStickyForEntities() {
-        return this.movedState.getBlock() == Blocks.HONEY_BLOCK;
+        return this.movedState.is(Blocks.HONEY_BLOCK);
     }
 
     public Direction getMovementDirection() {
@@ -245,7 +245,7 @@ implements TickableBlockEntity {
             this.progressO = this.progress = 1.0f;
             this.level.removeBlockEntity(this.worldPosition);
             this.setRemoved();
-            if (this.level.getBlockState(this.worldPosition).getBlock() == Blocks.MOVING_PISTON) {
+            if (this.level.getBlockState(this.worldPosition).is(Blocks.MOVING_PISTON)) {
                 BlockState blockState = this.isSourcePiston ? Blocks.AIR.defaultBlockState() : Block.updateFromNeighbourShapes(this.movedState, this.level, this.worldPosition);
                 this.level.setBlock(this.worldPosition, blockState, 3);
                 this.level.neighborChanged(this.worldPosition, blockState.getBlock(), this.worldPosition);
@@ -260,7 +260,7 @@ implements TickableBlockEntity {
         if (this.progressO >= 1.0f) {
             this.level.removeBlockEntity(this.worldPosition);
             this.setRemoved();
-            if (this.movedState != null && this.level.getBlockState(this.worldPosition).getBlock() == Blocks.MOVING_PISTON) {
+            if (this.movedState != null && this.level.getBlockState(this.worldPosition).is(Blocks.MOVING_PISTON)) {
                 BlockState blockState = Block.updateFromNeighbourShapes(this.movedState, this.level, this.worldPosition);
                 if (blockState.isAir()) {
                     this.level.setBlock(this.worldPosition, this.movedState, 84);

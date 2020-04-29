@@ -832,7 +832,7 @@ extends Animal {
                         int n = l = k < j && k > -j ? j : 0;
                         while (l <= j) {
                             mutableBlockPos.setWithOffset(blockPos, k, i, l);
-                            if (this.level.getBlockState(mutableBlockPos).getBlock() == Blocks.BAMBOO) {
+                            if (this.level.getBlockState(mutableBlockPos).is(Blocks.BAMBOO)) {
                                 return true;
                             }
                             l = l > 0 ? -l : 1 - l;

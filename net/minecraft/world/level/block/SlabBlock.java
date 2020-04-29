@@ -70,7 +70,7 @@ implements SimpleWaterloggedBlock {
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
         BlockPos blockPos = blockPlaceContext.getClickedPos();
         BlockState blockState = blockPlaceContext.getLevel().getBlockState(blockPos);
-        if (blockState.getBlock() == this) {
+        if (blockState.is(this)) {
             return (BlockState)((BlockState)blockState.setValue(TYPE, SlabType.DOUBLE)).setValue(WATERLOGGED, false);
         }
         FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPos);

@@ -31,7 +31,7 @@ extends Item {
         BlockPos blockPos;
         Level level = useOnContext.getLevel();
         BlockState blockState = level.getBlockState(blockPos = useOnContext.getClickedPos());
-        if (blockState.getBlock() == Blocks.LECTERN) {
+        if (blockState.is(Blocks.LECTERN)) {
             return LecternBlock.tryPlaceBook(level, blockPos, blockState, useOnContext.getItemInHand()) ? InteractionResult.SUCCESS : InteractionResult.PASS;
         }
         return InteractionResult.PASS;

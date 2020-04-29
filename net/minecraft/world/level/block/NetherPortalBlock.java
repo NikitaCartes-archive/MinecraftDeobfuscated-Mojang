@@ -62,7 +62,7 @@ extends Block {
     public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         if (serverLevel.dimension.isNaturalDimension() && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING) && random.nextInt(2000) < serverLevel.getDifficulty().getId()) {
             ZombifiedPiglin entity;
-            while (serverLevel.getBlockState(blockPos).getBlock() == this) {
+            while (serverLevel.getBlockState(blockPos).is(this)) {
                 blockPos = blockPos.below();
             }
             if (serverLevel.getBlockState(blockPos).isValidSpawn(serverLevel, blockPos, EntityType.ZOMBIFIED_PIGLIN) && (entity = EntityType.ZOMBIFIED_PIGLIN.spawn(serverLevel, null, null, null, blockPos.above(), MobSpawnType.STRUCTURE, false, false)) != null) {
@@ -99,7 +99,7 @@ extends Block {
         Direction.Axis axis = direction.getAxis();
         Direction.Axis axis2 = blockState.getValue(AXIS);
         boolean bl2 = bl = axis2 != axis && axis.isHorizontal();
-        if (bl || blockState2.getBlock() == this || new PortalShape(levelAccessor, blockPos, axis2).isComplete()) {
+        if (bl || blockState2.is(this) || new PortalShape(levelAccessor, blockPos, axis2).isComplete()) {
             return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
         }
         return Blocks.AIR.defaultBlockState();
@@ -126,7 +126,7 @@ extends Block {
             double h = ((double)random.nextFloat() - 0.5) * 0.5;
             double j = ((double)random.nextFloat() - 0.5) * 0.5;
             int k = random.nextInt(2) * 2 - 1;
-            if (level.getBlockState(blockPos.west()).getBlock() == this || level.getBlockState(blockPos.east()).getBlock() == this) {
+            if (level.getBlockState(blockPos.west()).is(this) || level.getBlockState(blockPos.east()).is(this)) {
                 f = (double)blockPos.getZ() + 0.5 + 0.25 * (double)k;
                 j = random.nextFloat() * 2.0f * (float)k;
             } else {
@@ -242,10 +242,9 @@ extends Block {
         protected int getDistanceUntilEdge(BlockPos blockPos, Direction direction) {
             BlockPos blockPos2;
             int i;
-            for (i = 0; i < 22 && this.isEmpty(this.level.getBlockState(blockPos2 = blockPos.relative(direction, i))) && this.level.getBlockState(blockPos2.below()).getBlock() == Blocks.OBSIDIAN; ++i) {
+            for (i = 0; i < 22 && this.isEmpty(this.level.getBlockState(blockPos2 = blockPos.relative(direction, i))) && this.level.getBlockState(blockPos2.below()).is(Blocks.OBSIDIAN); ++i) {
             }
-            Block block = this.level.getBlockState(blockPos.relative(direction, i)).getBlock();
-            if (block == Blocks.OBSIDIAN) {
+            if (this.level.getBlockState(blockPos.relative(direction, i)).is(Blocks.OBSIDIAN)) {
                 return i;
             }
             return 0;
@@ -267,16 +266,15 @@ extends Block {
                     BlockPos blockPos = this.bottomLeft.relative(this.rightDir, i).above(this.height);
                     BlockState blockState = this.level.getBlockState(blockPos);
                     if (!this.isEmpty(blockState)) break block0;
-                    Block block = blockState.getBlock();
-                    if (block == Blocks.NETHER_PORTAL) {
+                    if (blockState.is(Blocks.NETHER_PORTAL)) {
                         ++this.numPortalBlocks;
                     }
-                    if (i == 0 ? (block = this.level.getBlockState(blockPos.relative(this.leftDir)).getBlock()) != Blocks.OBSIDIAN : i == this.width - 1 && (block = this.level.getBlockState(blockPos.relative(this.rightDir)).getBlock()) != Blocks.OBSIDIAN) break block0;
+                    if (i == 0 ? !this.level.getBlockState(blockPos.relative(this.leftDir)).is(Blocks.OBSIDIAN) : i == this.width - 1 && !this.level.getBlockState(blockPos.relative(this.rightDir)).is(Blocks.OBSIDIAN)) break block0;
                 }
                 ++this.height;
             }
             for (i = 0; i < this.width; ++i) {
-                if (this.level.getBlockState(this.bottomLeft.relative(this.rightDir, i).above(this.height)).getBlock() == Blocks.OBSIDIAN) continue;
+                if (this.level.getBlockState(this.bottomLeft.relative(this.rightDir, i).above(this.height)).is(Blocks.OBSIDIAN)) continue;
                 this.height = 0;
                 break;
             }
@@ -290,8 +288,7 @@ extends Block {
         }
 
         protected boolean isEmpty(BlockState blockState) {
-            Block block = blockState.getBlock();
-            return blockState.isAir() || blockState.is(BlockTags.FIRE) || block == Blocks.NETHER_PORTAL;
+            return blockState.isAir() || blockState.is(BlockTags.FIRE) || blockState.is(Blocks.NETHER_PORTAL);
         }
 
         public boolean isValid() {

@@ -118,6 +118,7 @@ import net.minecraft.util.datafix.fixes.PlayerUUIDFix;
 import net.minecraft.util.datafix.fixes.RecipesFix;
 import net.minecraft.util.datafix.fixes.RecipesRenameFix;
 import net.minecraft.util.datafix.fixes.RecipesRenameningFix;
+import net.minecraft.util.datafix.fixes.RedstoneWireConnectionsFix;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.util.datafix.fixes.RenameBiomesFix;
 import net.minecraft.util.datafix.fixes.RenamedCoralFansFix;
@@ -126,6 +127,7 @@ import net.minecraft.util.datafix.fixes.ReorganizePoi;
 import net.minecraft.util.datafix.fixes.SavedDataUUIDFix;
 import net.minecraft.util.datafix.fixes.SavedDataVillageCropFix;
 import net.minecraft.util.datafix.fixes.StatsCounterFix;
+import net.minecraft.util.datafix.fixes.StriderGravityFix;
 import net.minecraft.util.datafix.fixes.StructureReferenceCountFix;
 import net.minecraft.util.datafix.fixes.SwimStatsRenameFix;
 import net.minecraft.util.datafix.fixes.TeamDisplayNameFix;
@@ -499,6 +501,10 @@ public class DataFixers {
         Schema schema115 = dataFixerBuilder.addSchema(2528, SAME_NAMESPACED);
         dataFixerBuilder.addFixer(ItemRenameFix.create(schema115, "Rename soul fire torch and soul fire lantern", string -> ImmutableMap.of("minecraft:soul_fire_torch", "minecraft:soul_torch", "minecraft:soul_fire_lantern", "minecraft:soul_lantern").getOrDefault(string, (String)string)));
         dataFixerBuilder.addFixer(BlockRenameFix.create(schema115, "Rename soul fire torch and soul fire lantern", string -> ImmutableMap.of("minecraft:soul_fire_torch", "minecraft:soul_torch", "minecraft:soul_fire_wall_torch", "minecraft:soul_wall_torch", "minecraft:soul_fire_lantern", "minecraft:soul_lantern").getOrDefault(string, (String)string)));
+        Schema schema116 = dataFixerBuilder.addSchema(2529, SAME_NAMESPACED);
+        dataFixerBuilder.addFixer(new StriderGravityFix(schema116, false));
+        Schema schema117 = dataFixerBuilder.addSchema(2531, SAME_NAMESPACED);
+        dataFixerBuilder.addFixer(new RedstoneWireConnectionsFix(schema117));
     }
 }
 

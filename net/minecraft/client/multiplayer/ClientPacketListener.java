@@ -274,7 +274,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -299,8 +298,6 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import net.minecraft.world.level.storage.PrimaryLevelData;
-import net.minecraft.world.level.storage.WorldData;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
@@ -321,7 +318,7 @@ implements ClientGamePacketListener {
     private final Screen callbackScreen;
     private Minecraft minecraft;
     private ClientLevel level;
-    private WorldData worldData;
+    private ClientLevel.ClientLevelData levelData;
     private boolean started;
     private final Map<UUID, PlayerInfo> playerInfoMap = Maps.newHashMap();
     private final ClientAdvancements advancements;
@@ -357,6 +354,7 @@ implements ClientGamePacketListener {
 
     @Override
     public void handleLogin(ClientboundLoginPacket clientboundLoginPacket) {
+        ClientLevel.ClientLevelData clientLevelData;
         PacketUtils.ensureRunningOnSameThread(clientboundLoginPacket, this, this.minecraft);
         this.minecraft.gameMode = new MultiPlayerGameMode(this.minecraft, this);
         if (!this.connection.isMemoryConnection()) {
@@ -366,9 +364,8 @@ implements ClientGamePacketListener {
             EntityTypeTags.resetToEmpty();
         }
         this.serverChunkRadius = clientboundLoginPacket.getChunkRadius();
-        PrimaryLevelData primaryLevelData = new PrimaryLevelData(new LevelSettings("MpServer", clientboundLoginPacket.getSeed(), clientboundLoginPacket.getGameType(), false, clientboundLoginPacket.isHardcore(), Difficulty.NORMAL, clientboundLoginPacket.getLevelType().getDefaultProvider()));
-        this.worldData = primaryLevelData;
-        this.level = new ClientLevel(this, primaryLevelData, clientboundLoginPacket.getDimension(), this.serverChunkRadius, this.minecraft::getProfiler, this.minecraft.levelRenderer);
+        this.levelData = clientLevelData = new ClientLevel.ClientLevelData(clientboundLoginPacket.getSeed(), Difficulty.NORMAL, clientboundLoginPacket.isHardcore(), clientboundLoginPacket.getLevelType().getDefaultProvider());
+        this.level = new ClientLevel(this, clientLevelData, clientboundLoginPacket.getDimension(), this.serverChunkRadius, this.minecraft::getProfiler, this.minecraft.levelRenderer);
         this.minecraft.setLevel(this.level);
         if (this.minecraft.player == null) {
             this.minecraft.player = this.minecraft.gameMode.createPlayer(this.level, new StatsCounter(), new ClientRecipeBook(this.level.getRecipeManager()));
@@ -842,7 +839,7 @@ implements ClientGamePacketListener {
     @Override
     public void handleSetSpawn(ClientboundSetDefaultSpawnPositionPacket clientboundSetDefaultSpawnPositionPacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundSetDefaultSpawnPositionPacket, this, this.minecraft);
-        this.minecraft.level.getLevelData().setSpawn(clientboundSetDefaultSpawnPositionPacket.getPos());
+        this.minecraft.level.setDefaultSpawnPos(clientboundSetDefaultSpawnPositionPacket.getPos());
     }
 
     @Override
@@ -924,10 +921,10 @@ implements ClientGamePacketListener {
         int i = localPlayer.getId();
         this.started = false;
         if (dimensionType != localPlayer.dimension) {
+            ClientLevel.ClientLevelData clientLevelData;
             Scoreboard scoreboard = this.level.getScoreboard();
-            PrimaryLevelData primaryLevelData = new PrimaryLevelData(new LevelSettings("MpServer", clientboundRespawnPacket.getSeed(), clientboundRespawnPacket.getPlayerGameType(), false, this.worldData.isHardcore(), this.worldData.getDifficulty(), clientboundRespawnPacket.getLevelType().getDefaultProvider()));
-            this.worldData = primaryLevelData;
-            this.level = new ClientLevel(this, primaryLevelData, clientboundRespawnPacket.getDimension(), this.serverChunkRadius, this.minecraft::getProfiler, this.minecraft.levelRenderer);
+            this.levelData = clientLevelData = new ClientLevel.ClientLevelData(clientboundRespawnPacket.getSeed(), this.levelData.getDifficulty(), this.levelData.isHardcore(), clientboundRespawnPacket.getLevelType().getDefaultProvider());
+            this.level = new ClientLevel(this, clientLevelData, clientboundRespawnPacket.getDimension(), this.serverChunkRadius, this.minecraft::getProfiler, this.minecraft.levelRenderer);
             this.level.setScoreboard(scoreboard);
             this.minecraft.setLevel(this.level);
             this.minecraft.setScreen(new ReceivingLevelScreen());
@@ -941,7 +938,9 @@ implements ClientGamePacketListener {
         this.minecraft.player = localPlayer2;
         this.minecraft.cameraEntity = localPlayer2;
         localPlayer2.getEntityData().assignValues(localPlayer.getEntityData().getAll());
-        localPlayer2.getAttributes().assignValues(localPlayer.getAttributes());
+        if (clientboundRespawnPacket.shouldKeepAllPlayerData()) {
+            localPlayer2.getAttributes().assignValues(localPlayer.getAttributes());
+        }
         localPlayer2.resetPos();
         localPlayer2.setServerBrand(string);
         this.level.addPlayer(i, localPlayer2);
@@ -1354,8 +1353,8 @@ implements ClientGamePacketListener {
     @Override
     public void handleChangeDifficulty(ClientboundChangeDifficultyPacket clientboundChangeDifficultyPacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundChangeDifficultyPacket, this, this.minecraft);
-        this.worldData.setDifficulty(clientboundChangeDifficultyPacket.getDifficulty());
-        this.worldData.setDifficultyLocked(clientboundChangeDifficultyPacket.isLocked());
+        this.levelData.setDifficulty(clientboundChangeDifficultyPacket.getDifficulty());
+        this.levelData.setDifficultyLocked(clientboundChangeDifficultyPacket.isLocked());
     }
 
     @Override

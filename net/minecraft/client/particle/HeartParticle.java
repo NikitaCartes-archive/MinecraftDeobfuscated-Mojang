@@ -5,6 +5,7 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -12,13 +13,12 @@ import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
 public class HeartParticle
 extends TextureSheetParticle {
-    private HeartParticle(Level level, double d, double e, double f) {
-        super(level, d, e, f, 0.0, 0.0, 0.0);
+    private HeartParticle(ClientLevel clientLevel, double d, double e, double f) {
+        super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
         this.xd *= (double)0.01f;
         this.yd *= (double)0.01f;
         this.zd *= (double)0.01f;
@@ -71,8 +71,8 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            HeartParticle heartParticle = new HeartParticle(level, d, e + 0.5, f);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            HeartParticle heartParticle = new HeartParticle(clientLevel, d, e + 0.5, f);
             heartParticle.pickSprite(this.sprite);
             heartParticle.setColor(1.0f, 1.0f, 1.0f);
             return heartParticle;
@@ -89,8 +89,8 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            HeartParticle heartParticle = new HeartParticle(level, d, e, f);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            HeartParticle heartParticle = new HeartParticle(clientLevel, d, e, f);
             heartParticle.pickSprite(this.sprite);
             return heartParticle;
         }

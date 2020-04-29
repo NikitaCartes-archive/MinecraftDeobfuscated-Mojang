@@ -54,14 +54,14 @@ implements Shearable {
 
     @Override
     public float getWalkTargetValue(BlockPos blockPos, LevelReader levelReader) {
-        if (levelReader.getBlockState(blockPos.below()).getBlock() == Blocks.MYCELIUM) {
+        if (levelReader.getBlockState(blockPos.below()).is(Blocks.MYCELIUM)) {
             return 10.0f;
         }
         return levelReader.getBrightness(blockPos) - 0.5f;
     }
 
     public static boolean checkMushroomSpawnRules(EntityType<MushroomCow> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
-        return levelAccessor.getBlockState(blockPos.below()).getBlock() == Blocks.MYCELIUM && levelAccessor.getRawBrightness(blockPos, 0) > 8;
+        return levelAccessor.getBlockState(blockPos.below()).is(Blocks.MYCELIUM) && levelAccessor.getRawBrightness(blockPos, 0) > 8;
     }
 
     @Override

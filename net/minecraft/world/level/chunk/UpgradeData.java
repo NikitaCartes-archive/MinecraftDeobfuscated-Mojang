@@ -195,7 +195,7 @@ public class UpgradeData {
 
             @Override
             public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
-                if (blockState2.getBlock() == blockState.getBlock() && direction.getAxis().isHorizontal() && blockState.getValue(ChestBlock.TYPE) == ChestType.SINGLE && blockState2.getValue(ChestBlock.TYPE) == ChestType.SINGLE) {
+                if (blockState2.is(blockState.getBlock()) && direction.getAxis().isHorizontal() && blockState.getValue(ChestBlock.TYPE) == ChestType.SINGLE && blockState2.getValue(ChestBlock.TYPE) == ChestType.SINGLE) {
                     Direction direction2 = blockState.getValue(ChestBlock.FACING);
                     if (direction.getAxis() != direction2.getAxis() && direction2 == blockState2.getValue(ChestBlock.FACING)) {
                         ChestType chestType = direction == direction2.getClockWise() ? ChestType.LEFT : ChestType.RIGHT;
@@ -262,11 +262,9 @@ public class UpgradeData {
 
             @Override
             public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
-                if (blockState.getValue(StemBlock.AGE) == 7) {
-                    StemGrownBlock stemGrownBlock = ((StemBlock)blockState.getBlock()).getFruit();
-                    if (blockState2.getBlock() == stemGrownBlock) {
-                        return (BlockState)stemGrownBlock.getAttachedStem().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, direction);
-                    }
+                StemGrownBlock stemGrownBlock;
+                if (blockState.getValue(StemBlock.AGE) == 7 && blockState2.is(stemGrownBlock = ((StemBlock)blockState.getBlock()).getFruit())) {
+                    return (BlockState)stemGrownBlock.getAttachedStem().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, direction);
                 }
                 return blockState;
             }

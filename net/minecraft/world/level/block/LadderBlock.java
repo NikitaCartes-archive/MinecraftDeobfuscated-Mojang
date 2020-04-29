@@ -85,7 +85,7 @@ implements SimpleWaterloggedBlock {
     @Nullable
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
         BlockState blockState;
-        if (!blockPlaceContext.replacingClickedOnBlock() && (blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos().relative(blockPlaceContext.getClickedFace().getOpposite()))).getBlock() == this && blockState.getValue(FACING) == blockPlaceContext.getClickedFace()) {
+        if (!blockPlaceContext.replacingClickedOnBlock() && (blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos().relative(blockPlaceContext.getClickedFace().getOpposite()))).is(this) && blockState.getValue(FACING) == blockPlaceContext.getClickedFace()) {
             return null;
         }
         blockState = this.defaultBlockState();

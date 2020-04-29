@@ -48,7 +48,7 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
                 r = -1;
                 continue;
             }
-            if (blockState5.getBlock() != blockState.getBlock()) continue;
+            if (!blockState5.is(blockState.getBlock())) continue;
             if (r == -1) {
                 if (q <= 0) {
                     blockState4 = AIR;

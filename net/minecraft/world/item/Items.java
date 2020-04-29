@@ -31,7 +31,6 @@ import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.BowlFoodItem;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ChorusFruitItem;
-import net.minecraft.world.item.ClockItem;
 import net.minecraft.world.item.CompassItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CrossbowItem;
@@ -788,7 +787,7 @@ public class Items {
     public static final Item EGG = Items.registerItem("egg", (Item)new EggItem(new Item.Properties().stacksTo(16).tab(CreativeModeTab.TAB_MATERIALS)));
     public static final Item COMPASS = Items.registerItem("compass", (Item)new CompassItem(new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
     public static final Item FISHING_ROD = Items.registerItem("fishing_rod", (Item)new FishingRodItem(new Item.Properties().durability(64).tab(CreativeModeTab.TAB_TOOLS)));
-    public static final Item CLOCK = Items.registerItem("clock", (Item)new ClockItem(new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+    public static final Item CLOCK = Items.registerItem("clock", new Item(new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
     public static final Item GLOWSTONE_DUST = Items.registerItem("glowstone_dust", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
     public static final Item COD = Items.registerItem("cod", new Item(new Item.Properties().tab(CreativeModeTab.TAB_FOOD).food(Foods.COD)));
     public static final Item SALMON = Items.registerItem("salmon", new Item(new Item.Properties().tab(CreativeModeTab.TAB_FOOD).food(Foods.SALMON)));

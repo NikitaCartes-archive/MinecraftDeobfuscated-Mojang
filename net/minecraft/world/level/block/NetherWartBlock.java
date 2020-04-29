@@ -39,7 +39,7 @@ extends BushBlock {
 
     @Override
     protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-        return blockState.getBlock() == Blocks.SOUL_SAND;
+        return blockState.is(Blocks.SOUL_SAND);
     }
 
     @Override

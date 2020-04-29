@@ -38,7 +38,7 @@ extends Feature<ReplaceSpheroidConfiguration> {
         for (BlockPos blockPos3 : BlockPos.withinManhattan(blockPos2, vec3i.getX(), vec3i.getY(), vec3i.getZ())) {
             if (blockPos3.distManhattan(blockPos2) > i) break;
             BlockState blockState = levelAccessor.getBlockState(blockPos3);
-            if (blockState.getBlock() != block) continue;
+            if (!blockState.is(block)) continue;
             this.setBlock(levelAccessor, blockPos3, replaceSpheroidConfiguration.replaceState);
             bl = true;
         }
@@ -49,7 +49,7 @@ extends Feature<ReplaceSpheroidConfiguration> {
     private static BlockPos findTarget(LevelAccessor levelAccessor, BlockPos.MutableBlockPos mutableBlockPos, Block block) {
         while (mutableBlockPos.getY() > 1) {
             BlockState blockState = levelAccessor.getBlockState(mutableBlockPos);
-            if (blockState.getBlock() == block) {
+            if (blockState.is(block)) {
                 return mutableBlockPos;
             }
             mutableBlockPos.move(Direction.DOWN);

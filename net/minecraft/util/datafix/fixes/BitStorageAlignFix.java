@@ -14,6 +14,7 @@ import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.types.templates.List;
 import com.mojang.datafixers.util.Pair;
+import java.util.List;
 import java.util.stream.LongStream;
 import net.minecraft.util.Mth;
 import net.minecraft.util.datafix.fixes.References;
@@ -34,21 +35,27 @@ extends DataFix {
         OpticFinder opticFinder3 = DSL.typeFinder(type3);
         Type<Pair<String, Dynamic<?>>> type4 = DSL.named(References.BLOCK_STATE.typeName(), DSL.remainderType());
         OpticFinder<Pair<String, Dynamic<?>>> opticFinder4 = DSL.fieldFinder("Palette", DSL.list(type4));
-        return this.fixTypeEverywhereTyped("BitStorageAlignFix", type, this.getOutputSchema().getType(References.CHUNK), (Typed<?> typed2) -> typed2.updateTyped(opticFinder, typed -> typed.updateTyped(opticFinder2, typed2 -> typed2.updateTyped(opticFinder3, typed -> {
-            int i = typed.getOptional(opticFinder4).map(list -> Math.max(4, DataFixUtils.ceillog2(list.size()))).orElse(0);
+        return this.fixTypeEverywhereTyped("BitStorageAlignFix", type, this.getOutputSchema().getType(References.CHUNK), (Typed<?> typed2) -> typed2.updateTyped(opticFinder, typed -> this.updateHeightmaps(BitStorageAlignFix.updateSections(opticFinder2, opticFinder3, opticFinder4, typed))));
+    }
+
+    private Typed<?> updateHeightmaps(Typed<?> typed) {
+        return typed.update(DSL.remainderFinder(), dynamic -> dynamic.update("Heightmaps", dynamic2 -> dynamic2.updateMapValues(pair -> pair.mapSecond(dynamic2 -> BitStorageAlignFix.updateBitStorage(dynamic, dynamic2, 256, 9)))));
+    }
+
+    private static Typed<?> updateSections(OpticFinder<?> opticFinder, OpticFinder<?> opticFinder2, OpticFinder<List<Pair<String, Dynamic<?>>>> opticFinder3, Typed<?> typed) {
+        return typed.updateTyped(opticFinder, typed2 -> typed2.updateTyped(opticFinder2, typed -> {
+            int i = typed.getOptional(opticFinder3).map(list -> Math.max(4, DataFixUtils.ceillog2(list.size()))).orElse(0);
             if (i == 0 || Mth.isPowerOfTwo(i)) {
                 return typed;
             }
-            return typed.update(DSL.remainderFinder(), dynamic -> this.fixBlockStates((Dynamic<?>)dynamic, i));
-        }))));
+            return typed.update(DSL.remainderFinder(), dynamic -> dynamic.update("BlockStates", dynamic2 -> BitStorageAlignFix.updateBitStorage(dynamic, dynamic2, 4096, i)));
+        }));
     }
 
-    private Dynamic<?> fixBlockStates(Dynamic<?> dynamic, int i) {
-        return dynamic.update("BlockStates", dynamic2 -> {
-            long[] ls = dynamic2.asLongStream().toArray();
-            long[] ms = BitStorageAlignFix.addPadding(4096, i, ls);
-            return dynamic.createLongList(LongStream.of(ms));
-        });
+    private static Dynamic<?> updateBitStorage(Dynamic<?> dynamic, Dynamic<?> dynamic2, int i, int j) {
+        long[] ls = dynamic2.asLongStream().toArray();
+        long[] ms = BitStorageAlignFix.addPadding(i, j, ls);
+        return dynamic.createLongList(LongStream.of(ms));
     }
 
     public static long[] addPadding(int i, int j, long[] ls) {

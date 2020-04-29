@@ -39,7 +39,7 @@ extends BushBlock {
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
         DoubleBlockHalf doubleBlockHalf = blockState.getValue(HALF);
-        if (direction.getAxis() == Direction.Axis.Y && doubleBlockHalf == DoubleBlockHalf.LOWER == (direction == Direction.UP) && (blockState2.getBlock() != this || blockState2.getValue(HALF) == doubleBlockHalf)) {
+        if (!(direction.getAxis() != Direction.Axis.Y || doubleBlockHalf == DoubleBlockHalf.LOWER != (direction == Direction.UP) || blockState2.is(this) && blockState2.getValue(HALF) != doubleBlockHalf)) {
             return Blocks.AIR.defaultBlockState();
         }
         if (doubleBlockHalf == DoubleBlockHalf.LOWER && direction == Direction.DOWN && !blockState.canSurvive(levelAccessor, blockPos)) {
@@ -67,7 +67,7 @@ extends BushBlock {
     public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
         if (blockState.getValue(HALF) == DoubleBlockHalf.UPPER) {
             BlockState blockState2 = levelReader.getBlockState(blockPos.below());
-            return blockState2.getBlock() == this && blockState2.getValue(HALF) == DoubleBlockHalf.LOWER;
+            return blockState2.is(this) && blockState2.getValue(HALF) == DoubleBlockHalf.LOWER;
         }
         return super.canSurvive(blockState, levelReader, blockPos);
     }
@@ -87,7 +87,7 @@ extends BushBlock {
         DoubleBlockHalf doubleBlockHalf = blockState.getValue(HALF);
         BlockPos blockPos2 = doubleBlockHalf == DoubleBlockHalf.LOWER ? blockPos.above() : blockPos.below();
         BlockState blockState2 = level.getBlockState(blockPos2);
-        if (blockState2.getBlock() == this && blockState2.getValue(HALF) != doubleBlockHalf) {
+        if (blockState2.is(this) && blockState2.getValue(HALF) != doubleBlockHalf) {
             level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 35);
             level.levelEvent(player, 2001, blockPos2, Block.getId(blockState2));
             if (!level.isClientSide && !player.isCreative()) {

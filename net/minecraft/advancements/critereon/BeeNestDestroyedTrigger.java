@@ -3,14 +3,14 @@
  */
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
+import net.minecraft.advancements.critereon.DeserializationContext;
+import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -30,11 +30,11 @@ extends SimpleCriterionTrigger<TriggerInstance> {
     }
 
     @Override
-    public TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+    public TriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
         Block block = BeeNestDestroyedTrigger.deserializeBlock(jsonObject);
         ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("item"));
         MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("num_bees_inside"));
-        return new TriggerInstance(block, itemPredicate, ints);
+        return new TriggerInstance(composite, block, itemPredicate, ints);
     }
 
     @Nullable
@@ -47,29 +47,30 @@ extends SimpleCriterionTrigger<TriggerInstance> {
     }
 
     public void trigger(ServerPlayer serverPlayer, Block block, ItemStack itemStack, int i) {
-        this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(block, itemStack, i));
+        this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(block, itemStack, i));
     }
 
     @Override
-    public /* synthetic */ CriterionTriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-        return this.createInstance(jsonObject, jsonDeserializationContext);
+    public /* synthetic */ AbstractCriterionTriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
+        return this.createInstance(jsonObject, composite, deserializationContext);
     }
 
     public static class TriggerInstance
     extends AbstractCriterionTriggerInstance {
+        @Nullable
         private final Block block;
         private final ItemPredicate item;
         private final MinMaxBounds.Ints numBees;
 
-        public TriggerInstance(Block block, ItemPredicate itemPredicate, MinMaxBounds.Ints ints) {
-            super(ID);
+        public TriggerInstance(EntityPredicate.Composite composite, @Nullable Block block, ItemPredicate itemPredicate, MinMaxBounds.Ints ints) {
+            super(ID, composite);
             this.block = block;
             this.item = itemPredicate;
             this.numBees = ints;
         }
 
         public static TriggerInstance destroyedBeeNest(Block block, ItemPredicate.Builder builder, MinMaxBounds.Ints ints) {
-            return new TriggerInstance(block, builder.build(), ints);
+            return new TriggerInstance(EntityPredicate.Composite.ANY, block, builder.build(), ints);
         }
 
         public boolean matches(Block block, ItemStack itemStack, int i) {
@@ -83,8 +84,8 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         }
 
         @Override
-        public JsonElement serializeToJson() {
-            JsonObject jsonObject = new JsonObject();
+        public JsonObject serializeToJson(SerializationContext serializationContext) {
+            JsonObject jsonObject = super.serializeToJson(serializationContext);
             if (this.block != null) {
                 jsonObject.addProperty("block", Registry.BLOCK.getKey(this.block).toString());
             }

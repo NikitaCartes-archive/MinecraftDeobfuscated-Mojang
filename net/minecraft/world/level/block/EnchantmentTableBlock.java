@@ -65,7 +65,7 @@ extends BaseEntityBlock {
                 if (random.nextInt(16) != 0) continue;
                 for (int k = 0; k <= 1; ++k) {
                     BlockPos blockPos2 = blockPos.offset(i, k, j);
-                    if (level.getBlockState(blockPos2).getBlock() != Blocks.BOOKSHELF) continue;
+                    if (!level.getBlockState(blockPos2).is(Blocks.BOOKSHELF)) continue;
                     if (!level.isEmptyBlock(blockPos.offset(i / 2, 0, j / 2))) continue block1;
                     level.addParticle(ParticleTypes.ENCHANT, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 2.0, (double)blockPos.getZ() + 0.5, (double)((float)i + random.nextFloat()) - 0.5, (float)k - random.nextFloat() - 1.0f, (double)((float)j + random.nextFloat()) - 0.5);
                 }

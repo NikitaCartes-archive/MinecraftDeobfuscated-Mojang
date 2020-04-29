@@ -5,18 +5,18 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SimpleAnimatedParticle;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
 public class EndRodParticle
 extends SimpleAnimatedParticle {
-    private EndRodParticle(Level level, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
-        super(level, d, e, f, spriteSet, -5.0E-4f);
+    private EndRodParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
+        super(clientLevel, d, e, f, spriteSet, -5.0E-4f);
         this.xd = g;
         this.yd = h;
         this.zd = i;
@@ -42,8 +42,8 @@ extends SimpleAnimatedParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            return new EndRodParticle(level, d, e, f, g, h, i, this.sprites);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return new EndRodParticle(clientLevel, d, e, f, g, h, i, this.sprites);
         }
     }
 }

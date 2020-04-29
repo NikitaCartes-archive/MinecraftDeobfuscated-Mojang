@@ -51,7 +51,7 @@ extends Block {
             return;
         }
         int i = 1;
-        while (serverLevel.getBlockState(blockPos.below(i)).getBlock() == this) {
+        while (serverLevel.getBlockState(blockPos.below(i)).is(this)) {
             ++i;
         }
         if (i >= 3) {
@@ -94,8 +94,8 @@ extends Block {
             if (!material.isSolid() && !levelReader.getFluidState(blockPos.relative(direction)).is(FluidTags.LAVA)) continue;
             return false;
         }
-        Block block = levelReader.getBlockState(blockPos.below()).getBlock();
-        return (block == Blocks.CACTUS || block == Blocks.SAND || block == Blocks.RED_SAND) && !levelReader.getBlockState(blockPos.above()).getMaterial().isLiquid();
+        BlockState blockState3 = levelReader.getBlockState(blockPos.below());
+        return (blockState3.is(Blocks.CACTUS) || blockState3.is(Blocks.SAND) || blockState3.is(Blocks.RED_SAND)) && !levelReader.getBlockState(blockPos.above()).getMaterial().isLiquid();
     }
 
     @Override

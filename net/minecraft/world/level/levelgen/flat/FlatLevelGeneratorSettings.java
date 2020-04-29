@@ -32,6 +32,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGeneratorType;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.feature.BastionPieces;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
@@ -40,6 +41,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfi
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MultiJigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OceanRuinConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RuinedPortalConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
@@ -69,6 +71,7 @@ extends ChunkGeneratorSettings {
     private static final ConfiguredFeature<?, ? extends StructureFeature<?>> RUINED_PORTAL_COMPOSITE_FEATURE = Feature.RUINED_PORTAL.configured(new RuinedPortalConfiguration());
     private static final ConfiguredFeature<?, ? extends StructureFeature<?>> OCEAN_RUIN_COMPOSITE_FEATURE = Feature.OCEAN_RUIN.configured(new OceanRuinConfiguration(OceanRuinFeature.Type.COLD, 0.3f, 0.1f));
     private static final ConfiguredFeature<?, ? extends StructureFeature<?>> PILLAGER_OUTPOST_COMPOSITE_FEATURE = Feature.PILLAGER_OUTPOST.configured(FeatureConfiguration.NONE);
+    private static final ConfiguredFeature<?, ? extends StructureFeature<?>> BASTION_REMNANT_COMMPOSITE_FEATURE = Feature.BASTION_REMNANT.configured(new MultiJigsawConfiguration(BastionPieces.POOLS));
     private static final ConfiguredFeature<?, ?> WATER_LAKE_COMPOSITE_FEATURE = Feature.LAKE.configured(new BlockStateConfiguration(Blocks.WATER.defaultBlockState())).decorated(FeatureDecorator.WATER_LAKE.configured(new ChanceDecoratorConfiguration(4)));
     private static final ConfiguredFeature<?, ?> LAVA_LAKE_COMPOSITE_FEATURE = Feature.LAKE.configured(new BlockStateConfiguration(Blocks.LAVA.defaultBlockState())).decorated(FeatureDecorator.LAVA_LAKE.configured(new ChanceDecoratorConfiguration(80)));
     public static final Map<ConfiguredFeature<?, ?>, GenerationStep.Decoration> STRUCTURE_FEATURES_STEP = Util.make(Maps.newHashMap(), hashMap -> {
@@ -89,6 +92,7 @@ extends ChunkGeneratorSettings {
         hashMap.put(FORTRESS_COMPOSITE_FEATURE, GenerationStep.Decoration.UNDERGROUND_STRUCTURES);
         hashMap.put(OCEAN_MONUMENT_COMPOSITE_FEATURE, GenerationStep.Decoration.SURFACE_STRUCTURES);
         hashMap.put(PILLAGER_OUTPOST_COMPOSITE_FEATURE, GenerationStep.Decoration.SURFACE_STRUCTURES);
+        hashMap.put(BASTION_REMNANT_COMMPOSITE_FEATURE, GenerationStep.Decoration.SURFACE_STRUCTURES);
     });
     public static final Map<String, ConfiguredFeature<?, ?>[]> STRUCTURE_FEATURES = Util.make(Maps.newHashMap(), hashMap -> {
         hashMap.put("mineshaft", new ConfiguredFeature[]{MINESHAFT_COMPOSITE_FEATURE});
@@ -103,6 +107,7 @@ extends ChunkGeneratorSettings {
         hashMap.put("fortress", new ConfiguredFeature[]{FORTRESS_COMPOSITE_FEATURE});
         hashMap.put("pillager_outpost", new ConfiguredFeature[]{PILLAGER_OUTPOST_COMPOSITE_FEATURE});
         hashMap.put("ruined_portal", new ConfiguredFeature[]{RUINED_PORTAL_COMPOSITE_FEATURE});
+        hashMap.put("bastion_remnant", new ConfiguredFeature[]{BASTION_REMNANT_COMMPOSITE_FEATURE});
     });
     public static final Map<ConfiguredFeature<?, ? extends StructureFeature<?>>, FeatureConfiguration> STRUCTURE_FEATURES_DEFAULT = Util.make(Maps.newHashMap(), hashMap -> {
         hashMap.put(MINESHAFT_COMPOSITE_FEATURE, new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL));
@@ -119,6 +124,7 @@ extends ChunkGeneratorSettings {
         hashMap.put(WOOLAND_MANSION_COMPOSITE_FEATURE, FeatureConfiguration.NONE);
         hashMap.put(FORTRESS_COMPOSITE_FEATURE, FeatureConfiguration.NONE);
         hashMap.put(PILLAGER_OUTPOST_COMPOSITE_FEATURE, FeatureConfiguration.NONE);
+        hashMap.put(BASTION_REMNANT_COMMPOSITE_FEATURE, new MultiJigsawConfiguration(BastionPieces.POOLS));
     });
     private final List<FlatLayerInfo> layersInfo = Lists.newArrayList();
     private final Map<String, Map<String, String>> structuresOptions = Maps.newHashMap();
@@ -166,11 +172,11 @@ extends ChunkGeneratorSettings {
         for (FlatLayerInfo flatLayerInfo : this.layersInfo) {
             for (int j = flatLayerInfo.getStart(); j < flatLayerInfo.getStart() + flatLayerInfo.getHeight(); ++j) {
                 BlockState blockState = flatLayerInfo.getBlockState();
-                if (blockState.getBlock() == Blocks.AIR) continue;
+                if (blockState.is(Blocks.AIR)) continue;
                 this.voidGen = false;
                 this.layers[j] = blockState;
             }
-            if (flatLayerInfo.getBlockState().getBlock() == Blocks.AIR) {
+            if (flatLayerInfo.getBlockState().is(Blocks.AIR)) {
                 i += flatLayerInfo.getHeight();
                 continue;
             }

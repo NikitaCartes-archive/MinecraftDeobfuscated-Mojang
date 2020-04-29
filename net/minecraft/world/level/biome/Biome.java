@@ -91,6 +91,7 @@ public abstract class Biome {
     protected final List<ConfiguredFeature<?, ?>> flowerFeatures = Lists.newArrayList();
     protected final Map<StructureFeature<?>, FeatureConfiguration> validFeatureStarts = Maps.newHashMap();
     private final Map<MobCategory, List<SpawnerData>> spawners = Maps.newHashMap();
+    private final Map<EntityType<?>, MobSpawnCost> mobSpawnCosts = Maps.newHashMap();
     private final ThreadLocal<Long2FloatLinkedOpenHashMap> temperatureCache = ThreadLocal.withInitial(() -> Util.make(() -> {
         Long2FloatLinkedOpenHashMap long2FloatLinkedOpenHashMap = new Long2FloatLinkedOpenHashMap(1024, 0.25f){
 
@@ -155,8 +156,17 @@ public abstract class Biome {
         this.spawners.get((Object)mobCategory).add(spawnerData);
     }
 
+    protected void addMobCharge(EntityType<?> entityType, double d, double e) {
+        this.mobSpawnCosts.put(entityType, new MobSpawnCost(e, d));
+    }
+
     public List<SpawnerData> getMobs(MobCategory mobCategory) {
         return this.spawners.get((Object)mobCategory);
+    }
+
+    @Nullable
+    public MobSpawnCost getMobSpawnCost(EntityType<?> entityType) {
+        return this.mobSpawnCosts.get(entityType);
     }
 
     public Precipitation getPrecipitation() {
@@ -547,6 +557,24 @@ public abstract class Biome {
 
         public String toString() {
             return EntityType.getKey(this.type) + "*(" + this.minCount + "-" + this.maxCount + "):" + this.weight;
+        }
+    }
+
+    public static class MobSpawnCost {
+        private final double energyBudget;
+        private final double charge;
+
+        public MobSpawnCost(double d, double e) {
+            this.energyBudget = d;
+            this.charge = e;
+        }
+
+        public double getEnergyBudget() {
+            return this.energyBudget;
+        }
+
+        public double getCharge() {
+            return this.charge;
         }
     }
 

@@ -78,7 +78,6 @@ public class Node {
         return f + g + h;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public BlockPos asBlockPos() {
         return new BlockPos(this.x, this.y, this.z);
     }

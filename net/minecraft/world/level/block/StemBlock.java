@@ -51,7 +51,7 @@ implements BonemealableBlock {
 
     @Override
     protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-        return blockState.getBlock() == Blocks.FARMLAND;
+        return blockState.is(Blocks.FARMLAND);
     }
 
     @Override
@@ -68,8 +68,8 @@ implements BonemealableBlock {
             } else {
                 Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
                 BlockPos blockPos2 = blockPos.relative(direction);
-                Block block = serverLevel.getBlockState(blockPos2.below()).getBlock();
-                if (serverLevel.getBlockState(blockPos2).isAir() && (block == Blocks.FARMLAND || block == Blocks.DIRT || block == Blocks.COARSE_DIRT || block == Blocks.PODZOL || block == Blocks.GRASS_BLOCK)) {
+                BlockState blockState2 = serverLevel.getBlockState(blockPos2.below());
+                if (serverLevel.getBlockState(blockPos2).isAir() && (blockState2.is(Blocks.FARMLAND) || blockState2.is(Blocks.DIRT) || blockState2.is(Blocks.COARSE_DIRT) || blockState2.is(Blocks.PODZOL) || blockState2.is(Blocks.GRASS_BLOCK))) {
                     serverLevel.setBlockAndUpdate(blockPos2, this.fruit.defaultBlockState());
                     serverLevel.setBlockAndUpdate(blockPos, (BlockState)this.fruit.getAttachedStem().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, direction));
                 }

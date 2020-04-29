@@ -29,8 +29,7 @@ extends BushBlock {
 
     @Override
     protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-        Block block = blockState.getBlock();
-        return blockState.is(BlockTags.NYLIUM) || block == Blocks.SOUL_SOIL || super.mayPlaceOn(blockState, blockGetter, blockPos);
+        return blockState.is(BlockTags.NYLIUM) || blockState.is(Blocks.SOUL_SOIL) || super.mayPlaceOn(blockState, blockGetter, blockPos);
     }
 }
 

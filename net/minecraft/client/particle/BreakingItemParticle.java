@@ -6,6 +6,7 @@ package net.minecraft.client.particle;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -14,7 +15,6 @@ import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
 public class BreakingItemParticle
@@ -22,8 +22,8 @@ extends TextureSheetParticle {
     private final float uo;
     private final float vo;
 
-    private BreakingItemParticle(Level level, double d, double e, double f, double g, double h, double i, ItemStack itemStack) {
-        this(level, d, e, f, itemStack);
+    private BreakingItemParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, ItemStack itemStack) {
+        this(clientLevel, d, e, f, itemStack);
         this.xd *= (double)0.1f;
         this.yd *= (double)0.1f;
         this.zd *= (double)0.1f;
@@ -37,9 +37,9 @@ extends TextureSheetParticle {
         return ParticleRenderType.TERRAIN_SHEET;
     }
 
-    protected BreakingItemParticle(Level level, double d, double e, double f, ItemStack itemStack) {
-        super(level, d, e, f, 0.0, 0.0, 0.0);
-        this.setSprite(Minecraft.getInstance().getItemRenderer().getModel(itemStack, level, null).getParticleIcon());
+    protected BreakingItemParticle(ClientLevel clientLevel, double d, double e, double f, ItemStack itemStack) {
+        super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
+        this.setSprite(Minecraft.getInstance().getItemRenderer().getModel(itemStack, clientLevel, null).getParticleIcon());
         this.gravity = 1.0f;
         this.quadSize /= 2.0f;
         this.uo = this.random.nextFloat() * 3.0f;
@@ -70,8 +70,8 @@ extends TextureSheetParticle {
     public static class SnowballProvider
     implements ParticleProvider<SimpleParticleType> {
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            return new BreakingItemParticle(level, d, e, f, new ItemStack(Items.SNOWBALL));
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return new BreakingItemParticle(clientLevel, d, e, f, new ItemStack(Items.SNOWBALL));
         }
     }
 
@@ -79,8 +79,8 @@ extends TextureSheetParticle {
     public static class SlimeProvider
     implements ParticleProvider<SimpleParticleType> {
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            return new BreakingItemParticle(level, d, e, f, new ItemStack(Items.SLIME_BALL));
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return new BreakingItemParticle(clientLevel, d, e, f, new ItemStack(Items.SLIME_BALL));
         }
     }
 
@@ -88,8 +88,8 @@ extends TextureSheetParticle {
     public static class Provider
     implements ParticleProvider<ItemParticleOption> {
         @Override
-        public Particle createParticle(ItemParticleOption itemParticleOption, Level level, double d, double e, double f, double g, double h, double i) {
-            return new BreakingItemParticle(level, d, e, f, g, h, i, itemParticleOption.getItem());
+        public Particle createParticle(ItemParticleOption itemParticleOption, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return new BreakingItemParticle(clientLevel, d, e, f, g, h, i, itemParticleOption.getItem());
         }
     }
 }

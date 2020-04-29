@@ -5,19 +5,19 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
 public class CampfireSmokeParticle
 extends TextureSheetParticle {
-    private CampfireSmokeParticle(Level level, double d, double e, double f, double g, double h, double i, boolean bl) {
-        super(level, d, e, f);
+    private CampfireSmokeParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, boolean bl) {
+        super(clientLevel, d, e, f);
         this.scale(3.0f);
         this.setSize(0.25f, 0.25f);
         this.lifetime = bl ? this.random.nextInt(50) + 280 : this.random.nextInt(50) + 80;
@@ -60,8 +60,8 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            CampfireSmokeParticle campfireSmokeParticle = new CampfireSmokeParticle(level, d, e, f, g, h, i, true);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            CampfireSmokeParticle campfireSmokeParticle = new CampfireSmokeParticle(clientLevel, d, e, f, g, h, i, true);
             campfireSmokeParticle.setAlpha(0.95f);
             campfireSmokeParticle.pickSprite(this.sprites);
             return campfireSmokeParticle;
@@ -78,8 +78,8 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            CampfireSmokeParticle campfireSmokeParticle = new CampfireSmokeParticle(level, d, e, f, g, h, i, false);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            CampfireSmokeParticle campfireSmokeParticle = new CampfireSmokeParticle(clientLevel, d, e, f, g, h, i, false);
             campfireSmokeParticle.setAlpha(0.9f);
             campfireSmokeParticle.pickSprite(this.sprites);
             return campfireSmokeParticle;

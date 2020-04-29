@@ -10,8 +10,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -28,8 +28,8 @@ extends Feature<NoneFeatureConfiguration> {
         if (!levelAccessor.isEmptyBlock(blockPos)) {
             return false;
         }
-        Block block = levelAccessor.getBlockState(blockPos.above()).getBlock();
-        if (block != Blocks.NETHERRACK && block != Blocks.BASALT && block != Blocks.BLACKSTONE) {
+        BlockState blockState = levelAccessor.getBlockState(blockPos.above());
+        if (!(blockState.is(Blocks.NETHERRACK) || blockState.is(Blocks.BASALT) || blockState.is(Blocks.BLACKSTONE))) {
             return false;
         }
         levelAccessor.setBlock(blockPos, Blocks.GLOWSTONE.defaultBlockState(), 2);
@@ -38,7 +38,7 @@ extends Feature<NoneFeatureConfiguration> {
             if (!levelAccessor.getBlockState(blockPos2).isAir()) continue;
             int j = 0;
             for (Direction direction : Direction.values()) {
-                if (levelAccessor.getBlockState(blockPos2.relative(direction)).getBlock() == Blocks.GLOWSTONE) {
+                if (levelAccessor.getBlockState(blockPos2.relative(direction)).is(Blocks.GLOWSTONE)) {
                     ++j;
                 }
                 if (j > 1) break;

@@ -3,13 +3,13 @@
  */
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
+import net.minecraft.advancements.critereon.DeserializationContext;
+import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,20 +25,20 @@ extends SimpleCriterionTrigger<TriggerInstance> {
     }
 
     @Override
-    public TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+    public TriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
         ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("item"));
         MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("durability"));
         MinMaxBounds.Ints ints2 = MinMaxBounds.Ints.fromJson(jsonObject.get("delta"));
-        return new TriggerInstance(itemPredicate, ints, ints2);
+        return new TriggerInstance(composite, itemPredicate, ints, ints2);
     }
 
     public void trigger(ServerPlayer serverPlayer, ItemStack itemStack, int i) {
-        this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(itemStack, i));
+        this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(itemStack, i));
     }
 
     @Override
-    public /* synthetic */ CriterionTriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-        return this.createInstance(jsonObject, jsonDeserializationContext);
+    public /* synthetic */ AbstractCriterionTriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
+        return this.createInstance(jsonObject, composite, deserializationContext);
     }
 
     public static class TriggerInstance
@@ -47,15 +47,15 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         private final MinMaxBounds.Ints durability;
         private final MinMaxBounds.Ints delta;
 
-        public TriggerInstance(ItemPredicate itemPredicate, MinMaxBounds.Ints ints, MinMaxBounds.Ints ints2) {
-            super(ID);
+        public TriggerInstance(EntityPredicate.Composite composite, ItemPredicate itemPredicate, MinMaxBounds.Ints ints, MinMaxBounds.Ints ints2) {
+            super(ID, composite);
             this.item = itemPredicate;
             this.durability = ints;
             this.delta = ints2;
         }
 
         public static TriggerInstance changedDurability(ItemPredicate itemPredicate, MinMaxBounds.Ints ints) {
-            return new TriggerInstance(itemPredicate, ints, MinMaxBounds.Ints.ANY);
+            return new TriggerInstance(EntityPredicate.Composite.ANY, itemPredicate, ints, MinMaxBounds.Ints.ANY);
         }
 
         public boolean matches(ItemStack itemStack, int i) {
@@ -69,8 +69,8 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         }
 
         @Override
-        public JsonElement serializeToJson() {
-            JsonObject jsonObject = new JsonObject();
+        public JsonObject serializeToJson(SerializationContext serializationContext) {
+            JsonObject jsonObject = super.serializeToJson(serializationContext);
             jsonObject.add("item", this.item.serializeToJson());
             jsonObject.add("durability", this.durability.serializeToJson());
             jsonObject.add("delta", this.delta.serializeToJson());

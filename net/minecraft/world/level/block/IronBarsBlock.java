@@ -66,7 +66,7 @@ extends CrossCollisionBlock {
     @Override
     @Environment(value=EnvType.CLIENT)
     public boolean skipRendering(BlockState blockState, BlockState blockState2, Direction direction) {
-        if (blockState2.getBlock() == this) {
+        if (blockState2.is(this)) {
             if (!direction.getAxis().isHorizontal()) {
                 return true;
             }

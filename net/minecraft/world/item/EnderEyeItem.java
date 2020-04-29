@@ -39,7 +39,7 @@ extends Item {
         BlockPos blockPos;
         Level level = useOnContext.getLevel();
         BlockState blockState = level.getBlockState(blockPos = useOnContext.getClickedPos());
-        if (blockState.getBlock() != Blocks.END_PORTAL_FRAME || blockState.getValue(EndPortalFrameBlock.HAS_EYE).booleanValue()) {
+        if (!blockState.is(Blocks.END_PORTAL_FRAME) || blockState.getValue(EndPortalFrameBlock.HAS_EYE).booleanValue()) {
             return InteractionResult.PASS;
         }
         if (level.isClientSide) {
@@ -69,7 +69,7 @@ extends Item {
         BlockPos blockPos;
         ItemStack itemStack = player.getItemInHand(interactionHand);
         HitResult hitResult = EnderEyeItem.getPlayerPOVHitResult(level, player, ClipContext.Fluid.NONE);
-        if (hitResult.getType() == HitResult.Type.BLOCK && level.getBlockState(((BlockHitResult)hitResult).getBlockPos()).getBlock() == Blocks.END_PORTAL_FRAME) {
+        if (hitResult.getType() == HitResult.Type.BLOCK && level.getBlockState(((BlockHitResult)hitResult).getBlockPos()).is(Blocks.END_PORTAL_FRAME)) {
             return InteractionResultHolder.pass(itemStack);
         }
         player.startUsingItem(interactionHand);

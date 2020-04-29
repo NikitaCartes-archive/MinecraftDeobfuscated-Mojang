@@ -3,15 +3,13 @@
  */
 package net.minecraft.advancements;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.resources.ResourceLocation;
 
 public interface CriterionTriggerInstance {
     public ResourceLocation getCriterion();
 
-    default public JsonElement serializeToJson() {
-        return JsonNull.INSTANCE;
-    }
+    public JsonObject serializeToJson(SerializationContext var1);
 }
 

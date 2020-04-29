@@ -74,6 +74,7 @@ extends Screen {
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.tooltip = null;
         this.rules.render(poseStack, i, j, f);
+        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 0xFFFFFF);
         super.render(poseStack, i, j, f);
         if (this.tooltip != null) {
             this.renderTooltip(poseStack, this.tooltip, i, j);

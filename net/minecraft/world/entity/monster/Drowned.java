@@ -371,7 +371,7 @@ implements RangedAttackMob {
             BlockPos blockPos = this.mob.blockPosition();
             for (int i = 0; i < 10; ++i) {
                 BlockPos blockPos2 = blockPos.offset(random.nextInt(20) - 10, 2 - random.nextInt(8), random.nextInt(20) - 10);
-                if (this.level.getBlockState(blockPos2).getBlock() != Blocks.WATER) continue;
+                if (!this.level.getBlockState(blockPos2).is(Blocks.WATER)) continue;
                 return Vec3.atBottomCenterOf(blockPos2);
             }
             return null;

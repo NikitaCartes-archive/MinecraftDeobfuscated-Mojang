@@ -163,11 +163,7 @@ public class StringSplitter {
         return list;
     }
 
-    public List<Component> splitLines(Component component, int i, Style style) {
-        return this.splitLines(component, i, style, false);
-    }
-
-    public List<Component> splitLines(Component component, int i, Style style2, boolean bl) {
+    public List<Component> splitLines(Component component, int i, Style style2) {
         ArrayList<Component> list = Lists.newArrayList();
         ArrayList<LineComponent> list2 = Lists.newArrayList();
         component.visit((style, string) -> {
@@ -177,9 +173,10 @@ public class StringSplitter {
             return Optional.empty();
         }, style2);
         FlatComponents flatComponents = new FlatComponents(list2);
-        boolean bl2 = true;
-        block0: while (bl2) {
-            bl2 = false;
+        boolean bl = true;
+        boolean bl2 = false;
+        block0: while (bl) {
+            bl = false;
             LineBreakFinder lineBreakFinder = new LineBreakFinder(i);
             for (LineComponent lineComponent : flatComponents.parts) {
                 boolean bl3 = StringDecomposer.iterateFormatted(lineComponent.contents, 0, lineComponent.style, style2, lineBreakFinder);
@@ -187,9 +184,11 @@ public class StringSplitter {
                     int j = lineBreakFinder.getSplitPosition();
                     Style style22 = lineBreakFinder.getSplitStyle();
                     char c = flatComponents.charAt(j);
-                    boolean bl4 = !bl && (c == '\n' || c == ' ');
-                    list.add(flatComponents.splitAt(j, bl4 ? 1 : 0, style22));
-                    bl2 = true;
+                    boolean bl4 = c == '\n';
+                    boolean bl5 = bl4 || c == ' ';
+                    bl2 = bl4;
+                    list.add(flatComponents.splitAt(j, bl5 ? 1 : 0, style22));
+                    bl = true;
                     continue block0;
                 }
                 lineBreakFinder.addToOffset(lineComponent.contents.length());
@@ -198,6 +197,8 @@ public class StringSplitter {
         Component component2 = flatComponents.getRemainder();
         if (component2 != null) {
             list.add(component2);
+        } else if (bl2) {
+            list.add(new TextComponent("").withStyle(style2));
         }
         return list;
     }

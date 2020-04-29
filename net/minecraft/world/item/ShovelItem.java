@@ -35,8 +35,7 @@ extends DiggerItem {
 
     @Override
     public boolean canDestroySpecial(BlockState blockState) {
-        Block block = blockState.getBlock();
-        return block == Blocks.SNOW || block == Blocks.SNOW_BLOCK;
+        return blockState.is(Blocks.SNOW) || blockState.is(Blocks.SNOW_BLOCK);
     }
 
     @Override

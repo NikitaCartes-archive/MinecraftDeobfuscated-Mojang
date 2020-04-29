@@ -8,7 +8,7 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 
 public class Attributes {
-    public static final Attribute MAX_HEALTH = Attributes.register("generic.max_health", new RangedAttribute("attribute.name.generic.max_health", 20.0, 0.0, 1024.0).setSyncable(true));
+    public static final Attribute MAX_HEALTH = Attributes.register("generic.max_health", new RangedAttribute("attribute.name.generic.max_health", 20.0, 1.0, 1024.0).setSyncable(true));
     public static final Attribute FOLLOW_RANGE = Attributes.register("generic.follow_range", new RangedAttribute("attribute.name.generic.follow_range", 32.0, 0.0, 2048.0));
     public static final Attribute KNOCKBACK_RESISTANCE = Attributes.register("generic.knockback_resistance", new RangedAttribute("attribute.name.generic.knockback_resistance", 0.0, 0.0, 1.0));
     public static final Attribute MOVEMENT_SPEED = Attributes.register("generic.movement_speed", new RangedAttribute("attribute.name.generic.movement_speed", 0.7f, 0.0, 1024.0).setSyncable(true));

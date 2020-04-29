@@ -68,7 +68,7 @@ extends Goal {
 
     private boolean givesAir(LevelReader levelReader, BlockPos blockPos) {
         BlockState blockState = levelReader.getBlockState(blockPos);
-        return (levelReader.getFluidState(blockPos).isEmpty() || blockState.getBlock() == Blocks.BUBBLE_COLUMN) && blockState.isPathfindable(levelReader, blockPos, PathComputationType.LAND);
+        return (levelReader.getFluidState(blockPos).isEmpty() || blockState.is(Blocks.BUBBLE_COLUMN)) && blockState.isPathfindable(levelReader, blockPos, PathComputationType.LAND);
     }
 }
 

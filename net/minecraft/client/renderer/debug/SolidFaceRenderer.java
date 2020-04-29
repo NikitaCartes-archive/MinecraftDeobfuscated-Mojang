@@ -41,7 +41,7 @@ implements DebugRenderer.SimpleDebugRenderer {
         BlockPos blockPos = new BlockPos(d, e, f);
         for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-6, -6, -6), blockPos.offset(6, 6, 6))) {
             BlockState blockState = blockGetter.getBlockState(blockPos2);
-            if (blockState.getBlock() == Blocks.AIR) continue;
+            if (blockState.is(Blocks.AIR)) continue;
             VoxelShape voxelShape = blockState.getShape(blockGetter, blockPos2);
             for (AABB aABB : voxelShape.toAabbs()) {
                 BufferBuilder bufferBuilder;

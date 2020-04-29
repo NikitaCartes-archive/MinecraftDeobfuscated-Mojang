@@ -42,7 +42,7 @@ implements BonemealableBlock {
             int i = 5;
             int j = 4;
             for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-4, -1, -4), blockPos.offset(4, 1, 4))) {
-                if (serverLevel.getBlockState(blockPos2).getBlock() != this || --i > 0) continue;
+                if (!serverLevel.getBlockState(blockPos2).is(this) || --i > 0) continue;
                 return;
             }
             BlockPos blockPos3 = blockPos.offset(random.nextInt(3) - 1, random.nextInt(2) - random.nextInt(2), random.nextInt(3) - 1);
@@ -67,8 +67,7 @@ implements BonemealableBlock {
     public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
         BlockPos blockPos2 = blockPos.below();
         BlockState blockState2 = levelReader.getBlockState(blockPos2);
-        Block block = blockState2.getBlock();
-        if (block == Blocks.MYCELIUM || block == Blocks.PODZOL) {
+        if (blockState2.is(Blocks.MYCELIUM) || blockState2.is(Blocks.PODZOL)) {
             return true;
         }
         return levelReader.getRawBrightness(blockPos, 0) < 13 && this.mayPlaceOn(blockState2, levelReader, blockPos2);

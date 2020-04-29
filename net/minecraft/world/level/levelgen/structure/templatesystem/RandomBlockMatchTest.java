@@ -30,7 +30,7 @@ extends RuleTest {
 
     @Override
     public boolean test(BlockState blockState, Random random) {
-        return blockState.getBlock() == this.block && random.nextFloat() < this.probability;
+        return blockState.is(this.block) && random.nextFloat() < this.probability;
     }
 
     @Override

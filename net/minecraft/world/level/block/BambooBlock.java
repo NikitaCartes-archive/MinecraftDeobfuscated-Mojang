@@ -89,11 +89,10 @@ implements BonemealableBlock {
         }
         BlockState blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos().below());
         if (blockState.is(BlockTags.BAMBOO_PLANTABLE_ON)) {
-            Block block = blockState.getBlock();
-            if (block == Blocks.BAMBOO_SAPLING) {
+            if (blockState.is(Blocks.BAMBOO_SAPLING)) {
                 return (BlockState)this.defaultBlockState().setValue(AGE, 0);
             }
-            if (block == Blocks.BAMBOO) {
+            if (blockState.is(Blocks.BAMBOO)) {
                 int i = blockState.getValue(AGE) > 0 ? 1 : 0;
                 return (BlockState)this.defaultBlockState().setValue(AGE, i);
             }
@@ -135,7 +134,7 @@ implements BonemealableBlock {
         if (!blockState.canSurvive(levelAccessor, blockPos)) {
             levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
         }
-        if (direction == Direction.UP && blockState2.getBlock() == Blocks.BAMBOO && blockState2.getValue(AGE) > blockState.getValue(AGE)) {
+        if (direction == Direction.UP && blockState2.is(Blocks.BAMBOO) && blockState2.getValue(AGE) > blockState.getValue(AGE)) {
             levelAccessor.setBlock(blockPos, (BlockState)blockState.cycle(AGE), 2);
         }
         return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
@@ -185,31 +184,31 @@ implements BonemealableBlock {
         BlockState blockState3 = level.getBlockState(blockPos2);
         BambooLeaves bambooLeaves = BambooLeaves.NONE;
         if (i >= 1) {
-            if (blockState2.getBlock() != Blocks.BAMBOO || blockState2.getValue(LEAVES) == BambooLeaves.NONE) {
+            if (!blockState2.is(Blocks.BAMBOO) || blockState2.getValue(LEAVES) == BambooLeaves.NONE) {
                 bambooLeaves = BambooLeaves.SMALL;
-            } else if (blockState2.getBlock() == Blocks.BAMBOO && blockState2.getValue(LEAVES) != BambooLeaves.NONE) {
+            } else if (blockState2.is(Blocks.BAMBOO) && blockState2.getValue(LEAVES) != BambooLeaves.NONE) {
                 bambooLeaves = BambooLeaves.LARGE;
-                if (blockState3.getBlock() == Blocks.BAMBOO) {
+                if (blockState3.is(Blocks.BAMBOO)) {
                     level.setBlock(blockPos.below(), (BlockState)blockState2.setValue(LEAVES, BambooLeaves.SMALL), 3);
                     level.setBlock(blockPos2, (BlockState)blockState3.setValue(LEAVES, BambooLeaves.NONE), 3);
                 }
             }
         }
-        int j = blockState.getValue(AGE) == 1 || blockState3.getBlock() == Blocks.BAMBOO ? 1 : 0;
+        int j = blockState.getValue(AGE) == 1 || blockState3.is(Blocks.BAMBOO) ? 1 : 0;
         int k = i >= 11 && random.nextFloat() < 0.25f || i == 15 ? 1 : 0;
         level.setBlock(blockPos.above(), (BlockState)((BlockState)((BlockState)this.defaultBlockState().setValue(AGE, j)).setValue(LEAVES, bambooLeaves)).setValue(STAGE, k), 3);
     }
 
     protected int getHeightAboveUpToMax(BlockGetter blockGetter, BlockPos blockPos) {
         int i;
-        for (i = 0; i < 16 && blockGetter.getBlockState(blockPos.above(i + 1)).getBlock() == Blocks.BAMBOO; ++i) {
+        for (i = 0; i < 16 && blockGetter.getBlockState(blockPos.above(i + 1)).is(Blocks.BAMBOO); ++i) {
         }
         return i;
     }
 
     protected int getHeightBelowUpToMax(BlockGetter blockGetter, BlockPos blockPos) {
         int i;
-        for (i = 0; i < 16 && blockGetter.getBlockState(blockPos.below(i + 1)).getBlock() == Blocks.BAMBOO; ++i) {
+        for (i = 0; i < 16 && blockGetter.getBlockState(blockPos.below(i + 1)).is(Blocks.BAMBOO); ++i) {
         }
         return i;
     }

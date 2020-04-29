@@ -32,7 +32,7 @@ public class DoubleBlockCombiner {
         }
         BlockPos blockPos2 = blockPos.relative(function2.apply(blockState));
         BlockState blockState2 = levelAccessor.getBlockState(blockPos2);
-        if (blockState2.getBlock() == blockState.getBlock() && (blockType2 = function.apply(blockState2)) != BlockType.SINGLE && blockType != blockType2 && blockState2.getValue(directionProperty) == blockState.getValue(directionProperty)) {
+        if (blockState2.is(blockState.getBlock()) && (blockType2 = function.apply(blockState2)) != BlockType.SINGLE && blockType != blockType2 && blockState2.getValue(directionProperty) == blockState.getValue(directionProperty)) {
             if (biPredicate.test(levelAccessor, blockPos2)) {
                 return Combiner::acceptNone;
             }

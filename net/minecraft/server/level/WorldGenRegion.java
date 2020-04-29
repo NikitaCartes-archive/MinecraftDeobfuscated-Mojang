@@ -59,7 +59,6 @@ implements LevelAccessor {
     private final int size;
     private final ServerLevel level;
     private final long seed;
-    private final int seaLevel;
     private final LevelData levelData;
     private final Random random;
     private final Dimension dimension;
@@ -83,7 +82,6 @@ implements LevelAccessor {
         this.level = serverLevel;
         this.seed = serverLevel.getSeed();
         this.settings = serverLevel.getChunkSource().getGenerator().getSettings();
-        this.seaLevel = serverLevel.getSeaLevel();
         this.levelData = serverLevel.getLevelData();
         this.random = serverLevel.getRandom();
         this.dimension = serverLevel.getDimension();
@@ -317,7 +315,7 @@ implements LevelAccessor {
 
     @Override
     public int getSeaLevel() {
-        return this.seaLevel;
+        return this.level.getSeaLevel();
     }
 
     @Override

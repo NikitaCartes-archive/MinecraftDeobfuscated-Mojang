@@ -198,7 +198,7 @@ extends BaseEntityBlock {
             mutableBlockPos.move(direction);
             BlockState blockState = level.getBlockState(mutableBlockPos);
             Block block = blockState.getBlock();
-            if (block != Blocks.CHAIN_COMMAND_BLOCK || !((blockEntity = level.getBlockEntity(mutableBlockPos)) instanceof CommandBlockEntity) || (commandBlockEntity = (CommandBlockEntity)blockEntity).getMode() != CommandBlockEntity.Mode.SEQUENCE) break;
+            if (!blockState.is(Blocks.CHAIN_COMMAND_BLOCK) || !((blockEntity = level.getBlockEntity(mutableBlockPos)) instanceof CommandBlockEntity) || (commandBlockEntity = (CommandBlockEntity)blockEntity).getMode() != CommandBlockEntity.Mode.SEQUENCE) break;
             if (commandBlockEntity.isPowered() || commandBlockEntity.isAutomatic()) {
                 BaseCommandBlock baseCommandBlock = commandBlockEntity.getCommandBlock();
                 if (commandBlockEntity.markConditionMet()) {

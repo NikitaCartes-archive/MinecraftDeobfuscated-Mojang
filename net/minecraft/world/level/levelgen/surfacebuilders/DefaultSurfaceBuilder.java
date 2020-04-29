@@ -40,7 +40,7 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
                 m = -1;
                 continue;
             }
-            if (blockState8.getBlock() != blockState.getBlock()) continue;
+            if (!blockState8.is(blockState.getBlock())) continue;
             if (m == -1) {
                 if (n <= 0) {
                     blockState6 = Blocks.AIR.defaultBlockState();
@@ -69,9 +69,9 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
             }
             if (m <= 0) continue;
             chunkAccess.setBlockState(mutableBlockPos, blockState7, false);
-            if (--m != 0 || blockState7.getBlock() != Blocks.SAND || n <= 1) continue;
+            if (--m != 0 || !blockState7.is(Blocks.SAND) || n <= 1) continue;
             m = random.nextInt(4) + Math.max(0, q - 63);
-            blockState7 = blockState7.getBlock() == Blocks.RED_SAND ? Blocks.RED_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
+            blockState7 = blockState7.is(Blocks.RED_SAND) ? Blocks.RED_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
         }
     }
 }

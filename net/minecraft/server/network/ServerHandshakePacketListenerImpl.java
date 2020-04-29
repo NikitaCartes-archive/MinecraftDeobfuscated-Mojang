@@ -7,6 +7,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.handshake.ServerHandshakePacketListener;
@@ -17,6 +18,7 @@ import net.minecraft.server.network.ServerStatusPacketListenerImpl;
 
 public class ServerHandshakePacketListenerImpl
 implements ServerHandshakePacketListener {
+    private static final Component IGNORE_STATUS_REASON = new TextComponent("Ignoring status request");
     private final MinecraftServer server;
     private final Connection connection;
 
@@ -46,8 +48,12 @@ implements ServerHandshakePacketListener {
                 break;
             }
             case STATUS: {
-                this.connection.setProtocol(ConnectionProtocol.STATUS);
-                this.connection.setListener(new ServerStatusPacketListenerImpl(this.server, this.connection));
+                if (this.server.repliesToStatus()) {
+                    this.connection.setProtocol(ConnectionProtocol.STATUS);
+                    this.connection.setListener(new ServerStatusPacketListenerImpl(this.server, this.connection));
+                    break;
+                }
+                this.connection.disconnect(IGNORE_STATUS_REASON);
                 break;
             }
             default: {

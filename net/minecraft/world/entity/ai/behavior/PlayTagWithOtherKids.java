@@ -62,8 +62,8 @@ extends Behavior<PathfinderMob> {
     private static void chaseKid(PathfinderMob pathfinderMob, LivingEntity livingEntity) {
         Brain<?> brain = pathfinderMob.getBrain();
         brain.setMemory(MemoryModuleType.INTERACTION_TARGET, livingEntity);
-        brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(livingEntity));
-        brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityTracker(livingEntity), 0.6f, 1));
+        brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(livingEntity, true));
+        brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityTracker(livingEntity, false), 0.6f, 1));
     }
 
     private Optional<LivingEntity> findSomeoneToChase(PathfinderMob pathfinderMob) {

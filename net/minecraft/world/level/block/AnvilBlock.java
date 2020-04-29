@@ -106,11 +106,10 @@ extends FallingBlock {
 
     @Nullable
     public static BlockState damage(BlockState blockState) {
-        Block block = blockState.getBlock();
-        if (block == Blocks.ANVIL) {
+        if (blockState.is(Blocks.ANVIL)) {
             return (BlockState)Blocks.CHIPPED_ANVIL.defaultBlockState().setValue(FACING, blockState.getValue(FACING));
         }
-        if (block == Blocks.CHIPPED_ANVIL) {
+        if (blockState.is(Blocks.CHIPPED_ANVIL)) {
             return (BlockState)Blocks.DAMAGED_ANVIL.defaultBlockState().setValue(FACING, blockState.getValue(FACING));
         }
         return null;

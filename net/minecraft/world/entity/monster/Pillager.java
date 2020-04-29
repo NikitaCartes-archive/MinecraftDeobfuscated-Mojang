@@ -56,8 +56,8 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public class Pillager
@@ -156,8 +156,8 @@ implements CrossbowAttackMob {
 
     @Override
     public float getWalkTargetValue(BlockPos blockPos, LevelReader levelReader) {
-        Block block = levelReader.getBlockState(blockPos.below()).getBlock();
-        if (block == Blocks.GRASS_BLOCK || block == Blocks.SAND) {
+        BlockState blockState = levelReader.getBlockState(blockPos.below());
+        if (blockState.is(Blocks.GRASS_BLOCK) || blockState.is(Blocks.SAND)) {
             return 10.0f;
         }
         return 0.5f - levelReader.getBrightness(blockPos);

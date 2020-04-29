@@ -29,11 +29,11 @@ extends BlockItem {
     @Override
     @Nullable
     public BlockPlaceContext updatePlacementContext(BlockPlaceContext blockPlaceContext) {
+        Block block;
         BlockPos blockPos = blockPlaceContext.getClickedPos();
         Level level = blockPlaceContext.getLevel();
         BlockState blockState = level.getBlockState(blockPos);
-        Block block = this.getBlock();
-        if (blockState.getBlock() == block) {
+        if (blockState.is(block = this.getBlock())) {
             Direction direction = blockPlaceContext.isSecondaryUseActive() ? (blockPlaceContext.isInside() ? blockPlaceContext.getClickedFace().getOpposite() : blockPlaceContext.getClickedFace()) : (blockPlaceContext.getClickedFace() == Direction.UP ? blockPlaceContext.getHorizontalDirection() : Direction.UP);
             int i = 0;
             BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable().move(direction);
@@ -47,7 +47,7 @@ extends BlockItem {
                     break;
                 }
                 blockState = level.getBlockState(mutableBlockPos);
-                if (blockState.getBlock() != this.getBlock()) {
+                if (!blockState.is(this.getBlock())) {
                     if (!blockState.canBeReplaced(blockPlaceContext)) break;
                     return BlockPlaceContext.at(blockPlaceContext, mutableBlockPos, direction);
                 }

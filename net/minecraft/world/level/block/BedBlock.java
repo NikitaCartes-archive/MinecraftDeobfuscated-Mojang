@@ -28,7 +28,6 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoubleBlockCombiner;
@@ -44,6 +43,7 @@ import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.AABB;
@@ -88,13 +88,13 @@ implements EntityBlock {
         if (level.isClientSide) {
             return InteractionResult.CONSUME;
         }
-        if (blockState.getValue(PART) != BedPart.HEAD && (blockState = level.getBlockState(blockPos = blockPos.relative(blockState.getValue(FACING)))).getBlock() != this) {
+        if (blockState.getValue(PART) != BedPart.HEAD && !(blockState = level.getBlockState(blockPos = blockPos.relative(blockState.getValue(FACING)))).is(this)) {
             return InteractionResult.CONSUME;
         }
         if (!BedBlock.canSetSpawn(level, blockPos)) {
             level.removeBlock(blockPos, false);
             BlockPos blockPos2 = blockPos.relative(blockState.getValue(FACING).getOpposite());
-            if (level.getBlockState(blockPos2).getBlock() == this) {
+            if (level.getBlockState(blockPos2).is(this)) {
                 level.removeBlock(blockPos2, false);
             }
             level.explode(null, DamageSource.badRespawnPointExplosion(), (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 5.0f, true, Explosion.BlockInteraction.DESTROY);
@@ -115,7 +115,7 @@ implements EntityBlock {
     }
 
     public static boolean canSetSpawn(Level level, BlockPos blockPos) {
-        return level.dimension.mayRespawn() && level.getBiome(blockPos) != Biomes.NETHER_WASTES;
+        return level.dimension.getType() == DimensionType.OVERWORLD;
     }
 
     private boolean kickVillagerOutOfBed(Level level, BlockPos blockPos) {
@@ -152,7 +152,7 @@ implements EntityBlock {
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
         if (direction == BedBlock.getNeighbourDirection(blockState.getValue(PART), blockState.getValue(FACING))) {
-            if (blockState2.getBlock() == this && blockState2.getValue(PART) != blockState.getValue(PART)) {
+            if (blockState2.is(this) && blockState2.getValue(PART) != blockState.getValue(PART)) {
                 return (BlockState)blockState.setValue(OCCUPIED, blockState2.getValue(OCCUPIED));
             }
             return Blocks.AIR.defaultBlockState();
@@ -174,7 +174,7 @@ implements EntityBlock {
         BedPart bedPart = blockState.getValue(PART);
         BlockPos blockPos2 = blockPos.relative(BedBlock.getNeighbourDirection(bedPart, blockState.getValue(FACING)));
         BlockState blockState2 = level.getBlockState(blockPos2);
-        if (blockState2.getBlock() == this && blockState2.getValue(PART) != bedPart) {
+        if (blockState2.is(this) && blockState2.getValue(PART) != bedPart) {
             level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 35);
             level.levelEvent(player, 2001, blockPos2, Block.getId(blockState2));
             if (!level.isClientSide && !player.isCreative()) {

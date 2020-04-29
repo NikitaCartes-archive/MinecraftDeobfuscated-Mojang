@@ -97,7 +97,7 @@ extends DirectionalBlock {
 
     @Override
     public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        if (blockState.getBlock() == blockState2.getBlock()) {
+        if (blockState.is(blockState2.getBlock())) {
             return;
         }
         if (!level.isClientSide() && blockState.getValue(POWERED).booleanValue() && !level.getBlockTicks().hasScheduledTick(blockPos, this)) {
@@ -109,7 +109,7 @@ extends DirectionalBlock {
 
     @Override
     public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        if (blockState.getBlock() == blockState2.getBlock()) {
+        if (blockState.is(blockState2.getBlock())) {
             return;
         }
         if (!level.isClientSide && blockState.getValue(POWERED).booleanValue() && level.getBlockTicks().hasScheduledTick(blockPos, this)) {

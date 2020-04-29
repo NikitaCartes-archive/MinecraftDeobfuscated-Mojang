@@ -32,7 +32,7 @@ public class TextFieldHelper {
         this.getClipboardFn = supplier2;
         this.setClipboardFn = consumer2;
         this.stringValidator = predicate;
-        this.setEnd();
+        this.setCursorToEnd();
     }
 
     public static Supplier<String> createClipboardGetter(Minecraft minecraft) {
@@ -99,11 +99,11 @@ public class TextFieldHelper {
                 return true;
             }
             if (i == 268) {
-                this.setStart(Screen.hasShiftDown());
+                this.setCursorToStart(Screen.hasShiftDown());
                 return true;
             }
             if (i == 269) {
-                this.setEnd(Screen.hasShiftDown());
+                this.setCursorToEnd(Screen.hasShiftDown());
                 return true;
             }
         }
@@ -202,21 +202,17 @@ public class TextFieldHelper {
         return string2;
     }
 
-    public void setStart() {
-        this.setStart(false);
-    }
-
-    public void setStart(boolean bl) {
+    private void setCursorToStart(boolean bl) {
         this.cursorPos = 0;
         this.resetSelectionIfNeeded(bl);
     }
 
-    public void setEnd() {
-        this.setEnd(false);
+    public void setCursorToEnd() {
+        this.setCursorToEnd(false);
     }
 
-    public void setEnd(boolean bl) {
-        this.selectionPos = this.cursorPos = this.getMessageFn.get().length();
+    private void setCursorToEnd(boolean bl) {
+        this.cursorPos = this.getMessageFn.get().length();
         this.resetSelectionIfNeeded(bl);
     }
 

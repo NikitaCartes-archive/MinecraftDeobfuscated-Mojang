@@ -7,6 +7,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import java.util.function.Predicate;
+import net.minecraft.advancements.critereon.DeserializationContext;
 import net.minecraft.advancements.critereon.DistancePredicate;
 import net.minecraft.advancements.critereon.EntityEquipmentPredicate;
 import net.minecraft.advancements.critereon.EntityFlagsPredicate;
@@ -16,6 +18,7 @@ import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.MobEffectsPredicate;
 import net.minecraft.advancements.critereon.NbtPredicate;
 import net.minecraft.advancements.critereon.PlayerPredicate;
+import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,13 +27,18 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Cat;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
+import net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyCondition;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Team;
 import org.jetbrains.annotations.Nullable;
 
 public class EntityPredicate {
     public static final EntityPredicate ANY = new EntityPredicate(EntityTypePredicate.ANY, DistancePredicate.ANY, LocationPredicate.ANY, MobEffectsPredicate.ANY, NbtPredicate.ANY, EntityFlagsPredicate.ANY, EntityEquipmentPredicate.ANY, PlayerPredicate.ANY, FishingHookPredicate.ANY, null, null);
-    public static final EntityPredicate[] ANY_ARRAY = new EntityPredicate[0];
     private final EntityTypePredicate entityType;
     private final DistancePredicate distanceToPlayer;
     private final LocationPredicate location;
@@ -123,18 +131,6 @@ public class EntityPredicate {
         return new Builder().entityType(entityTypePredicate).distance(distancePredicate).located(locationPredicate).effects(mobEffectsPredicate).nbt(nbtPredicate).flags(entityFlagsPredicate).equipment(entityEquipmentPredicate).player(playerPredicate).fishingHook(fishingHookPredicate).team(string).catType(resourceLocation).build();
     }
 
-    public static EntityPredicate[] fromJsonArray(@Nullable JsonElement jsonElement) {
-        if (jsonElement == null || jsonElement.isJsonNull()) {
-            return ANY_ARRAY;
-        }
-        JsonArray jsonArray = GsonHelper.convertToJsonArray(jsonElement, "entities");
-        EntityPredicate[] entityPredicates = new EntityPredicate[jsonArray.size()];
-        for (int i = 0; i < jsonArray.size(); ++i) {
-            entityPredicates[i] = EntityPredicate.fromJson(jsonArray.get(i));
-        }
-        return entityPredicates;
-    }
-
     public JsonElement serializeToJson() {
         if (this == ANY) {
             return JsonNull.INSTANCE;
@@ -156,17 +152,76 @@ public class EntityPredicate {
         return jsonObject;
     }
 
-    public static JsonElement serializeArrayToJson(EntityPredicate[] entityPredicates) {
-        if (entityPredicates == ANY_ARRAY) {
-            return JsonNull.INSTANCE;
+    public static LootContext createContext(ServerPlayer serverPlayer, Entity entity) {
+        return new LootContext.Builder(serverPlayer.getLevel()).withParameter(LootContextParams.THIS_ENTITY, entity).withParameter(LootContextParams.BLOCK_POS, entity.blockPosition()).withParameter(LootContextParams.ORIGIN, serverPlayer.position()).withRandom(serverPlayer.getRandom()).create(LootContextParamSets.ADVANCEMENT_ENTITY);
+    }
+
+    public static class Composite {
+        public static final Composite ANY = new Composite(new LootItemCondition[0]);
+        private final LootItemCondition[] conditions;
+        private final Predicate<LootContext> compositePredicates;
+
+        private Composite(LootItemCondition[] lootItemConditions) {
+            this.conditions = lootItemConditions;
+            this.compositePredicates = LootItemConditions.andConditions(lootItemConditions);
         }
-        JsonArray jsonArray = new JsonArray();
-        for (EntityPredicate entityPredicate : entityPredicates) {
-            JsonElement jsonElement = entityPredicate.serializeToJson();
-            if (jsonElement.isJsonNull()) continue;
-            jsonArray.add(jsonElement);
+
+        public static Composite fromJson(JsonObject jsonObject, String string, DeserializationContext deserializationContext) {
+            JsonElement jsonElement = jsonObject.get(string);
+            return Composite.fromElement(string, deserializationContext, jsonElement);
         }
-        return jsonArray;
+
+        public static Composite[] fromJsonArray(JsonObject jsonObject, String string, DeserializationContext deserializationContext) {
+            JsonElement jsonElement = jsonObject.get(string);
+            if (jsonElement == null || jsonElement.isJsonNull()) {
+                return new Composite[0];
+            }
+            JsonArray jsonArray = GsonHelper.convertToJsonArray(jsonElement, string);
+            Composite[] composites = new Composite[jsonArray.size()];
+            for (int i = 0; i < jsonArray.size(); ++i) {
+                composites[i] = Composite.fromElement(string + "[" + i + "]", deserializationContext, jsonArray.get(i));
+            }
+            return composites;
+        }
+
+        private static Composite fromElement(String string, DeserializationContext deserializationContext, @Nullable JsonElement jsonElement) {
+            if (jsonElement != null && jsonElement.isJsonArray()) {
+                LootItemCondition[] lootItemConditions = deserializationContext.deserializeConditions(jsonElement.getAsJsonArray(), deserializationContext.getAdvancementId().toString() + "/" + string, LootContextParamSets.ADVANCEMENT_ENTITY);
+                return new Composite(lootItemConditions);
+            }
+            EntityPredicate entityPredicate = EntityPredicate.fromJson(jsonElement);
+            return Composite.wrap(entityPredicate);
+        }
+
+        public static Composite wrap(EntityPredicate entityPredicate) {
+            if (entityPredicate == ANY) {
+                return ANY;
+            }
+            LootItemCondition lootItemCondition = LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, entityPredicate).build();
+            return new Composite(new LootItemCondition[]{lootItemCondition});
+        }
+
+        public boolean matches(LootContext lootContext) {
+            return this.compositePredicates.test(lootContext);
+        }
+
+        public JsonElement toJson(SerializationContext serializationContext) {
+            if (this.conditions.length == 0) {
+                return JsonNull.INSTANCE;
+            }
+            return serializationContext.serializeConditions(this.conditions);
+        }
+
+        public static JsonElement toJson(Composite[] composites, SerializationContext serializationContext) {
+            if (composites.length == 0) {
+                return JsonNull.INSTANCE;
+            }
+            JsonArray jsonArray = new JsonArray();
+            for (Composite composite : composites) {
+                jsonArray.add(composite.toJson(serializationContext));
+            }
+            return jsonArray;
+        }
     }
 
     public static class Builder {

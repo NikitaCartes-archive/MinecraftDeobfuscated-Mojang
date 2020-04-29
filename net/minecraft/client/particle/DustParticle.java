@@ -5,6 +5,7 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -12,15 +13,14 @@ import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
 public class DustParticle
 extends TextureSheetParticle {
     private final SpriteSet sprites;
 
-    private DustParticle(Level level, double d, double e, double f, double g, double h, double i, DustParticleOptions dustParticleOptions, SpriteSet spriteSet) {
-        super(level, d, e, f, g, h, i);
+    private DustParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, DustParticleOptions dustParticleOptions, SpriteSet spriteSet) {
+        super(clientLevel, d, e, f, g, h, i);
         this.sprites = spriteSet;
         this.xd *= (double)0.1f;
         this.yd *= (double)0.1f;
@@ -79,8 +79,8 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(DustParticleOptions dustParticleOptions, Level level, double d, double e, double f, double g, double h, double i) {
-            return new DustParticle(level, d, e, f, g, h, i, dustParticleOptions, this.sprites);
+        public Particle createParticle(DustParticleOptions dustParticleOptions, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return new DustParticle(clientLevel, d, e, f, g, h, i, dustParticleOptions, this.sprites);
         }
     }
 }

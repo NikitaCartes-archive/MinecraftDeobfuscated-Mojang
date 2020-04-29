@@ -5,6 +5,7 @@ package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -22,7 +23,7 @@ extends Behavior<Mob> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, Mob mob) {
-        return mob.isInWater() && mob.getFluidHeight() > (double)this.height || mob.isInLava();
+        return mob.isInWater() && mob.getFluidHeight(FluidTags.WATER) > (double)this.height || mob.isInLava();
     }
 
     @Override

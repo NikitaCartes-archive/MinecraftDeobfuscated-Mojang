@@ -3,12 +3,12 @@
  */
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
+import net.minecraft.advancements.critereon.DeserializationContext;
+import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -27,35 +27,35 @@ extends SimpleCriterionTrigger<TriggerInstance> {
     }
 
     @Override
-    public TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+    public TriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
         Potion potion = null;
         if (jsonObject.has("potion")) {
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "potion"));
             potion = (Potion)Registry.POTION.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown potion '" + resourceLocation + "'"));
         }
-        return new TriggerInstance(potion);
+        return new TriggerInstance(composite, potion);
     }
 
     public void trigger(ServerPlayer serverPlayer, Potion potion) {
-        this.trigger(serverPlayer.getAdvancements(), (T triggerInstance) -> triggerInstance.matches(potion));
+        this.trigger(serverPlayer, (T triggerInstance) -> triggerInstance.matches(potion));
     }
 
     @Override
-    public /* synthetic */ CriterionTriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-        return this.createInstance(jsonObject, jsonDeserializationContext);
+    public /* synthetic */ AbstractCriterionTriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
+        return this.createInstance(jsonObject, composite, deserializationContext);
     }
 
     public static class TriggerInstance
     extends AbstractCriterionTriggerInstance {
         private final Potion potion;
 
-        public TriggerInstance(@Nullable Potion potion) {
-            super(ID);
+        public TriggerInstance(EntityPredicate.Composite composite, @Nullable Potion potion) {
+            super(ID, composite);
             this.potion = potion;
         }
 
         public static TriggerInstance brewedPotion() {
-            return new TriggerInstance(null);
+            return new TriggerInstance(EntityPredicate.Composite.ANY, null);
         }
 
         public boolean matches(Potion potion) {
@@ -63,8 +63,8 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         }
 
         @Override
-        public JsonElement serializeToJson() {
-            JsonObject jsonObject = new JsonObject();
+        public JsonObject serializeToJson(SerializationContext serializationContext) {
+            JsonObject jsonObject = super.serializeToJson(serializationContext);
             if (this.potion != null) {
                 jsonObject.addProperty("potion", Registry.POTION.getKey(this.potion).toString());
             }

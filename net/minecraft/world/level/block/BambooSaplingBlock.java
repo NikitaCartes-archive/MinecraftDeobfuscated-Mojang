@@ -66,7 +66,7 @@ implements BonemealableBlock {
         if (!blockState.canSurvive(levelAccessor, blockPos)) {
             return Blocks.AIR.defaultBlockState();
         }
-        if (direction == Direction.UP && blockState2.getBlock() == Blocks.BAMBOO) {
+        if (direction == Direction.UP && blockState2.is(Blocks.BAMBOO)) {
             levelAccessor.setBlock(blockPos, Blocks.BAMBOO.defaultBlockState(), 2);
         }
         return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);

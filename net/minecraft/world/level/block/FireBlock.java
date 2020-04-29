@@ -117,8 +117,8 @@ extends BaseFireBlock {
         if (!blockState.canSurvive(serverLevel, blockPos)) {
             serverLevel.removeBlock(blockPos, false);
         }
-        Block block = serverLevel.getBlockState(blockPos.below()).getBlock();
-        boolean bl = serverLevel.dimension instanceof TheEndDimension && block == Blocks.BEDROCK || block == Blocks.NETHERRACK || block == Blocks.MAGMA_BLOCK;
+        BlockState blockState2 = serverLevel.getBlockState(blockPos.below());
+        boolean bl = serverLevel.dimension instanceof TheEndDimension && blockState2.is(Blocks.BEDROCK) || blockState2.is(Blocks.NETHERRACK) || blockState2.is(Blocks.MAGMA_BLOCK);
         int i = blockState.getValue(AGE);
         if (!bl && serverLevel.isRaining() && this.isNearRain(serverLevel, blockPos) && random.nextFloat() < 0.2f + (float)i * 0.03f) {
             serverLevel.removeBlock(blockPos, false);
@@ -212,7 +212,7 @@ extends BaseFireBlock {
 
     private BlockState getStateWithAge(LevelAccessor levelAccessor, BlockPos blockPos, int i) {
         BlockState blockState = FireBlock.getState(levelAccessor, blockPos);
-        if (blockState.getBlock() == Blocks.FIRE) {
+        if (blockState.is(Blocks.FIRE)) {
             return (BlockState)blockState.setValue(AGE, i);
         }
         return blockState;

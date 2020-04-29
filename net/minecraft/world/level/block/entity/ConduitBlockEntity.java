@@ -133,7 +133,7 @@ implements TickableBlockEntity {
                     BlockPos blockPos2 = this.worldPosition.offset(i, j, k);
                     BlockState blockState = this.level.getBlockState(blockPos2);
                     for (Block block : VALID_BLOCKS) {
-                        if (blockState.getBlock() != block) continue;
+                        if (!blockState.is(block)) continue;
                         this.effectBlocks.add(blockPos2);
                     }
                 }

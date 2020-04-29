@@ -26,7 +26,7 @@ extends SnowyDirtBlock {
     private static boolean canBeGrass(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
         BlockPos blockPos2 = blockPos.above();
         BlockState blockState2 = levelReader.getBlockState(blockPos2);
-        if (blockState2.getBlock() == Blocks.SNOW && blockState2.getValue(SnowLayerBlock.LAYERS) == 1) {
+        if (blockState2.is(Blocks.SNOW) && blockState2.getValue(SnowLayerBlock.LAYERS) == 1) {
             return true;
         }
         if (blockState2.getFluidState().getType() != Fluids.EMPTY) {
@@ -51,8 +51,8 @@ extends SnowyDirtBlock {
             BlockState blockState2 = this.defaultBlockState();
             for (int i = 0; i < 4; ++i) {
                 BlockPos blockPos2 = blockPos.offset(random.nextInt(3) - 1, random.nextInt(5) - 3, random.nextInt(3) - 1);
-                if (serverLevel.getBlockState(blockPos2).getBlock() != Blocks.DIRT || !SpreadingSnowyDirtBlock.canPropagate(blockState2, serverLevel, blockPos2)) continue;
-                serverLevel.setBlockAndUpdate(blockPos2, (BlockState)blockState2.setValue(SNOWY, serverLevel.getBlockState(blockPos2.above()).getBlock() == Blocks.SNOW));
+                if (!serverLevel.getBlockState(blockPos2).is(Blocks.DIRT) || !SpreadingSnowyDirtBlock.canPropagate(blockState2, serverLevel, blockPos2)) continue;
+                serverLevel.setBlockAndUpdate(blockPos2, (BlockState)blockState2.setValue(SNOWY, serverLevel.getBlockState(blockPos2.above()).is(Blocks.SNOW)));
             }
         }
     }

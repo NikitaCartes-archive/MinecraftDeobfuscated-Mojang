@@ -5,19 +5,19 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SimpleAnimatedParticle;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
 public class SquidInkParticle
 extends SimpleAnimatedParticle {
-    private SquidInkParticle(Level level, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
-        super(level, d, e, f, spriteSet, 0.0f);
+    private SquidInkParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
+        super(clientLevel, d, e, f, spriteSet, 0.0f);
         this.quadSize = 0.5f;
         this.setAlpha(1.0f);
         this.setColor(0.0f, 0.0f, 0.0f);
@@ -66,8 +66,8 @@ extends SimpleAnimatedParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            return new SquidInkParticle(level, d, e, f, g, h, i, this.sprites);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return new SquidInkParticle(clientLevel, d, e, f, g, h, i, this.sprites);
         }
     }
 }

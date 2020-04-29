@@ -16,8 +16,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public class CombatTracker {
@@ -38,8 +38,8 @@ public class CombatTracker {
         this.resetPreparedStatus();
         Optional<BlockPos> optional = this.mob.getLastClimbablePos();
         if (optional.isPresent()) {
-            Block block = this.mob.level.getBlockState(optional.get()).getBlock();
-            this.nextLocation = block == Blocks.LADDER || block.is(BlockTags.TRAPDOORS) ? "ladder" : (block == Blocks.VINE ? "vines" : (block == Blocks.WEEPING_VINES || block == Blocks.WEEPING_VINES_PLANT ? "weeping_vines" : (block == Blocks.TWISTING_VINES || block == Blocks.TWISTING_VINES_PLANT ? "twisting_vines" : (block == Blocks.SCAFFOLDING ? "scaffolding" : "other_climbable"))));
+            BlockState blockState = this.mob.level.getBlockState(optional.get());
+            this.nextLocation = blockState.is(Blocks.LADDER) || blockState.is(BlockTags.TRAPDOORS) ? "ladder" : (blockState.is(Blocks.VINE) ? "vines" : (blockState.is(Blocks.WEEPING_VINES) || blockState.is(Blocks.WEEPING_VINES_PLANT) ? "weeping_vines" : (blockState.is(Blocks.TWISTING_VINES) || blockState.is(Blocks.TWISTING_VINES_PLANT) ? "twisting_vines" : (blockState.is(Blocks.SCAFFOLDING) ? "scaffolding" : "other_climbable"))));
         } else if (this.mob.isInWater()) {
             this.nextLocation = "water";
         }

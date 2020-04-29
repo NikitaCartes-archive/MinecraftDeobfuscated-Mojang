@@ -112,23 +112,23 @@ extends AbstractContainerMenu {
                     for (j = -1; j <= 1; ++j) {
                         for (int k = -1; k <= 1; ++k) {
                             if (j == 0 && k == 0 || !level.isEmptyBlock(blockPos.offset(k, 0, j)) || !level.isEmptyBlock(blockPos.offset(k, 1, j))) continue;
-                            if (level.getBlockState(blockPos.offset(k * 2, 0, j * 2)).getBlock() == Blocks.BOOKSHELF) {
+                            if (level.getBlockState(blockPos.offset(k * 2, 0, j * 2)).is(Blocks.BOOKSHELF)) {
                                 ++i;
                             }
-                            if (level.getBlockState(blockPos.offset(k * 2, 1, j * 2)).getBlock() == Blocks.BOOKSHELF) {
+                            if (level.getBlockState(blockPos.offset(k * 2, 1, j * 2)).is(Blocks.BOOKSHELF)) {
                                 ++i;
                             }
                             if (k == 0 || j == 0) continue;
-                            if (level.getBlockState(blockPos.offset(k * 2, 0, j)).getBlock() == Blocks.BOOKSHELF) {
+                            if (level.getBlockState(blockPos.offset(k * 2, 0, j)).is(Blocks.BOOKSHELF)) {
                                 ++i;
                             }
-                            if (level.getBlockState(blockPos.offset(k * 2, 1, j)).getBlock() == Blocks.BOOKSHELF) {
+                            if (level.getBlockState(blockPos.offset(k * 2, 1, j)).is(Blocks.BOOKSHELF)) {
                                 ++i;
                             }
-                            if (level.getBlockState(blockPos.offset(k, 0, j * 2)).getBlock() == Blocks.BOOKSHELF) {
+                            if (level.getBlockState(blockPos.offset(k, 0, j * 2)).is(Blocks.BOOKSHELF)) {
                                 ++i;
                             }
-                            if (level.getBlockState(blockPos.offset(k, 1, j * 2)).getBlock() != Blocks.BOOKSHELF) continue;
+                            if (!level.getBlockState(blockPos.offset(k, 1, j * 2)).is(Blocks.BOOKSHELF)) continue;
                             ++i;
                         }
                     }

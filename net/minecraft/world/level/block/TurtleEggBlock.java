@@ -101,7 +101,7 @@ extends Block {
     }
 
     private boolean onSand(BlockGetter blockGetter, BlockPos blockPos) {
-        return blockGetter.getBlockState(blockPos.below()).getBlock() == Blocks.SAND;
+        return blockGetter.getBlockState(blockPos.below()).is(Blocks.SAND);
     }
 
     @Override
@@ -137,7 +137,7 @@ extends Block {
     @Nullable
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
         BlockState blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos());
-        if (blockState.getBlock() == this) {
+        if (blockState.is(this)) {
             return (BlockState)blockState.setValue(EGGS, Math.min(4, blockState.getValue(EGGS) + 1));
         }
         return super.getStateForPlacement(blockPlaceContext);

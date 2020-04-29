@@ -100,7 +100,7 @@ extends DirectionalBlock {
 
     @Override
     public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        if (blockState2.getBlock() == blockState.getBlock()) {
+        if (blockState2.is(blockState.getBlock())) {
             return;
         }
         if (!level.isClientSide && level.getBlockEntity(blockPos) == null) {
@@ -126,7 +126,7 @@ extends DirectionalBlock {
             BlockPos blockPos2 = blockPos.relative(direction, 2);
             BlockState blockState2 = level.getBlockState(blockPos2);
             int i = 1;
-            if (blockState2.getBlock() == Blocks.MOVING_PISTON && blockState2.getValue(FACING) == direction && (blockEntity = level.getBlockEntity(blockPos2)) instanceof PistonMovingBlockEntity && (pistonMovingBlockEntity = (PistonMovingBlockEntity)blockEntity).isExtending() && (pistonMovingBlockEntity.getProgress(0.0f) < 0.5f || level.getGameTime() == pistonMovingBlockEntity.getLastTicked() || ((ServerLevel)level).isHandlingTick())) {
+            if (blockState2.is(Blocks.MOVING_PISTON) && blockState2.getValue(FACING) == direction && (blockEntity = level.getBlockEntity(blockPos2)) instanceof PistonMovingBlockEntity && (pistonMovingBlockEntity = (PistonMovingBlockEntity)blockEntity).isExtending() && (pistonMovingBlockEntity.getProgress(0.0f) < 0.5f || level.getGameTime() == pistonMovingBlockEntity.getLastTicked() || ((ServerLevel)level).isHandlingTick())) {
                 i = 2;
             }
             level.blockEvent(blockPos, this, i, direction.get3DDataValue());
@@ -187,14 +187,13 @@ extends DirectionalBlock {
                 BlockEntity blockEntity2;
                 BlockPos blockPos2 = blockPos.offset(direction.getStepX() * 2, direction.getStepY() * 2, direction.getStepZ() * 2);
                 BlockState blockState3 = level.getBlockState(blockPos2);
-                Block block = blockState3.getBlock();
                 boolean bl2 = false;
-                if (block == Blocks.MOVING_PISTON && (blockEntity2 = level.getBlockEntity(blockPos2)) instanceof PistonMovingBlockEntity && (pistonMovingBlockEntity = (PistonMovingBlockEntity)blockEntity2).getDirection() == direction && pistonMovingBlockEntity.isExtending()) {
+                if (blockState3.is(Blocks.MOVING_PISTON) && (blockEntity2 = level.getBlockEntity(blockPos2)) instanceof PistonMovingBlockEntity && (pistonMovingBlockEntity = (PistonMovingBlockEntity)blockEntity2).getDirection() == direction && pistonMovingBlockEntity.isExtending()) {
                     pistonMovingBlockEntity.finalTick();
                     bl2 = true;
                 }
                 if (!bl2) {
-                    if (i == 1 && !blockState3.isAir() && PistonBaseBlock.isPushable(blockState3, level, blockPos2, direction.getOpposite(), false, direction) && (blockState3.getPistonPushReaction() == PushReaction.NORMAL || block == Blocks.PISTON || block == Blocks.STICKY_PISTON)) {
+                    if (i == 1 && !blockState3.isAir() && PistonBaseBlock.isPushable(blockState3, level, blockPos2, direction.getOpposite(), false, direction) && (blockState3.getPistonPushReaction() == PushReaction.NORMAL || blockState3.is(Blocks.PISTON) || blockState3.is(Blocks.STICKY_PISTON))) {
                         this.moveBlocks(level, blockPos, direction, false);
                     } else {
                         level.removeBlock(blockPos.relative(direction), false);
@@ -209,8 +208,7 @@ extends DirectionalBlock {
     }
 
     public static boolean isPushable(BlockState blockState, Level level, BlockPos blockPos, Direction direction, boolean bl, Direction direction2) {
-        Block block = blockState.getBlock();
-        if (block == Blocks.OBSIDIAN || block == Blocks.CRYING_OBSIDIAN || block == Blocks.RESPAWN_ANCHOR) {
+        if (blockState.is(Blocks.OBSIDIAN) || blockState.is(Blocks.CRYING_OBSIDIAN) || blockState.is(Blocks.RESPAWN_ANCHOR)) {
             return false;
         }
         if (!level.getWorldBorder().isWithinBounds(blockPos)) {
@@ -222,7 +220,7 @@ extends DirectionalBlock {
         if (blockPos.getY() > level.getMaxBuildHeight() - 1 || direction == Direction.UP && blockPos.getY() == level.getMaxBuildHeight() - 1) {
             return false;
         }
-        if (block == Blocks.PISTON || block == Blocks.STICKY_PISTON) {
+        if (blockState.is(Blocks.PISTON) || blockState.is(Blocks.STICKY_PISTON)) {
             if (blockState.getValue(EXTENDED).booleanValue()) {
                 return false;
             }
@@ -242,7 +240,7 @@ extends DirectionalBlock {
                 }
             }
         }
-        return !block.isEntityBlock();
+        return !blockState.getBlock().isEntityBlock();
     }
 
     private boolean moveBlocks(Level level, BlockPos blockPos, Direction direction, boolean bl) {
@@ -252,7 +250,7 @@ extends DirectionalBlock {
         int k;
         PistonStructureResolver pistonStructureResolver;
         BlockPos blockPos2 = blockPos.relative(direction);
-        if (!bl && level.getBlockState(blockPos2).getBlock() == Blocks.PISTON_HEAD) {
+        if (!bl && level.getBlockState(blockPos2).is(Blocks.PISTON_HEAD)) {
             level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 20);
         }
         if (!(pistonStructureResolver = new PistonStructureResolver(level, blockPos, direction, bl)).resolve()) {

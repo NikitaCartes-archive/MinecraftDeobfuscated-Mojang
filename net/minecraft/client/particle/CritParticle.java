@@ -5,6 +5,7 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -12,13 +13,12 @@ import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
 public class CritParticle
 extends TextureSheetParticle {
-    private CritParticle(Level level, double d, double e, double f, double g, double h, double i) {
-        super(level, d, e, f, 0.0, 0.0, 0.0);
+    private CritParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+        super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
         float j;
         this.xd *= (double)0.1f;
         this.yd *= (double)0.1f;
@@ -77,8 +77,8 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            CritParticle critParticle = new CritParticle(level, d, e, f, g, h + 1.0, i);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            CritParticle critParticle = new CritParticle(clientLevel, d, e, f, g, h + 1.0, i);
             critParticle.setLifetime(20);
             critParticle.pickSprite(this.sprite);
             return critParticle;
@@ -95,8 +95,8 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            CritParticle critParticle = new CritParticle(level, d, e, f, g, h, i);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            CritParticle critParticle = new CritParticle(clientLevel, d, e, f, g, h, i);
             critParticle.rCol *= 0.3f;
             critParticle.gCol *= 0.8f;
             critParticle.pickSprite(this.sprite);
@@ -114,8 +114,8 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            CritParticle critParticle = new CritParticle(level, d, e, f, g, h, i);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            CritParticle critParticle = new CritParticle(clientLevel, d, e, f, g, h, i);
             critParticle.pickSprite(this.sprite);
             return critParticle;
         }

@@ -48,7 +48,7 @@ extends Block {
     public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         if (serverLevel.isEmptyBlock(blockPos.above())) {
             int i = 1;
-            while (serverLevel.getBlockState(blockPos.below(i)).getBlock() == this) {
+            while (serverLevel.getBlockState(blockPos.below(i)).is(this)) {
                 ++i;
             }
             if (i < 3) {
@@ -73,16 +73,16 @@ extends Block {
 
     @Override
     public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
-        Block block = levelReader.getBlockState(blockPos.below()).getBlock();
-        if (block == this) {
+        BlockState blockState2 = levelReader.getBlockState(blockPos.below());
+        if (blockState2.getBlock() == this) {
             return true;
         }
-        if (block == Blocks.GRASS_BLOCK || block == Blocks.DIRT || block == Blocks.COARSE_DIRT || block == Blocks.PODZOL || block == Blocks.SAND || block == Blocks.RED_SAND) {
+        if (blockState2.is(Blocks.GRASS_BLOCK) || blockState2.is(Blocks.DIRT) || blockState2.is(Blocks.COARSE_DIRT) || blockState2.is(Blocks.PODZOL) || blockState2.is(Blocks.SAND) || blockState2.is(Blocks.RED_SAND)) {
             BlockPos blockPos2 = blockPos.below();
             for (Direction direction : Direction.Plane.HORIZONTAL) {
-                BlockState blockState2 = levelReader.getBlockState(blockPos2.relative(direction));
+                BlockState blockState3 = levelReader.getBlockState(blockPos2.relative(direction));
                 FluidState fluidState = levelReader.getFluidState(blockPos2.relative(direction));
-                if (!fluidState.is(FluidTags.WATER) && blockState2.getBlock() != Blocks.FROSTED_ICE) continue;
+                if (!fluidState.is(FluidTags.WATER) && !blockState3.is(Blocks.FROSTED_ICE)) continue;
                 return true;
             }
         }

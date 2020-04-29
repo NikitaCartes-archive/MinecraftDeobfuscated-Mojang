@@ -11,7 +11,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -497,8 +496,7 @@ extends TamableAnimal {
                 BlockPos blockPos = this.ownerPlayer.blockPosition();
                 BlockState blockState = this.cat.level.getBlockState(blockPos);
                 if (blockState.getBlock().is(BlockTags.BEDS)) {
-                    Direction direction = blockState.getValue(BedBlock.FACING);
-                    this.goalPos = new BlockPos(blockPos.getX() - direction.getStepX(), blockPos.getY(), blockPos.getZ() - direction.getStepZ());
+                    this.goalPos = blockState.getOptionalValue(BedBlock.FACING).map(direction -> blockPos.relative(direction.getOpposite())).orElseGet(() -> new BlockPos(blockPos));
                     return !this.spaceIsOccupied();
                 }
             }

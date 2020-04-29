@@ -77,7 +77,7 @@ extends BlockEntityRenderer<SignBlockEntity> {
         int q = 20;
         for (int r = 0; r < 4; ++r) {
             Component component2 = signBlockEntity.getRenderMessage(r, component -> {
-                List<Component> list = font.getSplitter().splitLines((Component)component, 90, Style.EMPTY, true);
+                List<Component> list = font.getSplitter().splitLines((Component)component, 90, Style.EMPTY);
                 return list.isEmpty() ? TextComponent.EMPTY : list.get(0);
             });
             if (component2 == null) continue;

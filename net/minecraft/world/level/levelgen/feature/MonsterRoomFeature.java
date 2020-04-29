@@ -82,7 +82,7 @@ extends Feature<NoneFeatureConfiguration> {
                             levelAccessor.setBlock(blockPos2, AIR, 2);
                             continue;
                         }
-                        if (!levelAccessor.getBlockState(blockPos2).getMaterial().isSolid() || levelAccessor.getBlockState(blockPos2).getBlock() == Blocks.CHEST) continue;
+                        if (!levelAccessor.getBlockState(blockPos2).getMaterial().isSolid() || levelAccessor.getBlockState(blockPos2).is(Blocks.CHEST)) continue;
                         if (t == -1 && random.nextInt(4) != 0) {
                             levelAccessor.setBlock(blockPos2, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), 2);
                             continue;
@@ -90,7 +90,7 @@ extends Feature<NoneFeatureConfiguration> {
                         levelAccessor.setBlock(blockPos2, Blocks.COBBLESTONE.defaultBlockState(), 2);
                         continue;
                     }
-                    if (levelAccessor.getBlockState(blockPos2).getBlock() == Blocks.CHEST) continue;
+                    if (levelAccessor.getBlockState(blockPos2).is(Blocks.CHEST)) continue;
                     levelAccessor.setBlock(blockPos2, AIR, 2);
                 }
             }

@@ -42,7 +42,7 @@ extends Block {
 
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
-        if (blockState2.getBlock() == this) {
+        if (blockState2.is(this)) {
             return (BlockState)blockState.setValue(PROPERTY_BY_DIRECTION.get(direction), false);
         }
         return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);

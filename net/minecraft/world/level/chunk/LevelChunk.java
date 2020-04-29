@@ -251,7 +251,7 @@ implements ChunkAccess {
         } else if (block2 != block && block2 instanceof EntityBlock) {
             this.level.removeBlockEntity(blockPos);
         }
-        if (levelChunkSection.getBlockState(i, j & 0xF, k).getBlock() != block) {
+        if (!levelChunkSection.getBlockState(i, j & 0xF, k).is(block)) {
             return null;
         }
         if (block2 instanceof EntityBlock && (blockEntity = this.getBlockEntity(blockPos, EntityCreationType.CHECK)) != null) {

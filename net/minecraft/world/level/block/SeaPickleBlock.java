@@ -52,7 +52,7 @@ SimpleWaterloggedBlock {
     @Nullable
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
         BlockState blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos());
-        if (blockState.getBlock() == this) {
+        if (blockState.is(this)) {
             return (BlockState)blockState.setValue(PICKLES, Math.min(4, blockState.getValue(PICKLES) + 1));
         }
         FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
@@ -149,7 +149,7 @@ SimpleWaterloggedBlock {
                     for (int r = q - 2; r < q; ++r) {
                         BlockState blockState2;
                         BlockPos blockPos2 = new BlockPos(m + o, r, blockPos.getZ() - n + p);
-                        if (blockPos2 == blockPos || random.nextInt(6) != 0 || serverLevel.getBlockState(blockPos2).getBlock() != Blocks.WATER || !(blockState2 = serverLevel.getBlockState(blockPos2.below())).is(BlockTags.CORAL_BLOCKS)) continue;
+                        if (blockPos2 == blockPos || random.nextInt(6) != 0 || !serverLevel.getBlockState(blockPos2).is(Blocks.WATER) || !(blockState2 = serverLevel.getBlockState(blockPos2.below())).is(BlockTags.CORAL_BLOCKS)) continue;
                         serverLevel.setBlock(blockPos2, (BlockState)Blocks.SEA_PICKLE.defaultBlockState().setValue(PICKLES, random.nextInt(4) + 1), 3);
                     }
                 }

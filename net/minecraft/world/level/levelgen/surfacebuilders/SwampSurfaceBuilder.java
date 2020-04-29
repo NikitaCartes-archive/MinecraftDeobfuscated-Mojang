@@ -29,7 +29,7 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
             for (int p = k; p >= 0; --p) {
                 mutableBlockPos.set(n, p, o);
                 if (chunkAccess.getBlockState(mutableBlockPos).isAir()) continue;
-                if (p != 62 || chunkAccess.getBlockState(mutableBlockPos).getBlock() == blockState2.getBlock()) break;
+                if (p != 62 || chunkAccess.getBlockState(mutableBlockPos).is(blockState2.getBlock())) break;
                 chunkAccess.setBlockState(mutableBlockPos, blockState2, false);
                 break;
             }

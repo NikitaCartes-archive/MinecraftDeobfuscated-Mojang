@@ -63,7 +63,7 @@ extends Feature<ColumnFeatureConfiguration> {
                     bl = true;
                     continue;
                 }
-                if (levelAccessor.getBlockState(mutableBlockPos).getBlock() != Blocks.BASALT) continue block0;
+                if (!levelAccessor.getBlockState(mutableBlockPos).is(Blocks.BASALT)) continue block0;
                 mutableBlockPos.move(Direction.UP);
             }
         }
@@ -112,7 +112,7 @@ extends Feature<ColumnFeatureConfiguration> {
 
     private static boolean isAirOrLavaOcean(LevelAccessor levelAccessor, int i, BlockPos blockPos) {
         BlockState blockState = levelAccessor.getBlockState(blockPos);
-        return blockState.isAir() || blockState.getBlock() == Blocks.LAVA && blockPos.getY() <= i;
+        return blockState.isAir() || blockState.is(Blocks.LAVA) && blockPos.getY() <= i;
     }
 }
 

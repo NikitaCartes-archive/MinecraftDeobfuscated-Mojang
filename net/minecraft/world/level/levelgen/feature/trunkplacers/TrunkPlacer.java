@@ -51,7 +51,7 @@ public abstract class TrunkPlacer {
     private static boolean isDirt(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
         return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> {
             Block block = blockState.getBlock();
-            return Feature.isDirt(block) && block != Blocks.GRASS_BLOCK && block != Blocks.MYCELIUM;
+            return Feature.isDirt(block) && !blockState.is(Blocks.GRASS_BLOCK) && !blockState.is(Blocks.MYCELIUM);
         });
     }
 

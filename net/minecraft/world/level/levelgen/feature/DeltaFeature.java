@@ -67,11 +67,11 @@ extends Feature<DeltaFeatureConfiguration> {
     }
 
     private static boolean isClear(LevelAccessor levelAccessor, BlockPos blockPos, DeltaFeatureConfiguration deltaFeatureConfiguration) {
-        Block block = levelAccessor.getBlockState(blockPos).getBlock();
-        if (block == deltaFeatureConfiguration.contents.getBlock()) {
+        BlockState blockState = levelAccessor.getBlockState(blockPos);
+        if (blockState.is(deltaFeatureConfiguration.contents.getBlock())) {
             return false;
         }
-        if (CANNOT_REPLACE.contains(block)) {
+        if (CANNOT_REPLACE.contains(blockState.getBlock())) {
             return false;
         }
         for (Direction direction : DIRECTIONS) {
@@ -88,8 +88,7 @@ extends Feature<DeltaFeatureConfiguration> {
             if (levelAccessor.getBlockState(mutableBlockPos).isAir()) {
                 BlockState blockState = levelAccessor.getBlockState(mutableBlockPos.move(Direction.DOWN));
                 mutableBlockPos.move(Direction.UP);
-                Block block = blockState.getBlock();
-                if (block != Blocks.LAVA && block != Blocks.BEDROCK && !blockState.isAir()) {
+                if (!(blockState.is(Blocks.LAVA) || blockState.is(Blocks.BEDROCK) || blockState.isAir())) {
                     return mutableBlockPos;
                 }
             }

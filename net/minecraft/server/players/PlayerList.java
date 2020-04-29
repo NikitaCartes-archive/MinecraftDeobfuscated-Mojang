@@ -75,7 +75,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
@@ -391,7 +390,7 @@ public abstract class PlayerList {
             serverPlayer2.setPos(serverPlayer2.getX(), serverPlayer2.getY() + 1.0, serverPlayer2.getZ());
         }
         LevelData levelData = serverPlayer2.level.getLevelData();
-        serverPlayer2.connection.send(new ClientboundRespawnPacket(serverPlayer2.dimension, LevelData.obfuscateSeed(levelData.getSeed()), levelData.getGeneratorType(), serverPlayer2.gameMode.getGameModeForPlayer()));
+        serverPlayer2.connection.send(new ClientboundRespawnPacket(serverPlayer2.dimension, LevelData.obfuscateSeed(levelData.getSeed()), levelData.getGeneratorType(), serverPlayer2.gameMode.getGameModeForPlayer(), bl));
         serverPlayer2.connection.teleport(serverPlayer2.getX(), serverPlayer2.getY(), serverPlayer2.getZ(), serverPlayer2.yRot, serverPlayer2.xRot);
         serverPlayer2.connection.send(new ClientboundSetDefaultSpawnPositionPacket(serverLevel.getSharedSpawnPos()));
         serverPlayer2.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
@@ -507,7 +506,7 @@ public abstract class PlayerList {
     }
 
     public boolean isOp(GameProfile gameProfile) {
-        return this.ops.contains(gameProfile) || this.server.isSingleplayerOwner(gameProfile) && this.server.getLevel(DimensionType.OVERWORLD).getLevelData().getAllowCommands() || this.allowCheatsForAllPlayers;
+        return this.ops.contains(gameProfile) || this.server.isSingleplayerOwner(gameProfile) && this.server.getWorldData().getAllowCommands() || this.allowCheatsForAllPlayers;
     }
 
     @Nullable
@@ -615,13 +614,13 @@ public abstract class PlayerList {
         this.overrideGameMode = gameType;
     }
 
-    private void updatePlayerGameMode(ServerPlayer serverPlayer, ServerPlayer serverPlayer2, LevelAccessor levelAccessor) {
+    private void updatePlayerGameMode(ServerPlayer serverPlayer, ServerPlayer serverPlayer2, ServerLevel serverLevel) {
         if (serverPlayer2 != null) {
             serverPlayer.gameMode.setGameModeForPlayer(serverPlayer2.gameMode.getGameModeForPlayer());
         } else if (this.overrideGameMode != null) {
             serverPlayer.gameMode.setGameModeForPlayer(this.overrideGameMode);
         }
-        serverPlayer.gameMode.updateGameMode(levelAccessor.getLevelData().getGameType());
+        serverPlayer.gameMode.updateGameMode(serverLevel.getServer().getWorldData().getGameType());
     }
 
     @Environment(value=EnvType.CLIENT)

@@ -78,7 +78,7 @@ extends Screen {
             if (bl) {
                 EditWorldScreen.makeBackupAndShowToast(this.levelAccess);
             }
-            this.minecraft.setScreen(OptimizeWorldScreen.create(this.callback, this.levelAccess, bl2));
+            this.minecraft.setScreen(OptimizeWorldScreen.create(this.callback, this.minecraft.getFixerUpper(), this.levelAccess, bl2));
         }, new TranslatableComponent("optimizeWorld.confirm.title"), new TranslatableComponent("optimizeWorld.confirm.description"), true))));
         this.renameButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 144 + 5, 98, 20, new TranslatableComponent("selectWorld.edit.save"), button -> this.onRename()));
         this.addButton(new Button(this.width / 2 + 2, this.height / 4 + 144 + 5, 98, 20, CommonComponents.GUI_CANCEL, button -> this.callback.accept(false)));

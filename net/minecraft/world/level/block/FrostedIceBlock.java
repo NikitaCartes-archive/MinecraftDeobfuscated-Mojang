@@ -42,7 +42,7 @@ extends IceBlock {
             for (Direction direction : Direction.values()) {
                 mutableBlockPos.setWithOffset(blockPos, direction);
                 BlockState blockState2 = serverLevel.getBlockState(mutableBlockPos);
-                if (blockState2.getBlock() != this || this.slightlyMelt(blockState2, serverLevel, mutableBlockPos)) continue;
+                if (!blockState2.is(this) || this.slightlyMelt(blockState2, serverLevel, mutableBlockPos)) continue;
                 serverLevel.getBlockTicks().scheduleTick(mutableBlockPos, this, Mth.nextInt(random, 20, 40));
             }
             return;
@@ -73,7 +73,7 @@ extends IceBlock {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (Direction direction : Direction.values()) {
             mutableBlockPos.setWithOffset(blockPos, direction);
-            if (blockGetter.getBlockState(mutableBlockPos).getBlock() != this || ++j < i) continue;
+            if (!blockGetter.getBlockState(mutableBlockPos).is(this) || ++j < i) continue;
             return false;
         }
         return true;

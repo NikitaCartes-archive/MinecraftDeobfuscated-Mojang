@@ -11,11 +11,12 @@ import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.DerivedLevelData;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.ServerLevelData;
 
 public class DerivedServerLevel
 extends ServerLevel {
-    public DerivedServerLevel(ServerLevel serverLevel, MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, DimensionType dimensionType, ChunkProgressListener chunkProgressListener) {
-        super(minecraftServer, executor, levelStorageAccess, new DerivedLevelData(dimensionType, minecraftServer.getWorldData(), serverLevel.getLevelData()), dimensionType, chunkProgressListener);
+    public DerivedServerLevel(ServerLevel serverLevel, ServerLevelData serverLevelData, MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, DimensionType dimensionType, ChunkProgressListener chunkProgressListener) {
+        super(minecraftServer, executor, levelStorageAccess, new DerivedLevelData(dimensionType, minecraftServer.getWorldData(), serverLevelData), dimensionType, chunkProgressListener);
         serverLevel.getWorldBorder().addListener(new BorderChangeListener.DelegateBorderChangeListener(this.getWorldBorder()));
     }
 

@@ -45,7 +45,7 @@ extends Item {
         BlockPos blockPos;
         Level level = useOnContext.getLevel();
         BlockState blockState = level.getBlockState(blockPos = useOnContext.getClickedPos());
-        if (blockState.getBlock() != Blocks.JUKEBOX || blockState.getValue(JukeboxBlock.HAS_RECORD).booleanValue()) {
+        if (!blockState.is(Blocks.JUKEBOX) || blockState.getValue(JukeboxBlock.HAS_RECORD).booleanValue()) {
             return InteractionResult.PASS;
         }
         ItemStack itemStack = useOnContext.getItemInHand();

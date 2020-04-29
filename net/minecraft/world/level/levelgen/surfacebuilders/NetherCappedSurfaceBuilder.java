@@ -47,16 +47,16 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
             int t;
             mutableBlockPos.set(o, s, p);
             BlockState blockState6 = chunkAccess.getBlockState(mutableBlockPos);
-            if (blockState5.getBlock() == blockState.getBlock() && (blockState6.isAir() || blockState6 == blockState2)) {
+            if (blockState5.is(blockState.getBlock()) && (blockState6.isAir() || blockState6 == blockState2)) {
                 for (t = 0; t < q; ++t) {
                     mutableBlockPos.move(Direction.UP);
-                    if (chunkAccess.getBlockState(mutableBlockPos).getBlock() != blockState.getBlock()) break;
+                    if (!chunkAccess.getBlockState(mutableBlockPos).is(blockState.getBlock())) break;
                     chunkAccess.setBlockState(mutableBlockPos, blockState3, false);
                 }
                 mutableBlockPos.set(o, s, p);
             }
-            if ((blockState5.isAir() || blockState5 == blockState2) && blockState6.getBlock() == blockState.getBlock()) {
-                for (t = 0; t < r && chunkAccess.getBlockState(mutableBlockPos).getBlock() == blockState.getBlock(); ++t) {
+            if ((blockState5.isAir() || blockState5 == blockState2) && blockState6.is(blockState.getBlock())) {
+                for (t = 0; t < r && chunkAccess.getBlockState(mutableBlockPos).is(blockState.getBlock()); ++t) {
                     if (bl && s >= n - 4 && s <= n + 1) {
                         chunkAccess.setBlockState(mutableBlockPos, this.getPatchBlockState(), false);
                     } else {

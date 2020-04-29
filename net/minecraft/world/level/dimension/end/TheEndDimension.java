@@ -19,6 +19,8 @@ import net.minecraft.world.level.dimension.Dimension;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.level.levelgen.TheEndGeneratorSettings;
+import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,8 +31,18 @@ extends Dimension {
 
     public TheEndDimension(Level level, DimensionType dimensionType) {
         super(level, dimensionType, 0.0f);
-        CompoundTag compoundTag = level.getLevelData().getDimensionData();
-        this.dragonFight = level instanceof ServerLevel ? new EndDragonFight((ServerLevel)level, compoundTag.getCompound("DragonFight")) : null;
+        if (level instanceof ServerLevel) {
+            ServerLevel serverLevel = (ServerLevel)level;
+            LevelData levelData = serverLevel.getLevelData();
+            if (levelData instanceof ServerLevelData) {
+                CompoundTag compoundTag = ((ServerLevelData)levelData).getDimensionData();
+                this.dragonFight = new EndDragonFight(serverLevel, compoundTag.getCompound("DragonFight"));
+            } else {
+                this.dragonFight = null;
+            }
+        } else {
+            this.dragonFight = null;
+        }
     }
 
     @Override
@@ -113,12 +125,12 @@ extends Dimension {
     }
 
     @Override
-    public void saveData() {
+    public void saveData(ServerLevelData serverLevelData) {
         CompoundTag compoundTag = new CompoundTag();
         if (this.dragonFight != null) {
             compoundTag.put("DragonFight", this.dragonFight.saveData());
         }
-        this.level.getLevelData().setDimensionData(compoundTag);
+        serverLevelData.setDimensionData(compoundTag);
     }
 
     @Override

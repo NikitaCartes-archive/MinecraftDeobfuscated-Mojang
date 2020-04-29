@@ -107,7 +107,7 @@ public class IglooPieces {
             BlockPos blockPos4 = this.templatePosition;
             this.templatePosition = this.templatePosition.offset(0, i - 90 - 1, 0);
             boolean bl = super.postProcess(levelAccessor, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
-            if (this.templateLocation.equals(STRUCTURE_LOCATION_IGLOO) && !(blockState = levelAccessor.getBlockState((blockPos5 = this.templatePosition.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, new BlockPos(3, 0, 5)))).below())).isAir() && blockState.getBlock() != Blocks.LADDER) {
+            if (this.templateLocation.equals(STRUCTURE_LOCATION_IGLOO) && !(blockState = levelAccessor.getBlockState((blockPos5 = this.templatePosition.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, new BlockPos(3, 0, 5)))).below())).isAir() && !blockState.is(Blocks.LADDER)) {
                 levelAccessor.setBlock(blockPos5, Blocks.SNOW_BLOCK.defaultBlockState(), 3);
             }
             this.templatePosition = blockPos4;

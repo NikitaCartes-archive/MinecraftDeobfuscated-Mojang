@@ -146,7 +146,7 @@ implements ChunkAccess {
         if (j < 0 || j >= 256) {
             return Blocks.VOID_AIR.defaultBlockState();
         }
-        if (this.sections[j >> 4] == LevelChunk.EMPTY_SECTION && blockState.getBlock() == Blocks.AIR) {
+        if (this.sections[j >> 4] == LevelChunk.EMPTY_SECTION && blockState.is(Blocks.AIR)) {
             return blockState;
         }
         if (blockState.getLightEmission() > 0) {

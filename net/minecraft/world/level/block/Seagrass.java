@@ -45,7 +45,7 @@ LiquidBlockContainer {
 
     @Override
     protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-        return blockState.isFaceSturdy(blockGetter, blockPos, Direction.UP) && blockState.getBlock() != Blocks.MAGMA_BLOCK;
+        return blockState.isFaceSturdy(blockGetter, blockPos, Direction.UP) && !blockState.is(Blocks.MAGMA_BLOCK);
     }
 
     @Override
@@ -87,7 +87,7 @@ LiquidBlockContainer {
         BlockState blockState2 = Blocks.TALL_SEAGRASS.defaultBlockState();
         BlockState blockState3 = (BlockState)blockState2.setValue(TallSeagrass.HALF, DoubleBlockHalf.UPPER);
         BlockPos blockPos2 = blockPos.above();
-        if (serverLevel.getBlockState(blockPos2).getBlock() == Blocks.WATER) {
+        if (serverLevel.getBlockState(blockPos2).is(Blocks.WATER)) {
             serverLevel.setBlock(blockPos, blockState2, 2);
             serverLevel.setBlock(blockPos2, blockState3, 2);
         }

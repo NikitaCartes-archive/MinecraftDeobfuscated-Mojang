@@ -29,7 +29,7 @@ extends Feature<FeatureRadiusConfiguration> {
         while (levelAccessor.isEmptyBlock(blockPos) && blockPos.getY() > 2) {
             blockPos = blockPos.below();
         }
-        if (levelAccessor.getBlockState(blockPos).getBlock() != Blocks.SNOW_BLOCK) {
+        if (!levelAccessor.getBlockState(blockPos).is(Blocks.SNOW_BLOCK)) {
             return false;
         }
         int i = random.nextInt(featureRadiusConfiguration.radius) + 2;

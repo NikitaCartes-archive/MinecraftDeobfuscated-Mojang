@@ -324,9 +324,9 @@ extends Projectile {
                 if (!this.level.isClientSide && entity2 instanceof ServerPlayer) {
                     ServerPlayer serverPlayer = (ServerPlayer)entity2;
                     if (this.piercedAndKilledEntities != null && this.shotFromCrossbow()) {
-                        CriteriaTriggers.KILLED_BY_CROSSBOW.trigger(serverPlayer, this.piercedAndKilledEntities, this.piercedAndKilledEntities.size());
+                        CriteriaTriggers.KILLED_BY_CROSSBOW.trigger(serverPlayer, this.piercedAndKilledEntities);
                     } else if (!entity.isAlive() && this.shotFromCrossbow()) {
-                        CriteriaTriggers.KILLED_BY_CROSSBOW.trigger(serverPlayer, Arrays.asList(entity), 0);
+                        CriteriaTriggers.KILLED_BY_CROSSBOW.trigger(serverPlayer, Arrays.asList(entity));
                     }
                 }
             }

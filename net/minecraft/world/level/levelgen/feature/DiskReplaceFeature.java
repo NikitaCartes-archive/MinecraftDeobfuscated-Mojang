@@ -38,7 +38,7 @@ extends Feature<DiskConfiguration> {
                     BlockPos blockPos2 = new BlockPos(k, o, l);
                     BlockState blockState = levelAccessor.getBlockState(blockPos2);
                     for (BlockState blockState2 : diskConfiguration.targets) {
-                        if (blockState2.getBlock() != blockState.getBlock()) continue;
+                        if (!blockState2.is(blockState.getBlock())) continue;
                         levelAccessor.setBlock(blockPos2, diskConfiguration.state, 2);
                         ++i;
                         continue block2;

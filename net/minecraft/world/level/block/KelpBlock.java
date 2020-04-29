@@ -33,7 +33,7 @@ implements LiquidBlockContainer {
 
     @Override
     protected boolean canGrowInto(BlockState blockState) {
-        return blockState.getBlock() == Blocks.WATER;
+        return blockState.is(Blocks.WATER);
     }
 
     @Override

@@ -122,11 +122,11 @@ extends MoveToBlockGoal {
     @Nullable
     private BlockPos getPosWithBlock(BlockPos blockPos, BlockGetter blockGetter) {
         BlockPos[] blockPoss;
-        if (blockGetter.getBlockState(blockPos).getBlock() == this.blockToRemove) {
+        if (blockGetter.getBlockState(blockPos).is(this.blockToRemove)) {
             return blockPos;
         }
         for (BlockPos blockPos2 : blockPoss = new BlockPos[]{blockPos.below(), blockPos.west(), blockPos.east(), blockPos.north(), blockPos.south(), blockPos.below().below()}) {
-            if (blockGetter.getBlockState(blockPos2).getBlock() != this.blockToRemove) continue;
+            if (!blockGetter.getBlockState(blockPos2).is(this.blockToRemove)) continue;
             return blockPos2;
         }
         return null;
@@ -136,7 +136,7 @@ extends MoveToBlockGoal {
     protected boolean isValidTarget(LevelReader levelReader, BlockPos blockPos) {
         ChunkAccess chunkAccess = levelReader.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4, ChunkStatus.FULL, false);
         if (chunkAccess != null) {
-            return chunkAccess.getBlockState(blockPos).getBlock() == this.blockToRemove && chunkAccess.getBlockState(blockPos.above()).isAir() && chunkAccess.getBlockState(blockPos.above(2)).isAir();
+            return chunkAccess.getBlockState(blockPos).is(this.blockToRemove) && chunkAccess.getBlockState(blockPos.above()).isAir() && chunkAccess.getBlockState(blockPos.above(2)).isAir();
         }
         return false;
     }

@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.item;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -22,18 +21,6 @@ extends Item
 implements Vanishable {
     public FishingRodItem(Item.Properties properties) {
         super(properties);
-        this.addProperty(new ResourceLocation("cast"), (itemStack, level, livingEntity) -> {
-            boolean bl2;
-            if (livingEntity == null) {
-                return 0.0f;
-            }
-            boolean bl = livingEntity.getMainHandItem() == itemStack;
-            boolean bl3 = bl2 = livingEntity.getOffhandItem() == itemStack;
-            if (livingEntity.getMainHandItem().getItem() instanceof FishingRodItem) {
-                bl2 = false;
-            }
-            return (bl || bl2) && livingEntity instanceof Player && ((Player)livingEntity).fishing != null ? 1.0f : 0.0f;
-        });
     }
 
     @Override

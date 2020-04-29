@@ -4,6 +4,7 @@
 package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 
@@ -20,7 +21,7 @@ extends Goal {
     @Override
     public boolean canUse() {
         double d = (double)this.mob.getEyeHeight() < 0.4 ? 0.2 : 0.4;
-        return this.mob.isInWater() && this.mob.getFluidHeight() > d || this.mob.isInLava();
+        return this.mob.isInWater() && this.mob.getFluidHeight(FluidTags.WATER) > d || this.mob.isInLava();
     }
 
     @Override

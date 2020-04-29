@@ -29,7 +29,7 @@ implements AmbientSoundHandler {
         Level level = this.player.level;
         BlockState blockState = level.containsBlock(this.player.getBoundingBox().inflate(0.0, -0.4f, 0.0).deflate(0.001), Blocks.BUBBLE_COLUMN);
         if (blockState != null) {
-            if (!(this.wasInBubbleColumn || this.firstTick || blockState.getBlock() != Blocks.BUBBLE_COLUMN || this.player.isSpectator())) {
+            if (!this.wasInBubbleColumn && !this.firstTick && blockState.is(Blocks.BUBBLE_COLUMN) && !this.player.isSpectator()) {
                 boolean bl = blockState.getValue(BubbleColumnBlock.DRAG_DOWN);
                 if (bl) {
                     this.player.playSound(SoundEvents.BUBBLE_COLUMN_WHIRLPOOL_INSIDE, 1.0f, 1.0f);

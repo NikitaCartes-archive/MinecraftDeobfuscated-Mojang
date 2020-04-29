@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
+import net.minecraft.world.phys.Vec3;
 
 public class LootContextParams {
     public static final LootContextParam<Entity> THIS_ENTITY = LootContextParams.create("this_entity");
@@ -20,6 +21,7 @@ public class LootContextParams {
     public static final LootContextParam<Entity> KILLER_ENTITY = LootContextParams.create("killer_entity");
     public static final LootContextParam<Entity> DIRECT_KILLER_ENTITY = LootContextParams.create("direct_killer_entity");
     public static final LootContextParam<BlockPos> BLOCK_POS = LootContextParams.create("position");
+    public static final LootContextParam<Vec3> ORIGIN = LootContextParams.create("origin");
     public static final LootContextParam<BlockState> BLOCK_STATE = LootContextParams.create("block_state");
     public static final LootContextParam<BlockEntity> BLOCK_ENTITY = LootContextParams.create("block_entity");
     public static final LootContextParam<ItemStack> TOOL = LootContextParams.create("tool");

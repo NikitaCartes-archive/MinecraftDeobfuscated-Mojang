@@ -5,6 +5,7 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -13,13 +14,12 @@ import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
 public class BubbleColumnUpParticle
 extends TextureSheetParticle {
-    private BubbleColumnUpParticle(Level level, double d, double e, double f, double g, double h, double i) {
-        super(level, d, e, f);
+    private BubbleColumnUpParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+        super(clientLevel, d, e, f);
         this.setSize(0.02f, 0.02f);
         this.quadSize *= this.random.nextFloat() * 0.6f + 0.2f;
         this.xd = g * (double)0.2f + (Math.random() * 2.0 - 1.0) * (double)0.02f;
@@ -62,8 +62,8 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            BubbleColumnUpParticle bubbleColumnUpParticle = new BubbleColumnUpParticle(level, d, e, f, g, h, i);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            BubbleColumnUpParticle bubbleColumnUpParticle = new BubbleColumnUpParticle(clientLevel, d, e, f, g, h, i);
             bubbleColumnUpParticle.pickSprite(this.sprite);
             return bubbleColumnUpParticle;
         }

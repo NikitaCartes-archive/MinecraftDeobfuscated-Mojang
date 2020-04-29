@@ -92,7 +92,7 @@ extends Feature<BlockStateConfiguration> {
                     BlockPos blockPos2;
                     if (!bls[(j * 16 + s) * 8 + t] || !LakeFeature.isDirt(levelAccessor.getBlockState(blockPos2 = blockPos.offset(j, t - 1, s)).getBlock()) || levelAccessor.getBrightness(LightLayer.SKY, blockPos.offset(j, t, s)) <= 0) continue;
                     Biome biome = levelAccessor.getBiome(blockPos2);
-                    if (biome.getSurfaceBuilderConfig().getTopMaterial().getBlock() == Blocks.MYCELIUM) {
+                    if (biome.getSurfaceBuilderConfig().getTopMaterial().is(Blocks.MYCELIUM)) {
                         levelAccessor.setBlock(blockPos2, Blocks.MYCELIUM.defaultBlockState(), 2);
                         continue;
                     }

@@ -20,27 +20,28 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.ServerLevelData;
 import org.jetbrains.annotations.Nullable;
 
 public class WanderingTraderSpawner {
     private final Random random = new Random();
     private final ServerLevel level;
+    private final ServerLevelData serverLevelData;
     private int tickDelay;
     private int spawnDelay;
     private int spawnChance;
 
-    public WanderingTraderSpawner(ServerLevel serverLevel) {
+    public WanderingTraderSpawner(ServerLevel serverLevel, ServerLevelData serverLevelData) {
         this.level = serverLevel;
+        this.serverLevelData = serverLevelData;
         this.tickDelay = 1200;
-        LevelData levelData = serverLevel.getLevelData();
-        this.spawnDelay = levelData.getWanderingTraderSpawnDelay();
-        this.spawnChance = levelData.getWanderingTraderSpawnChance();
+        this.spawnDelay = serverLevelData.getWanderingTraderSpawnDelay();
+        this.spawnChance = serverLevelData.getWanderingTraderSpawnChance();
         if (this.spawnDelay == 0 && this.spawnChance == 0) {
             this.spawnDelay = 24000;
-            levelData.setWanderingTraderSpawnDelay(this.spawnDelay);
+            serverLevelData.setWanderingTraderSpawnDelay(this.spawnDelay);
             this.spawnChance = 25;
-            levelData.setWanderingTraderSpawnChance(this.spawnChance);
+            serverLevelData.setWanderingTraderSpawnChance(this.spawnChance);
         }
     }
 
@@ -52,9 +53,8 @@ public class WanderingTraderSpawner {
             return;
         }
         this.tickDelay = 1200;
-        LevelData levelData = this.level.getLevelData();
         this.spawnDelay -= 1200;
-        levelData.setWanderingTraderSpawnDelay(this.spawnDelay);
+        this.serverLevelData.setWanderingTraderSpawnDelay(this.spawnDelay);
         if (this.spawnDelay > 0) {
             return;
         }
@@ -64,7 +64,7 @@ public class WanderingTraderSpawner {
         }
         int i = this.spawnChance;
         this.spawnChance = Mth.clamp(this.spawnChance + 25, 25, 75);
-        levelData.setWanderingTraderSpawnChance(this.spawnChance);
+        this.serverLevelData.setWanderingTraderSpawnChance(this.spawnChance);
         if (this.random.nextInt(100) > i) {
             return;
         }
@@ -96,7 +96,7 @@ public class WanderingTraderSpawner {
                 for (int j = 0; j < 2; ++j) {
                     this.tryToSpawnLlamaFor(wanderingTrader, 4);
                 }
-                this.level.getLevelData().setWanderingTraderId(wanderingTrader.getUUID());
+                this.serverLevelData.setWanderingTraderId(wanderingTrader.getUUID());
                 wanderingTrader.setDespawnDelay(48000);
                 wanderingTrader.setWanderTarget(blockPos22);
                 wanderingTrader.restrictTo(blockPos22, 16);

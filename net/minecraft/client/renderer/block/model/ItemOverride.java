@@ -14,13 +14,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.client.renderer.item.ItemPropertyFunction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemPropertyFunction;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -37,11 +38,11 @@ public class ItemOverride {
         return this.model;
     }
 
-    boolean test(ItemStack itemStack, @Nullable Level level, @Nullable LivingEntity livingEntity) {
+    boolean test(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity) {
         Item item = itemStack.getItem();
         for (Map.Entry<ResourceLocation, Float> entry : this.predicates.entrySet()) {
-            ItemPropertyFunction itemPropertyFunction = item.getProperty(entry.getKey());
-            if (itemPropertyFunction != null && !(itemPropertyFunction.call(itemStack, level, livingEntity) < entry.getValue().floatValue())) continue;
+            ItemPropertyFunction itemPropertyFunction = ItemProperties.getProperty(item, entry.getKey());
+            if (itemPropertyFunction != null && !(itemPropertyFunction.call(itemStack, clientLevel, livingEntity) < entry.getValue().floatValue())) continue;
             return false;
         }
         return true;

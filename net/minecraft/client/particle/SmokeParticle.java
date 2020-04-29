@@ -5,18 +5,18 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.BaseAshSmokeParticle;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
 public class SmokeParticle
 extends BaseAshSmokeParticle {
-    protected SmokeParticle(Level level, double d, double e, double f, double g, double h, double i, float j, SpriteSet spriteSet) {
-        super(level, d, e, f, 0.1f, 0.1f, 0.1f, g, h, i, j, spriteSet, 0.3f, 8, 0.004, true);
+    protected SmokeParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, float j, SpriteSet spriteSet) {
+        super(clientLevel, d, e, f, 0.1f, 0.1f, 0.1f, g, h, i, j, spriteSet, 0.3f, 8, 0.004, true);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -29,8 +29,8 @@ extends BaseAshSmokeParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            return new SmokeParticle(level, d, e, f, g, h, i, 1.0f, this.sprites);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return new SmokeParticle(clientLevel, d, e, f, g, h, i, 1.0f, this.sprites);
         }
     }
 }

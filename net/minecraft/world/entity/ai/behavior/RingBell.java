@@ -31,7 +31,7 @@ extends Behavior<LivingEntity> {
         BlockState blockState;
         Brain<?> brain = livingEntity.getBrain();
         BlockPos blockPos = brain.getMemory(MemoryModuleType.MEETING_POINT).get().pos();
-        if (blockPos.closerThan(livingEntity.blockPosition(), 3.0) && (blockState = serverLevel.getBlockState(blockPos)).getBlock() == Blocks.BELL) {
+        if (blockPos.closerThan(livingEntity.blockPosition(), 3.0) && (blockState = serverLevel.getBlockState(blockPos)).is(Blocks.BELL)) {
             BellBlock bellBlock = (BellBlock)blockState.getBlock();
             bellBlock.attemptToRing(serverLevel, blockPos, null);
         }

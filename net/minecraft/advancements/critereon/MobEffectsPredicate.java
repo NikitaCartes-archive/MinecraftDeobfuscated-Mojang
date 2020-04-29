@@ -9,7 +9,7 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.Registry;
@@ -30,7 +30,7 @@ public class MobEffectsPredicate {
     }
 
     public static MobEffectsPredicate effects() {
-        return new MobEffectsPredicate(Maps.newHashMap());
+        return new MobEffectsPredicate(Maps.newLinkedHashMap());
     }
 
     public MobEffectsPredicate and(MobEffect mobEffect) {
@@ -72,7 +72,7 @@ public class MobEffectsPredicate {
             return ANY;
         }
         JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "effects");
-        HashMap<MobEffect, MobEffectInstancePredicate> map = Maps.newHashMap();
+        LinkedHashMap<MobEffect, MobEffectInstancePredicate> map = Maps.newLinkedHashMap();
         for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
             ResourceLocation resourceLocation = new ResourceLocation(entry.getKey());
             MobEffect mobEffect = Registry.MOB_EFFECT.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown effect '" + resourceLocation + "'"));

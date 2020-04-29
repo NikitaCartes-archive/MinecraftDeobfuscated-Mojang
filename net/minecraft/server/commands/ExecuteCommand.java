@@ -288,7 +288,7 @@ public class ExecuteCommand {
                     BlockPos blockPos5 = new BlockPos(m, l, k);
                     BlockPos blockPos6 = blockPos5.offset(blockPos4);
                     BlockState blockState = serverLevel.getBlockState(blockPos5);
-                    if (bl && blockState.getBlock() == Blocks.AIR) continue;
+                    if (bl && blockState.is(Blocks.AIR)) continue;
                     if (blockState != serverLevel.getBlockState(blockPos6)) {
                         return OptionalInt.empty();
                     }

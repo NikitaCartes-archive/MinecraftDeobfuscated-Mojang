@@ -42,7 +42,7 @@ implements Wearable {
     private BlockPattern ironGolemBase;
     @Nullable
     private BlockPattern ironGolemFull;
-    private static final Predicate<BlockState> PUMPKINS_PREDICATE = blockState -> blockState != null && (blockState.getBlock() == Blocks.CARVED_PUMPKIN || blockState.getBlock() == Blocks.JACK_O_LANTERN);
+    private static final Predicate<BlockState> PUMPKINS_PREDICATE = blockState -> blockState != null && (blockState.is(Blocks.CARVED_PUMPKIN) || blockState.is(Blocks.JACK_O_LANTERN));
 
     protected CarvedPumpkinBlock(BlockBehaviour.Properties properties) {
         super(properties);
@@ -51,7 +51,7 @@ implements Wearable {
 
     @Override
     public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        if (blockState2.getBlock() == blockState.getBlock()) {
+        if (blockState2.is(blockState.getBlock())) {
             return;
         }
         this.trySpawnGolem(level, blockPos);

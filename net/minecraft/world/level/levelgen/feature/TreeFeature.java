@@ -48,16 +48,16 @@ extends Feature<TreeConfiguration> {
     public static boolean isFree(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
         return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> {
             Block block = blockState.getBlock();
-            return blockState.isAir() || blockState.is(BlockTags.LEAVES) || TreeFeature.isDirt(block) || block.is(BlockTags.LOGS) || block.is(BlockTags.SAPLINGS) || block == Blocks.VINE || block == Blocks.WATER;
+            return blockState.isAir() || blockState.is(BlockTags.LEAVES) || TreeFeature.isDirt(block) || blockState.is(BlockTags.LOGS) || blockState.is(BlockTags.SAPLINGS) || blockState.is(Blocks.VINE) || blockState.is(Blocks.WATER);
         });
     }
 
     private static boolean isVine(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
-        return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> blockState.getBlock() == Blocks.VINE);
+        return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> blockState.is(Blocks.VINE));
     }
 
     private static boolean isBlockWater(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
-        return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> blockState.getBlock() == Blocks.WATER);
+        return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> blockState.is(Blocks.WATER));
     }
 
     public static boolean isAirOrLeaves(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {

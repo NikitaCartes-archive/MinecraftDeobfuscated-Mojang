@@ -69,6 +69,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -97,22 +98,22 @@ AutoCloseable {
     public final Random random = new Random();
     public final Dimension dimension;
     protected final ChunkSource chunkSource;
-    protected final LevelData levelData;
+    protected final WritableLevelData levelData;
     private final Supplier<ProfilerFiller> profiler;
     public final boolean isClientSide;
     protected boolean updatingBlockEntities;
     private final WorldBorder worldBorder;
     private final BiomeManager biomeManager;
 
-    protected Level(LevelData levelData, DimensionType dimensionType, BiFunction<Level, Dimension, ChunkSource> biFunction, Supplier<ProfilerFiller> supplier, boolean bl) {
+    protected Level(WritableLevelData writableLevelData, DimensionType dimensionType, BiFunction<Level, Dimension, ChunkSource> biFunction, Supplier<ProfilerFiller> supplier, boolean bl) {
         this.profiler = supplier;
-        this.levelData = levelData;
+        this.levelData = writableLevelData;
         this.dimension = dimensionType.create(this);
         this.chunkSource = biFunction.apply(this, this.dimension);
         this.isClientSide = bl;
         this.worldBorder = this.dimension.createWorldBorder();
         this.thread = Thread.currentThread();
-        this.biomeManager = new BiomeManager(this, bl ? levelData.getSeed() : LevelData.obfuscateSeed(levelData.getSeed()), dimensionType.getBiomeZoomer());
+        this.biomeManager = new BiomeManager(this, bl ? writableLevelData.getSeed() : LevelData.obfuscateSeed(writableLevelData.getSeed()), dimensionType.getBiomeZoomer());
     }
 
     @Override
@@ -536,7 +537,7 @@ AutoCloseable {
                 for (int p = k; p < l; ++p) {
                     for (int q = m; q < n; ++q) {
                         BlockState blockState = this.getBlockState(mutableBlockPos.set(o, p, q));
-                        if (!blockState.is(BlockTags.FIRE) && blockState.getBlock() != Blocks.LAVA) continue;
+                        if (!blockState.is(BlockTags.FIRE) && !blockState.is(Blocks.LAVA)) continue;
                         return true;
                     }
                 }
@@ -560,7 +561,7 @@ AutoCloseable {
                 for (int p = k; p < l; ++p) {
                     for (int q = m; q < n; ++q) {
                         BlockState blockState = this.getBlockState(mutableBlockPos.set(o, p, q));
-                        if (blockState.getBlock() != block) continue;
+                        if (!blockState.is(block)) continue;
                         return blockState;
                     }
                 }
@@ -850,10 +851,11 @@ AutoCloseable {
 
     public int getSignal(BlockPos blockPos, Direction direction) {
         BlockState blockState = this.getBlockState(blockPos);
+        int i = blockState.getSignal(this, blockPos, direction);
         if (blockState.isRedstoneConductor(this, blockPos)) {
-            return this.getDirectSignalTo(blockPos);
+            return Math.max(i, this.getDirectSignalTo(blockPos));
         }
-        return blockState.getSignal(this, blockPos, direction);
+        return i;
     }
 
     public boolean hasNeighborSignal(BlockPos blockPos) {
@@ -918,18 +920,6 @@ AutoCloseable {
         if (this.levelData.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
             this.setDayTime(this.levelData.getDayTime() + 1L);
         }
-    }
-
-    public BlockPos getSharedSpawnPos() {
-        BlockPos blockPos = new BlockPos(this.levelData.getXSpawn(), this.levelData.getYSpawn(), this.levelData.getZSpawn());
-        if (!this.getWorldBorder().isWithinBounds(blockPos)) {
-            blockPos = this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(this.getWorldBorder().getCenterX(), 0.0, this.getWorldBorder().getCenterZ()));
-        }
-        return blockPos;
-    }
-
-    public void setDefaultSpawnPos(BlockPos blockPos) {
-        this.levelData.setSpawn(blockPos);
     }
 
     public boolean mayInteract(Player player, BlockPos blockPos) {
@@ -1043,11 +1033,11 @@ AutoCloseable {
             BlockPos blockPos2 = blockPos.relative(direction);
             if (!this.hasChunkAt(blockPos2)) continue;
             BlockState blockState = this.getBlockState(blockPos2);
-            if (blockState.getBlock() == Blocks.COMPARATOR) {
+            if (blockState.is(Blocks.COMPARATOR)) {
                 blockState.neighborChanged(this, blockPos2, block, blockPos, false);
                 continue;
             }
-            if (!blockState.isRedstoneConductor(this, blockPos2) || (blockState = this.getBlockState(blockPos2 = blockPos2.relative(direction))).getBlock() != Blocks.COMPARATOR) continue;
+            if (!blockState.isRedstoneConductor(this, blockPos2) || !(blockState = this.getBlockState(blockPos2 = blockPos2.relative(direction))).is(Blocks.COMPARATOR)) continue;
             blockState.neighborChanged(this, blockPos2, block, blockPos, false);
         }
     }

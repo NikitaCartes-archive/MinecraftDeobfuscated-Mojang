@@ -136,7 +136,7 @@ extends Item {
                     level.destroyBlock(blockPos, true);
                 }
                 this.playEmptySound(player, level, blockPos);
-                level.setBlock(blockPos, this.content.defaultFluidState().createLegacyBlock(), 11);
+                return level.setBlock(blockPos, this.content.defaultFluidState().createLegacyBlock(), 11);
             }
             return true;
         }

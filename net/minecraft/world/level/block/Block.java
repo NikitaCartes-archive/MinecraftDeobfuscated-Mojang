@@ -134,6 +134,10 @@ implements ItemLike {
         return tag.contains(this);
     }
 
+    public boolean is(Block block) {
+        return this == block;
+    }
+
     public static BlockState updateFromNeighbourShapes(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
         BlockState blockState2 = blockState;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();

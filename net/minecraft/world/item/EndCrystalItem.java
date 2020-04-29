@@ -31,7 +31,7 @@ extends Item {
         BlockPos blockPos;
         Level level = useOnContext.getLevel();
         BlockState blockState = level.getBlockState(blockPos = useOnContext.getClickedPos());
-        if (blockState.getBlock() != Blocks.OBSIDIAN && blockState.getBlock() != Blocks.BEDROCK) {
+        if (!blockState.is(Blocks.OBSIDIAN) && !blockState.is(Blocks.BEDROCK)) {
             return InteractionResult.FAIL;
         }
         BlockPos blockPos2 = blockPos.above();

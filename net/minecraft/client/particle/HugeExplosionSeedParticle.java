@@ -5,12 +5,12 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.NoRenderParticle;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
 public class HugeExplosionSeedParticle
@@ -18,8 +18,8 @@ extends NoRenderParticle {
     private int life;
     private final int lifeTime;
 
-    private HugeExplosionSeedParticle(Level level, double d, double e, double f) {
-        super(level, d, e, f, 0.0, 0.0, 0.0);
+    private HugeExplosionSeedParticle(ClientLevel clientLevel, double d, double e, double f) {
+        super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
         this.lifeTime = 8;
     }
 
@@ -41,8 +41,8 @@ extends NoRenderParticle {
     public static class Provider
     implements ParticleProvider<SimpleParticleType> {
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            return new HugeExplosionSeedParticle(level, d, e, f);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return new HugeExplosionSeedParticle(clientLevel, d, e, f);
         }
     }
 }

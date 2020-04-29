@@ -72,7 +72,7 @@ extends Block {
 
     @Override
     public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        if (blockState2.getBlock() == blockState.getBlock()) {
+        if (blockState2.is(blockState.getBlock())) {
             return;
         }
         this.updateSource(level, blockPos, blockState);
@@ -80,7 +80,7 @@ extends Block {
 
     @Override
     public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        if (bl || blockState.getBlock() == blockState2.getBlock()) {
+        if (bl || blockState.is(blockState2.getBlock())) {
             return;
         }
         this.updateSource(level, blockPos, (BlockState)blockState.setValue(POWERED, true));
@@ -99,12 +99,12 @@ extends Block {
             for (int i = 1; i < 42; ++i) {
                 BlockPos blockPos2 = blockPos.relative(direction, i);
                 BlockState blockState2 = level.getBlockState(blockPos2);
-                if (blockState2.getBlock() == this.hook) {
+                if (blockState2.is(this.hook)) {
                     if (blockState2.getValue(TripWireHookBlock.FACING) != direction.getOpposite()) continue block0;
                     this.hook.calculateState(level, blockPos2, blockState2, false, true, i, blockState);
                     continue block0;
                 }
-                if (blockState2.getBlock() != this) continue block0;
+                if (!blockState2.is(this)) continue block0;
             }
         }
     }

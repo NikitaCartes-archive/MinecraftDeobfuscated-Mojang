@@ -178,7 +178,7 @@ extends Animal {
     }
 
     public static boolean checkTurtleSpawnRules(EntityType<Turtle> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
-        return blockPos.getY() < levelAccessor.getSeaLevel() + 4 && levelAccessor.getBlockState(blockPos.below()).getBlock() == Blocks.SAND && levelAccessor.getRawBrightness(blockPos, 0) > 8;
+        return blockPos.getY() < levelAccessor.getSeaLevel() + 4 && levelAccessor.getBlockState(blockPos.below()).is(Blocks.SAND) && levelAccessor.getRawBrightness(blockPos, 0) > 8;
     }
 
     @Override
@@ -297,7 +297,7 @@ extends Animal {
         if (!this.isGoingHome() && levelReader.getFluidState(blockPos).is(FluidTags.WATER)) {
             return 10.0f;
         }
-        if (levelReader.getBlockState(blockPos.below()).getBlock() == Blocks.SAND) {
+        if (levelReader.getBlockState(blockPos.below()).is(Blocks.SAND)) {
             return 10.0f;
         }
         return levelReader.getBrightness(blockPos) - 0.5f;
@@ -307,7 +307,7 @@ extends Animal {
     public void aiStep() {
         BlockPos blockPos;
         super.aiStep();
-        if (this.isAlive() && this.isLayingEgg() && this.layEggCounter >= 1 && this.layEggCounter % 5 == 0 && this.level.getBlockState((blockPos = this.blockPosition()).below()).getBlock() == Blocks.SAND) {
+        if (this.isAlive() && this.isLayingEgg() && this.layEggCounter >= 1 && this.layEggCounter % 5 == 0 && this.level.getBlockState((blockPos = this.blockPosition()).below()).is(Blocks.SAND)) {
             this.level.levelEvent(2001, blockPos, Block.getId(Blocks.SAND.defaultBlockState()));
         }
     }
@@ -365,7 +365,7 @@ extends Animal {
         public boolean isStableDestination(BlockPos blockPos) {
             Turtle turtle;
             if (this.mob instanceof Turtle && (turtle = (Turtle)this.mob).isTravelling()) {
-                return this.level.getBlockState(blockPos).getBlock() == Blocks.WATER;
+                return this.level.getBlockState(blockPos).is(Blocks.WATER);
             }
             return !this.level.getBlockState(blockPos.below()).isAir();
         }
@@ -446,8 +446,7 @@ extends Animal {
 
         @Override
         protected boolean isValidTarget(LevelReader levelReader, BlockPos blockPos) {
-            Block block = levelReader.getBlockState(blockPos).getBlock();
-            return block == Blocks.WATER;
+            return levelReader.getBlockState(blockPos).is(Blocks.WATER);
         }
     }
 
@@ -517,8 +516,7 @@ extends Animal {
             if (!levelReader.isEmptyBlock(blockPos.above())) {
                 return false;
             }
-            Block block = levelReader.getBlockState(blockPos).getBlock();
-            return block == Blocks.SAND;
+            return levelReader.getBlockState(blockPos).is(Blocks.SAND);
         }
     }
 
@@ -668,7 +666,7 @@ extends Animal {
                 if (vec32 == null) {
                     vec32 = RandomPos.getPosTowards(this.turtle, 8, 7, vec3);
                 }
-                if (vec32 != null && !bl && this.turtle.level.getBlockState(new BlockPos(vec32)).getBlock() != Blocks.WATER) {
+                if (vec32 != null && !bl && !this.turtle.level.getBlockState(new BlockPos(vec32)).is(Blocks.WATER)) {
                     vec32 = RandomPos.getPosTowards(this.turtle, 16, 5, vec3);
                 }
                 if (vec32 == null) {

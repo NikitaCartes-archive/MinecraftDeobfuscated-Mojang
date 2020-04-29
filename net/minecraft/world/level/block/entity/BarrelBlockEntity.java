@@ -110,7 +110,7 @@ extends RandomizableContainerBlockEntity {
             this.scheduleRecheck();
         } else {
             BlockState blockState = this.getBlockState();
-            if (blockState.getBlock() != Blocks.BARREL) {
+            if (!blockState.is(Blocks.BARREL)) {
                 this.setRemoved();
                 return;
             }

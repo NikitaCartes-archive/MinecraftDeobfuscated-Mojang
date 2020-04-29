@@ -24,6 +24,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -134,14 +135,8 @@ implements ResourceManagerReloadListener {
     public BakedModel getModel(ItemStack itemStack, @Nullable Level level, @Nullable LivingEntity livingEntity) {
         Item item = itemStack.getItem();
         BakedModel bakedModel = item == Items.TRIDENT ? this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:trident_in_hand#inventory")) : this.itemModelShaper.getItemModel(itemStack);
-        if (!item.hasProperties()) {
-            return bakedModel;
-        }
-        return this.resolveOverrides(bakedModel, itemStack, level, livingEntity);
-    }
-
-    private BakedModel resolveOverrides(BakedModel bakedModel, ItemStack itemStack, @Nullable Level level, @Nullable LivingEntity livingEntity) {
-        BakedModel bakedModel2 = bakedModel.getOverrides().resolve(bakedModel, itemStack, level, livingEntity);
+        ClientLevel clientLevel = level instanceof ClientLevel ? (ClientLevel)level : null;
+        BakedModel bakedModel2 = bakedModel.getOverrides().resolve(bakedModel, itemStack, clientLevel, livingEntity);
         return bakedModel2 == null ? this.itemModelShaper.getModelManager().getMissingModel() : bakedModel2;
     }
 

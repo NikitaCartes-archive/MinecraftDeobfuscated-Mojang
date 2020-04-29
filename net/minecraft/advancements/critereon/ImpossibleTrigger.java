@@ -3,11 +3,11 @@
  */
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
+import net.minecraft.advancements.critereon.DeserializationContext;
+import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
 
@@ -33,19 +33,25 @@ implements CriterionTrigger<TriggerInstance> {
     }
 
     @Override
-    public TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+    public TriggerInstance createInstance(JsonObject jsonObject, DeserializationContext deserializationContext) {
         return new TriggerInstance();
     }
 
     @Override
-    public /* synthetic */ CriterionTriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-        return this.createInstance(jsonObject, jsonDeserializationContext);
+    public /* synthetic */ CriterionTriggerInstance createInstance(JsonObject jsonObject, DeserializationContext deserializationContext) {
+        return this.createInstance(jsonObject, deserializationContext);
     }
 
     public static class TriggerInstance
-    extends AbstractCriterionTriggerInstance {
-        public TriggerInstance() {
-            super(ID);
+    implements CriterionTriggerInstance {
+        @Override
+        public ResourceLocation getCriterion() {
+            return ID;
+        }
+
+        @Override
+        public JsonObject serializeToJson(SerializationContext serializationContext) {
+            return new JsonObject();
         }
     }
 }

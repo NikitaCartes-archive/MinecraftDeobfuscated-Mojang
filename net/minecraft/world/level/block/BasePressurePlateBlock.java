@@ -105,7 +105,7 @@ extends Block {
 
     @Override
     public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        if (bl || blockState.getBlock() == blockState2.getBlock()) {
+        if (bl || blockState.is(blockState2.getBlock())) {
             return;
         }
         if (this.getSignalForState(blockState) > 0) {

@@ -69,7 +69,7 @@ extends Item {
     }
 
     public static boolean growWaterPlant(ItemStack itemStack, Level level, BlockPos blockPos, @Nullable Direction direction) {
-        if (level.getBlockState(blockPos).getBlock() != Blocks.WATER || level.getFluidState(blockPos).getAmount() != 8) {
+        if (!level.getBlockState(blockPos).is(Blocks.WATER) || level.getFluidState(blockPos).getAmount() != 8) {
             return false;
         }
         if (!(level instanceof ServerLevel)) {
@@ -99,11 +99,11 @@ extends Item {
             }
             if (!blockState.canSurvive(level, blockPos2)) continue;
             BlockState blockState2 = level.getBlockState(blockPos2);
-            if (blockState2.getBlock() == Blocks.WATER && level.getFluidState(blockPos2).getAmount() == 8) {
+            if (blockState2.is(Blocks.WATER) && level.getFluidState(blockPos2).getAmount() == 8) {
                 level.setBlock(blockPos2, blockState, 3);
                 continue;
             }
-            if (blockState2.getBlock() != Blocks.SEAGRASS || random.nextInt(10) != 0) continue;
+            if (!blockState2.is(Blocks.SEAGRASS) || random.nextInt(10) != 0) continue;
             ((BonemealableBlock)((Object)Blocks.SEAGRASS)).performBonemeal((ServerLevel)level, random, blockPos2, blockState2);
         }
         itemStack.shrink(1);

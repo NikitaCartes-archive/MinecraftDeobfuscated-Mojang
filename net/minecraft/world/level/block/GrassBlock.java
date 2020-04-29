@@ -43,10 +43,10 @@ implements BonemealableBlock {
             BlockState blockState4;
             BlockPos blockPos3 = blockPos2;
             for (int j = 0; j < i / 16; ++j) {
-                if (serverLevel.getBlockState((blockPos3 = blockPos3.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1)).below()).getBlock() != this || serverLevel.getBlockState(blockPos3).isCollisionShapeFullBlock(serverLevel, blockPos3)) continue block0;
+                if (!serverLevel.getBlockState((blockPos3 = blockPos3.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1)).below()).is(this) || serverLevel.getBlockState(blockPos3).isCollisionShapeFullBlock(serverLevel, blockPos3)) continue block0;
             }
             BlockState blockState3 = serverLevel.getBlockState(blockPos3);
-            if (blockState3.getBlock() == blockState2.getBlock() && random.nextInt(10) == 0) {
+            if (blockState3.is(blockState2.getBlock()) && random.nextInt(10) == 0) {
                 ((BonemealableBlock)((Object)blockState2.getBlock())).performBonemeal(serverLevel, random, blockPos3, blockState3);
             }
             if (!blockState3.isAir()) continue;

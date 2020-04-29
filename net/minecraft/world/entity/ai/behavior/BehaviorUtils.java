@@ -19,7 +19,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
-import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -52,7 +51,7 @@ public class BehaviorUtils {
     }
 
     public static void lookAtEntity(LivingEntity livingEntity, LivingEntity livingEntity2) {
-        livingEntity.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(livingEntity2));
+        livingEntity.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(livingEntity2, true));
     }
 
     private static void setWalkAndLookTargetMemoriesToEachOther(LivingEntity livingEntity, LivingEntity livingEntity2, float f) {
@@ -62,18 +61,14 @@ public class BehaviorUtils {
     }
 
     public static void setWalkAndLookTargetMemories(LivingEntity livingEntity, Entity entity, float f, int i) {
-        EntityTracker positionTracker = new EntityTracker(entity);
-        BehaviorUtils.setWalkAndLookTargetMemories(livingEntity, positionTracker, f, i);
+        WalkTarget walkTarget = new WalkTarget(new EntityTracker(entity, false), f, i);
+        livingEntity.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(entity, true));
+        livingEntity.getBrain().setMemory(MemoryModuleType.WALK_TARGET, walkTarget);
     }
 
     public static void setWalkAndLookTargetMemories(LivingEntity livingEntity, BlockPos blockPos, float f, int i) {
-        BlockPosTracker positionTracker = new BlockPosTracker(blockPos);
-        BehaviorUtils.setWalkAndLookTargetMemories(livingEntity, positionTracker, f, i);
-    }
-
-    private static void setWalkAndLookTargetMemories(LivingEntity livingEntity, PositionTracker positionTracker, float f, int i) {
-        WalkTarget walkTarget = new WalkTarget(positionTracker, f, i);
-        livingEntity.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, positionTracker);
+        WalkTarget walkTarget = new WalkTarget(new BlockPosTracker(blockPos), f, i);
+        livingEntity.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(blockPos));
         livingEntity.getBrain().setMemory(MemoryModuleType.WALK_TARGET, walkTarget);
     }
 

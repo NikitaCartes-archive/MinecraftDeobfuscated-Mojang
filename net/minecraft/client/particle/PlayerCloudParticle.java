@@ -5,6 +5,7 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -13,15 +14,14 @@ import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
 public class PlayerCloudParticle
 extends TextureSheetParticle {
     private final SpriteSet sprites;
 
-    private PlayerCloudParticle(Level level, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
-        super(level, d, e, f, 0.0, 0.0, 0.0);
+    private PlayerCloudParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
+        super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
         float k;
         this.sprites = spriteSet;
         float j = 2.5f;
@@ -88,8 +88,8 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            PlayerCloudParticle particle = new PlayerCloudParticle(level, d, e, f, g, h, i, this.sprites);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            PlayerCloudParticle particle = new PlayerCloudParticle(clientLevel, d, e, f, g, h, i, this.sprites);
             particle.setColor(200.0f, 50.0f, 120.0f);
             particle.setAlpha(0.4f);
             return particle;
@@ -106,8 +106,8 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            return new PlayerCloudParticle(level, d, e, f, g, h, i, this.sprites);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return new PlayerCloudParticle(clientLevel, d, e, f, g, h, i, this.sprites);
         }
     }
 }

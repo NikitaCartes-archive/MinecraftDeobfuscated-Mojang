@@ -10,7 +10,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -30,12 +29,12 @@ extends Feature<NoneFeatureConfiguration> {
         if (blockPos.getY() > levelAccessor.getSeaLevel() - 1) {
             return false;
         }
-        if (levelAccessor.getBlockState(blockPos).getBlock() != Blocks.WATER && levelAccessor.getBlockState(blockPos.below()).getBlock() != Blocks.WATER) {
+        if (!levelAccessor.getBlockState(blockPos).is(Blocks.WATER) && !levelAccessor.getBlockState(blockPos.below()).is(Blocks.WATER)) {
             return false;
         }
         boolean bl = false;
         for (Direction direction : Direction.values()) {
-            if (direction == Direction.DOWN || levelAccessor.getBlockState(blockPos.relative(direction)).getBlock() != Blocks.PACKED_ICE) continue;
+            if (direction == Direction.DOWN || !levelAccessor.getBlockState(blockPos.relative(direction)).is(Blocks.PACKED_ICE)) continue;
             bl = true;
             break;
         }
@@ -44,19 +43,17 @@ extends Feature<NoneFeatureConfiguration> {
         }
         levelAccessor.setBlock(blockPos, Blocks.BLUE_ICE.defaultBlockState(), 2);
         block1: for (int i = 0; i < 200; ++i) {
+            BlockPos blockPos2;
+            BlockState blockState;
             int j = random.nextInt(5) - random.nextInt(6);
             int k = 3;
             if (j < 2) {
                 k += j / 2;
             }
-            if (k < 1) continue;
-            BlockPos blockPos2 = blockPos.offset(random.nextInt(k) - random.nextInt(k), j, random.nextInt(k) - random.nextInt(k));
-            BlockState blockState = levelAccessor.getBlockState(blockPos2);
-            Block block = blockState.getBlock();
-            if (blockState.getMaterial() != Material.AIR && block != Blocks.WATER && block != Blocks.PACKED_ICE && block != Blocks.ICE) continue;
+            if (k < 1 || (blockState = levelAccessor.getBlockState(blockPos2 = blockPos.offset(random.nextInt(k) - random.nextInt(k), j, random.nextInt(k) - random.nextInt(k)))).getMaterial() != Material.AIR && !blockState.is(Blocks.WATER) && !blockState.is(Blocks.PACKED_ICE) && !blockState.is(Blocks.ICE)) continue;
             for (Direction direction2 : Direction.values()) {
-                Block block2 = levelAccessor.getBlockState(blockPos2.relative(direction2)).getBlock();
-                if (block2 != Blocks.BLUE_ICE) continue;
+                BlockState blockState2 = levelAccessor.getBlockState(blockPos2.relative(direction2));
+                if (!blockState2.is(Blocks.BLUE_ICE)) continue;
                 levelAccessor.setBlock(blockPos2, Blocks.BLUE_ICE.defaultBlockState(), 2);
                 continue block1;
             }

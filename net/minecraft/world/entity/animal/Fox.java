@@ -31,6 +31,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -766,7 +767,7 @@ extends Animal {
             }
             if (livingEntity != null && Fox.this.distanceTo(livingEntity) <= 2.0f) {
                 Fox.this.doHurtTarget(livingEntity);
-            } else if (Fox.this.xRot > 0.0f && Fox.this.onGround && (float)Fox.this.getDeltaMovement().y != 0.0f && Fox.this.level.getBlockState(Fox.this.blockPosition()).getBlock() == Blocks.SNOW) {
+            } else if (Fox.this.xRot > 0.0f && Fox.this.onGround && (float)Fox.this.getDeltaMovement().y != 0.0f && Fox.this.level.getBlockState(Fox.this.blockPosition()).is(Blocks.SNOW)) {
                 Fox.this.xRot = 60.0f;
                 Fox.this.setTarget(null);
                 Fox.this.setFaceplanted(true);
@@ -788,7 +789,7 @@ extends Animal {
 
         @Override
         public boolean canUse() {
-            return Fox.this.isInWater() && Fox.this.getFluidHeight() > 0.25 || Fox.this.isInLava();
+            return Fox.this.isInWater() && Fox.this.getFluidHeight(FluidTags.WATER) > 0.25 || Fox.this.isInLava();
         }
     }
 
@@ -896,7 +897,7 @@ extends Animal {
         @Override
         protected boolean isValidTarget(LevelReader levelReader, BlockPos blockPos) {
             BlockState blockState = levelReader.getBlockState(blockPos);
-            return blockState.getBlock() == Blocks.SWEET_BERRY_BUSH && blockState.getValue(SweetBerryBushBlock.AGE) >= 2;
+            return blockState.is(Blocks.SWEET_BERRY_BUSH) && blockState.getValue(SweetBerryBushBlock.AGE) >= 2;
         }
 
         @Override
@@ -918,7 +919,7 @@ extends Animal {
                 return;
             }
             BlockState blockState = Fox.this.level.getBlockState(this.blockPos);
-            if (blockState.getBlock() != Blocks.SWEET_BERRY_BUSH) {
+            if (!blockState.is(Blocks.SWEET_BERRY_BUSH)) {
                 return;
             }
             int i = blockState.getValue(SweetBerryBushBlock.AGE);

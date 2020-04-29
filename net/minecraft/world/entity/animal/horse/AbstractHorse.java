@@ -332,7 +332,7 @@ Saddleable {
         }
         BlockState blockState2 = this.level.getBlockState(blockPos.above());
         SoundType soundType = blockState.getSoundType();
-        if (blockState2.getBlock() == Blocks.SNOW) {
+        if (blockState2.is(Blocks.SNOW)) {
             soundType = blockState2.getSoundType();
         }
         if (this.isVehicle() && this.canGallop) {
@@ -493,7 +493,7 @@ Saddleable {
             this.heal(1.0f);
         }
         if (this.canEatGrass()) {
-            if (!this.isEating() && !this.isVehicle() && this.random.nextInt(300) == 0 && this.level.getBlockState(this.blockPosition().below()).getBlock() == Blocks.GRASS_BLOCK) {
+            if (!this.isEating() && !this.isVehicle() && this.random.nextInt(300) == 0 && this.level.getBlockState(this.blockPosition().below()).is(Blocks.GRASS_BLOCK)) {
                 this.setEating(true);
             }
             if (this.isEating() && ++this.eatingCounter > 50) {

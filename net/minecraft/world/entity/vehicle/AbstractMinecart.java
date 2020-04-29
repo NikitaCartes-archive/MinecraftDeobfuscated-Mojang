@@ -270,9 +270,9 @@ extends Entity {
         if (this.level.getBlockState(new BlockPos(i = Mth.floor(this.getX()), (j = Mth.floor(this.getY())) - 1, k = Mth.floor(this.getZ()))).is(BlockTags.RAILS)) {
             --j;
         }
-        if ((blockState = this.level.getBlockState(blockPos = new BlockPos(i, j, k))).is(BlockTags.RAILS)) {
+        if (BaseRailBlock.isRail(blockState = this.level.getBlockState(blockPos = new BlockPos(i, j, k)))) {
             this.moveAlongTrack(blockPos, blockState);
-            if (blockState.getBlock() == Blocks.ACTIVATOR_RAIL) {
+            if (blockState.is(Blocks.ACTIVATOR_RAIL)) {
                 this.activateMinecart(i, j, k, blockState.getValue(PoweredRailBlock.POWERED));
             }
         } else {
@@ -505,7 +505,7 @@ extends Entity {
         if (this.level.getBlockState(new BlockPos(i, (j = Mth.floor(e)) - 1, k = Mth.floor(f))).is(BlockTags.RAILS)) {
             --j;
         }
-        if ((blockState = this.level.getBlockState(new BlockPos(i, j, k))).is(BlockTags.RAILS)) {
+        if (BaseRailBlock.isRail(blockState = this.level.getBlockState(new BlockPos(i, j, k)))) {
             RailShape railShape = blockState.getValue(((BaseRailBlock)blockState.getBlock()).getShapeProperty());
             e = j;
             if (railShape.isAscending()) {
@@ -536,7 +536,7 @@ extends Entity {
         if (this.level.getBlockState(new BlockPos(i, (j = Mth.floor(e)) - 1, k = Mth.floor(f))).is(BlockTags.RAILS)) {
             --j;
         }
-        if ((blockState = this.level.getBlockState(new BlockPos(i, j, k))).is(BlockTags.RAILS)) {
+        if (BaseRailBlock.isRail(blockState = this.level.getBlockState(new BlockPos(i, j, k)))) {
             double s;
             RailShape railShape = blockState.getValue(((BaseRailBlock)blockState.getBlock()).getShapeProperty());
             Pair<Vec3i, Vec3i> pair = AbstractMinecart.exits(railShape);

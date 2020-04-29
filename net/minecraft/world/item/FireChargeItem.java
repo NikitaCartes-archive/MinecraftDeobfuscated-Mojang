@@ -27,7 +27,7 @@ extends Item {
         BlockPos blockPos = useOnContext.getClickedPos();
         BlockState blockState = level.getBlockState(blockPos);
         boolean bl = false;
-        if (blockState.getBlock().is(BlockTags.CAMPFIRES)) {
+        if (blockState.is(BlockTags.CAMPFIRES, blockStateBase -> blockStateBase.hasProperty(CampfireBlock.LIT) && blockStateBase.hasProperty(CampfireBlock.WATERLOGGED))) {
             if (!blockState.getValue(CampfireBlock.LIT).booleanValue() && !blockState.getValue(CampfireBlock.WATERLOGGED).booleanValue()) {
                 this.playSound(level, blockPos);
                 level.setBlockAndUpdate(blockPos, (BlockState)blockState.setValue(CampfireBlock.LIT, true));

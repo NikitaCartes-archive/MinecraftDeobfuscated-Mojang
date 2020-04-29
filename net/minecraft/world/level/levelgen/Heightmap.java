@@ -45,7 +45,7 @@ public class Heightmap {
                 for (int m = j - 1; m >= 0; --m) {
                     mutableBlockPos.set(k, m, l);
                     BlockState blockState = chunkAccess.getBlockState(mutableBlockPos);
-                    if (blockState.getBlock() == Blocks.AIR) continue;
+                    if (blockState.is(Blocks.AIR)) continue;
                     while (objectListIterator.hasNext()) {
                         Heightmap heightmap = (Heightmap)objectListIterator.next();
                         if (!heightmap.isOpaque.test(blockState)) continue;

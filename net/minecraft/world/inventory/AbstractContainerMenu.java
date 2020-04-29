@@ -51,7 +51,7 @@ public abstract class AbstractContainerMenu {
 
     protected static boolean stillValid(ContainerLevelAccess containerLevelAccess, Player player, Block block) {
         return containerLevelAccess.evaluate((level, blockPos) -> {
-            if (level.getBlockState((BlockPos)blockPos).getBlock() != block) {
+            if (!level.getBlockState((BlockPos)blockPos).is(block)) {
                 return false;
             }
             return player.distanceToSqr((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5) <= 64.0;

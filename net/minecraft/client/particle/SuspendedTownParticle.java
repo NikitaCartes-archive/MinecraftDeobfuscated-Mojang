@@ -5,19 +5,19 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
 public class SuspendedTownParticle
 extends TextureSheetParticle {
-    private SuspendedTownParticle(Level level, double d, double e, double f, double g, double h, double i) {
-        super(level, d, e, f, g, h, i);
+    private SuspendedTownParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+        super(clientLevel, d, e, f, g, h, i);
         float j;
         this.rCol = j = this.random.nextFloat() * 0.1f + 0.2f;
         this.gCol = j;
@@ -66,11 +66,11 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            SuspendedTownParticle suspendedTownParticle = new SuspendedTownParticle(level, d, e, f, g, h, i);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            SuspendedTownParticle suspendedTownParticle = new SuspendedTownParticle(clientLevel, d, e, f, g, h, i);
             suspendedTownParticle.setColor(0.3f, 0.5f, 1.0f);
             suspendedTownParticle.pickSprite(this.sprite);
-            suspendedTownParticle.setAlpha(1.0f - level.random.nextFloat() * 0.7f);
+            suspendedTownParticle.setAlpha(1.0f - clientLevel.random.nextFloat() * 0.7f);
             suspendedTownParticle.setLifetime(suspendedTownParticle.getLifetime() / 2);
             return suspendedTownParticle;
         }
@@ -86,11 +86,11 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            SuspendedTownParticle suspendedTownParticle = new SuspendedTownParticle(level, d, e, f, g, h, i);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            SuspendedTownParticle suspendedTownParticle = new SuspendedTownParticle(clientLevel, d, e, f, g, h, i);
             suspendedTownParticle.pickSprite(this.sprite);
             suspendedTownParticle.setColor(1.0f, 1.0f, 1.0f);
-            suspendedTownParticle.setLifetime(3 + level.getRandom().nextInt(5));
+            suspendedTownParticle.setLifetime(3 + clientLevel.getRandom().nextInt(5));
             return suspendedTownParticle;
         }
     }
@@ -105,8 +105,8 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            SuspendedTownParticle suspendedTownParticle = new SuspendedTownParticle(level, d, e, f, g, h, i);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            SuspendedTownParticle suspendedTownParticle = new SuspendedTownParticle(clientLevel, d, e, f, g, h, i);
             suspendedTownParticle.pickSprite(this.sprite);
             suspendedTownParticle.setColor(1.0f, 1.0f, 1.0f);
             return suspendedTownParticle;
@@ -123,8 +123,8 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            SuspendedTownParticle suspendedTownParticle = new SuspendedTownParticle(level, d, e, f, g, h, i);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            SuspendedTownParticle suspendedTownParticle = new SuspendedTownParticle(clientLevel, d, e, f, g, h, i);
             suspendedTownParticle.pickSprite(this.sprite);
             return suspendedTownParticle;
         }

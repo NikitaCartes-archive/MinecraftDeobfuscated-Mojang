@@ -155,7 +155,7 @@ public class GameTestRunner {
         gameTestTicker.clear();
         BlockPos blockPos22 = blockPos2.offset(-i, 0, -i);
         BlockPos blockPos3 = blockPos2.offset(i, 0, i);
-        BlockPos.betweenClosedStream(blockPos22, blockPos3).filter(blockPos -> serverLevel.getBlockState((BlockPos)blockPos).getBlock() == Blocks.STRUCTURE_BLOCK).forEach(blockPos -> {
+        BlockPos.betweenClosedStream(blockPos22, blockPos3).filter(blockPos -> serverLevel.getBlockState((BlockPos)blockPos).is(Blocks.STRUCTURE_BLOCK)).forEach(blockPos -> {
             StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity((BlockPos)blockPos);
             BlockPos blockPos2 = structureBlockEntity.getBlockPos();
             BoundingBox boundingBox = StructureUtils.createStructureBoundingBox(blockPos2, structureBlockEntity.getStructureSize(), 2);

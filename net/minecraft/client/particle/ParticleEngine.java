@@ -34,6 +34,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.AshParticle;
 import net.minecraft.client.particle.AttackSweepParticle;
 import net.minecraft.client.particle.BarrierParticle;
@@ -102,7 +103,6 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -113,7 +113,7 @@ import org.jetbrains.annotations.Nullable;
 public class ParticleEngine
 implements PreparableReloadListener {
     private static final List<ParticleRenderType> RENDER_ORDER = ImmutableList.of(ParticleRenderType.TERRAIN_SHEET, ParticleRenderType.PARTICLE_SHEET_OPAQUE, ParticleRenderType.PARTICLE_SHEET_LIT, ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT, ParticleRenderType.CUSTOM);
-    protected Level level;
+    protected ClientLevel level;
     private final Map<ParticleRenderType, Queue<Particle>> particles = Maps.newIdentityHashMap();
     private final Queue<TrackingEmitter> trackingEmitters = Queues.newArrayDeque();
     private final TextureManager textureManager;
@@ -123,9 +123,9 @@ implements PreparableReloadListener {
     private final Map<ResourceLocation, MutableSpriteSet> spriteSets = Maps.newHashMap();
     private final TextureAtlas textureAtlas = new TextureAtlas(TextureAtlas.LOCATION_PARTICLES);
 
-    public ParticleEngine(Level level, TextureManager textureManager) {
+    public ParticleEngine(ClientLevel clientLevel, TextureManager textureManager) {
         textureManager.register(this.textureAtlas.location(), this.textureAtlas);
-        this.level = level;
+        this.level = clientLevel;
         this.textureManager = textureManager;
         this.registerProviders();
     }
@@ -382,8 +382,8 @@ implements PreparableReloadListener {
         RenderSystem.disableFog();
     }
 
-    public void setLevel(@Nullable Level level) {
-        this.level = level;
+    public void setLevel(@Nullable ClientLevel clientLevel) {
+        this.level = clientLevel;
         this.particles.clear();
         this.trackingEmitters.clear();
     }

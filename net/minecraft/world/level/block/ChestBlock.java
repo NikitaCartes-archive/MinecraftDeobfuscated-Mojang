@@ -170,7 +170,7 @@ implements SimpleWaterloggedBlock {
         if (blockState.getValue(WATERLOGGED).booleanValue()) {
             levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
         }
-        if (blockState2.getBlock() == this && direction.getAxis().isHorizontal()) {
+        if (blockState2.is(this) && direction.getAxis().isHorizontal()) {
             ChestType chestType = blockState2.getValue(TYPE);
             if (blockState.getValue(TYPE) == ChestType.SINGLE && chestType != ChestType.SINGLE && blockState.getValue(FACING) == blockState2.getValue(FACING) && ChestBlock.getConnectedDirection(blockState2) == direction.getOpposite()) {
                 return (BlockState)blockState.setValue(TYPE, chestType.getOpposite());
@@ -239,7 +239,7 @@ implements SimpleWaterloggedBlock {
     @Nullable
     private Direction candidatePartnerFacing(BlockPlaceContext blockPlaceContext, Direction direction) {
         BlockState blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos().relative(direction));
-        return blockState.getBlock() == this && blockState.getValue(TYPE) == ChestType.SINGLE ? blockState.getValue(FACING) : null;
+        return blockState.is(this) && blockState.getValue(TYPE) == ChestType.SINGLE ? blockState.getValue(FACING) : null;
     }
 
     @Override
@@ -252,7 +252,7 @@ implements SimpleWaterloggedBlock {
 
     @Override
     public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        if (blockState.getBlock() == blockState2.getBlock()) {
+        if (blockState.is(blockState2.getBlock())) {
             return;
         }
         BlockEntity blockEntity = level.getBlockEntity(blockPos);

@@ -83,7 +83,7 @@ extends Block {
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
         DoubleBlockHalf doubleBlockHalf = blockState.getValue(HALF);
         if (direction.getAxis() == Direction.Axis.Y && doubleBlockHalf == DoubleBlockHalf.LOWER == (direction == Direction.UP)) {
-            if (blockState2.getBlock() == this && blockState2.getValue(HALF) != doubleBlockHalf) {
+            if (blockState2.is(this) && blockState2.getValue(HALF) != doubleBlockHalf) {
                 return (BlockState)((BlockState)((BlockState)((BlockState)blockState.setValue(FACING, blockState2.getValue(FACING))).setValue(OPEN, blockState2.getValue(OPEN))).setValue(HINGE, blockState2.getValue(HINGE))).setValue(POWERED, blockState2.getValue(POWERED));
             }
             return Blocks.AIR.defaultBlockState();
@@ -104,7 +104,7 @@ extends Block {
         DoubleBlockHalf doubleBlockHalf = blockState.getValue(HALF);
         BlockPos blockPos2 = doubleBlockHalf == DoubleBlockHalf.LOWER ? blockPos.above() : blockPos.below();
         BlockState blockState2 = level.getBlockState(blockPos2);
-        if (blockState2.getBlock() == this && blockState2.getValue(HALF) != doubleBlockHalf) {
+        if (blockState2.is(this) && blockState2.getValue(HALF) != doubleBlockHalf) {
             level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 35);
             level.levelEvent(player, 2001, blockPos2, Block.getId(blockState2));
             ItemStack itemStack = player.getMainHandItem();
@@ -174,8 +174,8 @@ extends Block {
         BlockPos blockPos6 = blockPos2.relative(direction3);
         BlockState blockState4 = blockGetter.getBlockState(blockPos6);
         int i = (blockState.isCollisionShapeFullBlock(blockGetter, blockPos3) ? -1 : 0) + (blockState2.isCollisionShapeFullBlock(blockGetter, blockPos4) ? -1 : 0) + (blockState3.isCollisionShapeFullBlock(blockGetter, blockPos5) ? 1 : 0) + (blockState4.isCollisionShapeFullBlock(blockGetter, blockPos6) ? 1 : 0);
-        boolean bl = blockState.getBlock() == this && blockState.getValue(HALF) == DoubleBlockHalf.LOWER;
-        boolean bl3 = bl2 = blockState3.getBlock() == this && blockState3.getValue(HALF) == DoubleBlockHalf.LOWER;
+        boolean bl = blockState.is(this) && blockState.getValue(HALF) == DoubleBlockHalf.LOWER;
+        boolean bl3 = bl2 = blockState3.is(this) && blockState3.getValue(HALF) == DoubleBlockHalf.LOWER;
         if (bl && !bl2 || i > 0) {
             return DoorHingeSide.RIGHT;
         }
@@ -203,7 +203,7 @@ extends Block {
 
     public void setOpen(Level level, BlockPos blockPos, boolean bl) {
         BlockState blockState = level.getBlockState(blockPos);
-        if (blockState.getBlock() != this || blockState.getValue(OPEN) == bl) {
+        if (!blockState.is(this) || blockState.getValue(OPEN) == bl) {
             return;
         }
         level.setBlock(blockPos, (BlockState)blockState.setValue(OPEN, bl), 10);
@@ -229,7 +229,7 @@ extends Block {
         if (blockState.getValue(HALF) == DoubleBlockHalf.LOWER) {
             return blockState2.isFaceSturdy(levelReader, blockPos2, Direction.UP);
         }
-        return blockState2.getBlock() == this;
+        return blockState2.is(this);
     }
 
     private void playSound(Level level, BlockPos blockPos, boolean bl) {

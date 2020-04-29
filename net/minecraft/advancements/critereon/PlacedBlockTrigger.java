@@ -3,14 +3,14 @@
  */
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
+import net.minecraft.advancements.critereon.DeserializationContext;
+import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.LocationPredicate;
+import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.BlockPos;
@@ -34,7 +34,7 @@ extends SimpleCriterionTrigger<TriggerInstance> {
     }
 
     @Override
-    public TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+    public TriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
         Block block = PlacedBlockTrigger.deserializeBlock(jsonObject);
         StatePropertiesPredicate statePropertiesPredicate = StatePropertiesPredicate.fromJson(jsonObject.get("state"));
         if (block != null) {
@@ -44,7 +44,7 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         }
         LocationPredicate locationPredicate = LocationPredicate.fromJson(jsonObject.get("location"));
         ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("item"));
-        return new TriggerInstance(block, statePropertiesPredicate, locationPredicate, itemPredicate);
+        return new TriggerInstance(composite, block, statePropertiesPredicate, locationPredicate, itemPredicate);
     }
 
     @Nullable
@@ -58,12 +58,12 @@ extends SimpleCriterionTrigger<TriggerInstance> {
 
     public void trigger(ServerPlayer serverPlayer, BlockPos blockPos, ItemStack itemStack) {
         BlockState blockState = serverPlayer.getLevel().getBlockState(blockPos);
-        this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(blockState, blockPos, serverPlayer.getLevel(), itemStack));
+        this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(blockState, blockPos, serverPlayer.getLevel(), itemStack));
     }
 
     @Override
-    public /* synthetic */ CriterionTriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-        return this.createInstance(jsonObject, jsonDeserializationContext);
+    public /* synthetic */ AbstractCriterionTriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
+        return this.createInstance(jsonObject, composite, deserializationContext);
     }
 
     public static class TriggerInstance
@@ -73,8 +73,8 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         private final LocationPredicate location;
         private final ItemPredicate item;
 
-        public TriggerInstance(@Nullable Block block, StatePropertiesPredicate statePropertiesPredicate, LocationPredicate locationPredicate, ItemPredicate itemPredicate) {
-            super(ID);
+        public TriggerInstance(EntityPredicate.Composite composite, @Nullable Block block, StatePropertiesPredicate statePropertiesPredicate, LocationPredicate locationPredicate, ItemPredicate itemPredicate) {
+            super(ID, composite);
             this.block = block;
             this.state = statePropertiesPredicate;
             this.location = locationPredicate;
@@ -82,11 +82,11 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         }
 
         public static TriggerInstance placedBlock(Block block) {
-            return new TriggerInstance(block, StatePropertiesPredicate.ANY, LocationPredicate.ANY, ItemPredicate.ANY);
+            return new TriggerInstance(EntityPredicate.Composite.ANY, block, StatePropertiesPredicate.ANY, LocationPredicate.ANY, ItemPredicate.ANY);
         }
 
         public boolean matches(BlockState blockState, BlockPos blockPos, ServerLevel serverLevel, ItemStack itemStack) {
-            if (this.block != null && blockState.getBlock() != this.block) {
+            if (this.block != null && !blockState.is(this.block)) {
                 return false;
             }
             if (!this.state.matches(blockState)) {
@@ -99,8 +99,8 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         }
 
         @Override
-        public JsonElement serializeToJson() {
-            JsonObject jsonObject = new JsonObject();
+        public JsonObject serializeToJson(SerializationContext serializationContext) {
+            JsonObject jsonObject = super.serializeToJson(serializationContext);
             if (this.block != null) {
                 jsonObject.addProperty("block", Registry.BLOCK.getKey(this.block).toString());
             }

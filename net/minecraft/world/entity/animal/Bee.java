@@ -764,7 +764,7 @@ implements FlyingAnimal {
         BeePollinateGoal() {
             this.VALID_POLLINATION_BLOCKS = blockState -> {
                 if (blockState.is(BlockTags.TALL_FLOWERS)) {
-                    if (blockState.getBlock() == Blocks.SUNFLOWER) {
+                    if (blockState.is(Blocks.SUNFLOWER)) {
                         return blockState.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.UPPER;
                     }
                     return true;

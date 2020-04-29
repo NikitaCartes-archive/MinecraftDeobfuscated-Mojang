@@ -11,7 +11,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GrowingPlantHeadBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -33,8 +32,8 @@ extends Feature<NoneFeatureConfiguration> {
         if (!levelAccessor.isEmptyBlock(blockPos)) {
             return false;
         }
-        Block block = levelAccessor.getBlockState(blockPos.above()).getBlock();
-        if (block != Blocks.NETHERRACK && block != Blocks.NETHER_WART_BLOCK) {
+        BlockState blockState = levelAccessor.getBlockState(blockPos.above());
+        if (!blockState.is(Blocks.NETHERRACK) && !blockState.is(Blocks.NETHER_WART_BLOCK)) {
             return false;
         }
         this.placeRoofNetherWart(levelAccessor, random, blockPos);
@@ -51,8 +50,8 @@ extends Feature<NoneFeatureConfiguration> {
             if (!levelAccessor.isEmptyBlock(mutableBlockPos)) continue;
             int j = 0;
             for (Direction direction : DIRECTIONS) {
-                Block block = levelAccessor.getBlockState(mutableBlockPos2.setWithOffset(mutableBlockPos, direction)).getBlock();
-                if (block == Blocks.NETHERRACK || block == Blocks.NETHER_WART_BLOCK) {
+                BlockState blockState = levelAccessor.getBlockState(mutableBlockPos2.setWithOffset(mutableBlockPos, direction));
+                if (blockState.is(Blocks.NETHERRACK) || blockState.is(Blocks.NETHER_WART_BLOCK)) {
                     ++j;
                 }
                 if (j > 1) break;
@@ -65,9 +64,9 @@ extends Feature<NoneFeatureConfiguration> {
     private void placeRoofWeepingVines(LevelAccessor levelAccessor, Random random, BlockPos blockPos) {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int i = 0; i < 100; ++i) {
-            Block block;
+            BlockState blockState;
             mutableBlockPos.setWithOffset(blockPos, random.nextInt(8) - random.nextInt(8), random.nextInt(2) - random.nextInt(7), random.nextInt(8) - random.nextInt(8));
-            if (!levelAccessor.isEmptyBlock(mutableBlockPos) || (block = levelAccessor.getBlockState(mutableBlockPos.above()).getBlock()) != Blocks.NETHERRACK && block != Blocks.NETHER_WART_BLOCK) continue;
+            if (!levelAccessor.isEmptyBlock(mutableBlockPos) || !(blockState = levelAccessor.getBlockState(mutableBlockPos.above())).is(Blocks.NETHERRACK) && !blockState.is(Blocks.NETHER_WART_BLOCK)) continue;
             int j = Mth.nextInt(random, 1, 8);
             if (random.nextInt(6) == 0) {
                 j *= 2;

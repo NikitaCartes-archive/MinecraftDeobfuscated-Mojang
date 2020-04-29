@@ -110,7 +110,7 @@ extends BlockGetter {
                     if (l == 3 || (blockGetter = CollisionGetter.this.getChunkForCollisions(m = i >> 4, n = k >> 4)) == null) continue;
                     mutableBlockPos.set(i, j, k);
                     BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
-                    if (l == 1 && !blockState.hasLargeCollisionShape() || l == 2 && blockState.getBlock() != Blocks.MOVING_PISTON) continue;
+                    if (l == 1 && !blockState.hasLargeCollisionShape() || l == 2 && !blockState.is(Blocks.MOVING_PISTON)) continue;
                     VoxelShape voxelShape3 = blockState.getCollisionShape(CollisionGetter.this, mutableBlockPos, collisionContext);
                     if (voxelShape3 == Shapes.block()) {
                         if (!aABB.intersects(i, j, k, (double)i + 1.0, (double)j + 1.0, (double)k + 1.0)) continue;

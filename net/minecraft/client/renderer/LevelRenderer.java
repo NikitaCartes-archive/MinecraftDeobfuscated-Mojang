@@ -361,7 +361,7 @@ AutoCloseable {
             float m = (float)voxelShape.max(Direction.Axis.Y, g, h);
             float n = fluidState.getHeight(levelReader, (BlockPos)blockPos2);
             float o = Math.max(m, n);
-            SimpleParticleType particleOptions = fluidState.is(FluidTags.LAVA) || blockState.getBlock() == Blocks.MAGMA_BLOCK || CampfireBlock.isLitCampfire(blockState) ? ParticleTypes.SMOKE : ParticleTypes.RAIN;
+            SimpleParticleType particleOptions = fluidState.is(FluidTags.LAVA) || blockState.is(Blocks.MAGMA_BLOCK) || CampfireBlock.isLitCampfire(blockState) ? ParticleTypes.SMOKE : ParticleTypes.RAIN;
             this.minecraft.level.addParticle(particleOptions, (float)blockPos2.getX() + g, (float)blockPos2.getY() + o, (float)blockPos2.getZ() + h, 0.0, 0.0, 0.0);
         }
         if (blockPos2 != null && random.nextInt(3) < this.rainSoundTime++) {
@@ -807,7 +807,11 @@ AutoCloseable {
         this.renderChunkLayer(RenderType.solid(), poseStack, d, e, g);
         this.renderChunkLayer(RenderType.cutoutMipped(), poseStack, d, e, g);
         this.renderChunkLayer(RenderType.cutout(), poseStack, d, e, g);
-        Lighting.setupLevel(poseStack.last().pose());
+        if (this.level.dimension.getType() == DimensionType.NETHER) {
+            Lighting.setupNetherLevel(poseStack.last().pose());
+        } else {
+            Lighting.setupLevel(poseStack.last().pose());
+        }
         profilerFiller.popPush("entities");
         profilerFiller.push("prepare");
         this.renderedEntities = 0;

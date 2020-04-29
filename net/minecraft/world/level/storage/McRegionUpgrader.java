@@ -57,7 +57,7 @@ public class McRegionUpgrader {
         long l = worldData != null ? worldData.getSeed() : 0L;
         BiomeSourceType<FixedBiomeSourceSettings, FixedBiomeSource> biomeSourceType = BiomeSourceType.FIXED;
         BiomeSourceType<OverworldBiomeSourceSettings, OverworldBiomeSource> biomeSourceType2 = BiomeSourceType.VANILLA_LAYERED;
-        BiomeSource biomeSource = worldData != null && worldData.getLevelData(DimensionType.OVERWORLD).getGeneratorType() == LevelType.FLAT ? biomeSourceType.create(biomeSourceType.createSettings(worldData.getSeed()).setBiome(Biomes.PLAINS)) : biomeSourceType2.create(biomeSourceType2.createSettings(l));
+        BiomeSource biomeSource = worldData != null && worldData.overworldData().getGeneratorType() == LevelType.FLAT ? biomeSourceType.create(biomeSourceType.createSettings(worldData.getSeed()).setBiome(Biomes.PLAINS)) : biomeSourceType2.create(biomeSourceType2.createSettings(l));
         McRegionUpgrader.convertRegions(new File(file, "region"), list, biomeSource, 0, i, progressListener);
         McRegionUpgrader.convertRegions(new File(file2, "region"), list2, biomeSourceType.create(biomeSourceType.createSettings(l).setBiome(Biomes.NETHER_WASTES)), list.size(), i, progressListener);
         McRegionUpgrader.convertRegions(new File(file3, "region"), list3, biomeSourceType.create(biomeSourceType.createSettings(l).setBiome(Biomes.THE_END)), list.size() + list2.size(), i, progressListener);

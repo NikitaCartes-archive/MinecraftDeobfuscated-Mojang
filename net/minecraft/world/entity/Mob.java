@@ -490,6 +490,7 @@ extends LivingEntity {
                 this.spawnAtLocation(itemStack2);
             }
             this.setItemSlotAndDropWhenKilled(equipmentSlot, itemStack);
+            this.playEquipSound(itemStack);
             return true;
         }
         return false;
@@ -587,7 +588,7 @@ extends LivingEntity {
     }
 
     public boolean requiresCustomPersistence() {
-        return false;
+        return this.isPassenger();
     }
 
     protected boolean shouldDespawnInPeaceful() {

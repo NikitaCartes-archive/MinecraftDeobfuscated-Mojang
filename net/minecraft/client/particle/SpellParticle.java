@@ -6,13 +6,13 @@ package net.minecraft.client.particle;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
 public class SpellParticle
@@ -20,8 +20,8 @@ extends TextureSheetParticle {
     private static final Random RANDOM = new Random();
     private final SpriteSet sprites;
 
-    private SpellParticle(Level level, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
-        super(level, d, e, f, 0.5 - RANDOM.nextDouble(), h, 0.5 - RANDOM.nextDouble());
+    private SpellParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
+        super(clientLevel, d, e, f, 0.5 - RANDOM.nextDouble(), h, 0.5 - RANDOM.nextDouble());
         this.sprites = spriteSet;
         this.yd *= (double)0.2f;
         if (g == 0.0 && i == 0.0) {
@@ -74,8 +74,8 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            return new SpellParticle(level, d, e, f, g, h, i, this.sprite);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return new SpellParticle(clientLevel, d, e, f, g, h, i, this.sprite);
         }
     }
 
@@ -89,9 +89,9 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            SpellParticle spellParticle = new SpellParticle(level, d, e, f, g, h, i, this.sprite);
-            float j = level.random.nextFloat() * 0.5f + 0.35f;
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            SpellParticle spellParticle = new SpellParticle(clientLevel, d, e, f, g, h, i, this.sprite);
+            float j = clientLevel.random.nextFloat() * 0.5f + 0.35f;
             spellParticle.setColor(1.0f * j, 0.0f * j, 1.0f * j);
             return spellParticle;
         }
@@ -107,8 +107,8 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            SpellParticle particle = new SpellParticle(level, d, e, f, g, h, i, this.sprite);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            SpellParticle particle = new SpellParticle(clientLevel, d, e, f, g, h, i, this.sprite);
             particle.setAlpha(0.15f);
             particle.setColor((float)g, (float)h, (float)i);
             return particle;
@@ -125,8 +125,8 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            SpellParticle particle = new SpellParticle(level, d, e, f, g, h, i, this.sprite);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            SpellParticle particle = new SpellParticle(clientLevel, d, e, f, g, h, i, this.sprite);
             particle.setColor((float)g, (float)h, (float)i);
             return particle;
         }
@@ -142,8 +142,8 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            return new SpellParticle(level, d, e, f, g, h, i, this.sprite);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return new SpellParticle(clientLevel, d, e, f, g, h, i, this.sprite);
         }
     }
 }

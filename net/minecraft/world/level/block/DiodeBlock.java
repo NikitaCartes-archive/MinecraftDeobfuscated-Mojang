@@ -126,7 +126,7 @@ extends HorizontalDirectionalBlock {
             return i;
         }
         BlockState blockState2 = level.getBlockState(blockPos2);
-        return Math.max(i, blockState2.getBlock() == Blocks.REDSTONE_WIRE ? blockState2.getValue(RedStoneWireBlock.POWER) : 0);
+        return Math.max(i, blockState2.is(Blocks.REDSTONE_WIRE) ? blockState2.getValue(RedStoneWireBlock.POWER) : 0);
     }
 
     protected int getAlternateSignal(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
@@ -138,12 +138,11 @@ extends HorizontalDirectionalBlock {
 
     protected int getAlternateSignalAt(LevelReader levelReader, BlockPos blockPos, Direction direction) {
         BlockState blockState = levelReader.getBlockState(blockPos);
-        Block block = blockState.getBlock();
         if (this.isAlternateInput(blockState)) {
-            if (block == Blocks.REDSTONE_BLOCK) {
+            if (blockState.is(Blocks.REDSTONE_BLOCK)) {
                 return 15;
             }
-            if (block == Blocks.REDSTONE_WIRE) {
+            if (blockState.is(Blocks.REDSTONE_WIRE)) {
                 return blockState.getValue(RedStoneWireBlock.POWER);
             }
             return levelReader.getDirectSignal(blockPos, direction);
@@ -175,7 +174,7 @@ extends HorizontalDirectionalBlock {
 
     @Override
     public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        if (bl || blockState.getBlock() == blockState2.getBlock()) {
+        if (bl || blockState.is(blockState2.getBlock())) {
             return;
         }
         super.onRemove(blockState, level, blockPos, blockState2, bl);

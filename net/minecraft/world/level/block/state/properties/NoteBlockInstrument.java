@@ -7,7 +7,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
@@ -49,38 +48,37 @@ public enum NoteBlockInstrument implements StringRepresentable
     }
 
     public static NoteBlockInstrument byState(BlockState blockState) {
-        Block block = blockState.getBlock();
-        if (block == Blocks.CLAY) {
+        if (blockState.is(Blocks.CLAY)) {
             return FLUTE;
         }
-        if (block == Blocks.GOLD_BLOCK) {
+        if (blockState.is(Blocks.GOLD_BLOCK)) {
             return BELL;
         }
-        if (block.is(BlockTags.WOOL)) {
+        if (blockState.is(BlockTags.WOOL)) {
             return GUITAR;
         }
-        if (block == Blocks.PACKED_ICE) {
+        if (blockState.is(Blocks.PACKED_ICE)) {
             return CHIME;
         }
-        if (block == Blocks.BONE_BLOCK) {
+        if (blockState.is(Blocks.BONE_BLOCK)) {
             return XYLOPHONE;
         }
-        if (block == Blocks.IRON_BLOCK) {
+        if (blockState.is(Blocks.IRON_BLOCK)) {
             return IRON_XYLOPHONE;
         }
-        if (block == Blocks.SOUL_SAND) {
+        if (blockState.is(Blocks.SOUL_SAND)) {
             return COW_BELL;
         }
-        if (block == Blocks.PUMPKIN) {
+        if (blockState.is(Blocks.PUMPKIN)) {
             return DIDGERIDOO;
         }
-        if (block == Blocks.EMERALD_BLOCK) {
+        if (blockState.is(Blocks.EMERALD_BLOCK)) {
             return BIT;
         }
-        if (block == Blocks.HAY_BLOCK) {
+        if (blockState.is(Blocks.HAY_BLOCK)) {
             return BANJO;
         }
-        if (block == Blocks.GLOWSTONE) {
+        if (blockState.is(Blocks.GLOWSTONE)) {
             return PLING;
         }
         Material material = blockState.getMaterial();

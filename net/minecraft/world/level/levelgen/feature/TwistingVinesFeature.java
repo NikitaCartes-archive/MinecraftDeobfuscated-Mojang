@@ -12,7 +12,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GrowingPlantHeadBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -85,8 +84,8 @@ extends Feature<NoneFeatureConfiguration> {
         if (!levelAccessor.isEmptyBlock(blockPos)) {
             return true;
         }
-        Block block = levelAccessor.getBlockState(blockPos.below()).getBlock();
-        return block != Blocks.NETHERRACK && block != Blocks.WARPED_NYLIUM && block != Blocks.WARPED_WART_BLOCK;
+        BlockState blockState = levelAccessor.getBlockState(blockPos.below());
+        return !blockState.is(Blocks.NETHERRACK) && !blockState.is(Blocks.WARPED_NYLIUM) && !blockState.is(Blocks.WARPED_WART_BLOCK);
     }
 }
 

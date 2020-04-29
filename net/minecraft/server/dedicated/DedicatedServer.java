@@ -38,6 +38,7 @@ import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
 import net.minecraft.server.dedicated.ServerWatchdog;
 import net.minecraft.server.gui.MinecraftServerGui;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.OldUsersConverter;
@@ -54,7 +55,6 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.LevelStorageSource;
@@ -387,9 +387,9 @@ implements ServerInterface {
     }
 
     @Override
-    public boolean isUnderSpawnProtection(Level level, BlockPos blockPos, Player player) {
+    public boolean isUnderSpawnProtection(ServerLevel serverLevel, BlockPos blockPos, Player player) {
         int j;
-        if (level.dimension.getType() != DimensionType.OVERWORLD) {
+        if (serverLevel.dimension.getType() != DimensionType.OVERWORLD) {
             return false;
         }
         if (this.getPlayerList().getOps().isEmpty()) {
@@ -401,10 +401,15 @@ implements ServerInterface {
         if (this.getSpawnProtectionRadius() <= 0) {
             return false;
         }
-        BlockPos blockPos2 = level.getSharedSpawnPos();
+        BlockPos blockPos2 = serverLevel.getSharedSpawnPos();
         int i = Mth.abs(blockPos.getX() - blockPos2.getX());
         int k = Math.max(i, j = Mth.abs(blockPos.getZ() - blockPos2.getZ()));
         return k <= this.getSpawnProtectionRadius();
+    }
+
+    @Override
+    public boolean repliesToStatus() {
+        return this.getProperties().enableStatus;
     }
 
     @Override
@@ -525,6 +530,11 @@ implements ServerInterface {
     @Override
     public boolean isSingleplayerOwner(GameProfile gameProfile) {
         return false;
+    }
+
+    @Override
+    public int getScaledTrackingDistance(int i) {
+        return this.getProperties().entityBroadcastRangePercentage * i / 100;
     }
 
     @Override

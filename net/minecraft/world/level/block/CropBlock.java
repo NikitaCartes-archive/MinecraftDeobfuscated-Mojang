@@ -49,7 +49,7 @@ implements BonemealableBlock {
 
     @Override
     protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-        return blockState.getBlock() == Blocks.FARMLAND;
+        return blockState.is(Blocks.FARMLAND);
     }
 
     public IntegerProperty getAgeProperty() {
@@ -107,7 +107,7 @@ implements BonemealableBlock {
             for (int j = -1; j <= 1; ++j) {
                 float g = 0.0f;
                 BlockState blockState = blockGetter.getBlockState(blockPos2.offset(i, 0, j));
-                if (blockState.getBlock() == Blocks.FARMLAND) {
+                if (blockState.is(Blocks.FARMLAND)) {
                     g = 1.0f;
                     if (blockState.getValue(FarmBlock.MOISTURE) > 0) {
                         g = 3.0f;

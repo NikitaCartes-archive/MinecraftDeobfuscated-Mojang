@@ -3,17 +3,17 @@
  */
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
+import net.minecraft.advancements.critereon.DeserializationContext;
 import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.level.storage.loot.LootContext;
 import org.jetbrains.annotations.Nullable;
 
 public class BredAnimalsTrigger
@@ -26,56 +26,59 @@ extends SimpleCriterionTrigger<TriggerInstance> {
     }
 
     @Override
-    public TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-        EntityPredicate entityPredicate = EntityPredicate.fromJson(jsonObject.get("parent"));
-        EntityPredicate entityPredicate2 = EntityPredicate.fromJson(jsonObject.get("partner"));
-        EntityPredicate entityPredicate3 = EntityPredicate.fromJson(jsonObject.get("child"));
-        return new TriggerInstance(entityPredicate, entityPredicate2, entityPredicate3);
+    public TriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
+        EntityPredicate.Composite composite2 = EntityPredicate.Composite.fromJson(jsonObject, "parent", deserializationContext);
+        EntityPredicate.Composite composite3 = EntityPredicate.Composite.fromJson(jsonObject, "partner", deserializationContext);
+        EntityPredicate.Composite composite4 = EntityPredicate.Composite.fromJson(jsonObject, "child", deserializationContext);
+        return new TriggerInstance(composite, composite2, composite3, composite4);
     }
 
-    public void trigger(ServerPlayer serverPlayer, Animal animal, @Nullable Animal animal2, @Nullable AgableMob agableMob) {
-        this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(serverPlayer, animal, animal2, agableMob));
+    public void trigger(ServerPlayer serverPlayer, Animal animal, Animal animal2, @Nullable AgableMob agableMob) {
+        LootContext lootContext = EntityPredicate.createContext(serverPlayer, animal);
+        LootContext lootContext2 = EntityPredicate.createContext(serverPlayer, animal2);
+        LootContext lootContext3 = agableMob != null ? EntityPredicate.createContext(serverPlayer, agableMob) : null;
+        this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(lootContext, lootContext2, lootContext3));
     }
 
     @Override
-    public /* synthetic */ CriterionTriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-        return this.createInstance(jsonObject, jsonDeserializationContext);
+    public /* synthetic */ AbstractCriterionTriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
+        return this.createInstance(jsonObject, composite, deserializationContext);
     }
 
     public static class TriggerInstance
     extends AbstractCriterionTriggerInstance {
-        private final EntityPredicate parent;
-        private final EntityPredicate partner;
-        private final EntityPredicate child;
+        private final EntityPredicate.Composite parent;
+        private final EntityPredicate.Composite partner;
+        private final EntityPredicate.Composite child;
 
-        public TriggerInstance(EntityPredicate entityPredicate, EntityPredicate entityPredicate2, EntityPredicate entityPredicate3) {
-            super(ID);
-            this.parent = entityPredicate;
-            this.partner = entityPredicate2;
-            this.child = entityPredicate3;
+        public TriggerInstance(EntityPredicate.Composite composite, EntityPredicate.Composite composite2, EntityPredicate.Composite composite3, EntityPredicate.Composite composite4) {
+            super(ID, composite);
+            this.parent = composite2;
+            this.partner = composite3;
+            this.child = composite4;
         }
 
         public static TriggerInstance bredAnimals() {
-            return new TriggerInstance(EntityPredicate.ANY, EntityPredicate.ANY, EntityPredicate.ANY);
+            return new TriggerInstance(EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY);
         }
 
         public static TriggerInstance bredAnimals(EntityPredicate.Builder builder) {
-            return new TriggerInstance(builder.build(), EntityPredicate.ANY, EntityPredicate.ANY);
+            return new TriggerInstance(EntityPredicate.Composite.ANY, EntityPredicate.Composite.wrap(builder.build()), EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY);
         }
 
-        public boolean matches(ServerPlayer serverPlayer, Animal animal, @Nullable Animal animal2, @Nullable AgableMob agableMob) {
-            if (!this.child.matches(serverPlayer, agableMob)) {
+        public boolean matches(LootContext lootContext, LootContext lootContext2, @Nullable LootContext lootContext3) {
+            if (lootContext3 != null && !this.child.matches(lootContext3)) {
                 return false;
             }
-            return this.parent.matches(serverPlayer, animal) && this.partner.matches(serverPlayer, animal2) || this.parent.matches(serverPlayer, animal2) && this.partner.matches(serverPlayer, animal);
+            return this.parent.matches(lootContext) && this.partner.matches(lootContext2) || this.parent.matches(lootContext2) && this.partner.matches(lootContext);
         }
 
         @Override
-        public JsonElement serializeToJson() {
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.add("parent", this.parent.serializeToJson());
-            jsonObject.add("partner", this.partner.serializeToJson());
-            jsonObject.add("child", this.child.serializeToJson());
+        public JsonObject serializeToJson(SerializationContext serializationContext) {
+            JsonObject jsonObject = super.serializeToJson(serializationContext);
+            jsonObject.add("parent", this.parent.toJson(serializationContext));
+            jsonObject.add("partner", this.partner.toJson(serializationContext));
+            jsonObject.add("child", this.child.toJson(serializationContext));
             return jsonObject;
         }
     }

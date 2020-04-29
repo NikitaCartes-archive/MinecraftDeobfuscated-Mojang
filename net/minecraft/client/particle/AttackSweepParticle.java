@@ -5,21 +5,21 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
 public class AttackSweepParticle
 extends TextureSheetParticle {
     private final SpriteSet sprites;
 
-    private AttackSweepParticle(Level level, double d, double e, double f, double g, SpriteSet spriteSet) {
-        super(level, d, e, f, 0.0, 0.0, 0.0);
+    private AttackSweepParticle(ClientLevel clientLevel, double d, double e, double f, double g, SpriteSet spriteSet) {
+        super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
         float h;
         this.sprites = spriteSet;
         this.lifetime = 4;
@@ -62,8 +62,8 @@ extends TextureSheetParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            return new AttackSweepParticle(level, d, e, f, g, this.sprites);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            return new AttackSweepParticle(clientLevel, d, e, f, g, this.sprites);
         }
     }
 }

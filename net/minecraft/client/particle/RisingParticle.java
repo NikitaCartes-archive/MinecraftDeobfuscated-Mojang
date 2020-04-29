@@ -5,14 +5,14 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.TextureSheetParticle;
-import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
 public abstract class RisingParticle
 extends TextureSheetParticle {
-    protected RisingParticle(Level level, double d, double e, double f, double g, double h, double i) {
-        super(level, d, e, f, g, h, i);
+    protected RisingParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+        super(clientLevel, d, e, f, g, h, i);
         this.xd = this.xd * (double)0.01f + g;
         this.yd = this.yd * (double)0.01f + h;
         this.zd = this.zd * (double)0.01f + i;

@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.minecraft.world.level.block.state.StateHolder;
@@ -92,6 +93,14 @@ implements StateHolder<S> {
             throw new IllegalArgumentException("Cannot get property " + property + " as it does not exist in " + this.owner);
         }
         return (T)((Comparable)property.getValueClass().cast(comparable));
+    }
+
+    public <T extends Comparable<T>> Optional<T> getOptionalValue(Property<T> property) {
+        Comparable<?> comparable = this.values.get(property);
+        if (comparable == null) {
+            return Optional.empty();
+        }
+        return Optional.of(property.getValueClass().cast(comparable));
     }
 
     @Override

@@ -3,9 +3,16 @@
  */
 package net.minecraft.world.level;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMaps;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerLevel;
@@ -26,8 +33,10 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.PotentialCalculator;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.NearestNeighborBiomeZoomer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -42,16 +51,52 @@ import org.jetbrains.annotations.Nullable;
 
 public final class NaturalSpawner {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final int MAGIC_NUMBER = (int)Math.pow(17.0, 2.0);
+    private static final MobCategory[] SPAWNING_CATEGORIES = (MobCategory[])Stream.of(MobCategory.values()).filter(mobCategory -> mobCategory != MobCategory.MISC).toArray(MobCategory[]::new);
 
-    public static void spawnCategoryForChunk(MobCategory mobCategory, ServerLevel serverLevel, LevelChunk levelChunk) {
+    public static SpawnState createState(int i, Iterable<Entity> iterable, ChunkGetter chunkGetter) {
+        PotentialCalculator potentialCalculator = new PotentialCalculator();
+        Object2IntOpenHashMap object2IntOpenHashMap = new Object2IntOpenHashMap();
+        for (Entity entity : iterable) {
+            MobCategory mobCategory;
+            Mob mob;
+            if (entity instanceof Mob && ((mob = (Mob)entity).isPersistenceRequired() || mob.requiresCustomPersistence()) || (mobCategory = entity.getType().getCategory()) == MobCategory.MISC) continue;
+            BlockPos blockPos = entity.blockPosition();
+            long l = ChunkPos.asLong(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+            chunkGetter.query(l, levelChunk -> {
+                Biome biome = NaturalSpawner.getRoughBiome(blockPos, levelChunk);
+                Biome.MobSpawnCost mobSpawnCost = biome.getMobSpawnCost(entity.getType());
+                if (mobSpawnCost != null) {
+                    potentialCalculator.addCharge(entity.blockPosition(), mobSpawnCost.getCharge());
+                }
+                object2IntOpenHashMap.addTo(mobCategory, 1);
+            });
+        }
+        return new SpawnState(i, object2IntOpenHashMap, potentialCalculator);
+    }
+
+    private static Biome getRoughBiome(BlockPos blockPos, ChunkAccess chunkAccess) {
+        return NearestNeighborBiomeZoomer.INSTANCE.getBiome(0L, blockPos.getX(), blockPos.getY(), blockPos.getZ(), chunkAccess.getBiomes());
+    }
+
+    public static void spawnForChunk(ServerLevel serverLevel, LevelChunk levelChunk, SpawnState spawnState, boolean bl, boolean bl2, boolean bl3) {
+        serverLevel.getProfiler().push("spawner");
+        for (MobCategory mobCategory : SPAWNING_CATEGORIES) {
+            if (!bl && mobCategory.isFriendly() || !bl2 && !mobCategory.isFriendly() || !bl3 && mobCategory.isPersistent() || !spawnState.canSpawnForCategory(mobCategory)) continue;
+            NaturalSpawner.spawnCategoryForChunk(mobCategory, serverLevel, levelChunk, (entityType, blockPos, chunkAccess) -> spawnState.canSpawn(entityType, blockPos, chunkAccess), (mob, chunkAccess) -> spawnState.afterSpawn(mob, chunkAccess));
+        }
+        serverLevel.getProfiler().pop();
+    }
+
+    public static void spawnCategoryForChunk(MobCategory mobCategory, ServerLevel serverLevel, LevelChunk levelChunk, SpawnPredicate spawnPredicate, AfterSpawnCallback afterSpawnCallback) {
         BlockPos blockPos = NaturalSpawner.getRandomPosWithin(serverLevel, levelChunk);
         if (blockPos.getY() < 1) {
             return;
         }
-        NaturalSpawner.spawnCategoryForPosition(mobCategory, serverLevel, levelChunk, blockPos);
+        NaturalSpawner.spawnCategoryForPosition(mobCategory, serverLevel, levelChunk, blockPos, spawnPredicate, afterSpawnCallback);
     }
 
-    public static void spawnCategoryForPosition(MobCategory mobCategory, ServerLevel serverLevel, ChunkAccess chunkAccess, BlockPos blockPos) {
+    public static void spawnCategoryForPosition(MobCategory mobCategory, ServerLevel serverLevel, ChunkAccess chunkAccess, BlockPos blockPos, SpawnPredicate spawnPredicate, AfterSpawnCallback afterSpawnCallback) {
         StructureFeatureManager structureFeatureManager = serverLevel.structureFeatureManager();
         ChunkGenerator<?> chunkGenerator = serverLevel.getChunkSource().getGenerator();
         int i = blockPos.getY();
@@ -67,7 +112,7 @@ public final class NaturalSpawner {
             int n = 6;
             Biome.SpawnerData spawnerData = null;
             SpawnGroupData spawnGroupData = null;
-            int o = Mth.ceil(Math.random() * 4.0);
+            int o = Mth.ceil(serverLevel.random.nextFloat() * 4.0f);
             int p = 0;
             for (int q = 0; q < o; ++q) {
                 double d;
@@ -81,7 +126,7 @@ public final class NaturalSpawner {
                     if (spawnerData == null) continue block0;
                     o = spawnerData.minCount + serverLevel.random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
                 }
-                if (!NaturalSpawner.isValidSpawnPostitionForType(serverLevel, mobCategory, structureFeatureManager, chunkGenerator, spawnerData, mutableBlockPos, d)) continue;
+                if (!NaturalSpawner.isValidSpawnPostitionForType(serverLevel, mobCategory, structureFeatureManager, chunkGenerator, spawnerData, mutableBlockPos, d) || !spawnPredicate.test(spawnerData.type, mutableBlockPos, chunkAccess)) continue;
                 Mob mob = NaturalSpawner.getMobForSpawn(serverLevel, spawnerData.type);
                 if (mob == null) {
                     return;
@@ -91,6 +136,7 @@ public final class NaturalSpawner {
                 spawnGroupData = mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.NATURAL, spawnGroupData, null);
                 ++p;
                 serverLevel.addFreshEntity(mob);
+                afterSpawnCallback.run(mob, chunkAccess);
                 if (++j >= mob.getMaxSpawnClusterSize()) {
                     return;
                 }
@@ -272,6 +318,86 @@ public final class NaturalSpawner {
             return blockPos2;
         }
         return blockPos;
+    }
+
+    @FunctionalInterface
+    public static interface ChunkGetter {
+        public void query(long var1, Consumer<LevelChunk> var3);
+    }
+
+    @FunctionalInterface
+    public static interface AfterSpawnCallback {
+        public void run(Mob var1, ChunkAccess var2);
+    }
+
+    @FunctionalInterface
+    public static interface SpawnPredicate {
+        public boolean test(EntityType<?> var1, BlockPos var2, ChunkAccess var3);
+    }
+
+    public static class SpawnState {
+        private final int spawnableChunkCount;
+        private final Object2IntMap<MobCategory> mobCategoryCounts;
+        private final PotentialCalculator spawnPotential;
+        private final Object2IntMap<MobCategory> unmodifiableMobCategoryCounts;
+        @Nullable
+        private BlockPos lastCheckedPos;
+        @Nullable
+        private EntityType<?> lastCheckedType;
+        private double lastCharge;
+
+        private SpawnState(int i, Object2IntMap<MobCategory> object2IntMap, PotentialCalculator potentialCalculator) {
+            this.spawnableChunkCount = i;
+            this.mobCategoryCounts = object2IntMap;
+            this.spawnPotential = potentialCalculator;
+            this.unmodifiableMobCategoryCounts = Object2IntMaps.unmodifiable(object2IntMap);
+        }
+
+        private boolean canSpawn(EntityType<?> entityType, BlockPos blockPos, ChunkAccess chunkAccess) {
+            double d;
+            this.lastCheckedPos = blockPos;
+            this.lastCheckedType = entityType;
+            Biome biome = NaturalSpawner.getRoughBiome(blockPos, chunkAccess);
+            Biome.MobSpawnCost mobSpawnCost = biome.getMobSpawnCost(entityType);
+            if (mobSpawnCost == null) {
+                this.lastCharge = 0.0;
+                return true;
+            }
+            this.lastCharge = d = mobSpawnCost.getCharge();
+            double e = this.spawnPotential.getPotentialEnergyChange(blockPos, d);
+            return e <= mobSpawnCost.getEnergyBudget();
+        }
+
+        private void afterSpawn(Mob mob, ChunkAccess chunkAccess) {
+            double d;
+            EntityType<?> entityType = mob.getType();
+            BlockPos blockPos = mob.blockPosition();
+            if (blockPos.equals(this.lastCheckedPos) && entityType == this.lastCheckedType) {
+                d = this.lastCharge;
+            } else {
+                Biome biome = NaturalSpawner.getRoughBiome(blockPos, chunkAccess);
+                Biome.MobSpawnCost mobSpawnCost = biome.getMobSpawnCost(entityType);
+                if (mobSpawnCost == null) {
+                    return;
+                }
+                d = mobSpawnCost.getCharge();
+            }
+            this.spawnPotential.addCharge(blockPos, d);
+        }
+
+        @Environment(value=EnvType.CLIENT)
+        public int getSpawnableChunkCount() {
+            return this.spawnableChunkCount;
+        }
+
+        public Object2IntMap<MobCategory> getMobCategoryCounts() {
+            return this.unmodifiableMobCategoryCounts;
+        }
+
+        private boolean canSpawnForCategory(MobCategory mobCategory) {
+            int i = mobCategory.getMaxInstancesPerChunk() * this.spawnableChunkCount / MAGIC_NUMBER;
+            return this.mobCategoryCounts.getInt((Object)mobCategory) < i;
+        }
     }
 }
 

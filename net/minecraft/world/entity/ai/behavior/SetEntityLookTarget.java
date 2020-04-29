@@ -47,7 +47,7 @@ extends Behavior<LivingEntity> {
     @Override
     protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
         Brain<?> brain = livingEntity.getBrain();
-        brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).ifPresent(list -> list.stream().filter(this.predicate).filter(livingEntity2 -> livingEntity2.distanceToSqr(livingEntity) <= (double)this.maxDistSqr).findFirst().ifPresent(livingEntity -> brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker((Entity)livingEntity))));
+        brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).ifPresent(list -> list.stream().filter(this.predicate).filter(livingEntity2 -> livingEntity2.distanceToSqr(livingEntity) <= (double)this.maxDistSqr).findFirst().ifPresent(livingEntity -> brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker((Entity)livingEntity, true))));
     }
 }
 

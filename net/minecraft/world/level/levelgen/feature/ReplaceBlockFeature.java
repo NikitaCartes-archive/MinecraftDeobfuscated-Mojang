@@ -22,7 +22,7 @@ extends Feature<ReplaceBlockConfiguration> {
 
     @Override
     public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, ReplaceBlockConfiguration replaceBlockConfiguration) {
-        if (levelAccessor.getBlockState(blockPos).getBlock() == replaceBlockConfiguration.target.getBlock()) {
+        if (levelAccessor.getBlockState(blockPos).is(replaceBlockConfiguration.target.getBlock())) {
             levelAccessor.setBlock(blockPos, replaceBlockConfiguration.state, 2);
         }
         return true;

@@ -59,7 +59,7 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
                 q = -1;
                 continue;
             }
-            if (blockState5.getBlock() != blockState.getBlock()) continue;
+            if (!blockState5.is(blockState.getBlock())) continue;
             if (q == -1) {
                 bl2 = false;
                 if (p <= 0) {

@@ -4,16 +4,16 @@
 package net.minecraft.advancements.critereon;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
+import net.minecraft.advancements.critereon.DeserializationContext;
 import net.minecraft.advancements.critereon.EnchantmentPredicate;
+import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.NbtPredicate;
+import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,13 +32,13 @@ extends SimpleCriterionTrigger<TriggerInstance> {
     }
 
     @Override
-    public TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+    public TriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
         JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "slots", new JsonObject());
         MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject2.get("occupied"));
         MinMaxBounds.Ints ints2 = MinMaxBounds.Ints.fromJson(jsonObject2.get("full"));
         MinMaxBounds.Ints ints3 = MinMaxBounds.Ints.fromJson(jsonObject2.get("empty"));
         ItemPredicate[] itemPredicates = ItemPredicate.fromJsonArray(jsonObject.get("items"));
-        return new TriggerInstance(ints, ints2, ints3, itemPredicates);
+        return new TriggerInstance(composite, ints, ints2, ints3, itemPredicates);
     }
 
     public void trigger(ServerPlayer serverPlayer, Inventory inventory, ItemStack itemStack) {
@@ -59,12 +59,12 @@ extends SimpleCriterionTrigger<TriggerInstance> {
     }
 
     private void trigger(ServerPlayer serverPlayer, Inventory inventory, ItemStack itemStack, int i, int j, int k) {
-        this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(inventory, itemStack, i, j, k));
+        this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(inventory, itemStack, i, j, k));
     }
 
     @Override
-    public /* synthetic */ CriterionTriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-        return this.createInstance(jsonObject, jsonDeserializationContext);
+    public /* synthetic */ AbstractCriterionTriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
+        return this.createInstance(jsonObject, composite, deserializationContext);
     }
 
     public static class TriggerInstance
@@ -74,8 +74,8 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         private final MinMaxBounds.Ints slotsEmpty;
         private final ItemPredicate[] predicates;
 
-        public TriggerInstance(MinMaxBounds.Ints ints, MinMaxBounds.Ints ints2, MinMaxBounds.Ints ints3, ItemPredicate[] itemPredicates) {
-            super(ID);
+        public TriggerInstance(EntityPredicate.Composite composite, MinMaxBounds.Ints ints, MinMaxBounds.Ints ints2, MinMaxBounds.Ints ints3, ItemPredicate[] itemPredicates) {
+            super(ID, composite);
             this.slotsOccupied = ints;
             this.slotsFull = ints2;
             this.slotsEmpty = ints3;
@@ -83,7 +83,7 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         }
 
         public static TriggerInstance hasItem(ItemPredicate ... itemPredicates) {
-            return new TriggerInstance(MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, itemPredicates);
+            return new TriggerInstance(EntityPredicate.Composite.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, itemPredicates);
         }
 
         public static TriggerInstance hasItem(ItemLike ... itemLikes) {
@@ -95,8 +95,8 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         }
 
         @Override
-        public JsonElement serializeToJson() {
-            JsonObject jsonObject = new JsonObject();
+        public JsonObject serializeToJson(SerializationContext serializationContext) {
+            JsonObject jsonObject = super.serializeToJson(serializationContext);
             if (!(this.slotsOccupied.isAny() && this.slotsFull.isAny() && this.slotsEmpty.isAny())) {
                 JsonObject jsonObject2 = new JsonObject();
                 jsonObject2.add("occupied", this.slotsOccupied.serializeToJson());

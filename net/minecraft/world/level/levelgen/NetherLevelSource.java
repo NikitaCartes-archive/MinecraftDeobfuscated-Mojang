@@ -67,7 +67,7 @@ extends NoiseBasedChunkGenerator<NetherGeneratorSettings> {
             if (Feature.NETHER_BRIDGE.isInsideFeature(this.level, structureFeatureManager, blockPos)) {
                 return Feature.NETHER_BRIDGE.getSpecialEnemies();
             }
-            if (Feature.NETHER_BRIDGE.isInsideBoundingFeature(this.level, structureFeatureManager, blockPos) && this.level.getBlockState(blockPos.below()).getBlock() == Blocks.NETHER_BRICKS) {
+            if (Feature.NETHER_BRIDGE.isInsideBoundingFeature(this.level, structureFeatureManager, blockPos) && this.level.getBlockState(blockPos.below()).is(Blocks.NETHER_BRICKS)) {
                 return Feature.NETHER_BRIDGE.getSpecialEnemies();
             }
         }

@@ -47,6 +47,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagManager;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.player.Player;
@@ -68,10 +69,12 @@ import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.Scoreboard;
@@ -84,6 +87,7 @@ extends Level {
     private final Int2ObjectMap<Entity> entitiesById = new Int2ObjectOpenHashMap<Entity>();
     private final ClientPacketListener connection;
     private final LevelRenderer levelRenderer;
+    private final ClientLevelData clientLevelData;
     private final Minecraft minecraft = Minecraft.getInstance();
     private final List<AbstractClientPlayer> players = Lists.newArrayList();
     private Scoreboard scoreboard = new Scoreboard();
@@ -95,8 +99,9 @@ extends Level {
         object2ObjectArrayMap.put(BiomeColors.WATER_COLOR_RESOLVER, new BlockTintCache());
     });
 
-    public ClientLevel(ClientPacketListener clientPacketListener, LevelData levelData, DimensionType dimensionType, int i, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer) {
-        super(levelData, dimensionType, (level, dimension) -> new ClientChunkCache((ClientLevel)level, i), supplier, true);
+    public ClientLevel(ClientPacketListener clientPacketListener, ClientLevelData clientLevelData, DimensionType dimensionType, int i, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer) {
+        super(clientLevelData, dimensionType, (level, dimension) -> new ClientChunkCache((ClientLevel)level, i), supplier, true);
+        this.clientLevelData = clientLevelData;
         this.connection = clientPacketListener;
         this.levelRenderer = levelRenderer;
         this.setDefaultSpawnPos(new BlockPos(8, 64, 8));
@@ -331,7 +336,7 @@ extends Level {
                 this.trySpawnDripParticles((BlockPos)blockPos, this.getBlockState((BlockPos)blockPos), particleOptions, bl2);
             }
         }
-        if (bl && blockState.getBlock() == Blocks.BARRIER) {
+        if (bl && blockState.is(Blocks.BARRIER)) {
             this.addParticle(ParticleTypes.BARRIER, (double)m + 0.5, (double)n + 0.5, (double)o + 0.5, 0.0, 0.0, 0.0);
         }
         if (!blockState.isCollisionShapeFullBlock(this, mutableBlockPos)) {
@@ -723,9 +728,170 @@ extends Level {
         return (k / j & 0xFF) << 16 | (l / j & 0xFF) << 8 | m / j & 0xFF;
     }
 
+    public BlockPos getSharedSpawnPos() {
+        BlockPos blockPos = new BlockPos(this.levelData.getXSpawn(), this.levelData.getYSpawn(), this.levelData.getZSpawn());
+        if (!this.getWorldBorder().isWithinBounds(blockPos)) {
+            blockPos = this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(this.getWorldBorder().getCenterX(), 0.0, this.getWorldBorder().getCenterZ()));
+        }
+        return blockPos;
+    }
+
+    public void setDefaultSpawnPos(BlockPos blockPos) {
+        this.levelData.setSpawn(blockPos);
+    }
+
+    public String toString() {
+        return "ClientLevel";
+    }
+
     @Override
     public /* synthetic */ ChunkSource getChunkSource() {
         return this.getChunkSource();
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class ClientLevelData
+    implements WritableLevelData {
+        private final long seed;
+        private final ChunkGeneratorProvider generatorProvider;
+        private final boolean hardcore;
+        private final GameRules gameRules;
+        private int xSpawn;
+        private int ySpawn;
+        private int zSpawn;
+        private long gameTime;
+        private long dayTime;
+        private boolean raining;
+        private Difficulty difficulty;
+        private boolean difficultyLocked;
+
+        public ClientLevelData(long l, Difficulty difficulty, boolean bl, ChunkGeneratorProvider chunkGeneratorProvider) {
+            this.seed = l;
+            this.difficulty = difficulty;
+            this.hardcore = bl;
+            this.generatorProvider = chunkGeneratorProvider;
+            this.gameRules = new GameRules();
+        }
+
+        @Override
+        public long getSeed() {
+            return this.seed;
+        }
+
+        @Override
+        public int getXSpawn() {
+            return this.xSpawn;
+        }
+
+        @Override
+        public int getYSpawn() {
+            return this.ySpawn;
+        }
+
+        @Override
+        public int getZSpawn() {
+            return this.zSpawn;
+        }
+
+        @Override
+        public long getGameTime() {
+            return this.gameTime;
+        }
+
+        @Override
+        public long getDayTime() {
+            return this.dayTime;
+        }
+
+        @Override
+        public void setXSpawn(int i) {
+            this.xSpawn = i;
+        }
+
+        @Override
+        public void setYSpawn(int i) {
+            this.ySpawn = i;
+        }
+
+        @Override
+        public void setZSpawn(int i) {
+            this.zSpawn = i;
+        }
+
+        @Override
+        public void setGameTime(long l) {
+            this.gameTime = l;
+        }
+
+        @Override
+        public void setDayTime(long l) {
+            this.dayTime = l;
+        }
+
+        @Override
+        public void setSpawn(BlockPos blockPos) {
+            this.xSpawn = blockPos.getX();
+            this.ySpawn = blockPos.getY();
+            this.zSpawn = blockPos.getZ();
+        }
+
+        @Override
+        public boolean isThundering() {
+            return false;
+        }
+
+        @Override
+        public boolean isRaining() {
+            return this.raining;
+        }
+
+        @Override
+        public void setRaining(boolean bl) {
+            this.raining = bl;
+        }
+
+        @Override
+        public boolean isHardcore() {
+            return this.hardcore;
+        }
+
+        @Override
+        public LevelType getGeneratorType() {
+            return this.generatorProvider.getType();
+        }
+
+        @Override
+        public ChunkGeneratorProvider getGeneratorProvider() {
+            return this.generatorProvider;
+        }
+
+        @Override
+        public GameRules getGameRules() {
+            return this.gameRules;
+        }
+
+        @Override
+        public Difficulty getDifficulty() {
+            return this.difficulty;
+        }
+
+        @Override
+        public boolean isDifficultyLocked() {
+            return this.difficultyLocked;
+        }
+
+        @Override
+        public void fillCrashReportCategory(CrashReportCategory crashReportCategory) {
+            WritableLevelData.super.fillCrashReportCategory(crashReportCategory);
+        }
+
+        public void setDifficulty(Difficulty difficulty) {
+            this.difficulty = difficulty;
+        }
+
+        public void setDifficultyLocked(boolean bl) {
+            this.difficultyLocked = bl;
+        }
     }
 }
 

@@ -3,7 +3,6 @@
  */
 package net.minecraft.advancements;
 
-import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -17,6 +16,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
@@ -97,9 +97,9 @@ public class DisplayInfo {
         return this.hidden;
     }
 
-    public static DisplayInfo fromJson(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-        Component component = GsonHelper.getAsObject(jsonObject, "title", jsonDeserializationContext, Component.class);
-        Component component2 = GsonHelper.getAsObject(jsonObject, "description", jsonDeserializationContext, Component.class);
+    public static DisplayInfo fromJson(JsonObject jsonObject) {
+        MutableComponent component = Component.Serializer.fromJson(jsonObject.get("title"));
+        MutableComponent component2 = Component.Serializer.fromJson(jsonObject.get("description"));
         if (component == null || component2 == null) {
             throw new JsonSyntaxException("Both title and description must be set");
         }

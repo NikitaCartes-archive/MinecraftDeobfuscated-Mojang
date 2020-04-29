@@ -54,7 +54,7 @@ extends PathNavigation {
             return;
         }
         if (this.canUpdatePath()) {
-            this.updatePath();
+            this.followThePath();
         } else if (this.path != null && this.path.getIndex() < this.path.getSize()) {
             vec3 = this.path.getPos(this.mob, this.path.getIndex());
             if (Mth.floor(this.mob.getX()) == Mth.floor(vec3.x) && Mth.floor(this.mob.getY()) == Mth.floor(vec3.y) && Mth.floor(this.mob.getZ()) == Mth.floor(vec3.z)) {

@@ -5,18 +5,18 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.PortalParticle;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.level.Level;
 
 @Environment(value=EnvType.CLIENT)
 public class ReversePortalParticle
 extends PortalParticle {
-    private ReversePortalParticle(Level level, double d, double e, double f, double g, double h, double i) {
-        super(level, d, e, f, g, h, i);
+    private ReversePortalParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+        super(clientLevel, d, e, f, g, h, i);
         this.quadSize = (float)((double)this.quadSize * 1.5);
         this.lifetime = (int)(Math.random() * 2.0) + 60;
     }
@@ -52,8 +52,8 @@ extends PortalParticle {
         }
 
         @Override
-        public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-            ReversePortalParticle reversePortalParticle = new ReversePortalParticle(level, d, e, f, g, h, i);
+        public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+            ReversePortalParticle reversePortalParticle = new ReversePortalParticle(clientLevel, d, e, f, g, h, i);
             reversePortalParticle.pickSprite(this.sprite);
             return reversePortalParticle;
         }

@@ -19,7 +19,7 @@ extends Block {
     @Override
     @Environment(value=EnvType.CLIENT)
     public boolean skipRendering(BlockState blockState, BlockState blockState2, Direction direction) {
-        if (blockState2.getBlock() == this) {
+        if (blockState2.is(this)) {
             return true;
         }
         return super.skipRendering(blockState, blockState2, direction);

@@ -336,7 +336,7 @@ public class EndDragonFight {
         EndPodiumFeature endPodiumFeature = new EndPodiumFeature(bl);
         if (this.portalLocation == null) {
             this.portalLocation = this.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION).below();
-            while (this.level.getBlockState(this.portalLocation).getBlock() == Blocks.BEDROCK && this.portalLocation.getY() > this.level.getSeaLevel()) {
+            while (this.level.getBlockState(this.portalLocation).is(Blocks.BEDROCK) && this.portalLocation.getY() > this.level.getSeaLevel()) {
                 this.portalLocation = this.portalLocation.below();
             }
         }
@@ -423,7 +423,7 @@ public class EndDragonFight {
                     for (int j = 0; j < this.exitPortalPattern.getHeight(); ++j) {
                         for (int k = 0; k < this.exitPortalPattern.getDepth(); ++k) {
                             BlockInWorld blockInWorld = blockPatternMatch.getBlock(i, j, k);
-                            if (blockInWorld.getState().getBlock() != Blocks.BEDROCK && blockInWorld.getState().getBlock() != Blocks.END_PORTAL) continue;
+                            if (!blockInWorld.getState().is(Blocks.BEDROCK) && !blockInWorld.getState().is(Blocks.END_PORTAL)) continue;
                             this.level.setBlockAndUpdate(blockInWorld.getPos(), Blocks.END_STONE.defaultBlockState());
                         }
                     }

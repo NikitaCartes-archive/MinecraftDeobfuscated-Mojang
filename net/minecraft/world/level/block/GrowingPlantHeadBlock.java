@@ -62,7 +62,7 @@ implements BonemealableBlock {
         if (direction == this.growthDirection.getOpposite() && !blockState.canSurvive(levelAccessor, blockPos)) {
             levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
         }
-        if (direction == this.growthDirection && blockState2.getBlock() == this) {
+        if (direction == this.growthDirection && blockState2.is(this)) {
             return this.getBodyBlock().defaultBlockState();
         }
         if (this.scheduleFluidTicks) {

@@ -59,14 +59,14 @@ extends Item {
     }
 
     public static boolean canLightCampFire(BlockState blockState) {
-        return blockState.getBlock().is(BlockTags.CAMPFIRES) && blockState.getValue(BlockStateProperties.WATERLOGGED) == false && blockState.getValue(BlockStateProperties.LIT) == false;
+        return blockState.is(BlockTags.CAMPFIRES, blockStateBase -> blockStateBase.hasProperty(BlockStateProperties.WATERLOGGED) && blockStateBase.hasProperty(BlockStateProperties.LIT)) && blockState.getValue(BlockStateProperties.WATERLOGGED) == false && blockState.getValue(BlockStateProperties.LIT) == false;
     }
 
     public static boolean canUse(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
         BlockState blockState2 = BaseFireBlock.getState(levelAccessor, blockPos);
         boolean bl = false;
         for (Direction direction : Direction.Plane.HORIZONTAL) {
-            if (levelAccessor.getBlockState(blockPos.relative(direction)).getBlock() != Blocks.OBSIDIAN || NetherPortalBlock.isPortal(levelAccessor, blockPos) == null) continue;
+            if (!levelAccessor.getBlockState(blockPos.relative(direction)).is(Blocks.OBSIDIAN) || NetherPortalBlock.isPortal(levelAccessor, blockPos) == null) continue;
             bl = true;
         }
         return blockState.isAir() && (blockState2.canSurvive(levelAccessor, blockPos) || bl);

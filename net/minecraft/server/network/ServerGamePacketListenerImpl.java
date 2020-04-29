@@ -116,6 +116,9 @@ import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.BeaconMenu;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.WritableBookItem;
@@ -847,6 +850,14 @@ implements ServerGamePacketListener {
         throw new IllegalArgumentException("Invalid player action");
     }
 
+    private static boolean wasBlockPlacementAttempt(ServerPlayer serverPlayer, ItemStack itemStack) {
+        if (itemStack.isEmpty()) {
+            return false;
+        }
+        Item item = itemStack.getItem();
+        return (item instanceof BlockItem || item instanceof BucketItem) && !serverPlayer.getCooldowns().isOnCooldown(item);
+    }
+
     @Override
     public void handleUseItemOn(ServerboundUseItemOnPacket serverboundUseItemOnPacket) {
         PacketUtils.ensureRunningOnSameThread(serverboundUseItemOnPacket, this, this.player.getLevel());
@@ -857,14 +868,19 @@ implements ServerGamePacketListener {
         BlockPos blockPos = blockHitResult.getBlockPos();
         Direction direction = blockHitResult.getDirection();
         this.player.resetLastActionTime();
-        if (blockPos.getY() < this.server.getMaxBuildHeight() - 1 || direction != Direction.UP && blockPos.getY() < this.server.getMaxBuildHeight()) {
-            InteractionResult interactionResult;
-            if (this.awaitingPositionFromClient == null && this.player.distanceToSqr((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5) < 64.0 && serverLevel.mayInteract(this.player, blockPos) && (interactionResult = this.player.gameMode.useItemOn(this.player, serverLevel, itemStack, interactionHand, blockHitResult)).shouldSwing()) {
-                this.player.swing(interactionHand, true);
+        if (blockPos.getY() < this.server.getMaxBuildHeight()) {
+            if (this.awaitingPositionFromClient == null && this.player.distanceToSqr((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5) < 64.0 && serverLevel.mayInteract(this.player, blockPos)) {
+                InteractionResult interactionResult = this.player.gameMode.useItemOn(this.player, serverLevel, itemStack, interactionHand, blockHitResult);
+                if (direction == Direction.UP && interactionResult != InteractionResult.SUCCESS && blockPos.getY() >= this.server.getMaxBuildHeight() - 1 && ServerGamePacketListenerImpl.wasBlockPlacementAttempt(this.player, itemStack)) {
+                    MutableComponent component = new TranslatableComponent("build.tooHigh", this.server.getMaxBuildHeight()).withStyle(ChatFormatting.RED);
+                    this.player.connection.send(new ClientboundChatPacket(component, ChatType.GAME_INFO));
+                } else if (interactionResult.shouldSwing()) {
+                    this.player.swing(interactionHand, true);
+                }
             }
         } else {
-            MutableComponent component = new TranslatableComponent("build.tooHigh", this.server.getMaxBuildHeight()).withStyle(ChatFormatting.RED);
-            this.player.connection.send(new ClientboundChatPacket(component, ChatType.GAME_INFO));
+            MutableComponent component2 = new TranslatableComponent("build.tooHigh", this.server.getMaxBuildHeight()).withStyle(ChatFormatting.RED);
+            this.player.connection.send(new ClientboundChatPacket(component2, ChatType.GAME_INFO));
         }
         this.player.connection.send(new ClientboundBlockUpdatePacket(serverLevel, blockPos));
         this.player.connection.send(new ClientboundBlockUpdatePacket(serverLevel, blockPos.relative(direction)));

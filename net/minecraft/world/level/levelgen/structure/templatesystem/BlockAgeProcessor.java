@@ -38,22 +38,22 @@ extends StructureProcessor {
     @Nullable
     public StructureTemplate.StructureBlockInfo processBlock(LevelReader levelReader, BlockPos blockPos, BlockPos blockPos2, StructureTemplate.StructureBlockInfo structureBlockInfo, StructureTemplate.StructureBlockInfo structureBlockInfo2, StructurePlaceSettings structurePlaceSettings) {
         Random random = structurePlaceSettings.getRandom(structureBlockInfo2.pos);
-        Block block = structureBlockInfo2.state.getBlock();
+        BlockState blockState = structureBlockInfo2.state;
         BlockPos blockPos3 = structureBlockInfo2.pos;
-        BlockState blockState = null;
-        if (block == Blocks.STONE_BRICKS || block == Blocks.STONE || block == Blocks.CHISELED_STONE_BRICKS) {
-            blockState = this.maybeReplaceFullStoneBlock(random);
-        } else if (block.is(BlockTags.STAIRS)) {
-            blockState = this.maybeReplaceStairs(random, structureBlockInfo2.state);
-        } else if (block.is(BlockTags.SLABS)) {
-            blockState = this.maybeReplaceSlab(random);
-        } else if (block.is(BlockTags.WALLS)) {
-            blockState = this.maybeReplaceWall(random);
-        } else if (block == Blocks.OBSIDIAN) {
-            blockState = this.maybeReplaceObsidian(random);
+        BlockState blockState2 = null;
+        if (blockState.is(Blocks.STONE_BRICKS) || blockState.is(Blocks.STONE) || blockState.is(Blocks.CHISELED_STONE_BRICKS)) {
+            blockState2 = this.maybeReplaceFullStoneBlock(random);
+        } else if (blockState.is(BlockTags.STAIRS)) {
+            blockState2 = this.maybeReplaceStairs(random, structureBlockInfo2.state);
+        } else if (blockState.is(BlockTags.SLABS)) {
+            blockState2 = this.maybeReplaceSlab(random);
+        } else if (blockState.is(BlockTags.WALLS)) {
+            blockState2 = this.maybeReplaceWall(random);
+        } else if (blockState.is(Blocks.OBSIDIAN)) {
+            blockState2 = this.maybeReplaceObsidian(random);
         }
-        if (blockState != null) {
-            return new StructureTemplate.StructureBlockInfo(blockPos3, blockState, structureBlockInfo2.nbt);
+        if (blockState2 != null) {
+            return new StructureTemplate.StructureBlockInfo(blockPos3, blockState2, structureBlockInfo2.nbt);
         }
         return structureBlockInfo2;
     }

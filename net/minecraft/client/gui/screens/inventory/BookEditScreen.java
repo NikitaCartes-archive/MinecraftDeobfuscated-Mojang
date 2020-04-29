@@ -148,22 +148,20 @@ extends Screen {
             --this.currentPage;
         }
         this.updateButtonVisibility();
-        this.clearDisplayCache();
+        this.clearDisplayCacheAfterPageChange();
     }
 
     private void pageForward() {
         if (this.currentPage < this.getNumPages() - 1) {
             ++this.currentPage;
-            this.pageEdit.setStart();
         } else {
             this.appendPageToBook();
             if (this.currentPage < this.getNumPages() - 1) {
                 ++this.currentPage;
             }
-            this.pageEdit.setStart();
         }
         this.updateButtonVisibility();
-        this.clearDisplayCache();
+        this.clearDisplayCacheAfterPageChange();
     }
 
     @Override
@@ -463,6 +461,9 @@ extends Screen {
 
     @Override
     public boolean mouseClicked(double d, double e, int i) {
+        if (super.mouseClicked(d, e, i)) {
+            return true;
+        }
         if (i == 0) {
             long l = Util.getMillis();
             DisplayCache displayCache = this.getDisplayCache();
@@ -482,7 +483,7 @@ extends Screen {
             this.lastIndex = j;
             this.lastClickTime = l;
         }
-        return super.mouseClicked(d, e, i);
+        return true;
     }
 
     private void selectWord(int i) {
@@ -492,13 +493,16 @@ extends Screen {
 
     @Override
     public boolean mouseDragged(double d, double e, int i, double f, double g) {
+        if (super.mouseDragged(d, e, i, f, g)) {
+            return true;
+        }
         if (i == 0) {
             DisplayCache displayCache = this.getDisplayCache();
             int j = displayCache.getIndexAtPosition(this.font, this.convertScreenToLocal(new Pos2i((int)d, (int)e)));
             this.pageEdit.setCursorPos(j, true);
             this.clearDisplayCache();
         }
-        return super.mouseDragged(d, e, i, f, g);
+        return true;
     }
 
     private DisplayCache getDisplayCache() {
@@ -510,6 +514,11 @@ extends Screen {
 
     private void clearDisplayCache() {
         this.displayCache = null;
+    }
+
+    private void clearDisplayCacheAfterPageChange() {
+        this.pageEdit.setCursorToEnd();
+        this.clearDisplayCache();
     }
 
     private DisplayCache rebuildDisplayCache() {

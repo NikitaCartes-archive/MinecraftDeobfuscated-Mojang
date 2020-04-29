@@ -64,7 +64,7 @@ extends WaterAnimal {
     }
 
     public static boolean checkFishSpawnRules(EntityType<? extends AbstractFish> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
-        return levelAccessor.getBlockState(blockPos).getBlock() == Blocks.WATER && levelAccessor.getBlockState(blockPos.above()).getBlock() == Blocks.WATER;
+        return levelAccessor.getBlockState(blockPos).is(Blocks.WATER) && levelAccessor.getBlockState(blockPos.above()).is(Blocks.WATER);
     }
 
     @Override

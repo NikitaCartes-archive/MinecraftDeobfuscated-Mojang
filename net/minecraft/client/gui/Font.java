@@ -36,7 +36,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class Font {
-    private static final Vector3f SHADOW_OFFSET = new Vector3f(0.0f, 0.0f, 0.001f);
+    private static final Vector3f SHADOW_OFFSET = new Vector3f(0.0f, 0.0f, 0.03f);
     public final int lineHeight = 9;
     public final Random random = new Random();
     private final Function<ResourceLocation, FontSet> fonts;
@@ -280,10 +280,10 @@ public class Font {
             float m = glyphInfo.getAdvance(bl);
             float f2 = n = this.dropShadow ? 1.0f : 0.0f;
             if (style.isStrikethrough()) {
-                this.addEffect(new BakedGlyph.Effect(this.x + n - 1.0f, this.y + n + 4.5f, this.x + n + m, this.y + n + 4.5f - 1.0f, -0.01f, g, h, l, f));
+                this.addEffect(new BakedGlyph.Effect(this.x + n - 1.0f, this.y + n + 4.5f, this.x + n + m, this.y + n + 4.5f - 1.0f, 0.01f, g, h, l, f));
             }
             if (style.isUnderlined()) {
-                this.addEffect(new BakedGlyph.Effect(this.x + n - 1.0f, this.y + n + 9.0f, this.x + n + m, this.y + n + 9.0f - 1.0f, -0.01f, g, h, l, f));
+                this.addEffect(new BakedGlyph.Effect(this.x + n - 1.0f, this.y + n + 9.0f, this.x + n + m, this.y + n + 9.0f - 1.0f, 0.01f, g, h, l, f));
             }
             this.x += m;
             return true;
@@ -295,7 +295,7 @@ public class Font {
                 float h = (float)(i >> 16 & 0xFF) / 255.0f;
                 float j = (float)(i >> 8 & 0xFF) / 255.0f;
                 float k = (float)(i & 0xFF) / 255.0f;
-                this.addEffect(new BakedGlyph.Effect(f - 1.0f, this.y + 9.0f, this.x + 1.0f, this.y - 1.0f, 0.01f, h, j, k, g));
+                this.addEffect(new BakedGlyph.Effect(f - 1.0f, this.y + 9.0f, this.x + 1.0f, this.y - 1.0f, -0.01f, h, j, k, g));
             }
             if (this.effects != null) {
                 BakedGlyph bakedGlyph = Font.this.getFontSet(Style.DEFAULT_FONT).whiteGlyph();

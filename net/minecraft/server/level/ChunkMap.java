@@ -1028,6 +1028,10 @@ implements ChunkHolder.PlayerProvider {
             }
         }
 
+        private int scaledRange(int i) {
+            return ChunkMap.this.level.getServer().getScaledTrackingDistance(i);
+        }
+
         private int getEffectiveRange() {
             Collection<Entity> collection = this.entity.getIndirectPassengers();
             int i = this.range;
@@ -1036,7 +1040,7 @@ implements ChunkHolder.PlayerProvider {
                 if (j <= i) continue;
                 i = j;
             }
-            return i;
+            return this.scaledRange(i);
         }
 
         public void updatePlayers(List<ServerPlayer> list) {

@@ -15,20 +15,20 @@ import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
-import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
 import net.minecraft.world.level.timers.TimerQueue;
 
 public class DerivedLevelData
-implements LevelData {
+implements ServerLevelData {
     private final DimensionType dimensionType;
     private final WorldData worldData;
-    private final LevelData wrapped;
+    private final ServerLevelData wrapped;
 
-    public DerivedLevelData(DimensionType dimensionType, WorldData worldData, LevelData levelData) {
+    public DerivedLevelData(DimensionType dimensionType, WorldData worldData, ServerLevelData serverLevelData) {
         this.dimensionType = dimensionType;
         this.worldData = worldData;
-        this.wrapped = levelData;
+        this.wrapped = serverLevelData;
     }
 
     @Override
@@ -151,7 +151,7 @@ implements LevelData {
 
     @Override
     public boolean isHardcore() {
-        return false;
+        return this.worldData.isHardcore();
     }
 
     @Override

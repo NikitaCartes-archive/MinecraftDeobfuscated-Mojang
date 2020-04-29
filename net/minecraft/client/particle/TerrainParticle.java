@@ -6,6 +6,7 @@ package net.minecraft.client.particle;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -13,8 +14,6 @@ import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
@@ -27,8 +26,8 @@ extends TextureSheetParticle {
     private final float uo;
     private final float vo;
 
-    public TerrainParticle(Level level, double d, double e, double f, double g, double h, double i, BlockState blockState) {
-        super(level, d, e, f, g, h, i);
+    public TerrainParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, BlockState blockState) {
+        super(clientLevel, d, e, f, g, h, i);
         this.blockState = blockState;
         this.setSprite(Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getParticleIcon(blockState));
         this.gravity = 1.0f;
@@ -47,7 +46,7 @@ extends TextureSheetParticle {
 
     public TerrainParticle init(BlockPos blockPos) {
         this.pos = blockPos;
-        if (this.blockState.getBlock() == Blocks.GRASS_BLOCK) {
+        if (this.blockState.is(Blocks.GRASS_BLOCK)) {
             return this;
         }
         this.multiplyColor(blockPos);
@@ -56,8 +55,7 @@ extends TextureSheetParticle {
 
     public TerrainParticle init() {
         this.pos = new BlockPos(this.x, this.y, this.z);
-        Block block = this.blockState.getBlock();
-        if (block == Blocks.GRASS_BLOCK) {
+        if (this.blockState.is(Blocks.GRASS_BLOCK)) {
             return this;
         }
         this.multiplyColor(this.pos);
@@ -105,12 +103,12 @@ extends TextureSheetParticle {
     public static class Provider
     implements ParticleProvider<BlockParticleOption> {
         @Override
-        public Particle createParticle(BlockParticleOption blockParticleOption, Level level, double d, double e, double f, double g, double h, double i) {
+        public Particle createParticle(BlockParticleOption blockParticleOption, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
             BlockState blockState = blockParticleOption.getState();
-            if (blockState.isAir() || blockState.getBlock() == Blocks.MOVING_PISTON) {
+            if (blockState.isAir() || blockState.is(Blocks.MOVING_PISTON)) {
                 return null;
             }
-            return new TerrainParticle(level, d, e, f, g, h, i, blockState).init();
+            return new TerrainParticle(clientLevel, d, e, f, g, h, i, blockState).init();
         }
     }
 }

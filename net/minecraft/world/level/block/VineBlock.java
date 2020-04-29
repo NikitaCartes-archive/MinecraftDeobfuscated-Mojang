@@ -96,7 +96,7 @@ extends Block {
         if (direction.getAxis() != Direction.Axis.Y) {
             BooleanProperty booleanProperty = PROPERTY_BY_DIRECTION.get(direction);
             BlockState blockState = blockGetter.getBlockState(blockPos.above());
-            return blockState.getBlock() == this && blockState.getValue(booleanProperty) != false;
+            return blockState.is(this) && blockState.getValue(booleanProperty) != false;
         }
         return false;
     }
@@ -120,7 +120,7 @@ extends Block {
                 if (blockState2 == null) {
                     blockState2 = blockGetter.getBlockState(blockPos2);
                 }
-                bl = blockState2.getBlock() == this && blockState2.getValue(booleanProperty) != false;
+                bl = blockState2.is(this) && blockState2.getValue(booleanProperty) != false;
             }
             blockState = (BlockState)blockState.setValue(booleanProperty, bl);
         }
@@ -202,7 +202,7 @@ extends Block {
                 return;
             }
         }
-        if (blockPos.getY() > 0 && ((blockState2 = serverLevel.getBlockState(blockPos3 = blockPos.below())).isAir() || blockState2.getBlock() == this) && (blockState4 = blockState2.isAir() ? this.defaultBlockState() : blockState2) != (blockState5 = this.copyRandomFaces(blockState, blockState4, random)) && this.hasHorizontalConnection(blockState5)) {
+        if (blockPos.getY() > 0 && ((blockState2 = serverLevel.getBlockState(blockPos3 = blockPos.below())).isAir() || blockState2.is(this)) && (blockState4 = blockState2.isAir() ? this.defaultBlockState() : blockState2) != (blockState5 = this.copyRandomFaces(blockState, blockState4, random)) && this.hasHorizontalConnection(blockState5)) {
             serverLevel.setBlock(blockPos3, blockState5, 2);
         }
     }
@@ -225,7 +225,7 @@ extends Block {
         Iterable<BlockPos> iterable = BlockPos.betweenClosed(blockPos.getX() - 4, blockPos.getY() - 1, blockPos.getZ() - 4, blockPos.getX() + 4, blockPos.getY() + 1, blockPos.getZ() + 4);
         int j = 5;
         for (BlockPos blockPos2 : iterable) {
-            if (blockGetter.getBlockState(blockPos2).getBlock() != this || --j > 0) continue;
+            if (!blockGetter.getBlockState(blockPos2).is(this) || --j > 0) continue;
             return false;
         }
         return true;
@@ -234,7 +234,7 @@ extends Block {
     @Override
     public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
         BlockState blockState2 = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos());
-        if (blockState2.getBlock() == this) {
+        if (blockState2.is(this)) {
             return this.countFaces(blockState2) < PROPERTY_BY_DIRECTION.size();
         }
         return super.canBeReplaced(blockState, blockPlaceContext);
@@ -244,7 +244,7 @@ extends Block {
     @Nullable
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
         BlockState blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos());
-        boolean bl = blockState.getBlock() == this;
+        boolean bl = blockState.is(this);
         BlockState blockState2 = bl ? blockState : this.defaultBlockState();
         for (Direction direction : blockPlaceContext.getNearestLookingDirections()) {
             boolean bl2;

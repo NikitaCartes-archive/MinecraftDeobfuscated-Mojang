@@ -35,7 +35,7 @@ implements Predicate<BlockInWorld> {
     @Override
     public boolean test(BlockInWorld blockInWorld) {
         BlockState blockState = blockInWorld.getState();
-        if (blockState.getBlock() != this.state.getBlock()) {
+        if (!blockState.is(this.state.getBlock())) {
             return false;
         }
         for (Property<?> property : this.properties) {

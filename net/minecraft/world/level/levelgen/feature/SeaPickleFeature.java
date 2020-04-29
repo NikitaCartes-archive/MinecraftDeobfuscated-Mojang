@@ -32,7 +32,7 @@ extends Feature<CountFeatureConfiguration> {
             int m = levelAccessor.getHeight(Heightmap.Types.OCEAN_FLOOR, blockPos.getX() + k, blockPos.getZ() + l);
             BlockPos blockPos2 = new BlockPos(blockPos.getX() + k, m, blockPos.getZ() + l);
             BlockState blockState = (BlockState)Blocks.SEA_PICKLE.defaultBlockState().setValue(SeaPickleBlock.PICKLES, random.nextInt(4) + 1);
-            if (levelAccessor.getBlockState(blockPos2).getBlock() != Blocks.WATER || !blockState.canSurvive(levelAccessor, blockPos2)) continue;
+            if (!levelAccessor.getBlockState(blockPos2).is(Blocks.WATER) || !blockState.canSurvive(levelAccessor, blockPos2)) continue;
             levelAccessor.setBlock(blockPos2, blockState, 2);
             ++i;
         }

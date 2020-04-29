@@ -4,7 +4,6 @@
 package net.minecraft.advancements;
 
 import com.google.common.collect.Maps;
-import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -13,6 +12,8 @@ import java.util.Map;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.CriterionTriggerInstance;
+import net.minecraft.advancements.critereon.DeserializationContext;
+import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -32,13 +33,13 @@ public class Criterion {
     public void serializeToNetwork(FriendlyByteBuf friendlyByteBuf) {
     }
 
-    public static Criterion criterionFromJson(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+    public static Criterion criterionFromJson(JsonObject jsonObject, DeserializationContext deserializationContext) {
         ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "trigger"));
         CriterionTrigger criterionTrigger = CriteriaTriggers.getCriterion(resourceLocation);
         if (criterionTrigger == null) {
             throw new JsonSyntaxException("Invalid criterion trigger: " + resourceLocation);
         }
-        Object criterionTriggerInstance = criterionTrigger.createInstance(GsonHelper.getAsJsonObject(jsonObject, "conditions", new JsonObject()), jsonDeserializationContext);
+        Object criterionTriggerInstance = criterionTrigger.createInstance(GsonHelper.getAsJsonObject(jsonObject, "conditions", new JsonObject()), deserializationContext);
         return new Criterion((CriterionTriggerInstance)criterionTriggerInstance);
     }
 
@@ -46,10 +47,10 @@ public class Criterion {
         return new Criterion();
     }
 
-    public static Map<String, Criterion> criteriaFromJson(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+    public static Map<String, Criterion> criteriaFromJson(JsonObject jsonObject, DeserializationContext deserializationContext) {
         HashMap<String, Criterion> map = Maps.newHashMap();
         for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
-            map.put(entry.getKey(), Criterion.criterionFromJson(GsonHelper.convertToJsonObject(entry.getValue(), "criterion"), jsonDeserializationContext));
+            map.put(entry.getKey(), Criterion.criterionFromJson(GsonHelper.convertToJsonObject(entry.getValue(), "criterion"), deserializationContext));
         }
         return map;
     }
@@ -79,7 +80,10 @@ public class Criterion {
     public JsonElement serializeToJson() {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("trigger", this.trigger.getCriterion().toString());
-        jsonObject.add("conditions", this.trigger.serializeToJson());
+        JsonObject jsonObject2 = this.trigger.serializeToJson(SerializationContext.INSTANCE);
+        if (jsonObject2.size() != 0) {
+            jsonObject.add("conditions", jsonObject2);
+        }
         return jsonObject;
     }
 }

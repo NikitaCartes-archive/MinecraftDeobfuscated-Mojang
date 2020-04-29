@@ -24,7 +24,7 @@ extends Feature<NoneFeatureConfiguration> {
 
     @Override
     public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
-        if (levelAccessor.isEmptyBlock(blockPos.above()) && levelAccessor.getBlockState(blockPos).getBlock() == Blocks.END_STONE) {
+        if (levelAccessor.isEmptyBlock(blockPos.above()) && levelAccessor.getBlockState(blockPos).is(Blocks.END_STONE)) {
             ChorusFlowerBlock.generatePlant(levelAccessor, blockPos.above(), random, 8);
             return true;
         }

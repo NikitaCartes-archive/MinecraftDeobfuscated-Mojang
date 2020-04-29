@@ -33,7 +33,7 @@ import net.minecraft.world.level.timers.TimerQueue;
 public class ScheduleCommand {
     private static final SimpleCommandExceptionType ERROR_SAME_TICK = new SimpleCommandExceptionType(new TranslatableComponent("commands.schedule.same_tick"));
     private static final DynamicCommandExceptionType ERROR_CANT_REMOVE = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.schedule.cleared.failure", object));
-    private static final SuggestionProvider<CommandSourceStack> SUGGEST_SCHEDULE = (commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggest(((CommandSourceStack)commandContext.getSource()).getLevel().getLevelData().getScheduledEvents().getEventsIds(), suggestionsBuilder);
+    private static final SuggestionProvider<CommandSourceStack> SUGGEST_SCHEDULE = (commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggest(((CommandSourceStack)commandContext.getSource()).getServer().getWorldData().overworldData().getScheduledEvents().getEventsIds(), suggestionsBuilder);
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("schedule").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.literal("function").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("function", FunctionArgument.functions()).suggests(FunctionCommand.SUGGEST_FUNCTION).then((ArgumentBuilder<CommandSourceStack, ?>)((RequiredArgumentBuilder)((RequiredArgumentBuilder)Commands.argument("time", TimeArgument.time()).executes(commandContext -> ScheduleCommand.schedule((CommandSourceStack)commandContext.getSource(), FunctionArgument.getFunctionOrTag(commandContext, "function"), IntegerArgumentType.getInteger(commandContext, "time"), true))).then(Commands.literal("append").executes(commandContext -> ScheduleCommand.schedule((CommandSourceStack)commandContext.getSource(), FunctionArgument.getFunctionOrTag(commandContext, "function"), IntegerArgumentType.getInteger(commandContext, "time"), false)))).then(Commands.literal("replace").executes(commandContext -> ScheduleCommand.schedule((CommandSourceStack)commandContext.getSource(), FunctionArgument.getFunctionOrTag(commandContext, "function"), IntegerArgumentType.getInteger(commandContext, "time"), true))))))).then(Commands.literal("clear").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("function", StringArgumentType.greedyString()).suggests(SUGGEST_SCHEDULE).executes(commandContext -> ScheduleCommand.remove((CommandSourceStack)commandContext.getSource(), StringArgumentType.getString(commandContext, "function"))))));
@@ -45,7 +45,7 @@ public class ScheduleCommand {
         }
         long l = commandSourceStack.getLevel().getGameTime() + (long)i;
         ResourceLocation resourceLocation = pair.getFirst();
-        TimerQueue<MinecraftServer> timerQueue = commandSourceStack.getLevel().getLevelData().getScheduledEvents();
+        TimerQueue<MinecraftServer> timerQueue = commandSourceStack.getServer().getWorldData().overworldData().getScheduledEvents();
         pair.getSecond().ifLeft(commandFunction -> {
             String string = resourceLocation.toString();
             if (bl) {
@@ -65,7 +65,7 @@ public class ScheduleCommand {
     }
 
     private static int remove(CommandSourceStack commandSourceStack, String string) throws CommandSyntaxException {
-        int i = commandSourceStack.getLevel().getLevelData().getScheduledEvents().remove(string);
+        int i = commandSourceStack.getServer().getWorldData().overworldData().getScheduledEvents().remove(string);
         if (i == 0) {
             throw ERROR_CANT_REMOVE.create(string);
         }

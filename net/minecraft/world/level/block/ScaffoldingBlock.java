@@ -134,7 +134,7 @@ implements SimpleWaterloggedBlock {
     }
 
     private boolean isBottom(BlockGetter blockGetter, BlockPos blockPos, int i) {
-        return i > 0 && blockGetter.getBlockState(blockPos.below()).getBlock() != this;
+        return i > 0 && !blockGetter.getBlockState(blockPos.below()).is(this);
     }
 
     public static int getDistance(BlockGetter blockGetter, BlockPos blockPos) {
@@ -143,13 +143,13 @@ implements SimpleWaterloggedBlock {
         BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable().move(Direction.DOWN);
         BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
         int i = 7;
-        if (blockState.getBlock() == Blocks.SCAFFOLDING) {
+        if (blockState.is(Blocks.SCAFFOLDING)) {
             i = blockState.getValue(DISTANCE);
         } else if (blockState.isFaceSturdy(blockGetter, mutableBlockPos, Direction.UP)) {
             return 0;
         }
         Iterator<Direction> iterator = Direction.Plane.HORIZONTAL.iterator();
-        while (iterator.hasNext() && ((blockState2 = blockGetter.getBlockState(mutableBlockPos.setWithOffset(blockPos, direction = iterator.next()))).getBlock() != Blocks.SCAFFOLDING || (i = Math.min(i, blockState2.getValue(DISTANCE) + 1)) != 1)) {
+        while (iterator.hasNext() && (!(blockState2 = blockGetter.getBlockState(mutableBlockPos.setWithOffset(blockPos, direction = iterator.next()))).is(Blocks.SCAFFOLDING) || (i = Math.min(i, blockState2.getValue(DISTANCE) + 1)) != 1)) {
         }
         return i;
     }

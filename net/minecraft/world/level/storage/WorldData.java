@@ -13,7 +13,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.ServerLevelData;
 import org.jetbrains.annotations.Nullable;
 
 public interface WorldData {
@@ -62,7 +62,7 @@ public interface WorldData {
 
     public void setCustomBossEvents(@Nullable CompoundTag var1);
 
-    public LevelData getLevelData(DimensionType var1);
+    public ServerLevelData overworldData();
 
     public LevelSettings getLevelSettings();
 

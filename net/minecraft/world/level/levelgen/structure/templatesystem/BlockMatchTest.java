@@ -28,7 +28,7 @@ extends RuleTest {
 
     @Override
     public boolean test(BlockState blockState, Random random) {
-        return blockState.getBlock() == this.block;
+        return blockState.is(this.block);
     }
 
     @Override

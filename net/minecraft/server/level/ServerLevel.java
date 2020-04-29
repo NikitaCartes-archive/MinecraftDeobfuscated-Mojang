@@ -5,6 +5,7 @@ package net.minecraft.server.level;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
@@ -14,7 +15,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
@@ -69,7 +68,6 @@ import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagManager;
 import net.minecraft.util.ClassInstanceMultiMap;
 import net.minecraft.util.CsvOutput;
@@ -108,13 +106,13 @@ import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelType;
+import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.PortalForcer;
 import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.TickNextTickData;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -126,10 +124,6 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.material.Fluid;
@@ -138,8 +132,8 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.saveddata.maps.MapIndex;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
-import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
@@ -161,6 +155,7 @@ extends Level {
     private final List<ServerPlayer> players = Lists.newArrayList();
     boolean tickingEntities;
     private final MinecraftServer server;
+    private final ServerLevelData serverLevelData;
     public boolean noSave;
     private boolean allPlayersSleeping;
     private int emptyTime;
@@ -173,20 +168,30 @@ extends Level {
     private boolean handlingTick;
     @Nullable
     private final WanderingTraderSpawner wanderingTraderSpawner;
-    private final StructureFeatureManager structureFeatureManager = new StructureFeatureManager();
+    private final StructureFeatureManager structureFeatureManager;
 
-    public ServerLevel(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, LevelData levelData, DimensionType dimensionType, ChunkProgressListener chunkProgressListener) {
-        super(levelData, dimensionType, (level, dimension) -> new ServerChunkCache((ServerLevel)level, levelStorageAccess, minecraftServer.getFixerUpper(), minecraftServer.getStructureManager(), executor, dimension.createRandomLevelGenerator(), minecraftServer.getPlayerList().getViewDistance(), minecraftServer.forceSynchronousWrites(), chunkProgressListener, () -> minecraftServer.getLevel(DimensionType.OVERWORLD).getDataStorage()), minecraftServer::getProfiler, false);
+    public ServerLevel(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, ServerLevelData serverLevelData, DimensionType dimensionType, ChunkProgressListener chunkProgressListener) {
+        super(serverLevelData, dimensionType, (level, dimension) -> new ServerChunkCache((ServerLevel)level, levelStorageAccess, minecraftServer.getFixerUpper(), minecraftServer.getStructureManager(), executor, dimension.createRandomLevelGenerator(), minecraftServer.getPlayerList().getViewDistance(), minecraftServer.forceSynchronousWrites(), chunkProgressListener, () -> minecraftServer.getLevel(DimensionType.OVERWORLD).getDataStorage()), minecraftServer::getProfiler, false);
         this.server = minecraftServer;
+        this.serverLevelData = serverLevelData;
         this.portalForcer = new PortalForcer(this);
         this.updateSkyBrightness();
         this.prepareWeather();
         this.getWorldBorder().setAbsoluteMaxSize(minecraftServer.getAbsoluteMaxWorldSize());
         this.raids = this.getDataStorage().computeIfAbsent(() -> new Raids(this), Raids.getFileId(this.dimension));
         if (!minecraftServer.isSingleplayer()) {
-            this.getLevelData().setGameType(minecraftServer.getDefaultGameType());
+            serverLevelData.setGameType(minecraftServer.getDefaultGameType());
         }
-        this.wanderingTraderSpawner = this.dimension.getType() == DimensionType.OVERWORLD ? new WanderingTraderSpawner(this) : null;
+        this.wanderingTraderSpawner = this.dimension.getType() == DimensionType.OVERWORLD ? new WanderingTraderSpawner(this, this.serverLevelData) : null;
+        this.structureFeatureManager = new StructureFeatureManager(this, this.serverLevelData);
+    }
+
+    public void setWeatherParameters(int i, int j, boolean bl, boolean bl2) {
+        this.serverLevelData.setClearWeatherTime(i);
+        this.serverLevelData.setRainTime(j);
+        this.serverLevelData.setThunderTime(j);
+        this.serverLevelData.setRaining(bl);
+        this.serverLevelData.setThundering(bl2);
     }
 
     @Override
@@ -209,9 +214,9 @@ extends Level {
         boolean bl = this.isRaining();
         if (this.dimension.isHasSkyLight()) {
             if (this.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE)) {
-                int i = this.levelData.getClearWeatherTime();
-                j = this.levelData.getThunderTime();
-                int k = this.levelData.getRainTime();
+                int i = this.serverLevelData.getClearWeatherTime();
+                j = this.serverLevelData.getThunderTime();
+                int k = this.serverLevelData.getRainTime();
                 boolean bl2 = this.levelData.isThundering();
                 boolean bl3 = this.levelData.isRaining();
                 if (i > 0) {
@@ -236,11 +241,11 @@ extends Level {
                         k = bl3 ? this.random.nextInt(12000) + 12000 : this.random.nextInt(168000) + 12000;
                     }
                 }
-                this.levelData.setThunderTime(j);
-                this.levelData.setRainTime(k);
-                this.levelData.setClearWeatherTime(i);
-                this.levelData.setThundering(bl2);
-                this.levelData.setRaining(bl3);
+                this.serverLevelData.setThunderTime(j);
+                this.serverLevelData.setRainTime(k);
+                this.serverLevelData.setClearWeatherTime(i);
+                this.serverLevelData.setThundering(bl2);
+                this.serverLevelData.setRaining(bl3);
             }
             this.oThunderLevel = this.thunderLevel;
             this.thunderLevel = this.levelData.isThundering() ? (float)((double)this.thunderLevel + 0.01) : (float)((double)this.thunderLevel - 0.01);
@@ -458,10 +463,10 @@ extends Level {
     }
 
     private void stopWeather() {
-        this.levelData.setRainTime(0);
-        this.levelData.setRaining(false);
-        this.levelData.setThunderTime(0);
-        this.levelData.setThundering(false);
+        this.serverLevelData.setRainTime(0);
+        this.serverLevelData.setRaining(false);
+        this.serverLevelData.setThunderTime(0);
+        this.serverLevelData.setThundering(false);
     }
 
     public void resetEmptyTime() {
@@ -477,7 +482,7 @@ extends Level {
 
     private void tickBlock(TickNextTickData<Block> tickNextTickData) {
         BlockState blockState = this.getBlockState(tickNextTickData.pos);
-        if (blockState.getBlock() == tickNextTickData.getType()) {
+        if (blockState.is(tickNextTickData.getType())) {
             blockState.tick(this, tickNextTickData.pos, this.random);
         }
     }
@@ -555,60 +560,6 @@ extends Level {
         return !this.server.isUnderSpawnProtection(this, blockPos, player) && this.getWorldBorder().isWithinBounds(blockPos);
     }
 
-    public void setInitialSpawn(boolean bl) {
-        ChunkPos chunkPos;
-        if (!this.dimension.mayRespawn()) {
-            this.levelData.setSpawn(BlockPos.ZERO.above(this.getChunkSource().getGenerator().getSpawnHeight()));
-            return;
-        }
-        if (this.levelData.getGeneratorType() == LevelType.DEBUG_ALL_BLOCK_STATES) {
-            this.levelData.setSpawn(BlockPos.ZERO.above());
-            return;
-        }
-        BiomeSource biomeSource = this.getChunkSource().getGenerator().getBiomeSource();
-        List<Biome> list = biomeSource.getPlayerSpawnBiomes();
-        Random random = new Random(this.getSeed());
-        BlockPos blockPos = biomeSource.findBiomeHorizontal(0, this.getSeaLevel(), 0, 256, list, random);
-        ChunkPos chunkPos2 = chunkPos = blockPos == null ? new ChunkPos(0, 0) : new ChunkPos(blockPos);
-        if (blockPos == null) {
-            LOGGER.warn("Unable to find spawn biome");
-        }
-        boolean bl2 = false;
-        for (Block block : BlockTags.VALID_SPAWN.getValues()) {
-            if (!biomeSource.getSurfaceBlocks().contains(block.defaultBlockState())) continue;
-            bl2 = true;
-            break;
-        }
-        this.levelData.setSpawn(chunkPos.getWorldPosition().offset(8, this.getChunkSource().getGenerator().getSpawnHeight(), 8));
-        int i = 0;
-        int j = 0;
-        int k = 0;
-        int l = -1;
-        int m = 32;
-        for (int n = 0; n < 1024; ++n) {
-            BlockPos blockPos2;
-            if (i > -16 && i <= 16 && j > -16 && j <= 16 && (blockPos2 = this.dimension.getSpawnPosInChunk(new ChunkPos(chunkPos.x + i, chunkPos.z + j), bl2)) != null) {
-                this.levelData.setSpawn(blockPos2);
-                break;
-            }
-            if (i == j || i < 0 && i == -j || i > 0 && i == 1 - j) {
-                int o = k;
-                k = -l;
-                l = o;
-            }
-            i += k;
-            j += l;
-        }
-        if (bl) {
-            this.generateBonusItemsNearSpawn();
-        }
-    }
-
-    protected void generateBonusItemsNearSpawn() {
-        ConfiguredFeature<NoneFeatureConfiguration, ?> configuredFeature = Feature.BONUS_CHEST.configured(FeatureConfiguration.NONE);
-        configuredFeature.place(this, this.structureFeatureManager(), this.getChunkSource().getGenerator(), this.random, new BlockPos(this.levelData.getXSpawn(), this.levelData.getYSpawn(), this.levelData.getZSpawn()));
-    }
-
     @Nullable
     public BlockPos getDimensionSpecificSpawn() {
         return this.dimension.getDimensionSpecificSpawn();
@@ -630,7 +581,7 @@ extends Level {
     }
 
     protected void saveLevelData() {
-        this.dimension.saveData();
+        this.dimension.saveData(this.serverLevelData);
         this.getChunkSource().getDataStorage().save();
     }
 
@@ -669,17 +620,6 @@ extends Level {
             return null;
         }
         return list.get(this.random.nextInt(list.size()));
-    }
-
-    public Object2IntMap<MobCategory> getMobCategoryCounts() {
-        Object2IntOpenHashMap<MobCategory> object2IntMap = new Object2IntOpenHashMap<MobCategory>();
-        for (Entity entity : this.entitiesById.values()) {
-            MobCategory mobCategory;
-            Mob mob;
-            if (entity instanceof Mob && ((mob = (Mob)entity).isPersistenceRequired() || mob.requiresCustomPersistence()) || (mobCategory = entity.getType().getCategory()) == MobCategory.MISC || !this.getChunkSource().isInAccessibleChunk(entity)) continue;
-            object2IntMap.mergeInt(mobCategory, 1, Integer::sum);
-        }
-        return object2IntMap;
     }
 
     @Override
@@ -932,7 +872,7 @@ extends Level {
 
     private boolean doBlockEvent(BlockEventData blockEventData) {
         BlockState blockState = this.getBlockState(blockEventData.getPos());
-        if (blockState.getBlock() == blockEventData.getBlock()) {
+        if (blockState.is(blockEventData.getBlock())) {
             return blockState.triggerEvent(this, blockEventData.getPos(), blockEventData.getParamA(), blockEventData.getParamB());
         }
         return false;
@@ -1001,7 +941,7 @@ extends Level {
 
     @Nullable
     public BlockPos findNearestMapFeature(String string, BlockPos blockPos, int i, boolean bl) {
-        if (!this.levelData.shouldGenerateMapFeatures()) {
+        if (!this.serverLevelData.shouldGenerateMapFeatures()) {
             return null;
         }
         return this.getChunkSource().getGenerator().findNearestMapFeature(this, string, blockPos, i, bl);
@@ -1025,7 +965,7 @@ extends Level {
     @Override
     public void setGameTime(long l) {
         super.setGameTime(l);
-        this.levelData.getScheduledEvents().tick(this.server, l);
+        this.serverLevelData.getScheduledEvents().tick(this.server, l);
     }
 
     @Override
@@ -1053,13 +993,20 @@ extends Level {
         return this.getServer().getLevel(DimensionType.OVERWORLD).getDataStorage().computeIfAbsent(MapIndex::new, "idcounts").getFreeAuxValueForMap();
     }
 
-    @Override
     public void setDefaultSpawnPos(BlockPos blockPos) {
         ChunkPos chunkPos = new ChunkPos(new BlockPos(this.levelData.getXSpawn(), 0, this.levelData.getZSpawn()));
-        super.setDefaultSpawnPos(blockPos);
+        this.levelData.setSpawn(blockPos);
         this.getChunkSource().removeRegionTicket(TicketType.START, chunkPos, 11, Unit.INSTANCE);
         this.getChunkSource().addRegionTicket(TicketType.START, new ChunkPos(blockPos), 11, Unit.INSTANCE);
         this.getServer().getPlayerList().broadcastAll(new ClientboundSetDefaultSpawnPositionPacket(blockPos));
+    }
+
+    public BlockPos getSharedSpawnPos() {
+        BlockPos blockPos = new BlockPos(this.levelData.getXSpawn(), this.levelData.getYSpawn(), this.levelData.getZSpawn());
+        if (!this.getWorldBorder().isWithinBounds(blockPos)) {
+            blockPos = this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(this.getWorldBorder().getCenterX(), 0.0, this.getWorldBorder().getCenterZ()));
+        }
+        return blockPos;
     }
 
     public LongSet getForcedChunks() {
@@ -1150,11 +1097,15 @@ extends Level {
     }
 
     public void saveDebugReport(Path path) throws IOException {
+        Object spawnState;
         ChunkMap chunkMap = this.getChunkSource().chunkMap;
         try (BufferedWriter writer = Files.newBufferedWriter(path.resolve("stats.txt"), new OpenOption[0]);){
             writer.write(String.format("spawning_chunks: %d\n", chunkMap.getDistanceManager().getNaturalSpawnChunkCount()));
-            for (Object2IntMap.Entry entry : this.getMobCategoryCounts().object2IntEntrySet()) {
-                writer.write(String.format("spawn_count.%s: %d\n", ((MobCategory)((Object)entry.getKey())).getName(), entry.getIntValue()));
+            spawnState = this.getChunkSource().getLastSpawnState();
+            if (spawnState != null) {
+                for (Object2IntMap.Entry entry : ((NaturalSpawner.SpawnState)spawnState).getMobCategoryCounts().object2IntEntrySet()) {
+                    writer.write(String.format("spawn_count.%s: %d\n", ((MobCategory)((Object)entry.getKey())).getName(), entry.getIntValue()));
+                }
             }
             writer.write(String.format("entities: %d\n", this.entitiesById.size()));
             writer.write(String.format("block_entities: %d\n", this.blockEntityList.size()));
@@ -1166,19 +1117,19 @@ extends Level {
         CrashReport crashReport = new CrashReport("Level dump", new Exception("dummy"));
         this.fillReportDetails(crashReport);
         BufferedWriter writer2 = Files.newBufferedWriter(path.resolve("example_crash.txt"), new OpenOption[0]);
-        Object object = null;
+        spawnState = null;
         try {
             writer2.write(crashReport.getFriendlyReport());
         } catch (Throwable throwable) {
-            object = throwable;
+            spawnState = throwable;
             throw throwable;
         } finally {
             if (writer2 != null) {
-                if (object != null) {
+                if (spawnState != null) {
                     try {
                         ((Writer)writer2).close();
                     } catch (Throwable throwable) {
-                        ((Throwable)object).addSuppressed(throwable);
+                        ((Throwable)spawnState).addSuppressed(throwable);
                     }
                 } else {
                     ((Writer)writer2).close();
@@ -1186,20 +1137,37 @@ extends Level {
             }
         }
         Path path2 = path.resolve("chunks.csv");
-        Throwable throwable = null;
-        try (BufferedWriter writer3 = Files.newBufferedWriter(path2, new OpenOption[0]);){
+        BufferedWriter writer3 = Files.newBufferedWriter(path2, new OpenOption[0]);
+        Object object = null;
+        try {
             chunkMap.dumpChunks(writer3);
+        } catch (Throwable throwable) {
+            object = throwable;
+            throw throwable;
+        } finally {
+            if (writer3 != null) {
+                if (object != null) {
+                    try {
+                        ((Writer)writer3).close();
+                    } catch (Throwable throwable) {
+                        ((Throwable)object).addSuppressed(throwable);
+                    }
+                } else {
+                    ((Writer)writer3).close();
+                }
+            }
+        }
+        Path path3 = path.resolve("entities.csv");
+        Throwable throwable = null;
+        try (BufferedWriter writer4 = Files.newBufferedWriter(path3, new OpenOption[0]);){
+            ServerLevel.dumpEntities(writer4, this.entitiesById.values());
         } catch (Throwable throwable2) {
             Throwable throwable3 = throwable2;
             throw throwable2;
         }
-        Path path3 = path.resolve("entities.csv");
-        try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path3, new OpenOption[0]);){
-            ServerLevel.dumpEntities(bufferedWriter, this.entitiesById.values());
-        }
         Path path4 = path.resolve("global_entities.csv");
-        try (BufferedWriter writer5 = Files.newBufferedWriter(path4, new OpenOption[0]);){
-            ServerLevel.dumpEntities(writer5, this.globalEntities);
+        try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path4, new OpenOption[0]);){
+            ServerLevel.dumpEntities(bufferedWriter, this.globalEntities);
         }
         Path path5 = path.resolve("block_entities.csv");
         try (BufferedWriter writer6 = Files.newBufferedWriter(path5, new OpenOption[0]);){
@@ -1240,6 +1208,14 @@ extends Level {
     @Environment(value=EnvType.CLIENT)
     public float getShade(Direction direction, boolean bl) {
         return 1.0f;
+    }
+
+    public Iterable<Entity> getAllEntities() {
+        return Iterables.unmodifiableIterable(this.entitiesById.values());
+    }
+
+    public String toString() {
+        return "ServerLevel[" + this.serverLevelData.getLevelName() + "]";
     }
 
     @Override

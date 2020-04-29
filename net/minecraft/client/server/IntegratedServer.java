@@ -235,5 +235,10 @@ extends MinecraftServer {
     public boolean isSingleplayerOwner(GameProfile gameProfile) {
         return gameProfile.getName().equalsIgnoreCase(this.getSingleplayerName());
     }
+
+    @Override
+    public int getScaledTrackingDistance(int i) {
+        return (int)(this.minecraft.options.entityDistanceScaling * (float)i);
+    }
 }
 

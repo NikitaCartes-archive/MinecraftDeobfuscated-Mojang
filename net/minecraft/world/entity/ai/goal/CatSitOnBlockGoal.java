@@ -9,7 +9,6 @@ import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BedBlock;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FurnaceBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
@@ -54,14 +53,13 @@ extends MoveToBlockGoal {
             return false;
         }
         BlockState blockState = levelReader.getBlockState(blockPos);
-        Block block = blockState.getBlock();
-        if (block == Blocks.CHEST) {
+        if (blockState.is(Blocks.CHEST)) {
             return ChestBlockEntity.getOpenCount(levelReader, blockPos) < 1;
         }
-        if (block == Blocks.FURNACE && blockState.getValue(FurnaceBlock.LIT).booleanValue()) {
+        if (blockState.is(Blocks.FURNACE) && blockState.getValue(FurnaceBlock.LIT).booleanValue()) {
             return true;
         }
-        return block.is(BlockTags.BEDS) && blockState.getValue(BedBlock.PART) != BedPart.HEAD;
+        return blockState.is(BlockTags.BEDS, blockStateBase -> blockStateBase.getOptionalValue(BedBlock.PART).map(bedPart -> bedPart != BedPart.HEAD).orElse(true));
     }
 }
 

@@ -113,10 +113,9 @@ extends BlockEntityRenderer<StructureBlockEntity> {
         BlockPos blockPos2 = structureBlockEntity.getBlockPos();
         BlockPos blockPos3 = blockPos2.offset(blockPos);
         for (BlockPos blockPos4 : BlockPos.betweenClosed(blockPos3, blockPos3.offset(structureBlockEntity.getStructureSize()).offset(-1, -1, -1))) {
-            boolean bl3;
             BlockState blockState = blockGetter.getBlockState(blockPos4);
             boolean bl2 = blockState.isAir();
-            boolean bl4 = bl3 = blockState.getBlock() == Blocks.STRUCTURE_VOID;
+            boolean bl3 = blockState.is(Blocks.STRUCTURE_VOID);
             if (!bl2 && !bl3) continue;
             float f = bl2 ? 0.05f : 0.0f;
             double d = (float)(blockPos4.getX() - blockPos2.getX()) + 0.45f - f;
