@@ -251,9 +251,9 @@ public abstract class AbstractMinecart extends Entity {
 
 			BlockPos blockPos = new BlockPos(i, j, k);
 			BlockState blockState = this.level.getBlockState(blockPos);
-			if (blockState.is(BlockTags.RAILS)) {
+			if (BaseRailBlock.isRail(blockState)) {
 				this.moveAlongTrack(blockPos, blockState);
-				if (blockState.getBlock() == Blocks.ACTIVATOR_RAIL) {
+				if (blockState.is(Blocks.ACTIVATOR_RAIL)) {
 					this.activateMinecart(i, j, k, (Boolean)blockState.getValue(PoweredRailBlock.POWERED));
 				}
 			} else {
@@ -499,7 +499,7 @@ public abstract class AbstractMinecart extends Entity {
 		}
 
 		BlockState blockState = this.level.getBlockState(new BlockPos(i, j, k));
-		if (blockState.is(BlockTags.RAILS)) {
+		if (BaseRailBlock.isRail(blockState)) {
 			RailShape railShape = blockState.getValue(((BaseRailBlock)blockState.getBlock()).getShapeProperty());
 			e = (double)j;
 			if (railShape.isAscending()) {
@@ -538,7 +538,7 @@ public abstract class AbstractMinecart extends Entity {
 		}
 
 		BlockState blockState = this.level.getBlockState(new BlockPos(i, j, k));
-		if (blockState.is(BlockTags.RAILS)) {
+		if (BaseRailBlock.isRail(blockState)) {
 			RailShape railShape = blockState.getValue(((BaseRailBlock)blockState.getBlock()).getShapeProperty());
 			Pair<Vec3i, Vec3i> pair = exits(railShape);
 			Vec3i vec3i = pair.getFirst();

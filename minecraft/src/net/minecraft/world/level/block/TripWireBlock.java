@@ -78,14 +78,14 @@ public class TripWireBlock extends Block {
 
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState2.getBlock() != blockState.getBlock()) {
+		if (!blockState2.is(blockState.getBlock())) {
 			this.updateSource(level, blockPos, blockState);
 		}
 	}
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (!bl && blockState.getBlock() != blockState2.getBlock()) {
+		if (!bl && !blockState.is(blockState2.getBlock())) {
 			this.updateSource(level, blockPos, blockState.setValue(POWERED, Boolean.valueOf(true)));
 		}
 	}
@@ -104,14 +104,14 @@ public class TripWireBlock extends Block {
 			for (int i = 1; i < 42; i++) {
 				BlockPos blockPos2 = blockPos.relative(direction, i);
 				BlockState blockState2 = level.getBlockState(blockPos2);
-				if (blockState2.getBlock() == this.hook) {
+				if (blockState2.is(this.hook)) {
 					if (blockState2.getValue(TripWireHookBlock.FACING) == direction.getOpposite()) {
 						this.hook.calculateState(level, blockPos2, blockState2, false, true, i, blockState);
 					}
 					break;
 				}
 
-				if (blockState2.getBlock() != this) {
+				if (!blockState2.is(this)) {
 					break;
 				}
 			}

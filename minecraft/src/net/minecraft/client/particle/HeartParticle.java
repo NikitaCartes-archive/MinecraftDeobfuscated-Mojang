@@ -2,14 +2,14 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
 public class HeartParticle extends TextureSheetParticle {
-	private HeartParticle(Level level, double d, double e, double f) {
-		super(level, d, e, f, 0.0, 0.0, 0.0);
+	private HeartParticle(ClientLevel clientLevel, double d, double e, double f) {
+		super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
 		this.xd *= 0.01F;
 		this.yd *= 0.01F;
 		this.zd *= 0.01F;
@@ -61,8 +61,8 @@ public class HeartParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			HeartParticle heartParticle = new HeartParticle(level, d, e + 0.5, f);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			HeartParticle heartParticle = new HeartParticle(clientLevel, d, e + 0.5, f);
 			heartParticle.pickSprite(this.sprite);
 			heartParticle.setColor(1.0F, 1.0F, 1.0F);
 			return heartParticle;
@@ -77,8 +77,8 @@ public class HeartParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			HeartParticle heartParticle = new HeartParticle(level, d, e, f);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			HeartParticle heartParticle = new HeartParticle(clientLevel, d, e, f);
 			heartParticle.pickSprite(this.sprite);
 			return heartParticle;
 		}

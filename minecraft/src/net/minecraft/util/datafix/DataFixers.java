@@ -113,6 +113,7 @@ import net.minecraft.util.datafix.fixes.PlayerUUIDFix;
 import net.minecraft.util.datafix.fixes.RecipesFix;
 import net.minecraft.util.datafix.fixes.RecipesRenameFix;
 import net.minecraft.util.datafix.fixes.RecipesRenameningFix;
+import net.minecraft.util.datafix.fixes.RedstoneWireConnectionsFix;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.util.datafix.fixes.RenameBiomesFix;
 import net.minecraft.util.datafix.fixes.RenamedCoralFansFix;
@@ -121,6 +122,7 @@ import net.minecraft.util.datafix.fixes.ReorganizePoi;
 import net.minecraft.util.datafix.fixes.SavedDataUUIDFix;
 import net.minecraft.util.datafix.fixes.SavedDataVillageCropFix;
 import net.minecraft.util.datafix.fixes.StatsCounterFix;
+import net.minecraft.util.datafix.fixes.StriderGravityFix;
 import net.minecraft.util.datafix.fixes.StructureReferenceCountFix;
 import net.minecraft.util.datafix.fixes.SwimStatsRenameFix;
 import net.minecraft.util.datafix.fixes.TeamDisplayNameFix;
@@ -650,5 +652,9 @@ public class DataFixers {
 						.getOrDefault(string, string)
 			)
 		);
+		Schema schema116 = dataFixerBuilder.addSchema(2529, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new StriderGravityFix(schema116, false));
+		Schema schema117 = dataFixerBuilder.addSchema(2531, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new RedstoneWireConnectionsFix(schema117));
 	}
 }

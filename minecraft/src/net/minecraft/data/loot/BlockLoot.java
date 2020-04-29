@@ -1633,16 +1633,9 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 	}
 
 	private void addNetherVinesDropTable(Block block, Block block2) {
-		LootTable.Builder builder = LootTable.lootTable()
-			.withPool(
-				LootPool.lootPool()
-					.setRolls(ConstantIntValue.exactly(1))
-					.add(
-						LootItem.lootTableItem(block)
-							.when(LootItemRandomChanceCondition.randomChance(0.33333334F))
-							.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.BLOCK_FORTUNE, 2))
-					)
-			);
+		LootTable.Builder builder = createSilkTouchOrShearsDispatchTable(
+			block, LootItem.lootTableItem(block).when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.BLOCK_FORTUNE, 0.33F, 0.55F, 0.77F, 1.0F))
+		);
 		this.add(block, builder);
 		this.add(block2, builder);
 	}

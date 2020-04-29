@@ -45,7 +45,7 @@ public class SoulSandBlock extends Block {
 	public BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
-		if (direction == Direction.UP && blockState2.getBlock() == Blocks.WATER) {
+		if (direction == Direction.UP && blockState2.is(Blocks.WATER)) {
 			levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 20);
 		}
 

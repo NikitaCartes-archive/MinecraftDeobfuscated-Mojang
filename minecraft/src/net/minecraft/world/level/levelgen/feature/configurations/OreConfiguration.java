@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.predicate.BlockPredicate;
@@ -48,14 +47,12 @@ public class OreConfiguration implements FeatureConfiguration {
 	}
 
 	public static enum Predicates {
-		NATURAL_STONE("natural_stone", blockState -> {
-			if (blockState == null) {
-				return false;
-			} else {
-				Block block = blockState.getBlock();
-				return block == Blocks.STONE || block == Blocks.GRANITE || block == Blocks.DIORITE || block == Blocks.ANDESITE;
-			}
-		}),
+		NATURAL_STONE(
+			"natural_stone",
+			blockState -> blockState == null
+					? false
+					: blockState.is(Blocks.STONE) || blockState.is(Blocks.GRANITE) || blockState.is(Blocks.DIORITE) || blockState.is(Blocks.ANDESITE)
+		),
 		NETHERRACK("netherrack", new BlockPredicate(Blocks.NETHERRACK));
 
 		private static final Map<String, OreConfiguration.Predicates> BY_NAME = (Map<String, OreConfiguration.Predicates>)Arrays.stream(values())

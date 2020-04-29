@@ -2,13 +2,10 @@ package net.minecraft.advancements;
 
 import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -143,6 +140,32 @@ public class AdvancementRewards {
 		}
 	}
 
+	public static AdvancementRewards deserialize(JsonObject jsonObject) throws JsonParseException {
+		int i = GsonHelper.getAsInt(jsonObject, "experience", 0);
+		JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "loot", new JsonArray());
+		ResourceLocation[] resourceLocations = new ResourceLocation[jsonArray.size()];
+
+		for (int j = 0; j < resourceLocations.length; j++) {
+			resourceLocations[j] = new ResourceLocation(GsonHelper.convertToString(jsonArray.get(j), "loot[" + j + "]"));
+		}
+
+		JsonArray jsonArray2 = GsonHelper.getAsJsonArray(jsonObject, "recipes", new JsonArray());
+		ResourceLocation[] resourceLocations2 = new ResourceLocation[jsonArray2.size()];
+
+		for (int k = 0; k < resourceLocations2.length; k++) {
+			resourceLocations2[k] = new ResourceLocation(GsonHelper.convertToString(jsonArray2.get(k), "recipes[" + k + "]"));
+		}
+
+		CommandFunction.CacheableFunction cacheableFunction;
+		if (jsonObject.has("function")) {
+			cacheableFunction = new CommandFunction.CacheableFunction(new ResourceLocation(GsonHelper.getAsString(jsonObject, "function")));
+		} else {
+			cacheableFunction = CommandFunction.CacheableFunction.NONE;
+		}
+
+		return new AdvancementRewards(i, resourceLocations, resourceLocations2, cacheableFunction);
+	}
+
 	public static class Builder {
 		private int experience;
 		private final List<ResourceLocation> loot = Lists.<ResourceLocation>newArrayList();
@@ -175,35 +198,6 @@ public class AdvancementRewards {
 				(ResourceLocation[])this.recipes.toArray(new ResourceLocation[0]),
 				this.function == null ? CommandFunction.CacheableFunction.NONE : new CommandFunction.CacheableFunction(this.function)
 			);
-		}
-	}
-
-	public static class Deserializer implements JsonDeserializer<AdvancementRewards> {
-		public AdvancementRewards deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-			JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "rewards");
-			int i = GsonHelper.getAsInt(jsonObject, "experience", 0);
-			JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "loot", new JsonArray());
-			ResourceLocation[] resourceLocations = new ResourceLocation[jsonArray.size()];
-
-			for (int j = 0; j < resourceLocations.length; j++) {
-				resourceLocations[j] = new ResourceLocation(GsonHelper.convertToString(jsonArray.get(j), "loot[" + j + "]"));
-			}
-
-			JsonArray jsonArray2 = GsonHelper.getAsJsonArray(jsonObject, "recipes", new JsonArray());
-			ResourceLocation[] resourceLocations2 = new ResourceLocation[jsonArray2.size()];
-
-			for (int k = 0; k < resourceLocations2.length; k++) {
-				resourceLocations2[k] = new ResourceLocation(GsonHelper.convertToString(jsonArray2.get(k), "recipes[" + k + "]"));
-			}
-
-			CommandFunction.CacheableFunction cacheableFunction;
-			if (jsonObject.has("function")) {
-				cacheableFunction = new CommandFunction.CacheableFunction(new ResourceLocation(GsonHelper.getAsString(jsonObject, "function")));
-			} else {
-				cacheableFunction = CommandFunction.CacheableFunction.NONE;
-			}
-
-			return new AdvancementRewards(i, resourceLocations, resourceLocations2, cacheableFunction);
 		}
 	}
 }

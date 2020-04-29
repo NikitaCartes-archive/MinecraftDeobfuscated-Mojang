@@ -2,14 +2,14 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
 public class CritParticle extends TextureSheetParticle {
-	private CritParticle(Level level, double d, double e, double f, double g, double h, double i) {
-		super(level, d, e, f, 0.0, 0.0, 0.0);
+	private CritParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+		super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
 		this.xd *= 0.1F;
 		this.yd *= 0.1F;
 		this.zd *= 0.1F;
@@ -66,8 +66,8 @@ public class CritParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			CritParticle critParticle = new CritParticle(level, d, e, f, g, h + 1.0, i);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			CritParticle critParticle = new CritParticle(clientLevel, d, e, f, g, h + 1.0, i);
 			critParticle.setLifetime(20);
 			critParticle.pickSprite(this.sprite);
 			return critParticle;
@@ -82,8 +82,8 @@ public class CritParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			CritParticle critParticle = new CritParticle(level, d, e, f, g, h, i);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			CritParticle critParticle = new CritParticle(clientLevel, d, e, f, g, h, i);
 			critParticle.rCol *= 0.3F;
 			critParticle.gCol *= 0.8F;
 			critParticle.pickSprite(this.sprite);
@@ -99,8 +99,8 @@ public class CritParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			CritParticle critParticle = new CritParticle(level, d, e, f, g, h, i);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			CritParticle critParticle = new CritParticle(clientLevel, d, e, f, g, h, i);
 			critParticle.pickSprite(this.sprite);
 			return critParticle;
 		}

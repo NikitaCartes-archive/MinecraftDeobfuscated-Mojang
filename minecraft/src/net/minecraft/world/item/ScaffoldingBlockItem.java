@@ -26,7 +26,7 @@ public class ScaffoldingBlockItem extends BlockItem {
 		Level level = blockPlaceContext.getLevel();
 		BlockState blockState = level.getBlockState(blockPos);
 		Block block = this.getBlock();
-		if (blockState.getBlock() != block) {
+		if (!blockState.is(block)) {
 			return ScaffoldingBlock.getDistance(level, blockPos) == 7 ? null : blockPlaceContext;
 		} else {
 			Direction direction;
@@ -53,7 +53,7 @@ public class ScaffoldingBlockItem extends BlockItem {
 				}
 
 				blockState = level.getBlockState(mutableBlockPos);
-				if (blockState.getBlock() != this.getBlock()) {
+				if (!blockState.is(this.getBlock())) {
 					if (blockState.canBeReplaced(blockPlaceContext)) {
 						return BlockPlaceContext.at(blockPlaceContext, mutableBlockPos, direction);
 					}

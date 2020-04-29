@@ -141,8 +141,7 @@ public class ChorusFlowerBlock extends Block {
 	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockState blockState2 = levelReader.getBlockState(blockPos.below());
-		Block block = blockState2.getBlock();
-		if (block != this.plant && block != Blocks.END_STONE) {
+		if (blockState2.getBlock() != this.plant && !blockState2.is(Blocks.END_STONE)) {
 			if (!blockState2.isAir()) {
 				return false;
 			} else {
@@ -150,7 +149,7 @@ public class ChorusFlowerBlock extends Block {
 
 				for (Direction direction : Direction.Plane.HORIZONTAL) {
 					BlockState blockState3 = levelReader.getBlockState(blockPos.relative(direction));
-					if (blockState3.getBlock() == this.plant) {
+					if (blockState3.is(this.plant)) {
 						if (bl) {
 							return false;
 						}

@@ -146,7 +146,7 @@ public class ProtoChunk implements ChunkAccess {
 		int j = blockPos.getY();
 		int k = blockPos.getZ();
 		if (j >= 0 && j < 256) {
-			if (this.sections[j >> 4] == LevelChunk.EMPTY_SECTION && blockState.getBlock() == Blocks.AIR) {
+			if (this.sections[j >> 4] == LevelChunk.EMPTY_SECTION && blockState.is(Blocks.AIR)) {
 				return blockState;
 			} else {
 				if (blockState.getLightEmission() > 0) {

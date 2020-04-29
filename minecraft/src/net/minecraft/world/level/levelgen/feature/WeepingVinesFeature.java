@@ -8,9 +8,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GrowingPlantHeadBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
@@ -33,8 +33,8 @@ public class WeepingVinesFeature extends Feature<NoneFeatureConfiguration> {
 		if (!levelAccessor.isEmptyBlock(blockPos)) {
 			return false;
 		} else {
-			Block block = levelAccessor.getBlockState(blockPos.above()).getBlock();
-			if (block != Blocks.NETHERRACK && block != Blocks.NETHER_WART_BLOCK) {
+			BlockState blockState = levelAccessor.getBlockState(blockPos.above());
+			if (!blockState.is(Blocks.NETHERRACK) && !blockState.is(Blocks.NETHER_WART_BLOCK)) {
 				return false;
 			} else {
 				this.placeRoofNetherWart(levelAccessor, random, blockPos);
@@ -55,8 +55,8 @@ public class WeepingVinesFeature extends Feature<NoneFeatureConfiguration> {
 				int j = 0;
 
 				for (Direction direction : DIRECTIONS) {
-					Block block = levelAccessor.getBlockState(mutableBlockPos2.setWithOffset(mutableBlockPos, direction)).getBlock();
-					if (block == Blocks.NETHERRACK || block == Blocks.NETHER_WART_BLOCK) {
+					BlockState blockState = levelAccessor.getBlockState(mutableBlockPos2.setWithOffset(mutableBlockPos, direction));
+					if (blockState.is(Blocks.NETHERRACK) || blockState.is(Blocks.NETHER_WART_BLOCK)) {
 						j++;
 					}
 
@@ -78,8 +78,8 @@ public class WeepingVinesFeature extends Feature<NoneFeatureConfiguration> {
 		for (int i = 0; i < 100; i++) {
 			mutableBlockPos.setWithOffset(blockPos, random.nextInt(8) - random.nextInt(8), random.nextInt(2) - random.nextInt(7), random.nextInt(8) - random.nextInt(8));
 			if (levelAccessor.isEmptyBlock(mutableBlockPos)) {
-				Block block = levelAccessor.getBlockState(mutableBlockPos.above()).getBlock();
-				if (block == Blocks.NETHERRACK || block == Blocks.NETHER_WART_BLOCK) {
+				BlockState blockState = levelAccessor.getBlockState(mutableBlockPos.above());
+				if (blockState.is(Blocks.NETHERRACK) || blockState.is(Blocks.NETHER_WART_BLOCK)) {
 					int j = Mth.nextInt(random, 1, 8);
 					if (random.nextInt(6) == 0) {
 						j *= 2;

@@ -96,7 +96,7 @@ public class FontSet implements AutoCloseable {
 	}
 
 	public GlyphInfo getGlyphInfo(int i) {
-		return this.glyphInfos.computeIfAbsent(i, ix -> (GlyphInfo)(ix == 32 ? SPACE_INFO : this.getRaw((char)ix)));
+		return this.glyphInfos.computeIfAbsent(i, ix -> (GlyphInfo)(ix == 32 ? SPACE_INFO : this.getRaw(ix)));
 	}
 
 	private RawGlyph getRaw(int i) {

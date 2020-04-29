@@ -124,7 +124,7 @@ public class StructureUtils {
 				for (int l = (int)aABB.minZ; l <= (int)aABB.maxZ; l++) {
 					BlockPos blockPos2 = new BlockPos(j, k, l);
 					BlockState blockState = serverLevel.getBlockState(blockPos2);
-					if (blockState.getBlock() == Blocks.STRUCTURE_BLOCK) {
+					if (blockState.is(Blocks.STRUCTURE_BLOCK)) {
 						collection.add(blockPos2);
 					}
 				}

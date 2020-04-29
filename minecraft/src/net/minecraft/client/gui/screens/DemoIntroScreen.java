@@ -7,7 +7,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
@@ -53,7 +52,7 @@ public class DemoIntroScreen extends Screen {
 		this.font
 			.draw(
 				poseStack,
-				I18n.get(
+				new TranslatableComponent(
 					"demo.help.movementShort",
 					options.keyUp.getTranslatedKeyMessage(),
 					options.keyLeft.getTranslatedKeyMessage(),
@@ -64,9 +63,10 @@ public class DemoIntroScreen extends Screen {
 				(float)l,
 				5197647
 			);
-		this.font.draw(poseStack, I18n.get("demo.help.movementMouse"), (float)k, (float)(l + 12), 5197647);
-		this.font.draw(poseStack, I18n.get("demo.help.jump", options.keyJump.getTranslatedKeyMessage()), (float)k, (float)(l + 24), 5197647);
-		this.font.draw(poseStack, I18n.get("demo.help.inventory", options.keyInventory.getTranslatedKeyMessage()), (float)k, (float)(l + 36), 5197647);
+		this.font.draw(poseStack, new TranslatableComponent("demo.help.movementMouse"), (float)k, (float)(l + 12), 5197647);
+		this.font.draw(poseStack, new TranslatableComponent("demo.help.jump", options.keyJump.getTranslatedKeyMessage()), (float)k, (float)(l + 24), 5197647);
+		this.font
+			.draw(poseStack, new TranslatableComponent("demo.help.inventory", options.keyInventory.getTranslatedKeyMessage()), (float)k, (float)(l + 36), 5197647);
 		this.font.drawWordWrap(new TranslatableComponent("demo.help.fullWrapped"), k, l + 68, 218, 2039583);
 		super.render(poseStack, i, j, f);
 	}

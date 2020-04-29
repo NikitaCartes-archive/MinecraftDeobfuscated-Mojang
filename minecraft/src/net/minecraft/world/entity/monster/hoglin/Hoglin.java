@@ -184,7 +184,7 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	public static boolean checkHoglinSpawnRules(
 		EntityType<Hoglin> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
-		return levelAccessor.getBlockState(blockPos.below()).getBlock() != Blocks.NETHER_WART_BLOCK;
+		return !levelAccessor.getBlockState(blockPos.below()).is(Blocks.NETHER_WART_BLOCK);
 	}
 
 	@Nullable
@@ -213,7 +213,7 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 		if (HoglinAi.isPosNearNearestRepellent(this, blockPos)) {
 			return -1.0F;
 		} else {
-			return levelReader.getBlockState(blockPos.below()).getBlock() == Blocks.CRIMSON_NYLIUM ? 10.0F : 0.0F;
+			return levelReader.getBlockState(blockPos.below()).is(Blocks.CRIMSON_NYLIUM) ? 10.0F : 0.0F;
 		}
 	}
 

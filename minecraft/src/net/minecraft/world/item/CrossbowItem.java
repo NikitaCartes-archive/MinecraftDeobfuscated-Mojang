@@ -16,7 +16,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -41,26 +40,6 @@ public class CrossbowItem extends ProjectileWeaponItem implements Vanishable {
 
 	public CrossbowItem(Item.Properties properties) {
 		super(properties);
-		this.addProperty(new ResourceLocation("pull"), (itemStack, level, livingEntity) -> {
-			if (livingEntity == null || itemStack.getItem() != this) {
-				return 0.0F;
-			} else {
-				return isCharged(itemStack) ? 0.0F : (float)(itemStack.getUseDuration() - livingEntity.getUseItemRemainingTicks()) / (float)getChargeDuration(itemStack);
-			}
-		});
-		this.addProperty(
-			new ResourceLocation("pulling"),
-			(itemStack, level, livingEntity) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack && !isCharged(itemStack)
-					? 1.0F
-					: 0.0F
-		);
-		this.addProperty(new ResourceLocation("charged"), (itemStack, level, livingEntity) -> livingEntity != null && isCharged(itemStack) ? 1.0F : 0.0F);
-		this.addProperty(
-			new ResourceLocation("firework"),
-			(itemStack, level, livingEntity) -> livingEntity != null && isCharged(itemStack) && containsChargedProjectile(itemStack, Items.FIREWORK_ROCKET)
-					? 1.0F
-					: 0.0F
-		);
 	}
 
 	@Override
@@ -208,7 +187,7 @@ public class CrossbowItem extends ProjectileWeaponItem implements Vanishable {
 		}
 	}
 
-	private static boolean containsChargedProjectile(ItemStack itemStack, Item item) {
+	public static boolean containsChargedProjectile(ItemStack itemStack, Item item) {
 		return getChargedProjectiles(itemStack).stream().anyMatch(itemStackx -> itemStackx.getItem() == item);
 	}
 

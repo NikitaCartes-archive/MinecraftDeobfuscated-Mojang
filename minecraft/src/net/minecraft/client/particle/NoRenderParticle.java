@@ -4,16 +4,16 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
-import net.minecraft.world.level.Level;
+import net.minecraft.client.multiplayer.ClientLevel;
 
 @Environment(EnvType.CLIENT)
 public class NoRenderParticle extends Particle {
-	protected NoRenderParticle(Level level, double d, double e, double f) {
-		super(level, d, e, f);
+	protected NoRenderParticle(ClientLevel clientLevel, double d, double e, double f) {
+		super(clientLevel, d, e, f);
 	}
 
-	protected NoRenderParticle(Level level, double d, double e, double f, double g, double h, double i) {
-		super(level, d, e, f, g, h, i);
+	protected NoRenderParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+		super(clientLevel, d, e, f, g, h, i);
 	}
 
 	@Override

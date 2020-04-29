@@ -10,6 +10,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.phys.Vec3;
 
 public abstract class Dimension {
@@ -96,7 +97,7 @@ public abstract class Dimension {
 		return new WorldBorder();
 	}
 
-	public void saveData() {
+	public void saveData(ServerLevelData serverLevelData) {
 	}
 
 	public void tick() {

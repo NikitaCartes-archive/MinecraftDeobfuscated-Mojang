@@ -36,7 +36,7 @@ import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
 import net.minecraft.world.level.timers.TimerCallbacks;
 import net.minecraft.world.level.timers.TimerQueue;
 
-public class PrimaryLevelData implements LevelData, WorldData {
+public class PrimaryLevelData implements ServerLevelData, WorldData {
 	private final String minecraftVersionName;
 	private final int minecraftVersion;
 	private final boolean snapshot;
@@ -69,7 +69,7 @@ public class PrimaryLevelData implements LevelData, WorldData {
 	private final boolean allowCommands;
 	private final boolean generateBonusChest;
 	private boolean initialized;
-	private Difficulty difficulty;
+	private Difficulty difficulty = Difficulty.NORMAL;
 	private boolean difficultyLocked;
 	private WorldBorder.Settings worldBorder = WorldBorder.DEFAULT_SETTINGS;
 	private final Set<String> disabledDataPacks = Sets.<String>newHashSet();
@@ -318,10 +318,7 @@ public class PrimaryLevelData implements LevelData, WorldData {
 		compoundTag.putBoolean("BonusChest", this.generateBonusChest);
 		compoundTag.putBoolean("initialized", this.initialized);
 		this.worldBorder.write(compoundTag);
-		if (this.difficulty != null) {
-			compoundTag.putByte("Difficulty", (byte)this.difficulty.getId());
-		}
-
+		compoundTag.putByte("Difficulty", (byte)this.difficulty.getId());
 		compoundTag.putBoolean("DifficultyLocked", this.difficultyLocked);
 		compoundTag.put("GameRules", this.gameRules.createTag());
 		CompoundTag compoundTag5 = new CompoundTag();
@@ -598,7 +595,7 @@ public class PrimaryLevelData implements LevelData, WorldData {
 
 	@Override
 	public void fillCrashReportCategory(CrashReportCategory crashReportCategory) {
-		LevelData.super.fillCrashReportCategory(crashReportCategory);
+		ServerLevelData.super.fillCrashReportCategory(crashReportCategory);
 		WorldData.super.fillCrashReportCategory(crashReportCategory);
 	}
 
@@ -704,8 +701,8 @@ public class PrimaryLevelData implements LevelData, WorldData {
 	}
 
 	@Override
-	public LevelData getLevelData(DimensionType dimensionType) {
-		return (LevelData)(dimensionType == DimensionType.OVERWORLD ? this : new DerivedLevelData(dimensionType, this, this));
+	public ServerLevelData overworldData() {
+		return this;
 	}
 
 	@Override

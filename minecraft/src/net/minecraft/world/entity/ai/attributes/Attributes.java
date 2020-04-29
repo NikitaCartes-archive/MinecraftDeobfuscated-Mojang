@@ -4,7 +4,7 @@ import net.minecraft.core.Registry;
 
 public class Attributes {
 	public static final Attribute MAX_HEALTH = register(
-		"generic.max_health", new RangedAttribute("attribute.name.generic.max_health", 20.0, 0.0, 1024.0).setSyncable(true)
+		"generic.max_health", new RangedAttribute("attribute.name.generic.max_health", 20.0, 1.0, 1024.0).setSyncable(true)
 	);
 	public static final Attribute FOLLOW_RANGE = register("generic.follow_range", new RangedAttribute("attribute.name.generic.follow_range", 32.0, 0.0, 2048.0));
 	public static final Attribute KNOCKBACK_RESISTANCE = register(

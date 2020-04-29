@@ -96,6 +96,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -307,8 +308,7 @@ public abstract class LivingEntity extends Entity {
 
 		boolean bl2 = bl && ((Player)this).abilities.invulnerable;
 		if (this.isAlive()) {
-			if (this.isUnderLiquid(FluidTags.WATER)
-				&& this.level.getBlockState(new BlockPos(this.getX(), this.getEyeY(), this.getZ())).getBlock() != Blocks.BUBBLE_COLUMN) {
+			if (this.isUnderLiquid(FluidTags.WATER) && !this.level.getBlockState(new BlockPos(this.getX(), this.getEyeY(), this.getZ())).is(Blocks.BUBBLE_COLUMN)) {
 				if (!this.canBreatheUnderwater() && !MobEffectUtil.hasWaterBreathing(this) && !bl2) {
 					this.setAirSupply(this.decreaseAirSupply(this.getAirSupply()));
 					if (this.getAirSupply() == -20) {
@@ -1321,7 +1321,7 @@ public abstract class LivingEntity extends Entity {
 	private boolean trapdoorUsableAsLadder(BlockPos blockPos, BlockState blockState) {
 		if ((Boolean)blockState.getValue(TrapDoorBlock.OPEN)) {
 			BlockState blockState2 = this.level.getBlockState(blockPos.below());
-			if (blockState2.getBlock() == Blocks.LADDER && blockState2.getValue(LadderBlock.FACING) == blockState.getValue(TrapDoorBlock.FACING)) {
+			if (blockState2.is(Blocks.LADDER) && blockState2.getValue(LadderBlock.FACING) == blockState.getValue(TrapDoorBlock.FACING)) {
 				return true;
 			}
 		}
@@ -1834,7 +1834,7 @@ public abstract class LivingEntity extends Entity {
 		return 0.8F;
 	}
 
-	public boolean canFloatInLava() {
+	public boolean canStandOnFluid(Fluid fluid) {
 		return false;
 	}
 
@@ -1847,99 +1847,10 @@ public abstract class LivingEntity extends Entity {
 				this.fallDistance = 0.0F;
 			}
 
-			if (!this.isInWater() || this instanceof Player && ((Player)this).abilities.flying) {
-				if (!this.isInLava() || this instanceof Player && ((Player)this).abilities.flying) {
-					if (this.isFallFlying()) {
-						Vec3 vec35 = this.getDeltaMovement();
-						if (vec35.y > -0.5) {
-							this.fallDistance = 1.0F;
-						}
-
-						Vec3 vec36 = this.getLookAngle();
-						float f = this.xRot * (float) (Math.PI / 180.0);
-						double k = Math.sqrt(vec36.x * vec36.x + vec36.z * vec36.z);
-						double l = Math.sqrt(getHorizontalDistanceSqr(vec35));
-						double m = vec36.length();
-						float n = Mth.cos(f);
-						n = (float)((double)n * (double)n * Math.min(1.0, m / 0.4));
-						vec35 = this.getDeltaMovement().add(0.0, d * (-1.0 + (double)n * 0.75), 0.0);
-						if (vec35.y < 0.0 && k > 0.0) {
-							double o = vec35.y * -0.1 * (double)n;
-							vec35 = vec35.add(vec36.x * o / k, o, vec36.z * o / k);
-						}
-
-						if (f < 0.0F && k > 0.0) {
-							double o = l * (double)(-Mth.sin(f)) * 0.04;
-							vec35 = vec35.add(-vec36.x * o / k, o * 3.2, -vec36.z * o / k);
-						}
-
-						if (k > 0.0) {
-							vec35 = vec35.add((vec36.x / k * l - vec35.x) * 0.1, 0.0, (vec36.z / k * l - vec35.z) * 0.1);
-						}
-
-						this.setDeltaMovement(vec35.multiply(0.99F, 0.98F, 0.99F));
-						this.move(MoverType.SELF, this.getDeltaMovement());
-						if (this.horizontalCollision && !this.level.isClientSide) {
-							double o = Math.sqrt(getHorizontalDistanceSqr(this.getDeltaMovement()));
-							double p = l - o;
-							float q = (float)(p * 10.0 - 3.0);
-							if (q > 0.0F) {
-								this.playSound(this.getFallDamageSound((int)q), 1.0F, 1.0F);
-								this.hurt(DamageSource.FLY_INTO_WALL, q);
-							}
-						}
-
-						if (this.onGround && !this.level.isClientSide) {
-							this.setSharedFlag(7, false);
-						}
-					} else {
-						BlockPos blockPos = this.getBlockPosBelowThatAffectsMyMovement();
-						float j = this.level.getBlockState(blockPos).getBlock().getFriction();
-						float fx = this.onGround ? j * 0.91F : 0.91F;
-						Vec3 vec37 = this.handleRelativeFrictionAndCalculateMovement(vec3, j);
-						double r = vec37.y;
-						if (this.hasEffect(MobEffects.LEVITATION)) {
-							r += (0.05 * (double)(this.getEffect(MobEffects.LEVITATION).getAmplifier() + 1) - vec37.y) * 0.2;
-							this.fallDistance = 0.0F;
-						} else if (this.level.isClientSide && !this.level.hasChunkAt(blockPos)) {
-							if (this.getY() > 0.0) {
-								r = -0.1;
-							} else {
-								r = 0.0;
-							}
-						} else if (!this.isNoGravity()) {
-							r -= d;
-						}
-
-						this.setDeltaMovement(vec37.x * (double)fx, r * 0.98F, vec37.z * (double)fx);
-					}
-				} else if (this.canFloatInLava()) {
-					float i = 0.6F;
-					float j = 0.54600006F;
-					Vec3 vec34 = this.handleRelativeFrictionAndCalculateMovement(vec3, 0.54600006F);
-					vec34 = vec34.multiply(1.0, 0.8F, 1.0);
-					vec34 = this.getFluidFallingAdjustedMovement(d, bl, vec34);
-					this.setDeltaMovement(vec34.x * 0.54600006F, vec34.y, vec34.z * 0.54600006F);
-					if (this.horizontalCollision && this.isFree(vec34.x, vec34.y + 0.6F - this.getY() + this.yo, vec34.z)) {
-						this.setDeltaMovement(vec34.x * 0.54600006F, 0.3F, vec34.z * 0.54600006F);
-					}
-				} else {
-					double e = this.getY();
-					this.moveRelative(0.02F, vec3);
-					this.move(MoverType.SELF, this.getDeltaMovement());
-					this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
-					if (!this.isNoGravity()) {
-						this.setDeltaMovement(this.getDeltaMovement().add(0.0, -d / 4.0, 0.0));
-					}
-
-					Vec3 vec34 = this.getDeltaMovement();
-					if (this.horizontalCollision && this.isFree(vec34.x, vec34.y + 0.6F - this.getY() + e, vec34.z)) {
-						this.setDeltaMovement(vec34.x, 0.3F, vec34.z);
-					}
-				}
-			} else {
-				double ex = this.getY();
-				float fx = this.isSprinting() ? 0.9F : this.getWaterSlowDown();
+			FluidState fluidState = this.level.getFluidState(this.blockPosition());
+			if (this.isInWater() && (!(this instanceof Player) || !((Player)this).abilities.flying) && !this.canStandOnFluid(fluidState.getType())) {
+				double e = this.getY();
+				float f = this.isSprinting() ? 0.9F : this.getWaterSlowDown();
 				float g = 0.02F;
 				float h = (float)EnchantmentHelper.getDepthStrider(this);
 				if (h > 3.0F) {
@@ -1951,12 +1862,12 @@ public abstract class LivingEntity extends Entity {
 				}
 
 				if (h > 0.0F) {
-					fx += (0.54600006F - fx) * h / 3.0F;
+					f += (0.54600006F - f) * h / 3.0F;
 					g += (this.getSpeed() - g) * h / 3.0F;
 				}
 
 				if (this.hasEffect(MobEffects.DOLPHINS_GRACE)) {
-					fx = 0.96F;
+					f = 0.96F;
 				}
 
 				this.moveRelative(g, vec3);
@@ -1966,25 +1877,101 @@ public abstract class LivingEntity extends Entity {
 					vec32 = new Vec3(vec32.x, 0.2, vec32.z);
 				}
 
-				this.setDeltaMovement(vec32.multiply((double)fx, 0.8F, (double)fx));
+				this.setDeltaMovement(vec32.multiply((double)f, 0.8F, (double)f));
 				Vec3 vec33 = this.getFluidFallingAdjustedMovement(d, bl, this.getDeltaMovement());
 				this.setDeltaMovement(vec33);
-				if (this.horizontalCollision && this.isFree(vec33.x, vec33.y + 0.6F - this.getY() + ex, vec33.z)) {
+				if (this.horizontalCollision && this.isFree(vec33.x, vec33.y + 0.6F - this.getY() + e, vec33.z)) {
 					this.setDeltaMovement(vec33.x, 0.3F, vec33.z);
 				}
+			} else if (this.isInLava() && (!(this instanceof Player) || !((Player)this).abilities.flying) && !this.canStandOnFluid(fluidState.getType())) {
+				double ex = this.getY();
+				this.moveRelative(0.02F, vec3);
+				this.move(MoverType.SELF, this.getDeltaMovement());
+				this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
+				if (!this.isNoGravity()) {
+					this.setDeltaMovement(this.getDeltaMovement().add(0.0, -d / 4.0, 0.0));
+				}
+
+				Vec3 vec34 = this.getDeltaMovement();
+				if (this.horizontalCollision && this.isFree(vec34.x, vec34.y + 0.6F - this.getY() + ex, vec34.z)) {
+					this.setDeltaMovement(vec34.x, 0.3F, vec34.z);
+				}
+			} else if (this.isFallFlying()) {
+				Vec3 vec35 = this.getDeltaMovement();
+				if (vec35.y > -0.5) {
+					this.fallDistance = 1.0F;
+				}
+
+				Vec3 vec36 = this.getLookAngle();
+				float fx = this.xRot * (float) (Math.PI / 180.0);
+				double i = Math.sqrt(vec36.x * vec36.x + vec36.z * vec36.z);
+				double j = Math.sqrt(getHorizontalDistanceSqr(vec35));
+				double k = vec36.length();
+				float l = Mth.cos(fx);
+				l = (float)((double)l * (double)l * Math.min(1.0, k / 0.4));
+				vec35 = this.getDeltaMovement().add(0.0, d * (-1.0 + (double)l * 0.75), 0.0);
+				if (vec35.y < 0.0 && i > 0.0) {
+					double m = vec35.y * -0.1 * (double)l;
+					vec35 = vec35.add(vec36.x * m / i, m, vec36.z * m / i);
+				}
+
+				if (fx < 0.0F && i > 0.0) {
+					double m = j * (double)(-Mth.sin(fx)) * 0.04;
+					vec35 = vec35.add(-vec36.x * m / i, m * 3.2, -vec36.z * m / i);
+				}
+
+				if (i > 0.0) {
+					vec35 = vec35.add((vec36.x / i * j - vec35.x) * 0.1, 0.0, (vec36.z / i * j - vec35.z) * 0.1);
+				}
+
+				this.setDeltaMovement(vec35.multiply(0.99F, 0.98F, 0.99F));
+				this.move(MoverType.SELF, this.getDeltaMovement());
+				if (this.horizontalCollision && !this.level.isClientSide) {
+					double m = Math.sqrt(getHorizontalDistanceSqr(this.getDeltaMovement()));
+					double n = j - m;
+					float o = (float)(n * 10.0 - 3.0);
+					if (o > 0.0F) {
+						this.playSound(this.getFallDamageSound((int)o), 1.0F, 1.0F);
+						this.hurt(DamageSource.FLY_INTO_WALL, o);
+					}
+				}
+
+				if (this.onGround && !this.level.isClientSide) {
+					this.setSharedFlag(7, false);
+				}
+			} else {
+				BlockPos blockPos = this.getBlockPosBelowThatAffectsMyMovement();
+				float p = this.level.getBlockState(blockPos).getBlock().getFriction();
+				float fxx = this.onGround ? p * 0.91F : 0.91F;
+				Vec3 vec37 = this.handleRelativeFrictionAndCalculateMovement(vec3, p);
+				double q = vec37.y;
+				if (this.hasEffect(MobEffects.LEVITATION)) {
+					q += (0.05 * (double)(this.getEffect(MobEffects.LEVITATION).getAmplifier() + 1) - vec37.y) * 0.2;
+					this.fallDistance = 0.0F;
+				} else if (this.level.isClientSide && !this.level.hasChunkAt(blockPos)) {
+					if (this.getY() > 0.0) {
+						q = -0.1;
+					} else {
+						q = 0.0;
+					}
+				} else if (!this.isNoGravity()) {
+					q -= d;
+				}
+
+				this.setDeltaMovement(vec37.x * (double)fxx, q * 0.98F, vec37.z * (double)fxx);
 			}
 		}
 
 		this.animationSpeedOld = this.animationSpeed;
 		double dx = this.getX() - this.xo;
-		double s = this.getZ() - this.zo;
-		double t = this instanceof FlyingAnimal ? this.getY() - this.yo : 0.0;
-		float gx = Mth.sqrt(dx * dx + t * t + s * s) * 4.0F;
-		if (gx > 1.0F) {
-			gx = 1.0F;
+		double r = this.getZ() - this.zo;
+		double exx = this instanceof FlyingAnimal ? this.getY() - this.yo : 0.0;
+		float fxx = Mth.sqrt(dx * dx + exx * exx + r * r) * 4.0F;
+		if (fxx > 1.0F) {
+			fxx = 1.0F;
 		}
 
-		this.animationSpeed = this.animationSpeed + (gx - this.animationSpeed) * 0.4F;
+		this.animationSpeed = this.animationSpeed + (fxx - this.animationSpeed) * 0.4F;
 		this.animationPosition = this.animationPosition + this.animationSpeed;
 	}
 
@@ -2022,7 +2009,7 @@ public abstract class LivingEntity extends Entity {
 			double d = Mth.clamp(vec3.x, -0.15F, 0.15F);
 			double e = Mth.clamp(vec3.z, -0.15F, 0.15F);
 			double g = Math.max(vec3.y, -0.15F);
-			if (g < 0.0 && this.getFeetBlockState().getBlock() != Blocks.SCAFFOLDING && this.isSuppressingSlidingDownLadder() && this instanceof Player) {
+			if (g < 0.0 && !this.getFeetBlockState().is(Blocks.SCAFFOLDING) && this.isSuppressingSlidingDownLadder() && this instanceof Player) {
 				g = 0.0;
 			}
 
@@ -2293,11 +2280,12 @@ public abstract class LivingEntity extends Entity {
 		this.level.getProfiler().pop();
 		this.level.getProfiler().push("jump");
 		if (this.jumping) {
-			boolean bl = this.isInWater() && this.fluidHeight > 0.0;
-			if (!bl || this.onGround && !(this.fluidHeight > 0.4)) {
+			double k = this.getFluidHeight(FluidTags.WATER);
+			boolean bl = this.isInWater() && k > 0.0;
+			if (!bl || this.onGround && !(k > 0.4)) {
 				if (this.isInLava()) {
 					this.jumpInLiquid(FluidTags.LAVA);
-				} else if ((this.onGround || bl && this.fluidHeight <= 0.4) && this.noJumpDelay == 0) {
+				} else if ((this.onGround || bl && k <= 0.4) && this.noJumpDelay == 0) {
 					this.jumpFromGround();
 					this.noJumpDelay = 10;
 				}

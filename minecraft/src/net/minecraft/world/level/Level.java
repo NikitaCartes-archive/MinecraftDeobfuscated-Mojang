@@ -62,6 +62,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -87,7 +88,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	public final Random random = new Random();
 	public final Dimension dimension;
 	protected final ChunkSource chunkSource;
-	protected final LevelData levelData;
+	protected final WritableLevelData levelData;
 	private final Supplier<ProfilerFiller> profiler;
 	public final boolean isClientSide;
 	protected boolean updatingBlockEntities;
@@ -95,16 +96,22 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	private final BiomeManager biomeManager;
 
 	protected Level(
-		LevelData levelData, DimensionType dimensionType, BiFunction<Level, Dimension, ChunkSource> biFunction, Supplier<ProfilerFiller> supplier, boolean bl
+		WritableLevelData writableLevelData,
+		DimensionType dimensionType,
+		BiFunction<Level, Dimension, ChunkSource> biFunction,
+		Supplier<ProfilerFiller> supplier,
+		boolean bl
 	) {
 		this.profiler = supplier;
-		this.levelData = levelData;
+		this.levelData = writableLevelData;
 		this.dimension = dimensionType.create(this);
 		this.chunkSource = (ChunkSource)biFunction.apply(this, this.dimension);
 		this.isClientSide = bl;
 		this.worldBorder = this.dimension.createWorldBorder();
 		this.thread = Thread.currentThread();
-		this.biomeManager = new BiomeManager(this, bl ? levelData.getSeed() : LevelData.obfuscateSeed(levelData.getSeed()), dimensionType.getBiomeZoomer());
+		this.biomeManager = new BiomeManager(
+			this, bl ? writableLevelData.getSeed() : LevelData.obfuscateSeed(writableLevelData.getSeed()), dimensionType.getBiomeZoomer()
+		);
 	}
 
 	@Override
@@ -585,7 +592,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 				for (int p = k; p < l; p++) {
 					for (int q = m; q < n; q++) {
 						BlockState blockState = this.getBlockState(mutableBlockPos.set(o, p, q));
-						if (blockState.is(BlockTags.FIRE) || blockState.getBlock() == Blocks.LAVA) {
+						if (blockState.is(BlockTags.FIRE) || blockState.is(Blocks.LAVA)) {
 							return true;
 						}
 					}
@@ -612,7 +619,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 				for (int p = k; p < l; p++) {
 					for (int q = m; q < n; q++) {
 						BlockState blockState = this.getBlockState(mutableBlockPos.set(o, p, q));
-						if (blockState.getBlock() == block) {
+						if (blockState.is(block)) {
 							return blockState;
 						}
 					}
@@ -929,7 +936,8 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	public int getSignal(BlockPos blockPos, Direction direction) {
 		BlockState blockState = this.getBlockState(blockPos);
-		return blockState.isRedstoneConductor(this, blockPos) ? this.getDirectSignalTo(blockPos) : blockState.getSignal(this, blockPos, direction);
+		int i = blockState.getSignal(this, blockPos, direction);
+		return blockState.isRedstoneConductor(this, blockPos) ? Math.max(i, this.getDirectSignalTo(blockPos)) : i;
 	}
 
 	public boolean hasNeighborSignal(BlockPos blockPos) {
@@ -993,19 +1001,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		if (this.levelData.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
 			this.setDayTime(this.levelData.getDayTime() + 1L);
 		}
-	}
-
-	public BlockPos getSharedSpawnPos() {
-		BlockPos blockPos = new BlockPos(this.levelData.getXSpawn(), this.levelData.getYSpawn(), this.levelData.getZSpawn());
-		if (!this.getWorldBorder().isWithinBounds(blockPos)) {
-			blockPos = this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(this.getWorldBorder().getCenterX(), 0.0, this.getWorldBorder().getCenterZ()));
-		}
-
-		return blockPos;
-	}
-
-	public void setDefaultSpawnPos(BlockPos blockPos) {
-		this.levelData.setSpawn(blockPos);
 	}
 
 	public boolean mayInteract(Player player, BlockPos blockPos) {
@@ -1117,12 +1112,12 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 			BlockPos blockPos2 = blockPos.relative(direction);
 			if (this.hasChunkAt(blockPos2)) {
 				BlockState blockState = this.getBlockState(blockPos2);
-				if (blockState.getBlock() == Blocks.COMPARATOR) {
+				if (blockState.is(Blocks.COMPARATOR)) {
 					blockState.neighborChanged(this, blockPos2, block, blockPos, false);
 				} else if (blockState.isRedstoneConductor(this, blockPos2)) {
 					blockPos2 = blockPos2.relative(direction);
 					blockState = this.getBlockState(blockPos2);
-					if (blockState.getBlock() == Blocks.COMPARATOR) {
+					if (blockState.is(Blocks.COMPARATOR)) {
 						blockState.neighborChanged(this, blockPos2, block, blockPos, false);
 					}
 				}

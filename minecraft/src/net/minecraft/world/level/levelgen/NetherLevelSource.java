@@ -65,7 +65,7 @@ public class NetherLevelSource extends NoiseBasedChunkGenerator<NetherGeneratorS
 			}
 
 			if (Feature.NETHER_BRIDGE.isInsideBoundingFeature(this.level, structureFeatureManager, blockPos)
-				&& this.level.getBlockState(blockPos.below()).getBlock() == Blocks.NETHER_BRICKS) {
+				&& this.level.getBlockState(blockPos.below()).is(Blocks.NETHER_BRICKS)) {
 				return Feature.NETHER_BRIDGE.getSpecialEnemies();
 			}
 		}

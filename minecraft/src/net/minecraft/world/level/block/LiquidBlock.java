@@ -35,6 +35,7 @@ public class LiquidBlock extends Block implements BucketPickup {
 	public static final IntegerProperty LEVEL = BlockStateProperties.LEVEL;
 	protected final FlowingFluid fluid;
 	private final List<FluidState> stateCache;
+	public static final VoxelShape STABLE_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 8.0, 16.0);
 
 	protected LiquidBlock(FlowingFluid flowingFluid, BlockBehaviour.Properties properties) {
 		super(properties);
@@ -48,6 +49,15 @@ public class LiquidBlock extends Block implements BucketPickup {
 
 		this.stateCache.add(flowingFluid.getFlowing(8, true));
 		this.registerDefaultState(this.stateDefinition.any().setValue(LEVEL, Integer.valueOf(0)));
+	}
+
+	@Override
+	public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+		return collisionContext.isAbove(STABLE_SHAPE, blockPos, true)
+				&& blockState.getValue(LEVEL) == 0
+				&& collisionContext.canStandOnFluid(blockGetter.getFluidState(blockPos.above()), this.fluid)
+			? STABLE_SHAPE
+			: Shapes.empty();
 	}
 
 	@Override
@@ -124,7 +134,7 @@ public class LiquidBlock extends Block implements BucketPickup {
 
 	private boolean shouldSpreadLiquid(Level level, BlockPos blockPos, BlockState blockState) {
 		if (this.fluid.is(FluidTags.LAVA)) {
-			boolean bl = level.getBlockState(blockPos.below()).getBlock() == Blocks.SOUL_SOIL;
+			boolean bl = level.getBlockState(blockPos.below()).is(Blocks.SOUL_SOIL);
 
 			for (Direction direction : Direction.values()) {
 				if (direction != Direction.DOWN) {
@@ -136,7 +146,7 @@ public class LiquidBlock extends Block implements BucketPickup {
 						return false;
 					}
 
-					if (bl && level.getBlockState(blockPos2).getBlock() == Blocks.BLUE_ICE) {
+					if (bl && level.getBlockState(blockPos2).is(Blocks.BLUE_ICE)) {
 						level.setBlockAndUpdate(blockPos, Blocks.BASALT.defaultBlockState());
 						this.fizz(level, blockPos);
 						return false;

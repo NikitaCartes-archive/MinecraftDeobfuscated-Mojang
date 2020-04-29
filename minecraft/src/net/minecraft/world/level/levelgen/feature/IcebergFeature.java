@@ -134,7 +134,7 @@ public class IcebergFeature extends Feature<BlockStateConfiguration> {
 	}
 
 	private void removeFloatingSnowLayer(LevelAccessor levelAccessor, BlockPos blockPos) {
-		if (levelAccessor.getBlockState(blockPos.above()).getBlock() == Blocks.SNOW) {
+		if (levelAccessor.getBlockState(blockPos.above()).is(Blocks.SNOW)) {
 			this.setBlock(levelAccessor, blockPos.above(), Blocks.AIR.defaultBlockState());
 		}
 	}
@@ -169,11 +169,10 @@ public class IcebergFeature extends Feature<BlockStateConfiguration> {
 
 	private void setIcebergBlock(BlockPos blockPos, LevelAccessor levelAccessor, Random random, int i, int j, boolean bl, boolean bl2, BlockState blockState) {
 		BlockState blockState2 = levelAccessor.getBlockState(blockPos);
-		Block block = blockState2.getBlock();
-		if (blockState2.getMaterial() == Material.AIR || block == Blocks.SNOW_BLOCK || block == Blocks.ICE || block == Blocks.WATER) {
+		if (blockState2.getMaterial() == Material.AIR || blockState2.is(Blocks.SNOW_BLOCK) || blockState2.is(Blocks.ICE) || blockState2.is(Blocks.WATER)) {
 			boolean bl3 = !bl || random.nextDouble() > 0.05;
 			int k = bl ? 3 : 2;
-			if (bl2 && block != Blocks.WATER && (double)i <= (double)random.nextInt(Math.max(1, j / k)) + (double)j * 0.6 && bl3) {
+			if (bl2 && !blockState2.is(Blocks.WATER) && (double)i <= (double)random.nextInt(Math.max(1, j / k)) + (double)j * 0.6 && bl3) {
 				this.setBlock(levelAccessor, blockPos, Blocks.SNOW_BLOCK.defaultBlockState());
 			} else {
 				this.setBlock(levelAccessor, blockPos, blockState);

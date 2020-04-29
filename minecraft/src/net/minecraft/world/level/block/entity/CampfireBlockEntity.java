@@ -185,10 +185,12 @@ public class CampfireBlockEntity extends BlockEntity implements Clearable, Ticka
 	}
 
 	public void dowse() {
-		if (!this.getLevel().isClientSide) {
-			Containers.dropContents(this.getLevel(), this.getBlockPos(), this.getItems());
-		}
+		if (this.level != null) {
+			if (!this.level.isClientSide) {
+				Containers.dropContents(this.level, this.getBlockPos(), this.getItems());
+			}
 
-		this.markUpdated();
+			this.markUpdated();
+		}
 	}
 }

@@ -101,7 +101,7 @@ public interface CollisionGetter extends BlockGetter {
 						if (blockGetter != null) {
 							mutableBlockPos.set(i, j, k);
 							BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
-							if ((l != 1 || blockState.hasLargeCollisionShape()) && (l != 2 || blockState.getBlock() == Blocks.MOVING_PISTON)) {
+							if ((l != 1 || blockState.hasLargeCollisionShape()) && (l != 2 || blockState.is(Blocks.MOVING_PISTON))) {
 								VoxelShape voxelShape = blockState.getCollisionShape(CollisionGetter.this, mutableBlockPos, collisionContext);
 								if (voxelShape == Shapes.block()) {
 									if (aABB.intersects((double)i, (double)j, (double)k, (double)i + 1.0, (double)j + 1.0, (double)k + 1.0)) {

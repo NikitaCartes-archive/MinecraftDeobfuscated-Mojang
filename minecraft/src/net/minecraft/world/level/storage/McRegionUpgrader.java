@@ -54,7 +54,7 @@ public class McRegionUpgrader {
 		BiomeSourceType<FixedBiomeSourceSettings, FixedBiomeSource> biomeSourceType = BiomeSourceType.FIXED;
 		BiomeSourceType<OverworldBiomeSourceSettings, OverworldBiomeSource> biomeSourceType2 = BiomeSourceType.VANILLA_LAYERED;
 		BiomeSource biomeSource;
-		if (worldData != null && worldData.getLevelData(DimensionType.OVERWORLD).getGeneratorType() == LevelType.FLAT) {
+		if (worldData != null && worldData.overworldData().getGeneratorType() == LevelType.FLAT) {
 			biomeSource = biomeSourceType.create(biomeSourceType.createSettings(worldData.getSeed()).setBiome(Biomes.PLAINS));
 		} else {
 			biomeSource = biomeSourceType2.create(biomeSourceType2.createSettings(l));

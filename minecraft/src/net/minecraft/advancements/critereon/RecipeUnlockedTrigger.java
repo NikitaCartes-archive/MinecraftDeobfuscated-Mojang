@@ -1,7 +1,5 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,26 +14,32 @@ public class RecipeUnlockedTrigger extends SimpleCriterionTrigger<RecipeUnlocked
 		return ID;
 	}
 
-	public RecipeUnlockedTrigger.TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+	public RecipeUnlockedTrigger.TriggerInstance createInstance(
+		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+	) {
 		ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "recipe"));
-		return new RecipeUnlockedTrigger.TriggerInstance(resourceLocation);
+		return new RecipeUnlockedTrigger.TriggerInstance(composite, resourceLocation);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Recipe<?> recipe) {
-		this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(recipe));
+		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(recipe));
+	}
+
+	public static RecipeUnlockedTrigger.TriggerInstance unlocked(ResourceLocation resourceLocation) {
+		return new RecipeUnlockedTrigger.TriggerInstance(EntityPredicate.Composite.ANY, resourceLocation);
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final ResourceLocation recipe;
 
-		public TriggerInstance(ResourceLocation resourceLocation) {
-			super(RecipeUnlockedTrigger.ID);
+		public TriggerInstance(EntityPredicate.Composite composite, ResourceLocation resourceLocation) {
+			super(RecipeUnlockedTrigger.ID, composite);
 			this.recipe = resourceLocation;
 		}
 
 		@Override
-		public JsonElement serializeToJson() {
-			JsonObject jsonObject = new JsonObject();
+		public JsonObject serializeToJson(SerializationContext serializationContext) {
+			JsonObject jsonObject = super.serializeToJson(serializationContext);
 			jsonObject.addProperty("recipe", this.recipe.toString());
 			return jsonObject;
 		}

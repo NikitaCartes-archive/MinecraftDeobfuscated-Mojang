@@ -6,6 +6,7 @@ import com.mojang.datafixers.DataFixUtils;
 import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.TypeRewriteRule;
+import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.types.templates.List.ListType;
@@ -33,19 +34,40 @@ public class BitStorageAlignFix extends DataFix {
 			"BitStorageAlignFix",
 			type,
 			this.getOutputSchema().getType(References.CHUNK),
-			typed -> typed.updateTyped(opticFinder, typedx -> typedx.updateTyped(opticFinder2, typedxx -> typedxx.updateTyped(opticFinder3, typedxxx -> {
-							int i = (Integer)typedxxx.getOptional(opticFinder4).map(list -> Math.max(4, DataFixUtils.ceillog2(list.size()))).orElse(0);
-							return i != 0 && !Mth.isPowerOfTwo(i) ? typedxxx.update(DSL.remainderFinder(), dynamic -> this.fixBlockStates(dynamic, i)) : typedxxx;
-						})))
+			typed -> typed.updateTyped(opticFinder, typedx -> this.updateHeightmaps(updateSections(opticFinder2, opticFinder3, opticFinder4, typedx)))
 		);
 	}
 
-	private Dynamic<?> fixBlockStates(Dynamic<?> dynamic, int i) {
-		return dynamic.update("BlockStates", dynamic2 -> {
-			long[] ls = dynamic2.asLongStream().toArray();
-			long[] ms = addPadding(4096, i, ls);
-			return dynamic.createLongList(LongStream.of(ms));
-		});
+	private Typed<?> updateHeightmaps(Typed<?> typed) {
+		return typed.update(
+			DSL.remainderFinder(),
+			dynamic -> dynamic.update(
+					"Heightmaps", dynamic2 -> dynamic2.updateMapValues(pair -> pair.mapSecond(dynamic2x -> updateBitStorage(dynamic, dynamic2x, 256, 9)))
+				)
+		);
+	}
+
+	private static Typed<?> updateSections(
+		OpticFinder<?> opticFinder, OpticFinder<?> opticFinder2, OpticFinder<List<Pair<String, Dynamic<?>>>> opticFinder3, Typed<?> typed
+	) {
+		return typed.updateTyped(
+			opticFinder,
+			typedx -> typedx.updateTyped(
+					opticFinder2,
+					typedxx -> {
+						int i = (Integer)typedxx.getOptional(opticFinder3).map(list -> Math.max(4, DataFixUtils.ceillog2(list.size()))).orElse(0);
+						return i != 0 && !Mth.isPowerOfTwo(i)
+							? typedxx.update(DSL.remainderFinder(), dynamic -> dynamic.update("BlockStates", dynamic2 -> updateBitStorage(dynamic, dynamic2, 4096, i)))
+							: typedxx;
+					}
+				)
+		);
+	}
+
+	private static Dynamic<?> updateBitStorage(Dynamic<?> dynamic, Dynamic<?> dynamic2, int i, int j) {
+		long[] ls = dynamic2.asLongStream().toArray();
+		long[] ms = addPadding(i, j, ls);
+		return dynamic.createLongList(LongStream.of(ms));
 	}
 
 	public static long[] addPadding(int i, int j, long[] ls) {

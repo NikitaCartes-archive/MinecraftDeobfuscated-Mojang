@@ -1103,7 +1103,7 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 						.add(LootItem.lootTableItem(Items.IRON_NUGGET).setWeight(40).apply(SetItemCountFunction.setCount(RandomValueBounds.between(9.0F, 18.0F))))
 						.add(LootItem.lootTableItem(Items.FLINT_AND_STEEL).setWeight(40))
 						.add(LootItem.lootTableItem(Items.FIRE_CHARGE).setWeight(40))
-						.add(LootItem.lootTableItem(Items.GOLDEN_APPLE).setWeight(40))
+						.add(LootItem.lootTableItem(Items.GOLDEN_APPLE).setWeight(15))
 						.add(LootItem.lootTableItem(Items.GOLD_NUGGET).setWeight(15).apply(SetItemCountFunction.setCount(RandomValueBounds.between(4.0F, 24.0F))))
 						.add(LootItem.lootTableItem(Items.GOLDEN_SWORD).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
 						.add(LootItem.lootTableItem(Items.GOLDEN_AXE).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))

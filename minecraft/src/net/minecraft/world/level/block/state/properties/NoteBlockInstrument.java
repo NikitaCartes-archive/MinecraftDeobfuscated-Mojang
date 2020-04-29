@@ -4,7 +4,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
@@ -45,28 +44,27 @@ public enum NoteBlockInstrument implements StringRepresentable {
 	}
 
 	public static NoteBlockInstrument byState(BlockState blockState) {
-		Block block = blockState.getBlock();
-		if (block == Blocks.CLAY) {
+		if (blockState.is(Blocks.CLAY)) {
 			return FLUTE;
-		} else if (block == Blocks.GOLD_BLOCK) {
+		} else if (blockState.is(Blocks.GOLD_BLOCK)) {
 			return BELL;
-		} else if (block.is(BlockTags.WOOL)) {
+		} else if (blockState.is(BlockTags.WOOL)) {
 			return GUITAR;
-		} else if (block == Blocks.PACKED_ICE) {
+		} else if (blockState.is(Blocks.PACKED_ICE)) {
 			return CHIME;
-		} else if (block == Blocks.BONE_BLOCK) {
+		} else if (blockState.is(Blocks.BONE_BLOCK)) {
 			return XYLOPHONE;
-		} else if (block == Blocks.IRON_BLOCK) {
+		} else if (blockState.is(Blocks.IRON_BLOCK)) {
 			return IRON_XYLOPHONE;
-		} else if (block == Blocks.SOUL_SAND) {
+		} else if (blockState.is(Blocks.SOUL_SAND)) {
 			return COW_BELL;
-		} else if (block == Blocks.PUMPKIN) {
+		} else if (blockState.is(Blocks.PUMPKIN)) {
 			return DIDGERIDOO;
-		} else if (block == Blocks.EMERALD_BLOCK) {
+		} else if (blockState.is(Blocks.EMERALD_BLOCK)) {
 			return BIT;
-		} else if (block == Blocks.HAY_BLOCK) {
+		} else if (blockState.is(Blocks.HAY_BLOCK)) {
 			return BANJO;
-		} else if (block == Blocks.GLOWSTONE) {
+		} else if (blockState.is(Blocks.GLOWSTONE)) {
 			return PLING;
 		} else {
 			Material material = blockState.getMaterial();

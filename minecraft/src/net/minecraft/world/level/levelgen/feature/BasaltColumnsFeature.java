@@ -85,7 +85,7 @@ public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
 						mutableBlockPos.move(Direction.UP);
 						bl = true;
 					} else {
-						if (levelAccessor.getBlockState(mutableBlockPos).getBlock() != Blocks.BASALT) {
+						if (!levelAccessor.getBlockState(mutableBlockPos).is(Blocks.BASALT)) {
 							break;
 						}
 
@@ -145,6 +145,6 @@ public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
 
 	private static boolean isAirOrLavaOcean(LevelAccessor levelAccessor, int i, BlockPos blockPos) {
 		BlockState blockState = levelAccessor.getBlockState(blockPos);
-		return blockState.isAir() || blockState.getBlock() == Blocks.LAVA && blockPos.getY() <= i;
+		return blockState.isAir() || blockState.is(Blocks.LAVA) && blockPos.getY() <= i;
 	}
 }

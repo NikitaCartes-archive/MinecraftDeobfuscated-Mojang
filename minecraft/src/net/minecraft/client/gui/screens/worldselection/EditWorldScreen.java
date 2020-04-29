@@ -94,7 +94,7 @@ public class EditWorldScreen extends Screen {
 							makeBackupAndShowToast(this.levelAccess);
 						}
 
-						this.minecraft.setScreen(OptimizeWorldScreen.create(this.callback, this.levelAccess, bl2));
+						this.minecraft.setScreen(OptimizeWorldScreen.create(this.callback, this.minecraft.getFixerUpper(), this.levelAccess, bl2));
 					}, new TranslatableComponent("optimizeWorld.confirm.title"), new TranslatableComponent("optimizeWorld.confirm.description"), true))
 			)
 		);

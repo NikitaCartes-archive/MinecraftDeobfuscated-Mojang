@@ -58,8 +58,7 @@ public class ChorusPlantBlock extends PipeBlock {
 			levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
 			return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
 		} else {
-			Block block = blockState2.getBlock();
-			boolean bl = block == this || block == Blocks.CHORUS_FLOWER || direction == Direction.DOWN && block == Blocks.END_STONE;
+			boolean bl = blockState2.getBlock() == this || blockState2.is(Blocks.CHORUS_FLOWER) || direction == Direction.DOWN && blockState2.is(Blocks.END_STONE);
 			return blockState.setValue((Property)PROPERTY_BY_DIRECTION.get(direction), Boolean.valueOf(bl));
 		}
 	}

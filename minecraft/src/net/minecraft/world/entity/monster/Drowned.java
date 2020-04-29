@@ -361,7 +361,7 @@ public class Drowned extends Zombie implements RangedAttackMob {
 
 			for (int i = 0; i < 10; i++) {
 				BlockPos blockPos2 = blockPos.offset(random.nextInt(20) - 10, 2 - random.nextInt(8), random.nextInt(20) - 10);
-				if (this.level.getBlockState(blockPos2).getBlock() == Blocks.WATER) {
+				if (this.level.getBlockState(blockPos2).is(Blocks.WATER)) {
 					return Vec3.atBottomCenterOf(blockPos2);
 				}
 			}

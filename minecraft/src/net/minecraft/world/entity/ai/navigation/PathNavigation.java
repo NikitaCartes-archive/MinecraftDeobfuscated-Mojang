@@ -15,7 +15,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.PathNavigationRegion;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Node;
@@ -185,7 +184,7 @@ public abstract class PathNavigation {
 
 		if (!this.isDone()) {
 			if (this.canUpdatePath()) {
-				this.updatePath();
+				this.followThePath();
 			} else if (this.path != null && this.path.getIndex() < this.path.getSize()) {
 				Vec3 vec3 = this.getTempMobPos();
 				Vec3 vec32 = this.path.getPos(this.mob, this.path.getIndex());
@@ -207,17 +206,34 @@ public abstract class PathNavigation {
 		}
 	}
 
-	protected void updatePath() {
+	protected void followThePath() {
 		Vec3 vec3 = this.getTempMobPos();
 		this.maxDistanceToWaypoint = this.mob.getBbWidth() > 0.75F ? this.mob.getBbWidth() / 2.0F : 0.75F - this.mob.getBbWidth() / 2.0F;
 		Vec3i vec3i = this.path.currentPos();
-		if (Math.abs(this.mob.getX() - (double)((float)vec3i.getX() + 0.5F)) < (double)this.maxDistanceToWaypoint
+		boolean bl = Math.abs(this.mob.getX() - (double)((float)vec3i.getX() + 0.5F)) < (double)this.maxDistanceToWaypoint
 			&& Math.abs(this.mob.getZ() - (double)((float)vec3i.getZ() + 0.5F)) < (double)this.maxDistanceToWaypoint
-			&& Math.abs(this.mob.getY() - (double)vec3i.getY()) < 1.0) {
+			&& Math.abs(this.mob.getY() - (double)vec3i.getY()) < 1.0;
+		if (bl || this.shouldTargetNextNodeInDirection(vec3)) {
 			this.path.setIndex(this.path.getIndex() + 1);
 		}
 
 		this.doStuckDetection(vec3);
+	}
+
+	private boolean shouldTargetNextNodeInDirection(Vec3 vec3) {
+		if (this.path.getSize() <= this.path.getIndex() + 1) {
+			return false;
+		} else {
+			Vec3 vec32 = Vec3.atBottomCenterOf(this.path.get(this.path.getIndex()).asBlockPos());
+			if (!vec3.closerThan(vec32, 2.0)) {
+				return false;
+			} else {
+				Vec3 vec33 = Vec3.atBottomCenterOf(this.path.get(this.path.getIndex() + 1).asBlockPos());
+				Vec3 vec34 = vec33.subtract(vec32);
+				Vec3 vec35 = vec3.subtract(vec32);
+				return vec34.dot(vec35) > 0.0;
+			}
+		}
 	}
 
 	protected void doStuckDetection(Vec3 vec3) {
@@ -281,8 +297,7 @@ public abstract class PathNavigation {
 				Node node = this.path.get(i);
 				Node node2 = i + 1 < this.path.getSize() ? this.path.get(i + 1) : null;
 				BlockState blockState = this.level.getBlockState(new BlockPos(node.x, node.y, node.z));
-				Block block = blockState.getBlock();
-				if (block == Blocks.CAULDRON) {
+				if (blockState.is(Blocks.CAULDRON)) {
 					this.path.set(i, node.cloneMove(node.x, node.y + 1, node.z));
 					if (node2 != null && node.y >= node2.y) {
 						this.path.set(i + 1, node2.cloneMove(node2.x, node.y + 1, node2.z));

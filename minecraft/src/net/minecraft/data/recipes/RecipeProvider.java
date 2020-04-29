@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.critereon.EnterBlockTrigger;
+import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
@@ -641,7 +642,9 @@ public class RecipeProvider implements DataProvider {
 			.pattern("###")
 			.unlockedBy(
 				"has_lots_of_items",
-				new InventoryChangeTrigger.TriggerInstance(MinMaxBounds.Ints.atLeast(10), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, new ItemPredicate[0])
+				new InventoryChangeTrigger.TriggerInstance(
+					EntityPredicate.Composite.ANY, MinMaxBounds.Ints.atLeast(10), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, new ItemPredicate[0]
+				)
 			)
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Items.CHEST_MINECART)
@@ -3627,7 +3630,7 @@ public class RecipeProvider implements DataProvider {
 	}
 
 	private static EnterBlockTrigger.TriggerInstance insideOf(Block block) {
-		return new EnterBlockTrigger.TriggerInstance(block, StatePropertiesPredicate.ANY);
+		return new EnterBlockTrigger.TriggerInstance(EntityPredicate.Composite.ANY, block, StatePropertiesPredicate.ANY);
 	}
 
 	private static InventoryChangeTrigger.TriggerInstance has(ItemLike itemLike) {
@@ -3639,7 +3642,9 @@ public class RecipeProvider implements DataProvider {
 	}
 
 	private static InventoryChangeTrigger.TriggerInstance inventoryTrigger(ItemPredicate... itemPredicates) {
-		return new InventoryChangeTrigger.TriggerInstance(MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, itemPredicates);
+		return new InventoryChangeTrigger.TriggerInstance(
+			EntityPredicate.Composite.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, itemPredicates
+		);
 	}
 
 	@Override

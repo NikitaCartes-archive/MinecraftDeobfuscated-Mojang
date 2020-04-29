@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import it.unimi.dsi.fastutil.objects.Object2DoubleArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -63,6 +65,7 @@ import net.minecraft.world.Nameable;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ItemStack;
@@ -157,7 +160,7 @@ public abstract class Entity implements Nameable, CommandSource {
 	public int tickCount;
 	private int remainingFireTicks = -this.getFireImmuneTicks();
 	protected boolean wasInWater;
-	protected double fluidHeight;
+	protected Object2DoubleMap<Tag<Fluid>> fluidHeight = new Object2DoubleArrayMap<>(2);
 	protected boolean wasUnderWater;
 	protected boolean isInLava;
 	public int invulnerableTime;
@@ -309,7 +312,7 @@ public abstract class Entity implements Nameable, CommandSource {
 		this.removed = true;
 	}
 
-	protected void setPose(Pose pose) {
+	public void setPose(Pose pose) {
 		this.entityData.set(DATA_POSE, pose);
 	}
 
@@ -836,7 +839,7 @@ public abstract class Entity implements Nameable, CommandSource {
 	protected void playStepSound(BlockPos blockPos, BlockState blockState) {
 		if (!blockState.getMaterial().isLiquid()) {
 			BlockState blockState2 = this.level.getBlockState(blockPos.above());
-			SoundType soundType = blockState2.getBlock() == Blocks.SNOW ? blockState2.getSoundType() : blockState.getSoundType();
+			SoundType soundType = blockState2.is(Blocks.SNOW) ? blockState2.getSoundType() : blockState.getSoundType();
 			this.playSound(soundType.getStepSound(), soundType.getVolume() * 0.15F, soundType.getPitch());
 		}
 	}
@@ -920,7 +923,7 @@ public abstract class Entity implements Nameable, CommandSource {
 	}
 
 	private boolean isInBubbleColumn() {
-		return this.level.getBlockState(this.blockPosition()).getBlock() == Blocks.BUBBLE_COLUMN;
+		return this.level.getBlockState(this.blockPosition()).is(Blocks.BUBBLE_COLUMN);
 	}
 
 	public boolean isInWaterOrRain() {
@@ -948,6 +951,7 @@ public abstract class Entity implements Nameable, CommandSource {
 	}
 
 	protected boolean updateInWaterStateAndDoFluidPushing() {
+		this.fluidHeight.clear();
 		this.updateInWaterStateAndDoWaterCurrentPushing();
 		if (this.isInWater()) {
 			return true;
@@ -1397,6 +1401,11 @@ public abstract class Entity implements Nameable, CommandSource {
 			this.xRot = listTag3.getFloat(1);
 			this.yRotO = this.yRot;
 			this.xRotO = this.xRot;
+			if (listTag3.isEmpty() && this instanceof Shulker) {
+				this.yRot = 180.0F;
+				this.yRotO = 180.0F;
+			}
+
 			this.setYHeadRot(this.yRot);
 			this.setYBodyRot(this.yRot);
 			this.fallDistance = compoundTag.getFloat("FallDistance");
@@ -1999,7 +2008,7 @@ public abstract class Entity implements Nameable, CommandSource {
 	}
 
 	private static Component removeAction(Component component) {
-		MutableComponent mutableComponent = component.mutableCopy().withStyle(style -> style.withClickEvent(null));
+		MutableComponent mutableComponent = component.toMutable().withStyle(style -> style.withClickEvent(null));
 
 		for (Component component2 : component.getSiblings()) {
 			mutableComponent.append(removeAction(component2));
@@ -2047,7 +2056,7 @@ public abstract class Entity implements Nameable, CommandSource {
 			this.getClass().getSimpleName(),
 			this.getName().getContents(),
 			this.id,
-			this.level == null ? "~NULL~" : this.level.getLevelData().getLevelName(),
+			this.level == null ? "~NULL~" : this.level.toString(),
 			this.getX(),
 			this.getY(),
 			this.getZ()
@@ -2748,13 +2757,13 @@ public abstract class Entity implements Nameable, CommandSource {
 				this.setDeltaMovement(this.getDeltaMovement().add(vec3.scale(d)));
 			}
 
-			this.fluidHeight = e;
+			this.fluidHeight.put(tag, e);
 			return bl2;
 		}
 	}
 
-	public double getFluidHeight() {
-		return this.fluidHeight;
+	public double getFluidHeight(Tag<Fluid> tag) {
+		return this.fluidHeight.getDouble(tag);
 	}
 
 	public final float getBbWidth() {

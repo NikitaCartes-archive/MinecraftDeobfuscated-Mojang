@@ -59,7 +59,7 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
 			levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
 		}
 
-		if (direction == this.growthDirection && blockState2.getBlock() == this) {
+		if (direction == this.growthDirection && blockState2.is(this)) {
 			return this.getBodyBlock().defaultBlockState();
 		} else {
 			if (this.scheduleFluidTicks) {

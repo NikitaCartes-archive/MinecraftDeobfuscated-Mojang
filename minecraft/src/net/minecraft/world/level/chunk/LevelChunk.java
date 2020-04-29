@@ -285,7 +285,7 @@ public class LevelChunk implements ChunkAccess {
 				this.level.removeBlockEntity(blockPos);
 			}
 
-			if (levelChunkSection.getBlockState(i, j & 15, k).getBlock() != block) {
+			if (!levelChunkSection.getBlockState(i, j & 15, k).is(block)) {
 				return null;
 			} else {
 				if (block2 instanceof EntityBlock) {

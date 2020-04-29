@@ -105,6 +105,7 @@ public abstract class RenderType extends RenderStateShard {
 			.setDepthTestState(EQUAL_DEPTH_TEST)
 			.setTransparencyState(GLINT_TRANSPARENCY)
 			.setTexturingState(ENTITY_GLINT_TEXTURING)
+			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
 			.createCompositeState(false)
 	);
 	private static final RenderType LIGHTNING = create(

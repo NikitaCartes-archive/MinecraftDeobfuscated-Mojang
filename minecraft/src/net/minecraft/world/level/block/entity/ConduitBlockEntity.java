@@ -134,7 +134,7 @@ public class ConduitBlockEntity extends BlockEntity implements TickableBlockEnti
 						BlockState blockState = this.level.getBlockState(blockPos2);
 
 						for (Block block : VALID_BLOCKS) {
-							if (blockState.getBlock() == block) {
+							if (blockState.is(block)) {
 								this.effectBlocks.add(blockPos2);
 							}
 						}

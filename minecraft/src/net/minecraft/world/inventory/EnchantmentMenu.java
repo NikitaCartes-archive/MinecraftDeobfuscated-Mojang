@@ -95,28 +95,28 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 					for (int j = -1; j <= 1; j++) {
 						for (int k = -1; k <= 1; k++) {
 							if ((j != 0 || k != 0) && level.isEmptyBlock(blockPos.offset(k, 0, j)) && level.isEmptyBlock(blockPos.offset(k, 1, j))) {
-								if (level.getBlockState(blockPos.offset(k * 2, 0, j * 2)).getBlock() == Blocks.BOOKSHELF) {
+								if (level.getBlockState(blockPos.offset(k * 2, 0, j * 2)).is(Blocks.BOOKSHELF)) {
 									ix++;
 								}
 
-								if (level.getBlockState(blockPos.offset(k * 2, 1, j * 2)).getBlock() == Blocks.BOOKSHELF) {
+								if (level.getBlockState(blockPos.offset(k * 2, 1, j * 2)).is(Blocks.BOOKSHELF)) {
 									ix++;
 								}
 
 								if (k != 0 && j != 0) {
-									if (level.getBlockState(blockPos.offset(k * 2, 0, j)).getBlock() == Blocks.BOOKSHELF) {
+									if (level.getBlockState(blockPos.offset(k * 2, 0, j)).is(Blocks.BOOKSHELF)) {
 										ix++;
 									}
 
-									if (level.getBlockState(blockPos.offset(k * 2, 1, j)).getBlock() == Blocks.BOOKSHELF) {
+									if (level.getBlockState(blockPos.offset(k * 2, 1, j)).is(Blocks.BOOKSHELF)) {
 										ix++;
 									}
 
-									if (level.getBlockState(blockPos.offset(k, 0, j * 2)).getBlock() == Blocks.BOOKSHELF) {
+									if (level.getBlockState(blockPos.offset(k, 0, j * 2)).is(Blocks.BOOKSHELF)) {
 										ix++;
 									}
 
-									if (level.getBlockState(blockPos.offset(k, 1, j * 2)).getBlock() == Blocks.BOOKSHELF) {
+									if (level.getBlockState(blockPos.offset(k, 1, j * 2)).is(Blocks.BOOKSHELF)) {
 										ix++;
 									}
 								}

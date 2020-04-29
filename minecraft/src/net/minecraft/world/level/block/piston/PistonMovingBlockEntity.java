@@ -98,7 +98,7 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 			? Blocks.PISTON_HEAD
 				.defaultBlockState()
 				.setValue(PistonHeadBlock.SHORT, Boolean.valueOf(this.progress > 0.25F))
-				.setValue(PistonHeadBlock.TYPE, this.movedState.getBlock() == Blocks.STICKY_PISTON ? PistonType.STICKY : PistonType.DEFAULT)
+				.setValue(PistonHeadBlock.TYPE, this.movedState.is(Blocks.STICKY_PISTON) ? PistonType.STICKY : PistonType.DEFAULT)
 				.setValue(PistonHeadBlock.FACING, this.movedState.getValue(PistonBaseBlock.FACING))
 			: this.movedState;
 	}
@@ -112,7 +112,7 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 			List<Entity> list = this.level.getEntities(null, PistonMath.getMovementArea(aABB, direction, d).minmax(aABB));
 			if (!list.isEmpty()) {
 				List<AABB> list2 = voxelShape.toAabbs();
-				boolean bl = this.movedState.getBlock() == Blocks.SLIME_BLOCK;
+				boolean bl = this.movedState.is(Blocks.SLIME_BLOCK);
 
 				for (Entity entity : list) {
 					if (entity.getPistonPushReaction() != PushReaction.IGNORE) {
@@ -195,7 +195,7 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 	}
 
 	private boolean isStickyForEntities() {
-		return this.movedState.getBlock() == Blocks.HONEY_BLOCK;
+		return this.movedState.is(Blocks.HONEY_BLOCK);
 	}
 
 	public Direction getMovementDirection() {
@@ -253,7 +253,7 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 			this.progressO = this.progress;
 			this.level.removeBlockEntity(this.worldPosition);
 			this.setRemoved();
-			if (this.level.getBlockState(this.worldPosition).getBlock() == Blocks.MOVING_PISTON) {
+			if (this.level.getBlockState(this.worldPosition).is(Blocks.MOVING_PISTON)) {
 				BlockState blockState;
 				if (this.isSourcePiston) {
 					blockState = Blocks.AIR.defaultBlockState();
@@ -274,7 +274,7 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 		if (this.progressO >= 1.0F) {
 			this.level.removeBlockEntity(this.worldPosition);
 			this.setRemoved();
-			if (this.movedState != null && this.level.getBlockState(this.worldPosition).getBlock() == Blocks.MOVING_PISTON) {
+			if (this.movedState != null && this.level.getBlockState(this.worldPosition).is(Blocks.MOVING_PISTON)) {
 				BlockState blockState = Block.updateFromNeighbourShapes(this.movedState, this.level, this.worldPosition);
 				if (blockState.isAir()) {
 					this.level.setBlock(this.worldPosition, this.movedState, 84);

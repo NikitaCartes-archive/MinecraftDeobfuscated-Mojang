@@ -1024,7 +1024,7 @@ public class Bee extends Animal implements FlyingAnimal {
 	class BeePollinateGoal extends Bee.BaseBeeGoal {
 		private final Predicate<BlockState> VALID_POLLINATION_BLOCKS = blockState -> {
 			if (blockState.is(BlockTags.TALL_FLOWERS)) {
-				return blockState.getBlock() == Blocks.SUNFLOWER ? blockState.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.UPPER : true;
+				return blockState.is(Blocks.SUNFLOWER) ? blockState.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.UPPER : true;
 			} else {
 				return blockState.is(BlockTags.SMALL_FLOWERS);
 			}

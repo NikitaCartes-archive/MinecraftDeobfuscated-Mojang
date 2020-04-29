@@ -35,7 +35,7 @@ public class CarvedPumpkinBlock extends HorizontalDirectionalBlock implements We
 	@Nullable
 	private BlockPattern ironGolemFull;
 	private static final Predicate<BlockState> PUMPKINS_PREDICATE = blockState -> blockState != null
-			&& (blockState.getBlock() == Blocks.CARVED_PUMPKIN || blockState.getBlock() == Blocks.JACK_O_LANTERN);
+			&& (blockState.is(Blocks.CARVED_PUMPKIN) || blockState.is(Blocks.JACK_O_LANTERN));
 
 	protected CarvedPumpkinBlock(BlockBehaviour.Properties properties) {
 		super(properties);
@@ -44,7 +44,7 @@ public class CarvedPumpkinBlock extends HorizontalDirectionalBlock implements We
 
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState2.getBlock() != blockState.getBlock()) {
+		if (!blockState2.is(blockState.getBlock())) {
 			this.trySpawnGolem(level, blockPos);
 		}
 	}

@@ -12,7 +12,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
@@ -43,8 +42,7 @@ public class SwordItem extends TieredItem implements Vanishable {
 
 	@Override
 	public float getDestroySpeed(ItemStack itemStack, BlockState blockState) {
-		Block block = blockState.getBlock();
-		if (block == Blocks.COBWEB) {
+		if (blockState.is(Blocks.COBWEB)) {
 			return 15.0F;
 		} else {
 			Material material = blockState.getMaterial();
@@ -75,7 +73,7 @@ public class SwordItem extends TieredItem implements Vanishable {
 
 	@Override
 	public boolean canDestroySpecial(BlockState blockState) {
-		return blockState.getBlock() == Blocks.COBWEB;
+		return blockState.is(Blocks.COBWEB);
 	}
 
 	@Override

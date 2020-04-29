@@ -24,7 +24,7 @@ public class KelpBlock extends GrowingPlantHeadBlock implements LiquidBlockConta
 
 	@Override
 	protected boolean canGrowInto(BlockState blockState) {
-		return blockState.getBlock() == Blocks.WATER;
+		return blockState.is(Blocks.WATER);
 	}
 
 	@Override

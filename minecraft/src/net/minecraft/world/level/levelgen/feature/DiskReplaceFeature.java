@@ -41,7 +41,7 @@ public class DiskReplaceFeature extends Feature<DiskConfiguration> {
 							BlockState blockState = levelAccessor.getBlockState(blockPos2);
 
 							for (BlockState blockState2 : diskConfiguration.targets) {
-								if (blockState2.getBlock() == blockState.getBlock()) {
+								if (blockState2.is(blockState.getBlock())) {
 									levelAccessor.setBlock(blockPos2, diskConfiguration.state, 2);
 									i++;
 									break;

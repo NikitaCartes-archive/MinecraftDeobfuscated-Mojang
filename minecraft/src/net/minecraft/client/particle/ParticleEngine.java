@@ -31,6 +31,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
@@ -51,7 +52,6 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -66,7 +66,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT,
 		ParticleRenderType.CUSTOM
 	);
-	protected Level level;
+	protected ClientLevel level;
 	private final Map<ParticleRenderType, Queue<Particle>> particles = Maps.<ParticleRenderType, Queue<Particle>>newIdentityHashMap();
 	private final Queue<TrackingEmitter> trackingEmitters = Queues.<TrackingEmitter>newArrayDeque();
 	private final TextureManager textureManager;
@@ -76,9 +76,9 @@ public class ParticleEngine implements PreparableReloadListener {
 	private final Map<ResourceLocation, ParticleEngine.MutableSpriteSet> spriteSets = Maps.<ResourceLocation, ParticleEngine.MutableSpriteSet>newHashMap();
 	private final TextureAtlas textureAtlas = new TextureAtlas(TextureAtlas.LOCATION_PARTICLES);
 
-	public ParticleEngine(Level level, TextureManager textureManager) {
+	public ParticleEngine(ClientLevel clientLevel, TextureManager textureManager) {
 		textureManager.register(this.textureAtlas.location(), this.textureAtlas);
-		this.level = level;
+		this.level = clientLevel;
 		this.textureManager = textureManager;
 		this.registerProviders();
 	}
@@ -416,8 +416,8 @@ public class ParticleEngine implements PreparableReloadListener {
 		RenderSystem.disableFog();
 	}
 
-	public void setLevel(@Nullable Level level) {
-		this.level = level;
+	public void setLevel(@Nullable ClientLevel clientLevel) {
+		this.level = clientLevel;
 		this.particles.clear();
 		this.trackingEmitters.clear();
 	}

@@ -2,13 +2,13 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
 public class CampfireSmokeParticle extends TextureSheetParticle {
-	private CampfireSmokeParticle(Level level, double d, double e, double f, double g, double h, double i, boolean bl) {
-		super(level, d, e, f);
+	private CampfireSmokeParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, boolean bl) {
+		super(clientLevel, d, e, f);
 		this.scale(3.0F);
 		this.setSize(0.25F, 0.25F);
 		if (bl) {
@@ -54,8 +54,8 @@ public class CampfireSmokeParticle extends TextureSheetParticle {
 			this.sprites = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			CampfireSmokeParticle campfireSmokeParticle = new CampfireSmokeParticle(level, d, e, f, g, h, i, false);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			CampfireSmokeParticle campfireSmokeParticle = new CampfireSmokeParticle(clientLevel, d, e, f, g, h, i, false);
 			campfireSmokeParticle.setAlpha(0.9F);
 			campfireSmokeParticle.pickSprite(this.sprites);
 			return campfireSmokeParticle;
@@ -70,8 +70,8 @@ public class CampfireSmokeParticle extends TextureSheetParticle {
 			this.sprites = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			CampfireSmokeParticle campfireSmokeParticle = new CampfireSmokeParticle(level, d, e, f, g, h, i, true);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			CampfireSmokeParticle campfireSmokeParticle = new CampfireSmokeParticle(clientLevel, d, e, f, g, h, i, true);
 			campfireSmokeParticle.setAlpha(0.95F);
 			campfireSmokeParticle.pickSprite(this.sprites);
 			return campfireSmokeParticle;

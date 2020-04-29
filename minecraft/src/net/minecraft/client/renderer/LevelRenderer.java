@@ -397,9 +397,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					float m = (float)voxelShape.max(Direction.Axis.Y, (double)g, (double)h);
 					float n = fluidState.getHeight(levelReader, blockPos3);
 					float o = Math.max(m, n);
-					ParticleOptions particleOptions = !fluidState.is(FluidTags.LAVA)
-							&& blockState.getBlock() != Blocks.MAGMA_BLOCK
-							&& !CampfireBlock.isLitCampfire(blockState)
+					ParticleOptions particleOptions = !fluidState.is(FluidTags.LAVA) && !blockState.is(Blocks.MAGMA_BLOCK) && !CampfireBlock.isLitCampfire(blockState)
 						? ParticleTypes.RAIN
 						: ParticleTypes.SMOKE;
 					this.minecraft
@@ -914,7 +912,12 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		this.renderChunkLayer(RenderType.solid(), poseStack, d, e, g);
 		this.renderChunkLayer(RenderType.cutoutMipped(), poseStack, d, e, g);
 		this.renderChunkLayer(RenderType.cutout(), poseStack, d, e, g);
-		Lighting.setupLevel(poseStack.last().pose());
+		if (this.level.dimension.getType() == DimensionType.NETHER) {
+			Lighting.setupNetherLevel(poseStack.last().pose());
+		} else {
+			Lighting.setupLevel(poseStack.last().pose());
+		}
+
 		profilerFiller.popPush("entities");
 		profilerFiller.push("prepare");
 		this.renderedEntities = 0;

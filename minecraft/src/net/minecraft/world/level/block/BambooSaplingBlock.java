@@ -59,7 +59,7 @@ public class BambooSaplingBlock extends Block implements BonemealableBlock {
 		if (!blockState.canSurvive(levelAccessor, blockPos)) {
 			return Blocks.AIR.defaultBlockState();
 		} else {
-			if (direction == Direction.UP && blockState2.getBlock() == Blocks.BAMBOO) {
+			if (direction == Direction.UP && blockState2.is(Blocks.BAMBOO)) {
 				levelAccessor.setBlock(blockPos, Blocks.BAMBOO.defaultBlockState(), 2);
 			}
 

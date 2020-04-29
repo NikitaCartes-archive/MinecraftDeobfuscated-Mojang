@@ -31,7 +31,7 @@ public class IceSpikeFeature extends Feature<NoneFeatureConfiguration> {
 			blockPos = blockPos.below();
 		}
 
-		if (levelAccessor.getBlockState(blockPos).getBlock() != Blocks.SNOW_BLOCK) {
+		if (!levelAccessor.getBlockState(blockPos).is(Blocks.SNOW_BLOCK)) {
 			return false;
 		} else {
 			blockPos = blockPos.above(random.nextInt(4));

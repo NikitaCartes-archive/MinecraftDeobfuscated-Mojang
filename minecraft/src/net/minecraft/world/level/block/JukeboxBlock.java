@@ -74,7 +74,7 @@ public class JukeboxBlock extends BaseEntityBlock {
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState.getBlock() != blockState2.getBlock()) {
+		if (!blockState.is(blockState2.getBlock())) {
 			this.dropRecording(level, blockPos);
 			super.onRemove(blockState, level, blockPos, blockState2, bl);
 		}

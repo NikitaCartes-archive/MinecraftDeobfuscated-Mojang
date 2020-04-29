@@ -2,15 +2,15 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
 public class BubbleParticle extends TextureSheetParticle {
-	private BubbleParticle(Level level, double d, double e, double f, double g, double h, double i) {
-		super(level, d, e, f);
+	private BubbleParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+		super(clientLevel, d, e, f);
 		this.setSize(0.02F, 0.02F);
 		this.quadSize = this.quadSize * (this.random.nextFloat() * 0.6F + 0.2F);
 		this.xd = g * 0.2F + (Math.random() * 2.0 - 1.0) * 0.02F;
@@ -51,8 +51,8 @@ public class BubbleParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			BubbleParticle bubbleParticle = new BubbleParticle(level, d, e, f, g, h, i);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			BubbleParticle bubbleParticle = new BubbleParticle(clientLevel, d, e, f, g, h, i);
 			bubbleParticle.pickSprite(this.sprite);
 			return bubbleParticle;
 		}

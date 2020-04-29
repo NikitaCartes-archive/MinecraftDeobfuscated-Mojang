@@ -1,12 +1,14 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.storage.loot.LootContext;
 
 public class ChanneledLightningTrigger extends SimpleCriterionTrigger<ChanneledLightningTrigger.TriggerInstance> {
 	private static final ResourceLocation ID = new ResourceLocation("channeled_lightning");
@@ -16,33 +18,41 @@ public class ChanneledLightningTrigger extends SimpleCriterionTrigger<ChanneledL
 		return ID;
 	}
 
-	public ChanneledLightningTrigger.TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-		EntityPredicate[] entityPredicates = EntityPredicate.fromJsonArray(jsonObject.get("victims"));
-		return new ChanneledLightningTrigger.TriggerInstance(entityPredicates);
+	public ChanneledLightningTrigger.TriggerInstance createInstance(
+		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+	) {
+		EntityPredicate.Composite[] composites = EntityPredicate.Composite.fromJsonArray(jsonObject, "victims", deserializationContext);
+		return new ChanneledLightningTrigger.TriggerInstance(composite, composites);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Collection<? extends Entity> collection) {
-		this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(serverPlayer, collection));
+		List<LootContext> list = (List<LootContext>)collection.stream()
+			.map(entity -> EntityPredicate.createContext(serverPlayer, entity))
+			.collect(Collectors.toList());
+		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(list));
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final EntityPredicate[] victims;
+		private final EntityPredicate.Composite[] victims;
 
-		public TriggerInstance(EntityPredicate[] entityPredicates) {
-			super(ChanneledLightningTrigger.ID);
-			this.victims = entityPredicates;
+		public TriggerInstance(EntityPredicate.Composite composite, EntityPredicate.Composite[] composites) {
+			super(ChanneledLightningTrigger.ID, composite);
+			this.victims = composites;
 		}
 
 		public static ChanneledLightningTrigger.TriggerInstance channeledLightning(EntityPredicate... entityPredicates) {
-			return new ChanneledLightningTrigger.TriggerInstance(entityPredicates);
+			return new ChanneledLightningTrigger.TriggerInstance(
+				EntityPredicate.Composite.ANY,
+				(EntityPredicate.Composite[])Stream.of(entityPredicates).map(EntityPredicate.Composite::wrap).toArray(EntityPredicate.Composite[]::new)
+			);
 		}
 
-		public boolean matches(ServerPlayer serverPlayer, Collection<? extends Entity> collection) {
-			for (EntityPredicate entityPredicate : this.victims) {
+		public boolean matches(Collection<? extends LootContext> collection) {
+			for (EntityPredicate.Composite composite : this.victims) {
 				boolean bl = false;
 
-				for (Entity entity : collection) {
-					if (entityPredicate.matches(serverPlayer, entity)) {
+				for (LootContext lootContext : collection) {
+					if (composite.matches(lootContext)) {
 						bl = true;
 						break;
 					}
@@ -57,9 +67,9 @@ public class ChanneledLightningTrigger extends SimpleCriterionTrigger<ChanneledL
 		}
 
 		@Override
-		public JsonElement serializeToJson() {
-			JsonObject jsonObject = new JsonObject();
-			jsonObject.add("victims", EntityPredicate.serializeArrayToJson(this.victims));
+		public JsonObject serializeToJson(SerializationContext serializationContext) {
+			JsonObject jsonObject = super.serializeToJson(serializationContext);
+			jsonObject.add("victims", EntityPredicate.Composite.toJson(this.victims, serializationContext));
 			return jsonObject;
 		}
 	}

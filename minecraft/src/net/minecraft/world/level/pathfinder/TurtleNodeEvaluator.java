@@ -9,8 +9,8 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.block.BaseRailBlock;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -241,7 +241,7 @@ public class TurtleNodeEvaluator extends WalkNodeEvaluator {
 			return BlockPathTypes.WATER;
 		} else {
 			if (blockPathTypes == BlockPathTypes.OPEN && j >= 1) {
-				Block block = blockGetter.getBlockState(new BlockPos(i, j - 1, k)).getBlock();
+				BlockState blockState = blockGetter.getBlockState(new BlockPos(i, j - 1, k));
 				BlockPathTypes blockPathTypes3 = getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j - 1, k));
 				if (blockPathTypes3 != BlockPathTypes.WALKABLE && blockPathTypes3 != BlockPathTypes.OPEN && blockPathTypes3 != BlockPathTypes.LAVA) {
 					blockPathTypes = BlockPathTypes.WALKABLE;
@@ -249,7 +249,7 @@ public class TurtleNodeEvaluator extends WalkNodeEvaluator {
 					blockPathTypes = BlockPathTypes.OPEN;
 				}
 
-				if (blockPathTypes3 == BlockPathTypes.DAMAGE_FIRE || block == Blocks.MAGMA_BLOCK || block.is(BlockTags.CAMPFIRES)) {
+				if (blockPathTypes3 == BlockPathTypes.DAMAGE_FIRE || blockState.is(Blocks.MAGMA_BLOCK) || blockState.is(BlockTags.CAMPFIRES)) {
 					blockPathTypes = BlockPathTypes.DAMAGE_FIRE;
 				}
 

@@ -44,7 +44,7 @@ public class CactusBlock extends Block {
 		if (serverLevel.isEmptyBlock(blockPos2)) {
 			int i = 1;
 
-			while (serverLevel.getBlockState(blockPos.below(i)).getBlock() == this) {
+			while (serverLevel.getBlockState(blockPos.below(i)).is(this)) {
 				i++;
 			}
 
@@ -93,8 +93,9 @@ public class CactusBlock extends Block {
 			}
 		}
 
-		Block block = levelReader.getBlockState(blockPos.below()).getBlock();
-		return (block == Blocks.CACTUS || block == Blocks.SAND || block == Blocks.RED_SAND) && !levelReader.getBlockState(blockPos.above()).getMaterial().isLiquid();
+		BlockState blockState3 = levelReader.getBlockState(blockPos.below());
+		return (blockState3.is(Blocks.CACTUS) || blockState3.is(Blocks.SAND) || blockState3.is(Blocks.RED_SAND))
+			&& !levelReader.getBlockState(blockPos.above()).getMaterial().isLiquid();
 	}
 
 	@Override

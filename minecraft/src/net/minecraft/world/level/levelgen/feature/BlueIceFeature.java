@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -30,13 +29,13 @@ public class BlueIceFeature extends Feature<NoneFeatureConfiguration> {
 	) {
 		if (blockPos.getY() > levelAccessor.getSeaLevel() - 1) {
 			return false;
-		} else if (levelAccessor.getBlockState(blockPos).getBlock() != Blocks.WATER && levelAccessor.getBlockState(blockPos.below()).getBlock() != Blocks.WATER) {
+		} else if (!levelAccessor.getBlockState(blockPos).is(Blocks.WATER) && !levelAccessor.getBlockState(blockPos.below()).is(Blocks.WATER)) {
 			return false;
 		} else {
 			boolean bl = false;
 
 			for (Direction direction : Direction.values()) {
-				if (direction != Direction.DOWN && levelAccessor.getBlockState(blockPos.relative(direction)).getBlock() == Blocks.PACKED_ICE) {
+				if (direction != Direction.DOWN && levelAccessor.getBlockState(blockPos.relative(direction)).is(Blocks.PACKED_ICE)) {
 					bl = true;
 					break;
 				}
@@ -57,11 +56,10 @@ public class BlueIceFeature extends Feature<NoneFeatureConfiguration> {
 					if (k >= 1) {
 						BlockPos blockPos2 = blockPos.offset(random.nextInt(k) - random.nextInt(k), j, random.nextInt(k) - random.nextInt(k));
 						BlockState blockState = levelAccessor.getBlockState(blockPos2);
-						Block block = blockState.getBlock();
-						if (blockState.getMaterial() == Material.AIR || block == Blocks.WATER || block == Blocks.PACKED_ICE || block == Blocks.ICE) {
+						if (blockState.getMaterial() == Material.AIR || blockState.is(Blocks.WATER) || blockState.is(Blocks.PACKED_ICE) || blockState.is(Blocks.ICE)) {
 							for (Direction direction2 : Direction.values()) {
-								Block block2 = levelAccessor.getBlockState(blockPos2.relative(direction2)).getBlock();
-								if (block2 == Blocks.BLUE_ICE) {
+								BlockState blockState2 = levelAccessor.getBlockState(blockPos2.relative(direction2));
+								if (blockState2.is(Blocks.BLUE_ICE)) {
 									levelAccessor.setBlock(blockPos2, Blocks.BLUE_ICE.defaultBlockState(), 2);
 									break;
 								}

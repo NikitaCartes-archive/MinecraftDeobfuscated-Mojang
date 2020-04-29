@@ -3,7 +3,6 @@ package net.minecraft.server.level;
 import com.google.common.annotations.VisibleForTesting;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.util.Either;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -12,6 +11,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -27,7 +27,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
@@ -47,7 +46,6 @@ import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelStorageSource;
 
 public class ServerChunkCache extends ChunkSource {
-	private static final int MAGIC_NUMBER = (int)Math.pow(17.0, 2.0);
 	private static final List<ChunkStatus> CHUNK_STATUSES = ChunkStatus.getStatusList();
 	private final DistanceManager distanceManager;
 	private final ChunkGenerator<?> generator;
@@ -63,6 +61,8 @@ public class ServerChunkCache extends ChunkSource {
 	private final long[] lastChunkPos = new long[4];
 	private final ChunkStatus[] lastChunkStatus = new ChunkStatus[4];
 	private final ChunkAccess[] lastChunk = new ChunkAccess[4];
+	@Nullable
+	private NaturalSpawner.SpawnState lastSpawnState;
 
 	public ServerChunkCache(
 		ServerLevel serverLevel,
@@ -318,11 +318,6 @@ public class ServerChunkCache extends ChunkSource {
 		return this.checkChunkFuture(l, ChunkHolder::getTickingChunkFuture);
 	}
 
-	public boolean isInAccessibleChunk(Entity entity) {
-		long l = ChunkPos.asLong(Mth.floor(entity.getX()) >> 4, Mth.floor(entity.getZ()) >> 4);
-		return this.checkChunkFuture(l, ChunkHolder::getFullChunkFuture);
-	}
-
 	private boolean checkChunkFuture(long l, Function<ChunkHolder, CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>>> function) {
 		ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(l);
 		if (chunkHolder == null) {
@@ -374,45 +369,27 @@ public class ServerChunkCache extends ChunkSource {
 			boolean bl3 = levelData.getGameTime() % 400L == 0L;
 			this.level.getProfiler().push("naturalSpawnCount");
 			int j = this.distanceManager.getNaturalSpawnChunkCount();
-			MobCategory[] mobCategorys = MobCategory.values();
-			Object2IntMap<MobCategory> object2IntMap = this.level.getMobCategoryCounts();
+			NaturalSpawner.SpawnState spawnState = NaturalSpawner.createState(j, this.level.getAllEntities(), this::getFullChunk);
+			this.lastSpawnState = spawnState;
 			this.level.getProfiler().pop();
-			this.chunkMap
-				.getChunks()
-				.forEach(
-					chunkHolder -> {
-						Optional<LevelChunk> optional = ((Either)chunkHolder.getEntityTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK)).left();
-						if (optional.isPresent()) {
-							LevelChunk levelChunk = (LevelChunk)optional.get();
-							this.level.getProfiler().push("broadcast");
-							chunkHolder.broadcastChanges(levelChunk);
-							this.level.getProfiler().pop();
-							ChunkPos chunkPos = chunkHolder.getPos();
-							if (!this.chunkMap.noPlayersCloseForSpawning(chunkPos)) {
-								levelChunk.setInhabitedTime(levelChunk.getInhabitedTime() + m);
-								if (bl2 && (this.spawnEnemies || this.spawnFriendlies) && this.level.getWorldBorder().isWithinBounds(levelChunk.getPos())) {
-									this.level.getProfiler().push("spawner");
-
-									for (MobCategory mobCategory : mobCategorys) {
-										if (mobCategory != MobCategory.MISC
-											&& (!mobCategory.isFriendly() || this.spawnFriendlies)
-											&& (mobCategory.isFriendly() || this.spawnEnemies)
-											&& (!mobCategory.isPersistent() || bl3)) {
-											int k = mobCategory.getMaxInstancesPerChunk() * j / MAGIC_NUMBER;
-											if (object2IntMap.getInt(mobCategory) <= k) {
-												NaturalSpawner.spawnCategoryForChunk(mobCategory, this.level, levelChunk);
-											}
-										}
-									}
-
-									this.level.getProfiler().pop();
-								}
-
-								this.level.tickChunk(levelChunk, i);
-							}
+			this.chunkMap.getChunks().forEach(chunkHolder -> {
+				Optional<LevelChunk> optional = ((Either)chunkHolder.getEntityTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK)).left();
+				if (optional.isPresent()) {
+					LevelChunk levelChunk = (LevelChunk)optional.get();
+					this.level.getProfiler().push("broadcast");
+					chunkHolder.broadcastChanges(levelChunk);
+					this.level.getProfiler().pop();
+					ChunkPos chunkPos = chunkHolder.getPos();
+					if (!this.chunkMap.noPlayersCloseForSpawning(chunkPos)) {
+						levelChunk.setInhabitedTime(levelChunk.getInhabitedTime() + m);
+						if (bl2 && (this.spawnEnemies || this.spawnFriendlies) && this.level.getWorldBorder().isWithinBounds(levelChunk.getPos())) {
+							NaturalSpawner.spawnForChunk(this.level, levelChunk, spawnState, this.spawnFriendlies, this.spawnEnemies, bl3);
 						}
+
+						this.level.tickChunk(levelChunk, i);
 					}
-				);
+				}
+			});
 			this.level.getProfiler().push("customSpawners");
 			if (bl2) {
 				this.generator.tickCustomSpawners(this.level, this.spawnEnemies, this.spawnFriendlies);
@@ -423,6 +400,13 @@ public class ServerChunkCache extends ChunkSource {
 		}
 
 		this.chunkMap.tick();
+	}
+
+	private void getFullChunk(long l, Consumer<LevelChunk> consumer) {
+		ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(l);
+		if (chunkHolder != null) {
+			((Either)chunkHolder.getFullChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK)).left().ifPresent(consumer);
+		}
 	}
 
 	@Override
@@ -516,6 +500,11 @@ public class ServerChunkCache extends ChunkSource {
 
 	public PoiManager getPoiManager() {
 		return this.chunkMap.getPoiManager();
+	}
+
+	@Nullable
+	public NaturalSpawner.SpawnState getLastSpawnState() {
+		return this.lastSpawnState;
 	}
 
 	final class MainThreadExecutor extends BlockableEventLoop<Runnable> {

@@ -85,6 +85,7 @@ public abstract class Biome {
 	protected final List<ConfiguredFeature<?, ?>> flowerFeatures = Lists.<ConfiguredFeature<?, ?>>newArrayList();
 	protected final Map<StructureFeature<?>, FeatureConfiguration> validFeatureStarts = Maps.<StructureFeature<?>, FeatureConfiguration>newHashMap();
 	private final Map<MobCategory, List<Biome.SpawnerData>> spawners = Maps.<MobCategory, List<Biome.SpawnerData>>newHashMap();
+	private final Map<EntityType<?>, Biome.MobSpawnCost> mobSpawnCosts = Maps.<EntityType<?>, Biome.MobSpawnCost>newHashMap();
 	private final ThreadLocal<Long2FloatLinkedOpenHashMap> temperatureCache = ThreadLocal.withInitial(() -> Util.make(() -> {
 			Long2FloatLinkedOpenHashMap long2FloatLinkedOpenHashMap = new Long2FloatLinkedOpenHashMap(1024, 0.25F) {
 				@Override
@@ -158,8 +159,17 @@ public abstract class Biome {
 		((List)this.spawners.get(mobCategory)).add(spawnerData);
 	}
 
+	protected void addMobCharge(EntityType<?> entityType, double d, double e) {
+		this.mobSpawnCosts.put(entityType, new Biome.MobSpawnCost(e, d));
+	}
+
 	public List<Biome.SpawnerData> getMobs(MobCategory mobCategory) {
 		return (List<Biome.SpawnerData>)this.spawners.get(mobCategory);
+	}
+
+	@Nullable
+	public Biome.MobSpawnCost getMobSpawnCost(EntityType<?> entityType) {
+		return (Biome.MobSpawnCost)this.mobSpawnCosts.get(entityType);
 	}
 
 	public Biome.Precipitation getPrecipitation() {
@@ -631,6 +641,24 @@ public abstract class Biome {
 				+ (this.altitude - climateParameters.altitude) * (this.altitude - climateParameters.altitude)
 				+ (this.weirdness - climateParameters.weirdness) * (this.weirdness - climateParameters.weirdness)
 				+ (this.offset - climateParameters.offset) * (this.offset - climateParameters.offset);
+		}
+	}
+
+	public static class MobSpawnCost {
+		private final double energyBudget;
+		private final double charge;
+
+		public MobSpawnCost(double d, double e) {
+			this.energyBudget = d;
+			this.charge = e;
+		}
+
+		public double getEnergyBudget() {
+			return this.energyBudget;
+		}
+
+		public double getCharge() {
+			return this.charge;
 		}
 	}
 

@@ -2,13 +2,13 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
 public class TotemParticle extends SimpleAnimatedParticle {
-	private TotemParticle(Level level, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
-		super(level, d, e, f, spriteSet, -0.05F);
+	private TotemParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
+		super(clientLevel, d, e, f, spriteSet, -0.05F);
 		this.xd = g;
 		this.yd = h;
 		this.zd = i;
@@ -32,8 +32,8 @@ public class TotemParticle extends SimpleAnimatedParticle {
 			this.sprites = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			return new TotemParticle(level, d, e, f, g, h, i, this.sprites);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			return new TotemParticle(clientLevel, d, e, f, g, h, i, this.sprites);
 		}
 	}
 }

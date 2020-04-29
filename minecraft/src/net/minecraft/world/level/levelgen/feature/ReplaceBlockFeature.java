@@ -23,7 +23,7 @@ public class ReplaceBlockFeature extends Feature<ReplaceBlockConfiguration> {
 		BlockPos blockPos,
 		ReplaceBlockConfiguration replaceBlockConfiguration
 	) {
-		if (levelAccessor.getBlockState(blockPos).getBlock() == replaceBlockConfiguration.target.getBlock()) {
+		if (levelAccessor.getBlockState(blockPos).is(replaceBlockConfiguration.target.getBlock())) {
 			levelAccessor.setBlock(blockPos, replaceBlockConfiguration.state, 2);
 		}
 

@@ -28,6 +28,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -871,7 +872,7 @@ public class Fox extends Animal {
 		@Override
 		protected boolean isValidTarget(LevelReader levelReader, BlockPos blockPos) {
 			BlockState blockState = levelReader.getBlockState(blockPos);
-			return blockState.getBlock() == Blocks.SWEET_BERRY_BUSH && (Integer)blockState.getValue(SweetBerryBushBlock.AGE) >= 2;
+			return blockState.is(Blocks.SWEET_BERRY_BUSH) && (Integer)blockState.getValue(SweetBerryBushBlock.AGE) >= 2;
 		}
 
 		@Override
@@ -892,7 +893,7 @@ public class Fox extends Animal {
 		protected void onReachedTarget() {
 			if (Fox.this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 				BlockState blockState = Fox.this.level.getBlockState(this.blockPos);
-				if (blockState.getBlock() == Blocks.SWEET_BERRY_BUSH) {
+				if (blockState.is(Blocks.SWEET_BERRY_BUSH)) {
 					int i = (Integer)blockState.getValue(SweetBerryBushBlock.AGE);
 					blockState.setValue(SweetBerryBushBlock.AGE, Integer.valueOf(1));
 					int j = 1 + Fox.this.level.random.nextInt(2) + (i == 3 ? 1 : 0);
@@ -938,7 +939,7 @@ public class Fox extends Animal {
 
 		@Override
 		public boolean canUse() {
-			return Fox.this.isInWater() && Fox.this.getFluidHeight() > 0.25 || Fox.this.isInLava();
+			return Fox.this.isInWater() && Fox.this.getFluidHeight(FluidTags.WATER) > 0.25 || Fox.this.isInLava();
 		}
 	}
 
@@ -1147,7 +1148,7 @@ public class Fox extends Animal {
 			} else if (Fox.this.xRot > 0.0F
 				&& Fox.this.onGround
 				&& (float)Fox.this.getDeltaMovement().y != 0.0F
-				&& Fox.this.level.getBlockState(Fox.this.blockPosition()).getBlock() == Blocks.SNOW) {
+				&& Fox.this.level.getBlockState(Fox.this.blockPosition()).is(Blocks.SNOW)) {
 				Fox.this.xRot = 60.0F;
 				Fox.this.setTarget(null);
 				Fox.this.setFaceplanted(true);

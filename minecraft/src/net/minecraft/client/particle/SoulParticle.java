@@ -2,15 +2,15 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
 public class SoulParticle extends RisingParticle {
 	private final SpriteSet sprites;
 
-	private SoulParticle(Level level, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
-		super(level, d, e, f, g, h, i);
+	private SoulParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
+		super(clientLevel, d, e, f, g, h, i);
 		this.sprites = spriteSet;
 		this.scale(1.5F);
 		this.setSpriteFromAge(spriteSet);
@@ -37,8 +37,8 @@ public class SoulParticle extends RisingParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			SoulParticle soulParticle = new SoulParticle(level, d, e, f, g, h, i, this.sprite);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			SoulParticle soulParticle = new SoulParticle(clientLevel, d, e, f, g, h, i, this.sprite);
 			soulParticle.setAlpha(1.0F);
 			soulParticle.pickSprite(this.sprite);
 			return soulParticle;

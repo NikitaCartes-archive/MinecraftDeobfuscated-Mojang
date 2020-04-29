@@ -21,7 +21,9 @@ public class FireChargeItem extends Item {
 		BlockPos blockPos = useOnContext.getClickedPos();
 		BlockState blockState = level.getBlockState(blockPos);
 		boolean bl = false;
-		if (blockState.getBlock().is(BlockTags.CAMPFIRES)) {
+		if (blockState.is(
+			BlockTags.CAMPFIRES, blockStateBase -> blockStateBase.hasProperty(CampfireBlock.LIT) && blockStateBase.hasProperty(CampfireBlock.WATERLOGGED)
+		)) {
 			if (!(Boolean)blockState.getValue(CampfireBlock.LIT) && !(Boolean)blockState.getValue(CampfireBlock.WATERLOGGED)) {
 				this.playSound(level, blockPos);
 				level.setBlockAndUpdate(blockPos, blockState.setValue(CampfireBlock.LIT, Boolean.valueOf(true)));

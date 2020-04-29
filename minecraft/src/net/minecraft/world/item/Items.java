@@ -902,7 +902,7 @@ public class Items {
 	public static final Item EGG = registerItem("egg", new EggItem(new Item.Properties().stacksTo(16).tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item COMPASS = registerItem("compass", new CompassItem(new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
 	public static final Item FISHING_ROD = registerItem("fishing_rod", new FishingRodItem(new Item.Properties().durability(64).tab(CreativeModeTab.TAB_TOOLS)));
-	public static final Item CLOCK = registerItem("clock", new ClockItem(new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
+	public static final Item CLOCK = registerItem("clock", new Item(new Item.Properties().tab(CreativeModeTab.TAB_TOOLS)));
 	public static final Item GLOWSTONE_DUST = registerItem("glowstone_dust", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item COD = registerItem("cod", new Item(new Item.Properties().tab(CreativeModeTab.TAB_FOOD).food(Foods.COD)));
 	public static final Item SALMON = registerItem("salmon", new Item(new Item.Properties().tab(CreativeModeTab.TAB_FOOD).food(Foods.SALMON)));

@@ -2,8 +2,8 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
 public class PortalParticle extends TextureSheetParticle {
@@ -11,8 +11,8 @@ public class PortalParticle extends TextureSheetParticle {
 	private final double yStart;
 	private final double zStart;
 
-	protected PortalParticle(Level level, double d, double e, double f, double g, double h, double i) {
-		super(level, d, e, f);
+	protected PortalParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+		super(clientLevel, d, e, f);
 		this.xd = g;
 		this.yd = h;
 		this.zd = i;
@@ -91,8 +91,8 @@ public class PortalParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			PortalParticle portalParticle = new PortalParticle(level, d, e, f, g, h, i);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			PortalParticle portalParticle = new PortalParticle(clientLevel, d, e, f, g, h, i);
 			portalParticle.pickSprite(this.sprite);
 			return portalParticle;
 		}

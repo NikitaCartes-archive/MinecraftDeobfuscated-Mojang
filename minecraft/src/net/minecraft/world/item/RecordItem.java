@@ -37,7 +37,7 @@ public class RecordItem extends Item {
 		Level level = useOnContext.getLevel();
 		BlockPos blockPos = useOnContext.getClickedPos();
 		BlockState blockState = level.getBlockState(blockPos);
-		if (blockState.getBlock() == Blocks.JUKEBOX && !(Boolean)blockState.getValue(JukeboxBlock.HAS_RECORD)) {
+		if (blockState.is(Blocks.JUKEBOX) && !(Boolean)blockState.getValue(JukeboxBlock.HAS_RECORD)) {
 			ItemStack itemStack = useOnContext.getItemInHand();
 			if (!level.isClientSide) {
 				((JukeboxBlock)Blocks.JUKEBOX).setRecord(level, blockPos, blockState, itemStack);

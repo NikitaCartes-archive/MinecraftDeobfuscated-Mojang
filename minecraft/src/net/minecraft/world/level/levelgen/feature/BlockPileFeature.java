@@ -49,7 +49,7 @@ public class BlockPileFeature extends Feature<BlockPileConfiguration> {
 	private boolean mayPlaceOn(LevelAccessor levelAccessor, BlockPos blockPos, Random random) {
 		BlockPos blockPos2 = blockPos.below();
 		BlockState blockState = levelAccessor.getBlockState(blockPos2);
-		return blockState.getBlock() == Blocks.GRASS_PATH ? random.nextBoolean() : blockState.isFaceSturdy(levelAccessor, blockPos2, Direction.UP);
+		return blockState.is(Blocks.GRASS_PATH) ? random.nextBoolean() : blockState.isFaceSturdy(levelAccessor, blockPos2, Direction.UP);
 	}
 
 	private void tryPlaceBlock(LevelAccessor levelAccessor, BlockPos blockPos, Random random, BlockPileConfiguration blockPileConfiguration) {

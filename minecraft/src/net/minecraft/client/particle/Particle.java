@@ -6,12 +6,12 @@ import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RewindableStream;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -19,7 +19,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 @Environment(EnvType.CLIENT)
 public abstract class Particle {
 	private static final AABB INITIAL_AABB = new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-	protected final Level level;
+	protected final ClientLevel level;
 	protected double xo;
 	protected double yo;
 	protected double zo;
@@ -47,8 +47,8 @@ public abstract class Particle {
 	protected float roll;
 	protected float oRoll;
 
-	protected Particle(Level level, double d, double e, double f) {
-		this.level = level;
+	protected Particle(ClientLevel clientLevel, double d, double e, double f) {
+		this.level = clientLevel;
 		this.setSize(0.2F, 0.2F);
 		this.setPos(d, e, f);
 		this.xo = d;
@@ -57,8 +57,8 @@ public abstract class Particle {
 		this.lifetime = (int)(4.0F / (this.random.nextFloat() * 0.9F + 0.1F));
 	}
 
-	public Particle(Level level, double d, double e, double f, double g, double h, double i) {
-		this(level, d, e, f);
+	public Particle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+		this(clientLevel, d, e, f);
 		this.xd = g + (Math.random() * 2.0 - 1.0) * 0.4F;
 		this.yd = h + (Math.random() * 2.0 - 1.0) * 0.4F;
 		this.zd = i + (Math.random() * 2.0 - 1.0) * 0.4F;

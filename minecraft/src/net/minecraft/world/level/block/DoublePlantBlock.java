@@ -36,7 +36,7 @@ public class DoublePlantBlock extends BushBlock {
 		DoubleBlockHalf doubleBlockHalf = blockState.getValue(HALF);
 		if (direction.getAxis() != Direction.Axis.Y
 			|| doubleBlockHalf == DoubleBlockHalf.LOWER != (direction == Direction.UP)
-			|| blockState2.getBlock() == this && blockState2.getValue(HALF) != doubleBlockHalf) {
+			|| blockState2.is(this) && blockState2.getValue(HALF) != doubleBlockHalf) {
 			return doubleBlockHalf == DoubleBlockHalf.LOWER && direction == Direction.DOWN && !blockState.canSurvive(levelAccessor, blockPos)
 				? Blocks.AIR.defaultBlockState()
 				: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
@@ -65,7 +65,7 @@ public class DoublePlantBlock extends BushBlock {
 			return super.canSurvive(blockState, levelReader, blockPos);
 		} else {
 			BlockState blockState2 = levelReader.getBlockState(blockPos.below());
-			return blockState2.getBlock() == this && blockState2.getValue(HALF) == DoubleBlockHalf.LOWER;
+			return blockState2.is(this) && blockState2.getValue(HALF) == DoubleBlockHalf.LOWER;
 		}
 	}
 
@@ -84,7 +84,7 @@ public class DoublePlantBlock extends BushBlock {
 		DoubleBlockHalf doubleBlockHalf = blockState.getValue(HALF);
 		BlockPos blockPos2 = doubleBlockHalf == DoubleBlockHalf.LOWER ? blockPos.above() : blockPos.below();
 		BlockState blockState2 = level.getBlockState(blockPos2);
-		if (blockState2.getBlock() == this && blockState2.getValue(HALF) != doubleBlockHalf) {
+		if (blockState2.is(this) && blockState2.getValue(HALF) != doubleBlockHalf) {
 			level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 35);
 			level.levelEvent(player, 2001, blockPos2, Block.getId(blockState2));
 			if (!level.isClientSide && !player.isCreative()) {

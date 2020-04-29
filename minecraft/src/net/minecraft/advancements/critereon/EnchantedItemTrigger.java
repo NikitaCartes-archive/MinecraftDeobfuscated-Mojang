@@ -1,7 +1,5 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -15,28 +13,30 @@ public class EnchantedItemTrigger extends SimpleCriterionTrigger<EnchantedItemTr
 		return ID;
 	}
 
-	public EnchantedItemTrigger.TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+	public EnchantedItemTrigger.TriggerInstance createInstance(
+		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+	) {
 		ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("item"));
 		MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("levels"));
-		return new EnchantedItemTrigger.TriggerInstance(itemPredicate, ints);
+		return new EnchantedItemTrigger.TriggerInstance(composite, itemPredicate, ints);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ItemStack itemStack, int i) {
-		this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(itemStack, i));
+		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(itemStack, i));
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final ItemPredicate item;
 		private final MinMaxBounds.Ints levels;
 
-		public TriggerInstance(ItemPredicate itemPredicate, MinMaxBounds.Ints ints) {
-			super(EnchantedItemTrigger.ID);
+		public TriggerInstance(EntityPredicate.Composite composite, ItemPredicate itemPredicate, MinMaxBounds.Ints ints) {
+			super(EnchantedItemTrigger.ID, composite);
 			this.item = itemPredicate;
 			this.levels = ints;
 		}
 
 		public static EnchantedItemTrigger.TriggerInstance enchantedItem() {
-			return new EnchantedItemTrigger.TriggerInstance(ItemPredicate.ANY, MinMaxBounds.Ints.ANY);
+			return new EnchantedItemTrigger.TriggerInstance(EntityPredicate.Composite.ANY, ItemPredicate.ANY, MinMaxBounds.Ints.ANY);
 		}
 
 		public boolean matches(ItemStack itemStack, int i) {
@@ -44,8 +44,8 @@ public class EnchantedItemTrigger extends SimpleCriterionTrigger<EnchantedItemTr
 		}
 
 		@Override
-		public JsonElement serializeToJson() {
-			JsonObject jsonObject = new JsonObject();
+		public JsonObject serializeToJson(SerializationContext serializationContext) {
+			JsonObject jsonObject = super.serializeToJson(serializationContext);
 			jsonObject.add("item", this.item.serializeToJson());
 			jsonObject.add("levels", this.levels.serializeToJson());
 			return jsonObject;

@@ -102,11 +102,11 @@ public class SignEditScreen extends Screen {
 	public boolean keyPressed(int i, int j, int k) {
 		if (i == 265) {
 			this.line = this.line - 1 & 3;
-			this.signField.setEnd();
+			this.signField.setCursorToEnd();
 			return true;
 		} else if (i == 264 || i == 257 || i == 335) {
 			this.line = this.line + 1 & 3;
-			this.signField.setEnd();
+			this.signField.setCursorToEnd();
 			return true;
 		} else {
 			return this.signField.keyPressed(i) ? true : super.keyPressed(i, j, k);

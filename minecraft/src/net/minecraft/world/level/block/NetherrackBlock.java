@@ -40,12 +40,12 @@ public class NetherrackBlock extends Block implements BonemealableBlock {
 		boolean bl2 = false;
 
 		for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-1, -1, -1), blockPos.offset(1, 1, 1))) {
-			Block block = serverLevel.getBlockState(blockPos2).getBlock();
-			if (block == Blocks.WARPED_NYLIUM) {
+			BlockState blockState2 = serverLevel.getBlockState(blockPos2);
+			if (blockState2.is(Blocks.WARPED_NYLIUM)) {
 				bl2 = true;
 			}
 
-			if (block == Blocks.CRIMSON_NYLIUM) {
+			if (blockState2.is(Blocks.CRIMSON_NYLIUM)) {
 				bl = true;
 			}
 

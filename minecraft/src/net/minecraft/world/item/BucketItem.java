@@ -131,17 +131,19 @@ public class BucketItem extends Item {
 					for (int l = 0; l < 8; l++) {
 						level.addParticle(ParticleTypes.LARGE_SMOKE, (double)i + Math.random(), (double)j + Math.random(), (double)k + Math.random(), 0.0, 0.0, 0.0);
 					}
-				} else if (blockState.getBlock() instanceof LiquidBlockContainer && this.content == Fluids.WATER) {
+				} else {
+					if (!(blockState.getBlock() instanceof LiquidBlockContainer) || this.content != Fluids.WATER) {
+						if (!level.isClientSide && bl && !material.isLiquid()) {
+							level.destroyBlock(blockPos, true);
+						}
+
+						this.playEmptySound(player, level, blockPos);
+						return level.setBlock(blockPos, this.content.defaultFluidState().createLegacyBlock(), 11);
+					}
+
 					if (((LiquidBlockContainer)blockState.getBlock()).placeLiquid(level, blockPos, blockState, ((FlowingFluid)this.content).getSource(false))) {
 						this.playEmptySound(player, level, blockPos);
 					}
-				} else {
-					if (!level.isClientSide && bl && !material.isLiquid()) {
-						level.destroyBlock(blockPos, true);
-					}
-
-					this.playEmptySound(player, level, blockPos);
-					level.setBlock(blockPos, this.content.defaultFluidState().createLegacyBlock(), 11);
 				}
 
 				return true;

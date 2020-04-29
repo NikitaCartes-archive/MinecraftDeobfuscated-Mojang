@@ -6,20 +6,20 @@ import com.mojang.math.Vector3f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public abstract class SingleQuadParticle extends Particle {
 	protected float quadSize = 0.1F * (this.random.nextFloat() * 0.5F + 0.5F) * 2.0F;
 
-	protected SingleQuadParticle(Level level, double d, double e, double f) {
-		super(level, d, e, f);
+	protected SingleQuadParticle(ClientLevel clientLevel, double d, double e, double f) {
+		super(clientLevel, d, e, f);
 	}
 
-	protected SingleQuadParticle(Level level, double d, double e, double f, double g, double h, double i) {
-		super(level, d, e, f, g, h, i);
+	protected SingleQuadParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+		super(clientLevel, d, e, f, g, h, i);
 	}
 
 	@Override

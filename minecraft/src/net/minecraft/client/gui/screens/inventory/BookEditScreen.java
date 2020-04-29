@@ -152,24 +152,21 @@ public class BookEditScreen extends Screen {
 		}
 
 		this.updateButtonVisibility();
-		this.clearDisplayCache();
+		this.clearDisplayCacheAfterPageChange();
 	}
 
 	private void pageForward() {
 		if (this.currentPage < this.getNumPages() - 1) {
 			this.currentPage++;
-			this.pageEdit.setStart();
 		} else {
 			this.appendPageToBook();
 			if (this.currentPage < this.getNumPages() - 1) {
 				this.currentPage++;
 			}
-
-			this.pageEdit.setStart();
 		}
 
 		this.updateButtonVisibility();
-		this.clearDisplayCache();
+		this.clearDisplayCacheAfterPageChange();
 	}
 
 	@Override
@@ -466,27 +463,31 @@ public class BookEditScreen extends Screen {
 
 	@Override
 	public boolean mouseClicked(double d, double e, int i) {
-		if (i == 0) {
-			long l = Util.getMillis();
-			BookEditScreen.DisplayCache displayCache = this.getDisplayCache();
-			int j = displayCache.getIndexAtPosition(this.font, this.convertScreenToLocal(new BookEditScreen.Pos2i((int)d, (int)e)));
-			if (j >= 0) {
-				if (j != this.lastIndex || l - this.lastClickTime >= 250L) {
-					this.pageEdit.setCursorPos(j, Screen.hasShiftDown());
-				} else if (!this.pageEdit.isSelecting()) {
-					this.selectWord(j);
-				} else {
-					this.pageEdit.selectAll();
+		if (super.mouseClicked(d, e, i)) {
+			return true;
+		} else {
+			if (i == 0) {
+				long l = Util.getMillis();
+				BookEditScreen.DisplayCache displayCache = this.getDisplayCache();
+				int j = displayCache.getIndexAtPosition(this.font, this.convertScreenToLocal(new BookEditScreen.Pos2i((int)d, (int)e)));
+				if (j >= 0) {
+					if (j != this.lastIndex || l - this.lastClickTime >= 250L) {
+						this.pageEdit.setCursorPos(j, Screen.hasShiftDown());
+					} else if (!this.pageEdit.isSelecting()) {
+						this.selectWord(j);
+					} else {
+						this.pageEdit.selectAll();
+					}
+
+					this.clearDisplayCache();
 				}
 
-				this.clearDisplayCache();
+				this.lastIndex = j;
+				this.lastClickTime = l;
 			}
 
-			this.lastIndex = j;
-			this.lastClickTime = l;
+			return true;
 		}
-
-		return super.mouseClicked(d, e, i);
 	}
 
 	private void selectWord(int i) {
@@ -496,14 +497,18 @@ public class BookEditScreen extends Screen {
 
 	@Override
 	public boolean mouseDragged(double d, double e, int i, double f, double g) {
-		if (i == 0) {
-			BookEditScreen.DisplayCache displayCache = this.getDisplayCache();
-			int j = displayCache.getIndexAtPosition(this.font, this.convertScreenToLocal(new BookEditScreen.Pos2i((int)d, (int)e)));
-			this.pageEdit.setCursorPos(j, true);
-			this.clearDisplayCache();
-		}
+		if (super.mouseDragged(d, e, i, f, g)) {
+			return true;
+		} else {
+			if (i == 0) {
+				BookEditScreen.DisplayCache displayCache = this.getDisplayCache();
+				int j = displayCache.getIndexAtPosition(this.font, this.convertScreenToLocal(new BookEditScreen.Pos2i((int)d, (int)e)));
+				this.pageEdit.setCursorPos(j, true);
+				this.clearDisplayCache();
+			}
 
-		return super.mouseDragged(d, e, i, f, g);
+			return true;
+		}
 	}
 
 	private BookEditScreen.DisplayCache getDisplayCache() {
@@ -516,6 +521,11 @@ public class BookEditScreen extends Screen {
 
 	private void clearDisplayCache() {
 		this.displayCache = null;
+	}
+
+	private void clearDisplayCacheAfterPageChange() {
+		this.pageEdit.setCursorToEnd();
+		this.clearDisplayCache();
 	}
 
 	private BookEditScreen.DisplayCache rebuildDisplayCache() {

@@ -59,7 +59,7 @@ public class EnchantmentTableBlock extends BaseEntityBlock {
 				if (random.nextInt(16) == 0) {
 					for (int k = 0; k <= 1; k++) {
 						BlockPos blockPos2 = blockPos.offset(i, k, j);
-						if (level.getBlockState(blockPos2).getBlock() == Blocks.BOOKSHELF) {
+						if (level.getBlockState(blockPos2).is(Blocks.BOOKSHELF)) {
 							if (!level.isEmptyBlock(blockPos.offset(i / 2, 0, j / 2))) {
 								break;
 							}

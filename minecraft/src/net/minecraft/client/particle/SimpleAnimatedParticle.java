@@ -2,7 +2,7 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.world.level.Level;
+import net.minecraft.client.multiplayer.ClientLevel;
 
 @Environment(EnvType.CLIENT)
 public class SimpleAnimatedParticle extends TextureSheetParticle {
@@ -14,8 +14,8 @@ public class SimpleAnimatedParticle extends TextureSheetParticle {
 	private float fadeB;
 	private boolean hasFade;
 
-	protected SimpleAnimatedParticle(Level level, double d, double e, double f, SpriteSet spriteSet, float g) {
-		super(level, d, e, f);
+	protected SimpleAnimatedParticle(ClientLevel clientLevel, double d, double e, double f, SpriteSet spriteSet, float g) {
+		super(clientLevel, d, e, f);
 		this.sprites = spriteSet;
 		this.baseGravity = g;
 	}

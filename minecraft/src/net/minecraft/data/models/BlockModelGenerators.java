@@ -1675,49 +1675,21 @@ public class BlockModelGenerators {
 						Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.decorateBlockModelLocation("redstone_dust_dot"))
 					)
 					.with(
-						Condition.or(
-							Condition.condition().term(BlockStateProperties.NORTH_REDSTONE, RedstoneSide.SIDE, RedstoneSide.UP),
-							Condition.condition()
-								.term(BlockStateProperties.NORTH_REDSTONE, RedstoneSide.NONE)
-								.term(BlockStateProperties.EAST_REDSTONE, RedstoneSide.NONE)
-								.term(BlockStateProperties.SOUTH_REDSTONE, RedstoneSide.SIDE, RedstoneSide.UP)
-								.term(BlockStateProperties.WEST_REDSTONE, RedstoneSide.NONE)
-						),
+						Condition.condition().term(BlockStateProperties.NORTH_REDSTONE, RedstoneSide.SIDE, RedstoneSide.UP),
 						Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.decorateBlockModelLocation("redstone_dust_side0"))
 					)
 					.with(
-						Condition.or(
-							Condition.condition().term(BlockStateProperties.SOUTH_REDSTONE, RedstoneSide.SIDE, RedstoneSide.UP),
-							Condition.condition()
-								.term(BlockStateProperties.NORTH_REDSTONE, RedstoneSide.SIDE, RedstoneSide.UP)
-								.term(BlockStateProperties.EAST_REDSTONE, RedstoneSide.NONE)
-								.term(BlockStateProperties.SOUTH_REDSTONE, RedstoneSide.NONE)
-								.term(BlockStateProperties.WEST_REDSTONE, RedstoneSide.NONE)
-						),
+						Condition.condition().term(BlockStateProperties.SOUTH_REDSTONE, RedstoneSide.SIDE, RedstoneSide.UP),
 						Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.decorateBlockModelLocation("redstone_dust_side_alt0"))
 					)
 					.with(
-						Condition.or(
-							Condition.condition().term(BlockStateProperties.EAST_REDSTONE, RedstoneSide.SIDE, RedstoneSide.UP),
-							Condition.condition()
-								.term(BlockStateProperties.NORTH_REDSTONE, RedstoneSide.NONE)
-								.term(BlockStateProperties.EAST_REDSTONE, RedstoneSide.NONE)
-								.term(BlockStateProperties.SOUTH_REDSTONE, RedstoneSide.NONE)
-								.term(BlockStateProperties.WEST_REDSTONE, RedstoneSide.SIDE, RedstoneSide.UP)
-						),
+						Condition.condition().term(BlockStateProperties.EAST_REDSTONE, RedstoneSide.SIDE, RedstoneSide.UP),
 						Variant.variant()
 							.with(VariantProperties.MODEL, ModelLocationUtils.decorateBlockModelLocation("redstone_dust_side_alt1"))
 							.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
 					)
 					.with(
-						Condition.or(
-							Condition.condition().term(BlockStateProperties.WEST_REDSTONE, RedstoneSide.SIDE, RedstoneSide.UP),
-							Condition.condition()
-								.term(BlockStateProperties.NORTH_REDSTONE, RedstoneSide.NONE)
-								.term(BlockStateProperties.EAST_REDSTONE, RedstoneSide.SIDE, RedstoneSide.UP)
-								.term(BlockStateProperties.SOUTH_REDSTONE, RedstoneSide.NONE)
-								.term(BlockStateProperties.WEST_REDSTONE, RedstoneSide.NONE)
-						),
+						Condition.condition().term(BlockStateProperties.WEST_REDSTONE, RedstoneSide.SIDE, RedstoneSide.UP),
 						Variant.variant()
 							.with(VariantProperties.MODEL, ModelLocationUtils.decorateBlockModelLocation("redstone_dust_side1"))
 							.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)

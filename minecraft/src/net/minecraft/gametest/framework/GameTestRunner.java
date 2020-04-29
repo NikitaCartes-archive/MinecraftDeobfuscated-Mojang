@@ -152,7 +152,7 @@ public class GameTestRunner {
 		BlockPos blockPos2 = blockPos.offset(-i, 0, -i);
 		BlockPos blockPos3 = blockPos.offset(i, 0, i);
 		BlockPos.betweenClosedStream(blockPos2, blockPos3)
-			.filter(blockPosx -> serverLevel.getBlockState(blockPosx).getBlock() == Blocks.STRUCTURE_BLOCK)
+			.filter(blockPosx -> serverLevel.getBlockState(blockPosx).is(Blocks.STRUCTURE_BLOCK))
 			.forEach(blockPosx -> {
 				StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPosx);
 				BlockPos blockPos2x = structureBlockEntity.getBlockPos();

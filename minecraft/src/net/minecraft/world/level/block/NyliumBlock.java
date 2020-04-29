@@ -47,11 +47,11 @@ public class NyliumBlock extends Block implements BonemealableBlock {
 
 	@Override
 	public void performBonemeal(ServerLevel serverLevel, Random random, BlockPos blockPos, BlockState blockState) {
-		Block block = serverLevel.getBlockState(blockPos).getBlock();
+		BlockState blockState2 = serverLevel.getBlockState(blockPos);
 		BlockPos blockPos2 = blockPos.above();
-		if (block == Blocks.CRIMSON_NYLIUM) {
+		if (blockState2.is(Blocks.CRIMSON_NYLIUM)) {
 			NetherForestVegetationFeature.place(serverLevel, random, blockPos2, BiomeDefaultFeatures.CRIMSON_FOREST_CONFIG, 3, 1);
-		} else if (block == Blocks.WARPED_NYLIUM) {
+		} else if (blockState2.is(Blocks.WARPED_NYLIUM)) {
 			NetherForestVegetationFeature.place(serverLevel, random, blockPos2, BiomeDefaultFeatures.WARPED_FOREST_CONFIG, 3, 1);
 			NetherForestVegetationFeature.place(serverLevel, random, blockPos2, BiomeDefaultFeatures.NETHER_SPROUTS_CONFIG, 3, 1);
 			if (random.nextInt(8) == 0) {

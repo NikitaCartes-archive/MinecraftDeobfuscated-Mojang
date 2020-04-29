@@ -50,7 +50,7 @@ public class WoodedBadlandsSurfaceBuilder extends BadlandsSurfaceBuilder {
 				BlockState blockState5 = chunkAccess.getBlockState(mutableBlockPos);
 				if (blockState5.isAir()) {
 					q = -1;
-				} else if (blockState5.getBlock() == blockState.getBlock()) {
+				} else if (blockState5.is(blockState.getBlock())) {
 					if (q == -1) {
 						bl2 = false;
 						if (p <= 0) {

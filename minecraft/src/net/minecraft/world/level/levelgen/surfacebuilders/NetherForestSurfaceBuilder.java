@@ -53,7 +53,7 @@ public class NetherForestSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBas
 			BlockState blockState5 = chunkAccess.getBlockState(mutableBlockPos);
 			if (blockState5.isAir()) {
 				r = -1;
-			} else if (blockState5.getBlock() == blockState.getBlock()) {
+			} else if (blockState5.is(blockState.getBlock())) {
 				if (r == -1) {
 					if (q <= 0) {
 						blockState4 = AIR;

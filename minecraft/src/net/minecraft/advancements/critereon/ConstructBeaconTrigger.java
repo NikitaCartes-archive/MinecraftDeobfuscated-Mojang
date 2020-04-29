@@ -1,7 +1,5 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -15,25 +13,27 @@ public class ConstructBeaconTrigger extends SimpleCriterionTrigger<ConstructBeac
 		return ID;
 	}
 
-	public ConstructBeaconTrigger.TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+	public ConstructBeaconTrigger.TriggerInstance createInstance(
+		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+	) {
 		MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("level"));
-		return new ConstructBeaconTrigger.TriggerInstance(ints);
+		return new ConstructBeaconTrigger.TriggerInstance(composite, ints);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, BeaconBlockEntity beaconBlockEntity) {
-		this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(beaconBlockEntity));
+		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(beaconBlockEntity));
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final MinMaxBounds.Ints level;
 
-		public TriggerInstance(MinMaxBounds.Ints ints) {
-			super(ConstructBeaconTrigger.ID);
+		public TriggerInstance(EntityPredicate.Composite composite, MinMaxBounds.Ints ints) {
+			super(ConstructBeaconTrigger.ID, composite);
 			this.level = ints;
 		}
 
 		public static ConstructBeaconTrigger.TriggerInstance constructedBeacon(MinMaxBounds.Ints ints) {
-			return new ConstructBeaconTrigger.TriggerInstance(ints);
+			return new ConstructBeaconTrigger.TriggerInstance(EntityPredicate.Composite.ANY, ints);
 		}
 
 		public boolean matches(BeaconBlockEntity beaconBlockEntity) {
@@ -41,8 +41,8 @@ public class ConstructBeaconTrigger extends SimpleCriterionTrigger<ConstructBeac
 		}
 
 		@Override
-		public JsonElement serializeToJson() {
-			JsonObject jsonObject = new JsonObject();
+		public JsonObject serializeToJson(SerializationContext serializationContext) {
+			JsonObject jsonObject = super.serializeToJson(serializationContext);
 			jsonObject.add("level", this.level.serializeToJson());
 			return jsonObject;
 		}

@@ -262,7 +262,7 @@ public final class Shapes {
 						if (s < 3) {
 							mutableBlockPos.set(axisCycle2, q, r, p);
 							BlockState blockState = levelReader.getBlockState(mutableBlockPos);
-							if ((s != 1 || blockState.hasLargeCollisionShape()) && (s != 2 || blockState.getBlock() == Blocks.MOVING_PISTON)) {
+							if ((s != 1 || blockState.hasLargeCollisionShape()) && (s != 2 || blockState.is(Blocks.MOVING_PISTON))) {
 								d = blockState.getCollisionShape(levelReader, mutableBlockPos, collisionContext)
 									.collide(axis3, aABB.move((double)(-mutableBlockPos.getX()), (double)(-mutableBlockPos.getY()), (double)(-mutableBlockPos.getZ())), d);
 								if (Math.abs(d) < 1.0E-7) {

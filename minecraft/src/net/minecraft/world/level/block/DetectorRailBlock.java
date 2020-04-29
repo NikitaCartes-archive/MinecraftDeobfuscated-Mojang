@@ -113,7 +113,7 @@ public class DetectorRailBlock extends BaseRailBlock {
 
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState2.getBlock() != blockState.getBlock()) {
+		if (!blockState2.is(blockState.getBlock())) {
 			this.checkPressed(level, blockPos, this.updateState(blockState, level, blockPos, bl));
 		}
 	}

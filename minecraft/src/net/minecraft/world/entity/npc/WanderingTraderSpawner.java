@@ -17,26 +17,27 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.ServerLevelData;
 
 public class WanderingTraderSpawner {
 	private final Random random = new Random();
 	private final ServerLevel level;
+	private final ServerLevelData serverLevelData;
 	private int tickDelay;
 	private int spawnDelay;
 	private int spawnChance;
 
-	public WanderingTraderSpawner(ServerLevel serverLevel) {
+	public WanderingTraderSpawner(ServerLevel serverLevel, ServerLevelData serverLevelData) {
 		this.level = serverLevel;
+		this.serverLevelData = serverLevelData;
 		this.tickDelay = 1200;
-		LevelData levelData = serverLevel.getLevelData();
-		this.spawnDelay = levelData.getWanderingTraderSpawnDelay();
-		this.spawnChance = levelData.getWanderingTraderSpawnChance();
+		this.spawnDelay = serverLevelData.getWanderingTraderSpawnDelay();
+		this.spawnChance = serverLevelData.getWanderingTraderSpawnChance();
 		if (this.spawnDelay == 0 && this.spawnChance == 0) {
 			this.spawnDelay = 24000;
-			levelData.setWanderingTraderSpawnDelay(this.spawnDelay);
+			serverLevelData.setWanderingTraderSpawnDelay(this.spawnDelay);
 			this.spawnChance = 25;
-			levelData.setWanderingTraderSpawnChance(this.spawnChance);
+			serverLevelData.setWanderingTraderSpawnChance(this.spawnChance);
 		}
 	}
 
@@ -44,15 +45,14 @@ public class WanderingTraderSpawner {
 		if (this.level.getGameRules().getBoolean(GameRules.RULE_DO_TRADER_SPAWNING)) {
 			if (--this.tickDelay <= 0) {
 				this.tickDelay = 1200;
-				LevelData levelData = this.level.getLevelData();
 				this.spawnDelay -= 1200;
-				levelData.setWanderingTraderSpawnDelay(this.spawnDelay);
+				this.serverLevelData.setWanderingTraderSpawnDelay(this.spawnDelay);
 				if (this.spawnDelay <= 0) {
 					this.spawnDelay = 24000;
 					if (this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
 						int i = this.spawnChance;
 						this.spawnChance = Mth.clamp(this.spawnChance + 25, 25, 75);
-						levelData.setWanderingTraderSpawnChance(this.spawnChance);
+						this.serverLevelData.setWanderingTraderSpawnChance(this.spawnChance);
 						if (this.random.nextInt(100) <= i) {
 							if (this.spawn()) {
 								this.spawnChance = 25;
@@ -88,7 +88,7 @@ public class WanderingTraderSpawner {
 						this.tryToSpawnLlamaFor(wanderingTrader, 4);
 					}
 
-					this.level.getLevelData().setWanderingTraderId(wanderingTrader.getUUID());
+					this.serverLevelData.setWanderingTraderId(wanderingTrader.getUUID());
 					wanderingTrader.setDespawnDelay(48000);
 					wanderingTrader.setWanderTarget(blockPos2);
 					wanderingTrader.restrictTo(blockPos2, 16);

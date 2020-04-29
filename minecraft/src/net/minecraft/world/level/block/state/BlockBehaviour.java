@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -133,7 +134,7 @@ public abstract class BlockBehaviour {
 
 	@Deprecated
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (this.isEntityBlock() && blockState.getBlock() != blockState2.getBlock()) {
+		if (this.isEntityBlock() && !blockState.is(blockState2.getBlock())) {
 			level.removeBlockEntity(blockPos);
 		}
 	}
@@ -668,6 +669,14 @@ public abstract class BlockBehaviour {
 			return this.getBlock().is(tag);
 		}
 
+		public boolean is(Tag<Block> tag, Predicate<BlockBehaviour.BlockStateBase> predicate) {
+			return this.getBlock().is(tag) && predicate.test(this);
+		}
+
+		public boolean is(Block block) {
+			return this.getBlock().is(block);
+		}
+
 		public FluidState getFluidState() {
 			return this.getBlock().getFluidState(this.asState());
 		}
@@ -767,8 +776,7 @@ public abstract class BlockBehaviour {
 				)
 				&& blockState.getLightEmission() < 14;
 		private BlockBehaviour.StatePredicate isRedstoneConductor = (blockState, blockGetter, blockPos) -> blockState.getMaterial().isSolidBlocking()
-				&& blockState.isCollisionShapeFullBlock(blockGetter, blockPos)
-				&& !blockState.isSignalSource();
+				&& blockState.isCollisionShapeFullBlock(blockGetter, blockPos);
 		private BlockBehaviour.StatePredicate isSuffocating = (blockState, blockGetter, blockPos) -> this.material.blocksMotion()
 				&& blockState.isCollisionShapeFullBlock(blockGetter, blockPos);
 		private BlockBehaviour.StatePredicate isViewBlocking = this.isSuffocating;

@@ -52,7 +52,7 @@ public class HugeMushroomBlock extends Block {
 	public BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
-		return blockState2.getBlock() == this
+		return blockState2.is(this)
 			? blockState.setValue((Property)PROPERTY_BY_DIRECTION.get(direction), Boolean.valueOf(false))
 			: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
 	}

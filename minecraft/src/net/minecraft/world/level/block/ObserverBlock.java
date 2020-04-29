@@ -90,7 +90,7 @@ public class ObserverBlock extends DirectionalBlock {
 
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState.getBlock() != blockState2.getBlock()) {
+		if (!blockState.is(blockState2.getBlock())) {
 			if (!level.isClientSide() && (Boolean)blockState.getValue(POWERED) && !level.getBlockTicks().hasScheduledTick(blockPos, this)) {
 				BlockState blockState3 = blockState.setValue(POWERED, Boolean.valueOf(false));
 				level.setBlock(blockPos, blockState3, 18);
@@ -101,7 +101,7 @@ public class ObserverBlock extends DirectionalBlock {
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState.getBlock() != blockState2.getBlock()) {
+		if (!blockState.is(blockState2.getBlock())) {
 			if (!level.isClientSide && (Boolean)blockState.getValue(POWERED) && level.getBlockTicks().hasScheduledTick(blockPos, this)) {
 				this.updateNeighborsInFront(level, blockPos, blockState.setValue(POWERED, Boolean.valueOf(false)));
 			}

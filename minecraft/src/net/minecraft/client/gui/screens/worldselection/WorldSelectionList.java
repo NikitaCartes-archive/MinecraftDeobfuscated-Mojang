@@ -218,6 +218,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 						this.screen.setToolTip(this.minecraft.font.split(component2, 175));
 					}
 				} else if (this.summary.markVersionInList()) {
+					GuiComponent.blit(poseStack, k, j, 32.0F, (float)q, 32, 32, 256, 256);
 					if (this.summary.isOldCustomizedWorld()) {
 						GuiComponent.blit(poseStack, k, j, 96.0F, (float)q, 32, 32, 256, 256);
 						if (bl2) {

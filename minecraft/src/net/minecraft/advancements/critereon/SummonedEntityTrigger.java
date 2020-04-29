@@ -1,11 +1,10 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.storage.loot.LootContext;
 
 public class SummonedEntityTrigger extends SimpleCriterionTrigger<SummonedEntityTrigger.TriggerInstance> {
 	private static final ResourceLocation ID = new ResourceLocation("summoned_entity");
@@ -15,35 +14,38 @@ public class SummonedEntityTrigger extends SimpleCriterionTrigger<SummonedEntity
 		return ID;
 	}
 
-	public SummonedEntityTrigger.TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-		EntityPredicate entityPredicate = EntityPredicate.fromJson(jsonObject.get("entity"));
-		return new SummonedEntityTrigger.TriggerInstance(entityPredicate);
+	public SummonedEntityTrigger.TriggerInstance createInstance(
+		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+	) {
+		EntityPredicate.Composite composite2 = EntityPredicate.Composite.fromJson(jsonObject, "entity", deserializationContext);
+		return new SummonedEntityTrigger.TriggerInstance(composite, composite2);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Entity entity) {
-		this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(serverPlayer, entity));
+		LootContext lootContext = EntityPredicate.createContext(serverPlayer, entity);
+		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(lootContext));
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final EntityPredicate entity;
+		private final EntityPredicate.Composite entity;
 
-		public TriggerInstance(EntityPredicate entityPredicate) {
-			super(SummonedEntityTrigger.ID);
-			this.entity = entityPredicate;
+		public TriggerInstance(EntityPredicate.Composite composite, EntityPredicate.Composite composite2) {
+			super(SummonedEntityTrigger.ID, composite);
+			this.entity = composite2;
 		}
 
 		public static SummonedEntityTrigger.TriggerInstance summonedEntity(EntityPredicate.Builder builder) {
-			return new SummonedEntityTrigger.TriggerInstance(builder.build());
+			return new SummonedEntityTrigger.TriggerInstance(EntityPredicate.Composite.ANY, EntityPredicate.Composite.wrap(builder.build()));
 		}
 
-		public boolean matches(ServerPlayer serverPlayer, Entity entity) {
-			return this.entity.matches(serverPlayer, entity);
+		public boolean matches(LootContext lootContext) {
+			return this.entity.matches(lootContext);
 		}
 
 		@Override
-		public JsonElement serializeToJson() {
-			JsonObject jsonObject = new JsonObject();
-			jsonObject.add("entity", this.entity.serializeToJson());
+		public JsonObject serializeToJson(SerializationContext serializationContext) {
+			JsonObject jsonObject = super.serializeToJson(serializationContext);
+			jsonObject.add("entity", this.entity.toJson(serializationContext));
 			return jsonObject;
 		}
 	}

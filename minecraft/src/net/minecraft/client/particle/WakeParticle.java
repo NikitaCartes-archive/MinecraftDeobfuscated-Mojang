@@ -2,15 +2,15 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
 public class WakeParticle extends TextureSheetParticle {
 	private final SpriteSet sprites;
 
-	private WakeParticle(Level level, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
-		super(level, d, e, f, 0.0, 0.0, 0.0);
+	private WakeParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
+		super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
 		this.sprites = spriteSet;
 		this.xd *= 0.3F;
 		this.yd = Math.random() * 0.2F + 0.1F;
@@ -57,8 +57,8 @@ public class WakeParticle extends TextureSheetParticle {
 			this.sprites = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			return new WakeParticle(level, d, e, f, g, h, i, this.sprites);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			return new WakeParticle(clientLevel, d, e, f, g, h, i, this.sprites);
 		}
 	}
 }

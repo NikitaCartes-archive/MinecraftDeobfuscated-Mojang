@@ -25,7 +25,7 @@ public abstract class BaseRailBlock extends Block {
 	}
 
 	public static boolean isRail(BlockState blockState) {
-		return blockState.is(BlockTags.RAILS);
+		return blockState.is(BlockTags.RAILS) && blockState.getBlock() instanceof BaseRailBlock;
 	}
 
 	protected BaseRailBlock(boolean bl, BlockBehaviour.Properties properties) {
@@ -39,7 +39,7 @@ public abstract class BaseRailBlock extends Block {
 
 	@Override
 	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-		RailShape railShape = blockState.getBlock() == this ? blockState.getValue(this.getShapeProperty()) : null;
+		RailShape railShape = blockState.is(this) ? blockState.getValue(this.getShapeProperty()) : null;
 		return railShape != null && railShape.isAscending() ? HALF_BLOCK_AABB : FLAT_AABB;
 	}
 
@@ -50,7 +50,7 @@ public abstract class BaseRailBlock extends Block {
 
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState2.getBlock() != blockState.getBlock()) {
+		if (!blockState2.is(blockState.getBlock())) {
 			this.updateState(blockState, level, blockPos, bl);
 		}
 	}

@@ -33,7 +33,7 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class Font {
-	private static final Vector3f SHADOW_OFFSET = new Vector3f(0.0F, 0.0F, 0.001F);
+	private static final Vector3f SHADOW_OFFSET = new Vector3f(0.0F, 0.0F, 0.03F);
 	public final int lineHeight = 9;
 	public final Random random = new Random();
 	private final Function<ResourceLocation, FontSet> fonts;
@@ -304,11 +304,11 @@ public class Font {
 			float m = glyphInfo.getAdvance(bl);
 			float n = this.dropShadow ? 1.0F : 0.0F;
 			if (style.isStrikethrough()) {
-				this.addEffect(new BakedGlyph.Effect(this.x + n - 1.0F, this.y + n + 4.5F, this.x + n + m, this.y + n + 4.5F - 1.0F, -0.01F, g, h, l, f));
+				this.addEffect(new BakedGlyph.Effect(this.x + n - 1.0F, this.y + n + 4.5F, this.x + n + m, this.y + n + 4.5F - 1.0F, 0.01F, g, h, l, f));
 			}
 
 			if (style.isUnderlined()) {
-				this.addEffect(new BakedGlyph.Effect(this.x + n - 1.0F, this.y + n + 9.0F, this.x + n + m, this.y + n + 9.0F - 1.0F, -0.01F, g, h, l, f));
+				this.addEffect(new BakedGlyph.Effect(this.x + n - 1.0F, this.y + n + 9.0F, this.x + n + m, this.y + n + 9.0F - 1.0F, 0.01F, g, h, l, f));
 			}
 
 			this.x += m;
@@ -321,7 +321,7 @@ public class Font {
 				float h = (float)(i >> 16 & 0xFF) / 255.0F;
 				float j = (float)(i >> 8 & 0xFF) / 255.0F;
 				float k = (float)(i & 0xFF) / 255.0F;
-				this.addEffect(new BakedGlyph.Effect(f - 1.0F, this.y + 9.0F, this.x + 1.0F, this.y - 1.0F, 0.01F, h, j, k, g));
+				this.addEffect(new BakedGlyph.Effect(f - 1.0F, this.y + 9.0F, this.x + 1.0F, this.y - 1.0F, -0.01F, h, j, k, g));
 			}
 
 			if (this.effects != null) {

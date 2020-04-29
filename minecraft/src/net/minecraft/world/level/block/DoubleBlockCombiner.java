@@ -35,7 +35,7 @@ public class DoubleBlockCombiner {
 			} else {
 				BlockPos blockPos2 = blockPos.relative((Direction)function2.apply(blockState));
 				BlockState blockState2 = levelAccessor.getBlockState(blockPos2);
-				if (blockState2.getBlock() == blockState.getBlock()) {
+				if (blockState2.is(blockState.getBlock())) {
 					DoubleBlockCombiner.BlockType blockType2 = (DoubleBlockCombiner.BlockType)function.apply(blockState2);
 					if (blockType2 != DoubleBlockCombiner.BlockType.SINGLE
 						&& blockType != blockType2

@@ -95,13 +95,12 @@ public class BubbleColumnBlock extends Block implements BucketPickup {
 
 	public static boolean canExistIn(LevelAccessor levelAccessor, BlockPos blockPos) {
 		FluidState fluidState = levelAccessor.getFluidState(blockPos);
-		return levelAccessor.getBlockState(blockPos).getBlock() == Blocks.WATER && fluidState.getAmount() >= 8 && fluidState.isSource();
+		return levelAccessor.getBlockState(blockPos).is(Blocks.WATER) && fluidState.getAmount() >= 8 && fluidState.isSource();
 	}
 
 	private static boolean getDrag(BlockGetter blockGetter, BlockPos blockPos) {
 		BlockState blockState = blockGetter.getBlockState(blockPos);
-		Block block = blockState.getBlock();
-		return block == Blocks.BUBBLE_COLUMN ? (Boolean)blockState.getValue(DRAG_DOWN) : block != Blocks.SOUL_SAND;
+		return blockState.is(Blocks.BUBBLE_COLUMN) ? (Boolean)blockState.getValue(DRAG_DOWN) : !blockState.is(Blocks.SOUL_SAND);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -139,7 +138,7 @@ public class BubbleColumnBlock extends Block implements BucketPickup {
 		} else {
 			if (direction == Direction.DOWN) {
 				levelAccessor.setBlock(blockPos, Blocks.BUBBLE_COLUMN.defaultBlockState().setValue(DRAG_DOWN, Boolean.valueOf(getDrag(levelAccessor, blockPos2))), 2);
-			} else if (direction == Direction.UP && blockState2.getBlock() != Blocks.BUBBLE_COLUMN && canExistIn(levelAccessor, blockPos2)) {
+			} else if (direction == Direction.UP && !blockState2.is(Blocks.BUBBLE_COLUMN) && canExistIn(levelAccessor, blockPos2)) {
 				levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 5);
 			}
 
@@ -150,8 +149,8 @@ public class BubbleColumnBlock extends Block implements BucketPickup {
 
 	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
-		Block block = levelReader.getBlockState(blockPos.below()).getBlock();
-		return block == Blocks.BUBBLE_COLUMN || block == Blocks.MAGMA_BLOCK || block == Blocks.SOUL_SAND;
+		BlockState blockState2 = levelReader.getBlockState(blockPos.below());
+		return blockState2.is(Blocks.BUBBLE_COLUMN) || blockState2.is(Blocks.MAGMA_BLOCK) || blockState2.is(Blocks.SOUL_SAND);
 	}
 
 	@Override

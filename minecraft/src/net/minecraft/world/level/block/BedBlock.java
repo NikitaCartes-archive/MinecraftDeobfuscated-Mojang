@@ -26,7 +26,6 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.entity.BedBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -36,6 +35,7 @@ import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.AABB;
@@ -82,7 +82,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 			if (blockState.getValue(PART) != BedPart.HEAD) {
 				blockPos = blockPos.relative(blockState.getValue(FACING));
 				blockState = level.getBlockState(blockPos);
-				if (blockState.getBlock() != this) {
+				if (!blockState.is(this)) {
 					return InteractionResult.CONSUME;
 				}
 			}
@@ -90,7 +90,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 			if (!canSetSpawn(level, blockPos)) {
 				level.removeBlock(blockPos, false);
 				BlockPos blockPos2 = blockPos.relative(((Direction)blockState.getValue(FACING)).getOpposite());
-				if (level.getBlockState(blockPos2).getBlock() == this) {
+				if (level.getBlockState(blockPos2).is(this)) {
 					level.removeBlock(blockPos2, false);
 				}
 
@@ -123,7 +123,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 	}
 
 	public static boolean canSetSpawn(Level level, BlockPos blockPos) {
-		return level.dimension.mayRespawn() && level.getBiome(blockPos) != Biomes.NETHER_WASTES;
+		return level.dimension.getType() == DimensionType.OVERWORLD;
 	}
 
 	private boolean kickVillagerOutOfBed(Level level, BlockPos blockPos) {
@@ -163,7 +163,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if (direction == getNeighbourDirection(blockState.getValue(PART), blockState.getValue(FACING))) {
-			return blockState2.getBlock() == this && blockState2.getValue(PART) != blockState.getValue(PART)
+			return blockState2.is(this) && blockState2.getValue(PART) != blockState.getValue(PART)
 				? blockState.setValue(OCCUPIED, blockState2.getValue(OCCUPIED))
 				: Blocks.AIR.defaultBlockState();
 		} else {
@@ -185,7 +185,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 		BedPart bedPart = blockState.getValue(PART);
 		BlockPos blockPos2 = blockPos.relative(getNeighbourDirection(bedPart, blockState.getValue(FACING)));
 		BlockState blockState2 = level.getBlockState(blockPos2);
-		if (blockState2.getBlock() == this && blockState2.getValue(PART) != bedPart) {
+		if (blockState2.is(this) && blockState2.getValue(PART) != bedPart) {
 			level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 35);
 			level.levelEvent(player, 2001, blockPos2, Block.getId(blockState2));
 			if (!level.isClientSide && !player.isCreative()) {

@@ -23,7 +23,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -57,8 +56,7 @@ public class SpawnEggItem extends Item {
 			BlockPos blockPos = useOnContext.getClickedPos();
 			Direction direction = useOnContext.getClickedFace();
 			BlockState blockState = level.getBlockState(blockPos);
-			Block block = blockState.getBlock();
-			if (block == Blocks.SPAWNER) {
+			if (blockState.is(Blocks.SPAWNER)) {
 				BlockEntity blockEntity = level.getBlockEntity(blockPos);
 				if (blockEntity instanceof SpawnerBlockEntity) {
 					BaseSpawner baseSpawner = ((SpawnerBlockEntity)blockEntity).getSpawner();

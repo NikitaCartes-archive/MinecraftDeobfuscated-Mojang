@@ -78,7 +78,7 @@ public class LadderBlock extends Block implements SimpleWaterloggedBlock {
 		if (!blockPlaceContext.replacingClickedOnBlock()) {
 			BlockState blockState = blockPlaceContext.getLevel()
 				.getBlockState(blockPlaceContext.getClickedPos().relative(blockPlaceContext.getClickedFace().getOpposite()));
-			if (blockState.getBlock() == this && blockState.getValue(FACING) == blockPlaceContext.getClickedFace()) {
+			if (blockState.is(this) && blockState.getValue(FACING) == blockPlaceContext.getClickedFace()) {
 				return null;
 			}
 		}

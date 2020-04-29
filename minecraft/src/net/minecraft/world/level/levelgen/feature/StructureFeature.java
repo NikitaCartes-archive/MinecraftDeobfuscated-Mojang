@@ -45,7 +45,7 @@ public abstract class StructureFeature<C extends FeatureConfiguration> extends F
 		BlockPos blockPos,
 		C featureConfiguration
 	) {
-		if (!levelAccessor.getLevelData().shouldGenerateMapFeatures()) {
+		if (!structureFeatureManager.shouldGenerateFeatures()) {
 			return false;
 		} else {
 			int i = blockPos.getX() >> 4;

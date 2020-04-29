@@ -159,7 +159,7 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 
 	private void maybeAddVines(Random random, LevelAccessor levelAccessor, BlockPos blockPos) {
 		BlockState blockState = levelAccessor.getBlockState(blockPos);
-		if (!blockState.isAir() && blockState.getBlock() != Blocks.VINE) {
+		if (!blockState.isAir() && !blockState.is(Blocks.VINE)) {
 			Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
 			BlockPos blockPos2 = blockPos.relative(direction);
 			BlockState blockState2 = levelAccessor.getBlockState(blockPos2);
@@ -173,9 +173,7 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 	}
 
 	private void maybeAddLeavesAbove(Random random, LevelAccessor levelAccessor, BlockPos blockPos) {
-		if (random.nextFloat() < 0.5F
-			&& levelAccessor.getBlockState(blockPos).getBlock() == Blocks.NETHERRACK
-			&& levelAccessor.getBlockState(blockPos.above()).isAir()) {
+		if (random.nextFloat() < 0.5F && levelAccessor.getBlockState(blockPos).is(Blocks.NETHERRACK) && levelAccessor.getBlockState(blockPos.above()).isAir()) {
 			levelAccessor.setBlock(blockPos.above(), Blocks.JUNGLE_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, Boolean.valueOf(true)), 3);
 		}
 	}
@@ -184,7 +182,7 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 		for (int i = this.boundingBox.x0 + 1; i < this.boundingBox.x1; i++) {
 			for (int j = this.boundingBox.z0 + 1; j < this.boundingBox.z1; j++) {
 				BlockPos blockPos = new BlockPos(i, this.boundingBox.y0, j);
-				if (levelAccessor.getBlockState(blockPos).getBlock() == Blocks.NETHERRACK) {
+				if (levelAccessor.getBlockState(blockPos).is(Blocks.NETHERRACK)) {
 					this.addNetherrackDripColumn(random, levelAccessor, blockPos.below());
 				}
 			}
@@ -241,8 +239,10 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 	}
 
 	private boolean canBlockBeReplacedByNetherrackOrMagma(LevelAccessor levelAccessor, BlockPos blockPos) {
-		Block block = levelAccessor.getBlockState(blockPos).getBlock();
-		return block != Blocks.AIR && block != Blocks.OBSIDIAN && (this.verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_NETHER || block != Blocks.LAVA);
+		BlockState blockState = levelAccessor.getBlockState(blockPos);
+		return !blockState.is(Blocks.AIR)
+			&& !blockState.is(Blocks.OBSIDIAN)
+			&& (this.verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_NETHER || !blockState.is(Blocks.LAVA));
 	}
 
 	private void placeNetherrackOrMagma(Random random, LevelAccessor levelAccessor, BlockPos blockPos) {

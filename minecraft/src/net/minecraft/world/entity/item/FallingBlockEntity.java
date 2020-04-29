@@ -105,7 +105,7 @@ public class FallingBlockEntity extends Entity {
 			Block block = this.blockState.getBlock();
 			if (this.time++ == 0) {
 				BlockPos blockPos = this.blockPosition();
-				if (this.level.getBlockState(blockPos).getBlock() == block) {
+				if (this.level.getBlockState(blockPos).is(block)) {
 					this.level.removeBlock(blockPos, false);
 				} else if (!this.level.isClientSide) {
 					this.remove();
@@ -135,7 +135,7 @@ public class FallingBlockEntity extends Entity {
 				if (this.onGround || bl2) {
 					BlockState blockState = this.level.getBlockState(blockPos);
 					this.setDeltaMovement(this.getDeltaMovement().multiply(0.7, -0.5, 0.7));
-					if (blockState.getBlock() != Blocks.MOVING_PISTON) {
+					if (!blockState.is(Blocks.MOVING_PISTON)) {
 						this.remove();
 						if (!this.cancelDrop) {
 							boolean bl3 = blockState.canBeReplaced(new DirectionalPlaceContext(this.level, blockPos, Direction.DOWN, ItemStack.EMPTY, Direction.UP));

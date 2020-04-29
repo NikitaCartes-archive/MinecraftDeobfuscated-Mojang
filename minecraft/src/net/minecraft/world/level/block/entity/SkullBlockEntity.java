@@ -12,7 +12,6 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.StringUtil;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -62,8 +61,8 @@ public class SkullBlockEntity extends BlockEntity implements TickableBlockEntity
 
 	@Override
 	public void tick() {
-		Block block = this.getBlockState().getBlock();
-		if (block == Blocks.DRAGON_HEAD || block == Blocks.DRAGON_WALL_HEAD) {
+		BlockState blockState = this.getBlockState();
+		if (blockState.is(Blocks.DRAGON_HEAD) || blockState.is(Blocks.DRAGON_WALL_HEAD)) {
 			if (this.level.hasNeighborSignal(this.worldPosition)) {
 				this.isMovingMouth = true;
 				this.mouthTickCount++;

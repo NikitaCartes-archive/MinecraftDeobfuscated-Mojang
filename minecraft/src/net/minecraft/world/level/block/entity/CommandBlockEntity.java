@@ -169,13 +169,13 @@ public class CommandBlockEntity extends BlockEntity {
 	}
 
 	public CommandBlockEntity.Mode getMode() {
-		Block block = this.getBlockState().getBlock();
-		if (block == Blocks.COMMAND_BLOCK) {
+		BlockState blockState = this.getBlockState();
+		if (blockState.is(Blocks.COMMAND_BLOCK)) {
 			return CommandBlockEntity.Mode.REDSTONE;
-		} else if (block == Blocks.REPEATING_COMMAND_BLOCK) {
+		} else if (blockState.is(Blocks.REPEATING_COMMAND_BLOCK)) {
 			return CommandBlockEntity.Mode.AUTO;
 		} else {
-			return block == Blocks.CHAIN_COMMAND_BLOCK ? CommandBlockEntity.Mode.SEQUENCE : CommandBlockEntity.Mode.REDSTONE;
+			return blockState.is(Blocks.CHAIN_COMMAND_BLOCK) ? CommandBlockEntity.Mode.SEQUENCE : CommandBlockEntity.Mode.REDSTONE;
 		}
 	}
 

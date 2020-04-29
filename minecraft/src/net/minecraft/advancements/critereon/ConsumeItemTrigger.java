@@ -1,7 +1,5 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,28 +14,31 @@ public class ConsumeItemTrigger extends SimpleCriterionTrigger<ConsumeItemTrigge
 		return ID;
 	}
 
-	public ConsumeItemTrigger.TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-		return new ConsumeItemTrigger.TriggerInstance(ItemPredicate.fromJson(jsonObject.get("item")));
+	public ConsumeItemTrigger.TriggerInstance createInstance(
+		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+	) {
+		return new ConsumeItemTrigger.TriggerInstance(composite, ItemPredicate.fromJson(jsonObject.get("item")));
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ItemStack itemStack) {
-		this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(itemStack));
+		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(itemStack));
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final ItemPredicate item;
 
-		public TriggerInstance(ItemPredicate itemPredicate) {
-			super(ConsumeItemTrigger.ID);
+		public TriggerInstance(EntityPredicate.Composite composite, ItemPredicate itemPredicate) {
+			super(ConsumeItemTrigger.ID, composite);
 			this.item = itemPredicate;
 		}
 
 		public static ConsumeItemTrigger.TriggerInstance usedItem() {
-			return new ConsumeItemTrigger.TriggerInstance(ItemPredicate.ANY);
+			return new ConsumeItemTrigger.TriggerInstance(EntityPredicate.Composite.ANY, ItemPredicate.ANY);
 		}
 
 		public static ConsumeItemTrigger.TriggerInstance usedItem(ItemLike itemLike) {
 			return new ConsumeItemTrigger.TriggerInstance(
+				EntityPredicate.Composite.ANY,
 				new ItemPredicate(
 					null, itemLike.asItem(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, EnchantmentPredicate.NONE, EnchantmentPredicate.NONE, null, NbtPredicate.ANY
 				)
@@ -49,8 +50,8 @@ public class ConsumeItemTrigger extends SimpleCriterionTrigger<ConsumeItemTrigge
 		}
 
 		@Override
-		public JsonElement serializeToJson() {
-			JsonObject jsonObject = new JsonObject();
+		public JsonObject serializeToJson(SerializationContext serializationContext) {
+			JsonObject jsonObject = super.serializeToJson(serializationContext);
 			jsonObject.add("item", this.item.serializeToJson());
 			return jsonObject;
 		}

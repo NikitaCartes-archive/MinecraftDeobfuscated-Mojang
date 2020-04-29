@@ -44,7 +44,6 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -252,8 +251,7 @@ public class Ocelot extends Animal {
 			}
 
 			BlockState blockState = levelReader.getBlockState(blockPos.below());
-			Block block = blockState.getBlock();
-			if (block == Blocks.GRASS_BLOCK || blockState.is(BlockTags.LEAVES)) {
+			if (blockState.is(Blocks.GRASS_BLOCK) || blockState.is(BlockTags.LEAVES)) {
 				return true;
 			}
 		}

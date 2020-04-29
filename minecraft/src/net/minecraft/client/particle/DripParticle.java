@@ -2,13 +2,13 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -18,8 +18,8 @@ public class DripParticle extends TextureSheetParticle {
 	private final Fluid type;
 	protected boolean isGlowing;
 
-	private DripParticle(Level level, double d, double e, double f, Fluid fluid) {
-		super(level, d, e, f);
+	private DripParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid) {
+		super(clientLevel, d, e, f);
 		this.setSize(0.01F, 0.01F);
 		this.gravity = 0.06F;
 		this.type = fluid;
@@ -69,8 +69,8 @@ public class DripParticle extends TextureSheetParticle {
 
 	@Environment(EnvType.CLIENT)
 	static class CoolingDripHangParticle extends DripParticle.DripHangParticle {
-		private CoolingDripHangParticle(Level level, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
-			super(level, d, e, f, fluid, particleOptions);
+		private CoolingDripHangParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
+			super(clientLevel, d, e, f, fluid, particleOptions);
 		}
 
 		@Override
@@ -86,8 +86,8 @@ public class DripParticle extends TextureSheetParticle {
 	static class DripHangParticle extends DripParticle {
 		private final ParticleOptions fallingParticle;
 
-		private DripHangParticle(Level level, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
-			super(level, d, e, f, fluid);
+		private DripHangParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
+			super(clientLevel, d, e, f, fluid);
 			this.fallingParticle = particleOptions;
 			this.gravity *= 0.02F;
 			this.lifetime = 40;
@@ -111,8 +111,8 @@ public class DripParticle extends TextureSheetParticle {
 
 	@Environment(EnvType.CLIENT)
 	static class DripLandParticle extends DripParticle {
-		private DripLandParticle(Level level, double d, double e, double f, Fluid fluid) {
-			super(level, d, e, f, fluid);
+		private DripLandParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid) {
+			super(clientLevel, d, e, f, fluid);
 			this.lifetime = (int)(16.0 / (Math.random() * 0.8 + 0.2));
 		}
 	}
@@ -121,8 +121,8 @@ public class DripParticle extends TextureSheetParticle {
 	static class FallAndLandParticle extends DripParticle.FallingParticle {
 		protected final ParticleOptions landParticle;
 
-		private FallAndLandParticle(Level level, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
-			super(level, d, e, f, fluid);
+		private FallAndLandParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
+			super(clientLevel, d, e, f, fluid);
 			this.landParticle = particleOptions;
 		}
 
@@ -137,8 +137,8 @@ public class DripParticle extends TextureSheetParticle {
 
 	@Environment(EnvType.CLIENT)
 	static class FallingParticle extends DripParticle {
-		private FallingParticle(Level level, double d, double e, double f, Fluid fluid) {
-			super(level, d, e, f, fluid);
+		private FallingParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid) {
+			super(clientLevel, d, e, f, fluid);
 			this.lifetime = (int)(64.0 / (Math.random() * 0.8 + 0.2));
 		}
 
@@ -152,8 +152,8 @@ public class DripParticle extends TextureSheetParticle {
 
 	@Environment(EnvType.CLIENT)
 	static class HoneyFallAndLandParticle extends DripParticle.FallAndLandParticle {
-		private HoneyFallAndLandParticle(Level level, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
-			super(level, d, e, f, fluid, particleOptions);
+		private HoneyFallAndLandParticle(ClientLevel clientLevel, double d, double e, double f, Fluid fluid, ParticleOptions particleOptions) {
+			super(clientLevel, d, e, f, fluid, particleOptions);
 		}
 
 		@Override
@@ -177,8 +177,8 @@ public class DripParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			DripParticle dripParticle = new DripParticle.HoneyFallAndLandParticle(level, d, e, f, Fluids.EMPTY, ParticleTypes.LANDING_HONEY);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			DripParticle dripParticle = new DripParticle.HoneyFallAndLandParticle(clientLevel, d, e, f, Fluids.EMPTY, ParticleTypes.LANDING_HONEY);
 			dripParticle.gravity = 0.01F;
 			dripParticle.setColor(0.582F, 0.448F, 0.082F);
 			dripParticle.pickSprite(this.sprite);
@@ -194,8 +194,8 @@ public class DripParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			DripParticle.DripHangParticle dripHangParticle = new DripParticle.DripHangParticle(level, d, e, f, Fluids.EMPTY, ParticleTypes.FALLING_HONEY);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			DripParticle.DripHangParticle dripHangParticle = new DripParticle.DripHangParticle(clientLevel, d, e, f, Fluids.EMPTY, ParticleTypes.FALLING_HONEY);
 			dripHangParticle.gravity *= 0.01F;
 			dripHangParticle.lifetime = 100;
 			dripHangParticle.setColor(0.622F, 0.508F, 0.082F);
@@ -212,8 +212,8 @@ public class DripParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			DripParticle dripParticle = new DripParticle.DripLandParticle(level, d, e, f, Fluids.EMPTY);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			DripParticle dripParticle = new DripParticle.DripLandParticle(clientLevel, d, e, f, Fluids.EMPTY);
 			dripParticle.lifetime = (int)(128.0 / (Math.random() * 0.8 + 0.2));
 			dripParticle.setColor(0.522F, 0.408F, 0.082F);
 			dripParticle.pickSprite(this.sprite);
@@ -229,8 +229,8 @@ public class DripParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			DripParticle dripParticle = new DripParticle.FallAndLandParticle(level, d, e, f, Fluids.LAVA, ParticleTypes.LANDING_LAVA);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			DripParticle dripParticle = new DripParticle.FallAndLandParticle(clientLevel, d, e, f, Fluids.LAVA, ParticleTypes.LANDING_LAVA);
 			dripParticle.setColor(1.0F, 0.2857143F, 0.083333336F);
 			dripParticle.pickSprite(this.sprite);
 			return dripParticle;
@@ -245,9 +245,9 @@ public class DripParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
 			DripParticle.CoolingDripHangParticle coolingDripHangParticle = new DripParticle.CoolingDripHangParticle(
-				level, d, e, f, Fluids.LAVA, ParticleTypes.FALLING_LAVA
+				clientLevel, d, e, f, Fluids.LAVA, ParticleTypes.FALLING_LAVA
 			);
 			coolingDripHangParticle.pickSprite(this.sprite);
 			return coolingDripHangParticle;
@@ -262,8 +262,8 @@ public class DripParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			DripParticle dripParticle = new DripParticle.DripLandParticle(level, d, e, f, Fluids.LAVA);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			DripParticle dripParticle = new DripParticle.DripLandParticle(clientLevel, d, e, f, Fluids.LAVA);
 			dripParticle.setColor(1.0F, 0.2857143F, 0.083333336F);
 			dripParticle.pickSprite(this.sprite);
 			return dripParticle;
@@ -278,8 +278,8 @@ public class DripParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			DripParticle dripParticle = new DripParticle.FallingParticle(level, d, e, f, Fluids.EMPTY);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			DripParticle dripParticle = new DripParticle.FallingParticle(clientLevel, d, e, f, Fluids.EMPTY);
 			dripParticle.lifetime = (int)(16.0 / (Math.random() * 0.8 + 0.2));
 			dripParticle.gravity = 0.007F;
 			dripParticle.setColor(0.92F, 0.782F, 0.72F);
@@ -296,8 +296,8 @@ public class DripParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			DripParticle dripParticle = new DripParticle.FallAndLandParticle(level, d, e, f, Fluids.EMPTY, ParticleTypes.LANDING_OBSIDIAN_TEAR);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			DripParticle dripParticle = new DripParticle.FallAndLandParticle(clientLevel, d, e, f, Fluids.EMPTY, ParticleTypes.LANDING_OBSIDIAN_TEAR);
 			dripParticle.isGlowing = true;
 			dripParticle.gravity = 0.01F;
 			dripParticle.setColor(0.51171875F, 0.03125F, 0.890625F);
@@ -314,8 +314,8 @@ public class DripParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			DripParticle.DripHangParticle dripHangParticle = new DripParticle.DripHangParticle(level, d, e, f, Fluids.EMPTY, ParticleTypes.FALLING_OBSIDIAN_TEAR);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			DripParticle.DripHangParticle dripHangParticle = new DripParticle.DripHangParticle(clientLevel, d, e, f, Fluids.EMPTY, ParticleTypes.FALLING_OBSIDIAN_TEAR);
 			dripHangParticle.isGlowing = true;
 			dripHangParticle.gravity *= 0.01F;
 			dripHangParticle.lifetime = 100;
@@ -333,8 +333,8 @@ public class DripParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			DripParticle dripParticle = new DripParticle.DripLandParticle(level, d, e, f, Fluids.EMPTY);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			DripParticle dripParticle = new DripParticle.DripLandParticle(clientLevel, d, e, f, Fluids.EMPTY);
 			dripParticle.isGlowing = true;
 			dripParticle.lifetime = (int)(28.0 / (Math.random() * 0.8 + 0.2));
 			dripParticle.setColor(0.51171875F, 0.03125F, 0.890625F);
@@ -351,8 +351,8 @@ public class DripParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			DripParticle dripParticle = new DripParticle.FallAndLandParticle(level, d, e, f, Fluids.WATER, ParticleTypes.SPLASH);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			DripParticle dripParticle = new DripParticle.FallAndLandParticle(clientLevel, d, e, f, Fluids.WATER, ParticleTypes.SPLASH);
 			dripParticle.setColor(0.2F, 0.3F, 1.0F);
 			dripParticle.pickSprite(this.sprite);
 			return dripParticle;
@@ -367,8 +367,8 @@ public class DripParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			DripParticle dripParticle = new DripParticle.DripHangParticle(level, d, e, f, Fluids.WATER, ParticleTypes.FALLING_WATER);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			DripParticle dripParticle = new DripParticle.DripHangParticle(clientLevel, d, e, f, Fluids.WATER, ParticleTypes.FALLING_WATER);
 			dripParticle.setColor(0.2F, 0.3F, 1.0F);
 			dripParticle.pickSprite(this.sprite);
 			return dripParticle;

@@ -2,8 +2,8 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
 public class BaseAshSmokeParticle extends TextureSheetParticle {
@@ -11,7 +11,7 @@ public class BaseAshSmokeParticle extends TextureSheetParticle {
 	private final double fallSpeed;
 
 	protected BaseAshSmokeParticle(
-		Level level,
+		ClientLevel clientLevel,
 		double d,
 		double e,
 		double f,
@@ -28,7 +28,7 @@ public class BaseAshSmokeParticle extends TextureSheetParticle {
 		double p,
 		boolean bl
 	) {
-		super(level, d, e, f, 0.0, 0.0, 0.0);
+		super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
 		this.fallSpeed = p;
 		this.sprites = spriteSet;
 		this.xd *= (double)g;
@@ -37,12 +37,12 @@ public class BaseAshSmokeParticle extends TextureSheetParticle {
 		this.xd += j;
 		this.yd += k;
 		this.zd += l;
-		float q = level.random.nextFloat() * n;
+		float q = clientLevel.random.nextFloat() * n;
 		this.rCol = q;
 		this.gCol = q;
 		this.bCol = q;
 		this.quadSize *= 0.75F * m;
-		this.lifetime = (int)((double)o / ((double)level.random.nextFloat() * 0.8 + 0.2));
+		this.lifetime = (int)((double)o / ((double)clientLevel.random.nextFloat() * 0.8 + 0.2));
 		this.lifetime = (int)((float)this.lifetime * m);
 		this.lifetime = Math.max(this.lifetime, 1);
 		this.setSpriteFromAge(spriteSet);

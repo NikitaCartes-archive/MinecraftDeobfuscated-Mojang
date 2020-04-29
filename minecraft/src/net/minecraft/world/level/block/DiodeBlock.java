@@ -115,7 +115,7 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
 			return i;
 		} else {
 			BlockState blockState2 = level.getBlockState(blockPos2);
-			return Math.max(i, blockState2.getBlock() == Blocks.REDSTONE_WIRE ? (Integer)blockState2.getValue(RedStoneWireBlock.POWER) : 0);
+			return Math.max(i, blockState2.is(Blocks.REDSTONE_WIRE) ? (Integer)blockState2.getValue(RedStoneWireBlock.POWER) : 0);
 		}
 	}
 
@@ -131,12 +131,11 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
 
 	protected int getAlternateSignalAt(LevelReader levelReader, BlockPos blockPos, Direction direction) {
 		BlockState blockState = levelReader.getBlockState(blockPos);
-		Block block = blockState.getBlock();
 		if (this.isAlternateInput(blockState)) {
-			if (block == Blocks.REDSTONE_BLOCK) {
+			if (blockState.is(Blocks.REDSTONE_BLOCK)) {
 				return 15;
 			} else {
-				return block == Blocks.REDSTONE_WIRE ? (Integer)blockState.getValue(RedStoneWireBlock.POWER) : levelReader.getDirectSignal(blockPos, direction);
+				return blockState.is(Blocks.REDSTONE_WIRE) ? (Integer)blockState.getValue(RedStoneWireBlock.POWER) : levelReader.getDirectSignal(blockPos, direction);
 			}
 		} else {
 			return 0;
@@ -167,7 +166,7 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (!bl && blockState.getBlock() != blockState2.getBlock()) {
+		if (!bl && !blockState.is(blockState2.getBlock())) {
 			super.onRemove(blockState, level, blockPos, blockState2, bl);
 			this.updateNeighborsInFront(level, blockPos, blockState);
 		}

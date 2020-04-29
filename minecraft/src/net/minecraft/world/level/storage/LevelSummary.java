@@ -13,7 +13,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelType;
-import net.minecraft.world.level.dimension.DimensionType;
 
 @Environment(EnvType.CLIENT)
 public class LevelSummary implements Comparable<LevelSummary> {
@@ -48,7 +47,7 @@ public class LevelSummary implements Comparable<LevelSummary> {
 		this.worldVersionName = worldData.getMinecraftVersionName();
 		this.worldVersion = worldData.getMinecraftVersion();
 		this.snapshot = worldData.isSnapshot();
-		this.generatorType = worldData.getLevelData(DimensionType.OVERWORLD).getGeneratorType();
+		this.generatorType = worldData.overworldData().getGeneratorType();
 	}
 
 	public String getLevelId() {

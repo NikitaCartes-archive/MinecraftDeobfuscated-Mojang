@@ -28,7 +28,7 @@ public class RingBell extends Behavior<LivingEntity> {
 		BlockPos blockPos = ((GlobalPos)brain.getMemory(MemoryModuleType.MEETING_POINT).get()).pos();
 		if (blockPos.closerThan(livingEntity.blockPosition(), 3.0)) {
 			BlockState blockState = serverLevel.getBlockState(blockPos);
-			if (blockState.getBlock() == Blocks.BELL) {
+			if (blockState.is(Blocks.BELL)) {
 				BellBlock bellBlock = (BellBlock)blockState.getBlock();
 				bellBlock.attemptToRing(serverLevel, blockPos, null);
 			}

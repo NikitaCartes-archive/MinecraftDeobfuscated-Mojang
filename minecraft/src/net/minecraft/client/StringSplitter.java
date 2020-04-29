@@ -178,10 +178,6 @@ public class StringSplitter {
 	}
 
 	public List<Component> splitLines(Component component, int i, Style style) {
-		return this.splitLines(component, i, style, false);
-	}
-
-	public List<Component> splitLines(Component component, int i, Style style, boolean bl) {
 		List<Component> list = Lists.<Component>newArrayList();
 		List<StringSplitter.LineComponent> list2 = Lists.<StringSplitter.LineComponent>newArrayList();
 		component.visit((stylex, string) -> {
@@ -192,10 +188,11 @@ public class StringSplitter {
 			return Optional.empty();
 		}, style);
 		StringSplitter.FlatComponents flatComponents = new StringSplitter.FlatComponents(list2);
-		boolean bl2 = true;
+		boolean bl = true;
+		boolean bl2 = false;
 
-		while (bl2) {
-			bl2 = false;
+		while (bl) {
+			bl = false;
 			StringSplitter.LineBreakFinder lineBreakFinder = new StringSplitter.LineBreakFinder((float)i);
 
 			for (StringSplitter.LineComponent lineComponent : flatComponents.parts) {
@@ -204,9 +201,11 @@ public class StringSplitter {
 					int j = lineBreakFinder.getSplitPosition();
 					Style style2 = lineBreakFinder.getSplitStyle();
 					char c = flatComponents.charAt(j);
-					boolean bl4 = !bl && (c == '\n' || c == ' ');
-					list.add(flatComponents.splitAt(j, bl4 ? 1 : 0, style2));
-					bl2 = true;
+					boolean bl4 = c == '\n';
+					boolean bl5 = bl4 || c == ' ';
+					bl2 = bl4;
+					list.add(flatComponents.splitAt(j, bl5 ? 1 : 0, style2));
+					bl = true;
 					break;
 				}
 
@@ -217,6 +216,8 @@ public class StringSplitter {
 		Component component2 = flatComponents.getRemainder();
 		if (component2 != null) {
 			list.add(component2);
+		} else if (bl2) {
+			list.add(new TextComponent("").withStyle(style));
 		}
 
 		return list;

@@ -49,6 +49,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.MenuProvider;
@@ -251,7 +252,7 @@ public class Gui extends GuiComponent {
 
 					int l = k << 24 & 0xFF000000;
 					int m = font.width(this.overlayMessageString);
-					this.drawBackdrop(poseStack, font, -4, m);
+					this.drawBackdrop(poseStack, font, -4, m, 16777215 | l);
 					font.draw(poseStack, this.overlayMessageString, (float)(-m / 2), -4.0F, j | l);
 					RenderSystem.disableBlend();
 					RenderSystem.popMatrix();
@@ -283,14 +284,14 @@ public class Gui extends GuiComponent {
 					RenderSystem.scalef(4.0F, 4.0F, 4.0F);
 					int j = kx << 24 & 0xFF000000;
 					int l = font.width(this.title);
-					this.drawBackdrop(poseStack, font, -10, l);
+					this.drawBackdrop(poseStack, font, -10, l, 16777215 | j);
 					font.drawShadow(poseStack, this.title, (float)(-l / 2), -10.0F, 16777215 | j);
 					RenderSystem.popMatrix();
 					if (this.subtitle != null) {
 						RenderSystem.pushMatrix();
 						RenderSystem.scalef(2.0F, 2.0F, 2.0F);
 						int m = font.width(this.subtitle);
-						this.drawBackdrop(poseStack, font, 5, m);
+						this.drawBackdrop(poseStack, font, 5, m, 16777215 | j);
 						font.drawShadow(poseStack, this.subtitle, (float)(-m / 2), 5.0F, 16777215 | j);
 						RenderSystem.popMatrix();
 					}
@@ -341,11 +342,11 @@ public class Gui extends GuiComponent {
 		RenderSystem.enableAlphaTest();
 	}
 
-	private void drawBackdrop(PoseStack poseStack, Font font, int i, int j) {
-		int k = this.minecraft.options.getBackgroundColor(0.0F);
-		if (k != 0) {
-			int l = -j / 2;
-			fill(poseStack, l - 2, i - 2, l + j + 2, i + 9 + 2, k);
+	private void drawBackdrop(PoseStack poseStack, Font font, int i, int j, int k) {
+		int l = this.minecraft.options.getBackgroundColor(0.0F);
+		if (l != 0) {
+			int m = -j / 2;
+			fill(poseStack, m - 2, i - 2, m + j + 2, i + 9 + 2, FastColor.ARGB32.multiply(l, k));
 		}
 	}
 

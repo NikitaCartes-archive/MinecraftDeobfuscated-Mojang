@@ -1075,7 +1075,10 @@ public class Blocks {
 		"daylight_detector", new DaylightDetectorBlock(BlockBehaviour.Properties.of(Material.WOOD).strength(0.2F).sound(SoundType.WOOD))
 	);
 	public static final Block REDSTONE_BLOCK = register(
-		"redstone_block", new PoweredBlock(BlockBehaviour.Properties.of(Material.METAL, MaterialColor.FIRE).strength(5.0F, 6.0F).sound(SoundType.METAL))
+		"redstone_block",
+		new PoweredBlock(
+			BlockBehaviour.Properties.of(Material.METAL, MaterialColor.FIRE).strength(5.0F, 6.0F).sound(SoundType.METAL).isRedstoneConductor(Blocks::never)
+		)
 	);
 	public static final Block NETHER_QUARTZ_ORE = register(
 		"nether_quartz_ore", new OreBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.NETHER).strength(3.0F, 3.0F).sound(SoundType.NETHER_ORE))
@@ -1692,7 +1695,9 @@ public class Blocks {
 	public static final Block STRUCTURE_VOID = register(
 		"structure_void", new StructureVoidBlock(BlockBehaviour.Properties.of(Material.STRUCTURAL_AIR).noCollission().noDrops())
 	);
-	public static final Block OBSERVER = register("observer", new ObserverBlock(BlockBehaviour.Properties.of(Material.STONE).strength(3.0F)));
+	public static final Block OBSERVER = register(
+		"observer", new ObserverBlock(BlockBehaviour.Properties.of(Material.STONE).strength(3.0F).isRedstoneConductor(Blocks::never))
+	);
 	public static final Block SHULKER_BOX = register("shulker_box", shulkerBox(null, BlockBehaviour.Properties.of(Material.SHULKER_SHELL)));
 	public static final Block WHITE_SHULKER_BOX = register(
 		"white_shulker_box", shulkerBox(DyeColor.WHITE, BlockBehaviour.Properties.of(Material.SHULKER_SHELL, MaterialColor.SNOW))

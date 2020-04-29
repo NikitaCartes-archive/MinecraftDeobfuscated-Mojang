@@ -14,6 +14,7 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Transformation;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
@@ -22,6 +23,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -44,9 +47,11 @@ import net.minecraft.util.FrameTimer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -333,19 +338,28 @@ public class DebugScreenOverlay extends GuiComponent {
 				list.add("Outside of world...");
 			}
 
+			ServerLevel serverLevel = this.getServerLevel();
+			if (serverLevel != null) {
+				NaturalSpawner.SpawnState spawnState = serverLevel.getChunkSource().getLastSpawnState();
+				if (spawnState != null) {
+					Object2IntMap<MobCategory> object2IntMap = spawnState.getMobCategoryCounts();
+					int kx = spawnState.getSpawnableChunkCount();
+					list.add(
+						"SC: "
+							+ kx
+							+ ", "
+							+ (String)Stream.of(MobCategory.values())
+								.map(mobCategory -> Character.toUpperCase(mobCategory.getName().charAt(0)) + ": " + object2IntMap.getInt(mobCategory))
+								.collect(Collectors.joining(", "))
+					);
+				} else {
+					list.add("SC: N/A");
+				}
+			}
+
 			PostChain postChain = this.minecraft.gameRenderer.currentEffect();
 			if (postChain != null) {
 				list.add("Shader: " + postChain.getName());
-			}
-
-			if (this.block.getType() == HitResult.Type.BLOCK) {
-				BlockPos blockPos2 = ((BlockHitResult)this.block).getBlockPos();
-				list.add(String.format("Looking at block: %d %d %d", blockPos2.getX(), blockPos2.getY(), blockPos2.getZ()));
-			}
-
-			if (this.liquid.getType() == HitResult.Type.BLOCK) {
-				BlockPos blockPos2 = ((BlockHitResult)this.liquid).getBlockPos();
-				list.add(String.format("Looking at liquid: %d %d %d", blockPos2.getX(), blockPos2.getY(), blockPos2.getZ()));
 			}
 
 			list.add(this.minecraft.getSoundManager().getDebugString() + String.format(" (Mood %d%%)", Math.round(this.minecraft.player.getCurrentMood() * 100.0F)));
@@ -354,16 +368,15 @@ public class DebugScreenOverlay extends GuiComponent {
 	}
 
 	@Nullable
-	private String getServerChunkStats() {
+	private ServerLevel getServerLevel() {
 		IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
-		if (integratedServer != null) {
-			ServerLevel serverLevel = integratedServer.getLevel(this.minecraft.level.getDimension().getType());
-			if (serverLevel != null) {
-				return serverLevel.gatherChunkSourceStats();
-			}
-		}
+		return integratedServer != null ? integratedServer.getLevel(this.minecraft.level.getDimension().getType()) : null;
+	}
 
-		return null;
+	@Nullable
+	private String getServerChunkStats() {
+		ServerLevel serverLevel = this.getServerLevel();
+		return serverLevel != null ? serverLevel.gatherChunkSourceStats() : null;
 	}
 
 	private Level getLevel() {
@@ -376,14 +389,11 @@ public class DebugScreenOverlay extends GuiComponent {
 	@Nullable
 	private LevelChunk getServerChunk() {
 		if (this.serverChunk == null) {
-			IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
-			if (integratedServer != null) {
-				ServerLevel serverLevel = integratedServer.getLevel(this.minecraft.level.dimension.getType());
-				if (serverLevel != null) {
-					this.serverChunk = serverLevel.getChunkSource()
-						.getChunkFuture(this.lastPos.x, this.lastPos.z, ChunkStatus.FULL, false)
-						.thenApply(either -> either.map(chunkAccess -> (LevelChunk)chunkAccess, chunkLoadingFailure -> null));
-				}
+			ServerLevel serverLevel = this.getServerLevel();
+			if (serverLevel != null) {
+				this.serverChunk = serverLevel.getChunkSource()
+					.getChunkFuture(this.lastPos.x, this.lastPos.z, ChunkStatus.FULL, false)
+					.thenApply(either -> either.map(chunkAccess -> (LevelChunk)chunkAccess, chunkLoadingFailure -> null));
 			}
 
 			if (this.serverChunk == null) {
@@ -425,7 +435,7 @@ public class DebugScreenOverlay extends GuiComponent {
 				BlockPos blockPos = ((BlockHitResult)this.block).getBlockPos();
 				BlockState blockState = this.minecraft.level.getBlockState(blockPos);
 				list.add("");
-				list.add(ChatFormatting.UNDERLINE + "Targeted Block");
+				list.add(ChatFormatting.UNDERLINE + "Targeted Block: " + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ());
 				list.add(String.valueOf(Registry.BLOCK.getKey(blockState.getBlock())));
 
 				for (Entry<Property<?>, Comparable<?>> entry : blockState.getValues().entrySet()) {
@@ -441,7 +451,7 @@ public class DebugScreenOverlay extends GuiComponent {
 				BlockPos blockPos = ((BlockHitResult)this.liquid).getBlockPos();
 				FluidState fluidState = this.minecraft.level.getFluidState(blockPos);
 				list.add("");
-				list.add(ChatFormatting.UNDERLINE + "Targeted Fluid");
+				list.add(ChatFormatting.UNDERLINE + "Targeted Fluid: " + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ());
 				list.add(String.valueOf(Registry.FLUID.getKey(fluidState.getType())));
 
 				for (Entry<Property<?>, Comparable<?>> entry : fluidState.getValues().entrySet()) {

@@ -1,7 +1,5 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,25 +14,27 @@ public class ShotCrossbowTrigger extends SimpleCriterionTrigger<ShotCrossbowTrig
 		return ID;
 	}
 
-	public ShotCrossbowTrigger.TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+	public ShotCrossbowTrigger.TriggerInstance createInstance(
+		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+	) {
 		ItemPredicate itemPredicate = ItemPredicate.fromJson(jsonObject.get("item"));
-		return new ShotCrossbowTrigger.TriggerInstance(itemPredicate);
+		return new ShotCrossbowTrigger.TriggerInstance(composite, itemPredicate);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, ItemStack itemStack) {
-		this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(itemStack));
+		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(itemStack));
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final ItemPredicate item;
 
-		public TriggerInstance(ItemPredicate itemPredicate) {
-			super(ShotCrossbowTrigger.ID);
+		public TriggerInstance(EntityPredicate.Composite composite, ItemPredicate itemPredicate) {
+			super(ShotCrossbowTrigger.ID, composite);
 			this.item = itemPredicate;
 		}
 
 		public static ShotCrossbowTrigger.TriggerInstance shotCrossbow(ItemLike itemLike) {
-			return new ShotCrossbowTrigger.TriggerInstance(ItemPredicate.Builder.item().of(itemLike).build());
+			return new ShotCrossbowTrigger.TriggerInstance(EntityPredicate.Composite.ANY, ItemPredicate.Builder.item().of(itemLike).build());
 		}
 
 		public boolean matches(ItemStack itemStack) {
@@ -42,8 +42,8 @@ public class ShotCrossbowTrigger extends SimpleCriterionTrigger<ShotCrossbowTrig
 		}
 
 		@Override
-		public JsonElement serializeToJson() {
-			JsonObject jsonObject = new JsonObject();
+		public JsonObject serializeToJson(SerializationContext serializationContext) {
+			JsonObject jsonObject = super.serializeToJson(serializationContext);
 			jsonObject.add("item", this.item.serializeToJson());
 			return jsonObject;
 		}

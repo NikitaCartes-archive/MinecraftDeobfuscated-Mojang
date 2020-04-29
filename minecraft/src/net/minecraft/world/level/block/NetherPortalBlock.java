@@ -56,7 +56,7 @@ public class NetherPortalBlock extends Block {
 		if (serverLevel.dimension.isNaturalDimension()
 			&& serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)
 			&& random.nextInt(2000) < serverLevel.getDifficulty().getId()) {
-			while (serverLevel.getBlockState(blockPos).getBlock() == this) {
+			while (serverLevel.getBlockState(blockPos).is(this)) {
 				blockPos = blockPos.below();
 			}
 
@@ -97,7 +97,7 @@ public class NetherPortalBlock extends Block {
 		Direction.Axis axis = direction.getAxis();
 		Direction.Axis axis2 = blockState.getValue(AXIS);
 		boolean bl = axis2 != axis && axis.isHorizontal();
-		return !bl && blockState2.getBlock() != this && !new NetherPortalBlock.PortalShape(levelAccessor, blockPos, axis2).isComplete()
+		return !bl && !blockState2.is(this) && !new NetherPortalBlock.PortalShape(levelAccessor, blockPos, axis2).isComplete()
 			? Blocks.AIR.defaultBlockState()
 			: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
 	}
@@ -133,7 +133,7 @@ public class NetherPortalBlock extends Block {
 			double h = ((double)random.nextFloat() - 0.5) * 0.5;
 			double j = ((double)random.nextFloat() - 0.5) * 0.5;
 			int k = random.nextInt(2) * 2 - 1;
-			if (level.getBlockState(blockPos.west()).getBlock() != this && level.getBlockState(blockPos.east()).getBlock() != this) {
+			if (!level.getBlockState(blockPos.west()).is(this) && !level.getBlockState(blockPos.east()).is(this)) {
 				d = (double)blockPos.getX() + 0.5 + 0.25 * (double)k;
 				g = (double)(random.nextFloat() * 2.0F * (float)k);
 			} else {
@@ -278,13 +278,12 @@ public class NetherPortalBlock extends Block {
 			int i;
 			for (i = 0; i < 22; i++) {
 				BlockPos blockPos2 = blockPos.relative(direction, i);
-				if (!this.isEmpty(this.level.getBlockState(blockPos2)) || this.level.getBlockState(blockPos2.below()).getBlock() != Blocks.OBSIDIAN) {
+				if (!this.isEmpty(this.level.getBlockState(blockPos2)) || !this.level.getBlockState(blockPos2.below()).is(Blocks.OBSIDIAN)) {
 					break;
 				}
 			}
 
-			Block block = this.level.getBlockState(blockPos.relative(direction, i)).getBlock();
-			return block == Blocks.OBSIDIAN ? i : 0;
+			return this.level.getBlockState(blockPos.relative(direction, i)).is(Blocks.OBSIDIAN) ? i : 0;
 		}
 
 		public int getHeight() {
@@ -305,27 +304,20 @@ public class NetherPortalBlock extends Block {
 						break label56;
 					}
 
-					Block block = blockState.getBlock();
-					if (block == Blocks.NETHER_PORTAL) {
+					if (blockState.is(Blocks.NETHER_PORTAL)) {
 						this.numPortalBlocks++;
 					}
 
-					if (i == 0) {
-						block = this.level.getBlockState(blockPos.relative(this.leftDir)).getBlock();
-						if (block != Blocks.OBSIDIAN) {
-							break label56;
-						}
-					} else if (i == this.width - 1) {
-						block = this.level.getBlockState(blockPos.relative(this.rightDir)).getBlock();
-						if (block != Blocks.OBSIDIAN) {
-							break label56;
-						}
+					if (i == 0
+						? !this.level.getBlockState(blockPos.relative(this.leftDir)).is(Blocks.OBSIDIAN)
+						: i == this.width - 1 && !this.level.getBlockState(blockPos.relative(this.rightDir)).is(Blocks.OBSIDIAN)) {
+						break label56;
 					}
 				}
 			}
 
 			for (int i = 0; i < this.width; i++) {
-				if (this.level.getBlockState(this.bottomLeft.relative(this.rightDir, i).above(this.height)).getBlock() != Blocks.OBSIDIAN) {
+				if (!this.level.getBlockState(this.bottomLeft.relative(this.rightDir, i).above(this.height)).is(Blocks.OBSIDIAN)) {
 					this.height = 0;
 					break;
 				}
@@ -342,8 +334,7 @@ public class NetherPortalBlock extends Block {
 		}
 
 		protected boolean isEmpty(BlockState blockState) {
-			Block block = blockState.getBlock();
-			return blockState.isAir() || blockState.is(BlockTags.FIRE) || block == Blocks.NETHER_PORTAL;
+			return blockState.isAir() || blockState.is(BlockTags.FIRE) || blockState.is(Blocks.NETHER_PORTAL);
 		}
 
 		public boolean isValid() {

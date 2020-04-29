@@ -24,7 +24,7 @@ public class WritableBookItem extends Item {
 		Level level = useOnContext.getLevel();
 		BlockPos blockPos = useOnContext.getClickedPos();
 		BlockState blockState = level.getBlockState(blockPos);
-		if (blockState.getBlock() == Blocks.LECTERN) {
+		if (blockState.is(Blocks.LECTERN)) {
 			return LecternBlock.tryPlaceBook(level, blockPos, blockState, useOnContext.getItemInHand()) ? InteractionResult.SUCCESS : InteractionResult.PASS;
 		} else {
 			return InteractionResult.PASS;

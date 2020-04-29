@@ -48,13 +48,13 @@ public class MushroomCow extends Cow implements Shearable {
 
 	@Override
 	public float getWalkTargetValue(BlockPos blockPos, LevelReader levelReader) {
-		return levelReader.getBlockState(blockPos.below()).getBlock() == Blocks.MYCELIUM ? 10.0F : levelReader.getBrightness(blockPos) - 0.5F;
+		return levelReader.getBlockState(blockPos.below()).is(Blocks.MYCELIUM) ? 10.0F : levelReader.getBrightness(blockPos) - 0.5F;
 	}
 
 	public static boolean checkMushroomSpawnRules(
 		EntityType<MushroomCow> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
-		return levelAccessor.getBlockState(blockPos.below()).getBlock() == Blocks.MYCELIUM && levelAccessor.getRawBrightness(blockPos, 0) > 8;
+		return levelAccessor.getBlockState(blockPos.below()).is(Blocks.MYCELIUM) && levelAccessor.getRawBrightness(blockPos, 0) > 8;
 	}
 
 	@Override

@@ -73,7 +73,7 @@ public class DefaultSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConf
 			BlockState blockState8 = chunkAccess.getBlockState(mutableBlockPos);
 			if (blockState8.isAir()) {
 				m = -1;
-			} else if (blockState8.getBlock() == blockState.getBlock()) {
+			} else if (blockState8.is(blockState.getBlock())) {
 				if (m == -1) {
 					if (n <= 0) {
 						blockState6 = Blocks.AIR.defaultBlockState();
@@ -106,9 +106,9 @@ public class DefaultSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConf
 				} else if (m > 0) {
 					m--;
 					chunkAccess.setBlockState(mutableBlockPos, blockState7, false);
-					if (m == 0 && blockState7.getBlock() == Blocks.SAND && n > 1) {
+					if (m == 0 && blockState7.is(Blocks.SAND) && n > 1) {
 						m = random.nextInt(4) + Math.max(0, q - 63);
-						blockState7 = blockState7.getBlock() == Blocks.RED_SAND ? Blocks.RED_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
+						blockState7 = blockState7.is(Blocks.RED_SAND) ? Blocks.RED_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
 					}
 				}
 			}

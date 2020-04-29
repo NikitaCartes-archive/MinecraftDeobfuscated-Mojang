@@ -121,5 +121,11 @@ public class SoulSandValleyBiome extends Biome {
 		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.GHAST, 50, 4, 4));
 		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.ENDERMAN, 1, 4, 4));
 		this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.STRIDER, 60, 2, 4));
+		double d = 1.0;
+		double e = 0.08;
+		this.addMobCharge(EntityType.SKELETON, 1.0, 0.08);
+		this.addMobCharge(EntityType.GHAST, 1.0, 0.08);
+		this.addMobCharge(EntityType.ENDERMAN, 1.0, 0.08);
+		this.addMobCharge(EntityType.STRIDER, 1.0, 0.08);
 	}
 }

@@ -5,12 +5,12 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
@@ -21,12 +21,14 @@ public class ItemPickupParticle extends Particle {
 	private int life;
 	private final EntityRenderDispatcher entityRenderDispatcher;
 
-	public ItemPickupParticle(EntityRenderDispatcher entityRenderDispatcher, RenderBuffers renderBuffers, Level level, Entity entity, Entity entity2) {
-		this(entityRenderDispatcher, renderBuffers, level, entity, entity2, entity.getDeltaMovement());
+	public ItemPickupParticle(EntityRenderDispatcher entityRenderDispatcher, RenderBuffers renderBuffers, ClientLevel clientLevel, Entity entity, Entity entity2) {
+		this(entityRenderDispatcher, renderBuffers, clientLevel, entity, entity2, entity.getDeltaMovement());
 	}
 
-	private ItemPickupParticle(EntityRenderDispatcher entityRenderDispatcher, RenderBuffers renderBuffers, Level level, Entity entity, Entity entity2, Vec3 vec3) {
-		super(level, entity.getX(), entity.getY(), entity.getZ(), vec3.x, vec3.y, vec3.z);
+	private ItemPickupParticle(
+		EntityRenderDispatcher entityRenderDispatcher, RenderBuffers renderBuffers, ClientLevel clientLevel, Entity entity, Entity entity2, Vec3 vec3
+	) {
+		super(clientLevel, entity.getX(), entity.getY(), entity.getZ(), vec3.x, vec3.y, vec3.z);
 		this.renderBuffers = renderBuffers;
 		this.itemEntity = entity;
 		this.target = entity2;

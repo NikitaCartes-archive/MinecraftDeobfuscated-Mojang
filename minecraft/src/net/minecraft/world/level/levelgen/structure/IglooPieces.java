@@ -130,7 +130,7 @@ public class IglooPieces {
 			if (this.templateLocation.equals(IglooPieces.STRUCTURE_LOCATION_IGLOO)) {
 				BlockPos blockPos5 = this.templatePosition.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, new BlockPos(3, 0, 5)));
 				BlockState blockState = levelAccessor.getBlockState(blockPos5.below());
-				if (!blockState.isAir() && blockState.getBlock() != Blocks.LADDER) {
+				if (!blockState.isAir() && !blockState.is(Blocks.LADDER)) {
 					levelAccessor.setBlock(blockPos5, Blocks.SNOW_BLOCK.defaultBlockState(), 3);
 				}
 			}

@@ -138,7 +138,7 @@ public class LoomMenu extends AbstractContainerMenu {
 			|| !itemStack.isEmpty()
 				&& !itemStack2.isEmpty()
 				&& this.selectedBannerPatternIndex.get() > 0
-				&& (this.selectedBannerPatternIndex.get() < BannerPattern.COUNT - 5 || !itemStack3.isEmpty())) {
+				&& (this.selectedBannerPatternIndex.get() < BannerPattern.COUNT - BannerPattern.PATTERN_ITEM_COUNT || !itemStack3.isEmpty())) {
 			if (!itemStack3.isEmpty() && itemStack3.getItem() instanceof BannerPatternItem) {
 				CompoundTag compoundTag = itemStack.getOrCreateTagElement("BlockEntityTag");
 				boolean bl = compoundTag.contains("Patterns", 9) && !itemStack.isEmpty() && compoundTag.getList("Patterns", 10).size() >= 6;

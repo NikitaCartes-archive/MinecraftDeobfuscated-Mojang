@@ -28,7 +28,7 @@ public abstract class AbstractClientPlayer extends Player {
 	public final ClientLevel clientLevel;
 
 	public AbstractClientPlayer(ClientLevel clientLevel, GameProfile gameProfile) {
-		super(clientLevel, gameProfile);
+		super(clientLevel, clientLevel.getSharedSpawnPos(), gameProfile);
 		this.clientLevel = clientLevel;
 	}
 

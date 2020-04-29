@@ -49,6 +49,7 @@ public interface LevelReader extends BlockAndTintGetter, CollisionGetter, BiomeM
 
 	boolean isClientSide();
 
+	@Deprecated
 	int getSeaLevel();
 
 	Dimension getDimension();

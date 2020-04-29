@@ -1,7 +1,5 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -15,25 +13,27 @@ public class EffectsChangedTrigger extends SimpleCriterionTrigger<EffectsChanged
 		return ID;
 	}
 
-	public EffectsChangedTrigger.TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+	public EffectsChangedTrigger.TriggerInstance createInstance(
+		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+	) {
 		MobEffectsPredicate mobEffectsPredicate = MobEffectsPredicate.fromJson(jsonObject.get("effects"));
-		return new EffectsChangedTrigger.TriggerInstance(mobEffectsPredicate);
+		return new EffectsChangedTrigger.TriggerInstance(composite, mobEffectsPredicate);
 	}
 
 	public void trigger(ServerPlayer serverPlayer) {
-		this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(serverPlayer));
+		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(serverPlayer));
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final MobEffectsPredicate effects;
 
-		public TriggerInstance(MobEffectsPredicate mobEffectsPredicate) {
-			super(EffectsChangedTrigger.ID);
+		public TriggerInstance(EntityPredicate.Composite composite, MobEffectsPredicate mobEffectsPredicate) {
+			super(EffectsChangedTrigger.ID, composite);
 			this.effects = mobEffectsPredicate;
 		}
 
 		public static EffectsChangedTrigger.TriggerInstance hasEffects(MobEffectsPredicate mobEffectsPredicate) {
-			return new EffectsChangedTrigger.TriggerInstance(mobEffectsPredicate);
+			return new EffectsChangedTrigger.TriggerInstance(EntityPredicate.Composite.ANY, mobEffectsPredicate);
 		}
 
 		public boolean matches(ServerPlayer serverPlayer) {
@@ -41,8 +41,8 @@ public class EffectsChangedTrigger extends SimpleCriterionTrigger<EffectsChanged
 		}
 
 		@Override
-		public JsonElement serializeToJson() {
-			JsonObject jsonObject = new JsonObject();
+		public JsonObject serializeToJson(SerializationContext serializationContext) {
+			JsonObject jsonObject = super.serializeToJson(serializationContext);
 			jsonObject.add("effects", this.effects.serializeToJson());
 			return jsonObject;
 		}

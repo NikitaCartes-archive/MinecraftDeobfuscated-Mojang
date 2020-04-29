@@ -258,7 +258,7 @@ public class UpgradeData {
 			public BlockState updateShape(
 				BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 			) {
-				if (blockState2.getBlock() == blockState.getBlock()
+				if (blockState2.is(blockState.getBlock())
 					&& direction.getAxis().isHorizontal()
 					&& blockState.getValue(ChestBlock.TYPE) == ChestType.SINGLE
 					&& blockState2.getValue(ChestBlock.TYPE) == ChestType.SINGLE) {
@@ -341,7 +341,7 @@ public class UpgradeData {
 			) {
 				if ((Integer)blockState.getValue(StemBlock.AGE) == 7) {
 					StemGrownBlock stemGrownBlock = ((StemBlock)blockState.getBlock()).getFruit();
-					if (blockState2.getBlock() == stemGrownBlock) {
+					if (blockState2.is(stemGrownBlock)) {
 						return stemGrownBlock.getAttachedStem().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, direction);
 					}
 				}

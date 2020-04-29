@@ -42,41 +42,38 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 	@Override
 	public Node getStart() {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-		int i;
-		if (this.canFloat() && this.mob.isInWater()) {
-			i = Mth.floor(this.mob.getY());
-			BlockState blockState = this.level.getBlockState(mutableBlockPos.set(this.mob.getX(), (double)i, this.mob.getZ()));
+		int i = Mth.floor(this.mob.getY());
+		BlockState blockState = this.level.getBlockState(mutableBlockPos.set(this.mob.getX(), (double)i, this.mob.getZ()));
+		if (!this.mob.canStandOnFluid(blockState.getFluidState().getType())) {
+			if (this.canFloat() && this.mob.isInWater()) {
+				while (true) {
+					if (blockState.getBlock() != Blocks.WATER && blockState.getFluidState() != Fluids.WATER.getSource(false)) {
+						i--;
+						break;
+					}
 
-			while (blockState.getBlock() == Blocks.WATER || blockState.getFluidState() == Fluids.WATER.getSource(false)) {
+					blockState = this.level.getBlockState(mutableBlockPos.set(this.mob.getX(), (double)(++i), this.mob.getZ()));
+				}
+			} else if (this.mob.isOnGround()) {
+				i = Mth.floor(this.mob.getY() + 0.5);
+			} else {
+				BlockPos blockPos = this.mob.blockPosition();
+
+				while (
+					(this.level.getBlockState(blockPos).isAir() || this.level.getBlockState(blockPos).isPathfindable(this.level, blockPos, PathComputationType.LAND))
+						&& blockPos.getY() > 0
+				) {
+					blockPos = blockPos.below();
+				}
+
+				i = blockPos.above().getY();
+			}
+		} else {
+			while (this.mob.canStandOnFluid(blockState.getFluidState().getType())) {
 				blockState = this.level.getBlockState(mutableBlockPos.set(this.mob.getX(), (double)(++i), this.mob.getZ()));
 			}
 
 			i--;
-		} else if (this.mob.isInLava() && this.mob.canFloatInLava()) {
-			i = Mth.floor(this.mob.getY());
-			BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos(this.mob.getX(), (double)i, this.mob.getZ());
-
-			for (BlockState blockState2 = this.level.getBlockState(mutableBlockPos2);
-				blockState2.getBlock() == Blocks.LAVA || blockState2.getFluidState() == Fluids.LAVA.getSource(false);
-				blockState2 = this.level.getBlockState(mutableBlockPos2)
-			) {
-				mutableBlockPos2.set(this.mob.getX(), (double)(++i), this.mob.getZ());
-			}
-
-			i--;
-		} else if (this.mob.isOnGround()) {
-			i = Mth.floor(this.mob.getY() + 0.5);
-		} else {
-			BlockPos blockPos = this.mob.blockPosition();
-
-			while (
-				(this.level.getBlockState(blockPos).isAir() || this.level.getBlockState(blockPos).isPathfindable(this.level, blockPos, PathComputationType.LAND))
-					&& blockPos.getY() > 0
-			) {
-				blockPos = blockPos.below();
-			}
-
-			i = blockPos.above().getY();
 		}
 
 		BlockPos blockPos = this.mob.blockPosition();
@@ -437,10 +434,9 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 					if (l != 0 || n != 0) {
 						mutableBlockPos.set(l + i, m + j, n + k);
 						BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
-						Block block = blockState.getBlock();
-						if (block == Blocks.CACTUS) {
+						if (blockState.is(Blocks.CACTUS)) {
 							blockPathTypes = BlockPathTypes.DANGER_CACTUS;
-						} else if (block == Blocks.SWEET_BERRY_BUSH) {
+						} else if (blockState.is(Blocks.SWEET_BERRY_BUSH)) {
 							blockPathTypes = BlockPathTypes.DANGER_OTHER;
 						} else if (isBurningBlock(blockState)) {
 							blockPathTypes = BlockPathTypes.DANGER_FIRE;
@@ -459,15 +455,15 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 		Material material = blockState.getMaterial();
 		if (blockState.isAir()) {
 			return BlockPathTypes.OPEN;
-		} else if (block.is(BlockTags.TRAPDOORS) || block == Blocks.LILY_PAD) {
+		} else if (blockState.is(BlockTags.TRAPDOORS) || blockState.is(Blocks.LILY_PAD)) {
 			return BlockPathTypes.TRAPDOOR;
-		} else if (block == Blocks.CACTUS) {
+		} else if (blockState.is(Blocks.CACTUS)) {
 			return BlockPathTypes.DAMAGE_CACTUS;
-		} else if (block == Blocks.SWEET_BERRY_BUSH) {
+		} else if (blockState.is(Blocks.SWEET_BERRY_BUSH)) {
 			return BlockPathTypes.DAMAGE_OTHER;
-		} else if (block == Blocks.HONEY_BLOCK) {
+		} else if (blockState.is(Blocks.HONEY_BLOCK)) {
 			return BlockPathTypes.STICKY_HONEY;
-		} else if (block == Blocks.COCOA) {
+		} else if (blockState.is(Blocks.COCOA)) {
 			return BlockPathTypes.COCOA;
 		} else if (isBurningBlock(blockState)) {
 			return BlockPathTypes.DAMAGE_FIRE;
@@ -500,7 +496,6 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 	}
 
 	private static boolean isBurningBlock(BlockState blockState) {
-		Block block = blockState.getBlock();
-		return block.is(BlockTags.FIRE) || block == Blocks.LAVA || block == Blocks.MAGMA_BLOCK || CampfireBlock.isLitCampfire(blockState);
+		return blockState.is(BlockTags.FIRE) || blockState.is(Blocks.LAVA) || blockState.is(Blocks.MAGMA_BLOCK) || CampfireBlock.isLitCampfire(blockState);
 	}
 }

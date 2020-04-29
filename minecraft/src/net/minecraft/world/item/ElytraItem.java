@@ -1,6 +1,5 @@
 package net.minecraft.world.item;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -12,7 +11,6 @@ import net.minecraft.world.level.block.DispenserBlock;
 public class ElytraItem extends Item implements Wearable {
 	public ElytraItem(Item.Properties properties) {
 		super(properties);
-		this.addProperty(new ResourceLocation("broken"), (itemStack, level, livingEntity) -> isFlyEnabled(itemStack) ? 0.0F : 1.0F);
 		DispenserBlock.registerBehavior(this, ArmorItem.DISPENSE_ITEM_BEHAVIOR);
 	}
 

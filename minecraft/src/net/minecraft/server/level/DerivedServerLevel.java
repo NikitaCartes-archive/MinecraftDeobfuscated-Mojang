@@ -7,10 +7,12 @@ import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.DerivedLevelData;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.ServerLevelData;
 
 public class DerivedServerLevel extends ServerLevel {
 	public DerivedServerLevel(
 		ServerLevel serverLevel,
+		ServerLevelData serverLevelData,
 		MinecraftServer minecraftServer,
 		Executor executor,
 		LevelStorageSource.LevelStorageAccess levelStorageAccess,
@@ -21,7 +23,7 @@ public class DerivedServerLevel extends ServerLevel {
 			minecraftServer,
 			executor,
 			levelStorageAccess,
-			new DerivedLevelData(dimensionType, minecraftServer.getWorldData(), serverLevel.getLevelData()),
+			new DerivedLevelData(dimensionType, minecraftServer.getWorldData(), serverLevelData),
 			dimensionType,
 			chunkProgressListener
 		);

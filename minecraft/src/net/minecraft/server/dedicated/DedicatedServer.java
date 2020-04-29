@@ -33,6 +33,7 @@ import net.minecraft.server.ConsoleInput;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerInterface;
 import net.minecraft.server.gui.MinecraftServerGui;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.OldUsersConverter;
@@ -48,7 +49,6 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.LevelStorageSource;
@@ -408,8 +408,8 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	}
 
 	@Override
-	public boolean isUnderSpawnProtection(Level level, BlockPos blockPos, Player player) {
-		if (level.dimension.getType() != DimensionType.OVERWORLD) {
+	public boolean isUnderSpawnProtection(ServerLevel serverLevel, BlockPos blockPos, Player player) {
+		if (serverLevel.dimension.getType() != DimensionType.OVERWORLD) {
 			return false;
 		} else if (this.getPlayerList().getOps().isEmpty()) {
 			return false;
@@ -418,12 +418,17 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 		} else if (this.getSpawnProtectionRadius() <= 0) {
 			return false;
 		} else {
-			BlockPos blockPos2 = level.getSharedSpawnPos();
+			BlockPos blockPos2 = serverLevel.getSharedSpawnPos();
 			int i = Mth.abs(blockPos.getX() - blockPos2.getX());
 			int j = Mth.abs(blockPos.getZ() - blockPos2.getZ());
 			int k = Math.max(i, j);
 			return k <= this.getSpawnProtectionRadius();
 		}
+	}
+
+	@Override
+	public boolean repliesToStatus() {
+		return this.getProperties().enableStatus;
 	}
 
 	@Override
@@ -557,6 +562,11 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	@Override
 	public boolean isSingleplayerOwner(GameProfile gameProfile) {
 		return false;
+	}
+
+	@Override
+	public int getScaledTrackingDistance(int i) {
+		return this.getProperties().entityBroadcastRangePercentage * i / 100;
 	}
 
 	@Override

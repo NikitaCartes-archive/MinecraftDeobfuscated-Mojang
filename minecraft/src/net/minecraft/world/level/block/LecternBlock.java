@@ -184,7 +184,7 @@ public class LecternBlock extends BaseEntityBlock {
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState.getBlock() != blockState2.getBlock()) {
+		if (!blockState.is(blockState2.getBlock())) {
 			if ((Boolean)blockState.getValue(HAS_BOOK)) {
 				this.popBook(blockState, level, blockPos);
 			}

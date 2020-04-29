@@ -36,7 +36,7 @@ public class SwampSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfig
 			for (int p = k; p >= 0; p--) {
 				mutableBlockPos.set(n, p, o);
 				if (!chunkAccess.getBlockState(mutableBlockPos).isAir()) {
-					if (p == 62 && chunkAccess.getBlockState(mutableBlockPos).getBlock() != blockState2.getBlock()) {
+					if (p == 62 && !chunkAccess.getBlockState(mutableBlockPos).is(blockState2.getBlock())) {
 						chunkAccess.setBlockState(mutableBlockPos, blockState2, false);
 					}
 					break;

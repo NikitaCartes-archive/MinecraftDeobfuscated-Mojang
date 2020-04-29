@@ -12,6 +12,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class FlyNodeEvaluator extends WalkNodeEvaluator {
 	@Override
@@ -257,9 +258,12 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 		BlockPathTypes blockPathTypes = getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j, k));
 		if (blockPathTypes == BlockPathTypes.OPEN && j >= 1) {
-			Block block = blockGetter.getBlockState(mutableBlockPos.set(i, j - 1, k)).getBlock();
+			BlockState blockState = blockGetter.getBlockState(mutableBlockPos.set(i, j - 1, k));
 			BlockPathTypes blockPathTypes2 = getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j - 1, k));
-			if (blockPathTypes2 == BlockPathTypes.DAMAGE_FIRE || block == Blocks.MAGMA_BLOCK || blockPathTypes2 == BlockPathTypes.LAVA || block.is(BlockTags.CAMPFIRES)) {
+			if (blockPathTypes2 == BlockPathTypes.DAMAGE_FIRE
+				|| blockState.is(Blocks.MAGMA_BLOCK)
+				|| blockPathTypes2 == BlockPathTypes.LAVA
+				|| blockState.is(BlockTags.CAMPFIRES)) {
 				blockPathTypes = BlockPathTypes.DAMAGE_FIRE;
 			} else if (blockPathTypes2 == BlockPathTypes.DAMAGE_CACTUS) {
 				blockPathTypes = BlockPathTypes.DAMAGE_CACTUS;

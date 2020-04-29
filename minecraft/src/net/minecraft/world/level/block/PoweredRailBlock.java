@@ -97,7 +97,7 @@ public class PoweredRailBlock extends BaseRailBlock {
 
 	protected boolean isSameRailWithPower(Level level, BlockPos blockPos, boolean bl, int i, RailShape railShape) {
 		BlockState blockState = level.getBlockState(blockPos);
-		if (blockState.getBlock() != this) {
+		if (!blockState.is(this)) {
 			return false;
 		} else {
 			RailShape railShape2 = blockState.getValue(SHAPE);

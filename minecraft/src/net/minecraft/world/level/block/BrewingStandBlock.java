@@ -98,7 +98,7 @@ public class BrewingStandBlock extends BaseEntityBlock {
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState.getBlock() != blockState2.getBlock()) {
+		if (!blockState.is(blockState2.getBlock())) {
 			BlockEntity blockEntity = level.getBlockEntity(blockPos);
 			if (blockEntity instanceof BrewingStandBlockEntity) {
 				Containers.dropContents(level, blockPos, (BrewingStandBlockEntity)blockEntity);

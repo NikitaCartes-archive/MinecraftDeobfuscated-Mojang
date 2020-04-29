@@ -50,14 +50,14 @@ public class AttachedStemBlock extends BushBlock {
 	public BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
-		return blockState2.getBlock() != this.fruit && direction == blockState.getValue(FACING)
+		return !blockState2.is(this.fruit) && direction == blockState.getValue(FACING)
 			? this.fruit.getStem().defaultBlockState().setValue(StemBlock.AGE, Integer.valueOf(7))
 			: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
 	}
 
 	@Override
 	protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return blockState.getBlock() == Blocks.FARMLAND;
+		return blockState.is(Blocks.FARMLAND);
 	}
 
 	@Environment(EnvType.CLIENT)

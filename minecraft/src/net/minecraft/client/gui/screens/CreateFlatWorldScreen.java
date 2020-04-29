@@ -20,7 +20,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.LevelType;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
@@ -182,12 +181,11 @@ public class CreateFlatWorldScreen extends Screen {
 					.getLayersInfo()
 					.get(CreateFlatWorldScreen.this.generator.getLayersInfo().size() - i - 1);
 				BlockState blockState = flatLayerInfo.getBlockState();
-				Block block = blockState.getBlock();
-				Item item = block.asItem();
+				Item item = blockState.getBlock().asItem();
 				if (item == Items.AIR) {
-					if (block == Blocks.WATER) {
+					if (blockState.is(Blocks.WATER)) {
 						item = Items.WATER_BUCKET;
-					} else if (block == Blocks.LAVA) {
+					} else if (blockState.is(Blocks.LAVA)) {
 						item = Items.LAVA_BUCKET;
 					}
 				}

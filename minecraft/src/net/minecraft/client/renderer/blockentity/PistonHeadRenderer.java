@@ -37,11 +37,11 @@ public class PistonHeadRenderer extends BlockEntityRenderer<PistonMovingBlockEnt
 				ModelBlockRenderer.enableCaching();
 				poseStack.pushPose();
 				poseStack.translate((double)pistonMovingBlockEntity.getXOff(f), (double)pistonMovingBlockEntity.getYOff(f), (double)pistonMovingBlockEntity.getZOff(f));
-				if (blockState.getBlock() == Blocks.PISTON_HEAD && pistonMovingBlockEntity.getProgress(f) <= 4.0F) {
+				if (blockState.is(Blocks.PISTON_HEAD) && pistonMovingBlockEntity.getProgress(f) <= 4.0F) {
 					blockState = blockState.setValue(PistonHeadBlock.SHORT, Boolean.valueOf(pistonMovingBlockEntity.getProgress(f) <= 0.5F));
 					this.renderBlock(blockPos, blockState, poseStack, multiBufferSource, level, false, j);
 				} else if (pistonMovingBlockEntity.isSourcePiston() && !pistonMovingBlockEntity.isExtending()) {
-					PistonType pistonType = blockState.getBlock() == Blocks.STICKY_PISTON ? PistonType.STICKY : PistonType.DEFAULT;
+					PistonType pistonType = blockState.is(Blocks.STICKY_PISTON) ? PistonType.STICKY : PistonType.DEFAULT;
 					BlockState blockState2 = Blocks.PISTON_HEAD
 						.defaultBlockState()
 						.setValue(PistonHeadBlock.TYPE, pistonType)

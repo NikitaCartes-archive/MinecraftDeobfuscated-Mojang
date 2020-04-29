@@ -29,7 +29,7 @@ public class ScheduleCommand {
 		object -> new TranslatableComponent("commands.schedule.cleared.failure", object)
 	);
 	private static final SuggestionProvider<CommandSourceStack> SUGGEST_SCHEDULE = (commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggest(
-			commandContext.getSource().getLevel().getLevelData().getScheduledEvents().getEventsIds(), suggestionsBuilder
+			commandContext.getSource().getServer().getWorldData().overworldData().getScheduledEvents().getEventsIds(), suggestionsBuilder
 		);
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
@@ -95,7 +95,7 @@ public class ScheduleCommand {
 		} else {
 			long l = commandSourceStack.getLevel().getGameTime() + (long)i;
 			ResourceLocation resourceLocation = pair.getFirst();
-			TimerQueue<MinecraftServer> timerQueue = commandSourceStack.getLevel().getLevelData().getScheduledEvents();
+			TimerQueue<MinecraftServer> timerQueue = commandSourceStack.getServer().getWorldData().overworldData().getScheduledEvents();
 			pair.getSecond().ifLeft(commandFunction -> {
 				String string = resourceLocation.toString();
 				if (bl) {
@@ -118,7 +118,7 @@ public class ScheduleCommand {
 	}
 
 	private static int remove(CommandSourceStack commandSourceStack, String string) throws CommandSyntaxException {
-		int i = commandSourceStack.getLevel().getLevelData().getScheduledEvents().remove(string);
+		int i = commandSourceStack.getServer().getWorldData().overworldData().getScheduledEvents().remove(string);
 		if (i == 0) {
 			throw ERROR_CANT_REMOVE.create(string);
 		} else {

@@ -34,7 +34,7 @@ public class SeaPickleFeature extends Feature<CountFeatureConfiguration> {
 			int m = levelAccessor.getHeight(Heightmap.Types.OCEAN_FLOOR, blockPos.getX() + k, blockPos.getZ() + l);
 			BlockPos blockPos2 = new BlockPos(blockPos.getX() + k, m, blockPos.getZ() + l);
 			BlockState blockState = Blocks.SEA_PICKLE.defaultBlockState().setValue(SeaPickleBlock.PICKLES, Integer.valueOf(random.nextInt(4) + 1));
-			if (levelAccessor.getBlockState(blockPos2).getBlock() == Blocks.WATER && blockState.canSurvive(levelAccessor, blockPos2)) {
+			if (levelAccessor.getBlockState(blockPos2).is(Blocks.WATER) && blockState.canSurvive(levelAccessor, blockPos2)) {
 				levelAccessor.setBlock(blockPos2, blockState, 2);
 				i++;
 			}

@@ -75,8 +75,8 @@ public class InteractWith<E extends LivingEntity, T extends LivingEntity> extend
 						.findFirst()
 						.ifPresent(livingEntityxx -> {
 							brain.setMemory(this.memory, (T)livingEntityxx);
-							brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(livingEntityxx));
-							brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityTracker(livingEntityxx), this.speedModifier, this.maxDist));
+							brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(livingEntityxx, true));
+							brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityTracker(livingEntityxx, false), this.speedModifier, this.maxDist));
 						})
 			);
 	}
