@@ -63,7 +63,7 @@ implements Toast {
                     toastComponent.getMinecraft().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f));
                 }
             }
-            toastComponent.getMinecraft().getItemRenderer().renderAndDecorateItem(null, displayInfo.getIcon(), 8, 8);
+            toastComponent.getMinecraft().getItemRenderer().renderAndDecorateFakeItem(displayInfo.getIcon(), 8, 8);
             return l >= 5000L ? Toast.Visibility.HIDE : Toast.Visibility.SHOW;
         }
         return Toast.Visibility.HIDE;

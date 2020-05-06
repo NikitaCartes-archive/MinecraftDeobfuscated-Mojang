@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
+import net.minecraft.SharedConstants;
 import net.minecraft.util.thread.ProcessorHandle;
 import net.minecraft.util.thread.StrictQueue;
 import org.apache.logging.log4j.LogManager;
@@ -67,6 +68,8 @@ Runnable {
     }
 
     private boolean pollTask() {
+        String string;
+        Thread thread;
         if (!this.shouldProcess()) {
             return false;
         }
@@ -74,7 +77,18 @@ Runnable {
         if (runnable == null) {
             return false;
         }
+        if (SharedConstants.IS_RUNNING_IN_IDE) {
+            thread = Thread.currentThread();
+            string = thread.getName();
+            thread.setName(this.name);
+        } else {
+            thread = null;
+            string = null;
+        }
         runnable.run();
+        if (thread != null) {
+            thread.setName(string);
+        }
         return true;
     }
 

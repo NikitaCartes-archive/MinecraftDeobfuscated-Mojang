@@ -286,7 +286,7 @@ extends Monster {
             return false;
         }
         boolean bl = super.hurt(damageSource, f);
-        if (!this.level.isClientSide() && damageSource.isBypassArmor() && this.random.nextInt(10) != 0) {
+        if (!this.level.isClientSide() && this.random.nextInt(10) != 0) {
             this.teleport();
         }
         return bl;

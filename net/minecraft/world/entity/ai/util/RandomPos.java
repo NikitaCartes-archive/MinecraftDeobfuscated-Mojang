@@ -43,6 +43,12 @@ public class RandomPos {
     }
 
     @Nullable
+    public static Vec3 getLandPosTowards(PathfinderMob pathfinderMob, int i, int j, Vec3 vec3) {
+        Vec3 vec32 = vec3.subtract(pathfinderMob.getX(), pathfinderMob.getY(), pathfinderMob.getZ());
+        return RandomPos.generateRandomPos(pathfinderMob, i, j, 0, vec32, false, 1.5707963705062866, pathfinderMob::getWalkTargetValue, true, 0, 0, true);
+    }
+
+    @Nullable
     public static Vec3 getPosTowards(PathfinderMob pathfinderMob, int i, int j, Vec3 vec3) {
         Vec3 vec32 = vec3.subtract(pathfinderMob.getX(), pathfinderMob.getY(), pathfinderMob.getZ());
         return RandomPos.generateRandomPos(pathfinderMob, i, j, 0, vec32, true, 1.5707963705062866, pathfinderMob::getWalkTargetValue, false, 0, 0, true);

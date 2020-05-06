@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -32,8 +33,8 @@ extends EntityRenderer<ExperienceOrb> {
     }
 
     @Override
-    protected int getBlockLightLevel(ExperienceOrb experienceOrb, float f) {
-        return Mth.clamp(super.getBlockLightLevel(experienceOrb, f) + 7, 0, 15);
+    protected int getBlockLightLevel(ExperienceOrb experienceOrb, BlockPos blockPos) {
+        return Mth.clamp(super.getBlockLightLevel(experienceOrb, blockPos) + 7, 0, 15);
     }
 
     @Override

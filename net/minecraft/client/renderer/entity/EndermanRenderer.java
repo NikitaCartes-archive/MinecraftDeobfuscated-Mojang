@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.CarriedBlockLayer;
 import net.minecraft.client.renderer.entity.layers.EnderEyesLayer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -52,11 +51,6 @@ extends MobRenderer<EnderMan, EndermanModel<EnderMan>> {
     @Override
     public ResourceLocation getTextureLocation(EnderMan enderMan) {
         return ENDERMAN_LOCATION;
-    }
-
-    @Override
-    public /* synthetic */ Vec3 getRenderOffset(Entity entity, float f) {
-        return this.getRenderOffset((EnderMan)entity, f);
     }
 }
 

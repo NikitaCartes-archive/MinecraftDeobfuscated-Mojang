@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ItemSupplier;
@@ -37,8 +38,8 @@ extends EntityRenderer<T> {
     }
 
     @Override
-    protected int getBlockLightLevel(T entity, float f) {
-        return this.fullBright ? 15 : super.getBlockLightLevel(entity, f);
+    protected int getBlockLightLevel(T entity, BlockPos blockPos) {
+        return this.fullBright ? 15 : super.getBlockLightLevel(entity, blockPos);
     }
 
     @Override

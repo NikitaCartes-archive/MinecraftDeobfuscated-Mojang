@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.projectile.ShulkerBullet;
@@ -30,7 +31,7 @@ extends EntityRenderer<ShulkerBullet> {
     }
 
     @Override
-    protected int getBlockLightLevel(ShulkerBullet shulkerBullet, float f) {
+    protected int getBlockLightLevel(ShulkerBullet shulkerBullet, BlockPos blockPos) {
         return 15;
     }
 

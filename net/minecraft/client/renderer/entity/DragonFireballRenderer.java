@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.projectile.DragonFireball;
 
@@ -29,7 +30,7 @@ extends EntityRenderer<DragonFireball> {
     }
 
     @Override
-    protected int getBlockLightLevel(DragonFireball dragonFireball, float f) {
+    protected int getBlockLightLevel(DragonFireball dragonFireball, BlockPos blockPos) {
         return 15;
     }
 

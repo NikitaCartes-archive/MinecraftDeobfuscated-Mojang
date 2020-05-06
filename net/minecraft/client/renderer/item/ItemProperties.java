@@ -95,9 +95,11 @@ public class ItemProperties {
             @Override
             public float call(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity) {
                 Entity entity;
-                boolean bl = livingEntity != null;
-                Entity entity2 = entity = bl ? livingEntity : itemStack.getFrame();
-                if (clientLevel == null && entity != null && entity.level instanceof ClientLevel) {
+                Entity entity2 = entity = livingEntity != null ? livingEntity : itemStack.getEntityRepresentation();
+                if (entity == null) {
+                    return 0.0f;
+                }
+                if (clientLevel == null && entity.level instanceof ClientLevel) {
                     clientLevel = (ClientLevel)entity.level;
                 }
                 if (clientLevel == null) {

@@ -94,7 +94,7 @@ extends AbstractWidget {
             minecraft.getItemRenderer().renderAndDecorateItem(itemStack, this.x + m + 1, this.y + m + 1);
             --m;
         }
-        minecraft.getItemRenderer().renderAndDecorateItem(itemStack, this.x + m, this.y + m);
+        minecraft.getItemRenderer().renderAndDecorateFakeItem(itemStack, this.x + m, this.y + m);
         if (bl) {
             RenderSystem.popMatrix();
         }

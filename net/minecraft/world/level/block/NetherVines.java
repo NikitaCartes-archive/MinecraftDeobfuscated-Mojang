@@ -15,7 +15,7 @@ public class NetherVines {
         double d = 1.0;
         int i = 0;
         while (random.nextDouble() < d) {
-            d *= 0.94;
+            d *= 0.826;
             ++i;
         }
         return i;

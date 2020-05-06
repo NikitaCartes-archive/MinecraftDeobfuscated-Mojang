@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BlazeModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.monster.Blaze;
 
@@ -21,7 +22,7 @@ extends MobRenderer<Blaze, BlazeModel<Blaze>> {
     }
 
     @Override
-    protected int getBlockLightLevel(Blaze blaze, float f) {
+    protected int getBlockLightLevel(Blaze blaze, BlockPos blockPos) {
         return 15;
     }
 

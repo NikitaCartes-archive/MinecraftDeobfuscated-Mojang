@@ -110,6 +110,13 @@ implements ResourceManagerReloadListener {
         poseStack.popPose();
     }
 
+    public static VertexConsumer getArmorFoilBuffer(MultiBufferSource multiBufferSource, RenderType renderType, boolean bl, boolean bl2) {
+        if (bl2) {
+            return VertexMultiConsumer.create(multiBufferSource.getBuffer(bl ? RenderType.armorGlint() : RenderType.armorEntityGlint()), multiBufferSource.getBuffer(renderType));
+        }
+        return multiBufferSource.getBuffer(renderType);
+    }
+
     public static VertexConsumer getFoilBuffer(MultiBufferSource multiBufferSource, RenderType renderType, boolean bl, boolean bl2) {
         if (bl2) {
             return VertexMultiConsumer.create(multiBufferSource.getBuffer(bl ? RenderType.glint() : RenderType.entityGlint()), multiBufferSource.getBuffer(renderType));
@@ -189,10 +196,18 @@ implements ResourceManagerReloadListener {
     }
 
     public void renderAndDecorateItem(ItemStack itemStack, int i, int j) {
-        this.renderAndDecorateItem(Minecraft.getInstance().player, itemStack, i, j);
+        this.tryRenderGuiItem(Minecraft.getInstance().player, itemStack, i, j);
     }
 
-    public void renderAndDecorateItem(@Nullable LivingEntity livingEntity, ItemStack itemStack, int i, int j) {
+    public void renderAndDecorateFakeItem(ItemStack itemStack, int i, int j) {
+        this.tryRenderGuiItem(null, itemStack, i, j);
+    }
+
+    public void renderAndDecorateItem(LivingEntity livingEntity, ItemStack itemStack, int i, int j) {
+        this.tryRenderGuiItem(livingEntity, itemStack, i, j);
+    }
+
+    private void tryRenderGuiItem(@Nullable LivingEntity livingEntity, ItemStack itemStack, int i, int j) {
         if (itemStack.isEmpty()) {
             return;
         }

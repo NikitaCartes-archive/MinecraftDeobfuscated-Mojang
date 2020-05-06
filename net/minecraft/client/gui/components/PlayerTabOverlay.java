@@ -149,7 +149,7 @@ extends GuiComponent {
                 }
                 x += 9;
             }
-            this.minecraft.font.drawShadow(poseStack, this.getNameForDisplay(playerInfo2), (float)x, (float)y, -1862270977);
+            this.minecraft.font.drawShadow(poseStack, this.getNameForDisplay(playerInfo2), (float)x, (float)y, playerInfo2.getGameMode() == GameType.SPECTATOR ? -1862270977 : -1);
             if (objective != null && playerInfo2.getGameMode() != GameType.SPECTATOR && (ae = (ad = x + j + 1) + o) - ad > 5) {
                 this.renderTablistScore(objective, y, gameProfile.getName(), ad, ae, playerInfo2, poseStack);
             }

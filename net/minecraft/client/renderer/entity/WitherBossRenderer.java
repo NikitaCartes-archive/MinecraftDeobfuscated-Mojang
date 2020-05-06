@@ -10,6 +10,7 @@ import net.minecraft.client.model.WitherBossModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.WitherArmorLayer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 
@@ -25,7 +26,7 @@ extends MobRenderer<WitherBoss, WitherBossModel<WitherBoss>> {
     }
 
     @Override
-    protected int getBlockLightLevel(WitherBoss witherBoss, float f) {
+    protected int getBlockLightLevel(WitherBoss witherBoss, BlockPos blockPos) {
         return 15;
     }
 

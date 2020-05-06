@@ -89,10 +89,12 @@ extends LivingEntityRenderer<T, M> {
         float v = Mth.fastInvSqrt(r * r + t * t) * 0.025f / 2.0f;
         float w = t * v;
         float x = r * v;
-        int y = this.getBlockLightLevel(mob, f);
-        int z = this.entityRenderDispatcher.getRenderer(entity).getBlockLightLevel(entity, f);
-        int aa = ((Mob)mob).level.getBrightness(LightLayer.SKY, new BlockPos(((Entity)mob).getEyePosition(f)));
-        int ab = ((Mob)mob).level.getBrightness(LightLayer.SKY, new BlockPos(entity.getEyePosition(f)));
+        BlockPos blockPos = new BlockPos(((Entity)mob).getEyePosition(f));
+        BlockPos blockPos2 = new BlockPos(entity.getEyePosition(f));
+        int y = this.getBlockLightLevel(mob, blockPos);
+        int z = this.entityRenderDispatcher.getRenderer(entity).getBlockLightLevel(entity, blockPos2);
+        int aa = ((Mob)mob).level.getBrightness(LightLayer.SKY, blockPos);
+        int ab = ((Mob)mob).level.getBrightness(LightLayer.SKY, blockPos2);
         MobRenderer.renderSide(vertexConsumer, matrix4f, r, s, t, y, z, aa, ab, 0.025f, 0.025f, w, x);
         MobRenderer.renderSide(vertexConsumer, matrix4f, r, s, t, y, z, aa, ab, 0.025f, 0.0f, w, x);
         poseStack.popPose();

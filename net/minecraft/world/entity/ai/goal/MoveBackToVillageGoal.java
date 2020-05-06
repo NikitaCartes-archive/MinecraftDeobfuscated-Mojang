@@ -13,10 +13,10 @@ import net.minecraft.world.entity.ai.util.RandomPos;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public class MoveBackToVillage
+public class MoveBackToVillageGoal
 extends RandomStrollGoal {
-    public MoveBackToVillage(PathfinderMob pathfinderMob, double d) {
-        super(pathfinderMob, d, 10);
+    public MoveBackToVillageGoal(PathfinderMob pathfinderMob, double d, boolean bl) {
+        super(pathfinderMob, d, 10, bl);
     }
 
     @Override

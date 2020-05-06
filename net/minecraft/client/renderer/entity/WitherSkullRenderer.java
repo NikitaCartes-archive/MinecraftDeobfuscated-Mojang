@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.projectile.WitherSkull;
@@ -28,7 +29,7 @@ extends EntityRenderer<WitherSkull> {
     }
 
     @Override
-    protected int getBlockLightLevel(WitherSkull witherSkull, float f) {
+    protected int getBlockLightLevel(WitherSkull witherSkull, BlockPos blockPos) {
         return 15;
     }
 

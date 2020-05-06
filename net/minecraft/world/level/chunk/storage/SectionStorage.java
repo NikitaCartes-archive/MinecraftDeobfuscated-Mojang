@@ -30,7 +30,6 @@ import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.storage.IOWorker;
-import net.minecraft.world.level.chunk.storage.RegionFileStorage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -53,7 +52,7 @@ implements AutoCloseable {
         this.factory = function;
         this.fixerUpper = dataFixer;
         this.type = dataFixTypes;
-        this.worker = new IOWorker(new RegionFileStorage(file, bl), file.getName());
+        this.worker = new IOWorker(file, bl, file.getName());
     }
 
     protected void tick(BooleanSupplier booleanSupplier) {

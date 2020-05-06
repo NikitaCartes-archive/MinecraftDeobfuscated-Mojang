@@ -74,7 +74,7 @@ extends RenderLayer<T, M> {
     }
 
     private void renderModel(EquipmentSlot equipmentSlot, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, ArmorItem armorItem, boolean bl, A humanoidModel, boolean bl2, float f, float g, float h, @Nullable String string) {
-        VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, RenderType.armorCutoutNoCull(this.getArmorLocation(equipmentSlot, armorItem, bl2, string)), false, bl);
+        VertexConsumer vertexConsumer = ItemRenderer.getArmorFoilBuffer(multiBufferSource, RenderType.armorCutoutNoCull(this.getArmorLocation(equipmentSlot, armorItem, bl2, string)), false, bl);
         ((AgeableListModel)humanoidModel).renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, f, g, h, 1.0f);
     }
 

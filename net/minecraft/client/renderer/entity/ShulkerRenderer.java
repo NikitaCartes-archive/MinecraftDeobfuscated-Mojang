@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.ShulkerHeadLayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -81,11 +80,6 @@ extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
     protected void scale(Shulker shulker, PoseStack poseStack, float f) {
         float g = 0.999f;
         poseStack.scale(0.999f, 0.999f, 0.999f);
-    }
-
-    @Override
-    public /* synthetic */ Vec3 getRenderOffset(Entity entity, float f) {
-        return this.getRenderOffset((Shulker)entity, f);
     }
 }
 

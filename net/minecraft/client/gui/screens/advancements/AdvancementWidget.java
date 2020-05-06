@@ -126,7 +126,7 @@ extends GuiComponent {
             AdvancementWidgetType advancementWidgetType = f >= 1.0f ? AdvancementWidgetType.OBTAINED : AdvancementWidgetType.UNOBTAINED;
             this.minecraft.getTextureManager().bind(WIDGETS_LOCATION);
             this.blit(poseStack, i + this.x + 3, j + this.y, this.display.getFrame().getTexture(), 128 + advancementWidgetType.getIndex() * 26, 26, 26);
-            this.minecraft.getItemRenderer().renderAndDecorateItem(null, this.display.getIcon(), i + this.x + 8, j + this.y + 5);
+            this.minecraft.getItemRenderer().renderAndDecorateFakeItem(this.display.getIcon(), i + this.x + 8, j + this.y + 5);
         }
         for (AdvancementWidget advancementWidget : this.children) {
             advancementWidget.draw(poseStack, i, j);
@@ -208,7 +208,7 @@ extends GuiComponent {
                 this.minecraft.font.draw(poseStack, this.description.get(s), (float)(q + 5), (float)(j + this.y + 9 + 17 + s * this.minecraft.font.lineHeight), -5592406);
             }
         }
-        this.minecraft.getItemRenderer().renderAndDecorateItem(null, this.display.getIcon(), i + this.x + 8, j + this.y + 5);
+        this.minecraft.getItemRenderer().renderAndDecorateFakeItem(this.display.getIcon(), i + this.x + 8, j + this.y + 5);
     }
 
     protected void render9Sprite(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, int p, int q) {

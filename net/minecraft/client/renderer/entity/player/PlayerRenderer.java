@@ -219,10 +219,5 @@ extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPla
             super.setupRotations(abstractClientPlayer, poseStack, f, g, h);
         }
     }
-
-    @Override
-    public /* synthetic */ Vec3 getRenderOffset(Entity entity, float f) {
-        return this.getRenderOffset((AbstractClientPlayer)entity, f);
-    }
 }
 

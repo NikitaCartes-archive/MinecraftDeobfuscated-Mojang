@@ -161,7 +161,7 @@ public final class NaturalSpawner {
         if (entityType.getCategory() == MobCategory.MISC) {
             return false;
         }
-        if (!entityType.canSpawnFarFromPlayer() && d > (double)(entityType.getInstantDespawnDistance() * entityType.getInstantDespawnDistance())) {
+        if (!entityType.canSpawnFarFromPlayer() && d > (double)(entityType.getCategory().getDespawnDistance() * entityType.getCategory().getDespawnDistance())) {
             return false;
         }
         if (!entityType.canSummon() || !NaturalSpawner.canSpawnMobAt(structureFeatureManager, chunkGenerator, mobCategory, spawnerData, mutableBlockPos)) {
@@ -194,7 +194,7 @@ public final class NaturalSpawner {
     }
 
     private static boolean isValidPositionForMob(ServerLevel serverLevel, Mob mob, double d) {
-        if (d > (double)(mob.getType().getInstantDespawnDistance() * mob.getType().getInstantDespawnDistance()) && mob.removeWhenFarAway(d)) {
+        if (d > (double)(mob.getType().getCategory().getDespawnDistance() * mob.getType().getCategory().getDespawnDistance()) && mob.removeWhenFarAway(d)) {
             return false;
         }
         return mob.checkSpawnRules(serverLevel, MobSpawnType.NATURAL) && mob.checkSpawnObstruction(serverLevel);
@@ -232,7 +232,7 @@ public final class NaturalSpawner {
         if (!fluidState.isEmpty()) {
             return false;
         }
-        return !blockState.is(BlockTags.RAILS);
+        return !blockState.is(BlockTags.PREVENT_MOB_SPAWNING_INSIDE);
     }
 
     public static boolean isSpawnPositionOk(SpawnPlacements.Type type, LevelReader levelReader, BlockPos blockPos, @Nullable EntityType<?> entityType) {
@@ -337,7 +337,7 @@ public final class NaturalSpawner {
 
     public static class SpawnState {
         private final int spawnableChunkCount;
-        private final Object2IntMap<MobCategory> mobCategoryCounts;
+        private final Object2IntOpenHashMap<MobCategory> mobCategoryCounts;
         private final PotentialCalculator spawnPotential;
         private final Object2IntMap<MobCategory> unmodifiableMobCategoryCounts;
         @Nullable
@@ -346,11 +346,11 @@ public final class NaturalSpawner {
         private EntityType<?> lastCheckedType;
         private double lastCharge;
 
-        private SpawnState(int i, Object2IntMap<MobCategory> object2IntMap, PotentialCalculator potentialCalculator) {
+        private SpawnState(int i, Object2IntOpenHashMap<MobCategory> object2IntOpenHashMap, PotentialCalculator potentialCalculator) {
             this.spawnableChunkCount = i;
-            this.mobCategoryCounts = object2IntMap;
+            this.mobCategoryCounts = object2IntOpenHashMap;
             this.spawnPotential = potentialCalculator;
-            this.unmodifiableMobCategoryCounts = Object2IntMaps.unmodifiable(object2IntMap);
+            this.unmodifiableMobCategoryCounts = Object2IntMaps.unmodifiable(object2IntOpenHashMap);
         }
 
         private boolean canSpawn(EntityType<?> entityType, BlockPos blockPos, ChunkAccess chunkAccess) {
@@ -369,20 +369,13 @@ public final class NaturalSpawner {
         }
 
         private void afterSpawn(Mob mob, ChunkAccess chunkAccess) {
-            double d;
+            Biome biome;
+            Biome.MobSpawnCost mobSpawnCost;
             EntityType<?> entityType = mob.getType();
             BlockPos blockPos = mob.blockPosition();
-            if (blockPos.equals(this.lastCheckedPos) && entityType == this.lastCheckedType) {
-                d = this.lastCharge;
-            } else {
-                Biome biome = NaturalSpawner.getRoughBiome(blockPos, chunkAccess);
-                Biome.MobSpawnCost mobSpawnCost = biome.getMobSpawnCost(entityType);
-                if (mobSpawnCost == null) {
-                    return;
-                }
-                d = mobSpawnCost.getCharge();
-            }
+            double d = blockPos.equals(this.lastCheckedPos) && entityType == this.lastCheckedType ? this.lastCharge : ((mobSpawnCost = (biome = NaturalSpawner.getRoughBiome(blockPos, chunkAccess)).getMobSpawnCost(entityType)) != null ? mobSpawnCost.getCharge() : 0.0);
             this.spawnPotential.addCharge(blockPos, d);
+            this.mobCategoryCounts.addTo(entityType.getCategory(), 1);
         }
 
         @Environment(value=EnvType.CLIENT)

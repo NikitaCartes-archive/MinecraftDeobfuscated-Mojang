@@ -32,6 +32,7 @@ extends Behavior<LivingEntity> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity) {
+        long l;
         if (livingEntity.isPassenger()) {
             return false;
         }
@@ -41,7 +42,7 @@ extends Behavior<LivingEntity> {
             return false;
         }
         Optional<SerializableLong> optional = brain.getMemory(MemoryModuleType.LAST_WOKEN);
-        if (optional.isPresent() && serverLevel.getGameTime() - optional.get().value() < 100L) {
+        if (optional.isPresent() && (l = serverLevel.getGameTime() - optional.get().value()) > 0L && l < 100L) {
             return false;
         }
         BlockState blockState = serverLevel.getBlockState(globalPos.pos());

@@ -785,7 +785,7 @@ WindowEventHandler {
             this.mobEffectTextures.close();
             this.paintingTextures.close();
             this.textureManager.close();
-            Util.shutdownBackgroundExecutor();
+            Util.shutdownExecutors();
         } catch (Throwable throwable) {
             LOGGER.error("Shutdown failure!", throwable);
             throw throwable;

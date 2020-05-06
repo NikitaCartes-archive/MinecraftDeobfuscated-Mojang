@@ -160,7 +160,7 @@ public class EntityType<T extends Entity> {
     public static final EntityType<Cat> CAT = EntityType.register("cat", Builder.of(Cat::new, MobCategory.CREATURE).sized(0.6f, 0.7f).clientTrackingRange(8));
     public static final EntityType<CaveSpider> CAVE_SPIDER = EntityType.register("cave_spider", Builder.of(CaveSpider::new, MobCategory.MONSTER).sized(0.7f, 0.5f).clientTrackingRange(8));
     public static final EntityType<Chicken> CHICKEN = EntityType.register("chicken", Builder.of(Chicken::new, MobCategory.CREATURE).sized(0.4f, 0.7f).clientTrackingRange(10));
-    public static final EntityType<Cod> COD = EntityType.register("cod", Builder.of(Cod::new, MobCategory.WATER_CREATURE).sized(0.5f, 0.3f).instantDespawnDistance(64).clientTrackingRange(4));
+    public static final EntityType<Cod> COD = EntityType.register("cod", Builder.of(Cod::new, MobCategory.WATER_AMBIENT).sized(0.5f, 0.3f).clientTrackingRange(4));
     public static final EntityType<Cow> COW = EntityType.register("cow", Builder.of(Cow::new, MobCategory.CREATURE).sized(0.9f, 1.4f).clientTrackingRange(10));
     public static final EntityType<Creeper> CREEPER = EntityType.register("creeper", Builder.of(Creeper::new, MobCategory.MONSTER).sized(0.6f, 1.7f).clientTrackingRange(8));
     public static final EntityType<Dolphin> DOLPHIN = EntityType.register("dolphin", Builder.of(Dolphin::new, MobCategory.WATER_CREATURE).sized(0.9f, 0.6f));
@@ -213,10 +213,10 @@ public class EntityType<T extends Entity> {
     public static final EntityType<Pillager> PILLAGER = EntityType.register("pillager", Builder.of(Pillager::new, MobCategory.MONSTER).canSpawnFarFromPlayer().sized(0.6f, 1.95f).clientTrackingRange(8));
     public static final EntityType<PolarBear> POLAR_BEAR = EntityType.register("polar_bear", Builder.of(PolarBear::new, MobCategory.CREATURE).sized(1.4f, 1.4f).clientTrackingRange(10));
     public static final EntityType<PrimedTnt> TNT = EntityType.register("tnt", Builder.of(PrimedTnt::new, MobCategory.MISC).fireImmune().sized(0.98f, 0.98f).clientTrackingRange(10).updateInterval(10));
-    public static final EntityType<Pufferfish> PUFFERFISH = EntityType.register("pufferfish", Builder.of(Pufferfish::new, MobCategory.WATER_CREATURE).sized(0.7f, 0.7f).instantDespawnDistance(64).clientTrackingRange(4));
+    public static final EntityType<Pufferfish> PUFFERFISH = EntityType.register("pufferfish", Builder.of(Pufferfish::new, MobCategory.WATER_AMBIENT).sized(0.7f, 0.7f).clientTrackingRange(4));
     public static final EntityType<Rabbit> RABBIT = EntityType.register("rabbit", Builder.of(Rabbit::new, MobCategory.CREATURE).sized(0.4f, 0.5f).clientTrackingRange(8));
     public static final EntityType<Ravager> RAVAGER = EntityType.register("ravager", Builder.of(Ravager::new, MobCategory.MONSTER).sized(1.95f, 2.2f).clientTrackingRange(10));
-    public static final EntityType<Salmon> SALMON = EntityType.register("salmon", Builder.of(Salmon::new, MobCategory.WATER_CREATURE).sized(0.7f, 0.4f).instantDespawnDistance(64).clientTrackingRange(4));
+    public static final EntityType<Salmon> SALMON = EntityType.register("salmon", Builder.of(Salmon::new, MobCategory.WATER_AMBIENT).sized(0.7f, 0.4f).clientTrackingRange(4));
     public static final EntityType<Sheep> SHEEP = EntityType.register("sheep", Builder.of(Sheep::new, MobCategory.CREATURE).sized(0.9f, 1.3f).clientTrackingRange(10));
     public static final EntityType<Shulker> SHULKER = EntityType.register("shulker", Builder.of(Shulker::new, MobCategory.MONSTER).fireImmune().canSpawnFarFromPlayer().sized(1.0f, 1.0f).clientTrackingRange(10));
     public static final EntityType<ShulkerBullet> SHULKER_BULLET = EntityType.register("shulker_bullet", Builder.of(ShulkerBullet::new, MobCategory.MISC).sized(0.3125f, 0.3125f).clientTrackingRange(8));
@@ -238,7 +238,7 @@ public class EntityType<T extends Entity> {
     public static final EntityType<ThrownPotion> POTION = EntityType.register("potion", Builder.of(ThrownPotion::new, MobCategory.MISC).sized(0.25f, 0.25f).clientTrackingRange(4).updateInterval(10));
     public static final EntityType<ThrownTrident> TRIDENT = EntityType.register("trident", Builder.of(ThrownTrident::new, MobCategory.MISC).sized(0.5f, 0.5f).clientTrackingRange(4).updateInterval(20));
     public static final EntityType<TraderLlama> TRADER_LLAMA = EntityType.register("trader_llama", Builder.of(TraderLlama::new, MobCategory.CREATURE).sized(0.9f, 1.87f).clientTrackingRange(10));
-    public static final EntityType<TropicalFish> TROPICAL_FISH = EntityType.register("tropical_fish", Builder.of(TropicalFish::new, MobCategory.WATER_CREATURE).sized(0.5f, 0.4f).instantDespawnDistance(64).clientTrackingRange(4));
+    public static final EntityType<TropicalFish> TROPICAL_FISH = EntityType.register("tropical_fish", Builder.of(TropicalFish::new, MobCategory.WATER_AMBIENT).sized(0.5f, 0.4f).clientTrackingRange(4));
     public static final EntityType<Turtle> TURTLE = EntityType.register("turtle", Builder.of(Turtle::new, MobCategory.CREATURE).sized(1.2f, 0.4f).clientTrackingRange(10));
     public static final EntityType<Vex> VEX = EntityType.register("vex", Builder.of(Vex::new, MobCategory.MONSTER).fireImmune().sized(0.4f, 0.8f).clientTrackingRange(8));
     public static final EntityType<Villager> VILLAGER = EntityType.register("villager", Builder.of(Villager::new, MobCategory.MISC).sized(0.6f, 1.95f).clientTrackingRange(10));
@@ -263,8 +263,6 @@ public class EntityType<T extends Entity> {
     private final boolean summon;
     private final boolean fireImmune;
     private final boolean canSpawnFarFromPlayer;
-    private final int instantDespawnDistance;
-    private final int noDespawnDistance;
     private final int clientTrackingRange;
     private final int updateInterval;
     @Nullable
@@ -287,18 +285,16 @@ public class EntityType<T extends Entity> {
         return Registry.ENTITY_TYPE.getOptional(ResourceLocation.tryParse(string));
     }
 
-    public EntityType(EntityFactory<T> entityFactory, MobCategory mobCategory, boolean bl, boolean bl2, boolean bl3, boolean bl4, int i, int j, EntityDimensions entityDimensions, int k, int l) {
+    public EntityType(EntityFactory<T> entityFactory, MobCategory mobCategory, boolean bl, boolean bl2, boolean bl3, boolean bl4, EntityDimensions entityDimensions, int i, int j) {
         this.factory = entityFactory;
         this.category = mobCategory;
         this.canSpawnFarFromPlayer = bl4;
-        this.instantDespawnDistance = i;
-        this.noDespawnDistance = j;
         this.serialize = bl;
         this.summon = bl2;
         this.fireImmune = bl3;
         this.dimensions = entityDimensions;
-        this.clientTrackingRange = k;
-        this.updateInterval = l;
+        this.clientTrackingRange = i;
+        this.updateInterval = j;
     }
 
     @Nullable
@@ -382,14 +378,6 @@ public class EntityType<T extends Entity> {
 
     public boolean canSpawnFarFromPlayer() {
         return this.canSpawnFarFromPlayer;
-    }
-
-    public int getInstantDespawnDistance() {
-        return this.instantDespawnDistance;
-    }
-
-    public int getNoDespawnDistance() {
-        return this.noDespawnDistance;
     }
 
     public MobCategory getCategory() {
@@ -511,8 +499,6 @@ public class EntityType<T extends Entity> {
         private boolean summon = true;
         private boolean fireImmune;
         private boolean canSpawnFarFromPlayer;
-        private int instantDespawnDistance = 128;
-        private int noDespawnDistance = 32;
         private int clientTrackingRange = 5;
         private int updateInterval = 3;
         private EntityDimensions dimensions = EntityDimensions.scalable(0.6f, 1.8f);
@@ -556,11 +542,6 @@ public class EntityType<T extends Entity> {
             return this;
         }
 
-        public Builder<T> instantDespawnDistance(int i) {
-            this.instantDespawnDistance = i;
-            return this;
-        }
-
         public Builder<T> clientTrackingRange(int i) {
             this.clientTrackingRange = i;
             return this;
@@ -582,7 +563,7 @@ public class EntityType<T extends Entity> {
                     LOGGER.warn("No data fixer registered for entity {}", (Object)string);
                 }
             }
-            return new EntityType<T>(this.factory, this.category, this.serialize, this.summon, this.fireImmune, this.canSpawnFarFromPlayer, this.instantDespawnDistance, this.noDespawnDistance, this.dimensions, this.clientTrackingRange, this.updateInterval);
+            return new EntityType<T>(this.factory, this.category, this.serialize, this.summon, this.fireImmune, this.canSpawnFarFromPlayer, this.dimensions, this.clientTrackingRange, this.updateInterval);
         }
     }
 }

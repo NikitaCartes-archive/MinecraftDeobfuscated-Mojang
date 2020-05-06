@@ -63,7 +63,7 @@ public class BlockColors {
             }
             return BiomeColors.getAverageWaterColor(blockAndTintGetter, blockPos);
         }, Blocks.WATER, Blocks.BUBBLE_COLUMN, Blocks.CAULDRON);
-        blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> RedStoneWireBlock.getColorForData(blockState.getValue(RedStoneWireBlock.POWER)), Blocks.REDSTONE_WIRE);
+        blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> RedStoneWireBlock.getColorForPower(blockState.getValue(RedStoneWireBlock.POWER)), Blocks.REDSTONE_WIRE);
         blockColors.addColoringState(RedStoneWireBlock.POWER, Blocks.REDSTONE_WIRE);
         blockColors.register((blockState, blockAndTintGetter, blockPos, i) -> {
             if (blockAndTintGetter == null || blockPos == null) {

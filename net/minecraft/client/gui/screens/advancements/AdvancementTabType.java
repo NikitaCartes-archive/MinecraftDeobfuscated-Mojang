@@ -71,7 +71,7 @@ enum AdvancementTabType {
                 m += 5;
             }
         }
-        itemRenderer.renderAndDecorateItem(null, itemStack, l, m);
+        itemRenderer.renderAndDecorateFakeItem(itemStack, l, m);
     }
 
     public int getX(int i) {

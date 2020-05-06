@@ -288,7 +288,7 @@ HoglinBase {
     }
 
     public boolean isConverting() {
-        return this.level.getDimension().getType() == DimensionType.OVERWORLD && !this.isImmuneToZombification() && !this.isNoAi();
+        return this.level.getDimension().getType() != DimensionType.NETHER && !this.isImmuneToZombification() && !this.isNoAi();
     }
 
     private void setCannotBeHunted(boolean bl) {

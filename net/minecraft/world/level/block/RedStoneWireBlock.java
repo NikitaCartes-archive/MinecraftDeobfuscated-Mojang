@@ -6,6 +6,7 @@ package net.minecraft.world.level.block;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.mojang.math.Vector3f;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
@@ -50,6 +51,7 @@ extends Block {
     private static final Map<Direction, VoxelShape> SHAPES_FLOOR = Maps.newEnumMap(ImmutableMap.of(Direction.NORTH, Block.box(3.0, 0.0, 0.0, 13.0, 1.0, 13.0), Direction.SOUTH, Block.box(3.0, 0.0, 3.0, 13.0, 1.0, 16.0), Direction.EAST, Block.box(3.0, 0.0, 3.0, 16.0, 1.0, 13.0), Direction.WEST, Block.box(0.0, 0.0, 3.0, 13.0, 1.0, 13.0)));
     private static final Map<Direction, VoxelShape> SHAPES_UP = Maps.newEnumMap(ImmutableMap.of(Direction.NORTH, Shapes.or(SHAPES_FLOOR.get(Direction.NORTH), Block.box(3.0, 0.0, 0.0, 13.0, 16.0, 1.0)), Direction.SOUTH, Shapes.or(SHAPES_FLOOR.get(Direction.SOUTH), Block.box(3.0, 0.0, 15.0, 13.0, 16.0, 16.0)), Direction.EAST, Shapes.or(SHAPES_FLOOR.get(Direction.EAST), Block.box(15.0, 0.0, 3.0, 16.0, 16.0, 13.0)), Direction.WEST, Shapes.or(SHAPES_FLOOR.get(Direction.WEST), Block.box(0.0, 0.0, 3.0, 1.0, 16.0, 13.0))));
     private final Map<BlockState, VoxelShape> SHAPES_CACHE = Maps.newHashMap();
+    private static final Vector3f[] COLORS = new Vector3f[16];
     private boolean shouldSignal = true;
 
     public RedStoneWireBlock(BlockBehaviour.Properties properties) {
@@ -165,17 +167,14 @@ extends Block {
     }
 
     private RedstoneSide getConnectingSide(BlockGetter blockGetter, BlockPos blockPos, Direction direction, boolean bl) {
+        boolean bl2;
         BlockPos blockPos2 = blockPos.relative(direction);
         BlockState blockState = blockGetter.getBlockState(blockPos2);
-        if (bl) {
-            boolean bl2;
-            boolean bl3 = bl2 = blockState.isFaceSturdy(blockGetter, blockPos2, Direction.UP) || blockState.is(Blocks.HOPPER);
-            if (bl2 && RedStoneWireBlock.shouldConnectTo(blockGetter.getBlockState(blockPos2.above()))) {
-                if (blockState.isCollisionShapeFullBlock(blockGetter, blockPos2)) {
-                    return RedstoneSide.UP;
-                }
-                return RedstoneSide.SIDE;
+        if (bl && (bl2 = this.canSurviveOn(blockGetter, blockPos2, blockState)) && RedStoneWireBlock.shouldConnectTo(blockGetter.getBlockState(blockPos2.above()))) {
+            if (blockState.isFaceSturdy(blockGetter, blockPos2, direction.getOpposite())) {
+                return RedstoneSide.UP;
             }
+            return RedstoneSide.SIDE;
         }
         if (RedStoneWireBlock.shouldConnectTo(blockState, direction) || !blockState.isRedstoneConductor(blockGetter, blockPos2) && RedStoneWireBlock.shouldConnectTo(blockGetter.getBlockState(blockPos2.below()))) {
             return RedstoneSide.SIDE;
@@ -187,7 +186,11 @@ extends Block {
     public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
         BlockPos blockPos2 = blockPos.below();
         BlockState blockState2 = levelReader.getBlockState(blockPos2);
-        return blockState2.isFaceSturdy(levelReader, blockPos2, Direction.UP) || blockState2.is(Blocks.HOPPER);
+        return this.canSurviveOn(levelReader, blockPos2, blockState2);
+    }
+
+    private boolean canSurviveOn(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
+        return blockState.isFaceSturdy(blockGetter, blockPos, Direction.UP) || blockState.is(Blocks.HOPPER);
     }
 
     private void updatePowerStrength(Level level, BlockPos blockPos, BlockState blockState) {
@@ -345,24 +348,23 @@ extends Block {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static int getColorForData(int i) {
-        float f = (float)i / 15.0f;
-        float g = f * 0.6f + 0.4f;
-        if (i == 0) {
-            g = 0.3f;
+    public static int getColorForPower(int i) {
+        Vector3f vector3f = COLORS[i];
+        return Mth.color(vector3f.x(), vector3f.y(), vector3f.z());
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    private void spawnParticlesAlongLine(Level level, Random random, BlockPos blockPos, Vector3f vector3f, Direction direction, Direction direction2, float f, float g) {
+        float h = g - f;
+        if (random.nextFloat() >= 0.2f * h) {
+            return;
         }
-        float h = f * f * 0.7f - 0.5f;
-        float j = f * f * 0.6f - 0.7f;
-        if (h < 0.0f) {
-            h = 0.0f;
-        }
-        if (j < 0.0f) {
-            j = 0.0f;
-        }
-        int k = Mth.clamp((int)(g * 255.0f), 0, 255);
-        int l = Mth.clamp((int)(h * 255.0f), 0, 255);
-        int m = Mth.clamp((int)(j * 255.0f), 0, 255);
-        return 0xFF000000 | k << 16 | l << 8 | m;
+        float i = 0.4375f;
+        float j = f + h * random.nextFloat();
+        float k = 0.5f + 0.4375f * (float)direction.getStepX() + j * (float)direction2.getStepX();
+        float l = 0.5f + 0.4375f * (float)direction.getStepY() + j * (float)direction2.getStepY();
+        float m = 0.5f + 0.4375f * (float)direction.getStepZ() + j * (float)direction2.getStepZ();
+        level.addParticle(new DustParticleOptions(vector3f.x(), vector3f.y(), vector3f.z(), 1.0f), (float)blockPos.getX() + k, (float)blockPos.getY() + l, (float)blockPos.getZ() + m, 0.0, 0.0, 0.0);
     }
 
     @Override
@@ -372,14 +374,19 @@ extends Block {
         if (i == 0) {
             return;
         }
-        double d = (double)blockPos.getX() + 0.5 + ((double)random.nextFloat() - 0.5) * 0.2;
-        double e = (float)blockPos.getY() + 0.0625f;
-        double f = (double)blockPos.getZ() + 0.5 + ((double)random.nextFloat() - 0.5) * 0.2;
-        float g = (float)i / 15.0f;
-        float h = g * 0.6f + 0.4f;
-        float j = Math.max(0.0f, g * g * 0.7f - 0.5f);
-        float k = Math.max(0.0f, g * g * 0.6f - 0.7f);
-        level.addParticle(new DustParticleOptions(h, j, k, 1.0f), d, e, f, 0.0, 0.0, 0.0);
+        block4: for (Direction direction : Direction.Plane.HORIZONTAL) {
+            RedstoneSide redstoneSide = (RedstoneSide)blockState.getValue(PROPERTY_BY_DIRECTION.get(direction));
+            switch (redstoneSide) {
+                case UP: {
+                    this.spawnParticlesAlongLine(level, random, blockPos, COLORS[i], direction, Direction.UP, -0.5f, 0.5f);
+                }
+                case SIDE: {
+                    this.spawnParticlesAlongLine(level, random, blockPos, COLORS[i], Direction.DOWN, direction, 0.0f, 0.5f);
+                    continue block4;
+                }
+            }
+            this.spawnParticlesAlongLine(level, random, blockPos, COLORS[i], Direction.DOWN, direction, 0.0f, 0.3f);
+        }
     }
 
     @Override
@@ -414,6 +421,16 @@ extends Block {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(NORTH, EAST, SOUTH, WEST, POWER);
+    }
+
+    static {
+        for (int i = 0; i <= 15; ++i) {
+            float f;
+            float g = f * 0.6f + ((f = (float)i / 15.0f) > 0.0f ? 0.4f : 0.3f);
+            float h = Mth.clamp(f * f * 0.7f - 0.5f, 0.0f, 1.0f);
+            float j = Mth.clamp(f * f * 0.6f - 0.7f, 0.0f, 1.0f);
+            RedStoneWireBlock.COLORS[i] = new Vector3f(g, h, j);
+        }
     }
 }
 

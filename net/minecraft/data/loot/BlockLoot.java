@@ -825,7 +825,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.LAPIS_ORE, (Block block) -> BlockLoot.createSilkTouchDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, ((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.LAPIS_LAZULI).apply(SetItemCountFunction.setCount(RandomValueBounds.between(4.0f, 9.0f)))).apply(ApplyBonusCount.addOreBonusCount(Enchantments.BLOCK_FORTUNE)))));
         this.add(Blocks.COBWEB, (Block block) -> BlockLoot.createSilkTouchOrShearsDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionCondition(block, LootItem.lootTableItem(Items.STRING))));
         this.add(Blocks.DEAD_BUSH, (Block block) -> BlockLoot.createShearsDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionDecay(block, LootItem.lootTableItem(Items.STICK).apply(SetItemCountFunction.setCount(RandomValueBounds.between(0.0f, 2.0f))))));
-        this.add(Blocks.NETHER_SPROUTS, (Block block) -> BlockLoot.createSilkTouchOrShearsDispatchTable(block, (LootPoolEntryContainer.Builder)BlockLoot.applyExplosionCondition(block, LootItem.lootTableItem(Blocks.NETHER_SPROUTS))));
+        this.add(Blocks.NETHER_SPROUTS, BlockLoot::createShearsOnlyDrop);
         this.add(Blocks.SEAGRASS, BlockLoot::createShearsOnlyDrop);
         this.add(Blocks.VINE, BlockLoot::createShearsOnlyDrop);
         this.add(Blocks.TALL_SEAGRASS, BlockLoot.createShearsOnlyDrop(Blocks.SEAGRASS));

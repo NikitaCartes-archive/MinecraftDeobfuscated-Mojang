@@ -31,6 +31,7 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.TimeUnit;
@@ -57,6 +58,7 @@ import org.jetbrains.annotations.Nullable;
 public class Util {
     private static final AtomicInteger WORKER_COUNT = new AtomicInteger(1);
     private static final ExecutorService BACKGROUND_EXECUTOR = Util.makeBackgroundExecutor();
+    private static final ExecutorService IO_POOL = Util.makeIoExecutor();
     public static LongSupplier timeSource = System::nanoTime;
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -104,17 +106,7 @@ public class Util {
             };
             forkJoinWorkerThread.setName("Worker-" + WORKER_COUNT.getAndIncrement());
             return forkJoinWorkerThread;
-        }, (thread, throwable) -> {
-            Util.pauseInIde(throwable);
-            if (throwable instanceof CompletionException) {
-                throwable = throwable.getCause();
-            }
-            if (throwable instanceof ReportedException) {
-                Bootstrap.realStdoutPrintln(((ReportedException)throwable).getReport().getFriendlyReport());
-                System.exit(-1);
-            }
-            LOGGER.error(String.format("Caught exception in thread %s", thread), throwable);
-        }, true);
+        }, Util::onThreadException, true);
         return executorService;
     }
 
@@ -122,17 +114,35 @@ public class Util {
         return BACKGROUND_EXECUTOR;
     }
 
-    public static void shutdownBackgroundExecutor() {
+    public static Executor ioPool() {
+        return IO_POOL;
+    }
+
+    public static void shutdownExecutors() {
+        Util.shutdownExecutor(BACKGROUND_EXECUTOR);
+        Util.shutdownExecutor(IO_POOL);
+    }
+
+    private static void shutdownExecutor(ExecutorService executorService) {
         boolean bl;
-        BACKGROUND_EXECUTOR.shutdown();
+        executorService.shutdown();
         try {
-            bl = BACKGROUND_EXECUTOR.awaitTermination(3L, TimeUnit.SECONDS);
+            bl = executorService.awaitTermination(3L, TimeUnit.SECONDS);
         } catch (InterruptedException interruptedException) {
             bl = false;
         }
         if (!bl) {
-            BACKGROUND_EXECUTOR.shutdownNow();
+            executorService.shutdownNow();
         }
+    }
+
+    private static ExecutorService makeIoExecutor() {
+        return Executors.newCachedThreadPool(runnable -> {
+            Thread thread = new Thread(runnable);
+            thread.setName("IO-Worker-" + WORKER_COUNT.getAndIncrement());
+            thread.setUncaughtExceptionHandler(Util::onThreadException);
+            return thread;
+        });
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -145,6 +155,18 @@ public class Util {
     @Environment(value=EnvType.CLIENT)
     public static void throwAsRuntime(Throwable throwable) {
         throw throwable instanceof RuntimeException ? (RuntimeException)throwable : new RuntimeException(throwable);
+    }
+
+    private static void onThreadException(Thread thread, Throwable throwable) {
+        Util.pauseInIde(throwable);
+        if (throwable instanceof CompletionException) {
+            throwable = throwable.getCause();
+        }
+        if (throwable instanceof ReportedException) {
+            Bootstrap.realStdoutPrintln(((ReportedException)throwable).getReport().getFriendlyReport());
+            System.exit(-1);
+        }
+        LOGGER.error(String.format("Caught exception in thread %s", thread), throwable);
     }
 
     public static OS getPlatform() {

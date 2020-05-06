@@ -13,7 +13,6 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.storage.IOWorker;
-import net.minecraft.world.level.chunk.storage.RegionFileStorage;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.structure.LegacyStructureDataHandler;
 import net.minecraft.world.level.storage.DimensionDataStorage;
@@ -28,7 +27,7 @@ implements AutoCloseable {
 
     public ChunkStorage(File file, DataFixer dataFixer, boolean bl) {
         this.fixerUpper = dataFixer;
-        this.worker = new IOWorker(new RegionFileStorage(file, bl), "chunk");
+        this.worker = new IOWorker(file, bl, "chunk");
     }
 
     public CompoundTag upgradeChunkTag(DimensionType dimensionType, Supplier<DimensionDataStorage> supplier, CompoundTag compoundTag) {

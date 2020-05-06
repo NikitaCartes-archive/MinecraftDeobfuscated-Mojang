@@ -584,6 +584,8 @@ public class BiomeDefaultFeatures {
         biome.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, NETHER_QUARTZ_ORE, 14)).decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(16, 10, 20, 128))));
         biome.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.NO_SURFACE_ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Blocks.ANCIENT_DEBRIS.defaultBlockState(), 3)).decorated(FeatureDecorator.COUNT_DEPTH_AVERAGE.configured(new DepthAverageConfigation(1, 16, 8))));
         biome.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.NO_SURFACE_ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Blocks.ANCIENT_DEBRIS.defaultBlockState(), 2)).decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(1, 8, 16, 128))));
+        biome.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Blocks.GRAVEL.defaultBlockState(), 33)).decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(2, 5, 0, 37))));
+        biome.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Blocks.BLACKSTONE.defaultBlockState(), 33)).decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(2, 5, 10, 37))));
     }
 
     public static void addCrimsonForestVegetation(Biome biome) {

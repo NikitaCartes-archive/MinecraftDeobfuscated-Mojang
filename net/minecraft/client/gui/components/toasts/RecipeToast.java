@@ -44,9 +44,9 @@ implements Toast {
         ItemStack itemStack = recipe.getToastSymbol();
         RenderSystem.pushMatrix();
         RenderSystem.scalef(0.6f, 0.6f, 1.0f);
-        toastComponent.getMinecraft().getItemRenderer().renderAndDecorateItem(null, itemStack, 3, 3);
+        toastComponent.getMinecraft().getItemRenderer().renderAndDecorateFakeItem(itemStack, 3, 3);
         RenderSystem.popMatrix();
-        toastComponent.getMinecraft().getItemRenderer().renderAndDecorateItem(null, recipe.getResultItem(), 8, 8);
+        toastComponent.getMinecraft().getItemRenderer().renderAndDecorateFakeItem(recipe.getResultItem(), 8, 8);
         return l - this.lastChanged >= 5000L ? Toast.Visibility.HIDE : Toast.Visibility.SHOW;
     }
 

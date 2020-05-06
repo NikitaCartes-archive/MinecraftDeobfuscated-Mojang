@@ -80,31 +80,7 @@ extends Block {
             return;
         }
         RailShape railShape = blockState.getValue(this.getShapeProperty());
-        boolean bl2 = false;
-        BlockPos blockPos3 = blockPos.below();
-        if (!BaseRailBlock.canSupportRigidBlock(level, blockPos3)) {
-            bl2 = true;
-        }
-        BlockPos blockPos4 = blockPos.east();
-        if (railShape == RailShape.ASCENDING_EAST && !BaseRailBlock.canSupportRigidBlock(level, blockPos4)) {
-            bl2 = true;
-        } else {
-            BlockPos blockPos5 = blockPos.west();
-            if (railShape == RailShape.ASCENDING_WEST && !BaseRailBlock.canSupportRigidBlock(level, blockPos5)) {
-                bl2 = true;
-            } else {
-                BlockPos blockPos6 = blockPos.north();
-                if (railShape == RailShape.ASCENDING_NORTH && !BaseRailBlock.canSupportRigidBlock(level, blockPos6)) {
-                    bl2 = true;
-                } else {
-                    BlockPos blockPos7 = blockPos.south();
-                    if (railShape == RailShape.ASCENDING_SOUTH && !BaseRailBlock.canSupportRigidBlock(level, blockPos7)) {
-                        bl2 = true;
-                    }
-                }
-            }
-        }
-        if (bl2 && !level.isEmptyBlock(blockPos)) {
+        if (BaseRailBlock.shouldBeRemoved(blockPos, level, railShape) && !level.isEmptyBlock(blockPos)) {
             if (!bl) {
                 BaseRailBlock.dropResources(blockState, level, blockPos);
             }
@@ -112,6 +88,27 @@ extends Block {
         } else {
             this.updateState(blockState, level, blockPos, block);
         }
+    }
+
+    private static boolean shouldBeRemoved(BlockPos blockPos, Level level, RailShape railShape) {
+        if (!BaseRailBlock.canSupportRigidBlock(level, blockPos.below())) {
+            return true;
+        }
+        switch (railShape) {
+            case ASCENDING_EAST: {
+                return !BaseRailBlock.canSupportRigidBlock(level, blockPos.east());
+            }
+            case ASCENDING_WEST: {
+                return !BaseRailBlock.canSupportRigidBlock(level, blockPos.west());
+            }
+            case ASCENDING_NORTH: {
+                return !BaseRailBlock.canSupportRigidBlock(level, blockPos.north());
+            }
+            case ASCENDING_SOUTH: {
+                return !BaseRailBlock.canSupportRigidBlock(level, blockPos.south());
+            }
+        }
+        return false;
     }
 
     protected void updateState(BlockState blockState, Level level, BlockPos blockPos, Block block) {

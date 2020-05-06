@@ -9,6 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.LavaSlimeModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.monster.MagmaCube;
@@ -23,7 +24,7 @@ extends MobRenderer<MagmaCube, LavaSlimeModel<MagmaCube>> {
     }
 
     @Override
-    protected int getBlockLightLevel(MagmaCube magmaCube, float f) {
+    protected int getBlockLightLevel(MagmaCube magmaCube, BlockPos blockPos) {
         return 15;
     }
 

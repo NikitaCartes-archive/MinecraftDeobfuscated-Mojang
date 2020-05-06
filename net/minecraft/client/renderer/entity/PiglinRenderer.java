@@ -22,7 +22,7 @@ extends HumanoidMobRenderer<Mob, PiglinModel<Mob>> {
     private static final ResourceLocation ZOMBIFIED_PIGLIN_LOCATION = new ResourceLocation("textures/entity/piglin/zombified_piglin.png");
 
     public PiglinRenderer(EntityRenderDispatcher entityRenderDispatcher, boolean bl) {
-        super(entityRenderDispatcher, PiglinRenderer.createModel(bl), 0.5f);
+        super(entityRenderDispatcher, PiglinRenderer.createModel(bl), 0.5f, 1.0019531f, 1.0f, 1.0019531f);
         this.addLayer(new PiglinArmorLayer(this, new HumanoidModel(0.5f), new HumanoidModel(1.0f), PiglinRenderer.makeHelmetHeadModel()));
     }
 

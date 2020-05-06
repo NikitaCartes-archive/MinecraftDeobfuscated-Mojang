@@ -610,10 +610,10 @@ extends LivingEntity {
             int i;
             int j;
             double d = entity.distanceToSqr(this);
-            if (d > (double)(j = (i = this.getType().getInstantDespawnDistance()) * i) && this.removeWhenFarAway(d)) {
+            if (d > (double)(j = (i = this.getType().getCategory().getDespawnDistance()) * i) && this.removeWhenFarAway(d)) {
                 this.remove();
             }
-            int k = this.getType().getNoDespawnDistance();
+            int k = this.getType().getCategory().getNoDespawnDistance();
             int l = k * k;
             if (this.noActionTime > 600 && this.random.nextInt(800) == 0 && d > (double)l && this.removeWhenFarAway(d)) {
                 this.remove();

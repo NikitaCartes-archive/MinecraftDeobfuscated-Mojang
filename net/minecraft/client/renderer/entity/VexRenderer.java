@@ -9,6 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.VexModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.monster.Vex;
 
@@ -23,7 +24,7 @@ extends HumanoidMobRenderer<Vex, VexModel> {
     }
 
     @Override
-    protected int getBlockLightLevel(Vex vex, float f) {
+    protected int getBlockLightLevel(Vex vex, BlockPos blockPos) {
         return 15;
     }
 

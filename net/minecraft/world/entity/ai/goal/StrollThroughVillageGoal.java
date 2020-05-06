@@ -42,7 +42,7 @@ extends Goal {
         }
         ServerLevel serverLevel = (ServerLevel)this.mob.level;
         BlockPos blockPos2 = this.mob.blockPosition();
-        if (!serverLevel.closeToVillage(blockPos2, 6)) {
+        if (!serverLevel.isCloseToVillage(blockPos2, 6)) {
             return false;
         }
         Vec3 vec3 = RandomPos.getLandPos(this.mob, 15, 7, blockPos -> -serverLevel.sectionsToVillage(SectionPos.of(blockPos)));

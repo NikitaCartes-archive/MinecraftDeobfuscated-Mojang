@@ -295,7 +295,7 @@ public class Font {
                 float h = (float)(i >> 16 & 0xFF) / 255.0f;
                 float j = (float)(i >> 8 & 0xFF) / 255.0f;
                 float k = (float)(i & 0xFF) / 255.0f;
-                this.addEffect(new BakedGlyph.Effect(f - 1.0f, this.y + 9.0f, this.x + 1.0f, this.y - 1.0f, -0.01f, h, j, k, g));
+                this.addEffect(new BakedGlyph.Effect(f - 1.0f, this.y + 9.0f, this.x + 1.0f, this.y - 1.0f, 0.01f, h, j, k, g));
             }
             if (this.effects != null) {
                 BakedGlyph bakedGlyph = Font.this.getFontSet(Style.DEFAULT_FONT).whiteGlyph();

@@ -47,6 +47,7 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -63,7 +64,6 @@ import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class Strider
@@ -216,6 +216,7 @@ Saddleable {
 
     @Override
     public Vec3 getDismountLocationForPassenger(LivingEntity livingEntity) {
+        double f;
         Vec3[] vec3s = new Vec3[]{Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.yRot), Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.yRot - 22.5f), Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.yRot + 22.5f), Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.yRot - 45.0f), Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.yRot + 45.0f)};
         LinkedHashSet<BlockPos> set = Sets.newLinkedHashSet();
         double d = this.getBoundingBox().maxY;
@@ -223,21 +224,20 @@ Saddleable {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (Vec3 vec3 : vec3s) {
             mutableBlockPos.set(this.getX() + vec3.x, d, this.getZ() + vec3.z);
-            for (double f = d; f > e; f -= 1.0) {
+            for (f = d; f > e; f -= 1.0) {
                 set.add(mutableBlockPos.immutable());
                 mutableBlockPos.move(Direction.DOWN);
             }
         }
         for (BlockPos blockPos : set) {
             if (this.level.getFluidState(blockPos).is(FluidTags.LAVA)) continue;
-            Vec3 vec32 = Vec3.atBottomCenterOf(blockPos);
             for (Pose pose : livingEntity.getDismountPoses()) {
-                AABB aABB2;
-                AABB aABB = livingEntity.getLocalBoundsForPose(pose).move(vec32);
-                double g = this.level.getRelativeFloorHeight(blockPos);
-                if (Double.isInfinite(g) || !(g < 1.0) || !this.level.getBlockCollisions(livingEntity, aABB2 = aABB.move(0.0, g, 0.0)).allMatch(VoxelShape::isEmpty)) continue;
+                Vec3 vec32;
+                AABB aABB;
+                f = this.level.getRelativeFloorHeight(blockPos);
+                if (!DismountHelper.isFloorValid(f) || !DismountHelper.canDismountTo(this.level, livingEntity, (aABB = livingEntity.getLocalBoundsForPose(pose)).move(vec32 = Vec3.upFromBottomCenterOf(blockPos, f)))) continue;
                 livingEntity.setPose(pose);
-                return new Vec3(vec32.x, (double)blockPos.getY() + g, vec32.z);
+                return vec32;
             }
         }
         return new Vec3(this.getX(), this.getBoundingBox().maxY, this.getZ());

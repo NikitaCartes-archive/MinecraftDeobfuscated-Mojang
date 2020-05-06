@@ -22,7 +22,6 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -116,11 +115,6 @@ extends EntityRenderer<ItemFrame> {
     @Override
     protected void renderNameTag(ItemFrame itemFrame, Component component, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
         super.renderNameTag(itemFrame, itemFrame.getItem().getHoverName(), poseStack, multiBufferSource, i);
-    }
-
-    @Override
-    public /* synthetic */ Vec3 getRenderOffset(Entity entity, float f) {
-        return this.getRenderOffset((ItemFrame)entity, f);
     }
 }
 

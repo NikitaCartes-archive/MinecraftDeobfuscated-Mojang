@@ -471,6 +471,7 @@ extends Projectile {
         return entity instanceof Player ? (Player)entity : null;
     }
 
+    @Nullable
     public Entity getHookedIn() {
         return this.hookedIn;
     }
