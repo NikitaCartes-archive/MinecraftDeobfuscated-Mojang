@@ -1,11 +1,13 @@
 package net.minecraft.server.level;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.util.Either;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -372,7 +374,9 @@ public class ServerChunkCache extends ChunkSource {
 			NaturalSpawner.SpawnState spawnState = NaturalSpawner.createState(j, this.level.getAllEntities(), this::getFullChunk);
 			this.lastSpawnState = spawnState;
 			this.level.getProfiler().pop();
-			this.chunkMap.getChunks().forEach(chunkHolder -> {
+			List<ChunkHolder> list = Lists.<ChunkHolder>newArrayList(this.chunkMap.getChunks());
+			Collections.shuffle(list);
+			list.forEach(chunkHolder -> {
 				Optional<LevelChunk> optional = ((Either)chunkHolder.getEntityTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK)).left();
 				if (optional.isPresent()) {
 					LevelChunk levelChunk = (LevelChunk)optional.get();

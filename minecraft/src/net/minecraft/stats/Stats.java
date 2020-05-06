@@ -35,6 +35,7 @@ public class Stats {
 	public static final ResourceLocation HORSE_ONE_CM = makeCustomStat("horse_one_cm", StatFormatter.DISTANCE);
 	public static final ResourceLocation AVIATE_ONE_CM = makeCustomStat("aviate_one_cm", StatFormatter.DISTANCE);
 	public static final ResourceLocation SWIM_ONE_CM = makeCustomStat("swim_one_cm", StatFormatter.DISTANCE);
+	public static final ResourceLocation STRIDER_ONE_CM = makeCustomStat("strider_one_cm", StatFormatter.DISTANCE);
 	public static final ResourceLocation JUMP = makeCustomStat("jump", StatFormatter.DEFAULT);
 	public static final ResourceLocation DROP = makeCustomStat("drop", StatFormatter.DEFAULT);
 	public static final ResourceLocation DAMAGE_DEALT = makeCustomStat("damage_dealt", StatFormatter.DIVIDE_BY_TEN);

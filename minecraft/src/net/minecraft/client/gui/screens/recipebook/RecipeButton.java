@@ -94,7 +94,7 @@ public class RecipeButton extends AbstractWidget {
 			m--;
 		}
 
-		minecraft.getItemRenderer().renderAndDecorateItem(itemStack, this.x + m, this.y + m);
+		minecraft.getItemRenderer().renderAndDecorateFakeItem(itemStack, this.x + m, this.y + m);
 		if (bl) {
 			RenderSystem.popMatrix();
 		}

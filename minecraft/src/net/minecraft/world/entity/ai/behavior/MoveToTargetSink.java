@@ -41,11 +41,16 @@ public class MoveToTargetSink extends Behavior<Mob> {
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Mob mob) {
 		Brain<?> brain = mob.getBrain();
 		WalkTarget walkTarget = (WalkTarget)brain.getMemory(MemoryModuleType.WALK_TARGET).get();
-		if (!this.reachedTarget(mob, walkTarget) && this.tryComputePath(mob, walkTarget, serverLevel.getGameTime())) {
+		boolean bl = this.reachedTarget(mob, walkTarget);
+		if (!bl && this.tryComputePath(mob, walkTarget, serverLevel.getGameTime())) {
 			this.lastTargetPos = walkTarget.getTarget().currentBlockPosition();
 			return true;
 		} else {
 			brain.eraseMemory(MemoryModuleType.WALK_TARGET);
+			if (bl) {
+				brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
+			}
+
 			return false;
 		}
 	}

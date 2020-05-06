@@ -35,14 +35,17 @@ public class SleepInBed extends Behavior<LivingEntity> {
 				return false;
 			} else {
 				Optional<SerializableLong> optional = brain.getMemory(MemoryModuleType.LAST_WOKEN);
-				if (optional.isPresent() && serverLevel.getGameTime() - ((SerializableLong)optional.get()).value() < 100L) {
-					return false;
-				} else {
-					BlockState blockState = serverLevel.getBlockState(globalPos.pos());
-					return globalPos.pos().closerThan(livingEntity.position(), 2.0)
-						&& blockState.getBlock().is(BlockTags.BEDS)
-						&& !(Boolean)blockState.getValue(BedBlock.OCCUPIED);
+				if (optional.isPresent()) {
+					long l = serverLevel.getGameTime() - ((SerializableLong)optional.get()).value();
+					if (l > 0L && l < 100L) {
+						return false;
+					}
 				}
+
+				BlockState blockState = serverLevel.getBlockState(globalPos.pos());
+				return globalPos.pos().closerThan(livingEntity.position(), 2.0)
+					&& blockState.getBlock().is(BlockTags.BEDS)
+					&& !(Boolean)blockState.getValue(BedBlock.OCCUPIED);
 			}
 		}
 	}

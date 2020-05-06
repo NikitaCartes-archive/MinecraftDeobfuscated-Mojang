@@ -83,6 +83,7 @@ public class BlockTags {
 	public static final Tag.Named<Block> STRIDER_WARM_BLOCKS = bind("strider_warm_blocks");
 	public static final Tag.Named<Block> CAMPFIRES = bind("campfires");
 	public static final Tag.Named<Block> GUARDED_BY_PIGLINS = bind("guarded_by_piglins");
+	public static final Tag.Named<Block> PREVENT_MOB_SPAWNING_INSIDE = bind("prevent_mob_spawning_inside");
 
 	private static Tag.Named<Block> bind(String string) {
 		return HELPER.bind(string);

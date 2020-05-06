@@ -321,7 +321,7 @@ public class Font {
 				float h = (float)(i >> 16 & 0xFF) / 255.0F;
 				float j = (float)(i >> 8 & 0xFF) / 255.0F;
 				float k = (float)(i & 0xFF) / 255.0F;
-				this.addEffect(new BakedGlyph.Effect(f - 1.0F, this.y + 9.0F, this.x + 1.0F, this.y - 1.0F, -0.01F, h, j, k, g));
+				this.addEffect(new BakedGlyph.Effect(f - 1.0F, this.y + 9.0F, this.x + 1.0F, this.y - 1.0F, 0.01F, h, j, k, g));
 			}
 
 			if (this.effects != null) {

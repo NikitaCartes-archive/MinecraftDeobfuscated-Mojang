@@ -79,6 +79,36 @@ public abstract class RenderType extends RenderStateShard {
 		256,
 		RenderType.CompositeState.builder().setTextureState(NO_TEXTURE).setWriteMaskState(DEPTH_WRITE).createCompositeState(false)
 	);
+	private static final RenderType ARMOR_GLINT = create(
+		"armor_glint",
+		DefaultVertexFormat.POSITION_TEX,
+		7,
+		256,
+		RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, true, false))
+			.setWriteMaskState(COLOR_WRITE)
+			.setCullState(NO_CULL)
+			.setDepthTestState(EQUAL_DEPTH_TEST)
+			.setTransparencyState(GLINT_TRANSPARENCY)
+			.setTexturingState(GLINT_TEXTURING)
+			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
+			.createCompositeState(false)
+	);
+	private static final RenderType ARMOR_ENTITY_GLINT = create(
+		"armor_entity_glint",
+		DefaultVertexFormat.POSITION_TEX,
+		7,
+		256,
+		RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, true, false))
+			.setWriteMaskState(COLOR_WRITE)
+			.setCullState(NO_CULL)
+			.setDepthTestState(EQUAL_DEPTH_TEST)
+			.setTransparencyState(GLINT_TRANSPARENCY)
+			.setTexturingState(ENTITY_GLINT_TEXTURING)
+			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
+			.createCompositeState(false)
+	);
 	private static final RenderType GLINT = create(
 		"glint",
 		DefaultVertexFormat.POSITION_TEX,
@@ -105,7 +135,6 @@ public abstract class RenderType extends RenderStateShard {
 			.setDepthTestState(EQUAL_DEPTH_TEST)
 			.setTransparencyState(GLINT_TRANSPARENCY)
 			.setTexturingState(ENTITY_GLINT_TEXTURING)
-			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
 			.createCompositeState(false)
 	);
 	private static final RenderType LIGHTNING = create(
@@ -394,6 +423,14 @@ public abstract class RenderType extends RenderStateShard {
 				.setOutputState(OUTLINE_TARGET)
 				.createCompositeState(RenderType.OutlineProperty.IS_OUTLINE)
 		);
+	}
+
+	public static RenderType armorGlint() {
+		return ARMOR_GLINT;
+	}
+
+	public static RenderType armorEntityGlint() {
+		return ARMOR_ENTITY_GLINT;
 	}
 
 	public static RenderType glint() {

@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ItemSupplier;
@@ -30,8 +31,8 @@ public class ThrownItemRenderer<T extends Entity & ItemSupplier> extends EntityR
 	}
 
 	@Override
-	protected int getBlockLightLevel(T entity, float f) {
-		return this.fullBright ? 15 : super.getBlockLightLevel(entity, f);
+	protected int getBlockLightLevel(T entity, BlockPos blockPos) {
+		return this.fullBright ? 15 : super.getBlockLightLevel(entity, blockPos);
 	}
 
 	@Override

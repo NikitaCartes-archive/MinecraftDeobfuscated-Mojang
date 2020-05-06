@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.Dynamic;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
@@ -2316,7 +2315,7 @@ public abstract class LivingEntity extends Entity {
 
 	private void updateFallFlying() {
 		boolean bl = this.getSharedFlag(7);
-		if (bl && !this.onGround && !this.isPassenger()) {
+		if (bl && !this.onGround && !this.isPassenger() && !this.hasEffect(MobEffects.LEVITATION)) {
 			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
 			if (itemStack.getItem() == Items.ELYTRA && ElytraItem.isFlyEnabled(itemStack)) {
 				bl = true;
@@ -2795,10 +2794,6 @@ public abstract class LivingEntity extends Entity {
 
 	public ImmutableList<Pose> getDismountPoses() {
 		return ImmutableList.of(Pose.STANDING);
-	}
-
-	public Pose getShortestDismountPose() {
-		return (Pose)this.getDismountPoses().stream().min(Comparator.comparing(pose -> this.getDimensions(pose).height)).orElse(Pose.STANDING);
 	}
 
 	public AABB getLocalBoundsForPose(Pose pose) {

@@ -66,7 +66,7 @@ public class GhostRecipe {
 
 			ItemStack itemStack = ghostIngredient.getItem();
 			ItemRenderer itemRenderer = minecraft.getItemRenderer();
-			itemRenderer.renderAndDecorateItem(minecraft.player, itemStack, l, m);
+			itemRenderer.renderAndDecorateFakeItem(itemStack, l, m);
 			RenderSystem.depthFunc(516);
 			GuiComponent.fill(poseStack, l, m, l + 16, m + 16, 822083583);
 			RenderSystem.depthFunc(515);

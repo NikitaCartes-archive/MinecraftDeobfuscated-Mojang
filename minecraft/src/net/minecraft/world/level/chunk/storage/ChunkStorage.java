@@ -22,7 +22,7 @@ public class ChunkStorage implements AutoCloseable {
 
 	public ChunkStorage(File file, DataFixer dataFixer, boolean bl) {
 		this.fixerUpper = dataFixer;
-		this.worker = new IOWorker(new RegionFileStorage(file, bl), "chunk");
+		this.worker = new IOWorker(file, bl, "chunk");
 	}
 
 	public CompoundTag upgradeChunkTag(DimensionType dimensionType, Supplier<DimensionDataStorage> supplier, CompoundTag compoundTag) {

@@ -3,6 +3,7 @@ package net.minecraft.world.level.block;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.mojang.math.Vector3f;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -65,6 +66,7 @@ public class RedStoneWireBlock extends Block {
 		)
 	);
 	private final Map<BlockState, VoxelShape> SHAPES_CACHE = Maps.<BlockState, VoxelShape>newHashMap();
+	private static final Vector3f[] COLORS = new Vector3f[16];
 	private boolean shouldSignal = true;
 
 	public RedStoneWireBlock(BlockBehaviour.Properties properties) {
@@ -217,9 +219,9 @@ public class RedStoneWireBlock extends Block {
 		BlockPos blockPos2 = blockPos.relative(direction);
 		BlockState blockState = blockGetter.getBlockState(blockPos2);
 		if (bl) {
-			boolean bl2 = blockState.isFaceSturdy(blockGetter, blockPos2, Direction.UP) || blockState.is(Blocks.HOPPER);
+			boolean bl2 = this.canSurviveOn(blockGetter, blockPos2, blockState);
 			if (bl2 && shouldConnectTo(blockGetter.getBlockState(blockPos2.above()))) {
-				if (blockState.isCollisionShapeFullBlock(blockGetter, blockPos2)) {
+				if (blockState.isFaceSturdy(blockGetter, blockPos2, direction.getOpposite())) {
 					return RedstoneSide.UP;
 				}
 
@@ -237,7 +239,11 @@ public class RedStoneWireBlock extends Block {
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockPos blockPos2 = blockPos.below();
 		BlockState blockState2 = levelReader.getBlockState(blockPos2);
-		return blockState2.isFaceSturdy(levelReader, blockPos2, Direction.UP) || blockState2.is(Blocks.HOPPER);
+		return this.canSurviveOn(levelReader, blockPos2, blockState2);
+	}
+
+	private boolean canSurviveOn(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
+		return blockState.isFaceSturdy(blockGetter, blockPos, Direction.UP) || blockState.is(Blocks.HOPPER);
 	}
 
 	private void updatePowerStrength(Level level, BlockPos blockPos, BlockState blockState) {
@@ -395,27 +401,32 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static int getColorForData(int i) {
-		float f = (float)i / 15.0F;
-		float g = f * 0.6F + 0.4F;
-		if (i == 0) {
-			g = 0.3F;
-		}
+	public static int getColorForPower(int i) {
+		Vector3f vector3f = COLORS[i];
+		return Mth.color(vector3f.x(), vector3f.y(), vector3f.z());
+	}
 
-		float h = f * f * 0.7F - 0.5F;
-		float j = f * f * 0.6F - 0.7F;
-		if (h < 0.0F) {
-			h = 0.0F;
+	@Environment(EnvType.CLIENT)
+	private void spawnParticlesAlongLine(
+		Level level, Random random, BlockPos blockPos, Vector3f vector3f, Direction direction, Direction direction2, float f, float g
+	) {
+		float h = g - f;
+		if (!(random.nextFloat() >= 0.2F * h)) {
+			float i = 0.4375F;
+			float j = f + h * random.nextFloat();
+			float k = 0.5F + 0.4375F * (float)direction.getStepX() + j * (float)direction2.getStepX();
+			float l = 0.5F + 0.4375F * (float)direction.getStepY() + j * (float)direction2.getStepY();
+			float m = 0.5F + 0.4375F * (float)direction.getStepZ() + j * (float)direction2.getStepZ();
+			level.addParticle(
+				new DustParticleOptions(vector3f.x(), vector3f.y(), vector3f.z(), 1.0F),
+				(double)((float)blockPos.getX() + k),
+				(double)((float)blockPos.getY() + l),
+				(double)((float)blockPos.getZ() + m),
+				0.0,
+				0.0,
+				0.0
+			);
 		}
-
-		if (j < 0.0F) {
-			j = 0.0F;
-		}
-
-		int k = Mth.clamp((int)(g * 255.0F), 0, 255);
-		int l = Mth.clamp((int)(h * 255.0F), 0, 255);
-		int m = Mth.clamp((int)(j * 255.0F), 0, 255);
-		return 0xFF000000 | k << 16 | l << 8 | m;
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -423,14 +434,19 @@ public class RedStoneWireBlock extends Block {
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		int i = (Integer)blockState.getValue(POWER);
 		if (i != 0) {
-			double d = (double)blockPos.getX() + 0.5 + ((double)random.nextFloat() - 0.5) * 0.2;
-			double e = (double)((float)blockPos.getY() + 0.0625F);
-			double f = (double)blockPos.getZ() + 0.5 + ((double)random.nextFloat() - 0.5) * 0.2;
-			float g = (float)i / 15.0F;
-			float h = g * 0.6F + 0.4F;
-			float j = Math.max(0.0F, g * g * 0.7F - 0.5F);
-			float k = Math.max(0.0F, g * g * 0.6F - 0.7F);
-			level.addParticle(new DustParticleOptions(h, j, k, 1.0F), d, e, f, 0.0, 0.0, 0.0);
+			for (Direction direction : Direction.Plane.HORIZONTAL) {
+				RedstoneSide redstoneSide = blockState.getValue((Property<RedstoneSide>)PROPERTY_BY_DIRECTION.get(direction));
+				switch (redstoneSide) {
+					case UP:
+						this.spawnParticlesAlongLine(level, random, blockPos, COLORS[i], direction, Direction.UP, -0.5F, 0.5F);
+					case SIDE:
+						this.spawnParticlesAlongLine(level, random, blockPos, COLORS[i], Direction.DOWN, direction, 0.0F, 0.5F);
+						break;
+					case NONE:
+					default:
+						this.spawnParticlesAlongLine(level, random, blockPos, COLORS[i], Direction.DOWN, direction, 0.0F, 0.3F);
+				}
+			}
 		}
 	}
 
@@ -472,5 +488,15 @@ public class RedStoneWireBlock extends Block {
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(NORTH, EAST, SOUTH, WEST, POWER);
+	}
+
+	static {
+		for (int i = 0; i <= 15; i++) {
+			float f = (float)i / 15.0F;
+			float g = f * 0.6F + (f > 0.0F ? 0.4F : 0.3F);
+			float h = Mth.clamp(f * f * 0.7F - 0.5F, 0.0F, 1.0F);
+			float j = Mth.clamp(f * f * 0.6F - 0.7F, 0.0F, 1.0F);
+			COLORS[i] = new Vector3f(g, h, j);
+		}
 	}
 }

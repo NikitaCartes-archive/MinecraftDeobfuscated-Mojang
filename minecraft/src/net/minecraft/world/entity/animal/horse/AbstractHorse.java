@@ -53,6 +53,7 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -64,7 +65,6 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.VoxelShape;
 
 public abstract class AbstractHorse extends Animal implements ContainerListener, PlayerRideableJumping, Saddleable {
 	private static final Predicate<LivingEntity> PARENT_HORSE_SELECTOR = livingEntity -> livingEntity instanceof AbstractHorse
@@ -294,7 +294,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 
 	protected void updateContainerEquipment() {
 		if (!this.level.isClientSide) {
-			this.setFlag(4, !this.inventory.getItem(0).isEmpty() && this.isSaddleable());
+			this.setFlag(4, !this.inventory.getItem(0).isEmpty());
 		}
 	}
 
@@ -976,35 +976,54 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		return this.getPassengers().isEmpty() ? null : (Entity)this.getPassengers().get(0);
 	}
 
+	@Nullable
+	private Vec3 getDismountLocationInDirection(Vec3 vec3, LivingEntity livingEntity) {
+		double d = this.getX() + vec3.x;
+		double e = this.getBoundingBox().minY;
+		double f = this.getZ() + vec3.z;
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+
+		for (Pose pose : livingEntity.getDismountPoses()) {
+			mutableBlockPos.set(d, e, f);
+			double g = this.getBoundingBox().maxY + 0.75;
+
+			do {
+				double h = this.level.getRelativeFloorHeight(mutableBlockPos);
+				if ((double)mutableBlockPos.getY() + h > g) {
+					break;
+				}
+
+				if (DismountHelper.isFloorValid(h)) {
+					AABB aABB = livingEntity.getLocalBoundsForPose(pose);
+					Vec3 vec32 = new Vec3(d, (double)mutableBlockPos.getY() + h, f);
+					if (DismountHelper.canDismountTo(this.level, livingEntity, aABB.move(vec32))) {
+						livingEntity.setPose(pose);
+						return vec32;
+					}
+				}
+
+				mutableBlockPos.move(Direction.UP);
+			} while (!((double)mutableBlockPos.getY() < g));
+		}
+
+		return null;
+	}
+
 	@Override
 	public Vec3 getDismountLocationForPassenger(LivingEntity livingEntity) {
 		Vec3 vec3 = getCollisionHorizontalEscapeVector(
 			(double)this.getBbWidth(), (double)livingEntity.getBbWidth(), this.yRot + (livingEntity.getMainArm() == HumanoidArm.RIGHT ? 90.0F : -90.0F)
 		);
-		double d = this.getX() + vec3.x;
-		double e = this.getBoundingBox().minY;
-		double f = this.getZ() + vec3.z;
-		AABB aABB = livingEntity.getLocalBoundsForPose(livingEntity.getShortestDismountPose()).move(d, e, f);
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(d, e, f);
-		double g = this.getBoundingBox().maxY + 0.75;
-
-		do {
-			double h = this.level.getRelativeFloorHeight(mutableBlockPos);
-			if ((double)mutableBlockPos.getY() + h > g) {
-				break;
-			}
-
-			if (!Double.isInfinite(h) && h < 1.0) {
-				AABB aABB2 = aABB.move(d, (double)mutableBlockPos.getY() + h, f);
-				if (this.level.getBlockCollisions(livingEntity, aABB2).allMatch(VoxelShape::isEmpty)) {
-					return new Vec3(d, (double)mutableBlockPos.getY() + h, f);
-				}
-			}
-
-			mutableBlockPos.move(Direction.UP);
-		} while ((double)mutableBlockPos.getY() < g);
-
-		return new Vec3(this.getX(), this.getY(), this.getZ());
+		Vec3 vec32 = this.getDismountLocationInDirection(vec3, livingEntity);
+		if (vec32 != null) {
+			return vec32;
+		} else {
+			Vec3 vec33 = getCollisionHorizontalEscapeVector(
+				(double)this.getBbWidth(), (double)livingEntity.getBbWidth(), this.yRot + (livingEntity.getMainArm() == HumanoidArm.LEFT ? 90.0F : -90.0F)
+			);
+			Vec3 vec34 = this.getDismountLocationInDirection(vec33, livingEntity);
+			return vec34 != null ? vec34 : this.position();
+		}
 	}
 
 	protected void randomizeAttributes() {

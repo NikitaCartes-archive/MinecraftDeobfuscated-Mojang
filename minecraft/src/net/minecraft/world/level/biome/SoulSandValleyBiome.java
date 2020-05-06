@@ -47,7 +47,7 @@ public class SoulSandValleyBiome extends Biome {
 						.build()
 				)
 				.parent(null)
-				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.0F, -0.7F, 0.0F, 0.0F, 0.4F)))
+				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.0F, -0.5F, 0.0F, 0.0F, 0.0F)))
 		);
 		this.addStructureStart(Feature.NETHER_BRIDGE.configured(FeatureConfiguration.NONE));
 		this.addStructureStart(Feature.NETHER_FOSSIL.configured(FeatureConfiguration.NONE));
@@ -115,6 +115,12 @@ public class SoulSandValleyBiome extends Biome {
 			Feature.SPRING
 				.configured(BiomeDefaultFeatures.CLOSED_NETHER_SPRING_CONFIG)
 				.decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(16, 10, 20, 128)))
+		);
+		this.addFeature(
+			GenerationStep.Decoration.UNDERGROUND_DECORATION,
+			Feature.ORE
+				.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Blocks.SOUL_SAND.defaultBlockState(), 12))
+				.decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(12, 0, 0, 32)))
 		);
 		BiomeDefaultFeatures.addNetherDefaultOres(this);
 		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.SKELETON, 2, 5, 5));

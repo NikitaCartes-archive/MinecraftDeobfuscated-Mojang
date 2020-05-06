@@ -43,6 +43,7 @@ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -59,7 +60,6 @@ import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class Strider extends Animal implements ItemSteerable, Saddleable {
 	private static final Ingredient FOOD_ITEMS = Ingredient.of(Items.WARPED_FUNGUS);
@@ -225,16 +225,14 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 
 		for (BlockPos blockPos : set) {
 			if (!this.level.getFluidState(blockPos).is(FluidTags.LAVA)) {
-				Vec3 vec32 = Vec3.atBottomCenterOf(blockPos);
-
 				for (Pose pose : livingEntity.getDismountPoses()) {
-					AABB aABB = livingEntity.getLocalBoundsForPose(pose).move(vec32);
-					double g = this.level.getRelativeFloorHeight(blockPos);
-					if (!Double.isInfinite(g) && g < 1.0) {
-						AABB aABB2 = aABB.move(0.0, g, 0.0);
-						if (this.level.getBlockCollisions(livingEntity, aABB2).allMatch(VoxelShape::isEmpty)) {
+					double f = this.level.getRelativeFloorHeight(blockPos);
+					if (DismountHelper.isFloorValid(f)) {
+						AABB aABB = livingEntity.getLocalBoundsForPose(pose);
+						Vec3 vec32 = Vec3.upFromBottomCenterOf(blockPos, f);
+						if (DismountHelper.canDismountTo(this.level, livingEntity, aABB.move(vec32))) {
 							livingEntity.setPose(pose);
-							return new Vec3(vec32.x, (double)blockPos.getY() + g, vec32.z);
+							return vec32;
 						}
 					}
 				}

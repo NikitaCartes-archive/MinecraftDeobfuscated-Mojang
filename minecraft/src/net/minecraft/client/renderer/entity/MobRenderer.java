@@ -77,10 +77,12 @@ public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> exten
 		float v = Mth.fastInvSqrt(r * r + t * t) * 0.025F / 2.0F;
 		float w = t * v;
 		float x = r * v;
-		int y = this.getBlockLightLevel(mob, f);
-		int z = this.entityRenderDispatcher.getRenderer(entity).getBlockLightLevel(entity, f);
-		int aa = mob.level.getBrightness(LightLayer.SKY, new BlockPos(mob.getEyePosition(f)));
-		int ab = mob.level.getBrightness(LightLayer.SKY, new BlockPos(entity.getEyePosition(f)));
+		BlockPos blockPos = new BlockPos(mob.getEyePosition(f));
+		BlockPos blockPos2 = new BlockPos(entity.getEyePosition(f));
+		int y = this.getBlockLightLevel(mob, blockPos);
+		int z = this.entityRenderDispatcher.getRenderer(entity).getBlockLightLevel(entity, blockPos2);
+		int aa = mob.level.getBrightness(LightLayer.SKY, blockPos);
+		int ab = mob.level.getBrightness(LightLayer.SKY, blockPos2);
 		renderSide(vertexConsumer, matrix4f, r, s, t, y, z, aa, ab, 0.025F, 0.025F, w, x);
 		renderSide(vertexConsumer, matrix4f, r, s, t, y, z, aa, ab, 0.025F, 0.0F, w, x);
 		poseStack.popPose();

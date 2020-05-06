@@ -73,6 +73,7 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Strider;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
@@ -467,7 +468,7 @@ public abstract class Player extends LivingEntity {
 			super.rideTick();
 			this.oBob = this.bob;
 			this.bob = 0.0F;
-			this.checkRidingStatistiscs(this.getX() - d, this.getY() - e, this.getZ() - f);
+			this.checkRidingStatistics(this.getX() - d, this.getY() - e, this.getZ() - f);
 			if (this.getVehicle() instanceof Pig) {
 				this.xRot = h;
 				this.yRot = g;
@@ -883,19 +884,25 @@ public abstract class Player extends LivingEntity {
 
 	@Override
 	protected void hurtCurrentlyUsedShield(float f) {
-		if (f >= 3.0F && this.useItem.getItem() == Items.SHIELD) {
-			int i = 1 + Mth.floor(f);
-			InteractionHand interactionHand = this.getUsedItemHand();
-			this.useItem.hurtAndBreak(i, this, player -> player.broadcastBreakEvent(interactionHand));
-			if (this.useItem.isEmpty()) {
-				if (interactionHand == InteractionHand.MAIN_HAND) {
-					this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
-				} else {
-					this.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
-				}
+		if (this.useItem.getItem() == Items.SHIELD) {
+			if (!this.level.isClientSide) {
+				this.awardStat(Stats.ITEM_USED.get(this.useItem.getItem()));
+			}
 
-				this.useItem = ItemStack.EMPTY;
-				this.playSound(SoundEvents.SHIELD_BREAK, 0.8F, 0.8F + this.level.random.nextFloat() * 0.4F);
+			if (f >= 3.0F) {
+				int i = 1 + Mth.floor(f);
+				InteractionHand interactionHand = this.getUsedItemHand();
+				this.useItem.hurtAndBreak(i, this, player -> player.broadcastBreakEvent(interactionHand));
+				if (this.useItem.isEmpty()) {
+					if (interactionHand == InteractionHand.MAIN_HAND) {
+						this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+					} else {
+						this.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
+					}
+
+					this.useItem = ItemStack.EMPTY;
+					this.playSound(SoundEvents.SHIELD_BREAK, 0.8F, 0.8F + this.level.random.nextFloat() * 0.4F);
+				}
 			}
 		}
 	}
@@ -1470,18 +1477,21 @@ public abstract class Player extends LivingEntity {
 		}
 	}
 
-	private void checkRidingStatistiscs(double d, double e, double f) {
+	private void checkRidingStatistics(double d, double e, double f) {
 		if (this.isPassenger()) {
 			int i = Math.round(Mth.sqrt(d * d + e * e + f * f) * 100.0F);
 			if (i > 0) {
-				if (this.getVehicle() instanceof AbstractMinecart) {
+				Entity entity = this.getVehicle();
+				if (entity instanceof AbstractMinecart) {
 					this.awardStat(Stats.MINECART_ONE_CM, i);
-				} else if (this.getVehicle() instanceof Boat) {
+				} else if (entity instanceof Boat) {
 					this.awardStat(Stats.BOAT_ONE_CM, i);
-				} else if (this.getVehicle() instanceof Pig) {
+				} else if (entity instanceof Pig) {
 					this.awardStat(Stats.PIG_ONE_CM, i);
-				} else if (this.getVehicle() instanceof AbstractHorse) {
+				} else if (entity instanceof AbstractHorse) {
 					this.awardStat(Stats.HORSE_ONE_CM, i);
+				} else if (entity instanceof Strider) {
+					this.awardStat(Stats.STRIDER_ONE_CM, i);
 				}
 			}
 		}
@@ -1501,7 +1511,7 @@ public abstract class Player extends LivingEntity {
 	}
 
 	public boolean tryToStartFallFlying() {
-		if (!this.onGround && !this.isFallFlying() && !this.isInWater()) {
+		if (!this.onGround && !this.isFallFlying() && !this.isInWater() && !this.hasEffect(MobEffects.LEVITATION)) {
 			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
 			if (itemStack.getItem() == Items.ELYTRA && ElytraItem.isFlyEnabled(itemStack)) {
 				this.startFallFlying();

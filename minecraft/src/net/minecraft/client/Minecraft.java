@@ -854,7 +854,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.mobEffectTextures.close();
 			this.paintingTextures.close();
 			this.textureManager.close();
-			Util.shutdownBackgroundExecutor();
+			Util.shutdownExecutors();
 		} catch (Throwable var5) {
 			LOGGER.error("Shutdown failure!", var5);
 			throw var5;

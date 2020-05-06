@@ -1,7 +1,5 @@
 package net.minecraft.world.entity;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -88,7 +86,6 @@ import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -113,9 +110,6 @@ public abstract class Entity implements Nameable, CommandSource {
 	protected static final Logger LOGGER = LogManager.getLogger();
 	private static final AtomicInteger ENTITY_COUNTER = new AtomicInteger();
 	private static final List<ItemStack> EMPTY_LIST = Collections.emptyList();
-	private static final ImmutableMap<Pose, ImmutableList<Integer>> POSE_DISMOUNT_HEIGHTS = ImmutableMap.of(
-		Pose.STANDING, ImmutableList.of(0, 1, -1), Pose.CROUCHING, ImmutableList.of(0, 1, -1), Pose.SWIMMING, ImmutableList.of(0, 1)
-	);
 	private static final AABB INITIAL_AABB = new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 	private static double viewScale = 1.0;
 	private final EntityType<?> type;
@@ -2565,74 +2559,7 @@ public abstract class Entity implements Nameable, CommandSource {
 	}
 
 	public Vec3 getDismountLocationForPassenger(LivingEntity livingEntity) {
-		Direction direction = this.getMotionDirection();
-		if (direction.getAxis() == Direction.Axis.Y) {
-			return new Vec3(this.getX(), this.getBoundingBox().maxY, this.getZ());
-		} else {
-			Direction direction2 = direction.getClockWise();
-			int[][] is = new int[][]{
-				{direction2.getStepX(), direction2.getStepZ()},
-				{-direction2.getStepX(), -direction2.getStepZ()},
-				{-direction.getStepX() + direction2.getStepX(), -direction.getStepZ() + direction2.getStepZ()},
-				{-direction.getStepX() - direction2.getStepX(), -direction.getStepZ() - direction2.getStepZ()},
-				{direction.getStepX() + direction2.getStepX(), direction.getStepZ() + direction2.getStepZ()},
-				{direction.getStepX() - direction2.getStepX(), direction.getStepZ() - direction2.getStepZ()},
-				{-direction.getStepX(), -direction.getStepZ()},
-				{direction.getStepX(), direction.getStepZ()}
-			};
-			BlockPos blockPos = this.blockPosition();
-			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-			ImmutableList<Pose> immutableList = livingEntity.getDismountPoses();
-
-			for (Pose pose : immutableList) {
-				EntityDimensions entityDimensions = livingEntity.getDimensions(pose);
-				float f = Math.min(entityDimensions.width, 1.0F) / 2.0F;
-				float g = 0.5F - f;
-				float h = 0.5F + f;
-
-				for (int i : POSE_DISMOUNT_HEIGHTS.get(pose)) {
-					for (int[] js : is) {
-						mutableBlockPos.set(blockPos.getX() + js[0], blockPos.getY() + i, blockPos.getZ() + js[1]);
-						double d = this.level
-							.getRelativeFloorHeight(
-								mutableBlockPos,
-								blockState -> blockState.is(BlockTags.CLIMBABLE)
-										? true
-										: blockState.getBlock() instanceof TrapDoorBlock && (Boolean)blockState.getValue(TrapDoorBlock.OPEN)
-							);
-						if (!Double.isInfinite(d) && !(d >= 1.0)) {
-							double e = (double)mutableBlockPos.getY() + d;
-							AABB aABB = new AABB(
-								(double)((float)mutableBlockPos.getX() + g),
-								e,
-								(double)((float)mutableBlockPos.getZ() + g),
-								(double)((float)mutableBlockPos.getX() + h),
-								e + (double)entityDimensions.height,
-								(double)((float)mutableBlockPos.getZ() + h)
-							);
-							if (this.level.getBlockCollisions(livingEntity, aABB).allMatch(VoxelShape::isEmpty)) {
-								livingEntity.setPose(pose);
-								return Vec3.upFromBottomCenterOf(mutableBlockPos, d);
-							}
-						}
-					}
-				}
-			}
-
-			double j = this.getBoundingBox().maxY;
-			mutableBlockPos.set((double)blockPos.getX(), j, (double)blockPos.getZ());
-
-			for (Pose pose2 : immutableList) {
-				double k = (double)livingEntity.getDimensions(pose2).height;
-				double l = (double)mutableBlockPos.getY() + this.level.getRelativeCeilingHeight(mutableBlockPos, j - (double)mutableBlockPos.getY() + k);
-				if (j + k <= l) {
-					livingEntity.setPose(pose2);
-					break;
-				}
-			}
-
-			return new Vec3(this.getX(), j, this.getZ());
-		}
+		return new Vec3(this.getX(), this.getBoundingBox().maxY, this.getZ());
 	}
 
 	@Nullable

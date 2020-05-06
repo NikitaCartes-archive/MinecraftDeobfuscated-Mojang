@@ -10,6 +10,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -25,8 +26,8 @@ public class ExperienceOrbRenderer extends EntityRenderer<ExperienceOrb> {
 		this.shadowStrength = 0.75F;
 	}
 
-	protected int getBlockLightLevel(ExperienceOrb experienceOrb, float f) {
-		return Mth.clamp(super.getBlockLightLevel(experienceOrb, f) + 7, 0, 15);
+	protected int getBlockLightLevel(ExperienceOrb experienceOrb, BlockPos blockPos) {
+		return Mth.clamp(super.getBlockLightLevel(experienceOrb, blockPos) + 7, 0, 15);
 	}
 
 	public void render(ExperienceOrb experienceOrb, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {

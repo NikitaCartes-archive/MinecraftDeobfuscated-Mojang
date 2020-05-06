@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.VexModel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.monster.Vex;
 
@@ -16,7 +17,7 @@ public class VexRenderer extends HumanoidMobRenderer<Vex, VexModel> {
 		super(entityRenderDispatcher, new VexModel(), 0.3F);
 	}
 
-	protected int getBlockLightLevel(Vex vex, float f) {
+	protected int getBlockLightLevel(Vex vex, BlockPos blockPos) {
 		return 15;
 	}
 

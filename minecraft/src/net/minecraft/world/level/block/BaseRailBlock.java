@@ -68,33 +68,7 @@ public abstract class BaseRailBlock extends Block {
 	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if (!level.isClientSide) {
 			RailShape railShape = blockState.getValue(this.getShapeProperty());
-			boolean bl2 = false;
-			BlockPos blockPos3 = blockPos.below();
-			if (!canSupportRigidBlock(level, blockPos3)) {
-				bl2 = true;
-			}
-
-			BlockPos blockPos4 = blockPos.east();
-			if (railShape == RailShape.ASCENDING_EAST && !canSupportRigidBlock(level, blockPos4)) {
-				bl2 = true;
-			} else {
-				BlockPos blockPos5 = blockPos.west();
-				if (railShape == RailShape.ASCENDING_WEST && !canSupportRigidBlock(level, blockPos5)) {
-					bl2 = true;
-				} else {
-					BlockPos blockPos6 = blockPos.north();
-					if (railShape == RailShape.ASCENDING_NORTH && !canSupportRigidBlock(level, blockPos6)) {
-						bl2 = true;
-					} else {
-						BlockPos blockPos7 = blockPos.south();
-						if (railShape == RailShape.ASCENDING_SOUTH && !canSupportRigidBlock(level, blockPos7)) {
-							bl2 = true;
-						}
-					}
-				}
-			}
-
-			if (bl2 && !level.isEmptyBlock(blockPos)) {
+			if (shouldBeRemoved(blockPos, level, railShape) && !level.isEmptyBlock(blockPos)) {
 				if (!bl) {
 					dropResources(blockState, level, blockPos);
 				}
@@ -102,6 +76,25 @@ public abstract class BaseRailBlock extends Block {
 				level.removeBlock(blockPos, bl);
 			} else {
 				this.updateState(blockState, level, blockPos, block);
+			}
+		}
+	}
+
+	private static boolean shouldBeRemoved(BlockPos blockPos, Level level, RailShape railShape) {
+		if (!canSupportRigidBlock(level, blockPos.below())) {
+			return true;
+		} else {
+			switch (railShape) {
+				case ASCENDING_EAST:
+					return !canSupportRigidBlock(level, blockPos.east());
+				case ASCENDING_WEST:
+					return !canSupportRigidBlock(level, blockPos.west());
+				case ASCENDING_NORTH:
+					return !canSupportRigidBlock(level, blockPos.north());
+				case ASCENDING_SOUTH:
+					return !canSupportRigidBlock(level, blockPos.south());
+				default:
+					return false;
 			}
 		}
 	}

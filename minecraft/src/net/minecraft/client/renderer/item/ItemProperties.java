@@ -105,24 +105,27 @@ public class ItemProperties {
 
 			@Override
 			public float call(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity) {
-				boolean bl = livingEntity != null;
-				Entity entity = (Entity)(bl ? livingEntity : itemStack.getFrame());
-				if (clientLevel == null && entity != null && entity.level instanceof ClientLevel) {
-					clientLevel = (ClientLevel)entity.level;
-				}
-
-				if (clientLevel == null) {
+				Entity entity = (Entity)(livingEntity != null ? livingEntity : itemStack.getEntityRepresentation());
+				if (entity == null) {
 					return 0.0F;
 				} else {
-					double d;
-					if (clientLevel.dimension.isNaturalDimension()) {
-						d = (double)clientLevel.getTimeOfDay(1.0F);
-					} else {
-						d = Math.random();
+					if (clientLevel == null && entity.level instanceof ClientLevel) {
+						clientLevel = (ClientLevel)entity.level;
 					}
 
-					d = this.wobble(clientLevel, d);
-					return (float)d;
+					if (clientLevel == null) {
+						return 0.0F;
+					} else {
+						double d;
+						if (clientLevel.dimension.isNaturalDimension()) {
+							d = (double)clientLevel.getTimeOfDay(1.0F);
+						} else {
+							d = Math.random();
+						}
+
+						d = this.wobble(clientLevel, d);
+						return (float)d;
+					}
 				}
 			}
 

@@ -59,7 +59,7 @@ public class AdvancementToast implements Toast {
 				}
 			}
 
-			toastComponent.getMinecraft().getItemRenderer().renderAndDecorateItem(null, displayInfo.getIcon(), 8, 8);
+			toastComponent.getMinecraft().getItemRenderer().renderAndDecorateFakeItem(displayInfo.getIcon(), 8, 8);
 			return l >= 5000L ? Toast.Visibility.HIDE : Toast.Visibility.SHOW;
 		} else {
 			return Toast.Visibility.HIDE;

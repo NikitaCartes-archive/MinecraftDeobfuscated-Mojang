@@ -72,7 +72,7 @@ public class BlockColors {
 			Blocks.CAULDRON
 		);
 		blockColors.register(
-			(blockState, blockAndTintGetter, blockPos, i) -> RedStoneWireBlock.getColorForData((Integer)blockState.getValue(RedStoneWireBlock.POWER)),
+			(blockState, blockAndTintGetter, blockPos, i) -> RedStoneWireBlock.getColorForPower((Integer)blockState.getValue(RedStoneWireBlock.POWER)),
 			Blocks.REDSTONE_WIRE
 		);
 		blockColors.addColoringState(RedStoneWireBlock.POWER, Blocks.REDSTONE_WIRE);

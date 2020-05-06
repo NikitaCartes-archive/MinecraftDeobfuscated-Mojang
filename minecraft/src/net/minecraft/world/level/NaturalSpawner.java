@@ -215,7 +215,9 @@ public final class NaturalSpawner {
 		EntityType<?> entityType = spawnerData.type;
 		if (entityType.getCategory() == MobCategory.MISC) {
 			return false;
-		} else if (!entityType.canSpawnFarFromPlayer() && d > (double)(entityType.getInstantDespawnDistance() * entityType.getInstantDespawnDistance())) {
+		} else if (!entityType.canSpawnFarFromPlayer() && d > (double)(entityType.getCategory().getDespawnDistance() * entityType.getCategory().getDespawnDistance())
+			)
+		 {
 			return false;
 		} else if (entityType.canSummon() && canSpawnMobAt(structureFeatureManager, chunkGenerator, mobCategory, spawnerData, mutableBlockPos)) {
 			SpawnPlacements.Type type = SpawnPlacements.getPlacementType(entityType);
@@ -249,7 +251,7 @@ public final class NaturalSpawner {
 	}
 
 	private static boolean isValidPositionForMob(ServerLevel serverLevel, Mob mob, double d) {
-		return d > (double)(mob.getType().getInstantDespawnDistance() * mob.getType().getInstantDespawnDistance()) && mob.removeWhenFarAway(d)
+		return d > (double)(mob.getType().getCategory().getDespawnDistance() * mob.getType().getCategory().getDespawnDistance()) && mob.removeWhenFarAway(d)
 			? false
 			: mob.checkSpawnRules(serverLevel, MobSpawnType.NATURAL) && mob.checkSpawnObstruction(serverLevel);
 	}
@@ -283,7 +285,7 @@ public final class NaturalSpawner {
 		} else if (blockState.isSignalSource()) {
 			return false;
 		} else {
-			return !fluidState.isEmpty() ? false : !blockState.is(BlockTags.RAILS);
+			return !fluidState.isEmpty() ? false : !blockState.is(BlockTags.PREVENT_MOB_SPAWNING_INSIDE);
 		}
 	}
 
@@ -403,7 +405,7 @@ public final class NaturalSpawner {
 
 	public static class SpawnState {
 		private final int spawnableChunkCount;
-		private final Object2IntMap<MobCategory> mobCategoryCounts;
+		private final Object2IntOpenHashMap<MobCategory> mobCategoryCounts;
 		private final PotentialCalculator spawnPotential;
 		private final Object2IntMap<MobCategory> unmodifiableMobCategoryCounts;
 		@Nullable
@@ -412,11 +414,11 @@ public final class NaturalSpawner {
 		private EntityType<?> lastCheckedType;
 		private double lastCharge;
 
-		private SpawnState(int i, Object2IntMap<MobCategory> object2IntMap, PotentialCalculator potentialCalculator) {
+		private SpawnState(int i, Object2IntOpenHashMap<MobCategory> object2IntOpenHashMap, PotentialCalculator potentialCalculator) {
 			this.spawnableChunkCount = i;
-			this.mobCategoryCounts = object2IntMap;
+			this.mobCategoryCounts = object2IntOpenHashMap;
 			this.spawnPotential = potentialCalculator;
-			this.unmodifiableMobCategoryCounts = Object2IntMaps.unmodifiable(object2IntMap);
+			this.unmodifiableMobCategoryCounts = Object2IntMaps.unmodifiable(object2IntOpenHashMap);
 		}
 
 		private boolean canSpawn(EntityType<?> entityType, BlockPos blockPos, ChunkAccess chunkAccess) {
@@ -444,14 +446,15 @@ public final class NaturalSpawner {
 			} else {
 				Biome biome = NaturalSpawner.getRoughBiome(blockPos, chunkAccess);
 				Biome.MobSpawnCost mobSpawnCost = biome.getMobSpawnCost(entityType);
-				if (mobSpawnCost == null) {
-					return;
+				if (mobSpawnCost != null) {
+					d = mobSpawnCost.getCharge();
+				} else {
+					d = 0.0;
 				}
-
-				d = mobSpawnCost.getCharge();
 			}
 
 			this.spawnPotential.addCharge(blockPos, d);
+			this.mobCategoryCounts.addTo(entityType.getCategory(), 1);
 		}
 
 		@Environment(EnvType.CLIENT)

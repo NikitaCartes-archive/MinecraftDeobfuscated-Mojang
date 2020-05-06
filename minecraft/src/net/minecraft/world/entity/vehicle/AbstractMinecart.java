@@ -1,5 +1,7 @@
 package net.minecraft.world.entity.vehicle;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
@@ -22,9 +24,12 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -35,6 +40,7 @@ import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.PoweredRailBlock;
+import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
@@ -47,6 +53,9 @@ public abstract class AbstractMinecart extends Entity {
 	private static final EntityDataAccessor<Integer> DATA_ID_DISPLAY_BLOCK = SynchedEntityData.defineId(AbstractMinecart.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_ID_DISPLAY_OFFSET = SynchedEntityData.defineId(AbstractMinecart.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Boolean> DATA_ID_CUSTOM_DISPLAY = SynchedEntityData.defineId(AbstractMinecart.class, EntityDataSerializers.BOOLEAN);
+	private static final ImmutableMap<Pose, ImmutableList<Integer>> POSE_DISMOUNT_HEIGHTS = ImmutableMap.of(
+		Pose.STANDING, ImmutableList.of(0, 1, -1), Pose.CROUCHING, ImmutableList.of(0, 1, -1), Pose.SWIMMING, ImmutableList.of(0, 1)
+	);
 	private boolean flipped;
 	private static final Map<RailShape, Pair<Vec3i, Vec3i>> EXITS = Util.make(Maps.newEnumMap(RailShape.class), enumMap -> {
 		Vec3i vec3i = Direction.WEST.getNormal();
@@ -140,6 +149,59 @@ public abstract class AbstractMinecart extends Entity {
 	@Override
 	public double getRideHeight() {
 		return 0.0;
+	}
+
+	@Override
+	public Vec3 getDismountLocationForPassenger(LivingEntity livingEntity) {
+		Direction direction = this.getMotionDirection();
+		if (direction.getAxis() == Direction.Axis.Y) {
+			return super.getDismountLocationForPassenger(livingEntity);
+		} else {
+			int[][] is = DismountHelper.offsetsForDirection(direction);
+			BlockPos blockPos = this.blockPosition();
+			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+			ImmutableList<Pose> immutableList = livingEntity.getDismountPoses();
+
+			for (Pose pose : immutableList) {
+				EntityDimensions entityDimensions = livingEntity.getDimensions(pose);
+				float f = Math.min(entityDimensions.width, 1.0F) / 2.0F;
+
+				for (int i : POSE_DISMOUNT_HEIGHTS.get(pose)) {
+					for (int[] js : is) {
+						mutableBlockPos.set(blockPos.getX() + js[0], blockPos.getY() + i, blockPos.getZ() + js[1]);
+						double d = this.level
+							.getRelativeFloorHeight(
+								mutableBlockPos,
+								blockState -> blockState.is(BlockTags.CLIMBABLE)
+										? true
+										: blockState.getBlock() instanceof TrapDoorBlock && (Boolean)blockState.getValue(TrapDoorBlock.OPEN)
+							);
+						if (DismountHelper.isFloorValid(d)) {
+							AABB aABB = new AABB((double)(-f), d, (double)(-f), (double)f, d + (double)entityDimensions.height, (double)f);
+							Vec3 vec3 = Vec3.upFromBottomCenterOf(mutableBlockPos, d);
+							if (DismountHelper.canDismountTo(this.level, livingEntity, aABB.move(vec3))) {
+								livingEntity.setPose(pose);
+								return vec3;
+							}
+						}
+					}
+				}
+			}
+
+			double e = this.getBoundingBox().maxY;
+			mutableBlockPos.set((double)blockPos.getX(), e, (double)blockPos.getZ());
+
+			for (Pose pose2 : immutableList) {
+				double g = (double)livingEntity.getDimensions(pose2).height;
+				double h = (double)mutableBlockPos.getY() + this.level.getRelativeCeilingHeight(mutableBlockPos, e - (double)mutableBlockPos.getY() + g);
+				if (e + g <= h) {
+					livingEntity.setPose(pose2);
+					break;
+				}
+			}
+
+			return super.getDismountLocationForPassenger(livingEntity);
+		}
 	}
 
 	@Override

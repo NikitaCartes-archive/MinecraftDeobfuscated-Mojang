@@ -48,7 +48,7 @@ public class MoveThroughVillageGoal extends Goal {
 		} else {
 			ServerLevel serverLevel = (ServerLevel)this.mob.level;
 			BlockPos blockPos = this.mob.blockPosition();
-			if (!serverLevel.closeToVillage(blockPos, 6)) {
+			if (!serverLevel.isCloseToVillage(blockPos, 6)) {
 				return false;
 			} else {
 				Vec3 vec3 = RandomPos.getLandPos(this.mob, 15, 7, blockPos2x -> {

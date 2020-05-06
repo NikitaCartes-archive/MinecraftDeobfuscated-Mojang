@@ -15,7 +15,7 @@ public class PiglinRenderer extends HumanoidMobRenderer<Mob, PiglinModel<Mob>> {
 	private static final ResourceLocation ZOMBIFIED_PIGLIN_LOCATION = new ResourceLocation("textures/entity/piglin/zombified_piglin.png");
 
 	public PiglinRenderer(EntityRenderDispatcher entityRenderDispatcher, boolean bl) {
-		super(entityRenderDispatcher, createModel(bl), 0.5F);
+		super(entityRenderDispatcher, createModel(bl), 0.5F, 1.0019531F, 1.0F, 1.0019531F);
 		this.addLayer(new PiglinArmorLayer<>(this, new HumanoidModel(0.5F), new HumanoidModel(1.0F), makeHelmetHeadModel()));
 	}
 

@@ -268,15 +268,10 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 			.addTag(BlockTags.WOODEN_PRESSURE_PLATES)
 			.addTag(BlockTags.STONE_PRESSURE_PLATES);
 		this.tag(BlockTags.STAIRS)
+			.addTag(BlockTags.WOODEN_STAIRS)
 			.add(
-				Blocks.OAK_STAIRS,
 				Blocks.COBBLESTONE_STAIRS,
-				Blocks.SPRUCE_STAIRS,
 				Blocks.SANDSTONE_STAIRS,
-				Blocks.ACACIA_STAIRS,
-				Blocks.JUNGLE_STAIRS,
-				Blocks.BIRCH_STAIRS,
-				Blocks.DARK_OAK_STAIRS,
 				Blocks.NETHER_BRICK_STAIRS,
 				Blocks.STONE_BRICK_STAIRS,
 				Blocks.BRICK_STAIRS,
@@ -573,6 +568,7 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 			.add(Blocks.GOLD_BLOCK, Blocks.BARREL, Blocks.CHEST, Blocks.ENDER_CHEST, Blocks.GILDED_BLACKSTONE, Blocks.TRAPPED_CHEST)
 			.addTag(BlockTags.SHULKER_BOXES)
 			.addTag(BlockTags.GOLD_ORES);
+		this.tag(BlockTags.PREVENT_MOB_SPAWNING_INSIDE).addTag(BlockTags.RAILS).add(Blocks.WITHER_ROSE, Blocks.SWEET_BERRY_BUSH);
 	}
 
 	@Override

@@ -85,8 +85,8 @@ public class WarmOceanBiome extends Biome {
 		);
 		BiomeDefaultFeatures.addSurfaceFreezing(this);
 		this.addSpawn(MobCategory.WATER_CREATURE, new Biome.SpawnerData(EntityType.SQUID, 10, 4, 4));
-		this.addSpawn(MobCategory.WATER_CREATURE, new Biome.SpawnerData(EntityType.PUFFERFISH, 15, 1, 3));
-		this.addSpawn(MobCategory.WATER_CREATURE, new Biome.SpawnerData(EntityType.TROPICAL_FISH, 25, 8, 8));
+		this.addSpawn(MobCategory.WATER_AMBIENT, new Biome.SpawnerData(EntityType.PUFFERFISH, 15, 1, 3));
+		this.addSpawn(MobCategory.WATER_AMBIENT, new Biome.SpawnerData(EntityType.TROPICAL_FISH, 25, 8, 8));
 		this.addSpawn(MobCategory.WATER_CREATURE, new Biome.SpawnerData(EntityType.DOLPHIN, 2, 1, 2));
 		this.addSpawn(MobCategory.AMBIENT, new Biome.SpawnerData(EntityType.BAT, 10, 8, 8));
 		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.SPIDER, 100, 4, 4));

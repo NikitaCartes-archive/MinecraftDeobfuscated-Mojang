@@ -2,6 +2,7 @@ package net.minecraft.world.entity.animal;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -18,7 +19,9 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ItemBasedSteering;
 import net.minecraft.world.entity.ItemSteerable;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.Saddleable;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -33,11 +36,13 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class Pig extends Animal implements ItemSteerable, Saddleable {
@@ -173,6 +178,36 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 		this.steering.setSaddle(true);
 		if (soundSource != null) {
 			this.level.playSound(null, this, SoundEvents.PIG_SADDLE, soundSource, 0.5F, 1.0F);
+		}
+	}
+
+	@Override
+	public Vec3 getDismountLocationForPassenger(LivingEntity livingEntity) {
+		Direction direction = this.getMotionDirection();
+		if (direction.getAxis() == Direction.Axis.Y) {
+			return super.getDismountLocationForPassenger(livingEntity);
+		} else {
+			int[][] is = DismountHelper.offsetsForDirection(direction);
+			BlockPos blockPos = this.blockPosition();
+			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+
+			for (Pose pose : livingEntity.getDismountPoses()) {
+				AABB aABB = livingEntity.getLocalBoundsForPose(pose);
+
+				for (int[] js : is) {
+					mutableBlockPos.set(blockPos.getX() + js[0], blockPos.getY(), blockPos.getZ() + js[1]);
+					double d = this.level.getRelativeFloorHeight(mutableBlockPos);
+					if (DismountHelper.isFloorValid(d)) {
+						Vec3 vec3 = Vec3.upFromBottomCenterOf(mutableBlockPos, d);
+						if (DismountHelper.canDismountTo(this.level, livingEntity, aABB.move(vec3))) {
+							livingEntity.setPose(pose);
+							return vec3;
+						}
+					}
+				}
+			}
+
+			return super.getDismountLocationForPassenger(livingEntity);
 		}
 	}
 

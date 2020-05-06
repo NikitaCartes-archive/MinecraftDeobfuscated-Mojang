@@ -21,7 +21,7 @@ public class ChunkGeneratorSettings {
 	protected final int shipwreckSeparation = 4;
 	protected int woodlandMansionSpacing = 80;
 	protected final int woodlandMansionSeparation = 20;
-	protected final int rareNetherStructureSpacing = 24;
+	protected final int rareNetherStructureSpacing = 30;
 	protected final int rareNetherStructureSeparation = 4;
 	protected final int rareNetherStructureSalt = 30084232;
 	protected int ruinedPortalOverworldSpacing = 40;
@@ -32,7 +32,7 @@ public class ChunkGeneratorSettings {
 	protected BlockState defaultFluid = Blocks.WATER.defaultBlockState();
 
 	public int getRareNetherStructureSpacing() {
-		return 24;
+		return 30;
 	}
 
 	public int getRareNetherStructureSeparation() {

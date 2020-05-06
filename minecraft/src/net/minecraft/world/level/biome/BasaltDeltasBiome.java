@@ -53,7 +53,7 @@ public class BasaltDeltasBiome extends Biome {
 						.build()
 				)
 				.parent(null)
-				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(-0.7F, 0.0F, 0.0F, 0.0F, 0.3F)))
+				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(-0.5F, 0.0F, 0.0F, 0.0F, 0.175F)))
 		);
 		this.addStructureStart(Feature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.NETHER)));
 		this.addFeature(

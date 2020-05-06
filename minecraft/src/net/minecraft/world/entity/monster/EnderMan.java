@@ -310,7 +310,7 @@ public class EnderMan extends Monster {
 			return false;
 		} else {
 			boolean bl = super.hurt(damageSource, f);
-			if (!this.level.isClientSide() && damageSource.isBypassArmor() && this.random.nextInt(10) != 0) {
+			if (!this.level.isClientSide() && this.random.nextInt(10) != 0) {
 				this.teleport();
 			}
 

@@ -218,7 +218,7 @@ public interface DispenseItemBehavior {
 				if (!list.isEmpty()) {
 					((Saddleable)list.get(0)).equipSaddle(SoundSource.BLOCKS);
 					itemStack.shrink(1);
-					this.success = true;
+					this.setSuccess(true);
 					return itemStack;
 				} else {
 					return super.execute(blockSource, itemStack);
@@ -234,7 +234,7 @@ public interface DispenseItemBehavior {
 					.getEntitiesOfClass(AbstractHorse.class, new AABB(blockPos), abstractHorsex -> abstractHorsex.isAlive() && abstractHorsex.canWearArmor())) {
 					if (abstractHorse.isArmor(itemStack) && !abstractHorse.isWearingArmor() && abstractHorse.isTamed()) {
 						abstractHorse.setSlot(401, itemStack.split(1));
-						this.success = true;
+						this.setSuccess(true);
 						return itemStack;
 					}
 				}
@@ -275,7 +275,7 @@ public interface DispenseItemBehavior {
 						)) {
 						if (abstractChestedHorse.isTamed() && abstractChestedHorse.setSlot(499, itemStack)) {
 							itemStack.shrink(1);
-							this.success = true;
+							this.setSuccess(true);
 							return itemStack;
 						}
 					}
@@ -392,7 +392,7 @@ public interface DispenseItemBehavior {
 			@Override
 			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
 				Level level = blockSource.getLevel();
-				this.success = true;
+				this.setSuccess(true);
 				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
 				BlockState blockState = level.getBlockState(blockPos);
 				if (FlintAndSteelItem.canUse(blockState, level, blockPos)) {
@@ -403,10 +403,10 @@ public interface DispenseItemBehavior {
 					TntBlock.explode(level, blockPos);
 					level.removeBlock(blockPos, false);
 				} else {
-					this.success = false;
+					this.setSuccess(false);
 				}
 
-				if (this.success && itemStack.hurt(1, level.random, null)) {
+				if (this.isSuccess() && itemStack.hurt(1, level.random, null)) {
 					itemStack.setCount(0);
 				}
 
@@ -416,11 +416,11 @@ public interface DispenseItemBehavior {
 		DispenserBlock.registerBehavior(Items.BONE_MEAL, new OptionalDispenseItemBehavior() {
 			@Override
 			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				this.success = true;
+				this.setSuccess(true);
 				Level level = blockSource.getLevel();
 				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
 				if (!BoneMealItem.growCrop(itemStack, level, blockPos) && !BoneMealItem.growWaterPlant(itemStack, level, blockPos, null)) {
-					this.success = false;
+					this.setSuccess(false);
 				} else if (!level.isClientSide) {
 					level.levelEvent(2005, blockPos, 0);
 				}
@@ -443,7 +443,7 @@ public interface DispenseItemBehavior {
 		DispenseItemBehavior dispenseItemBehavior2 = new OptionalDispenseItemBehavior() {
 			@Override
 			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				this.success = ArmorItem.dispenseArmor(blockSource, itemStack);
+				this.setSuccess(ArmorItem.dispenseArmor(blockSource, itemStack));
 				return itemStack;
 			}
 		};
@@ -474,9 +474,9 @@ public interface DispenseItemBehavior {
 						}
 
 						itemStack.shrink(1);
-						this.success = true;
+						this.setSuccess(true);
 					} else {
-						this.success = ArmorItem.dispenseArmor(blockSource, itemStack);
+						this.setSuccess(ArmorItem.dispenseArmor(blockSource, itemStack));
 					}
 
 					return itemStack;
@@ -495,9 +495,9 @@ public interface DispenseItemBehavior {
 					}
 
 					itemStack.shrink(1);
-					this.success = true;
+					this.setSuccess(true);
 				} else {
-					this.success = ArmorItem.dispenseArmor(blockSource, itemStack);
+					this.setSuccess(ArmorItem.dispenseArmor(blockSource, itemStack));
 				}
 
 				return itemStack;
@@ -529,7 +529,7 @@ public interface DispenseItemBehavior {
 
 				@Override
 				public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-					this.success = false;
+					this.setSuccess(false);
 					LevelAccessor levelAccessor = blockSource.getLevel();
 					BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
 					BlockState blockState = levelAccessor.getBlockState(blockPos);
@@ -537,10 +537,10 @@ public interface DispenseItemBehavior {
 						&& (Integer)blockState.getValue(BeehiveBlock.HONEY_LEVEL) >= 5) {
 						((BeehiveBlock)blockState.getBlock())
 							.releaseBeesAndResetHoneyLevel(levelAccessor.getLevel(), blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
-						this.success = true;
+						this.setSuccess(true);
 						return this.takeLiquid(blockSource, itemStack, new ItemStack(Items.HONEY_BOTTLE));
 					} else if (levelAccessor.getFluidState(blockPos).is(FluidTags.WATER)) {
-						this.success = true;
+						this.setSuccess(true);
 						return this.takeLiquid(blockSource, itemStack, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER));
 					} else {
 						return super.execute(blockSource, itemStack);
@@ -555,12 +555,13 @@ public interface DispenseItemBehavior {
 				BlockPos blockPos = blockSource.getPos().relative(direction);
 				Level level = blockSource.getLevel();
 				BlockState blockState = level.getBlockState(blockPos);
+				this.setSuccess(true);
 				if (blockState.is(Blocks.RESPAWN_ANCHOR)) {
 					if ((Integer)blockState.getValue(RespawnAnchorBlock.CHARGE) != 4) {
 						RespawnAnchorBlock.charge(level, blockPos, blockState);
 						itemStack.shrink(1);
 					} else {
-						this.success = false;
+						this.setSuccess(false);
 					}
 
 					return itemStack;

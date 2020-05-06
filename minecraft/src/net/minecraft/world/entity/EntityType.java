@@ -168,9 +168,7 @@ public class EntityType<T extends Entity> {
 	public static final EntityType<Chicken> CHICKEN = register(
 		"chicken", EntityType.Builder.of(Chicken::new, MobCategory.CREATURE).sized(0.4F, 0.7F).clientTrackingRange(10)
 	);
-	public static final EntityType<Cod> COD = register(
-		"cod", EntityType.Builder.of(Cod::new, MobCategory.WATER_CREATURE).sized(0.5F, 0.3F).instantDespawnDistance(64).clientTrackingRange(4)
-	);
+	public static final EntityType<Cod> COD = register("cod", EntityType.Builder.of(Cod::new, MobCategory.WATER_AMBIENT).sized(0.5F, 0.3F).clientTrackingRange(4));
 	public static final EntityType<Cow> COW = register("cow", EntityType.Builder.of(Cow::new, MobCategory.CREATURE).sized(0.9F, 1.4F).clientTrackingRange(10));
 	public static final EntityType<Creeper> CREEPER = register(
 		"creeper", EntityType.Builder.of(Creeper::new, MobCategory.MONSTER).sized(0.6F, 1.7F).clientTrackingRange(8)
@@ -326,7 +324,7 @@ public class EntityType<T extends Entity> {
 		"tnt", EntityType.Builder.<PrimedTnt>of(PrimedTnt::new, MobCategory.MISC).fireImmune().sized(0.98F, 0.98F).clientTrackingRange(10).updateInterval(10)
 	);
 	public static final EntityType<Pufferfish> PUFFERFISH = register(
-		"pufferfish", EntityType.Builder.of(Pufferfish::new, MobCategory.WATER_CREATURE).sized(0.7F, 0.7F).instantDespawnDistance(64).clientTrackingRange(4)
+		"pufferfish", EntityType.Builder.of(Pufferfish::new, MobCategory.WATER_AMBIENT).sized(0.7F, 0.7F).clientTrackingRange(4)
 	);
 	public static final EntityType<Rabbit> RABBIT = register(
 		"rabbit", EntityType.Builder.of(Rabbit::new, MobCategory.CREATURE).sized(0.4F, 0.5F).clientTrackingRange(8)
@@ -335,7 +333,7 @@ public class EntityType<T extends Entity> {
 		"ravager", EntityType.Builder.of(Ravager::new, MobCategory.MONSTER).sized(1.95F, 2.2F).clientTrackingRange(10)
 	);
 	public static final EntityType<Salmon> SALMON = register(
-		"salmon", EntityType.Builder.of(Salmon::new, MobCategory.WATER_CREATURE).sized(0.7F, 0.4F).instantDespawnDistance(64).clientTrackingRange(4)
+		"salmon", EntityType.Builder.of(Salmon::new, MobCategory.WATER_AMBIENT).sized(0.7F, 0.4F).clientTrackingRange(4)
 	);
 	public static final EntityType<Sheep> SHEEP = register(
 		"sheep", EntityType.Builder.of(Sheep::new, MobCategory.CREATURE).sized(0.9F, 1.3F).clientTrackingRange(10)
@@ -403,7 +401,7 @@ public class EntityType<T extends Entity> {
 		"trader_llama", EntityType.Builder.of(TraderLlama::new, MobCategory.CREATURE).sized(0.9F, 1.87F).clientTrackingRange(10)
 	);
 	public static final EntityType<TropicalFish> TROPICAL_FISH = register(
-		"tropical_fish", EntityType.Builder.of(TropicalFish::new, MobCategory.WATER_CREATURE).sized(0.5F, 0.4F).instantDespawnDistance(64).clientTrackingRange(4)
+		"tropical_fish", EntityType.Builder.of(TropicalFish::new, MobCategory.WATER_AMBIENT).sized(0.5F, 0.4F).clientTrackingRange(4)
 	);
 	public static final EntityType<Turtle> TURTLE = register(
 		"turtle", EntityType.Builder.of(Turtle::new, MobCategory.CREATURE).sized(1.2F, 0.4F).clientTrackingRange(10)
@@ -464,8 +462,6 @@ public class EntityType<T extends Entity> {
 	private final boolean summon;
 	private final boolean fireImmune;
 	private final boolean canSpawnFarFromPlayer;
-	private final int instantDespawnDistance;
-	private final int noDespawnDistance;
 	private final int clientTrackingRange;
 	private final int updateInterval;
 	@Nullable
@@ -495,23 +491,19 @@ public class EntityType<T extends Entity> {
 		boolean bl2,
 		boolean bl3,
 		boolean bl4,
-		int i,
-		int j,
 		EntityDimensions entityDimensions,
-		int k,
-		int l
+		int i,
+		int j
 	) {
 		this.factory = entityFactory;
 		this.category = mobCategory;
 		this.canSpawnFarFromPlayer = bl4;
-		this.instantDespawnDistance = i;
-		this.noDespawnDistance = j;
 		this.serialize = bl;
 		this.summon = bl2;
 		this.fireImmune = bl3;
 		this.dimensions = entityDimensions;
-		this.clientTrackingRange = k;
-		this.updateInterval = l;
+		this.clientTrackingRange = i;
+		this.updateInterval = j;
 	}
 
 	@Nullable
@@ -626,14 +618,6 @@ public class EntityType<T extends Entity> {
 
 	public boolean canSpawnFarFromPlayer() {
 		return this.canSpawnFarFromPlayer;
-	}
-
-	public int getInstantDespawnDistance() {
-		return this.instantDespawnDistance;
-	}
-
-	public int getNoDespawnDistance() {
-		return this.noDespawnDistance;
 	}
 
 	public MobCategory getCategory() {
@@ -769,8 +753,6 @@ public class EntityType<T extends Entity> {
 		private boolean summon = true;
 		private boolean fireImmune;
 		private boolean canSpawnFarFromPlayer;
-		private int instantDespawnDistance = 128;
-		private int noDespawnDistance = 32;
 		private int clientTrackingRange = 5;
 		private int updateInterval = 3;
 		private EntityDimensions dimensions = EntityDimensions.scalable(0.6F, 1.8F);
@@ -814,11 +796,6 @@ public class EntityType<T extends Entity> {
 			return this;
 		}
 
-		public EntityType.Builder<T> instantDespawnDistance(int i) {
-			this.instantDespawnDistance = i;
-			return this;
-		}
-
 		public EntityType.Builder<T> clientTrackingRange(int i) {
 			this.clientTrackingRange = i;
 			return this;
@@ -851,8 +828,6 @@ public class EntityType<T extends Entity> {
 				this.summon,
 				this.fireImmune,
 				this.canSpawnFarFromPlayer,
-				this.instantDespawnDistance,
-				this.noDespawnDistance,
 				this.dimensions,
 				this.clientTrackingRange,
 				this.updateInterval

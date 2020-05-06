@@ -82,10 +82,10 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 		List<ItemStack> list = this.category.getIconItems();
 		int i = this.isStateTriggered ? -2 : 0;
 		if (list.size() == 1) {
-			itemRenderer.renderAndDecorateItem((ItemStack)list.get(0), this.x + 9 + i, this.y + 5);
+			itemRenderer.renderAndDecorateFakeItem((ItemStack)list.get(0), this.x + 9 + i, this.y + 5);
 		} else if (list.size() == 2) {
-			itemRenderer.renderAndDecorateItem((ItemStack)list.get(0), this.x + 3 + i, this.y + 5);
-			itemRenderer.renderAndDecorateItem((ItemStack)list.get(1), this.x + 14 + i, this.y + 5);
+			itemRenderer.renderAndDecorateFakeItem((ItemStack)list.get(0), this.x + 3 + i, this.y + 5);
+			itemRenderer.renderAndDecorateFakeItem((ItemStack)list.get(1), this.x + 14 + i, this.y + 5);
 		}
 	}
 

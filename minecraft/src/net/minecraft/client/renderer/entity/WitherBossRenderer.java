@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WitherBossModel;
 import net.minecraft.client.renderer.entity.layers.WitherArmorLayer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 
@@ -18,7 +19,7 @@ public class WitherBossRenderer extends MobRenderer<WitherBoss, WitherBossModel<
 		this.addLayer(new WitherArmorLayer(this));
 	}
 
-	protected int getBlockLightLevel(WitherBoss witherBoss, float f) {
+	protected int getBlockLightLevel(WitherBoss witherBoss, BlockPos blockPos) {
 		return 15;
 	}
 

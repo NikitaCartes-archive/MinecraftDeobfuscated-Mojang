@@ -556,7 +556,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	@Override
 	public void stopServer() {
 		super.stopServer();
-		Util.shutdownBackgroundExecutor();
+		Util.shutdownExecutors();
 	}
 
 	@Override
