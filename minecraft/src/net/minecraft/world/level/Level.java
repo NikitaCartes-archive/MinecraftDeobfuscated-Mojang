@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -78,6 +77,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	protected final List<BlockEntity> pendingBlockEntities = Lists.<BlockEntity>newArrayList();
 	protected final List<BlockEntity> blockEntitiesToUnload = Lists.<BlockEntity>newArrayList();
 	private final Thread thread;
+	private final boolean isDebug;
 	private int skyDarken;
 	protected int randValue = new Random().nextInt();
 	protected final int addend = 1013904223;
@@ -86,8 +86,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	protected float oThunderLevel;
 	protected float thunderLevel;
 	public final Random random = new Random();
-	public final Dimension dimension;
-	protected final ChunkSource chunkSource;
+	private final Dimension dimension;
 	protected final WritableLevelData levelData;
 	private final Supplier<ProfilerFiller> profiler;
 	public final boolean isClientSide;
@@ -95,23 +94,15 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	private final WorldBorder worldBorder;
 	private final BiomeManager biomeManager;
 
-	protected Level(
-		WritableLevelData writableLevelData,
-		DimensionType dimensionType,
-		BiFunction<Level, Dimension, ChunkSource> biFunction,
-		Supplier<ProfilerFiller> supplier,
-		boolean bl
-	) {
+	protected Level(WritableLevelData writableLevelData, DimensionType dimensionType, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l) {
 		this.profiler = supplier;
 		this.levelData = writableLevelData;
 		this.dimension = dimensionType.create(this);
-		this.chunkSource = (ChunkSource)biFunction.apply(this, this.dimension);
 		this.isClientSide = bl;
-		this.worldBorder = this.dimension.createWorldBorder();
+		this.worldBorder = this.getDimension().createWorldBorder();
 		this.thread = Thread.currentThread();
-		this.biomeManager = new BiomeManager(
-			this, bl ? writableLevelData.getSeed() : LevelData.obfuscateSeed(writableLevelData.getSeed()), dimensionType.getBiomeZoomer()
-		);
+		this.biomeManager = new BiomeManager(this, l, dimensionType.getBiomeZoomer());
+		this.isDebug = bl2;
 	}
 
 	@Override
@@ -204,7 +195,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	@Override
 	public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
-		ChunkAccess chunkAccess = this.chunkSource.getChunk(i, j, chunkStatus, bl);
+		ChunkAccess chunkAccess = this.getChunkSource().getChunk(i, j, chunkStatus, bl);
 		if (chunkAccess == null && bl) {
 			throw new IllegalStateException("Should always be able to create a chunk!");
 		} else {
@@ -216,7 +207,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	public boolean setBlock(BlockPos blockPos, BlockState blockState, int i) {
 		if (isOutsideBuildHeight(blockPos)) {
 			return false;
-		} else if (!this.isClientSide && this.levelData.getGeneratorType() == LevelType.DEBUG_ALL_BLOCK_STATES) {
+		} else if (!this.isClientSide && this.isDebug()) {
 			return false;
 		} else {
 			LevelChunk levelChunk = this.getChunkAt(blockPos);
@@ -408,11 +399,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public boolean isDay() {
-		return this.dimension.getType() == DimensionType.OVERWORLD && this.skyDarken < 4;
+		return this.dimensionType() == DimensionType.OVERWORLD && this.skyDarken < 4;
 	}
 
 	public boolean isNight() {
-		return this.dimension.getType() == DimensionType.OVERWORLD && !this.isDay();
+		return this.dimensionType() == DimensionType.OVERWORLD && !this.isDay();
 	}
 
 	@Override
@@ -491,7 +482,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 			BlockEntity blockEntity = (BlockEntity)iterator.next();
 			if (!blockEntity.isRemoved() && blockEntity.hasLevel()) {
 				BlockPos blockPos = blockEntity.getBlockPos();
-				if (this.chunkSource.isTickingChunk(blockPos) && this.getWorldBorder().isWithinBounds(blockPos)) {
+				if (this.getChunkSource().isTickingChunk(blockPos) && this.getWorldBorder().isWithinBounds(blockPos)) {
 					try {
 						profilerFiller.push((Supplier<String>)(() -> String.valueOf(BlockEntityType.getKey(blockEntity.getType()))));
 						if (blockEntity.getType().isValid(this.getBlockState(blockPos).getBlock())) {
@@ -664,7 +655,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	@Environment(EnvType.CLIENT)
 	public String gatherChunkSourceStats() {
-		return this.chunkSource.gatherStats();
+		return this.getChunkSource().gatherStats();
 	}
 
 	@Nullable
@@ -745,7 +736,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public boolean isLoaded(BlockPos blockPos) {
-		return isOutsideBuildHeight(blockPos) ? false : this.chunkSource.hasChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+		return isOutsideBuildHeight(blockPos) ? false : this.getChunkSource().hasChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4);
 	}
 
 	public boolean loadedAndEntityCanStandOnFace(BlockPos blockPos, Entity entity, Direction direction) {
@@ -782,7 +773,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public void close() throws IOException {
-		this.chunkSource.close();
+		this.getChunkSource().close();
 	}
 
 	@Nullable
@@ -895,10 +886,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		return this;
 	}
 
-	public LevelType getGeneratorType() {
-		return this.levelData.getGeneratorType();
-	}
-
 	public int getDirectSignalTo(BlockPos blockPos) {
 		int i = 0;
 		i = Math.max(i, this.getDirectSignal(blockPos.below(), Direction.DOWN));
@@ -979,11 +966,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		this.levelData.setGameTime(l);
 	}
 
-	@Override
-	public long getSeed() {
-		return this.levelData.getSeed();
-	}
-
 	public long getGameTime() {
 		return this.levelData.getGameTime();
 	}
@@ -1008,11 +990,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public void broadcastEntityEvent(Entity entity, byte b) {
-	}
-
-	@Override
-	public ChunkSource getChunkSource() {
-		return this.chunkSource;
 	}
 
 	public void blockEvent(BlockPos blockPos, Block block, int i, int j) {
@@ -1049,7 +1026,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public boolean isThundering() {
-		return this.dimension.isHasSkyLight() && !this.dimension.isHasCeiling() ? (double)this.getThunderLevel(1.0F) > 0.9 : false;
+		return this.dimensionType().hasSkyLight() && !this.dimensionType().hasCeiling() ? (double)this.getThunderLevel(1.0F) > 0.9 : false;
 	}
 
 	public boolean isRaining() {
@@ -1087,8 +1064,8 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	public CrashReportCategory fillReportDetails(CrashReport crashReport) {
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Affected level", 1);
 		crashReportCategory.setDetail("All players", (CrashReportDetail<String>)(() -> this.players().size() + " total; " + this.players()));
-		crashReportCategory.setDetail("Chunk stats", this.chunkSource::gatherStats);
-		crashReportCategory.setDetail("Level dimension", (CrashReportDetail<String>)(() -> this.dimension.getType().toString()));
+		crashReportCategory.setDetail("Chunk stats", this.getChunkSource()::gatherStats);
+		crashReportCategory.setDetail("Level dimension", (CrashReportDetail<String>)(() -> this.dimensionType().toString()));
 
 		try {
 			this.levelData.fillCrashReportCategory(crashReportCategory);
@@ -1160,6 +1137,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	@Override
+	public DimensionType dimensionType() {
+		return this.dimension.getType();
+	}
+
+	@Override
 	public Random getRandom() {
 		return this.random;
 	}
@@ -1194,5 +1176,9 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	@Override
 	public BiomeManager getBiomeManager() {
 		return this.biomeManager;
+	}
+
+	public final boolean isDebug() {
+		return this.isDebug;
 	}
 }

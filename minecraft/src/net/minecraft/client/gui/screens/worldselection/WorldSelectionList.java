@@ -396,12 +396,11 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 		public void recreateWorld() {
 			try {
 				this.minecraft.setScreen(new ProgressScreen());
-				CreateWorldScreen createWorldScreen = new CreateWorldScreen(this.screen);
 
 				try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(this.summary.getLevelId())) {
 					WorldData worldData = levelStorageAccess.getDataTag();
 					if (worldData != null) {
-						createWorldScreen.copyFromWorld(worldData);
+						CreateWorldScreen createWorldScreen = new CreateWorldScreen(this.screen, worldData);
 						if (this.summary.isOldCustomizedWorld()) {
 							this.minecraft
 								.setScreen(

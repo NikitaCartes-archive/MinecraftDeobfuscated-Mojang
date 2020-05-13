@@ -9,8 +9,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.ChanceRangeDecoratorConfiguration;
@@ -156,24 +156,24 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
 	}
 
 	protected <FC extends FeatureConfiguration, F extends Feature<FC>> boolean placeFeature(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		DC decoratorConfiguration,
 		ConfiguredFeature<FC, F> configuredFeature
 	) {
 		AtomicBoolean atomicBoolean = new AtomicBoolean(false);
-		this.getPositions(levelAccessor, chunkGenerator, random, decoratorConfiguration, blockPos).forEach(blockPosx -> {
-			boolean bl = configuredFeature.place(levelAccessor, structureFeatureManager, chunkGenerator, random, blockPosx);
+		this.getPositions(worldGenLevel, chunkGenerator, random, decoratorConfiguration, blockPos).forEach(blockPosx -> {
+			boolean bl = configuredFeature.place(worldGenLevel, structureFeatureManager, chunkGenerator, random, blockPosx);
 			atomicBoolean.set(atomicBoolean.get() || bl);
 		});
 		return atomicBoolean.get();
 	}
 
 	public abstract Stream<BlockPos> getPositions(
-		LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, DC decoratorConfiguration, BlockPos blockPos
+		LevelAccessor levelAccessor, ChunkGenerator chunkGenerator, Random random, DC decoratorConfiguration, BlockPos blockPos
 	);
 
 	public String toString() {

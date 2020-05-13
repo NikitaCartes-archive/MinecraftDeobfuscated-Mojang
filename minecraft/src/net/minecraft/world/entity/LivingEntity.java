@@ -1791,7 +1791,7 @@ public abstract class LivingEntity extends Entity {
 			vec3 = new Vec3(entity.getX(), entity.getY() + (double)entity.getBbHeight(), entity.getZ());
 		}
 
-		this.setPos(vec3.x, vec3.y, vec3.z);
+		this.teleportTo(vec3.x, vec3.y, vec3.z);
 	}
 
 	@Environment(EnvType.CLIENT)

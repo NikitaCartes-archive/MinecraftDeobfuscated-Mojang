@@ -11,7 +11,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 
 public class CarvingMaskDecorator extends FeatureDecorator<CarvingMaskDecoratorConfiguration> {
 	public CarvingMaskDecorator(Function<Dynamic<?>, ? extends CarvingMaskDecoratorConfiguration> function) {
@@ -20,7 +19,7 @@ public class CarvingMaskDecorator extends FeatureDecorator<CarvingMaskDecoratorC
 
 	public Stream<BlockPos> getPositions(
 		LevelAccessor levelAccessor,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		CarvingMaskDecoratorConfiguration carvingMaskDecoratorConfiguration,
 		BlockPos blockPos

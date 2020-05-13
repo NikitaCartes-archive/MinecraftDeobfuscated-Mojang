@@ -127,7 +127,7 @@ public class FireBlock extends BaseFireBlock {
 			}
 
 			BlockState blockState2 = serverLevel.getBlockState(blockPos.below());
-			boolean bl = serverLevel.dimension instanceof TheEndDimension && blockState2.is(Blocks.BEDROCK)
+			boolean bl = serverLevel.getDimension() instanceof TheEndDimension && blockState2.is(Blocks.BEDROCK)
 				|| blockState2.is(Blocks.NETHERRACK)
 				|| blockState2.is(Blocks.MAGMA_BLOCK);
 			int i = (Integer)blockState.getValue(AGE);

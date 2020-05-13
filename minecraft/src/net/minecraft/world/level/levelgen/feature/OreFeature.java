@@ -8,8 +8,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 
@@ -19,9 +19,9 @@ public class OreFeature extends Feature<OreConfiguration> {
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		OreConfiguration oreConfiguration
@@ -44,8 +44,8 @@ public class OreFeature extends Feature<OreConfiguration> {
 
 		for (int s = n; s <= n + q; s++) {
 			for (int t = p; t <= p + q; t++) {
-				if (o <= levelAccessor.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, s, t)) {
-					return this.doPlace(levelAccessor, random, oreConfiguration, d, e, h, j, l, m, n, o, p, q, r);
+				if (o <= worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, s, t)) {
+					return this.doPlace(worldGenLevel, random, oreConfiguration, d, e, h, j, l, m, n, o, p, q, r);
 				}
 			}
 		}

@@ -16,7 +16,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 public class InteractableDoorsSensor extends Sensor<LivingEntity> {
 	@Override
 	protected void doTick(ServerLevel serverLevel, LivingEntity livingEntity) {
-		DimensionType dimensionType = serverLevel.getDimension().getType();
+		DimensionType dimensionType = serverLevel.dimensionType();
 		BlockPos blockPos = livingEntity.blockPosition();
 		List<GlobalPos> list = Lists.<GlobalPos>newArrayList();
 

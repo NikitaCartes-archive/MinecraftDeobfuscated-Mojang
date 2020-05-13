@@ -10,7 +10,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.NoiseDependantDecoratorConfiguration;
 
@@ -21,7 +20,7 @@ public class NoiseHeightmap32Decorator extends FeatureDecorator<NoiseDependantDe
 
 	public Stream<BlockPos> getPositions(
 		LevelAccessor levelAccessor,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		NoiseDependantDecoratorConfiguration noiseDependantDecoratorConfiguration,
 		BlockPos blockPos

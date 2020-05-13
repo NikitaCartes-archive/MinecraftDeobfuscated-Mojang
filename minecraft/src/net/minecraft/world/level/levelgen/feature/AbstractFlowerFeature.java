@@ -6,9 +6,9 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 public abstract class AbstractFlowerFeature<U extends FeatureConfiguration> extends Feature<U> {
@@ -18,9 +18,9 @@ public abstract class AbstractFlowerFeature<U extends FeatureConfiguration> exte
 
 	@Override
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		U featureConfiguration
@@ -30,11 +30,11 @@ public abstract class AbstractFlowerFeature<U extends FeatureConfiguration> exte
 
 		for (int j = 0; j < this.getCount(featureConfiguration); j++) {
 			BlockPos blockPos2 = this.getPos(random, blockPos, featureConfiguration);
-			if (levelAccessor.isEmptyBlock(blockPos2)
+			if (worldGenLevel.isEmptyBlock(blockPos2)
 				&& blockPos2.getY() < 255
-				&& blockState.canSurvive(levelAccessor, blockPos2)
-				&& this.isValid(levelAccessor, blockPos2, featureConfiguration)) {
-				levelAccessor.setBlock(blockPos2, blockState, 2);
+				&& blockState.canSurvive(worldGenLevel, blockPos2)
+				&& this.isValid(worldGenLevel, blockPos2, featureConfiguration)) {
+				worldGenLevel.setBlock(blockPos2, blockState, 2);
 				i++;
 			}
 		}

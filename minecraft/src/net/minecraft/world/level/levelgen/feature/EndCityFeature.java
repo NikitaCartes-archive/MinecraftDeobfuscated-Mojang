@@ -9,7 +9,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
@@ -25,12 +24,12 @@ public class EndCityFeature extends StructureFeature<NoneFeatureConfiguration> {
 	}
 
 	@Override
-	protected int getSpacing(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+	protected int getSpacing(ChunkGeneratorSettings chunkGeneratorSettings) {
 		return chunkGeneratorSettings.getEndCitySpacing();
 	}
 
 	@Override
-	protected int getSeparation(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+	protected int getSeparation(ChunkGeneratorSettings chunkGeneratorSettings) {
 		return chunkGeneratorSettings.getEndCitySeparation();
 	}
 
@@ -46,7 +45,7 @@ public class EndCityFeature extends StructureFeature<NoneFeatureConfiguration> {
 
 	@Override
 	protected boolean isFeatureChunk(
-		BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos
+		BiomeManager biomeManager, ChunkGenerator chunkGenerator, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos
 	) {
 		return getYPositionForFeature(i, j, chunkGenerator) >= 60;
 	}
@@ -66,7 +65,7 @@ public class EndCityFeature extends StructureFeature<NoneFeatureConfiguration> {
 		return 8;
 	}
 
-	private static int getYPositionForFeature(int i, int j, ChunkGenerator<?> chunkGenerator) {
+	private static int getYPositionForFeature(int i, int j, ChunkGenerator chunkGenerator) {
 		Random random = new Random((long)(i + j * 10387313));
 		Rotation rotation = Rotation.getRandom(random);
 		int k = 5;
@@ -95,7 +94,7 @@ public class EndCityFeature extends StructureFeature<NoneFeatureConfiguration> {
 		}
 
 		@Override
-		public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+		public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
 			Rotation rotation = Rotation.getRandom(this.random);
 			int k = EndCityFeature.getYPositionForFeature(i, j, chunkGenerator);
 			if (k >= 60) {

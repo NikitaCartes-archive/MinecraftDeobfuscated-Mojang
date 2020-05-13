@@ -42,7 +42,7 @@ public class DesertPyramidFeature extends RandomScatteredFeature<NoneFeatureConf
 		}
 
 		@Override
-		public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+		public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
 			DesertPyramidPiece desertPyramidPiece = new DesertPyramidPiece(this.random, i * 16, j * 16);
 			this.pieces.add(desertPyramidPiece);
 			this.calculateBoundingBox();

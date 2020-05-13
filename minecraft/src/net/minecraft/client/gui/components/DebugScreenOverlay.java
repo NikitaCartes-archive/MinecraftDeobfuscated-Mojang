@@ -238,7 +238,7 @@ public class DebugScreenOverlay extends GuiComponent {
 				list.add(string3);
 			}
 
-			list.add(DimensionType.getName(this.minecraft.level.dimension.getType()).toString() + " FC: " + Integer.toString(longSet.size()));
+			list.add(DimensionType.getName(this.minecraft.level.dimensionType()).toString() + " FC: " + Integer.toString(longSet.size()));
 			list.add("");
 			list.add(
 				String.format(
@@ -370,7 +370,7 @@ public class DebugScreenOverlay extends GuiComponent {
 	@Nullable
 	private ServerLevel getServerLevel() {
 		IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
-		return integratedServer != null ? integratedServer.getLevel(this.minecraft.level.getDimension().getType()) : null;
+		return integratedServer != null ? integratedServer.getLevel(this.minecraft.level.dimensionType()) : null;
 	}
 
 	@Nullable
@@ -381,7 +381,7 @@ public class DebugScreenOverlay extends GuiComponent {
 
 	private Level getLevel() {
 		return DataFixUtils.orElse(
-			Optional.ofNullable(this.minecraft.getSingleplayerServer()).map(integratedServer -> integratedServer.getLevel(this.minecraft.level.dimension.getType())),
+			Optional.ofNullable(this.minecraft.getSingleplayerServer()).map(integratedServer -> integratedServer.getLevel(this.minecraft.level.dimensionType())),
 			this.minecraft.level
 		);
 	}

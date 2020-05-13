@@ -48,7 +48,7 @@ public class CompassItem extends Item implements Vanishable {
 
 				Optional<DimensionType> optional = getLodestoneDimension(compoundTag);
 				if (optional.isPresent()
-					&& ((DimensionType)optional.get()).equals(level.dimension.getType())
+					&& ((DimensionType)optional.get()).equals(level.dimensionType())
 					&& compoundTag.contains("LodestonePos")
 					&& !((ServerLevel)level).getPoiManager().existsAtPosition(PoiType.LODESTONE, NbtUtils.readBlockPos((CompoundTag)compoundTag.get("LodestonePos")))) {
 					compoundTag.remove("LodestonePos");
@@ -66,7 +66,7 @@ public class CompassItem extends Item implements Vanishable {
 			useOnContext.level.playSound(null, blockPos, SoundEvents.LODESTONE_COMPASS_LOCK, SoundSource.PLAYERS, 1.0F, 1.0F);
 			boolean bl = !useOnContext.player.abilities.instabuild && useOnContext.itemStack.getCount() == 1;
 			if (bl) {
-				this.addLodestoneTags(useOnContext.level.dimension, blockPos, useOnContext.itemStack.getOrCreateTag());
+				this.addLodestoneTags(useOnContext.level.getDimension(), blockPos, useOnContext.itemStack.getOrCreateTag());
 			} else {
 				ItemStack itemStack = new ItemStack(Items.COMPASS, 1);
 				CompoundTag compoundTag = useOnContext.itemStack.hasTag() ? useOnContext.itemStack.getTag().copy() : new CompoundTag();
@@ -75,7 +75,7 @@ public class CompassItem extends Item implements Vanishable {
 					useOnContext.itemStack.shrink(1);
 				}
 
-				this.addLodestoneTags(useOnContext.level.dimension, blockPos, compoundTag);
+				this.addLodestoneTags(useOnContext.level.getDimension(), blockPos, compoundTag);
 				if (!useOnContext.player.inventory.add(itemStack)) {
 					useOnContext.player.drop(itemStack, false);
 				}

@@ -1,25 +1,23 @@
 package net.minecraft.world.level.levelgen;
 
-public class OverworldGeneratorSettings extends ChunkGeneratorSettings {
-	private final int biomeSize = 4;
-	private final int riverSize = 4;
-	private final int fixedBiome = -1;
-	private final int seaLevel = 63;
+public class OverworldGeneratorSettings extends NoiseGeneratorSettings {
+	private final boolean isAmplified;
 
-	public int getBiomeSize() {
-		return 4;
+	public OverworldGeneratorSettings() {
+		this(new ChunkGeneratorSettings(), false);
 	}
 
-	public int getRiverSize() {
-		return 4;
-	}
-
-	public int getFixedBiome() {
-		return -1;
+	public OverworldGeneratorSettings(ChunkGeneratorSettings chunkGeneratorSettings, boolean bl) {
+		super(chunkGeneratorSettings);
+		this.isAmplified = bl;
 	}
 
 	@Override
 	public int getBedrockFloorPosition() {
 		return 0;
+	}
+
+	public boolean isAmplified() {
+		return this.isAmplified;
 	}
 }

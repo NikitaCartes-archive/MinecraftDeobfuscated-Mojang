@@ -48,7 +48,7 @@ public class EndPortalBlock extends BaseEntityBlock {
 				blockState.getShape(level, blockPos),
 				BooleanOp.AND
 			)) {
-			entity.changeDimension(level.dimension.getType() == DimensionType.THE_END ? DimensionType.OVERWORLD : DimensionType.THE_END);
+			entity.changeDimension(level.dimensionType() == DimensionType.THE_END ? DimensionType.OVERWORLD : DimensionType.THE_END);
 		}
 	}
 

@@ -18,7 +18,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.RuinedPortalConfiguration;
@@ -60,13 +59,13 @@ public class RuinedPortalFeature extends RandomScatteredFeature<RuinedPortalConf
 	}
 
 	@Override
-	protected int getSpacing(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
-		return chunkGeneratorSettings.getRuinedPortalSpacing(dimensionType == DimensionType.NETHER);
+	protected int getSpacing(ChunkGeneratorSettings chunkGeneratorSettings) {
+		return chunkGeneratorSettings.getRuinedPortalSpacing();
 	}
 
 	@Override
-	protected int getSeparation(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
-		return chunkGeneratorSettings.getRuinedPortalSeparation(dimensionType == DimensionType.NETHER);
+	protected int getSeparation(ChunkGeneratorSettings chunkGeneratorSettings) {
+		return chunkGeneratorSettings.getRuinedPortalSeparation();
 	}
 
 	@Override
@@ -84,7 +83,7 @@ public class RuinedPortalFeature extends RandomScatteredFeature<RuinedPortalConf
 	}
 
 	private static int findSuitableY(
-		Random random, ChunkGenerator<?> chunkGenerator, RuinedPortalPiece.VerticalPlacement verticalPlacement, boolean bl, int i, int j, BoundingBox boundingBox
+		Random random, ChunkGenerator chunkGenerator, RuinedPortalPiece.VerticalPlacement verticalPlacement, boolean bl, int i, int j, BoundingBox boundingBox
 	) {
 		int k;
 		if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_NETHER) {
@@ -150,7 +149,7 @@ public class RuinedPortalFeature extends RandomScatteredFeature<RuinedPortalConf
 		}
 
 		@Override
-		public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+		public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
 			RuinedPortalConfiguration ruinedPortalConfiguration = chunkGenerator.getStructureConfiguration(biome, Feature.RUINED_PORTAL);
 			if (ruinedPortalConfiguration != null) {
 				RuinedPortalPiece.Properties properties = new RuinedPortalPiece.Properties();

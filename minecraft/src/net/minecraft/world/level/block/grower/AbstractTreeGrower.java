@@ -9,7 +9,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 
@@ -17,16 +16,14 @@ public abstract class AbstractTreeGrower {
 	@Nullable
 	protected abstract ConfiguredFeature<TreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl);
 
-	public boolean growTree(ServerLevel serverLevel, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockState blockState, Random random) {
+	public boolean growTree(ServerLevel serverLevel, ChunkGenerator chunkGenerator, BlockPos blockPos, BlockState blockState, Random random) {
 		ConfiguredFeature<TreeConfiguration, ?> configuredFeature = this.getConfiguredFeature(random, this.hasFlowers(serverLevel, blockPos));
 		if (configuredFeature == null) {
 			return false;
 		} else {
 			serverLevel.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 4);
 			configuredFeature.config.setFromSapling();
-			if (configuredFeature.place(
-				serverLevel, serverLevel.structureFeatureManager(), (ChunkGenerator<? extends ChunkGeneratorSettings>)chunkGenerator, random, blockPos
-			)) {
+			if (configuredFeature.place(serverLevel, serverLevel.structureFeatureManager(), chunkGenerator, random, blockPos)) {
 				return true;
 			} else {
 				serverLevel.setBlock(blockPos, blockState, 4);

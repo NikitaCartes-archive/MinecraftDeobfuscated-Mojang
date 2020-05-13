@@ -63,8 +63,6 @@ import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.TieredItem;
-import net.minecraft.world.item.Tiers;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -80,22 +78,6 @@ public class PiglinAi {
 	private static final IntRange RIDE_DURATION = TimeUtil.rangeOfSeconds(10, 30);
 	private static final IntRange RETREAT_DURATION = TimeUtil.rangeOfSeconds(5, 20);
 	private static final Set FOOD_ITEMS = ImmutableSet.of(Items.PORKCHOP, Items.COOKED_PORKCHOP);
-	private static final Set<Item> LOVED_ITEMS_IN_ADDITION_TO_GOLD_TIER_AND_GOLD_MATERIAL = ImmutableSet.of(
-		Items.GOLD_INGOT,
-		Items.GOLDEN_APPLE,
-		Items.GOLDEN_HORSE_ARMOR,
-		Items.GOLDEN_CARROT,
-		Items.GOLD_BLOCK,
-		Items.GOLD_ORE,
-		Items.ENCHANTED_GOLDEN_APPLE,
-		Items.GOLDEN_HORSE_ARMOR,
-		Items.LIGHT_WEIGHTED_PRESSURE_PLATE,
-		Items.BELL,
-		Items.GLISTERING_MELON_SLICE,
-		Items.CLOCK,
-		Items.NETHER_GOLD_ORE,
-		Items.GILDED_BLACKSTONE
-	);
 
 	protected static Brain<?> makeBrain(Piglin piglin, Dynamic<?> dynamic) {
 		Brain<Piglin> brain = new Brain<>(Piglin.MEMORY_TYPES, Piglin.SENSOR_TYPES, dynamic);
@@ -411,9 +393,7 @@ public class PiglinAi {
 	}
 
 	protected static boolean isLovedItem(Item item) {
-		return LOVED_ITEMS_IN_ADDITION_TO_GOLD_TIER_AND_GOLD_MATERIAL.contains(item)
-			|| item instanceof TieredItem && ((TieredItem)item).getTier() == Tiers.GOLD
-			|| item instanceof ArmorItem && ((ArmorItem)item).getMaterial() == ArmorMaterials.GOLD;
+		return item.is(ItemTags.PIGLIN_LOVED);
 	}
 
 	private static boolean wantsToStopRiding(Piglin piglin, Entity entity) {

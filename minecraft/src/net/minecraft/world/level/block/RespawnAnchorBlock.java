@@ -72,8 +72,8 @@ public class RespawnAnchorBlock extends Block {
 		} else {
 			if (!level.isClientSide) {
 				ServerPlayer serverPlayer = (ServerPlayer)player;
-				if (serverPlayer.getRespawnDimension() != level.dimension.getType() || !serverPlayer.getRespawnPosition().equals(blockPos)) {
-					serverPlayer.setRespawnPosition(level.dimension.getType(), blockPos, false, true);
+				if (serverPlayer.getRespawnDimension() != level.dimensionType() || !serverPlayer.getRespawnPosition().equals(blockPos)) {
+					serverPlayer.setRespawnPosition(level.dimensionType(), blockPos, false, true);
 					level.playSound(
 						null,
 						(double)blockPos.getX() + 0.5,
@@ -93,7 +93,7 @@ public class RespawnAnchorBlock extends Block {
 	}
 
 	public static boolean canSetSpawn(Level level) {
-		return level.dimension.getType() == DimensionType.NETHER;
+		return level.dimensionType() == DimensionType.NETHER;
 	}
 
 	public static void charge(Level level, BlockPos blockPos, BlockState blockState) {

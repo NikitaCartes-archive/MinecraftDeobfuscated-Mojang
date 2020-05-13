@@ -17,6 +17,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.Mirror;
@@ -271,25 +272,25 @@ public class OceanRuinPieces {
 
 		@Override
 		public boolean postProcess(
-			LevelAccessor levelAccessor,
+			WorldGenLevel worldGenLevel,
 			StructureFeatureManager structureFeatureManager,
-			ChunkGenerator<?> chunkGenerator,
+			ChunkGenerator chunkGenerator,
 			Random random,
 			BoundingBox boundingBox,
 			ChunkPos chunkPos,
 			BlockPos blockPos
 		) {
 			this.placeSettings.clearProcessors().addProcessor(new BlockRotProcessor(this.integrity)).addProcessor(BlockIgnoreProcessor.STRUCTURE_AND_AIR);
-			int i = levelAccessor.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, this.templatePosition.getX(), this.templatePosition.getZ());
+			int i = worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, this.templatePosition.getX(), this.templatePosition.getZ());
 			this.templatePosition = new BlockPos(this.templatePosition.getX(), i, this.templatePosition.getZ());
 			BlockPos blockPos2 = StructureTemplate.transform(
 					new BlockPos(this.template.getSize().getX() - 1, 0, this.template.getSize().getZ() - 1), Mirror.NONE, this.rotation, BlockPos.ZERO
 				)
 				.offset(this.templatePosition);
 			this.templatePosition = new BlockPos(
-				this.templatePosition.getX(), this.getHeight(this.templatePosition, levelAccessor, blockPos2), this.templatePosition.getZ()
+				this.templatePosition.getX(), this.getHeight(this.templatePosition, worldGenLevel, blockPos2), this.templatePosition.getZ()
 			);
-			return super.postProcess(levelAccessor, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
+			return super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
 		}
 
 		private int getHeight(BlockPos blockPos, BlockGetter blockGetter, BlockPos blockPos2) {

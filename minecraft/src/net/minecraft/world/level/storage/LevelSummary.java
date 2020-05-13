@@ -12,7 +12,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.LevelType;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 
 @Environment(EnvType.CLIENT)
 public class LevelSummary implements Comparable<LevelSummary> {
@@ -27,9 +27,9 @@ public class LevelSummary implements Comparable<LevelSummary> {
 	private final String worldVersionName;
 	private final int worldVersion;
 	private final boolean snapshot;
-	private final LevelType generatorType;
 	private final boolean locked;
 	private final File icon;
+	private final WorldGenSettings worldGenSettings;
 	@Nullable
 	private Component info;
 
@@ -47,7 +47,7 @@ public class LevelSummary implements Comparable<LevelSummary> {
 		this.worldVersionName = worldData.getMinecraftVersionName();
 		this.worldVersion = worldData.getMinecraftVersion();
 		this.snapshot = worldData.isSnapshot();
-		this.generatorType = worldData.overworldData().getGeneratorType();
+		this.worldGenSettings = worldData.worldGenSettings();
 	}
 
 	public String getLevelId() {
@@ -105,7 +105,7 @@ public class LevelSummary implements Comparable<LevelSummary> {
 	}
 
 	public boolean isOldCustomizedWorld() {
-		return this.generatorType == LevelType.CUSTOMIZED && this.worldVersion < 1466;
+		return this.worldGenSettings.isOldCustomizedWorld();
 	}
 
 	public boolean shouldBackup() {

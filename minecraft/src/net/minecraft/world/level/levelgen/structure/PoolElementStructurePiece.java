@@ -11,8 +11,8 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.util.Deserializer;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
@@ -81,28 +81,28 @@ public abstract class PoolElementStructurePiece extends StructurePiece {
 
 	@Override
 	public boolean postProcess(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<?> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BoundingBox boundingBox,
 		ChunkPos chunkPos,
 		BlockPos blockPos
 	) {
-		return this.place(levelAccessor, structureFeatureManager, chunkGenerator, random, boundingBox, blockPos, false);
+		return this.place(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, blockPos, false);
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<?> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BoundingBox boundingBox,
 		BlockPos blockPos,
 		boolean bl
 	) {
 		return this.element
-			.place(this.structureManager, levelAccessor, structureFeatureManager, chunkGenerator, this.position, blockPos, this.rotation, boundingBox, random, bl);
+			.place(this.structureManager, worldGenLevel, structureFeatureManager, chunkGenerator, this.position, blockPos, this.rotation, boundingBox, random, bl);
 	}
 
 	@Override

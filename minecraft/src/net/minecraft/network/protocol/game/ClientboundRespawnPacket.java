@@ -6,25 +6,26 @@ import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.dimension.DimensionType;
 
 public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener> {
 	private DimensionType dimension;
 	private long seed;
 	private GameType playerGameType;
-	private LevelType levelType;
+	private boolean isDebug;
+	private boolean isFlat;
 	private boolean keepAllPlayerData;
 
 	public ClientboundRespawnPacket() {
 	}
 
-	public ClientboundRespawnPacket(DimensionType dimensionType, long l, LevelType levelType, GameType gameType, boolean bl) {
+	public ClientboundRespawnPacket(DimensionType dimensionType, long l, GameType gameType, boolean bl, boolean bl2, boolean bl3) {
 		this.dimension = dimensionType;
 		this.seed = l;
 		this.playerGameType = gameType;
-		this.levelType = levelType;
-		this.keepAllPlayerData = bl;
+		this.isDebug = bl;
+		this.isFlat = bl2;
+		this.keepAllPlayerData = bl3;
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {
@@ -36,11 +37,8 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 		this.dimension = DimensionType.getById(friendlyByteBuf.readInt());
 		this.seed = friendlyByteBuf.readLong();
 		this.playerGameType = GameType.byId(friendlyByteBuf.readUnsignedByte());
-		this.levelType = LevelType.getLevelType(friendlyByteBuf.readUtf(16));
-		if (this.levelType == null) {
-			this.levelType = LevelType.NORMAL;
-		}
-
+		this.isDebug = friendlyByteBuf.readBoolean();
+		this.isFlat = friendlyByteBuf.readBoolean();
 		this.keepAllPlayerData = friendlyByteBuf.readBoolean();
 	}
 
@@ -49,7 +47,8 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 		friendlyByteBuf.writeInt(this.dimension.getId());
 		friendlyByteBuf.writeLong(this.seed);
 		friendlyByteBuf.writeByte(this.playerGameType.getId());
-		friendlyByteBuf.writeUtf(this.levelType.getName());
+		friendlyByteBuf.writeBoolean(this.isDebug);
+		friendlyByteBuf.writeBoolean(this.isFlat);
 		friendlyByteBuf.writeBoolean(this.keepAllPlayerData);
 	}
 
@@ -69,8 +68,13 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 	}
 
 	@Environment(EnvType.CLIENT)
-	public LevelType getLevelType() {
-		return this.levelType;
+	public boolean isDebug() {
+		return this.isDebug;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public boolean isFlat() {
+		return this.isFlat;
 	}
 
 	@Environment(EnvType.CLIENT)

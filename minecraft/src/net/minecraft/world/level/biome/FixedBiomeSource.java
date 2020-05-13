@@ -6,14 +6,22 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 
 public class FixedBiomeSource extends BiomeSource {
 	private final Biome biome;
 
-	public FixedBiomeSource(FixedBiomeSourceSettings fixedBiomeSourceSettings) {
-		super(ImmutableSet.of(fixedBiomeSourceSettings.getBiome()));
-		this.biome = fixedBiomeSourceSettings.getBiome();
+	public FixedBiomeSource(Biome biome) {
+		super(ImmutableSet.of(biome));
+		this.biome = biome;
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public BiomeSource withSeed(long l) {
+		return this;
 	}
 
 	@Override

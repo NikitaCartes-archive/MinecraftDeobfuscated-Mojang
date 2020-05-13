@@ -37,7 +37,7 @@ public class SocializeAtBell extends Behavior<LivingEntity> {
 		Optional<GlobalPos> optional = brain.getMemory(MemoryModuleType.MEETING_POINT);
 		return serverLevel.getRandom().nextInt(100) == 0
 			&& optional.isPresent()
-			&& Objects.equals(serverLevel.getDimension().getType(), ((GlobalPos)optional.get()).dimension())
+			&& Objects.equals(serverLevel.dimensionType(), ((GlobalPos)optional.get()).dimension())
 			&& ((GlobalPos)optional.get()).pos().closerThan(livingEntity.position(), 4.0)
 			&& ((List)brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).get())
 				.stream()

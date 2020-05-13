@@ -5,11 +5,10 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
 
 public class DiskReplaceFeature extends Feature<DiskConfiguration> {
@@ -18,14 +17,14 @@ public class DiskReplaceFeature extends Feature<DiskConfiguration> {
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		DiskConfiguration diskConfiguration
 	) {
-		if (!levelAccessor.getFluidState(blockPos).is(FluidTags.WATER)) {
+		if (!worldGenLevel.getFluidState(blockPos).is(FluidTags.WATER)) {
 			return false;
 		} else {
 			int i = 0;
@@ -38,11 +37,11 @@ public class DiskReplaceFeature extends Feature<DiskConfiguration> {
 					if (m * m + n * n <= j * j) {
 						for (int o = blockPos.getY() - diskConfiguration.ySize; o <= blockPos.getY() + diskConfiguration.ySize; o++) {
 							BlockPos blockPos2 = new BlockPos(k, o, l);
-							BlockState blockState = levelAccessor.getBlockState(blockPos2);
+							BlockState blockState = worldGenLevel.getBlockState(blockPos2);
 
 							for (BlockState blockState2 : diskConfiguration.targets) {
 								if (blockState2.is(blockState.getBlock())) {
-									levelAccessor.setBlock(blockPos2, diskConfiguration.state, 2);
+									worldGenLevel.setBlock(blockPos2, diskConfiguration.state, 2);
 									i++;
 									break;
 								}

@@ -1,53 +1,29 @@
 package net.minecraft.world.level;
 
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 
 public final class LevelSettings {
 	private final String levelName;
-	private final long seed;
 	private final GameType gameType;
-	private final boolean generateMapFeatures;
 	private final boolean hardcore;
-	private final ChunkGeneratorProvider generatorProvider;
 	private final Difficulty difficulty;
-	private boolean allowCommands;
-	private boolean startingBonusItems;
+	private final boolean allowCommands;
 	private final GameRules gameRules;
+	private final WorldGenSettings worldGenSettings;
 
-	public LevelSettings(String string, long l, GameType gameType, boolean bl, boolean bl2, Difficulty difficulty, ChunkGeneratorProvider chunkGeneratorProvider) {
-		this(string, l, gameType, bl, bl2, difficulty, chunkGeneratorProvider, new GameRules());
-	}
-
-	public LevelSettings(
-		String string, long l, GameType gameType, boolean bl, boolean bl2, Difficulty difficulty, ChunkGeneratorProvider chunkGeneratorProvider, GameRules gameRules
-	) {
+	public LevelSettings(String string, GameType gameType, boolean bl, Difficulty difficulty, boolean bl2, GameRules gameRules, WorldGenSettings worldGenSettings) {
 		this.levelName = string;
-		this.seed = l;
 		this.gameType = gameType;
-		this.generateMapFeatures = bl;
-		this.hardcore = bl2;
-		this.generatorProvider = chunkGeneratorProvider;
+		this.hardcore = bl;
 		this.difficulty = difficulty;
+		this.allowCommands = bl2;
 		this.gameRules = gameRules;
+		this.worldGenSettings = worldGenSettings;
 	}
 
-	public LevelSettings enableStartingBonusItems() {
-		this.startingBonusItems = true;
-		return this;
-	}
-
-	public LevelSettings enableSinglePlayerCommands() {
-		this.allowCommands = true;
-		return this;
-	}
-
-	public boolean hasStartingBonusItems() {
-		return this.startingBonusItems;
-	}
-
-	public long getSeed() {
-		return this.seed;
+	public WorldGenSettings worldGenSettings() {
+		return this.worldGenSettings;
 	}
 
 	public GameType getGameType() {
@@ -56,14 +32,6 @@ public final class LevelSettings {
 
 	public boolean isHardcore() {
 		return this.hardcore;
-	}
-
-	public boolean shouldGenerateMapFeatures() {
-		return this.generateMapFeatures;
-	}
-
-	public ChunkGeneratorProvider getGeneratorProvider() {
-		return this.generatorProvider;
 	}
 
 	public boolean getAllowCommands() {

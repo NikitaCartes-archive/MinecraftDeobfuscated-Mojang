@@ -11,14 +11,13 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.JigsawBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.JigsawBlockEntity;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
@@ -90,9 +89,9 @@ public class FeaturePoolElement extends StructurePoolElement {
 	@Override
 	public boolean place(
 		StructureManager structureManager,
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<?> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		BlockPos blockPos,
 		BlockPos blockPos2,
 		Rotation rotation,
@@ -100,7 +99,7 @@ public class FeaturePoolElement extends StructurePoolElement {
 		Random random,
 		boolean bl
 	) {
-		return this.feature.place(levelAccessor, structureFeatureManager, (ChunkGenerator<? extends ChunkGeneratorSettings>)chunkGenerator, random, blockPos);
+		return this.feature.place(worldGenLevel, structureFeatureManager, chunkGenerator, random, blockPos);
 	}
 
 	@Override

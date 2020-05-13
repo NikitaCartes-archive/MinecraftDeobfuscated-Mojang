@@ -241,6 +241,7 @@ public abstract class Raider extends PatrollingMonster {
 				this.spawnAtLocation(itemStack2);
 			}
 
+			this.onItemPickup(itemEntity);
 			this.setItemSlot(equipmentSlot, itemStack);
 			this.take(itemEntity, itemStack.getCount());
 			itemEntity.remove();

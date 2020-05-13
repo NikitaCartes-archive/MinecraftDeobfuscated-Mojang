@@ -21,7 +21,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 
 public class PillagerOutpostPieces {
 	public static void addPieces(
-		ChunkGenerator<?> chunkGenerator, StructureManager structureManager, BlockPos blockPos, List<StructurePiece> list, WorldgenRandom worldgenRandom
+		ChunkGenerator chunkGenerator, StructureManager structureManager, BlockPos blockPos, List<StructurePiece> list, WorldgenRandom worldgenRandom
 	) {
 		JigsawPlacement.addPieces(
 			new ResourceLocation("pillager_outpost/base_plates"),

@@ -40,7 +40,7 @@ public class MapItem extends ComplexItem {
 
 	public static ItemStack create(Level level, int i, int j, byte b, boolean bl, boolean bl2) {
 		ItemStack itemStack = new ItemStack(Items.FILLED_MAP);
-		createAndStoreSavedData(itemStack, level, i, j, b, bl, bl2, level.dimension.getType());
+		createAndStoreSavedData(itemStack, level, i, j, b, bl, bl2, level.dimensionType());
 		return itemStack;
 	}
 
@@ -52,9 +52,9 @@ public class MapItem extends ComplexItem {
 	@Nullable
 	public static MapItemSavedData getOrCreateSavedData(ItemStack itemStack, Level level) {
 		MapItemSavedData mapItemSavedData = getSavedData(itemStack, level);
-		if (mapItemSavedData == null && !level.isClientSide) {
+		if (mapItemSavedData == null && level instanceof ServerLevel) {
 			mapItemSavedData = createAndStoreSavedData(
-				itemStack, level, level.getLevelData().getXSpawn(), level.getLevelData().getZSpawn(), 3, false, false, level.dimension.getType()
+				itemStack, level, level.getLevelData().getXSpawn(), level.getLevelData().getZSpawn(), 3, false, false, level.dimensionType()
 			);
 		}
 
@@ -82,14 +82,14 @@ public class MapItem extends ComplexItem {
 	}
 
 	public void update(Level level, Entity entity, MapItemSavedData mapItemSavedData) {
-		if (level.dimension.getType() == mapItemSavedData.dimension && entity instanceof Player) {
+		if (level.dimensionType() == mapItemSavedData.dimension && entity instanceof Player) {
 			int i = 1 << mapItemSavedData.scale;
 			int j = mapItemSavedData.x;
 			int k = mapItemSavedData.z;
 			int l = Mth.floor(entity.getX() - (double)j) / i + 64;
 			int m = Mth.floor(entity.getZ() - (double)k) / i + 64;
 			int n = 128 / i;
-			if (level.dimension.isHasCeiling()) {
+			if (level.dimensionType().hasCeiling()) {
 				n /= 2;
 			}
 
@@ -117,7 +117,7 @@ public class MapItem extends ComplexItem {
 								int v = t & 15;
 								int w = 0;
 								double e = 0.0;
-								if (level.dimension.isHasCeiling()) {
+								if (level.dimensionType().hasCeiling()) {
 									int x = s + t * 231871;
 									x = x * x * 31287121 + x * 11;
 									if ((x >> 20 & 1) == 0) {
@@ -219,7 +219,7 @@ public class MapItem extends ComplexItem {
 	public static void renderBiomePreviewMap(ServerLevel serverLevel, ItemStack itemStack) {
 		MapItemSavedData mapItemSavedData = getOrCreateSavedData(itemStack, serverLevel);
 		if (mapItemSavedData != null) {
-			if (serverLevel.dimension.getType() == mapItemSavedData.dimension) {
+			if (serverLevel.dimensionType() == mapItemSavedData.dimension) {
 				int i = 1 << mapItemSavedData.scale;
 				int j = mapItemSavedData.x;
 				int k = mapItemSavedData.z;

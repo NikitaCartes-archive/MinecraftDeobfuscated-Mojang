@@ -8,14 +8,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
@@ -38,9 +37,9 @@ public abstract class StructureFeature<C extends FeatureConfiguration> extends F
 
 	@Override
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		C featureConfiguration
@@ -52,38 +51,36 @@ public abstract class StructureFeature<C extends FeatureConfiguration> extends F
 			int j = blockPos.getZ() >> 4;
 			int k = i << 4;
 			int l = j << 4;
-			return structureFeatureManager.startsForFeature(SectionPos.of(blockPos), this, levelAccessor).map(structureStart -> {
-				structureStart.postProcess(levelAccessor, structureFeatureManager, chunkGenerator, random, new BoundingBox(k, l, k + 15, l + 15), new ChunkPos(i, j));
+			return structureFeatureManager.startsForFeature(SectionPos.of(blockPos), this).map(structureStart -> {
+				structureStart.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, new BoundingBox(k, l, k + 15, l + 15), new ChunkPos(i, j));
 				return null;
 			}).count() != 0L;
 		}
 	}
 
-	protected StructureStart getStructureAt(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, BlockPos blockPos, boolean bl) {
-		return (StructureStart)structureFeatureManager.startsForFeature(SectionPos.of(blockPos), this, levelAccessor)
+	protected StructureStart getStructureAt(StructureFeatureManager structureFeatureManager, BlockPos blockPos, boolean bl) {
+		return (StructureStart)structureFeatureManager.startsForFeature(SectionPos.of(blockPos), this)
 			.filter(structureStart -> structureStart.getBoundingBox().isInside(blockPos))
 			.filter(structureStart -> !bl || structureStart.getPieces().stream().anyMatch(structurePiece -> structurePiece.getBoundingBox().isInside(blockPos)))
 			.findFirst()
 			.orElse(StructureStart.INVALID_START);
 	}
 
-	public boolean isInsideBoundingFeature(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, BlockPos blockPos) {
-		return this.getStructureAt(levelAccessor, structureFeatureManager, blockPos, false).isValid();
+	public boolean isInsideBoundingFeature(StructureFeatureManager structureFeatureManager, BlockPos blockPos) {
+		return this.getStructureAt(structureFeatureManager, blockPos, false).isValid();
 	}
 
-	public boolean isInsideFeature(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, BlockPos blockPos) {
-		return this.getStructureAt(levelAccessor, structureFeatureManager, blockPos, true).isValid();
+	public boolean isInsideFeature(StructureFeatureManager structureFeatureManager, BlockPos blockPos) {
+		return this.getStructureAt(structureFeatureManager, blockPos, true).isValid();
 	}
 
 	@Nullable
-	public BlockPos getNearestGeneratedFeature(
-		ServerLevel serverLevel, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, BlockPos blockPos, int i, boolean bl
-	) {
+	public BlockPos getNearestGeneratedFeature(ServerLevel serverLevel, ChunkGenerator chunkGenerator, BlockPos blockPos, int i, boolean bl) {
 		if (!chunkGenerator.canGenerateStructure(this)) {
 			return null;
 		} else {
 			StructureFeatureManager structureFeatureManager = serverLevel.structureFeatureManager();
-			int j = this.getSpacing(chunkGenerator.getDimensionType(), chunkGenerator.getSettings());
+			int j = this.getSpacing(chunkGenerator.getSettings());
 			int k = blockPos.getX() >> 4;
 			int l = blockPos.getZ() >> 4;
 			int m = 0;
@@ -97,7 +94,7 @@ public abstract class StructureFeature<C extends FeatureConfiguration> extends F
 						if (bl2 || bl3) {
 							int p = k + j * n;
 							int q = l + j * o;
-							ChunkPos chunkPos = this.getPotentialFeatureChunk(chunkGenerator, worldgenRandom, p, q);
+							ChunkPos chunkPos = this.getPotentialFeatureChunk(chunkGenerator.getSettings(), serverLevel.getSeed(), worldgenRandom, p, q);
 							ChunkAccess chunkAccess = serverLevel.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.STRUCTURE_STARTS);
 							StructureStart structureStart = structureFeatureManager.getStartForFeature(SectionPos.of(chunkAccess.getPos(), 0), this, chunkAccess);
 							if (structureStart != null && structureStart.isValid()) {
@@ -127,11 +124,11 @@ public abstract class StructureFeature<C extends FeatureConfiguration> extends F
 		}
 	}
 
-	protected int getSpacing(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+	protected int getSpacing(ChunkGeneratorSettings chunkGeneratorSettings) {
 		return 1;
 	}
 
-	protected int getSeparation(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+	protected int getSeparation(ChunkGeneratorSettings chunkGeneratorSettings) {
 		return 0;
 	}
 
@@ -143,37 +140,35 @@ public abstract class StructureFeature<C extends FeatureConfiguration> extends F
 		return true;
 	}
 
-	public final ChunkPos getPotentialFeatureChunk(ChunkGenerator<?> chunkGenerator, WorldgenRandom worldgenRandom, int i, int j) {
-		ChunkGeneratorSettings chunkGeneratorSettings = chunkGenerator.getSettings();
-		DimensionType dimensionType = chunkGenerator.getDimensionType();
-		int k = this.getSpacing(dimensionType, chunkGeneratorSettings);
-		int l = this.getSeparation(dimensionType, chunkGeneratorSettings);
-		int m = Math.floorDiv(i, k);
-		int n = Math.floorDiv(j, k);
-		worldgenRandom.setLargeFeatureWithSalt(chunkGenerator.getSeed(), m, n, this.getRandomSalt(chunkGeneratorSettings));
-		int o;
+	public final ChunkPos getPotentialFeatureChunk(ChunkGeneratorSettings chunkGeneratorSettings, long l, WorldgenRandom worldgenRandom, int i, int j) {
+		int k = this.getSpacing(chunkGeneratorSettings);
+		int m = this.getSeparation(chunkGeneratorSettings);
+		int n = Math.floorDiv(i, k);
+		int o = Math.floorDiv(j, k);
+		worldgenRandom.setLargeFeatureWithSalt(l, n, o, this.getRandomSalt(chunkGeneratorSettings));
 		int p;
+		int q;
 		if (this.linearSeparation()) {
-			o = worldgenRandom.nextInt(k - l);
-			p = worldgenRandom.nextInt(k - l);
+			p = worldgenRandom.nextInt(k - m);
+			q = worldgenRandom.nextInt(k - m);
 		} else {
-			o = (worldgenRandom.nextInt(k - l) + worldgenRandom.nextInt(k - l)) / 2;
-			p = (worldgenRandom.nextInt(k - l) + worldgenRandom.nextInt(k - l)) / 2;
+			p = (worldgenRandom.nextInt(k - m) + worldgenRandom.nextInt(k - m)) / 2;
+			q = (worldgenRandom.nextInt(k - m) + worldgenRandom.nextInt(k - m)) / 2;
 		}
 
-		return new ChunkPos(m * k + o, n * k + p);
+		return new ChunkPos(n * k + p, o * k + q);
 	}
 
-	public boolean featureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, WorldgenRandom worldgenRandom, int i, int j, Biome biome) {
-		ChunkPos chunkPos = this.getPotentialFeatureChunk(chunkGenerator, worldgenRandom, i, j);
+	public boolean featureChunk(BiomeManager biomeManager, ChunkGenerator chunkGenerator, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome) {
+		ChunkPos chunkPos = this.getPotentialFeatureChunk(chunkGenerator.getSettings(), l, worldgenRandom, i, j);
 		return i == chunkPos.x
 			&& j == chunkPos.z
 			&& chunkGenerator.isBiomeValidStartForStructure(biome, this)
-			&& this.isFeatureChunk(biomeManager, chunkGenerator, worldgenRandom, i, j, biome, chunkPos);
+			&& this.isFeatureChunk(biomeManager, chunkGenerator, l, worldgenRandom, i, j, biome, chunkPos);
 	}
 
 	protected boolean isFeatureChunk(
-		BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos
+		BiomeManager biomeManager, ChunkGenerator chunkGenerator, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos
 	) {
 		return true;
 	}

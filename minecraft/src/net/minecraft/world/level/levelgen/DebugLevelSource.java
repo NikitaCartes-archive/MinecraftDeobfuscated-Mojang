@@ -3,6 +3,8 @@ package net.minecraft.world.level.levelgen;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.server.level.WorldGenRegion;
@@ -12,13 +14,15 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.FixedBiomeSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 
-public class DebugLevelSource extends ChunkGenerator<DebugGeneratorSettings> {
+public class DebugLevelSource extends ChunkGenerator {
+	public static final ChunkGenerator INSTANCE = new DebugLevelSource();
 	private static final List<BlockState> ALL_BLOCKS = (List<BlockState>)StreamSupport.stream(Registry.BLOCK.spliterator(), false)
 		.flatMap(block -> block.getStateDefinition().getPossibleStates().stream())
 		.collect(Collectors.toList());
@@ -27,8 +31,14 @@ public class DebugLevelSource extends ChunkGenerator<DebugGeneratorSettings> {
 	protected static final BlockState AIR = Blocks.AIR.defaultBlockState();
 	protected static final BlockState BARRIER = Blocks.BARRIER.defaultBlockState();
 
-	public DebugLevelSource(LevelAccessor levelAccessor, BiomeSource biomeSource, DebugGeneratorSettings debugGeneratorSettings) {
-		super(levelAccessor, biomeSource, debugGeneratorSettings);
+	private DebugLevelSource() {
+		super(new FixedBiomeSource(Biomes.PLAINS), new ChunkGeneratorSettings());
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public ChunkGenerator withSeed(long l) {
+		return this;
 	}
 
 	@Override
@@ -36,12 +46,7 @@ public class DebugLevelSource extends ChunkGenerator<DebugGeneratorSettings> {
 	}
 
 	@Override
-	public void applyCarvers(BiomeManager biomeManager, ChunkAccess chunkAccess, GenerationStep.Carving carving) {
-	}
-
-	@Override
-	public int getSpawnHeight() {
-		return this.level.getSeaLevel() + 1;
+	public void applyCarvers(long l, BiomeManager biomeManager, ChunkAccess chunkAccess, GenerationStep.Carving carving) {
 	}
 
 	@Override

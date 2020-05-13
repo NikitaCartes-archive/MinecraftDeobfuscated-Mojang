@@ -6,7 +6,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.dimension.DimensionType;
 
 public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> {
@@ -16,16 +15,17 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 	private GameType gameType;
 	private DimensionType dimension;
 	private int maxPlayers;
-	private LevelType levelType;
 	private int chunkRadius;
 	private boolean reducedDebugInfo;
 	private boolean showDeathScreen;
+	private boolean isDebug;
+	private boolean isFlat;
 
 	public ClientboundLoginPacket() {
 	}
 
 	public ClientboundLoginPacket(
-		int i, GameType gameType, long l, boolean bl, DimensionType dimensionType, int j, LevelType levelType, int k, boolean bl2, boolean bl3
+		int i, GameType gameType, long l, boolean bl, DimensionType dimensionType, int j, int k, boolean bl2, boolean bl3, boolean bl4, boolean bl5
 	) {
 		this.playerId = i;
 		this.dimension = dimensionType;
@@ -33,10 +33,11 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 		this.gameType = gameType;
 		this.maxPlayers = j;
 		this.hardcore = bl;
-		this.levelType = levelType;
 		this.chunkRadius = k;
 		this.reducedDebugInfo = bl2;
 		this.showDeathScreen = bl3;
+		this.isDebug = bl4;
+		this.isFlat = bl5;
 	}
 
 	@Override
@@ -49,14 +50,11 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 		this.dimension = DimensionType.getById(friendlyByteBuf.readInt());
 		this.seed = friendlyByteBuf.readLong();
 		this.maxPlayers = friendlyByteBuf.readUnsignedByte();
-		this.levelType = LevelType.getLevelType(friendlyByteBuf.readUtf(16));
-		if (this.levelType == null) {
-			this.levelType = LevelType.NORMAL;
-		}
-
 		this.chunkRadius = friendlyByteBuf.readVarInt();
 		this.reducedDebugInfo = friendlyByteBuf.readBoolean();
 		this.showDeathScreen = friendlyByteBuf.readBoolean();
+		this.isDebug = friendlyByteBuf.readBoolean();
+		this.isFlat = friendlyByteBuf.readBoolean();
 	}
 
 	@Override
@@ -71,10 +69,11 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 		friendlyByteBuf.writeInt(this.dimension.getId());
 		friendlyByteBuf.writeLong(this.seed);
 		friendlyByteBuf.writeByte(this.maxPlayers);
-		friendlyByteBuf.writeUtf(this.levelType.getName());
 		friendlyByteBuf.writeVarInt(this.chunkRadius);
 		friendlyByteBuf.writeBoolean(this.reducedDebugInfo);
 		friendlyByteBuf.writeBoolean(this.showDeathScreen);
+		friendlyByteBuf.writeBoolean(this.isDebug);
+		friendlyByteBuf.writeBoolean(this.isFlat);
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {
@@ -107,11 +106,6 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 	}
 
 	@Environment(EnvType.CLIENT)
-	public LevelType getLevelType() {
-		return this.levelType;
-	}
-
-	@Environment(EnvType.CLIENT)
 	public int getChunkRadius() {
 		return this.chunkRadius;
 	}
@@ -124,5 +118,15 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 	@Environment(EnvType.CLIENT)
 	public boolean shouldShowDeathScreen() {
 		return this.showDeathScreen;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public boolean isDebug() {
+		return this.isDebug;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public boolean isFlat() {
+		return this.isFlat;
 	}
 }

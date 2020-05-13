@@ -232,6 +232,7 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob {
 		} else {
 			Item item = itemStack.getItem();
 			if (this.wantsItem(item)) {
+				this.onItemPickup(itemEntity);
 				ItemStack itemStack2 = this.inventory.addItem(itemStack);
 				if (itemStack2.isEmpty()) {
 					itemEntity.remove();

@@ -8,11 +8,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GrowingPlantHeadBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class WeepingVinesFeature extends Feature<NoneFeatureConfiguration> {
@@ -23,22 +23,22 @@ public class WeepingVinesFeature extends Feature<NoneFeatureConfiguration> {
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		NoneFeatureConfiguration noneFeatureConfiguration
 	) {
-		if (!levelAccessor.isEmptyBlock(blockPos)) {
+		if (!worldGenLevel.isEmptyBlock(blockPos)) {
 			return false;
 		} else {
-			BlockState blockState = levelAccessor.getBlockState(blockPos.above());
+			BlockState blockState = worldGenLevel.getBlockState(blockPos.above());
 			if (!blockState.is(Blocks.NETHERRACK) && !blockState.is(Blocks.NETHER_WART_BLOCK)) {
 				return false;
 			} else {
-				this.placeRoofNetherWart(levelAccessor, random, blockPos);
-				this.placeRoofWeepingVines(levelAccessor, random, blockPos);
+				this.placeRoofNetherWart(worldGenLevel, random, blockPos);
+				this.placeRoofWeepingVines(worldGenLevel, random, blockPos);
 				return true;
 			}
 		}

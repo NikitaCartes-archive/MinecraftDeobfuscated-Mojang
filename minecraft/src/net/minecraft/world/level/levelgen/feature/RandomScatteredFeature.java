@@ -2,7 +2,6 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.datafixers.Dynamic;
 import java.util.function.Function;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
@@ -12,12 +11,12 @@ public abstract class RandomScatteredFeature<C extends FeatureConfiguration> ext
 	}
 
 	@Override
-	protected int getSpacing(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+	protected int getSpacing(ChunkGeneratorSettings chunkGeneratorSettings) {
 		return chunkGeneratorSettings.getTemplesSpacing();
 	}
 
 	@Override
-	protected int getSeparation(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+	protected int getSeparation(ChunkGeneratorSettings chunkGeneratorSettings) {
 		return chunkGeneratorSettings.getTemplesSeparation();
 	}
 

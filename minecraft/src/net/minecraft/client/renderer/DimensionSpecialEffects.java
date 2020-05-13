@@ -1,0 +1,127 @@
+package net.minecraft.client.renderer;
+
+import com.google.common.collect.Maps;
+import java.util.Map;
+import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.phys.Vec3;
+
+@Environment(EnvType.CLIENT)
+public abstract class DimensionSpecialEffects {
+	private static final Map<DimensionType, DimensionSpecialEffects> EFFECTS = Maps.<DimensionType, DimensionSpecialEffects>newHashMap();
+	private final float[] sunriseCol = new float[4];
+	private final float cloudLevel;
+	private final boolean hasGround;
+	private final boolean renderNormalSky;
+
+	public DimensionSpecialEffects(float f, boolean bl, boolean bl2) {
+		this.cloudLevel = f;
+		this.hasGround = bl;
+		this.renderNormalSky = bl2;
+	}
+
+	public static DimensionSpecialEffects forType(DimensionType dimensionType) {
+		return (DimensionSpecialEffects)EFFECTS.getOrDefault(dimensionType, EFFECTS.get(DimensionType.OVERWORLD));
+	}
+
+	@Nullable
+	public float[] getSunriseColor(float f, float g) {
+		float h = 0.4F;
+		float i = Mth.cos(f * (float) (Math.PI * 2)) - 0.0F;
+		float j = -0.0F;
+		if (i >= -0.4F && i <= 0.4F) {
+			float k = (i - -0.0F) / 0.4F * 0.5F + 0.5F;
+			float l = 1.0F - (1.0F - Mth.sin(k * (float) Math.PI)) * 0.99F;
+			l *= l;
+			this.sunriseCol[0] = k * 0.3F + 0.7F;
+			this.sunriseCol[1] = k * k * 0.7F + 0.2F;
+			this.sunriseCol[2] = k * k * 0.0F + 0.2F;
+			this.sunriseCol[3] = l;
+			return this.sunriseCol;
+		} else {
+			return null;
+		}
+	}
+
+	public float getCloudHeight() {
+		return this.cloudLevel;
+	}
+
+	public boolean hasGround() {
+		return this.hasGround;
+	}
+
+	public abstract Vec3 getBrightnessDependentFogColor(Vec3 vec3, float f);
+
+	public abstract boolean isFoggyAt(int i, int j);
+
+	public boolean renderNormalSky() {
+		return this.renderNormalSky;
+	}
+
+	static {
+		EFFECTS.put(DimensionType.OVERWORLD, new DimensionSpecialEffects.OverworldEffects());
+		EFFECTS.put(DimensionType.NETHER, new DimensionSpecialEffects.NetherEffects());
+		EFFECTS.put(DimensionType.THE_END, new DimensionSpecialEffects.EndEffects());
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static class EndEffects extends DimensionSpecialEffects {
+		public EndEffects() {
+			super(Float.NaN, false, false);
+		}
+
+		@Override
+		public Vec3 getBrightnessDependentFogColor(Vec3 vec3, float f) {
+			return vec3.scale(0.15F);
+		}
+
+		@Override
+		public boolean isFoggyAt(int i, int j) {
+			return false;
+		}
+
+		@Nullable
+		@Override
+		public float[] getSunriseColor(float f, float g) {
+			return null;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static class NetherEffects extends DimensionSpecialEffects {
+		public NetherEffects() {
+			super(Float.NaN, true, false);
+		}
+
+		@Override
+		public Vec3 getBrightnessDependentFogColor(Vec3 vec3, float f) {
+			return vec3;
+		}
+
+		@Override
+		public boolean isFoggyAt(int i, int j) {
+			return true;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static class OverworldEffects extends DimensionSpecialEffects {
+		public OverworldEffects() {
+			super(128.0F, true, true);
+		}
+
+		@Override
+		public Vec3 getBrightnessDependentFogColor(Vec3 vec3, float f) {
+			return vec3.multiply((double)(f * 0.94F + 0.06F), (double)(f * 0.94F + 0.06F), (double)(f * 0.91F + 0.09F));
+		}
+
+		@Override
+		public boolean isFoggyAt(int i, int j) {
+			return false;
+		}
+	}
+}

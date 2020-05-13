@@ -352,12 +352,19 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		}
 
 		this.serverChunkRadius = clientboundLoginPacket.getChunkRadius();
-		ClientLevel.ClientLevelData clientLevelData = new ClientLevel.ClientLevelData(
-			clientboundLoginPacket.getSeed(), Difficulty.NORMAL, clientboundLoginPacket.isHardcore(), clientboundLoginPacket.getLevelType().getDefaultProvider()
-		);
+		boolean bl = clientboundLoginPacket.isDebug();
+		boolean bl2 = clientboundLoginPacket.isFlat();
+		ClientLevel.ClientLevelData clientLevelData = new ClientLevel.ClientLevelData(Difficulty.NORMAL, clientboundLoginPacket.isHardcore(), bl2);
 		this.levelData = clientLevelData;
 		this.level = new ClientLevel(
-			this, clientLevelData, clientboundLoginPacket.getDimension(), this.serverChunkRadius, this.minecraft::getProfiler, this.minecraft.levelRenderer
+			this,
+			clientLevelData,
+			clientboundLoginPacket.getDimension(),
+			this.serverChunkRadius,
+			this.minecraft::getProfiler,
+			this.minecraft.levelRenderer,
+			bl,
+			clientboundLoginPacket.getSeed()
 		);
 		this.minecraft.setLevel(this.level);
 		if (this.minecraft.player == null) {
@@ -1046,15 +1053,19 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		this.started = false;
 		if (dimensionType != localPlayer.dimension) {
 			Scoreboard scoreboard = this.level.getScoreboard();
-			ClientLevel.ClientLevelData clientLevelData = new ClientLevel.ClientLevelData(
-				clientboundRespawnPacket.getSeed(),
-				this.levelData.getDifficulty(),
-				this.levelData.isHardcore(),
-				clientboundRespawnPacket.getLevelType().getDefaultProvider()
-			);
+			boolean bl = clientboundRespawnPacket.isDebug();
+			boolean bl2 = clientboundRespawnPacket.isFlat();
+			ClientLevel.ClientLevelData clientLevelData = new ClientLevel.ClientLevelData(this.levelData.getDifficulty(), this.levelData.isHardcore(), bl2);
 			this.levelData = clientLevelData;
 			this.level = new ClientLevel(
-				this, clientLevelData, clientboundRespawnPacket.getDimension(), this.serverChunkRadius, this.minecraft::getProfiler, this.minecraft.levelRenderer
+				this,
+				clientLevelData,
+				clientboundRespawnPacket.getDimension(),
+				this.serverChunkRadius,
+				this.minecraft::getProfiler,
+				this.minecraft.levelRenderer,
+				bl,
+				clientboundRespawnPacket.getSeed()
 			);
 			this.level.setScoreboard(scoreboard);
 			this.minecraft.setLevel(this.level);

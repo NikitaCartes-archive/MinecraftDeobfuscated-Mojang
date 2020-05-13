@@ -88,9 +88,9 @@ public class StructureBlockEntity extends BlockEntity {
 		this.setStructureName(compoundTag.getString("name"));
 		this.author = compoundTag.getString("author");
 		this.metaData = compoundTag.getString("metadata");
-		int i = Mth.clamp(compoundTag.getInt("posX"), -32, 32);
-		int j = Mth.clamp(compoundTag.getInt("posY"), -32, 32);
-		int k = Mth.clamp(compoundTag.getInt("posZ"), -32, 32);
+		int i = Mth.clamp(compoundTag.getInt("posX"), -48, 48);
+		int j = Mth.clamp(compoundTag.getInt("posY"), -48, 48);
+		int k = Mth.clamp(compoundTag.getInt("posZ"), -48, 48);
 		this.structurePos = new BlockPos(i, j, k);
 		int l = Mth.clamp(compoundTag.getInt("sizeX"), 0, 48);
 		int m = Mth.clamp(compoundTag.getInt("sizeY"), 0, 48);

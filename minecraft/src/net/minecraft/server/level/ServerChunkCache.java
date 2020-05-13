@@ -34,7 +34,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -50,7 +49,7 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 public class ServerChunkCache extends ChunkSource {
 	private static final List<ChunkStatus> CHUNK_STATUSES = ChunkStatus.getStatusList();
 	private final DistanceManager distanceManager;
-	private final ChunkGenerator<?> generator;
+	private final ChunkGenerator generator;
 	private final ServerLevel level;
 	private final Thread mainThread;
 	private final ThreadedLevelLightEngine lightEngine;
@@ -72,7 +71,7 @@ public class ServerChunkCache extends ChunkSource {
 		DataFixer dataFixer,
 		StructureManager structureManager,
 		Executor executor,
-		ChunkGenerator<?> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		int i,
 		boolean bl,
 		ChunkProgressListener chunkProgressListener,
@@ -82,7 +81,7 @@ public class ServerChunkCache extends ChunkSource {
 		this.mainThreadProcessor = new ServerChunkCache.MainThreadExecutor(serverLevel);
 		this.generator = chunkGenerator;
 		this.mainThread = Thread.currentThread();
-		File file = levelStorageAccess.getDimensionPath(serverLevel.getDimension().getType());
+		File file = levelStorageAccess.getDimensionPath(serverLevel.dimensionType());
 		File file2 = new File(file, "data");
 		file2.mkdirs();
 		this.dataStorage = new DimensionDataStorage(file2, dataFixer);
@@ -345,7 +344,6 @@ public class ServerChunkCache extends ChunkSource {
 		this.chunkMap.close();
 	}
 
-	@Override
 	public void tick(BooleanSupplier booleanSupplier) {
 		this.level.getProfiler().push("purge");
 		this.distanceManager.purgeStaleTickets();
@@ -363,7 +361,7 @@ public class ServerChunkCache extends ChunkSource {
 		long m = l - this.lastInhabitedUpdate;
 		this.lastInhabitedUpdate = l;
 		LevelData levelData = this.level.getLevelData();
-		boolean bl = levelData.getGeneratorType() == LevelType.DEBUG_ALL_BLOCK_STATES;
+		boolean bl = this.level.isDebug();
 		boolean bl2 = this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING);
 		if (!bl) {
 			this.level.getProfiler().push("pollingChunks");
@@ -423,7 +421,7 @@ public class ServerChunkCache extends ChunkSource {
 		return this.mainThreadProcessor.getPendingTasksCount();
 	}
 
-	public ChunkGenerator<?> getGenerator() {
+	public ChunkGenerator getGenerator() {
 		return this.generator;
 	}
 
@@ -513,7 +511,7 @@ public class ServerChunkCache extends ChunkSource {
 
 	final class MainThreadExecutor extends BlockableEventLoop<Runnable> {
 		private MainThreadExecutor(Level level) {
-			super("Chunk source main thread executor for " + Registry.DIMENSION_TYPE.getKey(level.getDimension().getType()));
+			super("Chunk source main thread executor for " + Registry.DIMENSION_TYPE.getKey(level.dimensionType()));
 		}
 
 		@Override

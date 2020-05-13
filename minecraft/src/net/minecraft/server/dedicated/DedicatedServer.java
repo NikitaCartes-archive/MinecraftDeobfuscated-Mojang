@@ -409,7 +409,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 
 	@Override
 	public boolean isUnderSpawnProtection(ServerLevel serverLevel, BlockPos blockPos, Player player) {
-		if (serverLevel.dimension.getType() != DimensionType.OVERWORLD) {
+		if (serverLevel.dimensionType() != DimensionType.OVERWORLD) {
 			return false;
 		} else if (this.getPlayerList().getOps().isEmpty()) {
 			return false;

@@ -85,7 +85,7 @@ public class ChunkDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 		private ChunkData(IntegratedServer integratedServer, double d, double e) {
 			ClientLevel clientLevel = ChunkDebugRenderer.this.minecraft.level;
-			DimensionType dimensionType = ChunkDebugRenderer.this.minecraft.level.dimension.getType();
+			DimensionType dimensionType = ChunkDebugRenderer.this.minecraft.level.dimensionType();
 			ServerLevel serverLevel;
 			if (integratedServer.getLevel(dimensionType) != null) {
 				serverLevel = integratedServer.getLevel(dimensionType);

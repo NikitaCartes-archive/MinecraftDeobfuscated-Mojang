@@ -98,18 +98,19 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.PortalForcer;
 import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.TickNextTickData;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -133,13 +134,14 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class ServerLevel extends Level {
+public class ServerLevel extends Level implements WorldGenLevel {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final List<Entity> globalEntities = Lists.<Entity>newArrayList();
 	private final Int2ObjectMap<Entity> entitiesById = new Int2ObjectLinkedOpenHashMap<>();
 	private final Map<UUID, Entity> entitiesByUuid = Maps.<UUID, Entity>newHashMap();
 	private final Queue<Entity> toAddAfterTick = Queues.<Entity>newArrayDeque();
 	private final List<ServerPlayer> players = Lists.<ServerPlayer>newArrayList();
+	private final ServerChunkCache chunkSource;
 	boolean tickingEntities;
 	private final MinecraftServer server;
 	private final ServerLevelData serverLevelData;
@@ -167,25 +169,23 @@ public class ServerLevel extends Level {
 		LevelStorageSource.LevelStorageAccess levelStorageAccess,
 		ServerLevelData serverLevelData,
 		DimensionType dimensionType,
-		ChunkProgressListener chunkProgressListener
+		ChunkProgressListener chunkProgressListener,
+		ChunkGenerator chunkGenerator,
+		boolean bl,
+		long l
 	) {
-		super(
-			serverLevelData,
-			dimensionType,
-			(level, dimension) -> new ServerChunkCache(
-					(ServerLevel)level,
-					levelStorageAccess,
-					minecraftServer.getFixerUpper(),
-					minecraftServer.getStructureManager(),
-					executor,
-					dimension.createRandomLevelGenerator(),
-					minecraftServer.getPlayerList().getViewDistance(),
-					minecraftServer.forceSynchronousWrites(),
-					chunkProgressListener,
-					() -> minecraftServer.getLevel(DimensionType.OVERWORLD).getDataStorage()
-				),
-			minecraftServer::getProfiler,
-			false
+		super(serverLevelData, dimensionType, minecraftServer::getProfiler, false, bl, l);
+		this.chunkSource = new ServerChunkCache(
+			this,
+			levelStorageAccess,
+			minecraftServer.getFixerUpper(),
+			minecraftServer.getStructureManager(),
+			executor,
+			chunkGenerator,
+			minecraftServer.getPlayerList().getViewDistance(),
+			minecraftServer.forceSynchronousWrites(),
+			chunkProgressListener,
+			() -> minecraftServer.getLevel(DimensionType.OVERWORLD).getDataStorage()
 		);
 		this.server = minecraftServer;
 		this.serverLevelData = serverLevelData;
@@ -193,13 +193,13 @@ public class ServerLevel extends Level {
 		this.updateSkyBrightness();
 		this.prepareWeather();
 		this.getWorldBorder().setAbsoluteMaxSize(minecraftServer.getAbsoluteMaxWorldSize());
-		this.raids = this.getDataStorage().computeIfAbsent(() -> new Raids(this), Raids.getFileId(this.dimension));
+		this.raids = this.getDataStorage().computeIfAbsent(() -> new Raids(this), Raids.getFileId(this.dimensionType()));
 		if (!minecraftServer.isSingleplayer()) {
 			serverLevelData.setGameType(minecraftServer.getDefaultGameType());
 		}
 
-		this.wanderingTraderSpawner = this.dimension.getType() == DimensionType.OVERWORLD ? new WanderingTraderSpawner(this, this.serverLevelData) : null;
-		this.structureFeatureManager = new StructureFeatureManager(this, this.serverLevelData);
+		this.wanderingTraderSpawner = this.dimensionType() == DimensionType.OVERWORLD ? new WanderingTraderSpawner(this, this.serverLevelData) : null;
+		this.structureFeatureManager = new StructureFeatureManager(this, minecraftServer.getWorldData().worldGenSettings());
 	}
 
 	public void setWeatherParameters(int i, int j, boolean bl, boolean bl2) {
@@ -226,7 +226,7 @@ public class ServerLevel extends Level {
 		this.getWorldBorder().tick();
 		profilerFiller.popPush("weather");
 		boolean bl = this.isRaining();
-		if (this.dimension.isHasSkyLight()) {
+		if (this.dimensionType().hasSkyLight()) {
 			if (this.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE)) {
 				int i = this.serverLevelData.getClearWeatherTime();
 				int j = this.serverLevelData.getThunderTime();
@@ -287,11 +287,11 @@ public class ServerLevel extends Level {
 		}
 
 		if (this.oRainLevel != this.rainLevel) {
-			this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(7, this.rainLevel), this.dimension.getType());
+			this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(7, this.rainLevel), this.dimensionType());
 		}
 
 		if (this.oThunderLevel != this.thunderLevel) {
-			this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(8, this.thunderLevel), this.dimension.getType());
+			this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(8, this.thunderLevel), this.dimensionType());
 		}
 
 		if (bl != this.isRaining()) {
@@ -323,7 +323,7 @@ public class ServerLevel extends Level {
 		profilerFiller.popPush("chunkSource");
 		this.getChunkSource().tick(booleanSupplier);
 		profilerFiller.popPush("tickPending");
-		if (this.levelData.getGeneratorType() != LevelType.DEBUG_ALL_BLOCK_STATES) {
+		if (!this.isDebug()) {
 			this.blockTicks.tick();
 			this.liquidTicks.tick();
 		}
@@ -344,7 +344,7 @@ public class ServerLevel extends Level {
 		}
 
 		if (bl4 || this.emptyTime++ < 300) {
-			this.dimension.tick();
+			this.getDimension().tick();
 			profilerFiller.push("global");
 
 			for (int j = 0; j < this.globalEntities.size(); j++) {
@@ -637,7 +637,7 @@ public class ServerLevel extends Level {
 
 	@Nullable
 	public BlockPos getDimensionSpecificSpawn() {
-		return this.dimension.getDimensionSpecificSpawn();
+		return this.getDimension().getDimensionSpecificSpawn();
 	}
 
 	public void save(@Nullable ProgressListener progressListener, boolean bl, boolean bl2) {
@@ -657,7 +657,7 @@ public class ServerLevel extends Level {
 	}
 
 	protected void saveLevelData() {
-		this.dimension.saveData(this.serverLevelData);
+		this.getDimension().saveData(this.serverLevelData);
 		this.getChunkSource().getDataStorage().save();
 	}
 
@@ -882,13 +882,7 @@ public class ServerLevel extends Level {
 		this.server
 			.getPlayerList()
 			.broadcast(
-				null,
-				lightningBolt.getX(),
-				lightningBolt.getY(),
-				lightningBolt.getZ(),
-				512.0,
-				this.dimension.getType(),
-				new ClientboundAddGlobalEntityPacket(lightningBolt)
+				null, lightningBolt.getX(), lightningBolt.getY(), lightningBolt.getZ(), 512.0, this.dimensionType(), new ClientboundAddGlobalEntityPacket(lightningBolt)
 			);
 	}
 
@@ -910,9 +904,7 @@ public class ServerLevel extends Level {
 	public void playSound(@Nullable Player player, double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h) {
 		this.server
 			.getPlayerList()
-			.broadcast(
-				player, d, e, f, g > 1.0F ? (double)(16.0F * g) : 16.0, this.dimension.getType(), new ClientboundSoundPacket(soundEvent, soundSource, d, e, f, g, h)
-			);
+			.broadcast(player, d, e, f, g > 1.0F ? (double)(16.0F * g) : 16.0, this.dimensionType(), new ClientboundSoundPacket(soundEvent, soundSource, d, e, f, g, h));
 	}
 
 	@Override
@@ -925,7 +917,7 @@ public class ServerLevel extends Level {
 				entity.getY(),
 				entity.getZ(),
 				f > 1.0F ? (double)(16.0F * f) : 16.0,
-				this.dimension.getType(),
+				this.dimensionType(),
 				new ClientboundSoundEntityPacket(soundEvent, soundSource, entity, f, g)
 			);
 	}
@@ -945,7 +937,7 @@ public class ServerLevel extends Level {
 				(double)blockPos.getY(),
 				(double)blockPos.getZ(),
 				64.0,
-				this.dimension.getType(),
+				this.dimensionType(),
 				new ClientboundLevelEventPacket(i, blockPos, j, false)
 			);
 	}
@@ -970,7 +962,7 @@ public class ServerLevel extends Level {
 	}
 
 	public ServerChunkCache getChunkSource() {
-		return (ServerChunkCache)super.getChunkSource();
+		return this.chunkSource;
 	}
 
 	@Override
@@ -1014,7 +1006,7 @@ public class ServerLevel extends Level {
 						(double)blockEventData.getPos().getY(),
 						(double)blockEventData.getPos().getZ(),
 						64.0,
-						this.dimension.getType(),
+						this.dimensionType(),
 						new ClientboundBlockEventPacket(blockEventData.getPos(), blockEventData.getBlock(), blockEventData.getParamA(), blockEventData.getParamB())
 					);
 			}
@@ -1100,7 +1092,9 @@ public class ServerLevel extends Level {
 
 	@Nullable
 	public BlockPos findNearestMapFeature(String string, BlockPos blockPos, int i, boolean bl) {
-		return !this.serverLevelData.shouldGenerateMapFeatures() ? null : this.getChunkSource().getGenerator().findNearestMapFeature(this, string, blockPos, i, bl);
+		return !this.server.getWorldData().worldGenSettings().generateFeatures()
+			? null
+			: this.getChunkSource().getGenerator().findNearestMapFeature(this, string, blockPos, i, bl);
 	}
 
 	@Nullable
@@ -1453,7 +1447,7 @@ public class ServerLevel extends Level {
 
 	@Override
 	public void blockUpdated(BlockPos blockPos, Block block) {
-		if (this.levelData.getGeneratorType() != LevelType.DEBUG_ALL_BLOCK_STATES) {
+		if (!this.isDebug()) {
 			this.updateNeighborsAt(blockPos, block);
 		}
 	}
@@ -1470,5 +1464,14 @@ public class ServerLevel extends Level {
 
 	public String toString() {
 		return "ServerLevel[" + this.serverLevelData.getLevelName() + "]";
+	}
+
+	public boolean isFlat() {
+		return this.server.getWorldData().worldGenSettings().isFlatWorld();
+	}
+
+	@Override
+	public long getSeed() {
+		return this.server.getWorldData().worldGenSettings().seed();
 	}
 }

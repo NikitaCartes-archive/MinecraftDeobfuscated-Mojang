@@ -7,8 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.SpikeFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfiguration;
@@ -77,7 +75,7 @@ public enum DragonRespawnAnimation {
 							.place(
 								serverLevel,
 								serverLevel.structureFeatureManager(),
-								(ChunkGenerator<? extends ChunkGeneratorSettings>)serverLevel.getChunkSource().getGenerator(),
+								serverLevel.getChunkSource().getGenerator(),
 								new Random(),
 								new BlockPos(endSpike.getCenterX(), 45, endSpike.getCenterZ())
 							);

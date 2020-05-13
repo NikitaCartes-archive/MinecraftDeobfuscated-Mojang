@@ -145,7 +145,7 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			)
 			.addCriterion("slept_in_bed", LocationTrigger.TriggerInstance.sleptInBed())
 			.save(consumer, "adventure/sleep_in_bed");
-		Advancement advancement3 = this.addBiomes(Advancement.Builder.advancement())
+		addBiomes(Advancement.Builder.advancement(), EXPLORABLE_BIOMES)
 			.parent(advancement2)
 			.display(
 				Items.DIAMOND_BOOTS,
@@ -159,7 +159,7 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			)
 			.rewards(AdvancementRewards.Builder.experience(500))
 			.save(consumer, "adventure/adventuring_time");
-		Advancement advancement4 = Advancement.Builder.advancement()
+		Advancement advancement3 = Advancement.Builder.advancement()
 			.parent(advancement)
 			.display(
 				Items.EMERALD,
@@ -173,7 +173,7 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			)
 			.addCriterion("traded", TradeTrigger.TriggerInstance.tradedWithVillager())
 			.save(consumer, "adventure/trade");
-		Advancement advancement5 = this.addMobsToKill(Advancement.Builder.advancement())
+		Advancement advancement4 = this.addMobsToKill(Advancement.Builder.advancement())
 			.parent(advancement)
 			.display(
 				Items.IRON_SWORD,
@@ -187,8 +187,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			)
 			.requirements(RequirementsStrategy.OR)
 			.save(consumer, "adventure/kill_a_mob");
-		Advancement advancement6 = this.addMobsToKill(Advancement.Builder.advancement())
-			.parent(advancement5)
+		this.addMobsToKill(Advancement.Builder.advancement())
+			.parent(advancement4)
 			.display(
 				Items.DIAMOND_SWORD,
 				new TranslatableComponent("advancements.adventure.kill_all_mobs.title"),
@@ -201,8 +201,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			)
 			.rewards(AdvancementRewards.Builder.experience(100))
 			.save(consumer, "adventure/kill_all_mobs");
-		Advancement advancement7 = Advancement.Builder.advancement()
-			.parent(advancement5)
+		Advancement advancement5 = Advancement.Builder.advancement()
+			.parent(advancement4)
 			.display(
 				Items.BOW,
 				new TranslatableComponent("advancements.adventure.shoot_arrow.title"),
@@ -221,8 +221,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 				)
 			)
 			.save(consumer, "adventure/shoot_arrow");
-		Advancement advancement8 = Advancement.Builder.advancement()
-			.parent(advancement5)
+		Advancement advancement6 = Advancement.Builder.advancement()
+			.parent(advancement4)
 			.display(
 				Items.TRIDENT,
 				new TranslatableComponent("advancements.adventure.throw_trident.title"),
@@ -241,8 +241,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 				)
 			)
 			.save(consumer, "adventure/throw_trident");
-		Advancement advancement9 = Advancement.Builder.advancement()
-			.parent(advancement8)
+		Advancement.Builder.advancement()
+			.parent(advancement6)
 			.display(
 				Items.TRIDENT,
 				new TranslatableComponent("advancements.adventure.very_very_frightening.title"),
@@ -257,8 +257,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 				"struck_villager", ChanneledLightningTrigger.TriggerInstance.channeledLightning(EntityPredicate.Builder.entity().of(EntityType.VILLAGER).build())
 			)
 			.save(consumer, "adventure/very_very_frightening");
-		Advancement advancement10 = Advancement.Builder.advancement()
-			.parent(advancement4)
+		Advancement.Builder.advancement()
+			.parent(advancement3)
 			.display(
 				Blocks.CARVED_PUMPKIN,
 				new TranslatableComponent("advancements.adventure.summon_iron_golem.title"),
@@ -271,8 +271,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			)
 			.addCriterion("summoned_golem", SummonedEntityTrigger.TriggerInstance.summonedEntity(EntityPredicate.Builder.entity().of(EntityType.IRON_GOLEM)))
 			.save(consumer, "adventure/summon_iron_golem");
-		Advancement advancement11 = Advancement.Builder.advancement()
-			.parent(advancement7)
+		Advancement.Builder.advancement()
+			.parent(advancement5)
 			.display(
 				Items.ARROW,
 				new TranslatableComponent("advancements.adventure.sniper_duel.title"),
@@ -292,8 +292,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 				)
 			)
 			.save(consumer, "adventure/sniper_duel");
-		Advancement advancement12 = Advancement.Builder.advancement()
-			.parent(advancement5)
+		Advancement.Builder.advancement()
+			.parent(advancement4)
 			.display(
 				Items.TOTEM_OF_UNDYING,
 				new TranslatableComponent("advancements.adventure.totem_of_undying.title"),
@@ -306,7 +306,7 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			)
 			.addCriterion("used_totem", UsedTotemTrigger.TriggerInstance.usedTotem(Items.TOTEM_OF_UNDYING))
 			.save(consumer, "adventure/totem_of_undying");
-		Advancement advancement13 = Advancement.Builder.advancement()
+		Advancement advancement7 = Advancement.Builder.advancement()
 			.parent(advancement)
 			.display(
 				Items.CROSSBOW,
@@ -320,8 +320,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			)
 			.addCriterion("shot_crossbow", ShotCrossbowTrigger.TriggerInstance.shotCrossbow(Items.CROSSBOW))
 			.save(consumer, "adventure/ol_betsy");
-		Advancement advancement14 = Advancement.Builder.advancement()
-			.parent(advancement13)
+		Advancement.Builder.advancement()
+			.parent(advancement7)
 			.display(
 				Items.CROSSBOW,
 				new TranslatableComponent("advancements.adventure.whos_the_pillager_now.title"),
@@ -334,8 +334,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			)
 			.addCriterion("kill_pillager", KilledByCrossbowTrigger.TriggerInstance.crossbowKilled(EntityPredicate.Builder.entity().of(EntityType.PILLAGER)))
 			.save(consumer, "adventure/whos_the_pillager_now");
-		Advancement advancement15 = Advancement.Builder.advancement()
-			.parent(advancement13)
+		Advancement.Builder.advancement()
+			.parent(advancement7)
 			.display(
 				Items.CROSSBOW,
 				new TranslatableComponent("advancements.adventure.two_birds_one_arrow.title"),
@@ -354,8 +354,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 				)
 			)
 			.save(consumer, "adventure/two_birds_one_arrow");
-		Advancement advancement16 = Advancement.Builder.advancement()
-			.parent(advancement13)
+		Advancement.Builder.advancement()
+			.parent(advancement7)
 			.display(
 				Items.CROSSBOW,
 				new TranslatableComponent("advancements.adventure.arbalistic.title"),
@@ -369,7 +369,7 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.rewards(AdvancementRewards.Builder.experience(85))
 			.addCriterion("arbalistic", KilledByCrossbowTrigger.TriggerInstance.crossbowKilled(MinMaxBounds.Ints.exactly(5)))
 			.save(consumer, "adventure/arbalistic");
-		Advancement advancement17 = Advancement.Builder.advancement()
+		Advancement advancement8 = Advancement.Builder.advancement()
 			.parent(advancement)
 			.display(
 				Raid.getLeaderBannerInstance(),
@@ -386,8 +386,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 				KilledTrigger.TriggerInstance.playerKilledEntity(EntityPredicate.Builder.entity().of(EntityTypeTags.RAIDERS).equipment(EntityEquipmentPredicate.CAPTAIN))
 			)
 			.save(consumer, "adventure/voluntary_exile");
-		Advancement advancement18 = Advancement.Builder.advancement()
-			.parent(advancement17)
+		Advancement.Builder.advancement()
+			.parent(advancement8)
 			.display(
 				Raid.getLeaderBannerInstance(),
 				new TranslatableComponent("advancements.adventure.hero_of_the_village.title"),
@@ -401,7 +401,7 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			.rewards(AdvancementRewards.Builder.experience(100))
 			.addCriterion("hero_of_the_village", LocationTrigger.TriggerInstance.raidWon())
 			.save(consumer, "adventure/hero_of_the_village");
-		Advancement advancement19 = Advancement.Builder.advancement()
+		Advancement.Builder.advancement()
 			.parent(advancement)
 			.display(
 				Blocks.HONEY_BLOCK.asItem(),
@@ -415,19 +415,26 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 			)
 			.addCriterion("honey_block_slide", SlideDownBlockTrigger.TriggerInstance.slidesDownBlock(Blocks.HONEY_BLOCK))
 			.save(consumer, "adventure/honey_block_slide");
-		Advancement advancement20 = Advancement.Builder.advancement()
-			.parent(advancement7)
+		Advancement.Builder.advancement()
+			.parent(advancement5)
 			.display(
 				Blocks.TARGET.asItem(),
 				new TranslatableComponent("advancements.adventure.bullseye.title"),
 				new TranslatableComponent("advancements.adventure.bullseye.description"),
 				null,
-				FrameType.TASK,
+				FrameType.CHALLENGE,
 				true,
 				true,
 				false
 			)
-			.addCriterion("bullseye", TargetBlockTrigger.TriggerInstance.targetHit(MinMaxBounds.Ints.exactly(15)))
+			.rewards(AdvancementRewards.Builder.experience(50))
+			.addCriterion(
+				"bullseye",
+				TargetBlockTrigger.TriggerInstance.targetHit(
+					MinMaxBounds.Ints.exactly(15),
+					EntityPredicate.Composite.wrap(EntityPredicate.Builder.entity().distance(DistancePredicate.horizontal(MinMaxBounds.Floats.atLeast(30.0F))).build())
+				)
+			)
 			.save(consumer, "adventure/bullseye");
 	}
 
@@ -441,8 +448,8 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 		return builder;
 	}
 
-	private Advancement.Builder addBiomes(Advancement.Builder builder) {
-		for (Biome biome : EXPLORABLE_BIOMES) {
+	protected static Advancement.Builder addBiomes(Advancement.Builder builder, Biome[] biomes) {
+		for (Biome biome : biomes) {
 			builder.addCriterion(Registry.BIOME.getKey(biome).toString(), LocationTrigger.TriggerInstance.located(LocationPredicate.inBiome(biome)));
 		}
 

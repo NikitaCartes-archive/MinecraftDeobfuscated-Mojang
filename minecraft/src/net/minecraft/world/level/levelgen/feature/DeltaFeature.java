@@ -9,11 +9,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureConfiguration;
 
 public class DeltaFeature extends Feature<DeltaFeatureConfiguration> {
@@ -35,14 +35,14 @@ public class DeltaFeature extends Feature<DeltaFeatureConfiguration> {
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		DeltaFeatureConfiguration deltaFeatureConfiguration
 	) {
-		BlockPos blockPos2 = findDeltaLevel(levelAccessor, blockPos.mutable().clamp(Direction.Axis.Y, 1, levelAccessor.getMaxBuildHeight() - 1));
+		BlockPos blockPos2 = findDeltaLevel(worldGenLevel, blockPos.mutable().clamp(Direction.Axis.Y, 1, worldGenLevel.getMaxBuildHeight() - 1));
 		if (blockPos2 == null) {
 			return false;
 		} else {
@@ -60,16 +60,16 @@ public class DeltaFeature extends Feature<DeltaFeatureConfiguration> {
 					break;
 				}
 
-				if (isClear(levelAccessor, blockPos3, deltaFeatureConfiguration)) {
+				if (isClear(worldGenLevel, blockPos3, deltaFeatureConfiguration)) {
 					if (bl3) {
 						bl = true;
-						this.setBlock(levelAccessor, blockPos3, deltaFeatureConfiguration.rim);
+						this.setBlock(worldGenLevel, blockPos3, deltaFeatureConfiguration.rim);
 					}
 
 					BlockPos blockPos4 = blockPos3.offset(i, 0, j);
-					if (isClear(levelAccessor, blockPos4, deltaFeatureConfiguration)) {
+					if (isClear(worldGenLevel, blockPos4, deltaFeatureConfiguration)) {
 						bl = true;
-						this.setBlock(levelAccessor, blockPos4, deltaFeatureConfiguration.contents);
+						this.setBlock(worldGenLevel, blockPos4, deltaFeatureConfiguration.contents);
 					}
 				}
 			}

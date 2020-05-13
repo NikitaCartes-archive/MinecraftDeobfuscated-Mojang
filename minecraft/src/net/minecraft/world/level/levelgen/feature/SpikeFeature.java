@@ -21,11 +21,11 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfiguration;
 import net.minecraft.world.phys.AABB;
 
@@ -38,28 +38,28 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 		super(function);
 	}
 
-	public static List<SpikeFeature.EndSpike> getSpikesForLevel(LevelAccessor levelAccessor) {
-		Random random = new Random(levelAccessor.getSeed());
+	public static List<SpikeFeature.EndSpike> getSpikesForLevel(WorldGenLevel worldGenLevel) {
+		Random random = new Random(worldGenLevel.getSeed());
 		long l = random.nextLong() & 65535L;
 		return SPIKE_CACHE.getUnchecked(l);
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		SpikeConfiguration spikeConfiguration
 	) {
 		List<SpikeFeature.EndSpike> list = spikeConfiguration.getSpikes();
 		if (list.isEmpty()) {
-			list = getSpikesForLevel(levelAccessor);
+			list = getSpikesForLevel(worldGenLevel);
 		}
 
 		for (SpikeFeature.EndSpike endSpike : list) {
 			if (endSpike.isCenterWithinChunk(blockPos)) {
-				this.placeSpike(levelAccessor, random, spikeConfiguration, endSpike);
+				this.placeSpike(worldGenLevel, random, spikeConfiguration, endSpike);
 			}
 		}
 

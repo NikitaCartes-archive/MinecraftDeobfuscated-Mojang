@@ -44,10 +44,8 @@ import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.level.block.state.pattern.BlockPatternBuilder;
 import net.minecraft.world.level.block.state.predicate.BlockPredicate;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.EndPodiumFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -81,6 +79,7 @@ public class EndDragonFight {
 	private DragonRespawnAnimation respawnStage;
 	private int respawnTime;
 	private List<EndCrystal> respawnCrystals;
+	private boolean populateGateways;
 
 	public EndDragonFight(ServerLevel serverLevel, CompoundTag compoundTag) {
 		this.level = serverLevel;
@@ -110,8 +109,7 @@ public class EndDragonFight {
 				this.gateways.add(listTag.getInt(i));
 			}
 		} else {
-			this.gateways.addAll(ContiguousSet.create(Range.closedOpen(0, 20), DiscreteDomain.integers()));
-			Collections.shuffle(this.gateways, new Random(serverLevel.getSeed()));
+			this.populateGateways = true;
 		}
 
 		this.exitPortalPattern = BlockPatternBuilder.start()
@@ -369,6 +367,12 @@ public class EndDragonFight {
 	}
 
 	private void spawnNewGateway() {
+		if (this.populateGateways) {
+			this.populateGateways = false;
+			this.gateways.addAll(ContiguousSet.create(Range.closedOpen(0, 20), DiscreteDomain.integers()));
+			Collections.shuffle(this.gateways, new Random(this.level.getSeed()));
+		}
+
 		if (!this.gateways.isEmpty()) {
 			int i = (Integer)this.gateways.remove(this.gateways.size() - 1);
 			int j = Mth.floor(96.0 * Math.cos(2.0 * (-Math.PI + (Math.PI / 20) * (double)i)));
@@ -381,13 +385,7 @@ public class EndDragonFight {
 		this.level.levelEvent(3000, blockPos, 0);
 		Feature.END_GATEWAY
 			.configured(EndGatewayConfiguration.delayedExitSearch())
-			.place(
-				this.level,
-				this.level.structureFeatureManager(),
-				(ChunkGenerator<? extends ChunkGeneratorSettings>)this.level.getChunkSource().getGenerator(),
-				new Random(),
-				blockPos
-			);
+			.place(this.level, this.level.structureFeatureManager(), this.level.getChunkSource().getGenerator(), new Random(), blockPos);
 	}
 
 	private void spawnExitPortal(boolean bl) {
@@ -401,13 +399,7 @@ public class EndDragonFight {
 		}
 
 		endPodiumFeature.configured(FeatureConfiguration.NONE)
-			.place(
-				this.level,
-				this.level.structureFeatureManager(),
-				(ChunkGenerator<? extends ChunkGeneratorSettings>)this.level.getChunkSource().getGenerator(),
-				new Random(),
-				this.portalLocation
-			);
+			.place(this.level, this.level.structureFeatureManager(), this.level.getChunkSource().getGenerator(), new Random(), this.portalLocation);
 	}
 
 	private EnderDragon createNewDragon() {

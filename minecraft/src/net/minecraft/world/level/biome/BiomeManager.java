@@ -1,5 +1,6 @@
 package net.minecraft.world.level.biome;
 
+import com.google.common.hash.Hashing;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -14,6 +15,10 @@ public class BiomeManager {
 		this.noiseBiomeSource = noiseBiomeSource;
 		this.biomeZoomSeed = l;
 		this.zoomer = biomeZoomer;
+	}
+
+	public static long obfuscateSeed(long l) {
+		return Hashing.sha256().hashLong(l).asLong();
 	}
 
 	public BiomeManager withDifferentSource(BiomeSource biomeSource) {

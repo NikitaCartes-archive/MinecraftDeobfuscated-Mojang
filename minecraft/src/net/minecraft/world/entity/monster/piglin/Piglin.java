@@ -304,7 +304,7 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 	}
 
 	public boolean isConverting() {
-		return this.level.getDimension().getType() != DimensionType.NETHER && !this.isImmuneToZombification() && !this.isNoAi();
+		return this.level.dimensionType() != DimensionType.NETHER && !this.isImmuneToZombification() && !this.isNoAi();
 	}
 
 	@Override
@@ -474,6 +474,7 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 
 	@Override
 	protected void pickUpItem(ItemEntity itemEntity) {
+		this.onItemPickup(itemEntity);
 		PiglinAi.pickUpItem(this, itemEntity);
 	}
 

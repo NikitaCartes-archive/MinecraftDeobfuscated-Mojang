@@ -38,8 +38,10 @@ public class ItemDurabilityTrigger extends SimpleCriterionTrigger<ItemDurability
 			this.delta = ints2;
 		}
 
-		public static ItemDurabilityTrigger.TriggerInstance changedDurability(ItemPredicate itemPredicate, MinMaxBounds.Ints ints) {
-			return new ItemDurabilityTrigger.TriggerInstance(EntityPredicate.Composite.ANY, itemPredicate, ints, MinMaxBounds.Ints.ANY);
+		public static ItemDurabilityTrigger.TriggerInstance changedDurability(
+			EntityPredicate.Composite composite, ItemPredicate itemPredicate, MinMaxBounds.Ints ints
+		) {
+			return new ItemDurabilityTrigger.TriggerInstance(composite, itemPredicate, ints, MinMaxBounds.Ints.ANY);
 		}
 
 		public boolean matches(ItemStack itemStack, int i) {

@@ -4,13 +4,12 @@ import com.mojang.datafixers.Dynamic;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
 
 public class EndGatewayFeature extends Feature<EndGatewayConfiguration> {
@@ -19,9 +18,9 @@ public class EndGatewayFeature extends Feature<EndGatewayConfiguration> {
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		EndGatewayConfiguration endGatewayConfiguration
@@ -33,9 +32,9 @@ public class EndGatewayFeature extends Feature<EndGatewayConfiguration> {
 			boolean bl4 = Math.abs(blockPos2.getY() - blockPos.getY()) == 2;
 			if (bl && bl2 && bl3) {
 				BlockPos blockPos3 = blockPos2.immutable();
-				this.setBlock(levelAccessor, blockPos3, Blocks.END_GATEWAY.defaultBlockState());
+				this.setBlock(worldGenLevel, blockPos3, Blocks.END_GATEWAY.defaultBlockState());
 				endGatewayConfiguration.getExit().ifPresent(blockPos2x -> {
-					BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos3);
+					BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos3);
 					if (blockEntity instanceof TheEndGatewayBlockEntity) {
 						TheEndGatewayBlockEntity theEndGatewayBlockEntity = (TheEndGatewayBlockEntity)blockEntity;
 						theEndGatewayBlockEntity.setExitPosition(blockPos2x, endGatewayConfiguration.isExitExact());
@@ -43,13 +42,13 @@ public class EndGatewayFeature extends Feature<EndGatewayConfiguration> {
 					}
 				});
 			} else if (bl2) {
-				this.setBlock(levelAccessor, blockPos2, Blocks.AIR.defaultBlockState());
+				this.setBlock(worldGenLevel, blockPos2, Blocks.AIR.defaultBlockState());
 			} else if (bl4 && bl && bl3) {
-				this.setBlock(levelAccessor, blockPos2, Blocks.BEDROCK.defaultBlockState());
+				this.setBlock(worldGenLevel, blockPos2, Blocks.BEDROCK.defaultBlockState());
 			} else if ((bl || bl3) && !bl4) {
-				this.setBlock(levelAccessor, blockPos2, Blocks.BEDROCK.defaultBlockState());
+				this.setBlock(worldGenLevel, blockPos2, Blocks.BEDROCK.defaultBlockState());
 			} else {
-				this.setBlock(levelAccessor, blockPos2, Blocks.AIR.defaultBlockState());
+				this.setBlock(worldGenLevel, blockPos2, Blocks.AIR.defaultBlockState());
 			}
 		}
 

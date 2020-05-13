@@ -1,20 +1,11 @@
 package net.minecraft.world.level.storage;
 
-import com.google.common.hash.Hashing;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.LevelType;
-import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
 
 public interface LevelData {
-	long getSeed();
-
-	static long obfuscateSeed(long l) {
-		return Hashing.sha256().hashLong(l).asLong();
-	}
-
 	int getXSpawn();
 
 	int getYSpawn();
@@ -33,10 +24,6 @@ public interface LevelData {
 
 	boolean isHardcore();
 
-	LevelType getGeneratorType();
-
-	ChunkGeneratorProvider getGeneratorProvider();
-
 	GameRules getGameRules();
 
 	Difficulty getDifficulty();
@@ -44,8 +31,6 @@ public interface LevelData {
 	boolean isDifficultyLocked();
 
 	default void fillCrashReportCategory(CrashReportCategory crashReportCategory) {
-		crashReportCategory.setDetail("Level seed", (CrashReportDetail<String>)(() -> String.valueOf(this.getSeed())));
-		crashReportCategory.setDetail("Level generator options", (CrashReportDetail<String>)(() -> this.getGeneratorProvider().getSettings().toString()));
 		crashReportCategory.setDetail(
 			"Level spawn location", (CrashReportDetail<String>)(() -> CrashReportCategory.formatLocation(this.getXSpawn(), this.getYSpawn(), this.getZSpawn()))
 		);

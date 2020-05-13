@@ -24,8 +24,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public interface LevelAccessor extends EntityGetter, LevelReader, LevelSimulatedRW {
-	long getSeed();
-
 	default float getMoonBrightness() {
 		return Dimension.MOON_BRIGHTNESS_PER_PHASE[this.getDimension().getMoonPhase(this.getLevelData().getDayTime())];
 	}
@@ -72,7 +70,7 @@ public interface LevelAccessor extends EntityGetter, LevelReader, LevelSimulated
 	void levelEvent(@Nullable Player player, int i, BlockPos blockPos, int j);
 
 	default int getHeight() {
-		return this.getDimension().isHasCeiling() ? 128 : 256;
+		return this.dimensionType().hasCeiling() ? 128 : 256;
 	}
 
 	default void levelEvent(int i, BlockPos blockPos, int j) {

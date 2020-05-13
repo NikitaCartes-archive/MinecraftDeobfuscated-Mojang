@@ -7,14 +7,13 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
@@ -31,12 +30,12 @@ public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfigur
 	}
 
 	@Override
-	protected int getSpacing(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+	protected int getSpacing(ChunkGeneratorSettings chunkGeneratorSettings) {
 		return chunkGeneratorSettings.getWoodlandMansionSpacing();
 	}
 
 	@Override
-	protected int getSeparation(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+	protected int getSeparation(ChunkGeneratorSettings chunkGeneratorSettings) {
 		return chunkGeneratorSettings.getWoodlandMansionSeparation();
 	}
 
@@ -52,7 +51,7 @@ public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfigur
 
 	@Override
 	protected boolean isFeatureChunk(
-		BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos
+		BiomeManager biomeManager, ChunkGenerator chunkGenerator, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos
 	) {
 		for (Biome biome2 : chunkGenerator.getBiomeSource().getBiomesWithin(i * 16 + 9, chunkGenerator.getSeaLevel(), j * 16 + 9, 32)) {
 			if (!chunkGenerator.isBiomeValidStartForStructure(biome2, this)) {
@@ -84,7 +83,7 @@ public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfigur
 		}
 
 		@Override
-		public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+		public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
 			Rotation rotation = Rotation.getRandom(this.random);
 			int k = 5;
 			int l = 5;
@@ -115,20 +114,20 @@ public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfigur
 
 		@Override
 		public void postProcess(
-			LevelAccessor levelAccessor,
+			WorldGenLevel worldGenLevel,
 			StructureFeatureManager structureFeatureManager,
-			ChunkGenerator<?> chunkGenerator,
+			ChunkGenerator chunkGenerator,
 			Random random,
 			BoundingBox boundingBox,
 			ChunkPos chunkPos
 		) {
-			super.postProcess(levelAccessor, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos);
+			super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos);
 			int i = this.boundingBox.y0;
 
 			for (int j = boundingBox.x0; j <= boundingBox.x1; j++) {
 				for (int k = boundingBox.z0; k <= boundingBox.z1; k++) {
 					BlockPos blockPos = new BlockPos(j, i, k);
-					if (!levelAccessor.isEmptyBlock(blockPos) && this.boundingBox.isInside(blockPos)) {
+					if (!worldGenLevel.isEmptyBlock(blockPos) && this.boundingBox.isInside(blockPos)) {
 						boolean bl = false;
 
 						for (StructurePiece structurePiece : this.pieces) {
@@ -141,11 +140,11 @@ public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfigur
 						if (bl) {
 							for (int l = i - 1; l > 1; l--) {
 								BlockPos blockPos2 = new BlockPos(j, l, k);
-								if (!levelAccessor.isEmptyBlock(blockPos2) && !levelAccessor.getBlockState(blockPos2).getMaterial().isLiquid()) {
+								if (!worldGenLevel.isEmptyBlock(blockPos2) && !worldGenLevel.getBlockState(blockPos2).getMaterial().isLiquid()) {
 									break;
 								}
 
-								levelAccessor.setBlock(blockPos2, Blocks.COBBLESTONE.defaultBlockState(), 2);
+								worldGenLevel.setBlock(blockPos2, Blocks.COBBLESTONE.defaultBlockState(), 2);
 							}
 						}
 					}

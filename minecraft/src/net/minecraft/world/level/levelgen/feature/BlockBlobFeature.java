@@ -4,11 +4,10 @@ import com.mojang.datafixers.Dynamic;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockBlobConfiguration;
 
 public class BlockBlobFeature extends Feature<BlockBlobConfiguration> {
@@ -17,16 +16,16 @@ public class BlockBlobFeature extends Feature<BlockBlobConfiguration> {
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		BlockBlobConfiguration blockBlobConfiguration
 	) {
 		while (blockPos.getY() > 3) {
-			if (!levelAccessor.isEmptyBlock(blockPos.below())) {
-				Block block = levelAccessor.getBlockState(blockPos.below()).getBlock();
+			if (!worldGenLevel.isEmptyBlock(blockPos.below())) {
+				Block block = worldGenLevel.getBlockState(blockPos.below()).getBlock();
 				if (isDirt(block) || isStone(block)) {
 					break;
 				}
@@ -48,7 +47,7 @@ public class BlockBlobFeature extends Feature<BlockBlobConfiguration> {
 
 				for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-k, -l, -m), blockPos.offset(k, l, m))) {
 					if (blockPos2.distSqr(blockPos) <= (double)(f * f)) {
-						levelAccessor.setBlock(blockPos2, blockBlobConfiguration.state, 4);
+						worldGenLevel.setBlock(blockPos2, blockBlobConfiguration.state, 4);
 					}
 				}
 

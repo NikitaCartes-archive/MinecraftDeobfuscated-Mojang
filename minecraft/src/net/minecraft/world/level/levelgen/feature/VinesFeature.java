@@ -5,12 +5,11 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class VinesFeature extends Feature<NoneFeatureConfiguration> {
@@ -21,9 +20,9 @@ public class VinesFeature extends Feature<NoneFeatureConfiguration> {
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		NoneFeatureConfiguration noneFeatureConfiguration
@@ -34,10 +33,10 @@ public class VinesFeature extends Feature<NoneFeatureConfiguration> {
 			mutableBlockPos.set(blockPos);
 			mutableBlockPos.move(random.nextInt(4) - random.nextInt(4), 0, random.nextInt(4) - random.nextInt(4));
 			mutableBlockPos.setY(i);
-			if (levelAccessor.isEmptyBlock(mutableBlockPos)) {
+			if (worldGenLevel.isEmptyBlock(mutableBlockPos)) {
 				for (Direction direction : DIRECTIONS) {
-					if (direction != Direction.DOWN && VineBlock.isAcceptableNeighbour(levelAccessor, mutableBlockPos, direction)) {
-						levelAccessor.setBlock(mutableBlockPos, Blocks.VINE.defaultBlockState().setValue(VineBlock.getPropertyForFace(direction), Boolean.valueOf(true)), 2);
+					if (direction != Direction.DOWN && VineBlock.isAcceptableNeighbour(worldGenLevel, mutableBlockPos, direction)) {
+						worldGenLevel.setBlock(mutableBlockPos, Blocks.VINE.defaultBlockState().setValue(VineBlock.getPropertyForFace(direction), Boolean.valueOf(true)), 2);
 						break;
 					}
 				}

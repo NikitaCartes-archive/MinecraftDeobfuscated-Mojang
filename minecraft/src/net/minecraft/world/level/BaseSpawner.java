@@ -49,9 +49,7 @@ public abstract class BaseSpawner {
 			return StringUtil.isNullOrEmpty(string) ? null : new ResourceLocation(string);
 		} catch (ResourceLocationException var4) {
 			BlockPos blockPos = this.getPos();
-			LOGGER.warn(
-				"Invalid entity id '{}' at spawner {}:[{},{},{}]", string, this.getLevel().dimension.getType(), blockPos.getX(), blockPos.getY(), blockPos.getZ()
-			);
+			LOGGER.warn("Invalid entity id '{}' at spawner {}:[{},{},{}]", string, this.getLevel().dimensionType(), blockPos.getX(), blockPos.getY(), blockPos.getZ());
 			return null;
 		}
 	}

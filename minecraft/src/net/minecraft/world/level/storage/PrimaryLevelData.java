@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.DataFixer;
-import com.mojang.datafixers.Dynamic;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -18,21 +17,18 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.datafix.DataFixTypes;
-import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.timers.TimerCallbacks;
 import net.minecraft.world.level.timers.TimerQueue;
 
@@ -40,10 +36,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	private final String minecraftVersionName;
 	private final int minecraftVersion;
 	private final boolean snapshot;
-	private final long seed;
-	private final ChunkGeneratorProvider generatorProvider;
-	@Nullable
-	private String legacyCustomOptions;
+	private final WorldGenSettings worldGenSettings;
 	private int xSpawn;
 	private int ySpawn;
 	private int zSpawn;
@@ -64,10 +57,8 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	private boolean thundering;
 	private int thunderTime;
 	private GameType gameType;
-	private final boolean generateMapFeatures;
 	private final boolean hardcore;
 	private final boolean allowCommands;
-	private final boolean generateBonusChest;
 	private boolean initialized;
 	private Difficulty difficulty = Difficulty.NORMAL;
 	private boolean difficultyLocked;
@@ -105,42 +96,8 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 			this.snapshot = !SharedConstants.getCurrentVersion().isStable();
 		}
 
-		this.seed = compoundTag.getLong("RandomSeed");
-		if (compoundTag.contains("generatorName", 8)) {
-			String string = compoundTag.getString("generatorName");
-			LevelType levelType = LevelType.getLevelType(string);
-			if (levelType == null) {
-				levelType = LevelType.NORMAL;
-			} else if (levelType == LevelType.CUSTOMIZED) {
-				this.legacyCustomOptions = compoundTag.getString("generatorOptions");
-			} else if (levelType.hasReplacement()) {
-				int k = 0;
-				if (compoundTag.contains("generatorVersion", 99)) {
-					k = compoundTag.getInt("generatorVersion");
-				}
-
-				levelType = levelType.getReplacementForVersion(k);
-			}
-
-			CompoundTag compoundTag4 = compoundTag.getCompound("generatorOptions");
-			Dynamic<?> dynamic = new Dynamic<>(NbtOps.INSTANCE, compoundTag4);
-			Dynamic<?> dynamic2 = datafixGeneratorOptions(levelType, dynamic, i, dataFixer);
-			this.generatorProvider = levelType.createProvider(dynamic2);
-		} else {
-			this.generatorProvider = LevelType.NORMAL.getDefaultProvider();
-		}
-
 		this.gameType = GameType.byId(compoundTag.getInt("GameType"));
-		if (compoundTag.contains("legacy_custom_options", 8)) {
-			this.legacyCustomOptions = compoundTag.getString("legacy_custom_options");
-		}
-
-		if (compoundTag.contains("MapFeatures", 99)) {
-			this.generateMapFeatures = compoundTag.getBoolean("MapFeatures");
-		} else {
-			this.generateMapFeatures = true;
-		}
-
+		this.worldGenSettings = WorldGenSettings.readWorldGenSettings(compoundTag, dataFixer, i);
 		this.xSpawn = compoundTag.getInt("SpawnX");
 		this.ySpawn = compoundTag.getInt("SpawnY");
 		this.zSpawn = compoundTag.getInt("SpawnZ");
@@ -173,7 +130,6 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 			this.allowCommands = this.gameType == GameType.CREATIVE;
 		}
 
-		this.generateBonusChest = compoundTag.getBoolean("BonusChest");
 		this.playerDataVersion = i;
 		if (compoundTag2 != null) {
 			this.loadedPlayerTag = compoundTag2;
@@ -195,8 +151,8 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		if (compoundTag.contains("DimensionData", 10)) {
 			CompoundTag compoundTag3 = compoundTag.getCompound("DimensionData");
 
-			for (String string2 : compoundTag3.getAllKeys()) {
-				this.dimensionData.put(DimensionType.getById(Integer.parseInt(string2)), compoundTag3.getCompound(string2));
+			for (String string : compoundTag3.getAllKeys()) {
+				this.dimensionData.put(DimensionType.getById(Integer.parseInt(string)), compoundTag3.getCompound(string));
 			}
 		}
 
@@ -236,23 +192,14 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		}
 	}
 
-	private static <T> Dynamic<T> datafixGeneratorOptions(LevelType levelType, Dynamic<T> dynamic, int i, DataFixer dataFixer) {
-		int j = Math.max(i, 2501);
-		Dynamic<T> dynamic2 = dynamic.merge(dynamic.createString("levelType"), dynamic.createString(levelType.getSerialization()));
-		return dataFixer.update(References.CHUNK_GENERATOR_SETTINGS, dynamic2, j, SharedConstants.getCurrentVersion().getWorldVersion()).remove("levelType");
-	}
-
 	public PrimaryLevelData(LevelSettings levelSettings) {
 		this.fixerUpper = null;
 		this.playerDataVersion = SharedConstants.getCurrentVersion().getWorldVersion();
-		this.seed = levelSettings.getSeed();
 		this.gameType = levelSettings.getGameType();
 		this.difficulty = levelSettings.getDifficulty();
-		this.generateMapFeatures = levelSettings.shouldGenerateMapFeatures();
 		this.hardcore = levelSettings.isHardcore();
-		this.generatorProvider = levelSettings.getGeneratorProvider();
+		this.worldGenSettings = levelSettings.worldGenSettings();
 		this.allowCommands = levelSettings.getAllowCommands();
-		this.generateBonusChest = levelSettings.hasStartingBonusItems();
 		this.levelName = levelSettings.getLevelName();
 		this.version = 19133;
 		this.initialized = false;
@@ -285,20 +232,13 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		compoundTag3.putBoolean("Snapshot", !SharedConstants.getCurrentVersion().isStable());
 		compoundTag.put("Version", compoundTag3);
 		compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
-		compoundTag.putLong("RandomSeed", this.seed);
-		compoundTag.putString("generatorName", this.generatorProvider.getType().getSerialization());
-		compoundTag.putInt("generatorVersion", this.generatorProvider.getType().getVersion());
-		CompoundTag compoundTag4 = (CompoundTag)this.generatorProvider.getSettings().convert(NbtOps.INSTANCE).getValue();
-		if (!compoundTag4.isEmpty()) {
-			compoundTag.put("generatorOptions", compoundTag4);
-		}
+		CompoundTag compoundTag4 = this.worldGenSettings.serialize();
 
-		if (this.legacyCustomOptions != null) {
-			compoundTag.putString("legacy_custom_options", this.legacyCustomOptions);
+		for (String string : compoundTag4.getAllKeys()) {
+			compoundTag.put(string, compoundTag4.get(string));
 		}
 
 		compoundTag.putInt("GameType", this.gameType.getId());
-		compoundTag.putBoolean("MapFeatures", this.generateMapFeatures);
 		compoundTag.putInt("SpawnX", this.xSpawn);
 		compoundTag.putInt("SpawnY", this.ySpawn);
 		compoundTag.putInt("SpawnZ", this.zSpawn);
@@ -315,7 +255,6 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		compoundTag.putBoolean("thundering", this.thundering);
 		compoundTag.putBoolean("hardcore", this.hardcore);
 		compoundTag.putBoolean("allowCommands", this.allowCommands);
-		compoundTag.putBoolean("BonusChest", this.generateBonusChest);
 		compoundTag.putBoolean("initialized", this.initialized);
 		this.worldBorder.write(compoundTag);
 		compoundTag.putByte("Difficulty", (byte)this.difficulty.getId());
@@ -335,15 +274,15 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		CompoundTag compoundTag6 = new CompoundTag();
 		ListTag listTag2 = new ListTag();
 
-		for (String string : this.enabledDataPacks) {
-			listTag2.add(StringTag.valueOf(string));
+		for (String string2 : this.enabledDataPacks) {
+			listTag2.add(StringTag.valueOf(string2));
 		}
 
 		compoundTag6.put("Enabled", listTag2);
 		ListTag listTag3 = new ListTag();
 
-		for (String string2 : this.disabledDataPacks) {
-			listTag3.add(StringTag.valueOf(string2));
+		for (String string3 : this.disabledDataPacks) {
+			listTag3.add(StringTag.valueOf(string3));
 		}
 
 		compoundTag6.put("Disabled", listTag3);
@@ -358,11 +297,6 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		if (this.wanderingTraderId != null) {
 			compoundTag.putUUID("WanderingTraderId", this.wanderingTraderId);
 		}
-	}
-
-	@Override
-	public long getSeed() {
-		return this.seed;
 	}
 
 	@Override
@@ -514,11 +448,6 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	}
 
 	@Override
-	public boolean shouldGenerateMapFeatures() {
-		return this.generateMapFeatures;
-	}
-
-	@Override
 	public void setGameType(GameType gameType) {
 		this.gameType = gameType;
 	}
@@ -526,16 +455,6 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	@Override
 	public boolean isHardcore() {
 		return this.hardcore;
-	}
-
-	@Override
-	public LevelType getGeneratorType() {
-		return this.generatorProvider.getType();
-	}
-
-	@Override
-	public ChunkGeneratorProvider getGeneratorProvider() {
-		return this.generatorProvider;
 	}
 
 	@Override
@@ -608,6 +527,11 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	@Override
 	public void setDimensionData(DimensionType dimensionType, CompoundTag compoundTag) {
 		this.dimensionData.put(dimensionType, compoundTag);
+	}
+
+	@Override
+	public WorldGenSettings worldGenSettings() {
+		return this.worldGenSettings;
 	}
 
 	@Override
@@ -705,19 +629,9 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		return this;
 	}
 
+	@Environment(EnvType.CLIENT)
 	@Override
 	public LevelSettings getLevelSettings() {
-		LevelSettings levelSettings = new LevelSettings(
-			this.levelName, this.seed, this.gameType, this.generateMapFeatures, this.hardcore, this.difficulty, this.generatorProvider, this.gameRules.copy()
-		);
-		if (this.generateBonusChest) {
-			levelSettings = levelSettings.enableStartingBonusItems();
-		}
-
-		if (this.allowCommands) {
-			levelSettings = levelSettings.enableSinglePlayerCommands();
-		}
-
-		return levelSettings;
+		return new LevelSettings(this.levelName, this.gameType, this.hardcore, this.difficulty, this.allowCommands, this.gameRules.copy(), this.worldGenSettings);
 	}
 }

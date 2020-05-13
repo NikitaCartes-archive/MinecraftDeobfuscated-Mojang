@@ -14,8 +14,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Deserializer;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.properties.StructureMode;
@@ -107,9 +107,9 @@ public class SinglePoolElement extends StructurePoolElement {
 	@Override
 	public boolean place(
 		StructureManager structureManager,
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<?> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		BlockPos blockPos,
 		BlockPos blockPos2,
 		Rotation rotation,
@@ -119,13 +119,13 @@ public class SinglePoolElement extends StructurePoolElement {
 	) {
 		StructureTemplate structureTemplate = this.getTemplate(structureManager);
 		StructurePlaceSettings structurePlaceSettings = this.getSettings(rotation, boundingBox, bl);
-		if (!structureTemplate.placeInWorld(levelAccessor, blockPos, blockPos2, structurePlaceSettings, 18)) {
+		if (!structureTemplate.placeInWorld(worldGenLevel, blockPos, blockPos2, structurePlaceSettings, 18)) {
 			return false;
 		} else {
 			for (StructureTemplate.StructureBlockInfo structureBlockInfo : StructureTemplate.processBlockInfos(
-				levelAccessor, blockPos, blockPos2, structurePlaceSettings, this.getDataMarkers(structureManager, blockPos, rotation, false)
+				worldGenLevel, blockPos, blockPos2, structurePlaceSettings, this.getDataMarkers(structureManager, blockPos, rotation, false)
 			)) {
-				this.handleDataMarker(levelAccessor, structureBlockInfo, blockPos, rotation, random, boundingBox);
+				this.handleDataMarker(worldGenLevel, structureBlockInfo, blockPos, rotation, random, boundingBox);
 			}
 
 			return true;

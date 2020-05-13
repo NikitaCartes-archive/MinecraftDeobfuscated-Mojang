@@ -7,7 +7,6 @@ import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 public class ChanceHeightmapDoubleDecorator extends FeatureDecorator<ChanceDecoratorConfiguration> {
@@ -16,11 +15,7 @@ public class ChanceHeightmapDoubleDecorator extends FeatureDecorator<ChanceDecor
 	}
 
 	public Stream<BlockPos> getPositions(
-		LevelAccessor levelAccessor,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
-		Random random,
-		ChanceDecoratorConfiguration chanceDecoratorConfiguration,
-		BlockPos blockPos
+		LevelAccessor levelAccessor, ChunkGenerator chunkGenerator, Random random, ChanceDecoratorConfiguration chanceDecoratorConfiguration, BlockPos blockPos
 	) {
 		if (random.nextFloat() < 1.0F / (float)chanceDecoratorConfiguration.chance) {
 			int i = random.nextInt(16) + blockPos.getX();

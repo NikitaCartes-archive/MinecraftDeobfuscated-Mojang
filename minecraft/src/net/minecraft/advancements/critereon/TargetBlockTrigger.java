@@ -38,8 +38,8 @@ public class TargetBlockTrigger extends SimpleCriterionTrigger<TargetBlockTrigge
 			this.projectile = composite2;
 		}
 
-		public static TargetBlockTrigger.TriggerInstance targetHit(MinMaxBounds.Ints ints) {
-			return new TargetBlockTrigger.TriggerInstance(EntityPredicate.Composite.ANY, ints, EntityPredicate.Composite.ANY);
+		public static TargetBlockTrigger.TriggerInstance targetHit(MinMaxBounds.Ints ints, EntityPredicate.Composite composite) {
+			return new TargetBlockTrigger.TriggerInstance(EntityPredicate.Composite.ANY, ints, composite);
 		}
 
 		@Override

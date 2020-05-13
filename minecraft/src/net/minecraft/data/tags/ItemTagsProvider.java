@@ -104,6 +104,32 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 		this.tag(ItemTags.LECTERN_BOOKS).add(Items.WRITTEN_BOOK, Items.WRITABLE_BOOK);
 		this.tag(ItemTags.BEACON_PAYMENT_ITEMS).add(Items.NETHERITE_INGOT, Items.EMERALD, Items.DIAMOND, Items.GOLD_INGOT, Items.IRON_INGOT);
 		this.tag(ItemTags.PIGLIN_REPELLENTS).add(Items.SOUL_TORCH).add(Items.SOUL_LANTERN).add(Items.SOUL_CAMPFIRE);
+		this.tag(ItemTags.PIGLIN_LOVED)
+			.add(
+				Items.GOLD_INGOT,
+				Items.GOLDEN_APPLE,
+				Items.GOLDEN_HORSE_ARMOR,
+				Items.GOLDEN_CARROT,
+				Items.GOLD_BLOCK,
+				Items.GOLD_ORE,
+				Items.ENCHANTED_GOLDEN_APPLE,
+				Items.GOLDEN_HORSE_ARMOR,
+				Items.LIGHT_WEIGHTED_PRESSURE_PLATE,
+				Items.BELL,
+				Items.GLISTERING_MELON_SLICE,
+				Items.CLOCK,
+				Items.NETHER_GOLD_ORE,
+				Items.GILDED_BLACKSTONE,
+				Items.GOLDEN_HELMET,
+				Items.GOLDEN_CHESTPLATE,
+				Items.GOLDEN_LEGGINGS,
+				Items.GOLDEN_BOOTS,
+				Items.GOLDEN_SWORD,
+				Items.GOLDEN_PICKAXE,
+				Items.GOLDEN_SHOVEL,
+				Items.GOLDEN_AXE,
+				Items.GOLDEN_HOE
+			);
 		this.tag(ItemTags.NON_FLAMMABLE_WOOD)
 			.add(
 				Items.WARPED_STEM,

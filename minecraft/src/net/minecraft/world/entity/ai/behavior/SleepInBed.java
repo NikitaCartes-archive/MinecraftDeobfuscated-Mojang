@@ -31,7 +31,7 @@ public class SleepInBed extends Behavior<LivingEntity> {
 		} else {
 			Brain<?> brain = livingEntity.getBrain();
 			GlobalPos globalPos = (GlobalPos)brain.getMemory(MemoryModuleType.HOME).get();
-			if (!Objects.equals(serverLevel.getDimension().getType(), globalPos.dimension())) {
+			if (!Objects.equals(serverLevel.dimensionType(), globalPos.dimension())) {
 				return false;
 			} else {
 				Optional<SerializableLong> optional = brain.getMemory(MemoryModuleType.LAST_WOKEN);

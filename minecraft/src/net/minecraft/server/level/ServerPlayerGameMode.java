@@ -1,6 +1,7 @@
 package net.minecraft.server.level;
 
 import java.util.Objects;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ClientboundBlockBreakAckPacket;
@@ -10,7 +11,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseOnContext;
 import net.minecraft.world.level.GameType;
@@ -249,22 +249,22 @@ public class ServerPlayerGameMode {
 		}
 	}
 
-	public InteractionResult useItem(Player player, Level level, ItemStack itemStack, InteractionHand interactionHand) {
+	public InteractionResult useItem(ServerPlayer serverPlayer, Level level, ItemStack itemStack, InteractionHand interactionHand) {
 		if (this.gameModeForPlayer == GameType.SPECTATOR) {
 			return InteractionResult.PASS;
-		} else if (player.getCooldowns().isOnCooldown(itemStack.getItem())) {
+		} else if (serverPlayer.getCooldowns().isOnCooldown(itemStack.getItem())) {
 			return InteractionResult.PASS;
 		} else {
 			int i = itemStack.getCount();
 			int j = itemStack.getDamageValue();
-			InteractionResultHolder<ItemStack> interactionResultHolder = itemStack.use(level, player, interactionHand);
+			InteractionResultHolder<ItemStack> interactionResultHolder = itemStack.use(level, serverPlayer, interactionHand);
 			ItemStack itemStack2 = interactionResultHolder.getObject();
 			if (itemStack2 == itemStack && itemStack2.getCount() == i && itemStack2.getUseDuration() <= 0 && itemStack2.getDamageValue() == j) {
 				return interactionResultHolder.getResult();
-			} else if (interactionResultHolder.getResult() == InteractionResult.FAIL && itemStack2.getUseDuration() > 0 && !player.isUsingItem()) {
+			} else if (interactionResultHolder.getResult() == InteractionResult.FAIL && itemStack2.getUseDuration() > 0 && !serverPlayer.isUsingItem()) {
 				return interactionResultHolder.getResult();
 			} else {
-				player.setItemInHand(interactionHand, itemStack2);
+				serverPlayer.setItemInHand(interactionHand, itemStack2);
 				if (this.isCreative()) {
 					itemStack2.setCount(i);
 					if (itemStack2.isDamageableItem() && itemStack2.getDamageValue() != j) {
@@ -273,11 +273,11 @@ public class ServerPlayerGameMode {
 				}
 
 				if (itemStack2.isEmpty()) {
-					player.setItemInHand(interactionHand, ItemStack.EMPTY);
+					serverPlayer.setItemInHand(interactionHand, ItemStack.EMPTY);
 				}
 
-				if (!player.isUsingItem()) {
-					((ServerPlayer)player).refreshContainer(player.inventoryMenu);
+				if (!serverPlayer.isUsingItem()) {
+					serverPlayer.refreshContainer(serverPlayer.inventoryMenu);
 				}
 
 				return interactionResultHolder.getResult();
@@ -285,37 +285,48 @@ public class ServerPlayerGameMode {
 		}
 	}
 
-	public InteractionResult useItemOn(Player player, Level level, ItemStack itemStack, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+	public InteractionResult useItemOn(ServerPlayer serverPlayer, Level level, ItemStack itemStack, InteractionHand interactionHand, BlockHitResult blockHitResult) {
 		BlockPos blockPos = blockHitResult.getBlockPos();
 		BlockState blockState = level.getBlockState(blockPos);
 		if (this.gameModeForPlayer == GameType.SPECTATOR) {
 			MenuProvider menuProvider = blockState.getMenuProvider(level, blockPos);
 			if (menuProvider != null) {
-				player.openMenu(menuProvider);
+				serverPlayer.openMenu(menuProvider);
 				return InteractionResult.SUCCESS;
 			} else {
 				return InteractionResult.PASS;
 			}
 		} else {
-			boolean bl = !player.getMainHandItem().isEmpty() || !player.getOffhandItem().isEmpty();
-			boolean bl2 = player.isSecondaryUseActive() && bl;
+			boolean bl = !serverPlayer.getMainHandItem().isEmpty() || !serverPlayer.getOffhandItem().isEmpty();
+			boolean bl2 = serverPlayer.isSecondaryUseActive() && bl;
+			ItemStack itemStack2 = itemStack.copy();
 			if (!bl2) {
-				InteractionResult interactionResult = blockState.use(level, player, interactionHand, blockHitResult);
+				InteractionResult interactionResult = blockState.use(level, serverPlayer, interactionHand, blockHitResult);
+				if (interactionResult == InteractionResult.SUCCESS) {
+					CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, blockPos, itemStack2);
+				}
+
 				if (interactionResult.consumesAction()) {
 					return interactionResult;
 				}
 			}
 
-			if (!itemStack.isEmpty() && !player.getCooldowns().isOnCooldown(itemStack.getItem())) {
-				UseOnContext useOnContext = new UseOnContext(player, interactionHand, blockHitResult);
+			if (!itemStack.isEmpty() && !serverPlayer.getCooldowns().isOnCooldown(itemStack.getItem())) {
+				UseOnContext useOnContext = new UseOnContext(serverPlayer, interactionHand, blockHitResult);
+				InteractionResult interactionResult2;
 				if (this.isCreative()) {
 					int i = itemStack.getCount();
-					InteractionResult interactionResult2 = itemStack.useOn(useOnContext);
+					interactionResult2 = itemStack.useOn(useOnContext);
 					itemStack.setCount(i);
-					return interactionResult2;
 				} else {
-					return itemStack.useOn(useOnContext);
+					interactionResult2 = itemStack.useOn(useOnContext);
 				}
+
+				if (interactionResult2 == InteractionResult.SUCCESS) {
+					CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, blockPos, itemStack2);
+				}
+
+				return interactionResult2;
 			} else {
 				return InteractionResult.PASS;
 			}

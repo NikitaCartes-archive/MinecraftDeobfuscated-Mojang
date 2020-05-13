@@ -18,6 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
@@ -122,9 +123,9 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 
 	@Override
 	public boolean postProcess(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<?> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BoundingBox boundingBox,
 		ChunkPos chunkPos,
@@ -134,17 +135,17 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 			return true;
 		} else {
 			boundingBox.expand(this.template.getBoundingBox(this.placeSettings, this.templatePosition));
-			boolean bl = super.postProcess(levelAccessor, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
-			this.spreadNetherrack(random, levelAccessor);
-			this.addNetherrackDripColumnsBelowPortal(random, levelAccessor);
+			boolean bl = super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
+			this.spreadNetherrack(random, worldGenLevel);
+			this.addNetherrackDripColumnsBelowPortal(random, worldGenLevel);
 			if (this.properties.vines || this.properties.overgrown) {
 				BlockPos.betweenClosedStream(this.getBoundingBox()).forEach(blockPosx -> {
 					if (this.properties.vines) {
-						this.maybeAddVines(random, levelAccessor, blockPosx);
+						this.maybeAddVines(random, worldGenLevel, blockPosx);
 					}
 
 					if (this.properties.overgrown) {
-						this.maybeAddLeavesAbove(random, levelAccessor, blockPosx);
+						this.maybeAddLeavesAbove(random, worldGenLevel, blockPosx);
 					}
 				});
 			}

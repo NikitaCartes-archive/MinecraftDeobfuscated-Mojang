@@ -8,10 +8,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 
 public abstract class AbstractHugeMushroomFeature extends Feature<HugeMushroomFeatureConfiguration> {
@@ -78,20 +78,20 @@ public abstract class AbstractHugeMushroomFeature extends Feature<HugeMushroomFe
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		HugeMushroomFeatureConfiguration hugeMushroomFeatureConfiguration
 	) {
 		int i = this.getTreeHeight(random);
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-		if (!this.isValidPosition(levelAccessor, blockPos, i, mutableBlockPos, hugeMushroomFeatureConfiguration)) {
+		if (!this.isValidPosition(worldGenLevel, blockPos, i, mutableBlockPos, hugeMushroomFeatureConfiguration)) {
 			return false;
 		} else {
-			this.makeCap(levelAccessor, random, blockPos, i, mutableBlockPos, hugeMushroomFeatureConfiguration);
-			this.placeTrunk(levelAccessor, random, blockPos, hugeMushroomFeatureConfiguration, i, mutableBlockPos);
+			this.makeCap(worldGenLevel, random, blockPos, i, mutableBlockPos, hugeMushroomFeatureConfiguration);
+			this.placeTrunk(worldGenLevel, random, blockPos, hugeMushroomFeatureConfiguration, i, mutableBlockPos);
 			return true;
 		}
 	}

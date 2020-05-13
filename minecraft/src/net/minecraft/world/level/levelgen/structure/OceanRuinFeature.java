@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.RandomScatteredFeature;
@@ -33,12 +32,12 @@ public class OceanRuinFeature extends RandomScatteredFeature<OceanRuinConfigurat
 	}
 
 	@Override
-	protected int getSpacing(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+	protected int getSpacing(ChunkGeneratorSettings chunkGeneratorSettings) {
 		return chunkGeneratorSettings.getOceanRuinSpacing();
 	}
 
 	@Override
-	protected int getSeparation(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+	protected int getSeparation(ChunkGeneratorSettings chunkGeneratorSettings) {
 		return chunkGeneratorSettings.getOceanRuinSeparation();
 	}
 
@@ -58,7 +57,7 @@ public class OceanRuinFeature extends RandomScatteredFeature<OceanRuinConfigurat
 		}
 
 		@Override
-		public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+		public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
 			OceanRuinConfiguration oceanRuinConfiguration = chunkGenerator.getStructureConfiguration(biome, Feature.OCEAN_RUIN);
 			int k = i * 16;
 			int l = j * 16;

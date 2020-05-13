@@ -84,7 +84,7 @@ public class ForceLoadCommand {
 
 	private static int queryForceLoad(CommandSourceStack commandSourceStack, ColumnPos columnPos) throws CommandSyntaxException {
 		ChunkPos chunkPos = new ChunkPos(columnPos.x >> 4, columnPos.z >> 4);
-		DimensionType dimensionType = commandSourceStack.getLevel().getDimension().getType();
+		DimensionType dimensionType = commandSourceStack.getLevel().dimensionType();
 		boolean bl = commandSourceStack.getServer().getLevel(dimensionType).getForcedChunks().contains(chunkPos.toLong());
 		if (bl) {
 			commandSourceStack.sendSuccess(new TranslatableComponent("commands.forceload.query.success", chunkPos, dimensionType), false);
@@ -95,7 +95,7 @@ public class ForceLoadCommand {
 	}
 
 	private static int listForceLoad(CommandSourceStack commandSourceStack) {
-		DimensionType dimensionType = commandSourceStack.getLevel().getDimension().getType();
+		DimensionType dimensionType = commandSourceStack.getLevel().dimensionType();
 		LongSet longSet = commandSourceStack.getServer().getLevel(dimensionType).getForcedChunks();
 		int i = longSet.size();
 		if (i > 0) {
@@ -113,7 +113,7 @@ public class ForceLoadCommand {
 	}
 
 	private static int removeAll(CommandSourceStack commandSourceStack) {
-		DimensionType dimensionType = commandSourceStack.getLevel().getDimension().getType();
+		DimensionType dimensionType = commandSourceStack.getLevel().dimensionType();
 		ServerLevel serverLevel = commandSourceStack.getServer().getLevel(dimensionType);
 		LongSet longSet = serverLevel.getForcedChunks();
 		longSet.forEach(l -> serverLevel.setChunkForced(ChunkPos.getX(l), ChunkPos.getZ(l), false));
@@ -135,7 +135,7 @@ public class ForceLoadCommand {
 			if (q > 256L) {
 				throw ERROR_TOO_MANY_CHUNKS.create(256, q);
 			} else {
-				DimensionType dimensionType = commandSourceStack.getLevel().getDimension().getType();
+				DimensionType dimensionType = commandSourceStack.getLevel().dimensionType();
 				ServerLevel serverLevel = commandSourceStack.getServer().getLevel(dimensionType);
 				ChunkPos chunkPos = null;
 				int r = 0;

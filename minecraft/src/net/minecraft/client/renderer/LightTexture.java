@@ -109,7 +109,7 @@ public class LightTexture implements AutoCloseable {
 						float q = o * ((o * 0.6F + 0.4F) * 0.6F + 0.4F);
 						float r = o * (o * o * 0.6F + 0.4F);
 						vector3f2.set(o, q, r);
-						if (clientLevel.dimension.getType() == DimensionType.THE_END) {
+						if (clientLevel.dimensionType() == DimensionType.THE_END) {
 							vector3f2.lerp(new Vector3f(0.99F, 1.12F, 1.0F), 0.25F);
 						} else {
 							Vector3f vector3f3 = vector3f.copy();
@@ -162,7 +162,7 @@ public class LightTexture implements AutoCloseable {
 	}
 
 	private float getBrightness(Level level, int i) {
-		return level.dimension.getBrightness(i);
+		return level.getDimension().getBrightness(i);
 	}
 
 	public static int pack(int i, int j) {

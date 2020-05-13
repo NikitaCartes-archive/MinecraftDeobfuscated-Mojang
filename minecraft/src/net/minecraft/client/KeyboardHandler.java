@@ -19,6 +19,7 @@ import net.minecraft.client.gui.screens.AccessibilityOptionsScreen;
 import net.minecraft.client.gui.screens.ChatOptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.controls.ControlsScreen;
+import net.minecraft.client.gui.screens.debug.GameModeSwitcherScreen;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -98,7 +99,7 @@ public class KeyboardHandler {
 						String.format(
 							Locale.ROOT,
 							"/execute in %s run tp @s %.2f %.2f %.2f %.2f %.2f",
-							DimensionType.getName(this.minecraft.player.level.dimension.getType()),
+							DimensionType.getName(this.minecraft.player.level.dimensionType()),
 							this.minecraft.player.getX(),
 							this.minecraft.player.getY(),
 							this.minecraft.player.getZ(),
@@ -113,16 +114,6 @@ public class KeyboardHandler {
 					}
 
 					return true;
-				case 69:
-				case 74:
-				case 75:
-				case 76:
-				case 77:
-				case 79:
-				case 82:
-				case 83:
-				default:
-					return false;
 				case 70:
 					Option.RENDER_DISTANCE
 						.set(
@@ -153,10 +144,10 @@ public class KeyboardHandler {
 				case 78:
 					if (!this.minecraft.player.hasPermissions(2)) {
 						this.debugFeedbackTranslated("debug.creative_spectator.error");
-					} else if (this.minecraft.player.isCreative()) {
+					} else if (!this.minecraft.player.isSpectator()) {
 						this.minecraft.player.chat("/gamemode spectator");
 					} else {
-						this.minecraft.player.chat("/gamemode creative");
+						this.minecraft.player.chat("/gamemode " + this.minecraft.gameMode.getPrevPlayerMode().getName());
 					}
 
 					return true;
@@ -181,11 +172,22 @@ public class KeyboardHandler {
 					chatComponent.addMessage(new TranslatableComponent("debug.help.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.reload_resourcepacks.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.pause.help"));
+					chatComponent.addMessage(new TranslatableComponent("debug.gamemodes.help"));
 					return true;
 				case 84:
 					this.debugFeedbackTranslated("debug.reload_resourcepacks.message");
 					this.minecraft.reloadResourcePacks();
 					return true;
+				case 293:
+					if (!this.minecraft.player.hasPermissions(2)) {
+						this.debugFeedbackTranslated("debug.gamemodes.error");
+					} else {
+						this.minecraft.setScreen(new GameModeSwitcherScreen());
+					}
+
+					return true;
+				default:
+					return false;
 			}
 		}
 	}

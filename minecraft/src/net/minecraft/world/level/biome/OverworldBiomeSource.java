@@ -2,6 +2,8 @@ package net.minecraft.world.level.biome;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.world.level.newbiome.layer.Layer;
 import net.minecraft.world.level.newbiome.layer.Layers;
 
@@ -75,12 +77,20 @@ public class OverworldBiomeSource extends BiomeSource {
 		Biomes.MODIFIED_WOODED_BADLANDS_PLATEAU,
 		Biomes.MODIFIED_BADLANDS_PLATEAU
 	);
+	private final boolean legacyBiomeInitLayer;
+	private final int biomeSize;
 
-	public OverworldBiomeSource(OverworldBiomeSourceSettings overworldBiomeSourceSettings) {
+	public OverworldBiomeSource(long l, boolean bl, int i) {
 		super(POSSIBLE_BIOMES);
-		this.noiseBiomeLayer = Layers.getDefaultLayer(
-			overworldBiomeSourceSettings.getSeed(), overworldBiomeSourceSettings.getGeneratorType(), overworldBiomeSourceSettings.getGeneratorSettings()
-		);
+		this.legacyBiomeInitLayer = bl;
+		this.biomeSize = i;
+		this.noiseBiomeLayer = Layers.getDefaultLayer(l, bl, i, 4);
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public BiomeSource withSeed(long l) {
+		return new OverworldBiomeSource(l, this.legacyBiomeInitLayer, this.biomeSize);
 	}
 
 	@Override

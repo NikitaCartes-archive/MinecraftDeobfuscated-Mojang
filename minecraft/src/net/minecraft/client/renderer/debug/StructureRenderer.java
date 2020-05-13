@@ -33,7 +33,7 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		Camera camera = this.minecraft.gameRenderer.getMainCamera();
 		LevelAccessor levelAccessor = this.minecraft.level;
-		DimensionType dimensionType = levelAccessor.getDimension().getType();
+		DimensionType dimensionType = levelAccessor.dimensionType();
 		BlockPos blockPos = new BlockPos(camera.getPosition().x, 0.0, camera.getPosition().z);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());
 		if (this.postMainBoxes.containsKey(dimensionType)) {

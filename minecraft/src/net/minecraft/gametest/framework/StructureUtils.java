@@ -27,7 +27,6 @@ import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.StructureMode;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
@@ -185,19 +184,11 @@ public class StructureUtils {
 	}
 
 	private static void clearBlock(int i, BlockPos blockPos, ServerLevel serverLevel) {
-		ChunkGeneratorSettings chunkGeneratorSettings = serverLevel.getChunkSource().getGenerator().getSettings();
+		FlatLevelGeneratorSettings flatLevelGeneratorSettings = FlatLevelGeneratorSettings.getDefault();
+		BlockState[] blockStates = flatLevelGeneratorSettings.getLayers();
 		BlockState blockState;
-		if (chunkGeneratorSettings instanceof FlatLevelGeneratorSettings) {
-			BlockState[] blockStates = ((FlatLevelGeneratorSettings)chunkGeneratorSettings).getLayers();
-			if (blockPos.getY() < i) {
-				blockState = blockStates[blockPos.getY() - 1];
-			} else {
-				blockState = Blocks.AIR.defaultBlockState();
-			}
-		} else if (blockPos.getY() == i - 1) {
-			blockState = serverLevel.getBiome(blockPos).getSurfaceBuilderConfig().getTopMaterial();
-		} else if (blockPos.getY() < i - 1) {
-			blockState = serverLevel.getBiome(blockPos).getSurfaceBuilderConfig().getUnderMaterial();
+		if (blockPos.getY() < i) {
+			blockState = blockStates[blockPos.getY() - 1];
 		} else {
 			blockState = Blocks.AIR.defaultBlockState();
 		}

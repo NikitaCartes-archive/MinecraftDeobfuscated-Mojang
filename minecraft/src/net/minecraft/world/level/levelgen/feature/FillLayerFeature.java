@@ -4,10 +4,9 @@ import com.mojang.datafixers.Dynamic;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
 
 public class FillLayerFeature extends Feature<LayerConfiguration> {
@@ -16,9 +15,9 @@ public class FillLayerFeature extends Feature<LayerConfiguration> {
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		LayerConfiguration layerConfiguration
@@ -31,8 +30,8 @@ public class FillLayerFeature extends Feature<LayerConfiguration> {
 				int l = blockPos.getZ() + j;
 				int m = layerConfiguration.height;
 				mutableBlockPos.set(k, m, l);
-				if (levelAccessor.getBlockState(mutableBlockPos).isAir()) {
-					levelAccessor.setBlock(mutableBlockPos, layerConfiguration.state, 2);
+				if (worldGenLevel.getBlockState(mutableBlockPos).isAir()) {
+					worldGenLevel.setBlock(mutableBlockPos, layerConfiguration.state, 2);
 				}
 			}
 		}

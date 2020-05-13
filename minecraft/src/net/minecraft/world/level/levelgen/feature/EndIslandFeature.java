@@ -5,11 +5,10 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class EndIslandFeature extends Feature<NoneFeatureConfiguration> {
@@ -18,9 +17,9 @@ public class EndIslandFeature extends Feature<NoneFeatureConfiguration> {
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		NoneFeatureConfiguration noneFeatureConfiguration
@@ -31,7 +30,7 @@ public class EndIslandFeature extends Feature<NoneFeatureConfiguration> {
 			for (int j = Mth.floor(-f); j <= Mth.ceil(f); j++) {
 				for (int k = Mth.floor(-f); k <= Mth.ceil(f); k++) {
 					if ((float)(j * j + k * k) <= (f + 1.0F) * (f + 1.0F)) {
-						this.setBlock(levelAccessor, blockPos.offset(j, i, k), Blocks.END_STONE.defaultBlockState());
+						this.setBlock(worldGenLevel, blockPos.offset(j, i, k), Blocks.END_STONE.defaultBlockState());
 					}
 				}
 			}

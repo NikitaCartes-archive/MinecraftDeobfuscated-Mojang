@@ -44,7 +44,7 @@ public class IglooFeature extends RandomScatteredFeature<NoneFeatureConfiguratio
 		}
 
 		@Override
-		public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+		public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
 			NoneFeatureConfiguration noneFeatureConfiguration = chunkGenerator.getStructureConfiguration(biome, Feature.IGLOO);
 			int k = i * 16;
 			int l = j * 16;

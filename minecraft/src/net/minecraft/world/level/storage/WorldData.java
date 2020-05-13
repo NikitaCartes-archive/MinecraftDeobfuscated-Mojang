@@ -12,6 +12,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 
 public interface WorldData {
 	@Environment(EnvType.CLIENT)
@@ -60,6 +61,7 @@ public interface WorldData {
 
 	ServerLevelData overworldData();
 
+	@Environment(EnvType.CLIENT)
 	LevelSettings getLevelSettings();
 
 	CompoundTag createTag(@Nullable CompoundTag compoundTag);
@@ -76,8 +78,6 @@ public interface WorldData {
 
 	@Environment(EnvType.CLIENT)
 	long getLastPlayed();
-
-	long getSeed();
 
 	boolean getAllowCommands();
 
@@ -96,4 +96,6 @@ public interface WorldData {
 	CompoundTag getDimensionData(DimensionType dimensionType);
 
 	void setDimensionData(DimensionType dimensionType, CompoundTag compoundTag);
+
+	WorldGenSettings worldGenSettings();
 }

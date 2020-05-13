@@ -97,8 +97,8 @@ public class EnderDragon extends Mob implements Enemy {
 		this.setHealth(this.getMaxHealth());
 		this.noPhysics = true;
 		this.noCulling = true;
-		if (!level.isClientSide && level.dimension instanceof TheEndDimension) {
-			this.dragonFight = ((TheEndDimension)level.dimension).getDragonFight();
+		if (!level.isClientSide && level.getDimension() instanceof TheEndDimension) {
+			this.dragonFight = ((TheEndDimension)level.getDimension()).getDragonFight();
 		} else {
 			this.dragonFight = null;
 		}

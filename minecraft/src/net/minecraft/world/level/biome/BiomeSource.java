@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -23,6 +25,9 @@ public abstract class BiomeSource implements BiomeManager.NoiseBiomeSource {
 	protected BiomeSource(Set<Biome> set) {
 		this.possibleBiomes = set;
 	}
+
+	@Environment(EnvType.CLIENT)
+	public abstract BiomeSource withSeed(long l);
 
 	public List<Biome> getPlayerSpawnBiomes() {
 		return PLAYER_SPAWN_BIOMES;

@@ -9,11 +9,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.material.Material;
 
 public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
@@ -22,9 +22,9 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		HugeFungusConfiguration hugeFungusConfiguration
@@ -32,12 +32,12 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 		Block block = hugeFungusConfiguration.validBaseState.getBlock();
 		BlockPos blockPos2 = null;
 		if (hugeFungusConfiguration.planted) {
-			Block block2 = levelAccessor.getBlockState(blockPos.below()).getBlock();
+			Block block2 = worldGenLevel.getBlockState(blockPos.below()).getBlock();
 			if (block2 == block) {
 				blockPos2 = blockPos;
 			}
 		} else {
-			blockPos2 = findOnNyliumPosition(levelAccessor, blockPos, block);
+			blockPos2 = findOnNyliumPosition(worldGenLevel, blockPos, block);
 		}
 
 		if (blockPos2 == null) {
@@ -49,16 +49,16 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 			}
 
 			if (!hugeFungusConfiguration.planted) {
-				int j = levelAccessor.getHeight();
+				int j = worldGenLevel.getHeight();
 				if (blockPos2.getY() + i + 1 >= j) {
 					return false;
 				}
 			}
 
 			boolean bl = !hugeFungusConfiguration.planted && random.nextFloat() < 0.06F;
-			levelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 4);
-			this.placeHat(levelAccessor, random, hugeFungusConfiguration, blockPos2, i, bl);
-			this.placeStem(levelAccessor, random, hugeFungusConfiguration, blockPos2, i, bl);
+			worldGenLevel.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 4);
+			this.placeHat(worldGenLevel, random, hugeFungusConfiguration, blockPos2, i, bl);
+			this.placeStem(worldGenLevel, random, hugeFungusConfiguration, blockPos2, i, bl);
 			return true;
 		}
 	}

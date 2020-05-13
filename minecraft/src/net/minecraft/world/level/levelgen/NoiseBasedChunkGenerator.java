@@ -36,7 +36,7 @@ import net.minecraft.world.level.levelgen.synth.PerlinNoise;
 import net.minecraft.world.level.levelgen.synth.PerlinSimplexNoise;
 import net.minecraft.world.level.levelgen.synth.SurfaceNoise;
 
-public abstract class NoiseBasedChunkGenerator<T extends ChunkGeneratorSettings> extends ChunkGenerator<T> {
+public abstract class NoiseBasedChunkGenerator<T extends NoiseGeneratorSettings> extends ChunkGenerator {
 	private static final float[] BEARD_KERNEL = Util.make(new float[13824], fs -> {
 		for (int i = 0; i < 24; i++) {
 			for (int j = 0; j < 24; j++) {
@@ -59,23 +59,27 @@ public abstract class NoiseBasedChunkGenerator<T extends ChunkGeneratorSettings>
 	private final SurfaceNoise surfaceNoise;
 	protected final BlockState defaultBlock;
 	protected final BlockState defaultFluid;
+	private final int bedrockFloorPosition;
+	private final int bedrockRoofPosition;
 
-	public NoiseBasedChunkGenerator(LevelAccessor levelAccessor, BiomeSource biomeSource, int i, int j, int k, T chunkGeneratorSettings, boolean bl) {
-		super(levelAccessor, biomeSource, chunkGeneratorSettings);
+	public NoiseBasedChunkGenerator(BiomeSource biomeSource, long l, T noiseGeneratorSettings, int i, int j, int k, boolean bl) {
+		super(biomeSource, noiseGeneratorSettings.structureSettings());
 		this.chunkHeight = j;
 		this.chunkWidth = i;
-		this.defaultBlock = chunkGeneratorSettings.getDefaultBlock();
-		this.defaultFluid = chunkGeneratorSettings.getDefaultFluid();
+		this.defaultBlock = noiseGeneratorSettings.getDefaultBlock();
+		this.defaultFluid = noiseGeneratorSettings.getDefaultFluid();
 		this.chunkCountX = 16 / this.chunkWidth;
 		this.chunkCountY = k / this.chunkHeight;
 		this.chunkCountZ = 16 / this.chunkWidth;
-		this.random = new WorldgenRandom(this.seed);
+		this.random = new WorldgenRandom(l);
 		this.minLimitPerlinNoise = new PerlinNoise(this.random, IntStream.rangeClosed(-15, 0));
 		this.maxLimitPerlinNoise = new PerlinNoise(this.random, IntStream.rangeClosed(-15, 0));
 		this.mainPerlinNoise = new PerlinNoise(this.random, IntStream.rangeClosed(-7, 0));
 		this.surfaceNoise = (SurfaceNoise)(bl
 			? new PerlinSimplexNoise(this.random, IntStream.rangeClosed(-3, 0))
 			: new PerlinNoise(this.random, IntStream.rangeClosed(-3, 0)));
+		this.bedrockFloorPosition = noiseGeneratorSettings.getBedrockFloorPosition();
+		this.bedrockRoofPosition = noiseGeneratorSettings.getBedrockRoofPosition();
 	}
 
 	private double sampleAndClampNoise(int i, int j, int k, double d, double e, double f, double g) {
@@ -243,18 +247,7 @@ public abstract class NoiseBasedChunkGenerator<T extends ChunkGeneratorSettings>
 				int q = chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, m, n) + 1;
 				double e = this.surfaceNoise.getSurfaceNoiseValue((double)o * 0.0625, (double)p * 0.0625, 0.0625, (double)m * 0.0625) * 15.0;
 				worldGenRegion.getBiome(mutableBlockPos.set(k + m, q, l + n))
-					.buildSurfaceAt(
-						worldgenRandom,
-						chunkAccess,
-						o,
-						p,
-						q,
-						e,
-						this.getSettings().getDefaultBlock(),
-						this.getSettings().getDefaultFluid(),
-						this.getSeaLevel(),
-						this.level.getSeed()
-					);
+					.buildSurfaceAt(worldgenRandom, chunkAccess, o, p, q, e, this.defaultBlock, this.defaultFluid, this.getSeaLevel(), worldGenRegion.getSeed());
 			}
 		}
 
@@ -265,9 +258,8 @@ public abstract class NoiseBasedChunkGenerator<T extends ChunkGeneratorSettings>
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 		int i = chunkAccess.getPos().getMinBlockX();
 		int j = chunkAccess.getPos().getMinBlockZ();
-		T chunkGeneratorSettings = this.getSettings();
-		int k = chunkGeneratorSettings.getBedrockFloorPosition();
-		int l = chunkGeneratorSettings.getBedrockRoofPosition();
+		int k = this.bedrockFloorPosition;
+		int l = this.bedrockRoofPosition;
 
 		for (BlockPos blockPos : BlockPos.betweenClosed(i, 0, j, i + 15, 0, j + 15)) {
 			if (l > 0) {
@@ -299,7 +291,7 @@ public abstract class NoiseBasedChunkGenerator<T extends ChunkGeneratorSettings>
 		int l = j << 4;
 
 		for (StructureFeature<?> structureFeature : Feature.NOISE_AFFECTING_FEATURES) {
-			structureFeatureManager.startsForFeature(SectionPos.of(chunkPos, 0), structureFeature, levelAccessor).forEach(structureStart -> {
+			structureFeatureManager.startsForFeature(SectionPos.of(chunkPos, 0), structureFeature).forEach(structureStart -> {
 				for (StructurePiece structurePiece : structureStart.getPieces()) {
 					if (structurePiece.isCloseToChunk(chunkPos, 12)) {
 						if (structurePiece instanceof PoolElementStructurePiece) {

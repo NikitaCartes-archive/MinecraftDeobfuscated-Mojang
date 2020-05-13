@@ -9,13 +9,12 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 
 public abstract class AbstractMegaTreeGrower extends AbstractTreeGrower {
 	@Override
-	public boolean growTree(ServerLevel serverLevel, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockState blockState, Random random) {
+	public boolean growTree(ServerLevel serverLevel, ChunkGenerator chunkGenerator, BlockPos blockPos, BlockState blockState, Random random) {
 		for (int i = 0; i >= -1; i--) {
 			for (int j = 0; j >= -1; j--) {
 				if (isTwoByTwoSapling(blockState, serverLevel, blockPos, i, j)) {
@@ -30,7 +29,7 @@ public abstract class AbstractMegaTreeGrower extends AbstractTreeGrower {
 	@Nullable
 	protected abstract ConfiguredFeature<TreeConfiguration, ?> getConfiguredMegaFeature(Random random);
 
-	public boolean placeMega(ServerLevel serverLevel, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockState blockState, Random random, int i, int j) {
+	public boolean placeMega(ServerLevel serverLevel, ChunkGenerator chunkGenerator, BlockPos blockPos, BlockState blockState, Random random, int i, int j) {
 		ConfiguredFeature<TreeConfiguration, ?> configuredFeature = this.getConfiguredMegaFeature(random);
 		if (configuredFeature == null) {
 			return false;
@@ -40,9 +39,7 @@ public abstract class AbstractMegaTreeGrower extends AbstractTreeGrower {
 			serverLevel.setBlock(blockPos.offset(i + 1, 0, j), blockState2, 4);
 			serverLevel.setBlock(blockPos.offset(i, 0, j + 1), blockState2, 4);
 			serverLevel.setBlock(blockPos.offset(i + 1, 0, j + 1), blockState2, 4);
-			if (configuredFeature.place(
-				serverLevel, serverLevel.structureFeatureManager(), (ChunkGenerator<? extends ChunkGeneratorSettings>)chunkGenerator, random, blockPos.offset(i, 0, j)
-			)) {
+			if (configuredFeature.place(serverLevel, serverLevel.structureFeatureManager(), chunkGenerator, random, blockPos.offset(i, 0, j))) {
 				return true;
 			} else {
 				serverLevel.setBlock(blockPos.offset(i, 0, j), blockState, 4);

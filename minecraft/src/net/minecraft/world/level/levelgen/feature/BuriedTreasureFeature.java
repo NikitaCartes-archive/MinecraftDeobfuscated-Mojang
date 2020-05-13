@@ -21,9 +21,9 @@ public class BuriedTreasureFeature extends StructureFeature<BuriedTreasureConfig
 
 	@Override
 	protected boolean isFeatureChunk(
-		BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos
+		BiomeManager biomeManager, ChunkGenerator chunkGenerator, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos
 	) {
-		worldgenRandom.setLargeFeatureWithSalt(chunkGenerator.getSeed(), i, j, 10387320);
+		worldgenRandom.setLargeFeatureWithSalt(l, i, j, 10387320);
 		BuriedTreasureConfiguration buriedTreasureConfiguration = chunkGenerator.getStructureConfiguration(biome, this);
 		return worldgenRandom.nextFloat() < buriedTreasureConfiguration.probability;
 	}
@@ -49,7 +49,7 @@ public class BuriedTreasureFeature extends StructureFeature<BuriedTreasureConfig
 		}
 
 		@Override
-		public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+		public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
 			int k = i * 16;
 			int l = j * 16;
 			BlockPos blockPos = new BlockPos(k + 9, 90, l + 9);

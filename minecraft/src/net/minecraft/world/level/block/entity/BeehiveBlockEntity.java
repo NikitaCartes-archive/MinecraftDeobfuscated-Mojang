@@ -100,7 +100,7 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 	}
 
 	public boolean isSedated() {
-		return CampfireBlock.isSmokeyPos(this.level, this.getBlockPos(), 5);
+		return CampfireBlock.isSmokeyPos(this.level, this.getBlockPos());
 	}
 
 	protected void sendDebugPackets() {

@@ -1,135 +1,75 @@
 package net.minecraft.client.gui.screens;
 
+import com.google.common.collect.ImmutableSet;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.datafixers.util.Pair;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
-import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Registry;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.LevelType;
-import net.minecraft.world.level.biome.BiomeSourceType;
-import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 
 @Environment(EnvType.CLIENT)
 public class CreateBuffetWorldScreen extends Screen {
-	private static final List<ResourceLocation> GENERATORS = (List<ResourceLocation>)Registry.CHUNK_GENERATOR_TYPE
-		.keySet()
-		.stream()
-		.filter(resourceLocation -> Registry.CHUNK_GENERATOR_TYPE.get(resourceLocation).isPublic())
-		.collect(Collectors.toList());
-	private final CreateWorldScreen parent;
-	private final CompoundTag optionsTag;
+	private static final WorldGenSettings.BuffetGeneratorType[] TYPES = WorldGenSettings.BuffetGeneratorType.values();
+	private final Screen parent;
+	private final Consumer<Pair<WorldGenSettings.BuffetGeneratorType, Set<Biome>>> applySettings;
 	private CreateBuffetWorldScreen.BiomeList list;
 	private int generatorIndex;
 	private Button doneButton;
 
-	public CreateBuffetWorldScreen(CreateWorldScreen createWorldScreen, ChunkGeneratorProvider chunkGeneratorProvider) {
+	public CreateBuffetWorldScreen(
+		Screen screen, Consumer<Pair<WorldGenSettings.BuffetGeneratorType, Set<Biome>>> consumer, Pair<WorldGenSettings.BuffetGeneratorType, Set<Biome>> pair
+	) {
 		super(new TranslatableComponent("createWorld.customize.buffet.title"));
-		this.parent = createWorldScreen;
-		if (chunkGeneratorProvider.getType() == LevelType.BUFFET) {
-			this.optionsTag = (CompoundTag)chunkGeneratorProvider.getSettings().convert(NbtOps.INSTANCE).getValue();
-		} else {
-			this.optionsTag = new CompoundTag();
+		this.parent = screen;
+		this.applySettings = consumer;
+
+		for (int i = 0; i < TYPES.length; i++) {
+			if (TYPES[i].equals(pair.getFirst())) {
+				this.generatorIndex = i;
+				break;
+			}
+		}
+
+		for (Biome biome : pair.getSecond()) {
+			this.list
+				.setSelected(
+					(CreateBuffetWorldScreen.BiomeList.Entry)this.list.children().stream().filter(entry -> Objects.equals(entry.biome, biome)).findFirst().orElse(null)
+				);
 		}
 	}
 
 	@Override
 	protected void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		this.addButton(new Button((this.width - 200) / 2, 40, 200, 20, createGeneratorString(this.generatorIndex), button -> {
+		this.addButton(new Button((this.width - 200) / 2, 40, 200, 20, TYPES[this.generatorIndex].createGeneratorString(), button -> {
 			this.generatorIndex++;
-			if (this.generatorIndex >= GENERATORS.size()) {
+			if (this.generatorIndex >= TYPES.length) {
 				this.generatorIndex = 0;
 			}
 
-			button.setMessage(createGeneratorString(this.generatorIndex));
+			button.setMessage(TYPES[this.generatorIndex].createGeneratorString());
 		}));
 		this.list = new CreateBuffetWorldScreen.BiomeList();
 		this.children.add(this.list);
 		this.doneButton = this.addButton(new Button(this.width / 2 - 155, this.height - 28, 150, 20, CommonComponents.GUI_DONE, button -> {
-			this.parent.levelTypeOptions = LevelType.BUFFET.createProvider(new Dynamic<>(NbtOps.INSTANCE, this.saveOptions()));
+			this.applySettings.accept(Pair.of(TYPES[this.generatorIndex], ImmutableSet.of(this.list.getSelected().biome)));
 			this.minecraft.setScreen(this.parent);
 		}));
 		this.addButton(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.parent)));
-		this.loadOptions();
 		this.updateButtonValidity();
-	}
-
-	private static Component createGeneratorString(int i) {
-		return new TranslatableComponent("createWorld.customize.buffet.generatortype")
-			.append(" ")
-			.append(new TranslatableComponent(Util.makeDescriptionId("generator", (ResourceLocation)GENERATORS.get(i))));
-	}
-
-	private void loadOptions() {
-		if (this.optionsTag.contains("chunk_generator", 10) && this.optionsTag.getCompound("chunk_generator").contains("type", 8)) {
-			ResourceLocation resourceLocation = new ResourceLocation(this.optionsTag.getCompound("chunk_generator").getString("type"));
-
-			for (int i = 0; i < GENERATORS.size(); i++) {
-				if (((ResourceLocation)GENERATORS.get(i)).equals(resourceLocation)) {
-					this.generatorIndex = i;
-					break;
-				}
-			}
-		}
-
-		if (this.optionsTag.contains("biome_source", 10) && this.optionsTag.getCompound("biome_source").contains("biomes", 9)) {
-			ListTag listTag = this.optionsTag.getCompound("biome_source").getList("biomes", 8);
-
-			for (int ix = 0; ix < listTag.size(); ix++) {
-				ResourceLocation resourceLocation2 = new ResourceLocation(listTag.getString(ix));
-				this.list
-					.setSelected(
-						(CreateBuffetWorldScreen.BiomeList.Entry)this.list
-							.children()
-							.stream()
-							.filter(entry -> Objects.equals(entry.key, resourceLocation2))
-							.findFirst()
-							.orElse(null)
-					);
-			}
-		}
-
-		this.optionsTag.remove("chunk_generator");
-		this.optionsTag.remove("biome_source");
-	}
-
-	private CompoundTag saveOptions() {
-		CompoundTag compoundTag = new CompoundTag();
-		CompoundTag compoundTag2 = new CompoundTag();
-		compoundTag2.putString("type", Registry.BIOME_SOURCE_TYPE.getKey(BiomeSourceType.FIXED).toString());
-		CompoundTag compoundTag3 = new CompoundTag();
-		ListTag listTag = new ListTag();
-		listTag.add(StringTag.valueOf(this.list.getSelected().key.toString()));
-		compoundTag3.put("biomes", listTag);
-		compoundTag2.put("options", compoundTag3);
-		CompoundTag compoundTag4 = new CompoundTag();
-		CompoundTag compoundTag5 = new CompoundTag();
-		compoundTag4.putString("type", ((ResourceLocation)GENERATORS.get(this.generatorIndex)).toString());
-		compoundTag5.putString("default_block", "minecraft:stone");
-		compoundTag5.putString("default_fluid", "minecraft:water");
-		compoundTag4.put("options", compoundTag5);
-		compoundTag.put("biome_source", compoundTag2);
-		compoundTag.put("chunk_generator", compoundTag4);
-		return compoundTag;
 	}
 
 	public void updateButtonValidity() {
@@ -158,10 +98,9 @@ public class CreateBuffetWorldScreen extends Screen {
 				16
 			);
 			Registry.BIOME
-				.keySet()
 				.stream()
-				.sorted(Comparator.comparing(resourceLocation -> Registry.BIOME.get(resourceLocation).getName().getString()))
-				.forEach(resourceLocation -> this.addEntry(new CreateBuffetWorldScreen.BiomeList.Entry(resourceLocation)));
+				.sorted(Comparator.comparing(biome -> biome.getName().getString()))
+				.forEach(biome -> this.addEntry(new CreateBuffetWorldScreen.BiomeList.Entry(biome)));
 		}
 
 		@Override
@@ -172,7 +111,7 @@ public class CreateBuffetWorldScreen extends Screen {
 		public void setSelected(@Nullable CreateBuffetWorldScreen.BiomeList.Entry entry) {
 			super.setSelected(entry);
 			if (entry != null) {
-				NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", Registry.BIOME.get(entry.key).getName().getString()).getString());
+				NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", entry.biome.getName().getString()).getString());
 			}
 		}
 
@@ -184,15 +123,15 @@ public class CreateBuffetWorldScreen extends Screen {
 
 		@Environment(EnvType.CLIENT)
 		class Entry extends ObjectSelectionList.Entry<CreateBuffetWorldScreen.BiomeList.Entry> {
-			private final ResourceLocation key;
+			private final Biome biome;
 
-			public Entry(ResourceLocation resourceLocation) {
-				this.key = resourceLocation;
+			public Entry(Biome biome) {
+				this.biome = biome;
 			}
 
 			@Override
 			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-				BiomeList.this.drawString(poseStack, CreateBuffetWorldScreen.this.font, Registry.BIOME.get(this.key).getName().getString(), k + 5, j + 2, 16777215);
+				BiomeList.this.drawString(poseStack, CreateBuffetWorldScreen.this.font, this.biome.getName().getString(), k + 5, j + 2, 16777215);
 			}
 
 			@Override

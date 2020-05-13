@@ -9,8 +9,6 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
@@ -87,13 +85,7 @@ public class MushroomBlock extends BushBlock implements BonemealableBlock {
 			configuredFeature = Feature.HUGE_RED_MUSHROOM.configured(BiomeDefaultFeatures.HUGE_RED_MUSHROOM_CONFIG);
 		}
 
-		if (configuredFeature.place(
-			serverLevel,
-			serverLevel.structureFeatureManager(),
-			(ChunkGenerator<? extends ChunkGeneratorSettings>)serverLevel.getChunkSource().getGenerator(),
-			random,
-			blockPos
-		)) {
+		if (configuredFeature.place(serverLevel, serverLevel.structureFeatureManager(), serverLevel.getChunkSource().getGenerator(), random, blockPos)) {
 			return true;
 		} else {
 			serverLevel.setBlock(blockPos, blockState, 3);

@@ -42,7 +42,7 @@ public class JigsawPlacement {
 		ResourceLocation resourceLocation,
 		int i,
 		JigsawPlacement.PieceFactory pieceFactory,
-		ChunkGenerator<?> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		StructureManager structureManager,
 		BlockPos blockPos,
 		List<? super PoolElementStructurePiece> list,
@@ -97,7 +97,7 @@ public class JigsawPlacement {
 		PoolElementStructurePiece poolElementStructurePiece,
 		int i,
 		JigsawPlacement.PieceFactory pieceFactory,
-		ChunkGenerator<?> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		StructureManager structureManager,
 		List<? super PoolElementStructurePiece> list,
 		Random random
@@ -139,7 +139,7 @@ public class JigsawPlacement {
 	static final class Placer {
 		private final int maxDepth;
 		private final JigsawPlacement.PieceFactory factory;
-		private final ChunkGenerator<?> chunkGenerator;
+		private final ChunkGenerator chunkGenerator;
 		private final StructureManager structureManager;
 		private final List<? super PoolElementStructurePiece> pieces;
 		private final Random random;
@@ -148,7 +148,7 @@ public class JigsawPlacement {
 		private Placer(
 			int i,
 			JigsawPlacement.PieceFactory pieceFactory,
-			ChunkGenerator<?> chunkGenerator,
+			ChunkGenerator chunkGenerator,
 			StructureManager structureManager,
 			List<? super PoolElementStructurePiece> list,
 			Random random

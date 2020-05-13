@@ -2,11 +2,13 @@ package net.minecraft.world.level.block.entity;
 
 import java.util.Random;
 import javax.annotation.Nullable;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -60,6 +62,10 @@ public abstract class RandomizableContainerBlockEntity extends BaseContainerBloc
 	public void unpackLootTable(@Nullable Player player) {
 		if (this.lootTable != null && this.level.getServer() != null) {
 			LootTable lootTable = this.level.getServer().getLootTables().get(this.lootTable);
+			if (player instanceof ServerPlayer) {
+				CriteriaTriggers.GENERATE_LOOT.trigger((ServerPlayer)player, this.lootTable);
+			}
+
 			this.lootTable = null;
 			LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level)
 				.withParameter(LootContextParams.BLOCK_POS, new BlockPos(this.worldPosition))

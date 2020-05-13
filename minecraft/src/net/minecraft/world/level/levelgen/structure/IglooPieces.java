@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -107,9 +108,9 @@ public class IglooPieces {
 
 		@Override
 		public boolean postProcess(
-			LevelAccessor levelAccessor,
+			WorldGenLevel worldGenLevel,
 			StructureFeatureManager structureFeatureManager,
-			ChunkGenerator<?> chunkGenerator,
+			ChunkGenerator chunkGenerator,
 			Random random,
 			BoundingBox boundingBox,
 			ChunkPos chunkPos,
@@ -123,15 +124,15 @@ public class IglooPieces {
 			BlockPos blockPos2 = (BlockPos)IglooPieces.OFFSETS.get(this.templateLocation);
 			BlockPos blockPos3 = this.templatePosition
 				.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, new BlockPos(3 - blockPos2.getX(), 0, 0 - blockPos2.getZ())));
-			int i = levelAccessor.getHeight(Heightmap.Types.WORLD_SURFACE_WG, blockPos3.getX(), blockPos3.getZ());
+			int i = worldGenLevel.getHeight(Heightmap.Types.WORLD_SURFACE_WG, blockPos3.getX(), blockPos3.getZ());
 			BlockPos blockPos4 = this.templatePosition;
 			this.templatePosition = this.templatePosition.offset(0, i - 90 - 1, 0);
-			boolean bl = super.postProcess(levelAccessor, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
+			boolean bl = super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
 			if (this.templateLocation.equals(IglooPieces.STRUCTURE_LOCATION_IGLOO)) {
 				BlockPos blockPos5 = this.templatePosition.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, new BlockPos(3, 0, 5)));
-				BlockState blockState = levelAccessor.getBlockState(blockPos5.below());
+				BlockState blockState = worldGenLevel.getBlockState(blockPos5.below());
 				if (!blockState.isAir() && !blockState.is(Blocks.LADDER)) {
-					levelAccessor.setBlock(blockPos5, Blocks.SNOW_BLOCK.defaultBlockState(), 3);
+					worldGenLevel.setBlock(blockPos5, Blocks.SNOW_BLOCK.defaultBlockState(), 3);
 				}
 			}
 

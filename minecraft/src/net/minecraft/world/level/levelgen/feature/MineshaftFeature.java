@@ -24,9 +24,9 @@ public class MineshaftFeature extends StructureFeature<MineshaftConfiguration> {
 
 	@Override
 	protected boolean isFeatureChunk(
-		BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos
+		BiomeManager biomeManager, ChunkGenerator chunkGenerator, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos
 	) {
-		worldgenRandom.setLargeFeatureSeed(chunkGenerator.getSeed(), i, j);
+		worldgenRandom.setLargeFeatureSeed(l, i, j);
 		MineshaftConfiguration mineshaftConfiguration = chunkGenerator.getStructureConfiguration(biome, this);
 		double d = mineshaftConfiguration.probability;
 		return worldgenRandom.nextDouble() < d;
@@ -53,7 +53,7 @@ public class MineshaftFeature extends StructureFeature<MineshaftConfiguration> {
 		}
 
 		@Override
-		public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+		public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
 			MineshaftConfiguration mineshaftConfiguration = chunkGenerator.getStructureConfiguration(biome, Feature.MINESHAFT);
 			MineShaftPieces.MineShaftRoom mineShaftRoom = new MineShaftPieces.MineShaftRoom(0, this.random, (i << 4) + 2, (j << 4) + 2, mineshaftConfiguration.type);
 			this.pieces.add(mineShaftRoom);

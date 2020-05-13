@@ -120,7 +120,7 @@ public class BucketItem extends Item {
 				|| bl
 				|| blockState.getBlock() instanceof LiquidBlockContainer
 					&& ((LiquidBlockContainer)blockState.getBlock()).canPlaceLiquid(level, blockPos, blockState, this.content)) {
-				if (level.dimension.isUltraWarm() && this.content.is(FluidTags.WATER)) {
+				if (level.dimensionType().ultraWarm() && this.content.is(FluidTags.WATER)) {
 					int i = blockPos.getX();
 					int j = blockPos.getY();
 					int k = blockPos.getZ();

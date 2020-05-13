@@ -6,7 +6,6 @@ import net.minecraft.CrashReportDetail;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.timers.TimerQueue;
 
@@ -34,15 +33,6 @@ public interface ServerLevelData extends WritableLevelData {
 				))
 		);
 		crashReportCategory.setDetail(
-			"Level generator",
-			(CrashReportDetail<String>)(() -> {
-				LevelType levelType = this.getGeneratorProvider().getType();
-				return String.format(
-					"ID %02d - %s, ver %d. Features enabled: %b", levelType.getId(), levelType.getName(), levelType.getVersion(), this.shouldGenerateMapFeatures()
-				);
-			})
-		);
-		crashReportCategory.setDetail(
 			"Level weather",
 			(CrashReportDetail<String>)(() -> String.format(
 					"Rain time: %d (now: %b), thunder time: %d (now: %b)", this.getRainTime(), this.isRaining(), this.getThunderTime(), this.isThundering()
@@ -53,8 +43,6 @@ public interface ServerLevelData extends WritableLevelData {
 	int getClearWeatherTime();
 
 	void setClearWeatherTime(int i);
-
-	boolean shouldGenerateMapFeatures();
 
 	CompoundTag getDimensionData();
 

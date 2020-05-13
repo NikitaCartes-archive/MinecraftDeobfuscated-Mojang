@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 public class CountChanceHeightmapDecorator extends FeatureDecorator<FrequencyChanceDecoratorConfiguration> {
@@ -18,7 +17,7 @@ public class CountChanceHeightmapDecorator extends FeatureDecorator<FrequencyCha
 
 	public Stream<BlockPos> getPositions(
 		LevelAccessor levelAccessor,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		FrequencyChanceDecoratorConfiguration frequencyChanceDecoratorConfiguration,
 		BlockPos blockPos

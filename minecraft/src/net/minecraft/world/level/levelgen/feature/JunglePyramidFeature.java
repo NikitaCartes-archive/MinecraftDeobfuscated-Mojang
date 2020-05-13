@@ -42,7 +42,7 @@ public class JunglePyramidFeature extends RandomScatteredFeature<NoneFeatureConf
 		}
 
 		@Override
-		public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+		public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
 			JunglePyramidPiece junglePyramidPiece = new JunglePyramidPiece(this.random, i * 16, j * 16);
 			this.pieces.add(junglePyramidPiece);
 			this.calculateBoundingBox();

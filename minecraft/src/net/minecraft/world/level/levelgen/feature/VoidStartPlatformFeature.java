@@ -5,11 +5,10 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class VoidStartPlatformFeature extends Feature<NoneFeatureConfiguration> {
@@ -25,9 +24,9 @@ public class VoidStartPlatformFeature extends Feature<NoneFeatureConfiguration> 
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		NoneFeatureConfiguration noneFeatureConfiguration
@@ -43,9 +42,9 @@ public class VoidStartPlatformFeature extends Feature<NoneFeatureConfiguration> 
 					if (checkerboardDistance(PLATFORM_ORIGIN.getX(), PLATFORM_ORIGIN.getZ(), j, i) <= 16) {
 						mutableBlockPos.set(j, PLATFORM_ORIGIN.getY(), i);
 						if (mutableBlockPos.equals(PLATFORM_ORIGIN)) {
-							levelAccessor.setBlock(mutableBlockPos, Blocks.COBBLESTONE.defaultBlockState(), 2);
+							worldGenLevel.setBlock(mutableBlockPos, Blocks.COBBLESTONE.defaultBlockState(), 2);
 						} else {
-							levelAccessor.setBlock(mutableBlockPos, Blocks.STONE.defaultBlockState(), 2);
+							worldGenLevel.setBlock(mutableBlockPos, Blocks.STONE.defaultBlockState(), 2);
 						}
 					}
 				}

@@ -5,14 +5,13 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.material.Material;
 
@@ -24,14 +23,14 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		BlockStateConfiguration blockStateConfiguration
 	) {
-		while (blockPos.getY() > 5 && levelAccessor.isEmptyBlock(blockPos)) {
+		while (blockPos.getY() > 5 && worldGenLevel.isEmptyBlock(blockPos)) {
 			blockPos = blockPos.below();
 		}
 
@@ -39,7 +38,7 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 			return false;
 		} else {
 			blockPos = blockPos.below(4);
-			if (structureFeatureManager.startsForFeature(SectionPos.of(blockPos), Feature.VILLAGE, levelAccessor).findAny().isPresent()) {
+			if (structureFeatureManager.startsForFeature(SectionPos.of(blockPos), Feature.VILLAGE).findAny().isPresent()) {
 				return false;
 			} else {
 				boolean[] bls = new boolean[2048];
@@ -81,12 +80,12 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 										|| t > 0 && bls[(j * 16 + s) * 8 + (t - 1)]
 								);
 							if (bl) {
-								Material material = levelAccessor.getBlockState(blockPos.offset(j, t, s)).getMaterial();
+								Material material = worldGenLevel.getBlockState(blockPos.offset(j, t, s)).getMaterial();
 								if (t >= 4 && material.isLiquid()) {
 									return false;
 								}
 
-								if (t < 4 && !material.isSolid() && levelAccessor.getBlockState(blockPos.offset(j, t, s)) != blockStateConfiguration.state) {
+								if (t < 4 && !material.isSolid() && worldGenLevel.getBlockState(blockPos.offset(j, t, s)) != blockStateConfiguration.state) {
 									return false;
 								}
 							}
@@ -98,7 +97,7 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 					for (int s = 0; s < 16; s++) {
 						for (int tx = 0; tx < 8; tx++) {
 							if (bls[(j * 16 + s) * 8 + tx]) {
-								levelAccessor.setBlock(blockPos.offset(j, tx, s), tx >= 4 ? AIR : blockStateConfiguration.state, 2);
+								worldGenLevel.setBlock(blockPos.offset(j, tx, s), tx >= 4 ? AIR : blockStateConfiguration.state, 2);
 							}
 						}
 					}
@@ -109,12 +108,12 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 						for (int txx = 4; txx < 8; txx++) {
 							if (bls[(j * 16 + s) * 8 + txx]) {
 								BlockPos blockPos2 = blockPos.offset(j, txx - 1, s);
-								if (isDirt(levelAccessor.getBlockState(blockPos2).getBlock()) && levelAccessor.getBrightness(LightLayer.SKY, blockPos.offset(j, txx, s)) > 0) {
-									Biome biome = levelAccessor.getBiome(blockPos2);
+								if (isDirt(worldGenLevel.getBlockState(blockPos2).getBlock()) && worldGenLevel.getBrightness(LightLayer.SKY, blockPos.offset(j, txx, s)) > 0) {
+									Biome biome = worldGenLevel.getBiome(blockPos2);
 									if (biome.getSurfaceBuilderConfig().getTopMaterial().is(Blocks.MYCELIUM)) {
-										levelAccessor.setBlock(blockPos2, Blocks.MYCELIUM.defaultBlockState(), 2);
+										worldGenLevel.setBlock(blockPos2, Blocks.MYCELIUM.defaultBlockState(), 2);
 									} else {
-										levelAccessor.setBlock(blockPos2, Blocks.GRASS_BLOCK.defaultBlockState(), 2);
+										worldGenLevel.setBlock(blockPos2, Blocks.GRASS_BLOCK.defaultBlockState(), 2);
 									}
 								}
 							}
@@ -135,8 +134,8 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 											|| txxx < 7 && bls[(j * 16 + s) * 8 + txxx + 1]
 											|| txxx > 0 && bls[(j * 16 + s) * 8 + (txxx - 1)]
 									);
-								if (bl && (txxx < 4 || random.nextInt(2) != 0) && levelAccessor.getBlockState(blockPos.offset(j, txxx, s)).getMaterial().isSolid()) {
-									levelAccessor.setBlock(blockPos.offset(j, txxx, s), Blocks.STONE.defaultBlockState(), 2);
+								if (bl && (txxx < 4 || random.nextInt(2) != 0) && worldGenLevel.getBlockState(blockPos.offset(j, txxx, s)).getMaterial().isSolid()) {
+									worldGenLevel.setBlock(blockPos.offset(j, txxx, s), Blocks.STONE.defaultBlockState(), 2);
 								}
 							}
 						}
@@ -148,8 +147,8 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 						for (int s = 0; s < 16; s++) {
 							int txxxx = 4;
 							BlockPos blockPos2 = blockPos.offset(j, 4, s);
-							if (levelAccessor.getBiome(blockPos2).shouldFreeze(levelAccessor, blockPos2, false)) {
-								levelAccessor.setBlock(blockPos2, Blocks.ICE.defaultBlockState(), 2);
+							if (worldGenLevel.getBiome(blockPos2).shouldFreeze(worldGenLevel, blockPos2, false)) {
+								worldGenLevel.setBlock(blockPos2, Blocks.ICE.defaultBlockState(), 2);
 							}
 						}
 					}

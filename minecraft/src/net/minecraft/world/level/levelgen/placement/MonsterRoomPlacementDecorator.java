@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 
 public class MonsterRoomPlacementDecorator extends FeatureDecorator<ChanceDecoratorConfiguration> {
 	public MonsterRoomPlacementDecorator(Function<Dynamic<?>, ? extends ChanceDecoratorConfiguration> function) {
@@ -16,11 +15,7 @@ public class MonsterRoomPlacementDecorator extends FeatureDecorator<ChanceDecora
 	}
 
 	public Stream<BlockPos> getPositions(
-		LevelAccessor levelAccessor,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
-		Random random,
-		ChanceDecoratorConfiguration chanceDecoratorConfiguration,
-		BlockPos blockPos
+		LevelAccessor levelAccessor, ChunkGenerator chunkGenerator, Random random, ChanceDecoratorConfiguration chanceDecoratorConfiguration, BlockPos blockPos
 	) {
 		int i = chanceDecoratorConfiguration.chance;
 		return IntStream.range(0, i).mapToObj(ix -> {

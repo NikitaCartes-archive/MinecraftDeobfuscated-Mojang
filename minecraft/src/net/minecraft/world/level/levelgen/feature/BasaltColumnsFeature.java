@@ -9,11 +9,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.ColumnFeatureConfiguration;
 
 public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
@@ -35,15 +35,15 @@ public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		ColumnFeatureConfiguration columnFeatureConfiguration
 	) {
 		int i = chunkGenerator.getSeaLevel();
-		BlockPos blockPos2 = findSurface(levelAccessor, i, blockPos.mutable().clamp(Direction.Axis.Y, 1, levelAccessor.getMaxBuildHeight() - 1), Integer.MAX_VALUE);
+		BlockPos blockPos2 = findSurface(worldGenLevel, i, blockPos.mutable().clamp(Direction.Axis.Y, 1, worldGenLevel.getMaxBuildHeight() - 1), Integer.MAX_VALUE);
 		if (blockPos2 == null) {
 			return false;
 		} else {
@@ -58,7 +58,7 @@ public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
 			)) {
 				int m = j - blockPos3.distManhattan(blockPos2);
 				if (m >= 0) {
-					bl2 |= this.placeColumn(levelAccessor, i, blockPos3, m, calculateReach(random, columnFeatureConfiguration));
+					bl2 |= this.placeColumn(worldGenLevel, i, blockPos3, m, calculateReach(random, columnFeatureConfiguration));
 				}
 			}
 

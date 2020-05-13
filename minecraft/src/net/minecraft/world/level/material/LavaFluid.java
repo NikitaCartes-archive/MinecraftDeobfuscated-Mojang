@@ -136,7 +136,7 @@ public abstract class LavaFluid extends FlowingFluid {
 
 	@Override
 	public int getSlopeFindDistance(LevelReader levelReader) {
-		return levelReader.getDimension().isUltraWarm() ? 4 : 2;
+		return levelReader.dimensionType().ultraWarm() ? 4 : 2;
 	}
 
 	@Override
@@ -151,7 +151,7 @@ public abstract class LavaFluid extends FlowingFluid {
 
 	@Override
 	public int getDropOff(LevelReader levelReader) {
-		return levelReader.getDimension().isUltraWarm() ? 1 : 2;
+		return levelReader.dimensionType().ultraWarm() ? 1 : 2;
 	}
 
 	@Override
@@ -161,7 +161,7 @@ public abstract class LavaFluid extends FlowingFluid {
 
 	@Override
 	public int getTickDelay(LevelReader levelReader) {
-		return levelReader.getDimension().isHasCeiling() ? 10 : 30;
+		return levelReader.dimensionType().hasCeiling() ? 10 : 30;
 	}
 
 	@Override

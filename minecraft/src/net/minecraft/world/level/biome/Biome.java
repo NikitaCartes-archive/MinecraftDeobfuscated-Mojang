@@ -33,16 +33,15 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.FoliageColor;
 import net.minecraft.world.level.GrassColor;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
@@ -295,8 +294,8 @@ public abstract class Biome {
 	public void generate(
 		GenerationStep.Decoration decoration,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
-		LevelAccessor levelAccessor,
+		ChunkGenerator chunkGenerator,
+		WorldGenLevel worldGenLevel,
 		long l,
 		WorldgenRandom worldgenRandom,
 		BlockPos blockPos
@@ -307,7 +306,7 @@ public abstract class Biome {
 			worldgenRandom.setFeatureSeed(l, i, decoration.ordinal());
 
 			try {
-				configuredFeature.place(levelAccessor, structureFeatureManager, chunkGenerator, worldgenRandom, blockPos);
+				configuredFeature.place(worldGenLevel, structureFeatureManager, chunkGenerator, worldgenRandom, blockPos);
 			} catch (Exception var14) {
 				CrashReport crashReport = CrashReport.forThrowable(var14, "Feature placement");
 				crashReport.addCategory("Feature")

@@ -33,7 +33,7 @@ public class BastionPieces {
 	}
 
 	public static void addPieces(
-		ChunkGenerator<?> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		StructureManager structureManager,
 		BlockPos blockPos,
 		List<StructurePiece> list,

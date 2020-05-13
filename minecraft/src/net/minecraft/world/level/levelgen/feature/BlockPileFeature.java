@@ -7,10 +7,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockPileConfiguration;
 
 public class BlockPileFeature extends Feature<BlockPileConfiguration> {
@@ -19,9 +19,9 @@ public class BlockPileFeature extends Feature<BlockPileConfiguration> {
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		BlockPileConfiguration blockPileConfiguration
@@ -36,9 +36,9 @@ public class BlockPileFeature extends Feature<BlockPileConfiguration> {
 				int k = blockPos.getX() - blockPos2.getX();
 				int l = blockPos.getZ() - blockPos2.getZ();
 				if ((float)(k * k + l * l) <= random.nextFloat() * 10.0F - random.nextFloat() * 6.0F) {
-					this.tryPlaceBlock(levelAccessor, blockPos2, random, blockPileConfiguration);
+					this.tryPlaceBlock(worldGenLevel, blockPos2, random, blockPileConfiguration);
 				} else if ((double)random.nextFloat() < 0.031) {
-					this.tryPlaceBlock(levelAccessor, blockPos2, random, blockPileConfiguration);
+					this.tryPlaceBlock(worldGenLevel, blockPos2, random, blockPileConfiguration);
 				}
 			}
 

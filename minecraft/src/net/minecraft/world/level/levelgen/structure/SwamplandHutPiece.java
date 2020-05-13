@@ -11,6 +11,7 @@ import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -42,54 +43,54 @@ public class SwamplandHutPiece extends ScatteredFeaturePiece {
 
 	@Override
 	public boolean postProcess(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<?> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BoundingBox boundingBox,
 		ChunkPos chunkPos,
 		BlockPos blockPos
 	) {
-		if (!this.updateAverageGroundHeight(levelAccessor, boundingBox, 0)) {
+		if (!this.updateAverageGroundHeight(worldGenLevel, boundingBox, 0)) {
 			return false;
 		} else {
-			this.generateBox(levelAccessor, boundingBox, 1, 1, 1, 5, 1, 7, Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(), false);
-			this.generateBox(levelAccessor, boundingBox, 1, 4, 2, 5, 4, 7, Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(), false);
-			this.generateBox(levelAccessor, boundingBox, 2, 1, 0, 4, 1, 0, Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(), false);
-			this.generateBox(levelAccessor, boundingBox, 2, 2, 2, 3, 3, 2, Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(), false);
-			this.generateBox(levelAccessor, boundingBox, 1, 2, 3, 1, 3, 6, Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(), false);
-			this.generateBox(levelAccessor, boundingBox, 5, 2, 3, 5, 3, 6, Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(), false);
-			this.generateBox(levelAccessor, boundingBox, 2, 2, 7, 4, 3, 7, Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(), false);
-			this.generateBox(levelAccessor, boundingBox, 1, 0, 2, 1, 3, 2, Blocks.OAK_LOG.defaultBlockState(), Blocks.OAK_LOG.defaultBlockState(), false);
-			this.generateBox(levelAccessor, boundingBox, 5, 0, 2, 5, 3, 2, Blocks.OAK_LOG.defaultBlockState(), Blocks.OAK_LOG.defaultBlockState(), false);
-			this.generateBox(levelAccessor, boundingBox, 1, 0, 7, 1, 3, 7, Blocks.OAK_LOG.defaultBlockState(), Blocks.OAK_LOG.defaultBlockState(), false);
-			this.generateBox(levelAccessor, boundingBox, 5, 0, 7, 5, 3, 7, Blocks.OAK_LOG.defaultBlockState(), Blocks.OAK_LOG.defaultBlockState(), false);
-			this.placeBlock(levelAccessor, Blocks.OAK_FENCE.defaultBlockState(), 2, 3, 2, boundingBox);
-			this.placeBlock(levelAccessor, Blocks.OAK_FENCE.defaultBlockState(), 3, 3, 7, boundingBox);
-			this.placeBlock(levelAccessor, Blocks.AIR.defaultBlockState(), 1, 3, 4, boundingBox);
-			this.placeBlock(levelAccessor, Blocks.AIR.defaultBlockState(), 5, 3, 4, boundingBox);
-			this.placeBlock(levelAccessor, Blocks.AIR.defaultBlockState(), 5, 3, 5, boundingBox);
-			this.placeBlock(levelAccessor, Blocks.POTTED_RED_MUSHROOM.defaultBlockState(), 1, 3, 5, boundingBox);
-			this.placeBlock(levelAccessor, Blocks.CRAFTING_TABLE.defaultBlockState(), 3, 2, 6, boundingBox);
-			this.placeBlock(levelAccessor, Blocks.CAULDRON.defaultBlockState(), 4, 2, 6, boundingBox);
-			this.placeBlock(levelAccessor, Blocks.OAK_FENCE.defaultBlockState(), 1, 2, 1, boundingBox);
-			this.placeBlock(levelAccessor, Blocks.OAK_FENCE.defaultBlockState(), 5, 2, 1, boundingBox);
+			this.generateBox(worldGenLevel, boundingBox, 1, 1, 1, 5, 1, 7, Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(), false);
+			this.generateBox(worldGenLevel, boundingBox, 1, 4, 2, 5, 4, 7, Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(), false);
+			this.generateBox(worldGenLevel, boundingBox, 2, 1, 0, 4, 1, 0, Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(), false);
+			this.generateBox(worldGenLevel, boundingBox, 2, 2, 2, 3, 3, 2, Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(), false);
+			this.generateBox(worldGenLevel, boundingBox, 1, 2, 3, 1, 3, 6, Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(), false);
+			this.generateBox(worldGenLevel, boundingBox, 5, 2, 3, 5, 3, 6, Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(), false);
+			this.generateBox(worldGenLevel, boundingBox, 2, 2, 7, 4, 3, 7, Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_PLANKS.defaultBlockState(), false);
+			this.generateBox(worldGenLevel, boundingBox, 1, 0, 2, 1, 3, 2, Blocks.OAK_LOG.defaultBlockState(), Blocks.OAK_LOG.defaultBlockState(), false);
+			this.generateBox(worldGenLevel, boundingBox, 5, 0, 2, 5, 3, 2, Blocks.OAK_LOG.defaultBlockState(), Blocks.OAK_LOG.defaultBlockState(), false);
+			this.generateBox(worldGenLevel, boundingBox, 1, 0, 7, 1, 3, 7, Blocks.OAK_LOG.defaultBlockState(), Blocks.OAK_LOG.defaultBlockState(), false);
+			this.generateBox(worldGenLevel, boundingBox, 5, 0, 7, 5, 3, 7, Blocks.OAK_LOG.defaultBlockState(), Blocks.OAK_LOG.defaultBlockState(), false);
+			this.placeBlock(worldGenLevel, Blocks.OAK_FENCE.defaultBlockState(), 2, 3, 2, boundingBox);
+			this.placeBlock(worldGenLevel, Blocks.OAK_FENCE.defaultBlockState(), 3, 3, 7, boundingBox);
+			this.placeBlock(worldGenLevel, Blocks.AIR.defaultBlockState(), 1, 3, 4, boundingBox);
+			this.placeBlock(worldGenLevel, Blocks.AIR.defaultBlockState(), 5, 3, 4, boundingBox);
+			this.placeBlock(worldGenLevel, Blocks.AIR.defaultBlockState(), 5, 3, 5, boundingBox);
+			this.placeBlock(worldGenLevel, Blocks.POTTED_RED_MUSHROOM.defaultBlockState(), 1, 3, 5, boundingBox);
+			this.placeBlock(worldGenLevel, Blocks.CRAFTING_TABLE.defaultBlockState(), 3, 2, 6, boundingBox);
+			this.placeBlock(worldGenLevel, Blocks.CAULDRON.defaultBlockState(), 4, 2, 6, boundingBox);
+			this.placeBlock(worldGenLevel, Blocks.OAK_FENCE.defaultBlockState(), 1, 2, 1, boundingBox);
+			this.placeBlock(worldGenLevel, Blocks.OAK_FENCE.defaultBlockState(), 5, 2, 1, boundingBox);
 			BlockState blockState = Blocks.SPRUCE_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.NORTH);
 			BlockState blockState2 = Blocks.SPRUCE_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.EAST);
 			BlockState blockState3 = Blocks.SPRUCE_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.WEST);
 			BlockState blockState4 = Blocks.SPRUCE_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.SOUTH);
-			this.generateBox(levelAccessor, boundingBox, 0, 4, 1, 6, 4, 1, blockState, blockState, false);
-			this.generateBox(levelAccessor, boundingBox, 0, 4, 2, 0, 4, 7, blockState2, blockState2, false);
-			this.generateBox(levelAccessor, boundingBox, 6, 4, 2, 6, 4, 7, blockState3, blockState3, false);
-			this.generateBox(levelAccessor, boundingBox, 0, 4, 8, 6, 4, 8, blockState4, blockState4, false);
-			this.placeBlock(levelAccessor, blockState.setValue(StairBlock.SHAPE, StairsShape.OUTER_RIGHT), 0, 4, 1, boundingBox);
-			this.placeBlock(levelAccessor, blockState.setValue(StairBlock.SHAPE, StairsShape.OUTER_LEFT), 6, 4, 1, boundingBox);
-			this.placeBlock(levelAccessor, blockState4.setValue(StairBlock.SHAPE, StairsShape.OUTER_LEFT), 0, 4, 8, boundingBox);
-			this.placeBlock(levelAccessor, blockState4.setValue(StairBlock.SHAPE, StairsShape.OUTER_RIGHT), 6, 4, 8, boundingBox);
+			this.generateBox(worldGenLevel, boundingBox, 0, 4, 1, 6, 4, 1, blockState, blockState, false);
+			this.generateBox(worldGenLevel, boundingBox, 0, 4, 2, 0, 4, 7, blockState2, blockState2, false);
+			this.generateBox(worldGenLevel, boundingBox, 6, 4, 2, 6, 4, 7, blockState3, blockState3, false);
+			this.generateBox(worldGenLevel, boundingBox, 0, 4, 8, 6, 4, 8, blockState4, blockState4, false);
+			this.placeBlock(worldGenLevel, blockState.setValue(StairBlock.SHAPE, StairsShape.OUTER_RIGHT), 0, 4, 1, boundingBox);
+			this.placeBlock(worldGenLevel, blockState.setValue(StairBlock.SHAPE, StairsShape.OUTER_LEFT), 6, 4, 1, boundingBox);
+			this.placeBlock(worldGenLevel, blockState4.setValue(StairBlock.SHAPE, StairsShape.OUTER_LEFT), 0, 4, 8, boundingBox);
+			this.placeBlock(worldGenLevel, blockState4.setValue(StairBlock.SHAPE, StairsShape.OUTER_RIGHT), 6, 4, 8, boundingBox);
 
 			for (int i = 2; i <= 7; i += 5) {
 				for (int j = 1; j <= 5; j += 4) {
-					this.fillColumnDown(levelAccessor, Blocks.OAK_LOG.defaultBlockState(), j, -1, i, boundingBox);
+					this.fillColumnDown(worldGenLevel, Blocks.OAK_LOG.defaultBlockState(), j, -1, i, boundingBox);
 				}
 			}
 
@@ -99,15 +100,15 @@ public class SwamplandHutPiece extends ScatteredFeaturePiece {
 				int k = this.getWorldZ(2, 5);
 				if (boundingBox.isInside(new BlockPos(i, j, k))) {
 					this.spawnedWitch = true;
-					Witch witch = EntityType.WITCH.create(levelAccessor.getLevel());
+					Witch witch = EntityType.WITCH.create(worldGenLevel.getLevel());
 					witch.setPersistenceRequired();
 					witch.moveTo((double)i + 0.5, (double)j, (double)k + 0.5, 0.0F, 0.0F);
-					witch.finalizeSpawn(levelAccessor, levelAccessor.getCurrentDifficultyAt(new BlockPos(i, j, k)), MobSpawnType.STRUCTURE, null, null);
-					levelAccessor.addFreshEntity(witch);
+					witch.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(new BlockPos(i, j, k)), MobSpawnType.STRUCTURE, null, null);
+					worldGenLevel.addFreshEntity(witch);
 				}
 			}
 
-			this.spawnCat(levelAccessor, boundingBox);
+			this.spawnCat(worldGenLevel, boundingBox);
 			return true;
 		}
 	}

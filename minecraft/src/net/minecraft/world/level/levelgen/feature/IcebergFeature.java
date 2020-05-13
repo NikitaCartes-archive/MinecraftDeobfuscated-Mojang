@@ -8,11 +8,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.material.Material;
 
@@ -22,14 +22,14 @@ public class IcebergFeature extends Feature<BlockStateConfiguration> {
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
+		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		BlockStateConfiguration blockStateConfiguration
 	) {
-		blockPos = new BlockPos(blockPos.getX(), levelAccessor.getSeaLevel(), blockPos.getZ());
+		blockPos = new BlockPos(blockPos.getX(), worldGenLevel.getSeaLevel(), blockPos.getZ());
 		boolean bl = random.nextDouble() > 0.7;
 		BlockState blockState = blockStateConfiguration.state;
 		double d = random.nextDouble() * 2.0 * Math.PI;
@@ -51,13 +51,13 @@ public class IcebergFeature extends Feature<BlockStateConfiguration> {
 				for (int r = 0; r < l; r++) {
 					int s = bl2 ? this.heightDependentRadiusEllipse(r, l, n) : this.heightDependentRadiusRound(random, r, l, n);
 					if (bl2 || p < s) {
-						this.generateIcebergBlock(levelAccessor, random, blockPos, l, p, r, q, s, o, bl2, j, d, bl, blockState);
+						this.generateIcebergBlock(worldGenLevel, random, blockPos, l, p, r, q, s, o, bl2, j, d, bl, blockState);
 					}
 				}
 			}
 		}
 
-		this.smooth(levelAccessor, blockPos, n, l, bl2, i);
+		this.smooth(worldGenLevel, blockPos, n, l, bl2, i);
 
 		for (int p = -o; p < o; p++) {
 			for (int q = -o; q < o; q++) {
@@ -65,7 +65,7 @@ public class IcebergFeature extends Feature<BlockStateConfiguration> {
 					int s = bl2 ? Mth.ceil((float)o * (1.0F - (float)Math.pow((double)rx, 2.0) / ((float)m * 8.0F))) : o;
 					int t = this.heightDependentRadiusSteep(random, -rx, m, n);
 					if (p < t) {
-						this.generateIcebergBlock(levelAccessor, random, blockPos, m, p, rx, q, t, s, bl2, j, d, bl, blockState);
+						this.generateIcebergBlock(worldGenLevel, random, blockPos, m, p, rx, q, t, s, bl2, j, d, bl, blockState);
 					}
 				}
 			}
@@ -73,7 +73,7 @@ public class IcebergFeature extends Feature<BlockStateConfiguration> {
 
 		boolean bl3 = bl2 ? random.nextDouble() > 0.1 : random.nextDouble() > 0.7;
 		if (bl3) {
-			this.generateCutOut(random, levelAccessor, n, l, blockPos, bl2, i, d, j);
+			this.generateCutOut(random, worldGenLevel, n, l, blockPos, bl2, i, d, j);
 		}
 
 		return true;
