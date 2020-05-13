@@ -43,7 +43,7 @@ extends Behavior<Villager> {
         Optional<GlobalPos> optional2 = villager.getBrain().getMemory(this.mustBeCloseToMemoryType);
         if (optional.isPresent() && optional2.isPresent() && !(list = optional.get()).isEmpty()) {
             this.targetPos = list.get(serverLevel.getRandom().nextInt(list.size()));
-            return this.targetPos != null && Objects.equals(serverLevel.getDimension().getType(), this.targetPos.dimension()) && optional2.get().pos().closerThan(villager.position(), (double)this.maxDistanceFromPoi);
+            return this.targetPos != null && Objects.equals(serverLevel.dimensionType(), this.targetPos.dimension()) && optional2.get().pos().closerThan(villager.position(), (double)this.maxDistanceFromPoi);
         }
         return false;
     }

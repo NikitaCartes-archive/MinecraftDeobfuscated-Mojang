@@ -36,7 +36,7 @@ public class BastionPieces {
         BastionSharedPools.bootstrap();
     }
 
-    public static void addPieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, BlockPos blockPos, List<StructurePiece> list, WorldgenRandom worldgenRandom, MultiJigsawConfiguration multiJigsawConfiguration) {
+    public static void addPieces(ChunkGenerator chunkGenerator, StructureManager structureManager, BlockPos blockPos, List<StructurePiece> list, WorldgenRandom worldgenRandom, MultiJigsawConfiguration multiJigsawConfiguration) {
         BastionPieces.bootstrap();
         JigsawConfiguration jigsawConfiguration = multiJigsawConfiguration.getRandomPool(worldgenRandom);
         JigsawPlacement.addPieces(jigsawConfiguration.startPool, jigsawConfiguration.size, BastionPiece::new, chunkGenerator, structureManager, blockPos, list, worldgenRandom, false, false);

@@ -60,8 +60,8 @@ extends Block {
         }
         if (RespawnAnchorBlock.canSetSpawn(level)) {
             ServerPlayer serverPlayer;
-            if (!(level.isClientSide || (serverPlayer = (ServerPlayer)player).getRespawnDimension() == level.dimension.getType() && serverPlayer.getRespawnPosition().equals(blockPos))) {
-                serverPlayer.setRespawnPosition(level.dimension.getType(), blockPos, false, true);
+            if (!(level.isClientSide || (serverPlayer = (ServerPlayer)player).getRespawnDimension() == level.dimensionType() && serverPlayer.getRespawnPosition().equals(blockPos))) {
+                serverPlayer.setRespawnPosition(level.dimensionType(), blockPos, false, true);
                 level.playSound(null, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, SoundEvents.RESPAWN_ANCHOR_SET_SPAWN, SoundSource.BLOCKS, 1.0f, 1.0f);
                 return InteractionResult.SUCCESS;
             }
@@ -75,7 +75,7 @@ extends Block {
     }
 
     public static boolean canSetSpawn(Level level) {
-        return level.dimension.getType() == DimensionType.NETHER;
+        return level.dimensionType() == DimensionType.NETHER;
     }
 
     public static void charge(Level level, BlockPos blockPos, BlockState blockState) {

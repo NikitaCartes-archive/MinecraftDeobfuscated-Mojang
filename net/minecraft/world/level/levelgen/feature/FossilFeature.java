@@ -10,12 +10,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
@@ -52,12 +51,12 @@ extends Feature<NoneFeatureConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
+    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
         int m;
-        Random random2 = levelAccessor.getRandom();
+        Random random2 = worldGenLevel.getRandom();
         Rotation rotation = Rotation.getRandom(random2);
         int i = random2.nextInt(fossils.length);
-        StructureManager structureManager = ((ServerLevel)levelAccessor.getLevel()).getServer().getStructureManager();
+        StructureManager structureManager = ((ServerLevel)worldGenLevel.getLevel()).getServer().getStructureManager();
         StructureTemplate structureTemplate = structureManager.getOrCreate(fossils[i]);
         StructureTemplate structureTemplate2 = structureManager.getOrCreate(fossilsCoal[i]);
         ChunkPos chunkPos = new ChunkPos(blockPos);
@@ -69,18 +68,18 @@ extends Feature<NoneFeatureConfiguration> {
         int l = 256;
         for (m = 0; m < blockPos2.getX(); ++m) {
             for (int n = 0; n < blockPos2.getZ(); ++n) {
-                l = Math.min(l, levelAccessor.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, blockPos.getX() + m + j, blockPos.getZ() + n + k));
+                l = Math.min(l, worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, blockPos.getX() + m + j, blockPos.getZ() + n + k));
             }
         }
         m = Math.max(l - 15 - random2.nextInt(10), 10);
         BlockPos blockPos3 = structureTemplate.getZeroPositionWithTransform(blockPos.offset(j, m, k), Mirror.NONE, rotation);
         BlockRotProcessor blockRotProcessor = new BlockRotProcessor(0.9f);
         structurePlaceSettings.clearProcessors().addProcessor(blockRotProcessor);
-        structureTemplate.placeInWorld(levelAccessor, blockPos3, blockPos3, structurePlaceSettings, 4);
+        structureTemplate.placeInWorld(worldGenLevel, blockPos3, blockPos3, structurePlaceSettings, 4);
         structurePlaceSettings.popProcessor(blockRotProcessor);
         BlockRotProcessor blockRotProcessor2 = new BlockRotProcessor(0.1f);
         structurePlaceSettings.clearProcessors().addProcessor(blockRotProcessor2);
-        structureTemplate2.placeInWorld(levelAccessor, blockPos3, blockPos3, structurePlaceSettings, 4);
+        structureTemplate2.placeInWorld(worldGenLevel, blockPos3, blockPos3, structurePlaceSettings, 4);
         return true;
     }
 }

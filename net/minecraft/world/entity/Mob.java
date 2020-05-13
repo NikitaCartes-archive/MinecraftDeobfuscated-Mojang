@@ -12,6 +12,7 @@ import java.util.Random;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
@@ -25,6 +26,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.Mth;
@@ -475,8 +477,17 @@ extends LivingEntity {
     protected void pickUpItem(ItemEntity itemEntity) {
         ItemStack itemStack = itemEntity.getItem();
         if (this.equipItemIfPossible(itemStack)) {
+            this.onItemPickup(itemEntity);
             this.take(itemEntity, itemStack.getCount());
             itemEntity.remove();
+        }
+    }
+
+    protected void onItemPickup(ItemEntity itemEntity) {
+        Player player;
+        Player player2 = player = itemEntity.getThrower() != null ? this.level.getPlayerByUUID(itemEntity.getThrower()) : null;
+        if (player instanceof ServerPlayer) {
+            CriteriaTriggers.ITEM_PICKED_UP_BY_ENTITY.trigger((ServerPlayer)player, itemEntity.getItem(), this);
         }
     }
 

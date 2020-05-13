@@ -38,7 +38,7 @@ extends Behavior<LivingEntity> {
         }
         Brain<?> brain = livingEntity.getBrain();
         GlobalPos globalPos = brain.getMemory(MemoryModuleType.HOME).get();
-        if (!Objects.equals(serverLevel.getDimension().getType(), globalPos.dimension())) {
+        if (!Objects.equals(serverLevel.dimensionType(), globalPos.dimension())) {
             return false;
         }
         Optional<SerializableLong> optional = brain.getMemory(MemoryModuleType.LAST_WOKEN);

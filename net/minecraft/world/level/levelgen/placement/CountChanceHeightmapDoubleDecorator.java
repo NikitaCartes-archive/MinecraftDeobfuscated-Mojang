@@ -12,7 +12,6 @@ import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.placement.FrequencyChanceDecoratorConfiguration;
@@ -24,7 +23,7 @@ extends FeatureDecorator<FrequencyChanceDecoratorConfiguration> {
     }
 
     @Override
-    public Stream<BlockPos> getPositions(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, FrequencyChanceDecoratorConfiguration frequencyChanceDecoratorConfiguration, BlockPos blockPos) {
+    public Stream<BlockPos> getPositions(LevelAccessor levelAccessor, ChunkGenerator chunkGenerator, Random random, FrequencyChanceDecoratorConfiguration frequencyChanceDecoratorConfiguration, BlockPos blockPos) {
         return IntStream.range(0, frequencyChanceDecoratorConfiguration.count).filter(i -> random.nextFloat() < frequencyChanceDecoratorConfiguration.chance).mapToObj(i -> {
             int k;
             int j = random.nextInt(16) + blockPos.getX();

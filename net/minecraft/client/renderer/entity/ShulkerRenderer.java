@@ -70,16 +70,10 @@ extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
 
     @Override
     protected void setupRotations(Shulker shulker, PoseStack poseStack, float f, float g, float h) {
-        super.setupRotations(shulker, poseStack, f, g, h);
+        super.setupRotations(shulker, poseStack, f, g + 180.0f, h);
         poseStack.translate(0.0, 0.5, 0.0);
         poseStack.mulPose(shulker.getAttachFace().getOpposite().getRotation());
         poseStack.translate(0.0, -0.5, 0.0);
-    }
-
-    @Override
-    protected void scale(Shulker shulker, PoseStack poseStack, float f) {
-        float g = 0.999f;
-        poseStack.scale(0.999f, 0.999f, 0.999f);
     }
 }
 

@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -26,6 +27,7 @@ import net.minecraft.data.HashCache;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.TagParser;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,6 +35,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class SnbtToNbt
 implements DataProvider {
+    @Nullable
+    private static final Path dumpSnbtTo = null;
     private static final Logger LOGGER = LogManager.getLogger();
     private final DataGenerator generator;
     private final List<Filter> filters = Lists.newArrayList();
@@ -83,11 +87,13 @@ implements DataProvider {
     private TaskResult readStructure(Path path, String string) {
         try (BufferedReader bufferedReader = Files.newBufferedReader(path);){
             String string2 = IOUtils.toString(bufferedReader);
+            CompoundTag compoundTag = this.applyFilters(string, TagParser.parseTag(string2));
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            NbtIo.writeCompressed(this.applyFilters(string, TagParser.parseTag(string2)), byteArrayOutputStream);
+            NbtIo.writeCompressed(compoundTag, byteArrayOutputStream);
             byte[] bs = byteArrayOutputStream.toByteArray();
             String string3 = SHA1.hashBytes(bs).toString();
-            TaskResult taskResult = new TaskResult(string, bs, string3);
+            String string4 = dumpSnbtTo != null ? compoundTag.getPrettyDisplay("    ", 0).getString() + "\n" : null;
+            TaskResult taskResult = new TaskResult(string, bs, string4, string3);
             return taskResult;
         } catch (CommandSyntaxException commandSyntaxException) {
             LOGGER.error("Couldn't convert {} from SNBT to NBT at {} as it's invalid SNBT", (Object)string, (Object)path, (Object)commandSyntaxException);
@@ -99,7 +105,16 @@ implements DataProvider {
     }
 
     private void storeStructureIfChanged(HashCache hashCache, TaskResult taskResult, Path path) {
-        Path path2 = path.resolve(taskResult.name + ".nbt");
+        Path path2;
+        if (taskResult.snbtPayload != null) {
+            path2 = dumpSnbtTo.resolve(taskResult.name + ".snbt");
+            try {
+                FileUtils.write(path2.toFile(), (CharSequence)taskResult.snbtPayload, StandardCharsets.UTF_8);
+            } catch (IOException iOException) {
+                LOGGER.error("Couldn't write structure SNBT {} at {}", (Object)taskResult.name, (Object)path2, (Object)iOException);
+            }
+        }
+        path2 = path.resolve(taskResult.name + ".nbt");
         try {
             if (!Objects.equals(hashCache.getHash(path2), taskResult.hash) || !Files.exists(path2, new LinkOption[0])) {
                 Files.createDirectories(path2.getParent(), new FileAttribute[0]);
@@ -121,12 +136,15 @@ implements DataProvider {
     static class TaskResult {
         private final String name;
         private final byte[] payload;
+        @Nullable
+        private final String snbtPayload;
         private final String hash;
 
-        public TaskResult(String string, byte[] bs, String string2) {
+        public TaskResult(String string, byte[] bs, @Nullable String string2, String string3) {
             this.name = string;
             this.payload = bs;
-            this.hash = string2;
+            this.snbtPayload = string2;
+            this.hash = string3;
         }
     }
 }

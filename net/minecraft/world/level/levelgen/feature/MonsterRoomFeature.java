@@ -10,15 +10,14 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
@@ -38,7 +37,7 @@ extends Feature<NoneFeatureConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
+    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
         BlockPos blockPos2;
         int u;
         int t;
@@ -57,7 +56,7 @@ extends Feature<NoneFeatureConfiguration> {
             for (t = -1; t <= 4; ++t) {
                 for (u = p; u <= q; ++u) {
                     blockPos2 = blockPos.offset(s, t, u);
-                    Material material = levelAccessor.getBlockState(blockPos2).getMaterial();
+                    Material material = worldGenLevel.getBlockState(blockPos2).getMaterial();
                     boolean bl = material.isSolid();
                     if (t == -1 && !bl) {
                         return false;
@@ -65,7 +64,7 @@ extends Feature<NoneFeatureConfiguration> {
                     if (t == 4 && !bl) {
                         return false;
                     }
-                    if (s != k && s != l && u != p && u != q || t != 0 || !levelAccessor.isEmptyBlock(blockPos2) || !levelAccessor.isEmptyBlock(blockPos2.above())) continue;
+                    if (s != k && s != l && u != p && u != q || t != 0 || !worldGenLevel.isEmptyBlock(blockPos2) || !worldGenLevel.isEmptyBlock(blockPos2.above())) continue;
                     ++r;
                 }
             }
@@ -78,20 +77,20 @@ extends Feature<NoneFeatureConfiguration> {
                 for (u = p; u <= q; ++u) {
                     blockPos2 = blockPos.offset(s, t, u);
                     if (s == k || t == -1 || u == p || s == l || t == 4 || u == q) {
-                        if (blockPos2.getY() >= 0 && !levelAccessor.getBlockState(blockPos2.below()).getMaterial().isSolid()) {
-                            levelAccessor.setBlock(blockPos2, AIR, 2);
+                        if (blockPos2.getY() >= 0 && !worldGenLevel.getBlockState(blockPos2.below()).getMaterial().isSolid()) {
+                            worldGenLevel.setBlock(blockPos2, AIR, 2);
                             continue;
                         }
-                        if (!levelAccessor.getBlockState(blockPos2).getMaterial().isSolid() || levelAccessor.getBlockState(blockPos2).is(Blocks.CHEST)) continue;
+                        if (!worldGenLevel.getBlockState(blockPos2).getMaterial().isSolid() || worldGenLevel.getBlockState(blockPos2).is(Blocks.CHEST)) continue;
                         if (t == -1 && random.nextInt(4) != 0) {
-                            levelAccessor.setBlock(blockPos2, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), 2);
+                            worldGenLevel.setBlock(blockPos2, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), 2);
                             continue;
                         }
-                        levelAccessor.setBlock(blockPos2, Blocks.COBBLESTONE.defaultBlockState(), 2);
+                        worldGenLevel.setBlock(blockPos2, Blocks.COBBLESTONE.defaultBlockState(), 2);
                         continue;
                     }
-                    if (levelAccessor.getBlockState(blockPos2).is(Blocks.CHEST)) continue;
-                    levelAccessor.setBlock(blockPos2, AIR, 2);
+                    if (worldGenLevel.getBlockState(blockPos2).is(Blocks.CHEST)) continue;
+                    worldGenLevel.setBlock(blockPos2, AIR, 2);
                 }
             }
         }
@@ -101,20 +100,20 @@ extends Feature<NoneFeatureConfiguration> {
                 int v;
                 u = blockPos.getX() + random.nextInt(j * 2 + 1) - j;
                 BlockPos blockPos3 = new BlockPos(u, v = blockPos.getY(), w = blockPos.getZ() + random.nextInt(o * 2 + 1) - o);
-                if (!levelAccessor.isEmptyBlock(blockPos3)) continue;
+                if (!worldGenLevel.isEmptyBlock(blockPos3)) continue;
                 int x = 0;
                 for (Direction direction : Direction.Plane.HORIZONTAL) {
-                    if (!levelAccessor.getBlockState(blockPos3.relative(direction)).getMaterial().isSolid()) continue;
+                    if (!worldGenLevel.getBlockState(blockPos3.relative(direction)).getMaterial().isSolid()) continue;
                     ++x;
                 }
                 if (x != 1) continue;
-                levelAccessor.setBlock(blockPos3, StructurePiece.reorient(levelAccessor, blockPos3, Blocks.CHEST.defaultBlockState()), 2);
-                RandomizableContainerBlockEntity.setLootTable(levelAccessor, random, blockPos3, BuiltInLootTables.SIMPLE_DUNGEON);
+                worldGenLevel.setBlock(blockPos3, StructurePiece.reorient(worldGenLevel, blockPos3, Blocks.CHEST.defaultBlockState()), 2);
+                RandomizableContainerBlockEntity.setLootTable(worldGenLevel, random, blockPos3, BuiltInLootTables.SIMPLE_DUNGEON);
                 continue block6;
             }
         }
-        levelAccessor.setBlock(blockPos, Blocks.SPAWNER.defaultBlockState(), 2);
-        BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos);
+        worldGenLevel.setBlock(blockPos, Blocks.SPAWNER.defaultBlockState(), 2);
+        BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos);
         if (blockEntity instanceof SpawnerBlockEntity) {
             ((SpawnerBlockEntity)blockEntity).getSpawner().setEntityId(this.randomEntityId(random));
         } else {

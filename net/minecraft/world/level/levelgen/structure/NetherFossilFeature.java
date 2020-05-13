@@ -13,7 +13,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.RandomScatteredFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -45,12 +44,12 @@ extends RandomScatteredFeature<NoneFeatureConfiguration> {
     }
 
     @Override
-    protected int getSpacing(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+    protected int getSpacing(ChunkGeneratorSettings chunkGeneratorSettings) {
         return 2;
     }
 
     @Override
-    protected int getSeparation(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+    protected int getSeparation(ChunkGeneratorSettings chunkGeneratorSettings) {
         return 1;
     }
 
@@ -66,7 +65,7 @@ extends RandomScatteredFeature<NoneFeatureConfiguration> {
         }
 
         @Override
-        public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+        public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
             int n;
             ChunkPos chunkPos = new ChunkPos(i, j);
             int k = chunkPos.getMinBlockX() + this.random.nextInt(16);

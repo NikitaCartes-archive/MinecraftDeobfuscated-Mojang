@@ -638,6 +638,7 @@ VillagerDataHolder {
             if (!bl) {
                 return;
             }
+            this.onItemPickup(itemEntity);
             this.take(itemEntity, itemStack.getCount());
             ItemStack itemStack2 = simpleContainer.addItem(itemStack);
             if (itemStack2.isEmpty()) {

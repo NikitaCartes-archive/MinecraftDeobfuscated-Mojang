@@ -46,7 +46,7 @@ extends BaseEntityBlock {
     @Override
     public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
         if (!level.isClientSide && !entity.isPassenger() && !entity.isVehicle() && entity.canChangeDimensions() && Shapes.joinIsNotEmpty(Shapes.create(entity.getBoundingBox().move(-blockPos.getX(), -blockPos.getY(), -blockPos.getZ())), blockState.getShape(level, blockPos), BooleanOp.AND)) {
-            entity.changeDimension(level.dimension.getType() == DimensionType.THE_END ? DimensionType.OVERWORLD : DimensionType.THE_END);
+            entity.changeDimension(level.dimensionType() == DimensionType.THE_END ? DimensionType.OVERWORLD : DimensionType.THE_END);
         }
     }
 

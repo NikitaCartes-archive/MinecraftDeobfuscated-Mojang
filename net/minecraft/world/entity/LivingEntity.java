@@ -1581,7 +1581,7 @@ extends Entity {
 
     private void dismountVehicle(Entity entity) {
         Vec3 vec3 = entity.removed || this.level.getBlockState(entity.blockPosition()).getBlock().is(BlockTags.PORTALS) ? new Vec3(entity.getX(), entity.getY() + (double)entity.getBbHeight(), entity.getZ()) : entity.getDismountLocationForPassenger(this);
-        this.setPos(vec3.x, vec3.y, vec3.z);
+        this.teleportTo(vec3.x, vec3.y, vec3.z);
     }
 
     @Override

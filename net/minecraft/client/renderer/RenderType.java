@@ -93,6 +93,15 @@ extends RenderStateShard {
         return RenderType.entityCutoutNoCull(resourceLocation, true);
     }
 
+    public static RenderType entityCutoutNoCullZOffset(ResourceLocation resourceLocation, boolean bl) {
+        CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(NO_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setCullState(NO_CULL).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).setLayeringState(VIEW_OFFSET_Z_LAYERING).createCompositeState(bl);
+        return RenderType.create("entity_cutout_no_cull_z_offset", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, false, compositeState);
+    }
+
+    public static RenderType entityCutoutNoCullZOffset(ResourceLocation resourceLocation) {
+        return RenderType.entityCutoutNoCullZOffset(resourceLocation, true);
+    }
+
     public static RenderType entityTranslucentCull(ResourceLocation resourceLocation) {
         CompositeState compositeState = CompositeState.builder().setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false)).setTransparencyState(TRANSLUCENT_TRANSPARENCY).setDiffuseLightingState(DIFFUSE_LIGHTING).setAlphaState(DEFAULT_ALPHA).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY).createCompositeState(true);
         return RenderType.create("entity_translucent_cull", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, true, compositeState);

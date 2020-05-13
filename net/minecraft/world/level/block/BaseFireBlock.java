@@ -148,7 +148,7 @@ extends Block {
         if (blockState2.is(blockState.getBlock())) {
             return;
         }
-        if ((level.dimension.getType() == DimensionType.OVERWORLD || level.dimension.getType() == DimensionType.NETHER) && NetherPortalBlock.trySpawnPortal(level, blockPos)) {
+        if ((level.dimensionType() == DimensionType.OVERWORLD || level.dimensionType() == DimensionType.NETHER) && NetherPortalBlock.trySpawnPortal(level, blockPos)) {
             return;
         }
         if (!blockState.canSurvive(level, blockPos)) {

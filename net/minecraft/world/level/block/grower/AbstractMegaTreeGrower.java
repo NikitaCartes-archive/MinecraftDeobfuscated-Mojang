@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 public abstract class AbstractMegaTreeGrower
 extends AbstractTreeGrower {
     @Override
-    public boolean growTree(ServerLevel serverLevel, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockState blockState, Random random) {
+    public boolean growTree(ServerLevel serverLevel, ChunkGenerator chunkGenerator, BlockPos blockPos, BlockState blockState, Random random) {
         for (int i = 0; i >= -1; --i) {
             for (int j = 0; j >= -1; --j) {
                 if (!AbstractMegaTreeGrower.isTwoByTwoSapling(blockState, serverLevel, blockPos, i, j)) continue;
@@ -32,7 +32,7 @@ extends AbstractTreeGrower {
     @Nullable
     protected abstract ConfiguredFeature<TreeConfiguration, ?> getConfiguredMegaFeature(Random var1);
 
-    public boolean placeMega(ServerLevel serverLevel, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockState blockState, Random random, int i, int j) {
+    public boolean placeMega(ServerLevel serverLevel, ChunkGenerator chunkGenerator, BlockPos blockPos, BlockState blockState, Random random, int i, int j) {
         ConfiguredFeature<TreeConfiguration, ?> configuredFeature = this.getConfiguredMegaFeature(random);
         if (configuredFeature == null) {
             return false;

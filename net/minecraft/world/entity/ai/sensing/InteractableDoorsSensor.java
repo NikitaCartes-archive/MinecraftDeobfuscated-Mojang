@@ -21,7 +21,7 @@ public class InteractableDoorsSensor
 extends Sensor<LivingEntity> {
     @Override
     protected void doTick(ServerLevel serverLevel, LivingEntity livingEntity) {
-        DimensionType dimensionType = serverLevel.getDimension().getType();
+        DimensionType dimensionType = serverLevel.dimensionType();
         BlockPos blockPos = livingEntity.blockPosition();
         ArrayList<GlobalPos> list = Lists.newArrayList();
         for (int i = -1; i <= 1; ++i) {

@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
@@ -87,18 +88,18 @@ public class ShipwreckPieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int i = 256;
             int j = 0;
             BlockPos blockPos2 = this.template.getSize();
             Heightmap.Types types = this.isBeached ? Heightmap.Types.WORLD_SURFACE_WG : Heightmap.Types.OCEAN_FLOOR_WG;
             int k = blockPos2.getX() * blockPos2.getZ();
             if (k == 0) {
-                j = levelAccessor.getHeight(types, this.templatePosition.getX(), this.templatePosition.getZ());
+                j = worldGenLevel.getHeight(types, this.templatePosition.getX(), this.templatePosition.getZ());
             } else {
                 BlockPos blockPos3 = this.templatePosition.offset(blockPos2.getX() - 1, 0, blockPos2.getZ() - 1);
                 for (BlockPos blockPos4 : BlockPos.betweenClosed(this.templatePosition, blockPos3)) {
-                    int l = levelAccessor.getHeight(types, blockPos4.getX(), blockPos4.getZ());
+                    int l = worldGenLevel.getHeight(types, blockPos4.getX(), blockPos4.getZ());
                     j += l;
                     i = Math.min(i, l);
                 }
@@ -106,7 +107,7 @@ public class ShipwreckPieces {
             }
             int m = this.isBeached ? i - blockPos2.getY() / 2 - random.nextInt(3) : j;
             this.templatePosition = new BlockPos(this.templatePosition.getX(), m, this.templatePosition.getZ());
-            return super.postProcess(levelAccessor, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
+            return super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
         }
     }
 }

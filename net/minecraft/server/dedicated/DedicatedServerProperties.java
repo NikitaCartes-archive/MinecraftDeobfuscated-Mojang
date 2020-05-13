@@ -10,7 +10,7 @@ import net.minecraft.server.dedicated.Settings;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.LevelType;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 
 public class DedicatedServerProperties
 extends Settings<DedicatedServerProperties> {
@@ -25,13 +25,9 @@ extends Settings<DedicatedServerProperties> {
     public final String motd = this.get("motd", "A Minecraft Server");
     public final boolean forceGameMode = this.get("force-gamemode", false);
     public final boolean enforceWhitelist = this.get("enforce-whitelist", false);
-    public final boolean generateStructures = this.get("generate-structures", true);
     public final Difficulty difficulty = this.get("difficulty", DedicatedServerProperties.dispatchNumberOrString(Difficulty::byId, Difficulty::byName), Difficulty::getKey, Difficulty.EASY);
     public final GameType gamemode = this.get("gamemode", DedicatedServerProperties.dispatchNumberOrString(GameType::byId, GameType::byName), GameType::getName, GameType.SURVIVAL);
     public final String levelName = this.get("level-name", "world");
-    public final String levelSeed = this.get("level-seed", "");
-    public final LevelType levelType = this.get("level-type", LevelType::getLevelType, LevelType::getName, LevelType.NORMAL);
-    public final String generatorSettings = this.get("generator-settings", "");
     public final int serverPort = this.get("server-port", 25565);
     public final int maxBuildHeight = this.get("max-build-height", integer -> Mth.clamp((integer + 8) / 16 * 16, 64, 256), 256);
     public final Boolean announcePlayerAchievements = this.getLegacyBoolean("announce-player-achievements");
@@ -64,6 +60,7 @@ extends Settings<DedicatedServerProperties> {
     public final int entityBroadcastRangePercentage;
     public final Settings.MutableValue<Integer> playerIdleTimeout;
     public final Settings.MutableValue<Boolean> whiteList;
+    public final WorldGenSettings worldGenSettings;
 
     public DedicatedServerProperties(Properties properties) {
         super(properties);
@@ -89,6 +86,7 @@ extends Settings<DedicatedServerProperties> {
         this.entityBroadcastRangePercentage = this.get("entity-broadcast-range-percentage", integer -> Mth.clamp(integer, 10, 1000), 100);
         this.playerIdleTimeout = this.getMutable("player-idle-timeout", 0);
         this.whiteList = this.getMutable("white-list", false);
+        this.worldGenSettings = WorldGenSettings.read(properties);
     }
 
     public static DedicatedServerProperties fromFile(Path path) {

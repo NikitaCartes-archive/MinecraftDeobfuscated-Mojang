@@ -48,18 +48,18 @@ extends RandomScatteredFeature<NoneFeatureConfiguration> {
     }
 
     @Override
-    protected boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos) {
+    protected boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator chunkGenerator, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos) {
         int k = i >> 4;
-        int l = j >> 4;
-        worldgenRandom.setSeed((long)(k ^ l << 4) ^ chunkGenerator.getSeed());
+        int m = j >> 4;
+        worldgenRandom.setSeed((long)(k ^ m << 4) ^ l);
         worldgenRandom.nextInt();
         if (worldgenRandom.nextInt(5) != 0) {
             return false;
         }
-        for (int m = i - 10; m <= i + 10; ++m) {
-            for (int n = j - 10; n <= j + 10; ++n) {
-                Biome biome2 = biomeManager.getBiome(new BlockPos((m << 4) + 9, 0, (n << 4) + 9));
-                if (!Feature.VILLAGE.featureChunk(biomeManager, chunkGenerator, worldgenRandom, m, n, biome2)) continue;
+        for (int n = i - 10; n <= i + 10; ++n) {
+            for (int o = j - 10; o <= j + 10; ++o) {
+                Biome biome2 = biomeManager.getBiome(new BlockPos((n << 4) + 9, 0, (o << 4) + 9));
+                if (!Feature.VILLAGE.featureChunk(biomeManager, chunkGenerator, l, worldgenRandom, n, o, biome2)) continue;
                 return false;
             }
         }
@@ -83,7 +83,7 @@ extends RandomScatteredFeature<NoneFeatureConfiguration> {
         }
 
         @Override
-        public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+        public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
             BlockPos blockPos = new BlockPos(i * 16, 0, j * 16);
             PillagerOutpostPieces.addPieces(chunkGenerator, structureManager, blockPos, this.pieces, this.random);
             this.calculateBoundingBox();

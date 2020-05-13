@@ -49,7 +49,7 @@ extends ComplexItem {
 
     public static ItemStack create(Level level, int i, int j, byte b, boolean bl, boolean bl2) {
         ItemStack itemStack = new ItemStack(Items.FILLED_MAP);
-        MapItem.createAndStoreSavedData(itemStack, level, i, j, b, bl, bl2, level.dimension.getType());
+        MapItem.createAndStoreSavedData(itemStack, level, i, j, b, bl, bl2, level.dimensionType());
         return itemStack;
     }
 
@@ -61,8 +61,8 @@ extends ComplexItem {
     @Nullable
     public static MapItemSavedData getOrCreateSavedData(ItemStack itemStack, Level level) {
         MapItemSavedData mapItemSavedData = MapItem.getSavedData(itemStack, level);
-        if (mapItemSavedData == null && !level.isClientSide) {
-            mapItemSavedData = MapItem.createAndStoreSavedData(itemStack, level, level.getLevelData().getXSpawn(), level.getLevelData().getZSpawn(), 3, false, false, level.dimension.getType());
+        if (mapItemSavedData == null && level instanceof ServerLevel) {
+            mapItemSavedData = MapItem.createAndStoreSavedData(itemStack, level, level.getLevelData().getXSpawn(), level.getLevelData().getZSpawn(), 3, false, false, level.dimensionType());
         }
         return mapItemSavedData;
     }
@@ -86,7 +86,7 @@ extends ComplexItem {
     }
 
     public void update(Level level, Entity entity, MapItemSavedData mapItemSavedData) {
-        if (level.dimension.getType() != mapItemSavedData.dimension || !(entity instanceof Player)) {
+        if (level.dimensionType() != mapItemSavedData.dimension || !(entity instanceof Player)) {
             return;
         }
         int i = 1 << mapItemSavedData.scale;
@@ -95,7 +95,7 @@ extends ComplexItem {
         int l = Mth.floor(entity.getX() - (double)j) / i + 64;
         int m = Mth.floor(entity.getZ() - (double)k) / i + 64;
         int n = 128 / i;
-        if (level.dimension.isHasCeiling()) {
+        if (level.dimensionType().hasCeiling()) {
             n /= 2;
         }
         MapItemSavedData.HoldingPlayer holdingPlayer = mapItemSavedData.getHoldingPlayer((Player)entity);
@@ -124,7 +124,7 @@ extends ComplexItem {
                 int v = t & 0xF;
                 int w = 0;
                 double e = 0.0;
-                if (level.dimension.isHasCeiling()) {
+                if (level.dimensionType().hasCeiling()) {
                     int x = s + t * 231871;
                     if (((x = x * x * 31287121 + x * 11) >> 20 & 1) == 0) {
                         multiset.add(Blocks.DIRT.defaultBlockState().getMapColor(level, BlockPos.ZERO), 10);
@@ -210,7 +210,7 @@ extends ComplexItem {
         if (mapItemSavedData == null) {
             return;
         }
-        if (serverLevel.dimension.getType() != mapItemSavedData.dimension) {
+        if (serverLevel.dimensionType() != mapItemSavedData.dimension) {
             return;
         }
         int i = 1 << mapItemSavedData.scale;

@@ -10,10 +10,9 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.AbstractFlowerFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.WeightedConfiguredFeature;
@@ -51,8 +50,8 @@ public class ConfiguredFeature<FC extends FeatureConfiguration, F extends Featur
         return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("name"), dynamicOps.createString(Registry.FEATURE.getKey((Feature<?>)this.feature).toString()), dynamicOps.createString("config"), this.config.serialize(dynamicOps).getValue())));
     }
 
-    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos) {
-        return ((Feature)this.feature).place(levelAccessor, structureFeatureManager, chunkGenerator, random, blockPos, this.config);
+    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos) {
+        return ((Feature)this.feature).place(worldGenLevel, structureFeatureManager, chunkGenerator, random, blockPos, this.config);
     }
 
     public static <T> ConfiguredFeature<?, ?> deserialize(Dynamic<T> dynamic) {

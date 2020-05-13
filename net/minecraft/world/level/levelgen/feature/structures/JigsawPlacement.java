@@ -48,7 +48,7 @@ public class JigsawPlacement {
         PillagerOutpostPieces.bootstrap();
     }
 
-    public static void addPieces(ResourceLocation resourceLocation, int i, PieceFactory pieceFactory, ChunkGenerator<?> chunkGenerator, StructureManager structureManager, BlockPos blockPos, List<? super PoolElementStructurePiece> list, Random random, boolean bl, boolean bl2) {
+    public static void addPieces(ResourceLocation resourceLocation, int i, PieceFactory pieceFactory, ChunkGenerator chunkGenerator, StructureManager structureManager, BlockPos blockPos, List<? super PoolElementStructurePiece> list, Random random, boolean bl, boolean bl2) {
         StructureFeatureIO.bootstrap();
         Rotation rotation = Rotation.getRandom(random);
         StructureTemplatePool structureTemplatePool = POOLS.getPool(resourceLocation);
@@ -74,7 +74,7 @@ public class JigsawPlacement {
         }
     }
 
-    public static void addPieces(PoolElementStructurePiece poolElementStructurePiece, int i, PieceFactory pieceFactory, ChunkGenerator<?> chunkGenerator, StructureManager structureManager, List<? super PoolElementStructurePiece> list, Random random) {
+    public static void addPieces(PoolElementStructurePiece poolElementStructurePiece, int i, PieceFactory pieceFactory, ChunkGenerator chunkGenerator, StructureManager structureManager, List<? super PoolElementStructurePiece> list, Random random) {
         JigsawPlacement.bootstrap();
         Placer placer = new Placer(i, pieceFactory, chunkGenerator, structureManager, list, random);
         placer.placing.addLast(new PieceState(poolElementStructurePiece, new AtomicReference<VoxelShape>(Shapes.INFINITY), 0, 0));
@@ -95,13 +95,13 @@ public class JigsawPlacement {
     static final class Placer {
         private final int maxDepth;
         private final PieceFactory factory;
-        private final ChunkGenerator<?> chunkGenerator;
+        private final ChunkGenerator chunkGenerator;
         private final StructureManager structureManager;
         private final List<? super PoolElementStructurePiece> pieces;
         private final Random random;
         private final Deque<PieceState> placing = Queues.newArrayDeque();
 
-        private Placer(int i, PieceFactory pieceFactory, ChunkGenerator<?> chunkGenerator, StructureManager structureManager, List<? super PoolElementStructurePiece> list, Random random) {
+        private Placer(int i, PieceFactory pieceFactory, ChunkGenerator chunkGenerator, StructureManager structureManager, List<? super PoolElementStructurePiece> list, Random random) {
             this.maxDepth = i;
             this.factory = pieceFactory;
             this.chunkGenerator = chunkGenerator;

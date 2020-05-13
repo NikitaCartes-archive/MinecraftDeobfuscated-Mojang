@@ -151,7 +151,7 @@ implements TickableBlockEntity {
             return;
         }
         this.teleportCooldown = 100;
-        if (this.exitPortal == null && this.level.dimension instanceof TheEndDimension) {
+        if (this.exitPortal == null && this.level.getDimension() instanceof TheEndDimension) {
             this.findExitPortal((ServerLevel)this.level);
         }
         if (this.exitPortal != null) {

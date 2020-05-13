@@ -66,6 +66,7 @@ public class MultiPlayerGameMode {
     private int destroyDelay;
     private boolean isDestroying;
     private GameType localPlayerMode = GameType.SURVIVAL;
+    private GameType prevLocalPlayerMode = GameType.SURVIVAL;
     private final Object2ObjectLinkedOpenHashMap<Pair<BlockPos, ServerboundPlayerActionPacket.Action>, PosAndRot> unAckedActions = new Object2ObjectLinkedOpenHashMap();
     private int carriedIndex;
 
@@ -79,6 +80,9 @@ public class MultiPlayerGameMode {
     }
 
     public void setLocalMode(GameType gameType) {
+        if (gameType != this.localPlayerMode) {
+            this.prevLocalPlayerMode = this.localPlayerMode;
+        }
         this.localPlayerMode = gameType;
         this.localPlayerMode.updatePlayerAbilities(this.minecraft.player.abilities);
     }
@@ -379,6 +383,10 @@ public class MultiPlayerGameMode {
 
     public boolean isAlwaysFlying() {
         return this.localPlayerMode == GameType.SPECTATOR;
+    }
+
+    public GameType getPrevPlayerMode() {
+        return this.prevLocalPlayerMode;
     }
 
     public GameType getPlayerMode() {

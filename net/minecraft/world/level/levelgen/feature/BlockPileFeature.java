@@ -10,10 +10,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockPileConfiguration;
 
@@ -24,7 +24,7 @@ extends Feature<BlockPileConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, BlockPileConfiguration blockPileConfiguration) {
+    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, BlockPileConfiguration blockPileConfiguration) {
         if (blockPos.getY() < 5) {
             return false;
         }
@@ -34,11 +34,11 @@ extends Feature<BlockPileConfiguration> {
             int l;
             int k = blockPos.getX() - blockPos2.getX();
             if ((float)(k * k + (l = blockPos.getZ() - blockPos2.getZ()) * l) <= random.nextFloat() * 10.0f - random.nextFloat() * 6.0f) {
-                this.tryPlaceBlock(levelAccessor, blockPos2, random, blockPileConfiguration);
+                this.tryPlaceBlock(worldGenLevel, blockPos2, random, blockPileConfiguration);
                 continue;
             }
             if (!((double)random.nextFloat() < 0.031)) continue;
-            this.tryPlaceBlock(levelAccessor, blockPos2, random, blockPileConfiguration);
+            this.tryPlaceBlock(worldGenLevel, blockPos2, random, blockPileConfiguration);
         }
         return true;
     }

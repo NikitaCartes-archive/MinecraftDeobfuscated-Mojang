@@ -23,6 +23,7 @@ import net.minecraft.client.gui.screens.AccessibilityOptionsScreen;
 import net.minecraft.client.gui.screens.ChatOptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.controls.ControlsScreen;
+import net.minecraft.client.gui.screens.debug.GameModeSwitcherScreen;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -111,10 +112,18 @@ public class KeyboardHandler {
             case 78: {
                 if (!this.minecraft.player.hasPermissions(2)) {
                     this.debugFeedbackTranslated("debug.creative_spectator.error", new Object[0]);
-                } else if (this.minecraft.player.isCreative()) {
+                } else if (!this.minecraft.player.isSpectator()) {
                     this.minecraft.player.chat("/gamemode spectator");
                 } else {
-                    this.minecraft.player.chat("/gamemode creative");
+                    this.minecraft.player.chat("/gamemode " + this.minecraft.gameMode.getPrevPlayerMode().getName());
+                }
+                return true;
+            }
+            case 293: {
+                if (!this.minecraft.player.hasPermissions(2)) {
+                    this.debugFeedbackTranslated("debug.gamemodes.error", new Object[0]);
+                } else {
+                    this.minecraft.setScreen(new GameModeSwitcherScreen());
                 }
                 return true;
             }
@@ -140,6 +149,7 @@ public class KeyboardHandler {
                 chatComponent.addMessage(new TranslatableComponent("debug.help.help"));
                 chatComponent.addMessage(new TranslatableComponent("debug.reload_resourcepacks.help"));
                 chatComponent.addMessage(new TranslatableComponent("debug.pause.help"));
+                chatComponent.addMessage(new TranslatableComponent("debug.gamemodes.help"));
                 return true;
             }
             case 84: {
@@ -152,7 +162,7 @@ public class KeyboardHandler {
                     return false;
                 }
                 this.debugFeedbackTranslated("debug.copy_location.message", new Object[0]);
-                this.setClipboard(String.format(Locale.ROOT, "/execute in %s run tp @s %.2f %.2f %.2f %.2f %.2f", DimensionType.getName(this.minecraft.player.level.dimension.getType()), this.minecraft.player.getX(), this.minecraft.player.getY(), this.minecraft.player.getZ(), Float.valueOf(this.minecraft.player.yRot), Float.valueOf(this.minecraft.player.xRot)));
+                this.setClipboard(String.format(Locale.ROOT, "/execute in %s run tp @s %.2f %.2f %.2f %.2f %.2f", DimensionType.getName(this.minecraft.player.level.dimensionType()), this.minecraft.player.getX(), this.minecraft.player.getY(), this.minecraft.player.getZ(), Float.valueOf(this.minecraft.player.yRot), Float.valueOf(this.minecraft.player.xRot)));
                 return true;
             }
         }

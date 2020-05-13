@@ -24,11 +24,11 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfiguration;
 import net.minecraft.world.phys.AABB;
@@ -41,21 +41,21 @@ extends Feature<SpikeConfiguration> {
         super(function);
     }
 
-    public static List<EndSpike> getSpikesForLevel(LevelAccessor levelAccessor) {
-        Random random = new Random(levelAccessor.getSeed());
+    public static List<EndSpike> getSpikesForLevel(WorldGenLevel worldGenLevel) {
+        Random random = new Random(worldGenLevel.getSeed());
         long l = random.nextLong() & 0xFFFFL;
         return SPIKE_CACHE.getUnchecked(l);
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, SpikeConfiguration spikeConfiguration) {
+    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, SpikeConfiguration spikeConfiguration) {
         List<EndSpike> list = spikeConfiguration.getSpikes();
         if (list.isEmpty()) {
-            list = SpikeFeature.getSpikesForLevel(levelAccessor);
+            list = SpikeFeature.getSpikesForLevel(worldGenLevel);
         }
         for (EndSpike endSpike : list) {
             if (!endSpike.isCenterWithinChunk(blockPos)) continue;
-            this.placeSpike(levelAccessor, random, spikeConfiguration, endSpike);
+            this.placeSpike(worldGenLevel, random, spikeConfiguration, endSpike);
         }
         return true;
     }

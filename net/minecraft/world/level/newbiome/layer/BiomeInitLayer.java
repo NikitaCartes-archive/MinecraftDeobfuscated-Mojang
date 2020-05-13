@@ -4,7 +4,6 @@
 package net.minecraft.world.level.newbiome.layer;
 
 import net.minecraft.core.Registry;
-import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.newbiome.context.Context;
 import net.minecraft.world.level.newbiome.layer.Layers;
@@ -33,23 +32,16 @@ implements C0Transformer {
     private static final int[] MEDIUM_BIOMES = new int[]{FOREST, DARK_FOREST, MOUNTAINS, PLAINS, BIRCH_FOREST, SWAMP};
     private static final int[] COLD_BIOMES = new int[]{FOREST, MOUNTAINS, TAIGA, PLAINS};
     private static final int[] ICE_BIOMES = new int[]{SNOWY_TUNDRA, SNOWY_TUNDRA, SNOWY_TUNDRA, SNOWY_TAIGA};
-    private final int fixedBiome;
     private int[] warmBiomes = WARM_BIOMES;
 
-    public BiomeInitLayer(LevelType levelType, int i) {
-        if (levelType == LevelType.NORMAL_1_1) {
+    public BiomeInitLayer(boolean bl) {
+        if (bl) {
             this.warmBiomes = LEGACY_WARM_BIOMES;
-            this.fixedBiome = -1;
-        } else {
-            this.fixedBiome = i;
         }
     }
 
     @Override
     public int apply(Context context, int i) {
-        if (this.fixedBiome >= 0) {
-            return this.fixedBiome;
-        }
         int j = (i & 0xF00) >> 8;
         if (Layers.isOcean(i &= 0xFFFFF0FF) || i == MUSHROOM_FIELDS) {
             return i;

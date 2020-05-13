@@ -197,7 +197,7 @@ extends GuiComponent {
         if (string3 != null) {
             list.add(string3);
         }
-        list.add(DimensionType.getName(this.minecraft.level.dimension.getType()).toString() + " FC: " + Integer.toString(longSet.size()));
+        list.add(DimensionType.getName(this.minecraft.level.dimensionType()).toString() + " FC: " + Integer.toString(longSet.size()));
         list.add("");
         list.add(String.format(Locale.ROOT, "XYZ: %.3f / %.5f / %.3f", this.minecraft.getCameraEntity().getX(), this.minecraft.getCameraEntity().getY(), this.minecraft.getCameraEntity().getZ()));
         list.add(String.format("Block: %d %d %d", blockPos.getX(), blockPos.getY(), blockPos.getZ()));
@@ -278,7 +278,7 @@ extends GuiComponent {
     private ServerLevel getServerLevel() {
         IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
         if (integratedServer != null) {
-            return integratedServer.getLevel(this.minecraft.level.getDimension().getType());
+            return integratedServer.getLevel(this.minecraft.level.dimensionType());
         }
         return null;
     }
@@ -293,7 +293,7 @@ extends GuiComponent {
     }
 
     private Level getLevel() {
-        return DataFixUtils.orElse(Optional.ofNullable(this.minecraft.getSingleplayerServer()).map(integratedServer -> integratedServer.getLevel(this.minecraft.level.dimension.getType())), this.minecraft.level);
+        return DataFixUtils.orElse(Optional.ofNullable(this.minecraft.getSingleplayerServer()).map(integratedServer -> integratedServer.getLevel(this.minecraft.level.dimensionType())), this.minecraft.level);
     }
 
     @Nullable

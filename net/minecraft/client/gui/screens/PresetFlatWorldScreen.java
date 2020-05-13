@@ -30,7 +30,6 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.chunk.ChunkGeneratorType;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import org.jetbrains.annotations.Nullable;
@@ -117,7 +116,7 @@ extends Screen {
     }
 
     private static void preset(Component component, ItemLike itemLike, Biome biome, List<String> list, FlatLayerInfo ... flatLayerInfos) {
-        FlatLevelGeneratorSettings flatLevelGeneratorSettings = ChunkGeneratorType.FLAT.createSettings();
+        FlatLevelGeneratorSettings flatLevelGeneratorSettings = new FlatLevelGeneratorSettings();
         for (int i = flatLayerInfos.length - 1; i >= 0; --i) {
             flatLevelGeneratorSettings.getLayersInfo().add(flatLayerInfos[i]);
         }

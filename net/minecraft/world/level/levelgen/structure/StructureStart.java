@@ -13,8 +13,8 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
@@ -28,7 +28,7 @@ public abstract class StructureStart {
     public static final StructureStart INVALID_START = new StructureStart((StructureFeature)Feature.MINESHAFT, 0, 0, BoundingBox.getUnknownBox(), 0, 0L){
 
         @Override
-        public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+        public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
         }
     };
     private final StructureFeature<?> feature;
@@ -49,7 +49,7 @@ public abstract class StructureStart {
         this.boundingBox = boundingBox;
     }
 
-    public abstract void generatePieces(ChunkGenerator<?> var1, StructureManager var2, int var3, int var4, Biome var5);
+    public abstract void generatePieces(ChunkGenerator var1, StructureManager var2, int var3, int var4, Biome var5);
 
     public BoundingBox getBoundingBox() {
         return this.boundingBox;
@@ -62,7 +62,7 @@ public abstract class StructureStart {
     /*
      * WARNING - Removed try catching itself - possible behaviour change.
      */
-    public void postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+    public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
         List<StructurePiece> list = this.pieces;
         synchronized (list) {
             if (this.pieces.isEmpty()) {
@@ -74,7 +74,7 @@ public abstract class StructureStart {
             Iterator<StructurePiece> iterator = this.pieces.iterator();
             while (iterator.hasNext()) {
                 StructurePiece structurePiece = iterator.next();
-                if (!structurePiece.getBoundingBox().intersects(boundingBox) || structurePiece.postProcess(levelAccessor, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos)) continue;
+                if (!structurePiece.getBoundingBox().intersects(boundingBox) || structurePiece.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos)) continue;
                 iterator.remove();
             }
             this.calculateBoundingBox();

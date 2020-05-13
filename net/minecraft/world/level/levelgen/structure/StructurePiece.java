@@ -17,6 +17,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DispenserBlock;
@@ -75,7 +76,7 @@ public abstract class StructurePiece {
     public void addChildren(StructurePiece structurePiece, List<StructurePiece> list, Random random) {
     }
 
-    public abstract boolean postProcess(LevelAccessor var1, StructureFeatureManager var2, ChunkGenerator<?> var3, Random var4, BoundingBox var5, ChunkPos var6, BlockPos var7);
+    public abstract boolean postProcess(WorldGenLevel var1, StructureFeatureManager var2, ChunkGenerator var3, Random var4, BoundingBox var5, ChunkPos var6, BlockPos var7);
 
     public BoundingBox getBoundingBox() {
         return this.boundingBox;

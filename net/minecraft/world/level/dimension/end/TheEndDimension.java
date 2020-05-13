@@ -4,24 +4,16 @@
 package net.minecraft.world.level.dimension.end;
 
 import java.util.Random;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.BiomeSourceType;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.chunk.ChunkGeneratorType;
 import net.minecraft.world.level.dimension.Dimension;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.end.EndDragonFight;
-import net.minecraft.world.level.levelgen.TheEndGeneratorSettings;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class TheEndDimension
@@ -46,36 +38,8 @@ extends Dimension {
     }
 
     @Override
-    public ChunkGenerator<?> createRandomLevelGenerator() {
-        TheEndGeneratorSettings theEndGeneratorSettings = ChunkGeneratorType.FLOATING_ISLANDS.createSettings();
-        theEndGeneratorSettings.setDefaultBlock(Blocks.END_STONE.defaultBlockState());
-        theEndGeneratorSettings.setDefaultFluid(Blocks.AIR.defaultBlockState());
-        theEndGeneratorSettings.setSpawnPosition(this.getDimensionSpecificSpawn());
-        return ChunkGeneratorType.FLOATING_ISLANDS.create(this.level, BiomeSourceType.THE_END.create(BiomeSourceType.THE_END.createSettings(this.level.getSeed())), theEndGeneratorSettings);
-    }
-
-    @Override
     public float getTimeOfDay(long l, float f) {
         return 0.0f;
-    }
-
-    @Override
-    @Nullable
-    @Environment(value=EnvType.CLIENT)
-    public float[] getSunriseColor(float f, float g) {
-        return null;
-    }
-
-    @Override
-    @Environment(value=EnvType.CLIENT)
-    public Vec3 getBrightnessDependentFogColor(Vec3 vec3, float f) {
-        return vec3.scale(0.15f);
-    }
-
-    @Override
-    @Environment(value=EnvType.CLIENT)
-    public boolean hasGround() {
-        return false;
     }
 
     @Override
@@ -89,15 +53,9 @@ extends Dimension {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
-    public float getCloudHeight() {
-        return 8.0f;
-    }
-
-    @Override
     @Nullable
-    public BlockPos getSpawnPosInChunk(ChunkPos chunkPos, boolean bl) {
-        Random random = new Random(this.level.getSeed());
+    public BlockPos getSpawnPosInChunk(long l, ChunkPos chunkPos, boolean bl) {
+        Random random = new Random(l);
         BlockPos blockPos = new BlockPos(chunkPos.getMinBlockX() + random.nextInt(15), 0, chunkPos.getMaxBlockZ() + random.nextInt(15));
         return this.level.getTopBlockState(blockPos).getMaterial().blocksMotion() ? blockPos : null;
     }
@@ -109,14 +67,8 @@ extends Dimension {
 
     @Override
     @Nullable
-    public BlockPos getValidSpawnPosition(int i, int j, boolean bl) {
-        return this.getSpawnPosInChunk(new ChunkPos(i >> 4, j >> 4), bl);
-    }
-
-    @Override
-    @Environment(value=EnvType.CLIENT)
-    public boolean isFoggyAt(int i, int j) {
-        return false;
+    public BlockPos getValidSpawnPosition(long l, int i, int j, boolean bl) {
+        return this.getSpawnPosInChunk(l, new ChunkPos(i >> 4, j >> 4), bl);
     }
 
     @Override

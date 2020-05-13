@@ -8,11 +8,10 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
@@ -23,14 +22,14 @@ extends Feature<NoneFeatureConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
+    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
         float f = random.nextInt(3) + 4;
         int i = 0;
         while (f > 0.5f) {
             for (int j = Mth.floor(-f); j <= Mth.ceil(f); ++j) {
                 for (int k = Mth.floor(-f); k <= Mth.ceil(f); ++k) {
                     if (!((float)(j * j + k * k) <= (f + 1.0f) * (f + 1.0f))) continue;
-                    this.setBlock(levelAccessor, blockPos.offset(j, i, k), Blocks.END_STONE.defaultBlockState());
+                    this.setBlock(worldGenLevel, blockPos.offset(j, i, k), Blocks.END_STONE.defaultBlockState());
                 }
             }
             f = (float)((double)f - ((double)random.nextInt(2) + 0.5));

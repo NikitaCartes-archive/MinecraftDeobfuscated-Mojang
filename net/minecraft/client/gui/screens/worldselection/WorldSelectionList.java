@@ -34,6 +34,7 @@ import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.ErrorScreen;
 import net.minecraft.client.gui.screens.ProgressScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
@@ -323,11 +324,10 @@ extends ObjectSelectionList<WorldListEntry> {
         public void recreateWorld() {
             try {
                 this.minecraft.setScreen(new ProgressScreen());
-                CreateWorldScreen createWorldScreen = new CreateWorldScreen(this.screen);
                 try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(this.summary.getLevelId());){
                     WorldData worldData = levelStorageAccess.getDataTag();
                     if (worldData != null) {
-                        createWorldScreen.copyFromWorld(worldData);
+                        CreateWorldScreen createWorldScreen = new CreateWorldScreen((Screen)this.screen, worldData);
                         if (this.summary.isOldCustomizedWorld()) {
                             this.minecraft.setScreen(new ConfirmScreen(bl -> this.minecraft.setScreen(bl ? createWorldScreen : this.screen), new TranslatableComponent("selectWorld.recreate.customized.title"), new TranslatableComponent("selectWorld.recreate.customized.text"), CommonComponents.GUI_PROCEED, CommonComponents.GUI_CANCEL));
                         } else {

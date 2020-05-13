@@ -11,11 +11,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.ColumnFeatureConfiguration;
 import org.jetbrains.annotations.Nullable;
@@ -29,9 +29,9 @@ extends Feature<ColumnFeatureConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, ColumnFeatureConfiguration columnFeatureConfiguration) {
+    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, ColumnFeatureConfiguration columnFeatureConfiguration) {
         int i = chunkGenerator.getSeaLevel();
-        BlockPos blockPos2 = BasaltColumnsFeature.findSurface(levelAccessor, i, blockPos.mutable().clamp(Direction.Axis.Y, 1, levelAccessor.getMaxBuildHeight() - 1), Integer.MAX_VALUE);
+        BlockPos blockPos2 = BasaltColumnsFeature.findSurface(worldGenLevel, i, blockPos.mutable().clamp(Direction.Axis.Y, 1, worldGenLevel.getMaxBuildHeight() - 1), Integer.MAX_VALUE);
         if (blockPos2 == null) {
             return false;
         }
@@ -43,7 +43,7 @@ extends Feature<ColumnFeatureConfiguration> {
         for (BlockPos blockPos3 : BlockPos.randomBetweenClosed(random, l, blockPos2.getX() - k, blockPos2.getY(), blockPos2.getZ() - k, blockPos2.getX() + k, blockPos2.getY(), blockPos2.getZ() + k)) {
             int m = j - blockPos3.distManhattan(blockPos2);
             if (m < 0) continue;
-            bl2 |= this.placeColumn(levelAccessor, i, blockPos3, m, BasaltColumnsFeature.calculateReach(random, columnFeatureConfiguration));
+            bl2 |= this.placeColumn(worldGenLevel, i, blockPos3, m, BasaltColumnsFeature.calculateReach(random, columnFeatureConfiguration));
         }
         return bl2;
     }

@@ -30,6 +30,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -79,6 +80,7 @@ public class StructureTemplate {
         BlockPos blockPos5 = new BlockPos(Math.max(blockPos.getX(), blockPos3.getX()), Math.max(blockPos.getY(), blockPos3.getY()), Math.max(blockPos.getZ(), blockPos3.getZ()));
         this.size = blockPos2;
         for (BlockPos blockPos6 : BlockPos.betweenClosed(blockPos4, blockPos5)) {
+            StructureBlockInfo structureBlockInfo;
             BlockPos blockPos7 = blockPos6.subtract(blockPos4);
             BlockState blockState = level.getBlockState(blockPos6);
             if (block != null && block == blockState.getBlock()) continue;
@@ -88,19 +90,13 @@ public class StructureTemplate {
                 compoundTag.remove("x");
                 compoundTag.remove("y");
                 compoundTag.remove("z");
-                list2.add(new StructureBlockInfo(blockPos7, blockState, compoundTag));
-                continue;
+                structureBlockInfo = new StructureBlockInfo(blockPos7, blockState, compoundTag);
+            } else {
+                structureBlockInfo = new StructureBlockInfo(blockPos7, blockState, null);
             }
-            if (blockState.isSolidRender(level, blockPos6) || blockState.isCollisionShapeFullBlock(level, blockPos6)) {
-                list.add(new StructureBlockInfo(blockPos7, blockState, null));
-                continue;
-            }
-            list3.add(new StructureBlockInfo(blockPos7, blockState, null));
+            StructureTemplate.addToLists(structureBlockInfo, list, list2, list3);
         }
-        ArrayList<StructureBlockInfo> list4 = Lists.newArrayList();
-        list4.addAll(list);
-        list4.addAll(list2);
-        list4.addAll(list3);
+        List<StructureBlockInfo> list4 = StructureTemplate.buildInfoList(list, list2, list3);
         this.palettes.clear();
         this.palettes.add(new Palette(list4));
         if (bl) {
@@ -108,6 +104,28 @@ public class StructureTemplate {
         } else {
             this.entityInfoList.clear();
         }
+    }
+
+    private static void addToLists(StructureBlockInfo structureBlockInfo, List<StructureBlockInfo> list, List<StructureBlockInfo> list2, List<StructureBlockInfo> list3) {
+        if (structureBlockInfo.nbt != null) {
+            list2.add(structureBlockInfo);
+        } else if (!structureBlockInfo.state.getBlock().hasDynamicShape() && structureBlockInfo.state.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO)) {
+            list.add(structureBlockInfo);
+        } else {
+            list3.add(structureBlockInfo);
+        }
+    }
+
+    private static List<StructureBlockInfo> buildInfoList(List<StructureBlockInfo> list, List<StructureBlockInfo> list2, List<StructureBlockInfo> list3) {
+        Comparator<StructureBlockInfo> comparator = Comparator.comparingInt(structureBlockInfo -> structureBlockInfo.pos.getY()).thenComparingInt(structureBlockInfo -> structureBlockInfo.pos.getX()).thenComparingInt(structureBlockInfo -> structureBlockInfo.pos.getZ());
+        list.sort(comparator);
+        list3.sort(comparator);
+        list2.sort(comparator);
+        ArrayList<StructureBlockInfo> list4 = Lists.newArrayList();
+        list4.addAll(list);
+        list4.addAll(list3);
+        list4.addAll(list2);
+        return list4;
     }
 
     private void fillEntityList(Level level, BlockPos blockPos, BlockPos blockPos2) {
@@ -582,22 +600,24 @@ public class StructureTemplate {
     }
 
     private void loadPalette(ListTag listTag, ListTag listTag2) {
-        int i;
         SimplePalette simplePalette = new SimplePalette();
-        ArrayList<StructureBlockInfo> list = Lists.newArrayList();
-        for (i = 0; i < listTag.size(); ++i) {
+        for (int i = 0; i < listTag.size(); ++i) {
             simplePalette.addMapping(NbtUtils.readBlockState(listTag.getCompound(i)), i);
         }
-        for (i = 0; i < listTag2.size(); ++i) {
-            CompoundTag compoundTag = listTag2.getCompound(i);
+        ArrayList<StructureBlockInfo> list = Lists.newArrayList();
+        ArrayList<StructureBlockInfo> list2 = Lists.newArrayList();
+        ArrayList<StructureBlockInfo> list3 = Lists.newArrayList();
+        for (int j = 0; j < listTag2.size(); ++j) {
+            CompoundTag compoundTag = listTag2.getCompound(j);
             ListTag listTag3 = compoundTag.getList("pos", 3);
             BlockPos blockPos = new BlockPos(listTag3.getInt(0), listTag3.getInt(1), listTag3.getInt(2));
             BlockState blockState = simplePalette.stateFor(compoundTag.getInt("state"));
             CompoundTag compoundTag2 = compoundTag.contains("nbt") ? compoundTag.getCompound("nbt") : null;
-            list.add(new StructureBlockInfo(blockPos, blockState, compoundTag2));
+            StructureBlockInfo structureBlockInfo = new StructureBlockInfo(blockPos, blockState, compoundTag2);
+            StructureTemplate.addToLists(structureBlockInfo, list, list2, list3);
         }
-        list.sort(Comparator.comparingInt(structureBlockInfo -> structureBlockInfo.pos.getY()));
-        this.palettes.add(new Palette(list));
+        List<StructureBlockInfo> list4 = StructureTemplate.buildInfoList(list, list2, list3);
+        this.palettes.add(new Palette(list4));
     }
 
     private ListTag newIntegerList(int ... is) {

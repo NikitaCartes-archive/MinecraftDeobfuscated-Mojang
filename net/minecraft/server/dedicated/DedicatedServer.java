@@ -389,7 +389,7 @@ implements ServerInterface {
     @Override
     public boolean isUnderSpawnProtection(ServerLevel serverLevel, BlockPos blockPos, Player player) {
         int j;
-        if (serverLevel.dimension.getType() != DimensionType.OVERWORLD) {
+        if (serverLevel.dimensionType() != DimensionType.OVERWORLD) {
             return false;
         }
         if (this.getPlayerList().getOps().isEmpty()) {

@@ -16,7 +16,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
@@ -39,18 +38,18 @@ extends StructureFeature<NoneFeatureConfiguration> {
     }
 
     @Override
-    public boolean featureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, WorldgenRandom worldgenRandom, int i, int j, Biome biome) {
-        ChunkPos chunkPos = this.getPotentialFeatureChunk(chunkGenerator, worldgenRandom, i, j);
-        return this.isFeatureChunk(biomeManager, chunkGenerator, worldgenRandom, i, j, biome, chunkPos);
+    public boolean featureChunk(BiomeManager biomeManager, ChunkGenerator chunkGenerator, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome) {
+        ChunkPos chunkPos = this.getPotentialFeatureChunk(chunkGenerator.getSettings(), l, worldgenRandom, i, j);
+        return this.isFeatureChunk(biomeManager, chunkGenerator, l, worldgenRandom, i, j, biome, chunkPos);
     }
 
     @Override
-    protected boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos) {
-        if (this.currentSeed != chunkGenerator.getSeed()) {
+    protected boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator chunkGenerator, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos) {
+        if (this.currentSeed != l) {
             this.reset();
         }
         if (!this.isSpotSelected) {
-            this.generatePositions(chunkGenerator);
+            this.generatePositions(chunkGenerator, l);
             this.isSpotSelected = true;
         }
         for (ChunkPos chunkPos2 : this.strongholdPos) {
@@ -83,7 +82,7 @@ extends StructureFeature<NoneFeatureConfiguration> {
 
     @Override
     @Nullable
-    public BlockPos getNearestGeneratedFeature(ServerLevel serverLevel, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, BlockPos blockPos, int i, boolean bl) {
+    public BlockPos getNearestGeneratedFeature(ServerLevel serverLevel, ChunkGenerator chunkGenerator, BlockPos blockPos, int i, boolean bl) {
         if (!chunkGenerator.canGenerateStructure(this)) {
             return null;
         }
@@ -91,7 +90,7 @@ extends StructureFeature<NoneFeatureConfiguration> {
             this.reset();
         }
         if (!this.isSpotSelected) {
-            this.generatePositions(chunkGenerator);
+            this.generatePositions(chunkGenerator, serverLevel.getSeed());
             this.isSpotSelected = true;
         }
         BlockPos blockPos2 = null;
@@ -112,46 +111,46 @@ extends StructureFeature<NoneFeatureConfiguration> {
         return blockPos2;
     }
 
-    private void generatePositions(ChunkGenerator<?> chunkGenerator) {
-        this.currentSeed = chunkGenerator.getSeed();
+    private void generatePositions(ChunkGenerator chunkGenerator, long l) {
+        this.currentSeed = l;
         ArrayList<Biome> list = Lists.newArrayList();
         for (Biome biome : Registry.BIOME) {
             if (biome == null || !chunkGenerator.isBiomeValidStartForStructure(biome, this)) continue;
             list.add(biome);
         }
-        int i = ((ChunkGeneratorSettings)chunkGenerator.getSettings()).getStrongholdsDistance();
-        int j = ((ChunkGeneratorSettings)chunkGenerator.getSettings()).getStrongholdsCount();
-        int k = ((ChunkGeneratorSettings)chunkGenerator.getSettings()).getStrongholdsSpread();
+        int i = chunkGenerator.getSettings().getStrongholdsDistance();
+        int j = chunkGenerator.getSettings().getStrongholdsCount();
+        int k = chunkGenerator.getSettings().getStrongholdsSpread();
         this.strongholdPos = new ChunkPos[j];
-        int l = 0;
+        int m = 0;
         for (StructureStart structureStart : this.discoveredStarts) {
-            if (l >= this.strongholdPos.length) continue;
-            this.strongholdPos[l++] = new ChunkPos(structureStart.getChunkX(), structureStart.getChunkZ());
+            if (m >= this.strongholdPos.length) continue;
+            this.strongholdPos[m++] = new ChunkPos(structureStart.getChunkX(), structureStart.getChunkZ());
         }
         Random random = new Random();
-        random.setSeed(chunkGenerator.getSeed());
+        random.setSeed(l);
         double d = random.nextDouble() * Math.PI * 2.0;
-        int m = l;
-        if (m < this.strongholdPos.length) {
-            int n = 0;
+        int n = m;
+        if (n < this.strongholdPos.length) {
             int o = 0;
-            for (int p = 0; p < this.strongholdPos.length; ++p) {
-                double e = (double)(4 * i + i * o * 6) + (random.nextDouble() - 0.5) * ((double)i * 2.5);
-                int q = (int)Math.round(Math.cos(d) * e);
-                int r = (int)Math.round(Math.sin(d) * e);
-                BlockPos blockPos = chunkGenerator.getBiomeSource().findBiomeHorizontal((q << 4) + 8, chunkGenerator.getSeaLevel(), (r << 4) + 8, 112, list, random);
+            int p = 0;
+            for (int q = 0; q < this.strongholdPos.length; ++q) {
+                double e = (double)(4 * i + i * p * 6) + (random.nextDouble() - 0.5) * ((double)i * 2.5);
+                int r = (int)Math.round(Math.cos(d) * e);
+                int s = (int)Math.round(Math.sin(d) * e);
+                BlockPos blockPos = chunkGenerator.getBiomeSource().findBiomeHorizontal((r << 4) + 8, chunkGenerator.getSeaLevel(), (s << 4) + 8, 112, list, random);
                 if (blockPos != null) {
-                    q = blockPos.getX() >> 4;
-                    r = blockPos.getZ() >> 4;
+                    r = blockPos.getX() >> 4;
+                    s = blockPos.getZ() >> 4;
                 }
-                if (p >= m) {
-                    this.strongholdPos[p] = new ChunkPos(q, r);
+                if (q >= n) {
+                    this.strongholdPos[q] = new ChunkPos(r, s);
                 }
                 d += Math.PI * 2 / (double)k;
-                if (++n != k) continue;
-                n = 0;
-                k += 2 * k / (++o + 1);
-                k = Math.min(k, this.strongholdPos.length - p);
+                if (++o != k) continue;
+                o = 0;
+                k += 2 * k / (++p + 1);
+                k = Math.min(k, this.strongholdPos.length - q);
                 d += random.nextDouble() * Math.PI * 2.0;
             }
         }
@@ -159,27 +158,29 @@ extends StructureFeature<NoneFeatureConfiguration> {
 
     public static class StrongholdStart
     extends StructureStart {
+        private final long seed;
+
         public StrongholdStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
             super(structureFeature, i, j, boundingBox, k, l);
+            this.seed = l;
         }
 
         @Override
-        public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+        public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
             StrongholdPieces.StartPiece startPiece;
             int k = 0;
-            long l = chunkGenerator.getSeed();
             do {
                 this.pieces.clear();
                 this.boundingBox = BoundingBox.getUnknownBox();
-                this.random.setLargeFeatureSeed(l + (long)k++, i, j);
+                this.random.setLargeFeatureSeed(this.seed + (long)k++, i, j);
                 StrongholdPieces.resetPieces();
                 startPiece = new StrongholdPieces.StartPiece(this.random, (i << 4) + 2, (j << 4) + 2);
                 this.pieces.add(startPiece);
                 startPiece.addChildren(startPiece, this.pieces, this.random);
                 List<StructurePiece> list = startPiece.pendingChildren;
                 while (!list.isEmpty()) {
-                    int m = this.random.nextInt(list.size());
-                    StructurePiece structurePiece = list.remove(m);
+                    int l = this.random.nextInt(list.size());
+                    StructurePiece structurePiece = list.remove(l);
                     structurePiece.addChildren(startPiece, this.pieces, this.random);
                 }
                 this.calculateBoundingBox();

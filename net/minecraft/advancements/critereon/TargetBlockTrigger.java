@@ -53,8 +53,8 @@ extends SimpleCriterionTrigger<TriggerInstance> {
             this.projectile = composite2;
         }
 
-        public static TriggerInstance targetHit(MinMaxBounds.Ints ints) {
-            return new TriggerInstance(EntityPredicate.Composite.ANY, ints, EntityPredicate.Composite.ANY);
+        public static TriggerInstance targetHit(MinMaxBounds.Ints ints, EntityPredicate.Composite composite) {
+            return new TriggerInstance(EntityPredicate.Composite.ANY, ints, composite);
         }
 
         @Override

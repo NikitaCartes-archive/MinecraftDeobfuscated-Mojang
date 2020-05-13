@@ -11,10 +11,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceSpheroidConfiguration;
 import org.jetbrains.annotations.Nullable;
@@ -26,9 +26,9 @@ extends Feature<ReplaceSpheroidConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, ReplaceSpheroidConfiguration replaceSpheroidConfiguration) {
+    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, ReplaceSpheroidConfiguration replaceSpheroidConfiguration) {
         Block block = replaceSpheroidConfiguration.targetState.getBlock();
-        BlockPos blockPos2 = ReplaceBlobsFeature.findTarget(levelAccessor, blockPos.mutable().clamp(Direction.Axis.Y, 1, levelAccessor.getMaxBuildHeight() - 1), block);
+        BlockPos blockPos2 = ReplaceBlobsFeature.findTarget(worldGenLevel, blockPos.mutable().clamp(Direction.Axis.Y, 1, worldGenLevel.getMaxBuildHeight() - 1), block);
         if (blockPos2 == null) {
             return false;
         }
@@ -37,9 +37,9 @@ extends Feature<ReplaceSpheroidConfiguration> {
         boolean bl = false;
         for (BlockPos blockPos3 : BlockPos.withinManhattan(blockPos2, vec3i.getX(), vec3i.getY(), vec3i.getZ())) {
             if (blockPos3.distManhattan(blockPos2) > i) break;
-            BlockState blockState = levelAccessor.getBlockState(blockPos3);
+            BlockState blockState = worldGenLevel.getBlockState(blockPos3);
             if (!blockState.is(block)) continue;
-            this.setBlock(levelAccessor, blockPos3, replaceSpheroidConfiguration.replaceState);
+            this.setBlock(worldGenLevel, blockPos3, replaceSpheroidConfiguration.replaceState);
             bl = true;
         }
         return bl;

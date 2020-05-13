@@ -8,7 +8,6 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.level.timers.TimerQueue;
@@ -32,18 +31,12 @@ extends WritableLevelData {
         WritableLevelData.super.fillCrashReportCategory(crashReportCategory);
         crashReportCategory.setDetail("Level name", this::getLevelName);
         crashReportCategory.setDetail("Level game mode", () -> String.format("Game mode: %s (ID %d). Hardcore: %b. Cheats: %b", this.getGameType().getName(), this.getGameType().getId(), this.isHardcore(), this.getAllowCommands()));
-        crashReportCategory.setDetail("Level generator", () -> {
-            LevelType levelType = this.getGeneratorProvider().getType();
-            return String.format("ID %02d - %s, ver %d. Features enabled: %b", levelType.getId(), levelType.getName(), levelType.getVersion(), this.shouldGenerateMapFeatures());
-        });
         crashReportCategory.setDetail("Level weather", () -> String.format("Rain time: %d (now: %b), thunder time: %d (now: %b)", this.getRainTime(), this.isRaining(), this.getThunderTime(), this.isThundering()));
     }
 
     public int getClearWeatherTime();
 
     public void setClearWeatherTime(int var1);
-
-    public boolean shouldGenerateMapFeatures();
 
     public CompoundTag getDimensionData();
 

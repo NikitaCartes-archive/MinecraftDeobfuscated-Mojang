@@ -11,11 +11,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.material.Material;
@@ -27,14 +27,14 @@ extends Feature<BlockStateConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, BlockStateConfiguration blockStateConfiguration) {
+    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, BlockStateConfiguration blockStateConfiguration) {
         boolean bl3;
         int s;
         int r;
         int q;
         int p;
         int l;
-        blockPos = new BlockPos(blockPos.getX(), levelAccessor.getSeaLevel(), blockPos.getZ());
+        blockPos = new BlockPos(blockPos.getX(), worldGenLevel.getSeaLevel(), blockPos.getZ());
         boolean bl = random.nextDouble() > 0.7;
         BlockState blockState = blockStateConfiguration.state;
         double d = random.nextDouble() * 2.0 * Math.PI;
@@ -54,24 +54,24 @@ extends Feature<BlockStateConfiguration> {
                 for (r = 0; r < l; ++r) {
                     int n3 = s = bl2 ? this.heightDependentRadiusEllipse(r, l, n2) : this.heightDependentRadiusRound(random, r, l, n2);
                     if (!bl2 && p >= s) continue;
-                    this.generateIcebergBlock(levelAccessor, random, blockPos, l, p, r, q, s, o, bl2, j, d, bl, blockState);
+                    this.generateIcebergBlock(worldGenLevel, random, blockPos, l, p, r, q, s, o, bl2, j, d, bl, blockState);
                 }
             }
         }
-        this.smooth(levelAccessor, blockPos, n2, l, bl2, i);
+        this.smooth(worldGenLevel, blockPos, n2, l, bl2, i);
         for (p = -o; p < o; ++p) {
             for (q = -o; q < o; ++q) {
                 for (r = -1; r > -m; --r) {
                     s = bl2 ? Mth.ceil((float)o * (1.0f - (float)Math.pow(r, 2.0) / ((float)m * 8.0f))) : o;
                     int t = this.heightDependentRadiusSteep(random, -r, m, n2);
                     if (p >= t) continue;
-                    this.generateIcebergBlock(levelAccessor, random, blockPos, m, p, r, q, t, s, bl2, j, d, bl, blockState);
+                    this.generateIcebergBlock(worldGenLevel, random, blockPos, m, p, r, q, t, s, bl2, j, d, bl, blockState);
                 }
             }
         }
         boolean bl4 = bl2 ? random.nextDouble() > 0.1 : (bl3 = random.nextDouble() > 0.7);
         if (bl3) {
-            this.generateCutOut(random, levelAccessor, n2, l, blockPos, bl2, i, d, j);
+            this.generateCutOut(random, worldGenLevel, n2, l, blockPos, bl2, i, d, j);
         }
         return true;
     }

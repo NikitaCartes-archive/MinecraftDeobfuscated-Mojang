@@ -47,7 +47,7 @@ public class CatSpawner {
             if (serverLevel.isCloseToVillage(blockPos, 2)) {
                 return this.spawnInVillage(serverLevel, blockPos);
             }
-            if (Feature.SWAMP_HUT.isInsideFeature(serverLevel, serverLevel.structureFeatureManager(), blockPos)) {
+            if (Feature.SWAMP_HUT.isInsideFeature(serverLevel.structureFeatureManager(), blockPos)) {
                 return this.spawnInHut(serverLevel, blockPos);
             }
         }

@@ -4,9 +4,6 @@
 package net.minecraft.world.level.chunk;
 
 import java.io.IOException;
-import java.util.function.BooleanSupplier;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
@@ -43,9 +40,6 @@ AutoCloseable {
 
     @Nullable
     public abstract ChunkAccess getChunk(int var1, int var2, ChunkStatus var3, boolean var4);
-
-    @Environment(value=EnvType.CLIENT)
-    public abstract void tick(BooleanSupplier var1);
 
     public abstract String gatherStats();
 

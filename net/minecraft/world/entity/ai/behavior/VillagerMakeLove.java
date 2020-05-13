@@ -120,7 +120,7 @@ extends Behavior<Villager> {
     }
 
     private void giveBedToChild(ServerLevel serverLevel, Villager villager, BlockPos blockPos) {
-        GlobalPos globalPos = GlobalPos.of(serverLevel.getDimension().getType(), blockPos);
+        GlobalPos globalPos = GlobalPos.of(serverLevel.dimensionType(), blockPos);
         villager.getBrain().setMemory(MemoryModuleType.HOME, globalPos);
     }
 

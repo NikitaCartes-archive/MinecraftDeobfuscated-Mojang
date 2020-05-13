@@ -237,6 +237,7 @@ extends PatrollingMonster {
             if (!itemStack2.isEmpty() && (double)Math.max(this.random.nextFloat() - 0.1f, 0.0f) < d) {
                 this.spawnAtLocation(itemStack2);
             }
+            this.onItemPickup(itemEntity);
             this.setItemSlot(equipmentSlot, itemStack);
             this.take(itemEntity, itemStack.getCount());
             itemEntity.remove();

@@ -14,6 +14,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
@@ -59,15 +60,15 @@ extends StructurePiece {
     }
 
     @Override
-    public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+    public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
         this.placeSettings.setBoundingBox(boundingBox);
         this.boundingBox = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
-        if (this.template.placeInWorld(levelAccessor, this.templatePosition, blockPos, this.placeSettings, 2)) {
+        if (this.template.placeInWorld(worldGenLevel, this.templatePosition, blockPos, this.placeSettings, 2)) {
             List<StructureTemplate.StructureBlockInfo> list = this.template.filterBlocks(this.templatePosition, this.placeSettings, Blocks.STRUCTURE_BLOCK);
             for (StructureTemplate.StructureBlockInfo structureBlockInfo : list) {
                 StructureMode structureMode;
                 if (structureBlockInfo.nbt == null || (structureMode = StructureMode.valueOf(structureBlockInfo.nbt.getString("mode"))) != StructureMode.DATA) continue;
-                this.handleDataMarker(structureBlockInfo.nbt.getString("metadata"), structureBlockInfo.pos, levelAccessor, random, boundingBox);
+                this.handleDataMarker(structureBlockInfo.nbt.getString("metadata"), structureBlockInfo.pos, worldGenLevel, random, boundingBox);
             }
             List<StructureTemplate.StructureBlockInfo> list2 = this.template.filterBlocks(this.templatePosition, this.placeSettings, Blocks.JIGSAW);
             for (StructureTemplate.StructureBlockInfo structureBlockInfo2 : list2) {
@@ -86,7 +87,7 @@ extends StructurePiece {
                 } catch (CommandSyntaxException commandSyntaxException) {
                     LOGGER.error("Error while parsing blockstate {} in jigsaw block @ {}", (Object)string, (Object)structureBlockInfo2.pos);
                 }
-                levelAccessor.setBlock(structureBlockInfo2.pos, blockState, 3);
+                worldGenLevel.setBlock(structureBlockInfo2.pos, blockState, 3);
             }
         }
         return true;

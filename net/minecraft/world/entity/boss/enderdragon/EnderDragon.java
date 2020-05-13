@@ -104,7 +104,7 @@ implements Enemy {
         this.setHealth(this.getMaxHealth());
         this.noPhysics = true;
         this.noCulling = true;
-        this.dragonFight = !level.isClientSide && level.dimension instanceof TheEndDimension ? ((TheEndDimension)level.dimension).getDragonFight() : null;
+        this.dragonFight = !level.isClientSide && level.getDimension() instanceof TheEndDimension ? ((TheEndDimension)level.getDimension()).getDragonFight() : null;
         this.phaseManager = new EnderDragonPhaseManager(this);
     }
 

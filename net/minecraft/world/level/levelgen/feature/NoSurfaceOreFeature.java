@@ -10,8 +10,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 
@@ -22,13 +22,13 @@ extends Feature<OreConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, OreConfiguration oreConfiguration) {
+    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, OreConfiguration oreConfiguration) {
         int i = random.nextInt(oreConfiguration.size + 1);
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int j = 0; j < i; ++j) {
             this.offsetTargetPos(mutableBlockPos, random, blockPos, Math.min(j, 7));
-            if (!oreConfiguration.target.getPredicate().test(levelAccessor.getBlockState(mutableBlockPos)) || this.isFacingAir(levelAccessor, mutableBlockPos)) continue;
-            levelAccessor.setBlock(mutableBlockPos, oreConfiguration.state, 2);
+            if (!oreConfiguration.target.getPredicate().test(worldGenLevel.getBlockState(mutableBlockPos)) || this.isFacingAir(worldGenLevel, mutableBlockPos)) continue;
+            worldGenLevel.setBlock(mutableBlockPos, oreConfiguration.state, 2);
         }
         return true;
     }

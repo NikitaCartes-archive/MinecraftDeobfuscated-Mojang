@@ -7,13 +7,12 @@ import com.mojang.datafixers.Dynamic;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
 
@@ -24,7 +23,7 @@ extends Feature<EndGatewayConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, EndGatewayConfiguration endGatewayConfiguration) {
+    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, EndGatewayConfiguration endGatewayConfiguration) {
         for (BlockPos blockPos22 : BlockPos.betweenClosed(blockPos.offset(-1, -2, -1), blockPos.offset(1, 2, 1))) {
             boolean bl4;
             boolean bl = blockPos22.getX() == blockPos.getX();
@@ -33,9 +32,9 @@ extends Feature<EndGatewayConfiguration> {
             boolean bl5 = bl4 = Math.abs(blockPos22.getY() - blockPos.getY()) == 2;
             if (bl && bl2 && bl3) {
                 BlockPos blockPos3 = blockPos22.immutable();
-                this.setBlock(levelAccessor, blockPos3, Blocks.END_GATEWAY.defaultBlockState());
+                this.setBlock(worldGenLevel, blockPos3, Blocks.END_GATEWAY.defaultBlockState());
                 endGatewayConfiguration.getExit().ifPresent(blockPos2 -> {
-                    BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos3);
+                    BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos3);
                     if (blockEntity instanceof TheEndGatewayBlockEntity) {
                         TheEndGatewayBlockEntity theEndGatewayBlockEntity = (TheEndGatewayBlockEntity)blockEntity;
                         theEndGatewayBlockEntity.setExitPosition((BlockPos)blockPos2, endGatewayConfiguration.isExitExact());
@@ -45,18 +44,18 @@ extends Feature<EndGatewayConfiguration> {
                 continue;
             }
             if (bl2) {
-                this.setBlock(levelAccessor, blockPos22, Blocks.AIR.defaultBlockState());
+                this.setBlock(worldGenLevel, blockPos22, Blocks.AIR.defaultBlockState());
                 continue;
             }
             if (bl4 && bl && bl3) {
-                this.setBlock(levelAccessor, blockPos22, Blocks.BEDROCK.defaultBlockState());
+                this.setBlock(worldGenLevel, blockPos22, Blocks.BEDROCK.defaultBlockState());
                 continue;
             }
             if (!bl && !bl3 || bl4) {
-                this.setBlock(levelAccessor, blockPos22, Blocks.AIR.defaultBlockState());
+                this.setBlock(worldGenLevel, blockPos22, Blocks.AIR.defaultBlockState());
                 continue;
             }
-            this.setBlock(levelAccessor, blockPos22, Blocks.BEDROCK.defaultBlockState());
+            this.setBlock(worldGenLevel, blockPos22, Blocks.BEDROCK.defaultBlockState());
         }
         return true;
     }

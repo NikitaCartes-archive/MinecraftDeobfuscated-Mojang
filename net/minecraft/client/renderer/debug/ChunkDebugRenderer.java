@@ -79,7 +79,7 @@ implements DebugRenderer.SimpleDebugRenderer {
 
         private ChunkData(IntegratedServer integratedServer, double d, double e) {
             ClientLevel clientLevel = ((ChunkDebugRenderer)ChunkDebugRenderer.this).minecraft.level;
-            DimensionType dimensionType = ((ChunkDebugRenderer)ChunkDebugRenderer.this).minecraft.level.dimension.getType();
+            DimensionType dimensionType = ((ChunkDebugRenderer)ChunkDebugRenderer.this).minecraft.level.dimensionType();
             ServerLevel serverLevel = integratedServer.getLevel(dimensionType) != null ? integratedServer.getLevel(dimensionType) : null;
             int i = (int)d >> 4;
             int j = (int)e >> 4;

@@ -71,7 +71,6 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ItemStack;
@@ -213,7 +212,7 @@ CommandSource {
         this.blockPosition = BlockPos.ZERO;
         this.setPos(0.0, 0.0, 0.0);
         if (level != null) {
-            this.dimension = level.dimension.getType();
+            this.dimension = level.dimensionType();
         }
         this.entityData = new SynchedEntityData(this);
         this.entityData.define(DATA_SHARED_FLAGS_ID, (byte)0);
@@ -900,7 +899,7 @@ CommandSource {
         if (this.isInWater()) {
             return true;
         }
-        double d = this.level.getDimension().isHasCeiling() ? 0.007 : 0.0023333333333333335;
+        double d = this.level.dimensionType().hasCeiling() ? 0.007 : 0.0023333333333333335;
         return this.updateFluidHeightAndDoFluidPushing(FluidTags.LAVA, d);
     }
 
@@ -1316,10 +1315,6 @@ CommandSource {
             this.xRot = listTag3.getFloat(1);
             this.yRotO = this.yRot;
             this.xRotO = this.xRot;
-            if (listTag3.isEmpty() && this instanceof Shulker) {
-                this.yRot = 180.0f;
-                this.yRotO = 180.0f;
-            }
             this.setYHeadRot(this.yRot);
             this.setYBodyRot(this.yRot);
             this.fallDistance = compoundTag.getFloat("FallDistance");
@@ -1622,7 +1617,7 @@ CommandSource {
                 this.level.getProfiler().push("portal");
                 this.portalTime = i;
                 this.changingDimensionDelay = this.getDimensionChangingDelay();
-                this.changeDimension(this.level.dimension.getType() == DimensionType.NETHER ? DimensionType.OVERWORLD : DimensionType.NETHER);
+                this.changeDimension(this.level.dimensionType() == DimensionType.NETHER ? DimensionType.OVERWORLD : DimensionType.NETHER);
                 this.level.getProfiler().pop();
             }
             this.isInsidePortal = false;

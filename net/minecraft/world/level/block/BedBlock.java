@@ -115,7 +115,7 @@ implements EntityBlock {
     }
 
     public static boolean canSetSpawn(Level level, BlockPos blockPos) {
-        return level.dimension.getType() == DimensionType.OVERWORLD;
+        return level.dimensionType() == DimensionType.OVERWORLD;
     }
 
     private boolean kickVillagerOutOfBed(Level level, BlockPos blockPos) {

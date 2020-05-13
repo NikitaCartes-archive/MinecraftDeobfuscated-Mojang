@@ -61,7 +61,7 @@ implements Vanishable {
                 return;
             }
             Optional<DimensionType> optional = CompassItem.getLodestoneDimension(compoundTag);
-            if (optional.isPresent() && optional.get().equals(level.dimension.getType()) && compoundTag.contains("LodestonePos") && !((ServerLevel)level).getPoiManager().existsAtPosition(PoiType.LODESTONE, NbtUtils.readBlockPos((CompoundTag)compoundTag.get("LodestonePos")))) {
+            if (optional.isPresent() && optional.get().equals(level.dimensionType()) && compoundTag.contains("LodestonePos") && !((ServerLevel)level).getPoiManager().existsAtPosition(PoiType.LODESTONE, NbtUtils.readBlockPos((CompoundTag)compoundTag.get("LodestonePos")))) {
                 compoundTag.remove("LodestonePos");
             }
         }
@@ -75,7 +75,7 @@ implements Vanishable {
             useOnContext.level.playSound(null, blockPos, SoundEvents.LODESTONE_COMPASS_LOCK, SoundSource.PLAYERS, 1.0f, 1.0f);
             boolean bl2 = bl = !useOnContext.player.abilities.instabuild && useOnContext.itemStack.getCount() == 1;
             if (bl) {
-                this.addLodestoneTags(useOnContext.level.dimension, blockPos, useOnContext.itemStack.getOrCreateTag());
+                this.addLodestoneTags(useOnContext.level.getDimension(), blockPos, useOnContext.itemStack.getOrCreateTag());
             } else {
                 ItemStack itemStack = new ItemStack(Items.COMPASS, 1);
                 CompoundTag compoundTag = useOnContext.itemStack.hasTag() ? useOnContext.itemStack.getTag().copy() : new CompoundTag();
@@ -83,7 +83,7 @@ implements Vanishable {
                 if (!useOnContext.player.abilities.instabuild) {
                     useOnContext.itemStack.shrink(1);
                 }
-                this.addLodestoneTags(useOnContext.level.dimension, blockPos, compoundTag);
+                this.addLodestoneTags(useOnContext.level.getDimension(), blockPos, compoundTag);
                 if (!useOnContext.player.inventory.add(itemStack)) {
                     useOnContext.player.drop(itemStack, false);
                 }

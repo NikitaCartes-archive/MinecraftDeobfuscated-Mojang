@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.Dynamic;
+import com.mojang.datafixers.OptionalDynamic;
 import com.mojang.datafixers.types.DynamicOps;
 import com.mojang.datafixers.util.Pair;
 import java.util.ArrayList;
@@ -23,13 +24,11 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGeneratorType;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.feature.BastionPieces;
@@ -53,8 +52,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-public class FlatLevelGeneratorSettings
-extends ChunkGeneratorSettings {
+public class FlatLevelGeneratorSettings {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final ConfiguredFeature<?, ? extends StructureFeature<?>> MINESHAFT_COMPOSITE_FEATURE = Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL));
     private static final ConfiguredFeature<?, ? extends StructureFeature<?>> VILLAGE_COMPOSITE_FEATURE = Feature.VILLAGE.configured(new JigsawConfiguration("village/plains/town_centers", 6));
@@ -126,12 +124,25 @@ extends ChunkGeneratorSettings {
         hashMap.put(PILLAGER_OUTPOST_COMPOSITE_FEATURE, FeatureConfiguration.NONE);
         hashMap.put(BASTION_REMNANT_COMMPOSITE_FEATURE, new MultiJigsawConfiguration(BastionPieces.POOLS));
     });
+    private final ChunkGeneratorSettings structureSettings;
     private final List<FlatLayerInfo> layersInfo = Lists.newArrayList();
     private final Map<String, Map<String, String>> structuresOptions = Maps.newHashMap();
     private Biome biome;
     private final BlockState[] layers = new BlockState[256];
     private boolean voidGen;
     private int seaLevel;
+
+    public FlatLevelGeneratorSettings() {
+        this(new ChunkGeneratorSettings());
+    }
+
+    public FlatLevelGeneratorSettings(ChunkGeneratorSettings chunkGeneratorSettings) {
+        this.structureSettings = chunkGeneratorSettings;
+    }
+
+    public ChunkGeneratorSettings structureSettings() {
+        return this.structureSettings;
+    }
 
     @Nullable
     public static Block byString(String string) {
@@ -279,7 +290,7 @@ extends ChunkGeneratorSettings {
     }
 
     public static FlatLevelGeneratorSettings fromObject(Dynamic<?> dynamic2) {
-        FlatLevelGeneratorSettings flatLevelGeneratorSettings = ChunkGeneratorType.FLAT.createSettings();
+        FlatLevelGeneratorSettings flatLevelGeneratorSettings = new FlatLevelGeneratorSettings();
         List<Pair> list = dynamic2.get("layers").asList(dynamic -> Pair.of(dynamic.get("height").asInt(1), FlatLevelGeneratorSettings.byString(dynamic.get("block").asString(""))));
         if (list.stream().anyMatch(pair -> pair.getSecond() == null)) {
             return FlatLevelGeneratorSettings.getDefault();
@@ -290,7 +301,11 @@ extends ChunkGeneratorSettings {
         }
         flatLevelGeneratorSettings.getLayersInfo().addAll(list2);
         flatLevelGeneratorSettings.updateLayers();
-        flatLevelGeneratorSettings.setBiome(Registry.BIOME.get(new ResourceLocation(dynamic2.get("biome").asString(""))));
+        OptionalDynamic<?> optionalDynamic = dynamic2.get("biome");
+        flatLevelGeneratorSettings.setBiome(Registry.BIOME.getOptional(new ResourceLocation(optionalDynamic.asString(""))).orElseGet(() -> {
+            LOGGER.error("Unknown biome, defaulting to plains: " + optionalDynamic);
+            return Biomes.PLAINS;
+        }));
         dynamic2.get("structures").flatMap(Dynamic::getMapValues).ifPresent(map -> map.keySet().forEach(dynamic -> dynamic.asString().map(string -> flatLevelGeneratorSettings.getStructuresOptions().put((String)string, Maps.newHashMap()))));
         return flatLevelGeneratorSettings;
     }
@@ -301,7 +316,7 @@ extends ChunkGeneratorSettings {
         if (!iterator.hasNext()) {
             return FlatLevelGeneratorSettings.getDefault();
         }
-        FlatLevelGeneratorSettings flatLevelGeneratorSettings = ChunkGeneratorType.FLAT.createSettings();
+        FlatLevelGeneratorSettings flatLevelGeneratorSettings = new FlatLevelGeneratorSettings();
         List<FlatLayerInfo> list = FlatLevelGeneratorSettings.getLayersInfoFromString(iterator.next());
         if (list.isEmpty()) {
             return FlatLevelGeneratorSettings.getDefault();
@@ -347,38 +362,11 @@ extends ChunkGeneratorSettings {
     @Environment(value=EnvType.CLIENT)
     private void addStructureOption(String string, String string2, String string3) {
         this.structuresOptions.get(string).put(string2, string3);
-        if ("village".equals(string) && "distance".equals(string2)) {
-            this.villagesSpacing = Mth.getInt(string3, this.villagesSpacing, 9);
-        }
-        if ("biome_1".equals(string) && "distance".equals(string2)) {
-            this.templesSpacing = Mth.getInt(string3, this.templesSpacing, 9);
-        }
-        if ("stronghold".equals(string)) {
-            if ("distance".equals(string2)) {
-                this.strongholdsDistance = Mth.getInt(string3, this.strongholdsDistance, 1);
-            } else if ("count".equals(string2)) {
-                this.strongholdsCount = Mth.getInt(string3, this.strongholdsCount, 1);
-            } else if ("spread".equals(string2)) {
-                this.strongholdsSpread = Mth.getInt(string3, this.strongholdsSpread, 1);
-            }
-        }
-        if ("oceanmonument".equals(string)) {
-            if ("separation".equals(string2)) {
-                this.monumentsSeparation = Mth.getInt(string3, this.monumentsSeparation, 1);
-            } else if ("spacing".equals(string2)) {
-                this.monumentsSpacing = Mth.getInt(string3, this.monumentsSpacing, 1);
-            }
-        }
-        if ("endcity".equals(string) && "distance".equals(string2)) {
-            this.endCitySpacing = Mth.getInt(string3, this.endCitySpacing, 1);
-        }
-        if ("mansion".equals(string) && "distance".equals(string2)) {
-            this.woodlandMansionSpacing = Mth.getInt(string3, this.woodlandMansionSpacing, 1);
-        }
+        this.structureSettings.setOption(string, string2, string3);
     }
 
     public static FlatLevelGeneratorSettings getDefault() {
-        FlatLevelGeneratorSettings flatLevelGeneratorSettings = ChunkGeneratorType.FLAT.createSettings();
+        FlatLevelGeneratorSettings flatLevelGeneratorSettings = new FlatLevelGeneratorSettings();
         flatLevelGeneratorSettings.setBiome(Biomes.PLAINS);
         flatLevelGeneratorSettings.getLayersInfo().add(new FlatLayerInfo(1, Blocks.BEDROCK));
         flatLevelGeneratorSettings.getLayersInfo().add(new FlatLayerInfo(2, Blocks.DIRT));

@@ -24,7 +24,7 @@ extends Sensor<Villager> {
 
     @Override
     protected void doTick(ServerLevel serverLevel, Villager villager) {
-        DimensionType dimensionType = serverLevel.getDimension().getType();
+        DimensionType dimensionType = serverLevel.dimensionType();
         BlockPos blockPos = villager.blockPosition();
         ArrayList<GlobalPos> list = Lists.newArrayList();
         int i = 4;

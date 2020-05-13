@@ -13,6 +13,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.ServerLevelData;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,6 +65,7 @@ public interface WorldData {
 
     public ServerLevelData overworldData();
 
+    @Environment(value=EnvType.CLIENT)
     public LevelSettings getLevelSettings();
 
     public CompoundTag createTag(@Nullable CompoundTag var1);
@@ -80,8 +82,6 @@ public interface WorldData {
 
     @Environment(value=EnvType.CLIENT)
     public long getLastPlayed();
-
-    public long getSeed();
 
     public boolean getAllowCommands();
 
@@ -100,5 +100,7 @@ public interface WorldData {
     public CompoundTag getDimensionData(DimensionType var1);
 
     public void setDimensionData(DimensionType var1, CompoundTag var2);
+
+    public WorldGenSettings worldGenSettings();
 }
 

@@ -43,6 +43,9 @@ implements SimpleWaterloggedBlock {
         super(properties);
         this.collisionShapeByIndex = this.makeShapes(f, g, j, 0.0f, j);
         this.shapeByIndex = this.makeShapes(f, g, h, 0.0f, i);
+        for (BlockState blockState : this.stateDefinition.getPossibleStates()) {
+            this.getAABBIndex(blockState);
+        }
     }
 
     protected VoxelShape[] makeShapes(float f, float g, float h, float i, float j) {

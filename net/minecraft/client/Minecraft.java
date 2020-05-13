@@ -1864,7 +1864,7 @@ WindowEventHandler {
             return Musics.CREDITS;
         }
         if (this.player != null) {
-            if (this.player.level.dimension instanceof TheEndDimension) {
+            if (this.player.level.getDimension() instanceof TheEndDimension) {
                 if (this.gui.getBossOverlay().shouldPlayMusic()) {
                     return Musics.END_BOSS;
                 }

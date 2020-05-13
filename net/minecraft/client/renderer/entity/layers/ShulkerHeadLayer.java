@@ -9,7 +9,6 @@ import com.mojang.math.Quaternion;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShulkerModel;
-import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
@@ -37,13 +36,10 @@ extends RenderLayer<Shulker, ShulkerModel<Shulker>> {
         poseStack.mulPose(quaternion);
         poseStack.scale(-1.0f, -1.0f, 1.0f);
         poseStack.translate(0.0, -1.0, 0.0);
-        ModelPart modelPart = ((ShulkerModel)this.getParentModel()).getHead();
-        modelPart.yRot = k * ((float)Math.PI / 180);
-        modelPart.xRot = l * ((float)Math.PI / 180);
         DyeColor dyeColor = shulker.getColor();
         ResourceLocation resourceLocation = dyeColor == null ? ShulkerRenderer.DEFAULT_TEXTURE_LOCATION : ShulkerRenderer.TEXTURE_LOCATION[dyeColor.getId()];
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(resourceLocation));
-        modelPart.render(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(shulker, 0.0f));
+        ((ShulkerModel)this.getParentModel()).getHead().render(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(shulker, 0.0f));
         poseStack.popPose();
     }
 }

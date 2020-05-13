@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.RandomScatteredFeature;
@@ -47,12 +46,12 @@ extends RandomScatteredFeature<ShipwreckConfiguration> {
     }
 
     @Override
-    protected int getSpacing(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+    protected int getSpacing(ChunkGeneratorSettings chunkGeneratorSettings) {
         return chunkGeneratorSettings.getShipwreckSpacing();
     }
 
     @Override
-    protected int getSeparation(DimensionType dimensionType, ChunkGeneratorSettings chunkGeneratorSettings) {
+    protected int getSeparation(ChunkGeneratorSettings chunkGeneratorSettings) {
         return chunkGeneratorSettings.getShipwreckSeparation();
     }
 
@@ -63,7 +62,7 @@ extends RandomScatteredFeature<ShipwreckConfiguration> {
         }
 
         @Override
-        public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+        public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
             ShipwreckConfiguration shipwreckConfiguration = chunkGenerator.getStructureConfiguration(biome, Feature.SHIPWRECK);
             Rotation rotation = Rotation.getRandom(this.random);
             BlockPos blockPos = new BlockPos(i * 16, 90, j * 16);

@@ -364,8 +364,10 @@ implements ClientGamePacketListener {
             EntityTypeTags.resetToEmpty();
         }
         this.serverChunkRadius = clientboundLoginPacket.getChunkRadius();
-        this.levelData = clientLevelData = new ClientLevel.ClientLevelData(clientboundLoginPacket.getSeed(), Difficulty.NORMAL, clientboundLoginPacket.isHardcore(), clientboundLoginPacket.getLevelType().getDefaultProvider());
-        this.level = new ClientLevel(this, clientLevelData, clientboundLoginPacket.getDimension(), this.serverChunkRadius, this.minecraft::getProfiler, this.minecraft.levelRenderer);
+        boolean bl = clientboundLoginPacket.isDebug();
+        boolean bl2 = clientboundLoginPacket.isFlat();
+        this.levelData = clientLevelData = new ClientLevel.ClientLevelData(Difficulty.NORMAL, clientboundLoginPacket.isHardcore(), bl2);
+        this.level = new ClientLevel(this, clientLevelData, clientboundLoginPacket.getDimension(), this.serverChunkRadius, this.minecraft::getProfiler, this.minecraft.levelRenderer, bl, clientboundLoginPacket.getSeed());
         this.minecraft.setLevel(this.level);
         if (this.minecraft.player == null) {
             this.minecraft.player = this.minecraft.gameMode.createPlayer(this.level, new StatsCounter(), new ClientRecipeBook(this.level.getRecipeManager()));
@@ -923,8 +925,10 @@ implements ClientGamePacketListener {
         if (dimensionType != localPlayer.dimension) {
             ClientLevel.ClientLevelData clientLevelData;
             Scoreboard scoreboard = this.level.getScoreboard();
-            this.levelData = clientLevelData = new ClientLevel.ClientLevelData(clientboundRespawnPacket.getSeed(), this.levelData.getDifficulty(), this.levelData.isHardcore(), clientboundRespawnPacket.getLevelType().getDefaultProvider());
-            this.level = new ClientLevel(this, clientLevelData, clientboundRespawnPacket.getDimension(), this.serverChunkRadius, this.minecraft::getProfiler, this.minecraft.levelRenderer);
+            boolean bl = clientboundRespawnPacket.isDebug();
+            boolean bl2 = clientboundRespawnPacket.isFlat();
+            this.levelData = clientLevelData = new ClientLevel.ClientLevelData(this.levelData.getDifficulty(), this.levelData.isHardcore(), bl2);
+            this.level = new ClientLevel(this, clientLevelData, clientboundRespawnPacket.getDimension(), this.serverChunkRadius, this.minecraft::getProfiler, this.minecraft.levelRenderer, bl, clientboundRespawnPacket.getSeed());
             this.level.setScoreboard(scoreboard);
             this.minecraft.setLevel(this.level);
             this.minecraft.setScreen(new ReceivingLevelScreen());

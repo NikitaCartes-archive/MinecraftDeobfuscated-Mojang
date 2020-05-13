@@ -39,7 +39,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelType;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
@@ -276,17 +276,17 @@ implements Enemy {
     }
 
     public static boolean checkSlimeSpawnRules(EntityType<Slime> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
-        if (levelAccessor.getLevelData().getGeneratorType() == LevelType.FLAT && random.nextInt(4) != 1) {
-            return false;
-        }
         if (levelAccessor.getDifficulty() != Difficulty.PEACEFUL) {
             boolean bl;
             Biome biome = levelAccessor.getBiome(blockPos);
             if (biome == Biomes.SWAMP && blockPos.getY() > 50 && blockPos.getY() < 70 && random.nextFloat() < 0.5f && random.nextFloat() < levelAccessor.getMoonBrightness() && levelAccessor.getMaxLocalRawBrightness(blockPos) <= random.nextInt(8)) {
                 return Slime.checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random);
             }
+            if (!(levelAccessor instanceof WorldGenLevel)) {
+                return false;
+            }
             ChunkPos chunkPos = new ChunkPos(blockPos);
-            boolean bl2 = bl = WorldgenRandom.seedSlimeChunk(chunkPos.x, chunkPos.z, levelAccessor.getSeed(), 987234911L).nextInt(10) == 0;
+            boolean bl2 = bl = WorldgenRandom.seedSlimeChunk(chunkPos.x, chunkPos.z, ((WorldGenLevel)levelAccessor).getSeed(), 987234911L).nextInt(10) == 0;
             if (random.nextInt(10) == 0 && bl && blockPos.getY() < 40) {
                 return Slime.checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random);
             }

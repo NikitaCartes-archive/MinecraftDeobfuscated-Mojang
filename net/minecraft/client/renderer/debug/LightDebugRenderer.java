@@ -15,7 +15,6 @@ import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 
 @Environment(value=EnvType.CLIENT)
@@ -42,7 +41,7 @@ implements DebugRenderer.SimpleDebugRenderer {
             int j = Mth.hsvToRgb(g, 0.9f, 0.9f);
             long l = SectionPos.blockToSection(blockPos2.asLong());
             if (longSet.add(l)) {
-                DebugRenderer.renderFloatingText(((Level)level).getChunkSource().getLightEngine().getDebugData(LightLayer.SKY, SectionPos.of(l)), SectionPos.x(l) * 16 + 8, SectionPos.y(l) * 16 + 8, SectionPos.z(l) * 16 + 8, 0xFF0000, 0.3f);
+                DebugRenderer.renderFloatingText(level.getChunkSource().getLightEngine().getDebugData(LightLayer.SKY, SectionPos.of(l)), SectionPos.x(l) * 16 + 8, SectionPos.y(l) * 16 + 8, SectionPos.z(l) * 16 + 8, 0xFF0000, 0.3f);
             }
             if (i == 15) continue;
             DebugRenderer.renderFloatingText(String.valueOf(i), (double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.25, (double)blockPos2.getZ() + 0.5, j);

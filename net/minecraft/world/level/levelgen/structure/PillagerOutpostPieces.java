@@ -26,7 +26,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.BlockRotProce
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public class PillagerOutpostPieces {
-    public static void addPieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, BlockPos blockPos, List<StructurePiece> list, WorldgenRandom worldgenRandom) {
+    public static void addPieces(ChunkGenerator chunkGenerator, StructureManager structureManager, BlockPos blockPos, List<StructurePiece> list, WorldgenRandom worldgenRandom) {
         JigsawPlacement.addPieces(new ResourceLocation("pillager_outpost/base_plates"), 7, PillagerOutpostPiece::new, chunkGenerator, structureManager, blockPos, list, worldgenRandom, true, true);
     }
 

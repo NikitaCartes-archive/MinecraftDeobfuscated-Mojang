@@ -51,6 +51,7 @@ public class ItemTags {
     public static final Tag.Named<Item> TALL_FLOWERS = ItemTags.bind("tall_flowers");
     public static final Tag.Named<Item> FLOWERS = ItemTags.bind("flowers");
     public static final Tag.Named<Item> PIGLIN_REPELLENTS = ItemTags.bind("piglin_repellents");
+    public static final Tag.Named<Item> PIGLIN_LOVED = ItemTags.bind("piglin_loved");
     public static final Tag.Named<Item> GOLD_ORES = ItemTags.bind("gold_ores");
     public static final Tag.Named<Item> NON_FLAMMABLE_WOOD = ItemTags.bind("non_flammable_wood");
     public static final Tag.Named<Item> SOUL_FIRE_BASE_BLOCKS = ItemTags.bind("soul_fire_base_blocks");

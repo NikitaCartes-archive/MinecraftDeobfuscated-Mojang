@@ -28,6 +28,7 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.particle.FireworkParticles;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.BiomeColors;
+import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -58,7 +59,6 @@ import net.minecraft.world.level.EmptyTickList;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
@@ -69,11 +69,11 @@ import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.ChunkGeneratorProvider;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -88,6 +88,7 @@ extends Level {
     private final ClientPacketListener connection;
     private final LevelRenderer levelRenderer;
     private final ClientLevelData clientLevelData;
+    private final DimensionSpecialEffects effects;
     private final Minecraft minecraft = Minecraft.getInstance();
     private final List<AbstractClientPlayer> players = Lists.newArrayList();
     private Scoreboard scoreboard = new Scoreboard();
@@ -98,15 +99,22 @@ extends Level {
         object2ObjectArrayMap.put(BiomeColors.FOLIAGE_COLOR_RESOLVER, new BlockTintCache());
         object2ObjectArrayMap.put(BiomeColors.WATER_COLOR_RESOLVER, new BlockTintCache());
     });
+    private final ClientChunkCache chunkSource;
 
-    public ClientLevel(ClientPacketListener clientPacketListener, ClientLevelData clientLevelData, DimensionType dimensionType, int i, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer) {
-        super(clientLevelData, dimensionType, (level, dimension) -> new ClientChunkCache((ClientLevel)level, i), supplier, true);
+    public ClientLevel(ClientPacketListener clientPacketListener, ClientLevelData clientLevelData, DimensionType dimensionType, int i, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer, boolean bl, long l) {
+        super(clientLevelData, dimensionType, supplier, true, bl, l);
+        this.chunkSource = new ClientChunkCache(this, i);
         this.clientLevelData = clientLevelData;
         this.connection = clientPacketListener;
         this.levelRenderer = levelRenderer;
+        this.effects = DimensionSpecialEffects.forType(dimensionType);
         this.setDefaultSpawnPos(new BlockPos(8, 64, 8));
         this.updateSkyBrightness();
         this.prepareWeather();
+    }
+
+    public DimensionSpecialEffects effects() {
+        return this.effects;
     }
 
     public void tick(BooleanSupplier booleanSupplier) {
@@ -473,7 +481,7 @@ extends Level {
 
     @Override
     public ClientChunkCache getChunkSource() {
-        return (ClientChunkCache)super.getChunkSource();
+        return this.chunkSource;
     }
 
     @Override
@@ -659,13 +667,6 @@ extends Level {
         return h * h * 0.5f;
     }
 
-    public double getHorizonHeight() {
-        if (this.levelData.getGeneratorType() == LevelType.FLAT) {
-            return 0.0;
-        }
-        return 63.0;
-    }
-
     public int getSkyFlashTime() {
         return this.skyFlashTime;
     }
@@ -678,7 +679,7 @@ extends Level {
     @Override
     public float getShade(Direction direction, boolean bl) {
         boolean bl2;
-        boolean bl3 = bl2 = this.dimension.getType() == DimensionType.NETHER;
+        boolean bl3 = bl2 = this.dimensionType() == DimensionType.NETHER;
         if (!bl) {
             return bl2 ? 0.9f : 1.0f;
         }
@@ -745,6 +746,16 @@ extends Level {
     }
 
     @Override
+    public ClientLevelData getLevelData() {
+        return this.clientLevelData;
+    }
+
+    @Override
+    public /* synthetic */ LevelData getLevelData() {
+        return this.getLevelData();
+    }
+
+    @Override
     public /* synthetic */ ChunkSource getChunkSource() {
         return this.getChunkSource();
     }
@@ -752,10 +763,9 @@ extends Level {
     @Environment(value=EnvType.CLIENT)
     public static class ClientLevelData
     implements WritableLevelData {
-        private final long seed;
-        private final ChunkGeneratorProvider generatorProvider;
         private final boolean hardcore;
         private final GameRules gameRules;
+        private final boolean isFlat;
         private int xSpawn;
         private int ySpawn;
         private int zSpawn;
@@ -765,17 +775,11 @@ extends Level {
         private Difficulty difficulty;
         private boolean difficultyLocked;
 
-        public ClientLevelData(long l, Difficulty difficulty, boolean bl, ChunkGeneratorProvider chunkGeneratorProvider) {
-            this.seed = l;
+        public ClientLevelData(Difficulty difficulty, boolean bl, boolean bl2) {
             this.difficulty = difficulty;
             this.hardcore = bl;
-            this.generatorProvider = chunkGeneratorProvider;
+            this.isFlat = bl2;
             this.gameRules = new GameRules();
-        }
-
-        @Override
-        public long getSeed() {
-            return this.seed;
         }
 
         @Override
@@ -856,16 +860,6 @@ extends Level {
         }
 
         @Override
-        public LevelType getGeneratorType() {
-            return this.generatorProvider.getType();
-        }
-
-        @Override
-        public ChunkGeneratorProvider getGeneratorProvider() {
-            return this.generatorProvider;
-        }
-
-        @Override
         public GameRules getGameRules() {
             return this.gameRules;
         }
@@ -891,6 +885,20 @@ extends Level {
 
         public void setDifficultyLocked(boolean bl) {
             this.difficultyLocked = bl;
+        }
+
+        public double getHorizonHeight() {
+            if (this.isFlat) {
+                return 0.0;
+            }
+            return 63.0;
+        }
+
+        public double getClearColorScale() {
+            if (this.isFlat) {
+                return 1.0;
+            }
+            return 0.03125;
         }
     }
 }

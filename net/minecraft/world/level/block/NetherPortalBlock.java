@@ -60,7 +60,7 @@ extends Block {
 
     @Override
     public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-        if (serverLevel.dimension.isNaturalDimension() && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING) && random.nextInt(2000) < serverLevel.getDifficulty().getId()) {
+        if (serverLevel.getDimension().isNaturalDimension() && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING) && random.nextInt(2000) < serverLevel.getDifficulty().getId()) {
             ZombifiedPiglin entity;
             while (serverLevel.getBlockState(blockPos).is(this)) {
                 blockPos = blockPos.below();

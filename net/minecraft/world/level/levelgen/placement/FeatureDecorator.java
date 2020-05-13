@@ -12,8 +12,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.ChanceRangeDecoratorConfiguration;
@@ -127,16 +127,16 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
         return new ConfiguredDecorator<DC>(this, decoratorConfiguration);
     }
 
-    protected <FC extends FeatureConfiguration, F extends Feature<FC>> boolean placeFeature(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos2, DC decoratorConfiguration, ConfiguredFeature<FC, F> configuredFeature) {
+    protected <FC extends FeatureConfiguration, F extends Feature<FC>> boolean placeFeature(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos2, DC decoratorConfiguration, ConfiguredFeature<FC, F> configuredFeature) {
         AtomicBoolean atomicBoolean = new AtomicBoolean(false);
-        this.getPositions(levelAccessor, chunkGenerator, random, decoratorConfiguration, blockPos2).forEach(blockPos -> {
-            boolean bl = configuredFeature.place(levelAccessor, structureFeatureManager, (ChunkGenerator<ChunkGeneratorSettings>)chunkGenerator, random, (BlockPos)blockPos);
+        this.getPositions(worldGenLevel, chunkGenerator, random, decoratorConfiguration, blockPos2).forEach(blockPos -> {
+            boolean bl = configuredFeature.place(worldGenLevel, structureFeatureManager, chunkGenerator, random, (BlockPos)blockPos);
             atomicBoolean.set(atomicBoolean.get() || bl);
         });
         return atomicBoolean.get();
     }
 
-    public abstract Stream<BlockPos> getPositions(LevelAccessor var1, ChunkGenerator<? extends ChunkGeneratorSettings> var2, Random var3, DC var4, BlockPos var5);
+    public abstract Stream<BlockPos> getPositions(LevelAccessor var1, ChunkGenerator var2, Random var3, DC var4, BlockPos var5);
 
     public String toString() {
         return this.getClass().getSimpleName() + "@" + Integer.toHexString(this.hashCode());

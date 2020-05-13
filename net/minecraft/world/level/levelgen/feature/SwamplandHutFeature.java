@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -62,8 +61,8 @@ extends RandomScatteredFeature<NoneFeatureConfiguration> {
         return SWAMPHUT_ANIMALS;
     }
 
-    public boolean isSwamphut(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, BlockPos blockPos) {
-        StructureStart structureStart = this.getStructureAt(levelAccessor, structureFeatureManager, blockPos, true);
+    public boolean isSwamphut(StructureFeatureManager structureFeatureManager, BlockPos blockPos) {
+        StructureStart structureStart = this.getStructureAt(structureFeatureManager, blockPos, true);
         if (!structureStart.isValid() || !(structureStart instanceof FeatureStart)) {
             return false;
         }
@@ -78,7 +77,7 @@ extends RandomScatteredFeature<NoneFeatureConfiguration> {
         }
 
         @Override
-        public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+        public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
             SwamplandHutPiece swamplandHutPiece = new SwamplandHutPiece(this.random, i * 16, j * 16);
             this.pieces.add(swamplandHutPiece);
             this.calculateBoundingBox();

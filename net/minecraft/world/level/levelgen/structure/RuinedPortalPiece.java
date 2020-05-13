@@ -22,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
@@ -113,21 +114,21 @@ extends TemplateStructurePiece {
     }
 
     @Override
-    public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos2) {
+    public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos2) {
         if (!boundingBox.isInside(this.templatePosition)) {
             return true;
         }
         boundingBox.expand(this.template.getBoundingBox(this.placeSettings, this.templatePosition));
-        boolean bl = super.postProcess(levelAccessor, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos2);
-        this.spreadNetherrack(random, levelAccessor);
-        this.addNetherrackDripColumnsBelowPortal(random, levelAccessor);
+        boolean bl = super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos2);
+        this.spreadNetherrack(random, worldGenLevel);
+        this.addNetherrackDripColumnsBelowPortal(random, worldGenLevel);
         if (this.properties.vines || this.properties.overgrown) {
             BlockPos.betweenClosedStream(this.getBoundingBox()).forEach(blockPos -> {
                 if (this.properties.vines) {
-                    this.maybeAddVines(random, levelAccessor, (BlockPos)blockPos);
+                    this.maybeAddVines(random, worldGenLevel, (BlockPos)blockPos);
                 }
                 if (this.properties.overgrown) {
-                    this.maybeAddLeavesAbove(random, levelAccessor, (BlockPos)blockPos);
+                    this.maybeAddLeavesAbove(random, worldGenLevel, (BlockPos)blockPos);
                 }
             });
         }

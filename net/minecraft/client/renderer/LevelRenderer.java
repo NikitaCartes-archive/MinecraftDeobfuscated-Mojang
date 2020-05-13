@@ -783,7 +783,7 @@ AutoCloseable {
         FogRenderer.setupColor(camera, f, this.minecraft.level, this.minecraft.options.renderDistance, gameRenderer.getDarkenWorldAmount(f));
         RenderSystem.clear(16640, Minecraft.ON_OSX);
         float h = gameRenderer.getRenderDistance();
-        boolean bl5 = bl3 = this.minecraft.level.dimension.isFoggyAt(Mth.floor(d), Mth.floor(e)) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog();
+        boolean bl5 = bl3 = this.minecraft.level.effects().isFoggyAt(Mth.floor(d), Mth.floor(e)) || this.minecraft.gui.getBossOverlay().shouldCreateWorldFog();
         if (this.minecraft.options.renderDistance >= 4) {
             FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_SKY, h, bl3);
             profilerFiller.popPush("sky");
@@ -807,7 +807,7 @@ AutoCloseable {
         this.renderChunkLayer(RenderType.solid(), poseStack, d, e, g);
         this.renderChunkLayer(RenderType.cutoutMipped(), poseStack, d, e, g);
         this.renderChunkLayer(RenderType.cutout(), poseStack, d, e, g);
-        if (this.level.dimension.getType() == DimensionType.NETHER) {
+        if (this.level.dimensionType() == DimensionType.NETHER) {
             Lighting.setupNetherLevel(poseStack.last().pose());
         } else {
             Lighting.setupLevel(poseStack.last().pose());
@@ -1243,11 +1243,11 @@ AutoCloseable {
         int n;
         float l;
         float j;
-        if (this.minecraft.level.dimension.getType() == DimensionType.THE_END) {
+        if (this.minecraft.level.dimensionType() == DimensionType.THE_END) {
             this.renderEndSky(poseStack);
             return;
         }
-        if (!this.minecraft.level.dimension.isNaturalDimension()) {
+        if (!this.minecraft.level.effects().renderNormalSky()) {
             return;
         }
         RenderSystem.disableTexture();
@@ -1269,7 +1269,7 @@ AutoCloseable {
         RenderSystem.disableAlphaTest();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        float[] fs = this.level.dimension.getSunriseColor(this.level.getTimeOfDay(f), f);
+        float[] fs = this.level.effects().getSunriseColor(this.level.getTimeOfDay(f), f);
         if (fs != null) {
             RenderSystem.disableTexture();
             RenderSystem.shadeModel(7425);
@@ -1346,7 +1346,7 @@ AutoCloseable {
         poseStack.popPose();
         RenderSystem.disableTexture();
         RenderSystem.color3f(0.0f, 0.0f, 0.0f);
-        double d = this.minecraft.player.getEyePosition((float)f).y - this.level.getHorizonHeight();
+        double d = this.minecraft.player.getEyePosition((float)f).y - this.level.getLevelData().getHorizonHeight();
         if (d < 0.0) {
             poseStack.pushPose();
             poseStack.translate(0.0, 12.0, 0.0);
@@ -1357,7 +1357,7 @@ AutoCloseable {
             this.skyFormat.clearBufferState();
             poseStack.popPose();
         }
-        if (this.level.dimension.hasGround()) {
+        if (this.level.effects().hasGround()) {
             RenderSystem.color3f(g * 0.2f + 0.04f, h * 0.2f + 0.04f, i * 0.6f + 0.1f);
         } else {
             RenderSystem.color3f(g, h, i);
@@ -1368,7 +1368,8 @@ AutoCloseable {
     }
 
     public void renderClouds(PoseStack poseStack, float f, double d, double e, double g) {
-        if (!this.minecraft.level.dimension.isNaturalDimension()) {
+        float h = this.level.effects().getCloudHeight();
+        if (Float.isNaN(h)) {
             return;
         }
         RenderSystem.disableCull();
@@ -1378,26 +1379,26 @@ AutoCloseable {
         RenderSystem.defaultAlphaFunc();
         RenderSystem.defaultBlendFunc();
         RenderSystem.enableFog();
-        float h = 12.0f;
-        float i = 4.0f;
-        double j = 2.0E-4;
-        double k = ((float)this.ticks + f) * 0.03f;
-        double l = (d + k) / 12.0;
-        double m = this.level.dimension.getCloudHeight() - (float)e + 0.33f;
-        double n = g / 12.0 + (double)0.33f;
-        l -= (double)(Mth.floor(l / 2048.0) * 2048);
-        n -= (double)(Mth.floor(n / 2048.0) * 2048);
-        float o = (float)(l - (double)Mth.floor(l));
-        float p = (float)(m / 4.0 - (double)Mth.floor(m / 4.0)) * 4.0f;
-        float q = (float)(n - (double)Mth.floor(n));
+        float i = 12.0f;
+        float j = 4.0f;
+        double k = 2.0E-4;
+        double l = ((float)this.ticks + f) * 0.03f;
+        double m = (d + l) / 12.0;
+        double n = h - (float)e + 0.33f;
+        double o = g / 12.0 + (double)0.33f;
+        m -= (double)(Mth.floor(m / 2048.0) * 2048);
+        o -= (double)(Mth.floor(o / 2048.0) * 2048);
+        float p = (float)(m - (double)Mth.floor(m));
+        float q = (float)(n / 4.0 - (double)Mth.floor(n / 4.0)) * 4.0f;
+        float r = (float)(o - (double)Mth.floor(o));
         Vec3 vec3 = this.level.getCloudColor(f);
-        int r = (int)Math.floor(l);
-        int s = (int)Math.floor(m / 4.0);
-        int t = (int)Math.floor(n);
-        if (r != this.prevCloudX || s != this.prevCloudY || t != this.prevCloudZ || this.minecraft.options.getCloudsType() != this.prevCloudsType || this.prevCloudColor.distanceToSqr(vec3) > 2.0E-4) {
-            this.prevCloudX = r;
-            this.prevCloudY = s;
-            this.prevCloudZ = t;
+        int s = (int)Math.floor(m);
+        int t = (int)Math.floor(n / 4.0);
+        int u = (int)Math.floor(o);
+        if (s != this.prevCloudX || t != this.prevCloudY || u != this.prevCloudZ || this.minecraft.options.getCloudsType() != this.prevCloudsType || this.prevCloudColor.distanceToSqr(vec3) > 2.0E-4) {
+            this.prevCloudX = s;
+            this.prevCloudY = t;
+            this.prevCloudZ = u;
             this.prevCloudColor = vec3;
             this.prevCloudsType = this.minecraft.options.getCloudsType();
             this.generateClouds = true;
@@ -1409,20 +1410,20 @@ AutoCloseable {
                 this.cloudBuffer.close();
             }
             this.cloudBuffer = new VertexBuffer(DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
-            this.buildClouds(bufferBuilder, l, m, n, vec3);
+            this.buildClouds(bufferBuilder, m, n, o, vec3);
             bufferBuilder.end();
             this.cloudBuffer.upload(bufferBuilder);
         }
         this.textureManager.bind(CLOUDS_LOCATION);
         poseStack.pushPose();
         poseStack.scale(12.0f, 1.0f, 12.0f);
-        poseStack.translate(-o, p, -q);
+        poseStack.translate(-p, q, -r);
         if (this.cloudBuffer != null) {
-            int u;
+            int v;
             this.cloudBuffer.bind();
             DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL.setupBufferState(0L);
-            for (int v = u = this.prevCloudsType == CloudStatus.FANCY ? 0 : 1; v < 2; ++v) {
-                if (v == 0) {
+            for (int w = v = this.prevCloudsType == CloudStatus.FANCY ? 0 : 1; w < 2; ++w) {
+                if (w == 0) {
                     RenderSystem.colorMask(false, false, false, false);
                 } else {
                     RenderSystem.colorMask(true, true, true, true);

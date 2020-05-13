@@ -34,10 +34,10 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.FoliageColor;
 import net.minecraft.world.level.GrassColor;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.AmbientAdditionsSettings;
 import net.minecraft.world.level.biome.AmbientMoodSettings;
 import net.minecraft.world.level.biome.AmbientParticleSettings;
@@ -47,7 +47,6 @@ import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
@@ -273,12 +272,12 @@ public abstract class Biome {
         return this.features.get((Object)decoration);
     }
 
-    public void generate(GenerationStep.Decoration decoration, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, LevelAccessor levelAccessor, long l, WorldgenRandom worldgenRandom, BlockPos blockPos) {
+    public void generate(GenerationStep.Decoration decoration, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, WorldGenLevel worldGenLevel, long l, WorldgenRandom worldgenRandom, BlockPos blockPos) {
         int i = 0;
         for (ConfiguredFeature<?, ?> configuredFeature : this.features.get((Object)decoration)) {
             worldgenRandom.setFeatureSeed(l, i, decoration.ordinal());
             try {
-                configuredFeature.place(levelAccessor, structureFeatureManager, chunkGenerator, worldgenRandom, blockPos);
+                configuredFeature.place(worldGenLevel, structureFeatureManager, chunkGenerator, worldgenRandom, blockPos);
             } catch (Exception exception) {
                 CrashReport crashReport = CrashReport.forThrowable(exception, "Feature placement");
                 crashReport.addCategory("Feature").setDetail("Id", Registry.FEATURE.getKey((Feature<?>)configuredFeature.feature)).setDetail("Config", configuredFeature.config).setDetail("Description", () -> configuredFeature.feature.toString());

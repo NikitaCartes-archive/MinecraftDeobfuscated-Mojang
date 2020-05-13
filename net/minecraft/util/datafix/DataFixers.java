@@ -67,6 +67,7 @@ import net.minecraft.util.datafix.fixes.EntityRavagerRenameFix;
 import net.minecraft.util.datafix.fixes.EntityRedundantChanceTagsFix;
 import net.minecraft.util.datafix.fixes.EntityRidingToPassengersFix;
 import net.minecraft.util.datafix.fixes.EntityShulkerColorFix;
+import net.minecraft.util.datafix.fixes.EntityShulkerRotationFix;
 import net.minecraft.util.datafix.fixes.EntitySkeletonSplitFix;
 import net.minecraft.util.datafix.fixes.EntityStringUuidFix;
 import net.minecraft.util.datafix.fixes.EntityTheRenameningFix;
@@ -197,7 +198,7 @@ public class DataFixers {
     private static DataFixer createFixerUpper() {
         DataFixerBuilder dataFixerBuilder = new DataFixerBuilder(SharedConstants.getCurrentVersion().getWorldVersion());
         DataFixers.addFixers(dataFixerBuilder);
-        return dataFixerBuilder.build(Util.backgroundExecutor());
+        return dataFixerBuilder.build(Util.bootstrapExecutor());
     }
 
     public static DataFixer getDataFixer() {
@@ -508,6 +509,8 @@ public class DataFixers {
         dataFixerBuilder.addFixer(new RedstoneWireConnectionsFix(schema117));
         Schema schema118 = dataFixerBuilder.addSchema(2533, SAME_NAMESPACED);
         dataFixerBuilder.addFixer(new VillagerFollowRangeFix(schema118));
+        Schema schema119 = dataFixerBuilder.addSchema(2535, SAME_NAMESPACED);
+        dataFixerBuilder.addFixer(new EntityShulkerRotationFix(schema119));
     }
 }
 

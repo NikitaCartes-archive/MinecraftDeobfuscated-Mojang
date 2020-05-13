@@ -3,46 +3,18 @@
  */
 package net.minecraft.world.level.dimension;
 
-import com.google.common.collect.ImmutableList;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.BiomeSourceType;
-import net.minecraft.world.level.biome.Biomes;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSourceSettings;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.chunk.ChunkGeneratorType;
 import net.minecraft.world.level.dimension.Dimension;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.NetherGeneratorSettings;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class NetherDimension
 extends Dimension {
     public NetherDimension(Level level, DimensionType dimensionType) {
         super(level, dimensionType, 0.1f);
-        this.ultraWarm = true;
-        this.hasCeiling = true;
-    }
-
-    @Override
-    @Environment(value=EnvType.CLIENT)
-    public Vec3 getBrightnessDependentFogColor(Vec3 vec3, float f) {
-        return vec3;
-    }
-
-    @Override
-    public ChunkGenerator<?> createRandomLevelGenerator() {
-        NetherGeneratorSettings netherGeneratorSettings = ChunkGeneratorType.CAVES.createSettings();
-        netherGeneratorSettings.setDefaultBlock(Blocks.NETHERRACK.defaultBlockState());
-        netherGeneratorSettings.setDefaultFluid(Blocks.LAVA.defaultBlockState());
-        MultiNoiseBiomeSourceSettings multiNoiseBiomeSourceSettings = BiomeSourceType.MULTI_NOISE.createSettings(this.level.getSeed()).setBiomes(ImmutableList.of(Biomes.NETHER_WASTES, Biomes.SOUL_SAND_VALLEY, Biomes.CRIMSON_FOREST, Biomes.WARPED_FOREST, Biomes.BASALT_DELTAS));
-        return ChunkGeneratorType.CAVES.create(this.level, BiomeSourceType.MULTI_NOISE.create(multiNoiseBiomeSourceSettings), netherGeneratorSettings);
     }
 
     @Override
@@ -52,13 +24,13 @@ extends Dimension {
 
     @Override
     @Nullable
-    public BlockPos getSpawnPosInChunk(ChunkPos chunkPos, boolean bl) {
+    public BlockPos getSpawnPosInChunk(long l, ChunkPos chunkPos, boolean bl) {
         return null;
     }
 
     @Override
     @Nullable
-    public BlockPos getValidSpawnPosition(int i, int j, boolean bl) {
+    public BlockPos getValidSpawnPosition(long l, int i, int j, boolean bl) {
         return null;
     }
 
@@ -70,12 +42,6 @@ extends Dimension {
     @Override
     public boolean mayRespawn() {
         return false;
-    }
-
-    @Override
-    @Environment(value=EnvType.CLIENT)
-    public boolean isFoggyAt(int i, int j) {
-        return true;
     }
 
     @Override

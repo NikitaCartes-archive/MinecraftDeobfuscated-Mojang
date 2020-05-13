@@ -4,19 +4,26 @@
 package net.minecraft.world.level.biome;
 
 import com.google.common.collect.ImmutableSet;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
-import net.minecraft.world.level.biome.CheckerboardBiomeSourceSettings;
 
 public class CheckerboardColumnBiomeSource
 extends BiomeSource {
     private final Biome[] allowedBiomes;
     private final int bitShift;
 
-    public CheckerboardColumnBiomeSource(CheckerboardBiomeSourceSettings checkerboardBiomeSourceSettings) {
-        super(ImmutableSet.copyOf(checkerboardBiomeSourceSettings.getAllowedBiomes()));
-        this.allowedBiomes = checkerboardBiomeSourceSettings.getAllowedBiomes();
-        this.bitShift = checkerboardBiomeSourceSettings.getSize() + 2;
+    public CheckerboardColumnBiomeSource(Biome[] biomes, int i) {
+        super(ImmutableSet.copyOf(biomes));
+        this.allowedBiomes = biomes;
+        this.bitShift = i + 2;
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public BiomeSource withSeed(long l) {
+        return this;
     }
 
     @Override

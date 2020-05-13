@@ -8,11 +8,10 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
@@ -30,7 +29,7 @@ extends Feature<NoneFeatureConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
+    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
         ChunkPos chunkPos = new ChunkPos(blockPos);
         if (VoidStartPlatformFeature.checkerboardDistance(chunkPos.x, chunkPos.z, VoidStartPlatformFeature.PLATFORM_ORIGIN_CHUNK.x, VoidStartPlatformFeature.PLATFORM_ORIGIN_CHUNK.z) > 1) {
             return true;
@@ -41,10 +40,10 @@ extends Feature<NoneFeatureConfiguration> {
                 if (VoidStartPlatformFeature.checkerboardDistance(PLATFORM_ORIGIN.getX(), PLATFORM_ORIGIN.getZ(), j, i) > 16) continue;
                 mutableBlockPos.set(j, PLATFORM_ORIGIN.getY(), i);
                 if (mutableBlockPos.equals(PLATFORM_ORIGIN)) {
-                    levelAccessor.setBlock(mutableBlockPos, Blocks.COBBLESTONE.defaultBlockState(), 2);
+                    worldGenLevel.setBlock(mutableBlockPos, Blocks.COBBLESTONE.defaultBlockState(), 2);
                     continue;
                 }
-                levelAccessor.setBlock(mutableBlockPos, Blocks.STONE.defaultBlockState(), 2);
+                worldGenLevel.setBlock(mutableBlockPos, Blocks.STONE.defaultBlockState(), 2);
             }
         }
         return true;

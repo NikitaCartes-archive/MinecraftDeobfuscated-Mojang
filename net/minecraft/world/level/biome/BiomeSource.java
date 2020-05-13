@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -29,6 +31,9 @@ implements BiomeManager.NoiseBiomeSource {
     protected BiomeSource(Set<Biome> set) {
         this.possibleBiomes = set;
     }
+
+    @Environment(value=EnvType.CLIENT)
+    public abstract BiomeSource withSeed(long var1);
 
     public List<Biome> getPlayerSpawnBiomes() {
         return PLAYER_SPAWN_BIOMES;

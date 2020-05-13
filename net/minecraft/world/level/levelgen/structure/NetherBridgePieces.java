@@ -13,6 +13,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.StairBlock;
@@ -97,33 +98,33 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             BlockState blockState = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.SOUTH, true);
             BlockState blockState2 = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.EAST, true);
-            this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 8, 1, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 8, 5, 8, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 6, 0, 8, 6, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 2, 5, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 6, 2, 0, 8, 5, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 1, 3, 0, 1, 4, 0, blockState2, blockState2, false);
-            this.generateBox(levelAccessor, boundingBox, 7, 3, 0, 7, 4, 0, blockState2, blockState2, false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 4, 8, 2, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 1, 1, 4, 2, 2, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 6, 1, 4, 7, 2, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 1, 3, 8, 7, 3, 8, blockState2, blockState2, false);
-            this.placeBlock(levelAccessor, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.EAST, true)).setValue(FenceBlock.SOUTH, true), 0, 3, 8, boundingBox);
-            this.placeBlock(levelAccessor, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.SOUTH, true), 8, 3, 8, boundingBox);
-            this.generateBox(levelAccessor, boundingBox, 0, 3, 6, 0, 3, 7, blockState, blockState, false);
-            this.generateBox(levelAccessor, boundingBox, 8, 3, 6, 8, 3, 7, blockState, blockState, false);
-            this.generateBox(levelAccessor, boundingBox, 0, 3, 4, 0, 5, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 8, 3, 4, 8, 5, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 1, 3, 5, 2, 5, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 6, 3, 5, 7, 5, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 1, 4, 5, 1, 5, 5, blockState2, blockState2, false);
-            this.generateBox(levelAccessor, boundingBox, 7, 4, 5, 7, 5, 5, blockState2, blockState2, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 8, 1, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 0, 8, 5, 8, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 6, 0, 8, 6, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 0, 2, 5, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 6, 2, 0, 8, 5, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 3, 0, 1, 4, 0, blockState2, blockState2, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 7, 3, 0, 7, 4, 0, blockState2, blockState2, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 4, 8, 2, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 1, 4, 2, 2, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 6, 1, 4, 7, 2, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 3, 8, 7, 3, 8, blockState2, blockState2, false);
+            this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.EAST, true)).setValue(FenceBlock.SOUTH, true), 0, 3, 8, boundingBox);
+            this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.SOUTH, true), 8, 3, 8, boundingBox);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 3, 6, 0, 3, 7, blockState, blockState, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 8, 3, 6, 8, 3, 7, blockState, blockState, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 3, 4, 0, 5, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 8, 3, 4, 8, 5, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 3, 5, 2, 5, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 6, 3, 5, 7, 5, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 4, 5, 1, 5, 5, blockState2, blockState2, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 7, 4, 5, 7, 5, 5, blockState2, blockState2, false);
             for (int i = 0; i <= 5; ++i) {
                 for (int j = 0; j <= 8; ++j) {
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), j, -1, i, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), j, -1, i, boundingBox);
                 }
             }
             return true;
@@ -156,29 +157,29 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             BlockState blockState = (BlockState)Blocks.NETHER_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.SOUTH);
             BlockState blockState2 = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.SOUTH, true);
             for (int i = 0; i <= 9; ++i) {
                 int j = Math.max(1, 7 - i);
                 int k = Math.min(Math.max(j + 5, 14 - i), 13);
                 int l = i;
-                this.generateBox(levelAccessor, boundingBox, 0, 0, l, 4, j, l, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-                this.generateBox(levelAccessor, boundingBox, 1, j + 1, l, 3, k - 1, l, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, l, 4, j, l, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, j + 1, l, 3, k - 1, l, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
                 if (i <= 6) {
-                    this.placeBlock(levelAccessor, blockState, 1, j + 1, l, boundingBox);
-                    this.placeBlock(levelAccessor, blockState, 2, j + 1, l, boundingBox);
-                    this.placeBlock(levelAccessor, blockState, 3, j + 1, l, boundingBox);
+                    this.placeBlock(worldGenLevel, blockState, 1, j + 1, l, boundingBox);
+                    this.placeBlock(worldGenLevel, blockState, 2, j + 1, l, boundingBox);
+                    this.placeBlock(worldGenLevel, blockState, 3, j + 1, l, boundingBox);
                 }
-                this.generateBox(levelAccessor, boundingBox, 0, k, l, 4, k, l, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-                this.generateBox(levelAccessor, boundingBox, 0, j + 1, l, 0, k - 1, l, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-                this.generateBox(levelAccessor, boundingBox, 4, j + 1, l, 4, k - 1, l, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, k, l, 4, k, l, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, j + 1, l, 0, k - 1, l, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, j + 1, l, 4, k - 1, l, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
                 if ((i & 1) == 0) {
-                    this.generateBox(levelAccessor, boundingBox, 0, j + 2, l, 0, j + 3, l, blockState2, blockState2, false);
-                    this.generateBox(levelAccessor, boundingBox, 4, j + 2, l, 4, j + 3, l, blockState2, blockState2, false);
+                    this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, j + 2, l, 0, j + 3, l, blockState2, blockState2, false);
+                    this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, j + 2, l, 4, j + 3, l, blockState2, blockState2, false);
                 }
                 for (int m = 0; m <= 4; ++m) {
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), m, -1, l, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), m, -1, l, boundingBox);
                 }
             }
             return true;
@@ -221,26 +222,26 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-            this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             BlockState blockState = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.EAST, true);
             BlockState blockState2 = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.SOUTH, true);
-            this.generateBox(levelAccessor, boundingBox, 4, 2, 0, 4, 5, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 4, 3, 1, 4, 4, 1, blockState2, blockState2, false);
-            this.generateBox(levelAccessor, boundingBox, 4, 3, 3, 4, 4, 3, blockState2, blockState2, false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 0, 5, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 4, 3, 5, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 1, 3, 4, 1, 4, 4, blockState, blockState, false);
-            this.generateBox(levelAccessor, boundingBox, 3, 3, 4, 3, 4, 4, blockState, blockState, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 2, 0, 4, 5, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 3, 1, 4, 4, 1, blockState2, blockState2, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 3, 3, 4, 4, 3, blockState2, blockState2, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 0, 0, 5, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 4, 3, 5, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 3, 4, 1, 4, 4, blockState, blockState, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 3, 3, 4, 3, 4, 4, blockState, blockState, false);
             if (this.isNeedingChest && boundingBox.isInside(new BlockPos(this.getWorldX(3, 3), this.getWorldY(2), this.getWorldZ(3, 3)))) {
                 this.isNeedingChest = false;
-                this.createChest(levelAccessor, boundingBox, random, 3, 2, 3, BuiltInLootTables.NETHER_BRIDGE);
+                this.createChest(worldGenLevel, boundingBox, random, 3, 2, 3, BuiltInLootTables.NETHER_BRIDGE);
             }
-            this.generateBox(levelAccessor, boundingBox, 0, 6, 0, 4, 6, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 6, 0, 4, 6, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             for (int i = 0; i <= 4; ++i) {
                 for (int j = 0; j <= 4; ++j) {
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
                 }
             }
             return true;
@@ -283,26 +284,26 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-            this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             BlockState blockState = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.EAST, true);
             BlockState blockState2 = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.SOUTH, true);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 0, 5, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 3, 1, 0, 4, 1, blockState2, blockState2, false);
-            this.generateBox(levelAccessor, boundingBox, 0, 3, 3, 0, 4, 3, blockState2, blockState2, false);
-            this.generateBox(levelAccessor, boundingBox, 4, 2, 0, 4, 5, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 1, 2, 4, 4, 5, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 1, 3, 4, 1, 4, 4, blockState, blockState, false);
-            this.generateBox(levelAccessor, boundingBox, 3, 3, 4, 3, 4, 4, blockState, blockState, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 0, 0, 5, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 3, 1, 0, 4, 1, blockState2, blockState2, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 3, 3, 0, 4, 3, blockState2, blockState2, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 2, 0, 4, 5, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 2, 4, 4, 5, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 3, 4, 1, 4, 4, blockState, blockState, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 3, 3, 4, 3, 4, 4, blockState, blockState, false);
             if (this.isNeedingChest && boundingBox.isInside(new BlockPos(this.getWorldX(1, 3), this.getWorldY(2), this.getWorldZ(1, 3)))) {
                 this.isNeedingChest = false;
-                this.createChest(levelAccessor, boundingBox, random, 1, 2, 3, BuiltInLootTables.NETHER_BRIDGE);
+                this.createChest(worldGenLevel, boundingBox, random, 1, 2, 3, BuiltInLootTables.NETHER_BRIDGE);
             }
-            this.generateBox(levelAccessor, boundingBox, 0, 6, 0, 4, 6, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 6, 0, 4, 6, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             for (int i = 0; i <= 4; ++i) {
                 for (int j = 0; j <= 4; ++j) {
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
                 }
             }
             return true;
@@ -337,17 +338,17 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-            this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 0, 5, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 4, 2, 0, 4, 5, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 4, 0, 5, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 4, 2, 4, 4, 5, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 6, 0, 4, 6, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 0, 0, 5, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 2, 0, 4, 5, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 4, 0, 5, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 2, 4, 4, 5, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 6, 0, 4, 6, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             for (int i = 0; i <= 4; ++i) {
                 for (int j = 0; j <= 4; ++j) {
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
                 }
             }
             return true;
@@ -380,20 +381,20 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-            this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 4, 1, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 0, 4, 5, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             BlockState blockState = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.SOUTH, true);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 0, 5, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 4, 2, 0, 4, 5, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 3, 1, 0, 4, 1, blockState, blockState, false);
-            this.generateBox(levelAccessor, boundingBox, 0, 3, 3, 0, 4, 3, blockState, blockState, false);
-            this.generateBox(levelAccessor, boundingBox, 4, 3, 1, 4, 4, 1, blockState, blockState, false);
-            this.generateBox(levelAccessor, boundingBox, 4, 3, 3, 4, 4, 3, blockState, blockState, false);
-            this.generateBox(levelAccessor, boundingBox, 0, 6, 0, 4, 6, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 0, 0, 5, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 2, 0, 4, 5, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 3, 1, 0, 4, 1, blockState, blockState, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 3, 3, 0, 4, 3, blockState, blockState, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 3, 1, 4, 4, 1, blockState, blockState, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 3, 3, 4, 4, 3, blockState, blockState, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 6, 0, 4, 6, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             for (int i = 0; i <= 4; ++i) {
                 for (int j = 0; j <= 4; ++j) {
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
                 }
             }
             return true;
@@ -427,105 +428,105 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int m;
             int l;
             int j;
             int i;
-            this.generateBox(levelAccessor, boundingBox, 0, 3, 0, 12, 4, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 5, 0, 12, 13, 12, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 5, 0, 1, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 11, 5, 0, 12, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 2, 5, 11, 4, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 8, 5, 11, 10, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 5, 9, 11, 7, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 2, 5, 0, 4, 12, 1, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 8, 5, 0, 10, 12, 1, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 5, 9, 0, 7, 12, 1, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 2, 11, 2, 10, 12, 10, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 3, 0, 12, 4, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 5, 0, 12, 13, 12, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 5, 0, 1, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 11, 5, 0, 12, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 5, 11, 4, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 8, 5, 11, 10, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 9, 11, 7, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 5, 0, 4, 12, 1, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 8, 5, 0, 10, 12, 1, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 9, 0, 7, 12, 1, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 11, 2, 10, 12, 10, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             BlockState blockState = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.EAST, true);
             BlockState blockState2 = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.SOUTH, true);
             BlockState blockState3 = (BlockState)blockState2.setValue(FenceBlock.WEST, true);
             BlockState blockState4 = (BlockState)blockState2.setValue(FenceBlock.EAST, true);
             for (i = 1; i <= 11; i += 2) {
-                this.generateBox(levelAccessor, boundingBox, i, 10, 0, i, 11, 0, blockState, blockState, false);
-                this.generateBox(levelAccessor, boundingBox, i, 10, 12, i, 11, 12, blockState, blockState, false);
-                this.generateBox(levelAccessor, boundingBox, 0, 10, i, 0, 11, i, blockState2, blockState2, false);
-                this.generateBox(levelAccessor, boundingBox, 12, 10, i, 12, 11, i, blockState2, blockState2, false);
-                this.placeBlock(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), i, 13, 0, boundingBox);
-                this.placeBlock(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), i, 13, 12, boundingBox);
-                this.placeBlock(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), 0, 13, i, boundingBox);
-                this.placeBlock(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), 12, 13, i, boundingBox);
+                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, i, 10, 0, i, 11, 0, blockState, blockState, false);
+                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, i, 10, 12, i, 11, 12, blockState, blockState, false);
+                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 10, i, 0, 11, i, blockState2, blockState2, false);
+                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 12, 10, i, 12, 11, i, blockState2, blockState2, false);
+                this.placeBlock(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, 13, 0, boundingBox);
+                this.placeBlock(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, 13, 12, boundingBox);
+                this.placeBlock(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), 0, 13, i, boundingBox);
+                this.placeBlock(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), 12, 13, i, boundingBox);
                 if (i == 11) continue;
-                this.placeBlock(levelAccessor, blockState, i + 1, 13, 0, boundingBox);
-                this.placeBlock(levelAccessor, blockState, i + 1, 13, 12, boundingBox);
-                this.placeBlock(levelAccessor, blockState2, 0, 13, i + 1, boundingBox);
-                this.placeBlock(levelAccessor, blockState2, 12, 13, i + 1, boundingBox);
+                this.placeBlock(worldGenLevel, blockState, i + 1, 13, 0, boundingBox);
+                this.placeBlock(worldGenLevel, blockState, i + 1, 13, 12, boundingBox);
+                this.placeBlock(worldGenLevel, blockState2, 0, 13, i + 1, boundingBox);
+                this.placeBlock(worldGenLevel, blockState2, 12, 13, i + 1, boundingBox);
             }
-            this.placeBlock(levelAccessor, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.EAST, true), 0, 13, 0, boundingBox);
-            this.placeBlock(levelAccessor, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.SOUTH, true)).setValue(FenceBlock.EAST, true), 0, 13, 12, boundingBox);
-            this.placeBlock(levelAccessor, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.SOUTH, true)).setValue(FenceBlock.WEST, true), 12, 13, 12, boundingBox);
-            this.placeBlock(levelAccessor, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.WEST, true), 12, 13, 0, boundingBox);
+            this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.EAST, true), 0, 13, 0, boundingBox);
+            this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.SOUTH, true)).setValue(FenceBlock.EAST, true), 0, 13, 12, boundingBox);
+            this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.SOUTH, true)).setValue(FenceBlock.WEST, true), 12, 13, 12, boundingBox);
+            this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.WEST, true), 12, 13, 0, boundingBox);
             for (i = 3; i <= 9; i += 2) {
-                this.generateBox(levelAccessor, boundingBox, 1, 7, i, 1, 8, i, blockState3, blockState3, false);
-                this.generateBox(levelAccessor, boundingBox, 11, 7, i, 11, 8, i, blockState4, blockState4, false);
+                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 7, i, 1, 8, i, blockState3, blockState3, false);
+                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 11, 7, i, 11, 8, i, blockState4, blockState4, false);
             }
             BlockState blockState5 = (BlockState)Blocks.NETHER_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.NORTH);
             for (j = 0; j <= 6; ++j) {
                 int k = j + 4;
                 for (l = 5; l <= 7; ++l) {
-                    this.placeBlock(levelAccessor, blockState5, l, 5 + j, k, boundingBox);
+                    this.placeBlock(worldGenLevel, blockState5, l, 5 + j, k, boundingBox);
                 }
                 if (k >= 5 && k <= 8) {
-                    this.generateBox(levelAccessor, boundingBox, 5, 5, k, 7, j + 4, k, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+                    this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 5, k, 7, j + 4, k, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
                 } else if (k >= 9 && k <= 10) {
-                    this.generateBox(levelAccessor, boundingBox, 5, 8, k, 7, j + 4, k, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+                    this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 8, k, 7, j + 4, k, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
                 }
                 if (j < 1) continue;
-                this.generateBox(levelAccessor, boundingBox, 5, 6 + j, k, 7, 9 + j, k, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 6 + j, k, 7, 9 + j, k, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
             }
             for (j = 5; j <= 7; ++j) {
-                this.placeBlock(levelAccessor, blockState5, j, 12, 11, boundingBox);
+                this.placeBlock(worldGenLevel, blockState5, j, 12, 11, boundingBox);
             }
-            this.generateBox(levelAccessor, boundingBox, 5, 6, 7, 5, 7, 7, blockState4, blockState4, false);
-            this.generateBox(levelAccessor, boundingBox, 7, 6, 7, 7, 7, 7, blockState3, blockState3, false);
-            this.generateBox(levelAccessor, boundingBox, 5, 13, 12, 7, 13, 12, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 2, 5, 2, 3, 5, 3, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 2, 5, 9, 3, 5, 10, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 2, 5, 4, 2, 5, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 9, 5, 2, 10, 5, 3, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 9, 5, 9, 10, 5, 10, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 10, 5, 4, 10, 5, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 6, 7, 5, 7, 7, blockState4, blockState4, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 7, 6, 7, 7, 7, 7, blockState3, blockState3, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 13, 12, 7, 13, 12, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 5, 2, 3, 5, 3, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 5, 9, 3, 5, 10, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 5, 4, 2, 5, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 9, 5, 2, 10, 5, 3, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 9, 5, 9, 10, 5, 10, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 10, 5, 4, 10, 5, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             BlockState blockState6 = (BlockState)blockState5.setValue(StairBlock.FACING, Direction.EAST);
             BlockState blockState7 = (BlockState)blockState5.setValue(StairBlock.FACING, Direction.WEST);
-            this.placeBlock(levelAccessor, blockState7, 4, 5, 2, boundingBox);
-            this.placeBlock(levelAccessor, blockState7, 4, 5, 3, boundingBox);
-            this.placeBlock(levelAccessor, blockState7, 4, 5, 9, boundingBox);
-            this.placeBlock(levelAccessor, blockState7, 4, 5, 10, boundingBox);
-            this.placeBlock(levelAccessor, blockState6, 8, 5, 2, boundingBox);
-            this.placeBlock(levelAccessor, blockState6, 8, 5, 3, boundingBox);
-            this.placeBlock(levelAccessor, blockState6, 8, 5, 9, boundingBox);
-            this.placeBlock(levelAccessor, blockState6, 8, 5, 10, boundingBox);
-            this.generateBox(levelAccessor, boundingBox, 3, 4, 4, 4, 4, 8, Blocks.SOUL_SAND.defaultBlockState(), Blocks.SOUL_SAND.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 8, 4, 4, 9, 4, 8, Blocks.SOUL_SAND.defaultBlockState(), Blocks.SOUL_SAND.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 3, 5, 4, 4, 5, 8, Blocks.NETHER_WART.defaultBlockState(), Blocks.NETHER_WART.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 8, 5, 4, 9, 5, 8, Blocks.NETHER_WART.defaultBlockState(), Blocks.NETHER_WART.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 4, 2, 0, 8, 2, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 4, 12, 2, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 4, 0, 0, 8, 1, 3, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 4, 0, 9, 8, 1, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 0, 4, 3, 1, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 9, 0, 4, 12, 1, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.placeBlock(worldGenLevel, blockState7, 4, 5, 2, boundingBox);
+            this.placeBlock(worldGenLevel, blockState7, 4, 5, 3, boundingBox);
+            this.placeBlock(worldGenLevel, blockState7, 4, 5, 9, boundingBox);
+            this.placeBlock(worldGenLevel, blockState7, 4, 5, 10, boundingBox);
+            this.placeBlock(worldGenLevel, blockState6, 8, 5, 2, boundingBox);
+            this.placeBlock(worldGenLevel, blockState6, 8, 5, 3, boundingBox);
+            this.placeBlock(worldGenLevel, blockState6, 8, 5, 9, boundingBox);
+            this.placeBlock(worldGenLevel, blockState6, 8, 5, 10, boundingBox);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 3, 4, 4, 4, 4, 8, Blocks.SOUL_SAND.defaultBlockState(), Blocks.SOUL_SAND.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 8, 4, 4, 9, 4, 8, Blocks.SOUL_SAND.defaultBlockState(), Blocks.SOUL_SAND.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 3, 5, 4, 4, 5, 8, Blocks.NETHER_WART.defaultBlockState(), Blocks.NETHER_WART.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 8, 5, 4, 9, 5, 8, Blocks.NETHER_WART.defaultBlockState(), Blocks.NETHER_WART.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 2, 0, 8, 2, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 4, 12, 2, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 0, 0, 8, 1, 3, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 0, 9, 8, 1, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 4, 3, 1, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 9, 0, 4, 12, 1, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             for (l = 4; l <= 8; ++l) {
                 for (m = 0; m <= 2; ++m) {
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), l, -1, m, boundingBox);
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), l, -1, 12 - m, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), l, -1, m, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), l, -1, 12 - m, boundingBox);
                 }
             }
             for (l = 0; l <= 2; ++l) {
                 for (m = 4; m <= 8; ++m) {
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), l, -1, m, boundingBox);
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), 12 - l, -1, m, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), l, -1, m, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), 12 - l, -1, m, boundingBox);
                 }
             }
             return true;
@@ -558,71 +559,71 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int j;
             int i;
-            this.generateBox(levelAccessor, boundingBox, 0, 3, 0, 12, 4, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 5, 0, 12, 13, 12, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 5, 0, 1, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 11, 5, 0, 12, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 2, 5, 11, 4, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 8, 5, 11, 10, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 5, 9, 11, 7, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 2, 5, 0, 4, 12, 1, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 8, 5, 0, 10, 12, 1, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 5, 9, 0, 7, 12, 1, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 2, 11, 2, 10, 12, 10, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 5, 8, 0, 7, 8, 0, Blocks.NETHER_BRICK_FENCE.defaultBlockState(), Blocks.NETHER_BRICK_FENCE.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 3, 0, 12, 4, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 5, 0, 12, 13, 12, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 5, 0, 1, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 11, 5, 0, 12, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 5, 11, 4, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 8, 5, 11, 10, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 9, 11, 7, 12, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 5, 0, 4, 12, 1, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 8, 5, 0, 10, 12, 1, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 9, 0, 7, 12, 1, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 11, 2, 10, 12, 10, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 8, 0, 7, 8, 0, Blocks.NETHER_BRICK_FENCE.defaultBlockState(), Blocks.NETHER_BRICK_FENCE.defaultBlockState(), false);
             BlockState blockState = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.EAST, true);
             BlockState blockState2 = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.SOUTH, true);
             for (i = 1; i <= 11; i += 2) {
-                this.generateBox(levelAccessor, boundingBox, i, 10, 0, i, 11, 0, blockState, blockState, false);
-                this.generateBox(levelAccessor, boundingBox, i, 10, 12, i, 11, 12, blockState, blockState, false);
-                this.generateBox(levelAccessor, boundingBox, 0, 10, i, 0, 11, i, blockState2, blockState2, false);
-                this.generateBox(levelAccessor, boundingBox, 12, 10, i, 12, 11, i, blockState2, blockState2, false);
-                this.placeBlock(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), i, 13, 0, boundingBox);
-                this.placeBlock(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), i, 13, 12, boundingBox);
-                this.placeBlock(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), 0, 13, i, boundingBox);
-                this.placeBlock(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), 12, 13, i, boundingBox);
+                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, i, 10, 0, i, 11, 0, blockState, blockState, false);
+                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, i, 10, 12, i, 11, 12, blockState, blockState, false);
+                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 10, i, 0, 11, i, blockState2, blockState2, false);
+                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 12, 10, i, 12, 11, i, blockState2, blockState2, false);
+                this.placeBlock(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, 13, 0, boundingBox);
+                this.placeBlock(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, 13, 12, boundingBox);
+                this.placeBlock(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), 0, 13, i, boundingBox);
+                this.placeBlock(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), 12, 13, i, boundingBox);
                 if (i == 11) continue;
-                this.placeBlock(levelAccessor, blockState, i + 1, 13, 0, boundingBox);
-                this.placeBlock(levelAccessor, blockState, i + 1, 13, 12, boundingBox);
-                this.placeBlock(levelAccessor, blockState2, 0, 13, i + 1, boundingBox);
-                this.placeBlock(levelAccessor, blockState2, 12, 13, i + 1, boundingBox);
+                this.placeBlock(worldGenLevel, blockState, i + 1, 13, 0, boundingBox);
+                this.placeBlock(worldGenLevel, blockState, i + 1, 13, 12, boundingBox);
+                this.placeBlock(worldGenLevel, blockState2, 0, 13, i + 1, boundingBox);
+                this.placeBlock(worldGenLevel, blockState2, 12, 13, i + 1, boundingBox);
             }
-            this.placeBlock(levelAccessor, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.EAST, true), 0, 13, 0, boundingBox);
-            this.placeBlock(levelAccessor, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.SOUTH, true)).setValue(FenceBlock.EAST, true), 0, 13, 12, boundingBox);
-            this.placeBlock(levelAccessor, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.SOUTH, true)).setValue(FenceBlock.WEST, true), 12, 13, 12, boundingBox);
-            this.placeBlock(levelAccessor, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.WEST, true), 12, 13, 0, boundingBox);
+            this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.EAST, true), 0, 13, 0, boundingBox);
+            this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.SOUTH, true)).setValue(FenceBlock.EAST, true), 0, 13, 12, boundingBox);
+            this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.SOUTH, true)).setValue(FenceBlock.WEST, true), 12, 13, 12, boundingBox);
+            this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.WEST, true), 12, 13, 0, boundingBox);
             for (i = 3; i <= 9; i += 2) {
-                this.generateBox(levelAccessor, boundingBox, 1, 7, i, 1, 8, i, (BlockState)blockState2.setValue(FenceBlock.WEST, true), (BlockState)blockState2.setValue(FenceBlock.WEST, true), false);
-                this.generateBox(levelAccessor, boundingBox, 11, 7, i, 11, 8, i, (BlockState)blockState2.setValue(FenceBlock.EAST, true), (BlockState)blockState2.setValue(FenceBlock.EAST, true), false);
+                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 7, i, 1, 8, i, (BlockState)blockState2.setValue(FenceBlock.WEST, true), (BlockState)blockState2.setValue(FenceBlock.WEST, true), false);
+                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 11, 7, i, 11, 8, i, (BlockState)blockState2.setValue(FenceBlock.EAST, true), (BlockState)blockState2.setValue(FenceBlock.EAST, true), false);
             }
-            this.generateBox(levelAccessor, boundingBox, 4, 2, 0, 8, 2, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 4, 12, 2, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 4, 0, 0, 8, 1, 3, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 4, 0, 9, 8, 1, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 0, 4, 3, 1, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 9, 0, 4, 12, 1, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 2, 0, 8, 2, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 4, 12, 2, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 0, 0, 8, 1, 3, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 0, 9, 8, 1, 12, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 4, 3, 1, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 9, 0, 4, 12, 1, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             for (i = 4; i <= 8; ++i) {
                 for (j = 0; j <= 2; ++j) {
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, 12 - j, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, 12 - j, boundingBox);
                 }
             }
             for (i = 0; i <= 2; ++i) {
                 for (j = 4; j <= 8; ++j) {
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), 12 - i, -1, j, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), 12 - i, -1, j, boundingBox);
                 }
             }
-            this.generateBox(levelAccessor, boundingBox, 5, 5, 5, 7, 5, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 6, 1, 6, 6, 4, 6, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
-            this.placeBlock(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), 6, 0, 6, boundingBox);
-            this.placeBlock(levelAccessor, Blocks.LAVA.defaultBlockState(), 6, 5, 6, boundingBox);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 5, 5, 7, 5, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 6, 1, 6, 6, 4, 6, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+            this.placeBlock(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), 6, 0, 6, boundingBox);
+            this.placeBlock(worldGenLevel, Blocks.LAVA.defaultBlockState(), 6, 5, 6, boundingBox);
             BlockPos blockPos2 = new BlockPos(this.getWorldX(6, 6), this.getWorldY(5), this.getWorldZ(6, 6));
             if (boundingBox.isInside(blockPos2)) {
-                levelAccessor.getLiquidTicks().scheduleTick(blockPos2, Fluids.LAVA, 0);
+                worldGenLevel.getLiquidTicks().scheduleTick(blockPos2, Fluids.LAVA, 0);
             }
             return true;
         }
@@ -658,48 +659,48 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             BlockPos blockPos2;
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 6, 7, 7, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 1, 0, 0, 5, 1, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 1, 2, 1, 5, 2, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 1, 3, 2, 5, 3, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 1, 4, 3, 5, 4, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 1, 2, 0, 1, 4, 2, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 5, 2, 0, 5, 4, 2, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 1, 5, 2, 1, 5, 3, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 5, 5, 2, 5, 5, 3, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 5, 3, 0, 5, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 6, 5, 3, 6, 5, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 1, 5, 8, 5, 5, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 0, 6, 7, 7, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 0, 0, 5, 1, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 2, 1, 5, 2, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 3, 2, 5, 3, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 4, 3, 5, 4, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 2, 0, 1, 4, 2, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 2, 0, 5, 4, 2, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 5, 2, 1, 5, 3, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 5, 2, 5, 5, 3, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 5, 3, 0, 5, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 6, 5, 3, 6, 5, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 5, 8, 5, 5, 8, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             BlockState blockState = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.EAST, true);
             BlockState blockState2 = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.SOUTH, true);
-            this.placeBlock(levelAccessor, (BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true), 1, 6, 3, boundingBox);
-            this.placeBlock(levelAccessor, (BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.EAST, true), 5, 6, 3, boundingBox);
-            this.placeBlock(levelAccessor, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.EAST, true)).setValue(FenceBlock.NORTH, true), 0, 6, 3, boundingBox);
-            this.placeBlock(levelAccessor, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.NORTH, true), 6, 6, 3, boundingBox);
-            this.generateBox(levelAccessor, boundingBox, 0, 6, 4, 0, 6, 7, blockState2, blockState2, false);
-            this.generateBox(levelAccessor, boundingBox, 6, 6, 4, 6, 6, 7, blockState2, blockState2, false);
-            this.placeBlock(levelAccessor, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.EAST, true)).setValue(FenceBlock.SOUTH, true), 0, 6, 8, boundingBox);
-            this.placeBlock(levelAccessor, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.SOUTH, true), 6, 6, 8, boundingBox);
-            this.generateBox(levelAccessor, boundingBox, 1, 6, 8, 5, 6, 8, blockState, blockState, false);
-            this.placeBlock(levelAccessor, (BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.EAST, true), 1, 7, 8, boundingBox);
-            this.generateBox(levelAccessor, boundingBox, 2, 7, 8, 4, 7, 8, blockState, blockState, false);
-            this.placeBlock(levelAccessor, (BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true), 5, 7, 8, boundingBox);
-            this.placeBlock(levelAccessor, (BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.EAST, true), 2, 8, 8, boundingBox);
-            this.placeBlock(levelAccessor, blockState, 3, 8, 8, boundingBox);
-            this.placeBlock(levelAccessor, (BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true), 4, 8, 8, boundingBox);
+            this.placeBlock(worldGenLevel, (BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true), 1, 6, 3, boundingBox);
+            this.placeBlock(worldGenLevel, (BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.EAST, true), 5, 6, 3, boundingBox);
+            this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.EAST, true)).setValue(FenceBlock.NORTH, true), 0, 6, 3, boundingBox);
+            this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.NORTH, true), 6, 6, 3, boundingBox);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 6, 4, 0, 6, 7, blockState2, blockState2, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 6, 6, 4, 6, 6, 7, blockState2, blockState2, false);
+            this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.EAST, true)).setValue(FenceBlock.SOUTH, true), 0, 6, 8, boundingBox);
+            this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.SOUTH, true), 6, 6, 8, boundingBox);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 6, 8, 5, 6, 8, blockState, blockState, false);
+            this.placeBlock(worldGenLevel, (BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.EAST, true), 1, 7, 8, boundingBox);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 7, 8, 4, 7, 8, blockState, blockState, false);
+            this.placeBlock(worldGenLevel, (BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true), 5, 7, 8, boundingBox);
+            this.placeBlock(worldGenLevel, (BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.EAST, true), 2, 8, 8, boundingBox);
+            this.placeBlock(worldGenLevel, blockState, 3, 8, 8, boundingBox);
+            this.placeBlock(worldGenLevel, (BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true), 4, 8, 8, boundingBox);
             if (!this.hasPlacedSpawner && boundingBox.isInside(blockPos2 = new BlockPos(this.getWorldX(3, 5), this.getWorldY(5), this.getWorldZ(3, 5)))) {
                 this.hasPlacedSpawner = true;
-                levelAccessor.setBlock(blockPos2, Blocks.SPAWNER.defaultBlockState(), 2);
-                BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos2);
+                worldGenLevel.setBlock(blockPos2, Blocks.SPAWNER.defaultBlockState(), 2);
+                BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos2);
                 if (blockEntity instanceof SpawnerBlockEntity) {
                     ((SpawnerBlockEntity)blockEntity).getSpawner().setEntityId(EntityType.BLAZE);
                 }
             }
             for (int i = 0; i <= 6; ++i) {
                 for (int j = 0; j <= 6; ++j) {
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
                 }
             }
             return true;
@@ -732,31 +733,31 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-            this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 6, 1, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 6, 10, 6, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 1, 8, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 5, 2, 0, 6, 8, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 1, 0, 8, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 6, 2, 1, 6, 8, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 1, 2, 6, 5, 8, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 6, 1, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 0, 6, 10, 6, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 0, 1, 8, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 2, 0, 6, 8, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 1, 0, 8, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 6, 2, 1, 6, 8, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 2, 6, 5, 8, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             BlockState blockState = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.EAST, true);
             BlockState blockState2 = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.SOUTH, true);
-            this.generateBox(levelAccessor, boundingBox, 0, 3, 2, 0, 5, 4, blockState2, blockState2, false);
-            this.generateBox(levelAccessor, boundingBox, 6, 3, 2, 6, 5, 2, blockState2, blockState2, false);
-            this.generateBox(levelAccessor, boundingBox, 6, 3, 4, 6, 5, 4, blockState2, blockState2, false);
-            this.placeBlock(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), 5, 2, 5, boundingBox);
-            this.generateBox(levelAccessor, boundingBox, 4, 2, 5, 4, 3, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 3, 2, 5, 3, 4, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 2, 2, 5, 2, 5, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 1, 2, 5, 1, 6, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 1, 7, 1, 5, 7, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 6, 8, 2, 6, 8, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 2, 6, 0, 4, 8, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 2, 5, 0, 4, 5, 0, blockState, blockState, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 3, 2, 0, 5, 4, blockState2, blockState2, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 6, 3, 2, 6, 5, 2, blockState2, blockState2, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 6, 3, 4, 6, 5, 4, blockState2, blockState2, false);
+            this.placeBlock(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), 5, 2, 5, boundingBox);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 2, 5, 4, 3, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 3, 2, 5, 3, 4, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 2, 5, 2, 5, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 2, 5, 1, 6, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 7, 1, 5, 7, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 6, 8, 2, 6, 8, 4, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 6, 0, 4, 8, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 5, 0, 4, 5, 0, blockState, blockState, false);
             for (int i = 0; i <= 6; ++i) {
                 for (int j = 0; j <= 6; ++j) {
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
                 }
             }
             return true;
@@ -791,30 +792,30 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-            this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 6, 1, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 6, 7, 6, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 1, 6, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 6, 1, 6, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 5, 2, 0, 6, 6, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 5, 2, 6, 6, 6, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 0, 6, 1, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 5, 0, 6, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 6, 2, 0, 6, 6, 1, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 6, 2, 5, 6, 6, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 6, 1, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 0, 6, 7, 6, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 0, 1, 6, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 6, 1, 6, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 2, 0, 6, 6, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 2, 6, 6, 6, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 0, 0, 6, 1, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 5, 0, 6, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 6, 2, 0, 6, 6, 1, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 6, 2, 5, 6, 6, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             BlockState blockState = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.EAST, true);
             BlockState blockState2 = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.SOUTH, true);
-            this.generateBox(levelAccessor, boundingBox, 2, 6, 0, 4, 6, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 2, 5, 0, 4, 5, 0, blockState, blockState, false);
-            this.generateBox(levelAccessor, boundingBox, 2, 6, 6, 4, 6, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 2, 5, 6, 4, 5, 6, blockState, blockState, false);
-            this.generateBox(levelAccessor, boundingBox, 0, 6, 2, 0, 6, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 5, 2, 0, 5, 4, blockState2, blockState2, false);
-            this.generateBox(levelAccessor, boundingBox, 6, 6, 2, 6, 6, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 6, 5, 2, 6, 5, 4, blockState2, blockState2, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 6, 0, 4, 6, 0, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 5, 0, 4, 5, 0, blockState, blockState, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 6, 6, 4, 6, 6, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 5, 6, 4, 5, 6, blockState, blockState, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 6, 2, 0, 6, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 5, 2, 0, 5, 4, blockState2, blockState2, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 6, 6, 2, 6, 6, 4, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 6, 5, 2, 6, 5, 4, blockState2, blockState2, false);
             for (int i = 0; i <= 6; ++i) {
                 for (int j = 0; j <= 6; ++j) {
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
                 }
             }
             return true;
@@ -859,39 +860,39 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int j;
             int i;
-            this.generateBox(levelAccessor, boundingBox, 7, 3, 0, 11, 4, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 3, 7, 18, 4, 11, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 8, 5, 0, 10, 7, 18, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 5, 8, 18, 7, 10, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 7, 5, 0, 7, 5, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 7, 5, 11, 7, 5, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 11, 5, 0, 11, 5, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 11, 5, 11, 11, 5, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 5, 7, 7, 5, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 11, 5, 7, 18, 5, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 5, 11, 7, 5, 11, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 11, 5, 11, 18, 5, 11, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 7, 2, 0, 11, 2, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 7, 2, 13, 11, 2, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 7, 0, 0, 11, 1, 3, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 7, 0, 15, 11, 1, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 7, 3, 0, 11, 4, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 3, 7, 18, 4, 11, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 8, 5, 0, 10, 7, 18, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 5, 8, 18, 7, 10, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 7, 5, 0, 7, 5, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 7, 5, 11, 7, 5, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 11, 5, 0, 11, 5, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 11, 5, 11, 11, 5, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 5, 7, 7, 5, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 11, 5, 7, 18, 5, 7, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 5, 11, 7, 5, 11, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 11, 5, 11, 18, 5, 11, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 7, 2, 0, 11, 2, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 7, 2, 13, 11, 2, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 7, 0, 0, 11, 1, 3, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 7, 0, 15, 11, 1, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             for (i = 7; i <= 11; ++i) {
                 for (j = 0; j <= 2; ++j) {
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, 18 - j, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, 18 - j, boundingBox);
                 }
             }
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 7, 5, 2, 11, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 13, 2, 7, 18, 2, 11, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 0, 7, 3, 1, 11, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 15, 0, 7, 18, 1, 11, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 7, 5, 2, 11, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 13, 2, 7, 18, 2, 11, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 7, 3, 1, 11, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 15, 0, 7, 18, 1, 11, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             for (i = 0; i <= 2; ++i) {
                 for (j = 7; j <= 11; ++j) {
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), 18 - i, -1, j, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), 18 - i, -1, j, boundingBox);
                 }
             }
             return true;
@@ -929,7 +930,7 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int k;
             int j;
             int i;
@@ -937,21 +938,21 @@ public class NetherBridgePieces {
             for (i = 0; i <= 4; ++i) {
                 for (j = 3; j <= 4; ++j) {
                     k = random2.nextInt(8);
-                    this.generateBox(levelAccessor, boundingBox, i, j, 0, i, j, k, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+                    this.generateBox((LevelAccessor)worldGenLevel, boundingBox, i, j, 0, i, j, k, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
                 }
             }
             i = random2.nextInt(8);
-            this.generateBox(levelAccessor, boundingBox, 0, 5, 0, 0, 5, i, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 5, 0, 0, 5, i, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             i = random2.nextInt(8);
-            this.generateBox(levelAccessor, boundingBox, 4, 5, 0, 4, 5, i, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 5, 0, 4, 5, i, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             for (i = 0; i <= 4; ++i) {
                 j = random2.nextInt(5);
-                this.generateBox(levelAccessor, boundingBox, i, 2, 0, i, 2, j, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, i, 2, 0, i, 2, j, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             }
             for (i = 0; i <= 4; ++i) {
                 for (j = 0; j <= 1; ++j) {
                     k = random2.nextInt(3);
-                    this.generateBox(levelAccessor, boundingBox, i, j, 0, i, j, k, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+                    this.generateBox((LevelAccessor)worldGenLevel, boundingBox, i, j, 0, i, j, k, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
                 }
             }
             return true;
@@ -984,32 +985,32 @@ public class NetherBridgePieces {
         }
 
         @Override
-        public boolean postProcess(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-            this.generateBox(levelAccessor, boundingBox, 0, 3, 0, 4, 4, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 1, 5, 0, 3, 7, 18, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 5, 0, 0, 5, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 4, 5, 0, 4, 5, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 0, 4, 2, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 2, 13, 4, 2, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 0, 0, 4, 1, 3, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
-            this.generateBox(levelAccessor, boundingBox, 0, 0, 15, 4, 1, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+        public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 3, 0, 4, 4, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 5, 0, 3, 7, 18, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 5, 0, 0, 5, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 5, 0, 4, 5, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 0, 4, 2, 5, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 2, 13, 4, 2, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 4, 1, 3, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 15, 4, 1, 18, Blocks.NETHER_BRICKS.defaultBlockState(), Blocks.NETHER_BRICKS.defaultBlockState(), false);
             for (int i = 0; i <= 4; ++i) {
                 for (int j = 0; j <= 2; ++j) {
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
-                    this.fillColumnDown(levelAccessor, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, 18 - j, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, j, boundingBox);
+                    this.fillColumnDown(worldGenLevel, Blocks.NETHER_BRICKS.defaultBlockState(), i, -1, 18 - j, boundingBox);
                 }
             }
             BlockState blockState = (BlockState)((BlockState)Blocks.NETHER_BRICK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.SOUTH, true);
             BlockState blockState2 = (BlockState)blockState.setValue(FenceBlock.EAST, true);
             BlockState blockState3 = (BlockState)blockState.setValue(FenceBlock.WEST, true);
-            this.generateBox(levelAccessor, boundingBox, 0, 1, 1, 0, 4, 1, blockState2, blockState2, false);
-            this.generateBox(levelAccessor, boundingBox, 0, 3, 4, 0, 4, 4, blockState2, blockState2, false);
-            this.generateBox(levelAccessor, boundingBox, 0, 3, 14, 0, 4, 14, blockState2, blockState2, false);
-            this.generateBox(levelAccessor, boundingBox, 0, 1, 17, 0, 4, 17, blockState2, blockState2, false);
-            this.generateBox(levelAccessor, boundingBox, 4, 1, 1, 4, 4, 1, blockState3, blockState3, false);
-            this.generateBox(levelAccessor, boundingBox, 4, 3, 4, 4, 4, 4, blockState3, blockState3, false);
-            this.generateBox(levelAccessor, boundingBox, 4, 3, 14, 4, 4, 14, blockState3, blockState3, false);
-            this.generateBox(levelAccessor, boundingBox, 4, 1, 17, 4, 4, 17, blockState3, blockState3, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 1, 1, 0, 4, 1, blockState2, blockState2, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 3, 4, 0, 4, 4, blockState2, blockState2, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 3, 14, 0, 4, 14, blockState2, blockState2, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 1, 17, 0, 4, 17, blockState2, blockState2, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 1, 1, 4, 4, 1, blockState3, blockState3, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 3, 4, 4, 4, 4, blockState3, blockState3, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 3, 14, 4, 4, 14, blockState3, blockState3, false);
+            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 1, 17, 4, 4, 17, blockState3, blockState3, false);
             return true;
         }
     }

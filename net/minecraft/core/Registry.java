@@ -53,7 +53,6 @@ import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.chunk.ChunkGeneratorType;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
@@ -105,9 +104,8 @@ implements IdMap<T> {
     public static final Registry<TreeDecoratorType<?>> TREE_DECORATOR_TYPES = Registry.registerSimple("tree_decorator_type", () -> TreeDecoratorType.LEAVE_VINE);
     public static final Registry<FeatureSizeType<?>> FEATURE_SIZE_TYPES = Registry.registerSimple("feature_size_type", () -> FeatureSizeType.TWO_LAYERS_FEATURE_SIZE);
     public static final Registry<ParticleType<? extends ParticleOptions>> PARTICLE_TYPE = Registry.registerSimple("particle_type", () -> ParticleTypes.BLOCK);
-    public static final Registry<BiomeSourceType<?, ?>> BIOME_SOURCE_TYPE = Registry.registerSimple("biome_source_type", () -> BiomeSourceType.VANILLA_LAYERED);
+    public static final Registry<BiomeSourceType> BIOME_SOURCE_TYPE = Registry.registerSimple("biome_source_type", () -> BiomeSourceType.VANILLA_LAYERED);
     public static final Registry<BlockEntityType<?>> BLOCK_ENTITY_TYPE = Registry.registerSimple("block_entity_type", () -> BlockEntityType.FURNACE);
-    public static final Registry<ChunkGeneratorType<?, ?>> CHUNK_GENERATOR_TYPE = Registry.registerSimple("chunk_generator_type", () -> ChunkGeneratorType.FLAT);
     public static final Registry<DimensionType> DIMENSION_TYPE = Registry.registerSimple("dimension_type", () -> DimensionType.OVERWORLD);
     public static final DefaultedRegistry<Motive> MOTIVE = Registry.registerDefaulted("motive", "kebab", () -> Motive.KEBAB);
     public static final Registry<ResourceLocation> CUSTOM_STAT = Registry.registerSimple("custom_stat", () -> Stats.JUMP);

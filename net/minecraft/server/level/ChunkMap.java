@@ -114,7 +114,7 @@ implements ChunkHolder.PlayerProvider {
     private final ServerLevel level;
     private final ThreadedLevelLightEngine lightEngine;
     private final BlockableEventLoop<Runnable> mainThreadExecutor;
-    private final ChunkGenerator<?> generator;
+    private final ChunkGenerator generator;
     private final Supplier<DimensionDataStorage> overworldDataStorage;
     private final PoiManager poiManager;
     private final LongSet toDrop = new LongOpenHashSet();
@@ -133,10 +133,10 @@ implements ChunkHolder.PlayerProvider {
     private final Queue<Runnable> unloadQueue = Queues.newConcurrentLinkedQueue();
     private int viewDistance;
 
-    public ChunkMap(ServerLevel serverLevel, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, StructureManager structureManager, Executor executor, BlockableEventLoop<Runnable> blockableEventLoop, LightChunkGetter lightChunkGetter, ChunkGenerator<?> chunkGenerator, ChunkProgressListener chunkProgressListener, Supplier<DimensionDataStorage> supplier, int i, boolean bl) {
-        super(new File(levelStorageAccess.getDimensionPath(serverLevel.getDimension().getType()), "region"), dataFixer, bl);
+    public ChunkMap(ServerLevel serverLevel, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, StructureManager structureManager, Executor executor, BlockableEventLoop<Runnable> blockableEventLoop, LightChunkGetter lightChunkGetter, ChunkGenerator chunkGenerator, ChunkProgressListener chunkProgressListener, Supplier<DimensionDataStorage> supplier, int i, boolean bl) {
+        super(new File(levelStorageAccess.getDimensionPath(serverLevel.dimensionType()), "region"), dataFixer, bl);
         this.structureManager = structureManager;
-        this.storageFolder = levelStorageAccess.getDimensionPath(serverLevel.getDimension().getType());
+        this.storageFolder = levelStorageAccess.getDimensionPath(serverLevel.dimensionType());
         this.level = serverLevel;
         this.generator = chunkGenerator;
         this.mainThreadExecutor = blockableEventLoop;
@@ -147,7 +147,7 @@ implements ChunkHolder.PlayerProvider {
         this.queueSorter = new ChunkTaskPriorityQueueSorter(ImmutableList.of(processorMailbox, processorHandle, processorMailbox2), executor, Integer.MAX_VALUE);
         this.worldgenMailbox = this.queueSorter.getProcessor(processorMailbox, false);
         this.mainThreadMailbox = this.queueSorter.getProcessor(processorHandle, false);
-        this.lightEngine = new ThreadedLevelLightEngine(lightChunkGetter, this, this.level.getDimension().isHasSkyLight(), processorMailbox2, this.queueSorter.getProcessor(processorMailbox2, false));
+        this.lightEngine = new ThreadedLevelLightEngine(lightChunkGetter, this, this.level.dimensionType().hasSkyLight(), processorMailbox2, this.queueSorter.getProcessor(processorMailbox2, false));
         this.distanceManager = new DistanceManager(executor, blockableEventLoop);
         this.overworldDataStorage = supplier;
         this.poiManager = new PoiManager(new File(this.storageFolder, "poi"), dataFixer, bl);
@@ -704,7 +704,7 @@ implements ChunkHolder.PlayerProvider {
         if (compoundTag == null) {
             return null;
         }
-        return this.upgradeChunkTag(this.level.getDimension().getType(), this.overworldDataStorage, compoundTag);
+        return this.upgradeChunkTag(this.level.dimensionType(), this.overworldDataStorage, compoundTag);
     }
 
     boolean noPlayersCloseForSpawning(ChunkPos chunkPos) {

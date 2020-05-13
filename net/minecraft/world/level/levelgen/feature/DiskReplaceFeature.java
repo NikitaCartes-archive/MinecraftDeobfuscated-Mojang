@@ -8,11 +8,10 @@ import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
 
@@ -23,8 +22,8 @@ extends Feature<DiskConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, DiskConfiguration diskConfiguration) {
-        if (!levelAccessor.getFluidState(blockPos).is(FluidTags.WATER)) {
+    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, DiskConfiguration diskConfiguration) {
+        if (!worldGenLevel.getFluidState(blockPos).is(FluidTags.WATER)) {
             return false;
         }
         int i = 0;
@@ -36,10 +35,10 @@ extends Feature<DiskConfiguration> {
                 if (m * m + (n = l - blockPos.getZ()) * n > j * j) continue;
                 block2: for (int o = blockPos.getY() - diskConfiguration.ySize; o <= blockPos.getY() + diskConfiguration.ySize; ++o) {
                     BlockPos blockPos2 = new BlockPos(k, o, l);
-                    BlockState blockState = levelAccessor.getBlockState(blockPos2);
+                    BlockState blockState = worldGenLevel.getBlockState(blockPos2);
                     for (BlockState blockState2 : diskConfiguration.targets) {
                         if (!blockState2.is(blockState.getBlock())) continue;
-                        levelAccessor.setBlock(blockPos2, diskConfiguration.state, 2);
+                        worldGenLevel.setBlock(blockPos2, diskConfiguration.state, 2);
                         ++i;
                         continue block2;
                     }

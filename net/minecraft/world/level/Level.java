@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -44,7 +43,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.BaseFireBlock;
@@ -88,6 +86,7 @@ AutoCloseable {
     protected final List<BlockEntity> pendingBlockEntities = Lists.newArrayList();
     protected final List<BlockEntity> blockEntitiesToUnload = Lists.newArrayList();
     private final Thread thread;
+    private final boolean isDebug;
     private int skyDarken;
     protected int randValue = new Random().nextInt();
     protected final int addend = 1013904223;
@@ -96,8 +95,7 @@ AutoCloseable {
     protected float oThunderLevel;
     protected float thunderLevel;
     public final Random random = new Random();
-    public final Dimension dimension;
-    protected final ChunkSource chunkSource;
+    private final Dimension dimension;
     protected final WritableLevelData levelData;
     private final Supplier<ProfilerFiller> profiler;
     public final boolean isClientSide;
@@ -105,15 +103,15 @@ AutoCloseable {
     private final WorldBorder worldBorder;
     private final BiomeManager biomeManager;
 
-    protected Level(WritableLevelData writableLevelData, DimensionType dimensionType, BiFunction<Level, Dimension, ChunkSource> biFunction, Supplier<ProfilerFiller> supplier, boolean bl) {
+    protected Level(WritableLevelData writableLevelData, DimensionType dimensionType, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l) {
         this.profiler = supplier;
         this.levelData = writableLevelData;
         this.dimension = dimensionType.create(this);
-        this.chunkSource = biFunction.apply(this, this.dimension);
         this.isClientSide = bl;
-        this.worldBorder = this.dimension.createWorldBorder();
+        this.worldBorder = this.getDimension().createWorldBorder();
         this.thread = Thread.currentThread();
-        this.biomeManager = new BiomeManager(this, bl ? writableLevelData.getSeed() : LevelData.obfuscateSeed(writableLevelData.getSeed()), dimensionType.getBiomeZoomer());
+        this.biomeManager = new BiomeManager(this, l, dimensionType.getBiomeZoomer());
+        this.isDebug = bl2;
     }
 
     @Override
@@ -203,7 +201,7 @@ AutoCloseable {
 
     @Override
     public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
-        ChunkAccess chunkAccess = this.chunkSource.getChunk(i, j, chunkStatus, bl);
+        ChunkAccess chunkAccess = this.getChunkSource().getChunk(i, j, chunkStatus, bl);
         if (chunkAccess == null && bl) {
             throw new IllegalStateException("Should always be able to create a chunk!");
         }
@@ -215,7 +213,7 @@ AutoCloseable {
         if (Level.isOutsideBuildHeight(blockPos)) {
             return false;
         }
-        if (!this.isClientSide && this.levelData.getGeneratorType() == LevelType.DEBUG_ALL_BLOCK_STATES) {
+        if (!this.isClientSide && this.isDebug()) {
             return false;
         }
         LevelChunk levelChunk = this.getChunkAt(blockPos);
@@ -371,11 +369,11 @@ AutoCloseable {
     }
 
     public boolean isDay() {
-        return this.dimension.getType() == DimensionType.OVERWORLD && this.skyDarken < 4;
+        return this.dimensionType() == DimensionType.OVERWORLD && this.skyDarken < 4;
     }
 
     public boolean isNight() {
-        return this.dimension.getType() == DimensionType.OVERWORLD && !this.isDay();
+        return this.dimensionType() == DimensionType.OVERWORLD && !this.isDay();
     }
 
     @Override
@@ -449,22 +447,24 @@ AutoCloseable {
         this.updatingBlockEntities = true;
         Iterator<BlockEntity> iterator = this.tickableBlockEntities.iterator();
         while (iterator.hasNext()) {
-            BlockPos blockPos;
             BlockEntity blockEntity = iterator.next();
-            if (!blockEntity.isRemoved() && blockEntity.hasLevel() && this.chunkSource.isTickingChunk(blockPos = blockEntity.getBlockPos()) && this.getWorldBorder().isWithinBounds(blockPos)) {
-                try {
-                    profilerFiller.push(() -> String.valueOf(BlockEntityType.getKey(blockEntity.getType())));
-                    if (blockEntity.getType().isValid(this.getBlockState(blockPos).getBlock())) {
-                        ((TickableBlockEntity)((Object)blockEntity)).tick();
-                    } else {
-                        blockEntity.logInvalidState();
+            if (!blockEntity.isRemoved() && blockEntity.hasLevel()) {
+                BlockPos blockPos = blockEntity.getBlockPos();
+                if (this.getChunkSource().isTickingChunk(blockPos) && this.getWorldBorder().isWithinBounds(blockPos)) {
+                    try {
+                        profilerFiller.push(() -> String.valueOf(BlockEntityType.getKey(blockEntity.getType())));
+                        if (blockEntity.getType().isValid(this.getBlockState(blockPos).getBlock())) {
+                            ((TickableBlockEntity)((Object)blockEntity)).tick();
+                        } else {
+                            blockEntity.logInvalidState();
+                        }
+                        profilerFiller.pop();
+                    } catch (Throwable throwable) {
+                        CrashReport crashReport = CrashReport.forThrowable(throwable, "Ticking block entity");
+                        CrashReportCategory crashReportCategory = crashReport.addCategory("Block entity being ticked");
+                        blockEntity.fillCrashReportCategory(crashReportCategory);
+                        throw new ReportedException(crashReport);
                     }
-                    profilerFiller.pop();
-                } catch (Throwable throwable) {
-                    CrashReport crashReport = CrashReport.forThrowable(throwable, "Ticking block entity");
-                    CrashReportCategory crashReportCategory = crashReport.addCategory("Block entity being ticked");
-                    blockEntity.fillCrashReportCategory(crashReportCategory);
-                    throw new ReportedException(crashReport);
                 }
             }
             if (!blockEntity.isRemoved()) continue;
@@ -601,7 +601,7 @@ AutoCloseable {
 
     @Environment(value=EnvType.CLIENT)
     public String gatherChunkSourceStats() {
-        return this.chunkSource.gatherStats();
+        return this.getChunkSource().gatherStats();
     }
 
     @Override
@@ -677,7 +677,7 @@ AutoCloseable {
         if (Level.isOutsideBuildHeight(blockPos)) {
             return false;
         }
-        return this.chunkSource.hasChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+        return this.getChunkSource().hasChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4);
     }
 
     public boolean loadedAndEntityCanStandOnFace(BlockPos blockPos, Entity entity, Direction direction) {
@@ -717,7 +717,7 @@ AutoCloseable {
 
     @Override
     public void close() throws IOException {
-        this.chunkSource.close();
+        this.getChunkSource().close();
     }
 
     @Override
@@ -818,10 +818,6 @@ AutoCloseable {
         return this;
     }
 
-    public LevelType getGeneratorType() {
-        return this.levelData.getGeneratorType();
-    }
-
     public int getDirectSignalTo(BlockPos blockPos) {
         int i = 0;
         if ((i = Math.max(i, this.getDirectSignal(blockPos.below(), Direction.DOWN))) >= 15) {
@@ -898,11 +894,6 @@ AutoCloseable {
         this.levelData.setGameTime(l);
     }
 
-    @Override
-    public long getSeed() {
-        return this.levelData.getSeed();
-    }
-
     public long getGameTime() {
         return this.levelData.getGameTime();
     }
@@ -927,11 +918,6 @@ AutoCloseable {
     }
 
     public void broadcastEntityEvent(Entity entity, byte b) {
-    }
-
-    @Override
-    public ChunkSource getChunkSource() {
-        return this.chunkSource;
     }
 
     public void blockEvent(BlockPos blockPos, Block block, int i, int j) {
@@ -968,7 +954,7 @@ AutoCloseable {
     }
 
     public boolean isThundering() {
-        if (!this.dimension.isHasSkyLight() || this.dimension.isHasCeiling()) {
+        if (!this.dimensionType().hasSkyLight() || this.dimensionType().hasCeiling()) {
             return false;
         }
         return (double)this.getThunderLevel(1.0f) > 0.9;
@@ -1010,8 +996,8 @@ AutoCloseable {
     public CrashReportCategory fillReportDetails(CrashReport crashReport) {
         CrashReportCategory crashReportCategory = crashReport.addCategory("Affected level", 1);
         crashReportCategory.setDetail("All players", () -> this.players().size() + " total; " + this.players());
-        crashReportCategory.setDetail("Chunk stats", this.chunkSource::gatherStats);
-        crashReportCategory.setDetail("Level dimension", () -> this.dimension.getType().toString());
+        crashReportCategory.setDetail("Chunk stats", this.getChunkSource()::gatherStats);
+        crashReportCategory.setDetail("Level dimension", () -> this.dimensionType().toString());
         try {
             this.levelData.fillCrashReportCategory(crashReportCategory);
         } catch (Throwable throwable) {
@@ -1076,6 +1062,11 @@ AutoCloseable {
     }
 
     @Override
+    public DimensionType dimensionType() {
+        return this.dimension.getType();
+    }
+
+    @Override
     public Random getRandom() {
         return this.random;
     }
@@ -1110,6 +1101,10 @@ AutoCloseable {
     @Override
     public BiomeManager getBiomeManager() {
         return this.biomeManager;
+    }
+
+    public final boolean isDebug() {
+        return this.isDebug;
     }
 
     @Override

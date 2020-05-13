@@ -74,11 +74,11 @@ extends Behavior<Villager> {
     }
 
     private boolean tooFar(ServerLevel serverLevel, Villager villager, GlobalPos globalPos) {
-        return globalPos.dimension() != serverLevel.getDimension().getType() || globalPos.pos().distManhattan(villager.blockPosition()) > this.tooFarDistance;
+        return globalPos.dimension() != serverLevel.dimensionType() || globalPos.pos().distManhattan(villager.blockPosition()) > this.tooFarDistance;
     }
 
     private boolean closeEnough(ServerLevel serverLevel, Villager villager, GlobalPos globalPos) {
-        return globalPos.dimension() == serverLevel.getDimension().getType() && globalPos.pos().distManhattan(villager.blockPosition()) <= this.closeEnoughDist;
+        return globalPos.dimension() == serverLevel.dimensionType() && globalPos.pos().distManhattan(villager.blockPosition()) <= this.closeEnoughDist;
     }
 }
 

@@ -82,16 +82,16 @@ extends SimpleCriterionTrigger<TriggerInstance> {
             this.predicates = itemPredicates;
         }
 
-        public static TriggerInstance hasItem(ItemPredicate ... itemPredicates) {
+        public static TriggerInstance hasItems(ItemPredicate ... itemPredicates) {
             return new TriggerInstance(EntityPredicate.Composite.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, itemPredicates);
         }
 
-        public static TriggerInstance hasItem(ItemLike ... itemLikes) {
+        public static TriggerInstance hasItems(ItemLike ... itemLikes) {
             ItemPredicate[] itemPredicates = new ItemPredicate[itemLikes.length];
             for (int i = 0; i < itemLikes.length; ++i) {
                 itemPredicates[i] = new ItemPredicate(null, itemLikes[i].asItem(), MinMaxBounds.Ints.ANY, MinMaxBounds.Ints.ANY, EnchantmentPredicate.NONE, EnchantmentPredicate.NONE, null, NbtPredicate.ANY);
             }
-            return TriggerInstance.hasItem(itemPredicates);
+            return TriggerInstance.hasItems(itemPredicates);
         }
 
         @Override

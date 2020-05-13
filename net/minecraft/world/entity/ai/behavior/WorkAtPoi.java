@@ -35,7 +35,7 @@ extends Behavior<Villager> {
         }
         this.lastCheck = serverLevel.getGameTime();
         GlobalPos globalPos = villager.getBrain().getMemory(MemoryModuleType.JOB_SITE).get();
-        return Objects.equals(globalPos.dimension(), serverLevel.getDimension().getType()) && globalPos.pos().closerThan(villager.position(), 1.73);
+        return Objects.equals(globalPos.dimension(), serverLevel.dimensionType()) && globalPos.pos().closerThan(villager.position(), 1.73);
     }
 
     @Override
@@ -60,7 +60,7 @@ extends Behavior<Villager> {
             return false;
         }
         GlobalPos globalPos = optional.get();
-        return Objects.equals(globalPos.dimension(), serverLevel.getDimension().getType()) && globalPos.pos().closerThan(villager.position(), 1.73);
+        return Objects.equals(globalPos.dimension(), serverLevel.dimensionType()) && globalPos.pos().closerThan(villager.position(), 1.73);
     }
 
     @Override

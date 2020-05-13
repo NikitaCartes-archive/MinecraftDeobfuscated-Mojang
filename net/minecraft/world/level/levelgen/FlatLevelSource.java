@@ -5,8 +5,11 @@ package net.minecraft.world.level.levelgen;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
@@ -17,9 +20,10 @@ import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.FixedBiomeSource;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -36,14 +40,22 @@ import net.minecraft.world.level.levelgen.surfacebuilders.ConfiguredSurfaceBuild
 import org.jetbrains.annotations.Nullable;
 
 public class FlatLevelSource
-extends ChunkGenerator<FlatLevelGeneratorSettings> {
+extends ChunkGenerator {
     private final Biome biomeWrapper;
     private final PhantomSpawner phantomSpawner = new PhantomSpawner();
     private final CatSpawner catSpawner = new CatSpawner();
+    private final FlatLevelGeneratorSettings settings;
 
-    public FlatLevelSource(LevelAccessor levelAccessor, BiomeSource biomeSource, FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
-        super(levelAccessor, biomeSource, flatLevelGeneratorSettings);
+    public FlatLevelSource(FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
+        super(new FixedBiomeSource(flatLevelGeneratorSettings.getBiome()), flatLevelGeneratorSettings.structureSettings());
+        this.settings = flatLevelGeneratorSettings;
         this.biomeWrapper = this.getBiomeFromSettings();
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public ChunkGenerator withSeed(long l) {
+        return this;
     }
 
     /*
@@ -52,9 +64,9 @@ extends ChunkGenerator<FlatLevelGeneratorSettings> {
     private Biome getBiomeFromSettings() {
         void var6_11;
         boolean bl;
-        Biome biome = ((FlatLevelGeneratorSettings)this.settings).getBiome();
+        Biome biome = this.settings.getBiome();
         FlatLevelBiomeWrapper flatLevelBiomeWrapper = new FlatLevelBiomeWrapper(biome.getSurfaceBuilder(), biome.getPrecipitation(), biome.getBiomeCategory(), biome.getDepth(), biome.getScale(), biome.getTemperature(), biome.getDownfall(), biome.getSpecialEffects(), biome.getParent());
-        Map<String, Map<String, String>> map = ((FlatLevelGeneratorSettings)this.settings).getStructuresOptions();
+        Map<String, Map<String, String>> map = this.settings.getStructuresOptions();
         for (String string : map.keySet()) {
             ConfiguredFeature<?, ?>[] configuredFeatureArray = FlatLevelGeneratorSettings.STRUCTURE_FEATURES.get(string);
             if (configuredFeatureArray == null) continue;
@@ -70,7 +82,7 @@ extends ChunkGenerator<FlatLevelGeneratorSettings> {
                 flatLevelBiomeWrapper.addStructureStart(structureFeature.configured(featureConfiguration2));
             }
         }
-        boolean bl2 = bl = (!((FlatLevelGeneratorSettings)this.settings).isVoidGen() || biome == Biomes.THE_VOID) && map.containsKey("decoration");
+        boolean bl2 = bl = (!this.settings.isVoidGen() || biome == Biomes.THE_VOID) && map.containsKey("decoration");
         if (bl) {
             ArrayList<GenerationStep.Decoration> list = Lists.newArrayList();
             list.add(GenerationStep.Decoration.UNDERGROUND_STRUCTURES);
@@ -82,12 +94,12 @@ extends ChunkGenerator<FlatLevelGeneratorSettings> {
                 }
             }
         }
-        BlockState[] blockStates = ((FlatLevelGeneratorSettings)this.settings).getLayers();
+        BlockState[] blockStates = this.settings.getLayers();
         boolean bl3 = false;
         while (var6_11 < blockStates.length) {
             BlockState blockState = blockStates[var6_11];
             if (blockState != null && !Heightmap.Types.MOTION_BLOCKING.isOpaque().test(blockState)) {
-                ((FlatLevelGeneratorSettings)this.settings).deleteLayer((int)var6_11);
+                this.settings.deleteLayer((int)var6_11);
                 flatLevelBiomeWrapper.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, Feature.FILL_LAYER.configured(new LayerConfiguration((int)var6_11, blockState)));
             }
             ++var6_11;
@@ -101,8 +113,14 @@ extends ChunkGenerator<FlatLevelGeneratorSettings> {
 
     @Override
     public int getSpawnHeight() {
-        ChunkAccess chunkAccess = this.level.getChunk(0, 0);
-        return chunkAccess.getHeight(Heightmap.Types.MOTION_BLOCKING, 8, 8);
+        BlockState[] blockStates = this.settings.getLayers();
+        for (int i = 0; i < blockStates.length; ++i) {
+            BlockState blockState;
+            BlockState blockState2 = blockState = blockStates[i] == null ? Blocks.AIR.defaultBlockState() : blockStates[i];
+            if (Heightmap.Types.MOTION_BLOCKING.isOpaque().test(blockState)) continue;
+            return i - 1;
+        }
+        return blockStates.length;
     }
 
     @Override
@@ -117,7 +135,7 @@ extends ChunkGenerator<FlatLevelGeneratorSettings> {
 
     @Override
     public void fillFromNoise(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
-        BlockState[] blockStates = ((FlatLevelGeneratorSettings)this.settings).getLayers();
+        BlockState[] blockStates = this.settings.getLayers();
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         Heightmap heightmap = chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);
         Heightmap heightmap2 = chunkAccess.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
@@ -136,7 +154,7 @@ extends ChunkGenerator<FlatLevelGeneratorSettings> {
 
     @Override
     public int getBaseHeight(int i, int j, Heightmap.Types types) {
-        BlockState[] blockStates = ((FlatLevelGeneratorSettings)this.settings).getLayers();
+        BlockState[] blockStates = this.settings.getLayers();
         for (int k = blockStates.length - 1; k >= 0; --k) {
             BlockState blockState = blockStates[k];
             if (blockState == null || !types.isOpaque().test(blockState)) continue;
@@ -147,7 +165,7 @@ extends ChunkGenerator<FlatLevelGeneratorSettings> {
 
     @Override
     public BlockGetter getBaseColumn(int i, int j) {
-        return new NoiseColumn(((FlatLevelGeneratorSettings)this.settings).getLayers());
+        return new NoiseColumn((BlockState[])Arrays.stream(this.settings.getLayers()).map(blockState -> blockState == null ? Blocks.AIR.defaultBlockState() : blockState).toArray(BlockState[]::new));
     }
 
     @Override
@@ -170,7 +188,7 @@ extends ChunkGenerator<FlatLevelGeneratorSettings> {
     @Override
     @Nullable
     public BlockPos findNearestMapFeature(ServerLevel serverLevel, String string, BlockPos blockPos, int i, boolean bl) {
-        if (!((FlatLevelGeneratorSettings)this.settings).getStructuresOptions().keySet().contains(string.toLowerCase(Locale.ROOT))) {
+        if (!this.settings.getStructuresOptions().keySet().contains(string.toLowerCase(Locale.ROOT))) {
             return null;
         }
         return super.findNearestMapFeature(serverLevel, string, blockPos, i, bl);

@@ -5,10 +5,8 @@ package net.minecraft.world.level.newbiome.layer;
 
 import java.util.function.LongFunction;
 import net.minecraft.core.Registry;
-import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
-import net.minecraft.world.level.levelgen.OverworldGeneratorSettings;
 import net.minecraft.world.level.newbiome.area.Area;
 import net.minecraft.world.level.newbiome.area.AreaFactory;
 import net.minecraft.world.level.newbiome.area.LazyArea;
@@ -57,7 +55,7 @@ public class Layers {
         return areaFactory2;
     }
 
-    public static <T extends Area, C extends BigContext<T>> AreaFactory<T> getDefaultLayer(LevelType levelType, OverworldGeneratorSettings overworldGeneratorSettings, LongFunction<C> longFunction) {
+    private static <T extends Area, C extends BigContext<T>> AreaFactory<T> getDefaultLayer(boolean bl, int i, int j, LongFunction<C> longFunction) {
         AreaFactory areaFactory = IslandLayer.INSTANCE.run((BigContext)longFunction.apply(1L));
         areaFactory = ZoomLayer.FUZZY.run((BigContext)longFunction.apply(2000L), areaFactory);
         areaFactory = AddIslandLayer.INSTANCE.run((BigContext)longFunction.apply(1L), areaFactory);
@@ -78,14 +76,11 @@ public class Layers {
         areaFactory = AddIslandLayer.INSTANCE.run((BigContext)longFunction.apply(4L), areaFactory);
         areaFactory = AddMushroomIslandLayer.INSTANCE.run((BigContext)longFunction.apply(5L), areaFactory);
         areaFactory = AddDeepOceanLayer.INSTANCE.run((BigContext)longFunction.apply(4L), areaFactory);
-        areaFactory = Layers.zoom(1000L, ZoomLayer.NORMAL, areaFactory, 0, longFunction);
-        int i = levelType == LevelType.LARGE_BIOMES ? 6 : overworldGeneratorSettings.getBiomeSize();
-        int j = overworldGeneratorSettings.getRiverSize();
-        AreaFactory areaFactory3 = areaFactory;
+        AreaFactory areaFactory3 = areaFactory = Layers.zoom(1000L, ZoomLayer.NORMAL, areaFactory, 0, longFunction);
         areaFactory3 = Layers.zoom(1000L, ZoomLayer.NORMAL, areaFactory3, 0, longFunction);
         areaFactory3 = RiverInitLayer.INSTANCE.run((BigContext)longFunction.apply(100L), areaFactory3);
         AreaFactory areaFactory4 = areaFactory;
-        areaFactory4 = new BiomeInitLayer(levelType, overworldGeneratorSettings.getFixedBiome()).run((BigContext)longFunction.apply(200L), areaFactory4);
+        areaFactory4 = new BiomeInitLayer(bl).run((BigContext)longFunction.apply(200L), areaFactory4);
         areaFactory4 = RareBiomeLargeLayer.INSTANCE.run((BigContext)longFunction.apply(1001L), areaFactory4);
         areaFactory4 = Layers.zoom(1000L, ZoomLayer.NORMAL, areaFactory4, 2, longFunction);
         areaFactory4 = BiomeEdgeLayer.INSTANCE.run((BigContext)longFunction.apply(1000L), areaFactory4);
@@ -111,9 +106,9 @@ public class Layers {
         return areaFactory4;
     }
 
-    public static Layer getDefaultLayer(long l, LevelType levelType, OverworldGeneratorSettings overworldGeneratorSettings) {
-        int i = 25;
-        AreaFactory<LazyArea> areaFactory = Layers.getDefaultLayer(levelType, overworldGeneratorSettings, (long m) -> new LazyAreaContext(25, l, m));
+    public static Layer getDefaultLayer(long l, boolean bl, int i, int j) {
+        int k = 25;
+        AreaFactory<LazyArea> areaFactory = Layers.getDefaultLayer(bl, i, j, m -> new LazyAreaContext(25, l, m));
         return new Layer(areaFactory);
     }
 

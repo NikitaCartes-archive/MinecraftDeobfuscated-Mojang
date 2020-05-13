@@ -7,10 +7,9 @@ import com.mojang.datafixers.Dynamic;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
 
@@ -21,7 +20,7 @@ extends Feature<LayerConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, LayerConfiguration layerConfiguration) {
+    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, LayerConfiguration layerConfiguration) {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int i = 0; i < 16; ++i) {
             for (int j = 0; j < 16; ++j) {
@@ -29,8 +28,8 @@ extends Feature<LayerConfiguration> {
                 int l = blockPos.getZ() + j;
                 int m = layerConfiguration.height;
                 mutableBlockPos.set(k, m, l);
-                if (!levelAccessor.getBlockState(mutableBlockPos).isAir()) continue;
-                levelAccessor.setBlock(mutableBlockPos, layerConfiguration.state, 2);
+                if (!worldGenLevel.getBlockState(mutableBlockPos).isAir()) continue;
+                worldGenLevel.setBlock(mutableBlockPos, layerConfiguration.state, 2);
             }
         }
         return true;

@@ -35,8 +35,6 @@ public interface LevelAccessor
 extends EntityGetter,
 LevelReader,
 LevelSimulatedRW {
-    public long getSeed();
-
     default public float getMoonBrightness() {
         return Dimension.MOON_BRIGHTNESS_PER_PHASE[this.getDimension().getMoonPhase(this.getLevelData().getDayTime())];
     }
@@ -83,7 +81,7 @@ LevelSimulatedRW {
     public void levelEvent(@Nullable Player var1, int var2, BlockPos var3, int var4);
 
     default public int getHeight() {
-        return this.getDimension().isHasCeiling() ? 128 : 256;
+        return this.dimensionType().hasCeiling() ? 128 : 256;
     }
 
     default public void levelEvent(int i, BlockPos blockPos, int j) {

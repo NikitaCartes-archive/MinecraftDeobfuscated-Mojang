@@ -7,11 +7,10 @@ import com.mojang.datafixers.Dynamic;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.SpringConfiguration;
 
@@ -22,53 +21,53 @@ extends Feature<SpringConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, SpringConfiguration springConfiguration) {
-        if (!springConfiguration.validBlocks.contains(levelAccessor.getBlockState(blockPos.above()).getBlock())) {
+    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, SpringConfiguration springConfiguration) {
+        if (!springConfiguration.validBlocks.contains(worldGenLevel.getBlockState(blockPos.above()).getBlock())) {
             return false;
         }
-        if (springConfiguration.requiresBlockBelow && !springConfiguration.validBlocks.contains(levelAccessor.getBlockState(blockPos.below()).getBlock())) {
+        if (springConfiguration.requiresBlockBelow && !springConfiguration.validBlocks.contains(worldGenLevel.getBlockState(blockPos.below()).getBlock())) {
             return false;
         }
-        BlockState blockState = levelAccessor.getBlockState(blockPos);
+        BlockState blockState = worldGenLevel.getBlockState(blockPos);
         if (!blockState.isAir() && !springConfiguration.validBlocks.contains(blockState.getBlock())) {
             return false;
         }
         int i = 0;
         int j = 0;
-        if (springConfiguration.validBlocks.contains(levelAccessor.getBlockState(blockPos.west()).getBlock())) {
+        if (springConfiguration.validBlocks.contains(worldGenLevel.getBlockState(blockPos.west()).getBlock())) {
             ++j;
         }
-        if (springConfiguration.validBlocks.contains(levelAccessor.getBlockState(blockPos.east()).getBlock())) {
+        if (springConfiguration.validBlocks.contains(worldGenLevel.getBlockState(blockPos.east()).getBlock())) {
             ++j;
         }
-        if (springConfiguration.validBlocks.contains(levelAccessor.getBlockState(blockPos.north()).getBlock())) {
+        if (springConfiguration.validBlocks.contains(worldGenLevel.getBlockState(blockPos.north()).getBlock())) {
             ++j;
         }
-        if (springConfiguration.validBlocks.contains(levelAccessor.getBlockState(blockPos.south()).getBlock())) {
+        if (springConfiguration.validBlocks.contains(worldGenLevel.getBlockState(blockPos.south()).getBlock())) {
             ++j;
         }
-        if (springConfiguration.validBlocks.contains(levelAccessor.getBlockState(blockPos.below()).getBlock())) {
+        if (springConfiguration.validBlocks.contains(worldGenLevel.getBlockState(blockPos.below()).getBlock())) {
             ++j;
         }
         int k = 0;
-        if (levelAccessor.isEmptyBlock(blockPos.west())) {
+        if (worldGenLevel.isEmptyBlock(blockPos.west())) {
             ++k;
         }
-        if (levelAccessor.isEmptyBlock(blockPos.east())) {
+        if (worldGenLevel.isEmptyBlock(blockPos.east())) {
             ++k;
         }
-        if (levelAccessor.isEmptyBlock(blockPos.north())) {
+        if (worldGenLevel.isEmptyBlock(blockPos.north())) {
             ++k;
         }
-        if (levelAccessor.isEmptyBlock(blockPos.south())) {
+        if (worldGenLevel.isEmptyBlock(blockPos.south())) {
             ++k;
         }
-        if (levelAccessor.isEmptyBlock(blockPos.below())) {
+        if (worldGenLevel.isEmptyBlock(blockPos.below())) {
             ++k;
         }
         if (j == springConfiguration.rockCount && k == springConfiguration.holeCount) {
-            levelAccessor.setBlock(blockPos, springConfiguration.state.createLegacyBlock(), 2);
-            levelAccessor.getLiquidTicks().scheduleTick(blockPos, springConfiguration.state.getType(), 0);
+            worldGenLevel.setBlock(blockPos, springConfiguration.state.createLegacyBlock(), 2);
+            worldGenLevel.getLiquidTicks().scheduleTick(blockPos, springConfiguration.state.getType(), 0);
             ++i;
         }
         return i > 0;

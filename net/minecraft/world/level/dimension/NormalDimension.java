@@ -3,8 +3,6 @@
  */
 package net.minecraft.world.level.dimension;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
@@ -12,13 +10,10 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.Dimension;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class NormalDimension
@@ -32,16 +27,12 @@ extends Dimension {
         return DimensionType.OVERWORLD;
     }
 
-    public ChunkGenerator<? extends ChunkGeneratorSettings> createRandomLevelGenerator() {
-        return this.level.getLevelData().getGeneratorProvider().create(this.level);
-    }
-
     @Override
     @Nullable
-    public BlockPos getSpawnPosInChunk(ChunkPos chunkPos, boolean bl) {
+    public BlockPos getSpawnPosInChunk(long l, ChunkPos chunkPos, boolean bl) {
         for (int i = chunkPos.getMinBlockX(); i <= chunkPos.getMaxBlockX(); ++i) {
             for (int j = chunkPos.getMinBlockZ(); j <= chunkPos.getMaxBlockZ(); ++j) {
-                BlockPos blockPos = this.getValidSpawnPosition(i, j, bl);
+                BlockPos blockPos = this.getValidSpawnPosition(l, i, j, bl);
                 if (blockPos == null) continue;
                 return blockPos;
             }
@@ -51,7 +42,7 @@ extends Dimension {
 
     @Override
     @Nullable
-    public BlockPos getValidSpawnPosition(int i, int j, boolean bl) {
+    public BlockPos getValidSpawnPosition(long l, int i, int j, boolean bl) {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, 0, j);
         Biome biome = this.level.getBiome(mutableBlockPos);
         BlockState blockState = biome.getSurfaceBuilderConfig().getTopMaterial();
@@ -66,8 +57,8 @@ extends Dimension {
         if (levelChunk.getHeight(Heightmap.Types.WORLD_SURFACE, i & 0xF, j & 0xF) > levelChunk.getHeight(Heightmap.Types.OCEAN_FLOOR, i & 0xF, j & 0xF)) {
             return null;
         }
-        for (int l = k + 1; l >= 0; --l) {
-            mutableBlockPos.set(i, l, j);
+        for (int m = k + 1; m >= 0; --m) {
+            mutableBlockPos.set(i, m, j);
             BlockState blockState2 = this.level.getBlockState(mutableBlockPos);
             if (!blockState2.getFluidState().isEmpty()) break;
             if (!blockState2.equals(blockState)) continue;
@@ -89,20 +80,8 @@ extends Dimension {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
-    public Vec3 getBrightnessDependentFogColor(Vec3 vec3, float f) {
-        return vec3.multiply(f * 0.94f + 0.06f, f * 0.94f + 0.06f, f * 0.91f + 0.09f);
-    }
-
-    @Override
     public boolean mayRespawn() {
         return true;
-    }
-
-    @Override
-    @Environment(value=EnvType.CLIENT)
-    public boolean isFoggyAt(int i, int j) {
-        return false;
     }
 }
 

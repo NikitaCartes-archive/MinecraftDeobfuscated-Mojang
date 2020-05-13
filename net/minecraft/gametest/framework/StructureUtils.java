@@ -179,14 +179,9 @@ public class StructureUtils {
     }
 
     private static void clearBlock(int i, BlockPos blockPos, ServerLevel serverLevel) {
-        BlockState blockState;
-        Object chunkGeneratorSettings = serverLevel.getChunkSource().getGenerator().getSettings();
-        if (chunkGeneratorSettings instanceof FlatLevelGeneratorSettings) {
-            BlockState[] blockStates = ((FlatLevelGeneratorSettings)chunkGeneratorSettings).getLayers();
-            blockState = blockPos.getY() < i ? blockStates[blockPos.getY() - 1] : Blocks.AIR.defaultBlockState();
-        } else {
-            blockState = blockPos.getY() == i - 1 ? serverLevel.getBiome(blockPos).getSurfaceBuilderConfig().getTopMaterial() : (blockPos.getY() < i - 1 ? serverLevel.getBiome(blockPos).getSurfaceBuilderConfig().getUnderMaterial() : Blocks.AIR.defaultBlockState());
-        }
+        FlatLevelGeneratorSettings flatLevelGeneratorSettings = FlatLevelGeneratorSettings.getDefault();
+        BlockState[] blockStates = flatLevelGeneratorSettings.getLayers();
+        BlockState blockState = blockPos.getY() < i ? blockStates[blockPos.getY() - 1] : Blocks.AIR.defaultBlockState();
         BlockInput blockInput = new BlockInput(blockState, Collections.emptySet(), null);
         blockInput.place(serverLevel, blockPos, 2);
         serverLevel.blockUpdated(blockPos, blockState.getBlock());

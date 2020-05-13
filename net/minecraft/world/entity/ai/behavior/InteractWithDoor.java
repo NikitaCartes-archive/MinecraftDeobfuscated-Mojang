@@ -41,7 +41,7 @@ extends Behavior<LivingEntity> {
     }
 
     private Set<BlockPos> getDoorsThatAreOnMyPath(ServerLevel serverLevel, List<GlobalPos> list, List<BlockPos> list2) {
-        return list.stream().filter(globalPos -> globalPos.dimension() == serverLevel.getDimension().getType()).map(GlobalPos::pos).filter(list2::contains).collect(Collectors.toSet());
+        return list.stream().filter(globalPos -> globalPos.dimension() == serverLevel.dimensionType()).map(GlobalPos::pos).filter(list2::contains).collect(Collectors.toSet());
     }
 
     private void openOrCloseDoors(ServerLevel serverLevel, List<BlockPos> list, Set<BlockPos> set, int i, LivingEntity livingEntity, Brain<?> brain) {
@@ -52,7 +52,7 @@ extends Behavior<LivingEntity> {
             if (BlockTags.WOODEN_DOORS.contains(block) && block instanceof DoorBlock) {
                 boolean bl = j >= i;
                 ((DoorBlock)block).setOpen(serverLevel, (BlockPos)blockPos, bl);
-                GlobalPos globalPos = GlobalPos.of(serverLevel.getDimension().getType(), blockPos);
+                GlobalPos globalPos = GlobalPos.of(serverLevel.dimensionType(), blockPos);
                 if (!brain.getMemory(MemoryModuleType.OPENED_DOORS).isPresent() && bl) {
                     brain.setMemory(MemoryModuleType.OPENED_DOORS, Sets.newHashSet(globalPos));
                 } else {
@@ -76,7 +76,7 @@ extends Behavior<LivingEntity> {
                 GlobalPos globalPos = (GlobalPos)iterator.next();
                 BlockPos blockPos = globalPos.pos();
                 int j = list.indexOf(blockPos);
-                if (serverLevel.getDimension().getType() != globalPos.dimension()) {
+                if (serverLevel.dimensionType() != globalPos.dimension()) {
                     iterator.remove();
                     continue;
                 }

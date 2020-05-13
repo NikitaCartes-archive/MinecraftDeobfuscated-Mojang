@@ -25,7 +25,7 @@ extends Block {
 
     @Override
     public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        if (level.getDimension().isUltraWarm()) {
+        if (level.dimensionType().ultraWarm()) {
             level.setBlock(blockPos, Blocks.SPONGE.defaultBlockState(), 3);
             level.levelEvent(2009, blockPos, 0);
             level.playSound(null, blockPos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 1.0f, (1.0f + level.getRandom().nextFloat() * 0.2f) * 0.7f);

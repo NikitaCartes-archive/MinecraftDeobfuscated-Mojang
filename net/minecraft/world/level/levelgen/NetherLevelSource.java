@@ -4,13 +4,14 @@
 package net.minecraft.world.level.levelgen;
 
 import java.util.List;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NetherGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
@@ -19,9 +20,17 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 public class NetherLevelSource
 extends NoiseBasedChunkGenerator<NetherGeneratorSettings> {
     private final double[] yOffsets = this.makeYOffsets();
+    private final NetherGeneratorSettings settings;
 
-    public NetherLevelSource(LevelAccessor levelAccessor, BiomeSource biomeSource, NetherGeneratorSettings netherGeneratorSettings) {
-        super(levelAccessor, biomeSource, 4, 8, 128, netherGeneratorSettings, false);
+    public NetherLevelSource(BiomeSource biomeSource, long l, NetherGeneratorSettings netherGeneratorSettings) {
+        super(biomeSource, l, netherGeneratorSettings, 4, 8, 128, false);
+        this.settings = netherGeneratorSettings;
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public ChunkGenerator withSeed(long l) {
+        return new NetherLevelSource(this.biomeSource.withSeed(l), l, this.settings);
     }
 
     @Override
@@ -62,21 +71,11 @@ extends NoiseBasedChunkGenerator<NetherGeneratorSettings> {
     }
 
     @Override
-    public List<Biome.SpawnerData> getMobsAt(StructureFeatureManager structureFeatureManager, MobCategory mobCategory, BlockPos blockPos) {
-        if (mobCategory == MobCategory.MONSTER) {
-            if (Feature.NETHER_BRIDGE.isInsideFeature(this.level, structureFeatureManager, blockPos)) {
-                return Feature.NETHER_BRIDGE.getSpecialEnemies();
-            }
-            if (Feature.NETHER_BRIDGE.isInsideBoundingFeature(this.level, structureFeatureManager, blockPos) && this.level.getBlockState(blockPos.below()).is(Blocks.NETHER_BRICKS)) {
-                return Feature.NETHER_BRIDGE.getSpecialEnemies();
-            }
+    public List<Biome.SpawnerData> getMobsAt(Biome biome, StructureFeatureManager structureFeatureManager, MobCategory mobCategory, BlockPos blockPos) {
+        if (mobCategory == MobCategory.MONSTER && Feature.NETHER_BRIDGE.isInsideFeature(structureFeatureManager, blockPos)) {
+            return Feature.NETHER_BRIDGE.getSpecialEnemies();
         }
-        return super.getMobsAt(structureFeatureManager, mobCategory, blockPos);
-    }
-
-    @Override
-    public int getSpawnHeight() {
-        return this.level.getSeaLevel() + 1;
+        return super.getMobsAt(biome, structureFeatureManager, mobCategory, blockPos);
     }
 
     @Override

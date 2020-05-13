@@ -24,11 +24,13 @@ import net.minecraft.advancements.critereon.FishingRodHookedTrigger;
 import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemDurabilityTrigger;
+import net.minecraft.advancements.critereon.ItemPickedUpByEntityTrigger;
 import net.minecraft.advancements.critereon.ItemUsedOnBlockTrigger;
 import net.minecraft.advancements.critereon.KilledByCrossbowTrigger;
 import net.minecraft.advancements.critereon.KilledTrigger;
 import net.minecraft.advancements.critereon.LevitationTrigger;
 import net.minecraft.advancements.critereon.LocationTrigger;
+import net.minecraft.advancements.critereon.LootTableTrigger;
 import net.minecraft.advancements.critereon.NetherTravelTrigger;
 import net.minecraft.advancements.critereon.PlacedBlockTrigger;
 import net.minecraft.advancements.critereon.PlayerHurtEntityTrigger;
@@ -82,10 +84,12 @@ public class CriteriaTriggers {
     public static final KilledByCrossbowTrigger KILLED_BY_CROSSBOW = CriteriaTriggers.register(new KilledByCrossbowTrigger());
     public static final LocationTrigger RAID_WIN = CriteriaTriggers.register(new LocationTrigger(new ResourceLocation("hero_of_the_village")));
     public static final LocationTrigger BAD_OMEN = CriteriaTriggers.register(new LocationTrigger(new ResourceLocation("voluntary_exile")));
-    public static final ItemUsedOnBlockTrigger SAFELY_HARVEST_HONEY = CriteriaTriggers.register(new ItemUsedOnBlockTrigger(new ResourceLocation("safely_harvest_honey")));
     public static final SlideDownBlockTrigger HONEY_BLOCK_SLIDE = CriteriaTriggers.register(new SlideDownBlockTrigger());
     public static final BeeNestDestroyedTrigger BEE_NEST_DESTROYED = CriteriaTriggers.register(new BeeNestDestroyedTrigger());
     public static final TargetBlockTrigger TARGET_BLOCK_HIT = CriteriaTriggers.register(new TargetBlockTrigger());
+    public static final ItemUsedOnBlockTrigger ITEM_USED_ON_BLOCK = CriteriaTriggers.register(new ItemUsedOnBlockTrigger());
+    public static final LootTableTrigger GENERATE_LOOT = CriteriaTriggers.register(new LootTableTrigger());
+    public static final ItemPickedUpByEntityTrigger ITEM_PICKED_UP_BY_ENTITY = CriteriaTriggers.register(new ItemPickedUpByEntityTrigger());
 
     private static <T extends CriterionTrigger<?>> T register(T criterionTrigger) {
         if (CRITERIA.containsKey(criterionTrigger.getId())) {

@@ -119,7 +119,7 @@ extends Item {
         Material material = blockState.getMaterial();
         boolean bl = blockState.canBeReplaced(this.content);
         if (blockState.isAir() || bl || blockState.getBlock() instanceof LiquidBlockContainer && ((LiquidBlockContainer)((Object)blockState.getBlock())).canPlaceLiquid(level, blockPos, blockState, this.content)) {
-            if (level.dimension.isUltraWarm() && this.content.is(FluidTags.WATER)) {
+            if (level.dimensionType().ultraWarm() && this.content.is(FluidTags.WATER)) {
                 int i = blockPos.getX();
                 int j = blockPos.getY();
                 int k = blockPos.getZ();

@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 
@@ -21,7 +20,7 @@ extends FeatureDecorator<DC> {
     }
 
     @Override
-    public final Stream<BlockPos> getPositions(LevelAccessor levelAccessor, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, DC decoratorConfiguration, BlockPos blockPos) {
+    public final Stream<BlockPos> getPositions(LevelAccessor levelAccessor, ChunkGenerator chunkGenerator, Random random, DC decoratorConfiguration, BlockPos blockPos) {
         return this.place(random, decoratorConfiguration, blockPos);
     }
 

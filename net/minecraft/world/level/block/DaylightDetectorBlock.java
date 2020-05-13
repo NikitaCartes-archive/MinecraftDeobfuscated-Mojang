@@ -54,7 +54,7 @@ extends BaseEntityBlock {
     }
 
     public static void updateSignalStrength(BlockState blockState, Level level, BlockPos blockPos) {
-        if (!level.dimension.isHasSkyLight()) {
+        if (!level.dimensionType().hasSkyLight()) {
             return;
         }
         int i = level.getBrightness(LightLayer.SKY, blockPos) - level.getSkyDarken();

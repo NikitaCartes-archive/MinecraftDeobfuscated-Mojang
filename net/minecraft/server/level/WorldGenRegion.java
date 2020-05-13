@@ -25,8 +25,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.TickList;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.Block;
@@ -39,7 +39,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.dimension.Dimension;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
@@ -51,7 +51,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class WorldGenRegion
-implements LevelAccessor {
+implements WorldGenLevel {
     private static final Logger LOGGER = LogManager.getLogger();
     private final List<ChunkAccess> cache;
     private final int x;
@@ -62,7 +62,6 @@ implements LevelAccessor {
     private final LevelData levelData;
     private final Random random;
     private final Dimension dimension;
-    private final ChunkGeneratorSettings settings;
     private final TickList<Block> blockTicks = new WorldGenTickList<Block>(blockPos -> this.getChunk((BlockPos)blockPos).getBlockTicks());
     private final TickList<Fluid> liquidTicks = new WorldGenTickList<Fluid>(blockPos -> this.getChunk((BlockPos)blockPos).getLiquidTicks());
     private final BiomeManager biomeManager;
@@ -81,11 +80,10 @@ implements LevelAccessor {
         this.size = i;
         this.level = serverLevel;
         this.seed = serverLevel.getSeed();
-        this.settings = serverLevel.getChunkSource().getGenerator().getSettings();
         this.levelData = serverLevel.getLevelData();
         this.random = serverLevel.getRandom();
         this.dimension = serverLevel.getDimension();
-        this.biomeManager = new BiomeManager(this, LevelData.obfuscateSeed(this.seed), this.dimension.getType().getBiomeZoomer());
+        this.biomeManager = new BiomeManager(this, BiomeManager.obfuscateSeed(this.seed), serverLevel.dimensionType().getBiomeZoomer());
         this.firstPos = list.get(0).getPos();
         this.lastPos = list.get(list.size() - 1).getPos();
     }
@@ -343,6 +341,11 @@ implements LevelAccessor {
     @Override
     public Dimension getDimension() {
         return this.dimension;
+    }
+
+    @Override
+    public DimensionType dimensionType() {
+        return this.dimension.getType();
     }
 
     @Override

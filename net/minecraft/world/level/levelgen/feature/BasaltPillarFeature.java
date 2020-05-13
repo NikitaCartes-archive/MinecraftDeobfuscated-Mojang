@@ -12,9 +12,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
@@ -25,8 +25,8 @@ extends Feature<NoneFeatureConfiguration> {
     }
 
     @Override
-    public boolean place(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
-        if (!levelAccessor.isEmptyBlock(blockPos) || levelAccessor.isEmptyBlock(blockPos.above())) {
+    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
+        if (!worldGenLevel.isEmptyBlock(blockPos) || worldGenLevel.isEmptyBlock(blockPos.above())) {
             return false;
         }
         BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
@@ -35,22 +35,22 @@ extends Feature<NoneFeatureConfiguration> {
         boolean bl2 = true;
         boolean bl3 = true;
         boolean bl4 = true;
-        while (levelAccessor.isEmptyBlock(mutableBlockPos)) {
+        while (worldGenLevel.isEmptyBlock(mutableBlockPos)) {
             if (Level.isOutsideBuildHeight(mutableBlockPos)) {
                 return true;
             }
-            levelAccessor.setBlock(mutableBlockPos, Blocks.BASALT.defaultBlockState(), 2);
-            bl = bl && this.placeHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.NORTH));
-            bl2 = bl2 && this.placeHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.SOUTH));
-            bl3 = bl3 && this.placeHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.WEST));
-            bl4 = bl4 && this.placeHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.EAST));
+            worldGenLevel.setBlock(mutableBlockPos, Blocks.BASALT.defaultBlockState(), 2);
+            bl = bl && this.placeHangOff(worldGenLevel, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.NORTH));
+            bl2 = bl2 && this.placeHangOff(worldGenLevel, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.SOUTH));
+            bl3 = bl3 && this.placeHangOff(worldGenLevel, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.WEST));
+            bl4 = bl4 && this.placeHangOff(worldGenLevel, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.EAST));
             mutableBlockPos.move(Direction.DOWN);
         }
         mutableBlockPos.move(Direction.UP);
-        this.placeBaseHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.NORTH));
-        this.placeBaseHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.SOUTH));
-        this.placeBaseHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.WEST));
-        this.placeBaseHangOff(levelAccessor, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.EAST));
+        this.placeBaseHangOff(worldGenLevel, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.NORTH));
+        this.placeBaseHangOff(worldGenLevel, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.SOUTH));
+        this.placeBaseHangOff(worldGenLevel, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.WEST));
+        this.placeBaseHangOff(worldGenLevel, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.EAST));
         BlockPos.MutableBlockPos mutableBlockPos3 = new BlockPos.MutableBlockPos();
         for (int i = -3; i < 4; ++i) {
             for (int j = -3; j < 4; ++j) {
@@ -58,12 +58,12 @@ extends Feature<NoneFeatureConfiguration> {
                 if (random.nextInt(10) >= 10 - k) continue;
                 mutableBlockPos3.set(mutableBlockPos.offset(i, 0, j));
                 int l = 3;
-                while (levelAccessor.isEmptyBlock(mutableBlockPos2.setWithOffset(mutableBlockPos3, Direction.DOWN))) {
+                while (worldGenLevel.isEmptyBlock(mutableBlockPos2.setWithOffset(mutableBlockPos3, Direction.DOWN))) {
                     mutableBlockPos3.move(Direction.DOWN);
                     if (--l > 0) continue;
                 }
-                if (levelAccessor.isEmptyBlock(mutableBlockPos2.setWithOffset(mutableBlockPos3, Direction.DOWN))) continue;
-                levelAccessor.setBlock(mutableBlockPos3, Blocks.BASALT.defaultBlockState(), 2);
+                if (worldGenLevel.isEmptyBlock(mutableBlockPos2.setWithOffset(mutableBlockPos3, Direction.DOWN))) continue;
+                worldGenLevel.setBlock(mutableBlockPos3, Blocks.BASALT.defaultBlockState(), 2);
             }
         }
         return true;

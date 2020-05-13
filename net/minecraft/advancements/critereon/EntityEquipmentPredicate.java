@@ -87,5 +87,42 @@ public class EntityEquipmentPredicate {
         jsonObject.add("offhand", this.offhand.serializeToJson());
         return jsonObject;
     }
+
+    public static class Builder {
+        private ItemPredicate head = ItemPredicate.ANY;
+        private ItemPredicate chest = ItemPredicate.ANY;
+        private ItemPredicate legs = ItemPredicate.ANY;
+        private ItemPredicate feet = ItemPredicate.ANY;
+        private ItemPredicate mainhand = ItemPredicate.ANY;
+        private ItemPredicate offhand = ItemPredicate.ANY;
+
+        public static Builder equipment() {
+            return new Builder();
+        }
+
+        public Builder head(ItemPredicate itemPredicate) {
+            this.head = itemPredicate;
+            return this;
+        }
+
+        public Builder chest(ItemPredicate itemPredicate) {
+            this.chest = itemPredicate;
+            return this;
+        }
+
+        public Builder legs(ItemPredicate itemPredicate) {
+            this.legs = itemPredicate;
+            return this;
+        }
+
+        public Builder feet(ItemPredicate itemPredicate) {
+            this.feet = itemPredicate;
+            return this;
+        }
+
+        public EntityEquipmentPredicate build() {
+            return new EntityEquipmentPredicate(this.head, this.chest, this.legs, this.feet, this.mainhand, this.offhand);
+        }
+    }
 }
 

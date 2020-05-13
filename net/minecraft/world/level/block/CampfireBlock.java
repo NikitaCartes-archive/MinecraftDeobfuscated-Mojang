@@ -205,9 +205,9 @@ implements SimpleWaterloggedBlock {
         }
     }
 
-    public static boolean isSmokeyPos(Level level, BlockPos blockPos, int i) {
-        for (int j = 1; j <= i; ++j) {
-            BlockPos blockPos2 = blockPos.below(j);
+    public static boolean isSmokeyPos(Level level, BlockPos blockPos) {
+        for (int i = 1; i <= 5; ++i) {
+            BlockPos blockPos2 = blockPos.below(i);
             BlockState blockState = level.getBlockState(blockPos2);
             if (CampfireBlock.isLitCampfire(blockState)) {
                 return true;

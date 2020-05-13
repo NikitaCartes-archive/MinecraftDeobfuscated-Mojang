@@ -43,7 +43,7 @@ extends ChunkSource {
     public ClientChunkCache(ClientLevel clientLevel, int i) {
         this.level = clientLevel;
         this.emptyChunk = new EmptyLevelChunk((Level)clientLevel, new ChunkPos(0, 0));
-        this.lightEngine = new LevelLightEngine(this, true, clientLevel.getDimension().isHasSkyLight());
+        this.lightEngine = new LevelLightEngine(this, true, clientLevel.dimensionType().hasSkyLight());
         this.storage = new Storage(ClientChunkCache.calculateStorageRange(i));
     }
 
@@ -119,7 +119,6 @@ extends ChunkSource {
         return levelChunk;
     }
 
-    @Override
     public void tick(BooleanSupplier booleanSupplier) {
     }
 

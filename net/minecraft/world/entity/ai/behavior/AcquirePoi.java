@@ -66,7 +66,7 @@ extends Behavior<PathfinderMob> {
             BlockPos blockPos2 = path.getTarget();
             poiManager.getType(blockPos2).ifPresent(poiType -> {
                 poiManager.take(this.poiType.getPredicate(), blockPos2 -> blockPos2.equals(blockPos2), blockPos2, 1);
-                pathfinderMob.getBrain().setMemory(this.memoryType, GlobalPos.of(serverLevel.getDimension().getType(), blockPos2));
+                pathfinderMob.getBrain().setMemory(this.memoryType, GlobalPos.of(serverLevel.dimensionType(), blockPos2));
                 DebugPackets.sendPoiTicketCountPacket(serverLevel, blockPos2);
             });
         } else if (this.triedCount < 5) {

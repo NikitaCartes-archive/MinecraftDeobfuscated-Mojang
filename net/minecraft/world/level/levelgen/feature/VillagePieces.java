@@ -32,7 +32,7 @@ public class VillagePieces {
         TaigaVillagePools.bootstrap();
     }
 
-    public static void addPieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, BlockPos blockPos, List<StructurePiece> list, WorldgenRandom worldgenRandom, JigsawConfiguration jigsawConfiguration) {
+    public static void addPieces(ChunkGenerator chunkGenerator, StructureManager structureManager, BlockPos blockPos, List<StructurePiece> list, WorldgenRandom worldgenRandom, JigsawConfiguration jigsawConfiguration) {
         VillagePieces.bootstrap();
         JigsawPlacement.addPieces(jigsawConfiguration.startPool, jigsawConfiguration.size, VillagePiece::new, chunkGenerator, structureManager, blockPos, list, worldgenRandom, true, true);
     }

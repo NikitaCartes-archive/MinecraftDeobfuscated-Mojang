@@ -129,7 +129,7 @@ extends BlockEntity {
     }
 
     public void generate(ServerLevel serverLevel, int i) {
-        ChunkGenerator<?> chunkGenerator = serverLevel.getChunkSource().getGenerator();
+        ChunkGenerator chunkGenerator = serverLevel.getChunkSource().getGenerator();
         StructureManager structureManager = serverLevel.getStructureManager();
         StructureFeatureManager structureFeatureManager = serverLevel.structureFeatureManager();
         Random random = serverLevel.getRandom();

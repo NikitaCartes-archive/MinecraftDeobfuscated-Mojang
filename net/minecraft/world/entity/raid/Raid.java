@@ -374,7 +374,7 @@ public class Raid {
             Set<Raider> set2 = iterator.next();
             for (Raider raider : set2) {
                 BlockPos blockPos = raider.blockPosition();
-                if (raider.removed || raider.dimension != this.level.getDimension().getType() || this.center.distSqr(blockPos) >= 12544.0) {
+                if (raider.removed || raider.dimension != this.level.dimensionType() || this.center.distSqr(blockPos) >= 12544.0) {
                     set.add(raider);
                     continue;
                 }

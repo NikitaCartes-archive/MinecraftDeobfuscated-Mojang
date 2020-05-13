@@ -8,7 +8,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
@@ -49,7 +48,7 @@ public class StructureFeatureIO {
     }
 
     @Nullable
-    public static StructureStart loadStaticStart(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, CompoundTag compoundTag) {
+    public static StructureStart loadStaticStart(StructureManager structureManager, CompoundTag compoundTag, long l) {
         String string = compoundTag.getString("id");
         if ("INVALID".equals(string)) {
             return StructureStart.INVALID_START;
@@ -65,9 +64,9 @@ public class StructureFeatureIO {
         BoundingBox boundingBox = compoundTag.contains("BB") ? new BoundingBox(compoundTag.getIntArray("BB")) : BoundingBox.getUnknownBox();
         ListTag listTag = compoundTag.getList("Children", 10);
         try {
-            StructureStart structureStart = structureFeature.getStartFactory().create(structureFeature, i, j, boundingBox, k, chunkGenerator.getSeed());
-            for (int l = 0; l < listTag.size(); ++l) {
-                CompoundTag compoundTag2 = listTag.getCompound(l);
+            StructureStart structureStart = structureFeature.getStartFactory().create(structureFeature, i, j, boundingBox, k, l);
+            for (int m = 0; m < listTag.size(); ++m) {
+                CompoundTag compoundTag2 = listTag.getCompound(m);
                 String string2 = compoundTag2.getString("id");
                 StructurePieceType structurePieceType = Registry.STRUCTURE_PIECE.get(new ResourceLocation(string2.toLowerCase(Locale.ROOT)));
                 if (structurePieceType == null) {
