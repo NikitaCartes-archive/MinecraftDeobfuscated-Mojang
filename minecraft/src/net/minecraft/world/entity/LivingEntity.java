@@ -2,8 +2,10 @@ package net.minecraft.world.entity;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
@@ -27,6 +29,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
@@ -45,7 +48,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.Tag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatRules;
@@ -64,7 +66,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.animal.Wolf;
@@ -205,15 +206,20 @@ public abstract class LivingEntity extends Entity {
 		this.yRot = (float)(Math.random() * (float) (Math.PI * 2));
 		this.yHeadRot = this.yRot;
 		this.maxUpStep = 0.6F;
-		this.brain = this.makeBrain(new Dynamic<>(NbtOps.INSTANCE, new CompoundTag()));
+		NbtOps nbtOps = NbtOps.INSTANCE;
+		this.brain = this.makeBrain(new Dynamic<>(nbtOps, nbtOps.createMap(ImmutableMap.of(nbtOps.createString("memories"), nbtOps.emptyMap()))));
 	}
 
 	public Brain<?> getBrain() {
 		return this.brain;
 	}
 
+	protected Brain.Provider<?> brainProvider() {
+		return Brain.provider(ImmutableList.of(), ImmutableList.of());
+	}
+
 	protected Brain<?> makeBrain(Dynamic<?> dynamic) {
-		return new Brain<>(ImmutableList.<MemoryModuleType<?>>of(), ImmutableList.of(), dynamic);
+		return this.brainProvider().makeBrain(dynamic);
 	}
 
 	@Override
@@ -580,7 +586,8 @@ public abstract class LivingEntity extends Entity {
 			compoundTag.putInt("SleepingY", blockPos.getY());
 			compoundTag.putInt("SleepingZ", blockPos.getZ());
 		});
-		compoundTag.put("Brain", this.brain.serialize(NbtOps.INSTANCE));
+		DataResult<Tag> dataResult = this.brain.serializeStart(NbtOps.INSTANCE);
+		dataResult.resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("Brain", tag));
 	}
 
 	@Override
@@ -1825,7 +1832,7 @@ public abstract class LivingEntity extends Entity {
 		this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04F, 0.0));
 	}
 
-	protected void jumpInLiquid(Tag<Fluid> tag) {
+	protected void jumpInLiquid(net.minecraft.tags.Tag<Fluid> tag) {
 		this.setDeltaMovement(this.getDeltaMovement().add(0.0, 0.04F, 0.0));
 	}
 

@@ -1,19 +1,19 @@
 package net.minecraft.world.level.levelgen.feature.structures;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
 import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Deserializer;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -23,44 +23,55 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnoreProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.JigsawReplacementProcessor;
-import net.minecraft.world.level.levelgen.structure.templatesystem.NopProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 public class SinglePoolElement extends StructurePoolElement {
+	private static final Codec<Either<ResourceLocation, StructureTemplate>> TEMPLATE_CODEC = Codec.of(
+		SinglePoolElement::encodeTemplate, ResourceLocation.CODEC.map(Either::left)
+	);
+	public static final Codec<SinglePoolElement> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(templateCodec(), processorsCodec(), projectionCodec()).apply(instance, SinglePoolElement::new)
+	);
 	protected final Either<ResourceLocation, StructureTemplate> template;
 	protected final ImmutableList<StructureProcessor> processors;
 
-	@Deprecated
-	public SinglePoolElement(String string, List<StructureProcessor> list) {
-		this(string, list, StructureTemplatePool.Projection.RIGID);
+	private static <T> DataResult<T> encodeTemplate(Either<ResourceLocation, StructureTemplate> either, DynamicOps<T> dynamicOps, T object) {
+		Optional<ResourceLocation> optional = either.left();
+		return !optional.isPresent()
+			? DataResult.error("Can not serialize a runtime pool element")
+			: ResourceLocation.CODEC.encode((ResourceLocation)optional.get(), dynamicOps, object);
 	}
 
-	public SinglePoolElement(String string, List<StructureProcessor> list, StructureTemplatePool.Projection projection) {
+	protected static <E extends SinglePoolElement> RecordCodecBuilder<E, List<StructureProcessor>> processorsCodec() {
+		return StructureProcessorType.CODEC.listOf().fieldOf("processors").forGetter(singlePoolElement -> singlePoolElement.processors);
+	}
+
+	protected static <E extends SinglePoolElement> RecordCodecBuilder<E, Either<ResourceLocation, StructureTemplate>> templateCodec() {
+		return TEMPLATE_CODEC.fieldOf("location").forGetter(singlePoolElement -> singlePoolElement.template);
+	}
+
+	@Deprecated
+	public SinglePoolElement(String string, List<StructureProcessor> list) {
+		this(Either.left(new ResourceLocation(string)), list, StructureTemplatePool.Projection.RIGID);
+	}
+
+	protected SinglePoolElement(Either<ResourceLocation, StructureTemplate> either, List<StructureProcessor> list, StructureTemplatePool.Projection projection) {
 		super(projection);
-		this.template = Either.left(new ResourceLocation(string));
+		this.template = either;
 		this.processors = ImmutableList.copyOf(list);
 	}
 
 	public SinglePoolElement(StructureTemplate structureTemplate, List<StructureProcessor> list, StructureTemplatePool.Projection projection) {
-		super(projection);
-		this.template = Either.right(structureTemplate);
-		this.processors = ImmutableList.copyOf(list);
+		this(Either.right(structureTemplate), list, projection);
 	}
 
 	@Deprecated
 	public SinglePoolElement(String string) {
 		this(string, ImmutableList.of());
-	}
-
-	public SinglePoolElement(Dynamic<?> dynamic) {
-		super(dynamic);
-		this.template = Either.left(new ResourceLocation(dynamic.get("location").asString("")));
-		this.processors = ImmutableList.copyOf(
-			dynamic.get("processors").asList(dynamicx -> Deserializer.deserialize(dynamicx, Registry.STRUCTURE_PROCESSOR, "processor_type", NopProcessor.INSTANCE))
-		);
 	}
 
 	private StructureTemplate getTemplate(StructureManager structureManager) {
@@ -150,23 +161,8 @@ public class SinglePoolElement extends StructurePoolElement {
 	}
 
 	@Override
-	public StructurePoolElementType getType() {
+	public StructurePoolElementType<?> getType() {
 		return StructurePoolElementType.SINGLE;
-	}
-
-	@Override
-	public <T> Dynamic<T> getDynamic(DynamicOps<T> dynamicOps) {
-		return new Dynamic<>(
-			dynamicOps,
-			dynamicOps.createMap(
-				ImmutableMap.of(
-					dynamicOps.createString("location"),
-					dynamicOps.createString(((ResourceLocation)this.template.left().orElseThrow(RuntimeException::new)).toString()),
-					dynamicOps.createString("processors"),
-					dynamicOps.createList(this.processors.stream().map(structureProcessor -> structureProcessor.serialize(dynamicOps).getValue()))
-				)
-			)
-		);
 	}
 
 	public String toString() {

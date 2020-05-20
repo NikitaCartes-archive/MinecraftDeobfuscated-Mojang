@@ -3,34 +3,44 @@ package net.minecraft.world.level.biome;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 
 public abstract class BiomeSource implements BiomeManager.NoiseBiomeSource {
+	public static final Codec<BiomeSource> CODEC = Registry.BIOME_SOURCE.dispatchStable(BiomeSource::codec, Function.identity());
 	private static final List<Biome> PLAYER_SPAWN_BIOMES = Lists.<Biome>newArrayList(
 		Biomes.FOREST, Biomes.PLAINS, Biomes.TAIGA, Biomes.TAIGA_HILLS, Biomes.WOODED_HILLS, Biomes.JUNGLE, Biomes.JUNGLE_HILLS
 	);
 	protected final Map<StructureFeature<?>, Boolean> supportedStructures = Maps.<StructureFeature<?>, Boolean>newHashMap();
 	protected final Set<BlockState> surfaceBlocks = Sets.<BlockState>newHashSet();
-	protected final Set<Biome> possibleBiomes;
+	protected final List<Biome> possibleBiomes;
 
-	protected BiomeSource(Set<Biome> set) {
-		this.possibleBiomes = set;
+	protected BiomeSource(List<Biome> list) {
+		this.possibleBiomes = list;
 	}
+
+	protected abstract Codec<? extends BiomeSource> codec();
 
 	@Environment(EnvType.CLIENT)
 	public abstract BiomeSource withSeed(long l);
 
 	public List<Biome> getPlayerSpawnBiomes() {
 		return PLAYER_SPAWN_BIOMES;
+	}
+
+	public List<Biome> possibleBiomes() {
+		return this.possibleBiomes;
 	}
 
 	public Set<Biome> getBiomesWithin(int i, int j, int k, int l) {
@@ -59,6 +69,7 @@ public abstract class BiomeSource implements BiomeManager.NoiseBiomeSource {
 		return set;
 	}
 
+	@Nullable
 	public BlockPos findBiomeHorizontal(int i, int j, int k, int l, List<Biome> list, Random random) {
 		return this.findBiomeHorizontal(i, j, k, l, 1, list, random, false);
 	}
@@ -107,10 +118,6 @@ public abstract class BiomeSource implements BiomeManager.NoiseBiomeSource {
 		return blockPos;
 	}
 
-	public float getHeightValue(int i, int j) {
-		return 0.0F;
-	}
-
 	public boolean canGenerateStructure(StructureFeature<?> structureFeature) {
 		return (Boolean)this.supportedStructures
 			.computeIfAbsent(structureFeature, structureFeaturex -> this.possibleBiomes.stream().anyMatch(biome -> biome.isValidStart(structureFeaturex)));
@@ -124,5 +131,13 @@ public abstract class BiomeSource implements BiomeManager.NoiseBiomeSource {
 		}
 
 		return this.surfaceBlocks;
+	}
+
+	static {
+		Registry.register(Registry.BIOME_SOURCE, "fixed", FixedBiomeSource.CODEC);
+		Registry.register(Registry.BIOME_SOURCE, "multi_noise", MultiNoiseBiomeSource.CODEC);
+		Registry.register(Registry.BIOME_SOURCE, "checkerboard", CheckerboardColumnBiomeSource.CODEC);
+		Registry.register(Registry.BIOME_SOURCE, "vanilla_layered", OverworldBiomeSource.CODEC);
+		Registry.register(Registry.BIOME_SOURCE, "the_end", TheEndBiomeSource.CODEC);
 	}
 }

@@ -174,6 +174,11 @@ public class LongArrayTag extends CollectionTag<LongTag> {
 		return LongTag.valueOf(l);
 	}
 
+	@Override
+	public byte getElementType() {
+		return 4;
+	}
+
 	public void clear() {
 		this.data = new long[0];
 	}

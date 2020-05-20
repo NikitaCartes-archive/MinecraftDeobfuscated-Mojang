@@ -29,6 +29,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -44,6 +45,7 @@ import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -180,7 +182,6 @@ public abstract class Entity implements Nameable, CommandSource {
 	public int changingDimensionDelay;
 	protected boolean isInsidePortal;
 	protected int portalTime;
-	public DimensionType dimension;
 	protected BlockPos portalEntranceBlock;
 	protected Vec3 portalEntranceOffset;
 	protected Direction portalEntranceForwards;
@@ -202,10 +203,6 @@ public abstract class Entity implements Nameable, CommandSource {
 		this.position = Vec3.ZERO;
 		this.blockPosition = BlockPos.ZERO;
 		this.setPos(0.0, 0.0, 0.0);
-		if (level != null) {
-			this.dimension = level.dimensionType();
-		}
-
 		this.entityData = new SynchedEntityData(this);
 		this.entityData.define(DATA_SHARED_FLAGS_ID, (byte)0);
 		this.entityData.define(DATA_AIR_SUPPLY_ID, this.getMaxAirSupply());
@@ -1320,7 +1317,6 @@ public abstract class Entity implements Nameable, CommandSource {
 			compoundTag.putShort("Fire", (short)this.remainingFireTicks);
 			compoundTag.putShort("Air", (short)this.getAirSupply());
 			compoundTag.putBoolean("OnGround", this.onGround);
-			compoundTag.putInt("Dimension", this.dimension.getId());
 			compoundTag.putBoolean("Invulnerable", this.invulnerable);
 			compoundTag.putInt("PortalCooldown", this.changingDimensionDelay);
 			compoundTag.putUUID("UUID", this.getUUID());
@@ -1400,10 +1396,6 @@ public abstract class Entity implements Nameable, CommandSource {
 			this.remainingFireTicks = compoundTag.getShort("Fire");
 			this.setAirSupply(compoundTag.getShort("Air"));
 			this.onGround = compoundTag.getBoolean("OnGround");
-			if (compoundTag.contains("Dimension")) {
-				this.dimension = DimensionType.getById(compoundTag.getInt("Dimension"));
-			}
-
 			this.invulnerable = compoundTag.getBoolean("Invulnerable");
 			this.changingDimensionDelay = compoundTag.getInt("PortalCooldown");
 			if (compoundTag.hasUUID("UUID")) {
@@ -1730,7 +1722,8 @@ public abstract class Entity implements Nameable, CommandSource {
 					this.level.getProfiler().push("portal");
 					this.portalTime = i;
 					this.changingDimensionDelay = this.getDimensionChangingDelay();
-					this.changeDimension(this.level.dimensionType() == DimensionType.NETHER ? DimensionType.OVERWORLD : DimensionType.NETHER);
+					ResourceKey<DimensionType> resourceKey = this.level.dimensionType().isNether() ? DimensionType.OVERWORLD_LOCATION : DimensionType.NETHER_LOCATION;
+					this.changeDimension(resourceKey);
 					this.level.getProfiler().pop();
 				}
 
@@ -2078,31 +2071,33 @@ public abstract class Entity implements Nameable, CommandSource {
 	}
 
 	@Nullable
-	public Entity changeDimension(DimensionType dimensionType) {
+	public Entity changeDimension(ResourceKey<DimensionType> resourceKey) {
 		if (!this.level.isClientSide && !this.removed) {
 			this.level.getProfiler().push("changeDimension");
 			MinecraftServer minecraftServer = this.getServer();
-			DimensionType dimensionType2 = this.dimension;
-			ServerLevel serverLevel = minecraftServer.getLevel(dimensionType2);
-			ServerLevel serverLevel2 = minecraftServer.getLevel(dimensionType);
-			this.dimension = dimensionType;
+			ResourceKey<DimensionType> resourceKey2 = this.level.dimension();
+			ServerLevel serverLevel = minecraftServer.getLevel(resourceKey2);
+			ServerLevel serverLevel2 = minecraftServer.getLevel(resourceKey);
 			this.unRide();
 			this.level.getProfiler().push("reposition");
 			Vec3 vec3 = this.getDeltaMovement();
 			float f = 0.0F;
 			BlockPos blockPos;
-			if (dimensionType2 == DimensionType.THE_END && dimensionType == DimensionType.OVERWORLD) {
+			if (resourceKey2 == DimensionType.END_LOCATION && resourceKey == DimensionType.OVERWORLD_LOCATION) {
 				blockPos = serverLevel2.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, serverLevel2.getSharedSpawnPos());
-			} else if (dimensionType == DimensionType.THE_END) {
-				blockPos = serverLevel2.getDimensionSpecificSpawn();
+			} else if (resourceKey == DimensionType.END_LOCATION) {
+				blockPos = ServerLevel.END_SPAWN_POINT;
 			} else {
 				double d = this.getX();
 				double e = this.getZ();
+				Registry<DimensionType> registry = minecraftServer.registryAccess().dimensionTypes();
+				DimensionType dimensionType = registry.get(resourceKey2);
+				DimensionType dimensionType2 = registry.get(resourceKey);
 				double g = 8.0;
-				if (dimensionType2 == DimensionType.OVERWORLD && dimensionType == DimensionType.NETHER) {
+				if (!dimensionType.shrunk() && dimensionType2.shrunk()) {
 					d /= 8.0;
 					e /= 8.0;
-				} else if (dimensionType2 == DimensionType.NETHER && dimensionType == DimensionType.OVERWORLD) {
+				} else if (dimensionType.shrunk() && !dimensionType2.shrunk()) {
 					d *= 8.0;
 					e *= 8.0;
 				}
@@ -2133,6 +2128,9 @@ public abstract class Entity implements Nameable, CommandSource {
 				entity.moveTo(blockPos, entity.yRot + f, entity.xRot);
 				entity.setDeltaMovement(vec3);
 				serverLevel2.addFromAnotherDimension(entity);
+				if (resourceKey == DimensionType.END_LOCATION) {
+					ServerLevel.makeObsidianPlatform(serverLevel2);
+				}
 			}
 
 			this.removed = true;
@@ -2374,7 +2372,7 @@ public abstract class Entity implements Nameable, CommandSource {
 	}
 
 	@Override
-	public void sendMessage(Component component) {
+	public void sendMessage(Component component, UUID uUID) {
 	}
 
 	public Level getCommandSenderWorld() {

@@ -1,18 +1,16 @@
 package net.minecraft.core;
 
 import com.google.common.collect.AbstractIterator;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Spliterator.OfInt;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.annotation.concurrent.Immutable;
+import net.minecraft.Util;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Serializable;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.Vec3;
@@ -20,7 +18,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Immutable
-public class BlockPos extends Vec3i implements Serializable {
+public class BlockPos extends Vec3i {
+	public static final Codec<BlockPos> CODEC = Codec.INT_STREAM
+		.<BlockPos>comapFlatMap(
+			intStream -> Util.fixedSize(intStream, 3).map(is -> new BlockPos(is[0], is[1], is[2])),
+			blockPos -> IntStream.of(new int[]{blockPos.getX(), blockPos.getY(), blockPos.getZ()})
+		)
+		.stable();
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final BlockPos ZERO = new BlockPos(0, 0, 0);
 	private static final int PACKED_X_LENGTH = 1 + Mth.log2(Mth.smallestEncompassingPowerOfTwo(30000000));
@@ -50,21 +54,6 @@ public class BlockPos extends Vec3i implements Serializable {
 
 	public BlockPos(Vec3i vec3i) {
 		this(vec3i.getX(), vec3i.getY(), vec3i.getZ());
-	}
-
-	public static <T> BlockPos deserialize(Dynamic<T> dynamic) {
-		OfInt ofInt = dynamic.asIntStream().spliterator();
-		int[] is = new int[3];
-		if (ofInt.tryAdvance(i -> is[0] = i) && ofInt.tryAdvance(i -> is[1] = i)) {
-			ofInt.tryAdvance(i -> is[2] = i);
-		}
-
-		return new BlockPos(is[0], is[1], is[2]);
-	}
-
-	@Override
-	public <T> T serialize(DynamicOps<T> dynamicOps) {
-		return dynamicOps.createIntList(IntStream.of(new int[]{this.getX(), this.getY(), this.getZ()}));
 	}
 
 	public static long offset(long l, Direction direction) {

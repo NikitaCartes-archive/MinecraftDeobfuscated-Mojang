@@ -18,7 +18,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -146,7 +145,7 @@ public abstract class BaseFireBlock extends Block {
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState2.is(blockState.getBlock())) {
-			if (level.dimensionType() != DimensionType.OVERWORLD && level.dimensionType() != DimensionType.NETHER || !NetherPortalBlock.trySpawnPortal(level, blockPos)) {
+			if (!level.dimensionType().isOverworld() && !level.dimensionType().isNether() || !NetherPortalBlock.trySpawnPortal(level, blockPos)) {
 				if (!blockState.canSurvive(level, blockPos)) {
 					level.removeBlock(blockPos, false);
 				}

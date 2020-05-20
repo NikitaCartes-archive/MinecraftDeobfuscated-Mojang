@@ -134,7 +134,7 @@ public class ModelBakery {
 	);
 	private static final StateDefinition<Block, BlockState> ITEM_FRAME_FAKE_DEFINITION = new StateDefinition.Builder<Block, BlockState>(Blocks.AIR)
 		.add(BooleanProperty.create("map"))
-		.create(BlockState::new);
+		.create(Block::defaultBlockState, BlockState::new);
 	private static final ItemModelGenerator ITEM_MODEL_GENERATOR = new ItemModelGenerator();
 	private static final Map<ResourceLocation, StateDefinition<Block, BlockState>> STATIC_DEFINITIONS = ImmutableMap.of(
 		new ResourceLocation("item_frame"), ITEM_FRAME_FAKE_DEFINITION

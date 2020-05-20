@@ -322,7 +322,8 @@ public class ListTag extends CollectionTag<Tag> {
 		}
 	}
 
-	public int getElementType() {
+	@Override
+	public byte getElementType() {
 		return this.type;
 	}
 

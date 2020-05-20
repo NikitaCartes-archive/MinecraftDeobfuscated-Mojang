@@ -30,9 +30,9 @@ public class McRegionUpgrader {
 		List<File> list = Lists.<File>newArrayList();
 		List<File> list2 = Lists.<File>newArrayList();
 		List<File> list3 = Lists.<File>newArrayList();
-		File file = levelStorageAccess.getDimensionPath(DimensionType.OVERWORLD);
-		File file2 = levelStorageAccess.getDimensionPath(DimensionType.NETHER);
-		File file3 = levelStorageAccess.getDimensionPath(DimensionType.THE_END);
+		File file = levelStorageAccess.getDimensionPath(DimensionType.OVERWORLD_LOCATION);
+		File file2 = levelStorageAccess.getDimensionPath(DimensionType.NETHER_LOCATION);
+		File file3 = levelStorageAccess.getDimensionPath(DimensionType.END_LOCATION);
 		LOGGER.info("Scanning folders...");
 		addRegionFiles(file, list);
 		if (file2.exists()) {
@@ -51,7 +51,7 @@ public class McRegionUpgrader {
 		if (worldData != null && worldData.worldGenSettings().isFlatWorld()) {
 			biomeSource = new FixedBiomeSource(Biomes.PLAINS);
 		} else {
-			biomeSource = new OverworldBiomeSource(l, false, 4);
+			biomeSource = new OverworldBiomeSource(l, false, false);
 		}
 
 		convertRegions(new File(file, "region"), list, biomeSource, 0, i, progressListener);

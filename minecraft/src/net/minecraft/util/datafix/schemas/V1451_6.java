@@ -40,7 +40,7 @@ public class V1451_6 extends NamespacedSchema {
 							"minecraft:killed_by",
 							DSL.compoundList(References.ENTITY_NAME.in(schema), DSL.constType(DSL.intType())),
 							"minecraft:custom",
-							DSL.compoundList(DSL.constType(DSL.namespacedString()), DSL.constType(DSL.intType()))
+							DSL.compoundList(DSL.constType(namespacedString()), DSL.constType(DSL.intType()))
 						)
 					)
 				)

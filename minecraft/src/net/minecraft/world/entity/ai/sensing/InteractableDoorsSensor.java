@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
@@ -16,7 +17,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 public class InteractableDoorsSensor extends Sensor<LivingEntity> {
 	@Override
 	protected void doTick(ServerLevel serverLevel, LivingEntity livingEntity) {
-		DimensionType dimensionType = serverLevel.dimensionType();
+		ResourceKey<DimensionType> resourceKey = serverLevel.dimension();
 		BlockPos blockPos = livingEntity.blockPosition();
 		List<GlobalPos> list = Lists.<GlobalPos>newArrayList();
 
@@ -25,7 +26,7 @@ public class InteractableDoorsSensor extends Sensor<LivingEntity> {
 				for (int k = -1; k <= 1; k++) {
 					BlockPos blockPos2 = blockPos.offset(i, j, k);
 					if (serverLevel.getBlockState(blockPos2).is(BlockTags.WOODEN_DOORS)) {
-						list.add(GlobalPos.of(dimensionType, blockPos2));
+						list.add(GlobalPos.of(resourceKey, blockPos2));
 					}
 				}
 			}

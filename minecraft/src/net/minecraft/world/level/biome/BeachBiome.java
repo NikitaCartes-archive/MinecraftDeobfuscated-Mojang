@@ -3,13 +3,6 @@ package net.minecraft.world.level.biome;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
-import net.minecraft.world.level.levelgen.feature.RuinedPortalFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.BuriedTreasureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.RuinedPortalConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 
 public final class BeachBiome extends Biome {
@@ -34,12 +27,11 @@ public final class BeachBiome extends Biome {
 				.parent(null)
 				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.0F, 0.0F, -0.1F, 0.0F, 0.9935F)))
 		);
-		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
-		this.addStructureStart(Feature.BURIED_TREASURE.configured(new BuriedTreasureConfiguration(0.01F)));
-		this.addStructureStart(Feature.SHIPWRECK.configured(new ShipwreckConfiguration(true)));
-		this.addStructureStart(Feature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.STANDARD)));
+		this.addStructureStart(BiomeDefaultFeatures.MINESHAFT);
+		this.addStructureStart(BiomeDefaultFeatures.BURIED_TREASURE);
+		this.addStructureStart(BiomeDefaultFeatures.SHIPWRECH_BEACHED);
+		this.addStructureStart(BiomeDefaultFeatures.RUINED_PORTAL_STANDARD);
 		BiomeDefaultFeatures.addDefaultCarvers(this);
-		BiomeDefaultFeatures.addStructureFeaturePlacement(this);
 		BiomeDefaultFeatures.addDefaultLakes(this);
 		BiomeDefaultFeatures.addDefaultMonsterRoom(this);
 		BiomeDefaultFeatures.addDefaultUndergroundVariety(this);

@@ -1,9 +1,9 @@
 package net.minecraft.util.datafix.fixes;
 
 import com.mojang.datafixers.DSL;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
+import com.mojang.serialization.Dynamic;
 
 public class StriderGravityFix extends NamedEntityFix {
 	public StriderGravityFix(Schema schema, boolean bl) {

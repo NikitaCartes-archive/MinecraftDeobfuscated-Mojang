@@ -1,48 +1,28 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.google.common.collect.Lists;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.List;
-import java.util.function.Function;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.SwamplandHutPiece;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
-public class SwamplandHutFeature extends RandomScatteredFeature<NoneFeatureConfiguration> {
+public class SwamplandHutFeature extends StructureFeature<NoneFeatureConfiguration> {
 	private static final List<Biome.SpawnerData> SWAMPHUT_ENEMIES = Lists.<Biome.SpawnerData>newArrayList(new Biome.SpawnerData(EntityType.WITCH, 1, 1, 1));
 	private static final List<Biome.SpawnerData> SWAMPHUT_ANIMALS = Lists.<Biome.SpawnerData>newArrayList(new Biome.SpawnerData(EntityType.CAT, 1, 1, 1));
 
-	public SwamplandHutFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-		super(function);
+	public SwamplandHutFeature(Codec<NoneFeatureConfiguration> codec) {
+		super(codec);
 	}
 
 	@Override
-	public String getFeatureName() {
-		return "Swamp_Hut";
-	}
-
-	@Override
-	public int getLookupRange() {
-		return 3;
-	}
-
-	@Override
-	public StructureFeature.StructureStartFactory getStartFactory() {
+	public StructureFeature.StructureStartFactory<NoneFeatureConfiguration> getStartFactory() {
 		return SwamplandHutFeature.FeatureStart::new;
-	}
-
-	@Override
-	protected int getRandomSalt(ChunkGeneratorSettings chunkGeneratorSettings) {
-		return 14357620;
 	}
 
 	@Override
@@ -55,23 +35,14 @@ public class SwamplandHutFeature extends RandomScatteredFeature<NoneFeatureConfi
 		return SWAMPHUT_ANIMALS;
 	}
 
-	public boolean isSwamphut(StructureFeatureManager structureFeatureManager, BlockPos blockPos) {
-		StructureStart structureStart = this.getStructureAt(structureFeatureManager, blockPos, true);
-		if (structureStart.isValid() && structureStart instanceof SwamplandHutFeature.FeatureStart) {
-			StructurePiece structurePiece = (StructurePiece)structureStart.getPieces().get(0);
-			return structurePiece instanceof SwamplandHutPiece;
-		} else {
-			return false;
-		}
-	}
-
-	public static class FeatureStart extends StructureStart {
-		public FeatureStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+	public static class FeatureStart extends StructureStart<NoneFeatureConfiguration> {
+		public FeatureStart(StructureFeature<NoneFeatureConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
 			super(structureFeature, i, j, boundingBox, k, l);
 		}
 
-		@Override
-		public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+		public void generatePieces(
+			ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration
+		) {
 			SwamplandHutPiece swamplandHutPiece = new SwamplandHutPiece(this.random, i * 16, j * 16);
 			this.pieces.add(swamplandHutPiece);
 			this.calculateBoundingBox();

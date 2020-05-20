@@ -34,6 +34,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Cursor3D;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -109,7 +110,7 @@ public class ClientLevel extends Level {
 		this.clientLevelData = clientLevelData;
 		this.connection = clientPacketListener;
 		this.levelRenderer = levelRenderer;
-		this.effects = DimensionSpecialEffects.forType(dimensionType);
+		this.effects = DimensionSpecialEffects.forType(clientPacketListener.registryAccess().dimensionTypes().getResourceKey(dimensionType));
 		this.setDefaultSpawnPos(new BlockPos(8, 64, 8));
 		this.updateSkyBrightness();
 		this.prepareWeather();
@@ -125,6 +126,28 @@ public class ClientLevel extends Level {
 		this.getProfiler().push("blocks");
 		this.chunkSource.tick(booleanSupplier);
 		this.getProfiler().pop();
+	}
+
+	private void tickTime() {
+		this.setGameTime(this.levelData.getGameTime() + 1L);
+		if (this.levelData.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
+			this.setDayTime(this.levelData.getDayTime() + 1L);
+		}
+	}
+
+	public void setGameTime(long l) {
+		this.clientLevelData.setGameTime(l);
+	}
+
+	public void setDayTime(long l) {
+		if (l < 0L) {
+			l = -l;
+			this.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false, null);
+		} else {
+			this.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(true, null);
+		}
+
+		this.clientLevelData.setDayTime(l);
 	}
 
 	public Iterable<Entity> entitiesForRendering() {
@@ -371,13 +394,13 @@ public class ClientLevel extends Level {
 					ambientParticleSettings -> {
 						if (ambientParticleSettings.canSpawn(this.random)) {
 							this.addParticle(
-								ambientParticleSettings.getParticleType(),
+								ambientParticleSettings.getOptions(),
 								(double)((float)mutableBlockPos.getX() + this.random.nextFloat()),
 								(double)((float)mutableBlockPos.getY() + this.random.nextFloat()),
 								(double)((float)mutableBlockPos.getZ() + this.random.nextFloat()),
-								ambientParticleSettings.getXVelocity(this.random),
-								ambientParticleSettings.getYVelocity(this.random),
-								ambientParticleSettings.getZVelocity(this.random)
+								0.0,
+								0.0,
+								0.0
 							);
 						}
 					}
@@ -506,18 +529,6 @@ public class ClientLevel extends Level {
 	}
 
 	@Override
-	public void setDayTime(long l) {
-		if (l < 0L) {
-			l = -l;
-			this.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false, null);
-		} else {
-			this.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(true, null);
-		}
-
-		super.setDayTime(l);
-	}
-
-	@Override
 	public TickList<Block> getBlockTicks() {
 		return EmptyTickList.empty();
 	}
@@ -555,6 +566,11 @@ public class ClientLevel extends Level {
 	@Override
 	public TagManager getTagManager() {
 		return this.connection.getTags();
+	}
+
+	@Override
+	public RegistryAccess registryAccess() {
+		return this.connection.registryAccess();
 	}
 
 	@Override
@@ -730,7 +746,7 @@ public class ClientLevel extends Level {
 
 	@Override
 	public float getShade(Direction direction, boolean bl) {
-		boolean bl2 = this.dimensionType() == DimensionType.NETHER;
+		boolean bl2 = this.dimensionType().isNether();
 		if (!bl) {
 			return bl2 ? 0.9F : 1.0F;
 		} else {
@@ -863,12 +879,10 @@ public class ClientLevel extends Level {
 			this.zSpawn = i;
 		}
 
-		@Override
 		public void setGameTime(long l) {
 			this.gameTime = l;
 		}
 
-		@Override
 		public void setDayTime(long l) {
 			this.dayTime = l;
 		}

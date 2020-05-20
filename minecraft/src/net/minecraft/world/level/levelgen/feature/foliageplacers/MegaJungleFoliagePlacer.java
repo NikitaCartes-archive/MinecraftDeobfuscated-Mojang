@@ -1,9 +1,7 @@
 package net.minecraft.world.level.levelgen.feature.foliageplacers;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
@@ -11,21 +9,21 @@ import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 
 public class MegaJungleFoliagePlacer extends FoliagePlacer {
+	public static final Codec<MegaJungleFoliagePlacer> CODEC = RecordCodecBuilder.create(
+		instance -> foliagePlacerParts(instance)
+				.and(Codec.INT.fieldOf("height").forGetter(megaJungleFoliagePlacer -> megaJungleFoliagePlacer.height))
+				.apply(instance, MegaJungleFoliagePlacer::new)
+	);
 	protected final int height;
 
 	public MegaJungleFoliagePlacer(int i, int j, int k, int l, int m) {
-		super(i, j, k, l, FoliagePlacerType.MEGA_JUNGLE_FOLIAGE_PLACER);
+		super(i, j, k, l);
 		this.height = m;
 	}
 
-	public <T> MegaJungleFoliagePlacer(Dynamic<T> dynamic) {
-		this(
-			dynamic.get("radius").asInt(0),
-			dynamic.get("radius_random").asInt(0),
-			dynamic.get("offset").asInt(0),
-			dynamic.get("offset_random").asInt(0),
-			dynamic.get("height").asInt(0)
-		);
+	@Override
+	protected FoliagePlacerType<?> type() {
+		return FoliagePlacerType.MEGA_JUNGLE_FOLIAGE_PLACER;
 	}
 
 	@Override
@@ -56,12 +54,5 @@ public class MegaJungleFoliagePlacer extends FoliagePlacer {
 	@Override
 	protected boolean shouldSkipLocation(Random random, int i, int j, int k, int l, boolean bl) {
 		return i + k >= 7 ? true : i * i + k * k > l * l;
-	}
-
-	@Override
-	public <T> T serialize(DynamicOps<T> dynamicOps) {
-		Builder<T, T> builder = ImmutableMap.builder();
-		builder.put(dynamicOps.createString("height"), dynamicOps.createInt(this.height));
-		return dynamicOps.merge(super.serialize(dynamicOps), dynamicOps.createMap(builder.build()));
 	}
 }

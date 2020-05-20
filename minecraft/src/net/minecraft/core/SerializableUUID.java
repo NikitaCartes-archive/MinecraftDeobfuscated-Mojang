@@ -1,12 +1,16 @@
 package net.minecraft.core;
 
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
 import java.util.Arrays;
 import java.util.UUID;
-import net.minecraft.util.Serializable;
+import net.minecraft.Util;
 
-public final class SerializableUUID implements Serializable {
+public final class SerializableUUID {
+	public static final Codec<SerializableUUID> CODEC = Codec.INT_STREAM
+		.comapFlatMap(
+			intStream -> Util.fixedSize(intStream, 4).map(is -> new SerializableUUID(uuidFromIntArray(is))),
+			serializableUUID -> Arrays.stream(uuidToIntArray(serializableUUID.value))
+		);
 	private final UUID value;
 
 	public SerializableUUID(UUID uUID) {
@@ -15,15 +19,6 @@ public final class SerializableUUID implements Serializable {
 
 	public UUID value() {
 		return this.value;
-	}
-
-	@Override
-	public <T> T serialize(DynamicOps<T> dynamicOps) {
-		return serialize(dynamicOps, this.value);
-	}
-
-	public static SerializableUUID of(Dynamic<?> dynamic) {
-		return new SerializableUUID(readUUID(dynamic));
 	}
 
 	public String toString() {
@@ -42,18 +37,5 @@ public final class SerializableUUID implements Serializable {
 
 	public static int[] leastMostToIntArray(long l, long m) {
 		return new int[]{(int)(l >> 32), (int)l, (int)(m >> 32), (int)m};
-	}
-
-	public static UUID readUUID(Dynamic<?> dynamic) {
-		int[] is = dynamic.asIntStream().toArray();
-		if (is.length != 4) {
-			throw new IllegalArgumentException("Could not read UUID. Expected int-array of length 4, got " + is.length + ".");
-		} else {
-			return uuidFromIntArray(is);
-		}
-	}
-
-	public static <T> T serialize(DynamicOps<T> dynamicOps, UUID uUID) {
-		return dynamicOps.createIntList(Arrays.stream(uuidToIntArray(uUID)));
 	}
 }

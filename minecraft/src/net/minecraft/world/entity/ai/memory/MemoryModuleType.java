@@ -1,18 +1,15 @@
 package net.minecraft.world.entity.ai.memory;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.SerializableBoolean;
 import net.minecraft.core.SerializableLong;
 import net.minecraft.core.SerializableUUID;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Serializable;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
@@ -27,9 +24,9 @@ import net.minecraft.world.level.pathfinder.Path;
 
 public class MemoryModuleType<U> {
 	public static final MemoryModuleType<Void> DUMMY = register("dummy");
-	public static final MemoryModuleType<GlobalPos> HOME = register("home", Optional.of(GlobalPos::of));
-	public static final MemoryModuleType<GlobalPos> JOB_SITE = register("job_site", Optional.of(GlobalPos::of));
-	public static final MemoryModuleType<GlobalPos> MEETING_POINT = register("meeting_point", Optional.of(GlobalPos::of));
+	public static final MemoryModuleType<GlobalPos> HOME = register("home", GlobalPos.CODEC);
+	public static final MemoryModuleType<GlobalPos> JOB_SITE = register("job_site", GlobalPos.CODEC);
+	public static final MemoryModuleType<GlobalPos> MEETING_POINT = register("meeting_point", GlobalPos.CODEC);
 	public static final MemoryModuleType<List<GlobalPos>> SECONDARY_JOB_SITE = register("secondary_job_site");
 	public static final MemoryModuleType<List<LivingEntity>> LIVING_ENTITIES = register("mobs");
 	public static final MemoryModuleType<List<LivingEntity>> VISIBLE_LIVING_ENTITIES = register("visible_mobs");
@@ -56,14 +53,14 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<Long> HEARD_BELL_TIME = register("heard_bell_time");
 	public static final MemoryModuleType<Long> CANT_REACH_WALK_TARGET_SINCE = register("cant_reach_walk_target_since");
 	public static final MemoryModuleType<Long> GOLEM_LAST_SEEN_TIME = register("golem_last_seen_time");
-	public static final MemoryModuleType<SerializableLong> LAST_SLEPT = register("last_slept", Optional.of(SerializableLong::of));
-	public static final MemoryModuleType<SerializableLong> LAST_WOKEN = register("last_woken", Optional.of(SerializableLong::of));
-	public static final MemoryModuleType<SerializableLong> LAST_WORKED_AT_POI = register("last_worked_at_poi", Optional.of(SerializableLong::of));
+	public static final MemoryModuleType<SerializableLong> LAST_SLEPT = register("last_slept", SerializableLong.CODEC);
+	public static final MemoryModuleType<SerializableLong> LAST_WOKEN = register("last_woken", SerializableLong.CODEC);
+	public static final MemoryModuleType<SerializableLong> LAST_WORKED_AT_POI = register("last_worked_at_poi", SerializableLong.CODEC);
 	public static final MemoryModuleType<ItemEntity> NEAREST_VISIBLE_WANTED_ITEM = register("nearest_visible_wanted_item");
-	public static final MemoryModuleType<SerializableUUID> ANGRY_AT = register("angry_at", Optional.of(SerializableUUID::of));
-	public static final MemoryModuleType<SerializableBoolean> ADMIRING_ITEM = register("admiring_item", Optional.of(SerializableBoolean::of));
-	public static final MemoryModuleType<SerializableBoolean> ADMIRING_DISABLED = register("admiring_disabled", Optional.of(SerializableBoolean::of));
-	public static final MemoryModuleType<SerializableBoolean> HUNTED_RECENTLY = register("hunted_recently", Optional.of(SerializableBoolean::of));
+	public static final MemoryModuleType<SerializableUUID> ANGRY_AT = register("angry_at", SerializableUUID.CODEC);
+	public static final MemoryModuleType<Boolean> ADMIRING_ITEM = register("admiring_item", Codec.BOOL);
+	public static final MemoryModuleType<Boolean> ADMIRING_DISABLED = register("admiring_disabled", Codec.BOOL);
+	public static final MemoryModuleType<Boolean> HUNTED_RECENTLY = register("hunted_recently", Codec.BOOL);
 	public static final MemoryModuleType<BlockPos> CELEBRATE_LOCATION = register("celebrate_location");
 	public static final MemoryModuleType<WitherSkeleton> NEAREST_VISIBLE_WITHER_SKELETON = register("nearest_visible_wither_skeleton");
 	public static final MemoryModuleType<Hoglin> NEAREST_VISIBLE_HUNTABLE_HOGLIN = register("nearest_visible_huntable_hoglin");
@@ -81,22 +78,22 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<Boolean> ATE_RECENTLY = register("ate_recently");
 	public static final MemoryModuleType<BlockPos> NEAREST_REPELLENT = register("nearest_repellent");
 	public static final MemoryModuleType<Boolean> PACIFIED = register("pacified");
-	private final Optional<Function<Dynamic<?>, U>> deserializer;
+	private final Optional<Codec<ExpirableValue<U>>> codec;
 
-	private MemoryModuleType(Optional<Function<Dynamic<?>, U>> optional) {
-		this.deserializer = optional;
+	private MemoryModuleType(Optional<Codec<U>> optional) {
+		this.codec = optional.map(ExpirableValue::codec);
 	}
 
 	public String toString() {
 		return Registry.MEMORY_MODULE_TYPE.getKey(this).toString();
 	}
 
-	public Optional<Function<Dynamic<?>, U>> getDeserializer() {
-		return this.deserializer;
+	public Optional<Codec<ExpirableValue<U>>> getCodec() {
+		return this.codec;
 	}
 
-	private static <U extends Serializable> MemoryModuleType<U> register(String string, Optional<Function<Dynamic<?>, U>> optional) {
-		return Registry.register(Registry.MEMORY_MODULE_TYPE, new ResourceLocation(string), new MemoryModuleType<>(optional));
+	private static <U> MemoryModuleType<U> register(String string, Codec<U> codec) {
+		return Registry.register(Registry.MEMORY_MODULE_TYPE, new ResourceLocation(string), new MemoryModuleType<>(Optional.of(codec)));
 	}
 
 	private static <U> MemoryModuleType<U> register(String string) {

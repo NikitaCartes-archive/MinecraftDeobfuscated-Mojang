@@ -28,6 +28,7 @@ import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.NearestNeighborBiomeZoomer;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -289,13 +290,15 @@ public final class NaturalSpawner {
 		return new BlockPos(i, l, j);
 	}
 
-	public static boolean isValidEmptySpawnBlock(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, FluidState fluidState) {
+	public static boolean isValidEmptySpawnBlock(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, FluidState fluidState, EntityType entityType) {
 		if (blockState.isCollisionShapeFullBlock(blockGetter, blockPos)) {
 			return false;
 		} else if (blockState.isSignalSource()) {
 			return false;
+		} else if (!fluidState.isEmpty()) {
+			return false;
 		} else {
-			return !fluidState.isEmpty() ? false : !blockState.is(BlockTags.PREVENT_MOB_SPAWNING_INSIDE);
+			return blockState.is(BlockTags.PREVENT_MOB_SPAWNING_INSIDE) ? false : !blockState.is(Blocks.WITHER_ROSE) || entityType == EntityType.WITHER_SKELETON;
 		}
 	}
 
@@ -321,8 +324,8 @@ public final class NaturalSpawner {
 					BlockState blockState2 = levelReader.getBlockState(blockPos3);
 					return !blockState2.isValidSpawn(levelReader, blockPos3, entityType)
 						? false
-						: isValidEmptySpawnBlock(levelReader, blockPos, blockState, fluidState)
-							&& isValidEmptySpawnBlock(levelReader, blockPos2, levelReader.getBlockState(blockPos2), levelReader.getFluidState(blockPos2));
+						: isValidEmptySpawnBlock(levelReader, blockPos, blockState, fluidState, entityType)
+							&& isValidEmptySpawnBlock(levelReader, blockPos2, levelReader.getBlockState(blockPos2), levelReader.getFluidState(blockPos2), entityType);
 			}
 		} else {
 			return false;

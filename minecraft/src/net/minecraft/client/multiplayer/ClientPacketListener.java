@@ -72,6 +72,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.core.PositionImpl;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -183,6 +184,7 @@ import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ServerboundResourcePackPacket;
 import net.minecraft.realms.DisconnectedRealmsScreen;
 import net.minecraft.realms.RealmsScreen;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -318,6 +320,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	private CommandDispatcher<SharedSuggestionProvider> commands = new CommandDispatcher<>();
 	private final RecipeManager recipeManager = new RecipeManager();
 	private final UUID id = UUID.randomUUID();
+	private RegistryAccess registryAccess = RegistryAccess.builtin();
 
 	public ClientPacketListener(Minecraft minecraft, Screen screen, Connection connection, GameProfile gameProfile) {
 		this.minecraft = minecraft;
@@ -351,6 +354,8 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			EntityTypeTags.resetToEmpty();
 		}
 
+		this.registryAccess = clientboundLoginPacket.registryAccess();
+		DimensionType dimensionType = this.registryAccess.dimensionTypes().get(clientboundLoginPacket.getDimension());
 		this.serverChunkRadius = clientboundLoginPacket.getChunkRadius();
 		boolean bl = clientboundLoginPacket.isDebug();
 		boolean bl2 = clientboundLoginPacket.isFlat();
@@ -359,7 +364,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		this.level = new ClientLevel(
 			this,
 			clientLevelData,
-			clientboundLoginPacket.getDimension(),
+			dimensionType,
 			this.serverChunkRadius,
 			this.minecraft::getProfiler,
 			this.minecraft.levelRenderer,
@@ -382,7 +387,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		this.minecraft.player.input = new KeyboardInput(this.minecraft.options);
 		this.minecraft.gameMode.adjustPlayer(this.minecraft.player);
 		this.minecraft.cameraEntity = this.minecraft.player;
-		this.minecraft.player.dimension = clientboundLoginPacket.getDimension();
 		this.minecraft.setScreen(new ReceivingLevelScreen());
 		this.minecraft.player.setId(i);
 		this.minecraft.player.setReducedDebugInfo(clientboundLoginPacket.isReducedDebugInfo());
@@ -876,7 +880,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	@Override
 	public void handleChat(ClientboundChatPacket clientboundChatPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundChatPacket, this, this.minecraft);
-		this.minecraft.gui.handleChat(clientboundChatPacket.getType(), clientboundChatPacket.getMessage());
+		this.minecraft.gui.handleChat(clientboundChatPacket.getType(), clientboundChatPacket.getMessage(), clientboundChatPacket.getSender());
 	}
 
 	@Override
@@ -1047,11 +1051,12 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	@Override
 	public void handleRespawn(ClientboundRespawnPacket clientboundRespawnPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundRespawnPacket, this, this.minecraft);
-		DimensionType dimensionType = clientboundRespawnPacket.getDimension();
+		ResourceKey<DimensionType> resourceKey = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, clientboundRespawnPacket.getDimension());
+		DimensionType dimensionType = this.registryAccess.dimensionTypes().get(resourceKey);
 		LocalPlayer localPlayer = this.minecraft.player;
 		int i = localPlayer.getId();
 		this.started = false;
-		if (dimensionType != localPlayer.dimension) {
+		if (resourceKey != localPlayer.level.dimension()) {
 			Scoreboard scoreboard = this.level.getScoreboard();
 			boolean bl = clientboundRespawnPacket.isDebug();
 			boolean bl2 = clientboundRespawnPacket.isFlat();
@@ -1060,7 +1065,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			this.level = new ClientLevel(
 				this,
 				clientLevelData,
-				clientboundRespawnPacket.getDimension(),
+				dimensionType,
 				this.serverChunkRadius,
 				this.minecraft::getProfiler,
 				this.minecraft.levelRenderer,
@@ -1077,7 +1082,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		this.minecraft.cameraEntity = null;
 		LocalPlayer localPlayer2 = this.minecraft.gameMode.createPlayer(this.level, localPlayer.getStats(), localPlayer.getRecipeBook());
 		localPlayer2.setId(i);
-		localPlayer2.dimension = dimensionType;
 		this.minecraft.player = localPlayer2;
 		this.minecraft.cameraEntity = localPlayer2;
 		localPlayer2.getEntityData().assignValues(localPlayer.getEntityData().getAll());
@@ -1900,7 +1904,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 
 				this.minecraft.debugRenderer.caveRenderer.addTunnel(blockPos2, list, list2);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_STRUCTURES_PACKET.equals(resourceLocation)) {
-				DimensionType dimensionType = DimensionType.getById(friendlyByteBuf.readInt());
+				DimensionType dimensionType = this.registryAccess.dimensionTypes().get(friendlyByteBuf.readResourceLocation());
 				BoundingBox boundingBox = new BoundingBox(
 					friendlyByteBuf.readInt(),
 					friendlyByteBuf.readInt(),
@@ -2414,5 +2418,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 
 	public UUID getId() {
 		return this.id;
+	}
+
+	public RegistryAccess registryAccess() {
+		return this.registryAccess;
 	}
 }

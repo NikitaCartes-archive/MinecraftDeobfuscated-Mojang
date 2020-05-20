@@ -163,6 +163,11 @@ public class ByteArrayTag extends CollectionTag<ByteTag> {
 		return ByteTag.valueOf(b);
 	}
 
+	@Override
+	public byte getElementType() {
+		return 1;
+	}
+
 	public void clear() {
 		this.data = new byte[0];
 	}

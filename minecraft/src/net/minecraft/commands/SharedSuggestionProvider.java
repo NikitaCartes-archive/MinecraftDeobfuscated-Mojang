@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 
 public interface SharedSuggestionProvider {
@@ -39,6 +40,8 @@ public interface SharedSuggestionProvider {
 	default Collection<SharedSuggestionProvider.TextCoordinates> getAbsoluteCoordinates() {
 		return Collections.singleton(SharedSuggestionProvider.TextCoordinates.DEFAULT_GLOBAL);
 	}
+
+	RegistryAccess registryAccess();
 
 	boolean hasPermission(int i);
 

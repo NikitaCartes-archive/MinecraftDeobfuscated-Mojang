@@ -36,7 +36,7 @@ public class V1125 extends NamespacedSchema {
 					DSL.optionalFields("criteria", DSL.compoundList(References.ENTITY_NAME.in(schema), DSL.constType(DSL.string())))
 				)
 		);
-		schema.registerType(false, References.BIOME, () -> DSL.constType(DSL.namespacedString()));
-		schema.registerType(false, References.ENTITY_NAME, () -> DSL.constType(DSL.namespacedString()));
+		schema.registerType(false, References.BIOME, () -> DSL.constType(namespacedString()));
+		schema.registerType(false, References.ENTITY_NAME, () -> DSL.constType(namespacedString()));
 	}
 }

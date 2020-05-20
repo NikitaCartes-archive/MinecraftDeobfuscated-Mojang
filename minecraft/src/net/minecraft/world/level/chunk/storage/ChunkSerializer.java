@@ -45,7 +45,7 @@ import net.minecraft.world.level.chunk.ProtoTickList;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.structure.StructureFeatureIO;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.lighting.LevelLightEngine;
@@ -318,7 +318,10 @@ public class ChunkSerializer {
 			CompoundTag compoundTag4 = new CompoundTag();
 
 			for (GenerationStep.Carving carving : GenerationStep.Carving.values()) {
-				compoundTag4.putByteArray(carving.toString(), chunkAccess.getCarvingMask(carving).toByteArray());
+				BitSet bitSet = protoChunk.getCarvingMask(carving);
+				if (bitSet != null) {
+					compoundTag4.putByteArray(carving.toString(), bitSet.toByteArray());
+				}
 			}
 
 			compoundTag2.put("CarvingMasks", compoundTag4);
@@ -398,11 +401,11 @@ public class ChunkSerializer {
 		}
 	}
 
-	private static CompoundTag packStructureData(ChunkPos chunkPos, Map<String, StructureStart> map, Map<String, LongSet> map2) {
+	private static CompoundTag packStructureData(ChunkPos chunkPos, Map<String, StructureStart<?>> map, Map<String, LongSet> map2) {
 		CompoundTag compoundTag = new CompoundTag();
 		CompoundTag compoundTag2 = new CompoundTag();
 
-		for (Entry<String, StructureStart> entry : map.entrySet()) {
+		for (Entry<String, StructureStart<?>> entry : map.entrySet()) {
 			compoundTag2.put((String)entry.getKey(), ((StructureStart)entry.getValue()).createTag(chunkPos.x, chunkPos.z));
 		}
 
@@ -417,12 +420,12 @@ public class ChunkSerializer {
 		return compoundTag;
 	}
 
-	private static Map<String, StructureStart> unpackStructureStart(StructureManager structureManager, CompoundTag compoundTag, long l) {
-		Map<String, StructureStart> map = Maps.<String, StructureStart>newHashMap();
+	private static Map<String, StructureStart<?>> unpackStructureStart(StructureManager structureManager, CompoundTag compoundTag, long l) {
+		Map<String, StructureStart<?>> map = Maps.<String, StructureStart<?>>newHashMap();
 		CompoundTag compoundTag2 = compoundTag.getCompound("Starts");
 
 		for (String string : compoundTag2.getAllKeys()) {
-			map.put(string, StructureFeatureIO.loadStaticStart(structureManager, compoundTag2.getCompound(string), l));
+			map.put(string, StructureFeature.loadStaticStart(structureManager, compoundTag2.getCompound(string), l));
 		}
 
 		return map;

@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.TextComponent;
@@ -26,7 +27,7 @@ public class RepeatedNarrator {
 						: new RepeatedNarrator.Params(string, RateLimiter.create((double)this.permitsPerSecond))
 			);
 		if (params.rateLimiter.tryAcquire(1)) {
-			NarratorChatListener.INSTANCE.handle(ChatType.SYSTEM, new TextComponent(string));
+			NarratorChatListener.INSTANCE.handle(ChatType.SYSTEM, new TextComponent(string), Util.NIL_UUID);
 		}
 	}
 

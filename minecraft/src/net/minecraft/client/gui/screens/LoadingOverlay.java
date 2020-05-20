@@ -12,16 +12,20 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.VanillaPack;
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class LoadingOverlay extends Overlay {
-	private static final ResourceLocation MOJANG_LOGO_LOCATION = new ResourceLocation("textures/gui/title/mojang.png");
+	private static final ResourceLocation MOJANG_STUDIOS_LOGO_LOCATION = new ResourceLocation("textures/gui/title/mojangstudios.png");
+	private static final int BRAND_BACKGROUND = FastColor.ARGB32.color(255, 239, 50, 61);
+	private static final int BRAND_BACKGROUND_NO_ALPHA = BRAND_BACKGROUND & 16777215;
 	private final Minecraft minecraft;
 	private final ReloadInstance reload;
 	private final Consumer<Optional<Throwable>> onFinish;
@@ -38,7 +42,7 @@ public class LoadingOverlay extends Overlay {
 	}
 
 	public static void registerTextures(Minecraft minecraft) {
-		minecraft.getTextureManager().register(MOJANG_LOGO_LOCATION, new LoadingOverlay.LogoTexture());
+		minecraft.getTextureManager().register(MOJANG_STUDIOS_LOGO_LOCATION, new LoadingOverlay.LogoTexture());
 	}
 
 	@Override
@@ -59,7 +63,7 @@ public class LoadingOverlay extends Overlay {
 			}
 
 			int n = Mth.ceil((1.0F - Mth.clamp(g - 1.0F, 0.0F, 1.0F)) * 255.0F);
-			fill(poseStack, 0, 0, k, l, 16777215 | n << 24);
+			fill(poseStack, 0, 0, k, l, BRAND_BACKGROUND_NO_ALPHA | n << 24);
 			o = 1.0F - Mth.clamp(g - 1.0F, 0.0F, 1.0F);
 		} else if (this.fadeIn) {
 			if (this.minecraft.screen != null && h < 1.0F) {
@@ -67,23 +71,32 @@ public class LoadingOverlay extends Overlay {
 			}
 
 			int n = Mth.ceil(Mth.clamp((double)h, 0.15, 1.0) * 255.0);
-			fill(poseStack, 0, 0, k, l, 16777215 | n << 24);
+			fill(poseStack, 0, 0, k, l, BRAND_BACKGROUND_NO_ALPHA | n << 24);
 			o = Mth.clamp(h, 0.0F, 1.0F);
 		} else {
-			fill(poseStack, 0, 0, k, l, -1);
+			fill(poseStack, 0, 0, k, l, BRAND_BACKGROUND);
 			o = 1.0F;
 		}
 
-		int n = (this.minecraft.getWindow().getGuiScaledWidth() - 256) / 2;
-		int p = (this.minecraft.getWindow().getGuiScaledHeight() - 256) / 2;
-		this.minecraft.getTextureManager().bind(MOJANG_LOGO_LOCATION);
+		int n = (this.minecraft.getWindow().getGuiScaledWidth() - 322) / 2;
+		int p = (this.minecraft.getWindow().getGuiScaledHeight() + 161) / 4;
+		this.minecraft.getTextureManager().bind(MOJANG_STUDIOS_LOGO_LOCATION);
 		RenderSystem.enableBlend();
+		RenderSystem.blendEquation(32774);
+		RenderSystem.blendFunc(770, 1);
+		RenderSystem.alphaFunc(516, 0.0F);
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, o);
-		this.blit(poseStack, n, p, 0, 0, 256, 256);
-		float q = this.reload.getActualProgress();
-		this.currentProgress = Mth.clamp(this.currentProgress * 0.95F + q * 0.050000012F, 0.0F, 1.0F);
+		float q = 0.0625F;
+		blit(poseStack, n, p, 161, 80, -0.0625F, 0.0F, 161, 80, 161, 161);
+		blit(poseStack, n + 161, p, 161, 80, 0.0625F, 80.5F, 161, 80, 161, 161);
+		RenderSystem.defaultBlendFunc();
+		RenderSystem.defaultAlphaFunc();
+		RenderSystem.disableBlend();
+		float r = this.reload.getActualProgress();
+		this.currentProgress = Mth.clamp(this.currentProgress * 0.95F + r * 0.050000012F, 0.0F, 1.0F);
 		if (g < 1.0F) {
-			this.drawProgressBar(poseStack, k / 2 - 150, l / 4 * 3, k / 2 + 150, l / 4 * 3 + 10, 1.0F - Mth.clamp(g, 0.0F, 1.0F));
+			int s = l * 648 / 801;
+			this.drawProgressBar(poseStack, k / 2 - 161, s, k / 2 + 161, s + 12, 1.0F - Mth.clamp(g, 0.0F, 1.0F));
 		}
 
 		if (g >= 2.0F) {
@@ -94,8 +107,8 @@ public class LoadingOverlay extends Overlay {
 			try {
 				this.reload.checkExceptions();
 				this.onFinish.accept(Optional.empty());
-			} catch (Throwable var16) {
-				this.onFinish.accept(Optional.of(var16));
+			} catch (Throwable var17) {
+				this.onFinish.accept(Optional.of(var17));
 			}
 
 			this.fadeOutStart = Util.getMillis();
@@ -106,24 +119,12 @@ public class LoadingOverlay extends Overlay {
 	}
 
 	private void drawProgressBar(PoseStack poseStack, int i, int j, int k, int l, float f) {
-		int m = Mth.ceil((float)(k - i - 1) * this.currentProgress);
-		fill(
-			poseStack,
-			i - 1,
-			j - 1,
-			k + 1,
-			l + 1,
-			0xFF000000 | Math.round((1.0F - f) * 255.0F) << 16 | Math.round((1.0F - f) * 255.0F) << 8 | Math.round((1.0F - f) * 255.0F)
-		);
-		fill(poseStack, i, j, k, l, -1);
-		fill(
-			poseStack,
-			i + 1,
-			j + 1,
-			i + m,
-			l - 1,
-			0xFF000000 | (int)Mth.lerp(1.0F - f, 226.0F, 255.0F) << 16 | (int)Mth.lerp(1.0F - f, 40.0F, 255.0F) << 8 | (int)Mth.lerp(1.0F - f, 55.0F, 255.0F)
-		);
+		int m = Mth.ceil((float)(k - i - 2) * this.currentProgress);
+		int n = Math.round(f * 255.0F);
+		int o = FastColor.ARGB32.color(n, 255, 255, 255);
+		fill(poseStack, i, j, k, l, o);
+		fill(poseStack, i + 1, j + 1, k - 1, l - 1, BRAND_BACKGROUND_NO_ALPHA | n << 24);
+		fill(poseStack, i + 2, j + 2, i + m, l - 2, o);
 	}
 
 	@Override
@@ -134,7 +135,7 @@ public class LoadingOverlay extends Overlay {
 	@Environment(EnvType.CLIENT)
 	static class LogoTexture extends SimpleTexture {
 		public LogoTexture() {
-			super(LoadingOverlay.MOJANG_LOGO_LOCATION);
+			super(LoadingOverlay.MOJANG_STUDIOS_LOGO_LOCATION);
 		}
 
 		@Override
@@ -143,12 +144,12 @@ public class LoadingOverlay extends Overlay {
 			VanillaPack vanillaPack = minecraft.getClientPackSource().getVanillaPack();
 
 			try {
-				InputStream inputStream = vanillaPack.getResource(PackType.CLIENT_RESOURCES, LoadingOverlay.MOJANG_LOGO_LOCATION);
+				InputStream inputStream = vanillaPack.getResource(PackType.CLIENT_RESOURCES, LoadingOverlay.MOJANG_STUDIOS_LOGO_LOCATION);
 				Throwable var5 = null;
 
 				SimpleTexture.TextureImage var6;
 				try {
-					var6 = new SimpleTexture.TextureImage(null, NativeImage.read(inputStream));
+					var6 = new SimpleTexture.TextureImage(new TextureMetadataSection(true, true), NativeImage.read(inputStream));
 				} catch (Throwable var16) {
 					var5 = var16;
 					throw var16;

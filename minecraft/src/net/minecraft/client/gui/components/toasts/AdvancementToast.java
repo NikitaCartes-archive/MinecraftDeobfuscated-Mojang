@@ -28,7 +28,7 @@ public class AdvancementToast implements Toast {
 		toastComponent.getMinecraft().getTextureManager().bind(TEXTURE);
 		RenderSystem.color3f(1.0F, 1.0F, 1.0F);
 		DisplayInfo displayInfo = this.advancement.getDisplay();
-		toastComponent.blit(poseStack, 0, 0, 0, 0, 160, 32);
+		toastComponent.blit(poseStack, 0, 0, 0, 0, this.width(), this.height());
 		if (displayInfo != null) {
 			List<Component> list = toastComponent.getMinecraft().font.split(displayInfo.getTitle(), 125);
 			int i = displayInfo.getFrame() == FrameType.CHALLENGE ? 16746751 : 16776960;
@@ -43,7 +43,7 @@ public class AdvancementToast implements Toast {
 					toastComponent.getMinecraft().font.draw(poseStack, I18n.get("advancements.toast." + displayInfo.getFrame().getName()), 30.0F, 11.0F, i | k);
 				} else {
 					int k = Mth.floor(Mth.clamp((float)(l - 1500L) / 300.0F, 0.0F, 1.0F) * 252.0F) << 24 | 67108864;
-					int m = 16 - list.size() * 9 / 2;
+					int m = this.height() / 2 - list.size() * 9 / 2;
 
 					for (Component component : list) {
 						toastComponent.getMinecraft().font.draw(poseStack, component, 30.0F, (float)m, 16777215 | k);

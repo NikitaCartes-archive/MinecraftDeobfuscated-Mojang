@@ -53,6 +53,7 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -561,6 +562,8 @@ public abstract class Mob extends LivingEntity {
 				return swordItem.getDamage() != swordItem2.getDamage() ? swordItem.getDamage() > swordItem2.getDamage() : this.canReplaceEqualItem(itemStack, itemStack2);
 			}
 		} else if (itemStack.getItem() instanceof BowItem && itemStack2.getItem() instanceof BowItem) {
+			return this.canReplaceEqualItem(itemStack, itemStack2);
+		} else if (itemStack.getItem() instanceof CrossbowItem && itemStack2.getItem() instanceof CrossbowItem) {
 			return this.canReplaceEqualItem(itemStack, itemStack2);
 		} else if (itemStack.getItem() instanceof ArmorItem) {
 			if (EnchantmentHelper.hasBindingCurse(itemStack2)) {

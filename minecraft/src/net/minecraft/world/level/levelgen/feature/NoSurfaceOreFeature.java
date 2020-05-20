@@ -1,8 +1,7 @@
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
@@ -12,8 +11,8 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 
 public class NoSurfaceOreFeature extends Feature<OreConfiguration> {
-	NoSurfaceOreFeature(Function<Dynamic<?>, ? extends OreConfiguration> function) {
-		super(function);
+	NoSurfaceOreFeature(Codec<OreConfiguration> codec) {
+		super(codec);
 	}
 
 	public boolean place(

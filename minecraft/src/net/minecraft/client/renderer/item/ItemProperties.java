@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -117,7 +118,7 @@ public class ItemProperties {
 						return 0.0F;
 					} else {
 						double d;
-						if (clientLevel.getDimension().isNaturalDimension()) {
+						if (clientLevel.dimensionType().natural()) {
 							d = (double)clientLevel.getTimeOfDay(1.0F);
 						} else {
 							d = Math.random();
@@ -205,7 +206,7 @@ public class ItemProperties {
 
 				@Nullable
 				private BlockPos getSpawnPosition(ClientLevel clientLevel) {
-					return clientLevel.getDimension().isNaturalDimension() ? clientLevel.getSharedSpawnPos() : null;
+					return clientLevel.dimensionType().natural() ? clientLevel.getSharedSpawnPos() : null;
 				}
 
 				@Nullable
@@ -213,9 +214,9 @@ public class ItemProperties {
 					boolean bl = compoundTag.contains("LodestonePos");
 					boolean bl2 = compoundTag.contains("LodestoneDimension");
 					if (bl && bl2) {
-						Optional<DimensionType> optional = CompassItem.getLodestoneDimension(compoundTag);
-						if (optional.isPresent() && level.dimensionType().equals(optional.get())) {
-							return NbtUtils.readBlockPos((CompoundTag)compoundTag.get("LodestonePos"));
+						Optional<ResourceKey<DimensionType>> optional = CompassItem.getLodestoneDimension(compoundTag);
+						if (optional.isPresent() && level.dimension() == optional.get()) {
+							return NbtUtils.readBlockPos(compoundTag.getCompound("LodestonePos"));
 						}
 					}
 

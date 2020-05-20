@@ -1,10 +1,20 @@
 package net.minecraft.world.level.levelgen.flat;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class FlatLayerInfo {
+	public static final Codec<FlatLayerInfo> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					Codec.INT.fieldOf("height").forGetter(FlatLayerInfo::getHeight),
+					Registry.BLOCK.fieldOf("block").withDefault(Blocks.AIR).forGetter(flatLayerInfo -> flatLayerInfo.getBlockState().getBlock())
+				)
+				.apply(instance, FlatLayerInfo::new)
+	);
 	private final BlockState blockState;
 	private final int height;
 	private int start;

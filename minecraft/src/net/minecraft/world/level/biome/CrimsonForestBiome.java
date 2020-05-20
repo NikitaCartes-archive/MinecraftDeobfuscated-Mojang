@@ -9,15 +9,11 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
-import net.minecraft.world.level.levelgen.feature.BastionPieces;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.RuinedPortalFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.CountRangeDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.MultiJigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.RuinedPortalConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.placement.FrequencyDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
@@ -38,15 +34,7 @@ public class CrimsonForestBiome extends Biome {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(3343107)
-						.ambientParticle(
-							new AmbientParticleSettings(
-								ParticleTypes.CRIMSON_SPORE,
-								0.025F,
-								random -> random.nextGaussian() * 1.0E-6F,
-								random -> random.nextGaussian() * 1.0E-4F,
-								random -> random.nextGaussian() * 1.0E-6F
-							)
-						)
+						.ambientParticle(new AmbientParticleSettings(ParticleTypes.CRIMSON_SPORE, 0.025F))
 						.ambientLoopSound(SoundEvents.AMBIENT_CRIMSON_FOREST_LOOP)
 						.ambientMoodSound(new AmbientMoodSettings(SoundEvents.AMBIENT_CRIMSON_FOREST_MOOD, 6000, 8, 2.0))
 						.ambientAdditionsSound(new AmbientAdditionsSettings(SoundEvents.AMBIENT_CRIMSON_FOREST_ADDITIONS, 0.0111))
@@ -56,11 +44,10 @@ public class CrimsonForestBiome extends Biome {
 				.parent(null)
 				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.4F, 0.0F, 0.0F, 0.0F, 0.0F)))
 		);
-		this.addStructureStart(Feature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.NETHER)));
+		this.addStructureStart(BiomeDefaultFeatures.RUINED_PORTAL_NETHER);
 		this.addCarver(GenerationStep.Carving.AIR, makeCarver(WorldCarver.NETHER_CAVE, new ProbabilityFeatureConfiguration(0.2F)));
-		this.addStructureStart(Feature.NETHER_BRIDGE.configured(FeatureConfiguration.NONE));
-		this.addStructureStart(Feature.BASTION_REMNANT.configured(new MultiJigsawConfiguration(BastionPieces.POOLS)));
-		BiomeDefaultFeatures.addStructureFeaturePlacement(this);
+		this.addStructureStart(BiomeDefaultFeatures.NETHER_BRIDGE);
+		this.addStructureStart(BiomeDefaultFeatures.BASTION_REMNANT);
 		this.addFeature(
 			GenerationStep.Decoration.VEGETAL_DECORATION,
 			Feature.SPRING
@@ -68,10 +55,6 @@ public class CrimsonForestBiome extends Biome {
 				.decorated(FeatureDecorator.COUNT_VERY_BIASED_RANGE.configured(new CountRangeDecoratorConfiguration(20, 8, 16, 256)))
 		);
 		BiomeDefaultFeatures.addDefaultMushrooms(this);
-		this.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.NETHER_BRIDGE.configured(FeatureConfiguration.NONE));
-		this.addFeature(
-			GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.NETHER))
-		);
 		this.addFeature(
 			GenerationStep.Decoration.UNDERGROUND_DECORATION,
 			Feature.SPRING

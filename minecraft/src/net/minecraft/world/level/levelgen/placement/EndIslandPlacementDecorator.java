@@ -1,15 +1,14 @@
 package net.minecraft.world.level.levelgen.placement;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
 
 public class EndIslandPlacementDecorator extends SimpleFeatureDecorator<NoneDecoratorConfiguration> {
-	public EndIslandPlacementDecorator(Function<Dynamic<?>, ? extends NoneDecoratorConfiguration> function) {
-		super(function);
+	public EndIslandPlacementDecorator(Codec<NoneDecoratorConfiguration> codec) {
+		super(codec);
 	}
 
 	public Stream<BlockPos> place(Random random, NoneDecoratorConfiguration noneDecoratorConfiguration, BlockPos blockPos) {

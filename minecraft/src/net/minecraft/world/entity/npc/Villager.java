@@ -3,8 +3,9 @@ package net.minecraft.world.entity.npc;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import java.util.List;
 import java.util.Map;
@@ -162,7 +163,6 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		this.getNavigation().setCanFloat(true);
 		this.setCanPickUpLoot(true);
 		this.setVillagerData(this.getVillagerData().setType(villagerType).setProfession(VillagerProfession.NONE));
-		this.brain = this.makeBrain(new Dynamic<>(NbtOps.INSTANCE, new CompoundTag()));
 	}
 
 	@Override
@@ -171,8 +171,13 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	}
 
 	@Override
+	protected Brain.Provider<Villager> brainProvider() {
+		return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
+	}
+
+	@Override
 	protected Brain<?> makeBrain(Dynamic<?> dynamic) {
-		Brain<Villager> brain = new Brain<>(MEMORY_TYPES, SENSOR_TYPES, dynamic);
+		Brain<Villager> brain = this.brainProvider().makeBrain(dynamic);
 		this.registerBrainGoals(brain);
 		return brain;
 	}
@@ -438,7 +443,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		compoundTag.put("VillagerData", this.getVillagerData().serialize(NbtOps.INSTANCE));
+		VillagerData.CODEC.encodeStart(NbtOps.INSTANCE, this.getVillagerData()).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("VillagerData", tag));
 		compoundTag.putByte("FoodLevel", this.foodLevel);
 		compoundTag.put("Gossips", this.gossips.store(NbtOps.INSTANCE).getValue());
 		compoundTag.putInt("Xp", this.villagerXp);
@@ -451,7 +456,8 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
 		if (compoundTag.contains("VillagerData", 10)) {
-			this.setVillagerData(new VillagerData(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("VillagerData"))));
+			DataResult<VillagerData> dataResult = VillagerData.CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("VillagerData")));
+			dataResult.resultOrPartial(LOGGER::error).ifPresent(this::setVillagerData);
 		}
 
 		if (compoundTag.contains("Offers", 10)) {

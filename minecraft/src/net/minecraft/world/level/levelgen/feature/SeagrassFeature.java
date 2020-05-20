@@ -1,8 +1,7 @@
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -15,8 +14,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.SeagrassFeatureConfiguration;
 
 public class SeagrassFeature extends Feature<SeagrassFeatureConfiguration> {
-	public SeagrassFeature(Function<Dynamic<?>, ? extends SeagrassFeatureConfiguration> function) {
-		super(function);
+	public SeagrassFeature(Codec<SeagrassFeatureConfiguration> codec) {
+		super(codec);
 	}
 
 	public boolean place(

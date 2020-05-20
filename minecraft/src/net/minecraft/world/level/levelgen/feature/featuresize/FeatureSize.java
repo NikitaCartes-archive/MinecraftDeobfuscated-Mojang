@@ -1,31 +1,34 @@
 package net.minecraft.world.level.levelgen.feature.featuresize;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Optional;
 import java.util.OptionalInt;
 import net.minecraft.core.Registry;
 
 public abstract class FeatureSize {
-	protected final FeatureSizeType<?> type;
-	private final OptionalInt minClippedHeight;
+	public static final Codec<FeatureSize> CODEC = Registry.FEATURE_SIZE_TYPES.dispatch(FeatureSize::type, FeatureSizeType::codec);
+	protected final OptionalInt minClippedHeight;
 
-	public FeatureSize(FeatureSizeType<?> featureSizeType, OptionalInt optionalInt) {
-		this.type = featureSizeType;
+	protected static <S extends FeatureSize> RecordCodecBuilder<S, OptionalInt> minClippedHeightCodec() {
+		return Codec.INT
+			.optionalFieldOf("min_clipped_height")
+			.<OptionalInt>xmap(
+				optional -> (OptionalInt)optional.map(OptionalInt::of).orElse(OptionalInt.empty()),
+				optionalInt -> optionalInt.isPresent() ? Optional.of(optionalInt.getAsInt()) : Optional.empty()
+			)
+			.forGetter(featureSize -> featureSize.minClippedHeight);
+	}
+
+	public FeatureSize(OptionalInt optionalInt) {
 		this.minClippedHeight = optionalInt;
 	}
+
+	protected abstract FeatureSizeType<?> type();
 
 	public abstract int getSizeAtHeight(int i, int j);
 
 	public OptionalInt minClippedHeight() {
 		return this.minClippedHeight;
-	}
-
-	public <T> T serialize(DynamicOps<T> dynamicOps) {
-		Builder<T, T> builder = ImmutableMap.builder();
-		builder.put(dynamicOps.createString("type"), dynamicOps.createString(Registry.FEATURE_SIZE_TYPES.getKey(this.type).toString()));
-		this.minClippedHeight.ifPresent(i -> builder.put(dynamicOps.createString("min_clipped_height"), dynamicOps.createInt(i)));
-		return new Dynamic<>(dynamicOps, dynamicOps.createMap(builder.build())).getValue();
 	}
 }

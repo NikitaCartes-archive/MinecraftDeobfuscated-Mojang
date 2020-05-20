@@ -5,11 +5,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.dimension.DimensionType;
 
 public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener> {
-	private DimensionType dimension;
+	private ResourceLocation dimension;
 	private long seed;
 	private GameType playerGameType;
 	private boolean isDebug;
@@ -19,8 +19,8 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 	public ClientboundRespawnPacket() {
 	}
 
-	public ClientboundRespawnPacket(DimensionType dimensionType, long l, GameType gameType, boolean bl, boolean bl2, boolean bl3) {
-		this.dimension = dimensionType;
+	public ClientboundRespawnPacket(ResourceLocation resourceLocation, long l, GameType gameType, boolean bl, boolean bl2, boolean bl3) {
+		this.dimension = resourceLocation;
 		this.seed = l;
 		this.playerGameType = gameType;
 		this.isDebug = bl;
@@ -34,7 +34,7 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 
 	@Override
 	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-		this.dimension = DimensionType.getById(friendlyByteBuf.readInt());
+		this.dimension = friendlyByteBuf.readResourceLocation();
 		this.seed = friendlyByteBuf.readLong();
 		this.playerGameType = GameType.byId(friendlyByteBuf.readUnsignedByte());
 		this.isDebug = friendlyByteBuf.readBoolean();
@@ -44,7 +44,7 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
-		friendlyByteBuf.writeInt(this.dimension.getId());
+		friendlyByteBuf.writeResourceLocation(this.dimension);
 		friendlyByteBuf.writeLong(this.seed);
 		friendlyByteBuf.writeByte(this.playerGameType.getId());
 		friendlyByteBuf.writeBoolean(this.isDebug);
@@ -53,7 +53,7 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 	}
 
 	@Environment(EnvType.CLIENT)
-	public DimensionType getDimension() {
+	public ResourceLocation getDimension() {
 		return this.dimension;
 	}
 

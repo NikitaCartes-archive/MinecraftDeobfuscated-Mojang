@@ -7,13 +7,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
-import net.minecraft.world.level.levelgen.feature.RuinedPortalFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.RuinedPortalConfiguration;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 
@@ -38,12 +33,10 @@ public final class DarkForestBiome extends Biome {
 				)
 				.parent(null)
 		);
-		this.addStructureStart(Feature.WOODLAND_MANSION.configured(FeatureConfiguration.NONE));
-		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
-		this.addStructureStart(Feature.STRONGHOLD.configured(FeatureConfiguration.NONE));
-		this.addStructureStart(Feature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.STANDARD)));
+		this.addStructureStart(BiomeDefaultFeatures.WOODLAND_MANSION);
+		BiomeDefaultFeatures.addDefaultOverworldLandStructures(this);
+		this.addStructureStart(BiomeDefaultFeatures.RUINED_PORTAL_STANDARD);
 		BiomeDefaultFeatures.addDefaultCarvers(this);
-		BiomeDefaultFeatures.addStructureFeaturePlacement(this);
 		BiomeDefaultFeatures.addDefaultLakes(this);
 		BiomeDefaultFeatures.addDefaultMonsterRoom(this);
 		this.addFeature(

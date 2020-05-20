@@ -3,12 +3,6 @@ package net.minecraft.world.level.biome;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
-import net.minecraft.world.level.levelgen.feature.RuinedPortalFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.RuinedPortalConfiguration;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 
 public class BambooJungleBiome extends Biome {
@@ -33,12 +27,10 @@ public class BambooJungleBiome extends Biome {
 				.parent(null)
 				.optimalParameters(ImmutableList.of(new Biome.ClimateParameters(0.5F, 0.5F, 0.0F, 0.2F, 1.0F)))
 		);
-		this.addStructureStart(Feature.JUNGLE_TEMPLE.configured(FeatureConfiguration.NONE));
-		this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
-		this.addStructureStart(Feature.STRONGHOLD.configured(FeatureConfiguration.NONE));
-		this.addStructureStart(Feature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.JUNGLE)));
+		this.addStructureStart(BiomeDefaultFeatures.JUNGLE_TEMPLE);
+		BiomeDefaultFeatures.addDefaultOverworldLandStructures(this);
+		this.addStructureStart(BiomeDefaultFeatures.RUINED_PORTAL_JUNGLE);
 		BiomeDefaultFeatures.addDefaultCarvers(this);
-		BiomeDefaultFeatures.addStructureFeaturePlacement(this);
 		BiomeDefaultFeatures.addDefaultLakes(this);
 		BiomeDefaultFeatures.addDefaultMonsterRoom(this);
 		BiomeDefaultFeatures.addDefaultUndergroundVariety(this);

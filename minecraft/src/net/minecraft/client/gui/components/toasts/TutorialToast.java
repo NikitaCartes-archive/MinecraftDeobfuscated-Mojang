@@ -31,7 +31,7 @@ public class TutorialToast implements Toast {
 	public Toast.Visibility render(PoseStack poseStack, ToastComponent toastComponent, long l) {
 		toastComponent.getMinecraft().getTextureManager().bind(TEXTURE);
 		RenderSystem.color3f(1.0F, 1.0F, 1.0F);
-		toastComponent.blit(poseStack, 0, 0, 0, 96, 160, 32);
+		toastComponent.blit(poseStack, 0, 0, 0, 96, this.width(), this.height());
 		this.icon.render(poseStack, toastComponent, 6, 6);
 		if (this.message == null) {
 			toastComponent.getMinecraft().font.draw(poseStack, this.title, 30.0F, 12.0F, -11534256);

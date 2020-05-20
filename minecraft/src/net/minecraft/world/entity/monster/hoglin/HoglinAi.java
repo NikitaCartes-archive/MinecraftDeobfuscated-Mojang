@@ -2,9 +2,7 @@ package net.minecraft.world.entity.monster.hoglin;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.util.Pair;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
@@ -36,17 +34,12 @@ import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromLookTarget;
 import net.minecraft.world.entity.ai.behavior.StartAttacking;
 import net.minecraft.world.entity.ai.behavior.StopAttackingIfTargetInvalid;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.sensing.Sensor;
-import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
 
 public class HoglinAi {
 	private static final IntRange RETREAT_DURATION = TimeUtil.rangeOfSeconds(5, 20);
 
-	protected static Brain<?> makeBrain(Dynamic<?> dynamic) {
-		Brain<Hoglin> brain = new Brain<>(
-			(Collection<MemoryModuleType<?>>)Hoglin.MEMORY_TYPES, (Collection<SensorType<? extends Sensor<? super Hoglin>>>)Hoglin.SENSOR_TYPES, dynamic
-		);
+	protected static Brain<?> makeBrain(Brain<Hoglin> brain) {
 		initCoreActivity(brain);
 		initIdleActivity(brain);
 		initFightActivity(brain);

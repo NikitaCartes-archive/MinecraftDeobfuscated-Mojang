@@ -1,8 +1,7 @@
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -15,8 +14,8 @@ public class VoidStartPlatformFeature extends Feature<NoneFeatureConfiguration> 
 	private static final BlockPos PLATFORM_ORIGIN = new BlockPos(8, 3, 8);
 	private static final ChunkPos PLATFORM_ORIGIN_CHUNK = new ChunkPos(PLATFORM_ORIGIN);
 
-	public VoidStartPlatformFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-		super(function);
+	public VoidStartPlatformFeature(Codec<NoneFeatureConfiguration> codec) {
+		super(codec);
 	}
 
 	private static int checkerboardDistance(int i, int j, int k, int l) {

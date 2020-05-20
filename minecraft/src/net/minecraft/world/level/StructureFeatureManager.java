@@ -1,7 +1,9 @@
 package net.minecraft.world.level;
 
+import com.mojang.datafixers.DataFixUtils;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -19,7 +21,7 @@ public class StructureFeatureManager {
 		this.worldGenSettings = worldGenSettings;
 	}
 
-	public Stream<StructureStart> startsForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature) {
+	public Stream<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature) {
 		return this.level
 			.getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_REFERENCES)
 			.getReferencesForFeature(structureFeature.getFeatureName())
@@ -32,11 +34,11 @@ public class StructureFeatureManager {
 	}
 
 	@Nullable
-	public StructureStart getStartForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature, FeatureAccess featureAccess) {
+	public StructureStart<?> getStartForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature, FeatureAccess featureAccess) {
 		return featureAccess.getStartForFeature(structureFeature.getFeatureName());
 	}
 
-	public void setStartForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature, StructureStart structureStart, FeatureAccess featureAccess) {
+	public void setStartForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature, StructureStart<?> structureStart, FeatureAccess featureAccess) {
 		featureAccess.setStartForFeature(structureFeature.getFeatureName(), structureStart);
 	}
 
@@ -46,5 +48,15 @@ public class StructureFeatureManager {
 
 	public boolean shouldGenerateFeatures() {
 		return this.worldGenSettings.generateFeatures();
+	}
+
+	public StructureStart<?> getStructureAt(BlockPos blockPos, boolean bl, StructureFeature<?> structureFeature) {
+		return DataFixUtils.orElse(
+			this.startsForFeature(SectionPos.of(blockPos), structureFeature)
+				.filter(structureStart -> structureStart.getBoundingBox().isInside(blockPos))
+				.filter(structureStart -> !bl || structureStart.getPieces().stream().anyMatch(structurePiece -> structurePiece.getBoundingBox().isInside(blockPos)))
+				.findFirst(),
+			StructureStart.INVALID_START
+		);
 	}
 }

@@ -2,8 +2,8 @@ package net.minecraft.world.level.levelgen.feature.structures;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.DynamicOps;
 
 public class JigsawJunction {
 	private final int sourceX;

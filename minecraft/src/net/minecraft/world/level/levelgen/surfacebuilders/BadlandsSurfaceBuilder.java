@@ -1,10 +1,9 @@
 package net.minecraft.world.level.levelgen.surfacebuilders;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
@@ -29,8 +28,8 @@ public class BadlandsSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseCon
 	protected PerlinSimplexNoise pillarRoofNoise;
 	protected PerlinSimplexNoise clayBandsOffsetNoise;
 
-	public BadlandsSurfaceBuilder(Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration> function) {
-		super(function);
+	public BadlandsSurfaceBuilder(Codec<SurfaceBuilderBaseConfiguration> codec) {
+		super(codec);
 	}
 
 	public void apply(

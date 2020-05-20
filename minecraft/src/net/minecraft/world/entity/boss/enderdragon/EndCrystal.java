@@ -12,6 +12,7 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -19,7 +20,6 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.dimension.end.EndDragonFight;
-import net.minecraft.world.level.dimension.end.TheEndDimension;
 
 public class EndCrystal extends Entity {
 	private static final EntityDataAccessor<Optional<BlockPos>> DATA_BEAM_TARGET = SynchedEntityData.defineId(
@@ -53,9 +53,9 @@ public class EndCrystal extends Entity {
 	@Override
 	public void tick() {
 		this.time++;
-		if (!this.level.isClientSide) {
+		if (this.level instanceof ServerLevel) {
 			BlockPos blockPos = this.blockPosition();
-			if (this.level.getDimension() instanceof TheEndDimension && this.level.getBlockState(blockPos).isAir()) {
+			if (((ServerLevel)this.level).dragonFight() != null && this.level.getBlockState(blockPos).isAir()) {
 				this.level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(this.level, blockPos));
 			}
 		}
@@ -113,9 +113,8 @@ public class EndCrystal extends Entity {
 	}
 
 	private void onDestroyedBy(DamageSource damageSource) {
-		if (this.level.getDimension() instanceof TheEndDimension) {
-			TheEndDimension theEndDimension = (TheEndDimension)this.level.getDimension();
-			EndDragonFight endDragonFight = theEndDimension.getDragonFight();
+		if (this.level instanceof ServerLevel) {
+			EndDragonFight endDragonFight = ((ServerLevel)this.level).dragonFight();
 			if (endDragonFight != null) {
 				endDragonFight.onCrystalDestroyed(this, damageSource);
 			}

@@ -65,7 +65,7 @@ public class DebugPackets {
 	public static void sendNeighborsUpdatePacket(Level level, BlockPos blockPos) {
 	}
 
-	public static void sendStructurePacket(LevelAccessor levelAccessor, StructureStart structureStart) {
+	public static void sendStructurePacket(LevelAccessor levelAccessor, StructureStart<?> structureStart) {
 	}
 
 	public static void sendGoalSelector(Level level, Mob mob, GoalSelector goalSelector) {

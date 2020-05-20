@@ -2,12 +2,12 @@ package net.minecraft.util.datafix.fixes;
 
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.OptionalDynamic;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.OptionalDynamic;
 import java.util.Arrays;
 import java.util.function.Function;
 
@@ -42,14 +42,14 @@ public class EntityProjectileOwnerFix extends DataFix {
 	}
 
 	private Dynamic<?> updateOwnerLlamaSpit(Dynamic<?> dynamic) {
-		OptionalDynamic optionalDynamic = dynamic.get("Owner");
+		OptionalDynamic<?> optionalDynamic = dynamic.get("Owner");
 		long l = optionalDynamic.get("OwnerUUIDMost").asLong(0L);
 		long m = optionalDynamic.get("OwnerUUIDLeast").asLong(0L);
 		return this.setUUID(dynamic, l, m).remove("Owner");
 	}
 
 	private Dynamic<?> updateItemPotion(Dynamic<?> dynamic) {
-		OptionalDynamic optionalDynamic = dynamic.get("Potion");
+		OptionalDynamic<?> optionalDynamic = dynamic.get("Potion");
 		return dynamic.set("Item", optionalDynamic.orElseEmptyMap()).remove("Potion");
 	}
 

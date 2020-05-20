@@ -1,48 +1,32 @@
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
-import java.util.function.Function;
+import com.mojang.serialization.Codec;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.JunglePyramidPiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
-public class JunglePyramidFeature extends RandomScatteredFeature<NoneFeatureConfiguration> {
-	public JunglePyramidFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-		super(function);
+public class JunglePyramidFeature extends StructureFeature<NoneFeatureConfiguration> {
+	public JunglePyramidFeature(Codec<NoneFeatureConfiguration> codec) {
+		super(codec);
 	}
 
 	@Override
-	public String getFeatureName() {
-		return "Jungle_Pyramid";
-	}
-
-	@Override
-	public int getLookupRange() {
-		return 3;
-	}
-
-	@Override
-	public StructureFeature.StructureStartFactory getStartFactory() {
+	public StructureFeature.StructureStartFactory<NoneFeatureConfiguration> getStartFactory() {
 		return JunglePyramidFeature.FeatureStart::new;
 	}
 
-	@Override
-	protected int getRandomSalt(ChunkGeneratorSettings chunkGeneratorSettings) {
-		return 14357619;
-	}
-
-	public static class FeatureStart extends StructureStart {
-		public FeatureStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+	public static class FeatureStart extends StructureStart<NoneFeatureConfiguration> {
+		public FeatureStart(StructureFeature<NoneFeatureConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
 			super(structureFeature, i, j, boundingBox, k, l);
 		}
 
-		@Override
-		public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+		public void generatePieces(
+			ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration
+		) {
 			JunglePyramidPiece junglePyramidPiece = new JunglePyramidPiece(this.random, i * 16, j * 16);
 			this.pieces.add(junglePyramidPiece);
 			this.calculateBoundingBox();

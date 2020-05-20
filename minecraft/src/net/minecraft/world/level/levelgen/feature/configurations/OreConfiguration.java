@@ -1,17 +1,25 @@
 package net.minecraft.world.level.levelgen.feature.configurations;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.predicate.BlockPredicate;
 
 public class OreConfiguration implements FeatureConfiguration {
+	public static final Codec<OreConfiguration> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					OreConfiguration.Predicates.CODEC.fieldOf("target").forGetter(oreConfiguration -> oreConfiguration.target),
+					BlockState.CODEC.fieldOf("state").forGetter(oreConfiguration -> oreConfiguration.state),
+					Codec.INT.fieldOf("size").withDefault(0).forGetter(oreConfiguration -> oreConfiguration.size)
+				)
+				.apply(instance, OreConfiguration::new)
+	);
 	public final OreConfiguration.Predicates target;
 	public final int size;
 	public final BlockState state;
@@ -22,39 +30,22 @@ public class OreConfiguration implements FeatureConfiguration {
 		this.target = predicates;
 	}
 
-	@Override
-	public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-		return new Dynamic<>(
-			dynamicOps,
-			dynamicOps.createMap(
-				ImmutableMap.of(
-					dynamicOps.createString("size"),
-					dynamicOps.createInt(this.size),
-					dynamicOps.createString("target"),
-					dynamicOps.createString(this.target.getName()),
-					dynamicOps.createString("state"),
-					BlockState.serialize(dynamicOps, this.state).getValue()
-				)
-			)
-		);
-	}
-
-	public static OreConfiguration deserialize(Dynamic<?> dynamic) {
-		int i = dynamic.get("size").asInt(0);
-		OreConfiguration.Predicates predicates = OreConfiguration.Predicates.byName(dynamic.get("target").asString(""));
-		BlockState blockState = (BlockState)dynamic.get("state").map(BlockState::deserialize).orElse(Blocks.AIR.defaultBlockState());
-		return new OreConfiguration(predicates, blockState, i);
-	}
-
-	public static enum Predicates {
+	public static enum Predicates implements StringRepresentable {
 		NATURAL_STONE(
 			"natural_stone",
 			blockState -> blockState == null
 					? false
 					: blockState.is(Blocks.STONE) || blockState.is(Blocks.GRANITE) || blockState.is(Blocks.DIORITE) || blockState.is(Blocks.ANDESITE)
 		),
-		NETHERRACK("netherrack", new BlockPredicate(Blocks.NETHERRACK));
+		NETHERRACK("netherrack", new BlockPredicate(Blocks.NETHERRACK)),
+		NETHER_ORE_REPLACEABLES(
+			"nether_ore_replaceables",
+			blockState -> blockState == null ? false : blockState.is(Blocks.NETHERRACK) || blockState.is(Blocks.BASALT) || blockState.is(Blocks.BLACKSTONE)
+		);
 
+		public static final Codec<OreConfiguration.Predicates> CODEC = StringRepresentable.fromEnum(
+			OreConfiguration.Predicates::values, OreConfiguration.Predicates::byName
+		);
 		private static final Map<String, OreConfiguration.Predicates> BY_NAME = (Map<String, OreConfiguration.Predicates>)Arrays.stream(values())
 			.collect(Collectors.toMap(OreConfiguration.Predicates::getName, predicates -> predicates));
 		private final String name;
@@ -75,6 +66,11 @@ public class OreConfiguration implements FeatureConfiguration {
 
 		public Predicate<BlockState> getPredicate() {
 			return this.predicate;
+		}
+
+		@Override
+		public String getSerializedName() {
+			return this.name;
 		}
 	}
 }

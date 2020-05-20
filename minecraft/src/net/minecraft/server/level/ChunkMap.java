@@ -131,9 +131,9 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		int i,
 		boolean bl
 	) {
-		super(new File(levelStorageAccess.getDimensionPath(serverLevel.dimensionType()), "region"), dataFixer, bl);
+		super(new File(levelStorageAccess.getDimensionPath(serverLevel.dimension()), "region"), dataFixer, bl);
 		this.structureManager = structureManager;
-		this.storageFolder = levelStorageAccess.getDimensionPath(serverLevel.dimensionType());
+		this.storageFolder = levelStorageAccess.getDimensionPath(serverLevel.dimension());
 		this.level = serverLevel;
 		this.generator = chunkGenerator;
 		this.mainThreadExecutor = blockableEventLoop;

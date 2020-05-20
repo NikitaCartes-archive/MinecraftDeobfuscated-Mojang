@@ -1,5 +1,6 @@
 package net.minecraft.client.particle;
 
+import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -51,7 +52,11 @@ public class SuspendedParticle extends TextureSheetParticle {
 		}
 
 		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
-			SuspendedParticle suspendedParticle = new SuspendedParticle(clientLevel, d, e, f, g, h, i);
+			Random random = clientLevel.random;
+			double j = random.nextGaussian() * 1.0E-6F;
+			double k = random.nextGaussian() * 1.0E-4F;
+			double l = random.nextGaussian() * 1.0E-6F;
+			SuspendedParticle suspendedParticle = new SuspendedParticle(clientLevel, d, e, f, j, k, l);
 			suspendedParticle.pickSprite(this.sprite);
 			suspendedParticle.setColor(0.9F, 0.4F, 0.5F);
 			return suspendedParticle;
@@ -82,7 +87,8 @@ public class SuspendedParticle extends TextureSheetParticle {
 		}
 
 		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
-			SuspendedParticle suspendedParticle = new SuspendedParticle(clientLevel, d, e, f, g, h, i);
+			double j = (double)clientLevel.random.nextFloat() * -1.9 * (double)clientLevel.random.nextFloat() * 0.1;
+			SuspendedParticle suspendedParticle = new SuspendedParticle(clientLevel, d, e, f, 0.0, j, 0.0);
 			suspendedParticle.pickSprite(this.sprite);
 			suspendedParticle.setColor(0.1F, 0.1F, 0.3F);
 			suspendedParticle.setSize(0.001F, 0.001F);

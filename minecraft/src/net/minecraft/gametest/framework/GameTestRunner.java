@@ -136,7 +136,8 @@ public class GameTestRunner {
 	}
 
 	private static void say(ServerLevel serverLevel, ChatFormatting chatFormatting, String string) {
-		serverLevel.getPlayers(serverPlayer -> true).forEach(serverPlayer -> serverPlayer.sendMessage(new TextComponent(string).withStyle(chatFormatting)));
+		serverLevel.getPlayers(serverPlayer -> true)
+			.forEach(serverPlayer -> serverPlayer.sendMessage(new TextComponent(string).withStyle(chatFormatting), Util.NIL_UUID));
 	}
 
 	public static void clearMarkers(ServerLevel serverLevel) {

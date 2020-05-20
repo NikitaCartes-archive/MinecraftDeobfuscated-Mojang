@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.TextComponent;
@@ -15,7 +16,7 @@ public class NarrationHelper {
 	public static void now(String string) {
 		NarratorChatListener narratorChatListener = NarratorChatListener.INSTANCE;
 		narratorChatListener.clear();
-		narratorChatListener.handle(ChatType.SYSTEM, new TextComponent(fixNarrationNewlines(string)));
+		narratorChatListener.handle(ChatType.SYSTEM, new TextComponent(fixNarrationNewlines(string)), Util.NIL_UUID);
 	}
 
 	private static String fixNarrationNewlines(String string) {

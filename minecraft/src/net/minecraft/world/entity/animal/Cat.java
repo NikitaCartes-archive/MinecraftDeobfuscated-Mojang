@@ -61,7 +61,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -372,7 +372,8 @@ public class Cat extends TamableAnimal {
 		}
 
 		Level level = levelAccessor.getLevel();
-		if (level instanceof ServerLevel && Feature.SWAMP_HUT.isInsideFeature(((ServerLevel)level).structureFeatureManager(), this.blockPosition())) {
+		if (level instanceof ServerLevel
+			&& ((ServerLevel)level).structureFeatureManager().getStructureAt(this.blockPosition(), true, StructureFeature.SWAMP_HUT).isValid()) {
 			this.setCatType(10);
 			this.setPersistenceRequired();
 		}

@@ -7,6 +7,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.ConstantIntValue;
@@ -523,7 +524,7 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 							LootItem.lootTableItem(Items.MAP)
 								.apply(
 									ExplorationMapFunction.makeExplorationMap()
-										.setDestination("buried_treasure")
+										.setDestination(StructureFeature.BURIED_TREASURE)
 										.setMapDecoration(MapDecoration.Type.RED_X)
 										.setZoom((byte)1)
 										.setSkipKnownStructures(false)
@@ -752,7 +753,7 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 								.setWeight(10)
 								.apply(
 									ExplorationMapFunction.makeExplorationMap()
-										.setDestination("buried_treasure")
+										.setDestination(StructureFeature.BURIED_TREASURE)
 										.setMapDecoration(MapDecoration.Type.RED_X)
 										.setZoom((byte)1)
 										.setSkipKnownStructures(false)
@@ -783,7 +784,7 @@ public class ChestLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 								.setWeight(5)
 								.apply(
 									ExplorationMapFunction.makeExplorationMap()
-										.setDestination("buried_treasure")
+										.setDestination(StructureFeature.BURIED_TREASURE)
 										.setMapDecoration(MapDecoration.Type.RED_X)
 										.setZoom((byte)1)
 										.setSkipKnownStructures(false)

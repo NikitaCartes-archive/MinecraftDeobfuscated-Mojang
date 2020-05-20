@@ -1,9 +1,10 @@
 package net.minecraft.core.particles;
 
+import com.mojang.serialization.Codec;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
-public class ParticleType<T extends ParticleOptions> {
+public abstract class ParticleType<T extends ParticleOptions> {
 	private final boolean overrideLimiter;
 	private final ParticleOptions.Deserializer<T> deserializer;
 
@@ -20,4 +21,6 @@ public class ParticleType<T extends ParticleOptions> {
 	public ParticleOptions.Deserializer<T> getDeserializer() {
 		return this.deserializer;
 	}
+
+	public abstract Codec<T> codec();
 }

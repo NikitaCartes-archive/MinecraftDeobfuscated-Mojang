@@ -3,8 +3,9 @@ package net.minecraft.world.entity.ai.gossip;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.DynamicOps;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
@@ -15,7 +16,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -79,7 +79,7 @@ public class GossipContainer {
 		collection.forEach(gossipEntry -> {
 			int ix = gossipEntry.value - gossipEntry.type.decayPerTransfer;
 			if (ix >= 2) {
-				this.getOrCreate(gossipEntry.target).entries.mergeInt(gossipEntry.type, ix, GossipContainer::mergeValuesForTransfer);
+				this.getOrCreate(gossipEntry.target.value()).entries.mergeInt(gossipEntry.type, ix, GossipContainer::mergeValuesForTransfer);
 			}
 		});
 	}
@@ -105,8 +105,8 @@ public class GossipContainer {
 	public void update(Dynamic<?> dynamic) {
 		dynamic.asStream()
 			.map(GossipContainer.GossipEntry::load)
-			.flatMap(Util::toStream)
-			.forEach(gossipEntry -> this.getOrCreate(gossipEntry.target).entries.put(gossipEntry.type, gossipEntry.value));
+			.flatMap(dataResult -> Util.toStream(dataResult.result()))
+			.forEach(gossipEntry -> this.getOrCreate(gossipEntry.target.value()).entries.put(gossipEntry.type, gossipEntry.value));
 	}
 
 	private static int mergeValuesForTransfer(int i, int j) {
@@ -172,12 +172,16 @@ public class GossipContainer {
 	}
 
 	static class GossipEntry {
-		public final UUID target;
+		public final SerializableUUID target;
 		public final GossipType type;
 		public final int value;
 
 		public GossipEntry(UUID uUID, GossipType gossipType, int i) {
-			this.target = uUID;
+			this(new SerializableUUID(uUID), gossipType, i);
+		}
+
+		public GossipEntry(SerializableUUID serializableUUID, GossipType gossipType, int i) {
+			this.target = serializableUUID;
 			this.type = gossipType;
 			this.value = i;
 		}
@@ -196,7 +200,7 @@ public class GossipContainer {
 				dynamicOps.createMap(
 					ImmutableMap.of(
 						dynamicOps.createString("Target"),
-						SerializableUUID.serialize(dynamicOps, this.target),
+						(T)SerializableUUID.CODEC.encodeStart(dynamicOps, this.target).result().orElseThrow(RuntimeException::new),
 						dynamicOps.createString("Type"),
 						dynamicOps.createString(this.type.id),
 						dynamicOps.createString("Value"),
@@ -206,15 +210,16 @@ public class GossipContainer {
 			);
 		}
 
-		public static Optional<GossipContainer.GossipEntry> load(Dynamic<?> dynamic) {
-			return dynamic.get("Type")
-				.asString()
-				.map(GossipType::byId)
-				.flatMap(
-					gossipType -> dynamic.get("Target")
-							.map(SerializableUUID::readUUID)
-							.flatMap(uUID -> dynamic.get("Value").asNumber().map(number -> new GossipContainer.GossipEntry(uUID, gossipType, number.intValue())))
-				);
+		public static DataResult<GossipContainer.GossipEntry> load(Dynamic<?> dynamic) {
+			return DataResult.unbox(
+				DataResult.instance()
+					.group(
+						dynamic.get("Target").read(SerializableUUID.CODEC),
+						dynamic.get("Type").asString().map(GossipType::byId),
+						dynamic.get("Value").asNumber().map(Number::intValue)
+					)
+					.apply(DataResult.instance(), GossipContainer.GossipEntry::new)
+			);
 		}
 	}
 }

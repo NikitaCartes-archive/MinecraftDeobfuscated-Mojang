@@ -26,7 +26,7 @@ public abstract class Fluid {
 	protected Fluid() {
 		StateDefinition.Builder<Fluid, FluidState> builder = new StateDefinition.Builder<>(this);
 		this.createFluidStateDefinition(builder);
-		this.stateDefinition = builder.create(FluidStateImpl::new);
+		this.stateDefinition = builder.create(Fluid::defaultFluidState, FluidState::new);
 		this.registerDefaultState(this.stateDefinition.any());
 	}
 

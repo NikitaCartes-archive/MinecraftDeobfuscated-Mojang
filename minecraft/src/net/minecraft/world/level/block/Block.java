@@ -155,7 +155,7 @@ public class Block extends BlockBehaviour implements ItemLike {
 		super(properties);
 		StateDefinition.Builder<Block, BlockState> builder = new StateDefinition.Builder<>(this);
 		this.createBlockStateDefinition(builder);
-		this.stateDefinition = builder.create(BlockState::new);
+		this.stateDefinition = builder.create(Block::defaultBlockState, BlockState::new);
 		this.registerDefaultState(this.stateDefinition.any());
 	}
 

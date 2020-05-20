@@ -1,11 +1,12 @@
 package net.minecraft.util.datafix.fixes;
 
 import com.mojang.datafixers.DSL;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Dynamic;
 
 public class BlockEntityJukeboxFix extends NamedEntityFix {
 	public BlockEntityJukeboxFix(Schema schema, boolean bl) {
@@ -27,7 +28,8 @@ public class BlockEntityJukeboxFix extends NamedEntityFix {
 				dynamic2 = dynamic2.set("id", dynamic2.createString(string));
 				dynamic2 = dynamic2.set("Count", dynamic2.createByte((byte)1));
 				return typed.set(
-						opticFinder, (Typed)type2.readTyped(dynamic2).getSecond().orElseThrow(() -> new IllegalStateException("Could not create record item stack."))
+						opticFinder,
+						(Typed)((Pair)type2.readTyped(dynamic2).result().orElseThrow(() -> new IllegalStateException("Could not create record item stack."))).getFirst()
 					)
 					.set(DSL.remainderFinder(), dynamic);
 			}

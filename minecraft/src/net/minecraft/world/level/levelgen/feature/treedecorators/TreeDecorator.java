@@ -1,10 +1,11 @@
 package net.minecraft.world.level.levelgen.feature.treedecorators;
 
+import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Serializable;
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelWriter;
 import net.minecraft.world.level.block.Blocks;
@@ -12,12 +13,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
-public abstract class TreeDecorator implements Serializable {
-	protected final TreeDecoratorType<?> type;
+public abstract class TreeDecorator {
+	public static final Codec<TreeDecorator> CODEC = Registry.TREE_DECORATOR_TYPES.dispatch(TreeDecorator::type, TreeDecoratorType::codec);
 
-	protected TreeDecorator(TreeDecoratorType<?> treeDecoratorType) {
-		this.type = treeDecoratorType;
-	}
+	protected abstract TreeDecoratorType<?> type();
 
 	public abstract void place(LevelAccessor levelAccessor, Random random, List<BlockPos> list, List<BlockPos> list2, Set<BlockPos> set, BoundingBox boundingBox);
 

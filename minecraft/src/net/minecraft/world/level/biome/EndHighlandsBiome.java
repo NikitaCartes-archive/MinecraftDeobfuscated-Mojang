@@ -2,9 +2,9 @@ package net.minecraft.world.level.biome;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.level.dimension.end.TheEndDimension;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
@@ -34,14 +34,13 @@ public class EndHighlandsBiome extends Biome {
 				)
 				.parent(null)
 		);
-		this.addStructureStart(Feature.END_CITY.configured(FeatureConfiguration.NONE));
+		this.addStructureStart(BiomeDefaultFeatures.END_CITY);
 		this.addFeature(
 			GenerationStep.Decoration.SURFACE_STRUCTURES,
 			Feature.END_GATEWAY
-				.configured(EndGatewayConfiguration.knownExit(TheEndDimension.END_SPAWN_POINT, true))
+				.configured(EndGatewayConfiguration.knownExit(ServerLevel.END_SPAWN_POINT, true))
 				.decorated(FeatureDecorator.END_GATEWAY.configured(DecoratorConfiguration.NONE))
 		);
-		BiomeDefaultFeatures.addEndCity(this);
 		this.addFeature(
 			GenerationStep.Decoration.VEGETAL_DECORATION,
 			Feature.CHORUS_PLANT.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.CHORUS_PLANT.configured(DecoratorConfiguration.NONE))

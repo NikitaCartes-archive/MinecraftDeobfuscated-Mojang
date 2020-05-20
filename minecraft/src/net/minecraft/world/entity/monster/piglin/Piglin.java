@@ -1,7 +1,7 @@
 package net.minecraft.world.entity.monster.piglin;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Dynamic;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -54,7 +54,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 
 public class Piglin extends Monster implements CrossbowAttackMob {
@@ -241,8 +240,13 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 	}
 
 	@Override
+	protected Brain.Provider<Piglin> brainProvider() {
+		return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
+	}
+
+	@Override
 	protected Brain<?> makeBrain(Dynamic<?> dynamic) {
-		return PiglinAi.makeBrain(this, dynamic);
+		return PiglinAi.makeBrain(this, this.brainProvider().makeBrain(dynamic));
 	}
 
 	@Override
@@ -304,7 +308,7 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 	}
 
 	public boolean isConverting() {
-		return this.level.dimensionType() != DimensionType.NETHER && !this.isImmuneToZombification() && !this.isNoAi();
+		return !this.level.dimensionType().isNether() && !this.isImmuneToZombification() && !this.isNoAi();
 	}
 
 	@Override
@@ -459,8 +463,8 @@ public class Piglin extends Monster implements CrossbowAttackMob {
 
 	@Override
 	protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2) {
-		boolean bl = PiglinAi.isLovedItem(itemStack.getItem());
-		boolean bl2 = PiglinAi.isLovedItem(itemStack2.getItem());
+		boolean bl = PiglinAi.isLovedItem(itemStack.getItem()) || itemStack.getItem() == Items.CROSSBOW;
+		boolean bl2 = PiglinAi.isLovedItem(itemStack2.getItem()) || itemStack2.getItem() == Items.CROSSBOW;
 		if (bl && !bl2) {
 			return true;
 		} else if (!bl && bl2) {

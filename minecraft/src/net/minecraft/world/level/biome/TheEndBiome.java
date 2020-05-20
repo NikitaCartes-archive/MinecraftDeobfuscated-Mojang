@@ -32,7 +32,6 @@ public final class TheEndBiome extends Biome {
 				.parent(null)
 		);
 		this.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.END_SPIKE.configured(new SpikeConfiguration(false, ImmutableList.of(), null)));
-		BiomeDefaultFeatures.addEndCity(this);
 		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.ENDERMAN, 10, 4, 4));
 	}
 

@@ -1,24 +1,16 @@
 package net.minecraft.world.level.levelgen.placement;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 
 public class ChanceDecoratorConfiguration implements DecoratorConfiguration {
+	public static final Codec<ChanceDecoratorConfiguration> CODEC = Codec.INT
+		.fieldOf("chance")
+		.<ChanceDecoratorConfiguration>xmap(ChanceDecoratorConfiguration::new, chanceDecoratorConfiguration -> chanceDecoratorConfiguration.chance)
+		.codec();
 	public final int chance;
 
 	public ChanceDecoratorConfiguration(int i) {
 		this.chance = i;
-	}
-
-	@Override
-	public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-		return new Dynamic<>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("chance"), dynamicOps.createInt(this.chance))));
-	}
-
-	public static ChanceDecoratorConfiguration deserialize(Dynamic<?> dynamic) {
-		int i = dynamic.get("chance").asInt(0);
-		return new ChanceDecoratorConfiguration(i);
 	}
 }

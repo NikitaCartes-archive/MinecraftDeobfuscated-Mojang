@@ -1,6 +1,8 @@
 package net.minecraft.world.level.levelgen;
 
+import com.mojang.serialization.Codec;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import net.fabricmc.api.EnvType;
@@ -22,7 +24,8 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 
 public class DebugLevelSource extends ChunkGenerator {
-	public static final ChunkGenerator INSTANCE = new DebugLevelSource();
+	public static final DebugLevelSource INSTANCE = new DebugLevelSource();
+	public static final Codec<DebugLevelSource> CODEC = Codec.<DebugLevelSource>unit((Supplier<DebugLevelSource>)(() -> INSTANCE)).stable();
 	private static final List<BlockState> ALL_BLOCKS = (List<BlockState>)StreamSupport.stream(Registry.BLOCK.spliterator(), false)
 		.flatMap(block -> block.getStateDefinition().getPossibleStates().stream())
 		.collect(Collectors.toList());
@@ -32,7 +35,12 @@ public class DebugLevelSource extends ChunkGenerator {
 	protected static final BlockState BARRIER = Blocks.BARRIER.defaultBlockState();
 
 	private DebugLevelSource() {
-		super(new FixedBiomeSource(Biomes.PLAINS), new ChunkGeneratorSettings());
+		super(new FixedBiomeSource(Biomes.PLAINS), new StructureSettings(false));
+	}
+
+	@Override
+	protected Codec<? extends ChunkGenerator> codec() {
+		return CODEC;
 	}
 
 	@Environment(EnvType.CLIENT)

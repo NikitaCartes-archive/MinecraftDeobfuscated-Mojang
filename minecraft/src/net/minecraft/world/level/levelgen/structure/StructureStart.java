@@ -15,17 +15,21 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
-public abstract class StructureStart {
-	public static final StructureStart INVALID_START = new StructureStart(Feature.MINESHAFT, 0, 0, BoundingBox.getUnknownBox(), 0, 0L) {
-		@Override
-		public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+public abstract class StructureStart<C extends FeatureConfiguration> {
+	public static final StructureStart<?> INVALID_START = new StructureStart<MineshaftConfiguration>(
+		StructureFeature.MINESHAFT, 0, 0, BoundingBox.getUnknownBox(), 0, 0L
+	) {
+		public void generatePieces(
+			ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, MineshaftConfiguration mineshaftConfiguration
+		) {
 		}
 	};
-	private final StructureFeature<?> feature;
+	private final StructureFeature<C> feature;
 	protected final List<StructurePiece> pieces = Lists.<StructurePiece>newArrayList();
 	protected BoundingBox boundingBox;
 	private final int chunkX;
@@ -33,7 +37,7 @@ public abstract class StructureStart {
 	private int references;
 	protected final WorldgenRandom random;
 
-	public StructureStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+	public StructureStart(StructureFeature<C> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
 		this.feature = structureFeature;
 		this.chunkX = i;
 		this.chunkZ = j;
@@ -43,7 +47,7 @@ public abstract class StructureStart {
 		this.boundingBox = boundingBox;
 	}
 
-	public abstract void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome);
+	public abstract void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, C featureConfiguration);
 
 	public BoundingBox getBoundingBox() {
 		return this.boundingBox;
@@ -53,7 +57,7 @@ public abstract class StructureStart {
 		return this.pieces;
 	}
 
-	public void postProcess(
+	public void placeInChunk(
 		WorldGenLevel worldGenLevel,
 		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator chunkGenerator,

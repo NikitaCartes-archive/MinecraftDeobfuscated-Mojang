@@ -1,9 +1,7 @@
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
@@ -13,14 +11,15 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class RuleProcessor extends StructureProcessor {
+	public static final Codec<RuleProcessor> CODEC = ProcessorRule.CODEC
+		.listOf()
+		.fieldOf("rules")
+		.<RuleProcessor>xmap(RuleProcessor::new, ruleProcessor -> ruleProcessor.rules)
+		.codec();
 	private final ImmutableList<ProcessorRule> rules;
 
-	public RuleProcessor(List<ProcessorRule> list) {
+	public RuleProcessor(List<? extends ProcessorRule> list) {
 		this.rules = ImmutableList.copyOf(list);
-	}
-
-	public RuleProcessor(Dynamic<?> dynamic) {
-		this(dynamic.get("rules").asList(ProcessorRule::deserialize));
 	}
 
 	@Nullable
@@ -46,19 +45,7 @@ public class RuleProcessor extends StructureProcessor {
 	}
 
 	@Override
-	protected StructureProcessorType getType() {
+	protected StructureProcessorType<?> getType() {
 		return StructureProcessorType.RULE;
-	}
-
-	@Override
-	protected <T> Dynamic<T> getDynamic(DynamicOps<T> dynamicOps) {
-		return new Dynamic<>(
-			dynamicOps,
-			dynamicOps.createMap(
-				ImmutableMap.of(
-					dynamicOps.createString("rules"), dynamicOps.createList(this.rules.stream().map(processorRule -> processorRule.serialize(dynamicOps).getValue()))
-				)
-			)
-		);
 	}
 }

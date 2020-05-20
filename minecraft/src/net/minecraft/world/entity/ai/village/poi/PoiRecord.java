@@ -1,19 +1,28 @@
 package net.minecraft.world.entity.ai.village.poi;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Objects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Serializable;
 
-public class PoiRecord implements Serializable {
+public class PoiRecord {
 	private final BlockPos pos;
 	private final PoiType poiType;
 	private int freeTickets;
 	private final Runnable setDirty;
+
+	public static Codec<PoiRecord> codec(Runnable runnable) {
+		return RecordCodecBuilder.create(
+			instance -> instance.group(
+						BlockPos.CODEC.fieldOf("pos").forGetter(poiRecord -> poiRecord.pos),
+						Registry.POINT_OF_INTEREST_TYPE.fieldOf("type").forGetter(poiRecord -> poiRecord.poiType),
+						Codec.INT.fieldOf("free_tickets").withDefault(0).forGetter(poiRecord -> poiRecord.freeTickets),
+						RecordCodecBuilder.point(runnable)
+					)
+					.apply(instance, PoiRecord::new)
+		);
+	}
 
 	private PoiRecord(BlockPos blockPos, PoiType poiType, int i, Runnable runnable) {
 		this.pos = blockPos.immutable();
@@ -24,29 +33,6 @@ public class PoiRecord implements Serializable {
 
 	public PoiRecord(BlockPos blockPos, PoiType poiType, Runnable runnable) {
 		this(blockPos, poiType, poiType.getMaxTickets(), runnable);
-	}
-
-	public <T> PoiRecord(Dynamic<T> dynamic, Runnable runnable) {
-		this(
-			(BlockPos)dynamic.get("pos").map(BlockPos::deserialize).orElse(new BlockPos(0, 0, 0)),
-			Registry.POINT_OF_INTEREST_TYPE.get(new ResourceLocation(dynamic.get("type").asString(""))),
-			dynamic.get("free_tickets").asInt(0),
-			runnable
-		);
-	}
-
-	@Override
-	public <T> T serialize(DynamicOps<T> dynamicOps) {
-		return dynamicOps.createMap(
-			ImmutableMap.of(
-				dynamicOps.createString("pos"),
-				this.pos.serialize(dynamicOps),
-				dynamicOps.createString("type"),
-				dynamicOps.createString(Registry.POINT_OF_INTEREST_TYPE.getKey(this.poiType).toString()),
-				dynamicOps.createString("free_tickets"),
-				dynamicOps.createInt(this.freeTickets)
-			)
-		);
 	}
 
 	protected boolean acquireTicket() {

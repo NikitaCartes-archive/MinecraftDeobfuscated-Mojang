@@ -1,6 +1,7 @@
 package net.minecraft.world.level.border;
 
 import com.google.common.collect.Lists;
+import com.mojang.serialization.DynamicLike;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -415,52 +416,16 @@ public class WorldBorder {
 			return this.sizeLerpTarget;
 		}
 
-		public static WorldBorder.Settings read(CompoundTag compoundTag, WorldBorder.Settings settings) {
-			double d = settings.centerX;
-			double e = settings.centerZ;
-			double f = settings.size;
-			long l = settings.sizeLerpTime;
-			double g = settings.sizeLerpTarget;
-			double h = settings.safeZone;
-			double i = settings.damagePerBlock;
-			int j = settings.warningBlocks;
-			int k = settings.warningTime;
-			if (compoundTag.contains("BorderCenterX", 99)) {
-				d = compoundTag.getDouble("BorderCenterX");
-			}
-
-			if (compoundTag.contains("BorderCenterZ", 99)) {
-				e = compoundTag.getDouble("BorderCenterZ");
-			}
-
-			if (compoundTag.contains("BorderSize", 99)) {
-				f = compoundTag.getDouble("BorderSize");
-			}
-
-			if (compoundTag.contains("BorderSizeLerpTime", 99)) {
-				l = compoundTag.getLong("BorderSizeLerpTime");
-			}
-
-			if (compoundTag.contains("BorderSizeLerpTarget", 99)) {
-				g = compoundTag.getDouble("BorderSizeLerpTarget");
-			}
-
-			if (compoundTag.contains("BorderSafeZone", 99)) {
-				h = compoundTag.getDouble("BorderSafeZone");
-			}
-
-			if (compoundTag.contains("BorderDamagePerBlock", 99)) {
-				i = compoundTag.getDouble("BorderDamagePerBlock");
-			}
-
-			if (compoundTag.contains("BorderWarningBlocks", 99)) {
-				j = compoundTag.getInt("BorderWarningBlocks");
-			}
-
-			if (compoundTag.contains("BorderWarningTime", 99)) {
-				k = compoundTag.getInt("BorderWarningTime");
-			}
-
+		public static WorldBorder.Settings read(DynamicLike<?> dynamicLike, WorldBorder.Settings settings) {
+			double d = dynamicLike.get("BorderCenterX").asDouble(settings.centerX);
+			double e = dynamicLike.get("BorderCenterZ").asDouble(settings.centerZ);
+			double f = dynamicLike.get("BorderSize").asDouble(settings.size);
+			long l = dynamicLike.get("BorderSizeLerpTime").asLong(settings.sizeLerpTime);
+			double g = dynamicLike.get("BorderSizeLerpTarget").asDouble(settings.sizeLerpTarget);
+			double h = dynamicLike.get("BorderSafeZone").asDouble(settings.safeZone);
+			double i = dynamicLike.get("BorderDamagePerBlock").asDouble(settings.damagePerBlock);
+			int j = dynamicLike.get("BorderWarningBlocks").asInt(settings.warningBlocks);
+			int k = dynamicLike.get("BorderWarningTime").asInt(settings.warningTime);
 			return new WorldBorder.Settings(d, e, i, h, j, k, f, l, g);
 		}
 

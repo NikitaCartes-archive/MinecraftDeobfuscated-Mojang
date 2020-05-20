@@ -1,9 +1,8 @@
 package net.minecraft.world.level.levelgen.placement;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Objects;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
@@ -14,8 +13,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.NoiseDependantDecoratorConfiguration;
 
 public class NoiseHeightmap32Decorator extends FeatureDecorator<NoiseDependantDecoratorConfiguration> {
-	public NoiseHeightmap32Decorator(Function<Dynamic<?>, ? extends NoiseDependantDecoratorConfiguration> function) {
-		super(function);
+	public NoiseHeightmap32Decorator(Codec<NoiseDependantDecoratorConfiguration> codec) {
+		super(codec);
 	}
 
 	public Stream<BlockPos> getPositions(

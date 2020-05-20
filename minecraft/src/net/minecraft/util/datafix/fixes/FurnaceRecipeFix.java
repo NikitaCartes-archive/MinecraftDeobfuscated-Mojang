@@ -3,7 +3,6 @@ package net.minecraft.util.datafix.fixes;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
@@ -12,6 +11,7 @@ import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.datafixers.util.Unit;
+import com.mojang.serialization.Dynamic;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,19 +51,19 @@ public class FurnaceRecipeFix extends DataFix {
 
 	private <R> Typed<?> updateFurnaceContents(Type<R> type, Type<Pair<Either<Pair<List<Pair<R, Integer>>, Dynamic<?>>, Unit>, Dynamic<?>>> type2, Typed<?> typed) {
 		Dynamic<?> dynamic = typed.getOrCreate(DSL.remainderFinder());
-		int i = ((Number)dynamic.get("RecipesUsedSize").asNumber().orElse(0)).intValue();
+		int i = dynamic.get("RecipesUsedSize").asInt(0);
 		dynamic = dynamic.remove("RecipesUsedSize");
 		List<Pair<R, Integer>> list = Lists.<Pair<R, Integer>>newArrayList();
 
 		for (int j = 0; j < i; j++) {
 			String string = "RecipeLocation" + j;
 			String string2 = "RecipeAmount" + j;
-			Optional<? extends Dynamic<?>> optional = dynamic.get(string).get();
-			int k = ((Number)dynamic.get(string2).asNumber().orElse(0)).intValue();
+			Optional<? extends Dynamic<?>> optional = dynamic.get(string).result();
+			int k = dynamic.get(string2).asInt(0);
 			if (k > 0) {
 				optional.ifPresent(dynamicx -> {
-					Pair<? extends Dynamic<?>, Optional<R>> pair = type.read(dynamicx);
-					pair.getSecond().ifPresent(object -> list.add(Pair.of(object, k)));
+					Optional<? extends Pair<R, ? extends Dynamic<?>>> optionalx = type.read(dynamicx).result();
+					optionalx.ifPresent(pair -> list.add(Pair.of(pair.getFirst(), k)));
 				});
 			}
 

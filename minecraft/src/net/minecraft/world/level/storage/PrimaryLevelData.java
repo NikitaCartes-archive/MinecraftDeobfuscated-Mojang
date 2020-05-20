@@ -1,13 +1,14 @@
 package net.minecraft.world.level.storage;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.DataFixer;
-import java.util.Map;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.OptionalDynamic;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,8 +16,10 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SerializableUUID;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
@@ -27,186 +30,186 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.timers.TimerCallbacks;
 import net.minecraft.world.level.timers.TimerQueue;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class PrimaryLevelData implements ServerLevelData, WorldData {
-	private final String minecraftVersionName;
-	private final int minecraftVersion;
-	private final boolean snapshot;
-	private final WorldGenSettings worldGenSettings;
+	private static final Logger LOGGER = LogManager.getLogger();
+	private LevelSettings settings;
 	private int xSpawn;
 	private int ySpawn;
 	private int zSpawn;
 	private long gameTime;
 	private long dayTime;
-	private long lastPlayed;
-	private long sizeOnDisk;
 	@Nullable
 	private final DataFixer fixerUpper;
 	private final int playerDataVersion;
 	private boolean upgradedPlayerTag;
+	@Nullable
 	private CompoundTag loadedPlayerTag;
-	private final String levelName;
 	private final int version;
 	private int clearWeatherTime;
 	private boolean raining;
 	private int rainTime;
 	private boolean thundering;
 	private int thunderTime;
-	private GameType gameType;
-	private final boolean hardcore;
-	private final boolean allowCommands;
 	private boolean initialized;
-	private Difficulty difficulty = Difficulty.NORMAL;
 	private boolean difficultyLocked;
-	private WorldBorder.Settings worldBorder = WorldBorder.DEFAULT_SETTINGS;
-	private final Set<String> disabledDataPacks = Sets.<String>newHashSet();
-	private final Set<String> enabledDataPacks = Sets.<String>newLinkedHashSet();
-	private final Map<DimensionType, CompoundTag> dimensionData = Maps.<DimensionType, CompoundTag>newIdentityHashMap();
+	private WorldBorder.Settings worldBorder;
+	private final Set<String> disabledDataPacks;
+	private final Set<String> enabledDataPacks;
+	private CompoundTag endDragonFightData;
 	@Nullable
 	private CompoundTag customBossEvents;
 	private int wanderingTraderSpawnDelay;
 	private int wanderingTraderSpawnChance;
+	@Nullable
 	private UUID wanderingTraderId;
-	private Set<String> knownServerBrands = Sets.<String>newLinkedHashSet();
+	private final Set<String> knownServerBrands;
 	private boolean wasModded;
-	private final GameRules gameRules = new GameRules();
-	private final TimerQueue<MinecraftServer> scheduledEvents = new TimerQueue<>(TimerCallbacks.SERVER_CALLBACKS);
+	private final TimerQueue<MinecraftServer> scheduledEvents;
 
-	public PrimaryLevelData(CompoundTag compoundTag, DataFixer dataFixer, int i, @Nullable CompoundTag compoundTag2) {
+	private PrimaryLevelData(
+		@Nullable DataFixer dataFixer,
+		int i,
+		@Nullable CompoundTag compoundTag,
+		boolean bl,
+		int j,
+		int k,
+		int l,
+		long m,
+		long n,
+		int o,
+		int p,
+		int q,
+		boolean bl2,
+		int r,
+		boolean bl3,
+		boolean bl4,
+		boolean bl5,
+		WorldBorder.Settings settings,
+		int s,
+		int t,
+		@Nullable UUID uUID,
+		LinkedHashSet<String> linkedHashSet,
+		LinkedHashSet<String> linkedHashSet2,
+		Set<String> set,
+		TimerQueue<MinecraftServer> timerQueue,
+		@Nullable CompoundTag compoundTag2,
+		CompoundTag compoundTag3,
+		LevelSettings levelSettings
+	) {
 		this.fixerUpper = dataFixer;
-		ListTag listTag = compoundTag.getList("ServerBrands", 8);
-
-		for (int j = 0; j < listTag.size(); j++) {
-			this.knownServerBrands.add(listTag.getString(j));
-		}
-
-		this.wasModded = compoundTag.getBoolean("WasModded");
-		if (compoundTag.contains("Version", 10)) {
-			CompoundTag compoundTag3 = compoundTag.getCompound("Version");
-			this.minecraftVersionName = compoundTag3.getString("Name");
-			this.minecraftVersion = compoundTag3.getInt("Id");
-			this.snapshot = compoundTag3.getBoolean("Snapshot");
-		} else {
-			this.minecraftVersionName = SharedConstants.getCurrentVersion().getName();
-			this.minecraftVersion = SharedConstants.getCurrentVersion().getWorldVersion();
-			this.snapshot = !SharedConstants.getCurrentVersion().isStable();
-		}
-
-		this.gameType = GameType.byId(compoundTag.getInt("GameType"));
-		this.worldGenSettings = WorldGenSettings.readWorldGenSettings(compoundTag, dataFixer, i);
-		this.xSpawn = compoundTag.getInt("SpawnX");
-		this.ySpawn = compoundTag.getInt("SpawnY");
-		this.zSpawn = compoundTag.getInt("SpawnZ");
-		this.gameTime = compoundTag.getLong("Time");
-		if (compoundTag.contains("DayTime", 99)) {
-			this.dayTime = compoundTag.getLong("DayTime");
-		} else {
-			this.dayTime = this.gameTime;
-		}
-
-		this.lastPlayed = compoundTag.getLong("LastPlayed");
-		this.sizeOnDisk = compoundTag.getLong("SizeOnDisk");
-		this.levelName = compoundTag.getString("LevelName");
-		this.version = compoundTag.getInt("version");
-		this.clearWeatherTime = compoundTag.getInt("clearWeatherTime");
-		this.rainTime = compoundTag.getInt("rainTime");
-		this.raining = compoundTag.getBoolean("raining");
-		this.thunderTime = compoundTag.getInt("thunderTime");
-		this.thundering = compoundTag.getBoolean("thundering");
-		this.hardcore = compoundTag.getBoolean("hardcore");
-		if (compoundTag.contains("initialized", 99)) {
-			this.initialized = compoundTag.getBoolean("initialized");
-		} else {
-			this.initialized = true;
-		}
-
-		if (compoundTag.contains("allowCommands", 99)) {
-			this.allowCommands = compoundTag.getBoolean("allowCommands");
-		} else {
-			this.allowCommands = this.gameType == GameType.CREATIVE;
-		}
-
+		this.wasModded = bl;
+		this.settings = levelSettings;
+		this.xSpawn = j;
+		this.ySpawn = k;
+		this.zSpawn = l;
+		this.gameTime = m;
+		this.dayTime = n;
+		this.version = o;
+		this.clearWeatherTime = p;
+		this.rainTime = q;
+		this.raining = bl2;
+		this.thunderTime = r;
+		this.thundering = bl3;
+		this.initialized = bl4;
+		this.difficultyLocked = bl5;
+		this.worldBorder = settings;
+		this.wanderingTraderSpawnDelay = s;
+		this.wanderingTraderSpawnChance = t;
+		this.wanderingTraderId = uUID;
+		this.knownServerBrands = linkedHashSet;
+		this.loadedPlayerTag = compoundTag;
 		this.playerDataVersion = i;
-		if (compoundTag2 != null) {
-			this.loadedPlayerTag = compoundTag2;
-		}
-
-		if (compoundTag.contains("GameRules", 10)) {
-			this.gameRules.loadFromTag(compoundTag.getCompound("GameRules"));
-		}
-
-		if (compoundTag.contains("Difficulty", 99)) {
-			this.difficulty = Difficulty.byId(compoundTag.getByte("Difficulty"));
-		}
-
-		if (compoundTag.contains("DifficultyLocked", 1)) {
-			this.difficultyLocked = compoundTag.getBoolean("DifficultyLocked");
-		}
-
-		this.worldBorder = WorldBorder.Settings.read(compoundTag, WorldBorder.DEFAULT_SETTINGS);
-		if (compoundTag.contains("DimensionData", 10)) {
-			CompoundTag compoundTag3 = compoundTag.getCompound("DimensionData");
-
-			for (String string : compoundTag3.getAllKeys()) {
-				this.dimensionData.put(DimensionType.getById(Integer.parseInt(string)), compoundTag3.getCompound(string));
-			}
-		}
-
-		if (compoundTag.contains("DataPacks", 10)) {
-			CompoundTag compoundTag3 = compoundTag.getCompound("DataPacks");
-			ListTag listTag2 = compoundTag3.getList("Disabled", 8);
-
-			for (int k = 0; k < listTag2.size(); k++) {
-				this.disabledDataPacks.add(listTag2.getString(k));
-			}
-
-			ListTag listTag3 = compoundTag3.getList("Enabled", 8);
-
-			for (int l = 0; l < listTag3.size(); l++) {
-				this.enabledDataPacks.add(listTag3.getString(l));
-			}
-		}
-
-		if (compoundTag.contains("CustomBossEvents", 10)) {
-			this.customBossEvents = compoundTag.getCompound("CustomBossEvents");
-		}
-
-		if (compoundTag.contains("ScheduledEvents", 9)) {
-			this.scheduledEvents.load(compoundTag.getList("ScheduledEvents", 10));
-		}
-
-		if (compoundTag.contains("WanderingTraderSpawnDelay", 99)) {
-			this.wanderingTraderSpawnDelay = compoundTag.getInt("WanderingTraderSpawnDelay");
-		}
-
-		if (compoundTag.contains("WanderingTraderSpawnChance", 99)) {
-			this.wanderingTraderSpawnChance = compoundTag.getInt("WanderingTraderSpawnChance");
-		}
-
-		if (compoundTag.hasUUID("WanderingTraderId")) {
-			this.wanderingTraderId = compoundTag.getUUID("WanderingTraderId");
-		}
+		this.scheduledEvents = timerQueue;
+		this.enabledDataPacks = linkedHashSet2;
+		this.disabledDataPacks = set;
+		this.customBossEvents = compoundTag2;
+		this.endDragonFightData = compoundTag3;
 	}
 
 	public PrimaryLevelData(LevelSettings levelSettings) {
-		this.fixerUpper = null;
-		this.playerDataVersion = SharedConstants.getCurrentVersion().getWorldVersion();
-		this.gameType = levelSettings.getGameType();
-		this.difficulty = levelSettings.getDifficulty();
-		this.hardcore = levelSettings.isHardcore();
-		this.worldGenSettings = levelSettings.worldGenSettings();
-		this.allowCommands = levelSettings.getAllowCommands();
-		this.levelName = levelSettings.getLevelName();
-		this.version = 19133;
-		this.initialized = false;
-		this.minecraftVersionName = SharedConstants.getCurrentVersion().getName();
-		this.minecraftVersion = SharedConstants.getCurrentVersion().getWorldVersion();
-		this.snapshot = !SharedConstants.getCurrentVersion().isStable();
-		this.gameRules.assignFrom(levelSettings.getGameRules(), null);
+		this(
+			null,
+			SharedConstants.getCurrentVersion().getWorldVersion(),
+			null,
+			false,
+			0,
+			0,
+			0,
+			0L,
+			0L,
+			19133,
+			0,
+			0,
+			false,
+			0,
+			false,
+			false,
+			false,
+			WorldBorder.DEFAULT_SETTINGS,
+			0,
+			0,
+			null,
+			Sets.newLinkedHashSet(),
+			Sets.newLinkedHashSet(),
+			Sets.<String>newHashSet(),
+			new TimerQueue<>(TimerCallbacks.SERVER_CALLBACKS),
+			null,
+			new CompoundTag(),
+			levelSettings.copy()
+		);
+	}
+
+	public static PrimaryLevelData parse(
+		Dynamic<Tag> dynamic, DataFixer dataFixer, int i, @Nullable CompoundTag compoundTag, LevelSettings levelSettings, LevelVersion levelVersion
+	) {
+		long l = dynamic.get("Time").asLong(0L);
+		OptionalDynamic<?> optionalDynamic = dynamic.get("DataPacks");
+		CompoundTag compoundTag2 = (CompoundTag)dynamic.get("DragonFight")
+			.result()
+			.map(Dynamic::getValue)
+			.orElseGet(() -> dynamic.get("DimensionData").get("1").get("DragonFight").orElseEmptyMap().getValue());
+		return new PrimaryLevelData(
+			dataFixer,
+			i,
+			compoundTag,
+			dynamic.get("WasModded").asBoolean(false),
+			dynamic.get("SpawnX").asInt(0),
+			dynamic.get("SpawnY").asInt(0),
+			dynamic.get("SpawnZ").asInt(0),
+			l,
+			dynamic.get("DayTime").asLong(l),
+			levelVersion.levelDataVersion(),
+			dynamic.get("clearWeatherTime").asInt(0),
+			dynamic.get("rainTime").asInt(0),
+			dynamic.get("raining").asBoolean(false),
+			dynamic.get("thunderTime").asInt(0),
+			dynamic.get("thundering").asBoolean(false),
+			dynamic.get("initialized").asBoolean(true),
+			dynamic.get("DifficultyLocked").asBoolean(false),
+			WorldBorder.Settings.read(dynamic, WorldBorder.DEFAULT_SETTINGS),
+			dynamic.get("WanderingTraderSpawnDelay").asInt(0),
+			dynamic.get("WanderingTraderSpawnChance").asInt(0),
+			(UUID)dynamic.get("WanderingTraderId").read(SerializableUUID.CODEC).result().map(SerializableUUID::value).orElse(null),
+			(LinkedHashSet<String>)dynamic.get("ServerBrands")
+				.asStream()
+				.flatMap(dynamicx -> Util.toStream(dynamicx.asString().result()))
+				.collect(Collectors.toCollection(Sets::newLinkedHashSet)),
+			(LinkedHashSet<String>)optionalDynamic.get("Enabled")
+				.asStream()
+				.flatMap(dynamicx -> Util.toStream(dynamicx.asString().result()))
+				.collect(Collectors.toCollection(Sets::newLinkedHashSet)),
+			(Set<String>)optionalDynamic.get("Disabled").asStream().flatMap(dynamicx -> Util.toStream(dynamicx.asString().result())).collect(Collectors.toSet()),
+			new TimerQueue<>(TimerCallbacks.SERVER_CALLBACKS, dynamic.get("ScheduledEvents").asStream()),
+			(CompoundTag)dynamic.get("CustomBossEvents").orElseEmptyMap().getValue(),
+			compoundTag2,
+			levelSettings
+		);
 	}
 
 	@Override
@@ -232,61 +235,52 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		compoundTag3.putBoolean("Snapshot", !SharedConstants.getCurrentVersion().isStable());
 		compoundTag.put("Version", compoundTag3);
 		compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
-		CompoundTag compoundTag4 = this.worldGenSettings.serialize();
-
-		for (String string : compoundTag4.getAllKeys()) {
-			compoundTag.put(string, compoundTag4.get(string));
-		}
-
-		compoundTag.putInt("GameType", this.gameType.getId());
+		WorldGenSettings.CODEC
+			.encodeStart(NbtOps.INSTANCE, this.settings.worldGenSettings())
+			.resultOrPartial(Util.prefix("WorldGenSettings: ", LOGGER::error))
+			.ifPresent(tag -> compoundTag.put("WorldGenSettings", tag));
+		compoundTag.putInt("GameType", this.settings.gameType().getId());
 		compoundTag.putInt("SpawnX", this.xSpawn);
 		compoundTag.putInt("SpawnY", this.ySpawn);
 		compoundTag.putInt("SpawnZ", this.zSpawn);
 		compoundTag.putLong("Time", this.gameTime);
 		compoundTag.putLong("DayTime", this.dayTime);
-		compoundTag.putLong("SizeOnDisk", this.sizeOnDisk);
 		compoundTag.putLong("LastPlayed", Util.getEpochMillis());
-		compoundTag.putString("LevelName", this.levelName);
+		compoundTag.putString("LevelName", this.settings.levelName());
 		compoundTag.putInt("version", 19133);
 		compoundTag.putInt("clearWeatherTime", this.clearWeatherTime);
 		compoundTag.putInt("rainTime", this.rainTime);
 		compoundTag.putBoolean("raining", this.raining);
 		compoundTag.putInt("thunderTime", this.thunderTime);
 		compoundTag.putBoolean("thundering", this.thundering);
-		compoundTag.putBoolean("hardcore", this.hardcore);
-		compoundTag.putBoolean("allowCommands", this.allowCommands);
+		compoundTag.putBoolean("hardcore", this.settings.hardcore());
+		compoundTag.putBoolean("allowCommands", this.settings.allowCommands());
 		compoundTag.putBoolean("initialized", this.initialized);
 		this.worldBorder.write(compoundTag);
-		compoundTag.putByte("Difficulty", (byte)this.difficulty.getId());
+		compoundTag.putByte("Difficulty", (byte)this.settings.difficulty().getId());
 		compoundTag.putBoolean("DifficultyLocked", this.difficultyLocked);
-		compoundTag.put("GameRules", this.gameRules.createTag());
-		CompoundTag compoundTag5 = new CompoundTag();
-
-		for (Entry<DimensionType, CompoundTag> entry : this.dimensionData.entrySet()) {
-			compoundTag5.put(String.valueOf(((DimensionType)entry.getKey()).getId()), (Tag)entry.getValue());
-		}
-
-		compoundTag.put("DimensionData", compoundTag5);
+		compoundTag.put("GameRules", this.settings.gameRules().createTag());
+		compoundTag.put("DragonFight", this.endDragonFightData);
 		if (compoundTag2 != null) {
 			compoundTag.put("Player", compoundTag2);
 		}
 
-		CompoundTag compoundTag6 = new CompoundTag();
+		CompoundTag compoundTag4 = new CompoundTag();
 		ListTag listTag2 = new ListTag();
 
-		for (String string2 : this.enabledDataPacks) {
-			listTag2.add(StringTag.valueOf(string2));
+		for (String string : this.enabledDataPacks) {
+			listTag2.add(StringTag.valueOf(string));
 		}
 
-		compoundTag6.put("Enabled", listTag2);
+		compoundTag4.put("Enabled", listTag2);
 		ListTag listTag3 = new ListTag();
 
-		for (String string3 : this.disabledDataPacks) {
-			listTag3.add(StringTag.valueOf(string3));
+		for (String string2 : this.disabledDataPacks) {
+			listTag3.add(StringTag.valueOf(string2));
 		}
 
-		compoundTag6.put("Disabled", listTag3);
-		compoundTag.put("DataPacks", compoundTag6);
+		compoundTag4.put("Disabled", listTag3);
+		compoundTag.put("DataPacks", compoundTag4);
 		if (this.customBossEvents != null) {
 			compoundTag.put("CustomBossEvents", this.customBossEvents);
 		}
@@ -378,18 +372,12 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 
 	@Override
 	public String getLevelName() {
-		return this.levelName;
+		return this.settings.levelName();
 	}
 
 	@Override
 	public int getVersion() {
 		return this.version;
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
-	public long getLastPlayed() {
-		return this.lastPlayed;
 	}
 
 	@Override
@@ -444,22 +432,22 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 
 	@Override
 	public GameType getGameType() {
-		return this.gameType;
+		return this.settings.gameType();
 	}
 
 	@Override
 	public void setGameType(GameType gameType) {
-		this.gameType = gameType;
+		this.settings = this.settings.withGameType(gameType);
 	}
 
 	@Override
 	public boolean isHardcore() {
-		return this.hardcore;
+		return this.settings.hardcore();
 	}
 
 	@Override
 	public boolean getAllowCommands() {
-		return this.allowCommands;
+		return this.settings.allowCommands();
 	}
 
 	@Override
@@ -474,7 +462,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 
 	@Override
 	public GameRules getGameRules() {
-		return this.gameRules;
+		return this.settings.gameRules();
 	}
 
 	@Override
@@ -489,12 +477,12 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 
 	@Override
 	public Difficulty getDifficulty() {
-		return this.difficulty;
+		return this.settings.difficulty();
 	}
 
 	@Override
 	public void setDifficulty(Difficulty difficulty) {
-		this.difficulty = difficulty;
+		this.settings = this.settings.withDifficulty(difficulty);
 	}
 
 	@Override
@@ -519,47 +507,18 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	}
 
 	@Override
-	public CompoundTag getDimensionData(DimensionType dimensionType) {
-		CompoundTag compoundTag = (CompoundTag)this.dimensionData.get(dimensionType);
-		return compoundTag == null ? new CompoundTag() : compoundTag;
-	}
-
-	@Override
-	public void setDimensionData(DimensionType dimensionType, CompoundTag compoundTag) {
-		this.dimensionData.put(dimensionType, compoundTag);
-	}
-
-	@Override
 	public WorldGenSettings worldGenSettings() {
-		return this.worldGenSettings;
+		return this.settings.worldGenSettings();
 	}
 
 	@Override
-	public CompoundTag getDimensionData() {
-		return this.getDimensionData(DimensionType.OVERWORLD);
+	public CompoundTag endDragonFightData() {
+		return this.endDragonFightData;
 	}
 
 	@Override
-	public void setDimensionData(CompoundTag compoundTag) {
-		this.setDimensionData(DimensionType.OVERWORLD, compoundTag);
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
-	public int getMinecraftVersion() {
-		return this.minecraftVersion;
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
-	public boolean isSnapshot() {
-		return this.snapshot;
-	}
-
-	@Environment(EnvType.CLIENT)
-	@Override
-	public String getMinecraftVersionName() {
-		return this.minecraftVersionName;
+	public void setEndDragonFightData(CompoundTag compoundTag) {
+		this.endDragonFightData = compoundTag;
 	}
 
 	@Override
@@ -632,6 +591,6 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	@Environment(EnvType.CLIENT)
 	@Override
 	public LevelSettings getLevelSettings() {
-		return new LevelSettings(this.levelName, this.gameType, this.hardcore, this.difficulty, this.allowCommands, this.gameRules.copy(), this.worldGenSettings);
+		return this.settings.copy();
 	}
 }

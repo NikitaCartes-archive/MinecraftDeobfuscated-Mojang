@@ -398,7 +398,7 @@ public class Raid {
 
 			for (Raider raider : set2) {
 				BlockPos blockPos = raider.blockPosition();
-				if (raider.removed || raider.dimension != this.level.dimensionType() || this.center.distSqr(blockPos) >= 12544.0) {
+				if (raider.removed || raider.level.dimension() != this.level.dimension() || this.center.distSqr(blockPos) >= 12544.0) {
 					set.add(raider);
 				} else if (raider.tickCount > 600) {
 					if (this.level.getEntity(raider.getUUID()) == null) {

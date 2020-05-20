@@ -1,11 +1,20 @@
 package net.minecraft.world.level.levelgen.placement;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 
 public class FrequencyWithExtraChanceDecoratorConfiguration implements DecoratorConfiguration {
+	public static final Codec<FrequencyWithExtraChanceDecoratorConfiguration> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					Codec.INT.fieldOf("count").forGetter(frequencyWithExtraChanceDecoratorConfiguration -> frequencyWithExtraChanceDecoratorConfiguration.count),
+					Codec.FLOAT
+						.fieldOf("extra_chance")
+						.forGetter(frequencyWithExtraChanceDecoratorConfiguration -> frequencyWithExtraChanceDecoratorConfiguration.extraChance),
+					Codec.INT.fieldOf("extra_count").forGetter(frequencyWithExtraChanceDecoratorConfiguration -> frequencyWithExtraChanceDecoratorConfiguration.extraCount)
+				)
+				.apply(instance, FrequencyWithExtraChanceDecoratorConfiguration::new)
+	);
 	public final int count;
 	public final float extraChance;
 	public final int extraCount;
@@ -14,29 +23,5 @@ public class FrequencyWithExtraChanceDecoratorConfiguration implements Decorator
 		this.count = i;
 		this.extraChance = f;
 		this.extraCount = j;
-	}
-
-	@Override
-	public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-		return new Dynamic<>(
-			dynamicOps,
-			dynamicOps.createMap(
-				ImmutableMap.of(
-					dynamicOps.createString("count"),
-					dynamicOps.createInt(this.count),
-					dynamicOps.createString("extra_chance"),
-					dynamicOps.createFloat(this.extraChance),
-					dynamicOps.createString("extra_count"),
-					dynamicOps.createInt(this.extraCount)
-				)
-			)
-		);
-	}
-
-	public static FrequencyWithExtraChanceDecoratorConfiguration deserialize(Dynamic<?> dynamic) {
-		int i = dynamic.get("count").asInt(0);
-		float f = dynamic.get("extra_chance").asFloat(0.0F);
-		int j = dynamic.get("extra_count").asInt(0);
-		return new FrequencyWithExtraChanceDecoratorConfiguration(i, f, j);
 	}
 }

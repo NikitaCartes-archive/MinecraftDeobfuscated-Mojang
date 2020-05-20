@@ -39,7 +39,7 @@ import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyCondition;
 
@@ -60,7 +60,7 @@ public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
 				false,
 				false
 			)
-			.addCriterion("entered_nether", ChangeDimensionTrigger.TriggerInstance.changedDimensionTo(DimensionType.NETHER))
+			.addCriterion("entered_nether", ChangeDimensionTrigger.TriggerInstance.changedDimensionTo(DimensionType.NETHER_LOCATION))
 			.save(consumer, "nether/root");
 		Advancement advancement2 = Advancement.Builder.advancement()
 			.parent(advancement)
@@ -95,7 +95,7 @@ public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
 				true,
 				false
 			)
-			.addCriterion("fortress", LocationTrigger.TriggerInstance.located(LocationPredicate.inFeature(Feature.NETHER_BRIDGE)))
+			.addCriterion("fortress", LocationTrigger.TriggerInstance.located(LocationPredicate.inFeature(StructureFeature.NETHER_BRIDGE)))
 			.save(consumer, "nether/find_fortress");
 		Advancement.Builder.advancement()
 			.parent(advancement)
@@ -128,7 +128,7 @@ public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
 			.addCriterion(
 				"killed_ghast",
 				KilledTrigger.TriggerInstance.playerKilledEntity(
-					EntityPredicate.Builder.entity().of(EntityType.GHAST).located(LocationPredicate.inDimension(DimensionType.OVERWORLD))
+					EntityPredicate.Builder.entity().of(EntityType.GHAST).located(LocationPredicate.inDimension(DimensionType.OVERWORLD_LOCATION))
 				)
 			)
 			.save(consumer, "nether/uneasy_alliance");
@@ -431,7 +431,7 @@ public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
 				true,
 				false
 			)
-			.addCriterion("bastion", LocationTrigger.TriggerInstance.located(LocationPredicate.inFeature(Feature.BASTION_REMNANT)))
+			.addCriterion("bastion", LocationTrigger.TriggerInstance.located(LocationPredicate.inFeature(StructureFeature.BASTION_REMNANT)))
 			.save(consumer, "nether/find_bastion");
 		Advancement.Builder.advancement()
 			.parent(advancement13)

@@ -9,11 +9,12 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
-public class VillageSiege {
+public class VillageSiege implements CustomSpawner {
 	private boolean hasSetupSiege;
 	private VillageSiege.State siegeState = VillageSiege.State.SIEGE_DONE;
 	private int zombiesToSpawn;
@@ -22,6 +23,7 @@ public class VillageSiege {
 	private int spawnY;
 	private int spawnZ;
 
+	@Override
 	public int tick(ServerLevel serverLevel, boolean bl, boolean bl2) {
 		if (!serverLevel.isDay() && bl) {
 			float f = serverLevel.getTimeOfDay(0.0F);

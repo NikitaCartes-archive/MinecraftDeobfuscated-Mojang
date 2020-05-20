@@ -1,9 +1,9 @@
 package net.minecraft.util.datafix.fixes;
 
 import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
+import com.mojang.serialization.Dynamic;
 import java.util.stream.Stream;
 
 public class SavedDataVillageCropFix extends DataFix {
@@ -26,7 +26,7 @@ public class SavedDataVillageCropFix extends DataFix {
 	}
 
 	private static <T> Dynamic<T> updateChildren(Dynamic<T> dynamic) {
-		return (Dynamic<T>)dynamic.asStreamOpt().map(SavedDataVillageCropFix::updateChildren).map(dynamic::createList).orElse(dynamic);
+		return (Dynamic<T>)dynamic.asStreamOpt().map(SavedDataVillageCropFix::updateChildren).map(dynamic::createList).result().orElse(dynamic);
 	}
 
 	private static Stream<? extends Dynamic<?>> updateChildren(Stream<? extends Dynamic<?>> stream) {
@@ -53,6 +53,6 @@ public class SavedDataVillageCropFix extends DataFix {
 	}
 
 	private static <T> Dynamic<T> updateCrop(Dynamic<T> dynamic, String string) {
-		return dynamic.get(string).asNumber().isPresent() ? dynamic.set(string, BlockStateData.getTag(dynamic.get(string).asInt(0) << 4)) : dynamic;
+		return dynamic.get(string).asNumber().result().isPresent() ? dynamic.set(string, BlockStateData.getTag(dynamic.get(string).asInt(0) << 4)) : dynamic;
 	}
 }

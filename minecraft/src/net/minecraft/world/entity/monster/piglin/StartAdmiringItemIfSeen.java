@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.monster.piglin;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.core.SerializableBoolean;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -31,6 +30,6 @@ public class StartAdmiringItemIfSeen<E extends Piglin> extends Behavior<E> {
 	}
 
 	protected void start(ServerLevel serverLevel, E piglin, long l) {
-		piglin.getBrain().setMemoryWithExpiry(MemoryModuleType.ADMIRING_ITEM, SerializableBoolean.of(true), (long)this.admireDuration);
+		piglin.getBrain().setMemoryWithExpiry(MemoryModuleType.ADMIRING_ITEM, true, (long)this.admireDuration);
 	}
 }

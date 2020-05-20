@@ -197,7 +197,6 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.dimension.end.TheEndDimension;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
@@ -249,6 +248,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	public final FrameTimer frameTimer = new FrameTimer();
 	private final boolean is64bit;
 	private final boolean demo;
+	private final boolean allowsMultiplayer;
+	private final boolean allowsChat;
 	private final ReloadableResourceManager resourceManager;
 	private final ClientPackSource clientPackSource;
 	private final PackRepository<UnopenedResourcePack> resourcePackRepository;
@@ -341,11 +342,13 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		LOGGER.info("Setting user: {}", this.user.getName());
 		LOGGER.debug("(Session ID is {})", this.user.getSessionId());
 		this.demo = gameConfig.game.demo;
+		this.allowsMultiplayer = !gameConfig.game.disableMultiplayer;
+		this.allowsChat = !gameConfig.game.disableChat;
 		this.is64bit = checkIs64Bit();
 		this.singleplayerServer = null;
 		String string;
 		int i;
-		if (gameConfig.server.hostname != null) {
+		if (this.allowsMultiplayer && gameConfig.server.hostname != null) {
 			string = gameConfig.server.hostname;
 			i = gameConfig.server.port;
 		} else {
@@ -769,6 +772,14 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public LevelStorageSource getLevelSource() {
 		return this.levelSource;
+	}
+
+	private void openChatScreen(String string) {
+		if (this.isLocalServer() || this.allowsChat()) {
+			this.setScreen(new ChatScreen(string));
+		} else if (this.player != null) {
+			this.player.sendMessage(new TranslatableComponent("chat.cannotSend").withStyle(ChatFormatting.RED), Util.NIL_UUID);
+		}
 	}
 
 	public void setScreen(@Nullable Screen screen) {
@@ -1502,11 +1513,11 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		boolean bl3 = this.options.chatVisibility != ChatVisiblity.HIDDEN;
 		if (bl3) {
 			while (this.options.keyChat.consumeClick()) {
-				this.setScreen(new ChatScreen(""));
+				this.openChatScreen("");
 			}
 
 			if (this.screen == null && this.overlay == null && this.options.keyCommand.consumeClick()) {
-				this.setScreen(new ChatScreen("/"));
+				this.openChatScreen("/");
 			}
 		}
 
@@ -1557,6 +1568,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			return;
 		}
 
+		MinecraftServer.convertFromRegionFormatIfNeeded(levelStorageAccess);
 		WorldData worldData = levelStorageAccess.getDataTag();
 		String string2;
 		if (worldData == null) {
@@ -1565,7 +1577,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			}
 
 			worldData = new PrimaryLevelData(levelSettings);
-			string2 = levelSettings.getLevelName();
+			string2 = levelSettings.levelName();
 			levelStorageAccess.saveDataTag(worldData);
 		} else {
 			string2 = worldData.getLevelName();
@@ -1703,6 +1715,18 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.particleEngine.setLevel(clientLevel);
 		BlockEntityRenderDispatcher.instance.setLevel(clientLevel);
 		this.updateTitle();
+	}
+
+	public boolean allowsMultiplayer() {
+		return this.allowsMultiplayer;
+	}
+
+	public boolean isBlocked(UUID uUID) {
+		return this.allowsChat() ? false : (this.player == null || !uUID.equals(this.player.getUUID())) && !uUID.equals(Util.NIL_UUID);
+	}
+
+	public boolean allowsChat() {
+		return this.allowsChat;
 	}
 
 	public final boolean isDemo() {
@@ -2041,7 +2065,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		if (this.screen instanceof WinScreen) {
 			return Musics.CREDITS;
 		} else if (this.player != null) {
-			if (this.player.level.getDimension() instanceof TheEndDimension) {
+			if (this.player.level.dimensionType().isEnd()) {
 				return this.gui.getBossOverlay().shouldPlayMusic() ? Musics.END_BOSS : Musics.END;
 			} else {
 				Biome.BiomeCategory biomeCategory = this.player.level.getBiome(this.player.blockPosition()).getBiomeCategory();

@@ -15,7 +15,7 @@ public class V1022 extends Schema {
 	@Override
 	public void registerTypes(Schema schema, Map<String, Supplier<TypeTemplate>> map, Map<String, Supplier<TypeTemplate>> map2) {
 		super.registerTypes(schema, map, map2);
-		schema.registerType(false, References.RECIPE, () -> DSL.constType(DSL.namespacedString()));
+		schema.registerType(false, References.RECIPE, () -> DSL.constType(NamespacedSchema.namespacedString()));
 		schema.registerType(
 			false,
 			References.PLAYER,

@@ -40,12 +40,12 @@ public class CreateFlatWorldScreen extends Screen {
 		this.generator = flatLevelGeneratorSettings;
 	}
 
-	public String saveLayerString() {
-		return this.generator.toString();
+	public FlatLevelGeneratorSettings settings() {
+		return this.generator;
 	}
 
-	public void loadLayers(String string) {
-		this.generator = FlatLevelGeneratorSettings.fromString(string);
+	public void setConfig(FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
+		this.generator = flatLevelGeneratorSettings;
 	}
 
 	@Override

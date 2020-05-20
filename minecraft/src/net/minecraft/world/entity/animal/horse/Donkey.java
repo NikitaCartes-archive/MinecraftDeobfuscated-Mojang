@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.animal.horse;
 
+import javax.annotation.Nullable;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
@@ -20,9 +21,21 @@ public class Donkey extends AbstractChestedHorse {
 	}
 
 	@Override
+	protected SoundEvent getAngrySound() {
+		super.getAngrySound();
+		return SoundEvents.DONKEY_ANGRY;
+	}
+
+	@Override
 	protected SoundEvent getDeathSound() {
 		super.getDeathSound();
 		return SoundEvents.DONKEY_DEATH;
+	}
+
+	@Nullable
+	@Override
+	protected SoundEvent getEatingSound() {
+		return SoundEvents.DONKEY_EAT;
 	}
 
 	@Override

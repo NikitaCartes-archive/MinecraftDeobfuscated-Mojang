@@ -13,7 +13,6 @@ import net.minecraft.commands.arguments.ParticleArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
@@ -161,10 +160,7 @@ public class ParticleCommand {
 			throw ERROR_FAILED.create();
 		} else {
 			commandSourceStack.sendSuccess(
-				new TranslatableComponent(
-					"commands.particle.success", Registry.PARTICLE_TYPE.getKey((ParticleType<? extends ParticleOptions>)particleOptions.getType()).toString()
-				),
-				true
+				new TranslatableComponent("commands.particle.success", Registry.PARTICLE_TYPE.getKey(particleOptions.getType()).toString()), true
 			);
 			return j;
 		}

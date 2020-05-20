@@ -20,7 +20,7 @@ public class EntityStringUuidFix extends DataFix {
 			typed -> typed.update(
 					DSL.remainderFinder(),
 					dynamic -> {
-						Optional<String> optional = dynamic.get("UUID").asString();
+						Optional<String> optional = dynamic.get("UUID").asString().result();
 						if (optional.isPresent()) {
 							UUID uUID = UUID.fromString((String)optional.get());
 							return dynamic.remove("UUID")

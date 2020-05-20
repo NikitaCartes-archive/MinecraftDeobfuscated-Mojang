@@ -1,6 +1,6 @@
 package net.minecraft.world.level.levelgen.carver;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.BitSet;
 import java.util.Random;
 import java.util.function.Function;
@@ -11,8 +11,8 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
 
 public class CaveWorldCarver extends WorldCarver<ProbabilityFeatureConfiguration> {
-	public CaveWorldCarver(Function<Dynamic<?>, ? extends ProbabilityFeatureConfiguration> function, int i) {
-		super(function, i);
+	public CaveWorldCarver(Codec<ProbabilityFeatureConfiguration> codec, int i) {
+		super(codec, i);
 	}
 
 	public boolean isStartChunk(Random random, int i, int j, ProbabilityFeatureConfiguration probabilityFeatureConfiguration) {

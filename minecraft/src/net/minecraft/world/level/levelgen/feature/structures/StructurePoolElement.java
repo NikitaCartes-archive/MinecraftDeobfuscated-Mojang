@@ -1,7 +1,7 @@
 package net.minecraft.world.level.levelgen.feature.structures;
 
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
@@ -17,15 +17,17 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 public abstract class StructurePoolElement {
+	public static final Codec<StructurePoolElement> CODEC = Registry.STRUCTURE_POOL_ELEMENT
+		.dispatch("element_type", StructurePoolElement::getType, StructurePoolElementType::codec);
 	@Nullable
 	private volatile StructureTemplatePool.Projection projection;
 
-	protected StructurePoolElement(StructureTemplatePool.Projection projection) {
-		this.projection = projection;
+	protected static <E extends StructurePoolElement> RecordCodecBuilder<E, StructureTemplatePool.Projection> projectionCodec() {
+		return StructureTemplatePool.Projection.CODEC.fieldOf("projection").forGetter(StructurePoolElement::getProjection);
 	}
 
-	protected StructurePoolElement(Dynamic<?> dynamic) {
-		this.projection = StructureTemplatePool.Projection.byName(dynamic.get("projection").asString(StructureTemplatePool.Projection.RIGID.getName()));
+	protected StructurePoolElement(StructureTemplatePool.Projection projection) {
+		this.projection = projection;
 	}
 
 	public abstract List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(
@@ -47,7 +49,7 @@ public abstract class StructurePoolElement {
 		boolean bl
 	);
 
-	public abstract StructurePoolElementType getType();
+	public abstract StructurePoolElementType<?> getType();
 
 	public void handleDataMarker(
 		LevelAccessor levelAccessor,
@@ -71,16 +73,6 @@ public abstract class StructurePoolElement {
 		} else {
 			return projection;
 		}
-	}
-
-	protected abstract <T> Dynamic<T> getDynamic(DynamicOps<T> dynamicOps);
-
-	public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-		T object = this.getDynamic(dynamicOps).getValue();
-		T object2 = dynamicOps.mergeInto(
-			object, dynamicOps.createString("element_type"), dynamicOps.createString(Registry.STRUCTURE_POOL_ELEMENT.getKey(this.getType()).toString())
-		);
-		return new Dynamic<>(dynamicOps, dynamicOps.mergeInto(object2, dynamicOps.createString("projection"), dynamicOps.createString(this.projection.getName())));
 	}
 
 	public int getGroundLevelDelta() {

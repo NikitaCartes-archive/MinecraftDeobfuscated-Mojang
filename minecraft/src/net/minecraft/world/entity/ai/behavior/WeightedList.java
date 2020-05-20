@@ -1,48 +1,30 @@
 package net.minecraft.world.entity.ai.behavior;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.DynamicOps;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class WeightedList<U> {
-	protected final List<WeightedList<U>.WeightedEntry<? extends U>> entries = Lists.<WeightedList<U>.WeightedEntry<? extends U>>newArrayList();
-	private final Random random;
-
-	public WeightedList(Random random) {
-		this.random = random;
-	}
+	protected final List<WeightedList.WeightedEntry<U>> entries;
+	private final Random random = new Random();
 
 	public WeightedList() {
-		this(new Random());
+		this(Lists.<WeightedList.WeightedEntry<U>>newArrayList());
 	}
 
-	public <T> WeightedList(Dynamic<T> dynamic, Function<Dynamic<T>, U> function) {
-		this();
-		dynamic.asStream().forEach(dynamicx -> dynamicx.get("data").map(dynamic2 -> {
-				U object = (U)function.apply(dynamic2);
-				int i = dynamicx.get("weight").asInt(1);
-				return this.add(object, i);
-			}));
+	private WeightedList(List<WeightedList.WeightedEntry<U>> list) {
+		this.entries = list;
 	}
 
-	public <T> T serialize(DynamicOps<T> dynamicOps, Function<U, Dynamic<T>> function) {
-		return dynamicOps.createList(
-			this.streamEntries()
-				.map(
-					weightedEntry -> dynamicOps.createMap(
-							ImmutableMap.<T, T>builder()
-								.put(dynamicOps.createString("data"), (T)((Dynamic)function.apply(weightedEntry.getData())).getValue())
-								.put(dynamicOps.createString("weight"), dynamicOps.createInt(weightedEntry.getWeight()))
-								.build()
-						)
-				)
-		);
+	public static <U> Codec<WeightedList<U>> codec(Codec<U> codec) {
+		return WeightedList.WeightedEntry.codec(codec).listOf().xmap(WeightedList::new, weightedList -> weightedList.entries);
 	}
 
 	public WeightedList<U> add(U object, int i) {
@@ -60,12 +42,12 @@ public class WeightedList<U> {
 		return this;
 	}
 
-	public Stream<? extends U> stream() {
-		return this.entries.stream().map(WeightedList.WeightedEntry::getData);
+	public boolean isEmpty() {
+		return this.entries.isEmpty();
 	}
 
-	public Stream<WeightedList<U>.WeightedEntry<? extends U>> streamEntries() {
-		return this.entries.stream();
+	public Stream<U> stream() {
+		return this.entries.stream().map(WeightedList.WeightedEntry::getData);
 	}
 
 	public U getOne(Random random) {
@@ -76,7 +58,7 @@ public class WeightedList<U> {
 		return "WeightedList[" + this.entries + "]";
 	}
 
-	public class WeightedEntry<T> {
+	public static class WeightedEntry<T> {
 		private final T data;
 		private final int weight;
 		private double randWeight;
@@ -98,12 +80,28 @@ public class WeightedList<U> {
 			return this.data;
 		}
 
-		public int getWeight() {
-			return this.weight;
-		}
-
 		public String toString() {
 			return "" + this.weight + ":" + this.data;
+		}
+
+		public static <E> Codec<WeightedList.WeightedEntry<E>> codec(Codec<E> codec) {
+			return new Codec<WeightedList.WeightedEntry<E>>() {
+				@Override
+				public <T> DataResult<Pair<WeightedList.WeightedEntry<E>, T>> decode(DynamicOps<T> dynamicOps, T object) {
+					Dynamic<T> dynamic = new Dynamic<>(dynamicOps, object);
+					return dynamic.get("data")
+						.flatMap(codec::parse)
+						.map(objectx -> new WeightedList.WeightedEntry(objectx, dynamic.get("weight").asInt(1)))
+						.map(weightedEntry -> Pair.of(weightedEntry, dynamicOps.empty()));
+				}
+
+				public <T> DataResult<T> encode(WeightedList.WeightedEntry<E> weightedEntry, DynamicOps<T> dynamicOps, T object) {
+					return dynamicOps.mapBuilder()
+						.add("weight", dynamicOps.createInt(weightedEntry.weight))
+						.add("data", codec.encodeStart(dynamicOps, weightedEntry.data))
+						.build(object);
+				}
+			};
 		}
 	}
 }

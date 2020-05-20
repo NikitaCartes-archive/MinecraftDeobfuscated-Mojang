@@ -40,6 +40,7 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
@@ -315,12 +316,12 @@ public class VillagerTrades {
 						2,
 						new VillagerTrades.ItemListing[]{
 							new VillagerTrades.EmeraldForItems(Items.GLASS_PANE, 11, 16, 10),
-							new VillagerTrades.TreasureMapForEmeralds(13, "Monument", MapDecoration.Type.MONUMENT, 12, 5)
+							new VillagerTrades.TreasureMapForEmeralds(13, StructureFeature.OCEAN_MONUMENT, MapDecoration.Type.MONUMENT, 12, 5)
 						},
 						3,
 						new VillagerTrades.ItemListing[]{
 							new VillagerTrades.EmeraldForItems(Items.COMPASS, 1, 12, 20),
-							new VillagerTrades.TreasureMapForEmeralds(14, "Mansion", MapDecoration.Type.MANSION, 12, 10)
+							new VillagerTrades.TreasureMapForEmeralds(14, StructureFeature.WOODLAND_MANSION, MapDecoration.Type.MANSION, 12, 10)
 						},
 						4,
 						new VillagerTrades.ItemListing[]{
@@ -974,14 +975,14 @@ public class VillagerTrades {
 
 	static class TreasureMapForEmeralds implements VillagerTrades.ItemListing {
 		private final int emeraldCost;
-		private final String destination;
+		private final StructureFeature<?> destination;
 		private final MapDecoration.Type destinationType;
 		private final int maxUses;
 		private final int villagerXp;
 
-		public TreasureMapForEmeralds(int i, String string, MapDecoration.Type type, int j, int k) {
+		public TreasureMapForEmeralds(int i, StructureFeature<?> structureFeature, MapDecoration.Type type, int j, int k) {
 			this.emeraldCost = i;
-			this.destination = string;
+			this.destination = structureFeature;
 			this.destinationType = type;
 			this.maxUses = j;
 			this.villagerXp = k;
@@ -999,7 +1000,7 @@ public class VillagerTrades {
 					ItemStack itemStack = MapItem.create(serverLevel, blockPos.getX(), blockPos.getZ(), (byte)2, true, true);
 					MapItem.renderBiomePreviewMap(serverLevel, itemStack);
 					MapItemSavedData.addTargetDecoration(itemStack, blockPos, "+", this.destinationType);
-					itemStack.setHoverName(new TranslatableComponent("filled_map." + this.destination.toLowerCase(Locale.ROOT)));
+					itemStack.setHoverName(new TranslatableComponent("filled_map." + this.destination.getFeatureName().toLowerCase(Locale.ROOT)));
 					return new MerchantOffer(new ItemStack(Items.EMERALD, this.emeraldCost), new ItemStack(Items.COMPASS), itemStack, this.maxUses, this.villagerXp, 0.2F);
 				} else {
 					return null;

@@ -233,7 +233,7 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		public void renderToolTip(PoseStack poseStack, int i, int j) {
 			MutableComponent mutableComponent = new TranslatableComponent(this.effect.getDescriptionId());
 			if (!this.isPrimary && this.effect != MobEffects.REGENERATION) {
-				mutableComponent.append("II");
+				mutableComponent.append(" II");
 			}
 
 			BeaconScreen.this.renderTooltip(poseStack, mutableComponent, i, j);

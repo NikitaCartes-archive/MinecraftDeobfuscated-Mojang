@@ -249,11 +249,6 @@ public class Mth {
 		return NumberUtils.toInt(string, i);
 	}
 
-	@Environment(EnvType.CLIENT)
-	public static int getInt(String string, int i, int j) {
-		return Math.max(j, getInt(string, i));
-	}
-
 	public static int smallestEncompassingPowerOfTwo(int i) {
 		int j = i - 1;
 		j |= j >> 1;
@@ -275,6 +270,21 @@ public class Mth {
 
 	public static int log2(int i) {
 		return ceillog2(i) - (isPowerOfTwo(i) ? 0 : 1);
+	}
+
+	public static int roundUp(int i, int j) {
+		if (j == 0) {
+			return 0;
+		} else if (i == 0) {
+			return j;
+		} else {
+			if (i < 0) {
+				j *= -1;
+			}
+
+			int k = i % j;
+			return k == 0 ? i : i + j - k;
+		}
 	}
 
 	@Environment(EnvType.CLIENT)

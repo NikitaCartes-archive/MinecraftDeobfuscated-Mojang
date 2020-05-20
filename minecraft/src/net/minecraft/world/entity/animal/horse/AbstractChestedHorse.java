@@ -5,7 +5,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
@@ -57,12 +56,6 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 	@Override
 	public double getRideHeight() {
 		return super.getRideHeight() - 0.25;
-	}
-
-	@Override
-	protected SoundEvent getAngrySound() {
-		super.getAngrySound();
-		return SoundEvents.DONKEY_ANGRY;
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package net.minecraft.world.level;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -152,7 +153,7 @@ public abstract class BaseCommandBlock implements CommandSource {
 	}
 
 	@Override
-	public void sendMessage(Component component) {
+	public void sendMessage(Component component, UUID uUID) {
 		if (this.trackOutput) {
 			this.lastOutput = new TextComponent("[" + TIME_FORMAT.format(new Date()) + "] ").append(component);
 			this.onUpdated();

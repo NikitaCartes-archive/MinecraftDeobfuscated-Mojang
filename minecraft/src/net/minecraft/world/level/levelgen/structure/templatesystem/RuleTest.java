@@ -1,26 +1,14 @@
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class RuleTest {
+	public static final Codec<RuleTest> CODEC = Registry.RULE_TEST.dispatch("predicate_type", RuleTest::getType, RuleTestType::codec);
+
 	public abstract boolean test(BlockState blockState, Random random);
 
-	public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-		return new Dynamic<>(
-			dynamicOps,
-			dynamicOps.mergeInto(
-				this.getDynamic(dynamicOps).getValue(),
-				dynamicOps.createString("predicate_type"),
-				dynamicOps.createString(Registry.RULE_TEST.getKey(this.getType()).toString())
-			)
-		);
-	}
-
-	protected abstract RuleTestType getType();
-
-	protected abstract <T> Dynamic<T> getDynamic(DynamicOps<T> dynamicOps);
+	protected abstract RuleTestType<?> getType();
 }

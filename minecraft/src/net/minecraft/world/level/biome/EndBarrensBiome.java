@@ -27,7 +27,6 @@ public class EndBarrensBiome extends Biome {
 				)
 				.parent(null)
 		);
-		BiomeDefaultFeatures.addEndCity(this);
 		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.ENDERMAN, 10, 4, 4));
 	}
 

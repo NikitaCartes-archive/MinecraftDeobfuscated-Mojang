@@ -46,7 +46,7 @@ public class StatePropertiesPredicate {
 		this.properties = ImmutableList.copyOf(list);
 	}
 
-	public <S extends StateHolder<S>> boolean matches(StateDefinition<?, S> stateDefinition, S stateHolder) {
+	public <S extends StateHolder<?, S>> boolean matches(StateDefinition<?, S> stateDefinition, S stateHolder) {
 		for (StatePropertiesPredicate.PropertyMatcher propertyMatcher : this.properties) {
 			if (!propertyMatcher.match(stateDefinition, stateHolder)) {
 				return false;
@@ -137,7 +137,7 @@ public class StatePropertiesPredicate {
 		}
 
 		@Override
-		protected <T extends Comparable<T>> boolean match(StateHolder<?> stateHolder, Property<T> property) {
+		protected <T extends Comparable<T>> boolean match(StateHolder<?, ?> stateHolder, Property<T> property) {
 			T comparable = stateHolder.getValue(property);
 			Optional<T> optional = property.getValue(this.value);
 			return optional.isPresent() && comparable.compareTo(optional.get()) == 0;
@@ -156,12 +156,12 @@ public class StatePropertiesPredicate {
 			this.name = string;
 		}
 
-		public <S extends StateHolder<S>> boolean match(StateDefinition<?, S> stateDefinition, S stateHolder) {
+		public <S extends StateHolder<?, S>> boolean match(StateDefinition<?, S> stateDefinition, S stateHolder) {
 			Property<?> property = stateDefinition.getProperty(this.name);
 			return property == null ? false : this.match(stateHolder, property);
 		}
 
-		protected abstract <T extends Comparable<T>> boolean match(StateHolder<?> stateHolder, Property<T> property);
+		protected abstract <T extends Comparable<T>> boolean match(StateHolder<?, ?> stateHolder, Property<T> property);
 
 		public abstract JsonElement toJson();
 
@@ -190,7 +190,7 @@ public class StatePropertiesPredicate {
 		}
 
 		@Override
-		protected <T extends Comparable<T>> boolean match(StateHolder<?> stateHolder, Property<T> property) {
+		protected <T extends Comparable<T>> boolean match(StateHolder<?, ?> stateHolder, Property<T> property) {
 			T comparable = stateHolder.getValue(property);
 			if (this.minValue != null) {
 				Optional<T> optional = property.getValue(this.minValue);

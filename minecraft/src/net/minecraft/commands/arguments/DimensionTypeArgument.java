@@ -1,6 +1,5 @@
 package net.minecraft.commands.arguments;
 
-import com.google.common.collect.Streams;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -16,25 +15,29 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.dimension.DimensionType;
 
-public class DimensionTypeArgument implements ArgumentType<DimensionType> {
-	private static final Collection<String> EXAMPLES = (Collection<String>)Stream.of(DimensionType.OVERWORLD, DimensionType.NETHER)
-		.map(dimensionType -> DimensionType.getName(dimensionType).toString())
+public class DimensionTypeArgument implements ArgumentType<ResourceLocation> {
+	private static final Collection<String> EXAMPLES = (Collection<String>)Stream.of(DimensionType.OVERWORLD_LOCATION, DimensionType.NETHER_LOCATION)
+		.map(resourceKey -> resourceKey.location().toString())
 		.collect(Collectors.toList());
-	public static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
+	private static final DynamicCommandExceptionType ERROR_INVALID_VALUE = new DynamicCommandExceptionType(
 		object -> new TranslatableComponent("argument.dimension.invalid", object)
 	);
 
-	public DimensionType parse(StringReader stringReader) throws CommandSyntaxException {
-		ResourceLocation resourceLocation = ResourceLocation.read(stringReader);
-		return (DimensionType)Registry.DIMENSION_TYPE.getOptional(resourceLocation).orElseThrow(() -> ERROR_INVALID_VALUE.create(resourceLocation));
+	public ResourceLocation parse(StringReader stringReader) throws CommandSyntaxException {
+		return ResourceLocation.read(stringReader);
 	}
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
-		return SharedSuggestionProvider.suggestResource(Streams.stream(DimensionType.getAllTypes()).map(DimensionType::getName), suggestionsBuilder);
+		return commandContext.getSource() instanceof SharedSuggestionProvider
+			? SharedSuggestionProvider.suggestResource(
+				((SharedSuggestionProvider)commandContext.getSource()).registryAccess().dimensionTypes().keySet().stream(), suggestionsBuilder
+			)
+			: Suggestions.empty();
 	}
 
 	@Override
@@ -46,7 +49,13 @@ public class DimensionTypeArgument implements ArgumentType<DimensionType> {
 		return new DimensionTypeArgument();
 	}
 
-	public static DimensionType getDimension(CommandContext<CommandSourceStack> commandContext, String string) {
-		return commandContext.getArgument(string, DimensionType.class);
+	public static ResourceKey<DimensionType> getDimension(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
+		ResourceLocation resourceLocation = commandContext.getArgument(string, ResourceLocation.class);
+		ResourceKey<DimensionType> resourceKey = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, resourceLocation);
+		if (!commandContext.getSource().getServer().registryAccess().dimensionTypes().containsKey(resourceKey)) {
+			throw ERROR_INVALID_VALUE.create(resourceLocation);
+		} else {
+			return resourceKey;
+		}
 	}
 }

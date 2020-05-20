@@ -2,14 +2,12 @@ package net.minecraft.world.level.chunk;
 
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortList;
-import java.util.BitSet;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
@@ -19,7 +17,6 @@ import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.material.Fluid;
@@ -68,9 +65,9 @@ public interface ChunkAccess extends BlockGetter, FeatureAccess {
 
 	void setLastSaveTime(long l);
 
-	Map<String, StructureStart> getAllStarts();
+	Map<String, StructureStart<?>> getAllStarts();
 
-	void setAllStarts(Map<String, StructureStart> map);
+	void setAllStarts(Map<String, StructureStart<?>> map);
 
 	default boolean isYSpaceEmpty(int i, int j) {
 		if (i < 0) {
@@ -126,10 +123,6 @@ public interface ChunkAccess extends BlockGetter, FeatureAccess {
 	TickList<Block> getBlockTicks();
 
 	TickList<Fluid> getLiquidTicks();
-
-	default BitSet getCarvingMask(GenerationStep.Carving carving) {
-		throw (RuntimeException)Util.pauseInIde(new RuntimeException("Meaningless in this context"));
-	}
 
 	UpgradeData getUpgradeData();
 

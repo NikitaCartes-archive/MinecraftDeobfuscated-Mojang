@@ -2,7 +2,6 @@ package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -31,7 +30,7 @@ public class SleepInBed extends Behavior<LivingEntity> {
 		} else {
 			Brain<?> brain = livingEntity.getBrain();
 			GlobalPos globalPos = (GlobalPos)brain.getMemory(MemoryModuleType.HOME).get();
-			if (!Objects.equals(serverLevel.dimensionType(), globalPos.dimension())) {
+			if (serverLevel.dimension() != globalPos.dimension()) {
 				return false;
 			} else {
 				Optional<SerializableLong> optional = brain.getMemory(MemoryModuleType.LAST_WOKEN);

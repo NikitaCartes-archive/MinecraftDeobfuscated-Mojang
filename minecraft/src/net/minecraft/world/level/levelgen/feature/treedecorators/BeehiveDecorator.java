@@ -1,15 +1,12 @@
 package net.minecraft.world.level.levelgen.feature.treedecorators;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.level.LevelAccessor;
@@ -22,15 +19,19 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class BeehiveDecorator extends TreeDecorator {
+	public static final Codec<BeehiveDecorator> CODEC = Codec.FLOAT
+		.fieldOf("probability")
+		.<BeehiveDecorator>xmap(BeehiveDecorator::new, beehiveDecorator -> beehiveDecorator.probability)
+		.codec();
 	private final float probability;
 
 	public BeehiveDecorator(float f) {
-		super(TreeDecoratorType.BEEHIVE);
 		this.probability = f;
 	}
 
-	public <T> BeehiveDecorator(Dynamic<T> dynamic) {
-		this(dynamic.get("probability").asFloat(0.0F));
+	@Override
+	protected TreeDecoratorType<?> type() {
+		return TreeDecoratorType.BEEHIVE;
 	}
 
 	@Override
@@ -60,21 +61,5 @@ public class BeehiveDecorator extends TreeDecorator {
 				}
 			}
 		}
-	}
-
-	@Override
-	public <T> T serialize(DynamicOps<T> dynamicOps) {
-		return new Dynamic<>(
-				dynamicOps,
-				dynamicOps.createMap(
-					ImmutableMap.of(
-						dynamicOps.createString("type"),
-						dynamicOps.createString(Registry.TREE_DECORATOR_TYPES.getKey(this.type).toString()),
-						dynamicOps.createString("probability"),
-						dynamicOps.createFloat(this.probability)
-					)
-				)
-			)
-			.getValue();
 	}
 }

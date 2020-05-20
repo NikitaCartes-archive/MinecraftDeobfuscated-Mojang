@@ -2,9 +2,9 @@ package net.minecraft.util.datafix.fixes;
 
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
+import com.mojang.serialization.Dynamic;
 
 public class RedstoneWireConnectionsFix extends DataFix {
 	public RedstoneWireConnectionsFix(Schema schema) {
@@ -20,16 +20,16 @@ public class RedstoneWireConnectionsFix extends DataFix {
 	}
 
 	private <T> Dynamic<T> updateRedstoneConnections(Dynamic<T> dynamic) {
-		boolean bl = dynamic.get("Name").asString().filter("minecraft:redstone_wire"::equals).isPresent();
+		boolean bl = dynamic.get("Name").asString().result().filter("minecraft:redstone_wire"::equals).isPresent();
 		return !bl
 			? dynamic
 			: dynamic.update(
 				"Properties",
 				dynamicx -> {
-					String string = (String)dynamicx.get("east").asString().orElseGet(() -> "none");
-					String string2 = (String)dynamicx.get("west").asString().orElseGet(() -> "none");
-					String string3 = (String)dynamicx.get("north").asString().orElseGet(() -> "none");
-					String string4 = (String)dynamicx.get("south").asString().orElseGet(() -> "none");
+					String string = dynamicx.get("east").asString("none");
+					String string2 = dynamicx.get("west").asString("none");
+					String string3 = dynamicx.get("north").asString("none");
+					String string4 = dynamicx.get("south").asString("none");
 					boolean blx = isConnected(string) || isConnected(string2);
 					boolean bl2 = isConnected(string3) || isConnected(string4);
 					String string5 = !isConnected(string) && !bl2 ? "side" : string;

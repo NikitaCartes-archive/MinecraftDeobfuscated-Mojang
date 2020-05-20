@@ -1,14 +1,23 @@
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 
 public class AxisAlignedLinearPosTest extends PosRuleTest {
+	public static final Codec<AxisAlignedLinearPosTest> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					Codec.FLOAT.fieldOf("min_chance").withDefault(0.0F).forGetter(axisAlignedLinearPosTest -> axisAlignedLinearPosTest.minChance),
+					Codec.FLOAT.fieldOf("max_chance").withDefault(0.0F).forGetter(axisAlignedLinearPosTest -> axisAlignedLinearPosTest.maxChance),
+					Codec.INT.fieldOf("min_dist").withDefault(0).forGetter(axisAlignedLinearPosTest -> axisAlignedLinearPosTest.minDist),
+					Codec.INT.fieldOf("max_dist").withDefault(0).forGetter(axisAlignedLinearPosTest -> axisAlignedLinearPosTest.maxDist),
+					Direction.Axis.CODEC.fieldOf("axis").withDefault(Direction.Axis.Y).forGetter(axisAlignedLinearPosTest -> axisAlignedLinearPosTest.axis)
+				)
+				.apply(instance, AxisAlignedLinearPosTest::new)
+	);
 	private final float minChance;
 	private final float maxChance;
 	private final int minDist;
@@ -27,16 +36,6 @@ public class AxisAlignedLinearPosTest extends PosRuleTest {
 		}
 	}
 
-	public <T> AxisAlignedLinearPosTest(Dynamic<T> dynamic) {
-		this(
-			dynamic.get("min_chance").asFloat(0.0F),
-			dynamic.get("max_chance").asFloat(0.0F),
-			dynamic.get("min_dist").asInt(0),
-			dynamic.get("max_dist").asInt(0),
-			Direction.Axis.byName(dynamic.get("axis").asString("y"))
-		);
-	}
-
 	@Override
 	public boolean test(BlockPos blockPos, BlockPos blockPos2, BlockPos blockPos3, Random random) {
 		Direction direction = Direction.get(Direction.AxisDirection.POSITIVE, this.axis);
@@ -49,28 +48,7 @@ public class AxisAlignedLinearPosTest extends PosRuleTest {
 	}
 
 	@Override
-	protected PosRuleTestType getType() {
+	protected PosRuleTestType<?> getType() {
 		return PosRuleTestType.AXIS_ALIGNED_LINEAR_POS_TEST;
-	}
-
-	@Override
-	protected <T> Dynamic<T> getDynamic(DynamicOps<T> dynamicOps) {
-		return new Dynamic<>(
-			dynamicOps,
-			dynamicOps.createMap(
-				ImmutableMap.of(
-					dynamicOps.createString("min_chance"),
-					dynamicOps.createFloat(this.minChance),
-					dynamicOps.createString("max_chance"),
-					dynamicOps.createFloat(this.maxChance),
-					dynamicOps.createString("min_dist"),
-					dynamicOps.createFloat((float)this.minDist),
-					dynamicOps.createString("max_dist"),
-					dynamicOps.createFloat((float)this.maxDist),
-					dynamicOps.createString("axis"),
-					dynamicOps.createString(this.axis.getName())
-				)
-			)
-		);
 	}
 }

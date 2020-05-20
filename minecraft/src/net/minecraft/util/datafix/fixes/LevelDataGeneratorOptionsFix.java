@@ -6,14 +6,14 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
-import com.mojang.datafixers.types.DynamicOps;
-import com.mojang.datafixers.types.JsonOps;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -109,22 +109,23 @@ public class LevelDataGeneratorOptionsFix extends DataFix {
 	@Override
 	protected TypeRewriteRule makeRule() {
 		Type<?> type = this.getOutputSchema().getType(References.LEVEL);
-		return this.fixTypeEverywhereTyped("LevelDataGeneratorOptionsFix", this.getInputSchema().getType(References.LEVEL), type, typed -> {
-			Dynamic<?> dynamic = typed.write();
-			Optional<String> optional = dynamic.get("generatorOptions").asString();
-			Dynamic<?> dynamic2;
-			if ("flat".equalsIgnoreCase(dynamic.get("generatorName").asString(""))) {
-				String string = (String)optional.orElse("");
-				dynamic2 = dynamic.set("generatorOptions", convert(string, dynamic.getOps()));
-			} else if ("buffet".equalsIgnoreCase(dynamic.get("generatorName").asString("")) && optional.isPresent()) {
-				Dynamic<JsonElement> dynamic3 = new Dynamic<>(JsonOps.INSTANCE, GsonHelper.parse((String)optional.get(), true));
-				dynamic2 = dynamic.set("generatorOptions", dynamic3.convert(dynamic.getOps()));
-			} else {
-				dynamic2 = dynamic;
-			}
+		return this.fixTypeEverywhereTyped(
+			"LevelDataGeneratorOptionsFix", this.getInputSchema().getType(References.LEVEL), type, typed -> (Typed)typed.write().flatMap(dynamic -> {
+					Optional<String> optional = dynamic.get("generatorOptions").asString().result();
+					Dynamic<?> dynamic2;
+					if ("flat".equalsIgnoreCase(dynamic.get("generatorName").asString(""))) {
+						String string = (String)optional.orElse("");
+						dynamic2 = dynamic.set("generatorOptions", convert(string, dynamic.getOps()));
+					} else if ("buffet".equalsIgnoreCase(dynamic.get("generatorName").asString("")) && optional.isPresent()) {
+						Dynamic<JsonElement> dynamic3 = new Dynamic<>(JsonOps.INSTANCE, GsonHelper.parse((String)optional.get(), true));
+						dynamic2 = dynamic.set("generatorOptions", dynamic3.convert(dynamic.getOps()));
+					} else {
+						dynamic2 = dynamic;
+					}
 
-			return (Typed)type.readTyped(dynamic2).getSecond().orElseThrow(() -> new IllegalStateException("Could not read new level type."));
-		});
+					return type.readTyped(dynamic2);
+				}).map(Pair::getFirst).result().orElseThrow(() -> new IllegalStateException("Could not read new level type."))
+		);
 	}
 
 	private static <T> Dynamic<T> convert(String string, DynamicOps<T> dynamicOps) {

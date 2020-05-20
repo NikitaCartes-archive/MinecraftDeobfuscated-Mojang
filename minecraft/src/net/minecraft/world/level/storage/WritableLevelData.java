@@ -14,8 +14,4 @@ public interface WritableLevelData extends LevelData {
 		this.setYSpawn(blockPos.getY());
 		this.setZSpawn(blockPos.getZ());
 	}
-
-	void setGameTime(long l);
-
-	void setDayTime(long l);
 }

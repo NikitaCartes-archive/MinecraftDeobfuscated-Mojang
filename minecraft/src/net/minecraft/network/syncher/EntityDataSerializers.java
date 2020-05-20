@@ -151,12 +151,12 @@ public class EntityDataSerializers {
 	};
 	public static final EntityDataSerializer<ParticleOptions> PARTICLE = new EntityDataSerializer<ParticleOptions>() {
 		public void write(FriendlyByteBuf friendlyByteBuf, ParticleOptions particleOptions) {
-			friendlyByteBuf.writeVarInt(Registry.PARTICLE_TYPE.getId((ParticleType<? extends ParticleOptions>)particleOptions.getType()));
+			friendlyByteBuf.writeVarInt(Registry.PARTICLE_TYPE.getId(particleOptions.getType()));
 			particleOptions.writeToNetwork(friendlyByteBuf);
 		}
 
 		public ParticleOptions read(FriendlyByteBuf friendlyByteBuf) {
-			return this.readParticle(friendlyByteBuf, Registry.PARTICLE_TYPE.byId(friendlyByteBuf.readVarInt()));
+			return this.readParticle(friendlyByteBuf, (ParticleType<ParticleOptions>)Registry.PARTICLE_TYPE.byId(friendlyByteBuf.readVarInt()));
 		}
 
 		private <T extends ParticleOptions> T readParticle(FriendlyByteBuf friendlyByteBuf, ParticleType<T> particleType) {

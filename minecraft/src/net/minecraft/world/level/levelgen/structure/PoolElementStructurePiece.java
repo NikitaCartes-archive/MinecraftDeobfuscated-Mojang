@@ -1,15 +1,13 @@
 package net.minecraft.world.level.levelgen.structure;
 
 import com.google.common.collect.Lists;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Dynamic;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.util.Deserializer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -20,8 +18,11 @@ import net.minecraft.world.level.levelgen.feature.structures.EmptyPoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.JigsawJunction;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class PoolElementStructurePiece extends StructurePiece {
+	private static final Logger LOGGER = LogManager.getLogger();
 	protected final StructurePoolElement element;
 	protected BlockPos position;
 	private final int groundLevelDelta;
@@ -52,9 +53,10 @@ public abstract class PoolElementStructurePiece extends StructurePiece {
 		this.structureManager = structureManager;
 		this.position = new BlockPos(compoundTag.getInt("PosX"), compoundTag.getInt("PosY"), compoundTag.getInt("PosZ"));
 		this.groundLevelDelta = compoundTag.getInt("ground_level_delta");
-		this.element = Deserializer.deserialize(
-			new Dynamic<>(NbtOps.INSTANCE, compoundTag.getCompound("pool_element")), Registry.STRUCTURE_POOL_ELEMENT, "element_type", EmptyPoolElement.INSTANCE
-		);
+		this.element = (StructurePoolElement)StructurePoolElement.CODEC
+			.parse(NbtOps.INSTANCE, compoundTag.getCompound("pool_element"))
+			.resultOrPartial(LOGGER::error)
+			.orElse(EmptyPoolElement.INSTANCE);
 		this.rotation = Rotation.valueOf(compoundTag.getString("rotation"));
 		this.boundingBox = this.element.getBoundingBox(structureManager, this.position, this.rotation);
 		ListTag listTag = compoundTag.getList("junctions", 10);
@@ -68,7 +70,7 @@ public abstract class PoolElementStructurePiece extends StructurePiece {
 		compoundTag.putInt("PosY", this.position.getY());
 		compoundTag.putInt("PosZ", this.position.getZ());
 		compoundTag.putInt("ground_level_delta", this.groundLevelDelta);
-		compoundTag.put("pool_element", this.element.serialize(NbtOps.INSTANCE).getValue());
+		StructurePoolElement.CODEC.encodeStart(NbtOps.INSTANCE, this.element).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("pool_element", tag));
 		compoundTag.putString("rotation", this.rotation.name());
 		ListTag listTag = new ListTag();
 

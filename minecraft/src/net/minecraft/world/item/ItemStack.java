@@ -6,6 +6,8 @@ import com.google.common.collect.Multimap;
 import com.google.gson.JsonParseException;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Collection;
@@ -69,6 +71,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public final class ItemStack {
+	public static final Codec<ItemStack> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					Registry.ITEM.fieldOf("id").forGetter(itemStack -> itemStack.item),
+					Codec.INT.fieldOf("Count").forGetter(itemStack -> itemStack.count),
+					CompoundTag.CODEC.optionalFieldOf("tag").forGetter(itemStack -> Optional.ofNullable(itemStack.tag))
+				)
+				.apply(instance, ItemStack::new)
+	);
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final ItemStack EMPTY = new ItemStack((Item)null);
 	public static final DecimalFormat ATTRIBUTE_MODIFIER_FORMAT = Util.make(
@@ -89,6 +99,11 @@ public final class ItemStack {
 
 	public ItemStack(ItemLike itemLike) {
 		this(itemLike, 1);
+	}
+
+	private ItemStack(ItemLike itemLike, int i, Optional<CompoundTag> optional) {
+		this(itemLike, i);
+		optional.ifPresent(this::setTag);
 	}
 
 	public ItemStack(ItemLike itemLike, int i) {

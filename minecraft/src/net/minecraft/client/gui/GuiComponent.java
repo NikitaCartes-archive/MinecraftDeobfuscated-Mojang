@@ -77,18 +77,6 @@ public abstract class GuiComponent {
 	}
 
 	protected void fillGradient(PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
-		this.fillGradient(poseStack.last().pose(), i, j, k, l, m, n);
-	}
-
-	private void fillGradient(Matrix4f matrix4f, int i, int j, int k, int l, int m, int n) {
-		float f = (float)(m >> 24 & 0xFF) / 255.0F;
-		float g = (float)(m >> 16 & 0xFF) / 255.0F;
-		float h = (float)(m >> 8 & 0xFF) / 255.0F;
-		float o = (float)(m & 0xFF) / 255.0F;
-		float p = (float)(n >> 24 & 0xFF) / 255.0F;
-		float q = (float)(n >> 16 & 0xFF) / 255.0F;
-		float r = (float)(n >> 8 & 0xFF) / 255.0F;
-		float s = (float)(n & 0xFF) / 255.0F;
 		RenderSystem.disableTexture();
 		RenderSystem.enableBlend();
 		RenderSystem.disableAlphaTest();
@@ -97,15 +85,27 @@ public abstract class GuiComponent {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
-		bufferBuilder.vertex(matrix4f, (float)k, (float)j, (float)this.blitOffset).color(g, h, o, f).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)i, (float)j, (float)this.blitOffset).color(g, h, o, f).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)i, (float)l, (float)this.blitOffset).color(q, r, s, p).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)k, (float)l, (float)this.blitOffset).color(q, r, s, p).endVertex();
+		fillGradient(poseStack.last().pose(), bufferBuilder, i, j, k, l, this.blitOffset, m, n);
 		tesselator.end();
 		RenderSystem.shadeModel(7424);
 		RenderSystem.disableBlend();
 		RenderSystem.enableAlphaTest();
 		RenderSystem.enableTexture();
+	}
+
+	protected static void fillGradient(Matrix4f matrix4f, BufferBuilder bufferBuilder, int i, int j, int k, int l, int m, int n, int o) {
+		float f = (float)(n >> 24 & 0xFF) / 255.0F;
+		float g = (float)(n >> 16 & 0xFF) / 255.0F;
+		float h = (float)(n >> 8 & 0xFF) / 255.0F;
+		float p = (float)(n & 0xFF) / 255.0F;
+		float q = (float)(o >> 24 & 0xFF) / 255.0F;
+		float r = (float)(o >> 16 & 0xFF) / 255.0F;
+		float s = (float)(o >> 8 & 0xFF) / 255.0F;
+		float t = (float)(o & 0xFF) / 255.0F;
+		bufferBuilder.vertex(matrix4f, (float)k, (float)j, (float)m).color(g, h, p, f).endVertex();
+		bufferBuilder.vertex(matrix4f, (float)i, (float)j, (float)m).color(g, h, p, f).endVertex();
+		bufferBuilder.vertex(matrix4f, (float)i, (float)l, (float)m).color(r, s, t, q).endVertex();
+		bufferBuilder.vertex(matrix4f, (float)k, (float)l, (float)m).color(r, s, t, q).endVertex();
 	}
 
 	public void drawCenteredString(PoseStack poseStack, Font font, String string, int i, int j, int k) {

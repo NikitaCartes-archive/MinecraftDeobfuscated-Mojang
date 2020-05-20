@@ -1,15 +1,28 @@
 package net.minecraft.world.level.biome;
 
-import com.google.common.collect.ImmutableSet;
-import java.util.Set;
+import com.google.common.collect.ImmutableList;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.Lifecycle;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.level.newbiome.layer.Layer;
 import net.minecraft.world.level.newbiome.layer.Layers;
 
 public class OverworldBiomeSource extends BiomeSource {
+	public static final Codec<OverworldBiomeSource> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					Codec.LONG.fieldOf("seed").stable().forGetter(overworldBiomeSource -> overworldBiomeSource.seed),
+					Codec.BOOL
+						.optionalFieldOf("legacy_biome_init_layer", Boolean.valueOf(false), Lifecycle.stable())
+						.forGetter(overworldBiomeSource -> overworldBiomeSource.legacyBiomeInitLayer),
+					Codec.BOOL.fieldOf("large_biomes").withDefault(false).stable().forGetter(overworldBiomeSource -> overworldBiomeSource.largeBiomes)
+				)
+				.apply(instance, instance.stable(OverworldBiomeSource::new))
+	);
 	private final Layer noiseBiomeLayer;
-	private static final Set<Biome> POSSIBLE_BIOMES = ImmutableSet.of(
+	private static final List<Biome> POSSIBLE_BIOMES = ImmutableList.of(
 		Biomes.OCEAN,
 		Biomes.PLAINS,
 		Biomes.DESERT,
@@ -77,20 +90,27 @@ public class OverworldBiomeSource extends BiomeSource {
 		Biomes.MODIFIED_WOODED_BADLANDS_PLATEAU,
 		Biomes.MODIFIED_BADLANDS_PLATEAU
 	);
+	private final long seed;
 	private final boolean legacyBiomeInitLayer;
-	private final int biomeSize;
+	private final boolean largeBiomes;
 
-	public OverworldBiomeSource(long l, boolean bl, int i) {
+	public OverworldBiomeSource(long l, boolean bl, boolean bl2) {
 		super(POSSIBLE_BIOMES);
+		this.seed = l;
 		this.legacyBiomeInitLayer = bl;
-		this.biomeSize = i;
-		this.noiseBiomeLayer = Layers.getDefaultLayer(l, bl, i, 4);
+		this.largeBiomes = bl2;
+		this.noiseBiomeLayer = Layers.getDefaultLayer(l, bl, bl2 ? 6 : 4, 4);
+	}
+
+	@Override
+	protected Codec<? extends BiomeSource> codec() {
+		return CODEC;
 	}
 
 	@Environment(EnvType.CLIENT)
 	@Override
 	public BiomeSource withSeed(long l) {
-		return new OverworldBiomeSource(l, this.legacyBiomeInitLayer, this.biomeSize);
+		return new OverworldBiomeSource(l, this.legacyBiomeInitLayer, this.largeBiomes);
 	}
 
 	@Override

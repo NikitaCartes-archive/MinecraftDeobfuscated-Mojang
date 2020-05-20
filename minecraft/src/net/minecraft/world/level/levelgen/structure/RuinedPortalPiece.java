@@ -1,9 +1,9 @@
 package net.minecraft.world.level.levelgen.structure;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -41,8 +41,11 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.RuleProcessor
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class RuinedPortalPiece extends TemplateStructurePiece {
+	private static final Logger LOGGER = LogManager.getLogger();
 	private final ResourceLocation templateLocation;
 	private final Rotation rotation;
 	private final Mirror mirror;
@@ -75,7 +78,7 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 		this.rotation = Rotation.valueOf(compoundTag.getString("Rotation"));
 		this.mirror = Mirror.valueOf(compoundTag.getString("Mirror"));
 		this.verticalPlacement = RuinedPortalPiece.VerticalPlacement.byName(compoundTag.getString("VerticalPlacement"));
-		this.properties = new RuinedPortalPiece.Properties(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("Properties")));
+		this.properties = RuinedPortalPiece.Properties.CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("Properties"))).getOrThrow(true, LOGGER::error);
 		StructureTemplate structureTemplate = structureManager.getOrCreate(this.templateLocation);
 		this.loadTemplate(structureTemplate, new BlockPos(structureTemplate.getSize().getX() / 2, 0, structureTemplate.getSize().getZ() / 2));
 	}
@@ -87,7 +90,10 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 		compoundTag.putString("Rotation", this.rotation.name());
 		compoundTag.putString("Mirror", this.mirror.name());
 		compoundTag.putString("VerticalPlacement", this.verticalPlacement.getName());
-		compoundTag.put("Properties", this.properties.serialize(NbtOps.INSTANCE));
+		RuinedPortalPiece.Properties.CODEC
+			.encodeStart(NbtOps.INSTANCE, this.properties)
+			.resultOrPartial(LOGGER::error)
+			.ifPresent(tag -> compoundTag.put("Properties", tag));
 	}
 
 	private void loadTemplate(StructureTemplate structureTemplate, BlockPos blockPos) {
@@ -107,7 +113,7 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 			.addProcessor(new RuleProcessor(list))
 			.addProcessor(new BlockAgeProcessor(this.properties.mossiness));
 		if (this.properties.replaceWithBlackstone) {
-			structurePlaceSettings.addProcessor(new BlackstoneReplaceProcessor());
+			structurePlaceSettings.addProcessor(BlackstoneReplaceProcessor.INSTANCE);
 		}
 
 		this.setup(structureTemplate, this.templatePosition, structurePlaceSettings);
@@ -271,6 +277,17 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 	}
 
 	public static class Properties {
+		public static final Codec<RuinedPortalPiece.Properties> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						Codec.BOOL.fieldOf("cold").forGetter(properties -> properties.cold),
+						Codec.FLOAT.fieldOf("mossiness").forGetter(properties -> properties.mossiness),
+						Codec.BOOL.fieldOf("air_pocket").forGetter(properties -> properties.airPocket),
+						Codec.BOOL.fieldOf("overgrown").forGetter(properties -> properties.overgrown),
+						Codec.BOOL.fieldOf("vines").forGetter(properties -> properties.vines),
+						Codec.BOOL.fieldOf("replace_with_blackstone").forGetter(properties -> properties.replaceWithBlackstone)
+					)
+					.apply(instance, RuinedPortalPiece.Properties::new)
+		);
 		public boolean cold;
 		public float mossiness = 0.2F;
 		public boolean airPocket;
@@ -281,26 +298,13 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 		public Properties() {
 		}
 
-		public <T> Properties(Dynamic<T> dynamic) {
-			this.cold = dynamic.get("Cold").asBoolean(false);
-			this.mossiness = dynamic.get("Mossiness").asFloat(0.2F);
-			this.airPocket = dynamic.get("AirPocket").asBoolean(false);
-			this.overgrown = dynamic.get("Overgrown").asBoolean(false);
-			this.vines = dynamic.get("Vines").asBoolean(false);
-			this.replaceWithBlackstone = dynamic.get("ReplaceWithBlackstone").asBoolean(false);
-		}
-
-		public <T> T serialize(DynamicOps<T> dynamicOps) {
-			return dynamicOps.createMap(
-				ImmutableMap.<T, T>builder()
-					.put(dynamicOps.createString("Cold"), dynamicOps.createBoolean(this.cold))
-					.put(dynamicOps.createString("Mossiness"), dynamicOps.createFloat(this.mossiness))
-					.put(dynamicOps.createString("AirPocket"), dynamicOps.createBoolean(this.airPocket))
-					.put(dynamicOps.createString("Overgrown"), dynamicOps.createBoolean(this.overgrown))
-					.put(dynamicOps.createString("Vines"), dynamicOps.createBoolean(this.vines))
-					.put(dynamicOps.createString("ReplaceWithBlackstone"), dynamicOps.createBoolean(this.replaceWithBlackstone))
-					.build()
-			);
+		public <T> Properties(boolean bl, float f, boolean bl2, boolean bl3, boolean bl4, boolean bl5) {
+			this.cold = bl;
+			this.mossiness = f;
+			this.airPocket = bl2;
+			this.overgrown = bl3;
+			this.vines = bl4;
+			this.replaceWithBlackstone = bl5;
 		}
 	}
 

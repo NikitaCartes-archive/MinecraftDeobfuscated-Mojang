@@ -1,13 +1,25 @@
 package net.minecraft.world.level.storage;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonIOException;
+import com.google.gson.stream.JsonWriter;
 import com.mojang.datafixers.DataFixer;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.Lifecycle;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -22,23 +34,30 @@ import java.time.format.SignStyle;
 import java.time.temporal.ChronoField;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.FileUtil;
+import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.DirectoryLock;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.util.datafix.fixes.References;
+import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.dimension.DimensionType;
-import org.apache.commons.lang3.StringUtils;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -57,6 +76,10 @@ public class LevelStorageSource {
 		.appendLiteral('-')
 		.appendValue(ChronoField.SECOND_OF_MINUTE, 2)
 		.toFormatter();
+	private static final ImmutableList<String> OLD_SETTINGS_KEYS = ImmutableList.of(
+		"RandomSeed", "generatorName", "generatorOptions", "generatorVersion", "legacy_custom_options", "MapFeatures", "BonusChest"
+	);
+	private static final Gson WORLD_GEN_SETTINGS_GSON = new GsonBuilder().setPrettyPrinting().serializeNulls().disableHtmlEscaping().create();
 	private final Path baseDir;
 	private final Path backupDir;
 	private final DataFixer fixerUpper;
@@ -78,6 +101,24 @@ public class LevelStorageSource {
 		return new LevelStorageSource(path, path.resolve("../backups"), DataFixers.getDataFixer());
 	}
 
+	private static Pair<WorldGenSettings, Lifecycle> readWorldGenSettings(Dynamic<?> dynamic, DataFixer dataFixer, int i) {
+		Dynamic<?> dynamic2 = dynamic.get("WorldGenSettings").orElseEmptyMap();
+
+		for (String string : OLD_SETTINGS_KEYS) {
+			Optional<? extends Dynamic<?>> optional = dynamic.get(string).result();
+			if (optional.isPresent()) {
+				dynamic2 = dynamic2.set(string, (Dynamic<?>)optional.get());
+			}
+		}
+
+		Dynamic<?> dynamic3 = dataFixer.update(References.WORLD_GEN_SETTINGS, dynamic2, i, SharedConstants.getCurrentVersion().getWorldVersion());
+		DataResult<WorldGenSettings> dataResult = WorldGenSettings.CODEC.parse(dynamic3);
+		return Pair.of(
+			(WorldGenSettings)dataResult.resultOrPartial(Util.prefix("WorldGenSettings: ", LOGGER::error)).orElseGet(WorldGenSettings::makeDefault),
+			dataResult.lifecycle()
+		);
+	}
+
 	@Environment(EnvType.CLIENT)
 	public List<LevelSummary> getLevelList() throws LevelStorageException {
 		if (!Files.isDirectory(this.baseDir, new LinkOption[0])) {
@@ -88,27 +129,17 @@ public class LevelStorageSource {
 
 			for (File file : files) {
 				if (file.isDirectory()) {
-					String string = file.getName();
-
 					boolean bl;
 					try {
 						bl = DirectoryLock.isLocked(file.toPath());
-					} catch (Exception var15) {
-						LOGGER.warn("Failed to read {} lock", file, var15);
+					} catch (Exception var9) {
+						LOGGER.warn("Failed to read {} lock", file, var9);
 						continue;
 					}
 
-					WorldData worldData = this.getLevelData(file);
-					if (worldData != null && (worldData.getVersion() == 19132 || worldData.getVersion() == 19133)) {
-						boolean bl2 = worldData.getVersion() != this.getStorageVersion();
-						String string2 = worldData.getLevelName();
-						if (StringUtils.isEmpty(string2)) {
-							string2 = string;
-						}
-
-						long l = 0L;
-						File file2 = new File(file, "icon.png");
-						list.add(new LevelSummary(worldData, string, string2, 0L, bl2, bl, file2));
+					LevelSummary levelSummary = this.readLevelData(file, this.levelSummaryReader(file, bl));
+					if (levelSummary != null) {
+						list.add(levelSummary);
 					}
 				}
 			}
@@ -122,36 +153,71 @@ public class LevelStorageSource {
 	}
 
 	@Nullable
-	private WorldData getLevelData(File file) {
+	private <T> T readLevelData(File file, BiFunction<File, DataFixer, T> biFunction) {
 		if (!file.exists()) {
 			return null;
 		} else {
 			File file2 = new File(file, "level.dat");
 			if (file2.exists()) {
-				WorldData worldData = getLevelData(file2, this.fixerUpper);
-				if (worldData != null) {
-					return worldData;
+				T object = (T)biFunction.apply(file2, this.fixerUpper);
+				if (object != null) {
+					return object;
 				}
 			}
 
 			file2 = new File(file, "level.dat_old");
-			return file2.exists() ? getLevelData(file2, this.fixerUpper) : null;
+			return (T)(file2.exists() ? biFunction.apply(file2, this.fixerUpper) : null);
 		}
 	}
 
 	@Nullable
-	public static WorldData getLevelData(File file, DataFixer dataFixer) {
+	private static WorldData getLevelData(File file, DataFixer dataFixer) {
 		try {
 			CompoundTag compoundTag = NbtIo.readCompressed(new FileInputStream(file));
 			CompoundTag compoundTag2 = compoundTag.getCompound("Data");
 			CompoundTag compoundTag3 = compoundTag2.contains("Player", 10) ? compoundTag2.getCompound("Player") : null;
 			compoundTag2.remove("Player");
 			int i = compoundTag2.contains("DataVersion", 99) ? compoundTag2.getInt("DataVersion") : -1;
-			return new PrimaryLevelData(NbtUtils.update(dataFixer, DataFixTypes.LEVEL, compoundTag2, i), dataFixer, i, compoundTag3);
-		} catch (Exception var6) {
-			LOGGER.error("Exception reading {}", file, var6);
+			Dynamic<Tag> dynamic = dataFixer.update(
+				DataFixTypes.LEVEL.getType(), new Dynamic<>(NbtOps.INSTANCE, compoundTag2), i, SharedConstants.getCurrentVersion().getWorldVersion()
+			);
+			Pair<WorldGenSettings, Lifecycle> pair = readWorldGenSettings(dynamic, dataFixer, i);
+			LevelVersion levelVersion = LevelVersion.parse(dynamic);
+			LevelSettings levelSettings = LevelSettings.parse(dynamic, pair.getFirst());
+			return PrimaryLevelData.parse(dynamic, dataFixer, i, compoundTag3, levelSettings, levelVersion);
+		} catch (Exception var10) {
+			LOGGER.error("Exception reading {}", file, var10);
 			return null;
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	private BiFunction<File, DataFixer, LevelSummary> levelSummaryReader(File file, boolean bl) {
+		return (file2, dataFixer) -> {
+			try {
+				CompoundTag compoundTag = NbtIo.readCompressed(new FileInputStream(file2));
+				CompoundTag compoundTag2 = compoundTag.getCompound("Data");
+				compoundTag2.remove("Player");
+				int i = compoundTag2.contains("DataVersion", 99) ? compoundTag2.getInt("DataVersion") : -1;
+				Dynamic<Tag> dynamic = dataFixer.update(
+					DataFixTypes.LEVEL.getType(), new Dynamic<>(NbtOps.INSTANCE, compoundTag2), i, SharedConstants.getCurrentVersion().getWorldVersion()
+				);
+				LevelVersion levelVersion = LevelVersion.parse(dynamic);
+				int j = levelVersion.levelDataVersion();
+				if (j != 19132 && j != 19133) {
+					return null;
+				} else {
+					boolean bl2 = j != this.getStorageVersion();
+					File file3 = new File(file, "icon.png");
+					Pair<WorldGenSettings, Lifecycle> pair = readWorldGenSettings(dynamic, dataFixer, i);
+					LevelSettings levelSettings = LevelSettings.parse(dynamic, pair.getFirst());
+					return new LevelSummary(levelSettings, levelVersion, file.getName(), bl2, bl, file3, pair.getSecond());
+				}
+			} catch (Exception var15) {
+				LOGGER.error("Exception reading {}", file2, var15);
+				return null;
+			}
+		};
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -205,8 +271,8 @@ public class LevelStorageSource {
 			return (Path)this.resources.computeIfAbsent(levelResource, levelResourcex -> this.levelPath.resolve(levelResourcex.getId()));
 		}
 
-		public File getDimensionPath(DimensionType dimensionType) {
-			return dimensionType.getStorageFolder(this.levelPath.toFile());
+		public File getDimensionPath(ResourceKey<DimensionType> resourceKey) {
+			return DimensionType.getStorageFolder(resourceKey, this.levelPath.toFile());
 		}
 
 		private void checkLock() {
@@ -233,7 +299,7 @@ public class LevelStorageSource {
 		@Nullable
 		public WorldData getDataTag() {
 			this.checkLock();
-			return LevelStorageSource.this.getLevelData(this.levelPath.toFile());
+			return LevelStorageSource.this.readLevelData(this.levelPath.toFile(), (file, dataFixer) -> LevelStorageSource.getLevelData(file, dataFixer));
 		}
 
 		public void saveDataTag(WorldData worldData) {
@@ -376,6 +442,49 @@ public class LevelStorageSource {
 			}
 
 			return Files.size(path2);
+		}
+
+		@Environment(EnvType.CLIENT)
+		public DataResult<String> exportWorldGenSettings() {
+			this.checkLock();
+			File file = this.levelPath.toFile();
+			LevelSummary levelSummary = LevelStorageSource.this.readLevelData(file, LevelStorageSource.this.levelSummaryReader(file, false));
+			if (levelSummary == null) {
+				return DataResult.error("Could not parse level data!");
+			} else {
+				DataResult<JsonElement> dataResult = WorldGenSettings.CODEC.encodeStart(JsonOps.INSTANCE, levelSummary.worldGenSettings());
+				return dataResult.flatMap(jsonElement -> {
+					Path path = this.levelPath.resolve("worldgen_settings_export.json");
+
+					try {
+						JsonWriter jsonWriter = LevelStorageSource.WORLD_GEN_SETTINGS_GSON.newJsonWriter(Files.newBufferedWriter(path, StandardCharsets.UTF_8));
+						Throwable var4 = null;
+
+						try {
+							LevelStorageSource.WORLD_GEN_SETTINGS_GSON.toJson(jsonElement, jsonWriter);
+						} catch (Throwable var14) {
+							var4 = var14;
+							throw var14;
+						} finally {
+							if (jsonWriter != null) {
+								if (var4 != null) {
+									try {
+										jsonWriter.close();
+									} catch (Throwable var13) {
+										var4.addSuppressed(var13);
+									}
+								} else {
+									jsonWriter.close();
+								}
+							}
+						}
+					} catch (JsonIOException | IOException var16) {
+						return DataResult.error("Error writing file: " + var16.getMessage());
+					}
+
+					return DataResult.success(path.toString());
+				});
+			}
 		}
 
 		public void close() throws IOException {

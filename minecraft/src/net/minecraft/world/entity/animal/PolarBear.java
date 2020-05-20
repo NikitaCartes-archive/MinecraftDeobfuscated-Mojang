@@ -262,22 +262,22 @@ public class PolarBear extends Animal {
 		@Override
 		protected void checkAndPerformAttack(LivingEntity livingEntity, double d) {
 			double e = this.getAttackReachSqr(livingEntity);
-			if (d <= e && this.attackTime <= 0) {
-				this.attackTime = 20;
+			if (d <= e && this.isTimeToAttack()) {
+				this.resetAttackCooldown();
 				this.mob.doHurtTarget(livingEntity);
 				PolarBear.this.setStanding(false);
 			} else if (d <= e * 2.0) {
-				if (this.attackTime <= 0) {
+				if (this.isTimeToAttack()) {
 					PolarBear.this.setStanding(false);
-					this.attackTime = 20;
+					this.resetAttackCooldown();
 				}
 
-				if (this.attackTime <= 10) {
+				if (this.getTicksUntilNextAttack() <= 10) {
 					PolarBear.this.setStanding(true);
 					PolarBear.this.playWarningSound();
 				}
 			} else {
-				this.attackTime = 20;
+				this.resetAttackCooldown();
 				PolarBear.this.setStanding(false);
 			}
 		}

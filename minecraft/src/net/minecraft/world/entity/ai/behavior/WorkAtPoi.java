@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.SerializableLong;
@@ -26,7 +25,7 @@ public class WorkAtPoi extends Behavior<Villager> {
 		} else {
 			this.lastCheck = serverLevel.getGameTime();
 			GlobalPos globalPos = (GlobalPos)villager.getBrain().getMemory(MemoryModuleType.JOB_SITE).get();
-			return Objects.equals(globalPos.dimension(), serverLevel.dimensionType()) && globalPos.pos().closerThan(villager.position(), 1.73);
+			return globalPos.dimension() == serverLevel.dimension() && globalPos.pos().closerThan(villager.position(), 1.73);
 		}
 	}
 
@@ -50,7 +49,7 @@ public class WorkAtPoi extends Behavior<Villager> {
 			return false;
 		} else {
 			GlobalPos globalPos = (GlobalPos)optional.get();
-			return Objects.equals(globalPos.dimension(), serverLevel.dimensionType()) && globalPos.pos().closerThan(villager.position(), 1.73);
+			return globalPos.dimension() == serverLevel.dimension() && globalPos.pos().closerThan(villager.position(), 1.73);
 		}
 	}
 }

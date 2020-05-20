@@ -54,11 +54,15 @@ public class GameConfig {
 		public final boolean demo;
 		public final String launchVersion;
 		public final String versionType;
+		public final boolean disableMultiplayer;
+		public final boolean disableChat;
 
-		public GameData(boolean bl, String string, String string2) {
+		public GameData(boolean bl, String string, String string2, boolean bl2, boolean bl3) {
 			this.demo = bl;
 			this.launchVersion = string;
 			this.versionType = string2;
+			this.disableMultiplayer = bl2;
+			this.disableChat = bl3;
 		}
 	}
 

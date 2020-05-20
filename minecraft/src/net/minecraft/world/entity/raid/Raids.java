@@ -80,7 +80,7 @@ public class Raids extends SavedData {
 			return null;
 		} else {
 			DimensionType dimensionType = serverPlayer.level.dimensionType();
-			if (dimensionType == DimensionType.NETHER) {
+			if (dimensionType.isNether()) {
 				return null;
 			} else {
 				BlockPos blockPos = serverPlayer.blockPosition();

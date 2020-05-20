@@ -47,13 +47,12 @@ public class ImageButton extends Button {
 	public void renderButton(PoseStack poseStack, int i, int j, float f) {
 		Minecraft minecraft = Minecraft.getInstance();
 		minecraft.getTextureManager().bind(this.resourceLocation);
-		RenderSystem.disableDepthTest();
 		int k = this.yTexStart;
 		if (this.isHovered()) {
 			k += this.yDiffTex;
 		}
 
-		blit(poseStack, this.x, this.y, (float)this.xTexStart, (float)k, this.width, this.height, this.textureWidth, this.textureHeight);
 		RenderSystem.enableDepthTest();
+		blit(poseStack, this.x, this.y, (float)this.xTexStart, (float)k, this.width, this.height, this.textureWidth, this.textureHeight);
 	}
 }

@@ -313,8 +313,7 @@ public class ParticleEngine implements PreparableReloadListener {
 
 	@Nullable
 	private <T extends ParticleOptions> Particle makeParticle(T particleOptions, double d, double e, double f, double g, double h, double i) {
-		ParticleProvider<T> particleProvider = (ParticleProvider<T>)this.providers
-			.get(Registry.PARTICLE_TYPE.getId((ParticleType<? extends ParticleOptions>)particleOptions.getType()));
+		ParticleProvider<T> particleProvider = (ParticleProvider<T>)this.providers.get(Registry.PARTICLE_TYPE.getId(particleOptions.getType()));
 		return particleProvider == null ? null : particleProvider.createParticle(particleOptions, this.level, d, e, f, g, h, i);
 	}
 

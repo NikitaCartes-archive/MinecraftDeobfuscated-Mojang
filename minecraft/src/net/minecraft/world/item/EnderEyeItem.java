@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EndPortalFrameBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
@@ -72,7 +73,7 @@ public class EnderEyeItem extends Item {
 				BlockPos blockPos = ((ServerLevel)level)
 					.getChunkSource()
 					.getGenerator()
-					.findNearestMapFeature((ServerLevel)level, "Stronghold", player.blockPosition(), 100, false);
+					.findNearestMapFeature((ServerLevel)level, StructureFeature.STRONGHOLD, player.blockPosition(), 100, false);
 				if (blockPos != null) {
 					EyeOfEnder eyeOfEnder = new EyeOfEnder(level, player.getX(), player.getY(0.5), player.getZ());
 					eyeOfEnder.setItem(itemStack);

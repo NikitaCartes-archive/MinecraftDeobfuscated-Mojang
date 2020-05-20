@@ -65,7 +65,7 @@ public class ClientboundLevelParticlesPacket implements Packet<ClientGamePacketL
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
-		friendlyByteBuf.writeInt(Registry.PARTICLE_TYPE.getId((ParticleType<? extends ParticleOptions>)this.particle.getType()));
+		friendlyByteBuf.writeInt(Registry.PARTICLE_TYPE.getId(this.particle.getType()));
 		friendlyByteBuf.writeBoolean(this.overrideLimiter);
 		friendlyByteBuf.writeDouble(this.x);
 		friendlyByteBuf.writeDouble(this.y);

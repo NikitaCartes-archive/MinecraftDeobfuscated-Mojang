@@ -275,7 +275,6 @@ public class TeleportCommand {
 					entity.setYHeadRot(i);
 				} else {
 					entity.unRide();
-					entity.dimension = serverLevel.dimensionType();
 					Entity entity2 = entity;
 					entity = entity.getType().create(serverLevel);
 					if (entity == null) {

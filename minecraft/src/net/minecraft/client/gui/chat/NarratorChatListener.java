@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.chat;
 
 import com.mojang.text2speech.Narrator;
+import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
@@ -23,20 +24,22 @@ public class NarratorChatListener implements ChatListener {
 	private final Narrator narrator = Narrator.getNarrator();
 
 	@Override
-	public void handle(ChatType chatType, Component component) {
-		NarratorStatus narratorStatus = getStatus();
-		if (narratorStatus != NarratorStatus.OFF && this.narrator.active()) {
-			if (narratorStatus == NarratorStatus.ALL
-				|| narratorStatus == NarratorStatus.CHAT && chatType == ChatType.CHAT
-				|| narratorStatus == NarratorStatus.SYSTEM && chatType == ChatType.SYSTEM) {
-				Component component2;
-				if (component instanceof TranslatableComponent && "chat.type.text".equals(((TranslatableComponent)component).getKey())) {
-					component2 = new TranslatableComponent("chat.type.text.narrate", ((TranslatableComponent)component).getArgs());
-				} else {
-					component2 = component;
-				}
+	public void handle(ChatType chatType, Component component, UUID uUID) {
+		if (!Minecraft.getInstance().isBlocked(uUID)) {
+			NarratorStatus narratorStatus = getStatus();
+			if (narratorStatus != NarratorStatus.OFF && this.narrator.active()) {
+				if (narratorStatus == NarratorStatus.ALL
+					|| narratorStatus == NarratorStatus.CHAT && chatType == ChatType.CHAT
+					|| narratorStatus == NarratorStatus.SYSTEM && chatType == ChatType.SYSTEM) {
+					Component component2;
+					if (component instanceof TranslatableComponent && "chat.type.text".equals(((TranslatableComponent)component).getKey())) {
+						component2 = new TranslatableComponent("chat.type.text.narrate", ((TranslatableComponent)component).getArgs());
+					} else {
+						component2 = component;
+					}
 
-				this.doSay(chatType.shouldInterrupt(), component2.getString());
+					this.doSay(chatType.shouldInterrupt(), component2.getString());
+				}
 			}
 		}
 	}

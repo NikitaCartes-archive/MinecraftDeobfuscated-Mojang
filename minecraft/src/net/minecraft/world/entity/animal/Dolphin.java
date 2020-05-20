@@ -60,6 +60,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.Vec3;
 
@@ -468,10 +469,11 @@ public class Dolphin extends WaterAnimal {
 				this.stuck = false;
 				this.dolphin.getNavigation().stop();
 				BlockPos blockPos = this.dolphin.blockPosition();
-				String string = (double)serverLevel.random.nextFloat() >= 0.5 ? "Ocean_Ruin" : "Shipwreck";
-				BlockPos blockPos2 = serverLevel.findNearestMapFeature(string, blockPos, 50, false);
+				StructureFeature<?> structureFeature = (double)serverLevel.random.nextFloat() >= 0.5 ? StructureFeature.OCEAN_RUIN : StructureFeature.SHIPWRECK;
+				BlockPos blockPos2 = serverLevel.findNearestMapFeature(structureFeature, blockPos, 50, false);
 				if (blockPos2 == null) {
-					BlockPos blockPos3 = serverLevel.findNearestMapFeature(string.equals("Ocean_Ruin") ? "Shipwreck" : "Ocean_Ruin", blockPos, 50, false);
+					StructureFeature<?> structureFeature2 = structureFeature.equals(StructureFeature.OCEAN_RUIN) ? StructureFeature.SHIPWRECK : StructureFeature.OCEAN_RUIN;
+					BlockPos blockPos3 = serverLevel.findNearestMapFeature(structureFeature2, blockPos, 50, false);
 					if (blockPos3 == null) {
 						this.stuck = true;
 						return;

@@ -13,22 +13,23 @@ import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.animal.horse.TraderLlama;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.storage.ServerLevelData;
 
-public class WanderingTraderSpawner {
+public class WanderingTraderSpawner implements CustomSpawner {
 	private final Random random = new Random();
-	private final ServerLevel level;
 	private final ServerLevelData serverLevelData;
 	private int tickDelay;
 	private int spawnDelay;
 	private int spawnChance;
 
-	public WanderingTraderSpawner(ServerLevel serverLevel, ServerLevelData serverLevelData) {
-		this.level = serverLevel;
+	public WanderingTraderSpawner(ServerLevelData serverLevelData) {
 		this.serverLevelData = serverLevelData;
 		this.tickDelay = 1200;
 		this.spawnDelay = serverLevelData.getWanderingTraderSpawnDelay();
@@ -41,31 +42,41 @@ public class WanderingTraderSpawner {
 		}
 	}
 
-	public void tick() {
-		if (this.level.getGameRules().getBoolean(GameRules.RULE_DO_TRADER_SPAWNING)) {
-			if (--this.tickDelay <= 0) {
-				this.tickDelay = 1200;
-				this.spawnDelay -= 1200;
-				this.serverLevelData.setWanderingTraderSpawnDelay(this.spawnDelay);
-				if (this.spawnDelay <= 0) {
-					this.spawnDelay = 24000;
-					if (this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
-						int i = this.spawnChance;
-						this.spawnChance = Mth.clamp(this.spawnChance + 25, 25, 75);
-						this.serverLevelData.setWanderingTraderSpawnChance(this.spawnChance);
-						if (this.random.nextInt(100) <= i) {
-							if (this.spawn()) {
-								this.spawnChance = 25;
-							}
-						}
+	@Override
+	public int tick(ServerLevel serverLevel, boolean bl, boolean bl2) {
+		if (!serverLevel.getGameRules().getBoolean(GameRules.RULE_DO_TRADER_SPAWNING)) {
+			return 0;
+		} else if (--this.tickDelay > 0) {
+			return 0;
+		} else {
+			this.tickDelay = 1200;
+			this.spawnDelay -= 1200;
+			this.serverLevelData.setWanderingTraderSpawnDelay(this.spawnDelay);
+			if (this.spawnDelay > 0) {
+				return 0;
+			} else {
+				this.spawnDelay = 24000;
+				if (!serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
+					return 0;
+				} else {
+					int i = this.spawnChance;
+					this.spawnChance = Mth.clamp(this.spawnChance + 25, 25, 75);
+					this.serverLevelData.setWanderingTraderSpawnChance(this.spawnChance);
+					if (this.random.nextInt(100) > i) {
+						return 0;
+					} else if (this.spawn(serverLevel)) {
+						this.spawnChance = 25;
+						return 1;
+					} else {
+						return 0;
 					}
 				}
 			}
 		}
 	}
 
-	private boolean spawn() {
-		Player player = this.level.getRandomPlayer();
+	private boolean spawn(ServerLevel serverLevel) {
+		Player player = serverLevel.getRandomPlayer();
 		if (player == null) {
 			return true;
 		} else if (this.random.nextInt(10) != 0) {
@@ -73,16 +84,16 @@ public class WanderingTraderSpawner {
 		} else {
 			BlockPos blockPos = player.blockPosition();
 			int i = 48;
-			PoiManager poiManager = this.level.getPoiManager();
+			PoiManager poiManager = serverLevel.getPoiManager();
 			Optional<BlockPos> optional = poiManager.find(PoiType.MEETING.getPredicate(), blockPosx -> true, blockPos, 48, PoiManager.Occupancy.ANY);
 			BlockPos blockPos2 = (BlockPos)optional.orElse(blockPos);
-			BlockPos blockPos3 = this.findSpawnPositionNear(blockPos2, 48);
-			if (blockPos3 != null && this.hasEnoughSpace(blockPos3)) {
-				if (this.level.getBiome(blockPos3) == Biomes.THE_VOID) {
+			BlockPos blockPos3 = this.findSpawnPositionNear(serverLevel, blockPos2, 48);
+			if (blockPos3 != null && this.hasEnoughSpace(serverLevel, blockPos3)) {
+				if (serverLevel.getBiome(blockPos3) == Biomes.THE_VOID) {
 					return false;
 				}
 
-				WanderingTrader wanderingTrader = EntityType.WANDERING_TRADER.spawn(this.level, null, null, null, blockPos3, MobSpawnType.EVENT, false, false);
+				WanderingTrader wanderingTrader = EntityType.WANDERING_TRADER.spawn(serverLevel, null, null, null, blockPos3, MobSpawnType.EVENT, false, false);
 				if (wanderingTrader != null) {
 					for (int j = 0; j < 2; j++) {
 						this.tryToSpawnLlamaFor(wanderingTrader, 4);
@@ -101,9 +112,9 @@ public class WanderingTraderSpawner {
 	}
 
 	private void tryToSpawnLlamaFor(WanderingTrader wanderingTrader, int i) {
-		BlockPos blockPos = this.findSpawnPositionNear(wanderingTrader.blockPosition(), i);
+		BlockPos blockPos = this.findSpawnPositionNear(wanderingTrader.level, wanderingTrader.blockPosition(), i);
 		if (blockPos != null) {
-			TraderLlama traderLlama = EntityType.TRADER_LLAMA.spawn(this.level, null, null, null, blockPos, MobSpawnType.EVENT, false, false);
+			TraderLlama traderLlama = EntityType.TRADER_LLAMA.spawn(wanderingTrader.level, null, null, null, blockPos, MobSpawnType.EVENT, false, false);
 			if (traderLlama != null) {
 				traderLlama.setLeashedTo(wanderingTrader, true);
 			}
@@ -111,15 +122,15 @@ public class WanderingTraderSpawner {
 	}
 
 	@Nullable
-	private BlockPos findSpawnPositionNear(BlockPos blockPos, int i) {
+	private BlockPos findSpawnPositionNear(LevelReader levelReader, BlockPos blockPos, int i) {
 		BlockPos blockPos2 = null;
 
 		for (int j = 0; j < 10; j++) {
 			int k = blockPos.getX() + this.random.nextInt(i * 2) - i;
 			int l = blockPos.getZ() + this.random.nextInt(i * 2) - i;
-			int m = this.level.getHeight(Heightmap.Types.WORLD_SURFACE, k, l);
+			int m = levelReader.getHeight(Heightmap.Types.WORLD_SURFACE, k, l);
 			BlockPos blockPos3 = new BlockPos(k, m, l);
-			if (NaturalSpawner.isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, this.level, blockPos3, EntityType.WANDERING_TRADER)) {
+			if (NaturalSpawner.isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, levelReader, blockPos3, EntityType.WANDERING_TRADER)) {
 				blockPos2 = blockPos3;
 				break;
 			}
@@ -128,9 +139,9 @@ public class WanderingTraderSpawner {
 		return blockPos2;
 	}
 
-	private boolean hasEnoughSpace(BlockPos blockPos) {
+	private boolean hasEnoughSpace(BlockGetter blockGetter, BlockPos blockPos) {
 		for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos, blockPos.offset(1, 2, 1))) {
-			if (!this.level.getBlockState(blockPos2).getCollisionShape(this.level, blockPos2).isEmpty()) {
+			if (!blockGetter.getBlockState(blockPos2).getCollisionShape(blockGetter, blockPos2).isEmpty()) {
 				return false;
 			}
 		}

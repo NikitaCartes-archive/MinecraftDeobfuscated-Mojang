@@ -7,15 +7,17 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.PatrollingMonster;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class PatrolSpawner {
+public class PatrolSpawner implements CustomSpawner {
 	private int nextTick;
 
+	@Override
 	public int tick(ServerLevel serverLevel, boolean bl, boolean bl2) {
 		if (!bl) {
 			return 0;
@@ -92,7 +94,7 @@ public class PatrolSpawner {
 
 	private boolean spawnPatrolMember(Level level, BlockPos blockPos, Random random, boolean bl) {
 		BlockState blockState = level.getBlockState(blockPos);
-		if (!NaturalSpawner.isValidEmptySpawnBlock(level, blockPos, blockState, blockState.getFluidState())) {
+		if (!NaturalSpawner.isValidEmptySpawnBlock(level, blockPos, blockState, blockState.getFluidState(), EntityType.PILLAGER)) {
 			return false;
 		} else if (!PatrollingMonster.checkPatrollingMonsterSpawnRules(EntityType.PILLAGER, level, MobSpawnType.PATROL, blockPos, random)) {
 			return false;

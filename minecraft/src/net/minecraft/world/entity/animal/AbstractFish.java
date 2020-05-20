@@ -34,6 +34,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public abstract class AbstractFish extends WaterAnimal {
@@ -183,6 +184,10 @@ public abstract class AbstractFish extends WaterAnimal {
 	@Override
 	protected SoundEvent getSwimSound() {
 		return SoundEvents.FISH_SWIM;
+	}
+
+	@Override
+	protected void playStepSound(BlockPos blockPos, BlockState blockState) {
 	}
 
 	static class FishMoveControl extends MoveControl {

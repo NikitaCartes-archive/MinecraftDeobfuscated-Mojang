@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -48,7 +49,8 @@ public class EndPortalBlock extends BaseEntityBlock {
 				blockState.getShape(level, blockPos),
 				BooleanOp.AND
 			)) {
-			entity.changeDimension(level.dimensionType() == DimensionType.THE_END ? DimensionType.OVERWORLD : DimensionType.THE_END);
+			ResourceKey<DimensionType> resourceKey = level.dimensionType().isEnd() ? DimensionType.OVERWORLD_LOCATION : DimensionType.END_LOCATION;
+			entity.changeDimension(resourceKey);
 		}
 	}
 

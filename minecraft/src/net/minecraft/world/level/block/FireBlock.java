@@ -20,7 +20,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.dimension.end.TheEndDimension;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -127,7 +126,7 @@ public class FireBlock extends BaseFireBlock {
 			}
 
 			BlockState blockState2 = serverLevel.getBlockState(blockPos.below());
-			boolean bl = serverLevel.getDimension() instanceof TheEndDimension && blockState2.is(Blocks.BEDROCK)
+			boolean bl = serverLevel.dimensionType().isEnd() && blockState2.is(Blocks.BEDROCK)
 				|| blockState2.is(Blocks.NETHERRACK)
 				|| blockState2.is(Blocks.MAGMA_BLOCK);
 			int i = (Integer)blockState.getValue(AGE);

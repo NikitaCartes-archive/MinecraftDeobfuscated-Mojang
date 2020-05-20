@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.chat;
 
+import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -15,7 +16,9 @@ public class OverlayChatListener implements ChatListener {
 	}
 
 	@Override
-	public void handle(ChatType chatType, Component component) {
-		this.minecraft.gui.setOverlayMessage(component, false);
+	public void handle(ChatType chatType, Component component, UUID uUID) {
+		if (!this.minecraft.isBlocked(uUID)) {
+			this.minecraft.gui.setOverlayMessage(component, false);
+		}
 	}
 }

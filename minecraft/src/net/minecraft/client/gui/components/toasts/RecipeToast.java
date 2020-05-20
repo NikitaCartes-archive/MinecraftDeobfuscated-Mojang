@@ -32,7 +32,7 @@ public class RecipeToast implements Toast {
 		} else {
 			toastComponent.getMinecraft().getTextureManager().bind(TEXTURE);
 			RenderSystem.color3f(1.0F, 1.0F, 1.0F);
-			toastComponent.blit(poseStack, 0, 0, 0, 32, 160, 32);
+			toastComponent.blit(poseStack, 0, 0, 0, 32, this.width(), this.height());
 			toastComponent.getMinecraft().font.draw(poseStack, I18n.get("recipe.toast.title"), 30.0F, 7.0F, -11534256);
 			toastComponent.getMinecraft().font.draw(poseStack, I18n.get("recipe.toast.description"), 30.0F, 18.0F, -16777216);
 			Recipe<?> recipe = (Recipe<?>)this.recipes.get((int)(l / Math.max(1L, 5000L / (long)this.recipes.size()) % (long)this.recipes.size()));

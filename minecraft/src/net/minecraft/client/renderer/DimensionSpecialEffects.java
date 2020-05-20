@@ -1,17 +1,27 @@
 package net.minecraft.client.renderer;
 
-import com.google.common.collect.Maps;
-import java.util.Map;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public abstract class DimensionSpecialEffects {
-	private static final Map<DimensionType, DimensionSpecialEffects> EFFECTS = Maps.<DimensionType, DimensionSpecialEffects>newHashMap();
+	private static final Object2ObjectMap<ResourceKey<DimensionType>, DimensionSpecialEffects> EFFECTS = Util.make(
+		new Object2ObjectArrayMap<>(), object2ObjectArrayMap -> {
+			DimensionSpecialEffects.OverworldEffects overworldEffects = new DimensionSpecialEffects.OverworldEffects();
+			object2ObjectArrayMap.defaultReturnValue(overworldEffects);
+			object2ObjectArrayMap.put(DimensionType.OVERWORLD_LOCATION, overworldEffects);
+			object2ObjectArrayMap.put(DimensionType.NETHER_LOCATION, new DimensionSpecialEffects.NetherEffects());
+			object2ObjectArrayMap.put(DimensionType.END_LOCATION, new DimensionSpecialEffects.EndEffects());
+		}
+	);
 	private final float[] sunriseCol = new float[4];
 	private final float cloudLevel;
 	private final boolean hasGround;
@@ -23,8 +33,8 @@ public abstract class DimensionSpecialEffects {
 		this.renderNormalSky = bl2;
 	}
 
-	public static DimensionSpecialEffects forType(DimensionType dimensionType) {
-		return (DimensionSpecialEffects)EFFECTS.getOrDefault(dimensionType, EFFECTS.get(DimensionType.OVERWORLD));
+	public static DimensionSpecialEffects forType(@Nullable ResourceKey<DimensionType> resourceKey) {
+		return EFFECTS.get(resourceKey);
 	}
 
 	@Nullable
@@ -60,12 +70,6 @@ public abstract class DimensionSpecialEffects {
 
 	public boolean renderNormalSky() {
 		return this.renderNormalSky;
-	}
-
-	static {
-		EFFECTS.put(DimensionType.OVERWORLD, new DimensionSpecialEffects.OverworldEffects());
-		EFFECTS.put(DimensionType.NETHER, new DimensionSpecialEffects.NetherEffects());
-		EFFECTS.put(DimensionType.THE_END, new DimensionSpecialEffects.EndEffects());
 	}
 
 	@Environment(EnvType.CLIENT)

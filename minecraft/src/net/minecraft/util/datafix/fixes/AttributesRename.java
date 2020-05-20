@@ -4,12 +4,12 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.DataFixUtils;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
+import com.mojang.serialization.Dynamic;
 import java.util.Map;
 
 public class AttributesRename extends DataFix {
@@ -50,7 +50,7 @@ public class AttributesRename extends DataFix {
 	}
 
 	private static Dynamic<?> fixName(Dynamic<?> dynamic) {
-		return DataFixUtils.orElse(dynamic.asString().map(string -> (String)RENAMES.getOrDefault(string, string)).map(dynamic::createString), dynamic);
+		return DataFixUtils.orElse(dynamic.asString().result().map(string -> (String)RENAMES.getOrDefault(string, string)).map(dynamic::createString), dynamic);
 	}
 
 	private static Typed<?> fixItemStackTag(Typed<?> typed) {
@@ -59,7 +59,10 @@ public class AttributesRename extends DataFix {
 			dynamic -> dynamic.update(
 					"AttributeModifiers",
 					dynamicx -> DataFixUtils.orElse(
-							dynamicx.asStreamOpt().map(stream -> stream.map(dynamicxx -> dynamicxx.update("AttributeName", AttributesRename::fixName))).map(dynamicx::createList),
+							dynamicx.asStreamOpt()
+								.result()
+								.map(stream -> stream.map(dynamicxx -> dynamicxx.update("AttributeName", AttributesRename::fixName)))
+								.map(dynamicx::createList),
 							dynamicx
 						)
 				)
@@ -72,7 +75,8 @@ public class AttributesRename extends DataFix {
 			dynamic -> dynamic.update(
 					"Attributes",
 					dynamicx -> DataFixUtils.orElse(
-							dynamicx.asStreamOpt().map(stream -> stream.map(dynamicxx -> dynamicxx.update("Name", AttributesRename::fixName))).map(dynamicx::createList), dynamicx
+							dynamicx.asStreamOpt().result().map(stream -> stream.map(dynamicxx -> dynamicxx.update("Name", AttributesRename::fixName))).map(dynamicx::createList),
+							dynamicx
 						)
 				)
 		);

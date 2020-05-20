@@ -16,6 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.BlockHitResult;
@@ -116,6 +117,11 @@ public class ClientSuggestionProvider implements SharedSuggestionProvider {
 		} else {
 			return SharedSuggestionProvider.super.getAbsoluteCoordinates();
 		}
+	}
+
+	@Override
+	public RegistryAccess registryAccess() {
+		return this.connection.registryAccess();
 	}
 
 	public void completeCustomSuggestions(int i, Suggestions suggestions) {

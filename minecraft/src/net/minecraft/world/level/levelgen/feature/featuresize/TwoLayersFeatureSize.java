@@ -1,12 +1,19 @@
 package net.minecraft.world.level.levelgen.feature.featuresize;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.OptionalInt;
 
 public class TwoLayersFeatureSize extends FeatureSize {
+	public static final Codec<TwoLayersFeatureSize> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					Codec.INT.fieldOf("limit").withDefault(1).forGetter(twoLayersFeatureSize -> twoLayersFeatureSize.limit),
+					Codec.INT.fieldOf("lower_size").withDefault(0).forGetter(twoLayersFeatureSize -> twoLayersFeatureSize.lowerSize),
+					Codec.INT.fieldOf("upper_size").withDefault(1).forGetter(twoLayersFeatureSize -> twoLayersFeatureSize.upperSize),
+					minClippedHeightCodec()
+				)
+				.apply(instance, TwoLayersFeatureSize::new)
+	);
 	private final int limit;
 	private final int lowerSize;
 	private final int upperSize;
@@ -16,32 +23,19 @@ public class TwoLayersFeatureSize extends FeatureSize {
 	}
 
 	public TwoLayersFeatureSize(int i, int j, int k, OptionalInt optionalInt) {
-		super(FeatureSizeType.TWO_LAYERS_FEATURE_SIZE, optionalInt);
+		super(optionalInt);
 		this.limit = i;
 		this.lowerSize = j;
 		this.upperSize = k;
 	}
 
-	public <T> TwoLayersFeatureSize(Dynamic<T> dynamic) {
-		this(
-			dynamic.get("limit").asInt(1),
-			dynamic.get("lower_size").asInt(0),
-			dynamic.get("upper_size").asInt(1),
-			(OptionalInt)dynamic.get("min_clipped_height").asNumber().map(number -> OptionalInt.of(number.intValue())).orElse(OptionalInt.empty())
-		);
+	@Override
+	protected FeatureSizeType<?> type() {
+		return FeatureSizeType.TWO_LAYERS_FEATURE_SIZE;
 	}
 
 	@Override
 	public int getSizeAtHeight(int i, int j) {
 		return j < this.limit ? this.lowerSize : this.upperSize;
-	}
-
-	@Override
-	public <T> T serialize(DynamicOps<T> dynamicOps) {
-		Builder<T, T> builder = ImmutableMap.builder();
-		builder.put(dynamicOps.createString("limit"), dynamicOps.createInt(this.limit))
-			.put(dynamicOps.createString("lower_size"), dynamicOps.createInt(this.lowerSize))
-			.put(dynamicOps.createString("upper_size"), dynamicOps.createInt(this.upperSize));
-		return dynamicOps.merge(super.serialize(dynamicOps), dynamicOps.createMap(builder.build()));
 	}
 }

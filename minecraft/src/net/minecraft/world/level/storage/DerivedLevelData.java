@@ -3,7 +3,6 @@ package net.minecraft.world.level.storage;
 import java.util.UUID;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameRules;
@@ -177,16 +176,6 @@ public class DerivedLevelData implements ServerLevelData {
 	@Override
 	public TimerQueue<MinecraftServer> getScheduledEvents() {
 		return this.wrapped.getScheduledEvents();
-	}
-
-	@Override
-	public void setDimensionData(CompoundTag compoundTag) {
-		this.worldData.setDimensionData(this.dimensionType, compoundTag);
-	}
-
-	@Override
-	public CompoundTag getDimensionData() {
-		return this.worldData.getDimensionData(this.dimensionType);
 	}
 
 	@Override

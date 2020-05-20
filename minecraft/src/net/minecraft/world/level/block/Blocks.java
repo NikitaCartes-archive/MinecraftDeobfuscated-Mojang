@@ -2561,7 +2561,7 @@ public class Blocks {
 	}
 
 	private static Block netherStem(MaterialColor materialColor) {
-		return new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.NETHER_WOOD, blockState -> materialColor).strength(1.0F).sound(SoundType.STEM));
+		return new RotatedPillarBlock(BlockBehaviour.Properties.of(Material.NETHER_WOOD, blockState -> materialColor).strength(2.0F).sound(SoundType.STEM));
 	}
 
 	private static boolean always(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {

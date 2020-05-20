@@ -22,7 +22,7 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
 	private Component[] levelTypes = new Component[]{
 		new TranslatableComponent("generator.default"),
 		new TranslatableComponent("generator.flat"),
-		new TranslatableComponent("generator.largeBiomes"),
+		new TranslatableComponent("generator.large_biomes"),
 		new TranslatableComponent("generator.amplified")
 	};
 	private Component buttonTitle;

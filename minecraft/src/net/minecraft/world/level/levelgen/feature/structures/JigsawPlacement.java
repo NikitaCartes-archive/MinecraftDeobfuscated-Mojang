@@ -14,11 +14,11 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.BastionPieces;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.VillagePieces;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PillagerOutpostPieces;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
-import net.minecraft.world.level.levelgen.structure.StructureFeatureIO;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.phys.AABB;
@@ -50,7 +50,7 @@ public class JigsawPlacement {
 		boolean bl,
 		boolean bl2
 	) {
-		StructureFeatureIO.bootstrap();
+		StructureFeature.bootstrap();
 		Rotation rotation = Rotation.getRandom(random);
 		StructureTemplatePool structureTemplatePool = POOLS.getPool(resourceLocation);
 		StructurePoolElement structurePoolElement = structureTemplatePool.getRandomTemplate(random);

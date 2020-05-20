@@ -154,6 +154,12 @@ public class Horse extends AbstractHorse {
 		return SoundEvents.HORSE_DEATH;
 	}
 
+	@Nullable
+	@Override
+	protected SoundEvent getEatingSound() {
+		return SoundEvents.HORSE_EAT;
+	}
+
 	@Override
 	protected SoundEvent getHurtSound(DamageSource damageSource) {
 		super.getHurtSound(damageSource);

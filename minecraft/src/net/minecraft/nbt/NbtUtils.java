@@ -4,7 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.DataFixer;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Dynamic;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.Map.Entry;
@@ -202,7 +202,7 @@ public final class NbtUtils {
 		}
 	}
 
-	private static <S extends StateHolder<S>, T extends Comparable<T>> S setValueHelper(
+	private static <S extends StateHolder<?, S>, T extends Comparable<T>> S setValueHelper(
 		S stateHolder, Property<T> property, String string, CompoundTag compoundTag, CompoundTag compoundTag2
 	) {
 		Optional<T> optional = property.getValue(compoundTag.getString(string));

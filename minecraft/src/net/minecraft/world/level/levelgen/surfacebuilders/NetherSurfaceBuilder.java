@@ -1,8 +1,7 @@
 package net.minecraft.world.level.levelgen.surfacebuilders;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
@@ -19,8 +18,8 @@ public class NetherSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfi
 	protected long seed;
 	protected PerlinNoise decorationNoise;
 
-	public NetherSurfaceBuilder(Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration> function) {
-		super(function);
+	public NetherSurfaceBuilder(Codec<SurfaceBuilderBaseConfiguration> codec) {
+		super(codec);
 	}
 
 	public void apply(

@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import java.util.BitSet;
 import java.util.Collection;
@@ -51,13 +52,13 @@ public class ProtoChunk implements ChunkAccess {
 	private final List<CompoundTag> entities = Lists.<CompoundTag>newArrayList();
 	private final List<BlockPos> lights = Lists.<BlockPos>newArrayList();
 	private final ShortList[] postProcessing = new ShortList[16];
-	private final Map<String, StructureStart> structureStarts = Maps.<String, StructureStart>newHashMap();
+	private final Map<String, StructureStart<?>> structureStarts = Maps.<String, StructureStart<?>>newHashMap();
 	private final Map<String, LongSet> structuresRefences = Maps.<String, LongSet>newHashMap();
 	private final UpgradeData upgradeData;
 	private final ProtoTickList<Block> blockTicks;
 	private final ProtoTickList<Fluid> liquidTicks;
 	private long inhabitedTime;
-	private final Map<GenerationStep.Carving, BitSet> carvingMasks = Maps.<GenerationStep.Carving, BitSet>newHashMap();
+	private final Map<GenerationStep.Carving, BitSet> carvingMasks = new Object2ObjectArrayMap<>();
 	private volatile boolean isLightCorrect;
 
 	public ProtoChunk(ChunkPos chunkPos, UpgradeData upgradeData) {
@@ -321,23 +322,23 @@ public class ProtoChunk implements ChunkAccess {
 
 	@Nullable
 	@Override
-	public StructureStart getStartForFeature(String string) {
-		return (StructureStart)this.structureStarts.get(string);
+	public StructureStart<?> getStartForFeature(String string) {
+		return (StructureStart<?>)this.structureStarts.get(string);
 	}
 
 	@Override
-	public void setStartForFeature(String string, StructureStart structureStart) {
+	public void setStartForFeature(String string, StructureStart<?> structureStart) {
 		this.structureStarts.put(string, structureStart);
 		this.isDirty = true;
 	}
 
 	@Override
-	public Map<String, StructureStart> getAllStarts() {
+	public Map<String, StructureStart<?>> getAllStarts() {
 		return Collections.unmodifiableMap(this.structureStarts);
 	}
 
 	@Override
-	public void setAllStarts(Map<String, StructureStart> map) {
+	public void setAllStarts(Map<String, StructureStart<?>> map) {
 		this.structureStarts.clear();
 		this.structureStarts.putAll(map);
 		this.isDirty = true;
@@ -450,8 +451,12 @@ public class ProtoChunk implements ChunkAccess {
 		this.blockEntityNbts.remove(blockPos);
 	}
 
-	@Override
+	@Nullable
 	public BitSet getCarvingMask(GenerationStep.Carving carving) {
+		return (BitSet)this.carvingMasks.get(carving);
+	}
+
+	public BitSet getOrCreateCarvingMask(GenerationStep.Carving carving) {
 		return (BitSet)this.carvingMasks.computeIfAbsent(carving, carvingx -> new BitSet(65536));
 	}
 

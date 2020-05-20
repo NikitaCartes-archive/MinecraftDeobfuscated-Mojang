@@ -47,14 +47,7 @@ public class ChunkStatus {
 		(chunkStatus, serverLevel, chunkGenerator, structureManager, threadedLevelLightEngine, function, list, chunkAccess) -> {
 			if (!chunkAccess.getStatus().isOrAfter(chunkStatus)) {
 				if (serverLevel.getServer().getWorldData().worldGenSettings().generateFeatures()) {
-					chunkGenerator.createStructures(
-						serverLevel.structureFeatureManager(),
-						serverLevel.getBiomeManager().withDifferentSource(chunkGenerator.getBiomeSource()),
-						chunkAccess,
-						chunkGenerator,
-						structureManager,
-						serverLevel.getSeed()
-					);
+					chunkGenerator.createStructures(serverLevel.structureFeatureManager(), chunkAccess, structureManager, serverLevel.getSeed());
 				}
 
 				if (chunkAccess instanceof ProtoChunk) {
@@ -108,7 +101,7 @@ public class ChunkStatus {
 		PRE_FEATURES,
 		ChunkStatus.ChunkType.PROTOCHUNK,
 		(serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.applyCarvers(
-				serverLevel.getSeed(), serverLevel.getBiomeManager().withDifferentSource(chunkGenerator.getBiomeSource()), chunkAccess, GenerationStep.Carving.AIR
+				serverLevel.getSeed(), serverLevel.getBiomeManager(), chunkAccess, GenerationStep.Carving.AIR
 			)
 	);
 	public static final ChunkStatus LIQUID_CARVERS = registerSimple(
@@ -118,7 +111,7 @@ public class ChunkStatus {
 		POST_FEATURES,
 		ChunkStatus.ChunkType.PROTOCHUNK,
 		(serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.applyCarvers(
-				serverLevel.getSeed(), serverLevel.getBiomeManager().withDifferentSource(chunkGenerator.getBiomeSource()), chunkAccess, GenerationStep.Carving.LIQUID
+				serverLevel.getSeed(), serverLevel.getBiomeManager(), chunkAccess, GenerationStep.Carving.LIQUID
 			)
 	);
 	public static final ChunkStatus FEATURES = register(

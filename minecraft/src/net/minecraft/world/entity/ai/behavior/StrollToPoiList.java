@@ -2,7 +2,6 @@ package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.GlobalPos;
@@ -43,7 +42,7 @@ public class StrollToPoiList extends Behavior<Villager> {
 			if (!list.isEmpty()) {
 				this.targetPos = (GlobalPos)list.get(serverLevel.getRandom().nextInt(list.size()));
 				return this.targetPos != null
-					&& Objects.equals(serverLevel.dimensionType(), this.targetPos.dimension())
+					&& serverLevel.dimension() == this.targetPos.dimension()
 					&& ((GlobalPos)optional2.get()).pos().closerThan(villager.position(), (double)this.maxDistanceFromPoi);
 			}
 		}

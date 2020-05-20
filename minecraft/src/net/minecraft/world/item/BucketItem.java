@@ -17,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.state.BlockState;
@@ -114,41 +115,42 @@ public class BucketItem extends Item {
 			return false;
 		} else {
 			BlockState blockState = level.getBlockState(blockPos);
+			Block block = blockState.getBlock();
 			Material material = blockState.getMaterial();
 			boolean bl = blockState.canBeReplaced(this.content);
-			if (blockState.isAir()
+			boolean bl2 = blockState.isAir()
 				|| bl
-				|| blockState.getBlock() instanceof LiquidBlockContainer
-					&& ((LiquidBlockContainer)blockState.getBlock()).canPlaceLiquid(level, blockPos, blockState, this.content)) {
-				if (level.dimensionType().ultraWarm() && this.content.is(FluidTags.WATER)) {
-					int i = blockPos.getX();
-					int j = blockPos.getY();
-					int k = blockPos.getZ();
-					level.playSound(
-						player, blockPos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 2.6F + (level.random.nextFloat() - level.random.nextFloat()) * 0.8F
-					);
+				|| block instanceof LiquidBlockContainer && ((LiquidBlockContainer)block).canPlaceLiquid(level, blockPos, blockState, this.content);
+			if (!bl2) {
+				return blockHitResult != null && this.emptyBucket(player, level, blockHitResult.getBlockPos().relative(blockHitResult.getDirection()), null);
+			} else if (level.dimensionType().ultraWarm() && this.content.is(FluidTags.WATER)) {
+				int i = blockPos.getX();
+				int j = blockPos.getY();
+				int k = blockPos.getZ();
+				level.playSound(
+					player, blockPos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 2.6F + (level.random.nextFloat() - level.random.nextFloat()) * 0.8F
+				);
 
-					for (int l = 0; l < 8; l++) {
-						level.addParticle(ParticleTypes.LARGE_SMOKE, (double)i + Math.random(), (double)j + Math.random(), (double)k + Math.random(), 0.0, 0.0, 0.0);
-					}
-				} else {
-					if (!(blockState.getBlock() instanceof LiquidBlockContainer) || this.content != Fluids.WATER) {
-						if (!level.isClientSide && bl && !material.isLiquid()) {
-							level.destroyBlock(blockPos, true);
-						}
-
-						this.playEmptySound(player, level, blockPos);
-						return level.setBlock(blockPos, this.content.defaultFluidState().createLegacyBlock(), 11);
-					}
-
-					if (((LiquidBlockContainer)blockState.getBlock()).placeLiquid(level, blockPos, blockState, ((FlowingFluid)this.content).getSource(false))) {
-						this.playEmptySound(player, level, blockPos);
-					}
+				for (int l = 0; l < 8; l++) {
+					level.addParticle(ParticleTypes.LARGE_SMOKE, (double)i + Math.random(), (double)j + Math.random(), (double)k + Math.random(), 0.0, 0.0, 0.0);
 				}
 
 				return true;
+			} else if (block instanceof LiquidBlockContainer && this.content == Fluids.WATER) {
+				((LiquidBlockContainer)block).placeLiquid(level, blockPos, blockState, ((FlowingFluid)this.content).getSource(false));
+				this.playEmptySound(player, level, blockPos);
+				return true;
 			} else {
-				return blockHitResult == null ? false : this.emptyBucket(player, level, blockHitResult.getBlockPos().relative(blockHitResult.getDirection()), null);
+				if (!level.isClientSide && bl && !material.isLiquid()) {
+					level.destroyBlock(blockPos, true);
+				}
+
+				if (!level.setBlock(blockPos, this.content.defaultFluidState().createLegacyBlock(), 11) && !blockState.getFluidState().isSource()) {
+					return false;
+				} else {
+					this.playEmptySound(player, level, blockPos);
+					return true;
+				}
 			}
 		}
 	}

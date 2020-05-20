@@ -56,7 +56,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
@@ -238,7 +237,7 @@ public class DebugScreenOverlay extends GuiComponent {
 				list.add(string3);
 			}
 
-			list.add(DimensionType.getName(this.minecraft.level.dimensionType()).toString() + " FC: " + Integer.toString(longSet.size()));
+			list.add(this.minecraft.level.dimension().location() + " FC: " + longSet.size());
 			list.add("");
 			list.add(
 				String.format(
@@ -370,7 +369,7 @@ public class DebugScreenOverlay extends GuiComponent {
 	@Nullable
 	private ServerLevel getServerLevel() {
 		IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
-		return integratedServer != null ? integratedServer.getLevel(this.minecraft.level.dimensionType()) : null;
+		return integratedServer != null ? integratedServer.getLevel(this.minecraft.level.dimension()) : null;
 	}
 
 	@Nullable
@@ -381,7 +380,7 @@ public class DebugScreenOverlay extends GuiComponent {
 
 	private Level getLevel() {
 		return DataFixUtils.orElse(
-			Optional.ofNullable(this.minecraft.getSingleplayerServer()).map(integratedServer -> integratedServer.getLevel(this.minecraft.level.dimensionType())),
+			Optional.ofNullable(this.minecraft.getSingleplayerServer()).map(integratedServer -> integratedServer.getLevel(this.minecraft.level.dimension())),
 			this.minecraft.level
 		);
 	}

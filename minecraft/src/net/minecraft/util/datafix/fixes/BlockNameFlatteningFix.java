@@ -19,8 +19,8 @@ public class BlockNameFlatteningFix extends DataFix {
 	public TypeRewriteRule makeRule() {
 		Type<?> type = this.getInputSchema().getType(References.BLOCK_NAME);
 		Type<?> type2 = this.getOutputSchema().getType(References.BLOCK_NAME);
-		Type<Pair<String, Either<Integer, String>>> type3 = DSL.named(References.BLOCK_NAME.typeName(), DSL.or(DSL.intType(), DSL.namespacedString()));
-		Type<Pair<String, String>> type4 = DSL.named(References.BLOCK_NAME.typeName(), DSL.namespacedString());
+		Type<Pair<String, Either<Integer, String>>> type3 = DSL.named(References.BLOCK_NAME.typeName(), DSL.or(DSL.intType(), NamespacedSchema.namespacedString()));
+		Type<Pair<String, String>> type4 = DSL.named(References.BLOCK_NAME.typeName(), NamespacedSchema.namespacedString());
 		if (Objects.equals(type, type3) && Objects.equals(type2, type4)) {
 			return this.fixTypeEverywhere(
 				"BlockNameFlatteningFix",

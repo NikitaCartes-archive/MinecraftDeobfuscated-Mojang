@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block.state;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.serialization.MapCodec;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -352,7 +353,7 @@ public abstract class BlockBehaviour {
 		return (MaterialColor)this.properties.materialColor.apply(this.asBlock().defaultBlockState());
 	}
 
-	public abstract static class BlockStateBase extends AbstractStateHolder<Block, BlockState> implements StateHolder<BlockState> {
+	public abstract static class BlockStateBase extends StateHolder<Block, BlockState> {
 		private final int lightEmission;
 		private final boolean useShapeForLightOcclusion;
 		private final boolean isAir;
@@ -368,8 +369,8 @@ public abstract class BlockBehaviour {
 		@Nullable
 		protected BlockBehaviour.BlockStateBase.Cache cache;
 
-		protected BlockStateBase(Block block, ImmutableMap<Property<?>, Comparable<?>> immutableMap) {
-			super(block, immutableMap);
+		protected BlockStateBase(Block block, ImmutableMap<Property<?>, Comparable<?>> immutableMap, MapCodec<BlockState> mapCodec) {
+			super(block, immutableMap, mapCodec);
 			BlockBehaviour.Properties properties = block.properties;
 			this.lightEmission = properties.lightEmission.applyAsInt(this.asState());
 			this.useShapeForLightOcclusion = block.useShapeForLightOcclusion(this.asState());

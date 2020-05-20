@@ -16,7 +16,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkSource;
-import net.minecraft.world.level.dimension.Dimension;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelData;
@@ -25,16 +25,16 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public interface LevelAccessor extends EntityGetter, LevelReader, LevelSimulatedRW {
 	default float getMoonBrightness() {
-		return Dimension.MOON_BRIGHTNESS_PER_PHASE[this.getDimension().getMoonPhase(this.getLevelData().getDayTime())];
+		return DimensionType.MOON_BRIGHTNESS_PER_PHASE[this.dimensionType().moonPhase(this.getLevelData().getDayTime())];
 	}
 
 	default float getTimeOfDay(float f) {
-		return this.getDimension().getTimeOfDay(this.getLevelData().getDayTime(), f);
+		return this.dimensionType().timeOfDay(this.getLevelData().getDayTime());
 	}
 
 	@Environment(EnvType.CLIENT)
 	default int getMoonPhase() {
-		return this.getDimension().getMoonPhase(this.getLevelData().getDayTime());
+		return this.dimensionType().moonPhase(this.getLevelData().getDayTime());
 	}
 
 	TickList<Block> getBlockTicks();

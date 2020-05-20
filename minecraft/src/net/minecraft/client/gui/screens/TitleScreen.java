@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -170,14 +171,24 @@ public class TitleScreen extends Screen {
 		this.addButton(
 			new Button(this.width / 2 - 100, i, 200, 20, new TranslatableComponent("menu.singleplayer"), button -> this.minecraft.setScreen(new SelectWorldScreen(this)))
 		);
+		boolean bl = this.minecraft.allowsMultiplayer();
+		Button.OnTooltip onTooltip = bl
+			? Button.NO_TOOLTIP
+			: (button, poseStack, ix, jx) -> {
+				if (!button.active) {
+					this.renderTooltip(
+						poseStack, this.minecraft.font.split(new TranslatableComponent("title.multiplayer.disabled"), Math.max(this.width / 2 - 43, 170)), ix, jx
+					);
+				}
+			};
 		this.addButton(new Button(this.width / 2 - 100, i + j * 1, 200, 20, new TranslatableComponent("menu.multiplayer"), button -> {
-			if (this.minecraft.options.skipMultiplayerWarning) {
-				this.minecraft.setScreen(new JoinMultiplayerScreen(this));
-			} else {
-				this.minecraft.setScreen(new SafetyScreen(this));
-			}
-		}));
-		this.addButton(new Button(this.width / 2 - 100, i + j * 2, 200, 20, new TranslatableComponent("menu.online"), button -> this.realmsButtonClicked()));
+			Screen screen = (Screen)(this.minecraft.options.skipMultiplayerWarning ? new JoinMultiplayerScreen(this) : new SafetyScreen(this));
+			this.minecraft.setScreen(screen);
+		}, onTooltip)).active = bl;
+		this.addButton(
+				new Button(this.width / 2 - 100, i + j * 2, 200, 20, new TranslatableComponent("menu.online"), button -> this.realmsButtonClicked(), onTooltip)
+			)
+			.active = bl;
 	}
 
 	private void createDemoMenuOptions(int i, int j) {
@@ -262,14 +273,18 @@ public class TitleScreen extends Screen {
 			this.minecraft.getTextureManager().bind(MINECRAFT_LOGO);
 			RenderSystem.color4f(1.0F, 1.0F, 1.0F, h);
 			if (this.minceraftEasterEgg) {
-				this.blit(poseStack, l + 0, 30, 0, 0, 99, 44);
-				this.blit(poseStack, l + 99, 30, 129, 0, 27, 44);
-				this.blit(poseStack, l + 99 + 26, 30, 126, 0, 3, 44);
-				this.blit(poseStack, l + 99 + 26 + 3, 30, 99, 0, 26, 44);
-				this.blit(poseStack, l + 155, 30, 0, 45, 155, 44);
+				this.blitOutline(l, 30, (integer, integer2) -> {
+					this.blit(poseStack, integer + 0, integer2, 0, 0, 99, 44);
+					this.blit(poseStack, integer + 99, integer2, 129, 0, 27, 44);
+					this.blit(poseStack, integer + 99 + 26, integer2, 126, 0, 3, 44);
+					this.blit(poseStack, integer + 99 + 26 + 3, integer2, 99, 0, 26, 44);
+					this.blit(poseStack, integer + 155, integer2, 0, 45, 155, 44);
+				});
 			} else {
-				this.blit(poseStack, l + 0, 30, 0, 0, 155, 44);
-				this.blit(poseStack, l + 155, 30, 0, 45, 155, 44);
+				this.blitOutline(l, 30, (integer, integer2) -> {
+					this.blit(poseStack, integer + 0, integer2, 0, 0, 155, 44);
+					this.blit(poseStack, integer + 155, integer2, 0, 45, 155, 44);
+				});
 			}
 
 			this.minecraft.getTextureManager().bind(MINECRAFT_EDITION);
@@ -311,6 +326,14 @@ public class TitleScreen extends Screen {
 				this.realmsNotificationsScreen.render(poseStack, i, j, f);
 			}
 		}
+	}
+
+	private void blitOutline(int i, int j, BiConsumer<Integer, Integer> biConsumer) {
+		biConsumer.accept(i + 1, j);
+		biConsumer.accept(i - 1, j);
+		biConsumer.accept(i, j + 1);
+		biConsumer.accept(i, j - 1);
+		biConsumer.accept(i, j);
 	}
 
 	@Override

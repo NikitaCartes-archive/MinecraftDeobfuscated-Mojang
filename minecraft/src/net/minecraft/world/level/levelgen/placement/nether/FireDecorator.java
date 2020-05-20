@@ -1,18 +1,17 @@
 package net.minecraft.world.level.levelgen.placement.nether;
 
 import com.google.common.collect.Lists;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.levelgen.placement.FrequencyDecoratorConfiguration;
 import net.minecraft.world.level.levelgen.placement.SimpleFeatureDecorator;
 
 public class FireDecorator extends SimpleFeatureDecorator<FrequencyDecoratorConfiguration> {
-	public FireDecorator(Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration> function) {
-		super(function);
+	public FireDecorator(Codec<FrequencyDecoratorConfiguration> codec) {
+		super(codec);
 	}
 
 	public Stream<BlockPos> place(Random random, FrequencyDecoratorConfiguration frequencyDecoratorConfiguration, BlockPos blockPos) {

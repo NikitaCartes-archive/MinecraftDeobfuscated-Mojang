@@ -1,14 +1,10 @@
 package net.minecraft.world.level.levelgen.feature.treedecorators;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -16,19 +12,19 @@ import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvi
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class AlterGroundDecorator extends TreeDecorator {
+	public static final Codec<AlterGroundDecorator> CODEC = BlockStateProvider.CODEC
+		.fieldOf("provider")
+		.<AlterGroundDecorator>xmap(AlterGroundDecorator::new, alterGroundDecorator -> alterGroundDecorator.provider)
+		.codec();
 	private final BlockStateProvider provider;
 
 	public AlterGroundDecorator(BlockStateProvider blockStateProvider) {
-		super(TreeDecoratorType.ALTER_GROUND);
 		this.provider = blockStateProvider;
 	}
 
-	public <T> AlterGroundDecorator(Dynamic<T> dynamic) {
-		this(
-			Registry.BLOCKSTATE_PROVIDER_TYPES
-				.get(new ResourceLocation((String)dynamic.get("provider").get("type").asString().orElseThrow(RuntimeException::new)))
-				.deserialize(dynamic.get("provider").orElseEmptyMap())
-		);
+	@Override
+	protected TreeDecoratorType<?> type() {
+		return TreeDecoratorType.ALTER_GROUND;
 	}
 
 	@Override
@@ -73,21 +69,5 @@ public class AlterGroundDecorator extends TreeDecorator {
 				break;
 			}
 		}
-	}
-
-	@Override
-	public <T> T serialize(DynamicOps<T> dynamicOps) {
-		return new Dynamic<>(
-				dynamicOps,
-				dynamicOps.createMap(
-					ImmutableMap.of(
-						dynamicOps.createString("type"),
-						dynamicOps.createString(Registry.TREE_DECORATOR_TYPES.getKey(this.type).toString()),
-						dynamicOps.createString("provider"),
-						this.provider.serialize(dynamicOps)
-					)
-				)
-			)
-			.getValue();
 	}
 }

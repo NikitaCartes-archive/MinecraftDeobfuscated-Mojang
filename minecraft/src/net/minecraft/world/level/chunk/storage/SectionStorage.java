@@ -3,9 +3,11 @@ package net.minecraft.world.level.chunk.storage;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.DataFixer;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.OptionalDynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.OptionalDynamic;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet;
@@ -13,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import javax.annotation.Nullable;
@@ -23,7 +24,6 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.util.Serializer;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -35,24 +35,16 @@ public class SectionStorage<R> implements AutoCloseable {
 	private final IOWorker worker;
 	private final Long2ObjectMap<Optional<R>> storage = new Long2ObjectOpenHashMap<>();
 	private final LongLinkedOpenHashSet dirty = new LongLinkedOpenHashSet();
-	private final Serializer<R> serializer;
-	private final BiFunction<Runnable, Dynamic<?>, R> deserializer;
+	private final Function<Runnable, Codec<R>> codec;
 	private final Function<Runnable, R> factory;
 	private final DataFixer fixerUpper;
 	private final DataFixTypes type;
 
 	public SectionStorage(
-		File file,
-		Serializer<R> serializer,
-		BiFunction<Runnable, Dynamic<?>, R> biFunction,
-		Function<Runnable, R> function,
-		DataFixer dataFixer,
-		DataFixTypes dataFixTypes,
-		boolean bl
+		File file, Function<Runnable, Codec<R>> function, Function<Runnable, R> function2, DataFixer dataFixer, DataFixTypes dataFixTypes, boolean bl
 	) {
-		this.serializer = serializer;
-		this.deserializer = biFunction;
-		this.factory = function;
+		this.codec = function;
+		this.factory = function2;
 		this.fixerUpper = dataFixer;
 		this.type = dataFixTypes;
 		this.worker = new IOWorker(file, bl, file.getName());
@@ -134,7 +126,9 @@ public class SectionStorage<R> implements AutoCloseable {
 
 			for (int l = 0; l < 16; l++) {
 				long m = SectionPos.of(chunkPos, l).asLong();
-				Optional<R> optional = optionalDynamic.get(Integer.toString(l)).get().map(dynamicx -> this.deserializer.apply((Runnable)() -> this.setDirty(m), dynamicx));
+				Optional<R> optional = optionalDynamic.get(Integer.toString(l))
+					.result()
+					.flatMap(dynamicx -> ((Codec)this.codec.apply((Runnable)() -> this.setDirty(m))).parse(dynamicx).resultOrPartial(LOGGER::error));
 				this.storage.put(m, optional);
 				optional.ifPresent(objectx -> {
 					this.onSectionLoad(m);
@@ -164,7 +158,9 @@ public class SectionStorage<R> implements AutoCloseable {
 			this.dirty.remove(l);
 			Optional<R> optional = this.storage.get(l);
 			if (optional != null && optional.isPresent()) {
-				map.put(dynamicOps.createString(Integer.toString(i)), this.serializer.serialize((R)optional.get(), dynamicOps));
+				DataResult<T> dataResult = ((Codec)this.codec.apply((Runnable)() -> this.setDirty(l))).encodeStart(dynamicOps, optional.get());
+				String string = Integer.toString(i);
+				dataResult.resultOrPartial(LOGGER::error).ifPresent(object -> map.put(dynamicOps.createString(string), object));
 			}
 		}
 
@@ -194,7 +190,7 @@ public class SectionStorage<R> implements AutoCloseable {
 	}
 
 	private static int getVersion(Dynamic<?> dynamic) {
-		return ((Number)dynamic.get("DataVersion").asNumber().orElse(1945)).intValue();
+		return dynamic.get("DataVersion").asInt(1945);
 	}
 
 	public void flush(ChunkPos chunkPos) {

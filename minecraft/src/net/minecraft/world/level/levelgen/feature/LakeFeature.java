@@ -1,8 +1,7 @@
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LightLayer;
@@ -18,8 +17,8 @@ import net.minecraft.world.level.material.Material;
 public class LakeFeature extends Feature<BlockStateConfiguration> {
 	private static final BlockState AIR = Blocks.CAVE_AIR.defaultBlockState();
 
-	public LakeFeature(Function<Dynamic<?>, ? extends BlockStateConfiguration> function) {
-		super(function);
+	public LakeFeature(Codec<BlockStateConfiguration> codec) {
+		super(codec);
 	}
 
 	public boolean place(
@@ -38,7 +37,7 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 			return false;
 		} else {
 			blockPos = blockPos.below(4);
-			if (structureFeatureManager.startsForFeature(SectionPos.of(blockPos), Feature.VILLAGE).findAny().isPresent()) {
+			if (structureFeatureManager.startsForFeature(SectionPos.of(blockPos), StructureFeature.VILLAGE).findAny().isPresent()) {
 				return false;
 			} else {
 				boolean[] bls = new boolean[2048];

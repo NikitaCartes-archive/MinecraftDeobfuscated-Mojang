@@ -1,8 +1,7 @@
 package net.minecraft.world.level.levelgen.placement.nether;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
@@ -12,8 +11,8 @@ import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.placement.FrequencyDecoratorConfiguration;
 
 public class MagmaDecorator extends FeatureDecorator<FrequencyDecoratorConfiguration> {
-	public MagmaDecorator(Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration> function) {
-		super(function);
+	public MagmaDecorator(Codec<FrequencyDecoratorConfiguration> codec) {
+		super(codec);
 	}
 
 	public Stream<BlockPos> getPositions(

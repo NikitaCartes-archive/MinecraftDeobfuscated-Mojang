@@ -3,6 +3,7 @@ package net.minecraft.server;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import com.mojang.datafixers.DataFixer;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.net.Proxy;
@@ -10,17 +11,21 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BooleanSupplier;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import net.minecraft.CrashReport;
 import net.minecraft.DefaultUncaughtExceptionHandler;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
 import net.minecraft.server.level.progress.LoggerChunkProgressListener;
 import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.util.Mth;
 import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.storage.LevelStorageSource;
@@ -64,7 +69,7 @@ public class Main {
 			Path path2 = Paths.get("eula.txt");
 			Eula eula = new Eula(path2);
 			if (optionSet.has(optionSpec2)) {
-				LOGGER.info("Initialized '" + path.toAbsolutePath().toString() + "' and '" + path2.toAbsolutePath().toString() + "'");
+				LOGGER.info("Initialized '{}' and '{}'", path.toAbsolutePath(), path2.toAbsolutePath());
 				return;
 			}
 
@@ -81,7 +86,11 @@ public class Main {
 			String string = (String)Optional.ofNullable(optionSet.valueOf(optionSpec10)).orElse(dedicatedServerSettings.getProperties().levelName);
 			LevelStorageSource levelStorageSource = LevelStorageSource.createDefault(file.toPath());
 			LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(string);
-			MinecraftServer.ensureLevelConversion(levelStorageAccess, DataFixers.getDataFixer(), optionSet.has(optionSpec5), optionSet.has(optionSpec6), () -> true);
+			MinecraftServer.convertFromRegionFormatIfNeeded(levelStorageAccess);
+			if (optionSet.has(optionSpec5)) {
+				forceUpgrade(levelStorageAccess, DataFixers.getDataFixer(), optionSet.has(optionSpec6), () -> true);
+			}
+
 			WorldData worldData = levelStorageAccess.getDataTag();
 			if (worldData == null) {
 				LevelSettings levelSettings;
@@ -96,7 +105,7 @@ public class Main {
 						dedicatedServerProperties.difficulty,
 						false,
 						new GameRules(),
-						optionSet.has(optionSpec4) ? dedicatedServerProperties.worldGenSettings : dedicatedServerProperties.worldGenSettings.withBonusChest()
+						optionSet.has(optionSpec4) ? dedicatedServerProperties.worldGenSettings.withBonusChest() : dedicatedServerProperties.worldGenSettings
 					);
 				}
 
@@ -132,6 +141,38 @@ public class Main {
 			Runtime.getRuntime().addShutdownHook(thread);
 		} catch (Exception var32) {
 			LOGGER.fatal("Failed to start the minecraft server", (Throwable)var32);
+		}
+	}
+
+	private static void forceUpgrade(LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, boolean bl, BooleanSupplier booleanSupplier) {
+		LOGGER.info("Forcing world upgrade!");
+		WorldData worldData = levelStorageAccess.getDataTag();
+		if (worldData != null) {
+			WorldUpgrader worldUpgrader = new WorldUpgrader(levelStorageAccess, dataFixer, worldData, bl);
+			Component component = null;
+
+			while (!worldUpgrader.isFinished()) {
+				Component component2 = worldUpgrader.getStatus();
+				if (component != component2) {
+					component = component2;
+					LOGGER.info(worldUpgrader.getStatus().getString());
+				}
+
+				int i = worldUpgrader.getTotalChunks();
+				if (i > 0) {
+					int j = worldUpgrader.getConverted() + worldUpgrader.getSkipped();
+					LOGGER.info("{}% completed ({} / {} chunks)...", Mth.floor((float)j / (float)i * 100.0F), j, i);
+				}
+
+				if (!booleanSupplier.getAsBoolean()) {
+					worldUpgrader.cancel();
+				} else {
+					try {
+						Thread.sleep(1000L);
+					} catch (InterruptedException var10) {
+					}
+				}
+			}
 		}
 	}
 }

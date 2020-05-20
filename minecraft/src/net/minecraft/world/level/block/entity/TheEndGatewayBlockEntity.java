@@ -20,7 +20,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.dimension.end.TheEndDimension;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
@@ -146,7 +145,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 	public void teleportEntity(Entity entity) {
 		if (this.level instanceof ServerLevel && !this.isCoolingDown()) {
 			this.teleportCooldown = 100;
-			if (this.exitPortal == null && this.level.getDimension() instanceof TheEndDimension) {
+			if (this.exitPortal == null && this.level.dimensionType().isEnd()) {
 				this.findExitPortal((ServerLevel)this.level);
 			}
 

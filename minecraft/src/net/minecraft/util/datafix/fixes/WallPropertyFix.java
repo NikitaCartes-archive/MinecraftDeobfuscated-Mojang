@@ -4,9 +4,9 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.DataFixUtils;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
+import com.mojang.serialization.Dynamic;
 import java.util.Set;
 
 public class WallPropertyFix extends DataFix {
@@ -45,11 +45,13 @@ public class WallPropertyFix extends DataFix {
 	}
 
 	private static <T> Dynamic<T> fixWallProperty(Dynamic<T> dynamic, String string) {
-		return dynamic.update(string, dynamicx -> DataFixUtils.orElse(dynamicx.asString().map(WallPropertyFix::mapProperty).map(dynamicx::createString), dynamicx));
+		return dynamic.update(
+			string, dynamicx -> DataFixUtils.orElse(dynamicx.asString().result().map(WallPropertyFix::mapProperty).map(dynamicx::createString), dynamicx)
+		);
 	}
 
 	private static <T> Dynamic<T> upgradeBlockStateTag(Dynamic<T> dynamic) {
-		boolean bl = dynamic.get("Name").asString().filter(WALL_BLOCKS::contains).isPresent();
+		boolean bl = dynamic.get("Name").asString().result().filter(WALL_BLOCKS::contains).isPresent();
 		return !bl ? dynamic : dynamic.update("Properties", dynamicx -> {
 			Dynamic<?> dynamic2 = fixWallProperty(dynamicx, "east");
 			dynamic2 = fixWallProperty(dynamic2, "west");
