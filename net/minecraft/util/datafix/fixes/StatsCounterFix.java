@@ -8,11 +8,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
+import com.mojang.serialization.Dynamic;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -41,13 +41,13 @@ extends DataFix {
         return this.fixTypeEverywhereTyped("StatsCounterFix", this.getInputSchema().getType(References.STATS), type, (Typed<?> typed) -> {
             Dynamic<?> dynamic = typed.get(DSL.remainderFinder());
             HashMap map = Maps.newHashMap();
-            Optional<Map<Dynamic<?>, Dynamic<?>>> optional = dynamic.getMapValues();
+            Optional<Map<Dynamic<?>, Dynamic<?>>> optional = dynamic.getMapValues().result();
             if (optional.isPresent()) {
                 for (Map.Entry<Dynamic<?>, Dynamic<?>> entry : optional.get().entrySet()) {
                     String string3;
                     String string2;
                     String string;
-                    if (!entry.getValue().asNumber().isPresent() || SKIP.contains(string = entry.getKey().asString(""))) continue;
+                    if (!entry.getValue().asNumber().result().isPresent() || SKIP.contains(string = entry.getKey().asString(""))) continue;
                     if (CUSTOM_MAP.containsKey(string)) {
                         string2 = "minecraft:custom";
                         string3 = CUSTOM_MAP.get(string);
@@ -76,7 +76,7 @@ extends DataFix {
                     map.put(dynamic22, dynamic3.set(string3, entry.getValue()));
                 }
             }
-            return type.readTyped(dynamic.emptyMap().set("stats", dynamic.createMap(map))).getSecond().orElseThrow(() -> new IllegalStateException("Could not parse new stats object."));
+            return type.readTyped(dynamic.emptyMap().set("stats", dynamic.createMap(map))).result().orElseThrow(() -> new IllegalStateException("Could not parse new stats object.")).getFirst();
         });
     }
 

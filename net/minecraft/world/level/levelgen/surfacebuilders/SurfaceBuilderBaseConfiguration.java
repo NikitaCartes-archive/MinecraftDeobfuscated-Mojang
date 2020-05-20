@@ -3,13 +3,16 @@
  */
 package net.minecraft.world.level.levelgen.surfacebuilders;
 
-import com.mojang.datafixers.Dynamic;
-import net.minecraft.world.level.block.Blocks;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderConfiguration;
 
 public class SurfaceBuilderBaseConfiguration
 implements SurfaceBuilderConfiguration {
+    public static final Codec<SurfaceBuilderBaseConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockState.CODEC.fieldOf("top_material")).forGetter(surfaceBuilderBaseConfiguration -> surfaceBuilderBaseConfiguration.topMaterial), ((MapCodec)BlockState.CODEC.fieldOf("under_material")).forGetter(surfaceBuilderBaseConfiguration -> surfaceBuilderBaseConfiguration.underMaterial), ((MapCodec)BlockState.CODEC.fieldOf("underwater_material")).forGetter(surfaceBuilderBaseConfiguration -> surfaceBuilderBaseConfiguration.underwaterMaterial)).apply((Applicative<SurfaceBuilderBaseConfiguration, ?>)instance, SurfaceBuilderBaseConfiguration::new));
     private final BlockState topMaterial;
     private final BlockState underMaterial;
     private final BlockState underwaterMaterial;
@@ -32,13 +35,6 @@ implements SurfaceBuilderConfiguration {
 
     public BlockState getUnderwaterMaterial() {
         return this.underwaterMaterial;
-    }
-
-    public static SurfaceBuilderBaseConfiguration deserialize(Dynamic<?> dynamic) {
-        BlockState blockState = dynamic.get("top_material").map(BlockState::deserialize).orElse(Blocks.AIR.defaultBlockState());
-        BlockState blockState2 = dynamic.get("under_material").map(BlockState::deserialize).orElse(Blocks.AIR.defaultBlockState());
-        BlockState blockState3 = dynamic.get("underwater_material").map(BlockState::deserialize).orElse(Blocks.AIR.defaultBlockState());
-        return new SurfaceBuilderBaseConfiguration(blockState, blockState2, blockState3);
     }
 }
 

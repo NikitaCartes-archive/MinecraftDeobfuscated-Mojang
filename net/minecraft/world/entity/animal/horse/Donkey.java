@@ -13,6 +13,7 @@ import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 public class Donkey
 extends AbstractChestedHorse {
@@ -27,9 +28,21 @@ extends AbstractChestedHorse {
     }
 
     @Override
+    protected SoundEvent getAngrySound() {
+        super.getAngrySound();
+        return SoundEvents.DONKEY_ANGRY;
+    }
+
+    @Override
     protected SoundEvent getDeathSound() {
         super.getDeathSound();
         return SoundEvents.DONKEY_DEATH;
+    }
+
+    @Override
+    @Nullable
+    protected SoundEvent getEatingSound() {
+        return SoundEvents.DONKEY_EAT;
     }
 
     @Override

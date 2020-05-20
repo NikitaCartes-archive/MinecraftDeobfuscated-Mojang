@@ -3,15 +3,17 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 public class HugeFungusConfiguration
 implements FeatureConfiguration {
+    public static final Codec<HugeFungusConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockState.CODEC.fieldOf("valid_base_block")).forGetter(hugeFungusConfiguration -> hugeFungusConfiguration.validBaseState), ((MapCodec)BlockState.CODEC.fieldOf("stem_state")).forGetter(hugeFungusConfiguration -> hugeFungusConfiguration.stemState), ((MapCodec)BlockState.CODEC.fieldOf("hat_state")).forGetter(hugeFungusConfiguration -> hugeFungusConfiguration.hatState), ((MapCodec)BlockState.CODEC.fieldOf("decor_state")).forGetter(hugeFungusConfiguration -> hugeFungusConfiguration.decorState), ((MapCodec)Codec.BOOL.fieldOf("planted")).withDefault(false).forGetter(hugeFungusConfiguration -> hugeFungusConfiguration.planted)).apply((Applicative<HugeFungusConfiguration, ?>)instance, HugeFungusConfiguration::new));
     public static final HugeFungusConfiguration HUGE_CRIMSON_FUNGI_PLANTED_CONFIG = new HugeFungusConfiguration(Blocks.CRIMSON_NYLIUM.defaultBlockState(), Blocks.CRIMSON_STEM.defaultBlockState(), Blocks.NETHER_WART_BLOCK.defaultBlockState(), Blocks.SHROOMLIGHT.defaultBlockState(), true);
     public static final HugeFungusConfiguration HUGE_CRIMSON_FUNGI_NOT_PLANTED_CONFIG = new HugeFungusConfiguration(HugeFungusConfiguration.HUGE_CRIMSON_FUNGI_PLANTED_CONFIG.validBaseState, HugeFungusConfiguration.HUGE_CRIMSON_FUNGI_PLANTED_CONFIG.stemState, HugeFungusConfiguration.HUGE_CRIMSON_FUNGI_PLANTED_CONFIG.hatState, HugeFungusConfiguration.HUGE_CRIMSON_FUNGI_PLANTED_CONFIG.decorState, false);
     public static final HugeFungusConfiguration HUGE_WARPED_FUNGI_PLANTED_CONFIG = new HugeFungusConfiguration(Blocks.WARPED_NYLIUM.defaultBlockState(), Blocks.WARPED_STEM.defaultBlockState(), Blocks.WARPED_WART_BLOCK.defaultBlockState(), Blocks.SHROOMLIGHT.defaultBlockState(), true);
@@ -28,20 +30,6 @@ implements FeatureConfiguration {
         this.hatState = blockState3;
         this.decorState = blockState4;
         this.planted = bl;
-    }
-
-    @Override
-    public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("valid_base_block"), BlockState.serialize(dynamicOps, this.validBaseState).getValue(), dynamicOps.createString("stem_state"), BlockState.serialize(dynamicOps, this.stemState).getValue(), dynamicOps.createString("hat_state"), BlockState.serialize(dynamicOps, this.hatState).getValue(), dynamicOps.createString("decor_state"), BlockState.serialize(dynamicOps, this.decorState).getValue(), dynamicOps.createString("planted"), dynamicOps.createBoolean(this.planted))));
-    }
-
-    public static <T> HugeFungusConfiguration deserialize(Dynamic<T> dynamic) {
-        BlockState blockState = dynamic.get("valid_base_state").map(BlockState::deserialize).orElse(Blocks.AIR.defaultBlockState());
-        BlockState blockState2 = dynamic.get("stem_state").map(BlockState::deserialize).orElse(Blocks.AIR.defaultBlockState());
-        BlockState blockState3 = dynamic.get("hat_state").map(BlockState::deserialize).orElse(Blocks.AIR.defaultBlockState());
-        BlockState blockState4 = dynamic.get("decor_state").map(BlockState::deserialize).orElse(Blocks.AIR.defaultBlockState());
-        boolean bl = dynamic.get("planted").asBoolean(false);
-        return new HugeFungusConfiguration(blockState, blockState2, blockState3, blockState4, bl);
     }
 }
 

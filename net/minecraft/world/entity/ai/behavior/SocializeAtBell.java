@@ -4,7 +4,6 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
@@ -28,7 +27,7 @@ extends Behavior<LivingEntity> {
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity2) {
         Brain<?> brain = livingEntity2.getBrain();
         Optional<GlobalPos> optional = brain.getMemory(MemoryModuleType.MEETING_POINT);
-        return serverLevel.getRandom().nextInt(100) == 0 && optional.isPresent() && Objects.equals(serverLevel.dimensionType(), optional.get().dimension()) && optional.get().pos().closerThan(livingEntity2.position(), 4.0) && brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).get().stream().anyMatch(livingEntity -> EntityType.VILLAGER.equals(livingEntity.getType()));
+        return serverLevel.getRandom().nextInt(100) == 0 && optional.isPresent() && serverLevel.dimension() == optional.get().dimension() && optional.get().pos().closerThan(livingEntity2.position(), 4.0) && brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).get().stream().anyMatch(livingEntity -> EntityType.VILLAGER.equals(livingEntity.getType()));
     }
 
     @Override

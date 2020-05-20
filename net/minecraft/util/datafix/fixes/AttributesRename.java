@@ -7,12 +7,12 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.DataFixUtils;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
+import com.mojang.serialization.Dynamic;
 import java.util.Map;
 import net.minecraft.util.datafix.fixes.References;
 
@@ -32,15 +32,15 @@ extends DataFix {
     }
 
     private static Dynamic<?> fixName(Dynamic<?> dynamic) {
-        return DataFixUtils.orElse(dynamic.asString().map(string -> RENAMES.getOrDefault(string, (String)string)).map(dynamic::createString), dynamic);
+        return DataFixUtils.orElse(dynamic.asString().result().map(string -> RENAMES.getOrDefault(string, (String)string)).map(dynamic::createString), dynamic);
     }
 
     private static Typed<?> fixItemStackTag(Typed<?> typed) {
-        return typed.update(DSL.remainderFinder(), dynamic2 -> dynamic2.update("AttributeModifiers", dynamic -> DataFixUtils.orElse(dynamic.asStreamOpt().map(stream -> stream.map(dynamic -> dynamic.update("AttributeName", AttributesRename::fixName))).map(dynamic::createList), dynamic)));
+        return typed.update(DSL.remainderFinder(), dynamic2 -> dynamic2.update("AttributeModifiers", dynamic -> DataFixUtils.orElse(dynamic.asStreamOpt().result().map(stream -> stream.map(dynamic -> dynamic.update("AttributeName", AttributesRename::fixName))).map(dynamic::createList), dynamic)));
     }
 
     private static Typed<?> fixEntity(Typed<?> typed) {
-        return typed.update(DSL.remainderFinder(), dynamic2 -> dynamic2.update("Attributes", dynamic -> DataFixUtils.orElse(dynamic.asStreamOpt().map(stream -> stream.map(dynamic -> dynamic.update("Name", AttributesRename::fixName))).map(dynamic::createList), dynamic)));
+        return typed.update(DSL.remainderFinder(), dynamic2 -> dynamic2.update("Attributes", dynamic -> DataFixUtils.orElse(dynamic.asStreamOpt().result().map(stream -> stream.map(dynamic -> dynamic.update("Name", AttributesRename::fixName))).map(dynamic::createList), dynamic)));
     }
 }
 

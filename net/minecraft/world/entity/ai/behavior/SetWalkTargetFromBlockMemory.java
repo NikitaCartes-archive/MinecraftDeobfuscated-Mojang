@@ -51,7 +51,7 @@ extends Behavior<Villager> {
                 int i;
                 Vec3 vec3 = null;
                 int j = 1000;
-                for (i = 0; i < 1000 && (vec3 == null || this.tooFar(serverLevel, villager, GlobalPos.of(villager.dimension, new BlockPos(vec3)))); ++i) {
+                for (i = 0; i < 1000 && (vec3 == null || this.tooFar(serverLevel, villager, GlobalPos.of(serverLevel.dimension(), new BlockPos(vec3)))); ++i) {
                     vec3 = RandomPos.getPosTowards(villager, 15, 7, Vec3.atBottomCenterOf(globalPos.pos()));
                 }
                 if (i == 1000) {
@@ -74,11 +74,11 @@ extends Behavior<Villager> {
     }
 
     private boolean tooFar(ServerLevel serverLevel, Villager villager, GlobalPos globalPos) {
-        return globalPos.dimension() != serverLevel.dimensionType() || globalPos.pos().distManhattan(villager.blockPosition()) > this.tooFarDistance;
+        return globalPos.dimension() != serverLevel.dimension() || globalPos.pos().distManhattan(villager.blockPosition()) > this.tooFarDistance;
     }
 
     private boolean closeEnough(ServerLevel serverLevel, Villager villager, GlobalPos globalPos) {
-        return globalPos.dimension() == serverLevel.dimensionType() && globalPos.pos().distManhattan(villager.blockPosition()) <= this.closeEnoughDist;
+        return globalPos.dimension() == serverLevel.dimension() && globalPos.pos().distManhattan(villager.blockPosition()) <= this.closeEnoughDist;
     }
 }
 

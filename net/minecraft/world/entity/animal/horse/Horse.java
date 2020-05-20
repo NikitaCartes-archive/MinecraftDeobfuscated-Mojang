@@ -157,6 +157,12 @@ extends AbstractHorse {
     }
 
     @Override
+    @Nullable
+    protected SoundEvent getEatingSound() {
+        return SoundEvents.HORSE_EAT;
+    }
+
+    @Override
     protected SoundEvent getHurtSound(DamageSource damageSource) {
         super.getHurtSound(damageSource);
         return SoundEvents.HORSE_HURT;

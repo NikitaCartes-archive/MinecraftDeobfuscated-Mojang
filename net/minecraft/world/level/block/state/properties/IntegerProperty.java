@@ -8,10 +8,10 @@ import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
-import net.minecraft.world.level.block.state.properties.AbstractProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 
 public class IntegerProperty
-extends AbstractProperty<Integer> {
+extends Property<Integer> {
     private final ImmutableSet<Integer> values;
 
     protected IntegerProperty(String string, int i, int j) {

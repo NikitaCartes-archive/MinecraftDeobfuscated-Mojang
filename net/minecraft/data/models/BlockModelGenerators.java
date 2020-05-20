@@ -1458,7 +1458,8 @@ public class BlockModelGenerators {
         this.woodProvider(Blocks.STRIPPED_WARPED_STEM).log(Blocks.STRIPPED_WARPED_STEM).wood(Blocks.STRIPPED_WARPED_HYPHAE);
         this.createPlant(Blocks.WARPED_FUNGUS, Blocks.POTTED_WARPED_FUNGUS, TintState.NOT_TINTED);
         this.createNetherRoots(Blocks.WARPED_ROOTS, Blocks.POTTED_WARPED_ROOTS);
-        this.createCrossBlockWithDefaultItem(Blocks.NETHER_SPROUTS, TintState.NOT_TINTED);
+        this.createCrossBlock(Blocks.NETHER_SPROUTS, TintState.NOT_TINTED);
+        this.createSimpleFlatItemModel(Items.NETHER_SPROUTS);
         this.family(TextureMapping.cube(Blocks.STONE)).fullBlock(textureMapping -> {
             ResourceLocation resourceLocation = ModelTemplates.CUBE_ALL.create(Blocks.STONE, (TextureMapping)textureMapping, this.modelOutput);
             ResourceLocation resourceLocation2 = ModelTemplates.CUBE_MIRRORED_ALL.create(Blocks.STONE, (TextureMapping)textureMapping, this.modelOutput);

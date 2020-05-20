@@ -3,9 +3,9 @@
  */
 package net.minecraft.world.level.levelgen.surfacebuilders;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.surfacebuilders.BadlandsSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.BasaltDeltasSurfaceBuilder;
+import net.minecraft.world.level.levelgen.surfacebuilders.ConfiguredSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.DefaultSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.ErodedBadlandsSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.FrozenOceanSurfaceBuilder;
@@ -69,29 +70,33 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
     public static final SurfaceBuilderBaseConfiguration CONFIG_CRIMSON_FOREST = new SurfaceBuilderBaseConfiguration(CRIMSON_NYLIUM, NETHERRACK, NETHER_WART_BLOCK);
     public static final SurfaceBuilderBaseConfiguration CONFIG_WARPED_FOREST = new SurfaceBuilderBaseConfiguration(WARPED_NYLIUM, NETHERRACK, WARPED_WART_BLOCK);
     public static final SurfaceBuilderBaseConfiguration CONFIG_BASALT_DELTAS = new SurfaceBuilderBaseConfiguration(BLACKSTONE, BASALT, MAGMA);
-    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> DEFAULT = SurfaceBuilder.register("default", new DefaultSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
-    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> MOUNTAIN = SurfaceBuilder.register("mountain", new MountainSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
-    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> SHATTERED_SAVANNA = SurfaceBuilder.register("shattered_savanna", new ShatteredSavanaSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
-    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> GRAVELLY_MOUNTAIN = SurfaceBuilder.register("gravelly_mountain", new GravellyMountainSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
-    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> GIANT_TREE_TAIGA = SurfaceBuilder.register("giant_tree_taiga", new GiantTreeTaigaSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
-    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> SWAMP = SurfaceBuilder.register("swamp", new SwampSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
-    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> BADLANDS = SurfaceBuilder.register("badlands", new BadlandsSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
-    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> WOODED_BADLANDS = SurfaceBuilder.register("wooded_badlands", new WoodedBadlandsSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
-    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> ERODED_BADLANDS = SurfaceBuilder.register("eroded_badlands", new ErodedBadlandsSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
-    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> FROZEN_OCEAN = SurfaceBuilder.register("frozen_ocean", new FrozenOceanSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
-    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> NETHER = SurfaceBuilder.register("nether", new NetherSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
-    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> NETHER_FOREST = SurfaceBuilder.register("nether_forest", new NetherForestSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
-    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> SOUL_SAND_VALLEY = SurfaceBuilder.register("soul_sand_valley", new SoulSandValleySurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
-    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> BASALT_DELTAS = SurfaceBuilder.register("basalt_deltas", new BasaltDeltasSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
-    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> NOPE = SurfaceBuilder.register("nope", new NopeSurfaceBuilder((Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration>)((Function<Dynamic<?>, SurfaceBuilderBaseConfiguration>)SurfaceBuilderBaseConfiguration::deserialize)));
-    private final Function<Dynamic<?>, ? extends C> configurationFactory;
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> DEFAULT = SurfaceBuilder.register("default", new DefaultSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> MOUNTAIN = SurfaceBuilder.register("mountain", new MountainSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> SHATTERED_SAVANNA = SurfaceBuilder.register("shattered_savanna", new ShatteredSavanaSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> GRAVELLY_MOUNTAIN = SurfaceBuilder.register("gravelly_mountain", new GravellyMountainSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> GIANT_TREE_TAIGA = SurfaceBuilder.register("giant_tree_taiga", new GiantTreeTaigaSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> SWAMP = SurfaceBuilder.register("swamp", new SwampSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> BADLANDS = SurfaceBuilder.register("badlands", new BadlandsSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> WOODED_BADLANDS = SurfaceBuilder.register("wooded_badlands", new WoodedBadlandsSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> ERODED_BADLANDS = SurfaceBuilder.register("eroded_badlands", new ErodedBadlandsSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> FROZEN_OCEAN = SurfaceBuilder.register("frozen_ocean", new FrozenOceanSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> NETHER = SurfaceBuilder.register("nether", new NetherSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> NETHER_FOREST = SurfaceBuilder.register("nether_forest", new NetherForestSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> SOUL_SAND_VALLEY = SurfaceBuilder.register("soul_sand_valley", new SoulSandValleySurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> BASALT_DELTAS = SurfaceBuilder.register("basalt_deltas", new BasaltDeltasSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    public static final SurfaceBuilder<SurfaceBuilderBaseConfiguration> NOPE = SurfaceBuilder.register("nope", new NopeSurfaceBuilder(SurfaceBuilderBaseConfiguration.CODEC));
+    private final Codec<ConfiguredSurfaceBuilder<C>> configuredCodec;
 
     private static <C extends SurfaceBuilderConfiguration, F extends SurfaceBuilder<C>> F register(String string, F surfaceBuilder) {
         return (F)Registry.register(Registry.SURFACE_BUILDER, string, surfaceBuilder);
     }
 
-    public SurfaceBuilder(Function<Dynamic<?>, ? extends C> function) {
-        this.configurationFactory = function;
+    public SurfaceBuilder(Codec<C> codec) {
+        this.configuredCodec = ((MapCodec)codec.fieldOf("config")).xmap(surfaceBuilderConfiguration -> new ConfiguredSurfaceBuilder<SurfaceBuilderConfiguration>(this, (SurfaceBuilderConfiguration)surfaceBuilderConfiguration), configuredSurfaceBuilder -> configuredSurfaceBuilder.config).codec();
+    }
+
+    public Codec<ConfiguredSurfaceBuilder<C>> configuredCodec() {
+        return this.configuredCodec;
     }
 
     public abstract void apply(Random var1, ChunkAccess var2, Biome var3, int var4, int var5, int var6, double var7, BlockState var9, BlockState var10, int var11, long var12, C var14);

@@ -5,7 +5,6 @@ package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -38,7 +37,7 @@ extends Behavior<LivingEntity> {
         }
         Brain<?> brain = livingEntity.getBrain();
         GlobalPos globalPos = brain.getMemory(MemoryModuleType.HOME).get();
-        if (!Objects.equals(serverLevel.dimensionType(), globalPos.dimension())) {
+        if (serverLevel.dimension() != globalPos.dimension()) {
             return false;
         }
         Optional<SerializableLong> optional = brain.getMemory(MemoryModuleType.LAST_WOKEN);

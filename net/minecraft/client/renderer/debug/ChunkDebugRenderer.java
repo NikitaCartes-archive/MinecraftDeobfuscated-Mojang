@@ -17,6 +17,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -79,8 +80,7 @@ implements DebugRenderer.SimpleDebugRenderer {
 
         private ChunkData(IntegratedServer integratedServer, double d, double e) {
             ClientLevel clientLevel = ((ChunkDebugRenderer)ChunkDebugRenderer.this).minecraft.level;
-            DimensionType dimensionType = ((ChunkDebugRenderer)ChunkDebugRenderer.this).minecraft.level.dimensionType();
-            ServerLevel serverLevel = integratedServer.getLevel(dimensionType) != null ? integratedServer.getLevel(dimensionType) : null;
+            ResourceKey<DimensionType> resourceKey = clientLevel.dimension();
             int i = (int)d >> 4;
             int j = (int)e >> 4;
             ImmutableMap.Builder<ChunkPos, String> builder = ImmutableMap.builder();
@@ -102,6 +102,7 @@ implements DebugRenderer.SimpleDebugRenderer {
             }
             this.clientData = builder.build();
             this.serverData = integratedServer.submit(() -> {
+                ServerLevel serverLevel = integratedServer.getLevel(resourceKey);
                 ImmutableMap.Builder<ChunkPos, String> builder = ImmutableMap.builder();
                 ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
                 for (int k = i - 12; k <= i + 12; ++k) {

@@ -22,6 +22,8 @@ implements Tag {
 
     public abstract boolean addTag(int var1, Tag var2);
 
+    public abstract byte getElementType();
+
     @Override
     public /* synthetic */ Object remove(int i) {
         return this.remove(i);

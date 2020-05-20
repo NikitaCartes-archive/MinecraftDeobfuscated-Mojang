@@ -6,9 +6,11 @@ package net.minecraft.world.level.chunk.storage;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.DataFixer;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.OptionalDynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.OptionalDynamic;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet;
@@ -16,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import net.minecraft.SharedConstants;
@@ -25,7 +26,6 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.util.Serializer;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -40,16 +40,14 @@ implements AutoCloseable {
     private final IOWorker worker;
     private final Long2ObjectMap<Optional<R>> storage = new Long2ObjectOpenHashMap<Optional<R>>();
     private final LongLinkedOpenHashSet dirty = new LongLinkedOpenHashSet();
-    private final Serializer<R> serializer;
-    private final BiFunction<Runnable, Dynamic<?>, R> deserializer;
+    private final Function<Runnable, Codec<R>> codec;
     private final Function<Runnable, R> factory;
     private final DataFixer fixerUpper;
     private final DataFixTypes type;
 
-    public SectionStorage(File file, Serializer<R> serializer, BiFunction<Runnable, Dynamic<?>, R> biFunction, Function<Runnable, R> function, DataFixer dataFixer, DataFixTypes dataFixTypes, boolean bl) {
-        this.serializer = serializer;
-        this.deserializer = biFunction;
-        this.factory = function;
+    public SectionStorage(File file, Function<Runnable, Codec<R>> function, Function<Runnable, R> function2, DataFixer dataFixer, DataFixTypes dataFixTypes, boolean bl) {
+        this.codec = function;
+        this.factory = function2;
         this.fixerUpper = dataFixer;
         this.type = dataFixTypes;
         this.worker = new IOWorker(file, bl, file.getName());
@@ -126,7 +124,7 @@ implements AutoCloseable {
             OptionalDynamic<T> optionalDynamic = dynamic22.get("Sections");
             for (int l = 0; l < 16; ++l) {
                 long m = SectionPos.of(chunkPos, l).asLong();
-                Optional<Object> optional = optionalDynamic.get(Integer.toString(l)).get().map(dynamic -> this.deserializer.apply(() -> this.setDirty(m), (Dynamic<?>)dynamic));
+                Optional optional = optionalDynamic.get(Integer.toString(l)).result().flatMap(dynamic -> this.codec.apply(() -> this.setDirty(m)).parse(dynamic).resultOrPartial(LOGGER::error));
                 this.storage.put(m, (Optional<R>)optional);
                 optional.ifPresent(object -> {
                     this.onSectionLoad(m);
@@ -149,13 +147,15 @@ implements AutoCloseable {
     }
 
     private <T> Dynamic<T> writeColumn(ChunkPos chunkPos, DynamicOps<T> dynamicOps) {
-        HashMap<T, T> map = Maps.newHashMap();
+        HashMap map = Maps.newHashMap();
         for (int i = 0; i < 16; ++i) {
             long l = SectionPos.of(chunkPos, i).asLong();
             this.dirty.remove(l);
             Optional optional = (Optional)this.storage.get(l);
             if (optional == null || !optional.isPresent()) continue;
-            map.put(dynamicOps.createString(Integer.toString(i)), this.serializer.serialize(optional.get(), dynamicOps));
+            DataResult<T> dataResult = this.codec.apply(() -> this.setDirty(l)).encodeStart(dynamicOps, optional.get());
+            String string = Integer.toString(i);
+            dataResult.resultOrPartial(LOGGER::error).ifPresent(object -> map.put(dynamicOps.createString(string), object));
         }
         return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("Sections"), dynamicOps.createMap(map), dynamicOps.createString("DataVersion"), dynamicOps.createInt(SharedConstants.getCurrentVersion().getWorldVersion()))));
     }
@@ -173,7 +173,7 @@ implements AutoCloseable {
     }
 
     private static int getVersion(Dynamic<?> dynamic) {
-        return dynamic.get("DataVersion").asNumber().orElse(1945).intValue();
+        return dynamic.get("DataVersion").asInt(1945);
     }
 
     public void flush(ChunkPos chunkPos) {

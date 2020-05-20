@@ -5,15 +5,16 @@ package net.minecraft.util.datafix.fixes;
 
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Dynamic;
 import java.util.Optional;
 import net.minecraft.util.datafix.fixes.References;
+import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class ItemWaterPotionFix
 extends DataFix {
@@ -24,7 +25,7 @@ extends DataFix {
     @Override
     public TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(References.ITEM_STACK);
-        OpticFinder<Pair<String, String>> opticFinder = DSL.fieldFinder("id", DSL.named(References.ITEM_NAME.typeName(), DSL.namespacedString()));
+        OpticFinder<Pair<String, String>> opticFinder = DSL.fieldFinder("id", DSL.named(References.ITEM_NAME.typeName(), NamespacedSchema.namespacedString()));
         OpticFinder<?> opticFinder2 = type.findField("tag");
         return this.fixTypeEverywhereTyped("ItemWaterPotionFix", type, typed -> {
             String string;
@@ -32,7 +33,7 @@ extends DataFix {
             if (optional.isPresent() && ("minecraft:potion".equals(string = (String)((Pair)optional.get()).getSecond()) || "minecraft:splash_potion".equals(string) || "minecraft:lingering_potion".equals(string) || "minecraft:tipped_arrow".equals(string))) {
                 Typed<Dynamic<?>> typed2 = typed.getOrCreateTyped(opticFinder2);
                 Dynamic dynamic = typed2.get(DSL.remainderFinder());
-                if (!dynamic.get("Potion").asString().isPresent()) {
+                if (!dynamic.get("Potion").asString().result().isPresent()) {
                     dynamic = dynamic.set("Potion", dynamic.createString("minecraft:water"));
                 }
                 return typed.set(opticFinder2, typed2.set(DSL.remainderFinder(), dynamic));

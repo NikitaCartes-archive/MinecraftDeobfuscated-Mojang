@@ -4,7 +4,6 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
@@ -32,7 +31,7 @@ extends Behavior<PathfinderMob> {
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, PathfinderMob pathfinderMob) {
         Optional<GlobalPos> optional = pathfinderMob.getBrain().getMemory(this.memoryType);
-        return optional.isPresent() && Objects.equals(serverLevel.dimensionType(), optional.get().dimension()) && optional.get().pos().closerThan(pathfinderMob.position(), (double)this.maxDistanceFromPoi);
+        return optional.isPresent() && serverLevel.dimension() == optional.get().dimension() && optional.get().pos().closerThan(pathfinderMob.position(), (double)this.maxDistanceFromPoi);
     }
 
     @Override

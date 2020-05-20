@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level;
 
+import com.mojang.serialization.Dynamic;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
@@ -27,32 +28,49 @@ public final class LevelSettings {
         this.worldGenSettings = worldGenSettings;
     }
 
+    public static LevelSettings parse(Dynamic<?> dynamic, WorldGenSettings worldGenSettings) {
+        GameType gameType = GameType.byId(dynamic.get("GameType").asInt(0));
+        return new LevelSettings(dynamic.get("LevelName").asString(""), gameType, dynamic.get("hardcore").asBoolean(false), dynamic.get("Difficulty").asNumber().map(number -> Difficulty.byId(number.byteValue())).result().orElse(Difficulty.NORMAL), dynamic.get("allowCommands").asBoolean(gameType == GameType.CREATIVE), new GameRules(dynamic.get("GameRules")), worldGenSettings);
+    }
+
+    public String levelName() {
+        return this.levelName;
+    }
+
+    public GameType gameType() {
+        return this.gameType;
+    }
+
+    public boolean hardcore() {
+        return this.hardcore;
+    }
+
+    public Difficulty difficulty() {
+        return this.difficulty;
+    }
+
+    public boolean allowCommands() {
+        return this.allowCommands;
+    }
+
+    public GameRules gameRules() {
+        return this.gameRules;
+    }
+
     public WorldGenSettings worldGenSettings() {
         return this.worldGenSettings;
     }
 
-    public GameType getGameType() {
-        return this.gameType;
+    public LevelSettings withGameType(GameType gameType) {
+        return new LevelSettings(this.levelName, gameType, this.hardcore, this.difficulty, this.allowCommands, this.gameRules, this.worldGenSettings);
     }
 
-    public boolean isHardcore() {
-        return this.hardcore;
+    public LevelSettings withDifficulty(Difficulty difficulty) {
+        return new LevelSettings(this.levelName, this.gameType, this.hardcore, difficulty, this.allowCommands, this.gameRules, this.worldGenSettings);
     }
 
-    public boolean getAllowCommands() {
-        return this.allowCommands;
-    }
-
-    public String getLevelName() {
-        return this.levelName;
-    }
-
-    public Difficulty getDifficulty() {
-        return this.difficulty;
-    }
-
-    public GameRules getGameRules() {
-        return this.gameRules;
+    public LevelSettings copy() {
+        return new LevelSettings(this.levelName, this.gameType, this.hardcore, this.difficulty, this.allowCommands, this.gameRules.copy(), this.worldGenSettings);
     }
 }
 

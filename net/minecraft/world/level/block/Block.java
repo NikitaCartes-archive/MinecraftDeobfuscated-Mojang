@@ -164,7 +164,7 @@ implements ItemLike {
         super(properties);
         StateDefinition.Builder<Block, BlockState> builder = new StateDefinition.Builder<Block, BlockState>(this);
         this.createBlockStateDefinition(builder);
-        this.stateDefinition = builder.create(BlockState::new);
+        this.stateDefinition = builder.create(Block::defaultBlockState, BlockState::new);
         this.registerDefaultState(this.stateDefinition.any());
     }
 

@@ -6,10 +6,10 @@ package net.minecraft.util.datafix.fixes;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFixUtils;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
+import com.mojang.serialization.Dynamic;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.util.datafix.fixes.AbstractUUIDFix;
@@ -93,7 +93,7 @@ extends AbstractUUIDFix {
     }
 
     private static Dynamic<?> updateFox(Dynamic<?> dynamic) {
-        Optional<Dynamic> optional = dynamic.get("TrustedUUIDs").map(dynamic22 -> dynamic.createList(dynamic22.asStream().map(dynamic -> EntityUUIDFix.createUUIDFromML(dynamic).orElseGet(() -> {
+        Optional<Dynamic> optional = dynamic.get("TrustedUUIDs").result().map(dynamic22 -> dynamic.createList(dynamic22.asStream().map(dynamic -> EntityUUIDFix.createUUIDFromML(dynamic).orElseGet(() -> {
             LOGGER.warn("Trusted contained invalid data.");
             return dynamic;
         }))));
@@ -123,7 +123,7 @@ extends AbstractUUIDFix {
     }
 
     private static Dynamic<?> updateProjectile(Dynamic<?> dynamic) {
-        return DataFixUtils.orElse(dynamic.get("OwnerUUID").map(dynamic2 -> dynamic.remove("OwnerUUID").set("Owner", (Dynamic<?>)dynamic2)), dynamic);
+        return DataFixUtils.orElse(dynamic.get("OwnerUUID").result().map(dynamic2 -> dynamic.remove("OwnerUUID").set("Owner", (Dynamic<?>)dynamic2)), dynamic);
     }
 
     public static Dynamic<?> updateEntityUUID(Dynamic<?> dynamic) {

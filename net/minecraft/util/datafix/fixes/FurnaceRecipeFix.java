@@ -6,7 +6,6 @@ package net.minecraft.util.datafix.fixes;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
@@ -15,6 +14,7 @@ import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.datafixers.util.Unit;
+import com.mojang.serialization.Dynamic;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -46,18 +46,18 @@ extends DataFix {
 
     private <R> Typed<?> updateFurnaceContents(Type<R> type, Type<Pair<Either<Pair<List<Pair<R, Integer>>, Dynamic<?>>, Unit>, Dynamic<?>>> type2, Typed<?> typed) {
         Dynamic<?> dynamic2 = typed.getOrCreate(DSL.remainderFinder());
-        int i = dynamic2.get("RecipesUsedSize").asNumber().orElse(0).intValue();
+        int i = dynamic2.get("RecipesUsedSize").asInt(0);
         dynamic2 = dynamic2.remove("RecipesUsedSize");
         ArrayList list = Lists.newArrayList();
         for (int j = 0; j < i; ++j) {
             String string = "RecipeLocation" + j;
             String string2 = "RecipeAmount" + j;
-            Optional<Dynamic<?>> optional = dynamic2.get(string).get();
-            int k = dynamic2.get(string2).asNumber().orElse(0).intValue();
+            Optional<Dynamic<?>> optional = dynamic2.get(string).result();
+            int k = dynamic2.get(string2).asInt(0);
             if (k > 0) {
                 optional.ifPresent(dynamic -> {
-                    Pair pair = type.read(dynamic);
-                    pair.getSecond().ifPresent(object -> list.add(Pair.of(object, k)));
+                    Optional optional = type.read(dynamic).result();
+                    optional.ifPresent(pair -> list.add(Pair.of(pair.getFirst(), k)));
                 });
             }
             dynamic2 = dynamic2.remove(string).remove(string2);

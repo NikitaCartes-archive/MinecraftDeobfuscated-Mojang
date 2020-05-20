@@ -4,8 +4,8 @@
 package net.minecraft.world.level.levelgen.feature.structures;
 
 import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.DynamicOps;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
 
 public class JigsawJunction {
@@ -75,7 +75,7 @@ public class JigsawJunction {
     }
 
     public String toString() {
-        return "JigsawJunction{sourceX=" + this.sourceX + ", sourceGroundY=" + this.sourceGroundY + ", sourceZ=" + this.sourceZ + ", deltaY=" + this.deltaY + ", destProjection=" + (Object)((Object)this.destProjection) + '}';
+        return "JigsawJunction{sourceX=" + this.sourceX + ", sourceGroundY=" + this.sourceGroundY + ", sourceZ=" + this.sourceZ + ", deltaY=" + this.deltaY + ", destProjection=" + this.destProjection + '}';
     }
 }
 

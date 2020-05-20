@@ -3,28 +3,27 @@
  */
 package net.minecraft.world.level.levelgen.feature.featuresize;
 
-import com.mojang.datafixers.Dynamic;
-import java.util.function.Function;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.levelgen.feature.featuresize.FeatureSize;
 import net.minecraft.world.level.levelgen.feature.featuresize.ThreeLayersFeatureSize;
 import net.minecraft.world.level.levelgen.feature.featuresize.TwoLayersFeatureSize;
 
 public class FeatureSizeType<P extends FeatureSize> {
-    public static final FeatureSizeType<TwoLayersFeatureSize> TWO_LAYERS_FEATURE_SIZE = FeatureSizeType.register("two_layers_feature_size", TwoLayersFeatureSize::new);
-    public static final FeatureSizeType<ThreeLayersFeatureSize> THREE_LAYERS_FEATURE_SIZE = FeatureSizeType.register("three_layers_feature_size", ThreeLayersFeatureSize::new);
-    private final Function<Dynamic<?>, P> deserializer;
+    public static final FeatureSizeType<TwoLayersFeatureSize> TWO_LAYERS_FEATURE_SIZE = FeatureSizeType.register("two_layers_feature_size", TwoLayersFeatureSize.CODEC);
+    public static final FeatureSizeType<ThreeLayersFeatureSize> THREE_LAYERS_FEATURE_SIZE = FeatureSizeType.register("three_layers_feature_size", ThreeLayersFeatureSize.CODEC);
+    private final Codec<P> codec;
 
-    private static <P extends FeatureSize> FeatureSizeType<P> register(String string, Function<Dynamic<?>, P> function) {
-        return Registry.register(Registry.FEATURE_SIZE_TYPES, string, new FeatureSizeType<P>(function));
+    private static <P extends FeatureSize> FeatureSizeType<P> register(String string, Codec<P> codec) {
+        return Registry.register(Registry.FEATURE_SIZE_TYPES, string, new FeatureSizeType<P>(codec));
     }
 
-    private FeatureSizeType(Function<Dynamic<?>, P> function) {
-        this.deserializer = function;
+    private FeatureSizeType(Codec<P> codec) {
+        this.codec = codec;
     }
 
-    public P deserialize(Dynamic<?> dynamic) {
-        return (P)((FeatureSize)this.deserializer.apply(dynamic));
+    public Codec<P> codec() {
+        return this.codec;
     }
 }
 

@@ -290,7 +290,7 @@ public class MultiPlayerGameMode {
         int i = itemStack.getCount();
         InteractionResultHolder<ItemStack> interactionResultHolder = itemStack.use(level, player, interactionHand);
         ItemStack itemStack2 = interactionResultHolder.getObject();
-        if (itemStack2 != itemStack || itemStack2.getCount() != i) {
+        if (itemStack2 != itemStack) {
             player.setItemInHand(interactionHand, itemStack2);
         }
         return interactionResultHolder.getResult();

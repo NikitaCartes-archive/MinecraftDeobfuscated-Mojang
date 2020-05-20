@@ -19,9 +19,5 @@ extends LevelData {
         this.setYSpawn(blockPos.getY());
         this.setZSpawn(blockPos.getZ());
     }
-
-    public void setGameTime(long var1);
-
-    public void setDayTime(long var1);
 }
 

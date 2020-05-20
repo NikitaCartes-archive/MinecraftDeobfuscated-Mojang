@@ -3,30 +3,21 @@
  */
 package net.minecraft.world.level.levelgen.placement;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 
 public class RangeDecoratorConfiguration
 implements DecoratorConfiguration {
+    public static final Codec<RangeDecoratorConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("min")).forGetter(rangeDecoratorConfiguration -> rangeDecoratorConfiguration.min), ((MapCodec)Codec.INT.fieldOf("max")).forGetter(rangeDecoratorConfiguration -> rangeDecoratorConfiguration.max)).apply((Applicative<RangeDecoratorConfiguration, ?>)instance, RangeDecoratorConfiguration::new));
     public final int min;
     public final int max;
 
     public RangeDecoratorConfiguration(int i, int j) {
         this.min = i;
         this.max = j;
-    }
-
-    @Override
-    public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("min"), dynamicOps.createInt(this.min), dynamicOps.createString("max"), dynamicOps.createInt(this.max))));
-    }
-
-    public static RangeDecoratorConfiguration deserialize(Dynamic<?> dynamic) {
-        int i = dynamic.get("min").asInt(0);
-        int j = dynamic.get("max").asInt(0);
-        return new RangeDecoratorConfiguration(i, j);
     }
 }
 

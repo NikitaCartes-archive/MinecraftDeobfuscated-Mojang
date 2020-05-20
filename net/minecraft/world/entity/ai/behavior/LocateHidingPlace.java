@@ -51,7 +51,7 @@ extends Behavior<LivingEntity> {
             brain.eraseMemory(MemoryModuleType.LOOK_TARGET);
             brain.eraseMemory(MemoryModuleType.BREED_TARGET);
             brain.eraseMemory(MemoryModuleType.INTERACTION_TARGET);
-            brain.setMemory(MemoryModuleType.HIDING_PLACE, GlobalPos.of(serverLevel.dimensionType(), optional.get()));
+            brain.setMemory(MemoryModuleType.HIDING_PLACE, GlobalPos.of(serverLevel.dimension(), optional.get()));
             if (!optional.get().closerThan(livingEntity.position(), (double)this.closeEnoughDist)) {
                 brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(optional.get(), this.speedModifier, this.closeEnoughDist));
             }

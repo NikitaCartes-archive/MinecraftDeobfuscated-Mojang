@@ -3,9 +3,10 @@
  */
 package net.minecraft.world.level.levelgen.feature.trunkplacers;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.Products;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -25,17 +26,22 @@ import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public abstract class TrunkPlacer {
-    private final int baseHeight;
-    private final int heightRandA;
-    private final int heightRandB;
-    protected final TrunkPlacerType<?> type;
+    public static final Codec<TrunkPlacer> CODEC = Registry.TRUNK_PLACER_TYPES.dispatch(TrunkPlacer::type, TrunkPlacerType::codec);
+    protected final int baseHeight;
+    protected final int heightRandA;
+    protected final int heightRandB;
 
-    public TrunkPlacer(int i, int j, int k, TrunkPlacerType<?> trunkPlacerType) {
+    protected static <P extends TrunkPlacer> Products.P3<RecordCodecBuilder.Mu<P>, Integer, Integer, Integer> trunkPlacerParts(RecordCodecBuilder.Instance<P> instance) {
+        return instance.group(((MapCodec)Codec.INT.fieldOf("base_height")).forGetter(trunkPlacer -> trunkPlacer.baseHeight), ((MapCodec)Codec.INT.fieldOf("height_rand_a")).forGetter(trunkPlacer -> trunkPlacer.heightRandA), ((MapCodec)Codec.INT.fieldOf("height_rand_b")).forGetter(trunkPlacer -> trunkPlacer.heightRandB));
+    }
+
+    public TrunkPlacer(int i, int j, int k) {
         this.baseHeight = i;
         this.heightRandA = j;
         this.heightRandB = k;
-        this.type = trunkPlacerType;
     }
+
+    protected abstract TrunkPlacerType<?> type();
 
     public abstract List<FoliagePlacer.FoliageAttachment> placeTrunk(LevelSimulatedRW var1, Random var2, int var3, BlockPos var4, Set<BlockPos> var5, BoundingBox var6, TreeConfiguration var7);
 
@@ -74,12 +80,6 @@ public abstract class TrunkPlacer {
         if (TreeFeature.isFree(levelSimulatedRW, mutableBlockPos)) {
             TrunkPlacer.placeLog(levelSimulatedRW, random, mutableBlockPos, set, boundingBox, treeConfiguration);
         }
-    }
-
-    public <T> T serialize(DynamicOps<T> dynamicOps) {
-        ImmutableMap.Builder<T, T> builder = ImmutableMap.builder();
-        builder.put(dynamicOps.createString("type"), dynamicOps.createString(Registry.TRUNK_PLACER_TYPES.getKey(this.type).toString())).put(dynamicOps.createString("base_height"), dynamicOps.createInt(this.baseHeight)).put(dynamicOps.createString("height_rand_a"), dynamicOps.createInt(this.heightRandA)).put(dynamicOps.createString("height_rand_b"), dynamicOps.createInt(this.heightRandB));
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(builder.build())).getValue();
     }
 }
 

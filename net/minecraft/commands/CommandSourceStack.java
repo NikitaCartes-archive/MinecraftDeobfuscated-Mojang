@@ -15,10 +15,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BinaryOperator;
 import java.util.stream.Stream;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
@@ -208,7 +210,7 @@ implements SharedSuggestionProvider {
 
     public void sendSuccess(Component component, boolean bl) {
         if (this.source.acceptsSuccess() && !this.silent) {
-            this.source.sendMessage(component);
+            this.source.sendMessage(component, Util.NIL_UUID);
         }
         if (bl && this.source.shouldInformAdmins() && !this.silent) {
             this.broadcastToAdmins(component);
@@ -220,17 +222,17 @@ implements SharedSuggestionProvider {
         if (this.server.getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
             for (ServerPlayer serverPlayer : this.server.getPlayerList().getPlayers()) {
                 if (serverPlayer == this.source || !this.server.getPlayerList().isOp(serverPlayer.getGameProfile())) continue;
-                serverPlayer.sendMessage(component2);
+                serverPlayer.sendMessage(component2, Util.NIL_UUID);
             }
         }
         if (this.source != this.server && this.server.getGameRules().getBoolean(GameRules.RULE_LOGADMINCOMMANDS)) {
-            this.server.sendMessage(component2);
+            this.server.sendMessage(component2, Util.NIL_UUID);
         }
     }
 
     public void sendFailure(Component component) {
         if (this.source.acceptsFailure() && !this.silent) {
-            this.source.sendMessage(new TextComponent("").append(component).withStyle(ChatFormatting.RED));
+            this.source.sendMessage(new TextComponent("").append(component).withStyle(ChatFormatting.RED), Util.NIL_UUID);
         }
     }
 
@@ -263,6 +265,11 @@ implements SharedSuggestionProvider {
     @Override
     public CompletableFuture<Suggestions> customSuggestion(CommandContext<SharedSuggestionProvider> commandContext, SuggestionsBuilder suggestionsBuilder) {
         return null;
+    }
+
+    @Override
+    public RegistryAccess registryAccess() {
+        return this.server.registryAccess();
     }
 }
 

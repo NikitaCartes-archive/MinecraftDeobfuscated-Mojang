@@ -3,8 +3,7 @@
  */
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTest;
@@ -12,6 +11,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTestTy
 
 public class PosAlwaysTrueTest
 extends PosRuleTest {
+    public static final Codec<PosAlwaysTrueTest> CODEC = Codec.unit(() -> INSTANCE);
     public static final PosAlwaysTrueTest INSTANCE = new PosAlwaysTrueTest();
 
     private PosAlwaysTrueTest() {
@@ -23,13 +23,8 @@ extends PosRuleTest {
     }
 
     @Override
-    protected PosRuleTestType getType() {
+    protected PosRuleTestType<?> getType() {
         return PosRuleTestType.ALWAYS_TRUE_TEST;
-    }
-
-    @Override
-    protected <T> Dynamic<T> getDynamic(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.emptyMap());
     }
 }
 

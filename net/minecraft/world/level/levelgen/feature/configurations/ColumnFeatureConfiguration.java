@@ -3,13 +3,15 @@
  */
 package net.minecraft.world.level.levelgen.feature.configurations;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 public class ColumnFeatureConfiguration
 implements FeatureConfiguration {
+    public static final Codec<ColumnFeatureConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("minimum_reach")).forGetter(columnFeatureConfiguration -> columnFeatureConfiguration.minimumReach), ((MapCodec)Codec.INT.fieldOf("maximum_reach")).forGetter(columnFeatureConfiguration -> columnFeatureConfiguration.maximumReach), ((MapCodec)Codec.INT.fieldOf("minimum_height")).forGetter(columnFeatureConfiguration -> columnFeatureConfiguration.minimumHeight), ((MapCodec)Codec.INT.fieldOf("maximum_height")).forGetter(columnFeatureConfiguration -> columnFeatureConfiguration.maximumHeight)).apply((Applicative<ColumnFeatureConfiguration, ?>)instance, ColumnFeatureConfiguration::new));
     public final int minimumReach;
     public final int maximumReach;
     public final int minimumHeight;
@@ -20,19 +22,6 @@ implements FeatureConfiguration {
         this.maximumReach = j;
         this.minimumHeight = k;
         this.maximumHeight = l;
-    }
-
-    @Override
-    public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("minimum_reach"), dynamicOps.createInt(this.minimumReach), dynamicOps.createString("maximum_reach"), dynamicOps.createInt(this.maximumReach), dynamicOps.createString("minimum_height"), dynamicOps.createInt(this.minimumHeight), dynamicOps.createString("maximum_height"), dynamicOps.createInt(this.maximumHeight))));
-    }
-
-    public static <T> ColumnFeatureConfiguration deserialize(Dynamic<T> dynamic) {
-        int i = dynamic.get("minimum_reach").asInt(0);
-        int j = dynamic.get("maximum_reach").asInt(0);
-        int k = dynamic.get("minimum_height").asInt(1);
-        int l = dynamic.get("maximum_height").asInt(1);
-        return new ColumnFeatureConfiguration(i, j, k, l);
     }
 
     public static class Builder {

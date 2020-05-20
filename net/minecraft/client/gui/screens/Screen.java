@@ -8,6 +8,7 @@ import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -134,8 +135,6 @@ Widget {
         if (list.isEmpty()) {
             return;
         }
-        RenderSystem.disableRescaleNormal();
-        RenderSystem.disableDepthTest();
         int k = 0;
         for (Component component : list) {
             l = this.font.width(component);
@@ -155,38 +154,50 @@ Widget {
         if (n + o + 6 > this.height) {
             n = this.height - o - 6;
         }
-        this.setBlitOffset(300);
+        poseStack.pushPose();
         this.itemRenderer.blitOffset = 300.0f;
         int p = -267386864;
-        this.fillGradient(poseStack, m - 3, n - 4, m + l + 3, n - 3, -267386864, -267386864);
-        this.fillGradient(poseStack, m - 3, n + o + 3, m + l + 3, n + o + 4, -267386864, -267386864);
-        this.fillGradient(poseStack, m - 3, n - 3, m + l + 3, n + o + 3, -267386864, -267386864);
-        this.fillGradient(poseStack, m - 4, n - 3, m - 3, n + o + 3, -267386864, -267386864);
-        this.fillGradient(poseStack, m + l + 3, n - 3, m + l + 4, n + o + 3, -267386864, -267386864);
         int q = 0x505000FF;
         int r = 1344798847;
-        this.fillGradient(poseStack, m - 3, n - 3 + 1, m - 3 + 1, n + o + 3 - 1, 0x505000FF, 1344798847);
-        this.fillGradient(poseStack, m + l + 2, n - 3 + 1, m + l + 3, n + o + 3 - 1, 0x505000FF, 1344798847);
-        this.fillGradient(poseStack, m - 3, n - 3, m + l + 3, n - 3 + 1, 0x505000FF, 0x505000FF);
-        this.fillGradient(poseStack, m - 3, n + o + 2, m + l + 3, n + o + 3, 1344798847, 1344798847);
+        int s = 300;
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
+        Matrix4f matrix4f = poseStack.last().pose();
+        Screen.fillGradient(matrix4f, bufferBuilder, m - 3, n - 4, m + l + 3, n - 3, 300, -267386864, -267386864);
+        Screen.fillGradient(matrix4f, bufferBuilder, m - 3, n + o + 3, m + l + 3, n + o + 4, 300, -267386864, -267386864);
+        Screen.fillGradient(matrix4f, bufferBuilder, m - 3, n - 3, m + l + 3, n + o + 3, 300, -267386864, -267386864);
+        Screen.fillGradient(matrix4f, bufferBuilder, m - 4, n - 3, m - 3, n + o + 3, 300, -267386864, -267386864);
+        Screen.fillGradient(matrix4f, bufferBuilder, m + l + 3, n - 3, m + l + 4, n + o + 3, 300, -267386864, -267386864);
+        Screen.fillGradient(matrix4f, bufferBuilder, m - 3, n - 3 + 1, m - 3 + 1, n + o + 3 - 1, 300, 0x505000FF, 1344798847);
+        Screen.fillGradient(matrix4f, bufferBuilder, m + l + 2, n - 3 + 1, m + l + 3, n + o + 3 - 1, 300, 0x505000FF, 1344798847);
+        Screen.fillGradient(matrix4f, bufferBuilder, m - 3, n - 3, m + l + 3, n - 3 + 1, 300, 0x505000FF, 0x505000FF);
+        Screen.fillGradient(matrix4f, bufferBuilder, m - 3, n + o + 2, m + l + 3, n + o + 3, 300, 1344798847, 1344798847);
+        RenderSystem.enableDepthTest();
+        RenderSystem.disableTexture();
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.shadeModel(7425);
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
+        RenderSystem.shadeModel(7424);
+        RenderSystem.disableBlend();
+        RenderSystem.enableTexture();
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         poseStack.translate(0.0, 0.0, this.itemRenderer.blitOffset);
-        Matrix4f matrix4f = poseStack.last().pose();
-        for (int s = 0; s < list.size(); ++s) {
-            Component component2 = list.get(s);
+        for (int t = 0; t < list.size(); ++t) {
+            Component component2 = list.get(t);
             if (component2 != null) {
                 this.font.drawInBatch(component2, (float)m, (float)n, -1, true, matrix4f, (MultiBufferSource)bufferSource, false, 0, 0xF000F0);
             }
-            if (s == 0) {
+            if (t == 0) {
                 n += 2;
             }
             n += 10;
         }
         bufferSource.endBatch();
-        this.setBlitOffset(0);
+        poseStack.popPose();
         this.itemRenderer.blitOffset = 0.0f;
-        RenderSystem.enableDepthTest();
-        RenderSystem.enableRescaleNormal();
     }
 
     protected void renderComponentHoverEffect(PoseStack poseStack, @Nullable Component component, int i, int j) {

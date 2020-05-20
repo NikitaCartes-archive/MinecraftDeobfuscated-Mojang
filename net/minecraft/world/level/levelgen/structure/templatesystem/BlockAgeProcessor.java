@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -24,14 +23,11 @@ import org.jetbrains.annotations.Nullable;
 
 public class BlockAgeProcessor
 extends StructureProcessor {
+    public static final Codec<BlockAgeProcessor> CODEC = ((MapCodec)Codec.FLOAT.fieldOf("mossiness")).xmap(BlockAgeProcessor::new, blockAgeProcessor -> Float.valueOf(blockAgeProcessor.mossiness)).codec();
     private final float mossiness;
 
     public BlockAgeProcessor(float f) {
         this.mossiness = f;
-    }
-
-    public BlockAgeProcessor(Dynamic<?> dynamic) {
-        this(dynamic.get("mossiness").asFloat(1.0f));
     }
 
     @Override
@@ -120,13 +116,8 @@ extends StructureProcessor {
     }
 
     @Override
-    protected StructureProcessorType getType() {
+    protected StructureProcessorType<?> getType() {
         return StructureProcessorType.BLOCK_AGE;
-    }
-
-    @Override
-    protected <T> Dynamic<T> getDynamic(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("mossiness"), dynamicOps.createFloat(this.mossiness))));
     }
 }
 

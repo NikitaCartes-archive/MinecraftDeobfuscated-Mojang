@@ -4,19 +4,15 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.google.common.collect.Lists;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.List;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.RandomScatteredFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BeardedStructureStart;
@@ -25,21 +21,11 @@ import net.minecraft.world.level.levelgen.structure.PillagerOutpostPieces;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public class PillagerOutpostFeature
-extends RandomScatteredFeature<NoneFeatureConfiguration> {
+extends StructureFeature<NoneFeatureConfiguration> {
     private static final List<Biome.SpawnerData> OUTPOST_ENEMIES = Lists.newArrayList(new Biome.SpawnerData(EntityType.PILLAGER, 1, 1, 1));
 
-    public PillagerOutpostFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-        super(function);
-    }
-
-    @Override
-    public String getFeatureName() {
-        return "Pillager_Outpost";
-    }
-
-    @Override
-    public int getLookupRange() {
-        return 3;
+    public PillagerOutpostFeature(Codec<NoneFeatureConfiguration> codec) {
+        super(codec);
     }
 
     @Override
@@ -48,7 +34,7 @@ extends RandomScatteredFeature<NoneFeatureConfiguration> {
     }
 
     @Override
-    protected boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator chunkGenerator, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos) {
+    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos, NoneFeatureConfiguration noneFeatureConfiguration) {
         int k = i >> 4;
         int m = j >> 4;
         worldgenRandom.setSeed((long)(k ^ m << 4) ^ l);
@@ -58,8 +44,8 @@ extends RandomScatteredFeature<NoneFeatureConfiguration> {
         }
         for (int n = i - 10; n <= i + 10; ++n) {
             for (int o = j - 10; o <= j + 10; ++o) {
-                Biome biome2 = biomeManager.getBiome(new BlockPos((n << 4) + 9, 0, (o << 4) + 9));
-                if (!Feature.VILLAGE.featureChunk(biomeManager, chunkGenerator, l, worldgenRandom, n, o, biome2)) continue;
+                ChunkPos chunkPos2 = StructureFeature.VILLAGE.getPotentialFeatureChunk(chunkGenerator.getSettings().getConfig(StructureFeature.VILLAGE), l, worldgenRandom, n, o);
+                if (n != chunkPos2.x || o != chunkPos2.z) continue;
                 return false;
             }
         }
@@ -67,23 +53,18 @@ extends RandomScatteredFeature<NoneFeatureConfiguration> {
     }
 
     @Override
-    public StructureFeature.StructureStartFactory getStartFactory() {
+    public StructureFeature.StructureStartFactory<NoneFeatureConfiguration> getStartFactory() {
         return FeatureStart::new;
     }
 
-    @Override
-    protected int getRandomSalt(ChunkGeneratorSettings chunkGeneratorSettings) {
-        return 165745296;
-    }
-
     public static class FeatureStart
-    extends BeardedStructureStart {
-        public FeatureStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+    extends BeardedStructureStart<NoneFeatureConfiguration> {
+        public FeatureStart(StructureFeature<NoneFeatureConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
             super(structureFeature, i, j, boundingBox, k, l);
         }
 
         @Override
-        public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+        public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration) {
             BlockPos blockPos = new BlockPos(i * 16, 0, j * 16);
             PillagerOutpostPieces.addPieces(chunkGenerator, structureManager, blockPos, this.pieces, this.random);
             this.calculateBoundingBox();

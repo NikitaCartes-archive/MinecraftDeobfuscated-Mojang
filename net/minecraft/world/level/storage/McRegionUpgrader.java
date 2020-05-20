@@ -36,9 +36,9 @@ public class McRegionUpgrader {
         ArrayList<File> list = Lists.newArrayList();
         ArrayList<File> list2 = Lists.newArrayList();
         ArrayList<File> list3 = Lists.newArrayList();
-        File file = levelStorageAccess.getDimensionPath(DimensionType.OVERWORLD);
-        File file2 = levelStorageAccess.getDimensionPath(DimensionType.NETHER);
-        File file3 = levelStorageAccess.getDimensionPath(DimensionType.THE_END);
+        File file = levelStorageAccess.getDimensionPath(DimensionType.OVERWORLD_LOCATION);
+        File file2 = levelStorageAccess.getDimensionPath(DimensionType.NETHER_LOCATION);
+        File file3 = levelStorageAccess.getDimensionPath(DimensionType.END_LOCATION);
         LOGGER.info("Scanning folders...");
         McRegionUpgrader.addRegionFiles(file, list);
         if (file2.exists()) {
@@ -51,7 +51,7 @@ public class McRegionUpgrader {
         LOGGER.info("Total conversion count is {}", (Object)i);
         WorldData worldData = levelStorageAccess.getDataTag();
         long l = worldData != null ? worldData.worldGenSettings().seed() : 0L;
-        BiomeSource biomeSource = worldData != null && worldData.worldGenSettings().isFlatWorld() ? new FixedBiomeSource(Biomes.PLAINS) : new OverworldBiomeSource(l, false, 4);
+        BiomeSource biomeSource = worldData != null && worldData.worldGenSettings().isFlatWorld() ? new FixedBiomeSource(Biomes.PLAINS) : new OverworldBiomeSource(l, false, false);
         McRegionUpgrader.convertRegions(new File(file, "region"), list, biomeSource, 0, i, progressListener);
         McRegionUpgrader.convertRegions(new File(file2, "region"), list2, new FixedBiomeSource(Biomes.NETHER_WASTES), list.size(), i, progressListener);
         McRegionUpgrader.convertRegions(new File(file3, "region"), list3, new FixedBiomeSource(Biomes.THE_END), list.size() + list2.size(), i, progressListener);

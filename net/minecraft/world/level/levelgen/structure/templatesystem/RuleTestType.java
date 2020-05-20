@@ -3,8 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
-import net.minecraft.util.Deserializer;
 import net.minecraft.world.level.levelgen.structure.templatesystem.AlwaysTrueTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockMatchTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockStateMatchTest;
@@ -13,17 +13,18 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.RandomBlockSt
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
 import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
 
-public interface RuleTestType
-extends Deserializer<RuleTest> {
-    public static final RuleTestType ALWAYS_TRUE_TEST = RuleTestType.register("always_true", dynamic -> AlwaysTrueTest.INSTANCE);
-    public static final RuleTestType BLOCK_TEST = RuleTestType.register("block_match", BlockMatchTest::new);
-    public static final RuleTestType BLOCKSTATE_TEST = RuleTestType.register("blockstate_match", BlockStateMatchTest::new);
-    public static final RuleTestType TAG_TEST = RuleTestType.register("tag_match", TagMatchTest::new);
-    public static final RuleTestType RANDOM_BLOCK_TEST = RuleTestType.register("random_block_match", RandomBlockMatchTest::new);
-    public static final RuleTestType RANDOM_BLOCKSTATE_TEST = RuleTestType.register("random_blockstate_match", RandomBlockStateMatchTest::new);
+public interface RuleTestType<P extends RuleTest> {
+    public static final RuleTestType<AlwaysTrueTest> ALWAYS_TRUE_TEST = RuleTestType.register("always_true", AlwaysTrueTest.CODEC);
+    public static final RuleTestType<BlockMatchTest> BLOCK_TEST = RuleTestType.register("block_match", BlockMatchTest.CODEC);
+    public static final RuleTestType<BlockStateMatchTest> BLOCKSTATE_TEST = RuleTestType.register("blockstate_match", BlockStateMatchTest.CODEC);
+    public static final RuleTestType<TagMatchTest> TAG_TEST = RuleTestType.register("tag_match", TagMatchTest.CODEC);
+    public static final RuleTestType<RandomBlockMatchTest> RANDOM_BLOCK_TEST = RuleTestType.register("random_block_match", RandomBlockMatchTest.CODEC);
+    public static final RuleTestType<RandomBlockStateMatchTest> RANDOM_BLOCKSTATE_TEST = RuleTestType.register("random_blockstate_match", RandomBlockStateMatchTest.CODEC);
 
-    public static RuleTestType register(String string, RuleTestType ruleTestType) {
-        return Registry.register(Registry.RULE_TEST, string, ruleTestType);
+    public Codec<P> codec();
+
+    public static <P extends RuleTest> RuleTestType<P> register(String string, Codec<P> codec) {
+        return Registry.register(Registry.RULE_TEST, string, () -> codec);
     }
 }
 

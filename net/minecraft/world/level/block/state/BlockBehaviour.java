@@ -4,6 +4,7 @@
 package net.minecraft.world.level.block.state;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.serialization.MapCodec;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -44,7 +45,6 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.AbstractStateHolder;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateHolder;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -359,8 +359,7 @@ public abstract class BlockBehaviour {
     }
 
     public static abstract class BlockStateBase
-    extends AbstractStateHolder<Block, BlockState>
-    implements StateHolder<BlockState> {
+    extends StateHolder<Block, BlockState> {
         private final int lightEmission;
         private final boolean useShapeForLightOcclusion;
         private final boolean isAir;
@@ -376,8 +375,8 @@ public abstract class BlockBehaviour {
         @Nullable
         protected Cache cache;
 
-        protected BlockStateBase(Block block, ImmutableMap<Property<?>, Comparable<?>> immutableMap) {
-            super(block, immutableMap);
+        protected BlockStateBase(Block block, ImmutableMap<Property<?>, Comparable<?>> immutableMap, MapCodec<BlockState> mapCodec) {
+            super(block, immutableMap, mapCodec);
             Properties properties = block.properties;
             this.lightEmission = properties.lightEmission.applyAsInt(this.asState());
             this.useShapeForLightOcclusion = block.useShapeForLightOcclusion(this.asState());

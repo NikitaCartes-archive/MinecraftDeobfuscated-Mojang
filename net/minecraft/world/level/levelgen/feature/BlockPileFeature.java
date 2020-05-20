@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
@@ -19,8 +18,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.BlockPileConfig
 
 public class BlockPileFeature
 extends Feature<BlockPileConfiguration> {
-    public BlockPileFeature(Function<Dynamic<?>, ? extends BlockPileConfiguration> function) {
-        super(function);
+    public BlockPileFeature(Codec<BlockPileConfiguration> codec) {
+        super(codec);
     }
 
     @Override

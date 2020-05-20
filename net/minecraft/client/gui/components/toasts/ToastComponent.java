@@ -104,7 +104,7 @@ extends GuiComponent {
                 this.visibleTime = l;
             }
             RenderSystem.pushMatrix();
-            RenderSystem.translatef((float)i - 160.0f * this.getVisibility(l), j * 32, 800 + j);
+            RenderSystem.translatef((float)i - (float)this.toast.width() * this.getVisibility(l), j * this.toast.height(), 800 + j);
             Toast.Visibility visibility = this.toast.render(poseStack, this.field_2245, l - this.visibleTime);
             RenderSystem.popMatrix();
             if (visibility != this.visibility) {

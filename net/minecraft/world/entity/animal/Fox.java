@@ -1229,8 +1229,8 @@ extends Animal {
         @Override
         protected void checkAndPerformAttack(LivingEntity livingEntity, double d) {
             double e = this.getAttackReachSqr(livingEntity);
-            if (d <= e && this.attackTime <= 0) {
-                this.attackTime = 20;
+            if (d <= e && this.isTimeToAttack()) {
+                this.resetAttackCooldown();
                 this.mob.doHurtTarget(livingEntity);
                 Fox.this.playSound(SoundEvents.FOX_BITE, 1.0f, 1.0f);
             }

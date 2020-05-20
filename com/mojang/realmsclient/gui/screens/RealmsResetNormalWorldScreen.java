@@ -24,7 +24,7 @@ extends RealmsScreen {
     private EditBox seedEdit;
     private Boolean generateStructures = true;
     private Integer levelTypeIndex = 0;
-    private Component[] levelTypes = new Component[]{new TranslatableComponent("generator.default"), new TranslatableComponent("generator.flat"), new TranslatableComponent("generator.largeBiomes"), new TranslatableComponent("generator.amplified")};
+    private Component[] levelTypes = new Component[]{new TranslatableComponent("generator.default"), new TranslatableComponent("generator.flat"), new TranslatableComponent("generator.large_biomes"), new TranslatableComponent("generator.amplified")};
     private Component buttonTitle;
 
     public RealmsResetNormalWorldScreen(RealmsResetWorldScreen realmsResetWorldScreen, Component component) {

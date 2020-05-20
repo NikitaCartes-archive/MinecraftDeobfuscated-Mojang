@@ -79,7 +79,7 @@ implements ChunkAccess {
     private final UpgradeData upgradeData;
     private final Map<BlockPos, BlockEntity> blockEntities = Maps.newHashMap();
     private final ClassInstanceMultiMap<Entity>[] entitySections;
-    private final Map<String, StructureStart> structureStarts = Maps.newHashMap();
+    private final Map<String, StructureStart<?>> structureStarts = Maps.newHashMap();
     private final Map<String, LongSet> structuresRefences = Maps.newHashMap();
     private final ShortList[] postProcessing = new ShortList[16];
     private TickList<Block> blockTicks;
@@ -105,7 +105,7 @@ implements ChunkAccess {
         this.chunkPos = chunkPos;
         this.upgradeData = upgradeData;
         for (Heightmap.Types types : Heightmap.Types.values()) {
-            if (!ChunkStatus.FULL.heightmapsAfter().contains((Object)types)) continue;
+            if (!ChunkStatus.FULL.heightmapsAfter().contains(types)) continue;
             this.heightmaps.put(types, new Heightmap(this, types));
         }
         for (int i = 0; i < this.entitySections.length; ++i) {
@@ -143,7 +143,7 @@ implements ChunkAccess {
         this.setAllStarts(protoChunk.getAllStarts());
         this.setAllReferences(protoChunk.getAllReferences());
         for (Map.Entry<Heightmap.Types, Heightmap> entry : protoChunk.getHeightmaps()) {
-            if (!ChunkStatus.FULL.heightmapsAfter().contains((Object)entry.getKey())) continue;
+            if (!ChunkStatus.FULL.heightmapsAfter().contains(entry.getKey())) continue;
             this.getOrCreateHeightmapUnprimed(entry.getKey()).setRawData(entry.getValue().getRawData());
         }
         this.setLightCorrect(protoChunk.isLightCorrect());
@@ -152,7 +152,7 @@ implements ChunkAccess {
 
     @Override
     public Heightmap getOrCreateHeightmapUnprimed(Heightmap.Types types2) {
-        return this.heightmaps.computeIfAbsent(types2, types -> new Heightmap(this, (Heightmap.Types)((Object)types)));
+        return this.heightmaps.computeIfAbsent(types2, types -> new Heightmap(this, (Heightmap.Types)types));
     }
 
     @Override
@@ -237,10 +237,10 @@ implements ChunkAccess {
         }
         Block block = blockState.getBlock();
         Block block2 = blockState2.getBlock();
-        this.heightmaps.get((Object)Heightmap.Types.MOTION_BLOCKING).update(i, j, k, blockState);
-        this.heightmaps.get((Object)Heightmap.Types.MOTION_BLOCKING_NO_LEAVES).update(i, j, k, blockState);
-        this.heightmaps.get((Object)Heightmap.Types.OCEAN_FLOOR).update(i, j, k, blockState);
-        this.heightmaps.get((Object)Heightmap.Types.WORLD_SURFACE).update(i, j, k, blockState);
+        this.heightmaps.get(Heightmap.Types.MOTION_BLOCKING).update(i, j, k, blockState);
+        this.heightmaps.get(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES).update(i, j, k, blockState);
+        this.heightmaps.get(Heightmap.Types.OCEAN_FLOOR).update(i, j, k, blockState);
+        this.heightmaps.get(Heightmap.Types.WORLD_SURFACE).update(i, j, k, blockState);
         boolean bl3 = levelChunkSection.isEmpty();
         if (bl2 != bl3) {
             this.level.getChunkSource().getLightEngine().updateSectionStatus(blockPos, bl3);
@@ -302,7 +302,7 @@ implements ChunkAccess {
 
     @Override
     public void setHeightmap(Heightmap.Types types, long[] ls) {
-        this.heightmaps.get((Object)types).setRawData(ls);
+        this.heightmaps.get(types).setRawData(ls);
     }
 
     public void removeEntity(Entity entity) {
@@ -321,7 +321,7 @@ implements ChunkAccess {
 
     @Override
     public int getHeight(Heightmap.Types types, int i, int j) {
-        return this.heightmaps.get((Object)types).getFirstAvailable(i & 0xF, j & 0xF) - 1;
+        return this.heightmaps.get(types).getFirstAvailable(i & 0xF, j & 0xF) - 1;
     }
 
     @Nullable
@@ -576,22 +576,22 @@ implements ChunkAccess {
 
     @Override
     @Nullable
-    public StructureStart getStartForFeature(String string) {
+    public StructureStart<?> getStartForFeature(String string) {
         return this.structureStarts.get(string);
     }
 
     @Override
-    public void setStartForFeature(String string, StructureStart structureStart) {
+    public void setStartForFeature(String string, StructureStart<?> structureStart) {
         this.structureStarts.put(string, structureStart);
     }
 
     @Override
-    public Map<String, StructureStart> getAllStarts() {
+    public Map<String, StructureStart<?>> getAllStarts() {
         return this.structureStarts;
     }
 
     @Override
-    public void setAllStarts(Map<String, StructureStart> map) {
+    public void setAllStarts(Map<String, StructureStart<?>> map) {
         this.structureStarts.clear();
         this.structureStarts.putAll(map);
     }

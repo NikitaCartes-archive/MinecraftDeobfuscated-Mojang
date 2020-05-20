@@ -6,11 +6,12 @@ package net.minecraft.network.protocol.game;
 import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.dimension.DimensionType;
 
 public class ClientboundLoginPacket
 implements Packet<ClientGamePacketListener> {
@@ -18,7 +19,8 @@ implements Packet<ClientGamePacketListener> {
     private long seed;
     private boolean hardcore;
     private GameType gameType;
-    private DimensionType dimension;
+    private RegistryAccess.RegistryHolder registryHolder;
+    private ResourceLocation dimension;
     private int maxPlayers;
     private int chunkRadius;
     private boolean reducedDebugInfo;
@@ -29,9 +31,10 @@ implements Packet<ClientGamePacketListener> {
     public ClientboundLoginPacket() {
     }
 
-    public ClientboundLoginPacket(int i, GameType gameType, long l, boolean bl, DimensionType dimensionType, int j, int k, boolean bl2, boolean bl3, boolean bl4, boolean bl5) {
+    public ClientboundLoginPacket(int i, GameType gameType, long l, boolean bl, RegistryAccess.RegistryHolder registryHolder, ResourceLocation resourceLocation, int j, int k, boolean bl2, boolean bl3, boolean bl4, boolean bl5) {
         this.playerId = i;
-        this.dimension = dimensionType;
+        this.registryHolder = registryHolder;
+        this.dimension = resourceLocation;
         this.seed = l;
         this.gameType = gameType;
         this.maxPlayers = j;
@@ -49,7 +52,8 @@ implements Packet<ClientGamePacketListener> {
         int i = friendlyByteBuf.readUnsignedByte();
         this.hardcore = (i & 8) == 8;
         this.gameType = GameType.byId(i &= 0xFFFFFFF7);
-        this.dimension = DimensionType.getById(friendlyByteBuf.readInt());
+        this.registryHolder = friendlyByteBuf.readWithCodec(RegistryAccess.RegistryHolder.CODEC);
+        this.dimension = friendlyByteBuf.readResourceLocation();
         this.seed = friendlyByteBuf.readLong();
         this.maxPlayers = friendlyByteBuf.readUnsignedByte();
         this.chunkRadius = friendlyByteBuf.readVarInt();
@@ -67,7 +71,8 @@ implements Packet<ClientGamePacketListener> {
             i |= 8;
         }
         friendlyByteBuf.writeByte(i);
-        friendlyByteBuf.writeInt(this.dimension.getId());
+        friendlyByteBuf.writeWithCodec(RegistryAccess.RegistryHolder.CODEC, this.registryHolder);
+        friendlyByteBuf.writeResourceLocation(this.dimension);
         friendlyByteBuf.writeLong(this.seed);
         friendlyByteBuf.writeByte(this.maxPlayers);
         friendlyByteBuf.writeVarInt(this.chunkRadius);
@@ -103,7 +108,12 @@ implements Packet<ClientGamePacketListener> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public DimensionType getDimension() {
+    public RegistryAccess registryAccess() {
+        return this.registryHolder;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public ResourceLocation getDimension() {
         return this.dimension;
     }
 

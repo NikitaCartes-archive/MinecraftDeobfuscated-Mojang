@@ -16,6 +16,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -34,6 +37,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.RedstoneSide;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -52,11 +56,13 @@ extends Block {
     private static final Map<Direction, VoxelShape> SHAPES_UP = Maps.newEnumMap(ImmutableMap.of(Direction.NORTH, Shapes.or(SHAPES_FLOOR.get(Direction.NORTH), Block.box(3.0, 0.0, 0.0, 13.0, 16.0, 1.0)), Direction.SOUTH, Shapes.or(SHAPES_FLOOR.get(Direction.SOUTH), Block.box(3.0, 0.0, 15.0, 13.0, 16.0, 16.0)), Direction.EAST, Shapes.or(SHAPES_FLOOR.get(Direction.EAST), Block.box(15.0, 0.0, 3.0, 16.0, 16.0, 13.0)), Direction.WEST, Shapes.or(SHAPES_FLOOR.get(Direction.WEST), Block.box(0.0, 0.0, 3.0, 1.0, 16.0, 13.0))));
     private final Map<BlockState, VoxelShape> SHAPES_CACHE = Maps.newHashMap();
     private static final Vector3f[] COLORS = new Vector3f[16];
+    private final BlockState dotState;
     private boolean shouldSignal = true;
 
     public RedStoneWireBlock(BlockBehaviour.Properties properties) {
         super(properties);
-        this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(NORTH, RedstoneSide.NONE)).setValue(EAST, RedstoneSide.NONE)).setValue(SOUTH, RedstoneSide.NONE)).setValue(WEST, RedstoneSide.NONE)).setValue(POWER, 0));
+        this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(NORTH, RedstoneSide.SIDE)).setValue(EAST, RedstoneSide.SIDE)).setValue(SOUTH, RedstoneSide.SIDE)).setValue(WEST, RedstoneSide.SIDE)).setValue(POWER, 0));
+        this.dotState = (BlockState)((BlockState)((BlockState)((BlockState)this.defaultBlockState().setValue(NORTH, RedstoneSide.NONE)).setValue(EAST, RedstoneSide.NONE)).setValue(SOUTH, RedstoneSide.NONE)).setValue(WEST, RedstoneSide.NONE);
         for (BlockState blockState : this.getStateDefinition().getPossibleStates()) {
             if (blockState.getValue(POWER) != 0) continue;
             this.SHAPES_CACHE.put(blockState, this.calculateShape(blockState));
@@ -88,24 +94,28 @@ extends Block {
     }
 
     private BlockState getConnectionState(BlockGetter blockGetter, BlockState blockState, BlockPos blockPos) {
-        boolean bl6;
-        blockState = this.getMissingConnections(blockGetter, (BlockState)this.defaultBlockState().setValue(POWER, blockState.getValue(POWER)), blockPos);
-        boolean bl = blockState.getValue(NORTH).isConnected();
-        boolean bl2 = blockState.getValue(SOUTH).isConnected();
-        boolean bl3 = blockState.getValue(EAST).isConnected();
-        boolean bl4 = blockState.getValue(WEST).isConnected();
-        boolean bl5 = !bl && !bl2;
-        boolean bl7 = bl6 = !bl3 && !bl4;
-        if (!bl4 && bl5) {
+        boolean bl7;
+        boolean bl = RedStoneWireBlock.isDot(blockState);
+        blockState = this.getMissingConnections(blockGetter, (BlockState)this.dotState.setValue(POWER, blockState.getValue(POWER)), blockPos);
+        boolean bl2 = blockState.getValue(NORTH).isConnected();
+        boolean bl3 = blockState.getValue(SOUTH).isConnected();
+        boolean bl4 = blockState.getValue(EAST).isConnected();
+        boolean bl5 = blockState.getValue(WEST).isConnected();
+        boolean bl6 = !bl2 && !bl3;
+        boolean bl8 = bl7 = !bl4 && !bl5;
+        if (bl && RedStoneWireBlock.isDot(blockState)) {
+            return blockState;
+        }
+        if (!bl5 && bl6) {
             blockState = (BlockState)blockState.setValue(WEST, RedstoneSide.SIDE);
         }
-        if (!bl3 && bl5) {
+        if (!bl4 && bl6) {
             blockState = (BlockState)blockState.setValue(EAST, RedstoneSide.SIDE);
         }
-        if (!bl && bl6) {
+        if (!bl2 && bl7) {
             blockState = (BlockState)blockState.setValue(NORTH, RedstoneSide.SIDE);
         }
-        if (!bl2 && bl6) {
+        if (!bl3 && bl7) {
             blockState = (BlockState)blockState.setValue(SOUTH, RedstoneSide.SIDE);
         }
         return blockState;
@@ -138,6 +148,10 @@ extends Block {
 
     private static boolean isCross(BlockState blockState) {
         return blockState.getValue(NORTH).isConnected() && blockState.getValue(SOUTH).isConnected() && blockState.getValue(EAST).isConnected() && blockState.getValue(WEST).isConnected();
+    }
+
+    private static boolean isDot(BlockState blockState) {
+        return !blockState.getValue(NORTH).isConnected() && !blockState.getValue(SOUTH).isConnected() && !blockState.getValue(EAST).isConnected() && !blockState.getValue(WEST).isConnected();
     }
 
     @Override
@@ -421,6 +435,28 @@ extends Block {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(NORTH, EAST, SOUTH, WEST, POWER);
+    }
+
+    @Override
+    public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+        if (RedStoneWireBlock.isCross(blockState) || RedStoneWireBlock.isDot(blockState)) {
+            BlockState blockState2 = RedStoneWireBlock.isCross(blockState) ? this.dotState : this.defaultBlockState();
+            blockState2 = (BlockState)blockState2.setValue(POWER, blockState.getValue(POWER));
+            if ((blockState2 = this.getConnectionState(level, blockState2, blockPos)) != blockState) {
+                level.setBlock(blockPos, blockState2, 3);
+                this.updatesOnShapeChange(level, blockPos, blockState, blockState2);
+                return InteractionResult.SUCCESS;
+            }
+        }
+        return InteractionResult.PASS;
+    }
+
+    private void updatesOnShapeChange(Level level, BlockPos blockPos, BlockState blockState, BlockState blockState2) {
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            BlockPos blockPos2 = blockPos.relative(direction);
+            if (((RedstoneSide)blockState.getValue(PROPERTY_BY_DIRECTION.get(direction))).isConnected() == ((RedstoneSide)blockState2.getValue(PROPERTY_BY_DIRECTION.get(direction))).isConnected() || !level.getBlockState(blockPos2).isRedstoneConductor(level, blockPos2)) continue;
+            level.updateNeighborsAtExceptFromFacing(blockPos2, blockState2.getBlock(), direction.getOpposite());
+        }
     }
 
     static {

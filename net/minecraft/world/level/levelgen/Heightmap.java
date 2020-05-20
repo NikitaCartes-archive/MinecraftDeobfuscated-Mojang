@@ -4,6 +4,7 @@
 package net.minecraft.world.level.levelgen;
 
 import com.google.common.collect.Maps;
+import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -14,10 +15,12 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.BitStorage;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import org.jetbrains.annotations.Nullable;
 
 public class Heightmap {
     private static final Predicate<BlockState> NOT_AIR = blockState -> !blockState.isAir();
@@ -115,7 +118,8 @@ public class Heightmap {
         return MATERIAL_MOTION_BLOCKING;
     }
 
-    public static enum Types {
+    public static enum Types implements StringRepresentable
+    {
         WORLD_SURFACE_WG("WORLD_SURFACE_WG", Usage.WORLDGEN, Heightmap.method_16683()),
         WORLD_SURFACE("WORLD_SURFACE", Usage.CLIENT, Heightmap.method_16683()),
         OCEAN_FLOOR_WG("OCEAN_FLOOR_WG", Usage.WORLDGEN, Heightmap.method_16681()),
@@ -123,6 +127,7 @@ public class Heightmap {
         MOTION_BLOCKING("MOTION_BLOCKING", Usage.CLIENT, blockState -> blockState.getMaterial().blocksMotion() || !blockState.getFluidState().isEmpty()),
         MOTION_BLOCKING_NO_LEAVES("MOTION_BLOCKING_NO_LEAVES", Usage.LIVE_WORLD, blockState -> (blockState.getMaterial().blocksMotion() || !blockState.getFluidState().isEmpty()) && !(blockState.getBlock() instanceof LeavesBlock));
 
+        public static final Codec<Types> CODEC;
         private final String serializationKey;
         private final Usage usage;
         private final Predicate<BlockState> isOpaque;
@@ -147,6 +152,7 @@ public class Heightmap {
             return this.usage != Usage.WORLDGEN;
         }
 
+        @Nullable
         public static Types getFromKey(String string) {
             return REVERSE_LOOKUP.get(string);
         }
@@ -155,7 +161,13 @@ public class Heightmap {
             return this.isOpaque;
         }
 
+        @Override
+        public String getSerializedName() {
+            return this.serializationKey;
+        }
+
         static {
+            CODEC = StringRepresentable.fromEnum(Types::values, Types::getFromKey);
             REVERSE_LOOKUP = Util.make(Maps.newHashMap(), hashMap -> {
                 for (Types types : Types.values()) {
                     hashMap.put(types.serializationKey, types);

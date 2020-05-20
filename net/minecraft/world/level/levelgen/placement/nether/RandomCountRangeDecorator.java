@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.placement.nether;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
@@ -14,8 +13,8 @@ import net.minecraft.world.level.levelgen.placement.SimpleFeatureDecorator;
 
 public class RandomCountRangeDecorator
 extends SimpleFeatureDecorator<CountRangeDecoratorConfiguration> {
-    public RandomCountRangeDecorator(Function<Dynamic<?>, ? extends CountRangeDecoratorConfiguration> function) {
-        super(function);
+    public RandomCountRangeDecorator(Codec<CountRangeDecoratorConfiguration> codec) {
+        super(codec);
     }
 
     @Override

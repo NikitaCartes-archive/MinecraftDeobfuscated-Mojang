@@ -6,6 +6,6 @@ package net.minecraft.world.level.levelgen.carver;
 import net.minecraft.world.level.levelgen.carver.NoneCarverConfiguration;
 
 public interface CarverConfiguration {
-    public static final NoneCarverConfiguration NONE = new NoneCarverConfiguration();
+    public static final NoneCarverConfiguration NONE = NoneCarverConfiguration.INSTANCE;
 }
 

@@ -8,6 +8,7 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
+import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.Arrays;
@@ -422,6 +423,7 @@ public enum Direction implements StringRepresentable
         };
 
         private static final Axis[] VALUES;
+        public static final Codec<Axis> CODEC;
         private static final Map<String, Axis> BY_NAME;
         private final String name;
 
@@ -488,6 +490,7 @@ public enum Direction implements StringRepresentable
 
         static {
             VALUES = Axis.values();
+            CODEC = StringRepresentable.fromEnum(Axis::values, Axis::byName);
             BY_NAME = Arrays.stream(VALUES).collect(Collectors.toMap(Axis::getName, axis -> axis));
         }
     }

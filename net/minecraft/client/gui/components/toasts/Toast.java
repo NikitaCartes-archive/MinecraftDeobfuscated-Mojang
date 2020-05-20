@@ -24,6 +24,14 @@ public interface Toast {
         return NO_TOKEN;
     }
 
+    default public int width() {
+        return 160;
+    }
+
+    default public int height() {
+        return 32;
+    }
+
     @Environment(value=EnvType.CLIENT)
     public static enum Visibility {
         SHOW(SoundEvents.UI_TOAST_IN),

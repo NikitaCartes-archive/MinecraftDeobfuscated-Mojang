@@ -26,7 +26,6 @@ import net.minecraft.world.level.block.entity.TheEndPortalBlockEntity;
 import net.minecraft.world.level.block.entity.TickableBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.dimension.end.TheEndDimension;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
@@ -151,7 +150,7 @@ implements TickableBlockEntity {
             return;
         }
         this.teleportCooldown = 100;
-        if (this.exitPortal == null && this.level.getDimension() instanceof TheEndDimension) {
+        if (this.exitPortal == null && this.level.dimensionType().isEnd()) {
             this.findExitPortal((ServerLevel)this.level);
         }
         if (this.exitPortal != null) {

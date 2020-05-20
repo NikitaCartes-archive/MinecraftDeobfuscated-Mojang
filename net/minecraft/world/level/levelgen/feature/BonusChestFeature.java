@@ -3,11 +3,10 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import net.minecraft.core.BlockPos;
@@ -26,8 +25,8 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class BonusChestFeature
 extends Feature<NoneFeatureConfiguration> {
-    public BonusChestFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-        super(function);
+    public BonusChestFeature(Codec<NoneFeatureConfiguration> codec) {
+        super(codec);
     }
 
     @Override

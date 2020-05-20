@@ -9,6 +9,8 @@ import net.minecraft.advancements.critereon.DeserializationContext;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
@@ -26,13 +28,13 @@ extends SimpleCriterionTrigger<TriggerInstance> {
 
     @Override
     public TriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
-        DimensionType dimensionType = jsonObject.has("from") ? DimensionType.getByName(new ResourceLocation(GsonHelper.getAsString(jsonObject, "from"))) : null;
-        DimensionType dimensionType2 = jsonObject.has("to") ? DimensionType.getByName(new ResourceLocation(GsonHelper.getAsString(jsonObject, "to"))) : null;
-        return new TriggerInstance(composite, dimensionType, dimensionType2);
+        ResourceKey<DimensionType> resourceKey = jsonObject.has("from") ? ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, new ResourceLocation(GsonHelper.getAsString(jsonObject, "from"))) : null;
+        ResourceKey<DimensionType> resourceKey2 = jsonObject.has("to") ? ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, new ResourceLocation(GsonHelper.getAsString(jsonObject, "to"))) : null;
+        return new TriggerInstance(composite, resourceKey, resourceKey2);
     }
 
-    public void trigger(ServerPlayer serverPlayer, DimensionType dimensionType, DimensionType dimensionType2) {
-        this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(dimensionType, dimensionType2));
+    public void trigger(ServerPlayer serverPlayer, ResourceKey<DimensionType> resourceKey, ResourceKey<DimensionType> resourceKey2) {
+        this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(resourceKey, resourceKey2));
     }
 
     @Override
@@ -43,35 +45,35 @@ extends SimpleCriterionTrigger<TriggerInstance> {
     public static class TriggerInstance
     extends AbstractCriterionTriggerInstance {
         @Nullable
-        private final DimensionType from;
+        private final ResourceKey<DimensionType> from;
         @Nullable
-        private final DimensionType to;
+        private final ResourceKey<DimensionType> to;
 
-        public TriggerInstance(EntityPredicate.Composite composite, @Nullable DimensionType dimensionType, @Nullable DimensionType dimensionType2) {
+        public TriggerInstance(EntityPredicate.Composite composite, @Nullable ResourceKey<DimensionType> resourceKey, @Nullable ResourceKey<DimensionType> resourceKey2) {
             super(ID, composite);
-            this.from = dimensionType;
-            this.to = dimensionType2;
+            this.from = resourceKey;
+            this.to = resourceKey2;
         }
 
-        public static TriggerInstance changedDimensionTo(DimensionType dimensionType) {
-            return new TriggerInstance(EntityPredicate.Composite.ANY, null, dimensionType);
+        public static TriggerInstance changedDimensionTo(ResourceKey<DimensionType> resourceKey) {
+            return new TriggerInstance(EntityPredicate.Composite.ANY, null, resourceKey);
         }
 
-        public boolean matches(DimensionType dimensionType, DimensionType dimensionType2) {
-            if (this.from != null && this.from != dimensionType) {
+        public boolean matches(ResourceKey<DimensionType> resourceKey, ResourceKey<DimensionType> resourceKey2) {
+            if (this.from != null && this.from != resourceKey) {
                 return false;
             }
-            return this.to == null || this.to == dimensionType2;
+            return this.to == null || this.to == resourceKey2;
         }
 
         @Override
         public JsonObject serializeToJson(SerializationContext serializationContext) {
             JsonObject jsonObject = super.serializeToJson(serializationContext);
             if (this.from != null) {
-                jsonObject.addProperty("from", DimensionType.getName(this.from).toString());
+                jsonObject.addProperty("from", this.from.location().toString());
             }
             if (this.to != null) {
-                jsonObject.addProperty("to", DimensionType.getName(this.to).toString());
+                jsonObject.addProperty("to", this.to.location().toString());
             }
             return jsonObject;
         }

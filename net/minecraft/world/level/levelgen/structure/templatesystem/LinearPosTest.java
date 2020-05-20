@@ -3,9 +3,10 @@
  */
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTestTy
 
 public class LinearPosTest
 extends PosRuleTest {
+    public static final Codec<LinearPosTest> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.FLOAT.fieldOf("min_chance")).withDefault(Float.valueOf(0.0f)).forGetter(linearPosTest -> Float.valueOf(linearPosTest.minChance)), ((MapCodec)Codec.FLOAT.fieldOf("max_chance")).withDefault(Float.valueOf(0.0f)).forGetter(linearPosTest -> Float.valueOf(linearPosTest.maxChance)), ((MapCodec)Codec.INT.fieldOf("min_dist")).withDefault(0).forGetter(linearPosTest -> linearPosTest.minDist), ((MapCodec)Codec.INT.fieldOf("max_dist")).withDefault(0).forGetter(linearPosTest -> linearPosTest.maxDist)).apply((Applicative<LinearPosTest, ?>)instance, LinearPosTest::new));
     private final float minChance;
     private final float maxChance;
     private final int minDist;
@@ -29,10 +31,6 @@ extends PosRuleTest {
         this.maxDist = j;
     }
 
-    public <T> LinearPosTest(Dynamic<T> dynamic) {
-        this(dynamic.get("min_chance").asFloat(0.0f), dynamic.get("max_chance").asFloat(0.0f), dynamic.get("min_dist").asInt(0), dynamic.get("max_dist").asInt(0));
-    }
-
     @Override
     public boolean test(BlockPos blockPos, BlockPos blockPos2, BlockPos blockPos3, Random random) {
         int i = blockPos2.distManhattan(blockPos3);
@@ -41,13 +39,8 @@ extends PosRuleTest {
     }
 
     @Override
-    protected PosRuleTestType getType() {
+    protected PosRuleTestType<?> getType() {
         return PosRuleTestType.LINEAR_POS_TEST;
-    }
-
-    @Override
-    protected <T> Dynamic<T> getDynamic(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("min_chance"), dynamicOps.createFloat(this.minChance), dynamicOps.createString("max_chance"), dynamicOps.createFloat(this.maxChance), dynamicOps.createString("min_dist"), dynamicOps.createFloat(this.minDist), dynamicOps.createString("max_dist"), dynamicOps.createFloat(this.maxDist))));
     }
 }
 

@@ -3,7 +3,8 @@
  */
 package net.minecraft.world.entity.monster;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -74,7 +75,7 @@ implements VillagerDataHolder {
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        compoundTag.put("VillagerData", this.getVillagerData().serialize(NbtOps.INSTANCE));
+        VillagerData.CODEC.encodeStart(NbtOps.INSTANCE, this.getVillagerData()).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("VillagerData", (Tag)tag));
         if (this.tradeOffers != null) {
             compoundTag.put("Offers", this.tradeOffers);
         }
@@ -92,7 +93,8 @@ implements VillagerDataHolder {
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
         if (compoundTag.contains("VillagerData", 10)) {
-            this.setVillagerData(new VillagerData(new Dynamic<Tag>(NbtOps.INSTANCE, compoundTag.get("VillagerData"))));
+            DataResult dataResult = VillagerData.CODEC.parse(new Dynamic<Tag>(NbtOps.INSTANCE, compoundTag.get("VillagerData")));
+            dataResult.resultOrPartial(LOGGER::error).ifPresent(this::setVillagerData);
         }
         if (compoundTag.contains("Offers", 10)) {
             this.tradeOffers = compoundTag.getCompound("Offers");

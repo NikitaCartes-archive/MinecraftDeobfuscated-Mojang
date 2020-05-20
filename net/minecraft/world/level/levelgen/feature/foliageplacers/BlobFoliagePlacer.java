@@ -3,9 +3,11 @@
  */
 package net.minecraft.world.level.levelgen.feature.foliageplacers;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.Products;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
@@ -16,10 +18,15 @@ import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerTy
 
 public class BlobFoliagePlacer
 extends FoliagePlacer {
+    public static final Codec<BlobFoliagePlacer> CODEC = RecordCodecBuilder.create(instance -> BlobFoliagePlacer.blobParts(instance).apply((Applicative)instance, BlobFoliagePlacer::new));
     protected final int height;
 
+    protected static <P extends BlobFoliagePlacer> Products.P5<RecordCodecBuilder.Mu<P>, Integer, Integer, Integer, Integer, Integer> blobParts(RecordCodecBuilder.Instance<P> instance) {
+        return BlobFoliagePlacer.foliagePlacerParts(instance).and(((MapCodec)Codec.INT.fieldOf("height")).forGetter(blobFoliagePlacer -> blobFoliagePlacer.height));
+    }
+
     protected BlobFoliagePlacer(int i, int j, int k, int l, int m, FoliagePlacerType<?> foliagePlacerType) {
-        super(i, j, k, l, foliagePlacerType);
+        super(i, j, k, l);
         this.height = m;
     }
 
@@ -27,8 +34,9 @@ extends FoliagePlacer {
         this(i, j, k, l, m, FoliagePlacerType.BLOB_FOLIAGE_PLACER);
     }
 
-    public <T> BlobFoliagePlacer(Dynamic<T> dynamic) {
-        this(dynamic.get("radius").asInt(0), dynamic.get("radius_random").asInt(0), dynamic.get("offset").asInt(0), dynamic.get("offset_random").asInt(0), dynamic.get("height").asInt(0));
+    @Override
+    protected FoliagePlacerType<?> type() {
+        return FoliagePlacerType.BLOB_FOLIAGE_PLACER;
     }
 
     @Override
@@ -47,13 +55,6 @@ extends FoliagePlacer {
     @Override
     protected boolean shouldSkipLocation(Random random, int i, int j, int k, int l, boolean bl) {
         return i == l && k == l && (random.nextInt(2) == 0 || j == 0);
-    }
-
-    @Override
-    public <T> T serialize(DynamicOps<T> dynamicOps) {
-        ImmutableMap.Builder<T, T> builder = ImmutableMap.builder();
-        builder.put(dynamicOps.createString("height"), dynamicOps.createInt(this.height));
-        return dynamicOps.merge(super.serialize(dynamicOps), dynamicOps.createMap(builder.build()));
     }
 }
 

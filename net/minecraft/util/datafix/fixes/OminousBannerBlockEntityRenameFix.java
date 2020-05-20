@@ -1,12 +1,12 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.util.datafix;
+package net.minecraft.util.datafix.fixes;
 
 import com.mojang.datafixers.DSL;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
+import com.mojang.serialization.Dynamic;
 import java.util.Optional;
 import net.minecraft.util.datafix.fixes.NamedEntityFix;
 import net.minecraft.util.datafix.fixes.References;
@@ -23,7 +23,7 @@ extends NamedEntityFix {
     }
 
     private Dynamic<?> fixTag(Dynamic<?> dynamic) {
-        Optional<String> optional = dynamic.get("CustomName").asString();
+        Optional<String> optional = dynamic.get("CustomName").asString().result();
         if (optional.isPresent()) {
             String string = optional.get();
             string = string.replace("\"translate\":\"block.minecraft.illager_banner\"", "\"translate\":\"block.minecraft.ominous_banner\"");

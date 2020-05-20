@@ -7,13 +7,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.types.templates.List;
+import com.mojang.serialization.Dynamic;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -70,7 +70,7 @@ extends DataFix {
                         map.put(dynamic22.createString("y"), dynamic22.createInt(p + (l << 4)));
                         map.put(dynamic22.createString("z"), dynamic22.createInt(q + (j << 4)));
                         map.put(dynamic22.createString("color"), dynamic22.createShort((short)14));
-                        list.add(type2.read(dynamic22.createMap(map)).getSecond().orElseThrow(() -> new IllegalStateException("Could not parse newly created bed block entity.")));
+                        list.add(type2.read(dynamic22.createMap(map)).result().orElseThrow(() -> new IllegalStateException("Could not parse newly created bed block entity.")).getFirst());
                     }
                     ++m;
                 }

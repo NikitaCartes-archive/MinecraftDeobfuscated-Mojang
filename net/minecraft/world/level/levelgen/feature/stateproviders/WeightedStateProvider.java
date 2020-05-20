@@ -3,12 +3,11 @@
  */
 package net.minecraft.world.level.levelgen.feature.stateproviders;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.world.entity.ai.behavior.WeightedList;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
@@ -16,19 +15,27 @@ import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvi
 
 public class WeightedStateProvider
 extends BlockStateProvider {
+    public static final Codec<WeightedStateProvider> CODEC = ((MapCodec)WeightedList.codec(BlockState.CODEC).comapFlatMap(WeightedStateProvider::create, weightedStateProvider -> weightedStateProvider.weightedList).fieldOf("entries")).codec();
     private final WeightedList<BlockState> weightedList;
 
+    private static DataResult<WeightedStateProvider> create(WeightedList<BlockState> weightedList) {
+        if (weightedList.isEmpty()) {
+            return DataResult.error("WeightedStateProvider with no states");
+        }
+        return DataResult.success(new WeightedStateProvider(weightedList));
+    }
+
     private WeightedStateProvider(WeightedList<BlockState> weightedList) {
-        super(BlockStateProviderType.WEIGHTED_STATE_PROVIDER);
         this.weightedList = weightedList;
+    }
+
+    @Override
+    protected BlockStateProviderType<?> type() {
+        return BlockStateProviderType.WEIGHTED_STATE_PROVIDER;
     }
 
     public WeightedStateProvider() {
         this(new WeightedList<BlockState>());
-    }
-
-    public <T> WeightedStateProvider(Dynamic<T> dynamic) {
-        this(new WeightedList<BlockState>(dynamic.get("entries").orElseEmptyList(), BlockState::deserialize));
     }
 
     public WeightedStateProvider add(BlockState blockState, int i) {
@@ -39,13 +46,6 @@ extends BlockStateProvider {
     @Override
     public BlockState getState(Random random, BlockPos blockPos) {
         return this.weightedList.getOne(random);
-    }
-
-    @Override
-    public <T> T serialize(DynamicOps<T> dynamicOps) {
-        ImmutableMap.Builder<T, T> builder = ImmutableMap.builder();
-        builder.put(dynamicOps.createString("type"), dynamicOps.createString(Registry.BLOCKSTATE_PROVIDER_TYPES.getKey(this.type).toString())).put(dynamicOps.createString("entries"), this.weightedList.serialize(dynamicOps, blockState -> BlockState.serialize(dynamicOps, blockState)));
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(builder.build())).getValue();
     }
 }
 

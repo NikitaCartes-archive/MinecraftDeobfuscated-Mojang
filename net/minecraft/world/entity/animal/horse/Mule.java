@@ -10,6 +10,7 @@ import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 public class Mule
 extends AbstractChestedHorse {
@@ -24,9 +25,21 @@ extends AbstractChestedHorse {
     }
 
     @Override
+    protected SoundEvent getAngrySound() {
+        super.getAngrySound();
+        return SoundEvents.MULE_ANGRY;
+    }
+
+    @Override
     protected SoundEvent getDeathSound() {
         super.getDeathSound();
         return SoundEvents.MULE_DEATH;
+    }
+
+    @Override
+    @Nullable
+    protected SoundEvent getEatingSound() {
+        return SoundEvents.MULE_EAT;
     }
 
     @Override

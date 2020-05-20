@@ -50,13 +50,12 @@ extends Button {
     public void renderButton(PoseStack poseStack, int i, int j, float f) {
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.getTextureManager().bind(this.resourceLocation);
-        RenderSystem.disableDepthTest();
         int k = this.yTexStart;
         if (this.isHovered()) {
             k += this.yDiffTex;
         }
-        ImageButton.blit(poseStack, this.x, this.y, this.xTexStart, k, this.width, this.height, this.textureWidth, this.textureHeight);
         RenderSystem.enableDepthTest();
+        ImageButton.blit(poseStack, this.x, this.y, this.xTexStart, k, this.width, this.height, this.textureWidth, this.textureHeight);
     }
 }
 

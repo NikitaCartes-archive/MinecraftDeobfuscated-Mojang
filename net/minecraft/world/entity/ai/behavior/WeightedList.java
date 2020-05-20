@@ -3,39 +3,31 @@
  */
 package net.minecraft.world.entity.ai.behavior;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.DynamicOps;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class WeightedList<U> {
-    protected final List<WeightedEntry<? extends U>> entries = Lists.newArrayList();
-    private final Random random;
-
-    public WeightedList(Random random) {
-        this.random = random;
-    }
+    protected final List<WeightedEntry<U>> entries;
+    private final Random random = new Random();
 
     public WeightedList() {
-        this(new Random());
+        this(Lists.newArrayList());
     }
 
-    public <T> WeightedList(Dynamic<T> dynamic2, Function<Dynamic<T>, U> function) {
-        this();
-        dynamic2.asStream().forEach(dynamic -> dynamic.get("data").map(dynamic2 -> {
-            Object object = function.apply((Dynamic)dynamic2);
-            int i = dynamic.get("weight").asInt(1);
-            return this.add(object, i);
-        }));
+    private WeightedList(List<WeightedEntry<U>> list) {
+        this.entries = list;
     }
 
-    public <T> T serialize(DynamicOps<T> dynamicOps, Function<U, Dynamic<T>> function) {
-        return (T)dynamicOps.createList(this.streamEntries().map(weightedEntry -> dynamicOps.createMap(ImmutableMap.builder().put(dynamicOps.createString("data"), ((Dynamic)function.apply(weightedEntry.getData())).getValue()).put(dynamicOps.createString("weight"), dynamicOps.createInt(weightedEntry.getWeight())).build())));
+    public static <U> Codec<WeightedList<U>> codec(Codec<U> codec) {
+        return WeightedEntry.codec(codec).listOf().xmap(WeightedList::new, weightedList -> weightedList.entries);
     }
 
     public WeightedList<U> add(U object, int i) {
@@ -53,12 +45,12 @@ public class WeightedList<U> {
         return this;
     }
 
-    public Stream<? extends U> stream() {
-        return this.entries.stream().map(WeightedEntry::getData);
+    public boolean isEmpty() {
+        return this.entries.isEmpty();
     }
 
-    public Stream<WeightedEntry<? extends U>> streamEntries() {
-        return this.entries.stream();
+    public Stream<U> stream() {
+        return this.entries.stream().map(WeightedEntry::getData);
     }
 
     public U getOne(Random random) {
@@ -69,7 +61,7 @@ public class WeightedList<U> {
         return "WeightedList[" + this.entries + "]";
     }
 
-    public class WeightedEntry<T> {
+    public static class WeightedEntry<T> {
         private final T data;
         private final int weight;
         private double randWeight;
@@ -91,12 +83,29 @@ public class WeightedList<U> {
             return this.data;
         }
 
-        public int getWeight() {
-            return this.weight;
-        }
-
         public String toString() {
             return "" + this.weight + ":" + this.data;
+        }
+
+        public static <E> Codec<WeightedEntry<E>> codec(final Codec<E> codec) {
+            return new Codec<WeightedEntry<E>>(){
+
+                @Override
+                public <T> DataResult<Pair<WeightedEntry<E>, T>> decode(DynamicOps<T> dynamicOps, T object2) {
+                    Dynamic dynamic = new Dynamic(dynamicOps, object2);
+                    return dynamic.get("data").flatMap(codec::parse).map((? super R object) -> new WeightedEntry(object, dynamic.get("weight").asInt(1))).map((? super R weightedEntry) -> Pair.of(weightedEntry, dynamicOps.empty()));
+                }
+
+                @Override
+                public <T> DataResult<T> encode(WeightedEntry<E> weightedEntry, DynamicOps<T> dynamicOps, T object) {
+                    return dynamicOps.mapBuilder().add("weight", dynamicOps.createInt(weightedEntry.weight)).add("data", codec.encodeStart(dynamicOps, weightedEntry.data)).build(object);
+                }
+
+                @Override
+                public /* synthetic */ DataResult encode(Object object, DynamicOps dynamicOps, Object object2) {
+                    return this.encode((WeightedEntry)object, dynamicOps, object2);
+                }
+            };
         }
     }
 }

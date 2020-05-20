@@ -5,8 +5,10 @@ package net.minecraft.world.entity;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
@@ -214,15 +216,20 @@ extends Entity {
         this.timeOffs = (float)Math.random() * 12398.0f;
         this.yHeadRot = this.yRot = (float)(Math.random() * 6.2831854820251465);
         this.maxUpStep = 0.6f;
-        this.brain = this.makeBrain(new Dynamic<CompoundTag>(NbtOps.INSTANCE, new CompoundTag()));
+        NbtOps nbtOps = NbtOps.INSTANCE;
+        this.brain = this.makeBrain(new Dynamic<net.minecraft.nbt.Tag>(nbtOps, nbtOps.createMap(ImmutableMap.of(nbtOps.createString("memories"), nbtOps.emptyMap()))));
     }
 
     public Brain<?> getBrain() {
         return this.brain;
     }
 
+    protected Brain.Provider<?> brainProvider() {
+        return Brain.provider(ImmutableList.of(), ImmutableList.of());
+    }
+
     protected Brain<?> makeBrain(Dynamic<?> dynamic) {
-        return new Brain(ImmutableList.of(), ImmutableList.of(), dynamic);
+        return this.brainProvider().makeBrain(dynamic);
     }
 
     @Override
@@ -537,7 +544,8 @@ extends Entity {
             compoundTag.putInt("SleepingY", blockPos.getY());
             compoundTag.putInt("SleepingZ", blockPos.getZ());
         });
-        compoundTag.put("Brain", this.brain.serialize(NbtOps.INSTANCE));
+        DataResult<net.minecraft.nbt.Tag> dataResult = this.brain.serializeStart(NbtOps.INSTANCE);
+        dataResult.resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("Brain", (net.minecraft.nbt.Tag)tag));
     }
 
     @Override

@@ -58,16 +58,16 @@ extends Screen {
     public CreateWorldScreen(@Nullable Screen screen, WorldData worldData) {
         this(screen, new WorldGenSettingsComponent(worldData.getLevelSettings().worldGenSettings()));
         LevelSettings levelSettings = worldData.getLevelSettings();
-        this.initName = levelSettings.getLevelName();
-        this.commands = levelSettings.getAllowCommands();
+        this.initName = levelSettings.levelName();
+        this.commands = levelSettings.allowCommands();
         this.commandsChanged = true;
-        this.effectiveDifficulty = this.selectedDifficulty = levelSettings.getDifficulty();
+        this.effectiveDifficulty = this.selectedDifficulty = levelSettings.difficulty();
         this.gameRules.assignFrom(worldData.getGameRules(), null);
-        if (levelSettings.isHardcore()) {
+        if (levelSettings.hardcore()) {
             this.gameMode = SelectedGameMode.HARDCORE;
-        } else if (levelSettings.getGameType().isSurvival()) {
+        } else if (levelSettings.gameType().isSurvival()) {
             this.gameMode = SelectedGameMode.SURVIVAL;
-        } else if (levelSettings.getGameType().isCreative()) {
+        } else if (levelSettings.gameType().isCreative()) {
             this.gameMode = SelectedGameMode.CREATIVE;
         }
     }
@@ -106,7 +106,7 @@ extends Screen {
             this.updateResultFolder();
         });
         this.children.add(this.nameEdit);
-        this.modeButton = this.addButton(new Button(this.width / 2 - 155, 115, 150, 20, new TranslatableComponent("selectWorld.gameMode"), button -> {
+        this.modeButton = this.addButton(new Button(this.width / 2 - 155, 100, 150, 20, new TranslatableComponent("selectWorld.gameMode"), button -> {
             switch (this.gameMode) {
                 case SURVIVAL: {
                     this.setGameMode(SelectedGameMode.HARDCORE);
@@ -133,7 +133,7 @@ extends Screen {
                 return super.createNarrationMessage().append(". ").append(CreateWorldScreen.this.gameModeHelp1).append(" ").append(CreateWorldScreen.this.gameModeHelp2);
             }
         });
-        this.difficultyButton = this.addButton(new Button(this.width / 2 + 5, 115, 150, 20, new TranslatableComponent("options.difficulty"), button -> {
+        this.difficultyButton = this.addButton(new Button(this.width / 2 + 5, 100, 150, 20, new TranslatableComponent("options.difficulty"), button -> {
             this.effectiveDifficulty = this.selectedDifficulty = this.selectedDifficulty.nextById();
             button.queueNarration(250);
         }){
@@ -143,7 +143,6 @@ extends Screen {
                 return new TranslatableComponent("options.difficulty").append(": ").append(CreateWorldScreen.this.effectiveDifficulty.getDisplayName());
             }
         });
-        this.worldGenSettingsComponent.init(this, this.minecraft, this.font);
         this.commandsButton = this.addButton(new Button(this.width / 2 - 155, 151, 150, 20, new TranslatableComponent("selectWorld.allowCommands"), button -> {
             this.commandsChanged = true;
             this.commands = !this.commands;
@@ -160,17 +159,17 @@ extends Screen {
                 return super.createNarrationMessage().append(". ").append(new TranslatableComponent("selectWorld.allowCommands.info"));
             }
         });
-        this.commandsButton.visible = false;
-        this.createButton = this.addButton(new Button(this.width / 2 - 155, this.height - 28, 150, 20, new TranslatableComponent("selectWorld.create"), button -> this.onCreate()));
-        this.createButton.active = !this.initName.isEmpty();
-        this.addButton(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)));
-        this.moreOptionsButton = this.addButton(new Button(this.width / 2 + 5, 185, 150, 20, new TranslatableComponent("selectWorld.moreWorldOptions"), button -> this.toggleDisplayOptions()));
         this.gameRulesButton = this.addButton(new Button(this.width / 2 - 155, 185, 150, 20, new TranslatableComponent("selectWorld.gameRules"), button -> this.minecraft.setScreen(new EditGameRulesScreen(this.gameRules.copy(), optional -> {
             this.minecraft.setScreen(this);
             optional.ifPresent(gameRules -> {
                 this.gameRules = gameRules;
             });
         }))));
+        this.worldGenSettingsComponent.init(this, this.minecraft, this.font);
+        this.moreOptionsButton = this.addButton(new Button(this.width / 2 + 5, 185, 150, 20, new TranslatableComponent("selectWorld.moreWorldOptions"), button -> this.toggleDisplayOptions()));
+        this.createButton = this.addButton(new Button(this.width / 2 - 155, this.height - 28, 150, 20, new TranslatableComponent("selectWorld.create"), button -> this.onCreate()));
+        this.createButton.active = !this.initName.isEmpty();
+        this.addButton(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.lastScreen)));
         this.updateDisplayOptions();
         this.setInitialFocus(this.nameEdit);
         this.setGameMode(this.gameMode);
@@ -267,7 +266,7 @@ extends Screen {
             if (this.oldGameMode != null) {
                 this.setGameMode(this.oldGameMode);
             }
-            this.commandsButton.visible = this.displayOptions;
+            this.commandsButton.visible = !this.displayOptions;
         }
         this.worldGenSettingsComponent.setDisplayOptions(this.displayOptions);
         this.nameEdit.setVisible(!this.displayOptions);
@@ -307,16 +306,16 @@ extends Screen {
         if (this.displayOptions) {
             this.drawString(poseStack, this.font, I18n.get("selectWorld.enterSeed", new Object[0]), this.width / 2 - 100, 47, -6250336);
             this.drawString(poseStack, this.font, I18n.get("selectWorld.seedInfo", new Object[0]), this.width / 2 - 100, 85, -6250336);
-            if (this.commandsButton.visible) {
-                this.drawString(poseStack, this.font, I18n.get("selectWorld.allowCommands.info", new Object[0]), this.width / 2 - 150, 172, -6250336);
-            }
             this.worldGenSettingsComponent.render(poseStack, i, j, f);
         } else {
             this.drawString(poseStack, this.font, I18n.get("selectWorld.enterName", new Object[0]), this.width / 2 - 100, 47, -6250336);
             this.drawString(poseStack, this.font, I18n.get("selectWorld.resultFolder", new Object[0]) + " " + this.resultFolder, this.width / 2 - 100, 85, -6250336);
             this.nameEdit.render(poseStack, i, j, f);
-            this.drawCenteredString(poseStack, this.font, this.gameModeHelp1, this.width / 2 - 155 + 75, 137, -6250336);
-            this.drawCenteredString(poseStack, this.font, this.gameModeHelp2, this.width / 2 - 155 + 75, 149, -6250336);
+            this.drawCenteredString(poseStack, this.font, this.gameModeHelp1, this.width / 2 - 155 + 75, 122, -6250336);
+            this.drawCenteredString(poseStack, this.font, this.gameModeHelp2, this.width / 2 - 155 + 75, 134, -6250336);
+            if (this.commandsButton.visible) {
+                this.drawString(poseStack, this.font, I18n.get("selectWorld.allowCommands.info", new Object[0]), this.width / 2 - 150, 172, -6250336);
+            }
         }
         super.render(poseStack, i, j, f);
     }

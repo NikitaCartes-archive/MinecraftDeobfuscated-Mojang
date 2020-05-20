@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -24,7 +25,7 @@ extends Sensor<Villager> {
 
     @Override
     protected void doTick(ServerLevel serverLevel, Villager villager) {
-        DimensionType dimensionType = serverLevel.dimensionType();
+        ResourceKey<DimensionType> resourceKey = serverLevel.dimension();
         BlockPos blockPos = villager.blockPosition();
         ArrayList<GlobalPos> list = Lists.newArrayList();
         int i = 4;
@@ -33,7 +34,7 @@ extends Sensor<Villager> {
                 for (int l = -4; l <= 4; ++l) {
                     BlockPos blockPos2 = blockPos.offset(j, k, l);
                     if (!villager.getVillagerData().getProfession().getSecondaryPoi().contains(serverLevel.getBlockState(blockPos2).getBlock())) continue;
-                    list.add(GlobalPos.of(dimensionType, blockPos2));
+                    list.add(GlobalPos.of(resourceKey, blockPos2));
                 }
             }
         }

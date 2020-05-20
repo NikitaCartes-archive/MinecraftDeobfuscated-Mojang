@@ -3,20 +3,20 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 public class WeightedConfiguredFeature<FC extends FeatureConfiguration> {
+    public static final Codec<WeightedConfiguredFeature<?>> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ConfiguredFeature.CODEC.fieldOf("feature")).forGetter(weightedConfiguredFeature -> weightedConfiguredFeature.feature), ((MapCodec)Codec.FLOAT.fieldOf("chance")).forGetter(weightedConfiguredFeature -> Float.valueOf(weightedConfiguredFeature.chance))).apply((Applicative<WeightedConfiguredFeature, ?>)instance, WeightedConfiguredFeature::new));
     public final ConfiguredFeature<FC, ?> feature;
     public final float chance;
 
@@ -25,16 +25,8 @@ public class WeightedConfiguredFeature<FC extends FeatureConfiguration> {
         this.chance = f;
     }
 
-    public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("name"), dynamicOps.createString(Registry.FEATURE.getKey((Feature<?>)this.feature.feature).toString()), dynamicOps.createString("config"), this.feature.config.serialize(dynamicOps).getValue(), dynamicOps.createString("chance"), dynamicOps.createFloat(this.chance))));
-    }
-
     public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos) {
         return this.feature.place(worldGenLevel, structureFeatureManager, chunkGenerator, random, blockPos);
-    }
-
-    public static <T> WeightedConfiguredFeature<?> deserialize(Dynamic<T> dynamic) {
-        return ConfiguredFeature.deserialize(dynamic).weighted(dynamic.get("chance").asFloat(0.0f));
     }
 }
 

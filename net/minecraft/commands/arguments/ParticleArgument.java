@@ -46,7 +46,7 @@ implements ArgumentType<ParticleOptions> {
 
     public static ParticleOptions readParticle(StringReader stringReader) throws CommandSyntaxException {
         ResourceLocation resourceLocation = ResourceLocation.read(stringReader);
-        ParticleType<? extends ParticleOptions> particleType = Registry.PARTICLE_TYPE.getOptional(resourceLocation).orElseThrow(() -> ERROR_UNKNOWN_PARTICLE.create(resourceLocation));
+        ParticleType<?> particleType = Registry.PARTICLE_TYPE.getOptional(resourceLocation).orElseThrow(() -> ERROR_UNKNOWN_PARTICLE.create(resourceLocation));
         return ParticleArgument.readParticle(stringReader, particleType);
     }
 

@@ -30,7 +30,7 @@ extends BaseAshSmokeParticle {
 
         @Override
         public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
-            return new AshParticle(clientLevel, d, e, f, g, h, i, 1.0f, this.sprites);
+            return new AshParticle(clientLevel, d, e, f, 0.0, 0.0, 0.0, 1.0f, this.sprites);
         }
     }
 }

@@ -4,9 +4,9 @@
 package net.minecraft.util.datafix.fixes;
 
 import com.mojang.datafixers.DSL;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
+import com.mojang.serialization.Dynamic;
 import java.util.Random;
 import net.minecraft.util.datafix.fixes.NamedEntityFix;
 import net.minecraft.util.datafix.fixes.References;
@@ -21,7 +21,7 @@ extends NamedEntityFix {
 
     public Dynamic<?> fixTag(Dynamic<?> dynamic) {
         if (dynamic.get("IsVillager").asBoolean(false)) {
-            if (!dynamic.get("ZombieType").get().isPresent()) {
+            if (!dynamic.get("ZombieType").result().isPresent()) {
                 int i = this.getVillagerProfession(dynamic.get("VillagerProfession").asInt(-1));
                 if (i == -1) {
                     i = this.getVillagerProfession(RANDOM.nextInt(6));

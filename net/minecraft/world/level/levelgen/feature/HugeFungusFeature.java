@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -24,8 +23,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class HugeFungusFeature
 extends Feature<HugeFungusConfiguration> {
-    public HugeFungusFeature(Function<Dynamic<?>, ? extends HugeFungusConfiguration> function) {
-        super(function);
+    public HugeFungusFeature(Codec<HugeFungusConfiguration> codec) {
+        super(codec);
     }
 
     @Override

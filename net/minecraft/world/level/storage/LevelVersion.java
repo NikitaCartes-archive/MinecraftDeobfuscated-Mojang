@@ -1,0 +1,61 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.world.level.storage;
+
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.OptionalDynamic;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.SharedConstants;
+
+public class LevelVersion {
+    private final int levelDataVersion;
+    private final long lastPlayed;
+    private final String minecraftVersionName;
+    private final int minecraftVersion;
+    private final boolean snapshot;
+
+    public LevelVersion(int i, long l, String string, int j, boolean bl) {
+        this.levelDataVersion = i;
+        this.lastPlayed = l;
+        this.minecraftVersionName = string;
+        this.minecraftVersion = j;
+        this.snapshot = bl;
+    }
+
+    public static LevelVersion parse(Dynamic<?> dynamic) {
+        int i = dynamic.get("version").asInt(0);
+        long l = dynamic.get("LastPlayed").asLong(0L);
+        OptionalDynamic<?> optionalDynamic = dynamic.get("Version");
+        if (optionalDynamic.result().isPresent()) {
+            return new LevelVersion(i, l, optionalDynamic.get("Name").asString(SharedConstants.getCurrentVersion().getName()), optionalDynamic.get("Id").asInt(SharedConstants.getCurrentVersion().getWorldVersion()), optionalDynamic.get("Snapshot").asBoolean(!SharedConstants.getCurrentVersion().isStable()));
+        }
+        return new LevelVersion(i, l, "", 0, false);
+    }
+
+    public int levelDataVersion() {
+        return this.levelDataVersion;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public long lastPlayed() {
+        return this.lastPlayed;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public String minecraftVersionName() {
+        return this.minecraftVersionName;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public int minecraftVersion() {
+        return this.minecraftVersion;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public boolean snapshot() {
+        return this.snapshot;
+    }
+}
+

@@ -57,7 +57,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
@@ -197,7 +196,7 @@ extends GuiComponent {
         if (string3 != null) {
             list.add(string3);
         }
-        list.add(DimensionType.getName(this.minecraft.level.dimensionType()).toString() + " FC: " + Integer.toString(longSet.size()));
+        list.add(this.minecraft.level.dimension().location() + " FC: " + longSet.size());
         list.add("");
         list.add(String.format(Locale.ROOT, "XYZ: %.3f / %.5f / %.3f", this.minecraft.getCameraEntity().getX(), this.minecraft.getCameraEntity().getY(), this.minecraft.getCameraEntity().getZ()));
         list.add(String.format("Block: %d %d %d", blockPos.getX(), blockPos.getY(), blockPos.getZ()));
@@ -223,14 +222,14 @@ extends GuiComponent {
                     StringBuilder stringBuilder = new StringBuilder("CH");
                     for (Heightmap.Types types : Heightmap.Types.values()) {
                         if (!types.sendToClient()) continue;
-                        stringBuilder.append(" ").append(HEIGHTMAP_NAMES.get((Object)types)).append(": ").append(levelChunk.getHeight(types, blockPos.getX(), blockPos.getZ()));
+                        stringBuilder.append(" ").append(HEIGHTMAP_NAMES.get(types)).append(": ").append(levelChunk.getHeight(types, blockPos.getX(), blockPos.getZ()));
                     }
                     list.add(stringBuilder.toString());
                     stringBuilder.setLength(0);
                     stringBuilder.append("SH");
                     for (Heightmap.Types types : Heightmap.Types.values()) {
                         if (!types.keepAfterWorldgen()) continue;
-                        stringBuilder.append(" ").append(HEIGHTMAP_NAMES.get((Object)types)).append(": ");
+                        stringBuilder.append(" ").append(HEIGHTMAP_NAMES.get(types)).append(": ");
                         if (levelChunk2 != null) {
                             stringBuilder.append(levelChunk2.getHeight(types, blockPos.getX(), blockPos.getZ()));
                             continue;
@@ -278,7 +277,7 @@ extends GuiComponent {
     private ServerLevel getServerLevel() {
         IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
         if (integratedServer != null) {
-            return integratedServer.getLevel(this.minecraft.level.dimensionType());
+            return integratedServer.getLevel(this.minecraft.level.dimension());
         }
         return null;
     }
@@ -293,7 +292,7 @@ extends GuiComponent {
     }
 
     private Level getLevel() {
-        return DataFixUtils.orElse(Optional.ofNullable(this.minecraft.getSingleplayerServer()).map(integratedServer -> integratedServer.getLevel(this.minecraft.level.dimensionType())), this.minecraft.level);
+        return DataFixUtils.orElse(Optional.ofNullable(this.minecraft.getSingleplayerServer()).map(integratedServer -> integratedServer.getLevel(this.minecraft.level.dimension())), this.minecraft.level);
     }
 
     @Nullable

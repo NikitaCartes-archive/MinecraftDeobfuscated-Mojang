@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.levelgen;
 
+import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -23,13 +24,14 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.StructureSettings;
 
 public class DebugLevelSource
 extends ChunkGenerator {
-    public static final ChunkGenerator INSTANCE = new DebugLevelSource();
+    public static final DebugLevelSource INSTANCE = new DebugLevelSource();
+    public static final Codec<DebugLevelSource> CODEC = Codec.unit(() -> INSTANCE).stable();
     private static final List<BlockState> ALL_BLOCKS = StreamSupport.stream(Registry.BLOCK.spliterator(), false).flatMap(block -> block.getStateDefinition().getPossibleStates().stream()).collect(Collectors.toList());
     private static final int GRID_WIDTH = Mth.ceil(Mth.sqrt(ALL_BLOCKS.size()));
     private static final int GRID_HEIGHT = Mth.ceil((float)ALL_BLOCKS.size() / (float)GRID_WIDTH);
@@ -37,7 +39,12 @@ extends ChunkGenerator {
     protected static final BlockState BARRIER = Blocks.BARRIER.defaultBlockState();
 
     private DebugLevelSource() {
-        super(new FixedBiomeSource(Biomes.PLAINS), new ChunkGeneratorSettings());
+        super(new FixedBiomeSource(Biomes.PLAINS), new StructureSettings(false));
+    }
+
+    @Override
+    protected Codec<? extends ChunkGenerator> codec() {
+        return CODEC;
     }
 
     @Override

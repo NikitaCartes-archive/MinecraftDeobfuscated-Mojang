@@ -18,7 +18,6 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.FluidStateImpl;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +30,7 @@ public abstract class Fluid {
     protected Fluid() {
         StateDefinition.Builder<Fluid, FluidState> builder = new StateDefinition.Builder<Fluid, FluidState>(this);
         this.createFluidStateDefinition(builder);
-        this.stateDefinition = builder.create(FluidStateImpl::new);
+        this.stateDefinition = builder.create(Fluid::defaultFluidState, FluidState::new);
         this.registerDefaultState(this.stateDefinition.any());
     }
 

@@ -91,11 +91,11 @@ public class PoiType {
     }
 
     private static PoiType register(String string, Set<BlockState> set, int i, int j) {
-        return PoiType.registerBlockStates(Registry.POINT_OF_INTEREST_TYPE.register(new ResourceLocation(string), new PoiType(string, set, i, j)));
+        return PoiType.registerBlockStates(Registry.register(Registry.POINT_OF_INTEREST_TYPE, new ResourceLocation(string), new PoiType(string, set, i, j)));
     }
 
     private static PoiType register(String string, Set<BlockState> set, int i, Predicate<PoiType> predicate, int j) {
-        return PoiType.registerBlockStates(Registry.POINT_OF_INTEREST_TYPE.register(new ResourceLocation(string), new PoiType(string, set, i, predicate, j)));
+        return PoiType.registerBlockStates(Registry.register(Registry.POINT_OF_INTEREST_TYPE, new ResourceLocation(string), new PoiType(string, set, i, predicate, j)));
     }
 
     private static PoiType registerBlockStates(PoiType poiType) {

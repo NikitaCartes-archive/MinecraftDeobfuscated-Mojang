@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.placement;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
@@ -17,8 +16,8 @@ import net.minecraft.world.level.levelgen.placement.FrequencyWithExtraChanceDeco
 
 public class CountWithExtraChanceHeightmapDecorator
 extends FeatureDecorator<FrequencyWithExtraChanceDecoratorConfiguration> {
-    public CountWithExtraChanceHeightmapDecorator(Function<Dynamic<?>, ? extends FrequencyWithExtraChanceDecoratorConfiguration> function) {
-        super(function);
+    public CountWithExtraChanceHeightmapDecorator(Codec<FrequencyWithExtraChanceDecoratorConfiguration> codec) {
+        super(codec);
     }
 
     @Override

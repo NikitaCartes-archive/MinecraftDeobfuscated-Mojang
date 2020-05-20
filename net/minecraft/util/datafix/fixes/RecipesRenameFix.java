@@ -12,6 +12,7 @@ import com.mojang.datafixers.util.Pair;
 import java.util.Objects;
 import java.util.function.Function;
 import net.minecraft.util.datafix.fixes.References;
+import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class RecipesRenameFix
 extends DataFix {
@@ -26,7 +27,7 @@ extends DataFix {
 
     @Override
     protected TypeRewriteRule makeRule() {
-        Type<Pair<String, String>> type = DSL.named(References.RECIPE.typeName(), DSL.namespacedString());
+        Type<Pair<String, String>> type = DSL.named(References.RECIPE.typeName(), NamespacedSchema.namespacedString());
         if (!Objects.equals(type, this.getInputSchema().getType(References.RECIPE))) {
             throw new IllegalStateException("Recipe type is not what was expected.");
         }

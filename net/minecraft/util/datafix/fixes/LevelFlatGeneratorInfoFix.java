@@ -8,9 +8,9 @@ import com.google.common.base.Splitter;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.DataFixUtils;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
+import com.mojang.serialization.Dynamic;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,7 +39,7 @@ extends DataFix {
 
     private Dynamic<?> fix(Dynamic<?> dynamic2) {
         if (dynamic2.get("generatorName").asString("").equalsIgnoreCase("flat")) {
-            return dynamic2.update("generatorOptions", dynamic -> DataFixUtils.orElse(dynamic.asString().map(this::fixString).map(dynamic::createString), dynamic));
+            return dynamic2.update("generatorOptions", dynamic -> DataFixUtils.orElse(dynamic.asString().map(this::fixString).map(dynamic::createString).result(), dynamic));
         }
         return dynamic2;
     }

@@ -3,30 +3,21 @@
  */
 package net.minecraft.world.level.levelgen.feature.configurations;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 public class SeagrassFeatureConfiguration
 implements FeatureConfiguration {
+    public static final Codec<SeagrassFeatureConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("count")).forGetter(seagrassFeatureConfiguration -> seagrassFeatureConfiguration.count), ((MapCodec)Codec.DOUBLE.fieldOf("probability")).forGetter(seagrassFeatureConfiguration -> seagrassFeatureConfiguration.tallSeagrassProbability)).apply((Applicative<SeagrassFeatureConfiguration, ?>)instance, SeagrassFeatureConfiguration::new));
     public final int count;
     public final double tallSeagrassProbability;
 
     public SeagrassFeatureConfiguration(int i, double d) {
         this.count = i;
         this.tallSeagrassProbability = d;
-    }
-
-    @Override
-    public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("count"), dynamicOps.createInt(this.count), dynamicOps.createString("tall_seagrass_probability"), dynamicOps.createDouble(this.tallSeagrassProbability))));
-    }
-
-    public static <T> SeagrassFeatureConfiguration deserialize(Dynamic<T> dynamic) {
-        int i = dynamic.get("count").asInt(0);
-        double d = dynamic.get("tall_seagrass_probability").asDouble(0.0);
-        return new SeagrassFeatureConfiguration(i, d);
     }
 }
 

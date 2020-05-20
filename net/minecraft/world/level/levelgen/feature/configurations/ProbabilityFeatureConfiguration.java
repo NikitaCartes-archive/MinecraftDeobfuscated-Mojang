@@ -3,29 +3,21 @@
  */
 package net.minecraft.world.level.levelgen.feature.configurations;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 public class ProbabilityFeatureConfiguration
 implements CarverConfiguration,
 FeatureConfiguration {
+    public static final Codec<ProbabilityFeatureConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.FLOAT.fieldOf("probability")).withDefault(Float.valueOf(0.0f)).forGetter(probabilityFeatureConfiguration -> Float.valueOf(probabilityFeatureConfiguration.probability))).apply((Applicative<ProbabilityFeatureConfiguration, ?>)instance, ProbabilityFeatureConfiguration::new));
     public final float probability;
 
     public ProbabilityFeatureConfiguration(float f) {
         this.probability = f;
-    }
-
-    @Override
-    public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("probability"), dynamicOps.createFloat(this.probability))));
-    }
-
-    public static <T> ProbabilityFeatureConfiguration deserialize(Dynamic<T> dynamic) {
-        float f = dynamic.get("probability").asFloat(0.0f);
-        return new ProbabilityFeatureConfiguration(f);
     }
 }
 

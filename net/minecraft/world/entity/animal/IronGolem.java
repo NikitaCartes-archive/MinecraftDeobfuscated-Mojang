@@ -270,10 +270,10 @@ extends AbstractGolem {
             for (int i = 1; i < 3; ++i) {
                 BlockState blockState2;
                 BlockPos blockPos3 = blockPos.above(i);
-                if (NaturalSpawner.isValidEmptySpawnBlock(levelReader, blockPos3, blockState2 = levelReader.getBlockState(blockPos3), blockState2.getFluidState())) continue;
+                if (NaturalSpawner.isValidEmptySpawnBlock(levelReader, blockPos3, blockState2 = levelReader.getBlockState(blockPos3), blockState2.getFluidState(), EntityType.IRON_GOLEM)) continue;
                 return false;
             }
-            return NaturalSpawner.isValidEmptySpawnBlock(levelReader, blockPos, levelReader.getBlockState(blockPos), Fluids.EMPTY.defaultFluidState()) && levelReader.isUnobstructed(this);
+            return NaturalSpawner.isValidEmptySpawnBlock(levelReader, blockPos, levelReader.getBlockState(blockPos), Fluids.EMPTY.defaultFluidState(), EntityType.IRON_GOLEM) && levelReader.isUnobstructed(this);
         }
         return false;
     }

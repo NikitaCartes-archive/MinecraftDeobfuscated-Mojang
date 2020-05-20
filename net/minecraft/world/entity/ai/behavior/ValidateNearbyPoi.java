@@ -4,7 +4,6 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Objects;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -34,7 +33,7 @@ extends Behavior<LivingEntity> {
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity) {
         GlobalPos globalPos = livingEntity.getBrain().getMemory(this.memoryType).get();
-        return Objects.equals(serverLevel.dimensionType(), globalPos.dimension()) && globalPos.pos().closerThan(livingEntity.position(), 5.0);
+        return serverLevel.dimension() == globalPos.dimension() && globalPos.pos().closerThan(livingEntity.position(), 5.0);
     }
 
     @Override

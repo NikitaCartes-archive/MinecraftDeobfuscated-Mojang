@@ -17,7 +17,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureFeatureIndexSavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
@@ -78,12 +77,12 @@ public class LegacyStructureDataHandler {
         CompoundTag compoundTag3 = compoundTag2.getCompound("Structures");
         CompoundTag compoundTag4 = compoundTag3.getCompound("References");
         for (String string : this.currentKeys) {
-            StructureFeature structureFeature = (StructureFeature)Feature.STRUCTURES_REGISTRY.get(string.toLowerCase(Locale.ROOT));
+            StructureFeature structureFeature = (StructureFeature)StructureFeature.STRUCTURES_REGISTRY.get(string.toLowerCase(Locale.ROOT));
             if (compoundTag4.contains(string, 12) || structureFeature == null) continue;
-            int i = structureFeature.getLookupRange();
+            int i = 8;
             LongArrayList longList = new LongArrayList();
-            for (int j = chunkPos.x - i; j <= chunkPos.x + i; ++j) {
-                for (int k = chunkPos.z - i; k <= chunkPos.z + i; ++k) {
+            for (int j = chunkPos.x - 8; j <= chunkPos.x + 8; ++j) {
+                for (int k = chunkPos.z - 8; k <= chunkPos.z + 8; ++k) {
                     if (!this.hasLegacyStart(j, k, string)) continue;
                     longList.add(ChunkPos.asLong(j, k));
                 }
@@ -175,14 +174,14 @@ public class LegacyStructureDataHandler {
     }
 
     public static LegacyStructureDataHandler getLegacyStructureHandler(DimensionType dimensionType, @Nullable DimensionDataStorage dimensionDataStorage) {
-        if (dimensionType == DimensionType.OVERWORLD) {
+        if (dimensionType.isOverworld()) {
             return new LegacyStructureDataHandler(dimensionDataStorage, ImmutableList.of("Monument", "Stronghold", "Village", "Mineshaft", "Temple", "Mansion"), ImmutableList.of("Village", "Mineshaft", "Mansion", "Igloo", "Desert_Pyramid", "Jungle_Pyramid", "Swamp_Hut", "Stronghold", "Monument"));
         }
-        if (dimensionType == DimensionType.NETHER) {
+        if (dimensionType.isNether()) {
             ImmutableList<String> list = ImmutableList.of("Fortress");
             return new LegacyStructureDataHandler(dimensionDataStorage, list, list);
         }
-        if (dimensionType == DimensionType.THE_END) {
+        if (dimensionType.isEnd()) {
             ImmutableList<String> list = ImmutableList.of("EndCity");
             return new LegacyStructureDataHandler(dimensionDataStorage, list, list);
         }

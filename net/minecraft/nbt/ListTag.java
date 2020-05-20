@@ -309,7 +309,8 @@ extends CollectionTag<Tag> {
         return mutableComponent2;
     }
 
-    public int getElementType() {
+    @Override
+    public byte getElementType() {
         return this.type;
     }
 

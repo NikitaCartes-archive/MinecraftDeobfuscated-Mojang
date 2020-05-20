@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -21,8 +20,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class ReplaceBlobsFeature
 extends Feature<ReplaceSpheroidConfiguration> {
-    public ReplaceBlobsFeature(Function<Dynamic<?>, ? extends ReplaceSpheroidConfiguration> function) {
-        super(function);
+    public ReplaceBlobsFeature(Codec<ReplaceSpheroidConfiguration> codec) {
+        super(codec);
     }
 
     @Override

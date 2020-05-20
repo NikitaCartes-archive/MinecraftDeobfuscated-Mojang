@@ -4,6 +4,7 @@
 package net.minecraft.world.item;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.ChatType;
@@ -42,7 +43,7 @@ extends BlockItem {
                     Player player = blockPlaceContext.getPlayer();
                     int j = level.getMaxBuildHeight();
                     if (!(player instanceof ServerPlayer) || mutableBlockPos.getY() < j) break;
-                    ClientboundChatPacket clientboundChatPacket = new ClientboundChatPacket(new TranslatableComponent("build.tooHigh", j).withStyle(ChatFormatting.RED), ChatType.GAME_INFO);
+                    ClientboundChatPacket clientboundChatPacket = new ClientboundChatPacket(new TranslatableComponent("build.tooHigh", j).withStyle(ChatFormatting.RED), ChatType.GAME_INFO, Util.NIL_UUID);
                     ((ServerPlayer)player).connection.send(clientboundChatPacket);
                     break;
                 }

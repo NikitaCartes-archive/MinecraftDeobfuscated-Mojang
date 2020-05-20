@@ -5,9 +5,9 @@ package net.minecraft.util.datafix.fixes;
 
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFixUtils;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
+import com.mojang.serialization.Dynamic;
 import net.minecraft.util.datafix.fixes.AbstractUUIDFix;
 import net.minecraft.util.datafix.fixes.NamedEntityFix;
 import net.minecraft.util.datafix.fixes.References;
@@ -20,7 +20,7 @@ extends NamedEntityFix {
 
     @Override
     protected Typed<?> fix(Typed<?> typed) {
-        return typed.update(DSL.remainderFinder(), dynamic2 -> dynamic2.update("Gossips", dynamic -> DataFixUtils.orElse(dynamic.asStreamOpt().map(stream -> stream.map(dynamic -> AbstractUUIDFix.replaceUUIDLeastMost(dynamic, "Target", "Target").orElse((Dynamic<?>)dynamic))).map(dynamic::createList), dynamic)));
+        return typed.update(DSL.remainderFinder(), dynamic2 -> dynamic2.update("Gossips", dynamic -> DataFixUtils.orElse(dynamic.asStreamOpt().result().map(stream -> stream.map(dynamic -> AbstractUUIDFix.replaceUUIDLeastMost(dynamic, "Target", "Target").orElse((Dynamic<?>)dynamic))).map(dynamic::createList), dynamic)));
     }
 }
 

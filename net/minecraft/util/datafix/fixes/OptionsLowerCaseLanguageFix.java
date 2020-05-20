@@ -20,7 +20,7 @@ extends DataFix {
     @Override
     public TypeRewriteRule makeRule() {
         return this.fixTypeEverywhereTyped("OptionsLowerCaseLanguageFix", this.getInputSchema().getType(References.OPTIONS), typed -> typed.update(DSL.remainderFinder(), dynamic -> {
-            Optional<String> optional = dynamic.get("lang").asString();
+            Optional<String> optional = dynamic.get("lang").asString().result();
             if (optional.isPresent()) {
                 return dynamic.set("lang", dynamic.createString(optional.get().toLowerCase(Locale.ROOT)));
             }

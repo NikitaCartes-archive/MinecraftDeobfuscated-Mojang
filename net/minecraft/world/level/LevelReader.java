@@ -18,7 +18,6 @@ import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraft.world.level.dimension.Dimension;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
@@ -66,8 +65,6 @@ BiomeManager.NoiseBiomeSource {
     @Deprecated
     public int getSeaLevel();
 
-    public Dimension getDimension();
-
     public DimensionType dimensionType();
 
     default public BlockPos getHeightmapPos(Heightmap.Types types, BlockPos blockPos) {
@@ -99,7 +96,7 @@ BiomeManager.NoiseBiomeSource {
 
     @Deprecated
     default public float getBrightness(BlockPos blockPos) {
-        return this.getDimension().getBrightness(this.getMaxLocalRawBrightness(blockPos));
+        return this.dimensionType().brightness(this.getMaxLocalRawBrightness(blockPos));
     }
 
     default public int getDirectSignal(BlockPos blockPos, Direction direction) {

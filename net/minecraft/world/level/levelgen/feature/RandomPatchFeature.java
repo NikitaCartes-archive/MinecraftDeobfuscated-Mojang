@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.tags.FluidTags;
@@ -19,8 +18,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConf
 
 public class RandomPatchFeature
 extends Feature<RandomPatchConfiguration> {
-    public RandomPatchFeature(Function<Dynamic<?>, ? extends RandomPatchConfiguration> function) {
-        super(function);
+    public RandomPatchFeature(Codec<RandomPatchConfiguration> codec) {
+        super(codec);
     }
 
     @Override

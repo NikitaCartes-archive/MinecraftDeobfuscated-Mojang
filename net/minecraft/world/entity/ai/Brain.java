@@ -4,13 +4,17 @@
 package net.minecraft.world.entity.ai;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.MapLike;
+import com.mojang.serialization.RecordBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -18,12 +22,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+import net.minecraft.Util;
 import net.minecraft.core.Registry;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Serializable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.ExpirableValue;
@@ -33,10 +36,14 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
+import org.apache.commons.lang3.mutable.MutableObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-public class Brain<E extends LivingEntity>
-implements Serializable {
+public class Brain<E extends LivingEntity> {
+    private static final Logger LOGGER = LogManager.getLogger();
+    private final Supplier<Codec<Brain<E>>> codec;
     private final Map<MemoryModuleType<?>, Optional<? extends ExpirableValue<?>>> memories = Maps.newHashMap();
     private final Map<SensorType<? extends Sensor<? super E>>, Sensor<? super E>> sensors = Maps.newLinkedHashMap();
     private final Map<Integer, Map<Activity, Set<Behavior<? super E>>>> availableBehaviorsByPriority = Maps.newTreeMap();
@@ -48,7 +55,51 @@ implements Serializable {
     private Activity defaultActivity = Activity.IDLE;
     private long lastScheduleUpdate = -9999L;
 
-    public <T> Brain(Collection<MemoryModuleType<?>> collection, Collection<SensorType<? extends Sensor<? super E>>> collection2, Dynamic<T> dynamic) {
+    public static <E extends LivingEntity> Provider<E> provider(Collection<? extends MemoryModuleType<?>> collection, Collection<? extends SensorType<? extends Sensor<? super E>>> collection2) {
+        return new Provider(collection, collection2);
+    }
+
+    public static <E extends LivingEntity> Codec<Brain<E>> codec(final Collection<? extends MemoryModuleType<?>> collection, final Collection<? extends SensorType<? extends Sensor<? super E>>> collection2) {
+        final MutableObject mutableObject = new MutableObject();
+        mutableObject.setValue(new MapCodec<Brain<E>>(){
+
+            @Override
+            public <T> Stream<T> keys(DynamicOps<T> dynamicOps) {
+                return collection.stream().flatMap((? super T memoryModuleType) -> Util.toStream(memoryModuleType.getCodec().map((? super T codec) -> Registry.MEMORY_MODULE_TYPE.getKey((MemoryModuleType<?>)memoryModuleType)))).map((? super T resourceLocation) -> dynamicOps.createString(resourceLocation.toString()));
+            }
+
+            @Override
+            public <T> DataResult<Brain<E>> decode(DynamicOps<T> dynamicOps, MapLike<T> mapLike) {
+                MutableObject mutableObject2 = new MutableObject(DataResult.success(ImmutableList.builder()));
+                mapLike.entries().forEach(pair -> {
+                    DataResult dataResult = Registry.MEMORY_MODULE_TYPE.parse(dynamicOps, (MemoryModuleType<?>)pair.getFirst());
+                    DataResult dataResult2 = dataResult.flatMap((? super R memoryModuleType) -> this.captureRead((MemoryModuleType)memoryModuleType, dynamicOps, (Object)pair.getSecond()));
+                    mutableObject2.setValue(((DataResult)mutableObject2.getValue()).apply2(ImmutableList.Builder::add, dataResult2));
+                });
+                ImmutableList immutableList = mutableObject2.getValue().resultOrPartial(LOGGER::error).map(ImmutableList.Builder::build).orElseGet(ImmutableList::of);
+                return DataResult.success(new Brain(collection, collection2, immutableList, mutableObject::getValue));
+            }
+
+            private <T, U> DataResult<MemoryValue<U>> captureRead(MemoryModuleType<U> memoryModuleType, DynamicOps<T> dynamicOps, T object) {
+                return memoryModuleType.getCodec().map(DataResult::success).orElseGet(() -> DataResult.error("No codec for memory: " + memoryModuleType)).flatMap((? super R codec) -> codec.parse(dynamicOps, object)).map((? super R expirableValue) -> new MemoryValue(memoryModuleType, Optional.of(expirableValue)));
+            }
+
+            @Override
+            public <T> RecordBuilder<T> encode(Brain<E> brain, DynamicOps<T> dynamicOps, RecordBuilder<T> recordBuilder) {
+                brain.memories().forEach(memoryValue -> memoryValue.serialize(dynamicOps, recordBuilder));
+                return recordBuilder;
+            }
+
+            @Override
+            public /* synthetic */ RecordBuilder encode(Object object, DynamicOps dynamicOps, RecordBuilder recordBuilder) {
+                return this.encode((Brain)object, dynamicOps, recordBuilder);
+            }
+        }.fieldOf("memories").codec());
+        return (Codec)mutableObject.getValue();
+    }
+
+    public Brain(Collection<? extends MemoryModuleType<?>> collection, Collection<? extends SensorType<? extends Sensor<? super E>>> collection2, ImmutableList<MemoryValue<?>> immutableList, Supplier<Codec<Brain<E>>> supplier) {
+        this.codec = supplier;
         for (MemoryModuleType<?> memoryModuleType : collection) {
             this.memories.put(memoryModuleType, Optional.empty());
         }
@@ -60,18 +111,21 @@ implements Serializable {
                 this.memories.put(memoryModuleType2, Optional.empty());
             }
         }
-        for (Map.Entry entry : dynamic.get("memories").asMap(Function.identity(), Function.identity()).entrySet()) {
-            this.readMemory(Registry.MEMORY_MODULE_TYPE.get(new ResourceLocation(((Dynamic)entry.getKey()).asString(""))), (Dynamic)entry.getValue());
+        for (MemoryValue memoryValue : immutableList) {
+            memoryValue.setMemoryInternal(this);
         }
+    }
+
+    public <T> DataResult<T> serializeStart(DynamicOps<T> dynamicOps) {
+        return this.codec.get().encodeStart(dynamicOps, this);
+    }
+
+    private Stream<MemoryValue<?>> memories() {
+        return this.memories.entrySet().stream().map(entry -> MemoryValue.createUnchecked((MemoryModuleType)entry.getKey(), (Optional)entry.getValue()));
     }
 
     public boolean hasMemoryValue(MemoryModuleType<?> memoryModuleType) {
         return this.checkMemory(memoryModuleType, MemoryStatus.VALUE_PRESENT);
-    }
-
-    private <T, U> void readMemory(MemoryModuleType<U> memoryModuleType, Dynamic<T> dynamic) {
-        ExpirableValue<U> expirableValue = new ExpirableValue<U>(memoryModuleType.getDeserializer().orElseThrow(RuntimeException::new), dynamic);
-        this.setMemoryInternal(memoryModuleType, Optional.of(expirableValue));
     }
 
     public <U> void eraseMemory(MemoryModuleType<U> memoryModuleType) {
@@ -233,7 +287,7 @@ implements Serializable {
     }
 
     public Brain<E> copyWithoutBehaviors() {
-        Brain<E> brain = new Brain<E>(this.memories.keySet(), this.sensors.keySet(), new Dynamic<CompoundTag>(NbtOps.INSTANCE, new CompoundTag()));
+        Brain<E> brain = new Brain<E>(this.memories.keySet(), this.sensors.keySet(), ImmutableList.of(), this.codec);
         for (Map.Entry<MemoryModuleType<?>, Optional<ExpirableValue<?>>> entry : this.memories.entrySet()) {
             MemoryModuleType<?> memoryModuleType = entry.getKey();
             if (!entry.getValue().isPresent()) continue;
@@ -270,20 +324,6 @@ implements Serializable {
         for (Behavior<E> behavior : this.getRunningBehaviors()) {
             behavior.doStop(serverLevel, livingEntity, l);
         }
-    }
-
-    @Override
-    public <T> T serialize(DynamicOps<T> dynamicOps) {
-        ImmutableMap.Builder<T, ?> builder = ImmutableMap.builder();
-        for (Map.Entry<MemoryModuleType<?>, Optional<ExpirableValue<?>>> entry : this.memories.entrySet()) {
-            MemoryModuleType<?> memoryModuleType = entry.getKey();
-            if (!entry.getValue().isPresent() || !memoryModuleType.getDeserializer().isPresent()) continue;
-            ExpirableValue<?> expirableValue = entry.getValue().get();
-            T object = dynamicOps.createString(Registry.MEMORY_MODULE_TYPE.getKey(memoryModuleType).toString());
-            Object object2 = expirableValue.serialize(dynamicOps);
-            builder.put(object, object2);
-        }
-        return dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("memories"), dynamicOps.createMap(builder.build())));
     }
 
     private void startEachNonRunningBehavior(ServerLevel serverLevel, E livingEntity) {
@@ -332,6 +372,44 @@ implements Serializable {
             builder.add(Pair.of(j++, behavior));
         }
         return builder.build();
+    }
+
+    static final class MemoryValue<U> {
+        private final MemoryModuleType<U> type;
+        private final Optional<? extends ExpirableValue<U>> value;
+
+        private static <U> MemoryValue<U> createUnchecked(MemoryModuleType<U> memoryModuleType, Optional<? extends ExpirableValue<?>> optional) {
+            return new MemoryValue<U>(memoryModuleType, optional);
+        }
+
+        private MemoryValue(MemoryModuleType<U> memoryModuleType, Optional<? extends ExpirableValue<U>> optional) {
+            this.type = memoryModuleType;
+            this.value = optional;
+        }
+
+        private void setMemoryInternal(Brain<?> brain) {
+            ((Brain)brain).setMemoryInternal(this.type, this.value);
+        }
+
+        public <T> void serialize(DynamicOps<T> dynamicOps, RecordBuilder<T> recordBuilder) {
+            this.type.getCodec().ifPresent(codec -> this.value.ifPresent(expirableValue -> recordBuilder.add(Registry.MEMORY_MODULE_TYPE.encodeStart(dynamicOps, this.type), codec.encodeStart(dynamicOps, expirableValue))));
+        }
+    }
+
+    public static final class Provider<E extends LivingEntity> {
+        private final Collection<? extends MemoryModuleType<?>> memoryTypes;
+        private final Collection<? extends SensorType<? extends Sensor<? super E>>> sensorTypes;
+        private final Codec<Brain<E>> codec;
+
+        private Provider(Collection<? extends MemoryModuleType<?>> collection, Collection<? extends SensorType<? extends Sensor<? super E>>> collection2) {
+            this.memoryTypes = collection;
+            this.sensorTypes = collection2;
+            this.codec = Brain.codec(collection, collection2);
+        }
+
+        public Brain<E> makeBrain(Dynamic<?> dynamic) {
+            return this.codec.parse(dynamic).resultOrPartial(LOGGER::error).orElseGet(() -> new Brain(this.memoryTypes, this.sensorTypes, ImmutableList.of(), () -> this.codec));
+        }
     }
 }
 

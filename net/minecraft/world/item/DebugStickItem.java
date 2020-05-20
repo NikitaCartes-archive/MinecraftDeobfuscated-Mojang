@@ -95,7 +95,7 @@ extends Item {
     }
 
     private static void message(Player player, Component component) {
-        ((ServerPlayer)player).sendMessage(component, ChatType.GAME_INFO);
+        ((ServerPlayer)player).sendMessage(component, ChatType.GAME_INFO, Util.NIL_UUID);
     }
 
     private static <T extends Comparable<T>> String getNameHelper(BlockState blockState, Property<T> property) {

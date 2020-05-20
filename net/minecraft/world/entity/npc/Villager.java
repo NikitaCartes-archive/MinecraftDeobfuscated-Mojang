@@ -6,8 +6,9 @@ package net.minecraft.world.entity.npc;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import java.util.List;
 import java.util.Map;
@@ -124,16 +125,19 @@ VillagerDataHolder {
         this.getNavigation().setCanFloat(true);
         this.setCanPickUpLoot(true);
         this.setVillagerData(this.getVillagerData().setType(villagerType).setProfession(VillagerProfession.NONE));
-        this.brain = this.makeBrain(new Dynamic<CompoundTag>(NbtOps.INSTANCE, new CompoundTag()));
     }
 
     public Brain<Villager> getBrain() {
         return super.getBrain();
     }
 
+    protected Brain.Provider<Villager> brainProvider() {
+        return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
+    }
+
     @Override
     protected Brain<?> makeBrain(Dynamic<?> dynamic) {
-        Brain<Villager> brain = new Brain<Villager>(MEMORY_TYPES, SENSOR_TYPES, dynamic);
+        Brain<Villager> brain = this.brainProvider().makeBrain(dynamic);
         this.registerBrainGoals(brain);
         return brain;
     }
@@ -369,7 +373,7 @@ VillagerDataHolder {
     @Override
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
-        compoundTag.put("VillagerData", this.getVillagerData().serialize(NbtOps.INSTANCE));
+        VillagerData.CODEC.encodeStart(NbtOps.INSTANCE, this.getVillagerData()).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("VillagerData", (Tag)tag));
         compoundTag.putByte("FoodLevel", this.foodLevel);
         compoundTag.put("Gossips", this.gossips.store(NbtOps.INSTANCE).getValue());
         compoundTag.putInt("Xp", this.villagerXp);
@@ -382,7 +386,8 @@ VillagerDataHolder {
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
         if (compoundTag.contains("VillagerData", 10)) {
-            this.setVillagerData(new VillagerData(new Dynamic<Tag>(NbtOps.INSTANCE, compoundTag.get("VillagerData"))));
+            DataResult dataResult = VillagerData.CODEC.parse(new Dynamic<Tag>(NbtOps.INSTANCE, compoundTag.get("VillagerData")));
+            dataResult.resultOrPartial(LOGGER::error).ifPresent(this::setVillagerData);
         }
         if (compoundTag.contains("Offers", 10)) {
             this.offers = new MerchantOffers(compoundTag.getCompound("Offers"));

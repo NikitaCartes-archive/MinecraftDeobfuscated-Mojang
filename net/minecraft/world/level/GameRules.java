@@ -10,6 +10,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.serialization.DynamicLike;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -82,11 +83,15 @@ public class GameRules {
         return key;
     }
 
+    public GameRules(DynamicLike<?> dynamicLike) {
+        this();
+        this.loadFromTag(dynamicLike);
+    }
+
     public GameRules() {
         this.rules = GAME_RULE_TYPES.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, entry -> ((Type)entry.getValue()).createRule()));
     }
 
-    @Environment(value=EnvType.CLIENT)
     private GameRules(Map<Key<?>, Value<?>> map) {
         this.rules = map;
     }
@@ -101,15 +106,10 @@ public class GameRules {
         return compoundTag;
     }
 
-    public void loadFromTag(CompoundTag compoundTag) {
-        this.rules.forEach((key, value) -> {
-            if (compoundTag.contains(((Key)key).id)) {
-                value.deserialize(compoundTag.getString(((Key)key).id));
-            }
-        });
+    private void loadFromTag(DynamicLike<?> dynamicLike) {
+        this.rules.forEach((key, value) -> dynamicLike.get(((Key)key).id).asString().result().ifPresent(value::deserialize));
     }
 
-    @Environment(value=EnvType.CLIENT)
     public GameRules copy() {
         return new GameRules((Map)this.rules.entrySet().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, entry -> ((Value)entry.getValue()).copy())));
     }
@@ -125,10 +125,12 @@ public class GameRules {
         type2.callVisitor(gameRuleTypeVisitor, key2);
     }
 
+    @Environment(value=EnvType.CLIENT)
     public void assignFrom(GameRules gameRules, @Nullable MinecraftServer minecraftServer) {
         gameRules.rules.keySet().forEach(key -> this.assignCap((Key)key, gameRules, minecraftServer));
     }
 
+    @Environment(value=EnvType.CLIENT)
     private <T extends Value<T>> void assignCap(Key<T> key, GameRules gameRules, @Nullable MinecraftServer minecraftServer) {
         T value = gameRules.getRule(key);
         ((Value)this.getRule(key)).setFrom(value, minecraftServer);
@@ -194,19 +196,18 @@ public class GameRules {
         }
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         protected BooleanValue copy() {
             return new BooleanValue(this.type, this.value);
         }
 
         @Override
+        @Environment(value=EnvType.CLIENT)
         public void setFrom(BooleanValue booleanValue, @Nullable MinecraftServer minecraftServer) {
             this.value = booleanValue.value;
             this.onChanged(minecraftServer);
         }
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         protected /* synthetic */ Value copy() {
             return this.copy();
         }
@@ -293,19 +294,18 @@ public class GameRules {
         }
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         protected IntegerValue copy() {
             return new IntegerValue(this.type, this.value);
         }
 
         @Override
+        @Environment(value=EnvType.CLIENT)
         public void setFrom(IntegerValue integerValue, @Nullable MinecraftServer minecraftServer) {
             this.value = integerValue.value;
             this.onChanged(minecraftServer);
         }
 
         @Override
-        @Environment(value=EnvType.CLIENT)
         protected /* synthetic */ Value copy() {
             return this.copy();
         }
@@ -352,9 +352,9 @@ public class GameRules {
 
         protected abstract T getSelf();
 
-        @Environment(value=EnvType.CLIENT)
         protected abstract T copy();
 
+        @Environment(value=EnvType.CLIENT)
         public abstract void setFrom(T var1, @Nullable MinecraftServer var2);
     }
 

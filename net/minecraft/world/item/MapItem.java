@@ -16,6 +16,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
@@ -49,7 +50,7 @@ extends ComplexItem {
 
     public static ItemStack create(Level level, int i, int j, byte b, boolean bl, boolean bl2) {
         ItemStack itemStack = new ItemStack(Items.FILLED_MAP);
-        MapItem.createAndStoreSavedData(itemStack, level, i, j, b, bl, bl2, level.dimensionType());
+        MapItem.createAndStoreSavedData(itemStack, level, i, j, b, bl, bl2, level.dimension());
         return itemStack;
     }
 
@@ -62,7 +63,7 @@ extends ComplexItem {
     public static MapItemSavedData getOrCreateSavedData(ItemStack itemStack, Level level) {
         MapItemSavedData mapItemSavedData = MapItem.getSavedData(itemStack, level);
         if (mapItemSavedData == null && level instanceof ServerLevel) {
-            mapItemSavedData = MapItem.createAndStoreSavedData(itemStack, level, level.getLevelData().getXSpawn(), level.getLevelData().getZSpawn(), 3, false, false, level.dimensionType());
+            mapItemSavedData = MapItem.createAndStoreSavedData(itemStack, level, level.getLevelData().getXSpawn(), level.getLevelData().getZSpawn(), 3, false, false, level.dimension());
         }
         return mapItemSavedData;
     }
@@ -72,10 +73,10 @@ extends ComplexItem {
         return compoundTag != null && compoundTag.contains("map", 99) ? compoundTag.getInt("map") : 0;
     }
 
-    private static MapItemSavedData createAndStoreSavedData(ItemStack itemStack, Level level, int i, int j, int k, boolean bl, boolean bl2, DimensionType dimensionType) {
+    private static MapItemSavedData createAndStoreSavedData(ItemStack itemStack, Level level, int i, int j, int k, boolean bl, boolean bl2, ResourceKey<DimensionType> resourceKey) {
         int l = level.getFreeMapId();
         MapItemSavedData mapItemSavedData = new MapItemSavedData(MapItem.makeKey(l));
-        mapItemSavedData.setProperties(i, j, k, bl, bl2, dimensionType);
+        mapItemSavedData.setProperties(i, j, k, bl, bl2, resourceKey);
         level.setMapData(mapItemSavedData);
         itemStack.getOrCreateTag().putInt("map", l);
         return mapItemSavedData;
@@ -86,7 +87,7 @@ extends ComplexItem {
     }
 
     public void update(Level level, Entity entity, MapItemSavedData mapItemSavedData) {
-        if (level.dimensionType() != mapItemSavedData.dimension || !(entity instanceof Player)) {
+        if (level.dimension() != mapItemSavedData.dimension || !(entity instanceof Player)) {
             return;
         }
         int i = 1 << mapItemSavedData.scale;
@@ -210,7 +211,7 @@ extends ComplexItem {
         if (mapItemSavedData == null) {
             return;
         }
-        if (serverLevel.dimensionType() != mapItemSavedData.dimension) {
+        if (serverLevel.dimension() != mapItemSavedData.dimension) {
             return;
         }
         int i = 1 << mapItemSavedData.scale;

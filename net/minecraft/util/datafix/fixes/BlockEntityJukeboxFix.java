@@ -4,11 +4,11 @@
 package net.minecraft.util.datafix.fixes;
 
 import com.mojang.datafixers.DSL;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
+import com.mojang.serialization.Dynamic;
 import net.minecraft.util.datafix.fixes.ItemIdFix;
 import net.minecraft.util.datafix.fixes.ItemStackTheFlatteningFix;
 import net.minecraft.util.datafix.fixes.NamedEntityFix;
@@ -34,7 +34,7 @@ extends NamedEntityFix {
                 Dynamic dynamic2 = dynamic.emptyMap();
                 dynamic2 = dynamic2.set("id", dynamic2.createString(string));
                 dynamic2 = dynamic2.set("Count", dynamic2.createByte((byte)1));
-                return typed.set(opticFinder, type2.readTyped(dynamic2).getSecond().orElseThrow(() -> new IllegalStateException("Could not create record item stack."))).set(DSL.remainderFinder(), dynamic);
+                return typed.set(opticFinder, type2.readTyped(dynamic2).result().orElseThrow(() -> new IllegalStateException("Could not create record item stack.")).getFirst()).set(DSL.remainderFinder(), dynamic);
             }
         }
         return typed;

@@ -16,14 +16,17 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 
-public class PhantomSpawner {
+public class PhantomSpawner
+implements CustomSpawner {
     private int nextTick;
 
+    @Override
     public int tick(ServerLevel serverLevel, boolean bl, boolean bl2) {
         if (!bl) {
             return 0;
@@ -52,7 +55,7 @@ public class PhantomSpawner {
             ServerStatsCounter serverStatsCounter = ((ServerPlayer)player).getStats();
             int j = Mth.clamp(serverStatsCounter.getValue(Stats.CUSTOM.get(Stats.TIME_SINCE_REST)), 1, Integer.MAX_VALUE);
             int k = 24000;
-            if (random.nextInt(j) < 72000 || !NaturalSpawner.isValidEmptySpawnBlock(serverLevel, blockPos2 = blockPos.above(20 + random.nextInt(15)).east(-10 + random.nextInt(21)).south(-10 + random.nextInt(21)), blockState = serverLevel.getBlockState(blockPos2), fluidState = serverLevel.getFluidState(blockPos2))) continue;
+            if (random.nextInt(j) < 72000 || !NaturalSpawner.isValidEmptySpawnBlock(serverLevel, blockPos2 = blockPos.above(20 + random.nextInt(15)).east(-10 + random.nextInt(21)).south(-10 + random.nextInt(21)), blockState = serverLevel.getBlockState(blockPos2), fluidState = serverLevel.getFluidState(blockPos2), EntityType.PHANTOM)) continue;
             SpawnGroupData spawnGroupData = null;
             int l = 1 + random.nextInt(difficultyInstance.getDifficulty().getId() + 1);
             for (int m = 0; m < l; ++m) {

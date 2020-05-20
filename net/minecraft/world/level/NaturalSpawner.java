@@ -37,6 +37,7 @@ import net.minecraft.world.level.PotentialCalculator;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.NearestNeighborBiomeZoomer;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -222,7 +223,7 @@ public final class NaturalSpawner {
         return new BlockPos(i, l, j);
     }
 
-    public static boolean isValidEmptySpawnBlock(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, FluidState fluidState) {
+    public static boolean isValidEmptySpawnBlock(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, FluidState fluidState, EntityType entityType) {
         if (blockState.isCollisionShapeFullBlock(blockGetter, blockPos)) {
             return false;
         }
@@ -232,7 +233,10 @@ public final class NaturalSpawner {
         if (!fluidState.isEmpty()) {
             return false;
         }
-        return !blockState.is(BlockTags.PREVENT_MOB_SPAWNING_INSIDE);
+        if (blockState.is(BlockTags.PREVENT_MOB_SPAWNING_INSIDE)) {
+            return false;
+        }
+        return !blockState.is(Blocks.WITHER_ROSE) || entityType == EntityType.WITHER_SKELETON;
     }
 
     public static boolean isSpawnPositionOk(SpawnPlacements.Type type, LevelReader levelReader, BlockPos blockPos, @Nullable EntityType<?> entityType) {
@@ -258,7 +262,7 @@ public final class NaturalSpawner {
         if (!blockState2.isValidSpawn(levelReader, blockPos3, entityType)) {
             return false;
         }
-        return NaturalSpawner.isValidEmptySpawnBlock(levelReader, blockPos, blockState, fluidState) && NaturalSpawner.isValidEmptySpawnBlock(levelReader, blockPos2, levelReader.getBlockState(blockPos2), levelReader.getFluidState(blockPos2));
+        return NaturalSpawner.isValidEmptySpawnBlock(levelReader, blockPos, blockState, fluidState, entityType) && NaturalSpawner.isValidEmptySpawnBlock(levelReader, blockPos2, levelReader.getBlockState(blockPos2), levelReader.getFluidState(blockPos2), entityType);
     }
 
     public static void spawnMobsForChunkGeneration(LevelAccessor levelAccessor, Biome biome, int i, int j, Random random) {
@@ -389,7 +393,7 @@ public final class NaturalSpawner {
 
         private boolean canSpawnForCategory(MobCategory mobCategory) {
             int i = mobCategory.getMaxInstancesPerChunk() * this.spawnableChunkCount / MAGIC_NUMBER;
-            return this.mobCategoryCounts.getInt((Object)mobCategory) < i;
+            return this.mobCategoryCounts.getInt(mobCategory) < i;
         }
     }
 }

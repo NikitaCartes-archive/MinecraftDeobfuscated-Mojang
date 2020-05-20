@@ -3,13 +3,15 @@
  */
 package net.minecraft.world.level.levelgen.feature.configurations;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 
 public class NoiseDependantDecoratorConfiguration
 implements DecoratorConfiguration {
+    public static final Codec<NoiseDependantDecoratorConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.DOUBLE.fieldOf("noise_level")).forGetter(noiseDependantDecoratorConfiguration -> noiseDependantDecoratorConfiguration.noiseLevel), ((MapCodec)Codec.INT.fieldOf("below_noise")).forGetter(noiseDependantDecoratorConfiguration -> noiseDependantDecoratorConfiguration.belowNoise), ((MapCodec)Codec.INT.fieldOf("above_noise")).forGetter(noiseDependantDecoratorConfiguration -> noiseDependantDecoratorConfiguration.aboveNoise)).apply((Applicative<NoiseDependantDecoratorConfiguration, ?>)instance, NoiseDependantDecoratorConfiguration::new));
     public final double noiseLevel;
     public final int belowNoise;
     public final int aboveNoise;
@@ -18,18 +20,6 @@ implements DecoratorConfiguration {
         this.noiseLevel = d;
         this.belowNoise = i;
         this.aboveNoise = j;
-    }
-
-    @Override
-    public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("noise_level"), dynamicOps.createDouble(this.noiseLevel), dynamicOps.createString("below_noise"), dynamicOps.createInt(this.belowNoise), dynamicOps.createString("above_noise"), dynamicOps.createInt(this.aboveNoise))));
-    }
-
-    public static NoiseDependantDecoratorConfiguration deserialize(Dynamic<?> dynamic) {
-        double d = dynamic.get("noise_level").asDouble(0.0);
-        int i = dynamic.get("below_noise").asInt(0);
-        int j = dynamic.get("above_noise").asInt(0);
-        return new NoiseDependantDecoratorConfiguration(d, i, j);
     }
 }
 

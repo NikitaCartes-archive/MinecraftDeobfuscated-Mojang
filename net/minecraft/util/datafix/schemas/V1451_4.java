@@ -20,7 +20,7 @@ extends NamespacedSchema {
     @Override
     public void registerTypes(Schema schema, Map<String, Supplier<TypeTemplate>> map, Map<String, Supplier<TypeTemplate>> map2) {
         super.registerTypes(schema, map, map2);
-        schema.registerType(false, References.BLOCK_NAME, () -> DSL.constType(DSL.namespacedString()));
+        schema.registerType(false, References.BLOCK_NAME, () -> DSL.constType(V1451_4.namespacedString()));
     }
 }
 

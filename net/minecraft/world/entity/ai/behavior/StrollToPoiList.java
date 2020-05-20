@@ -5,7 +5,6 @@ package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
@@ -43,7 +42,7 @@ extends Behavior<Villager> {
         Optional<GlobalPos> optional2 = villager.getBrain().getMemory(this.mustBeCloseToMemoryType);
         if (optional.isPresent() && optional2.isPresent() && !(list = optional.get()).isEmpty()) {
             this.targetPos = list.get(serverLevel.getRandom().nextInt(list.size()));
-            return this.targetPos != null && Objects.equals(serverLevel.dimensionType(), this.targetPos.dimension()) && optional2.get().pos().closerThan(villager.position(), (double)this.maxDistanceFromPoi);
+            return this.targetPos != null && serverLevel.dimension() == this.targetPos.dimension() && optional2.get().pos().closerThan(villager.position(), (double)this.maxDistanceFromPoi);
         }
         return false;
     }

@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockGetter;
@@ -22,8 +21,8 @@ import net.minecraft.world.level.material.Material;
 
 public class IcebergFeature
 extends Feature<BlockStateConfiguration> {
-    public IcebergFeature(Function<Dynamic<?>, ? extends BlockStateConfiguration> function) {
-        super(function);
+    public IcebergFeature(Codec<BlockStateConfiguration> codec) {
+        super(codec);
     }
 
     @Override

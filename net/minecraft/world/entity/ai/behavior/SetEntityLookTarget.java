@@ -22,7 +22,7 @@ extends Behavior<LivingEntity> {
     private final float maxDistSqr;
 
     public SetEntityLookTarget(MobCategory mobCategory, float f) {
-        this((LivingEntity livingEntity) -> mobCategory.equals((Object)livingEntity.getType().getCategory()), f);
+        this((LivingEntity livingEntity) -> mobCategory.equals(livingEntity.getType().getCategory()), f);
     }
 
     public SetEntityLookTarget(EntityType<?> entityType, float f) {

@@ -3,16 +3,19 @@
  */
 package net.minecraft.world.level.levelgen.carver;
 
+import com.mojang.serialization.Codec;
 import java.util.BitSet;
 import java.util.Random;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
 
 public class ConfiguredWorldCarver<WC extends CarverConfiguration> {
+    public static final Codec<ConfiguredWorldCarver<?>> CODEC = Registry.CARVER.dispatch("name", configuredWorldCarver -> configuredWorldCarver.worldCarver, WorldCarver::configuredCodec);
     public final WorldCarver<WC> worldCarver;
     public final WC config;
 

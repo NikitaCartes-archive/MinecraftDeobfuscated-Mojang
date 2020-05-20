@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -1019,9 +1020,9 @@ extends GuiComponent {
         }
     }
 
-    public void handleChat(ChatType chatType, Component component) {
+    public void handleChat(ChatType chatType, Component component, UUID uUID) {
         for (ChatListener chatListener : this.chatListeners.get((Object)chatType)) {
-            chatListener.handle(chatType, component);
+            chatListener.handle(chatType, component, uUID);
         }
     }
 

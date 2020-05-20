@@ -3,27 +3,17 @@
  */
 package net.minecraft.world.level.levelgen.feature.configurations;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 public class FeatureRadiusConfiguration
 implements FeatureConfiguration {
+    public static final Codec<FeatureRadiusConfiguration> CODEC = ((MapCodec)Codec.INT.fieldOf("radius")).xmap(FeatureRadiusConfiguration::new, featureRadiusConfiguration -> featureRadiusConfiguration.radius).codec();
     public final int radius;
 
     public FeatureRadiusConfiguration(int i) {
         this.radius = i;
-    }
-
-    @Override
-    public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("radius"), dynamicOps.createInt(this.radius))));
-    }
-
-    public static <T> FeatureRadiusConfiguration deserialize(Dynamic<T> dynamic) {
-        int i = dynamic.get("radius").asInt(0);
-        return new FeatureRadiusConfiguration(i);
     }
 }
 

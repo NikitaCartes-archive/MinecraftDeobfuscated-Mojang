@@ -3,27 +3,16 @@
  */
 package net.minecraft.world.level.levelgen.feature.configurations;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 public class BuriedTreasureConfiguration
 implements FeatureConfiguration {
+    public static final Codec<BuriedTreasureConfiguration> CODEC = Codec.FLOAT.xmap(BuriedTreasureConfiguration::new, buriedTreasureConfiguration -> Float.valueOf(buriedTreasureConfiguration.probability));
     public final float probability;
 
     public BuriedTreasureConfiguration(float f) {
         this.probability = f;
-    }
-
-    @Override
-    public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("probability"), dynamicOps.createFloat(this.probability))));
-    }
-
-    public static <T> BuriedTreasureConfiguration deserialize(Dynamic<T> dynamic) {
-        float f = dynamic.get("probability").asFloat(0.0f);
-        return new BuriedTreasureConfiguration(f);
     }
 }
 

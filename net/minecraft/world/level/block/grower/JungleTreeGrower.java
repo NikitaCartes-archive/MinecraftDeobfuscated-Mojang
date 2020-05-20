@@ -3,9 +3,7 @@
  */
 package net.minecraft.world.level.block.grower;
 
-import com.mojang.datafixers.Dynamic;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.block.grower.AbstractMegaTreeGrower;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -19,7 +17,7 @@ extends AbstractMegaTreeGrower {
     @Override
     @Nullable
     protected ConfiguredFeature<TreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl) {
-        return new TreeFeature((Function<Dynamic<?>, ? extends TreeConfiguration>)((Function<Dynamic<?>, TreeConfiguration>)TreeConfiguration::deserialize)).configured(BiomeDefaultFeatures.JUNGLE_TREE_NOVINE_CONFIG);
+        return new TreeFeature(TreeConfiguration.CODEC).configured(BiomeDefaultFeatures.JUNGLE_TREE_NOVINE_CONFIG);
     }
 
     @Override

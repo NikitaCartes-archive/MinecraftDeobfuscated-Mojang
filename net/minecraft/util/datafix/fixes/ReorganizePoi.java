@@ -7,11 +7,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Dynamic;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
@@ -36,7 +36,7 @@ extends DataFix {
         HashMap map = Maps.newHashMap();
         for (int i = 0; i < 16; ++i) {
             String string = String.valueOf(i);
-            Optional<Dynamic<T>> optional = dynamic.get(string).get();
+            Optional<Dynamic<T>> optional = dynamic.get(string).result();
             if (!optional.isPresent()) continue;
             Dynamic<T> dynamic2 = optional.get();
             Dynamic dynamic3 = dynamic.createMap(ImmutableMap.of(dynamic.createString("Records"), dynamic2));

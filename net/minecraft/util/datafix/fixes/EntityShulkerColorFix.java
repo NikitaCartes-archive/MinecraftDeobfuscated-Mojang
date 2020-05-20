@@ -4,9 +4,9 @@
 package net.minecraft.util.datafix.fixes;
 
 import com.mojang.datafixers.DSL;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
+import com.mojang.serialization.Dynamic;
 import net.minecraft.util.datafix.fixes.NamedEntityFix;
 import net.minecraft.util.datafix.fixes.References;
 
@@ -17,7 +17,7 @@ extends NamedEntityFix {
     }
 
     public Dynamic<?> fixTag(Dynamic<?> dynamic) {
-        if (!dynamic.get("Color").map(Dynamic::asNumber).isPresent()) {
+        if (!dynamic.get("Color").map(Dynamic::asNumber).result().isPresent()) {
             return dynamic.set("Color", dynamic.createByte((byte)10));
         }
         return dynamic;

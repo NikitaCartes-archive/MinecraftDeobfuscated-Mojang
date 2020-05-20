@@ -3,16 +3,14 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -24,23 +22,8 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 
 public class EndCityFeature
 extends StructureFeature<NoneFeatureConfiguration> {
-    public EndCityFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-        super(function);
-    }
-
-    @Override
-    protected int getSpacing(ChunkGeneratorSettings chunkGeneratorSettings) {
-        return chunkGeneratorSettings.getEndCitySpacing();
-    }
-
-    @Override
-    protected int getSeparation(ChunkGeneratorSettings chunkGeneratorSettings) {
-        return chunkGeneratorSettings.getEndCitySeparation();
-    }
-
-    @Override
-    protected int getRandomSalt(ChunkGeneratorSettings chunkGeneratorSettings) {
-        return 10387313;
+    public EndCityFeature(Codec<NoneFeatureConfiguration> codec) {
+        super(codec);
     }
 
     @Override
@@ -49,23 +32,13 @@ extends StructureFeature<NoneFeatureConfiguration> {
     }
 
     @Override
-    protected boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator chunkGenerator, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos) {
+    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos, NoneFeatureConfiguration noneFeatureConfiguration) {
         return EndCityFeature.getYPositionForFeature(i, j, chunkGenerator) >= 60;
     }
 
     @Override
-    public StructureFeature.StructureStartFactory getStartFactory() {
+    public StructureFeature.StructureStartFactory<NoneFeatureConfiguration> getStartFactory() {
         return EndCityStart::new;
-    }
-
-    @Override
-    public String getFeatureName() {
-        return "EndCity";
-    }
-
-    @Override
-    public int getLookupRange() {
-        return 8;
     }
 
     private static int getYPositionForFeature(int i, int j, ChunkGenerator chunkGenerator) {
@@ -91,13 +64,13 @@ extends StructureFeature<NoneFeatureConfiguration> {
     }
 
     public static class EndCityStart
-    extends StructureStart {
-        public EndCityStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+    extends StructureStart<NoneFeatureConfiguration> {
+        public EndCityStart(StructureFeature<NoneFeatureConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
             super(structureFeature, i, j, boundingBox, k, l);
         }
 
         @Override
-        public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+        public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration) {
             Rotation rotation = Rotation.getRandom(this.random);
             int k = EndCityFeature.getYPositionForFeature(i, j, chunkGenerator);
             if (k < 60) {

@@ -5,6 +5,7 @@ package net.minecraft.core.particles;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -35,13 +36,19 @@ implements ParticleOptions {
             return this.fromCommand(particleType, stringReader);
         }
     };
+    private final Codec<SimpleParticleType> codec = Codec.unit(this::getType);
 
     protected SimpleParticleType(boolean bl) {
         super(bl, DESERIALIZER);
     }
 
-    public ParticleType<SimpleParticleType> getType() {
+    public SimpleParticleType getType() {
         return this;
+    }
+
+    @Override
+    public Codec<SimpleParticleType> codec() {
+        return this.codec;
     }
 
     @Override
@@ -51,6 +58,10 @@ implements ParticleOptions {
     @Override
     public String writeToString() {
         return Registry.PARTICLE_TYPE.getKey(this).toString();
+    }
+
+    public /* synthetic */ ParticleType getType() {
+        return this.getType();
     }
 }
 

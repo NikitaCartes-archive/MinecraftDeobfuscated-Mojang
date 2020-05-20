@@ -175,7 +175,7 @@ implements ServerInterface {
         if (!OldUsersConverter.serverReadyAfterUserconversion(this)) {
             return false;
         }
-        this.setPlayerList(new DedicatedPlayerList(this, this.playerDataStorage));
+        this.setPlayerList(new DedicatedPlayerList(this, this.registryHolder, this.playerDataStorage));
         long l = Util.getNanos();
         this.setMaxBuildHeight(dedicatedServerProperties.maxBuildHeight);
         SkullBlockEntity.setProfileCache(this.getProfileCache());
@@ -389,7 +389,7 @@ implements ServerInterface {
     @Override
     public boolean isUnderSpawnProtection(ServerLevel serverLevel, BlockPos blockPos, Player player) {
         int j;
-        if (serverLevel.dimensionType() != DimensionType.OVERWORLD) {
+        if (serverLevel.dimension() != DimensionType.OVERWORLD_LOCATION) {
             return false;
         }
         if (this.getPlayerList().getOps().isEmpty()) {

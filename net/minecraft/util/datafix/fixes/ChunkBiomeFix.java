@@ -26,7 +26,7 @@ extends DataFix {
         OpticFinder<?> opticFinder = type.findField("Level");
         return this.fixTypeEverywhereTyped("Leaves fix", type, typed2 -> typed2.updateTyped(opticFinder, typed -> typed.update(DSL.remainderFinder(), dynamic -> {
             int i;
-            Optional<IntStream> optional = dynamic.get("Biomes").asIntStreamOpt();
+            Optional<IntStream> optional = dynamic.get("Biomes").asIntStreamOpt().result();
             if (!optional.isPresent()) {
                 return dynamic;
             }

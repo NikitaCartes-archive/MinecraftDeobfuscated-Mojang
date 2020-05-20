@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LightLayer;
@@ -16,6 +15,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.material.Material;
 
@@ -23,8 +23,8 @@ public class LakeFeature
 extends Feature<BlockStateConfiguration> {
     private static final BlockState AIR = Blocks.CAVE_AIR.defaultBlockState();
 
-    public LakeFeature(Function<Dynamic<?>, ? extends BlockStateConfiguration> function) {
-        super(function);
+    public LakeFeature(Codec<BlockStateConfiguration> codec) {
+        super(codec);
     }
 
     @Override
@@ -37,7 +37,7 @@ extends Feature<BlockStateConfiguration> {
         if (blockPos.getY() <= 4) {
             return false;
         }
-        if (structureFeatureManager.startsForFeature(SectionPos.of(blockPos = blockPos.below(4)), Feature.VILLAGE).findAny().isPresent()) {
+        if (structureFeatureManager.startsForFeature(SectionPos.of(blockPos = blockPos.below(4)), StructureFeature.VILLAGE).findAny().isPresent()) {
             return false;
         }
         boolean[] bls = new boolean[2048];

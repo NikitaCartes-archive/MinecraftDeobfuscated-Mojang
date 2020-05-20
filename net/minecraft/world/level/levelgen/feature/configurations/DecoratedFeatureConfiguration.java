@@ -3,9 +3,10 @@
  */
 package net.minecraft.world.level.levelgen.feature.configurations;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.levelgen.placement.ConfiguredDecorator;
 
 public class DecoratedFeatureConfiguration
 implements FeatureConfiguration {
+    public static final Codec<DecoratedFeatureConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ConfiguredFeature.CODEC.fieldOf("feature")).forGetter(decoratedFeatureConfiguration -> decoratedFeatureConfiguration.feature), ((MapCodec)ConfiguredDecorator.CODEC.fieldOf("decorator")).forGetter(decoratedFeatureConfiguration -> decoratedFeatureConfiguration.decorator)).apply((Applicative<DecoratedFeatureConfiguration, ?>)instance, DecoratedFeatureConfiguration::new));
     public final ConfiguredFeature<?, ?> feature;
     public final ConfiguredDecorator<?> decorator;
 
@@ -22,19 +24,8 @@ implements FeatureConfiguration {
         this.decorator = configuredDecorator;
     }
 
-    @Override
-    public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("feature"), this.feature.serialize(dynamicOps).getValue(), dynamicOps.createString("decorator"), this.decorator.serialize(dynamicOps).getValue())));
-    }
-
     public String toString() {
         return String.format("< %s [%s | %s] >", this.getClass().getSimpleName(), Registry.FEATURE.getKey((Feature<?>)this.feature.feature), Registry.DECORATOR.getKey(this.decorator.decorator));
-    }
-
-    public static <T> DecoratedFeatureConfiguration deserialize(Dynamic<T> dynamic) {
-        ConfiguredFeature<?, ?> configuredFeature = ConfiguredFeature.deserialize(dynamic.get("feature").orElseEmptyMap());
-        ConfiguredDecorator<?> configuredDecorator = ConfiguredDecorator.deserialize(dynamic.get("decorator").orElseEmptyMap());
-        return new DecoratedFeatureConfiguration(configuredFeature, configuredDecorator);
     }
 }
 

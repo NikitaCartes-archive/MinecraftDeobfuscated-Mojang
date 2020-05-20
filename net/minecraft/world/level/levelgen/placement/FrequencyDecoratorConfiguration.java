@@ -3,27 +3,17 @@
  */
 package net.minecraft.world.level.levelgen.placement;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 
 public class FrequencyDecoratorConfiguration
 implements DecoratorConfiguration {
+    public static final Codec<FrequencyDecoratorConfiguration> CODEC = ((MapCodec)Codec.INT.fieldOf("count")).xmap(FrequencyDecoratorConfiguration::new, frequencyDecoratorConfiguration -> frequencyDecoratorConfiguration.count).codec();
     public final int count;
 
     public FrequencyDecoratorConfiguration(int i) {
         this.count = i;
-    }
-
-    @Override
-    public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("count"), dynamicOps.createInt(this.count))));
-    }
-
-    public static FrequencyDecoratorConfiguration deserialize(Dynamic<?> dynamic) {
-        int i = dynamic.get("count").asInt(0);
-        return new FrequencyDecoratorConfiguration(i);
     }
 }
 

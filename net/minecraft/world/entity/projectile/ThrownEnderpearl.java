@@ -8,6 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -125,12 +126,12 @@ extends ThrowableItemProjectile {
 
     @Override
     @Nullable
-    public Entity changeDimension(DimensionType dimensionType) {
+    public Entity changeDimension(ResourceKey<DimensionType> resourceKey) {
         Entity entity = this.getOwner();
-        if (entity.dimension != dimensionType) {
+        if (entity != null && entity.level.dimension() != resourceKey) {
             this.setOwner(null);
         }
-        return super.changeDimension(dimensionType);
+        return super.changeDimension(resourceKey);
     }
 }
 

@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -32,8 +31,8 @@ extends Feature<NoneFeatureConfiguration> {
     private static final EntityType<?>[] MOBS = new EntityType[]{EntityType.SKELETON, EntityType.ZOMBIE, EntityType.ZOMBIE, EntityType.SPIDER};
     private static final BlockState AIR = Blocks.CAVE_AIR.defaultBlockState();
 
-    public MonsterRoomFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-        super(function);
+    public MonsterRoomFeature(Codec<NoneFeatureConfiguration> codec) {
+        super(codec);
     }
 
     @Override

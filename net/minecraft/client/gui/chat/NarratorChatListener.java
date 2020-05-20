@@ -4,6 +4,7 @@
 package net.minecraft.client.gui.chat;
 
 import com.mojang.text2speech.Narrator;
+import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
@@ -28,7 +29,10 @@ implements ChatListener {
     private final Narrator narrator = Narrator.getNarrator();
 
     @Override
-    public void handle(ChatType chatType, Component component) {
+    public void handle(ChatType chatType, Component component, UUID uUID) {
+        if (Minecraft.getInstance().isBlocked(uUID)) {
+            return;
+        }
         NarratorStatus narratorStatus = NarratorChatListener.getStatus();
         if (narratorStatus == NarratorStatus.OFF || !this.narrator.active()) {
             return;

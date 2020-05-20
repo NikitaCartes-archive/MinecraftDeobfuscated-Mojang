@@ -3,8 +3,7 @@
  */
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
@@ -15,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class NopProcessor
 extends StructureProcessor {
+    public static final Codec<NopProcessor> CODEC = Codec.unit(() -> INSTANCE);
     public static final NopProcessor INSTANCE = new NopProcessor();
 
     private NopProcessor() {
@@ -27,13 +27,8 @@ extends StructureProcessor {
     }
 
     @Override
-    protected StructureProcessorType getType() {
+    protected StructureProcessorType<?> getType() {
         return StructureProcessorType.NOP;
-    }
-
-    @Override
-    protected <T> Dynamic<T> getDynamic(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.emptyMap());
     }
 }
 

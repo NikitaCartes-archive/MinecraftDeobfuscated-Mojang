@@ -5,7 +5,7 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.OptionalInt;
 import java.util.Random;
 import java.util.Set;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -41,8 +40,8 @@ import net.minecraft.world.phys.shapes.DiscreteVoxelShape;
 
 public class TreeFeature
 extends Feature<TreeConfiguration> {
-    public TreeFeature(Function<Dynamic<?>, ? extends TreeConfiguration> function) {
-        super(function);
+    public TreeFeature(Codec<TreeConfiguration> codec) {
+        super(codec);
     }
 
     public static boolean isFree(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {

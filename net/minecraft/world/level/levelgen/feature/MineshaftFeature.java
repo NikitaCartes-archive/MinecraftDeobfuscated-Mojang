@@ -3,17 +3,16 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -24,42 +23,30 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 
 public class MineshaftFeature
 extends StructureFeature<MineshaftConfiguration> {
-    public MineshaftFeature(Function<Dynamic<?>, ? extends MineshaftConfiguration> function) {
-        super(function);
+    public MineshaftFeature(Codec<MineshaftConfiguration> codec) {
+        super(codec);
     }
 
     @Override
-    protected boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator chunkGenerator, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos) {
+    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos, MineshaftConfiguration mineshaftConfiguration) {
         worldgenRandom.setLargeFeatureSeed(l, i, j);
-        MineshaftConfiguration mineshaftConfiguration = chunkGenerator.getStructureConfiguration(biome, this);
         double d = mineshaftConfiguration.probability;
         return worldgenRandom.nextDouble() < d;
     }
 
     @Override
-    public StructureFeature.StructureStartFactory getStartFactory() {
+    public StructureFeature.StructureStartFactory<MineshaftConfiguration> getStartFactory() {
         return MineShaftStart::new;
     }
 
-    @Override
-    public String getFeatureName() {
-        return "Mineshaft";
-    }
-
-    @Override
-    public int getLookupRange() {
-        return 8;
-    }
-
     public static class MineShaftStart
-    extends StructureStart {
-        public MineShaftStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+    extends StructureStart<MineshaftConfiguration> {
+        public MineShaftStart(StructureFeature<MineshaftConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
             super(structureFeature, i, j, boundingBox, k, l);
         }
 
         @Override
-        public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
-            MineshaftConfiguration mineshaftConfiguration = chunkGenerator.getStructureConfiguration(biome, Feature.MINESHAFT);
+        public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, MineshaftConfiguration mineshaftConfiguration) {
             MineShaftPieces.MineShaftRoom mineShaftRoom = new MineShaftPieces.MineShaftRoom(0, this.random, (i << 4) + 2, (j << 4) + 2, mineshaftConfiguration.type);
             this.pieces.add(mineShaftRoom);
             mineShaftRoom.addChildren(mineShaftRoom, this.pieces, this.random);
@@ -77,10 +64,12 @@ extends StructureFeature<MineshaftConfiguration> {
         }
     }
 
-    public static enum Type {
+    public static enum Type implements StringRepresentable
+    {
         NORMAL("normal"),
         MESA("mesa");
 
+        public static final Codec<Type> CODEC;
         private static final Map<String, Type> BY_NAME;
         private final String name;
 
@@ -92,7 +81,7 @@ extends StructureFeature<MineshaftConfiguration> {
             return this.name;
         }
 
-        public static Type byName(String string) {
+        private static Type byName(String string) {
             return BY_NAME.get(string);
         }
 
@@ -103,7 +92,13 @@ extends StructureFeature<MineshaftConfiguration> {
             return Type.values()[i];
         }
 
+        @Override
+        public String getSerializedName() {
+            return this.name;
+        }
+
         static {
+            CODEC = StringRepresentable.fromEnum(Type::values, Type::byName);
             BY_NAME = Arrays.stream(Type.values()).collect(Collectors.toMap(Type::getName, type -> type));
         }
     }

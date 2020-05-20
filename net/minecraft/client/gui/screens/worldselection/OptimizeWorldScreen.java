@@ -8,6 +8,7 @@ import com.mojang.datafixers.DataFixer;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
+import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -16,6 +17,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -25,10 +27,10 @@ import net.minecraft.world.level.storage.WorldData;
 @Environment(value=EnvType.CLIENT)
 public class OptimizeWorldScreen
 extends Screen {
-    private static final Object2IntMap<DimensionType> DIMENSION_COLORS = Util.make(new Object2IntOpenCustomHashMap(Util.identityStrategy()), object2IntOpenCustomHashMap -> {
-        object2IntOpenCustomHashMap.put(DimensionType.OVERWORLD, -13408734);
-        object2IntOpenCustomHashMap.put(DimensionType.NETHER, -10075085);
-        object2IntOpenCustomHashMap.put(DimensionType.THE_END, -8943531);
+    private static final Object2IntMap<ResourceKey<DimensionType>> DIMENSION_COLORS = Util.make(new Object2IntOpenCustomHashMap(Util.identityStrategy()), object2IntOpenCustomHashMap -> {
+        object2IntOpenCustomHashMap.put(DimensionType.OVERWORLD_LOCATION, -13408734);
+        object2IntOpenCustomHashMap.put(DimensionType.NETHER_LOCATION, -10075085);
+        object2IntOpenCustomHashMap.put(DimensionType.END_LOCATION, -8943531);
         object2IntOpenCustomHashMap.defaultReturnValue(-2236963);
     });
     private final BooleanConsumer callback;
@@ -86,9 +88,9 @@ extends Screen {
             this.drawString(poseStack, this.font, I18n.get("optimizeWorld.info.skipped", this.upgrader.getSkipped()), k, 40 + this.font.lineHeight + 3, 0xA0A0A0);
             this.drawString(poseStack, this.font, I18n.get("optimizeWorld.info.total", this.upgrader.getTotalChunks()), k, 40 + (this.font.lineHeight + 3) * 2, 0xA0A0A0);
             int o = 0;
-            for (DimensionType dimensionType : DimensionType.getAllTypes()) {
-                int p = Mth.floor(this.upgrader.dimensionProgress(dimensionType) * (float)(l - k));
-                OptimizeWorldScreen.fill(poseStack, k + o, m, k + o + p, n, DIMENSION_COLORS.getInt(dimensionType));
+            for (Map.Entry entry : this.upgrader.dimensionTypes().entrySet()) {
+                int p = Mth.floor(this.upgrader.dimensionProgress((DimensionType)entry.getValue()) * (float)(l - k));
+                OptimizeWorldScreen.fill(poseStack, k + o, m, k + o + p, n, DIMENSION_COLORS.getInt(entry.getKey()));
                 o += p;
             }
             int q = this.upgrader.getConverted() + this.upgrader.getSkipped();

@@ -85,7 +85,7 @@ extends SavedData {
             return null;
         }
         DimensionType dimensionType = serverPlayer.level.dimensionType();
-        if (dimensionType == DimensionType.NETHER) {
+        if (dimensionType.isNether()) {
             return null;
         }
         BlockPos blockPos = serverPlayer.blockPosition();

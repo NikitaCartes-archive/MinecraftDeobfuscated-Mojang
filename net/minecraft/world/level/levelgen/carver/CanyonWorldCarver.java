@@ -3,7 +3,7 @@
  */
 package net.minecraft.world.level.levelgen.carver;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.BitSet;
 import java.util.Random;
 import java.util.function.Function;
@@ -18,8 +18,8 @@ public class CanyonWorldCarver
 extends WorldCarver<ProbabilityFeatureConfiguration> {
     private final float[] rs = new float[1024];
 
-    public CanyonWorldCarver(Function<Dynamic<?>, ? extends ProbabilityFeatureConfiguration> function) {
-        super(function, 256);
+    public CanyonWorldCarver(Codec<ProbabilityFeatureConfiguration> codec) {
+        super(codec, 256);
     }
 
     @Override

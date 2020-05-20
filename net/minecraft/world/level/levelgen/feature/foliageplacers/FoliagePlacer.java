@@ -3,34 +3,38 @@
  */
 package net.minecraft.world.level.levelgen.feature.foliageplacers;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.Products;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.util.Serializable;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.levelgen.feature.TreeFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerType;
 
-public abstract class FoliagePlacer
-implements Serializable {
-    private final int radius;
-    private final int radiusRandom;
-    private final int offset;
-    private final int offsetRandom;
-    private final FoliagePlacerType<?> type;
+public abstract class FoliagePlacer {
+    public static final Codec<FoliagePlacer> CODEC = Registry.FOLIAGE_PLACER_TYPES.dispatch(FoliagePlacer::type, FoliagePlacerType::codec);
+    protected final int radius;
+    protected final int radiusRandom;
+    protected final int offset;
+    protected final int offsetRandom;
 
-    public FoliagePlacer(int i, int j, int k, int l, FoliagePlacerType<?> foliagePlacerType) {
+    protected static <P extends FoliagePlacer> Products.P4<RecordCodecBuilder.Mu<P>, Integer, Integer, Integer, Integer> foliagePlacerParts(RecordCodecBuilder.Instance<P> instance) {
+        return instance.group(((MapCodec)Codec.INT.fieldOf("radius")).forGetter(foliagePlacer -> foliagePlacer.radius), ((MapCodec)Codec.INT.fieldOf("radius_random")).forGetter(foliagePlacer -> foliagePlacer.radiusRandom), ((MapCodec)Codec.INT.fieldOf("offset")).forGetter(foliagePlacer -> foliagePlacer.offset), ((MapCodec)Codec.INT.fieldOf("offset_random")).forGetter(foliagePlacer -> foliagePlacer.offsetRandom));
+    }
+
+    public FoliagePlacer(int i, int j, int k, int l) {
         this.radius = i;
         this.radiusRandom = j;
         this.offset = k;
         this.offsetRandom = l;
-        this.type = foliagePlacerType;
     }
+
+    protected abstract FoliagePlacerType<?> type();
 
     public void createFoliage(LevelSimulatedRW levelSimulatedRW, Random random, TreeConfiguration treeConfiguration, int i, FoliageAttachment foliageAttachment, int j, int k, Set<BlockPos> set) {
         this.createFoliage(levelSimulatedRW, random, treeConfiguration, i, foliageAttachment, j, k, set, this.offset(random));
@@ -75,13 +79,6 @@ implements Serializable {
                 set.add(mutableBlockPos.immutable());
             }
         }
-    }
-
-    @Override
-    public <T> T serialize(DynamicOps<T> dynamicOps) {
-        ImmutableMap.Builder<T, T> builder = ImmutableMap.builder();
-        builder.put(dynamicOps.createString("type"), dynamicOps.createString(Registry.FOLIAGE_PLACER_TYPES.getKey(this.type).toString())).put(dynamicOps.createString("radius"), dynamicOps.createInt(this.radius)).put(dynamicOps.createString("radius_random"), dynamicOps.createInt(this.radiusRandom)).put(dynamicOps.createString("offset"), dynamicOps.createInt(this.offset)).put(dynamicOps.createString("offset_random"), dynamicOps.createInt(this.offsetRandom));
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(builder.build())).getValue();
     }
 
     public static final class FoliageAttachment {

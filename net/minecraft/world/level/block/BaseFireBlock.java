@@ -26,7 +26,6 @@ import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.SoulFireBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -148,7 +147,7 @@ extends Block {
         if (blockState2.is(blockState.getBlock())) {
             return;
         }
-        if ((level.dimensionType() == DimensionType.OVERWORLD || level.dimensionType() == DimensionType.NETHER) && NetherPortalBlock.trySpawnPortal(level, blockPos)) {
+        if ((level.dimensionType().isOverworld() || level.dimensionType().isNether()) && NetherPortalBlock.trySpawnPortal(level, blockPos)) {
             return;
         }
         if (!blockState.canSurvive(level, blockPos)) {

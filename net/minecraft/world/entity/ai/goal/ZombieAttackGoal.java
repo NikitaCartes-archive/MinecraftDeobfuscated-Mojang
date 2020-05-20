@@ -32,7 +32,7 @@ extends MeleeAttackGoal {
     public void tick() {
         super.tick();
         ++this.raiseArmTicks;
-        if (this.raiseArmTicks >= 5 && this.attackTime < 10) {
+        if (this.raiseArmTicks >= 5 && this.getTicksUntilNextAttack() < this.getAttackInterval() / 2) {
             this.zombie.setAggressive(true);
         } else {
             this.zombie.setAggressive(false);

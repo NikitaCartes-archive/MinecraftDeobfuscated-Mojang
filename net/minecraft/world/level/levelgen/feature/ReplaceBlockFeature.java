@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -15,8 +14,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.ReplaceBlockCon
 
 public class ReplaceBlockFeature
 extends Feature<ReplaceBlockConfiguration> {
-    public ReplaceBlockFeature(Function<Dynamic<?>, ? extends ReplaceBlockConfiguration> function) {
-        super(function);
+    public ReplaceBlockFeature(Codec<ReplaceBlockConfiguration> codec) {
+        super(codec);
     }
 
     @Override

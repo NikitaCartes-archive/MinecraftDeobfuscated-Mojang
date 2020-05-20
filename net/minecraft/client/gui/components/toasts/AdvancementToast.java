@@ -34,7 +34,7 @@ implements Toast {
         toastComponent.getMinecraft().getTextureManager().bind(TEXTURE);
         RenderSystem.color3f(1.0f, 1.0f, 1.0f);
         DisplayInfo displayInfo = this.advancement.getDisplay();
-        toastComponent.blit(poseStack, 0, 0, 0, 0, 160, 32);
+        toastComponent.blit(poseStack, 0, 0, 0, 0, this.width(), this.height());
         if (displayInfo != null) {
             int i;
             List<Component> list = toastComponent.getMinecraft().font.split(displayInfo.getTitle(), 125);
@@ -50,7 +50,7 @@ implements Toast {
                     toastComponent.getMinecraft().font.draw(poseStack, I18n.get("advancements.toast." + displayInfo.getFrame().getName(), new Object[0]), 30.0f, 11.0f, i | k);
                 } else {
                     int k = Mth.floor(Mth.clamp((float)(l - 1500L) / 300.0f, 0.0f, 1.0f) * 252.0f) << 24 | 0x4000000;
-                    int m = 16 - list.size() * toastComponent.getMinecraft().font.lineHeight / 2;
+                    int m = this.height() / 2 - list.size() * toastComponent.getMinecraft().font.lineHeight / 2;
                     for (Component component : list) {
                         toastComponent.getMinecraft().font.draw(poseStack, component, 30.0f, (float)m, 0xFFFFFF | k);
                         m += toastComponent.getMinecraft().font.lineHeight;

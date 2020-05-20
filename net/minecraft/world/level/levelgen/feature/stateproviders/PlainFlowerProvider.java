@@ -3,13 +3,10 @@
  */
 package net.minecraft.world.level.levelgen.feature.stateproviders;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -18,15 +15,14 @@ import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvi
 
 public class PlainFlowerProvider
 extends BlockStateProvider {
+    public static final Codec<PlainFlowerProvider> CODEC = Codec.unit(() -> INSTANCE);
+    public static final PlainFlowerProvider INSTANCE = new PlainFlowerProvider();
     private static final BlockState[] LOW_NOISE_FLOWERS = new BlockState[]{Blocks.ORANGE_TULIP.defaultBlockState(), Blocks.RED_TULIP.defaultBlockState(), Blocks.PINK_TULIP.defaultBlockState(), Blocks.WHITE_TULIP.defaultBlockState()};
     private static final BlockState[] HIGH_NOISE_FLOWERS = new BlockState[]{Blocks.POPPY.defaultBlockState(), Blocks.AZURE_BLUET.defaultBlockState(), Blocks.OXEYE_DAISY.defaultBlockState(), Blocks.CORNFLOWER.defaultBlockState()};
 
-    public PlainFlowerProvider() {
-        super(BlockStateProviderType.PLAIN_FLOWER_PROVIDER);
-    }
-
-    public <T> PlainFlowerProvider(Dynamic<T> dynamic) {
-        this();
+    @Override
+    protected BlockStateProviderType<?> type() {
+        return BlockStateProviderType.PLAIN_FLOWER_PROVIDER;
     }
 
     @Override
@@ -39,13 +35,6 @@ extends BlockStateProvider {
             return Util.getRandom(HIGH_NOISE_FLOWERS, random);
         }
         return Blocks.DANDELION.defaultBlockState();
-    }
-
-    @Override
-    public <T> T serialize(DynamicOps<T> dynamicOps) {
-        ImmutableMap.Builder<T, T> builder = ImmutableMap.builder();
-        builder.put(dynamicOps.createString("type"), dynamicOps.createString(Registry.BLOCKSTATE_PROVIDER_TYPES.getKey(this.type).toString()));
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(builder.build())).getValue();
     }
 }
 

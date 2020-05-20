@@ -5,10 +5,10 @@ package net.minecraft.util.datafix.fixes;
 
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Dynamic;
 import java.util.stream.Collectors;
 import net.minecraft.util.datafix.fixes.References;
 
@@ -26,7 +26,7 @@ extends DataFix {
                 return Pair.of(entry.getKey(), dynamic.createString("key.keyboard." + string.substring("key.".length())));
             }
             return Pair.of(entry.getKey(), entry.getValue());
-        }).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond)))).orElse((Dynamic)dynamic)));
+        }).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond)))).result().orElse((Dynamic)dynamic)));
     }
 }
 

@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -105,7 +106,7 @@ public class ItemProperties {
                 if (clientLevel == null) {
                     return 0.0f;
                 }
-                double d = clientLevel.getDimension().isNaturalDimension() ? (double)clientLevel.getTimeOfDay(1.0f) : Math.random();
+                double d = clientLevel.dimensionType().natural() ? (double)clientLevel.getTimeOfDay(1.0f) : Math.random();
                 d = this.wobble(clientLevel, d);
                 return (float)d;
             }
@@ -172,16 +173,16 @@ public class ItemProperties {
 
             @Nullable
             private BlockPos getSpawnPosition(ClientLevel clientLevel) {
-                return clientLevel.getDimension().isNaturalDimension() ? clientLevel.getSharedSpawnPos() : null;
+                return clientLevel.dimensionType().natural() ? clientLevel.getSharedSpawnPos() : null;
             }
 
             @Nullable
             private BlockPos getLodestonePosition(Level level, CompoundTag compoundTag) {
-                Optional<DimensionType> optional;
+                Optional<ResourceKey<DimensionType>> optional;
                 boolean bl = compoundTag.contains("LodestonePos");
                 boolean bl2 = compoundTag.contains("LodestoneDimension");
-                if (bl && bl2 && (optional = CompassItem.getLodestoneDimension(compoundTag)).isPresent() && level.dimensionType().equals(optional.get())) {
-                    return NbtUtils.readBlockPos((CompoundTag)compoundTag.get("LodestonePos"));
+                if (bl && bl2 && (optional = CompassItem.getLodestoneDimension(compoundTag)).isPresent() && level.dimension() == optional.get()) {
+                    return NbtUtils.readBlockPos(compoundTag.getCompound("LodestonePos"));
                 }
                 return null;
             }

@@ -6,9 +6,9 @@ package net.minecraft.util.datafix.fixes;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
+import com.mojang.serialization.Dynamic;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.util.datafix.fixes.References;
@@ -23,8 +23,8 @@ extends DataFix {
 
     public Dynamic<?> fixTag(Dynamic<?> dynamic) {
         float f;
-        Optional<Number> optional = dynamic.get("HealF").asNumber();
-        Optional<Number> optional2 = dynamic.get("Health").asNumber();
+        Optional<Number> optional = dynamic.get("HealF").asNumber().result();
+        Optional<Number> optional2 = dynamic.get("Health").asNumber().result();
         if (optional.isPresent()) {
             f = optional.get().floatValue();
             dynamic = dynamic.remove("HealF");

@@ -5,11 +5,11 @@ package net.minecraft.util.datafix.fixes;
 
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
+import com.mojang.serialization.Dynamic;
 import net.minecraft.util.datafix.fixes.References;
 
 public class EntityPaintingItemFrameDirectionFix
@@ -21,16 +21,16 @@ extends DataFix {
     }
 
     private Dynamic<?> doFix(Dynamic<?> dynamic, boolean bl, boolean bl2) {
-        if ((bl || bl2) && !dynamic.get("Facing").asNumber().isPresent()) {
+        if ((bl || bl2) && !dynamic.get("Facing").asNumber().result().isPresent()) {
             int i;
-            if (dynamic.get("Direction").asNumber().isPresent()) {
+            if (dynamic.get("Direction").asNumber().result().isPresent()) {
                 i = dynamic.get("Direction").asByte((byte)0) % DIRECTIONS.length;
                 int[] is = DIRECTIONS[i];
                 dynamic = dynamic.set("TileX", dynamic.createInt(dynamic.get("TileX").asInt(0) + is[0]));
                 dynamic = dynamic.set("TileY", dynamic.createInt(dynamic.get("TileY").asInt(0) + is[1]));
                 dynamic = dynamic.set("TileZ", dynamic.createInt(dynamic.get("TileZ").asInt(0) + is[2]));
                 dynamic = dynamic.remove("Direction");
-                if (bl2 && dynamic.get("ItemRotation").asNumber().isPresent()) {
+                if (bl2 && dynamic.get("ItemRotation").asNumber().result().isPresent()) {
                     dynamic = dynamic.set("ItemRotation", dynamic.createByte((byte)(dynamic.get("ItemRotation").asByte((byte)0) * 2)));
                 }
             } else {

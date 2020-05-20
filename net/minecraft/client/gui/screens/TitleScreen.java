@@ -8,9 +8,11 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.io.IOException;
+import java.lang.invoke.LambdaMetafactory;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
@@ -33,6 +35,7 @@ import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsBridge;
 import net.minecraft.resources.ResourceLocation;
@@ -129,16 +132,16 @@ extends Screen {
         }
     }
 
-    private void createNormalMenuOptions(int i, int j) {
-        this.addButton(new Button(this.width / 2 - 100, i, 200, 20, new TranslatableComponent("menu.singleplayer"), button -> this.minecraft.setScreen(new SelectWorldScreen(this))));
-        this.addButton(new Button(this.width / 2 - 100, i + j * 1, 200, 20, new TranslatableComponent("menu.multiplayer"), button -> {
-            if (this.minecraft.options.skipMultiplayerWarning) {
-                this.minecraft.setScreen(new JoinMultiplayerScreen(this));
-            } else {
-                this.minecraft.setScreen(new SafetyScreen(this));
+    private void createNormalMenuOptions(int i2, int j2) {
+        this.addButton(new Button(this.width / 2 - 100, i2, 200, 20, new TranslatableComponent("menu.singleplayer"), button -> this.minecraft.setScreen(new SelectWorldScreen(this))));
+        boolean bl = this.minecraft.allowsMultiplayer();
+        Button.OnTooltip onTooltip = bl ? Button.NO_TOOLTIP : (button, poseStack, i, j) -> {
+            if (!button.active) {
+                this.renderTooltip(poseStack, this.minecraft.font.split(new TranslatableComponent("title.multiplayer.disabled"), Math.max(this.width / 2 - 43, 170)), i, j);
             }
-        }));
-        this.addButton(new Button(this.width / 2 - 100, i + j * 2, 200, 20, new TranslatableComponent("menu.online"), button -> this.realmsButtonClicked()));
+        };
+        this.addButton(new Button((int)(this.width / 2 - 100), (int)(i2 + j2 * 1), (int)200, (int)20, (Component)new TranslatableComponent((String)"menu.multiplayer"), (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, method_19860(net.minecraft.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((TitleScreen)this), (Button.OnTooltip)onTooltip)).active = bl;
+        this.addButton(new Button((int)(this.width / 2 - 100), (int)(i2 + j2 * 2), (int)200, (int)20, (Component)new TranslatableComponent((String)"menu.online"), (Button.OnPress)(Button.OnPress)LambdaMetafactory.metafactory(null, null, null, (Lnet/minecraft/client/gui/components/Button;)V, method_19859(net.minecraft.client.gui.components.Button ), (Lnet/minecraft/client/gui/components/Button;)V)((TitleScreen)this), (Button.OnTooltip)onTooltip)).active = bl;
     }
 
     private void createDemoMenuOptions(int i, int j) {
@@ -195,14 +198,18 @@ extends Screen {
         this.minecraft.getTextureManager().bind(MINECRAFT_LOGO);
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, h);
         if (this.minceraftEasterEgg) {
-            this.blit(poseStack, l + 0, 30, 0, 0, 99, 44);
-            this.blit(poseStack, l + 99, 30, 129, 0, 27, 44);
-            this.blit(poseStack, l + 99 + 26, 30, 126, 0, 3, 44);
-            this.blit(poseStack, l + 99 + 26 + 3, 30, 99, 0, 26, 44);
-            this.blit(poseStack, l + 155, 30, 0, 45, 155, 44);
+            this.blitOutline(l, 30, (integer, integer2) -> {
+                this.blit(poseStack, integer + 0, (int)integer2, 0, 0, 99, 44);
+                this.blit(poseStack, integer + 99, (int)integer2, 129, 0, 27, 44);
+                this.blit(poseStack, integer + 99 + 26, (int)integer2, 126, 0, 3, 44);
+                this.blit(poseStack, integer + 99 + 26 + 3, (int)integer2, 99, 0, 26, 44);
+                this.blit(poseStack, integer + 155, (int)integer2, 0, 45, 155, 44);
+            });
         } else {
-            this.blit(poseStack, l + 0, 30, 0, 0, 155, 44);
-            this.blit(poseStack, l + 155, 30, 0, 45, 155, 44);
+            this.blitOutline(l, 30, (integer, integer2) -> {
+                this.blit(poseStack, integer + 0, (int)integer2, 0, 0, 155, 44);
+                this.blit(poseStack, integer + 155, (int)integer2, 0, 45, 155, 44);
+            });
         }
         this.minecraft.getTextureManager().bind(MINECRAFT_EDITION);
         TitleScreen.blit(poseStack, l + 88, 67, 0.0f, 0.0f, 98, 14, 128, 16);
@@ -233,6 +240,14 @@ extends Screen {
         if (this.realmsNotificationsEnabled() && h >= 1.0f) {
             this.realmsNotificationsScreen.render(poseStack, i, j, f);
         }
+    }
+
+    private void blitOutline(int i, int j, BiConsumer<Integer, Integer> biConsumer) {
+        biConsumer.accept(i + 1, j);
+        biConsumer.accept(i - 1, j);
+        biConsumer.accept(i, j + 1);
+        biConsumer.accept(i, j - 1);
+        biConsumer.accept(i, j);
     }
 
     @Override
@@ -266,6 +281,15 @@ extends Screen {
             }
         }
         this.minecraft.setScreen(this);
+    }
+
+    private /* synthetic */ void method_19859(Button button) {
+        this.realmsButtonClicked();
+    }
+
+    private /* synthetic */ void method_19860(Button button) {
+        Screen screen = this.minecraft.options.skipMultiplayerWarning ? new JoinMultiplayerScreen(this) : new SafetyScreen(this);
+        this.minecraft.setScreen(screen);
     }
 }
 

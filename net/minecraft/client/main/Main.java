@@ -51,6 +51,8 @@ public class Main {
         OptionParser optionParser = new OptionParser();
         optionParser.allowsUnrecognizedOptions();
         optionParser.accepts("demo");
+        optionParser.accepts("disableMultiplayer");
+        optionParser.accepts("disableChat");
         optionParser.accepts("fullscreen");
         optionParser.accepts("checkGlErrors");
         ArgumentAcceptingOptionSpec<String> optionSpec = optionParser.accepts("server").withRequiredArg();
@@ -107,6 +109,8 @@ public class Main {
         OptionalInt optionalInt2 = Main.ofNullable(Main.parseArgument(optionSet, optionSpec17));
         boolean bl = optionSet.has("fullscreen");
         boolean bl2 = optionSet.has("demo");
+        boolean bl3 = optionSet.has("disableMultiplayer");
+        boolean bl4 = optionSet.has("disableChat");
         String string4 = Main.parseArgument(optionSet, optionSpec13);
         Gson gson = new GsonBuilder().registerTypeAdapter((Type)((Object)PropertyMap.class), new PropertyMap.Serializer()).create();
         PropertyMap propertyMap = GsonHelper.fromJson(gson, Main.parseArgument(optionSet, optionSpec18), PropertyMap.class);
@@ -121,7 +125,7 @@ public class Main {
         Integer integer = Main.parseArgument(optionSet, optionSpec2);
         CrashReport.preload();
         User user = new User((String)optionSpec10.value(optionSet), string6, (String)optionSpec12.value(optionSet), (String)optionSpec21.value(optionSet));
-        GameConfig gameConfig = new GameConfig(new GameConfig.UserData(user, propertyMap, propertyMap2, proxy), new DisplayData(i, j, optionalInt, optionalInt2, bl), new GameConfig.FolderData(file, file3, file2, string7), new GameConfig.GameData(bl2, string4, string5), new GameConfig.ServerData(string8, integer));
+        GameConfig gameConfig = new GameConfig(new GameConfig.UserData(user, propertyMap, propertyMap2, proxy), new DisplayData(i, j, optionalInt, optionalInt2, bl), new GameConfig.FolderData(file, file3, file2, string7), new GameConfig.GameData(bl2, string4, string5, bl3, bl4), new GameConfig.ServerData(string8, integer));
         Thread thread = new Thread("Client Shutdown Thread"){
 
             @Override

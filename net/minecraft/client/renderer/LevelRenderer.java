@@ -117,7 +117,6 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
@@ -807,7 +806,7 @@ AutoCloseable {
         this.renderChunkLayer(RenderType.solid(), poseStack, d, e, g);
         this.renderChunkLayer(RenderType.cutoutMipped(), poseStack, d, e, g);
         this.renderChunkLayer(RenderType.cutout(), poseStack, d, e, g);
-        if (this.level.dimensionType() == DimensionType.NETHER) {
+        if (this.level.dimensionType().isNether()) {
             Lighting.setupNetherLevel(poseStack.last().pose());
         } else {
             Lighting.setupLevel(poseStack.last().pose());
@@ -1243,7 +1242,7 @@ AutoCloseable {
         int n;
         float l;
         float j;
-        if (this.minecraft.level.dimensionType() == DimensionType.THE_END) {
+        if (this.minecraft.level.dimensionType().isEnd()) {
             this.renderEndSky(poseStack);
             return;
         }

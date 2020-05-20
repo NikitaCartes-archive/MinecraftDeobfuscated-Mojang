@@ -3,13 +3,15 @@
  */
 package net.minecraft.world.level.levelgen.placement;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 
 public class DepthAverageConfigation
 implements DecoratorConfiguration {
+    public static final Codec<DepthAverageConfigation> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("count")).forGetter(depthAverageConfigation -> depthAverageConfigation.count), ((MapCodec)Codec.INT.fieldOf("baseline")).forGetter(depthAverageConfigation -> depthAverageConfigation.baseline), ((MapCodec)Codec.INT.fieldOf("spread")).forGetter(depthAverageConfigation -> depthAverageConfigation.spread)).apply((Applicative<DepthAverageConfigation, ?>)instance, DepthAverageConfigation::new));
     public final int count;
     public final int baseline;
     public final int spread;
@@ -18,18 +20,6 @@ implements DecoratorConfiguration {
         this.count = i;
         this.baseline = j;
         this.spread = k;
-    }
-
-    @Override
-    public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("count"), dynamicOps.createInt(this.count), dynamicOps.createString("baseline"), dynamicOps.createInt(this.baseline), dynamicOps.createString("spread"), dynamicOps.createInt(this.spread))));
-    }
-
-    public static DepthAverageConfigation deserialize(Dynamic<?> dynamic) {
-        int i = dynamic.get("count").asInt(0);
-        int j = dynamic.get("baseline").asInt(0);
-        int k = dynamic.get("spread").asInt(0);
-        return new DepthAverageConfigation(i, j, k);
     }
 }
 

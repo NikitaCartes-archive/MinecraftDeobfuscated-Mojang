@@ -6,6 +6,7 @@ package net.minecraft.server.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ComponentArgument;
@@ -18,7 +19,7 @@ public class TellRawCommand {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("tellraw").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.argument("targets", EntityArgument.players()).then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("message", ComponentArgument.textComponent()).executes(commandContext -> {
             int i = 0;
             for (ServerPlayer serverPlayer : EntityArgument.getPlayers(commandContext, "targets")) {
-                serverPlayer.sendMessage(ComponentUtils.updateForEntity((CommandSourceStack)commandContext.getSource(), ComponentArgument.getComponent(commandContext, "message"), serverPlayer, 0));
+                serverPlayer.sendMessage(ComponentUtils.updateForEntity((CommandSourceStack)commandContext.getSource(), ComponentArgument.getComponent(commandContext, "message"), serverPlayer, 0), Util.NIL_UUID);
                 ++i;
             }
             return i;

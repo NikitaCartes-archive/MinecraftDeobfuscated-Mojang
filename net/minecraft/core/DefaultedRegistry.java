@@ -3,8 +3,11 @@
  */
 package net.minecraft.core;
 
+import com.mojang.serialization.Lifecycle;
 import java.util.Random;
 import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,16 +17,17 @@ extends MappedRegistry<T> {
     private final ResourceLocation defaultKey;
     private T defaultValue;
 
-    public DefaultedRegistry(String string) {
+    public DefaultedRegistry(String string, ResourceKey<Registry<T>> resourceKey, Lifecycle lifecycle) {
+        super(resourceKey, lifecycle);
         this.defaultKey = new ResourceLocation(string);
     }
 
     @Override
-    public <V extends T> V registerMapping(int i, ResourceLocation resourceLocation, V object) {
-        if (this.defaultKey.equals(resourceLocation)) {
+    public <V extends T> V registerMapping(int i, ResourceKey<T> resourceKey, V object) {
+        if (this.defaultKey.equals(resourceKey.location())) {
             this.defaultValue = object;
         }
-        return super.registerMapping(i, resourceLocation, object);
+        return super.registerMapping(i, resourceKey, object);
     }
 
     @Override

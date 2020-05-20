@@ -189,6 +189,11 @@ extends CollectionTag<LongTag> {
     }
 
     @Override
+    public byte getElementType() {
+        return 4;
+    }
+
+    @Override
     public void clear() {
         this.data = new long[0];
     }

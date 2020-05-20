@@ -1,20 +1,21 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.util.datafix;
+package net.minecraft.util.datafix.fixes;
 
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Dynamic;
 import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.util.datafix.fixes.References;
+import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class OminousBannerRenameFix
 extends DataFix {
@@ -23,10 +24,10 @@ extends DataFix {
     }
 
     private Dynamic<?> fixTag(Dynamic<?> dynamic) {
-        Optional<Dynamic<?>> optional = dynamic.get("display").get();
+        Optional<Dynamic<?>> optional = dynamic.get("display").result();
         if (optional.isPresent()) {
             Dynamic dynamic2 = optional.get();
-            Optional<String> optional2 = dynamic2.get("Name").asString();
+            Optional<String> optional2 = dynamic2.get("Name").asString().result();
             if (optional2.isPresent()) {
                 String string = optional2.get();
                 string = string.replace("\"translate\":\"block.minecraft.illager_banner\"", "\"translate\":\"block.minecraft.ominous_banner\"");
@@ -40,7 +41,7 @@ extends DataFix {
     @Override
     public TypeRewriteRule makeRule() {
         Type<?> type = this.getInputSchema().getType(References.ITEM_STACK);
-        OpticFinder<Pair<String, String>> opticFinder = DSL.fieldFinder("id", DSL.named(References.ITEM_NAME.typeName(), DSL.namespacedString()));
+        OpticFinder<Pair<String, String>> opticFinder = DSL.fieldFinder("id", DSL.named(References.ITEM_NAME.typeName(), NamespacedSchema.namespacedString()));
         OpticFinder<?> opticFinder2 = type.findField("tag");
         return this.fixTypeEverywhereTyped("OminousBannerRenameFix", type, typed -> {
             Optional optional2;

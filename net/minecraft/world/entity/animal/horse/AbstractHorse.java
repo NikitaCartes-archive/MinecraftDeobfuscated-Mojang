@@ -225,9 +225,10 @@ Saddleable {
     }
 
     private void eating() {
+        SoundEvent soundEvent;
         this.openMouth();
-        if (!this.isSilent()) {
-            this.level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.HORSE_EAT, this.getSoundSource(), 1.0f, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.2f);
+        if (!this.isSilent() && (soundEvent = this.getEatingSound()) != null) {
+            this.level.playSound(null, this.getX(), this.getY(), this.getZ(), soundEvent, this.getSoundSource(), 1.0f, 1.0f + (this.random.nextFloat() - this.random.nextFloat()) * 0.2f);
         }
     }
 
@@ -293,6 +294,11 @@ Saddleable {
 
     public double getCustomJump() {
         return this.getAttributeValue(Attributes.JUMP_STRENGTH);
+    }
+
+    @Nullable
+    protected SoundEvent getEatingSound() {
+        return null;
     }
 
     @Override

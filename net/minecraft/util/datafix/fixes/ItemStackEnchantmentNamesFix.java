@@ -6,11 +6,11 @@ package net.minecraft.util.datafix.fixes;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.DataFixUtils;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
+import com.mojang.serialization.Dynamic;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Optional;
@@ -67,11 +67,11 @@ extends DataFix {
     }
 
     private Dynamic<?> fixTag(Dynamic<?> dynamic2) {
-        Optional<Dynamic> optional = dynamic2.get("ench").asStreamOpt().map(stream -> stream.map(dynamic -> dynamic.set("id", dynamic.createString(MAP.getOrDefault(dynamic.get("id").asInt(0), "null"))))).map(dynamic2::createList);
+        Optional<Dynamic> optional = dynamic2.get("ench").asStreamOpt().map(stream -> stream.map(dynamic -> dynamic.set("id", dynamic.createString(MAP.getOrDefault(dynamic.get("id").asInt(0), "null"))))).map(dynamic2::createList).result();
         if (optional.isPresent()) {
             dynamic2 = dynamic2.remove("ench").set("Enchantments", optional.get());
         }
-        return dynamic2.update("StoredEnchantments", dynamic -> DataFixUtils.orElse(dynamic.asStreamOpt().map(stream -> stream.map(dynamic -> dynamic.set("id", dynamic.createString(MAP.getOrDefault(dynamic.get("id").asInt(0), "null"))))).map(dynamic::createList), dynamic));
+        return dynamic2.update("StoredEnchantments", dynamic -> DataFixUtils.orElse(dynamic.asStreamOpt().map(stream -> stream.map(dynamic -> dynamic.set("id", dynamic.createString(MAP.getOrDefault(dynamic.get("id").asInt(0), "null"))))).map(dynamic::createList).result(), dynamic));
     }
 }
 

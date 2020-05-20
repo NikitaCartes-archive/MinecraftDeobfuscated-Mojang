@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -26,8 +25,8 @@ extends Feature<ProbabilityFeatureConfiguration> {
     private static final BlockState BAMBOO_TOP_LARGE = (BlockState)BAMBOO_TRUNK.setValue(BambooBlock.LEAVES, BambooLeaves.LARGE);
     private static final BlockState BAMBOO_TOP_SMALL = (BlockState)BAMBOO_TRUNK.setValue(BambooBlock.LEAVES, BambooLeaves.SMALL);
 
-    public BambooFeature(Function<Dynamic<?>, ? extends ProbabilityFeatureConfiguration> function) {
-        super(function);
+    public BambooFeature(Codec<ProbabilityFeatureConfiguration> codec) {
+        super(codec);
     }
 
     @Override

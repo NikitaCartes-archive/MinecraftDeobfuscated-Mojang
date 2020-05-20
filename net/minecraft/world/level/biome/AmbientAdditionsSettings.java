@@ -3,11 +3,16 @@
  */
 package net.minecraft.world.level.biome;
 
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.sounds.SoundEvent;
 
 public class AmbientAdditionsSettings {
+    public static final Codec<AmbientAdditionsSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)SoundEvent.CODEC.fieldOf("sound")).forGetter(ambientAdditionsSettings -> ambientAdditionsSettings.soundEvent), ((MapCodec)Codec.DOUBLE.fieldOf("tick_chance")).forGetter(ambientAdditionsSettings -> ambientAdditionsSettings.tickChance)).apply((Applicative<AmbientAdditionsSettings, ?>)instance, AmbientAdditionsSettings::new));
     private SoundEvent soundEvent;
     private double tickChance;
 

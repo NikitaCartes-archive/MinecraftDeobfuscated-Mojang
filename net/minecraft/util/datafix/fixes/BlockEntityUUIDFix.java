@@ -3,10 +3,10 @@
  */
 package net.minecraft.util.datafix.fixes;
 
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
+import com.mojang.serialization.Dynamic;
 import net.minecraft.util.datafix.fixes.AbstractUUIDFix;
 import net.minecraft.util.datafix.fixes.References;
 
@@ -26,7 +26,7 @@ extends AbstractUUIDFix {
     }
 
     private Dynamic<?> updateSkull(Dynamic<?> dynamic3) {
-        return dynamic3.get("Owner").get().map(dynamic -> BlockEntityUUIDFix.replaceUUIDString(dynamic, "Id", "Id").orElse((Dynamic<?>)dynamic)).map(dynamic2 -> dynamic3.remove("Owner").set("SkullOwner", (Dynamic<?>)dynamic2)).orElse(dynamic3);
+        return dynamic3.get("Owner").get().map(dynamic -> BlockEntityUUIDFix.replaceUUIDString(dynamic, "Id", "Id").orElse((Dynamic<?>)dynamic)).map(dynamic2 -> dynamic3.remove("Owner").set("SkullOwner", (Dynamic<?>)dynamic2)).result().orElse(dynamic3);
     }
 
     private Dynamic<?> updateConduit(Dynamic<?> dynamic) {

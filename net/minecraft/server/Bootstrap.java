@@ -40,7 +40,7 @@ public class Bootstrap {
             return;
         }
         isBootstrapped = true;
-        if (Registry.REGISTRY.isEmpty()) {
+        if (Registry.REGISTRY.keySet().isEmpty()) {
             throw new IllegalStateException("Unable to load registries");
         }
         FireBlock.bootStrap();

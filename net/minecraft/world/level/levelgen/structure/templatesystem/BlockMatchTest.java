@@ -3,12 +3,10 @@
  */
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.Random;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTest;
@@ -16,14 +14,11 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
 
 public class BlockMatchTest
 extends RuleTest {
+    public static final Codec<BlockMatchTest> CODEC = ((MapCodec)Registry.BLOCK.fieldOf("block")).xmap(BlockMatchTest::new, blockMatchTest -> blockMatchTest.block).codec();
     private final Block block;
 
     public BlockMatchTest(Block block) {
         this.block = block;
-    }
-
-    public <T> BlockMatchTest(Dynamic<T> dynamic) {
-        this(Registry.BLOCK.get(new ResourceLocation(dynamic.get("block").asString(""))));
     }
 
     @Override
@@ -32,13 +27,8 @@ extends RuleTest {
     }
 
     @Override
-    protected RuleTestType getType() {
+    protected RuleTestType<?> getType() {
         return RuleTestType.BLOCK_TEST;
-    }
-
-    @Override
-    protected <T> Dynamic<T> getDynamic(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("block"), dynamicOps.createString(Registry.BLOCK.getKey(this.block).toString()))));
     }
 }
 

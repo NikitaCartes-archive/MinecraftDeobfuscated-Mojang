@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import java.util.BitSet;
 import java.util.Map;
 import java.util.stream.Stream;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
@@ -121,21 +122,21 @@ extends ProtoChunk {
 
     @Override
     @Nullable
-    public StructureStart getStartForFeature(String string) {
+    public StructureStart<?> getStartForFeature(String string) {
         return this.wrapped.getStartForFeature(string);
     }
 
     @Override
-    public void setStartForFeature(String string, StructureStart structureStart) {
+    public void setStartForFeature(String string, StructureStart<?> structureStart) {
     }
 
     @Override
-    public Map<String, StructureStart> getAllStarts() {
+    public Map<String, StructureStart<?>> getAllStarts() {
         return this.wrapped.getAllStarts();
     }
 
     @Override
-    public void setAllStarts(Map<String, StructureStart> map) {
+    public void setAllStarts(Map<String, StructureStart<?>> map) {
     }
 
     @Override
@@ -220,7 +221,12 @@ extends ProtoChunk {
 
     @Override
     public BitSet getCarvingMask(GenerationStep.Carving carving) {
-        return this.wrapped.getCarvingMask(carving);
+        throw Util.pauseInIde(new UnsupportedOperationException("Meaningless in this context"));
+    }
+
+    @Override
+    public BitSet getOrCreateCarvingMask(GenerationStep.Carving carving) {
+        throw Util.pauseInIde(new UnsupportedOperationException("Meaningless in this context"));
     }
 
     public LevelChunk getWrapped() {

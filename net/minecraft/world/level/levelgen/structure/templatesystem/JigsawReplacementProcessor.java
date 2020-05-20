@@ -5,8 +5,7 @@ package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelReader;
@@ -20,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class JigsawReplacementProcessor
 extends StructureProcessor {
+    public static final Codec<JigsawReplacementProcessor> CODEC = Codec.unit(() -> INSTANCE);
     public static final JigsawReplacementProcessor INSTANCE = new JigsawReplacementProcessor();
 
     private JigsawReplacementProcessor() {
@@ -46,13 +46,8 @@ extends StructureProcessor {
     }
 
     @Override
-    protected StructureProcessorType getType() {
+    protected StructureProcessorType<?> getType() {
         return StructureProcessorType.JIGSAW_REPLACEMENT;
-    }
-
-    @Override
-    protected <T> Dynamic<T> getDynamic(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.emptyMap());
     }
 }
 

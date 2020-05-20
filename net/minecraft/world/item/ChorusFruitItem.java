@@ -3,10 +3,12 @@
  */
 package net.minecraft.world.item;
 
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Fox;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -33,8 +35,9 @@ extends Item {
                     livingEntity.stopRiding();
                 }
                 if (!livingEntity.randomTeleport(g, h, j, true)) continue;
-                level.playSound(null, d, e, f, SoundEvents.CHORUS_FRUIT_TELEPORT, SoundSource.PLAYERS, 1.0f, 1.0f);
-                livingEntity.playSound(SoundEvents.CHORUS_FRUIT_TELEPORT, 1.0f, 1.0f);
+                SoundEvent soundEvent = livingEntity instanceof Fox ? SoundEvents.FOX_TELEPORT : SoundEvents.CHORUS_FRUIT_TELEPORT;
+                level.playSound(null, d, e, f, soundEvent, SoundSource.PLAYERS, 1.0f, 1.0f);
+                livingEntity.playSound(soundEvent, 1.0f, 1.0f);
                 break;
             }
             if (livingEntity instanceof Player) {

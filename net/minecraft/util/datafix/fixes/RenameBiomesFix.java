@@ -12,6 +12,7 @@ import com.mojang.datafixers.util.Pair;
 import java.util.Map;
 import java.util.Objects;
 import net.minecraft.util.datafix.fixes.References;
+import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class RenameBiomesFix
 extends DataFix {
@@ -26,7 +27,7 @@ extends DataFix {
 
     @Override
     protected TypeRewriteRule makeRule() {
-        Type<Pair<String, String>> type = DSL.named(References.BIOME.typeName(), DSL.namespacedString());
+        Type<Pair<String, String>> type = DSL.named(References.BIOME.typeName(), NamespacedSchema.namespacedString());
         if (!Objects.equals(type, this.getInputSchema().getType(References.BIOME))) {
             throw new IllegalStateException("Biome type is not what was expected.");
         }

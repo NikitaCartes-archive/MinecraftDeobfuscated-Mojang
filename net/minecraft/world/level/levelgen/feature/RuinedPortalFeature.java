@@ -4,27 +4,25 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.RandomScatteredFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.RuinedPortalConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -34,42 +32,17 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 public class RuinedPortalFeature
-extends RandomScatteredFeature<RuinedPortalConfiguration> {
+extends StructureFeature<RuinedPortalConfiguration> {
     private static final String[] STRUCTURE_LOCATION_PORTALS = new String[]{"ruined_portal/portal_1", "ruined_portal/portal_2", "ruined_portal/portal_3", "ruined_portal/portal_4", "ruined_portal/portal_5", "ruined_portal/portal_6", "ruined_portal/portal_7", "ruined_portal/portal_8", "ruined_portal/portal_9", "ruined_portal/portal_10"};
     private static final String[] STRUCTURE_LOCATION_GIANT_PORTALS = new String[]{"ruined_portal/giant_portal_1", "ruined_portal/giant_portal_2", "ruined_portal/giant_portal_3"};
 
-    public RuinedPortalFeature(Function<Dynamic<?>, ? extends RuinedPortalConfiguration> function) {
-        super(function);
+    public RuinedPortalFeature(Codec<RuinedPortalConfiguration> codec) {
+        super(codec);
     }
 
     @Override
-    public String getFeatureName() {
-        return "Ruined_Portal";
-    }
-
-    @Override
-    public int getLookupRange() {
-        return 3;
-    }
-
-    @Override
-    protected int getSpacing(ChunkGeneratorSettings chunkGeneratorSettings) {
-        return chunkGeneratorSettings.getRuinedPortalSpacing();
-    }
-
-    @Override
-    protected int getSeparation(ChunkGeneratorSettings chunkGeneratorSettings) {
-        return chunkGeneratorSettings.getRuinedPortalSeparation();
-    }
-
-    @Override
-    public StructureFeature.StructureStartFactory getStartFactory() {
+    public StructureFeature.StructureStartFactory<RuinedPortalConfiguration> getStartFactory() {
         return FeatureStart::new;
-    }
-
-    @Override
-    protected int getRandomSalt(ChunkGeneratorSettings chunkGeneratorSettings) {
-        return 34222645;
     }
 
     private static boolean isCold(BlockPos blockPos, Biome biome) {
@@ -94,10 +67,13 @@ extends RandomScatteredFeature<RuinedPortalConfiguration> {
         ImmutableList<BlockPos> list = ImmutableList.of(new BlockPos(boundingBox.x0, 0, boundingBox.z0), new BlockPos(boundingBox.x1, 0, boundingBox.z0), new BlockPos(boundingBox.x0, 0, boundingBox.z1), new BlockPos(boundingBox.x1, 0, boundingBox.z1));
         List list2 = list.stream().map(blockPos -> chunkGenerator.getBaseColumn(blockPos.getX(), blockPos.getZ())).collect(Collectors.toList());
         Heightmap.Types types = verticalPlacement == RuinedPortalPiece.VerticalPlacement.ON_OCEAN_FLOOR ? Heightmap.Types.OCEAN_FLOOR_WG : Heightmap.Types.WORLD_SURFACE_WG;
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         block0: for (m = k; m > 15; --m) {
             int n = 0;
+            mutableBlockPos.set(0, m, 0);
             for (BlockGetter blockGetter : list2) {
-                if (!types.isOpaque().test(blockGetter.getBlockState(new BlockPos(0, m, 0))) || ++n != 3) continue;
+                BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
+                if (blockState == null || !types.isOpaque().test(blockState) || ++n != 3) continue;
                 break block0;
             }
         }
@@ -115,7 +91,8 @@ extends RandomScatteredFeature<RuinedPortalConfiguration> {
         return j;
     }
 
-    public static enum Type {
+    public static enum Type implements StringRepresentable
+    {
         STANDARD("standard"),
         DESERT("desert"),
         JUNGLE("jungle"),
@@ -124,6 +101,7 @@ extends RandomScatteredFeature<RuinedPortalConfiguration> {
         OCEAN("ocean"),
         NETHER("nether");
 
+        public static final Codec<Type> CODEC;
         private static final Map<String, Type> BY_NAME;
         private final String name;
 
@@ -139,25 +117,27 @@ extends RandomScatteredFeature<RuinedPortalConfiguration> {
             return BY_NAME.get(string);
         }
 
+        @Override
+        public String getSerializedName() {
+            return this.name;
+        }
+
         static {
+            CODEC = StringRepresentable.fromEnum(Type::values, Type::byName);
             BY_NAME = Arrays.stream(Type.values()).collect(Collectors.toMap(Type::getName, type -> type));
         }
     }
 
     public static class FeatureStart
-    extends StructureStart {
-        protected FeatureStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+    extends StructureStart<RuinedPortalConfiguration> {
+        protected FeatureStart(StructureFeature<RuinedPortalConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
             super(structureFeature, i, j, boundingBox, k, l);
         }
 
         @Override
-        public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+        public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, RuinedPortalConfiguration ruinedPortalConfiguration) {
             boolean bl;
             RuinedPortalPiece.VerticalPlacement verticalPlacement;
-            RuinedPortalConfiguration ruinedPortalConfiguration = chunkGenerator.getStructureConfiguration(biome, Feature.RUINED_PORTAL);
-            if (ruinedPortalConfiguration == null) {
-                return;
-            }
             RuinedPortalPiece.Properties properties = new RuinedPortalPiece.Properties();
             if (ruinedPortalConfiguration.portalType == Type.DESERT) {
                 verticalPlacement = RuinedPortalPiece.VerticalPlacement.PARTLY_BURIED;

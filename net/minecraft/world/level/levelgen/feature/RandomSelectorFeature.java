@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -16,8 +15,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.RandomFeatureCo
 
 public class RandomSelectorFeature
 extends Feature<RandomFeatureConfiguration> {
-    public RandomSelectorFeature(Function<Dynamic<?>, ? extends RandomFeatureConfiguration> function) {
-        super(function);
+    public RandomSelectorFeature(Codec<RandomFeatureConfiguration> codec) {
+        super(codec);
     }
 
     @Override

@@ -4,7 +4,7 @@
 package net.minecraft.world.entity.monster.hoglin;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Dynamic;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -50,7 +50,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import org.jetbrains.annotations.Nullable;
 
@@ -112,9 +111,13 @@ HoglinBase {
         return bl;
     }
 
+    protected Brain.Provider<Hoglin> brainProvider() {
+        return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
+    }
+
     @Override
     protected Brain<?> makeBrain(Dynamic<?> dynamic) {
-        return HoglinAi.makeBrain(dynamic);
+        return HoglinAi.makeBrain(this.brainProvider().makeBrain(dynamic));
     }
 
     public Brain<Hoglin> getBrain() {
@@ -288,7 +291,7 @@ HoglinBase {
     }
 
     public boolean isConverting() {
-        return this.level.dimensionType() != DimensionType.NETHER && !this.isImmuneToZombification() && !this.isNoAi();
+        return !this.level.dimensionType().isNether() && !this.isImmuneToZombification() && !this.isNoAi();
     }
 
     private void setCannotBeHunted(boolean bl) {

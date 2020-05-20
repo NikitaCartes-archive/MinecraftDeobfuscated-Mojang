@@ -9,28 +9,17 @@ import net.minecraft.world.level.biome.AmbientMoodSettings;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
-import net.minecraft.world.level.levelgen.feature.RuinedPortalFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.OceanRuinConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.RuinedPortalConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.ShipwreckConfiguration;
-import net.minecraft.world.level.levelgen.structure.OceanRuinFeature;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 
 public class DeepLukeWarmOceanBiome
 extends Biome {
     public DeepLukeWarmOceanBiome() {
         super(new Biome.BiomeBuilder().surfaceBuilder(SurfaceBuilder.DEFAULT, SurfaceBuilder.CONFIG_OCEAN_SAND).precipitation(Biome.Precipitation.RAIN).biomeCategory(Biome.BiomeCategory.OCEAN).depth(-1.8f).scale(0.1f).temperature(0.5f).downfall(0.5f).specialEffects(new BiomeSpecialEffects.Builder().waterColor(4566514).waterFogColor(267827).fogColor(12638463).ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS).build()).parent(null));
-        this.addStructureStart(Feature.OCEAN_RUIN.configured(new OceanRuinConfiguration(OceanRuinFeature.Type.WARM, 0.3f, 0.9f)));
-        this.addStructureStart(Feature.OCEAN_MONUMENT.configured(FeatureConfiguration.NONE));
-        this.addStructureStart(Feature.MINESHAFT.configured(new MineshaftConfiguration(0.004, MineshaftFeature.Type.NORMAL)));
-        this.addStructureStart(Feature.SHIPWRECK.configured(new ShipwreckConfiguration(false)));
-        this.addStructureStart(Feature.RUINED_PORTAL.configured(new RuinedPortalConfiguration(RuinedPortalFeature.Type.OCEAN)));
+        this.addStructureStart(BiomeDefaultFeatures.OCEAN_RUIN_WARM);
+        this.addStructureStart(BiomeDefaultFeatures.OCEAN_MONUMENT);
+        BiomeDefaultFeatures.addDefaultOverworldOceanStructures(this);
+        this.addStructureStart(BiomeDefaultFeatures.RUINED_PORTAL_OCEAN);
         BiomeDefaultFeatures.addOceanCarvers(this);
-        BiomeDefaultFeatures.addStructureFeaturePlacement(this);
         BiomeDefaultFeatures.addDefaultLakes(this);
         BiomeDefaultFeatures.addDefaultMonsterRoom(this);
         BiomeDefaultFeatures.addDefaultUndergroundVariety(this);

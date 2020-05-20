@@ -10,9 +10,9 @@ import org.jetbrains.annotations.Nullable;
 
 public interface FeatureAccess {
     @Nullable
-    public StructureStart getStartForFeature(String var1);
+    public StructureStart<?> getStartForFeature(String var1);
 
-    public void setStartForFeature(String var1, StructureStart var2);
+    public void setStartForFeature(String var1, StructureStart<?> var2);
 
     public LongSet getReferencesForFeature(String var1);
 

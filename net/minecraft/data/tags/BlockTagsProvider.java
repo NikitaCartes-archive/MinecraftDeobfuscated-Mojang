@@ -97,7 +97,7 @@ extends TagsProvider<Block> {
         this.tag(BlockTags.STRIDER_WARM_BLOCKS).add(Blocks.LAVA);
         this.tag(BlockTags.CAMPFIRES).add((Block[])new Block[]{Blocks.CAMPFIRE, Blocks.SOUL_CAMPFIRE});
         this.tag(BlockTags.GUARDED_BY_PIGLINS).add((Block[])new Block[]{Blocks.GOLD_BLOCK, Blocks.BARREL, Blocks.CHEST, Blocks.ENDER_CHEST, Blocks.GILDED_BLACKSTONE, Blocks.TRAPPED_CHEST}).addTag(BlockTags.SHULKER_BOXES).addTag(BlockTags.GOLD_ORES);
-        this.tag(BlockTags.PREVENT_MOB_SPAWNING_INSIDE).addTag(BlockTags.RAILS).add((Block[])new Block[]{Blocks.WITHER_ROSE, Blocks.SWEET_BERRY_BUSH});
+        this.tag(BlockTags.PREVENT_MOB_SPAWNING_INSIDE).addTag(BlockTags.RAILS).add(Blocks.SWEET_BERRY_BUSH);
     }
 
     @Override

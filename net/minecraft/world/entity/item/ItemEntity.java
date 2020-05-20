@@ -17,6 +17,7 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
@@ -304,8 +305,8 @@ extends Entity {
 
     @Override
     @Nullable
-    public Entity changeDimension(DimensionType dimensionType) {
-        Entity entity = super.changeDimension(dimensionType);
+    public Entity changeDimension(ResourceKey<DimensionType> resourceKey) {
+        Entity entity = super.changeDimension(resourceKey);
         if (!this.level.isClientSide && entity instanceof ItemEntity) {
             ((ItemEntity)entity).mergeWithNeighbours();
         }

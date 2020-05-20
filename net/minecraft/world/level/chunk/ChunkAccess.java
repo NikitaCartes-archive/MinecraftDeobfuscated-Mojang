@@ -5,12 +5,10 @@ package net.minecraft.world.level.chunk;
 
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortList;
-import java.util.BitSet;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
@@ -25,7 +23,6 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.FeatureAccess;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.UpgradeData;
-import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.material.Fluid;
@@ -74,9 +71,9 @@ FeatureAccess {
 
     public void setLastSaveTime(long var1);
 
-    public Map<String, StructureStart> getAllStarts();
+    public Map<String, StructureStart<?>> getAllStarts();
 
-    public void setAllStarts(Map<String, StructureStart> var1);
+    public void setAllStarts(Map<String, StructureStart<?>> var1);
 
     default public boolean isYSpaceEmpty(int i, int j) {
         if (i < 0) {
@@ -128,10 +125,6 @@ FeatureAccess {
     public TickList<Block> getBlockTicks();
 
     public TickList<Fluid> getLiquidTicks();
-
-    default public BitSet getCarvingMask(GenerationStep.Carving carving) {
-        throw Util.pauseInIde(new RuntimeException("Meaningless in this context"));
-    }
 
     public UpgradeData getUpgradeData();
 

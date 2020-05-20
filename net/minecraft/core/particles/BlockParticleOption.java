@@ -5,6 +5,7 @@ package net.minecraft.core.particles;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
@@ -42,6 +43,10 @@ implements ParticleOptions {
     };
     private final ParticleType<BlockParticleOption> type;
     private final BlockState state;
+
+    public static Codec<BlockParticleOption> codec(ParticleType<BlockParticleOption> particleType) {
+        return BlockState.CODEC.xmap(blockState -> new BlockParticleOption(particleType, (BlockState)blockState), blockParticleOption -> blockParticleOption.state);
+    }
 
     public BlockParticleOption(ParticleType<BlockParticleOption> particleType, BlockState blockState) {
         this.type = particleType;

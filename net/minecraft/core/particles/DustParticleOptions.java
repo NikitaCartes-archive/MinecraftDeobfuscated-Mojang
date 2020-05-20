@@ -5,6 +5,10 @@ package net.minecraft.core.particles;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Locale;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -18,6 +22,7 @@ import net.minecraft.util.Mth;
 public class DustParticleOptions
 implements ParticleOptions {
     public static final DustParticleOptions REDSTONE = new DustParticleOptions(1.0f, 0.0f, 0.0f, 1.0f);
+    public static final Codec<DustParticleOptions> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.FLOAT.fieldOf("r")).forGetter(dustParticleOptions -> Float.valueOf(dustParticleOptions.r)), ((MapCodec)Codec.FLOAT.fieldOf("g")).forGetter(dustParticleOptions -> Float.valueOf(dustParticleOptions.g)), ((MapCodec)Codec.FLOAT.fieldOf("b")).forGetter(dustParticleOptions -> Float.valueOf(dustParticleOptions.b)), ((MapCodec)Codec.FLOAT.fieldOf("scale")).forGetter(dustParticleOptions -> Float.valueOf(dustParticleOptions.scale))).apply((Applicative<DustParticleOptions, ?>)instance, DustParticleOptions::new));
     public static final ParticleOptions.Deserializer<DustParticleOptions> DESERIALIZER = new ParticleOptions.Deserializer<DustParticleOptions>(){
 
         @Override

@@ -204,6 +204,12 @@ extends ObjectSelectionList<WorldListEntry> {
                             MutableComponent component2 = new TranslatableComponent("selectWorld.tooltip.unsupported", this.summary.getWorldVersionName()).withStyle(ChatFormatting.RED);
                             this.screen.setToolTip(this.minecraft.font.split(component2, 175));
                         }
+                    } else if (this.summary.experimental()) {
+                        GuiComponent.blit(poseStack, k, j, 96.0f, q, 32, 32, 256, 256);
+                        if (bl2) {
+                            MutableComponent component2 = new TranslatableComponent("selectWorld.tooltip.experimental").withStyle(ChatFormatting.RED);
+                            this.screen.setToolTip(this.minecraft.font.split(component2, 175));
+                        }
                     } else if (this.summary.askToOpenWorld()) {
                         GuiComponent.blit(poseStack, k, j, 96.0f, q, 32, 32, 256, 256);
                         if (bl2) {
@@ -244,12 +250,18 @@ extends ObjectSelectionList<WorldListEntry> {
             if (this.summary.isLocked()) {
                 return;
             }
-            if (this.summary.shouldBackup() || this.summary.isOldCustomizedWorld()) {
-                TranslatableComponent component = new TranslatableComponent("selectWorld.backupQuestion");
-                TranslatableComponent component2 = new TranslatableComponent("selectWorld.backupWarning", this.summary.getWorldVersionName(), SharedConstants.getCurrentVersion().getName());
+            if (this.summary.shouldBackup() || this.summary.isOldCustomizedWorld() || this.summary.experimental()) {
+                TranslatableComponent component2;
+                TranslatableComponent component;
                 if (this.summary.isOldCustomizedWorld()) {
                     component = new TranslatableComponent("selectWorld.backupQuestion.customized");
                     component2 = new TranslatableComponent("selectWorld.backupWarning.customized");
+                } else if (this.summary.experimental()) {
+                    component = new TranslatableComponent("selectWorld.backupQuestion.experimental");
+                    component2 = new TranslatableComponent("selectWorld.backupWarning.experimental");
+                } else {
+                    component = new TranslatableComponent("selectWorld.backupQuestion");
+                    component2 = new TranslatableComponent("selectWorld.backupWarning", this.summary.getWorldVersionName(), SharedConstants.getCurrentVersion().getName());
                 }
                 this.minecraft.setScreen(new BackupConfirmScreen(this.screen, (bl, bl2) -> {
                     if (bl) {

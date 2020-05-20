@@ -9,7 +9,6 @@ import com.google.common.collect.Lists;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.DataFixUtils;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
@@ -17,6 +16,7 @@ import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.types.templates.List;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Dynamic;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -32,7 +32,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import net.minecraft.util.BitStorage;
+import net.minecraft.util.datafix.PackedBitStorage;
 import net.minecraft.util.datafix.fixes.References;
 import org.jetbrains.annotations.Nullable;
 
@@ -118,7 +118,7 @@ extends DataFix {
             });
             if (is[0] != 0) {
                 typed22 = typed22.update(DSL.remainderFinder(), dynamic -> {
-                    Dynamic dynamic2 = DataFixUtils.orElse(dynamic.get("UpgradeData").get(), dynamic.emptyMap());
+                    Dynamic dynamic2 = DataFixUtils.orElse(dynamic.get("UpgradeData").result(), dynamic.emptyMap());
                     return dynamic.set("UpgradeData", dynamic2.set("Sides", dynamic.createByte((byte)(dynamic2.get("Sides").asByte((byte)0) | is[0]))));
                 });
             }
@@ -228,11 +228,11 @@ extends DataFix {
             }
             m = this.stateToIdMap.get(l);
             if (1 << this.storage.getBits() <= m) {
-                BitStorage bitStorage = new BitStorage(this.storage.getBits() + 1, 4096);
+                PackedBitStorage packedBitStorage = new PackedBitStorage(this.storage.getBits() + 1, 4096);
                 for (int n = 0; n < 4096; ++n) {
-                    bitStorage.set(n, this.storage.get(n));
+                    packedBitStorage.set(n, this.storage.get(n));
                 }
-                this.storage = bitStorage;
+                this.storage = packedBitStorage;
             }
             this.storage.set(i, m);
         }
@@ -244,7 +244,7 @@ extends DataFix {
         protected final List<Dynamic<?>> palette;
         protected final int index;
         @Nullable
-        protected BitStorage storage;
+        protected PackedBitStorage storage;
 
         public Section(Typed<?> typed, Schema schema) {
             if (!Objects.equals(schema.getType(References.BLOCK_STATE), this.blockStateType)) {
@@ -261,9 +261,9 @@ extends DataFix {
             if (this.skippable()) {
                 this.storage = null;
             } else {
-                long[] ls = dynamic.get("BlockStates").asLongStreamOpt().get().toArray();
+                long[] ls = dynamic.get("BlockStates").asLongStream().toArray();
                 int i = Math.max(4, DataFixUtils.ceillog2(this.palette.size()));
-                this.storage = new BitStorage(i, 4096, ls);
+                this.storage = new PackedBitStorage(i, 4096, ls);
             }
         }
 

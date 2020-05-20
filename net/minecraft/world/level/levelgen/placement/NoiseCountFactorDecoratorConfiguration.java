@@ -3,14 +3,19 @@
  */
 package net.minecraft.world.level.levelgen.placement;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class NoiseCountFactorDecoratorConfiguration
 implements DecoratorConfiguration {
+    public static final Codec<NoiseCountFactorDecoratorConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("noise_to_count_ratio")).forGetter(noiseCountFactorDecoratorConfiguration -> noiseCountFactorDecoratorConfiguration.noiseToCountRatio), ((MapCodec)Codec.DOUBLE.fieldOf("noise_factor")).forGetter(noiseCountFactorDecoratorConfiguration -> noiseCountFactorDecoratorConfiguration.noiseFactor), ((MapCodec)Codec.DOUBLE.fieldOf("noise_offset")).withDefault(0.0).forGetter(noiseCountFactorDecoratorConfiguration -> noiseCountFactorDecoratorConfiguration.noiseOffset), ((MapCodec)Heightmap.Types.CODEC.fieldOf("heightmap")).forGetter(noiseCountFactorDecoratorConfiguration -> noiseCountFactorDecoratorConfiguration.heightmap)).apply((Applicative<NoiseCountFactorDecoratorConfiguration, ?>)instance, NoiseCountFactorDecoratorConfiguration::new));
+    private static final Logger LOGGER = LogManager.getLogger();
     public final int noiseToCountRatio;
     public final double noiseFactor;
     public final double noiseOffset;
@@ -21,19 +26,6 @@ implements DecoratorConfiguration {
         this.noiseFactor = d;
         this.noiseOffset = e;
         this.heightmap = types;
-    }
-
-    @Override
-    public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("noise_to_count_ratio"), dynamicOps.createInt(this.noiseToCountRatio), dynamicOps.createString("noise_factor"), dynamicOps.createDouble(this.noiseFactor), dynamicOps.createString("noise_offset"), dynamicOps.createDouble(this.noiseOffset), dynamicOps.createString("heightmap"), dynamicOps.createString(this.heightmap.getSerializationKey()))));
-    }
-
-    public static NoiseCountFactorDecoratorConfiguration deserialize(Dynamic<?> dynamic) {
-        int i = dynamic.get("noise_to_count_ratio").asInt(10);
-        double d = dynamic.get("noise_factor").asDouble(80.0);
-        double e = dynamic.get("noise_offset").asDouble(0.0);
-        Heightmap.Types types = Heightmap.Types.getFromKey(dynamic.get("heightmap").asString("OCEAN_FLOOR_WG"));
-        return new NoiseCountFactorDecoratorConfiguration(i, d, e, types);
     }
 }
 

@@ -4,21 +4,19 @@
 package net.minecraft.core;
 
 import com.google.common.collect.AbstractIterator;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Spliterator;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import net.minecraft.Util;
 import net.minecraft.core.AxisCycle;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Serializable;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.Vec3;
@@ -28,8 +26,8 @@ import org.jetbrains.annotations.Unmodifiable;
 
 @Unmodifiable
 public class BlockPos
-extends Vec3i
-implements Serializable {
+extends Vec3i {
+    public static final Codec<BlockPos> CODEC = Codec.INT_STREAM.comapFlatMap(intStream -> Util.fixedSize(intStream, 3).map(is -> new BlockPos(is[0], is[1], is[2])), blockPos -> IntStream.of(blockPos.getX(), blockPos.getY(), blockPos.getZ())).stable();
     private static final Logger LOGGER = LogManager.getLogger();
     public static final BlockPos ZERO = new BlockPos(0, 0, 0);
     private static final int PACKED_X_LENGTH;
@@ -59,24 +57,6 @@ implements Serializable {
 
     public BlockPos(Vec3i vec3i) {
         this(vec3i.getX(), vec3i.getY(), vec3i.getZ());
-    }
-
-    public static <T> BlockPos deserialize(Dynamic<T> dynamic) {
-        int[] is;
-        Spliterator.OfInt ofInt = dynamic.asIntStream().spliterator();
-        if (ofInt.tryAdvance(arg_0 -> BlockPos.method_19441(is = new int[3], arg_0)) && ofInt.tryAdvance(i -> {
-            is[1] = i;
-        })) {
-            ofInt.tryAdvance(i -> {
-                is[2] = i;
-            });
-        }
-        return new BlockPos(is[0], is[1], is[2]);
-    }
-
-    @Override
-    public <T> T serialize(DynamicOps<T> dynamicOps) {
-        return dynamicOps.createIntList(IntStream.of(this.getX(), this.getY(), this.getZ()));
     }
 
     public static long offset(long l, Direction direction) {
@@ -382,10 +362,6 @@ implements Serializable {
     @Override
     public /* synthetic */ Vec3i below() {
         return this.below();
-    }
-
-    private static /* synthetic */ void method_19441(int[] is, int i) {
-        is[0] = i;
     }
 
     static {

@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.gui.chat;
 
+import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.ChatType;
@@ -10,6 +11,6 @@ import net.minecraft.network.chat.Component;
 
 @Environment(value=EnvType.CLIENT)
 public interface ChatListener {
-    public void handle(ChatType var1, Component var2);
+    public void handle(ChatType var1, Component var2, UUID var3);
 }
 

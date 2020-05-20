@@ -4,9 +4,8 @@
 package net.minecraft.world.level.levelgen.surfacebuilders;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
@@ -23,8 +22,8 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
     protected long seed;
     private PerlinNoise decorationNoise;
 
-    public NetherForestSurfaceBuilder(Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration> function) {
-        super(function);
+    public NetherForestSurfaceBuilder(Codec<SurfaceBuilderBaseConfiguration> codec) {
+        super(codec);
     }
 
     @Override

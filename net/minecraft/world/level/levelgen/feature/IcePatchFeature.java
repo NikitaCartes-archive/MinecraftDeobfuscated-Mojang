@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -19,8 +18,8 @@ public class IcePatchFeature
 extends Feature<FeatureRadiusConfiguration> {
     private final Block block = Blocks.PACKED_ICE;
 
-    public IcePatchFeature(Function<Dynamic<?>, ? extends FeatureRadiusConfiguration> function) {
-        super(function);
+    public IcePatchFeature(Codec<FeatureRadiusConfiguration> codec) {
+        super(codec);
     }
 
     @Override

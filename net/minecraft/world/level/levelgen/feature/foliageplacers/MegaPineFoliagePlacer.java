@@ -3,9 +3,10 @@
  */
 package net.minecraft.world.level.levelgen.feature.foliageplacers;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
@@ -17,17 +18,19 @@ import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerTy
 
 public class MegaPineFoliagePlacer
 extends FoliagePlacer {
+    public static final Codec<MegaPineFoliagePlacer> CODEC = RecordCodecBuilder.create(instance -> MegaPineFoliagePlacer.foliagePlacerParts(instance).and(instance.group(((MapCodec)Codec.INT.fieldOf("height_random")).forGetter(megaPineFoliagePlacer -> megaPineFoliagePlacer.heightRand), ((MapCodec)Codec.INT.fieldOf("crown_height")).forGetter(megaPineFoliagePlacer -> megaPineFoliagePlacer.crownHeight))).apply((Applicative<MegaPineFoliagePlacer, ?>)instance, MegaPineFoliagePlacer::new));
     private final int heightRand;
     private final int crownHeight;
 
     public MegaPineFoliagePlacer(int i, int j, int k, int l, int m, int n) {
-        super(i, j, k, l, FoliagePlacerType.MEGA_PINE_FOLIAGE_PLACER);
+        super(i, j, k, l);
         this.heightRand = m;
         this.crownHeight = n;
     }
 
-    public <T> MegaPineFoliagePlacer(Dynamic<T> dynamic) {
-        this(dynamic.get("radius").asInt(0), dynamic.get("radius_random").asInt(0), dynamic.get("offset").asInt(0), dynamic.get("offset_random").asInt(0), dynamic.get("height_rand").asInt(0), dynamic.get("crown_height").asInt(0));
+    @Override
+    protected FoliagePlacerType<?> type() {
+        return FoliagePlacerType.MEGA_PINE_FOLIAGE_PLACER;
     }
 
     @Override
@@ -54,14 +57,6 @@ extends FoliagePlacer {
             return true;
         }
         return i * i + k * k > l * l;
-    }
-
-    @Override
-    public <T> T serialize(DynamicOps<T> dynamicOps) {
-        ImmutableMap.Builder<T, T> builder = ImmutableMap.builder();
-        builder.put(dynamicOps.createString("height_rand"), dynamicOps.createInt(this.heightRand));
-        builder.put(dynamicOps.createString("crown_height"), dynamicOps.createInt(this.crownHeight));
-        return dynamicOps.merge(super.serialize(dynamicOps), dynamicOps.createMap(builder.build()));
     }
 }
 

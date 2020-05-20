@@ -6,7 +6,10 @@ package net.minecraft;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFixUtils;
+import com.mojang.datafixers.types.Type;
+import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.Hash;
 import java.io.File;
 import java.io.IOException;
@@ -20,12 +23,14 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
@@ -41,6 +46,7 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -49,6 +55,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.Mth;
+import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -61,6 +68,7 @@ public class Util {
     private static final ExecutorService BACKGROUND_EXECUTOR = Util.makeExecutor("Main");
     private static final ExecutorService IO_POOL = Util.makeIoExecutor();
     public static LongSupplier timeSource = System::nanoTime;
+    public static final UUID NIL_UUID = new UUID(0L, 0L);
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static <K, V> Collector<Map.Entry<? extends K, ? extends V>, ?, Map<K, V>> toMap() {
@@ -172,6 +180,30 @@ public class Util {
             System.exit(-1);
         }
         LOGGER.error(String.format("Caught exception in thread %s", thread), throwable);
+    }
+
+    @Nullable
+    public static Type<?> fetchChoiceType(DSL.TypeReference typeReference, String string) {
+        if (!SharedConstants.CHECK_DATA_FIXER_SCHEMA) {
+            return null;
+        }
+        return Util.doFetchChoiceType(typeReference, string);
+    }
+
+    @Nullable
+    private static Type<?> doFetchChoiceType(DSL.TypeReference typeReference, String string) {
+        Type<?> type;
+        block2: {
+            type = null;
+            try {
+                type = DataFixers.getDataFixer().getSchema(DataFixUtils.makeKey(SharedConstants.getCurrentVersion().getWorldVersion())).getChoiceType(typeReference, string);
+            } catch (IllegalArgumentException illegalArgumentException) {
+                LOGGER.error("No data fixer registered for {}", (Object)string);
+                if (!SharedConstants.IS_RUNNING_IN_IDE) break block2;
+                throw illegalArgumentException;
+            }
+        }
+        return type;
     }
 
     public static OS getPlatform() {
@@ -348,6 +380,22 @@ public class Util {
             }
         }
         return i;
+    }
+
+    public static Consumer<String> prefix(String string, Consumer<String> consumer) {
+        return string2 -> consumer.accept(string + string2);
+    }
+
+    public static DataResult<int[]> fixedSize(IntStream intStream, int i) {
+        int[] is = intStream.limit(i + 1).toArray();
+        if (is.length != i) {
+            String string = "Input is not a list of " + i + " ints";
+            if (is.length >= i) {
+                return DataResult.error(string, Arrays.copyOf(is, i));
+            }
+            return DataResult.error(string);
+        }
+        return DataResult.success(is);
     }
 
     static enum IdentityStrategy implements Hash.Strategy<Object>

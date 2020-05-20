@@ -42,6 +42,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
@@ -94,13 +95,13 @@ import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.npc.Npc;
-import net.minecraft.world.entity.npc.WanderingTraderSpawner;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raids;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.BlockEventData;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.GameRules;
@@ -124,7 +125,9 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.material.Fluid;
@@ -149,6 +152,7 @@ import org.jetbrains.annotations.Nullable;
 public class ServerLevel
 extends Level
 implements WorldGenLevel {
+    public static final BlockPos END_SPAWN_POINT = new BlockPos(100, 50, 0);
     private static final Logger LOGGER = LogManager.getLogger();
     private final List<Entity> globalEntities = Lists.newArrayList();
     private final Int2ObjectMap<Entity> entitiesById = new Int2ObjectLinkedOpenHashMap<Entity>();
@@ -169,15 +173,19 @@ implements WorldGenLevel {
     protected final Raids raids;
     private final ObjectLinkedOpenHashSet<BlockEventData> blockEvents = new ObjectLinkedOpenHashSet();
     private boolean handlingTick;
+    private final List<CustomSpawner> customSpawners;
     @Nullable
-    private final WanderingTraderSpawner wanderingTraderSpawner;
+    private final EndDragonFight dragonFight;
     private final StructureFeatureManager structureFeatureManager;
+    private final boolean tickTime;
 
-    public ServerLevel(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, ServerLevelData serverLevelData, DimensionType dimensionType, ChunkProgressListener chunkProgressListener, ChunkGenerator chunkGenerator, boolean bl, long l) {
+    public ServerLevel(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, ServerLevelData serverLevelData, DimensionType dimensionType, ChunkProgressListener chunkProgressListener, ChunkGenerator chunkGenerator, boolean bl, long l, List<CustomSpawner> list, boolean bl2) {
         super(serverLevelData, dimensionType, minecraftServer::getProfiler, false, bl, l);
-        this.chunkSource = new ServerChunkCache(this, levelStorageAccess, minecraftServer.getFixerUpper(), minecraftServer.getStructureManager(), executor, chunkGenerator, minecraftServer.getPlayerList().getViewDistance(), minecraftServer.forceSynchronousWrites(), chunkProgressListener, () -> minecraftServer.getLevel(DimensionType.OVERWORLD).getDataStorage());
+        this.tickTime = bl2;
         this.server = minecraftServer;
+        this.customSpawners = list;
         this.serverLevelData = serverLevelData;
+        this.chunkSource = new ServerChunkCache(this, levelStorageAccess, minecraftServer.getFixerUpper(), minecraftServer.getStructureManager(), executor, chunkGenerator, minecraftServer.getPlayerList().getViewDistance(), minecraftServer.forceSynchronousWrites(), chunkProgressListener, () -> minecraftServer.getLevel(DimensionType.OVERWORLD_LOCATION).getDataStorage());
         this.portalForcer = new PortalForcer(this);
         this.updateSkyBrightness();
         this.prepareWeather();
@@ -186,8 +194,8 @@ implements WorldGenLevel {
         if (!minecraftServer.isSingleplayer()) {
             serverLevelData.setGameType(minecraftServer.getDefaultGameType());
         }
-        this.wanderingTraderSpawner = this.dimensionType() == DimensionType.OVERWORLD ? new WanderingTraderSpawner(this, this.serverLevelData) : null;
         this.structureFeatureManager = new StructureFeatureManager(this, minecraftServer.getWorldData().worldGenSettings());
+        this.dragonFight = this.dimensionType().createDragonFight() ? new EndDragonFight(this, minecraftServer.getWorldData().endDragonFightData()) : null;
     }
 
     public void setWeatherParameters(int i, int j, boolean bl, boolean bl2) {
@@ -259,10 +267,10 @@ implements WorldGenLevel {
             this.rainLevel = Mth.clamp(this.rainLevel, 0.0f, 1.0f);
         }
         if (this.oRainLevel != this.rainLevel) {
-            this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(7, this.rainLevel), this.dimensionType());
+            this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(7, this.rainLevel), this.dimension());
         }
         if (this.oThunderLevel != this.thunderLevel) {
-            this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(8, this.thunderLevel), this.dimensionType());
+            this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(8, this.thunderLevel), this.dimension());
         }
         if (bl != this.isRaining()) {
             if (bl) {
@@ -295,9 +303,6 @@ implements WorldGenLevel {
         }
         profilerFiller.popPush("raid");
         this.raids.tick();
-        if (this.wanderingTraderSpawner != null) {
-            this.wanderingTraderSpawner.tick();
-        }
         profilerFiller.popPush("blockEvents");
         this.runBlockEvents();
         this.handlingTick = false;
@@ -308,7 +313,9 @@ implements WorldGenLevel {
         }
         if (bl4 || this.emptyTime++ < 300) {
             Entity entity2;
-            this.getDimension().tick();
+            if (this.dragonFight != null) {
+                this.dragonFight.tick();
+            }
             profilerFiller.push("global");
             for (j = 0; j < this.globalEntities.size(); ++j) {
                 Entity entity3 = this.globalEntities.get(j);
@@ -362,6 +369,28 @@ implements WorldGenLevel {
             this.tickBlockEntities();
         }
         profilerFiller.pop();
+    }
+
+    protected void tickTime() {
+        if (!this.tickTime) {
+            return;
+        }
+        long l = this.levelData.getGameTime() + 1L;
+        this.serverLevelData.setGameTime(l);
+        this.serverLevelData.getScheduledEvents().tick(this.server, l);
+        if (this.levelData.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
+            this.setDayTime(this.levelData.getDayTime() + 1L);
+        }
+    }
+
+    public void setDayTime(long l) {
+        this.serverLevelData.setDayTime(l);
+    }
+
+    public void tickCustomSpawners(boolean bl, boolean bl2) {
+        for (CustomSpawner customSpawner : this.customSpawners) {
+            customSpawner.tick(this, bl, bl2);
+        }
     }
 
     private void wakeUpAllPlayers() {
@@ -564,11 +593,6 @@ implements WorldGenLevel {
         return !this.server.isUnderSpawnProtection(this, blockPos, player) && this.getWorldBorder().isWithinBounds(blockPos);
     }
 
-    @Nullable
-    public BlockPos getDimensionSpecificSpawn() {
-        return this.getDimension().getDimensionSpecificSpawn();
-    }
-
     public void save(@Nullable ProgressListener progressListener, boolean bl, boolean bl2) {
         ServerChunkCache serverChunkCache = this.getChunkSource();
         if (bl2) {
@@ -584,8 +608,10 @@ implements WorldGenLevel {
         serverChunkCache.save(bl);
     }
 
-    protected void saveLevelData() {
-        this.getDimension().saveData(this.serverLevelData);
+    private void saveLevelData() {
+        if (this.dragonFight != null) {
+            this.server.getWorldData().setEndDragonFightData(this.dragonFight.saveData());
+        }
         this.getChunkSource().getDataStorage().save();
     }
 
@@ -785,7 +811,7 @@ implements WorldGenLevel {
 
     public void addGlobalEntity(LightningBolt lightningBolt) {
         this.globalEntities.add(lightningBolt);
-        this.server.getPlayerList().broadcast(null, lightningBolt.getX(), lightningBolt.getY(), lightningBolt.getZ(), 512.0, this.dimensionType(), new ClientboundAddGlobalEntityPacket(lightningBolt));
+        this.server.getPlayerList().broadcast(null, lightningBolt.getX(), lightningBolt.getY(), lightningBolt.getZ(), 512.0, this.dimension(), new ClientboundAddGlobalEntityPacket(lightningBolt));
     }
 
     @Override
@@ -801,12 +827,12 @@ implements WorldGenLevel {
 
     @Override
     public void playSound(@Nullable Player player, double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h) {
-        this.server.getPlayerList().broadcast(player, d, e, f, g > 1.0f ? (double)(16.0f * g) : 16.0, this.dimensionType(), new ClientboundSoundPacket(soundEvent, soundSource, d, e, f, g, h));
+        this.server.getPlayerList().broadcast(player, d, e, f, g > 1.0f ? (double)(16.0f * g) : 16.0, this.dimension(), new ClientboundSoundPacket(soundEvent, soundSource, d, e, f, g, h));
     }
 
     @Override
     public void playSound(@Nullable Player player, Entity entity, SoundEvent soundEvent, SoundSource soundSource, float f, float g) {
-        this.server.getPlayerList().broadcast(player, entity.getX(), entity.getY(), entity.getZ(), f > 1.0f ? (double)(16.0f * f) : 16.0, this.dimensionType(), new ClientboundSoundEntityPacket(soundEvent, soundSource, entity, f, g));
+        this.server.getPlayerList().broadcast(player, entity.getX(), entity.getY(), entity.getZ(), f > 1.0f ? (double)(16.0f * f) : 16.0, this.dimension(), new ClientboundSoundEntityPacket(soundEvent, soundSource, entity, f, g));
     }
 
     @Override
@@ -816,7 +842,7 @@ implements WorldGenLevel {
 
     @Override
     public void levelEvent(@Nullable Player player, int i, BlockPos blockPos, int j) {
-        this.server.getPlayerList().broadcast(player, blockPos.getX(), blockPos.getY(), blockPos.getZ(), 64.0, this.dimensionType(), new ClientboundLevelEventPacket(i, blockPos, j, false));
+        this.server.getPlayerList().broadcast(player, blockPos.getX(), blockPos.getY(), blockPos.getZ(), 64.0, this.dimension(), new ClientboundLevelEventPacket(i, blockPos, j, false));
     }
 
     @Override
@@ -870,7 +896,7 @@ implements WorldGenLevel {
         while (!this.blockEvents.isEmpty()) {
             BlockEventData blockEventData = this.blockEvents.removeFirst();
             if (!this.doBlockEvent(blockEventData)) continue;
-            this.server.getPlayerList().broadcast(null, blockEventData.getPos().getX(), blockEventData.getPos().getY(), blockEventData.getPos().getZ(), 64.0, this.dimensionType(), new ClientboundBlockEventPacket(blockEventData.getPos(), blockEventData.getBlock(), blockEventData.getParamA(), blockEventData.getParamB()));
+            this.server.getPlayerList().broadcast(null, blockEventData.getPos().getX(), blockEventData.getPos().getY(), blockEventData.getPos().getZ(), 64.0, this.dimension(), new ClientboundBlockEventPacket(blockEventData.getPos(), blockEventData.getBlock(), blockEventData.getParamA(), blockEventData.getParamB()));
         }
     }
 
@@ -944,11 +970,11 @@ implements WorldGenLevel {
     }
 
     @Nullable
-    public BlockPos findNearestMapFeature(String string, BlockPos blockPos, int i, boolean bl) {
+    public BlockPos findNearestMapFeature(StructureFeature<?> structureFeature, BlockPos blockPos, int i, boolean bl) {
         if (!this.server.getWorldData().worldGenSettings().generateFeatures()) {
             return null;
         }
-        return this.getChunkSource().getGenerator().findNearestMapFeature(this, string, blockPos, i, bl);
+        return this.getChunkSource().getGenerator().findNearestMapFeature(this, structureFeature, blockPos, i, bl);
     }
 
     @Nullable
@@ -967,14 +993,13 @@ implements WorldGenLevel {
     }
 
     @Override
-    public void setGameTime(long l) {
-        super.setGameTime(l);
-        this.serverLevelData.getScheduledEvents().tick(this.server, l);
+    public boolean noSave() {
+        return this.noSave;
     }
 
     @Override
-    public boolean noSave() {
-        return this.noSave;
+    public RegistryAccess registryAccess() {
+        return this.server.registryAccess();
     }
 
     public DimensionDataStorage getDataStorage() {
@@ -984,17 +1009,17 @@ implements WorldGenLevel {
     @Override
     @Nullable
     public MapItemSavedData getMapData(String string) {
-        return this.getServer().getLevel(DimensionType.OVERWORLD).getDataStorage().get(() -> new MapItemSavedData(string), string);
+        return this.getServer().getLevel(DimensionType.OVERWORLD_LOCATION).getDataStorage().get(() -> new MapItemSavedData(string), string);
     }
 
     @Override
     public void setMapData(MapItemSavedData mapItemSavedData) {
-        this.getServer().getLevel(DimensionType.OVERWORLD).getDataStorage().set(mapItemSavedData);
+        this.getServer().getLevel(DimensionType.OVERWORLD_LOCATION).getDataStorage().set(mapItemSavedData);
     }
 
     @Override
     public int getFreeMapId() {
-        return this.getServer().getLevel(DimensionType.OVERWORLD).getDataStorage().computeIfAbsent(MapIndex::new, "idcounts").getFreeAuxValueForMap();
+        return this.getServer().getLevel(DimensionType.OVERWORLD_LOCATION).getDataStorage().computeIfAbsent(MapIndex::new, "idcounts").getFreeAuxValueForMap();
     }
 
     public void setDefaultSpawnPos(BlockPos blockPos) {
@@ -1108,7 +1133,7 @@ implements WorldGenLevel {
             spawnState = this.getChunkSource().getLastSpawnState();
             if (spawnState != null) {
                 for (Object2IntMap.Entry entry : ((NaturalSpawner.SpawnState)spawnState).getMobCategoryCounts().object2IntEntrySet()) {
-                    writer.write(String.format("spawn_count.%s: %d\n", ((MobCategory)((Object)entry.getKey())).getName(), entry.getIntValue()));
+                    writer.write(String.format("spawn_count.%s: %d\n", ((MobCategory)entry.getKey()).getName(), entry.getIntValue()));
                 }
             }
             writer.write(String.format("entities: %d\n", this.entitiesById.size()));
@@ -1229,6 +1254,20 @@ implements WorldGenLevel {
     @Override
     public long getSeed() {
         return this.server.getWorldData().worldGenSettings().seed();
+    }
+
+    @Nullable
+    public EndDragonFight dragonFight() {
+        return this.dragonFight;
+    }
+
+    public static void makeObsidianPlatform(ServerLevel serverLevel) {
+        BlockPos blockPos2 = END_SPAWN_POINT;
+        int i = blockPos2.getX();
+        int j = blockPos2.getY() - 2;
+        int k = blockPos2.getZ();
+        BlockPos.betweenClosed(i - 2, j + 1, k - 2, i + 2, j + 3, k + 2).forEach(blockPos -> serverLevel.setBlockAndUpdate((BlockPos)blockPos, Blocks.AIR.defaultBlockState()));
+        BlockPos.betweenClosed(i - 2, j, k - 2, i + 2, j, k + 2).forEach(blockPos -> serverLevel.setBlockAndUpdate((BlockPos)blockPos, Blocks.OBSIDIAN.defaultBlockState()));
     }
 
     @Override

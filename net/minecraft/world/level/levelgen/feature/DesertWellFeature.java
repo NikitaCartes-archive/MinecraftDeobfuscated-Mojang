@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -24,8 +23,8 @@ extends Feature<NoneFeatureConfiguration> {
     private final BlockState sandstone = Blocks.SANDSTONE.defaultBlockState();
     private final BlockState water = Blocks.WATER.defaultBlockState();
 
-    public DesertWellFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-        super(function);
+    public DesertWellFeature(Codec<NoneFeatureConfiguration> codec) {
+        super(codec);
     }
 
     @Override

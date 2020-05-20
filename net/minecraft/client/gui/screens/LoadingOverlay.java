@@ -16,17 +16,21 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Overlay;
 import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.VanillaPack;
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
 @Environment(value=EnvType.CLIENT)
 public class LoadingOverlay
 extends Overlay {
-    private static final ResourceLocation MOJANG_LOGO_LOCATION = new ResourceLocation("textures/gui/title/mojang.png");
+    private static final ResourceLocation MOJANG_STUDIOS_LOGO_LOCATION = new ResourceLocation("textures/gui/title/mojangstudios.png");
+    private static final int BRAND_BACKGROUND = FastColor.ARGB32.color(255, 239, 50, 61);
+    private static final int BRAND_BACKGROUND_NO_ALPHA = BRAND_BACKGROUND & 0xFFFFFF;
     private final Minecraft minecraft;
     private final ReloadInstance reload;
     private final Consumer<Optional<Throwable>> onFinish;
@@ -43,7 +47,7 @@ extends Overlay {
     }
 
     public static void registerTextures(Minecraft minecraft) {
-        minecraft.getTextureManager().register(MOJANG_LOGO_LOCATION, new LogoTexture());
+        minecraft.getTextureManager().register(MOJANG_STUDIOS_LOGO_LOCATION, new LogoTexture());
     }
 
     @Override
@@ -64,29 +68,38 @@ extends Overlay {
                 this.minecraft.screen.render(poseStack, 0, 0, f);
             }
             n = Mth.ceil((1.0f - Mth.clamp(g - 1.0f, 0.0f, 1.0f)) * 255.0f);
-            LoadingOverlay.fill(poseStack, 0, 0, k, l, 0xFFFFFF | n << 24);
+            LoadingOverlay.fill(poseStack, 0, 0, k, l, BRAND_BACKGROUND_NO_ALPHA | n << 24);
             o = 1.0f - Mth.clamp(g - 1.0f, 0.0f, 1.0f);
         } else if (this.fadeIn) {
             if (this.minecraft.screen != null && h < 1.0f) {
                 this.minecraft.screen.render(poseStack, i, j, f);
             }
             n = Mth.ceil(Mth.clamp((double)h, 0.15, 1.0) * 255.0);
-            LoadingOverlay.fill(poseStack, 0, 0, k, l, 0xFFFFFF | n << 24);
+            LoadingOverlay.fill(poseStack, 0, 0, k, l, BRAND_BACKGROUND_NO_ALPHA | n << 24);
             o = Mth.clamp(h, 0.0f, 1.0f);
         } else {
-            LoadingOverlay.fill(poseStack, 0, 0, k, l, -1);
+            LoadingOverlay.fill(poseStack, 0, 0, k, l, BRAND_BACKGROUND);
             o = 1.0f;
         }
-        n = (this.minecraft.getWindow().getGuiScaledWidth() - 256) / 2;
-        int p = (this.minecraft.getWindow().getGuiScaledHeight() - 256) / 2;
-        this.minecraft.getTextureManager().bind(MOJANG_LOGO_LOCATION);
+        n = (this.minecraft.getWindow().getGuiScaledWidth() - 322) / 2;
+        int p = (this.minecraft.getWindow().getGuiScaledHeight() + 161) / 4;
+        this.minecraft.getTextureManager().bind(MOJANG_STUDIOS_LOGO_LOCATION);
         RenderSystem.enableBlend();
+        RenderSystem.blendEquation(32774);
+        RenderSystem.blendFunc(770, 1);
+        RenderSystem.alphaFunc(516, 0.0f);
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, o);
-        this.blit(poseStack, n, p, 0, 0, 256, 256);
-        float q = this.reload.getActualProgress();
-        this.currentProgress = Mth.clamp(this.currentProgress * 0.95f + q * 0.050000012f, 0.0f, 1.0f);
+        float q = 0.0625f;
+        LoadingOverlay.blit(poseStack, n, p, 161, 80, -0.0625f, 0.0f, 161, 80, 161, 161);
+        LoadingOverlay.blit(poseStack, n + 161, p, 161, 80, 0.0625f, 80.5f, 161, 80, 161, 161);
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.defaultAlphaFunc();
+        RenderSystem.disableBlend();
+        float r = this.reload.getActualProgress();
+        this.currentProgress = Mth.clamp(this.currentProgress * 0.95f + r * 0.050000012f, 0.0f, 1.0f);
         if (g < 1.0f) {
-            this.drawProgressBar(poseStack, k / 2 - 150, l / 4 * 3, k / 2 + 150, l / 4 * 3 + 10, 1.0f - Mth.clamp(g, 0.0f, 1.0f));
+            int s = l * 648 / 801;
+            this.drawProgressBar(poseStack, k / 2 - 161, s, k / 2 + 161, s + 12, 1.0f - Mth.clamp(g, 0.0f, 1.0f));
         }
         if (g >= 2.0f) {
             this.minecraft.setOverlay(null);
@@ -106,10 +119,12 @@ extends Overlay {
     }
 
     private void drawProgressBar(PoseStack poseStack, int i, int j, int k, int l, float f) {
-        int m = Mth.ceil((float)(k - i - 1) * this.currentProgress);
-        LoadingOverlay.fill(poseStack, i - 1, j - 1, k + 1, l + 1, 0xFF000000 | Math.round((1.0f - f) * 255.0f) << 16 | Math.round((1.0f - f) * 255.0f) << 8 | Math.round((1.0f - f) * 255.0f));
-        LoadingOverlay.fill(poseStack, i, j, k, l, -1);
-        LoadingOverlay.fill(poseStack, i + 1, j + 1, i + m, l - 1, 0xFF000000 | (int)Mth.lerp(1.0f - f, 226.0f, 255.0f) << 16 | (int)Mth.lerp(1.0f - f, 40.0f, 255.0f) << 8 | (int)Mth.lerp(1.0f - f, 55.0f, 255.0f));
+        int m = Mth.ceil((float)(k - i - 2) * this.currentProgress);
+        int n = Math.round(f * 255.0f);
+        int o = FastColor.ARGB32.color(n, 255, 255, 255);
+        LoadingOverlay.fill(poseStack, i, j, k, l, o);
+        LoadingOverlay.fill(poseStack, i + 1, j + 1, k - 1, l - 1, BRAND_BACKGROUND_NO_ALPHA | n << 24);
+        LoadingOverlay.fill(poseStack, i + 2, j + 2, i + m, l - 2, o);
     }
 
     @Override
@@ -121,7 +136,7 @@ extends Overlay {
     static class LogoTexture
     extends SimpleTexture {
         public LogoTexture() {
-            super(MOJANG_LOGO_LOCATION);
+            super(MOJANG_STUDIOS_LOGO_LOCATION);
         }
 
         /*
@@ -133,8 +148,8 @@ extends Overlay {
         protected SimpleTexture.TextureImage getTextureImage(ResourceManager resourceManager) {
             Minecraft minecraft = Minecraft.getInstance();
             VanillaPack vanillaPack = minecraft.getClientPackSource().getVanillaPack();
-            try (InputStream inputStream = vanillaPack.getResource(PackType.CLIENT_RESOURCES, MOJANG_LOGO_LOCATION);){
-                SimpleTexture.TextureImage textureImage = new SimpleTexture.TextureImage(null, NativeImage.read(inputStream));
+            try (InputStream inputStream = vanillaPack.getResource(PackType.CLIENT_RESOURCES, MOJANG_STUDIOS_LOGO_LOCATION);){
+                SimpleTexture.TextureImage textureImage = new SimpleTexture.TextureImage(new TextureMetadataSection(true, true), NativeImage.read(inputStream));
                 return textureImage;
             } catch (IOException iOException) {
                 return new SimpleTexture.TextureImage(iOException);

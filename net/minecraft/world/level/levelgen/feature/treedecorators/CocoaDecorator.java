@@ -3,15 +3,13 @@
  */
 package net.minecraft.world.level.levelgen.feature.treedecorators;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CocoaBlock;
@@ -23,15 +21,16 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class CocoaDecorator
 extends TreeDecorator {
+    public static final Codec<CocoaDecorator> CODEC = ((MapCodec)Codec.FLOAT.fieldOf("probability")).xmap(CocoaDecorator::new, cocoaDecorator -> Float.valueOf(cocoaDecorator.probability)).codec();
     private final float probability;
 
     public CocoaDecorator(float f) {
-        super(TreeDecoratorType.COCOA);
         this.probability = f;
     }
 
-    public <T> CocoaDecorator(Dynamic<T> dynamic) {
-        this(dynamic.get("probability").asFloat(0.0f));
+    @Override
+    protected TreeDecoratorType<?> type() {
+        return TreeDecoratorType.COCOA;
     }
 
     @Override
@@ -49,11 +48,6 @@ extends TreeDecorator {
                 this.setBlock(levelAccessor, blockPos2, blockState, set, boundingBox);
             }
         });
-    }
-
-    @Override
-    public <T> T serialize(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("type"), dynamicOps.createString(Registry.TREE_DECORATOR_TYPES.getKey(this.type).toString()), dynamicOps.createString("probability"), dynamicOps.createFloat(this.probability)))).getValue();
     }
 }
 

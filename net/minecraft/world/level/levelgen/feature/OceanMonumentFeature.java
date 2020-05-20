@@ -4,20 +4,18 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.google.common.collect.Lists;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.function.Function;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
@@ -30,23 +28,8 @@ public class OceanMonumentFeature
 extends StructureFeature<NoneFeatureConfiguration> {
     private static final List<Biome.SpawnerData> MONUMENT_ENEMIES = Lists.newArrayList(new Biome.SpawnerData(EntityType.GUARDIAN, 1, 2, 4));
 
-    public OceanMonumentFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-        super(function);
-    }
-
-    @Override
-    protected int getSpacing(ChunkGeneratorSettings chunkGeneratorSettings) {
-        return chunkGeneratorSettings.getMonumentsSpacing();
-    }
-
-    @Override
-    protected int getSeparation(ChunkGeneratorSettings chunkGeneratorSettings) {
-        return chunkGeneratorSettings.getMonumentsSeparation();
-    }
-
-    @Override
-    protected int getRandomSalt(ChunkGeneratorSettings chunkGeneratorSettings) {
-        return 10387313;
+    public OceanMonumentFeature(Codec<NoneFeatureConfiguration> codec) {
+        super(codec);
     }
 
     @Override
@@ -55,13 +38,13 @@ extends StructureFeature<NoneFeatureConfiguration> {
     }
 
     @Override
-    protected boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator chunkGenerator, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos) {
-        Set<Biome> set = chunkGenerator.getBiomeSource().getBiomesWithin(i * 16 + 9, chunkGenerator.getSeaLevel(), j * 16 + 9, 16);
+    protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos, NoneFeatureConfiguration noneFeatureConfiguration) {
+        Set<Biome> set = biomeSource.getBiomesWithin(i * 16 + 9, chunkGenerator.getSeaLevel(), j * 16 + 9, 16);
         for (Biome biome2 : set) {
-            if (chunkGenerator.isBiomeValidStartForStructure(biome2, this)) continue;
+            if (biome2.isValidStart(this)) continue;
             return false;
         }
-        Set<Biome> set2 = chunkGenerator.getBiomeSource().getBiomesWithin(i * 16 + 9, chunkGenerator.getSeaLevel(), j * 16 + 9, 29);
+        Set<Biome> set2 = biomeSource.getBiomesWithin(i * 16 + 9, chunkGenerator.getSeaLevel(), j * 16 + 9, 29);
         for (Biome biome3 : set2) {
             if (biome3.getBiomeCategory() == Biome.BiomeCategory.OCEAN || biome3.getBiomeCategory() == Biome.BiomeCategory.RIVER) continue;
             return false;
@@ -70,18 +53,8 @@ extends StructureFeature<NoneFeatureConfiguration> {
     }
 
     @Override
-    public StructureFeature.StructureStartFactory getStartFactory() {
+    public StructureFeature.StructureStartFactory<NoneFeatureConfiguration> getStartFactory() {
         return OceanMonumentStart::new;
-    }
-
-    @Override
-    public String getFeatureName() {
-        return "Monument";
-    }
-
-    @Override
-    public int getLookupRange() {
-        return 8;
     }
 
     @Override
@@ -90,15 +63,15 @@ extends StructureFeature<NoneFeatureConfiguration> {
     }
 
     public static class OceanMonumentStart
-    extends StructureStart {
+    extends StructureStart<NoneFeatureConfiguration> {
         private boolean isCreated;
 
-        public OceanMonumentStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+        public OceanMonumentStart(StructureFeature<NoneFeatureConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
             super(structureFeature, i, j, boundingBox, k, l);
         }
 
         @Override
-        public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+        public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration) {
             this.generatePieces(i, j);
         }
 
@@ -112,12 +85,12 @@ extends StructureFeature<NoneFeatureConfiguration> {
         }
 
         @Override
-        public void postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+        public void placeInChunk(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
             if (!this.isCreated) {
                 this.pieces.clear();
                 this.generatePieces(this.getChunkX(), this.getChunkZ());
             }
-            super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos);
+            super.placeInChunk(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos);
         }
     }
 }

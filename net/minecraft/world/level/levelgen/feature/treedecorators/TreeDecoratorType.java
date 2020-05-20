@@ -3,8 +3,7 @@
  */
 package net.minecraft.world.level.levelgen.feature.treedecorators;
 
-import com.mojang.datafixers.Dynamic;
-import java.util.function.Function;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.levelgen.feature.treedecorators.AlterGroundDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.BeehiveDecorator;
@@ -14,23 +13,23 @@ import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TrunkVineDecorator;
 
 public class TreeDecoratorType<P extends TreeDecorator> {
-    public static final TreeDecoratorType<TrunkVineDecorator> TRUNK_VINE = TreeDecoratorType.register("trunk_vine", TrunkVineDecorator::new);
-    public static final TreeDecoratorType<LeaveVineDecorator> LEAVE_VINE = TreeDecoratorType.register("leave_vine", LeaveVineDecorator::new);
-    public static final TreeDecoratorType<CocoaDecorator> COCOA = TreeDecoratorType.register("cocoa", CocoaDecorator::new);
-    public static final TreeDecoratorType<BeehiveDecorator> BEEHIVE = TreeDecoratorType.register("beehive", BeehiveDecorator::new);
-    public static final TreeDecoratorType<AlterGroundDecorator> ALTER_GROUND = TreeDecoratorType.register("alter_ground", AlterGroundDecorator::new);
-    private final Function<Dynamic<?>, P> deserializer;
+    public static final TreeDecoratorType<TrunkVineDecorator> TRUNK_VINE = TreeDecoratorType.register("trunk_vine", TrunkVineDecorator.CODEC);
+    public static final TreeDecoratorType<LeaveVineDecorator> LEAVE_VINE = TreeDecoratorType.register("leave_vine", LeaveVineDecorator.CODEC);
+    public static final TreeDecoratorType<CocoaDecorator> COCOA = TreeDecoratorType.register("cocoa", CocoaDecorator.CODEC);
+    public static final TreeDecoratorType<BeehiveDecorator> BEEHIVE = TreeDecoratorType.register("beehive", BeehiveDecorator.CODEC);
+    public static final TreeDecoratorType<AlterGroundDecorator> ALTER_GROUND = TreeDecoratorType.register("alter_ground", AlterGroundDecorator.CODEC);
+    private final Codec<P> codec;
 
-    private static <P extends TreeDecorator> TreeDecoratorType<P> register(String string, Function<Dynamic<?>, P> function) {
-        return Registry.register(Registry.TREE_DECORATOR_TYPES, string, new TreeDecoratorType<P>(function));
+    private static <P extends TreeDecorator> TreeDecoratorType<P> register(String string, Codec<P> codec) {
+        return Registry.register(Registry.TREE_DECORATOR_TYPES, string, new TreeDecoratorType<P>(codec));
     }
 
-    private TreeDecoratorType(Function<Dynamic<?>, P> function) {
-        this.deserializer = function;
+    private TreeDecoratorType(Codec<P> codec) {
+        this.codec = codec;
     }
 
-    public P deserialize(Dynamic<?> dynamic) {
-        return (P)((TreeDecorator)this.deserializer.apply(dynamic));
+    public Codec<P> codec() {
+        return this.codec;
     }
 }
 

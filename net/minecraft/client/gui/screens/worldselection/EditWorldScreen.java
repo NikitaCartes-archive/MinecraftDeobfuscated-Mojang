@@ -4,12 +4,14 @@
 package net.minecraft.client.gui.screens.worldselection;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
+import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -55,16 +57,16 @@ extends Screen {
     @Override
     protected void init() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-        Button button2 = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 24 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.resetIcon"), button -> {
+        Button button2 = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 0 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.resetIcon"), button -> {
             FileUtils.deleteQuietly(this.levelAccess.getIconFile());
             button.active = false;
         }));
-        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 48 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.openFolder"), button -> Util.getPlatform().openFile(this.levelAccess.getLevelPath(LevelResource.ROOT).toFile())));
-        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 72 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.backup"), button -> {
+        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 24 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.openFolder"), button -> Util.getPlatform().openFile(this.levelAccess.getLevelPath(LevelResource.ROOT).toFile())));
+        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 48 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.backup"), button -> {
             boolean bl = EditWorldScreen.makeBackupAndShowToast(this.levelAccess);
             this.callback.accept(!bl);
         }));
-        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 96 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.backupFolder"), button -> {
+        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 72 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.backupFolder"), button -> {
             LevelStorageSource levelStorageSource = this.minecraft.getLevelSource();
             Path path = levelStorageSource.getBackupPath();
             try {
@@ -74,18 +76,25 @@ extends Screen {
             }
             Util.getPlatform().openFile(path.toFile());
         }));
-        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.optimize"), button -> this.minecraft.setScreen(new BackupConfirmScreen(this, (bl, bl2) -> {
+        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 96 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.optimize"), button -> this.minecraft.setScreen(new BackupConfirmScreen(this, (bl, bl2) -> {
             if (bl) {
                 EditWorldScreen.makeBackupAndShowToast(this.levelAccess);
             }
             this.minecraft.setScreen(OptimizeWorldScreen.create(this.callback, this.minecraft.getFixerUpper(), this.levelAccess, bl2));
         }, new TranslatableComponent("optimizeWorld.confirm.title"), new TranslatableComponent("optimizeWorld.confirm.description"), true))));
+        this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.export_worldgen_settings"), button -> {
+            DataResult<String> dataResult = this.levelAccess.exportWorldGenSettings();
+            TextComponent component = new TextComponent(dataResult.get().map(Function.identity(), DataResult.PartialResult::message));
+            TranslatableComponent component2 = new TranslatableComponent(dataResult.result().isPresent() ? "selectWorld.edit.export_worldgen_settings.success" : "selectWorld.edit.export_worldgen_settings.failure");
+            dataResult.error().ifPresent(partialResult -> LOGGER.error("Error exporting world settings: {}", partialResult));
+            this.minecraft.getToasts().addToast(SystemToast.multiline(SystemToast.SystemToastIds.WORLD_GEN_SETTINGS_TRANSFER, component2, component));
+        }));
         this.renameButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 144 + 5, 98, 20, new TranslatableComponent("selectWorld.edit.save"), button -> this.onRename()));
         this.addButton(new Button(this.width / 2 + 2, this.height / 4 + 144 + 5, 98, 20, CommonComponents.GUI_CANCEL, button -> this.callback.accept(false)));
         button2.active = this.levelAccess.getIconFile().isFile();
         WorldData worldData = this.levelAccess.getDataTag();
         String string2 = worldData == null ? "" : worldData.getLevelName();
-        this.nameEdit = new EditBox(this.font, this.width / 2 - 100, 53, 200, 20, new TranslatableComponent("selectWorld.enterName"));
+        this.nameEdit = new EditBox(this.font, this.width / 2 - 100, 38, 200, 20, new TranslatableComponent("selectWorld.enterName"));
         this.nameEdit.setValue(string2);
         this.nameEdit.setResponder(string -> {
             this.renameButton.active = !string.trim().isEmpty();
@@ -145,8 +154,8 @@ extends Screen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
-        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 0xFFFFFF);
-        this.drawString(poseStack, this.font, I18n.get("selectWorld.enterName", new Object[0]), this.width / 2 - 100, 40, 0xA0A0A0);
+        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 0xFFFFFF);
+        this.drawString(poseStack, this.font, I18n.get("selectWorld.enterName", new Object[0]), this.width / 2 - 100, 24, 0xA0A0A0);
         this.nameEdit.render(poseStack, i, j, f);
         super.render(poseStack, i, j, f);
     }

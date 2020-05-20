@@ -21,6 +21,7 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.BlockHitResult;
@@ -116,6 +117,11 @@ implements SharedSuggestionProvider {
         }
         Vec3 vec3 = hitResult.getLocation();
         return Collections.singleton(new SharedSuggestionProvider.TextCoordinates(ClientSuggestionProvider.prettyPrint(vec3.x), ClientSuggestionProvider.prettyPrint(vec3.y), ClientSuggestionProvider.prettyPrint(vec3.z)));
+    }
+
+    @Override
+    public RegistryAccess registryAccess() {
+        return this.connection.registryAccess();
     }
 
     public void completeCustomSuggestions(int i, Suggestions suggestions) {

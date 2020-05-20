@@ -3,31 +3,22 @@
  */
 package net.minecraft.world.level.levelgen.feature.configurations;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.level.levelgen.feature.MineshaftFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 public class MineshaftConfiguration
 implements FeatureConfiguration {
+    public static final Codec<MineshaftConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.DOUBLE.fieldOf("probability")).forGetter(mineshaftConfiguration -> mineshaftConfiguration.probability), ((MapCodec)MineshaftFeature.Type.CODEC.fieldOf("type")).forGetter(mineshaftConfiguration -> mineshaftConfiguration.type)).apply((Applicative<MineshaftConfiguration, ?>)instance, MineshaftConfiguration::new));
     public final double probability;
     public final MineshaftFeature.Type type;
 
     public MineshaftConfiguration(double d, MineshaftFeature.Type type) {
         this.probability = d;
         this.type = type;
-    }
-
-    @Override
-    public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-        return new Dynamic<T>(dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("probability"), dynamicOps.createDouble(this.probability), dynamicOps.createString("type"), dynamicOps.createString(this.type.getName()))));
-    }
-
-    public static <T> MineshaftConfiguration deserialize(Dynamic<T> dynamic) {
-        float f = dynamic.get("probability").asFloat(0.0f);
-        MineshaftFeature.Type type = MineshaftFeature.Type.byName(dynamic.get("type").asString(""));
-        return new MineshaftConfiguration(f, type);
     }
 }
 

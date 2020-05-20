@@ -6,6 +6,9 @@ package net.minecraft.nbt;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -33,6 +36,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongArrayTag;
 import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.ShortTag;
@@ -49,6 +53,13 @@ import org.jetbrains.annotations.Nullable;
 
 public class CompoundTag
 implements Tag {
+    public static final Codec<CompoundTag> CODEC = Codec.PASSTHROUGH.comapFlatMap(dynamic -> {
+        Tag tag = dynamic.convert(NbtOps.INSTANCE).getValue();
+        if (tag instanceof CompoundTag) {
+            return DataResult.success((CompoundTag)tag);
+        }
+        return DataResult.error("Not a compound tag: " + tag);
+    }, compoundTag -> new Dynamic<CompoundTag>(NbtOps.INSTANCE, (CompoundTag)compoundTag));
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Pattern SIMPLE_VALUE = Pattern.compile("[A-Za-z0-9._+-]+");
     public static final TagType<CompoundTag> TYPE = new TagType<CompoundTag>(){
@@ -88,7 +99,7 @@ implements Tag {
     };
     private final Map<String, Tag> tags;
 
-    private CompoundTag(Map<String, Tag> map) {
+    protected CompoundTag(Map<String, Tag> map) {
         this.tags = map;
     }
 
@@ -504,6 +515,10 @@ implements Tag {
         }
         mutableComponent.append("}");
         return mutableComponent;
+    }
+
+    protected Map<String, Tag> entries() {
+        return Collections.unmodifiableMap(this.tags);
     }
 
     @Override

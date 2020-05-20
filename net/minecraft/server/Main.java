@@ -6,6 +6,7 @@ package net.minecraft.server;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import com.mojang.datafixers.DataFixer;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.net.Proxy;
@@ -13,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BooleanSupplier;
 import joptsimple.AbstractOptionSpec;
 import joptsimple.ArgumentAcceptingOptionSpec;
 import joptsimple.NonOptionArgumentSpec;
@@ -21,6 +23,7 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpecBuilder;
 import net.minecraft.CrashReport;
 import net.minecraft.DefaultUncaughtExceptionHandler;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.server.Eula;
 import net.minecraft.server.MinecraftServer;
@@ -29,7 +32,9 @@ import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
 import net.minecraft.server.level.progress.LoggerChunkProgressListener;
 import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.util.Mth;
 import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.storage.LevelStorageSource;
@@ -58,6 +63,7 @@ public class Main {
         NonOptionArgumentSpec<String> optionSpec13 = optionParser.nonOptions();
         try {
             boolean bl;
+            WorldData worldData;
             OptionSet optionSet = optionParser.parse(strings);
             if (optionSet.has(optionSpec7)) {
                 optionParser.printHelpOn(System.err);
@@ -72,7 +78,7 @@ public class Main {
             Path path2 = Paths.get("eula.txt", new String[0]);
             Eula eula = new Eula(path2);
             if (optionSet.has(optionSpec2)) {
-                LOGGER.info("Initialized '" + path.toAbsolutePath().toString() + "' and '" + path2.toAbsolutePath().toString() + "'");
+                LOGGER.info("Initialized '{}' and '{}'", (Object)path.toAbsolutePath(), (Object)path2.toAbsolutePath());
                 return;
             }
             if (!eula.hasAgreedToEULA()) {
@@ -87,15 +93,17 @@ public class Main {
             String string = Optional.ofNullable(optionSet.valueOf(optionSpec10)).orElse(dedicatedServerSettings.getProperties().levelName);
             LevelStorageSource levelStorageSource = LevelStorageSource.createDefault(file.toPath());
             LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(string);
-            MinecraftServer.ensureLevelConversion(levelStorageAccess, DataFixers.getDataFixer(), optionSet.has(optionSpec5), optionSet.has(optionSpec6), () -> true);
-            WorldData worldData = levelStorageAccess.getDataTag();
-            if (worldData == null) {
+            MinecraftServer.convertFromRegionFormatIfNeeded(levelStorageAccess);
+            if (optionSet.has(optionSpec5)) {
+                Main.forceUpgrade(levelStorageAccess, DataFixers.getDataFixer(), optionSet.has(optionSpec6), () -> true);
+            }
+            if ((worldData = levelStorageAccess.getDataTag()) == null) {
                 LevelSettings levelSettings;
                 if (optionSet.has(optionSpec3)) {
                     levelSettings = MinecraftServer.DEMO_SETTINGS;
                 } else {
                     DedicatedServerProperties dedicatedServerProperties = dedicatedServerSettings.getProperties();
-                    levelSettings = new LevelSettings(dedicatedServerProperties.levelName, dedicatedServerProperties.gamemode, dedicatedServerProperties.hardcore, dedicatedServerProperties.difficulty, false, new GameRules(), optionSet.has(optionSpec4) ? dedicatedServerProperties.worldGenSettings : dedicatedServerProperties.worldGenSettings.withBonusChest());
+                    levelSettings = new LevelSettings(dedicatedServerProperties.levelName, dedicatedServerProperties.gamemode, dedicatedServerProperties.hardcore, dedicatedServerProperties.difficulty, false, new GameRules(), optionSet.has(optionSpec4) ? dedicatedServerProperties.worldGenSettings.withBonusChest() : dedicatedServerProperties.worldGenSettings);
                 }
                 worldData = new PrimaryLevelData(levelSettings);
             }
@@ -120,6 +128,34 @@ public class Main {
             Runtime.getRuntime().addShutdownHook(thread);
         } catch (Exception exception) {
             LOGGER.fatal("Failed to start the minecraft server", (Throwable)exception);
+        }
+    }
+
+    private static void forceUpgrade(LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, boolean bl, BooleanSupplier booleanSupplier) {
+        LOGGER.info("Forcing world upgrade!");
+        WorldData worldData = levelStorageAccess.getDataTag();
+        if (worldData != null) {
+            WorldUpgrader worldUpgrader = new WorldUpgrader(levelStorageAccess, dataFixer, worldData, bl);
+            Component component = null;
+            while (!worldUpgrader.isFinished()) {
+                int i;
+                Component component2 = worldUpgrader.getStatus();
+                if (component != component2) {
+                    component = component2;
+                    LOGGER.info(worldUpgrader.getStatus().getString());
+                }
+                if ((i = worldUpgrader.getTotalChunks()) > 0) {
+                    int j = worldUpgrader.getConverted() + worldUpgrader.getSkipped();
+                    LOGGER.info("{}% completed ({} / {} chunks)...", (Object)Mth.floor((float)j / (float)i * 100.0f), (Object)j, (Object)i);
+                }
+                if (!booleanSupplier.getAsBoolean()) {
+                    worldUpgrader.cancel();
+                    continue;
+                }
+                try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException interruptedException) {}
+            }
         }
     }
 }

@@ -13,6 +13,8 @@ import com.google.gson.JsonSerializer;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import java.lang.reflect.Type;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -24,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ResourceLocation
 implements Comparable<ResourceLocation> {
+    public static final Codec<ResourceLocation> CODEC = Codec.STRING.comapFlatMap(ResourceLocation::read, ResourceLocation::toString).stable();
     private static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(new TranslatableComponent("argument.id.invalid"));
     protected final String namespace;
     protected final String path;
@@ -70,6 +73,14 @@ implements Comparable<ResourceLocation> {
             }
         }
         return strings;
+    }
+
+    private static DataResult<ResourceLocation> read(String string) {
+        try {
+            return DataResult.success(new ResourceLocation(string));
+        } catch (ResourceLocationException resourceLocationException) {
+            return DataResult.error("Not a valid resource location: " + string + " " + resourceLocationException.getMessage());
+        }
     }
 
     public String getPath() {
@@ -127,11 +138,27 @@ implements Comparable<ResourceLocation> {
     }
 
     private static boolean isValidPath(String string) {
-        return string.chars().allMatch(i -> i == 95 || i == 45 || i >= 97 && i <= 122 || i >= 48 && i <= 57 || i == 47 || i == 46);
+        for (int i = 0; i < string.length(); ++i) {
+            if (ResourceLocation.validPathChar(string.charAt(i))) continue;
+            return false;
+        }
+        return true;
     }
 
     private static boolean isValidNamespace(String string) {
-        return string.chars().allMatch(i -> i == 95 || i == 45 || i >= 97 && i <= 122 || i >= 48 && i <= 57 || i == 46);
+        for (int i = 0; i < string.length(); ++i) {
+            if (ResourceLocation.validNamespaceChar(string.charAt(i))) continue;
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean validPathChar(char c) {
+        return c == '_' || c == '-' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c == '/' || c == '.';
+    }
+
+    private static boolean validNamespaceChar(char c) {
+        return c == '_' || c == '-' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c == '.';
     }
 
     @Environment(value=EnvType.CLIENT)

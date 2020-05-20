@@ -5,10 +5,9 @@ package net.minecraft.world.level.levelgen.surfacebuilders;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Comparator;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.biome.Biome;
@@ -26,8 +25,8 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
     private ImmutableMap<BlockState, PerlinNoise> ceilingNoises = ImmutableMap.of();
     private PerlinNoise patchNoise;
 
-    public NetherCappedSurfaceBuilder(Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration> function) {
-        super(function);
+    public NetherCappedSurfaceBuilder(Codec<SurfaceBuilderBaseConfiguration> codec) {
+        super(codec);
     }
 
     @Override

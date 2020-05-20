@@ -208,7 +208,6 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.dimension.end.TheEndDimension;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
@@ -264,6 +263,8 @@ WindowEventHandler {
     public final FrameTimer frameTimer = new FrameTimer();
     private final boolean is64bit;
     private final boolean demo;
+    private final boolean allowsMultiplayer;
+    private final boolean allowsChat;
     private final ReloadableResourceManager resourceManager;
     private final ClientPackSource clientPackSource;
     private final PackRepository<UnopenedResourcePack> resourcePackRepository;
@@ -358,9 +359,11 @@ WindowEventHandler {
         LOGGER.info("Setting user: {}", (Object)this.user.getName());
         LOGGER.debug("(Session ID is {})", (Object)this.user.getSessionId());
         this.demo = gameConfig.game.demo;
+        this.allowsMultiplayer = !gameConfig.game.disableMultiplayer;
+        this.allowsChat = !gameConfig.game.disableChat;
         this.is64bit = Minecraft.checkIs64Bit();
         this.singleplayerServer = null;
-        if (gameConfig.server.hostname != null) {
+        if (this.allowsMultiplayer && gameConfig.server.hostname != null) {
             string = gameConfig.server.hostname;
             i = gameConfig.server.port;
         } else {
@@ -707,6 +710,16 @@ WindowEventHandler {
 
     public LevelStorageSource getLevelSource() {
         return this.levelSource;
+    }
+
+    private void openChatScreen(String string) {
+        if (!this.isLocalServer() && !this.allowsChat()) {
+            if (this.player != null) {
+                this.player.sendMessage(new TranslatableComponent("chat.cannotSend").withStyle(ChatFormatting.RED), Util.NIL_UUID);
+            }
+        } else {
+            this.setScreen(new ChatScreen(string));
+        }
     }
 
     public void setScreen(@Nullable Screen screen) {
@@ -1365,10 +1378,10 @@ WindowEventHandler {
         boolean bl = bl3 = this.options.chatVisibility != ChatVisiblity.HIDDEN;
         if (bl3) {
             while (this.options.keyChat.consumeClick()) {
-                this.setScreen(new ChatScreen(""));
+                this.openChatScreen("");
             }
             if (this.screen == null && this.overlay == null && this.options.keyCommand.consumeClick()) {
-                this.setScreen(new ChatScreen("/"));
+                this.openChatScreen("/");
             }
         }
         if (this.player.isUsingItem()) {
@@ -1410,13 +1423,14 @@ WindowEventHandler {
             this.setScreen(null);
             return;
         }
+        MinecraftServer.convertFromRegionFormatIfNeeded(levelStorageAccess);
         WorldData worldData = levelStorageAccess.getDataTag();
         if (worldData == null) {
             if (levelSettings == null) {
                 throw new IllegalStateException("Requested world creation without any settings");
             }
             worldData = new PrimaryLevelData(levelSettings);
-            string2 = levelSettings.getLevelName();
+            string2 = levelSettings.levelName();
             levelStorageAccess.saveDataTag(worldData);
         } else {
             string2 = worldData.getLevelName();
@@ -1540,6 +1554,21 @@ WindowEventHandler {
         this.particleEngine.setLevel(clientLevel);
         BlockEntityRenderDispatcher.instance.setLevel(clientLevel);
         this.updateTitle();
+    }
+
+    public boolean allowsMultiplayer() {
+        return this.allowsMultiplayer;
+    }
+
+    public boolean isBlocked(UUID uUID) {
+        if (!this.allowsChat()) {
+            return (this.player == null || !uUID.equals(this.player.getUUID())) && !uUID.equals(Util.NIL_UUID);
+        }
+        return false;
+    }
+
+    public boolean allowsChat() {
+        return this.allowsChat;
     }
 
     public final boolean isDemo() {
@@ -1864,7 +1893,7 @@ WindowEventHandler {
             return Musics.CREDITS;
         }
         if (this.player != null) {
-            if (this.player.level.getDimension() instanceof TheEndDimension) {
+            if (this.player.level.dimensionType().isEnd()) {
                 if (this.gui.getBossOverlay().shouldPlayMusic()) {
                     return Musics.END_BOSS;
                 }

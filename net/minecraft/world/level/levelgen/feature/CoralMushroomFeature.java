@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
@@ -15,8 +14,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 
 public class CoralMushroomFeature
 extends CoralFeature {
-    public CoralMushroomFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-        super(function);
+    public CoralMushroomFeature(Codec<NoneFeatureConfiguration> codec) {
+        super(codec);
     }
 
     @Override

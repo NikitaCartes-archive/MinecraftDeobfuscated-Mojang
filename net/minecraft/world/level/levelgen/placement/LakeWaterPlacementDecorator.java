@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.placement;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
@@ -15,8 +14,8 @@ import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 
 public class LakeWaterPlacementDecorator
 extends FeatureDecorator<ChanceDecoratorConfiguration> {
-    public LakeWaterPlacementDecorator(Function<Dynamic<?>, ? extends ChanceDecoratorConfiguration> function) {
-        super(function);
+    public LakeWaterPlacementDecorator(Codec<ChanceDecoratorConfiguration> codec) {
+        super(codec);
     }
 
     @Override

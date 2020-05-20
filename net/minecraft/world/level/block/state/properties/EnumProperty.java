@@ -14,10 +14,10 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.level.block.state.properties.AbstractProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 
 public class EnumProperty<T extends Enum<T>>
-extends AbstractProperty<T> {
+extends Property<T> {
     private final ImmutableSet<T> values;
     private final Map<String, T> names = Maps.newHashMap();
 

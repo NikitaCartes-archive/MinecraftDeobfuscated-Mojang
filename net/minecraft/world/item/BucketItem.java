@@ -22,6 +22,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.state.BlockState;
@@ -112,38 +113,41 @@ extends Item {
     }
 
     public boolean emptyBucket(@Nullable Player player, Level level, BlockPos blockPos, @Nullable BlockHitResult blockHitResult) {
+        boolean bl2;
         if (!(this.content instanceof FlowingFluid)) {
             return false;
         }
         BlockState blockState = level.getBlockState(blockPos);
+        Block block = blockState.getBlock();
         Material material = blockState.getMaterial();
         boolean bl = blockState.canBeReplaced(this.content);
-        if (blockState.isAir() || bl || blockState.getBlock() instanceof LiquidBlockContainer && ((LiquidBlockContainer)((Object)blockState.getBlock())).canPlaceLiquid(level, blockPos, blockState, this.content)) {
-            if (level.dimensionType().ultraWarm() && this.content.is(FluidTags.WATER)) {
-                int i = blockPos.getX();
-                int j = blockPos.getY();
-                int k = blockPos.getZ();
-                level.playSound(player, blockPos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5f, 2.6f + (level.random.nextFloat() - level.random.nextFloat()) * 0.8f);
-                for (int l = 0; l < 8; ++l) {
-                    level.addParticle(ParticleTypes.LARGE_SMOKE, (double)i + Math.random(), (double)j + Math.random(), (double)k + Math.random(), 0.0, 0.0, 0.0);
-                }
-            } else if (blockState.getBlock() instanceof LiquidBlockContainer && this.content == Fluids.WATER) {
-                if (((LiquidBlockContainer)((Object)blockState.getBlock())).placeLiquid(level, blockPos, blockState, ((FlowingFluid)this.content).getSource(false))) {
-                    this.playEmptySound(player, level, blockPos);
-                }
-            } else {
-                if (!level.isClientSide && bl && !material.isLiquid()) {
-                    level.destroyBlock(blockPos, true);
-                }
-                this.playEmptySound(player, level, blockPos);
-                return level.setBlock(blockPos, this.content.defaultFluidState().createLegacyBlock(), 11);
+        boolean bl3 = bl2 = blockState.isAir() || bl || block instanceof LiquidBlockContainer && ((LiquidBlockContainer)((Object)block)).canPlaceLiquid(level, blockPos, blockState, this.content);
+        if (!bl2) {
+            return blockHitResult != null && this.emptyBucket(player, level, blockHitResult.getBlockPos().relative(blockHitResult.getDirection()), null);
+        }
+        if (level.dimensionType().ultraWarm() && this.content.is(FluidTags.WATER)) {
+            int i = blockPos.getX();
+            int j = blockPos.getY();
+            int k = blockPos.getZ();
+            level.playSound(player, blockPos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5f, 2.6f + (level.random.nextFloat() - level.random.nextFloat()) * 0.8f);
+            for (int l = 0; l < 8; ++l) {
+                level.addParticle(ParticleTypes.LARGE_SMOKE, (double)i + Math.random(), (double)j + Math.random(), (double)k + Math.random(), 0.0, 0.0, 0.0);
             }
             return true;
         }
-        if (blockHitResult == null) {
-            return false;
+        if (block instanceof LiquidBlockContainer && this.content == Fluids.WATER) {
+            ((LiquidBlockContainer)((Object)block)).placeLiquid(level, blockPos, blockState, ((FlowingFluid)this.content).getSource(false));
+            this.playEmptySound(player, level, blockPos);
+            return true;
         }
-        return this.emptyBucket(player, level, blockHitResult.getBlockPos().relative(blockHitResult.getDirection()), null);
+        if (!level.isClientSide && bl && !material.isLiquid()) {
+            level.destroyBlock(blockPos, true);
+        }
+        if (level.setBlock(blockPos, this.content.defaultFluidState().createLegacyBlock(), 11) || blockState.getFluidState().isSource()) {
+            this.playEmptySound(player, level, blockPos);
+            return true;
+        }
+        return false;
     }
 
     protected void playEmptySound(@Nullable Player player, LevelAccessor levelAccessor, BlockPos blockPos) {

@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.placement;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
@@ -17,8 +16,8 @@ import net.minecraft.world.level.levelgen.placement.FrequencyDecoratorConfigurat
 
 public class CountTopSolidDecorator
 extends FeatureDecorator<FrequencyDecoratorConfiguration> {
-    public CountTopSolidDecorator(Function<Dynamic<?>, ? extends FrequencyDecoratorConfiguration> function) {
-        super(function);
+    public CountTopSolidDecorator(Codec<FrequencyDecoratorConfiguration> codec) {
+        super(codec);
     }
 
     @Override

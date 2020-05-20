@@ -9,14 +9,14 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
-import com.mojang.datafixers.types.DynamicOps;
-import com.mojang.datafixers.types.JsonOps;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -116,10 +116,9 @@ extends DataFix {
     @Override
     protected TypeRewriteRule makeRule() {
         Type<?> type = this.getOutputSchema().getType(References.LEVEL);
-        return this.fixTypeEverywhereTyped("LevelDataGeneratorOptionsFix", this.getInputSchema().getType(References.LEVEL), type, (Typed<?> typed) -> {
+        return this.fixTypeEverywhereTyped("LevelDataGeneratorOptionsFix", this.getInputSchema().getType(References.LEVEL), type, (Typed<?> typed) -> typed.write().flatMap(dynamic -> {
             Dynamic dynamic2;
-            Dynamic dynamic = typed.write();
-            Optional<String> optional = dynamic.get("generatorOptions").asString();
+            Optional<String> optional = dynamic.get("generatorOptions").asString().result();
             if ("flat".equalsIgnoreCase(dynamic.get("generatorName").asString(""))) {
                 String string = optional.orElse("");
                 dynamic2 = dynamic.set("generatorOptions", LevelDataGeneratorOptionsFix.convert(string, dynamic.getOps()));
@@ -129,8 +128,8 @@ extends DataFix {
             } else {
                 dynamic2 = dynamic;
             }
-            return type.readTyped(dynamic2).getSecond().orElseThrow(() -> new IllegalStateException("Could not read new level type."));
-        });
+            return type.readTyped(dynamic2);
+        }).map(Pair::getFirst).result().orElseThrow(() -> new IllegalStateException("Could not read new level type.")));
     }
 
     private static <T> Dynamic<T> convert(String string, DynamicOps<T> dynamicOps) {

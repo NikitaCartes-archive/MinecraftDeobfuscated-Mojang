@@ -3,29 +3,19 @@
  */
 package net.minecraft.world.entity.ai.memory;
 
-import com.google.common.collect.Maps;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
-import java.util.HashMap;
-import java.util.function.Function;
-import net.minecraft.util.Serializable;
+import com.mojang.datafixers.kinds.Applicative;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Optional;
 
-public class ExpirableValue<T>
-implements Serializable {
+public class ExpirableValue<T> {
     private final T value;
     private long timeToLive;
 
     public ExpirableValue(T object, long l) {
         this.value = object;
         this.timeToLive = l;
-    }
-
-    public ExpirableValue(T object) {
-        this(object, Long.MAX_VALUE);
-    }
-
-    public ExpirableValue(Function<Dynamic<?>, T> function, Dynamic<?> dynamic) {
-        this(function.apply(dynamic.get("value").get().orElseThrow(RuntimeException::new)), dynamic.get("ttl").asLong(Long.MAX_VALUE));
     }
 
     public void tick() {
@@ -35,7 +25,7 @@ implements Serializable {
     }
 
     public static <T> ExpirableValue<T> of(T object) {
-        return new ExpirableValue<T>(object);
+        return new ExpirableValue<T>(object, Long.MAX_VALUE);
     }
 
     public static <T> ExpirableValue<T> of(T object, long l) {
@@ -58,14 +48,8 @@ implements Serializable {
         return this.timeToLive != Long.MAX_VALUE;
     }
 
-    @Override
-    public <T> T serialize(DynamicOps<T> dynamicOps) {
-        HashMap<T, T> map = Maps.newHashMap();
-        map.put(dynamicOps.createString("value"), ((Serializable)this.value).serialize(dynamicOps));
-        if (this.canExpire()) {
-            map.put(dynamicOps.createString("ttl"), dynamicOps.createLong(this.timeToLive));
-        }
-        return dynamicOps.createMap(map);
+    public static <T> Codec<ExpirableValue<T>> codec(Codec<T> codec) {
+        return RecordCodecBuilder.create(instance -> instance.group(((MapCodec)codec.fieldOf("value")).forGetter(expirableValue -> expirableValue.value), Codec.LONG.optionalFieldOf("ttl").forGetter(expirableValue -> expirableValue.canExpire() ? Optional.of(expirableValue.timeToLive) : Optional.empty())).apply((Applicative<ExpirableValue, ?>)instance, (object, optional) -> new ExpirableValue<Object>(object, optional.orElse(Long.MAX_VALUE))));
     }
 }
 

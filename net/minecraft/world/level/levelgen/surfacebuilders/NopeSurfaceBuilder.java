@@ -3,9 +3,8 @@
  */
 package net.minecraft.world.level.levelgen.surfacebuilders;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -14,8 +13,8 @@ import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderBaseConf
 
 public class NopeSurfaceBuilder
 extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
-    public NopeSurfaceBuilder(Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration> function) {
-        super(function);
+    public NopeSurfaceBuilder(Codec<SurfaceBuilderBaseConfiguration> codec) {
+        super(codec);
     }
 
     @Override

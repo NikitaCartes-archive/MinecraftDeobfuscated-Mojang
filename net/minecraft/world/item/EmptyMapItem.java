@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.item;
 
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -28,6 +29,7 @@ extends ComplexItem {
             itemStack2.shrink(1);
         }
         player.awardStat(Stats.ITEM_USED.get(this));
+        player.playSound(SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, 1.0f, 1.0f);
         if (itemStack2.isEmpty()) {
             return InteractionResultHolder.success(itemStack);
         }
