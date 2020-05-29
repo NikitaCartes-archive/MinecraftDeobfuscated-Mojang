@@ -19,6 +19,8 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 
 public class BonusLevelTableCondition
 implements LootItemCondition {
@@ -28,6 +30,11 @@ implements LootItemCondition {
     private BonusLevelTableCondition(Enchantment enchantment, float[] fs) {
         this.enchantment = enchantment;
         this.values = fs;
+    }
+
+    @Override
+    public LootItemConditionType getType() {
+        return LootItemConditions.TABLE_BONUS;
     }
 
     @Override
@@ -53,11 +60,7 @@ implements LootItemCondition {
     }
 
     public static class Serializer
-    extends LootItemCondition.Serializer<BonusLevelTableCondition> {
-        public Serializer() {
-            super(new ResourceLocation("table_bonus"), BonusLevelTableCondition.class);
-        }
-
+    implements net.minecraft.world.level.storage.loot.Serializer<BonusLevelTableCondition> {
         @Override
         public void serialize(JsonObject jsonObject, BonusLevelTableCondition bonusLevelTableCondition, JsonSerializationContext jsonSerializationContext) {
             jsonObject.addProperty("enchantment", Registry.ENCHANTMENT.getKey(bonusLevelTableCondition.enchantment).toString());
@@ -73,7 +76,7 @@ implements LootItemCondition {
         }
 
         @Override
-        public /* synthetic */ LootItemCondition deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             return this.deserialize(jsonObject, jsonDeserializationContext);
         }
     }

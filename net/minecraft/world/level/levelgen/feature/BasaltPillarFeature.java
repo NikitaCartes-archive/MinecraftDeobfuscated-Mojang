@@ -50,6 +50,7 @@ extends Feature<NoneFeatureConfiguration> {
         this.placeBaseHangOff(worldGenLevel, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.SOUTH));
         this.placeBaseHangOff(worldGenLevel, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.WEST));
         this.placeBaseHangOff(worldGenLevel, random, mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.EAST));
+        mutableBlockPos.move(Direction.DOWN);
         BlockPos.MutableBlockPos mutableBlockPos3 = new BlockPos.MutableBlockPos();
         for (int i = -3; i < 4; ++i) {
             for (int j = -3; j < 4; ++j) {

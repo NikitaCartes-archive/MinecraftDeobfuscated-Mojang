@@ -74,7 +74,7 @@ implements Vanishable {
     }
 
     @Override
-    public boolean canDestroySpecial(BlockState blockState) {
+    public boolean isCorrectToolForDrops(BlockState blockState) {
         return blockState.is(Blocks.COBWEB);
     }
 

@@ -65,6 +65,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.OutlineBufferSource;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RunningTrimmedMean;
 import net.minecraft.client.renderer.Sheets;
@@ -167,8 +168,22 @@ AutoCloseable {
     private final Int2ObjectMap<BlockDestructionProgress> destroyingBlocks = new Int2ObjectOpenHashMap<BlockDestructionProgress>();
     private final Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress = new Long2ObjectOpenHashMap<SortedSet<BlockDestructionProgress>>();
     private final Map<BlockPos, SoundInstance> playingRecords = Maps.newHashMap();
+    @Nullable
     private RenderTarget entityTarget;
+    @Nullable
     private PostChain entityEffect;
+    @Nullable
+    private RenderTarget translucentTarget;
+    @Nullable
+    private RenderTarget itemEntityTarget;
+    @Nullable
+    private RenderTarget particlesTarget;
+    @Nullable
+    private RenderTarget weatherTarget;
+    @Nullable
+    private RenderTarget cloudsTarget;
+    @Nullable
+    private PostChain transparencyChain;
     private double lastCameraX = Double.MIN_VALUE;
     private double lastCameraY = Double.MIN_VALUE;
     private double lastCameraZ = Double.MIN_VALUE;
@@ -235,6 +250,7 @@ AutoCloseable {
         int k = Mth.floor(g);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
+        RenderSystem.enableAlphaTest();
         RenderSystem.disableCull();
         RenderSystem.normal3f(0.0f, 1.0f, 0.0f);
         RenderSystem.enableBlend();
@@ -331,6 +347,7 @@ AutoCloseable {
         RenderSystem.enableCull();
         RenderSystem.disableBlend();
         RenderSystem.defaultAlphaFunc();
+        RenderSystem.disableAlphaTest();
         lightTexture.turnOffLightLayer();
     }
 
@@ -378,6 +395,9 @@ AutoCloseable {
         if (this.entityEffect != null) {
             this.entityEffect.close();
         }
+        if (this.transparencyChain != null) {
+            this.transparencyChain.close();
+        }
     }
 
     @Override
@@ -387,6 +407,7 @@ AutoCloseable {
         RenderSystem.texParameter(3553, 10243, 10497);
         RenderSystem.bindTexture(0);
         this.initOutline();
+        this.initTransparency();
     }
 
     public void initOutline() {
@@ -403,9 +424,29 @@ AutoCloseable {
             this.entityEffect = null;
             this.entityTarget = null;
         } catch (JsonSyntaxException jsonSyntaxException) {
-            LOGGER.warn("Failed to load shader: {}", (Object)resourceLocation, (Object)jsonSyntaxException);
+            LOGGER.warn("Failed to parse shader: {}", (Object)resourceLocation, (Object)jsonSyntaxException);
             this.entityEffect = null;
             this.entityTarget = null;
+        }
+    }
+
+    private void initTransparency() {
+        if (this.transparencyChain != null) {
+            this.transparencyChain.close();
+        }
+        ResourceLocation resourceLocation = new ResourceLocation("shaders/post/transparency.json");
+        try {
+            this.transparencyChain = new PostChain(this.minecraft.getTextureManager(), this.minecraft.getResourceManager(), this.minecraft.getMainRenderTarget(), resourceLocation);
+            this.transparencyChain.resize(this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
+            this.translucentTarget = this.transparencyChain.getTempTarget("translucent");
+            this.itemEntityTarget = this.transparencyChain.getTempTarget("itemEntity");
+            this.particlesTarget = this.transparencyChain.getTempTarget("particles");
+            this.weatherTarget = this.transparencyChain.getTempTarget("weather");
+            this.cloudsTarget = this.transparencyChain.getTempTarget("clouds");
+        } catch (IOException iOException) {
+            throw new TranparencyShaderException("Failed to load shader: " + resourceLocation, iOException);
+        } catch (JsonSyntaxException jsonSyntaxException) {
+            throw new TranparencyShaderException("Failed to parse shader: " + resourceLocation, jsonSyntaxException);
         }
     }
 
@@ -586,6 +627,9 @@ AutoCloseable {
         this.needsUpdate();
         if (this.entityEffect != null) {
             this.entityEffect.resize(i, j);
+        }
+        if (this.transparencyChain != null) {
+            this.transparencyChain.resize(i, j);
         }
     }
 
@@ -816,6 +860,11 @@ AutoCloseable {
         this.renderedEntities = 0;
         this.culledEntities = 0;
         profilerFiller.popPush("entities");
+        if (this.itemEntityTarget != null) {
+            this.itemEntityTarget.clear(Minecraft.ON_OSX);
+            this.itemEntityTarget.copyDepthFrom(this.minecraft.getMainRenderTarget());
+            this.minecraft.getMainRenderTarget().bindWrite(false);
+        }
         if (this.shouldShowEntityOutlines()) {
             this.entityTarget.clear(Minecraft.ON_OSX);
             this.minecraft.getMainRenderTarget().bindWrite(false);
@@ -928,11 +977,12 @@ AutoCloseable {
         RenderSystem.pushMatrix();
         RenderSystem.multMatrix(poseStack.last().pose());
         this.minecraft.debugRenderer.render(poseStack, bufferSource, d, e, g);
-        this.renderWorldBounds(camera);
         RenderSystem.popMatrix();
         bufferSource.endBatch(Sheets.translucentCullBlockSheet());
         bufferSource.endBatch(Sheets.bannerSheet());
         bufferSource.endBatch(Sheets.shieldSheet());
+        bufferSource.endBatch(RenderType.armorGlint());
+        bufferSource.endBatch(RenderType.armorEntityGlint());
         bufferSource.endBatch(RenderType.glint());
         bufferSource.endBatch(RenderType.entityGlint());
         bufferSource.endBatch(RenderType.waterMask());
@@ -940,20 +990,53 @@ AutoCloseable {
         bufferSource.endBatch(RenderType.lines());
         bufferSource.endBatch();
         profilerFiller.popPush("translucent");
+        if (this.translucentTarget != null) {
+            this.translucentTarget.clear(Minecraft.ON_OSX);
+            this.translucentTarget.copyDepthFrom(this.minecraft.getMainRenderTarget());
+        }
         this.renderChunkLayer(RenderType.translucent(), poseStack, d, e, g);
         profilerFiller.popPush("particles");
+        if (this.particlesTarget != null) {
+            this.particlesTarget.clear(Minecraft.ON_OSX);
+            this.particlesTarget.copyDepthFrom(this.minecraft.getMainRenderTarget());
+            RenderStateShard.PARTICLES_TARGET.setupRenderState();
+        }
         this.minecraft.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
+        if (this.particlesTarget != null) {
+            RenderStateShard.PARTICLES_TARGET.clearRenderState();
+        }
         RenderSystem.pushMatrix();
         RenderSystem.multMatrix(poseStack.last().pose());
         profilerFiller.popPush("cloudsLayers");
         if (this.minecraft.options.getCloudsType() != CloudStatus.OFF) {
             profilerFiller.popPush("clouds");
+            if (this.cloudsTarget != null) {
+                this.cloudsTarget.clear(Minecraft.ON_OSX);
+                RenderStateShard.CLOUDS_TARGET.setupRenderState();
+            }
             this.renderClouds(poseStack, f, d, e, g);
+            if (this.cloudsTarget != null) {
+                RenderStateShard.CLOUDS_TARGET.clearRenderState();
+            }
         }
-        RenderSystem.depthMask(false);
         profilerFiller.popPush("weather");
+        if (this.weatherTarget != null) {
+            this.weatherTarget.clear(Minecraft.ON_OSX);
+            RenderStateShard.WEATHER_TARGET.setupRenderState();
+        } else {
+            RenderSystem.depthMask(false);
+        }
         this.renderSnowAndRain(lightTexture, f, d, e, g);
-        RenderSystem.depthMask(true);
+        this.renderWorldBounds(camera);
+        if (this.weatherTarget != null) {
+            RenderStateShard.WEATHER_TARGET.clearRenderState();
+        } else {
+            RenderSystem.depthMask(true);
+        }
+        if (this.transparencyChain != null) {
+            this.transparencyChain.process(f);
+            this.minecraft.getMainRenderTarget().bindWrite(false);
+        }
         this.renderDebug(camera);
         RenderSystem.shadeModel(7424);
         RenderSystem.depthMask(true);
@@ -1376,7 +1459,7 @@ AutoCloseable {
         RenderSystem.enableAlphaTest();
         RenderSystem.enableDepthTest();
         RenderSystem.defaultAlphaFunc();
-        RenderSystem.defaultBlendFunc();
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.enableFog();
         float i = 12.0f;
         float j = 4.0f;
@@ -1572,7 +1655,7 @@ AutoCloseable {
         RenderSystem.enableDepthTest();
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         this.textureManager.bind(FORCEFIELD_LOCATION);
-        RenderSystem.depthMask(false);
+        RenderSystem.depthMask(true);
         RenderSystem.pushMatrix();
         int i = worldBorder.getStatus().getColor();
         float j = (float)(i >> 16 & 0xFF) / 255.0f;
@@ -2316,8 +2399,42 @@ AutoCloseable {
         return i << 20 | j << 4;
     }
 
+    @Nullable
     public RenderTarget entityTarget() {
         return this.entityTarget;
+    }
+
+    @Nullable
+    public RenderTarget getTranslucentTarget() {
+        return this.translucentTarget;
+    }
+
+    @Nullable
+    public RenderTarget getItemEntityTarget() {
+        return this.itemEntityTarget;
+    }
+
+    @Nullable
+    public RenderTarget getParticlesTarget() {
+        return this.particlesTarget;
+    }
+
+    @Nullable
+    public RenderTarget getWeatherTarget() {
+        return this.weatherTarget;
+    }
+
+    @Nullable
+    public RenderTarget getCloudsTarget() {
+        return this.cloudsTarget;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static class TranparencyShaderException
+    extends RuntimeException {
+        public TranparencyShaderException(String string, Throwable throwable) {
+            super(string, throwable);
+        }
     }
 
     @Environment(value=EnvType.CLIENT)

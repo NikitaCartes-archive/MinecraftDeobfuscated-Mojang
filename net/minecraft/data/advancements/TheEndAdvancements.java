@@ -23,15 +23,15 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 
 public class TheEndAdvancements
 implements Consumer<Consumer<Advancement>> {
     @Override
     public void accept(Consumer<Advancement> consumer) {
-        Advancement advancement = Advancement.Builder.advancement().display(Blocks.END_STONE, (Component)new TranslatableComponent("advancements.end.root.title"), (Component)new TranslatableComponent("advancements.end.root.description"), new ResourceLocation("textures/gui/advancements/backgrounds/end.png"), FrameType.TASK, false, false, false).addCriterion("entered_end", ChangeDimensionTrigger.TriggerInstance.changedDimensionTo(DimensionType.END_LOCATION)).save(consumer, "end/root");
+        Advancement advancement = Advancement.Builder.advancement().display(Blocks.END_STONE, (Component)new TranslatableComponent("advancements.end.root.title"), (Component)new TranslatableComponent("advancements.end.root.description"), new ResourceLocation("textures/gui/advancements/backgrounds/end.png"), FrameType.TASK, false, false, false).addCriterion("entered_end", ChangeDimensionTrigger.TriggerInstance.changedDimensionTo(Level.END)).save(consumer, "end/root");
         Advancement advancement2 = Advancement.Builder.advancement().parent(advancement).display(Blocks.DRAGON_HEAD, (Component)new TranslatableComponent("advancements.end.kill_dragon.title"), (Component)new TranslatableComponent("advancements.end.kill_dragon.description"), null, FrameType.TASK, true, true, false).addCriterion("killed_dragon", KilledTrigger.TriggerInstance.playerKilledEntity(EntityPredicate.Builder.entity().of(EntityType.ENDER_DRAGON))).save(consumer, "end/kill_dragon");
         Advancement advancement3 = Advancement.Builder.advancement().parent(advancement2).display(Items.ENDER_PEARL, (Component)new TranslatableComponent("advancements.end.enter_end_gateway.title"), (Component)new TranslatableComponent("advancements.end.enter_end_gateway.description"), null, FrameType.TASK, true, true, false).addCriterion("entered_end_gateway", EnterBlockTrigger.TriggerInstance.entersBlock(Blocks.END_GATEWAY)).save(consumer, "end/enter_end_gateway");
         Advancement.Builder.advancement().parent(advancement2).display(Items.END_CRYSTAL, (Component)new TranslatableComponent("advancements.end.respawn_dragon.title"), (Component)new TranslatableComponent("advancements.end.respawn_dragon.description"), null, FrameType.GOAL, true, true, false).addCriterion("summoned_dragon", SummonedEntityTrigger.TriggerInstance.summonedEntity(EntityPredicate.Builder.entity().of(EntityType.ENDER_DRAGON))).save(consumer, "end/respawn_dragon");

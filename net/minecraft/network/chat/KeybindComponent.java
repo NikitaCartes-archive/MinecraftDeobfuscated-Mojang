@@ -10,6 +10,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.BaseComponent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
@@ -37,13 +38,13 @@ extends BaseComponent {
     }
 
     @Override
-    public <T> Optional<T> visitSelf(Component.ContentConsumer<T> contentConsumer) {
+    public <T> Optional<T> visitSelf(FormattedText.ContentConsumer<T> contentConsumer) {
         return this.getNestedComponent().visit(contentConsumer);
     }
 
     @Override
     @Environment(value=EnvType.CLIENT)
-    public <T> Optional<T> visitSelf(Component.StyledContentConsumer<T> styledContentConsumer, Style style) {
+    public <T> Optional<T> visitSelf(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
         return this.getNestedComponent().visit(styledContentConsumer, style);
     }
 

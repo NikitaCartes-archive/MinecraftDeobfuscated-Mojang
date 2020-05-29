@@ -36,7 +36,7 @@ extends ChatScreen {
         } else if (i == 257 || i == 335) {
             String string = this.input.getValue().trim();
             if (!string.isEmpty()) {
-                this.minecraft.player.chat(string);
+                this.sendMessage(string);
             }
             this.input.setValue("");
             this.minecraft.gui.getChat().resetChatScroll();

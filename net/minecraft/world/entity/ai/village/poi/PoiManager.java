@@ -90,7 +90,7 @@ extends SectionStorage<PoiSection> {
     }
 
     public Optional<BlockPos> findClosest(Predicate<PoiType> predicate, BlockPos blockPos, int i, Occupancy occupancy) {
-        return this.getInRange(predicate, blockPos, i, occupancy).map(PoiRecord::getPos).sorted(Comparator.comparingDouble(blockPos2 -> blockPos2.distSqr(blockPos))).findFirst();
+        return this.getInRange(predicate, blockPos, i, occupancy).map(PoiRecord::getPos).min(Comparator.comparingDouble(blockPos2 -> blockPos2.distSqr(blockPos)));
     }
 
     public Optional<BlockPos> take(Predicate<PoiType> predicate, Predicate<BlockPos> predicate2, BlockPos blockPos, int i) {
@@ -164,7 +164,7 @@ extends SectionStorage<PoiSection> {
     }
 
     private static boolean mayHavePoi(LevelChunkSection levelChunkSection) {
-        return PoiType.allPoiStates().anyMatch(levelChunkSection::maybeHas);
+        return levelChunkSection.maybeHas(PoiType.ALL_STATES::contains);
     }
 
     private void updateFromSection(LevelChunkSection levelChunkSection, SectionPos sectionPos, BiConsumer<BlockPos, PoiType> biConsumer) {

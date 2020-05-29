@@ -163,11 +163,11 @@ implements RangedAttackMob {
         float f = Mth.cos(this.yBodyRot * ((float)Math.PI / 180));
         float g = Mth.sin(this.yBodyRot * ((float)Math.PI / 180));
         float h = 0.3f;
-        entity.setPos(this.getX() + (double)(0.3f * g), this.getY() + this.getRideHeight() + entity.getRidingHeight(), this.getZ() - (double)(0.3f * f));
+        entity.setPos(this.getX() + (double)(0.3f * g), this.getY() + this.getPassengersRidingOffset() + entity.getMyRidingOffset(), this.getZ() - (double)(0.3f * f));
     }
 
     @Override
-    public double getRideHeight() {
+    public double getPassengersRidingOffset() {
         return (double)this.getBbHeight() * 0.67;
     }
 

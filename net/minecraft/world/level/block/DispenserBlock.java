@@ -76,7 +76,7 @@ extends BaseEntityBlock {
                 player.awardStat(Stats.INSPECT_DISPENSER);
             }
         }
-        return InteractionResult.SUCCESS;
+        return InteractionResult.CONSUME;
     }
 
     protected void dispenseFrom(Level level, BlockPos blockPos) {

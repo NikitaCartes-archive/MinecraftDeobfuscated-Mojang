@@ -13,10 +13,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.ComponentCollector;
 import net.minecraft.client.StringDecomposer;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
@@ -41,9 +39,9 @@ public class StringSplitter {
         return mutableFloat.floatValue();
     }
 
-    public float stringWidth(Component component) {
+    public float stringWidth(FormattedText formattedText) {
         MutableFloat mutableFloat = new MutableFloat();
-        StringDecomposer.iterateFormatted(component, Style.EMPTY, (i, style, j) -> {
+        StringDecomposer.iterateFormatted(formattedText, Style.EMPTY, (i, style, j) -> {
             mutableFloat.add(this.widthProvider.getWidth(j, style));
             return true;
         });
@@ -75,37 +73,32 @@ public class StringSplitter {
     }
 
     @Nullable
-    public Component componentAtWidth(Component component, int i) {
+    public Style componentStyleAtWidth(FormattedText formattedText, int i) {
         WidthLimitedCharSink widthLimitedCharSink = new WidthLimitedCharSink(i);
-        return component.visit((style, string) -> {
-            if (!StringDecomposer.iterateFormatted(string, style, (StringDecomposer.Output)widthLimitedCharSink)) {
-                return Optional.of(new TextComponent(string).setStyle(style));
-            }
-            return Optional.empty();
-        }, Style.EMPTY).orElse(null);
+        return formattedText.visit((style, string) -> StringDecomposer.iterateFormatted(string, style, (StringDecomposer.Output)widthLimitedCharSink) ? Optional.empty() : Optional.of(style), Style.EMPTY).orElse(null);
     }
 
-    public MutableComponent headByWidth(Component component, int i, Style style) {
+    public FormattedText headByWidth(FormattedText formattedText, int i, Style style) {
         final WidthLimitedCharSink widthLimitedCharSink = new WidthLimitedCharSink(i);
-        return component.visit(new Component.StyledContentConsumer<MutableComponent>(){
+        return formattedText.visit(new FormattedText.StyledContentConsumer<FormattedText>(){
             private final ComponentCollector collector = new ComponentCollector();
 
             @Override
-            public Optional<MutableComponent> accept(Style style, String string) {
+            public Optional<FormattedText> accept(Style style, String string) {
                 widthLimitedCharSink.resetPosition();
                 if (!StringDecomposer.iterateFormatted(string, style, (StringDecomposer.Output)widthLimitedCharSink)) {
                     String string2 = string.substring(0, widthLimitedCharSink.getPosition());
                     if (!string2.isEmpty()) {
-                        this.collector.append(new TextComponent(string2).withStyle(style));
+                        this.collector.append(FormattedText.of(string2, style));
                     }
                     return Optional.of(this.collector.getResultOrEmpty());
                 }
                 if (!string.isEmpty()) {
-                    this.collector.append(new TextComponent(string).withStyle(style));
+                    this.collector.append(FormattedText.of(string, style));
                 }
                 return Optional.empty();
             }
-        }, style).orElseGet(component::mutableCopy);
+        }, style).orElse(formattedText);
     }
 
     public static int getWordPosition(String string, int i, int j, boolean bl) {
@@ -157,16 +150,16 @@ public class StringSplitter {
         }
     }
 
-    public List<Component> splitLines(String string, int i2, Style style2) {
-        ArrayList<Component> list = Lists.newArrayList();
-        this.splitLines(string, i2, style2, false, (style, i, j) -> list.add(new TextComponent(string.substring(i, j)).setStyle(style)));
+    public List<FormattedText> splitLines(String string, int i2, Style style2) {
+        ArrayList<FormattedText> list = Lists.newArrayList();
+        this.splitLines(string, i2, style2, false, (style, i, j) -> list.add(FormattedText.of(string.substring(i, j), style)));
         return list;
     }
 
-    public List<Component> splitLines(Component component, int i, Style style2) {
-        ArrayList<Component> list = Lists.newArrayList();
+    public List<FormattedText> splitLines(FormattedText formattedText, int i, Style style2) {
+        ArrayList<FormattedText> list = Lists.newArrayList();
         ArrayList<LineComponent> list2 = Lists.newArrayList();
-        component.visit((style, string) -> {
+        formattedText.visit((style, string) -> {
             if (!string.isEmpty()) {
                 list2.add(new LineComponent(string, style));
             }
@@ -194,11 +187,11 @@ public class StringSplitter {
                 lineBreakFinder.addToOffset(lineComponent.contents.length());
             }
         }
-        Component component2 = flatComponents.getRemainder();
-        if (component2 != null) {
-            list.add(component2);
+        FormattedText formattedText2 = flatComponents.getRemainder();
+        if (formattedText2 != null) {
+            list.add(formattedText2);
         } else if (bl2) {
-            list.add(new TextComponent("").withStyle(style2));
+            list.add(FormattedText.EMPTY);
         }
         return list;
     }
@@ -217,7 +210,7 @@ public class StringSplitter {
             return this.flatParts.charAt(i);
         }
 
-        public Component splitAt(int i, int j, Style style) {
+        public FormattedText splitAt(int i, int j, Style style) {
             ComponentCollector componentCollector = new ComponentCollector();
             ListIterator<LineComponent> listIterator = this.parts.listIterator();
             int k = i;
@@ -229,13 +222,13 @@ public class StringSplitter {
                 int l = string.length();
                 if (!bl) {
                     if (k > l) {
-                        componentCollector.append(lineComponent.toComponent());
+                        componentCollector.append(lineComponent);
                         listIterator.remove();
                         k -= l;
                     } else {
                         string2 = string.substring(0, k);
                         if (!string2.isEmpty()) {
-                            componentCollector.append(new TextComponent(string2).setStyle(lineComponent.style));
+                            componentCollector.append(FormattedText.of(string2, lineComponent.style));
                         }
                         k += j;
                         bl = true;
@@ -260,16 +253,17 @@ public class StringSplitter {
         }
 
         @Nullable
-        public Component getRemainder() {
+        public FormattedText getRemainder() {
             ComponentCollector componentCollector = new ComponentCollector();
-            this.parts.forEach(lineComponent -> componentCollector.append(lineComponent.toComponent()));
+            this.parts.forEach(componentCollector::append);
             this.parts.clear();
             return componentCollector.getResult();
         }
     }
 
     @Environment(value=EnvType.CLIENT)
-    static class LineComponent {
+    static class LineComponent
+    implements FormattedText {
         private final String contents;
         private final Style style;
 
@@ -278,8 +272,14 @@ public class StringSplitter {
             this.style = style;
         }
 
-        public MutableComponent toComponent() {
-            return new TextComponent(this.contents).setStyle(this.style);
+        @Override
+        public <T> Optional<T> visit(FormattedText.ContentConsumer<T> contentConsumer) {
+            return contentConsumer.accept(this.contents);
+        }
+
+        @Override
+        public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
+            return styledContentConsumer.accept(this.style.applyTo(style), this.contents);
         }
     }
 

@@ -10,11 +10,12 @@ import com.google.gson.JsonSyntaxException;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class SetNbtFunction
@@ -24,6 +25,11 @@ extends LootItemConditionalFunction {
     private SetNbtFunction(LootItemCondition[] lootItemConditions, CompoundTag compoundTag) {
         super(lootItemConditions);
         this.tag = compoundTag;
+    }
+
+    @Override
+    public LootItemFunctionType getType() {
+        return LootItemFunctions.SET_NBT;
     }
 
     @Override
@@ -38,10 +44,6 @@ extends LootItemConditionalFunction {
 
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<SetNbtFunction> {
-        public Serializer() {
-            super(new ResourceLocation("set_nbt"), SetNbtFunction.class);
-        }
-
         @Override
         public void serialize(JsonObject jsonObject, SetNbtFunction setNbtFunction, JsonSerializationContext jsonSerializationContext) {
             super.serialize(jsonObject, setNbtFunction, jsonSerializationContext);

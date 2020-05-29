@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
@@ -39,6 +40,7 @@ import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
@@ -169,16 +171,16 @@ public class StructureTemplate {
         return StructureTemplate.transform(blockPos, structurePlaceSettings.getMirror(), structurePlaceSettings.getRotation(), structurePlaceSettings.getRotationPivot());
     }
 
-    public void placeInWorldChunk(LevelAccessor levelAccessor, BlockPos blockPos, StructurePlaceSettings structurePlaceSettings) {
+    public void placeInWorldChunk(LevelAccessor levelAccessor, BlockPos blockPos, StructurePlaceSettings structurePlaceSettings, Random random) {
         structurePlaceSettings.updateBoundingBoxFromChunkPos();
-        this.placeInWorld(levelAccessor, blockPos, structurePlaceSettings);
+        this.placeInWorld(levelAccessor, blockPos, structurePlaceSettings, random);
     }
 
-    public void placeInWorld(LevelAccessor levelAccessor, BlockPos blockPos, StructurePlaceSettings structurePlaceSettings) {
-        this.placeInWorld(levelAccessor, blockPos, blockPos, structurePlaceSettings, 2);
+    public void placeInWorld(LevelAccessor levelAccessor, BlockPos blockPos, StructurePlaceSettings structurePlaceSettings, Random random) {
+        this.placeInWorld(levelAccessor, blockPos, blockPos, structurePlaceSettings, random, 2);
     }
 
-    public boolean placeInWorld(LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2, StructurePlaceSettings structurePlaceSettings, int i) {
+    public boolean placeInWorld(LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2, StructurePlaceSettings structurePlaceSettings, Random random, int i) {
         if (this.palettes.isEmpty()) {
             return false;
         }
@@ -219,6 +221,9 @@ public class StructureTemplate {
                 structureBlockInfo.nbt.putInt("x", blockPos3.getX());
                 structureBlockInfo.nbt.putInt("y", blockPos3.getY());
                 structureBlockInfo.nbt.putInt("z", blockPos3.getZ());
+                if (blockEntity instanceof RandomizableContainerBlockEntity) {
+                    structureBlockInfo.nbt.putLong("LootTable", random.nextLong());
+                }
                 blockEntity.load(structureBlockInfo.state, structureBlockInfo.nbt);
                 blockEntity.mirror(structurePlaceSettings.getMirror());
                 blockEntity.rotate(structurePlaceSettings.getRotation());
@@ -393,7 +398,7 @@ public class StructureTemplate {
         return bl ? new BlockPos(i, j, k) : blockPos;
     }
 
-    private static Vec3 transform(Vec3 vec3, Mirror mirror, Rotation rotation, BlockPos blockPos) {
+    public static Vec3 transform(Vec3 vec3, Mirror mirror, Rotation rotation, BlockPos blockPos) {
         double d = vec3.x;
         double e = vec3.y;
         double f = vec3.z;

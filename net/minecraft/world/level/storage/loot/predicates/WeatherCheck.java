@@ -6,11 +6,12 @@ package net.minecraft.world.level.storage.loot.predicates;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 import org.jetbrains.annotations.Nullable;
 
 public class WeatherCheck
@@ -23,6 +24,11 @@ implements LootItemCondition {
     private WeatherCheck(@Nullable Boolean boolean_, @Nullable Boolean boolean2) {
         this.isRaining = boolean_;
         this.isThundering = boolean2;
+    }
+
+    @Override
+    public LootItemConditionType getType() {
+        return LootItemConditions.WEATHER_CHECK;
     }
 
     @Override
@@ -40,11 +46,7 @@ implements LootItemCondition {
     }
 
     public static class Serializer
-    extends LootItemCondition.Serializer<WeatherCheck> {
-        public Serializer() {
-            super(new ResourceLocation("weather_check"), WeatherCheck.class);
-        }
-
+    implements net.minecraft.world.level.storage.loot.Serializer<WeatherCheck> {
         @Override
         public void serialize(JsonObject jsonObject, WeatherCheck weatherCheck, JsonSerializationContext jsonSerializationContext) {
             jsonObject.addProperty("raining", weatherCheck.isRaining);
@@ -59,7 +61,7 @@ implements LootItemCondition {
         }
 
         @Override
-        public /* synthetic */ LootItemCondition deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             return this.deserialize(jsonObject, jsonDeserializationContext);
         }
     }

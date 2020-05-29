@@ -48,7 +48,7 @@ extends Item {
             level.playSound(null, armorStand.getX(), armorStand.getY(), armorStand.getZ(), SoundEvents.ARMOR_STAND_PLACE, SoundSource.BLOCKS, 0.75f, 0.8f);
         }
         itemStack.shrink(1);
-        return InteractionResult.SUCCESS;
+        return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
     private void randomizePose(ArmorStand armorStand, Random random) {

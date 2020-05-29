@@ -41,7 +41,7 @@ implements Vanishable {
             }
             player2.awardStat(Stats.ITEM_USED.get(this));
         }
-        return InteractionResultHolder.success(itemStack);
+        return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
     }
 
     @Override

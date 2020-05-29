@@ -59,7 +59,7 @@ public class Bootstrap {
         Language language = Language.getInstance();
         iterable.forEach(object -> {
             String string = (String)function.apply(object);
-            if (!language.exists(string)) {
+            if (!language.has(string)) {
                 set.add(string);
             }
         });
@@ -71,7 +71,7 @@ public class Bootstrap {
 
             @Override
             public <T extends GameRules.Value<T>> void visit(GameRules.Key<T> key, GameRules.Type<T> type) {
-                if (!language.exists(key.getDescriptionId())) {
+                if (!language.has(key.getDescriptionId())) {
                     set.add(key.getId());
                 }
             }

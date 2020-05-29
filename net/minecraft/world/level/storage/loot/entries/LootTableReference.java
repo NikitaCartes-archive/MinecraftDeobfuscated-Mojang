@@ -13,6 +13,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.ValidationContext;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntries;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -24,6 +26,11 @@ extends LootPoolSingletonContainer {
     private LootTableReference(ResourceLocation resourceLocation, int i, int j, LootItemCondition[] lootItemConditions, LootItemFunction[] lootItemFunctions) {
         super(i, j, lootItemConditions, lootItemFunctions);
         this.name = resourceLocation;
+    }
+
+    @Override
+    public LootPoolEntryType getType() {
+        return LootPoolEntries.REFERENCE;
     }
 
     @Override
@@ -53,13 +60,9 @@ extends LootPoolSingletonContainer {
 
     public static class Serializer
     extends LootPoolSingletonContainer.Serializer<LootTableReference> {
-        public Serializer() {
-            super(new ResourceLocation("loot_table"), LootTableReference.class);
-        }
-
         @Override
-        public void serialize(JsonObject jsonObject, LootTableReference lootTableReference, JsonSerializationContext jsonSerializationContext) {
-            super.serialize(jsonObject, lootTableReference, jsonSerializationContext);
+        public void serializeCustom(JsonObject jsonObject, LootTableReference lootTableReference, JsonSerializationContext jsonSerializationContext) {
+            super.serializeCustom(jsonObject, lootTableReference, jsonSerializationContext);
             jsonObject.addProperty("name", lootTableReference.name.toString());
         }
 

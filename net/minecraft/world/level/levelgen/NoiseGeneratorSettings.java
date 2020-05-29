@@ -18,6 +18,7 @@ import java.util.function.Function;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Codecs;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.NoiseSamplingSettings;
@@ -28,7 +29,7 @@ import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 
 public final class NoiseGeneratorSettings {
-    public static final Codec<NoiseGeneratorSettings> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)StructureSettings.CODEC.fieldOf("structures")).forGetter(NoiseGeneratorSettings::structureSettings), ((MapCodec)NoiseSettings.CODEC.fieldOf("noise")).forGetter(NoiseGeneratorSettings::noiseSettings), ((MapCodec)BlockState.CODEC.fieldOf("default_block")).forGetter(NoiseGeneratorSettings::getDefaultBlock), ((MapCodec)BlockState.CODEC.fieldOf("default_fluid")).forGetter(NoiseGeneratorSettings::getDefaultFluid), ((MapCodec)Codec.INT.stable().fieldOf("bedrock_roof_position")).forGetter(NoiseGeneratorSettings::getBedrockRoofPosition), ((MapCodec)Codec.INT.stable().fieldOf("bedrock_floor_position")).forGetter(NoiseGeneratorSettings::getBedrockFloorPosition), ((MapCodec)Codec.INT.stable().fieldOf("sea_level")).forGetter(NoiseGeneratorSettings::seaLevel), ((MapCodec)Codec.BOOL.stable().fieldOf("disable_mob_generation")).forGetter(NoiseGeneratorSettings::disableMobGeneration)).apply((Applicative<NoiseGeneratorSettings, ?>)instance, NoiseGeneratorSettings::new));
+    public static final Codec<NoiseGeneratorSettings> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)StructureSettings.CODEC.fieldOf("structures")).forGetter(NoiseGeneratorSettings::structureSettings), ((MapCodec)NoiseSettings.CODEC.fieldOf("noise")).forGetter(NoiseGeneratorSettings::noiseSettings), ((MapCodec)BlockState.CODEC.fieldOf("default_block")).forGetter(NoiseGeneratorSettings::getDefaultBlock), ((MapCodec)BlockState.CODEC.fieldOf("default_fluid")).forGetter(NoiseGeneratorSettings::getDefaultFluid), ((MapCodec)Codecs.intRange(-20, 276).fieldOf("bedrock_roof_position")).forGetter(NoiseGeneratorSettings::getBedrockRoofPosition), ((MapCodec)Codecs.intRange(-20, 276).fieldOf("bedrock_floor_position")).forGetter(NoiseGeneratorSettings::getBedrockFloorPosition), ((MapCodec)Codecs.intRange(0, 255).fieldOf("sea_level")).forGetter(NoiseGeneratorSettings::seaLevel), ((MapCodec)Codec.BOOL.fieldOf("disable_mob_generation")).forGetter(NoiseGeneratorSettings::disableMobGeneration)).apply((Applicative<NoiseGeneratorSettings, ?>)instance, NoiseGeneratorSettings::new));
     public static final Codec<NoiseGeneratorSettings> CODEC = Codec.either(Preset.CODEC, DIRECT_CODEC).xmap(either -> either.map(Preset::settings, Function.identity()), noiseGeneratorSettings -> noiseGeneratorSettings.preset.map(Either::left).orElseGet(() -> Either.right(noiseGeneratorSettings)));
     private final StructureSettings structureSettings;
     private final NoiseSettings noiseSettings;

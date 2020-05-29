@@ -47,12 +47,15 @@ extends Block {
     @Override
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
-        if (itemStack.getItem() == Items.GLOWSTONE && blockState.getValue(CHARGE) < 4) {
+        if (interactionHand == InteractionHand.MAIN_HAND && !RespawnAnchorBlock.isRespawnFuel(itemStack) && RespawnAnchorBlock.isRespawnFuel(player.getItemInHand(InteractionHand.OFF_HAND))) {
+            return InteractionResult.PASS;
+        }
+        if (RespawnAnchorBlock.isRespawnFuel(itemStack) && RespawnAnchorBlock.canBeCharged(blockState)) {
             RespawnAnchorBlock.charge(level, blockPos, blockState);
             if (!player.abilities.instabuild) {
                 itemStack.shrink(1);
             }
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         if (blockState.getValue(CHARGE) == 0) {
             return InteractionResult.PASS;
@@ -64,13 +67,21 @@ extends Block {
                 level.playSound(null, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, SoundEvents.RESPAWN_ANCHOR_SET_SPAWN, SoundSource.BLOCKS, 1.0f, 1.0f);
                 return InteractionResult.SUCCESS;
             }
-            return blockState.getValue(CHARGE) < 4 ? InteractionResult.PASS : InteractionResult.CONSUME;
+            return RespawnAnchorBlock.canBeCharged(blockState) ? InteractionResult.PASS : InteractionResult.CONSUME;
         }
         if (!level.isClientSide) {
             level.removeBlock(blockPos, false);
             level.explode(null, DamageSource.badRespawnPointExplosion(), (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 5.0f, true, Explosion.BlockInteraction.DESTROY);
         }
-        return InteractionResult.SUCCESS;
+        return InteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    private static boolean isRespawnFuel(ItemStack itemStack) {
+        return itemStack.getItem() == Items.GLOWSTONE;
+    }
+
+    private static boolean canBeCharged(BlockState blockState) {
+        return blockState.getValue(CHARGE) < 4;
     }
 
     public static boolean canSetSpawn(Level level) {

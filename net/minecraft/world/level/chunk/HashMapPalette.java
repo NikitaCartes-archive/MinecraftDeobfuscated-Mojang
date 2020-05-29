@@ -4,6 +4,7 @@
 package net.minecraft.world.level.chunk;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.IdMapper;
@@ -43,8 +44,12 @@ implements Palette<T> {
     }
 
     @Override
-    public boolean maybeHas(T object) {
-        return this.values.getId(object) != -1;
+    public boolean maybeHas(Predicate<T> predicate) {
+        for (int i = 0; i < this.getSize(); ++i) {
+            if (!predicate.test(this.values.byId(i))) continue;
+            return true;
+        }
+        return false;
     }
 
     @Override

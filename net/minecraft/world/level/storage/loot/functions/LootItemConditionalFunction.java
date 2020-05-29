@@ -10,7 +10,6 @@ import com.google.gson.JsonSerializationContext;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -56,11 +55,7 @@ implements LootItemFunction {
     }
 
     public static abstract class Serializer<T extends LootItemConditionalFunction>
-    extends LootItemFunction.Serializer<T> {
-        public Serializer(ResourceLocation resourceLocation, Class<T> class_) {
-            super(resourceLocation, class_);
-        }
-
+    implements net.minecraft.world.level.storage.loot.Serializer<T> {
         @Override
         public void serialize(JsonObject jsonObject, T lootItemConditionalFunction, JsonSerializationContext jsonSerializationContext) {
             if (!ArrayUtils.isEmpty(((LootItemConditionalFunction)lootItemConditionalFunction).predicates)) {
@@ -77,7 +72,7 @@ implements LootItemFunction {
         public abstract T deserialize(JsonObject var1, JsonDeserializationContext var2, LootItemCondition[] var3);
 
         @Override
-        public /* synthetic */ LootItemFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             return this.deserialize(jsonObject, jsonDeserializationContext);
         }
     }

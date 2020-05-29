@@ -222,7 +222,7 @@ public class ServerPlayerGameMode {
         }
         ItemStack itemStack = this.player.getMainHandItem();
         ItemStack itemStack2 = itemStack.copy();
-        boolean bl2 = this.player.canDestroy(blockState);
+        boolean bl2 = this.player.hasCorrectToolForDrops(blockState);
         itemStack.mineBlock(this.level, blockState, blockPos, this.player);
         if (bl && bl2) {
             block.playerDestroy(this.level, this.player, blockPos, blockState, blockEntity, itemStack2);
@@ -265,6 +265,7 @@ public class ServerPlayerGameMode {
 
     public InteractionResult useItemOn(ServerPlayer serverPlayer, Level level, ItemStack itemStack, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         InteractionResult interactionResult2;
+        InteractionResult interactionResult;
         BlockPos blockPos = blockHitResult.getBlockPos();
         BlockState blockState = level.getBlockState(blockPos);
         if (this.gameModeForPlayer == GameType.SPECTATOR) {
@@ -278,14 +279,9 @@ public class ServerPlayerGameMode {
         boolean bl = !serverPlayer.getMainHandItem().isEmpty() || !serverPlayer.getOffhandItem().isEmpty();
         boolean bl2 = serverPlayer.isSecondaryUseActive() && bl;
         ItemStack itemStack2 = itemStack.copy();
-        if (!bl2) {
-            InteractionResult interactionResult = blockState.use(level, serverPlayer, interactionHand, blockHitResult);
-            if (interactionResult == InteractionResult.SUCCESS) {
-                CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, blockPos, itemStack2);
-            }
-            if (interactionResult.consumesAction()) {
-                return interactionResult;
-            }
+        if (!bl2 && (interactionResult = blockState.use(level, serverPlayer, interactionHand, blockHitResult)).consumesAction()) {
+            CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, blockPos, itemStack2);
+            return interactionResult;
         }
         if (itemStack.isEmpty() || serverPlayer.getCooldowns().isOnCooldown(itemStack.getItem())) {
             return InteractionResult.PASS;
@@ -298,7 +294,7 @@ public class ServerPlayerGameMode {
         } else {
             interactionResult2 = itemStack.useOn(useOnContext);
         }
-        if (interactionResult2 == InteractionResult.SUCCESS) {
+        if (interactionResult2.consumesAction()) {
             CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, blockPos, itemStack2);
         }
         return interactionResult2;

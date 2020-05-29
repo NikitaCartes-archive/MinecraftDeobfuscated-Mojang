@@ -6,6 +6,7 @@ package net.minecraft.client.model;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.model.AnimationUtils;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
@@ -73,10 +74,7 @@ extends HumanoidModel<T> {
             this.leftArm.xRot = -1.5707964f;
             this.rightArm.xRot -= k * 1.2f - l * 0.4f;
             this.leftArm.xRot -= k * 1.2f - l * 0.4f;
-            this.rightArm.zRot += Mth.cos(h * 0.09f) * 0.05f + 0.05f;
-            this.leftArm.zRot -= Mth.cos(h * 0.09f) * 0.05f + 0.05f;
-            this.rightArm.xRot += Mth.sin(h * 0.067f) * 0.05f;
-            this.leftArm.xRot -= Mth.sin(h * 0.067f) * 0.05f;
+            AnimationUtils.bobArms(this.rightArm, this.leftArm, h);
         }
     }
 

@@ -6,12 +6,13 @@ package net.minecraft.world.level.storage.loot.functions;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.IntLimiter;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class LimitCount
@@ -21,6 +22,11 @@ extends LootItemConditionalFunction {
     private LimitCount(LootItemCondition[] lootItemConditions, IntLimiter intLimiter) {
         super(lootItemConditions);
         this.limiter = intLimiter;
+    }
+
+    @Override
+    public LootItemFunctionType getType() {
+        return LootItemFunctions.LIMIT_COUNT;
     }
 
     @Override
@@ -36,10 +42,6 @@ extends LootItemConditionalFunction {
 
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<LimitCount> {
-        protected Serializer() {
-            super(new ResourceLocation("limit_count"), LimitCount.class);
-        }
-
         @Override
         public void serialize(JsonObject jsonObject, LimitCount limitCount, JsonSerializationContext jsonSerializationContext) {
             super.serialize(jsonObject, limitCount, jsonSerializationContext);

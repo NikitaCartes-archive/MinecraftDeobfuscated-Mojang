@@ -163,7 +163,7 @@ extends FaceAttachedHorizontalDirectionalBlock {
         }
         player.openMenu(blockState.getMenuProvider(level, blockPos));
         player.awardStat(Stats.INTERACT_WITH_GRINDSTONE);
-        return InteractionResult.SUCCESS;
+        return InteractionResult.CONSUME;
     }
 
     @Override

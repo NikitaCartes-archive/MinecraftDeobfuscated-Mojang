@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.resources.language.Language;
+import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.client.resources.metadata.language.LanguageMetadataSection;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.util.GsonHelper;
@@ -21,7 +21,7 @@ public class LanguageMetadataSectionSerializer
 implements MetadataSectionSerializer<LanguageMetadataSection> {
     @Override
     public LanguageMetadataSection fromJson(JsonObject jsonObject) {
-        HashSet<Language> set = Sets.newHashSet();
+        HashSet<LanguageInfo> set = Sets.newHashSet();
         for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
             String string = entry.getKey();
             if (string.length() > 16) {
@@ -37,7 +37,7 @@ implements MetadataSectionSerializer<LanguageMetadataSection> {
             if (string3.isEmpty()) {
                 throw new JsonParseException("Invalid language->'" + string + "'->name: empty value");
             }
-            if (set.add(new Language(string, string2, string3, bl))) continue;
+            if (set.add(new LanguageInfo(string, string2, string3, bl))) continue;
             throw new JsonParseException("Duplicate language->'" + string + "' defined");
         }
         return new LanguageMetadataSection(set);

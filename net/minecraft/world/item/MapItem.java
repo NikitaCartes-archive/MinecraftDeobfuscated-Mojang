@@ -35,7 +35,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.MaterialColor;
@@ -73,7 +72,7 @@ extends ComplexItem {
         return compoundTag != null && compoundTag.contains("map", 99) ? compoundTag.getInt("map") : 0;
     }
 
-    private static MapItemSavedData createAndStoreSavedData(ItemStack itemStack, Level level, int i, int j, int k, boolean bl, boolean bl2, ResourceKey<DimensionType> resourceKey) {
+    private static MapItemSavedData createAndStoreSavedData(ItemStack itemStack, Level level, int i, int j, int k, boolean bl, boolean bl2, ResourceKey<Level> resourceKey) {
         int l = level.getFreeMapId();
         MapItemSavedData mapItemSavedData = new MapItemSavedData(MapItem.makeKey(l));
         mapItemSavedData.setProperties(i, j, k, bl, bl2, resourceKey);
@@ -372,7 +371,7 @@ extends ComplexItem {
                 MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(useOnContext.getItemInHand(), useOnContext.getLevel());
                 mapItemSavedData.toggleBanner(useOnContext.getLevel(), useOnContext.getClickedPos());
             }
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(useOnContext.level.isClientSide);
         }
         return super.useOn(useOnContext);
     }

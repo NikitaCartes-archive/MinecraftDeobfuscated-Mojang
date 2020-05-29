@@ -39,7 +39,6 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Zoglin;
-import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.hoglin.HoglinAi;
 import net.minecraft.world.entity.monster.hoglin.HoglinBase;
 import net.minecraft.world.entity.player.Player;
@@ -50,7 +49,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import org.jetbrains.annotations.Nullable;
 
 public class Hoglin
@@ -67,8 +65,6 @@ HoglinBase {
     public Hoglin(EntityType<? extends Hoglin> entityType, Level level) {
         super((EntityType<? extends Animal>)entityType, level);
         this.xpReward = 5;
-        this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0f);
-        this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0f);
     }
 
     @Override
@@ -191,6 +187,11 @@ HoglinBase {
     }
 
     @Override
+    public double getPassengersRidingOffset() {
+        return (double)this.getBbHeight() - (this.isBaby() ? 0.2 : 0.15);
+    }
+
+    @Override
     public boolean mobInteract(Player player, InteractionHand interactionHand) {
         boolean bl = super.mobInteract(player, interactionHand);
         if (bl) {
@@ -227,23 +228,7 @@ HoglinBase {
     }
 
     private void finishConversion(ServerLevel serverLevel) {
-        Zoglin zoglin = EntityType.ZOGLIN.create(serverLevel);
-        if (zoglin == null) {
-            return;
-        }
-        zoglin.copyPosition(this);
-        zoglin.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(zoglin.blockPosition()), MobSpawnType.CONVERSION, new Zombie.ZombieGroupData(this.isBaby()), null);
-        zoglin.setBaby(this.isBaby());
-        zoglin.setNoAi(this.isNoAi());
-        if (this.hasCustomName()) {
-            zoglin.setCustomName(this.getCustomName());
-            zoglin.setCustomNameVisible(this.isCustomNameVisible());
-        }
-        if (this.isPersistenceRequired()) {
-            zoglin.setPersistenceRequired();
-        }
-        this.remove();
-        serverLevel.addFreshEntity(zoglin);
+        Zoglin zoglin = this.convertTo(EntityType.ZOGLIN);
         zoglin.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
     }
 
@@ -282,7 +267,7 @@ HoglinBase {
         this.setCannotBeHunted(compoundTag.getBoolean("CannotBeHunted"));
     }
 
-    private void setImmuneToZombification(boolean bl) {
+    public void setImmuneToZombification(boolean bl) {
         this.getEntityData().set(DATA_IMMUNE_TO_ZOMBIFICATION, bl);
     }
 

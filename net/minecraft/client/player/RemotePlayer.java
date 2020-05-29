@@ -40,15 +40,7 @@ extends AbstractClientPlayer {
     @Override
     public void tick() {
         super.tick();
-        this.animationSpeedOld = this.animationSpeed;
-        double d = this.getX() - this.xo;
-        double e = this.getZ() - this.zo;
-        float f = Mth.sqrt(d * d + e * e) * 4.0f;
-        if (f > 1.0f) {
-            f = 1.0f;
-        }
-        this.animationSpeed += (f - this.animationSpeed) * 0.4f;
-        this.animationPosition += this.animationSpeed;
+        this.calculateEntityAnimation(this, false);
     }
 
     @Override

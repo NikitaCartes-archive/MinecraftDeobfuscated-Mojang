@@ -9,7 +9,6 @@ import com.mojang.serialization.MapCodec;
 import java.util.BitSet;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -32,6 +31,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeat
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public abstract class WorldCarver<C extends CarverConfiguration> {
     public static final WorldCarver<ProbabilityFeatureConfiguration> CAVE = WorldCarver.register("cave", new CaveWorldCarver(ProbabilityFeatureConfiguration.CODEC, 256));
@@ -92,18 +92,18 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
                 int y = x + k * 16;
                 double z = ((double)y + 0.5 - f) / g;
                 if (w * w + z * z >= 1.0) continue;
-                AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+                MutableBoolean mutableBoolean = new MutableBoolean(false);
                 for (int aa = r; aa > q; --aa) {
                     double ab = ((double)aa - 0.5 - e) / h;
                     if (this.skip(w, ab, z, aa)) continue;
-                    bl |= this.carveBlock(chunkAccess, function, bitSet, random, mutableBlockPos, mutableBlockPos2, mutableBlockPos3, i, j, k, v, y, u, aa, x, atomicBoolean);
+                    bl |= this.carveBlock(chunkAccess, function, bitSet, random, mutableBlockPos, mutableBlockPos2, mutableBlockPos3, i, j, k, v, y, u, aa, x, mutableBoolean);
                 }
             }
         }
         return bl;
     }
 
-    protected boolean carveBlock(ChunkAccess chunkAccess, Function<BlockPos, Biome> function, BitSet bitSet, Random random, BlockPos.MutableBlockPos mutableBlockPos, BlockPos.MutableBlockPos mutableBlockPos2, BlockPos.MutableBlockPos mutableBlockPos3, int i, int j, int k, int l, int m, int n, int o, int p, AtomicBoolean atomicBoolean) {
+    protected boolean carveBlock(ChunkAccess chunkAccess, Function<BlockPos, Biome> function, BitSet bitSet, Random random, BlockPos.MutableBlockPos mutableBlockPos, BlockPos.MutableBlockPos mutableBlockPos2, BlockPos.MutableBlockPos mutableBlockPos3, int i, int j, int k, int l, int m, int n, int o, int p, MutableBoolean mutableBoolean) {
         int q = n | p << 4 | o << 8;
         if (bitSet.get(q)) {
             return false;
@@ -113,7 +113,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
         BlockState blockState = chunkAccess.getBlockState(mutableBlockPos);
         BlockState blockState2 = chunkAccess.getBlockState(mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.UP));
         if (blockState.is(Blocks.GRASS_BLOCK) || blockState.is(Blocks.MYCELIUM)) {
-            atomicBoolean.set(true);
+            mutableBoolean.setTrue();
         }
         if (!this.canReplaceBlock(blockState, blockState2)) {
             return false;
@@ -122,7 +122,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
             chunkAccess.setBlockState(mutableBlockPos, LAVA.createLegacyBlock(), false);
         } else {
             chunkAccess.setBlockState(mutableBlockPos, CAVE_AIR, false);
-            if (atomicBoolean.get()) {
+            if (mutableBoolean.isTrue()) {
                 mutableBlockPos3.setWithOffset(mutableBlockPos, Direction.DOWN);
                 if (chunkAccess.getBlockState(mutableBlockPos3).is(Blocks.DIRT)) {
                     chunkAccess.setBlockState(mutableBlockPos3, function.apply(mutableBlockPos).getSurfaceBuilderConfig().getTopMaterial(), false);

@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.List;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.item.ItemStack;
@@ -22,6 +21,8 @@ import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class SetContainerContents
@@ -31,6 +32,11 @@ extends LootItemConditionalFunction {
     private SetContainerContents(LootItemCondition[] lootItemConditions, List<LootPoolEntryContainer> list) {
         super(lootItemConditions);
         this.entries = ImmutableList.copyOf(list);
+    }
+
+    @Override
+    public LootItemFunctionType getType() {
+        return LootItemFunctions.SET_CONTENTS;
     }
 
     @Override
@@ -61,10 +67,6 @@ extends LootItemConditionalFunction {
 
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<SetContainerContents> {
-        protected Serializer() {
-            super(new ResourceLocation("set_contents"), SetContainerContents.class);
-        }
-
         @Override
         public void serialize(JsonObject jsonObject, SetContainerContents setContainerContents, JsonSerializationContext jsonSerializationContext) {
             super.serialize(jsonObject, setContainerContents, jsonSerializationContext);

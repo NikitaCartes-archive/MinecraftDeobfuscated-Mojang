@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.dimension.DimensionType;
 
 public interface RegistryAccess {
+    @Environment(value=EnvType.CLIENT)
     public Registry<DimensionType> dimensionTypes();
 
     @Environment(value=EnvType.CLIENT)
@@ -39,6 +40,7 @@ public interface RegistryAccess {
         }
 
         @Override
+        @Environment(value=EnvType.CLIENT)
         public Registry<DimensionType> dimensionTypes() {
             return this.dimensionTypes;
         }

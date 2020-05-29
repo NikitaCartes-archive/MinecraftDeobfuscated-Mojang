@@ -17,6 +17,7 @@ import com.mojang.blaze3d.shaders.Program;
 import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -266,35 +267,33 @@ AutoCloseable {
     }
 
     private void updateLocations() {
-        int k;
-        String string;
+        int i;
         RenderSystem.assertThread(RenderSystem::isOnRenderThread);
-        int i = 0;
-        int j = 0;
-        while (i < this.samplerNames.size()) {
-            string = this.samplerNames.get(i);
-            k = Uniform.glGetUniformLocation(this.programId, string);
-            if (k == -1) {
-                LOGGER.warn("Shader {}could not find sampler named {} in the specified shader program.", (Object)this.name, (Object)string);
+        IntArrayList intList = new IntArrayList();
+        for (i = 0; i < this.samplerNames.size(); ++i) {
+            String string = this.samplerNames.get(i);
+            int j = Uniform.glGetUniformLocation(this.programId, string);
+            if (j == -1) {
+                LOGGER.warn("Shader {} could not find sampler named {} in the specified shader program.", (Object)this.name, (Object)string);
                 this.samplerMap.remove(string);
-                this.samplerNames.remove(j);
-                --j;
-            } else {
-                this.samplerLocations.add(k);
+                intList.add(i);
+                continue;
             }
-            ++i;
-            ++j;
+            this.samplerLocations.add(j);
+        }
+        for (i = intList.size() - 1; i >= 0; --i) {
+            this.samplerNames.remove(intList.getInt(i));
         }
         for (Uniform uniform : this.uniforms) {
-            string = uniform.getName();
-            k = Uniform.glGetUniformLocation(this.programId, string);
+            String string2 = uniform.getName();
+            int k = Uniform.glGetUniformLocation(this.programId, string2);
             if (k == -1) {
-                LOGGER.warn("Could not find uniform named {} in the specified shader program.", (Object)string);
+                LOGGER.warn("Could not find uniform named {} in the specified shader program.", (Object)string2);
                 continue;
             }
             this.uniformLocations.add(k);
             uniform.setLocation(k);
-            this.uniformMap.put(string, uniform);
+            this.uniformMap.put(string2, uniform);
         }
     }
 

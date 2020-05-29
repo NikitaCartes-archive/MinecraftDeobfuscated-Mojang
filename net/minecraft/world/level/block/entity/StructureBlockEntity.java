@@ -183,6 +183,7 @@ extends BlockEntity {
         this.author = livingEntity.getName().getString();
     }
 
+    @Environment(value=EnvType.CLIENT)
     public BlockPos getStructurePos() {
         return this.structurePos;
     }
@@ -208,7 +209,6 @@ extends BlockEntity {
         this.mirror = mirror;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public Rotation getRotation() {
         return this.rotation;
     }
@@ -434,7 +434,7 @@ extends BlockEntity {
                 structurePlaceSettings.clearProcessors().addProcessor(new BlockRotProcessor(Mth.clamp(this.integrity, 0.0f, 1.0f))).setRandom(StructureBlockEntity.createRandom(this.seed));
             }
             BlockPos blockPos3 = blockPos.offset(this.structurePos);
-            structureTemplate.placeInWorldChunk(this.level, blockPos3, structurePlaceSettings);
+            structureTemplate.placeInWorldChunk(this.level, blockPos3, structurePlaceSettings, StructureBlockEntity.createRandom(this.seed));
             return true;
         }
         return false;

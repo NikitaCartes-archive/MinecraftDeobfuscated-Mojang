@@ -81,6 +81,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.border.BorderChangeListener;
@@ -140,7 +141,7 @@ public abstract class PlayerList {
         String string = gameProfile2 == null ? gameProfile.getName() : gameProfile2.getName();
         gameProfileCache.add(gameProfile);
         CompoundTag compoundTag = this.load(serverPlayer);
-        ResourceKey<DimensionType> resourceKey = compoundTag != null ? DimensionType.parseLegacy(new Dynamic<Tag>(NbtOps.INSTANCE, compoundTag.get("Dimension"))).resultOrPartial(LOGGER::error).orElse(DimensionType.OVERWORLD_LOCATION) : DimensionType.OVERWORLD_LOCATION;
+        ResourceKey<Level> resourceKey = compoundTag != null ? DimensionType.parseLegacy(new Dynamic<Tag>(NbtOps.INSTANCE, compoundTag.get("Dimension"))).resultOrPartial(LOGGER::error).orElse(Level.OVERWORLD) : Level.OVERWORLD;
         ServerLevel serverLevel = this.server.getLevel(resourceKey);
         serverPlayer.setLevel(serverLevel);
         serverPlayer.gameMode.setLevel((ServerLevel)serverPlayer.level);
@@ -155,7 +156,7 @@ public abstract class PlayerList {
         GameRules gameRules = serverLevel.getGameRules();
         boolean bl = gameRules.getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN);
         boolean bl2 = gameRules.getBoolean(GameRules.RULE_REDUCEDDEBUGINFO);
-        serverGamePacketListenerImpl.send(new ClientboundLoginPacket(serverPlayer.getId(), serverPlayer.gameMode.getGameModeForPlayer(), BiomeManager.obfuscateSeed(serverLevel.getSeed()), levelData.isHardcore(), this.registryHolder, serverLevel.dimension().location(), this.getMaxPlayers(), this.viewDistance, bl2, !bl, serverLevel.isDebug(), serverLevel.isFlat()));
+        serverGamePacketListenerImpl.send(new ClientboundLoginPacket(serverPlayer.getId(), serverPlayer.gameMode.getGameModeForPlayer(), BiomeManager.obfuscateSeed(serverLevel.getSeed()), levelData.isHardcore(), this.server.levelKeys(), this.registryHolder, serverLevel.dimensionTypeKey(), serverLevel.dimension(), this.getMaxPlayers(), this.viewDistance, bl2, !bl, serverLevel.isDebug(), serverLevel.isFlat()));
         serverGamePacketListenerImpl.send(new ClientboundCustomPayloadPacket(ClientboundCustomPayloadPacket.BRAND, new FriendlyByteBuf(Unpooled.buffer()).writeUtf(this.getServer().getServerModName())));
         serverGamePacketListenerImpl.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
         serverGamePacketListenerImpl.send(new ClientboundPlayerAbilitiesPacket(serverPlayer.abilities));
@@ -365,8 +366,9 @@ public abstract class PlayerList {
         for (ServerPlayer serverPlayer : list) {
             serverPlayer.connection.disconnect(new TranslatableComponent("multiplayer.disconnect.duplicate_login"));
         }
-        ServerPlayerGameMode serverPlayerGameMode = this.server.isDemo() ? new DemoMode(this.server.getLevel(DimensionType.OVERWORLD_LOCATION)) : new ServerPlayerGameMode(this.server.getLevel(DimensionType.OVERWORLD_LOCATION));
-        return new ServerPlayer(this.server, this.server.getLevel(DimensionType.OVERWORLD_LOCATION), gameProfile, serverPlayerGameMode);
+        ServerLevel serverLevel = this.server.getLevel(Level.OVERWORLD);
+        ServerPlayerGameMode serverPlayerGameMode = this.server.isDemo() ? new DemoMode(serverLevel) : new ServerPlayerGameMode(serverLevel);
+        return new ServerPlayer(this.server, serverLevel, gameProfile, serverPlayerGameMode);
     }
 
     public ServerPlayer respawn(ServerPlayer serverPlayer, boolean bl) {
@@ -375,7 +377,7 @@ public abstract class PlayerList {
         BlockPos blockPos = serverPlayer.getRespawnPosition();
         boolean bl2 = serverPlayer.isRespawnForced();
         Optional<Object> optional = blockPos != null ? Player.findRespawnPositionAndUseSpawnBlock(this.server.getLevel(serverPlayer.getRespawnDimension()), blockPos, bl2, bl) : Optional.empty();
-        ResourceKey<DimensionType> resourceKey = optional.isPresent() ? serverPlayer.getRespawnDimension() : DimensionType.OVERWORLD_LOCATION;
+        ResourceKey<Level> resourceKey = optional.isPresent() ? serverPlayer.getRespawnDimension() : Level.OVERWORLD;
         ServerLevel serverLevel = this.server.getLevel(resourceKey);
         ServerPlayerGameMode serverPlayerGameMode = this.server.isDemo() ? new DemoMode(serverLevel) : new ServerPlayerGameMode(serverLevel);
         ServerPlayer serverPlayer2 = new ServerPlayer(this.server, serverLevel, serverPlayer.getGameProfile(), serverPlayerGameMode);
@@ -400,7 +402,7 @@ public abstract class PlayerList {
             serverPlayer2.setPos(serverPlayer2.getX(), serverPlayer2.getY() + 1.0, serverPlayer2.getZ());
         }
         LevelData levelData = serverPlayer2.level.getLevelData();
-        serverPlayer2.connection.send(new ClientboundRespawnPacket(serverPlayer2.level.dimension().location(), BiomeManager.obfuscateSeed(serverPlayer2.getLevel().getSeed()), serverPlayer2.gameMode.getGameModeForPlayer(), serverPlayer2.getLevel().isDebug(), serverPlayer2.getLevel().isFlat(), bl));
+        serverPlayer2.connection.send(new ClientboundRespawnPacket(serverPlayer2.level.dimensionTypeKey(), serverPlayer2.level.dimension(), BiomeManager.obfuscateSeed(serverPlayer2.getLevel().getSeed()), serverPlayer2.gameMode.getGameModeForPlayer(), serverPlayer2.getLevel().isDebug(), serverPlayer2.getLevel().isFlat(), bl));
         serverPlayer2.connection.teleport(serverPlayer2.getX(), serverPlayer2.getY(), serverPlayer2.getZ(), serverPlayer2.yRot, serverPlayer2.xRot);
         serverPlayer2.connection.send(new ClientboundSetDefaultSpawnPositionPacket(serverLevel.getSharedSpawnPos()));
         serverPlayer2.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
@@ -437,7 +439,7 @@ public abstract class PlayerList {
         }
     }
 
-    public void broadcastAll(Packet<?> packet, ResourceKey<DimensionType> resourceKey) {
+    public void broadcastAll(Packet<?> packet, ResourceKey<Level> resourceKey) {
         for (int i = 0; i < this.players.size(); ++i) {
             ServerPlayer serverPlayer = this.players.get(i);
             if (serverPlayer.level.dimension() != resourceKey) continue;
@@ -528,7 +530,7 @@ public abstract class PlayerList {
         return null;
     }
 
-    public void broadcast(@Nullable Player player, double d, double e, double f, double g, ResourceKey<DimensionType> resourceKey, Packet<?> packet) {
+    public void broadcast(@Nullable Player player, double d, double e, double f, double g, ResourceKey<Level> resourceKey, Packet<?> packet) {
         for (int i = 0; i < this.players.size(); ++i) {
             double k;
             double j;
@@ -565,7 +567,7 @@ public abstract class PlayerList {
     }
 
     public void sendLevelInfo(ServerPlayer serverPlayer, ServerLevel serverLevel) {
-        WorldBorder worldBorder = this.server.getLevel(DimensionType.OVERWORLD_LOCATION).getWorldBorder();
+        WorldBorder worldBorder = this.server.getLevel(Level.OVERWORLD).getWorldBorder();
         serverPlayer.connection.send(new ClientboundSetBorderPacket(worldBorder, ClientboundSetBorderPacket.Type.INITIALIZE));
         serverPlayer.connection.send(new ClientboundSetTimePacket(serverLevel.getGameTime(), serverLevel.getDayTime(), serverLevel.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)));
         serverPlayer.connection.send(new ClientboundSetDefaultSpawnPositionPacket(serverLevel.getSharedSpawnPos()));
@@ -672,7 +674,7 @@ public abstract class PlayerList {
         if (playerAdvancements == null) {
             File file = this.server.getWorldPath(LevelResource.PLAYER_ADVANCEMENTS_DIR).toFile();
             File file2 = new File(file, uUID + ".json");
-            playerAdvancements = new PlayerAdvancements(this.server, file2, serverPlayer);
+            playerAdvancements = new PlayerAdvancements(this.server.getFixerUpper(), this, this.server.getAdvancements(), file2, serverPlayer);
             this.advancements.put(uUID, playerAdvancements);
         }
         playerAdvancements.setPlayer(serverPlayer);
@@ -703,7 +705,7 @@ public abstract class PlayerList {
 
     public void reloadResources() {
         for (PlayerAdvancements playerAdvancements : this.advancements.values()) {
-            playerAdvancements.reload();
+            playerAdvancements.reload(this.server.getAdvancements());
         }
         this.broadcastAll(new ClientboundUpdateTagsPacket(this.server.getTags()));
         ClientboundUpdateRecipesPacket clientboundUpdateRecipesPacket = new ClientboundUpdateRecipesPacket(this.server.getRecipeManager().getRecipes());

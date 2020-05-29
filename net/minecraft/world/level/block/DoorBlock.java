@@ -108,7 +108,7 @@ extends Block {
             level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 35);
             level.levelEvent(player, 2001, blockPos2, Block.getId(blockState2));
             ItemStack itemStack = player.getMainHandItem();
-            if (!level.isClientSide && !player.isCreative() && player.canDestroy(blockState2)) {
+            if (!level.isClientSide && !player.isCreative() && player.hasCorrectToolForDrops(blockState2)) {
                 Block.dropResources(blockState, level, blockPos, null, player, itemStack);
                 Block.dropResources(blockState2, level, blockPos2, null, player, itemStack);
             }
@@ -198,7 +198,7 @@ extends Block {
         blockState = (BlockState)blockState.cycle(OPEN);
         level.setBlock(blockPos, blockState, 10);
         level.levelEvent(player, blockState.getValue(OPEN) != false ? this.getOpenSound() : this.getCloseSound(), blockPos, 0);
-        return InteractionResult.SUCCESS;
+        return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
     public void setOpen(Level level, BlockPos blockPos, boolean bl) {

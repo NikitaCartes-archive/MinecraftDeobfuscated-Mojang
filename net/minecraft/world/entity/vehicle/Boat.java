@@ -23,6 +23,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -97,6 +98,11 @@ extends Entity {
     }
 
     @Override
+    protected float getEyeHeight(Pose pose, EntityDimensions entityDimensions) {
+        return entityDimensions.height;
+    }
+
+    @Override
     protected boolean isMovementNoisy() {
         return false;
     }
@@ -133,7 +139,7 @@ extends Entity {
     }
 
     @Override
-    public double getRideHeight() {
+    public double getPassengersRidingOffset() {
         return -0.1;
     }
 
@@ -574,7 +580,7 @@ extends Entity {
             return;
         }
         float f = 0.0f;
-        float g = (float)((this.removed ? (double)0.01f : this.getRideHeight()) + entity.getRidingHeight());
+        float g = (float)((this.removed ? (double)0.01f : this.getPassengersRidingOffset()) + entity.getMyRidingOffset());
         if (this.getPassengers().size() > 1) {
             int i = this.getPassengers().indexOf(entity);
             f = i == 0 ? 0.2f : -0.6f;

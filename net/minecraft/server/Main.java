@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BooleanSupplier;
 import joptsimple.AbstractOptionSpec;
 import joptsimple.ArgumentAcceptingOptionSpec;
@@ -23,20 +24,25 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpecBuilder;
 import net.minecraft.CrashReport;
 import net.minecraft.DefaultUncaughtExceptionHandler;
+import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.server.Eula;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerResources;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
 import net.minecraft.server.level.progress.LoggerChunkProgressListener;
+import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.packs.repository.UnopenedPack;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.Mth;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
@@ -54,24 +60,28 @@ public class Main {
         OptionSpecBuilder optionSpec4 = optionParser.accepts("bonusChest");
         OptionSpecBuilder optionSpec5 = optionParser.accepts("forceUpgrade");
         OptionSpecBuilder optionSpec6 = optionParser.accepts("eraseCache");
-        AbstractOptionSpec optionSpec7 = optionParser.accepts("help").forHelp();
-        ArgumentAcceptingOptionSpec<String> optionSpec8 = optionParser.accepts("singleplayer").withRequiredArg();
-        ArgumentAcceptingOptionSpec<String> optionSpec9 = optionParser.accepts("universe").withRequiredArg().defaultsTo(".", (String[])new String[0]);
-        ArgumentAcceptingOptionSpec<String> optionSpec10 = optionParser.accepts("world").withRequiredArg();
-        ArgumentAcceptingOptionSpec<Integer> optionSpec11 = optionParser.accepts("port").withRequiredArg().ofType(Integer.class).defaultsTo(-1, (Integer[])new Integer[0]);
-        ArgumentAcceptingOptionSpec<String> optionSpec12 = optionParser.accepts("serverId").withRequiredArg();
-        NonOptionArgumentSpec<String> optionSpec13 = optionParser.nonOptions();
+        OptionSpecBuilder optionSpec7 = optionParser.accepts("safeMode", "Loads level with vanilla datapack only");
+        AbstractOptionSpec optionSpec8 = optionParser.accepts("help").forHelp();
+        ArgumentAcceptingOptionSpec<String> optionSpec9 = optionParser.accepts("singleplayer").withRequiredArg();
+        ArgumentAcceptingOptionSpec<String> optionSpec10 = optionParser.accepts("universe").withRequiredArg().defaultsTo(".", (String[])new String[0]);
+        ArgumentAcceptingOptionSpec<String> optionSpec11 = optionParser.accepts("world").withRequiredArg();
+        ArgumentAcceptingOptionSpec<Integer> optionSpec12 = optionParser.accepts("port").withRequiredArg().ofType(Integer.class).defaultsTo(-1, (Integer[])new Integer[0]);
+        ArgumentAcceptingOptionSpec<String> optionSpec13 = optionParser.accepts("serverId").withRequiredArg();
+        NonOptionArgumentSpec<String> optionSpec14 = optionParser.nonOptions();
         try {
+            boolean bl2;
+            ServerResources serverResources;
             boolean bl;
             WorldData worldData;
             OptionSet optionSet = optionParser.parse(strings);
-            if (optionSet.has(optionSpec7)) {
+            if (optionSet.has(optionSpec8)) {
                 optionParser.printHelpOn(System.err);
                 return;
             }
             CrashReport.preload();
             Bootstrap.bootStrap();
             Bootstrap.validate();
+            Util.startTimerHackThread();
             Path path = Paths.get("server.properties", new String[0]);
             DedicatedServerSettings dedicatedServerSettings = new DedicatedServerSettings(path);
             dedicatedServerSettings.forceSave();
@@ -85,12 +95,12 @@ public class Main {
                 LOGGER.info("You need to agree to the EULA in order to run the server. Go to eula.txt for more info.");
                 return;
             }
-            File file = new File(optionSet.valueOf(optionSpec9));
+            File file = new File(optionSet.valueOf(optionSpec10));
             YggdrasilAuthenticationService yggdrasilAuthenticationService = new YggdrasilAuthenticationService(Proxy.NO_PROXY, UUID.randomUUID().toString());
             MinecraftSessionService minecraftSessionService = yggdrasilAuthenticationService.createMinecraftSessionService();
             GameProfileRepository gameProfileRepository = yggdrasilAuthenticationService.createProfileRepository();
             GameProfileCache gameProfileCache = new GameProfileCache(gameProfileRepository, new File(file, MinecraftServer.USERID_CACHE_FILE.getName()));
-            String string = Optional.ofNullable(optionSet.valueOf(optionSpec10)).orElse(dedicatedServerSettings.getProperties().levelName);
+            String string = Optional.ofNullable(optionSet.valueOf(optionSpec11)).orElse(dedicatedServerSettings.getProperties().levelName);
             LevelStorageSource levelStorageSource = LevelStorageSource.createDefault(file.toPath());
             LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(string);
             MinecraftServer.convertFromRegionFormatIfNeeded(levelStorageAccess);
@@ -107,13 +117,26 @@ public class Main {
                 }
                 worldData = new PrimaryLevelData(levelSettings);
             }
-            final DedicatedServer dedicatedServer = new DedicatedServer(levelStorageAccess, worldData, dedicatedServerSettings, DataFixers.getDataFixer(), minecraftSessionService, gameProfileRepository, gameProfileCache, LoggerChunkProgressListener::new);
-            dedicatedServer.setSingleplayerName(optionSet.valueOf(optionSpec8));
-            dedicatedServer.setPort(optionSet.valueOf(optionSpec11));
+            if (bl = optionSet.has(optionSpec7)) {
+                LOGGER.warn("Safe mode active, only vanilla datapack will be loaded");
+            }
+            PackRepository<UnopenedPack> packRepository = MinecraftServer.createPackRepository(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR), worldData, bl);
+            CompletableFuture<ServerResources> completableFuture = ServerResources.loadResources(packRepository.openAllSelected(), true, dedicatedServerSettings.getProperties().functionPermissionLevel, Util.backgroundExecutor(), Runnable::run);
+            try {
+                serverResources = completableFuture.get();
+            } catch (Exception exception) {
+                LOGGER.warn("Failed to load datapacks, can't proceed with server load. You can either fix your datapacks or reset to vanilla with --safeMode", (Throwable)exception);
+                packRepository.close();
+                return;
+            }
+            serverResources.updateGlobals();
+            final DedicatedServer dedicatedServer = new DedicatedServer(levelStorageAccess, packRepository, serverResources, worldData, dedicatedServerSettings, DataFixers.getDataFixer(), minecraftSessionService, gameProfileRepository, gameProfileCache, LoggerChunkProgressListener::new);
+            dedicatedServer.setSingleplayerName(optionSet.valueOf(optionSpec9));
+            dedicatedServer.setPort(optionSet.valueOf(optionSpec12));
             dedicatedServer.setDemo(optionSet.has(optionSpec3));
-            dedicatedServer.setId(optionSet.valueOf(optionSpec12));
-            boolean bl2 = bl = !optionSet.has(optionSpec) && !optionSet.valuesOf(optionSpec13).contains("nogui");
-            if (bl && !GraphicsEnvironment.isHeadless()) {
+            dedicatedServer.setId(optionSet.valueOf(optionSpec13));
+            boolean bl3 = bl2 = !optionSet.has(optionSpec) && !optionSet.valuesOf(optionSpec14).contains("nogui");
+            if (bl2 && !GraphicsEnvironment.isHeadless()) {
                 dedicatedServer.showGui();
             }
             dedicatedServer.forkAndRun();
@@ -126,8 +149,8 @@ public class Main {
             };
             thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
             Runtime.getRuntime().addShutdownHook(thread);
-        } catch (Exception exception) {
-            LOGGER.fatal("Failed to start the minecraft server", (Throwable)exception);
+        } catch (Exception exception2) {
+            LOGGER.fatal("Failed to start the minecraft server", (Throwable)exception2);
         }
     }
 

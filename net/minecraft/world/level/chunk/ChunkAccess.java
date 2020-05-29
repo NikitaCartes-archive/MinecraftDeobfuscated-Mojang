@@ -24,6 +24,7 @@ import net.minecraft.world.level.chunk.FeatureAccess;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.material.Fluid;
 import org.apache.logging.log4j.LogManager;
@@ -71,9 +72,9 @@ FeatureAccess {
 
     public void setLastSaveTime(long var1);
 
-    public Map<String, StructureStart<?>> getAllStarts();
+    public Map<StructureFeature<?>, StructureStart<?>> getAllStarts();
 
-    public void setAllStarts(Map<String, StructureStart<?>> var1);
+    public void setAllStarts(Map<StructureFeature<?>, StructureStart<?>> var1);
 
     default public boolean isYSpaceEmpty(int i, int j) {
         if (i < 0) {

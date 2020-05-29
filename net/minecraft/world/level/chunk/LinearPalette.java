@@ -4,6 +4,7 @@
 package net.minecraft.world.level.chunk;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.IdMapper;
@@ -12,7 +13,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.chunk.Palette;
 import net.minecraft.world.level.chunk.PaletteResize;
-import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.Nullable;
 
 public class LinearPalette<T>
@@ -47,8 +47,12 @@ implements Palette<T> {
     }
 
     @Override
-    public boolean maybeHas(T object) {
-        return ArrayUtils.contains(this.values, object);
+    public boolean maybeHas(Predicate<T> predicate) {
+        for (int i = 0; i < this.size; ++i) {
+            if (!predicate.test(this.values[i])) continue;
+            return true;
+        }
+        return false;
     }
 
     @Override

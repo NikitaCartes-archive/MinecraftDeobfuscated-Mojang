@@ -27,12 +27,12 @@ import net.minecraft.DefaultUncaughtExceptionHandlerWithName;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.ConsoleInput;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerInterface;
+import net.minecraft.server.ServerResources;
 import net.minecraft.server.dedicated.DedicatedPlayerList;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
@@ -40,6 +40,8 @@ import net.minecraft.server.dedicated.ServerWatchdog;
 import net.minecraft.server.gui.MinecraftServerGui;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
+import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.packs.repository.UnopenedPack;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.OldUsersConverter;
 import net.minecraft.server.players.PlayerList;
@@ -55,8 +57,8 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
 import org.apache.logging.log4j.LogManager;
@@ -76,31 +78,10 @@ implements ServerInterface {
     @Nullable
     private MinecraftServerGui gui;
 
-    public DedicatedServer(LevelStorageSource.LevelStorageAccess levelStorageAccess, WorldData worldData, DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory) {
-        super(levelStorageAccess, worldData, Proxy.NO_PROXY, dataFixer, new Commands(true), minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
+    public DedicatedServer(LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository<UnopenedPack> packRepository, ServerResources serverResources, WorldData worldData, DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory) {
+        super(levelStorageAccess, worldData, packRepository, Proxy.NO_PROXY, dataFixer, serverResources, minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
         this.settings = dedicatedServerSettings;
         this.rconConsoleSource = new RconConsoleSource(this);
-        new Thread("Server Infinisleeper"){
-            {
-                this.setDaemon(true);
-                this.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
-                this.start();
-            }
-
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        while (true) {
-                            Thread.sleep(Integer.MAX_VALUE);
-                        }
-                    } catch (InterruptedException interruptedException) {
-                        continue;
-                    }
-                    break;
-                }
-            }
-        };
     }
 
     @Override
@@ -389,7 +370,7 @@ implements ServerInterface {
     @Override
     public boolean isUnderSpawnProtection(ServerLevel serverLevel, BlockPos blockPos, Player player) {
         int j;
-        if (serverLevel.dimension() != DimensionType.OVERWORLD_LOCATION) {
+        if (serverLevel.dimension() != Level.OVERWORLD) {
             return false;
         }
         if (this.getPlayerList().getOps().isEmpty()) {

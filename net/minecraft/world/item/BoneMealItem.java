@@ -40,7 +40,7 @@ extends Item {
             if (!level.isClientSide) {
                 level.levelEvent(2005, blockPos, 0);
             }
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         BlockState blockState = level.getBlockState(blockPos);
         boolean bl = blockState.isFaceSturdy(level, blockPos, useOnContext.getClickedFace());
@@ -48,7 +48,7 @@ extends Item {
             if (!level.isClientSide) {
                 level.levelEvent(2005, blockPos2, 0);
             }
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         return InteractionResult.PASS;
     }

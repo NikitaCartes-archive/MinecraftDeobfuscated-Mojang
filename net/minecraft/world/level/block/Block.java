@@ -209,6 +209,9 @@ implements ItemLike {
 
     public static boolean canSupportCenter(LevelReader levelReader, BlockPos blockPos, Direction direction) {
         BlockState blockState = levelReader.getBlockState(blockPos);
+        if (direction == Direction.DOWN && blockState.is(BlockTags.UNSTABLE_BOTTOM_CENTER)) {
+            return false;
+        }
         return !Shapes.joinIsNotEmpty(blockState.getBlockSupportShape(levelReader, blockPos).getFaceShape(direction), CENTER_SUPPORT_SHAPE, BooleanOp.ONLY_SECOND);
     }
 

@@ -19,9 +19,8 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.resources.model.Material;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.StandingSignBlock;
@@ -76,13 +75,13 @@ extends BlockEntityRenderer<SignBlockEntity> {
         int p = NativeImage.combine(0, o, n, m);
         int q = 20;
         for (int r = 0; r < 4; ++r) {
-            Component component2 = signBlockEntity.getRenderMessage(r, component -> {
-                List<Component> list = font.getSplitter().splitLines((Component)component, 90, Style.EMPTY);
-                return list.isEmpty() ? TextComponent.EMPTY : list.get(0);
+            FormattedText formattedText2 = signBlockEntity.getRenderMessage(r, formattedText -> {
+                List<FormattedText> list = font.getSplitter().splitLines((FormattedText)formattedText, 90, Style.EMPTY);
+                return list.isEmpty() ? FormattedText.EMPTY : list.get(0);
             });
-            if (component2 == null) continue;
-            float s = -font.width(component2) / 2;
-            font.drawInBatch(component2, s, (float)(r * 10 - 20), p, false, poseStack.last().pose(), multiBufferSource, false, 0, i);
+            if (formattedText2 == null) continue;
+            float s = -font.width(formattedText2) / 2;
+            font.drawInBatch(formattedText2, s, (float)(r * 10 - 20), p, false, poseStack.last().pose(), multiBufferSource, false, 0, i);
         }
         poseStack.popPose();
     }

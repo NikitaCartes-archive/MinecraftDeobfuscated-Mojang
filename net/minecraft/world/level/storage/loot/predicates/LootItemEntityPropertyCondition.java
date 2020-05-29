@@ -9,13 +9,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.Set;
 import net.minecraft.advancements.critereon.EntityPredicate;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 import net.minecraft.world.phys.Vec3;
 
 public class LootItemEntityPropertyCondition
@@ -26,6 +27,11 @@ implements LootItemCondition {
     private LootItemEntityPropertyCondition(EntityPredicate entityPredicate, LootContext.EntityTarget entityTarget) {
         this.predicate = entityPredicate;
         this.entityTarget = entityTarget;
+    }
+
+    @Override
+    public LootItemConditionType getType() {
+        return LootItemConditions.ENTITY_PROPERTIES;
     }
 
     @Override
@@ -58,11 +64,7 @@ implements LootItemCondition {
     }
 
     public static class Serializer
-    extends LootItemCondition.Serializer<LootItemEntityPropertyCondition> {
-        protected Serializer() {
-            super(new ResourceLocation("entity_properties"), LootItemEntityPropertyCondition.class);
-        }
-
+    implements net.minecraft.world.level.storage.loot.Serializer<LootItemEntityPropertyCondition> {
         @Override
         public void serialize(JsonObject jsonObject, LootItemEntityPropertyCondition lootItemEntityPropertyCondition, JsonSerializationContext jsonSerializationContext) {
             jsonObject.add("predicate", lootItemEntityPropertyCondition.predicate.serializeToJson());
@@ -76,7 +78,7 @@ implements LootItemCondition {
         }
 
         @Override
-        public /* synthetic */ LootItemCondition deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             return this.deserialize(jsonObject, jsonDeserializationContext);
         }
     }

@@ -6,8 +6,6 @@ package net.minecraft.server.packs.resources;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.server.packs.Pack;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadInstance;
@@ -16,9 +14,10 @@ import net.minecraft.util.Unit;
 
 public interface ReloadableResourceManager
 extends ResourceManager {
-    public CompletableFuture<Unit> reload(Executor var1, Executor var2, List<Pack> var3, CompletableFuture<Unit> var4);
+    default public CompletableFuture<Unit> reload(Executor executor, Executor executor2, List<Pack> list, CompletableFuture<Unit> completableFuture) {
+        return this.createFullReload(executor, executor2, completableFuture, list).done();
+    }
 
-    @Environment(value=EnvType.CLIENT)
     public ReloadInstance createFullReload(Executor var1, Executor var2, CompletableFuture<Unit> var3, List<Pack> var4);
 
     public void registerReloadListener(PreparableReloadListener var1);

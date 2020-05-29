@@ -35,6 +35,7 @@ extends AbstractContainerScreen<MerchantMenu> {
     public MerchantScreen(MerchantMenu merchantMenu, Inventory inventory, Component component) {
         super(merchantMenu, inventory, component);
         this.imageWidth = 276;
+        this.inventoryLabelX = 107;
     }
 
     private void postButtonClick() {
@@ -62,26 +63,24 @@ extends AbstractContainerScreen<MerchantMenu> {
 
     @Override
     protected void renderLabels(PoseStack poseStack, int i, int j) {
-        int m;
+        int l;
         String string;
         int k = ((MerchantMenu)this.menu).getTraderLevel();
-        int l = this.imageHeight - 94;
         if (k > 0 && k <= 5 && ((MerchantMenu)this.menu).showProgressBar()) {
             string = "- " + I18n.get("merchant.level." + k, new Object[0]);
-            m = this.font.width(this.title);
-            int n = this.font.width(string);
-            int o = m + n + 3;
-            int p = 49 + this.imageWidth / 2 - o / 2;
-            this.font.draw(poseStack, this.title, (float)p, 6.0f, 0x404040);
-            this.font.draw(poseStack, this.inventory.getDisplayName(), 107.0f, (float)l, 0x404040);
-            this.font.draw(poseStack, string, (float)(p + m + 3), 6.0f, 0x404040);
+            l = this.font.width(this.title);
+            int m = this.font.width(string);
+            int n = l + m + 3;
+            int o = 49 + this.imageWidth / 2 - n / 2;
+            this.font.draw(poseStack, this.title, (float)o, 6.0f, 0x404040);
+            this.font.draw(poseStack, string, (float)(o + l + 3), 6.0f, 0x404040);
         } else {
             this.font.draw(poseStack, this.title, (float)(49 + this.imageWidth / 2 - this.font.width(this.title) / 2), 6.0f, 0x404040);
-            this.font.draw(poseStack, this.inventory.getDisplayName(), 107.0f, (float)l, 0x404040);
         }
+        this.font.draw(poseStack, this.inventory.getDisplayName(), (float)this.inventoryLabelX, (float)this.inventoryLabelY, 0x404040);
         string = I18n.get("merchant.trades", new Object[0]);
-        m = this.font.width(string);
-        this.font.draw(poseStack, string, (float)(5 - m / 2 + 48), 6.0f, 0x404040);
+        l = this.font.width(string);
+        this.font.draw(poseStack, string, (float)(5 - l / 2 + 48), 6.0f, 0x404040);
     }
 
     @Override
@@ -119,7 +118,7 @@ extends AbstractContainerScreen<MerchantMenu> {
             return;
         }
         int n = 100;
-        float f = 100 / (VillagerData.getMaxXpPerLevel(k) - m);
+        float f = 100.0f / (float)(VillagerData.getMaxXpPerLevel(k) - m);
         int o = Math.min(Mth.floor(f * (float)(l - m)), 100);
         MerchantScreen.blit(poseStack, i + 136, j + 16, this.getBlitOffset(), 0.0f, 191.0f, o + 1, 5, 256, 512);
         int p = ((MerchantMenu)this.menu).getFutureTraderXp();
@@ -174,11 +173,11 @@ extends AbstractContainerScreen<MerchantMenu> {
                 int p = m + 2;
                 this.renderAndDecorateCostA(poseStack, itemStack2, itemStack, n, p);
                 if (!itemStack3.isEmpty()) {
-                    this.itemRenderer.renderAndDecorateItem(itemStack3, k + 5 + 35, p);
+                    this.itemRenderer.renderAndDecorateFakeItem(itemStack3, k + 5 + 35, p);
                     this.itemRenderer.renderGuiItemDecorations(this.font, itemStack3, k + 5 + 35, p);
                 }
                 this.renderButtonArrows(poseStack, merchantOffer2, k, p);
-                this.itemRenderer.renderAndDecorateItem(itemStack4, k + 5 + 68, p);
+                this.itemRenderer.renderAndDecorateFakeItem(itemStack4, k + 5 + 68, p);
                 this.itemRenderer.renderGuiItemDecorations(this.font, itemStack4, k + 5 + 68, p);
                 this.itemRenderer.blitOffset = 0.0f;
                 m += 20;
@@ -215,7 +214,7 @@ extends AbstractContainerScreen<MerchantMenu> {
     }
 
     private void renderAndDecorateCostA(PoseStack poseStack, ItemStack itemStack, ItemStack itemStack2, int i, int j) {
-        this.itemRenderer.renderAndDecorateItem(itemStack, i, j);
+        this.itemRenderer.renderAndDecorateFakeItem(itemStack, i, j);
         if (itemStack2.getCount() == itemStack.getCount()) {
             this.itemRenderer.renderGuiItemDecorations(this.font, itemStack, i, j);
         } else {

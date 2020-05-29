@@ -5,7 +5,7 @@ package net.minecraft.server.packs.resources;
 
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,7 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public abstract class SimpleJsonResourceReloadListener
-extends SimplePreparableReloadListener<Map<ResourceLocation, JsonObject>> {
+extends SimplePreparableReloadListener<Map<ResourceLocation, JsonElement>> {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final int PATH_SUFFIX_LENGTH = ".json".length();
     private final Gson gson;
@@ -37,8 +37,8 @@ extends SimplePreparableReloadListener<Map<ResourceLocation, JsonObject>> {
     }
 
     @Override
-    protected Map<ResourceLocation, JsonObject> prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-        HashMap<ResourceLocation, JsonObject> map = Maps.newHashMap();
+    protected Map<ResourceLocation, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+        HashMap<ResourceLocation, JsonElement> map = Maps.newHashMap();
         int i = this.directory.length() + 1;
         for (ResourceLocation resourceLocation : resourceManager.listResources(this.directory, string -> string.endsWith(".json"))) {
             String string2 = resourceLocation.getPath();
@@ -53,10 +53,10 @@ extends SimplePreparableReloadListener<Map<ResourceLocation, JsonObject>> {
                         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
                         Throwable throwable3 = null;
                         try {
-                            JsonObject jsonObject = GsonHelper.fromJson(this.gson, (Reader)reader, JsonObject.class);
-                            if (jsonObject != null) {
-                                JsonObject jsonObject2 = map.put(resourceLocation2, jsonObject);
-                                if (jsonObject2 == null) continue;
+                            JsonElement jsonElement = GsonHelper.fromJson(this.gson, (Reader)reader, JsonElement.class);
+                            if (jsonElement != null) {
+                                JsonElement jsonElement2 = map.put(resourceLocation2, jsonElement);
+                                if (jsonElement2 == null) continue;
                                 throw new IllegalStateException("Duplicate data file ignored with ID " + resourceLocation2);
                             }
                             LOGGER.error("Couldn't load data file {} from {} as it's null or empty", (Object)resourceLocation2, (Object)resourceLocation);

@@ -3,15 +3,17 @@
  */
 package net.minecraft.world.entity.ai.village.poi;
 
+import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -23,7 +25,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 
 public class PoiType {
-    private static final Predicate<PoiType> ALL_JOBS = poiType -> Registry.VILLAGER_PROFESSION.stream().map(VillagerProfession::getJobPoiType).collect(Collectors.toSet()).contains(poiType);
+    private static final Supplier<Set<PoiType>> ALL_JOB_POI_TYPES = Suppliers.memoize(() -> Registry.VILLAGER_PROFESSION.stream().map(VillagerProfession::getJobPoiType).collect(Collectors.toSet()));
+    public static final Predicate<PoiType> ALL_JOBS = poiType -> ALL_JOB_POI_TYPES.get().contains(poiType);
     public static final Predicate<PoiType> ALL = poiType -> true;
     private static final Set<BlockState> BEDS = ImmutableList.of(Blocks.RED_BED, Blocks.BLACK_BED, Blocks.BLUE_BED, Blocks.BROWN_BED, Blocks.CYAN_BED, Blocks.GRAY_BED, Blocks.GREEN_BED, Blocks.LIGHT_BLUE_BED, Blocks.LIGHT_GRAY_BED, Blocks.LIME_BED, Blocks.MAGENTA_BED, Blocks.ORANGE_BED, new Block[]{Blocks.PINK_BED, Blocks.PURPLE_BED, Blocks.WHITE_BED, Blocks.YELLOW_BED}).stream().flatMap(block -> block.getStateDefinition().getPossibleStates().stream()).filter(blockState -> blockState.getValue(BedBlock.PART) == BedPart.HEAD).collect(ImmutableSet.toImmutableSet());
     private static final Map<BlockState, PoiType> TYPE_BY_STATE = Maps.newHashMap();
@@ -48,6 +51,7 @@ public class PoiType {
     public static final PoiType BEE_NEST = PoiType.register("bee_nest", PoiType.getBlockStates(Blocks.BEE_NEST), 0, 1);
     public static final PoiType NETHER_PORTAL = PoiType.register("nether_portal", PoiType.getBlockStates(Blocks.NETHER_PORTAL), 0, 1);
     public static final PoiType LODESTONE = PoiType.register("lodestone", PoiType.getBlockStates(Blocks.LODESTONE), 0, 1);
+    protected static final Set<BlockState> ALL_STATES = new ObjectOpenHashSet<BlockState>(TYPE_BY_STATE.keySet());
     private final String name;
     private final Set<BlockState> matchingStates;
     private final int maxTickets;
@@ -110,10 +114,6 @@ public class PoiType {
 
     public static Optional<PoiType> forState(BlockState blockState) {
         return Optional.ofNullable(TYPE_BY_STATE.get(blockState));
-    }
-
-    public static Stream<BlockState> allPoiStates() {
-        return TYPE_BY_STATE.keySet().stream();
     }
 }
 

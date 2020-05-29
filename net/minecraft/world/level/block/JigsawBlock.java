@@ -70,7 +70,7 @@ implements EntityBlock {
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (blockEntity instanceof JigsawBlockEntity && player.canUseGameMasterBlocks()) {
             player.openJigsawBlock((JigsawBlockEntity)blockEntity);
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         return InteractionResult.PASS;
     }

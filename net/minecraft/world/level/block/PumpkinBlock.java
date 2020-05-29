@@ -43,7 +43,7 @@ extends StemGrownBlock {
                 level.addFreshEntity(itemEntity);
                 itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(interactionHand));
             }
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         return super.use(blockState, level, blockPos, player2, interactionHand, blockHitResult);
     }

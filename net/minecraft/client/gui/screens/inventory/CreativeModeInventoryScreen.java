@@ -662,7 +662,6 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
             m += this.imageHeight - 4;
         }
         this.blit(poseStack, l, m, j, k, 28, 32);
-        this.setBlitOffset(100);
         this.itemRenderer.blitOffset = 100.0f;
         int n2 = bl2 ? 1 : -1;
         RenderSystem.enableRescaleNormal();
@@ -670,7 +669,6 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
         this.itemRenderer.renderAndDecorateItem(itemStack, l += 6, m += 8 + n2);
         this.itemRenderer.renderGuiItemDecorations(this.font, itemStack, l, m);
         this.itemRenderer.blitOffset = 0.0f;
-        this.setBlitOffset(0);
     }
 
     public int getSelectedTab() {

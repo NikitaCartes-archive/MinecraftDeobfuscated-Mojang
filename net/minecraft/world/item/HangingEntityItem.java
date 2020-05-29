@@ -43,7 +43,7 @@ extends Item {
         } else if (this.type == EntityType.ITEM_FRAME) {
             hangingEntity = new ItemFrame(level, blockPos2, direction);
         } else {
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         CompoundTag compoundTag = itemStack.getTag();
         if (compoundTag != null) {
@@ -55,7 +55,7 @@ extends Item {
                 level.addFreshEntity(hangingEntity);
             }
             itemStack.shrink(1);
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         return InteractionResult.CONSUME;
     }

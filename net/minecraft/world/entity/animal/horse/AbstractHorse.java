@@ -626,8 +626,6 @@ Saddleable {
 
     @Override
     public void travel(Vec3 vec3) {
-        double e;
-        double d;
         if (!this.isAlive()) {
             return;
         }
@@ -652,8 +650,8 @@ Saddleable {
             g = 0.0f;
         }
         if (this.playerJumpPendingScale > 0.0f && !this.isJumping() && this.onGround) {
-            d = this.getCustomJump() * (double)this.playerJumpPendingScale * (double)this.getBlockJumpFactor();
-            e = this.hasEffect(MobEffects.JUMP) ? d + (double)((float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1) * 0.1f) : d;
+            double d = this.getCustomJump() * (double)this.playerJumpPendingScale * (double)this.getBlockJumpFactor();
+            double e = this.hasEffect(MobEffects.JUMP) ? d + (double)((float)(this.getEffect(MobEffects.JUMP).getAmplifier() + 1) * 0.1f) : d;
             Vec3 vec32 = this.getDeltaMovement();
             this.setDeltaMovement(vec32.x, e, vec32.z);
             this.setIsJumping(true);
@@ -677,14 +675,7 @@ Saddleable {
             this.playerJumpPendingScale = 0.0f;
             this.setIsJumping(false);
         }
-        this.animationSpeedOld = this.animationSpeed;
-        d = this.getX() - this.xo;
-        float j = Mth.sqrt(d * d + (e = this.getZ() - this.zo) * e) * 4.0f;
-        if (j > 1.0f) {
-            j = 1.0f;
-        }
-        this.animationSpeed += (j - this.animationSpeed) * 0.4f;
-        this.animationPosition += this.animationSpeed;
+        this.calculateEntityAnimation(this, false);
     }
 
     protected void playJumpSound() {
@@ -839,7 +830,7 @@ Saddleable {
             float g = Mth.cos(this.yBodyRot * ((float)Math.PI / 180));
             float h = 0.7f * this.standAnimO;
             float i = 0.15f * this.standAnimO;
-            entity.setPos(this.getX() + (double)(h * f), this.getY() + this.getRideHeight() + entity.getRidingHeight() + (double)i, this.getZ() - (double)(h * g));
+            entity.setPos(this.getX() + (double)(h * f), this.getY() + this.getPassengersRidingOffset() + entity.getMyRidingOffset() + (double)i, this.getZ() - (double)(h * g));
             if (entity instanceof LivingEntity) {
                 ((LivingEntity)entity).yBodyRot = this.yBodyRot;
             }

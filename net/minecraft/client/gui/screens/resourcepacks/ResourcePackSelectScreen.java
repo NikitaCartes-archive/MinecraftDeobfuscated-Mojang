@@ -37,17 +37,18 @@ extends OptionsSubScreen {
     @Override
     protected void init() {
         this.addButton(new Button(this.width / 2 - 154, this.height - 48, 150, 20, new TranslatableComponent("resourcePack.openFolder"), button -> Util.getPlatform().openFile(this.minecraft.getResourcePackDirectory())));
+        PackRepository<UnopenedResourcePack> packRepository = this.minecraft.getResourcePackRepository();
         this.addButton(new Button(this.width / 2 + 4, this.height - 48, 150, 20, CommonComponents.GUI_DONE, button -> {
             if (this.changed) {
-                ArrayList<UnopenedResourcePack> list = Lists.newArrayList();
+                ArrayList<String> list = Lists.newArrayList();
                 for (ResourcePackList.ResourcePackEntry resourcePackEntry : this.selectedResourcePackList.children()) {
-                    list.add(resourcePackEntry.getResourcePack());
+                    list.add(resourcePackEntry.getResourcePack().getId());
                 }
                 Collections.reverse(list);
-                this.minecraft.getResourcePackRepository().setSelected(list);
+                packRepository.setSelected(list);
                 this.options.resourcePacks.clear();
                 this.options.incompatibleResourcePacks.clear();
-                for (UnopenedResourcePack unopenedResourcePack : list) {
+                for (UnopenedResourcePack unopenedResourcePack : packRepository.getSelectedPacks()) {
                     if (unopenedResourcePack.isFixedPosition()) continue;
                     this.options.resourcePacks.add(unopenedResourcePack.getId());
                     if (unopenedResourcePack.getCompatibility().isCompatible()) continue;
@@ -80,14 +81,13 @@ extends OptionsSubScreen {
         if (!this.changed) {
             this.availableResourcePackList.children().clear();
             this.selectedResourcePackList.children().clear();
-            PackRepository<UnopenedResourcePack> packRepository = this.minecraft.getResourcePackRepository();
             packRepository.reload();
-            ArrayList<UnopenedResourcePack> list = Lists.newArrayList(packRepository.getAvailable());
-            list.removeAll(packRepository.getSelected());
+            ArrayList<UnopenedResourcePack> list = Lists.newArrayList(packRepository.getAvailablePacks());
+            list.removeAll(packRepository.getSelectedPacks());
             for (UnopenedResourcePack unopenedResourcePack : list) {
                 this.availableResourcePackList.addResourcePackEntry(new ResourcePackList.ResourcePackEntry(this.availableResourcePackList, this, unopenedResourcePack));
             }
-            for (UnopenedResourcePack unopenedResourcePack : Lists.reverse(Lists.newArrayList(packRepository.getSelected()))) {
+            for (UnopenedResourcePack unopenedResourcePack : Lists.reverse(Lists.newArrayList(packRepository.getSelectedPacks()))) {
                 this.selectedResourcePackList.addResourcePackEntry(new ResourcePackList.ResourcePackEntry(this.selectedResourcePackList, this, unopenedResourcePack));
             }
         }

@@ -12,6 +12,7 @@ import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerType;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class AcaciaFoliagePlacer
 extends FoliagePlacer {
@@ -27,12 +28,12 @@ extends FoliagePlacer {
     }
 
     @Override
-    protected void createFoliage(LevelSimulatedRW levelSimulatedRW, Random random, TreeConfiguration treeConfiguration, int i, FoliagePlacer.FoliageAttachment foliageAttachment, int j, int k, Set<BlockPos> set, int l) {
+    protected void createFoliage(LevelSimulatedRW levelSimulatedRW, Random random, TreeConfiguration treeConfiguration, int i, FoliagePlacer.FoliageAttachment foliageAttachment, int j, int k, Set<BlockPos> set, int l, BoundingBox boundingBox) {
         boolean bl = foliageAttachment.doubleTrunk();
         BlockPos blockPos = foliageAttachment.foliagePos().above(l);
-        this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + foliageAttachment.radiusOffset(), set, -1 - j, bl);
-        this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k - 1, set, -j, bl);
-        this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + foliageAttachment.radiusOffset() - 1, set, 0, bl);
+        this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + foliageAttachment.radiusOffset(), set, -1 - j, bl, boundingBox);
+        this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k - 1, set, -j, bl, boundingBox);
+        this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + foliageAttachment.radiusOffset() - 1, set, 0, bl, boundingBox);
     }
 
     @Override

@@ -126,6 +126,7 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CommandBlock;
@@ -135,7 +136,6 @@ import net.minecraft.world.level.block.entity.JigsawBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.StringUtils;
@@ -606,7 +606,7 @@ implements ServerGamePacketListener {
         BlockEntity blockEntity = this.player.level.getBlockEntity(blockPos);
         if (blockEntity instanceof JigsawBlockEntity) {
             JigsawBlockEntity jigsawBlockEntity = (JigsawBlockEntity)blockEntity;
-            jigsawBlockEntity.generate(this.server.getLevel(this.player.level.dimension()), serverboundJigsawGeneratePacket.levels());
+            jigsawBlockEntity.generate(this.server.getLevel(this.player.level.dimension()), serverboundJigsawGeneratePacket.levels(), serverboundJigsawGeneratePacket.keepJigsaws());
         }
     }
 
@@ -871,7 +871,7 @@ implements ServerGamePacketListener {
         if (blockPos.getY() < this.server.getMaxBuildHeight()) {
             if (this.awaitingPositionFromClient == null && this.player.distanceToSqr((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5) < 64.0 && serverLevel.mayInteract(this.player, blockPos)) {
                 InteractionResult interactionResult = this.player.gameMode.useItemOn(this.player, serverLevel, itemStack, interactionHand, blockHitResult);
-                if (direction == Direction.UP && interactionResult != InteractionResult.SUCCESS && blockPos.getY() >= this.server.getMaxBuildHeight() - 1 && ServerGamePacketListenerImpl.wasBlockPlacementAttempt(this.player, itemStack)) {
+                if (direction == Direction.UP && !interactionResult.consumesAction() && blockPos.getY() >= this.server.getMaxBuildHeight() - 1 && ServerGamePacketListenerImpl.wasBlockPlacementAttempt(this.player, itemStack)) {
                     MutableComponent component = new TranslatableComponent("build.tooHigh", this.server.getMaxBuildHeight()).withStyle(ChatFormatting.RED);
                     this.player.connection.send(new ClientboundChatPacket(component, ChatType.GAME_INFO, Util.NIL_UUID));
                 } else if (interactionResult.shouldSwing()) {
@@ -1111,7 +1111,7 @@ implements ServerGamePacketListener {
                 if (this.player.wonGame) {
                     this.player.wonGame = false;
                     this.player = this.server.getPlayerList().respawn(this.player, true);
-                    CriteriaTriggers.CHANGED_DIMENSION.trigger(this.player, DimensionType.END_LOCATION, DimensionType.OVERWORLD_LOCATION);
+                    CriteriaTriggers.CHANGED_DIMENSION.trigger(this.player, Level.END, Level.OVERWORLD);
                     break;
                 }
                 if (this.player.getHealth() > 0.0f) {

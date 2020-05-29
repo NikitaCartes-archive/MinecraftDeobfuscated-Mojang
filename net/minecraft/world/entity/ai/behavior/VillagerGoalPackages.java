@@ -20,6 +20,7 @@ import net.minecraft.world.entity.ai.behavior.GateBehavior;
 import net.minecraft.world.entity.ai.behavior.GiveGiftToHero;
 import net.minecraft.world.entity.ai.behavior.GoOutsideToCelebrate;
 import net.minecraft.world.entity.ai.behavior.GoToClosestVillage;
+import net.minecraft.world.entity.ai.behavior.GoToPotentialJobSite;
 import net.minecraft.world.entity.ai.behavior.GoToWantedItem;
 import net.minecraft.world.entity.ai.behavior.HarvestFarmland;
 import net.minecraft.world.entity.ai.behavior.InsideBrownianWalk;
@@ -32,6 +33,7 @@ import net.minecraft.world.entity.ai.behavior.LookAndFollowTradingPlayerSink;
 import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.behavior.PlayTagWithOtherKids;
+import net.minecraft.world.entity.ai.behavior.PoiCompetitorScan;
 import net.minecraft.world.entity.ai.behavior.ReactToBell;
 import net.minecraft.world.entity.ai.behavior.ResetProfession;
 import net.minecraft.world.entity.ai.behavior.ResetRaidStatus;
@@ -64,6 +66,7 @@ import net.minecraft.world.entity.ai.behavior.VillagerPanicTrigger;
 import net.minecraft.world.entity.ai.behavior.WakeUp;
 import net.minecraft.world.entity.ai.behavior.WorkAtComposter;
 import net.minecraft.world.entity.ai.behavior.WorkAtPoi;
+import net.minecraft.world.entity.ai.behavior.YieldJobSite;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
@@ -72,12 +75,12 @@ import net.minecraft.world.entity.npc.VillagerProfession;
 
 public class VillagerGoalPackages {
     public static ImmutableList<Pair<Integer, ? extends Behavior<? super Villager>>> getCorePackage(VillagerProfession villagerProfession, float f) {
-        return ImmutableList.of(Pair.of(0, new Swim(0.4f, 0.8f)), Pair.of(0, new InteractWithDoor()), Pair.of(0, new LookAtTargetSink(45, 90)), Pair.of(0, new VillagerPanicTrigger()), Pair.of(0, new WakeUp()), Pair.of(0, new ReactToBell()), Pair.of(0, new SetRaidStatus()), Pair.of(1, new MoveToTargetSink(200)), Pair.of(2, new LookAndFollowTradingPlayerSink(f)), Pair.of(5, new GoToWantedItem(0.5f, false, 4)), Pair.of(10, new AcquirePoi(villagerProfession.getJobPoiType(), MemoryModuleType.JOB_SITE, true)), Pair.of(10, new AcquirePoi(PoiType.HOME, MemoryModuleType.HOME, false)), new Pair[]{Pair.of(10, new AcquirePoi(PoiType.MEETING, MemoryModuleType.MEETING_POINT, true)), Pair.of(10, new AssignProfessionFromJobSite()), Pair.of(10, new ResetProfession())});
+        return ImmutableList.of(Pair.of(0, new Swim(0.8f)), Pair.of(0, new InteractWithDoor()), Pair.of(0, new LookAtTargetSink(45, 90)), Pair.of(0, new VillagerPanicTrigger()), Pair.of(0, new WakeUp()), Pair.of(0, new ReactToBell()), Pair.of(0, new SetRaidStatus()), Pair.of(0, new ValidateNearbyPoi(villagerProfession.getJobPoiType(), MemoryModuleType.JOB_SITE)), Pair.of(0, new ValidateNearbyPoi(villagerProfession.getJobPoiType(), MemoryModuleType.POTENTIAL_JOB_SITE)), Pair.of(1, new MoveToTargetSink(200)), Pair.of(2, new PoiCompetitorScan(villagerProfession)), Pair.of(3, new LookAndFollowTradingPlayerSink(f)), new Pair[]{Pair.of(5, new GoToWantedItem(f, false, 4)), Pair.of(6, new AcquirePoi(villagerProfession.getJobPoiType(), MemoryModuleType.JOB_SITE, MemoryModuleType.POTENTIAL_JOB_SITE, true)), Pair.of(6, new GoToPotentialJobSite(f)), Pair.of(7, new YieldJobSite(f)), Pair.of(10, new AcquirePoi(PoiType.HOME, MemoryModuleType.HOME, false)), Pair.of(10, new AcquirePoi(PoiType.MEETING, MemoryModuleType.MEETING_POINT, true)), Pair.of(10, new AssignProfessionFromJobSite()), Pair.of(10, new ResetProfession())});
     }
 
     public static ImmutableList<Pair<Integer, ? extends Behavior<? super Villager>>> getWorkPackage(VillagerProfession villagerProfession, float f) {
         WorkAtPoi workAtPoi = villagerProfession == VillagerProfession.FARMER ? new WorkAtComposter() : new WorkAtPoi();
-        return ImmutableList.of(VillagerGoalPackages.getMinimalLookBehavior(), Pair.of(5, new RunOne(ImmutableList.of(Pair.of(workAtPoi, 7), Pair.of(new StrollAroundPoi(MemoryModuleType.JOB_SITE, 4), 2), Pair.of(new StrollToPoi(MemoryModuleType.JOB_SITE, 1, 10), 5), Pair.of(new StrollToPoiList(MemoryModuleType.SECONDARY_JOB_SITE, f, 1, 6, MemoryModuleType.JOB_SITE), 5), Pair.of(new HarvestFarmland(), villagerProfession == VillagerProfession.FARMER ? 2 : 5), Pair.of(new UseBonemeal(), villagerProfession == VillagerProfession.FARMER ? 4 : 7)))), Pair.of(10, new ShowTradesToPlayer(400, 1600)), Pair.of(10, new SetLookAndInteract(EntityType.PLAYER, 4)), Pair.of(2, new SetWalkTargetFromBlockMemory(MemoryModuleType.JOB_SITE, f, 9, 100, 1200)), Pair.of(3, new GiveGiftToHero(100)), Pair.of(3, new ValidateNearbyPoi(villagerProfession.getJobPoiType(), MemoryModuleType.JOB_SITE)), Pair.of(99, new UpdateActivityFromSchedule()));
+        return ImmutableList.of(VillagerGoalPackages.getMinimalLookBehavior(), Pair.of(5, new RunOne(ImmutableList.of(Pair.of(workAtPoi, 7), Pair.of(new StrollAroundPoi(MemoryModuleType.JOB_SITE, 4), 2), Pair.of(new StrollToPoi(MemoryModuleType.JOB_SITE, 1, 10), 5), Pair.of(new StrollToPoiList(MemoryModuleType.SECONDARY_JOB_SITE, f, 1, 6, MemoryModuleType.JOB_SITE), 5), Pair.of(new HarvestFarmland(), villagerProfession == VillagerProfession.FARMER ? 2 : 5), Pair.of(new UseBonemeal(), villagerProfession == VillagerProfession.FARMER ? 4 : 7)))), Pair.of(10, new ShowTradesToPlayer(400, 1600)), Pair.of(10, new SetLookAndInteract(EntityType.PLAYER, 4)), Pair.of(2, new SetWalkTargetFromBlockMemory(MemoryModuleType.JOB_SITE, f, 9, 100, 1200)), Pair.of(3, new GiveGiftToHero(100)), Pair.of(99, new UpdateActivityFromSchedule()));
     }
 
     public static ImmutableList<Pair<Integer, ? extends Behavior<? super Villager>>> getPlayPackage(float f) {

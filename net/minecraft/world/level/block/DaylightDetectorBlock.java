@@ -82,7 +82,7 @@ extends BaseEntityBlock {
             BlockState blockState2 = (BlockState)blockState.cycle(INVERTED);
             level.setBlock(blockPos, blockState2, 4);
             DaylightDetectorBlock.updateSignalStrength(blockState2, level, blockPos);
-            return InteractionResult.SUCCESS;
+            return InteractionResult.CONSUME;
         }
         return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
     }

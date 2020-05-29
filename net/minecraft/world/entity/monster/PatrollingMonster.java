@@ -65,7 +65,7 @@ extends Monster {
     }
 
     @Override
-    public double getRidingHeight() {
+    public double getMyRidingOffset() {
         return -0.45;
     }
 

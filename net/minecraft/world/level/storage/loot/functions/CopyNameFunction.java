@@ -8,12 +8,13 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.Set;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -25,6 +26,11 @@ extends LootItemConditionalFunction {
     private CopyNameFunction(LootItemCondition[] lootItemConditions, NameSource nameSource) {
         super(lootItemConditions);
         this.source = nameSource;
+    }
+
+    @Override
+    public LootItemFunctionType getType() {
+        return LootItemFunctions.COPY_NAME;
     }
 
     @Override
@@ -48,10 +54,6 @@ extends LootItemConditionalFunction {
 
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<CopyNameFunction> {
-        public Serializer() {
-            super(new ResourceLocation("copy_name"), CopyNameFunction.class);
-        }
-
         @Override
         public void serialize(JsonObject jsonObject, CopyNameFunction copyNameFunction, JsonSerializationContext jsonSerializationContext) {
             super.serialize(jsonObject, copyNameFunction, jsonSerializationContext);

@@ -34,6 +34,7 @@ import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -63,6 +64,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
@@ -238,40 +240,18 @@ extends Monster {
     }
 
     protected void doUnderWaterConversion() {
-        this.convertTo(EntityType.DROWNED);
+        this.convertToZombieType(EntityType.DROWNED);
         if (!this.isSilent()) {
             this.level.levelEvent(null, 1040, this.blockPosition(), 0);
         }
     }
 
-    protected void convertTo(EntityType<? extends Zombie> entityType) {
-        if (this.removed) {
-            return;
+    protected void convertToZombieType(EntityType<? extends Zombie> entityType) {
+        Zombie zombie = this.convertTo(entityType);
+        if (zombie != null) {
+            zombie.handleAttributes(zombie.level.getCurrentDifficultyAt(zombie.blockPosition()).getSpecialMultiplier());
+            zombie.setCanBreakDoors(zombie.supportsBreakDoorGoal() && this.canBreakDoors());
         }
-        Zombie zombie = entityType.create(this.level);
-        zombie.copyPosition(this);
-        zombie.setCanPickUpLoot(this.canPickUpLoot());
-        zombie.setCanBreakDoors(zombie.supportsBreakDoorGoal() && this.canBreakDoors());
-        zombie.handleAttributes(zombie.level.getCurrentDifficultyAt(zombie.blockPosition()).getSpecialMultiplier());
-        zombie.setBaby(this.isBaby());
-        zombie.setNoAi(this.isNoAi());
-        for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-            ItemStack itemStack = this.getItemBySlot(equipmentSlot);
-            if (itemStack.isEmpty()) continue;
-            zombie.setItemSlot(equipmentSlot, itemStack.copy());
-            zombie.setDropChance(equipmentSlot, this.getEquipmentDropChance(equipmentSlot));
-            itemStack.setCount(0);
-        }
-        if (this.hasCustomName()) {
-            zombie.setCustomName(this.getCustomName());
-            zombie.setCustomNameVisible(this.isCustomNameVisible());
-        }
-        if (this.isPersistenceRequired()) {
-            zombie.setPersistenceRequired();
-        }
-        zombie.setInvulnerable(this.isInvulnerable());
-        this.level.addFreshEntity(zombie);
-        this.remove();
     }
 
     protected boolean isSunSensitive() {
@@ -291,11 +271,13 @@ extends Monster {
                 int k = Mth.floor(this.getZ());
                 Zombie zombie = new Zombie(this.level);
                 for (int l = 0; l < 50; ++l) {
-                    int o;
-                    int n;
                     int m = i + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
-                    BlockPos blockPos = new BlockPos(m, (n = j + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1)) - 1, o = k + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1));
-                    if (!this.level.getBlockState(blockPos).entityCanStandOn(this.level, blockPos, zombie) || this.level.getMaxLocalRawBrightness(new BlockPos(m, n, o)) >= 10) continue;
+                    int n = j + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
+                    int o = k + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
+                    BlockPos blockPos = new BlockPos(m, n, o);
+                    EntityType<?> entityType = zombie.getType();
+                    SpawnPlacements.Type type = SpawnPlacements.getPlacementType(entityType);
+                    if (!NaturalSpawner.isSpawnPositionOk(type, this.level, blockPos, entityType) || !SpawnPlacements.checkSpawnRules(entityType, this.level, MobSpawnType.REINFORCEMENT, blockPos, this.level.random)) continue;
                     zombie.setPos(m, n, o);
                     if (this.level.hasNearbyAlivePlayer(m, n, o, 7.0) || !this.level.isUnobstructed(zombie) || !this.level.noCollision(zombie) || this.level.containsAnyLiquid(zombie.getBoundingBox())) continue;
                     this.level.addFreshEntity(zombie);
@@ -413,7 +395,7 @@ extends Monster {
                 zombieVillager.setCustomName(villager.getCustomName());
                 zombieVillager.setCustomNameVisible(villager.isCustomNameVisible());
             }
-            if (this.isPersistenceRequired()) {
+            if (villager.isPersistenceRequired()) {
                 zombieVillager.setPersistenceRequired();
             }
             zombieVillager.setInvulnerable(this.isInvulnerable());
@@ -502,7 +484,7 @@ extends Monster {
     }
 
     @Override
-    public double getRidingHeight() {
+    public double getMyRidingOffset() {
         return this.isBaby() ? 0.0 : -0.45;
     }
 

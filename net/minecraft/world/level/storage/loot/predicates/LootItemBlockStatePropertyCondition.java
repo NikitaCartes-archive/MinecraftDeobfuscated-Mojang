@@ -19,6 +19,8 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 
 public class LootItemBlockStatePropertyCondition
 implements LootItemCondition {
@@ -28,6 +30,11 @@ implements LootItemCondition {
     private LootItemBlockStatePropertyCondition(Block block, StatePropertiesPredicate statePropertiesPredicate) {
         this.block = block;
         this.properties = statePropertiesPredicate;
+    }
+
+    @Override
+    public LootItemConditionType getType() {
+        return LootItemConditions.BLOCK_STATE_PROPERTY;
     }
 
     @Override
@@ -51,11 +58,7 @@ implements LootItemCondition {
     }
 
     public static class Serializer
-    extends LootItemCondition.Serializer<LootItemBlockStatePropertyCondition> {
-        protected Serializer() {
-            super(new ResourceLocation("block_state_property"), LootItemBlockStatePropertyCondition.class);
-        }
-
+    implements net.minecraft.world.level.storage.loot.Serializer<LootItemBlockStatePropertyCondition> {
         @Override
         public void serialize(JsonObject jsonObject, LootItemBlockStatePropertyCondition lootItemBlockStatePropertyCondition, JsonSerializationContext jsonSerializationContext) {
             jsonObject.addProperty("block", Registry.BLOCK.getKey(lootItemBlockStatePropertyCondition.block).toString());
@@ -74,7 +77,7 @@ implements LootItemCondition {
         }
 
         @Override
-        public /* synthetic */ LootItemCondition deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             return this.deserialize(jsonObject, jsonDeserializationContext);
         }
     }

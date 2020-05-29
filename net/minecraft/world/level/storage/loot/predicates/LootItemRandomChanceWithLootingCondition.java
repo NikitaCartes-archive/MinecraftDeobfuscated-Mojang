@@ -8,7 +8,6 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.Set;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,6 +16,8 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 
 public class LootItemRandomChanceWithLootingCondition
 implements LootItemCondition {
@@ -26,6 +27,11 @@ implements LootItemCondition {
     private LootItemRandomChanceWithLootingCondition(float f, float g) {
         this.percent = f;
         this.lootingMultiplier = g;
+    }
+
+    @Override
+    public LootItemConditionType getType() {
+        return LootItemConditions.RANDOM_CHANCE_WITH_LOOTING;
     }
 
     @Override
@@ -53,11 +59,7 @@ implements LootItemCondition {
     }
 
     public static class Serializer
-    extends LootItemCondition.Serializer<LootItemRandomChanceWithLootingCondition> {
-        protected Serializer() {
-            super(new ResourceLocation("random_chance_with_looting"), LootItemRandomChanceWithLootingCondition.class);
-        }
-
+    implements net.minecraft.world.level.storage.loot.Serializer<LootItemRandomChanceWithLootingCondition> {
         @Override
         public void serialize(JsonObject jsonObject, LootItemRandomChanceWithLootingCondition lootItemRandomChanceWithLootingCondition, JsonSerializationContext jsonSerializationContext) {
             jsonObject.addProperty("chance", Float.valueOf(lootItemRandomChanceWithLootingCondition.percent));
@@ -70,7 +72,7 @@ implements LootItemCondition {
         }
 
         @Override
-        public /* synthetic */ LootItemCondition deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             return this.deserialize(jsonObject, jsonDeserializationContext);
         }
     }

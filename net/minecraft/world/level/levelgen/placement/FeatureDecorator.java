@@ -6,7 +6,6 @@ package net.minecraft.world.level.levelgen.placement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -69,6 +68,7 @@ import net.minecraft.world.level.levelgen.placement.nether.FireDecorator;
 import net.minecraft.world.level.levelgen.placement.nether.LightGemChanceDecorator;
 import net.minecraft.world.level.levelgen.placement.nether.MagmaDecorator;
 import net.minecraft.world.level.levelgen.placement.nether.RandomCountRangeDecorator;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
     public static final FeatureDecorator<NoneDecoratorConfiguration> NOPE = FeatureDecorator.register("nope", new NopePlacementDecorator(NoneDecoratorConfiguration.CODEC));
@@ -128,12 +128,13 @@ public abstract class FeatureDecorator<DC extends DecoratorConfiguration> {
     }
 
     protected <FC extends FeatureConfiguration, F extends Feature<FC>> boolean placeFeature(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos2, DC decoratorConfiguration, ConfiguredFeature<FC, F> configuredFeature) {
-        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+        MutableBoolean mutableBoolean = new MutableBoolean();
         this.getPositions(worldGenLevel, chunkGenerator, random, decoratorConfiguration, blockPos2).forEach(blockPos -> {
-            boolean bl = configuredFeature.place(worldGenLevel, structureFeatureManager, chunkGenerator, random, (BlockPos)blockPos);
-            atomicBoolean.set(atomicBoolean.get() || bl);
+            if (configuredFeature.place(worldGenLevel, structureFeatureManager, chunkGenerator, random, (BlockPos)blockPos)) {
+                mutableBoolean.setTrue();
+            }
         });
-        return atomicBoolean.get();
+        return mutableBoolean.isTrue();
     }
 
     public abstract Stream<BlockPos> getPositions(LevelAccessor var1, ChunkGenerator var2, Random var3, DC var4, BlockPos var5);

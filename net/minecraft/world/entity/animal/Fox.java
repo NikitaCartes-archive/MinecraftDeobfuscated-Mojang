@@ -269,7 +269,9 @@ extends Animal {
         if (bl) {
             this.setAge(-24000);
         }
-        this.setTargetGoals();
+        if (levelAccessor instanceof ServerLevel) {
+            this.setTargetGoals();
+        }
         this.populateDefaultEquipmentSlots(difficultyInstance);
         return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
@@ -352,7 +354,9 @@ extends Animal {
         this.setFoxType(Type.byName(compoundTag.getString("Type")));
         this.setSitting(compoundTag.getBoolean("Sitting"));
         this.setIsCrouching(compoundTag.getBoolean("Crouching"));
-        this.setTargetGoals();
+        if (this.level instanceof ServerLevel) {
+            this.setTargetGoals();
+        }
     }
 
     public boolean isSitting() {

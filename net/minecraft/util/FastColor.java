@@ -6,11 +6,10 @@ package net.minecraft.util;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
-@Environment(value=EnvType.CLIENT)
 public class FastColor {
 
-    @Environment(value=EnvType.CLIENT)
     public static class ARGB32 {
+        @Environment(value=EnvType.CLIENT)
         public static int alpha(int i) {
             return i >>> 24;
         }
@@ -27,10 +26,12 @@ public class FastColor {
             return i & 0xFF;
         }
 
+        @Environment(value=EnvType.CLIENT)
         public static int color(int i, int j, int k, int l) {
             return i << 24 | j << 16 | k << 8 | l;
         }
 
+        @Environment(value=EnvType.CLIENT)
         public static int multiply(int i, int j) {
             return ARGB32.color(ARGB32.alpha(i) * ARGB32.alpha(j) / 255, ARGB32.red(i) * ARGB32.red(j) / 255, ARGB32.green(i) * ARGB32.green(j) / 255, ARGB32.blue(i) * ARGB32.blue(j) / 255);
         }

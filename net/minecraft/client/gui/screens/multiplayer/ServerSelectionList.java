@@ -33,6 +33,7 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.server.LanServer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -169,7 +170,7 @@ extends ObjectSelectionList<Entry> {
             boolean bl3 = this.serverData.protocol < SharedConstants.getCurrentVersion().getProtocolVersion();
             boolean bl4 = bl2 || bl3;
             this.minecraft.font.draw(poseStack, this.serverData.name, (float)(k + 32 + 3), (float)(j + 1), 0xFFFFFF);
-            List<Component> list = this.minecraft.font.split(this.serverData.motd, l - 32 - 2);
+            List<FormattedText> list = this.minecraft.font.split(this.serverData.motd, l - 32 - 2);
             for (int p = 0; p < Math.min(list.size(), 2); ++p) {
                 this.minecraft.font.draw(poseStack, list.get(p), (float)(k + 32 + 3), (float)(j + 12 + this.minecraft.font.lineHeight * p), 0x808080);
             }

@@ -704,7 +704,7 @@ implements ChunkHolder.PlayerProvider {
         if (compoundTag == null) {
             return null;
         }
-        return this.upgradeChunkTag(this.level.dimensionType(), this.overworldDataStorage, compoundTag);
+        return this.upgradeChunkTag(this.level.dimension(), this.overworldDataStorage, compoundTag);
     }
 
     boolean noPlayersCloseForSpawning(ChunkPos chunkPos) {

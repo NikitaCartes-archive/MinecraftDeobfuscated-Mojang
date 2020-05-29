@@ -41,7 +41,7 @@ extends BaseEntityBlock {
             this.dropRecording(level, blockPos);
             blockState = (BlockState)blockState.setValue(HAS_RECORD, false);
             level.setBlock(blockPos, blockState, 2);
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         return InteractionResult.PASS;
     }

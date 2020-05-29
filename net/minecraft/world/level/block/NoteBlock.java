@@ -75,7 +75,7 @@ extends Block {
         level.setBlock(blockPos, blockState, 3);
         this.playNote(level, blockPos);
         player.awardStat(Stats.TUNE_NOTEBLOCK);
-        return InteractionResult.SUCCESS;
+        return InteractionResult.CONSUME;
     }
 
     @Override

@@ -72,7 +72,7 @@ extends AbstractHurtingProjectile {
         Entity entity2 = this.getOwner();
         if (entity2 instanceof LivingEntity) {
             LivingEntity livingEntity = (LivingEntity)entity2;
-            if (entity.hurt(DamageSource.mobAttack(livingEntity), 8.0f)) {
+            if (entity.hurt(DamageSource.witherSkull(this, livingEntity), 8.0f)) {
                 if (entity.isAlive()) {
                     this.doEnchantDamageEffects(livingEntity, entity);
                 } else {

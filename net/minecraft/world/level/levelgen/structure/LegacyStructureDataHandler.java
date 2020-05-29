@@ -15,8 +15,9 @@ import java.util.Map;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureFeatureIndexSavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
@@ -173,19 +174,19 @@ public class LegacyStructureDataHandler {
         }
     }
 
-    public static LegacyStructureDataHandler getLegacyStructureHandler(DimensionType dimensionType, @Nullable DimensionDataStorage dimensionDataStorage) {
-        if (dimensionType.isOverworld()) {
+    public static LegacyStructureDataHandler getLegacyStructureHandler(ResourceKey<Level> resourceKey, @Nullable DimensionDataStorage dimensionDataStorage) {
+        if (resourceKey == Level.OVERWORLD) {
             return new LegacyStructureDataHandler(dimensionDataStorage, ImmutableList.of("Monument", "Stronghold", "Village", "Mineshaft", "Temple", "Mansion"), ImmutableList.of("Village", "Mineshaft", "Mansion", "Igloo", "Desert_Pyramid", "Jungle_Pyramid", "Swamp_Hut", "Stronghold", "Monument"));
         }
-        if (dimensionType.isNether()) {
+        if (resourceKey == Level.NETHER) {
             ImmutableList<String> list = ImmutableList.of("Fortress");
             return new LegacyStructureDataHandler(dimensionDataStorage, list, list);
         }
-        if (dimensionType.isEnd()) {
+        if (resourceKey == Level.END) {
             ImmutableList<String> list = ImmutableList.of("EndCity");
             return new LegacyStructureDataHandler(dimensionDataStorage, list, list);
         }
-        throw new RuntimeException(String.format("Unknown dimension type : %s", dimensionType));
+        throw new RuntimeException(String.format("Unknown dimension type : %s", resourceKey));
     }
 }
 

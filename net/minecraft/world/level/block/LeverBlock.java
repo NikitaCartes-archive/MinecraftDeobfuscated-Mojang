@@ -92,7 +92,7 @@ extends FaceAttachedHorizontalDirectionalBlock {
         BlockState blockState2 = this.pull(blockState, level, blockPos);
         float f = blockState2.getValue(POWERED) != false ? 0.6f : 0.5f;
         level.playSound(null, blockPos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 0.3f, f);
-        return InteractionResult.SUCCESS;
+        return InteractionResult.CONSUME;
     }
 
     public BlockState pull(BlockState blockState, Level level, BlockPos blockPos) {

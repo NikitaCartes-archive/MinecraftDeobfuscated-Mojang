@@ -88,7 +88,7 @@ extends Block {
                 this.setWaterLevel(level, blockPos, blockState, 3);
                 level.playSound(null, blockPos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
             }
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         if (item == Items.BUCKET) {
             if (i == 3 && !level.isClientSide) {
@@ -104,7 +104,7 @@ extends Block {
                 this.setWaterLevel(level, blockPos, blockState, 0);
                 level.playSound(null, blockPos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
             }
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         if (item == Items.GLASS_BOTTLE) {
             if (i > 0 && !level.isClientSide) {
@@ -123,7 +123,7 @@ extends Block {
                 level.playSound(null, blockPos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
                 this.setWaterLevel(level, blockPos, blockState, i - 1);
             }
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         if (item == Items.POTION && PotionUtils.getPotion(itemStack) == Potions.WATER) {
             if (i < 3 && !level.isClientSide) {
@@ -138,7 +138,7 @@ extends Block {
                 level.playSound(null, blockPos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
                 this.setWaterLevel(level, blockPos, blockState, i + 1);
             }
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         if (i > 0 && item instanceof DyeableLeatherItem && (dyeableLeatherItem = (DyeableLeatherItem)((Object)item)).hasCustomColor(itemStack) && !level.isClientSide) {
             dyeableLeatherItem.clearColor(itemStack);
@@ -164,7 +164,7 @@ extends Block {
                     ((ServerPlayer)player).refreshContainer(player.inventoryMenu);
                 }
             }
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         if (i > 0 && item instanceof BlockItem) {
             Block block = ((BlockItem)item).getBlock();

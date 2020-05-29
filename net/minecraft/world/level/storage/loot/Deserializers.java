@@ -21,11 +21,11 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 
 public class Deserializers {
     public static GsonBuilder createConditionSerializer() {
-        return new GsonBuilder().registerTypeAdapter((Type)((Object)RandomValueBounds.class), new RandomValueBounds.Serializer()).registerTypeAdapter((Type)((Object)BinomialDistributionGenerator.class), new BinomialDistributionGenerator.Serializer()).registerTypeAdapter((Type)((Object)ConstantIntValue.class), new ConstantIntValue.Serializer()).registerTypeHierarchyAdapter(LootItemCondition.class, new LootItemConditions.Serializer()).registerTypeHierarchyAdapter(LootContext.EntityTarget.class, new LootContext.EntityTarget.Serializer());
+        return new GsonBuilder().registerTypeAdapter((Type)((Object)RandomValueBounds.class), new RandomValueBounds.Serializer()).registerTypeAdapter((Type)((Object)BinomialDistributionGenerator.class), new BinomialDistributionGenerator.Serializer()).registerTypeAdapter((Type)((Object)ConstantIntValue.class), new ConstantIntValue.Serializer()).registerTypeHierarchyAdapter(LootItemCondition.class, LootItemConditions.createGsonAdapter()).registerTypeHierarchyAdapter(LootContext.EntityTarget.class, new LootContext.EntityTarget.Serializer());
     }
 
     public static GsonBuilder createFunctionSerializer() {
-        return Deserializers.createConditionSerializer().registerTypeAdapter((Type)((Object)IntLimiter.class), new IntLimiter.Serializer()).registerTypeHierarchyAdapter(LootPoolEntryContainer.class, new LootPoolEntries.Serializer()).registerTypeHierarchyAdapter(LootItemFunction.class, new LootItemFunctions.Serializer());
+        return Deserializers.createConditionSerializer().registerTypeAdapter((Type)((Object)IntLimiter.class), new IntLimiter.Serializer()).registerTypeHierarchyAdapter(LootPoolEntryContainer.class, LootPoolEntries.createGsonAdapter()).registerTypeHierarchyAdapter(LootItemFunction.class, LootItemFunctions.createGsonAdapter());
     }
 
     public static GsonBuilder createLootTableSerializer() {

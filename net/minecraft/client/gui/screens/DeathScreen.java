@@ -17,6 +17,7 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
@@ -92,14 +93,14 @@ extends Screen {
         }
         this.drawCenteredString(poseStack, this.font, I18n.get("deathScreen.score", new Object[0]) + ": " + (Object)((Object)ChatFormatting.YELLOW) + this.minecraft.player.getScore(), this.width / 2, 100, 0xFFFFFF);
         if (this.causeOfDeath != null && j > 85 && j < 85 + this.font.lineHeight) {
-            Component component = this.getClickedComponentAt(i);
-            this.renderComponentHoverEffect(poseStack, component, i, j);
+            Style style = this.getClickedComponentStyleAt(i);
+            this.renderComponentHoverEffect(poseStack, style, i, j);
         }
         super.render(poseStack, i, j, f);
     }
 
     @Nullable
-    public Component getClickedComponentAt(int i) {
+    private Style getClickedComponentStyleAt(int i) {
         if (this.causeOfDeath == null) {
             return null;
         }
@@ -109,14 +110,14 @@ extends Screen {
         if (i < k || i > l) {
             return null;
         }
-        return this.minecraft.font.getSplitter().componentAtWidth(this.causeOfDeath, i - k);
+        return this.minecraft.font.getSplitter().componentStyleAtWidth(this.causeOfDeath, i - k);
     }
 
     @Override
     public boolean mouseClicked(double d, double e, int i) {
-        Component component;
-        if (this.causeOfDeath != null && e > 85.0 && e < (double)(85 + this.font.lineHeight) && (component = this.getClickedComponentAt((int)d)) != null && component.getStyle().getClickEvent() != null && component.getStyle().getClickEvent().getAction() == ClickEvent.Action.OPEN_URL) {
-            this.handleComponentClicked(component);
+        Style style;
+        if (this.causeOfDeath != null && e > 85.0 && e < (double)(85 + this.font.lineHeight) && (style = this.getClickedComponentStyleAt((int)d)) != null && style.getClickEvent() != null && style.getClickEvent().getAction() == ClickEvent.Action.OPEN_URL) {
+            this.handleComponentClicked(style);
             return false;
         }
         return super.mouseClicked(d, e, i);

@@ -235,7 +235,7 @@ extends BaseEntityBlock {
             if (!level.isClientSide) {
                 this.openScreen(level, blockPos, player);
             }
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if (itemStack.isEmpty() || itemStack.getItem().is(ItemTags.LECTERN_BOOKS)) {

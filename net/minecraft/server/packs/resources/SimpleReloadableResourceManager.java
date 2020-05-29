@@ -19,6 +19,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
@@ -43,15 +44,15 @@ implements ReloadableResourceManager {
     private final List<PreparableReloadListener> listeners = Lists.newArrayList();
     private final List<PreparableReloadListener> recentlyRegistered = Lists.newArrayList();
     private final Set<String> namespaces = Sets.newLinkedHashSet();
+    private final List<Pack> packs = Lists.newArrayList();
     private final PackType type;
-    private final Thread mainThread;
 
-    public SimpleReloadableResourceManager(PackType packType, Thread thread) {
+    public SimpleReloadableResourceManager(PackType packType) {
         this.type = packType;
-        this.mainThread = thread;
     }
 
     public void add(Pack pack) {
+        this.packs.add(pack);
         for (String string : pack.getNamespaces(this.type)) {
             this.namespaces.add(string);
             FallbackResourceManager fallbackResourceManager = this.namespacedPacks.get(string);
@@ -111,12 +112,7 @@ implements ReloadableResourceManager {
     private void clear() {
         this.namespacedPacks.clear();
         this.namespaces.clear();
-    }
-
-    @Override
-    public CompletableFuture<Unit> reload(Executor executor, Executor executor2, List<Pack> list, CompletableFuture<Unit> completableFuture) {
-        ReloadInstance reloadInstance = this.createFullReload(executor, executor2, completableFuture, list);
-        return reloadInstance.done();
+        this.packs.clear();
     }
 
     @Override
@@ -144,6 +140,12 @@ implements ReloadableResourceManager {
             }
         }
         return this.createReload(executor, executor2, this.listeners, completableFuture);
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public Stream<Pack> listPacks() {
+        return this.packs.stream();
     }
 
     static class FailingReloadInstance

@@ -6,13 +6,14 @@ package net.minecraft.world.level.storage.loot.functions;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,6 +24,11 @@ extends LootItemConditionalFunction {
 
     private SmeltItemFunction(LootItemCondition[] lootItemConditions) {
         super(lootItemConditions);
+    }
+
+    @Override
+    public LootItemFunctionType getType() {
+        return LootItemFunctions.FURNACE_SMELT;
     }
 
     @Override
@@ -47,10 +53,6 @@ extends LootItemConditionalFunction {
 
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<SmeltItemFunction> {
-        protected Serializer() {
-            super(new ResourceLocation("furnace_smelt"), SmeltItemFunction.class);
-        }
-
         @Override
         public SmeltItemFunction deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
             return new SmeltItemFunction(lootItemConditions);

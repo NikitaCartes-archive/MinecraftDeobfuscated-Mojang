@@ -32,6 +32,7 @@ import net.minecraft.client.User;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.main.SilentInitException;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.server.Bootstrap;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.player.Player;
 import org.apache.logging.log4j.LogManager;
@@ -124,6 +125,9 @@ public class Main {
         String string8 = Main.parseArgument(optionSet, optionSpec);
         Integer integer = Main.parseArgument(optionSet, optionSpec2);
         CrashReport.preload();
+        Bootstrap.bootStrap();
+        Bootstrap.validate();
+        Util.startTimerHackThread();
         User user = new User((String)optionSpec10.value(optionSet), string6, (String)optionSpec12.value(optionSet), (String)optionSpec21.value(optionSet));
         GameConfig gameConfig = new GameConfig(new GameConfig.UserData(user, propertyMap, propertyMap2, proxy), new DisplayData(i, j, optionalInt, optionalInt2, bl), new GameConfig.FolderData(file, file3, file2, string7), new GameConfig.GameData(bl2, string4, string5, bl3, bl4), new GameConfig.ServerData(string8, integer));
         Thread thread = new Thread("Client Shutdown Thread"){

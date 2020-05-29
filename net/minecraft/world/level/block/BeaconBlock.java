@@ -49,7 +49,7 @@ implements BeaconBeamBlock {
             player.openMenu((BeaconBlockEntity)blockEntity);
             player.awardStat(Stats.INTERACT_WITH_BEACON);
         }
-        return InteractionResult.SUCCESS;
+        return InteractionResult.CONSUME;
     }
 
     @Override

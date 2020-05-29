@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.gui;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
@@ -10,11 +11,12 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
+import java.util.function.BiConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
 
 @Environment(value=EnvType.CLIENT)
@@ -113,16 +115,26 @@ public abstract class GuiComponent {
         font.drawShadow(poseStack, string, (float)(i - font.width(string) / 2), (float)j, k);
     }
 
-    public void drawCenteredString(PoseStack poseStack, Font font, Component component, int i, int j, int k) {
-        font.drawShadow(poseStack, component, (float)(i - font.width(component) / 2), (float)j, k);
+    public void drawCenteredString(PoseStack poseStack, Font font, FormattedText formattedText, int i, int j, int k) {
+        font.drawShadow(poseStack, formattedText, (float)(i - font.width(formattedText) / 2), (float)j, k);
     }
 
     public void drawString(PoseStack poseStack, Font font, String string, int i, int j, int k) {
         font.drawShadow(poseStack, string, (float)i, (float)j, k);
     }
 
-    public void drawString(PoseStack poseStack, Font font, Component component, int i, int j, int k) {
-        font.drawShadow(poseStack, component, (float)i, (float)j, k);
+    public void drawString(PoseStack poseStack, Font font, FormattedText formattedText, int i, int j, int k) {
+        font.drawShadow(poseStack, formattedText, (float)i, (float)j, k);
+    }
+
+    public void blitOutlineBlack(int i, int j, BiConsumer<Integer, Integer> biConsumer) {
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        biConsumer.accept(i + 1, j);
+        biConsumer.accept(i - 1, j);
+        biConsumer.accept(i, j + 1);
+        biConsumer.accept(i, j - 1);
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        biConsumer.accept(i, j);
     }
 
     public static void blit(PoseStack poseStack, int i, int j, int k, int l, int m, TextureAtlasSprite textureAtlasSprite) {

@@ -27,6 +27,8 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.RandomValueBounds;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class SetStewEffectFunction
@@ -36,6 +38,11 @@ extends LootItemConditionalFunction {
     private SetStewEffectFunction(LootItemCondition[] lootItemConditions, Map<MobEffect, RandomValueBounds> map) {
         super(lootItemConditions);
         this.effectDurationMap = ImmutableMap.copyOf(map);
+    }
+
+    @Override
+    public LootItemFunctionType getType() {
+        return LootItemFunctions.SET_STEW_EFFECT;
     }
 
     @Override
@@ -61,10 +68,6 @@ extends LootItemConditionalFunction {
 
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<SetStewEffectFunction> {
-        public Serializer() {
-            super(new ResourceLocation("set_stew_effect"), SetStewEffectFunction.class);
-        }
-
         @Override
         public void serialize(JsonObject jsonObject, SetStewEffectFunction setStewEffectFunction, JsonSerializationContext jsonSerializationContext) {
             super.serialize(jsonObject, setStewEffectFunction, jsonSerializationContext);

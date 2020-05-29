@@ -8,7 +8,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 
@@ -21,9 +20,9 @@ implements Packet<ServerGamePacketListener> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public ServerboundSignUpdatePacket(BlockPos blockPos, Component component, Component component2, Component component3, Component component4) {
+    public ServerboundSignUpdatePacket(BlockPos blockPos, String string, String string2, String string3, String string4) {
         this.pos = blockPos;
-        this.lines = new String[]{component.getString(), component2.getString(), component3.getString(), component4.getString()};
+        this.lines = new String[]{string, string2, string3, string4};
     }
 
     @Override

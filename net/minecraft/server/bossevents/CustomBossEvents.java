@@ -9,18 +9,12 @@ import java.util.Map;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.bossevents.CustomBossEvent;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 public class CustomBossEvents {
-    private final MinecraftServer server;
     private final Map<ResourceLocation, CustomBossEvent> events = Maps.newHashMap();
-
-    public CustomBossEvents(MinecraftServer minecraftServer) {
-        this.server = minecraftServer;
-    }
 
     @Nullable
     public CustomBossEvent get(ResourceLocation resourceLocation) {

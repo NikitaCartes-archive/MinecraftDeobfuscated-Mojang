@@ -184,7 +184,7 @@ Saddleable {
     }
 
     @Override
-    public double getRideHeight() {
+    public double getPassengersRidingOffset() {
         float f = Math.min(0.25f, this.animationSpeed);
         float g = this.animationPosition;
         return (double)this.getBbHeight() - 0.2 + (double)(0.12f * Mth.cos(g * 1.5f) * 2.0f * f);

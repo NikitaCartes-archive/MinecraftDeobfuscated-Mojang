@@ -40,14 +40,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
-import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -73,6 +71,7 @@ import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.client.gui.font.FontManager;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.ConnectScreen;
+import net.minecraft.client.gui.screens.DatapackLoadFailureScreen;
 import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.InBedChatScreen;
@@ -153,6 +152,7 @@ import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerResources;
 import net.minecraft.server.level.progress.ProcessorChunkProgressListener;
 import net.minecraft.server.level.progress.StoringChunkProgressListener;
 import net.minecraft.server.packs.Pack;
@@ -208,6 +208,7 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
@@ -350,9 +351,7 @@ WindowEventHandler {
         this.versionType = gameConfig.game.versionType;
         this.profileProperties = gameConfig.user.profileProperties;
         this.clientPackSource = new ClientPackSource(new File(this.gameDirectory, "server-resource-packs"), gameConfig.location.getAssetIndex());
-        this.resourcePackRepository = new PackRepository<UnopenedResourcePack>(Minecraft::createClientPackAdapter);
-        this.resourcePackRepository.addSource(this.clientPackSource);
-        this.resourcePackRepository.addSource(new FolderRepositorySource(this.resourcePackDirectory));
+        this.resourcePackRepository = new PackRepository<UnopenedResourcePack>(Minecraft::createClientPackAdapter, this.clientPackSource, new FolderRepositorySource(this.resourcePackDirectory));
         this.proxy = gameConfig.user.proxy;
         this.minecraftSessionService = new YggdrasilAuthenticationService(this.proxy, UUID.randomUUID().toString()).createMinecraftSessionService();
         this.user = gameConfig.user.user;
@@ -370,8 +369,6 @@ WindowEventHandler {
             string = null;
             i = 0;
         }
-        Bootstrap.bootStrap();
-        Bootstrap.validate();
         KeybindComponent.setKeyResolver(KeyMapping::createNameSupplier);
         this.fixerUpper = DataFixers.getDataFixer();
         this.toast = new ToastComponent(this);
@@ -379,7 +376,6 @@ WindowEventHandler {
         this.gameThread = Thread.currentThread();
         this.options = new Options(this, this.gameDirectory);
         this.hotbarManager = new HotbarManager(this.gameDirectory, this.fixerUpper);
-        this.startTimerHackThread();
         LOGGER.info("Backend library: {}", (Object)RenderSystem.getBackendDescription());
         DisplayData displayData = this.options.overrideHeight > 0 && this.options.overrideWidth > 0 ? new DisplayData(this.options.overrideWidth, this.options.overrideHeight, gameConfig.display.fullscreenWidth, gameConfig.display.fullscreenHeight, gameConfig.display.isFullscreen) : gameConfig.display;
         Util.timeSource = RenderSystem.initBackendSystem();
@@ -401,9 +397,9 @@ WindowEventHandler {
         RenderSystem.initRenderer(this.options.glDebugVerbosity, false);
         this.mainRenderTarget = new RenderTarget(this.window.getWidth(), this.window.getHeight(), true, ON_OSX);
         this.mainRenderTarget.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        this.resourceManager = new SimpleReloadableResourceManager(PackType.CLIENT_RESOURCES, this.gameThread);
-        this.options.loadResourcePacks(this.resourcePackRepository);
+        this.resourceManager = new SimpleReloadableResourceManager(PackType.CLIENT_RESOURCES);
         this.resourcePackRepository.reload();
+        this.options.loadSelectedResourcePacks(this.resourcePackRepository);
         this.languageManager = new LanguageManager(this.options.languageCode);
         this.resourceManager.registerReloadListener(this.languageManager);
         this.textureManager = new TextureManager(this.resourceManager);
@@ -464,9 +460,8 @@ WindowEventHandler {
             this.setScreen(new TitleScreen(true));
         }
         LoadingOverlay.registerTextures(this);
-        List<Pack> list = this.resourcePackRepository.getSelected().stream().map(UnopenedPack::open).collect(Collectors.toList());
+        List<Pack> list = this.resourcePackRepository.openAllSelected();
         this.setOverlay(new LoadingOverlay(this, this.resourceManager.createFullReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list), optional -> Util.ifElse(optional, this::rollbackResourcePacks, () -> {
-            this.languageManager.reload(list);
             if (SharedConstants.IS_RUNNING_IN_IDE) {
                 this.selfTest();
             }
@@ -505,7 +500,7 @@ WindowEventHandler {
     }
 
     private void rollbackResourcePacks(Throwable throwable) {
-        if (this.resourcePackRepository.getSelected().size() > 1) {
+        if (this.resourcePackRepository.getSelectedIds().size() > 1) {
             TextComponent component = throwable instanceof SimpleReloadableResourceManager.ResourcePackLoadingFailure ? new TextComponent(((SimpleReloadableResourceManager.ResourcePackLoadingFailure)throwable).getPack().getName()) : null;
             LOGGER.info("Caught error loading resourcepacks, removing all selected resourcepacks", throwable);
             this.resourcePackRepository.setSelected(Collections.emptyList());
@@ -564,7 +559,6 @@ WindowEventHandler {
 
     void selectMainFont(boolean bl) {
         this.fontManager.setRenames(bl ? ImmutableMap.of(DEFAULT_FONT, UNIFORM_FONT) : ImmutableMap.of());
-        this.font.setBidirectional(this.languageManager.isBidirectional());
     }
 
     private void createSearchTrees() {
@@ -611,23 +605,6 @@ WindowEventHandler {
         return this.versionType;
     }
 
-    private void startTimerHackThread() {
-        Thread thread = new Thread("Timer hack thread"){
-
-            @Override
-            public void run() {
-                while (Minecraft.this.running) {
-                    try {
-                        Thread.sleep(Integer.MAX_VALUE);
-                    } catch (InterruptedException interruptedException) {}
-                }
-            }
-        };
-        thread.setDaemon(true);
-        thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
-        thread.start();
-    }
-
     public void delayCrash(CrashReport crashReport) {
         this.delayedCrash = crashReport;
     }
@@ -662,9 +639,8 @@ WindowEventHandler {
             return completableFuture;
         }
         this.resourcePackRepository.reload();
-        List<Pack> list = this.resourcePackRepository.getSelected().stream().map(UnopenedPack::open).collect(Collectors.toList());
+        List<Pack> list = this.resourcePackRepository.openAllSelected();
         this.setOverlay(new LoadingOverlay(this, this.resourceManager.createFullReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list), optional -> Util.ifElse(optional, this::rollbackResourcePacks, () -> {
-            this.languageManager.reload(list);
             this.levelRenderer.allChanged();
             completableFuture.complete(null);
         }), true));
@@ -1412,6 +1388,11 @@ WindowEventHandler {
     }
 
     public void selectLevel(String string, @Nullable LevelSettings levelSettings) {
+        this.selectLevel(string, levelSettings, false);
+    }
+
+    public void selectLevel(String string, @Nullable LevelSettings levelSettings, boolean bl) {
+        ServerResources serverResources;
         String string2;
         LevelStorageSource.LevelStorageAccess levelStorageAccess;
         this.clearLevel();
@@ -1436,6 +1417,23 @@ WindowEventHandler {
             string2 = worldData.getLevelName();
         }
         this.progressListener.set(null);
+        PackRepository<UnopenedPack> packRepository = MinecraftServer.createPackRepository(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR), worldData, bl);
+        CompletableFuture<ServerResources> completableFuture = ServerResources.loadResources(packRepository.openAllSelected(), true, 2, Util.backgroundExecutor(), this);
+        this.managedBlock(completableFuture::isDone);
+        try {
+            serverResources = completableFuture.get();
+            serverResources.updateGlobals();
+        } catch (Exception exception) {
+            LOGGER.warn("Failed to load datapacks, can't proceed with server load", (Throwable)exception);
+            this.setScreen(new DatapackLoadFailureScreen(string, levelSettings));
+            try {
+                levelStorageAccess.close();
+                packRepository.close();
+            } catch (IOException iOException2) {
+                LOGGER.warn("Failed to unlock access to level {}", (Object)string, (Object)exception);
+            }
+            return;
+        }
         try {
             YggdrasilAuthenticationService yggdrasilAuthenticationService = new YggdrasilAuthenticationService(this.proxy, UUID.randomUUID().toString());
             MinecraftSessionService minecraftSessionService = yggdrasilAuthenticationService.createMinecraftSessionService();
@@ -1444,7 +1442,7 @@ WindowEventHandler {
             SkullBlockEntity.setProfileCache(gameProfileCache);
             SkullBlockEntity.setSessionService(minecraftSessionService);
             GameProfileCache.setUsesAuthentication(false);
-            this.singleplayerServer = new IntegratedServer(this, levelStorageAccess, worldData, minecraftSessionService, gameProfileRepository, gameProfileCache, i -> {
+            this.singleplayerServer = new IntegratedServer(this, levelStorageAccess, packRepository, serverResources, worldData, minecraftSessionService, gameProfileRepository, gameProfileCache, i -> {
                 StoringChunkProgressListener storingChunkProgressListener = new StoringChunkProgressListener(i + 0);
                 storingChunkProgressListener.start();
                 this.progressListener.set(storingChunkProgressListener);
@@ -1698,8 +1696,8 @@ WindowEventHandler {
 
     private ItemStack addCustomNbtData(ItemStack itemStack, BlockEntity blockEntity) {
         CompoundTag compoundTag = blockEntity.save(new CompoundTag());
-        if (itemStack.getItem() instanceof PlayerHeadItem && compoundTag.contains("Owner")) {
-            CompoundTag compoundTag2 = compoundTag.getCompound("Owner");
+        if (itemStack.getItem() instanceof PlayerHeadItem && compoundTag.contains("SkullOwner")) {
+            CompoundTag compoundTag2 = compoundTag.getCompound("SkullOwner");
             itemStack.getOrCreateTag().put("SkullOwner", compoundTag2);
             return itemStack;
         }
@@ -1780,7 +1778,7 @@ WindowEventHandler {
         snooper.setDynamicData("subtitles", this.options.showSubtitles);
         snooper.setDynamicData("touch", this.options.touchscreen ? "touch" : "mouse");
         int i = 0;
-        for (UnopenedResourcePack unopenedResourcePack : this.resourcePackRepository.getSelected()) {
+        for (UnopenedResourcePack unopenedResourcePack : this.resourcePackRepository.getSelectedPacks()) {
             if (unopenedResourcePack.isRequired() || unopenedResourcePack.isFixedPosition()) continue;
             snooper.setDynamicData("resource_pack[" + i++ + "]", unopenedResourcePack.getId());
         }

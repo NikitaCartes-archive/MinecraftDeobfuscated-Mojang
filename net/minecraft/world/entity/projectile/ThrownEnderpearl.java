@@ -23,7 +23,6 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -126,7 +125,7 @@ extends ThrowableItemProjectile {
 
     @Override
     @Nullable
-    public Entity changeDimension(ResourceKey<DimensionType> resourceKey) {
+    public Entity changeDimension(ResourceKey<Level> resourceKey) {
         Entity entity = this.getOwner();
         if (entity != null && entity.level.dimension() != resourceKey) {
             this.setOwner(null);

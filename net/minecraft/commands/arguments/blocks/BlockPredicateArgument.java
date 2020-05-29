@@ -22,6 +22,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagManager;
 import net.minecraft.world.level.block.Block;
@@ -71,7 +72,7 @@ implements ArgumentType<Result> {
         } catch (CommandSyntaxException commandSyntaxException) {
             // empty catch block
         }
-        return blockStateParser.fillSuggestions(suggestionsBuilder);
+        return blockStateParser.fillSuggestions(suggestionsBuilder, BlockTags.getAllTags());
     }
 
     @Override

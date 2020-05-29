@@ -10,7 +10,6 @@ import com.google.gson.JsonSerializationContext;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -71,12 +70,8 @@ extends LootPoolEntryContainer {
 
     public static abstract class Serializer<T extends LootPoolSingletonContainer>
     extends LootPoolEntryContainer.Serializer<T> {
-        public Serializer(ResourceLocation resourceLocation, Class<T> class_) {
-            super(resourceLocation, class_);
-        }
-
         @Override
-        public void serialize(JsonObject jsonObject, T lootPoolSingletonContainer, JsonSerializationContext jsonSerializationContext) {
+        public void serializeCustom(JsonObject jsonObject, T lootPoolSingletonContainer, JsonSerializationContext jsonSerializationContext) {
             if (((LootPoolSingletonContainer)lootPoolSingletonContainer).weight != 1) {
                 jsonObject.addProperty("weight", ((LootPoolSingletonContainer)lootPoolSingletonContainer).weight);
             }
@@ -89,7 +84,7 @@ extends LootPoolEntryContainer {
         }
 
         @Override
-        public final T deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
+        public final T deserializeCustom(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
             int i = GsonHelper.getAsInt(jsonObject, "weight", 1);
             int j = GsonHelper.getAsInt(jsonObject, "quality", 0);
             LootItemFunction[] lootItemFunctions = GsonHelper.getAsObject(jsonObject, "functions", new LootItemFunction[0], jsonDeserializationContext, LootItemFunction[].class);
@@ -99,8 +94,8 @@ extends LootPoolEntryContainer {
         protected abstract T deserialize(JsonObject var1, JsonDeserializationContext var2, int var3, int var4, LootItemCondition[] var5, LootItemFunction[] var6);
 
         @Override
-        public /* synthetic */ LootPoolEntryContainer deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
+        public /* synthetic */ LootPoolEntryContainer deserializeCustom(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
+            return this.deserializeCustom(jsonObject, jsonDeserializationContext, lootItemConditions);
         }
     }
 

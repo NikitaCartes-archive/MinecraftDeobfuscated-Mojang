@@ -193,16 +193,16 @@ extends ObjectSelectionList<WorldListEntry> {
                 if (this.summary.isLocked()) {
                     GuiComponent.blit(poseStack, k, j, 96.0f, q, 32, 32, 256, 256);
                     if (bl2) {
-                        MutableComponent component2 = new TranslatableComponent("selectWorld.locked").withStyle(ChatFormatting.RED);
-                        this.screen.setToolTip(this.minecraft.font.split(component2, 175));
+                        MutableComponent formattedText = new TranslatableComponent("selectWorld.locked").withStyle(ChatFormatting.RED);
+                        this.screen.setToolTip(this.minecraft.font.split(formattedText, 175));
                     }
                 } else if (this.summary.markVersionInList()) {
                     GuiComponent.blit(poseStack, k, j, 32.0f, q, 32, 32, 256, 256);
                     if (this.summary.isOldCustomizedWorld()) {
                         GuiComponent.blit(poseStack, k, j, 96.0f, q, 32, 32, 256, 256);
                         if (bl2) {
-                            MutableComponent component2 = new TranslatableComponent("selectWorld.tooltip.unsupported", this.summary.getWorldVersionName()).withStyle(ChatFormatting.RED);
-                            this.screen.setToolTip(this.minecraft.font.split(component2, 175));
+                            MutableComponent formattedText = new TranslatableComponent("selectWorld.tooltip.unsupported", this.summary.getWorldVersionName()).withStyle(ChatFormatting.RED);
+                            this.screen.setToolTip(this.minecraft.font.split(formattedText, 175));
                         }
                     } else if (this.summary.experimental()) {
                         GuiComponent.blit(poseStack, k, j, 96.0f, q, 32, 32, 256, 256);

@@ -28,6 +28,7 @@ implements MenuAccess<ChestMenu> {
         int j = 114;
         this.containerRows = chestMenu.getRowCount();
         this.imageHeight = 114 + this.containerRows * 18;
+        this.inventoryLabelY = this.imageHeight - 94;
     }
 
     @Override
@@ -35,12 +36,6 @@ implements MenuAccess<ChestMenu> {
         this.renderBackground(poseStack);
         super.render(poseStack, i, j, f);
         this.renderTooltip(poseStack, i, j);
-    }
-
-    @Override
-    protected void renderLabels(PoseStack poseStack, int i, int j) {
-        this.font.draw(poseStack, this.title, 8.0f, 6.0f, 0x404040);
-        this.font.draw(poseStack, this.inventory.getDisplayName(), 8.0f, (float)(this.imageHeight - 96 + 2), 0x404040);
     }
 
     @Override

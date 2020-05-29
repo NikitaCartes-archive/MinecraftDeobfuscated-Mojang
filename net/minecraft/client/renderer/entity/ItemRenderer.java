@@ -103,7 +103,7 @@ implements ResourceManagerReloadListener {
         if (bakedModel.isCustomRenderer() || itemStack.getItem() == Items.TRIDENT && !bl3) {
             BlockEntityWithoutLevelRenderer.instance.renderByItem(itemStack, poseStack, multiBufferSource, i, j);
         } else {
-            RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack);
+            RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack, transformType != ItemTransforms.TransformType.GROUND);
             VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, renderType, true, itemStack.hasFoil());
             this.renderModelLists(bakedModel, itemStack, i, j, poseStack, vertexConsumer);
         }

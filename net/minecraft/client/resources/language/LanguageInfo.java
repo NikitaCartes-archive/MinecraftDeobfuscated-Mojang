@@ -3,19 +3,20 @@
  */
 package net.minecraft.client.resources.language;
 
+import com.mojang.bridge.game.Language;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(value=EnvType.CLIENT)
-public class Language
-implements com.mojang.bridge.game.Language,
-Comparable<Language> {
+public class LanguageInfo
+implements Language,
+Comparable<LanguageInfo> {
     private final String code;
     private final String region;
     private final String name;
     private final boolean bidirectional;
 
-    public Language(String string, String string2, String string3, boolean bl) {
+    public LanguageInfo(String string, String string2, String string3, boolean bl) {
         this.code = string;
         this.region = string2;
         this.name = string3;
@@ -49,10 +50,10 @@ Comparable<Language> {
         if (this == object) {
             return true;
         }
-        if (!(object instanceof Language)) {
+        if (!(object instanceof LanguageInfo)) {
             return false;
         }
-        return this.code.equals(((Language)object).code);
+        return this.code.equals(((LanguageInfo)object).code);
     }
 
     public int hashCode() {
@@ -60,13 +61,13 @@ Comparable<Language> {
     }
 
     @Override
-    public int compareTo(Language language) {
-        return this.code.compareTo(language.code);
+    public int compareTo(LanguageInfo languageInfo) {
+        return this.code.compareTo(languageInfo.code);
     }
 
     @Override
     public /* synthetic */ int compareTo(Object object) {
-        return this.compareTo((Language)object);
+        return this.compareTo((LanguageInfo)object);
     }
 }
 

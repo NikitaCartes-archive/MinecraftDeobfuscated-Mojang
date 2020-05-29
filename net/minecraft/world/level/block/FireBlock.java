@@ -110,6 +110,7 @@ extends BaseFireBlock {
     @Override
     public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
         boolean bl2;
+        serverLevel.getBlockTicks().scheduleTick(blockPos, this, FireBlock.getFireTickDelay(serverLevel.random));
         if (!serverLevel.getGameRules().getBoolean(GameRules.RULE_DOFIRETICK)) {
             return;
         }
@@ -129,7 +130,6 @@ extends BaseFireBlock {
             serverLevel.setBlock(blockPos, blockState, 4);
         }
         if (!bl) {
-            serverLevel.getBlockTicks().scheduleTick(blockPos, this, FireBlock.getFireTickDelay(serverLevel.random));
             if (!this.isValidFireLocation(serverLevel, blockPos)) {
                 BlockPos blockPos2 = blockPos.below();
                 if (!serverLevel.getBlockState(blockPos2).isFaceSturdy(serverLevel, blockPos2, Direction.UP) || i > 3) {

@@ -18,9 +18,9 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.CampfireBlock;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,14 +37,14 @@ public class LocationPredicate {
     @Nullable
     private final StructureFeature<?> feature;
     @Nullable
-    private final ResourceKey<DimensionType> dimension;
+    private final ResourceKey<Level> dimension;
     @Nullable
     private final Boolean smokey;
     private final LightPredicate light;
     private final BlockPredicate block;
     private final FluidPredicate fluid;
 
-    public LocationPredicate(MinMaxBounds.Floats floats, MinMaxBounds.Floats floats2, MinMaxBounds.Floats floats3, @Nullable Biome biome, @Nullable StructureFeature<?> structureFeature, @Nullable ResourceKey<DimensionType> resourceKey, @Nullable Boolean boolean_, LightPredicate lightPredicate, BlockPredicate blockPredicate, FluidPredicate fluidPredicate) {
+    public LocationPredicate(MinMaxBounds.Floats floats, MinMaxBounds.Floats floats2, MinMaxBounds.Floats floats3, @Nullable Biome biome, @Nullable StructureFeature<?> structureFeature, @Nullable ResourceKey<Level> resourceKey, @Nullable Boolean boolean_, LightPredicate lightPredicate, BlockPredicate blockPredicate, FluidPredicate fluidPredicate) {
         this.x = floats;
         this.y = floats2;
         this.z = floats3;
@@ -61,7 +61,7 @@ public class LocationPredicate {
         return new LocationPredicate(MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, biome, null, null, null, LightPredicate.ANY, BlockPredicate.ANY, FluidPredicate.ANY);
     }
 
-    public static LocationPredicate inDimension(ResourceKey<DimensionType> resourceKey) {
+    public static LocationPredicate inDimension(ResourceKey<Level> resourceKey) {
         return new LocationPredicate(MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, null, null, resourceKey, null, LightPredicate.ANY, BlockPredicate.ANY, FluidPredicate.ANY);
     }
 
@@ -119,7 +119,7 @@ public class LocationPredicate {
             jsonObject.add("position", jsonObject2);
         }
         if (this.dimension != null) {
-            DimensionType.RESOURCE_KEY_CODEC.encodeStart(JsonOps.INSTANCE, this.dimension).resultOrPartial(LOGGER::error).ifPresent(jsonElement -> jsonObject.add("dimension", (JsonElement)jsonElement));
+            Level.RESOURCE_KEY_CODEC.encodeStart(JsonOps.INSTANCE, this.dimension).resultOrPartial(LOGGER::error).ifPresent(jsonElement -> jsonObject.add("dimension", (JsonElement)jsonElement));
         }
         if (this.feature != null) {
             jsonObject.addProperty("feature", this.feature.getFeatureName());
@@ -145,7 +145,7 @@ public class LocationPredicate {
         MinMaxBounds.Floats floats = MinMaxBounds.Floats.fromJson(jsonObject2.get("x"));
         MinMaxBounds.Floats floats2 = MinMaxBounds.Floats.fromJson(jsonObject2.get("y"));
         MinMaxBounds.Floats floats3 = MinMaxBounds.Floats.fromJson(jsonObject2.get("z"));
-        ResourceKey resourceKey = jsonObject.has("dimension") ? (ResourceKey)ResourceLocation.CODEC.parse(JsonOps.INSTANCE, jsonObject.get("dimension")).resultOrPartial(LOGGER::error).map(resourceLocation -> ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, resourceLocation)).orElse(null) : null;
+        ResourceKey resourceKey = jsonObject.has("dimension") ? (ResourceKey)ResourceLocation.CODEC.parse(JsonOps.INSTANCE, jsonObject.get("dimension")).resultOrPartial(LOGGER::error).map(resourceLocation -> ResourceKey.create(Registry.DIMENSION_REGISTRY, resourceLocation)).orElse(null) : null;
         StructureFeature structureFeature = jsonObject.has("feature") ? (StructureFeature)StructureFeature.STRUCTURES_REGISTRY.get(GsonHelper.getAsString(jsonObject, "feature")) : null;
         Biome biome = null;
         if (jsonObject.has("biome")) {
@@ -168,7 +168,7 @@ public class LocationPredicate {
         @Nullable
         private StructureFeature<?> feature;
         @Nullable
-        private ResourceKey<DimensionType> dimension;
+        private ResourceKey<Level> dimension;
         @Nullable
         private Boolean smokey;
         private LightPredicate light = LightPredicate.ANY;

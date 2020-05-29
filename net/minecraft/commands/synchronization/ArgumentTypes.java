@@ -18,7 +18,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.commands.arguments.ColorArgument;
 import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.CompoundTagArgument;
-import net.minecraft.commands.arguments.DimensionTypeArgument;
+import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.EntitySummonArgument;
@@ -116,7 +116,7 @@ public class ArgumentTypes {
         ArgumentTypes.register("float_range", RangeArgument.Floats.class, new RangeArgument.Floats.Serializer());
         ArgumentTypes.register("item_enchantment", ItemEnchantmentArgument.class, new EmptyArgumentSerializer<ItemEnchantmentArgument>(ItemEnchantmentArgument::enchantment));
         ArgumentTypes.register("entity_summon", EntitySummonArgument.class, new EmptyArgumentSerializer<EntitySummonArgument>(EntitySummonArgument::id));
-        ArgumentTypes.register("dimension", DimensionTypeArgument.class, new EmptyArgumentSerializer<DimensionTypeArgument>(DimensionTypeArgument::dimension));
+        ArgumentTypes.register("dimension", DimensionArgument.class, new EmptyArgumentSerializer<DimensionArgument>(DimensionArgument::dimension));
         ArgumentTypes.register("time", TimeArgument.class, new EmptyArgumentSerializer<TimeArgument>(TimeArgument::time));
         ArgumentTypes.register("uuid", UuidArgument.class, new EmptyArgumentSerializer<UuidArgument>(UuidArgument::uuid));
         if (SharedConstants.IS_RUNNING_IN_IDE) {

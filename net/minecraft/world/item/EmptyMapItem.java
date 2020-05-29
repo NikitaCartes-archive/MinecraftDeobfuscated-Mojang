@@ -31,12 +31,12 @@ extends ComplexItem {
         player.awardStat(Stats.ITEM_USED.get(this));
         player.playSound(SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, 1.0f, 1.0f);
         if (itemStack2.isEmpty()) {
-            return InteractionResultHolder.success(itemStack);
+            return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
         }
         if (!player.inventory.add(itemStack.copy())) {
             player.drop(itemStack, false);
         }
-        return InteractionResultHolder.success(itemStack2);
+        return InteractionResultHolder.sidedSuccess(itemStack2, level.isClientSide());
     }
 }
 

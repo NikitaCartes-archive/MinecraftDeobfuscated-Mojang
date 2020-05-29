@@ -9,6 +9,8 @@ import net.minecraft.client.model.AnimationUtils;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 
@@ -48,10 +50,21 @@ extends PlayerModel<T> {
         float m = 0.08f + g * 0.4f;
         this.earRight.zRot = -0.5235988f - Mth.cos(l * 1.2f) * m;
         this.earLeft.zRot = 0.5235988f + Mth.cos(l) * m;
-        if (mob instanceof Piglin) {
+        if (((Entity)mob).getType() == EntityType.PIGLIN) {
             Piglin piglin = (Piglin)mob;
             Piglin.PiglinArmPose piglinArmPose = piglin.getArmPose();
-            if (piglinArmPose == Piglin.PiglinArmPose.CROSSBOW_HOLD) {
+            if (piglinArmPose == Piglin.PiglinArmPose.DANCING) {
+                float n = h / 60.0f;
+                this.earLeft.zRot = 0.5235988f + (float)Math.PI / 180 * Mth.sin(n * 30.0f) * 10.0f;
+                this.earRight.zRot = -0.5235988f - (float)Math.PI / 180 * Mth.cos(n * 30.0f) * 10.0f;
+                this.head.x = Mth.sin(n * 10.0f);
+                this.head.y = Mth.sin(n * 40.0f);
+                this.rightArm.zRot = (float)Math.PI / 180 * (70.0f + Mth.cos(n * 40.0f) * 10.0f);
+                this.leftArm.zRot = this.rightArm.zRot * -1.0f;
+                this.body.y = Mth.sin(n * 40.0f) * 0.35f;
+            } else if (piglinArmPose == Piglin.PiglinArmPose.ATTACKING_WITH_MELEE_WEAPON && this.attackTime == 0.0f) {
+                this.holdWeaponHigh(mob);
+            } else if (piglinArmPose == Piglin.PiglinArmPose.CROSSBOW_HOLD) {
                 AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, !((Mob)mob).isLeftHanded());
             } else if (piglinArmPose == Piglin.PiglinArmPose.CROSSBOW_CHARGE) {
                 AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, mob, !((Mob)mob).isLeftHanded());
@@ -66,6 +79,25 @@ extends PlayerModel<T> {
                     this.leftArm.xRot = -0.9f;
                 }
             }
+        } else if (((Entity)mob).getType() == EntityType.ZOMBIFIED_PIGLIN) {
+            AnimationUtils.animateZombieArms(this.leftArm, this.rightArm, ((Mob)mob).isAggressive(), this.attackTime, h);
+        }
+    }
+
+    @Override
+    protected void setupAttackAnimation(T mob, float f) {
+        if (this.attackTime > 0.0f && mob instanceof Piglin && ((Piglin)mob).getArmPose() == Piglin.PiglinArmPose.ATTACKING_WITH_MELEE_WEAPON) {
+            AnimationUtils.swingWeaponDown(this.rightArm, this.leftArm, mob, this.attackTime, f);
+            return;
+        }
+        super.setupAttackAnimation(mob, f);
+    }
+
+    private void holdWeaponHigh(T mob) {
+        if (((Mob)mob).isLeftHanded()) {
+            this.leftArm.xRot = -1.8f;
+        } else {
+            this.rightArm.xRot = -1.8f;
         }
     }
 }

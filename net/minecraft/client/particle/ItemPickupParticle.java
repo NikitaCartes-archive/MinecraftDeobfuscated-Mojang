@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.phys.Vec3;
 
 @Environment(value=EnvType.CLIENT)
@@ -34,9 +35,16 @@ extends Particle {
     private ItemPickupParticle(EntityRenderDispatcher entityRenderDispatcher, RenderBuffers renderBuffers, ClientLevel clientLevel, Entity entity, Entity entity2, Vec3 vec3) {
         super(clientLevel, entity.getX(), entity.getY(), entity.getZ(), vec3.x, vec3.y, vec3.z);
         this.renderBuffers = renderBuffers;
-        this.itemEntity = entity;
+        this.itemEntity = this.getSafeCopy(entity);
         this.target = entity2;
         this.entityRenderDispatcher = entityRenderDispatcher;
+    }
+
+    private Entity getSafeCopy(Entity entity) {
+        if (!(entity instanceof ItemEntity)) {
+            return entity;
+        }
+        return ((ItemEntity)entity).copy();
     }
 
     @Override

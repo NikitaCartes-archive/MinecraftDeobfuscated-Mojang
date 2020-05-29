@@ -104,7 +104,7 @@ implements BonemealableBlock {
             SweetBerryBushBlock.popResource(level, blockPos, new ItemStack(Items.SWEET_BERRIES, j + (bl ? 1 : 0)));
             level.playSound(null, blockPos, SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, SoundSource.BLOCKS, 1.0f, 0.8f + level.random.nextFloat() * 0.4f);
             level.setBlock(blockPos, (BlockState)blockState.setValue(AGE, 1), 2);
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
     }

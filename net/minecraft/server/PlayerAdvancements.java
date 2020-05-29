@@ -15,6 +15,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.internal.Streams;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
+import com.mojang.datafixers.DataFixer;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import java.io.File;
@@ -47,8 +48,9 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundSelectAdvancementsTabPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerAdvancementManager;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.GameRules;
 import org.apache.logging.log4j.LogManager;
@@ -59,7 +61,8 @@ public class PlayerAdvancements {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson GSON = new GsonBuilder().registerTypeAdapter((Type)((Object)AdvancementProgress.class), new AdvancementProgress.Serializer()).registerTypeAdapter((Type)((Object)ResourceLocation.class), new ResourceLocation.Serializer()).setPrettyPrinting().create();
     private static final TypeToken<Map<ResourceLocation, AdvancementProgress>> TYPE_TOKEN = new TypeToken<Map<ResourceLocation, AdvancementProgress>>(){};
-    private final MinecraftServer server;
+    private final DataFixer dataFixer;
+    private final PlayerList playerList;
     private final File file;
     private final Map<Advancement, AdvancementProgress> advancements = Maps.newLinkedHashMap();
     private final Set<Advancement> visible = Sets.newLinkedHashSet();
@@ -70,11 +73,12 @@ public class PlayerAdvancements {
     private Advancement lastSelectedTab;
     private boolean isFirstPacket = true;
 
-    public PlayerAdvancements(MinecraftServer minecraftServer, File file, ServerPlayer serverPlayer) {
-        this.server = minecraftServer;
+    public PlayerAdvancements(DataFixer dataFixer, PlayerList playerList, ServerAdvancementManager serverAdvancementManager, File file, ServerPlayer serverPlayer) {
+        this.dataFixer = dataFixer;
+        this.playerList = playerList;
         this.file = file;
         this.player = serverPlayer;
-        this.load();
+        this.load(serverAdvancementManager);
     }
 
     public void setPlayer(ServerPlayer serverPlayer) {
@@ -87,7 +91,7 @@ public class PlayerAdvancements {
         }
     }
 
-    public void reload() {
+    public void reload(ServerAdvancementManager serverAdvancementManager) {
         this.stopListening();
         this.advancements.clear();
         this.visible.clear();
@@ -95,11 +99,11 @@ public class PlayerAdvancements {
         this.progressChanged.clear();
         this.isFirstPacket = true;
         this.lastSelectedTab = null;
-        this.load();
+        this.load(serverAdvancementManager);
     }
 
-    private void registerListeners() {
-        for (Advancement advancement : this.server.getAdvancements().getAllAdvancements()) {
+    private void registerListeners(ServerAdvancementManager serverAdvancementManager) {
+        for (Advancement advancement : serverAdvancementManager.getAllAdvancements()) {
             this.registerListeners(advancement);
         }
     }
@@ -116,15 +120,15 @@ public class PlayerAdvancements {
         }
     }
 
-    private void checkForAutomaticTriggers() {
-        for (Advancement advancement : this.server.getAdvancements().getAllAdvancements()) {
+    private void checkForAutomaticTriggers(ServerAdvancementManager serverAdvancementManager) {
+        for (Advancement advancement : serverAdvancementManager.getAllAdvancements()) {
             if (!advancement.getCriteria().isEmpty()) continue;
             this.award(advancement, "");
             advancement.getRewards().grant(this.player);
         }
     }
 
-    private void load() {
+    private void load(ServerAdvancementManager serverAdvancementManager) {
         if (this.file.isFile()) {
             try (JsonReader jsonReader = new JsonReader(new StringReader(Files.toString(this.file, StandardCharsets.UTF_8)));){
                 jsonReader.setLenient(false);
@@ -132,7 +136,7 @@ public class PlayerAdvancements {
                 if (!dynamic.get("DataVersion").asNumber().result().isPresent()) {
                     dynamic = dynamic.set("DataVersion", dynamic.createInt(1343));
                 }
-                dynamic = this.server.getFixerUpper().update(DataFixTypes.ADVANCEMENTS.getType(), dynamic, dynamic.get("DataVersion").asInt(0), SharedConstants.getCurrentVersion().getWorldVersion());
+                dynamic = this.dataFixer.update(DataFixTypes.ADVANCEMENTS.getType(), dynamic, dynamic.get("DataVersion").asInt(0), SharedConstants.getCurrentVersion().getWorldVersion());
                 dynamic = dynamic.remove("DataVersion");
                 Map<ResourceLocation, AdvancementProgress> map = GSON.getAdapter(TYPE_TOKEN).fromJsonTree(dynamic.getValue());
                 if (map == null) {
@@ -140,7 +144,7 @@ public class PlayerAdvancements {
                 }
                 Stream<Map.Entry> stream = map.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getValue));
                 for (Map.Entry entry : stream.collect(Collectors.toList())) {
-                    Advancement advancement = this.server.getAdvancements().getAdvancement((ResourceLocation)entry.getKey());
+                    Advancement advancement = serverAdvancementManager.getAdvancement((ResourceLocation)entry.getKey());
                     if (advancement == null) {
                         LOGGER.warn("Ignored advancement '{}' in progress file {} - it doesn't exist anymore?", entry.getKey(), (Object)this.file);
                         continue;
@@ -153,9 +157,9 @@ public class PlayerAdvancements {
                 LOGGER.error("Couldn't access player advancements in {}", (Object)this.file, (Object)iOException);
             }
         }
-        this.checkForAutomaticTriggers();
+        this.checkForAutomaticTriggers(serverAdvancementManager);
         this.ensureAllVisible();
-        this.registerListeners();
+        this.registerListeners(serverAdvancementManager);
     }
 
     public void save() {
@@ -189,7 +193,7 @@ public class PlayerAdvancements {
             if (!bl2 && advancementProgress.isDone()) {
                 advancement.getRewards().grant(this.player);
                 if (advancement.getDisplay() != null && advancement.getDisplay().shouldAnnounceChat() && this.player.level.getGameRules().getBoolean(GameRules.RULE_ANNOUNCE_ADVANCEMENTS)) {
-                    this.server.getPlayerList().broadcastMessage(new TranslatableComponent("chat.type.advancement." + advancement.getDisplay().getFrame().getName(), this.player.getDisplayName(), advancement.getChatComponent()), ChatType.SYSTEM, Util.NIL_UUID);
+                    this.playerList.broadcastMessage(new TranslatableComponent("chat.type.advancement." + advancement.getDisplay().getFrame().getName(), this.player.getDisplayName(), advancement.getChatComponent()), ChatType.SYSTEM, Util.NIL_UUID);
                 }
             }
         }

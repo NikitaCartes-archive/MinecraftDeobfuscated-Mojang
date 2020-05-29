@@ -536,7 +536,7 @@ extends LivingEntity {
     }
 
     @Override
-    public double getRidingHeight() {
+    public double getMyRidingOffset() {
         return this.isMarker() ? 0.0 : (double)0.1f;
     }
 

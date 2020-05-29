@@ -266,16 +266,16 @@ extends DirectionalBlock {
             map.put(blockPos3, blockState);
         }
         List<BlockPos> list3 = pistonStructureResolver.getToDestroy();
-        int j = list.size() + list3.size();
-        BlockState[] blockStates = new BlockState[j];
+        BlockState[] blockStates = new BlockState[list.size() + list3.size()];
         Direction direction2 = bl ? direction : direction.getOpposite();
+        int j = 0;
         for (k = list3.size() - 1; k >= 0; --k) {
             blockPos4 = list3.get(k);
             BlockState blockState = level.getBlockState(blockPos4);
             BlockEntity blockEntity = blockState.getBlock().isEntityBlock() ? level.getBlockEntity(blockPos4) : null;
             PistonBaseBlock.dropResources(blockState, level, blockPos4, blockEntity);
             level.setBlock(blockPos4, Blocks.AIR.defaultBlockState(), 18);
-            blockStates[--j] = blockState;
+            blockStates[j++] = blockState;
         }
         for (k = list.size() - 1; k >= 0; --k) {
             blockPos4 = list.get(k);
@@ -284,7 +284,7 @@ extends DirectionalBlock {
             map.remove(blockPos4);
             level.setBlock(blockPos4, (BlockState)Blocks.MOVING_PISTON.defaultBlockState().setValue(FACING, direction), 68);
             level.setBlockEntity(blockPos4, MovingPistonBlock.newMovingBlockEntity((BlockState)list2.get(k), direction, bl, false));
-            blockStates[--j] = blockState;
+            blockStates[j++] = blockState;
         }
         if (bl) {
             PistonType pistonType = this.isSticky ? PistonType.STICKY : PistonType.DEFAULT;
@@ -305,6 +305,7 @@ extends DirectionalBlock {
             blockState4.updateNeighbourShapes(level, blockPos6, 2);
             blockState4.updateIndirectNeighbourShapes(level, blockPos6, 2);
         }
+        j = 0;
         for (l = list3.size() - 1; l >= 0; --l) {
             BlockState blockState = blockStates[j++];
             blockPos6 = list3.get(l);

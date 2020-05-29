@@ -13,13 +13,14 @@ import com.google.gson.JsonSerializationContext;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.RandomValueBounds;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Scoreboard;
 
@@ -31,6 +32,11 @@ implements LootItemCondition {
     private EntityHasScoreCondition(Map<String, RandomValueBounds> map, LootContext.EntityTarget entityTarget) {
         this.scores = ImmutableMap.copyOf(map);
         this.entityTarget = entityTarget;
+    }
+
+    @Override
+    public LootItemConditionType getType() {
+        return LootItemConditions.ENTITY_SCORES;
     }
 
     @Override
@@ -70,11 +76,7 @@ implements LootItemCondition {
     }
 
     public static class Serializer
-    extends LootItemCondition.Serializer<EntityHasScoreCondition> {
-        protected Serializer() {
-            super(new ResourceLocation("entity_scores"), EntityHasScoreCondition.class);
-        }
-
+    implements net.minecraft.world.level.storage.loot.Serializer<EntityHasScoreCondition> {
         @Override
         public void serialize(JsonObject jsonObject, EntityHasScoreCondition entityHasScoreCondition, JsonSerializationContext jsonSerializationContext) {
             JsonObject jsonObject2 = new JsonObject();
@@ -96,7 +98,7 @@ implements LootItemCondition {
         }
 
         @Override
-        public /* synthetic */ LootItemCondition deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             return this.deserialize(jsonObject, jsonDeserializationContext);
         }
     }

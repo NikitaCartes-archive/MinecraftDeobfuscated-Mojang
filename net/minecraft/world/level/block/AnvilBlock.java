@@ -67,7 +67,7 @@ extends FallingBlock {
         }
         player.openMenu(blockState.getMenuProvider(level, blockPos));
         player.awardStat(Stats.INTERACT_WITH_ANVIL);
-        return InteractionResult.SUCCESS;
+        return InteractionResult.CONSUME;
     }
 
     @Override

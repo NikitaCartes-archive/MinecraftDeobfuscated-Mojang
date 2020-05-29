@@ -625,9 +625,8 @@ public class Options {
         return this.useNativeTransport;
     }
 
-    public void loadResourcePacks(PackRepository<UnopenedResourcePack> packRepository) {
-        packRepository.reload();
-        LinkedHashSet<UnopenedResourcePack> set = Sets.newLinkedHashSet();
+    public void loadSelectedResourcePacks(PackRepository<UnopenedResourcePack> packRepository) {
+        LinkedHashSet<String> set = Sets.newLinkedHashSet();
         Iterator<String> iterator = this.resourcePacks.iterator();
         while (iterator.hasNext()) {
             String string = iterator.next();
@@ -650,7 +649,7 @@ public class Options {
                 this.incompatibleResourcePacks.remove(string);
                 continue;
             }
-            set.add(unopenedResourcePack);
+            set.add(unopenedResourcePack.getId());
         }
         packRepository.setSelected(set);
     }

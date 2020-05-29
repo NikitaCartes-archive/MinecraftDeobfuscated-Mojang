@@ -68,7 +68,7 @@ implements ArgumentType<Result> {
     }
 
     private static Tag<CommandFunction> getFunctionTag(CommandContext<CommandSourceStack> commandContext, ResourceLocation resourceLocation) throws CommandSyntaxException {
-        Tag<CommandFunction> tag = commandContext.getSource().getServer().getFunctions().getTags().getTag(resourceLocation);
+        Tag<CommandFunction> tag = commandContext.getSource().getServer().getFunctions().getTag(resourceLocation);
         if (tag == null) {
             throw ERROR_UNKNOWN_TAG.create(resourceLocation.toString());
         }

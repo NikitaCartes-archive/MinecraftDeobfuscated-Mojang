@@ -8,17 +8,23 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.Set;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 
 public class LootItemKilledByPlayerCondition
 implements LootItemCondition {
     private static final LootItemKilledByPlayerCondition INSTANCE = new LootItemKilledByPlayerCondition();
 
     private LootItemKilledByPlayerCondition() {
+    }
+
+    @Override
+    public LootItemConditionType getType() {
+        return LootItemConditions.KILLED_BY_PLAYER;
     }
 
     @Override
@@ -41,11 +47,7 @@ implements LootItemCondition {
     }
 
     public static class Serializer
-    extends LootItemCondition.Serializer<LootItemKilledByPlayerCondition> {
-        protected Serializer() {
-            super(new ResourceLocation("killed_by_player"), LootItemKilledByPlayerCondition.class);
-        }
-
+    implements net.minecraft.world.level.storage.loot.Serializer<LootItemKilledByPlayerCondition> {
         @Override
         public void serialize(JsonObject jsonObject, LootItemKilledByPlayerCondition lootItemKilledByPlayerCondition, JsonSerializationContext jsonSerializationContext) {
         }
@@ -56,7 +58,7 @@ implements LootItemCondition {
         }
 
         @Override
-        public /* synthetic */ LootItemCondition deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             return this.deserialize(jsonObject, jsonDeserializationContext);
         }
     }

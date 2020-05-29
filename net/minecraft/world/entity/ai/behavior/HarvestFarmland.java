@@ -33,7 +33,6 @@ public class HarvestFarmland
 extends Behavior<Villager> {
     @Nullable
     private BlockPos aboveFarmlandPos;
-    private boolean canPlantStuff;
     private long nextOkStartTime;
     private int timeWorkedSoFar;
     private final List<BlockPos> validFarmlandAroundVillager = Lists.newArrayList();
@@ -50,7 +49,6 @@ extends Behavior<Villager> {
         if (villager.getVillagerData().getProfession() != VillagerProfession.FARMER) {
             return false;
         }
-        this.canPlantStuff = villager.hasFarmSeeds();
         BlockPos.MutableBlockPos mutableBlockPos = villager.blockPosition().mutable();
         this.validFarmlandAroundVillager.clear();
         for (int i = -1; i <= 1; ++i) {
@@ -63,7 +61,7 @@ extends Behavior<Villager> {
             }
         }
         this.aboveFarmlandPos = this.getValidFarmland(serverLevel);
-        return this.canPlantStuff && this.aboveFarmlandPos != null;
+        return this.aboveFarmlandPos != null;
     }
 
     @Nullable
@@ -75,7 +73,7 @@ extends Behavior<Villager> {
         BlockState blockState = serverLevel.getBlockState(blockPos);
         Block block = blockState.getBlock();
         Block block2 = serverLevel.getBlockState(blockPos.below()).getBlock();
-        return block instanceof CropBlock && ((CropBlock)block).isMaxAge(blockState) || blockState.isAir() && block2 instanceof FarmBlock && this.canPlantStuff;
+        return block instanceof CropBlock && ((CropBlock)block).isMaxAge(blockState) || blockState.isAir() && block2 instanceof FarmBlock;
     }
 
     @Override
@@ -106,7 +104,7 @@ extends Behavior<Villager> {
             if (block instanceof CropBlock && ((CropBlock)block).isMaxAge(blockState)) {
                 serverLevel.destroyBlock(this.aboveFarmlandPos, true, villager);
             }
-            if (blockState.isAir() && block2 instanceof FarmBlock && this.canPlantStuff) {
+            if (blockState.isAir() && block2 instanceof FarmBlock && villager.hasFarmSeeds()) {
                 SimpleContainer simpleContainer = villager.getInventory();
                 for (int i = 0; i < simpleContainer.getContainerSize(); ++i) {
                     ItemStack itemStack = simpleContainer.getItem(i);

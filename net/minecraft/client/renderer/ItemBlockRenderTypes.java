@@ -283,21 +283,36 @@ public class ItemBlockRenderTypes {
         return RenderType.solid();
     }
 
-    public static RenderType getRenderType(BlockState blockState) {
+    public static RenderType getMovingBlockRenderType(BlockState blockState) {
+        Block block = blockState.getBlock();
+        if (block instanceof LeavesBlock) {
+            return renderCutout ? RenderType.cutoutMipped() : RenderType.solid();
+        }
+        RenderType renderType = TYPE_BY_BLOCK.get(block);
+        if (renderType != null) {
+            if (renderType == RenderType.translucent()) {
+                return RenderType.translucentMovingBlock();
+            }
+            return renderType;
+        }
+        return RenderType.solid();
+    }
+
+    public static RenderType getRenderType(BlockState blockState, boolean bl) {
         RenderType renderType = ItemBlockRenderTypes.getChunkRenderType(blockState);
         if (renderType == RenderType.translucent()) {
-            return Sheets.translucentCullBlockSheet();
+            return bl ? Sheets.translucentCullBlockSheet() : Sheets.translucentItemSheet();
         }
         return Sheets.cutoutBlockSheet();
     }
 
-    public static RenderType getRenderType(ItemStack itemStack) {
+    public static RenderType getRenderType(ItemStack itemStack, boolean bl) {
         Item item = itemStack.getItem();
         if (item instanceof BlockItem) {
             Block block = ((BlockItem)item).getBlock();
-            return ItemBlockRenderTypes.getRenderType(block.defaultBlockState());
+            return ItemBlockRenderTypes.getRenderType(block.defaultBlockState(), bl);
         }
-        return Sheets.translucentCullBlockSheet();
+        return bl ? Sheets.translucentCullBlockSheet() : Sheets.translucentItemSheet();
     }
 
     public static RenderType getRenderLayer(FluidState fluidState) {

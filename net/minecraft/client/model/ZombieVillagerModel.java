@@ -5,10 +5,10 @@ package net.minecraft.client.model;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.model.AnimationUtils;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.VillagerHeadModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Zombie;
 
@@ -64,22 +64,8 @@ implements VillagerHeadModel {
 
     @Override
     public void setupAnim(T zombie, float f, float g, float h, float i, float j) {
-        float m;
         super.setupAnim(zombie, f, g, h, i, j);
-        float k = Mth.sin(this.attackTime * (float)Math.PI);
-        float l = Mth.sin((1.0f - (1.0f - this.attackTime) * (1.0f - this.attackTime)) * (float)Math.PI);
-        this.rightArm.zRot = 0.0f;
-        this.leftArm.zRot = 0.0f;
-        this.rightArm.yRot = -(0.1f - k * 0.6f);
-        this.leftArm.yRot = 0.1f - k * 0.6f;
-        this.rightArm.xRot = m = (float)(-Math.PI) / (((Mob)zombie).isAggressive() ? 1.5f : 2.25f);
-        this.leftArm.xRot = m;
-        this.rightArm.xRot += k * 1.2f - l * 0.4f;
-        this.leftArm.xRot += k * 1.2f - l * 0.4f;
-        this.rightArm.zRot += Mth.cos(h * 0.09f) * 0.05f + 0.05f;
-        this.leftArm.zRot -= Mth.cos(h * 0.09f) * 0.05f + 0.05f;
-        this.rightArm.xRot += Mth.sin(h * 0.067f) * 0.05f;
-        this.leftArm.xRot -= Mth.sin(h * 0.067f) * 0.05f;
+        AnimationUtils.animateZombieArms(this.leftArm, this.rightArm, ((Mob)zombie).isAggressive(), this.attackTime, h);
     }
 
     @Override

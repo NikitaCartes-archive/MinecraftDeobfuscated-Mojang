@@ -101,7 +101,7 @@ extends Block {
                     itemStack.shrink(1);
                 }
             }
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         return super.use(blockState, level, blockPos, player2, interactionHand, blockHitResult);
     }

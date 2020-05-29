@@ -5,13 +5,20 @@ package net.minecraft.world.level.storage.loot.entries;
 
 import net.minecraft.world.level.storage.loot.entries.ComposableEntryContainer;
 import net.minecraft.world.level.storage.loot.entries.CompositeEntryBase;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntries;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class SequentialEntry
 extends CompositeEntryBase {
     SequentialEntry(LootPoolEntryContainer[] lootPoolEntryContainers, LootItemCondition[] lootItemConditions) {
         super(lootPoolEntryContainers, lootItemConditions);
+    }
+
+    @Override
+    public LootPoolEntryType getType() {
+        return LootPoolEntries.SEQUENCE;
     }
 
     @Override

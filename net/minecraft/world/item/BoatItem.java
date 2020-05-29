@@ -17,6 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -33,8 +34,8 @@ extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
-        HitResult hitResult = BoatItem.getPlayerPOVHitResult(level, player, ClipContext.Fluid.ANY);
-        if (hitResult.getType() == HitResult.Type.MISS) {
+        BlockHitResult hitResult = BoatItem.getPlayerPOVHitResult(level, player, ClipContext.Fluid.ANY);
+        if (((HitResult)hitResult).getType() == HitResult.Type.MISS) {
             return InteractionResultHolder.pass(itemStack);
         }
         Vec3 vec3 = player.getViewVector(1.0f);
@@ -48,7 +49,7 @@ extends Item {
                 return InteractionResultHolder.pass(itemStack);
             }
         }
-        if (hitResult.getType() == HitResult.Type.BLOCK) {
+        if (((HitResult)hitResult).getType() == HitResult.Type.BLOCK) {
             Boat boat = new Boat(level, hitResult.getLocation().x, hitResult.getLocation().y, hitResult.getLocation().z);
             boat.setType(this.type);
             boat.yRot = player.yRot;
@@ -62,7 +63,7 @@ extends Item {
                 }
             }
             player.awardStat(Stats.ITEM_USED.get(this));
-            return InteractionResultHolder.success(itemStack);
+            return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
         }
         return InteractionResultHolder.pass(itemStack);
     }

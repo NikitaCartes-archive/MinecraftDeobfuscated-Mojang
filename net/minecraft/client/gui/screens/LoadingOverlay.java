@@ -81,25 +81,28 @@ extends Overlay {
             LoadingOverlay.fill(poseStack, 0, 0, k, l, BRAND_BACKGROUND);
             o = 1.0f;
         }
-        n = (this.minecraft.getWindow().getGuiScaledWidth() - 322) / 2;
-        int p = (this.minecraft.getWindow().getGuiScaledHeight() + 161) / 4;
+        n = (int)((double)this.minecraft.getWindow().getGuiScaledWidth() * 0.5);
+        int p = (int)((double)this.minecraft.getWindow().getGuiScaledHeight() * 0.5);
+        double d = Math.min((double)this.minecraft.getWindow().getGuiScaledWidth() * 0.75, (double)this.minecraft.getWindow().getGuiScaledHeight()) * 0.25;
+        int q = (int)(d * 0.5);
+        double e = d * 4.0;
+        int r = (int)(e * 0.5);
         this.minecraft.getTextureManager().bind(MOJANG_STUDIOS_LOGO_LOCATION);
         RenderSystem.enableBlend();
         RenderSystem.blendEquation(32774);
         RenderSystem.blendFunc(770, 1);
         RenderSystem.alphaFunc(516, 0.0f);
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, o);
-        float q = 0.0625f;
-        LoadingOverlay.blit(poseStack, n, p, 161, 80, -0.0625f, 0.0f, 161, 80, 161, 161);
-        LoadingOverlay.blit(poseStack, n + 161, p, 161, 80, 0.0625f, 80.5f, 161, 80, 161, 161);
+        LoadingOverlay.blit(poseStack, n - r, p - q, r, (int)d, -0.0625f, 0.0f, 120, 60, 120, 120);
+        LoadingOverlay.blit(poseStack, n, p - q, r, (int)d, 0.0625f, 60.0f, 120, 60, 120, 120);
         RenderSystem.defaultBlendFunc();
         RenderSystem.defaultAlphaFunc();
         RenderSystem.disableBlend();
-        float r = this.reload.getActualProgress();
-        this.currentProgress = Mth.clamp(this.currentProgress * 0.95f + r * 0.050000012f, 0.0f, 1.0f);
+        int s = (int)((double)this.minecraft.getWindow().getGuiScaledHeight() * 0.8325);
+        float t = this.reload.getActualProgress();
+        this.currentProgress = Mth.clamp(this.currentProgress * 0.95f + t * 0.050000012f, 0.0f, 1.0f);
         if (g < 1.0f) {
-            int s = l * 648 / 801;
-            this.drawProgressBar(poseStack, k / 2 - 161, s, k / 2 + 161, s + 12, 1.0f - Mth.clamp(g, 0.0f, 1.0f));
+            this.drawProgressBar(poseStack, k / 2 - r, s - 5, k / 2 + r, s + 5, 1.0f - Mth.clamp(g, 0.0f, 1.0f));
         }
         if (g >= 2.0f) {
             this.minecraft.setOverlay(null);
@@ -122,8 +125,10 @@ extends Overlay {
         int m = Mth.ceil((float)(k - i - 2) * this.currentProgress);
         int n = Math.round(f * 255.0f);
         int o = FastColor.ARGB32.color(n, 255, 255, 255);
-        LoadingOverlay.fill(poseStack, i, j, k, l, o);
-        LoadingOverlay.fill(poseStack, i + 1, j + 1, k - 1, l - 1, BRAND_BACKGROUND_NO_ALPHA | n << 24);
+        LoadingOverlay.fill(poseStack, i, j, k, j + 1, o);
+        LoadingOverlay.fill(poseStack, i, l, k, l - 1, o);
+        LoadingOverlay.fill(poseStack, i, j, i + 1, l, o);
+        LoadingOverlay.fill(poseStack, k, j, k - 1, l, o);
         LoadingOverlay.fill(poseStack, i + 2, j + 2, i + m, l - 2, o);
     }
 

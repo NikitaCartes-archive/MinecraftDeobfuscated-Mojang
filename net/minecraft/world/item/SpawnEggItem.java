@@ -71,27 +71,27 @@ extends Item {
             blockEntity.setChanged();
             level.sendBlockUpdated(blockPos, blockState, blockState, 3);
             itemStack.shrink(1);
-            return InteractionResult.SUCCESS;
+            return InteractionResult.CONSUME;
         }
         BlockPos blockPos2 = blockState.getCollisionShape(level, blockPos).isEmpty() ? blockPos : blockPos.relative(direction);
         EntityType<?> entityType2 = this.getType(itemStack.getTag());
         if (entityType2.spawn(level, itemStack, useOnContext.getPlayer(), blockPos2, MobSpawnType.SPAWN_EGG, true, !Objects.equals(blockPos, blockPos2) && direction == Direction.UP) != null) {
             itemStack.shrink(1);
         }
-        return InteractionResult.SUCCESS;
+        return InteractionResult.CONSUME;
     }
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
-        HitResult hitResult = SpawnEggItem.getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
-        if (hitResult.getType() != HitResult.Type.BLOCK) {
+        BlockHitResult hitResult = SpawnEggItem.getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
+        if (((HitResult)hitResult).getType() != HitResult.Type.BLOCK) {
             return InteractionResultHolder.pass(itemStack);
         }
         if (level.isClientSide) {
             return InteractionResultHolder.success(itemStack);
         }
-        BlockHitResult blockHitResult = (BlockHitResult)hitResult;
+        BlockHitResult blockHitResult = hitResult;
         BlockPos blockPos = blockHitResult.getBlockPos();
         if (!(level.getBlockState(blockPos).getBlock() instanceof LiquidBlock)) {
             return InteractionResultHolder.pass(itemStack);
@@ -107,7 +107,7 @@ extends Item {
             itemStack.shrink(1);
         }
         player.awardStat(Stats.ITEM_USED.get(this));
-        return InteractionResultHolder.success(itemStack);
+        return InteractionResultHolder.consume(itemStack);
     }
 
     public boolean spawnsEntity(@Nullable CompoundTag compoundTag, EntityType<?> entityType) {

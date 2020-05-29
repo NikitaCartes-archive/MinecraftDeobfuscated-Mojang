@@ -69,7 +69,7 @@ extends BlockEntityRenderer<PistonMovingBlockEntity> {
     }
 
     private void renderBlock(BlockPos blockPos, BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, Level level, boolean bl, int i) {
-        RenderType renderType = ItemBlockRenderTypes.getChunkRenderType(blockState);
+        RenderType renderType = ItemBlockRenderTypes.getMovingBlockRenderType(blockState);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(renderType);
         this.blockRenderer.getModelRenderer().tesselateBlock(level, this.blockRenderer.getBlockModel(blockState), blockState, blockPos, poseStack, vertexConsumer, bl, new Random(), blockState.getSeed(blockPos), i);
     }

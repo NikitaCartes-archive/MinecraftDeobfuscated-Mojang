@@ -213,7 +213,7 @@ public class BiomeDefaultFeatures {
     public static final TreeConfiguration JUNGLE_TREE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(JUNGLE_LOG), new SimpleStateProvider(JUNGLE_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(4, 8, 0), new TwoLayersFeatureSize(1, 0, 1)).decorators(ImmutableList.of(new CocoaDecorator(0.2f), TrunkVineDecorator.INSTANCE, LeaveVineDecorator.INSTANCE)).ignoreVines().build();
     public static final TreeConfiguration JUNGLE_TREE_NOVINE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(JUNGLE_LOG), new SimpleStateProvider(JUNGLE_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(4, 8, 0), new TwoLayersFeatureSize(1, 0, 1)).ignoreVines().build();
     public static final TreeConfiguration PINE_TREE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(SPRUCE_LOG), new SimpleStateProvider(SPRUCE_LEAVES), new PineFoliagePlacer(1, 0, 1, 0, 3, 1), new StraightTrunkPlacer(6, 4, 0), new TwoLayersFeatureSize(2, 0, 2)).ignoreVines().build();
-    public static final TreeConfiguration SPRUCE_TREE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(SPRUCE_LOG), new SimpleStateProvider(SPRUCE_LEAVES), new SpruceFoliagePlacer(2, 1, 0, 2, 1, 1), new StraightTrunkPlacer(4, 3, 2), new TwoLayersFeatureSize(2, 0, 2)).ignoreVines().build();
+    public static final TreeConfiguration SPRUCE_TREE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(SPRUCE_LOG), new SimpleStateProvider(SPRUCE_LEAVES), new SpruceFoliagePlacer(2, 1, 0, 2, 1, 1), new StraightTrunkPlacer(5, 2, 1), new TwoLayersFeatureSize(2, 0, 2)).ignoreVines().build();
     public static final TreeConfiguration ACACIA_TREE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(ACACIA_LOG), new SimpleStateProvider(ACACIA_LEAVES), new AcaciaFoliagePlacer(2, 0, 0, 0), new ForkingTrunkPlacer(5, 2, 2), new TwoLayersFeatureSize(1, 0, 2)).ignoreVines().build();
     public static final TreeConfiguration BIRCH_TREE_CONFIG = new TreeConfiguration.TreeConfigurationBuilder(new SimpleStateProvider(BIRCH_LOG), new SimpleStateProvider(BIRCH_LEAVES), new BlobFoliagePlacer(2, 0, 0, 0, 3), new StraightTrunkPlacer(5, 2, 0), new TwoLayersFeatureSize(1, 0, 1)).ignoreVines().build();
     public static final TreeConfiguration BIRCH_TREE_WITH_BEES_0002_CONFIG = BIRCH_TREE_CONFIG.withDecorators(ImmutableList.of(BEEHIVE_0002));
@@ -309,12 +309,12 @@ public class BiomeDefaultFeatures {
     }
 
     public static void addDefaultLakes(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.LOCAL_MODIFICATIONS, Feature.LAKE.configured(new BlockStateConfiguration(WATER)).decorated(FeatureDecorator.WATER_LAKE.configured(new ChanceDecoratorConfiguration(4))));
-        biome.addFeature(GenerationStep.Decoration.LOCAL_MODIFICATIONS, Feature.LAKE.configured(new BlockStateConfiguration(LAVA)).decorated(FeatureDecorator.LAVA_LAKE.configured(new ChanceDecoratorConfiguration(80))));
+        biome.addFeature(GenerationStep.Decoration.LAKES, Feature.LAKE.configured(new BlockStateConfiguration(WATER)).decorated(FeatureDecorator.WATER_LAKE.configured(new ChanceDecoratorConfiguration(4))));
+        biome.addFeature(GenerationStep.Decoration.LAKES, Feature.LAKE.configured(new BlockStateConfiguration(LAVA)).decorated(FeatureDecorator.LAVA_LAKE.configured(new ChanceDecoratorConfiguration(80))));
     }
 
     public static void addDesertLakes(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.LOCAL_MODIFICATIONS, Feature.LAKE.configured(new BlockStateConfiguration(LAVA)).decorated(FeatureDecorator.LAVA_LAKE.configured(new ChanceDecoratorConfiguration(80))));
+        biome.addFeature(GenerationStep.Decoration.LAKES, Feature.LAKE.configured(new BlockStateConfiguration(LAVA)).decorated(FeatureDecorator.LAVA_LAKE.configured(new ChanceDecoratorConfiguration(80))));
     }
 
     public static void addDefaultMonsterRoom(Biome biome) {
@@ -563,11 +563,10 @@ public class BiomeDefaultFeatures {
 
     public static void addDesertExtraDecoration(Biome biome) {
         biome.addFeature(GenerationStep.Decoration.SURFACE_STRUCTURES, Feature.DESERT_WELL.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.CHANCE_HEIGHTMAP.configured(new ChanceDecoratorConfiguration(1000))));
-        biome.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.FOSSIL.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.CHANCE_PASSTHROUGH.configured(new ChanceDecoratorConfiguration(64))));
     }
 
-    public static void addSwampExtraDecoration(Biome biome) {
-        biome.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.FOSSIL.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.CHANCE_PASSTHROUGH.configured(new ChanceDecoratorConfiguration(64))));
+    public static void addFossilDecoration(Biome biome) {
+        biome.addFeature(GenerationStep.Decoration.UNDERGROUND_STRUCTURES, Feature.FOSSIL.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.CHANCE_PASSTHROUGH.configured(new ChanceDecoratorConfiguration(64))));
     }
 
     public static void addColdOceanExtraVegetation(Biome biome) {

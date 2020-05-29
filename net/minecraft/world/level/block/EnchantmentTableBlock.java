@@ -89,7 +89,7 @@ extends BaseEntityBlock {
             return InteractionResult.SUCCESS;
         }
         player.openMenu(blockState.getMenuProvider(level, blockPos));
-        return InteractionResult.SUCCESS;
+        return InteractionResult.CONSUME;
     }
 
     @Override

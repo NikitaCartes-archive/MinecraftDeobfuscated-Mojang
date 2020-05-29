@@ -34,7 +34,7 @@ extends DiggerItem {
     }
 
     @Override
-    public boolean canDestroySpecial(BlockState blockState) {
+    public boolean isCorrectToolForDrops(BlockState blockState) {
         return blockState.is(Blocks.SNOW) || blockState.is(Blocks.SNOW_BLOCK);
     }
 
@@ -54,6 +54,7 @@ extends DiggerItem {
                 if (!level.isClientSide()) {
                     level.levelEvent(null, 1009, blockPos, 0);
                 }
+                CampfireBlock.dowse(level, blockPos, blockState);
                 blockState3 = (BlockState)blockState.setValue(CampfireBlock.LIT, false);
             }
             if (blockState3 != null) {
@@ -63,7 +64,7 @@ extends DiggerItem {
                         useOnContext.getItemInHand().hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(useOnContext.getHand()));
                     }
                 }
-                return InteractionResult.SUCCESS;
+                return InteractionResult.sidedSuccess(level.isClientSide);
             }
             return InteractionResult.PASS;
         }

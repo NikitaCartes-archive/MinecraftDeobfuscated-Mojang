@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
@@ -50,13 +51,13 @@ extends SimpleJsonResourceReloadListener {
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonObject> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+    protected void apply(Map<ResourceLocation, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         this.hasErrors = false;
         HashMap<RecipeType, ImmutableMap.Builder> map2 = Maps.newHashMap();
-        for (Map.Entry<ResourceLocation, JsonObject> entry2 : map.entrySet()) {
+        for (Map.Entry<ResourceLocation, JsonElement> entry2 : map.entrySet()) {
             ResourceLocation resourceLocation = entry2.getKey();
             try {
-                Recipe<?> recipe = RecipeManager.fromJson(resourceLocation, entry2.getValue());
+                Recipe<?> recipe = RecipeManager.fromJson(resourceLocation, GsonHelper.convertToJsonObject(entry2.getValue(), "top element"));
                 map2.computeIfAbsent(recipe.getType(), recipeType -> ImmutableMap.builder()).put(resourceLocation, recipe);
             } catch (JsonParseException | IllegalArgumentException runtimeException) {
                 LOGGER.error("Parsing error loading recipe {}", (Object)resourceLocation, (Object)runtimeException);

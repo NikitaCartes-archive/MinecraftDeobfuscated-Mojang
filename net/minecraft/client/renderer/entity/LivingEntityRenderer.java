@@ -133,7 +133,7 @@ implements RenderLayerParent<T, M> {
     protected RenderType getRenderType(T livingEntity, boolean bl, boolean bl2, boolean bl3) {
         ResourceLocation resourceLocation = this.getTextureLocation(livingEntity);
         if (bl2) {
-            return RenderType.entityTranslucent(resourceLocation);
+            return RenderType.itemEntityTranslucentCull(resourceLocation);
         }
         if (bl) {
             return ((Model)this.model).renderType(resourceLocation);

@@ -4,7 +4,6 @@
 package net.minecraft.world.entity;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
@@ -51,15 +50,7 @@ extends Mob {
             this.move(MoverType.SELF, this.getDeltaMovement());
             this.setDeltaMovement(this.getDeltaMovement().scale(f));
         }
-        this.animationSpeedOld = this.animationSpeed;
-        double d = this.getX() - this.xo;
-        double e = this.getZ() - this.zo;
-        float h = Mth.sqrt(d * d + e * e) * 4.0f;
-        if (h > 1.0f) {
-            h = 1.0f;
-        }
-        this.animationSpeed += (h - this.animationSpeed) * 0.4f;
-        this.animationPosition += this.animationSpeed;
+        this.calculateEntityAnimation(this, false);
     }
 
     @Override

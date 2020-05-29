@@ -126,7 +126,7 @@ extends HorizontalDirectionalBlock {
             level.setBlock(blockPos, blockState, 10);
         }
         level.levelEvent(player, blockState.getValue(OPEN) != false ? 1008 : 1014, blockPos, 0);
-        return InteractionResult.SUCCESS;
+        return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
     @Override

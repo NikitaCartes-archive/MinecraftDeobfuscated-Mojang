@@ -304,6 +304,11 @@ extends Monster {
         this.entityData.set(DATA_STARED_AT, true);
     }
 
+    @Override
+    public boolean requiresCustomPersistence() {
+        return super.requiresCustomPersistence() || this.getCarriedBlock() != null;
+    }
+
     static class EndermanTakeBlockGoal
     extends Goal {
         private final EnderMan enderman;

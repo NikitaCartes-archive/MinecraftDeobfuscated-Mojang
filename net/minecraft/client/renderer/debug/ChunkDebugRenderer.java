@@ -21,8 +21,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -80,7 +80,7 @@ implements DebugRenderer.SimpleDebugRenderer {
 
         private ChunkData(IntegratedServer integratedServer, double d, double e) {
             ClientLevel clientLevel = ((ChunkDebugRenderer)ChunkDebugRenderer.this).minecraft.level;
-            ResourceKey<DimensionType> resourceKey = clientLevel.dimension();
+            ResourceKey<Level> resourceKey = clientLevel.dimension();
             int i = (int)d >> 4;
             int j = (int)e >> 4;
             ImmutableMap.Builder<ChunkPos, String> builder = ImmutableMap.builder();

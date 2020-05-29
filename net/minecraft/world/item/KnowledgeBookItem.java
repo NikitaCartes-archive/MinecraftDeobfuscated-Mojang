@@ -56,7 +56,7 @@ extends Item {
             player.awardRecipes(list);
             player.awardStat(Stats.ITEM_USED.get(this));
         }
-        return InteractionResultHolder.success(itemStack);
+        return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
     }
 }
 

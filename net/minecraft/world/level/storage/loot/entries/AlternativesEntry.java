@@ -8,7 +8,9 @@ import java.util.List;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.entries.ComposableEntryContainer;
 import net.minecraft.world.level.storage.loot.entries.CompositeEntryBase;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntries;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -16,6 +18,11 @@ public class AlternativesEntry
 extends CompositeEntryBase {
     AlternativesEntry(LootPoolEntryContainer[] lootPoolEntryContainers, LootItemCondition[] lootItemConditions) {
         super(lootPoolEntryContainers, lootItemConditions);
+    }
+
+    @Override
+    public LootPoolEntryType getType() {
+        return LootPoolEntries.ALTERNATIVES;
     }
 
     @Override

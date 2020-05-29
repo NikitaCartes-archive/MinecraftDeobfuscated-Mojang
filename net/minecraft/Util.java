@@ -50,6 +50,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
 import net.minecraft.resources.ResourceLocation;
@@ -396,6 +397,26 @@ public class Util {
             return DataResult.error(string);
         }
         return DataResult.success(is);
+    }
+
+    public static void startTimerHackThread() {
+        Thread thread = new Thread("Timer hack thread"){
+
+            @Override
+            public void run() {
+                try {
+                    while (true) {
+                        Thread.sleep(Integer.MAX_VALUE);
+                    }
+                } catch (InterruptedException interruptedException) {
+                    LOGGER.warn("Timer hack thread interrupted, that really should not happen");
+                    return;
+                }
+            }
+        };
+        thread.setDaemon(true);
+        thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
+        thread.start();
     }
 
     static enum IdentityStrategy implements Hash.Strategy<Object>

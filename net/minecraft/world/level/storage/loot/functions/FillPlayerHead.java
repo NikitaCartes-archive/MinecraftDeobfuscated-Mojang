@@ -11,7 +11,6 @@ import com.mojang.authlib.GameProfile;
 import java.util.Set;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -19,6 +18,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
@@ -29,6 +30,11 @@ extends LootItemConditionalFunction {
     public FillPlayerHead(LootItemCondition[] lootItemConditions, LootContext.EntityTarget entityTarget) {
         super(lootItemConditions);
         this.entityTarget = entityTarget;
+    }
+
+    @Override
+    public LootItemFunctionType getType() {
+        return LootItemFunctions.FILL_PLAYER_HEAD;
     }
 
     @Override
@@ -48,10 +54,6 @@ extends LootItemConditionalFunction {
 
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<FillPlayerHead> {
-        public Serializer() {
-            super(new ResourceLocation("fill_player_head"), FillPlayerHead.class);
-        }
-
         @Override
         public void serialize(JsonObject jsonObject, FillPlayerHead fillPlayerHead, JsonSerializationContext jsonSerializationContext) {
             super.serialize(jsonObject, fillPlayerHead, jsonSerializationContext);

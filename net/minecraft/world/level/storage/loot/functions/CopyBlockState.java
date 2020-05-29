@@ -23,6 +23,8 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -36,6 +38,11 @@ extends LootItemConditionalFunction {
         super(lootItemConditions);
         this.block = block;
         this.properties = set;
+    }
+
+    @Override
+    public LootItemFunctionType getType() {
+        return LootItemFunctions.COPY_STATE;
     }
 
     @Override
@@ -71,10 +78,6 @@ extends LootItemConditionalFunction {
 
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<CopyBlockState> {
-        public Serializer() {
-            super(new ResourceLocation("copy_state"), CopyBlockState.class);
-        }
-
         @Override
         public void serialize(JsonObject jsonObject, CopyBlockState copyBlockState, JsonSerializationContext jsonSerializationContext) {
             super.serialize(jsonObject, copyBlockState, jsonSerializationContext);

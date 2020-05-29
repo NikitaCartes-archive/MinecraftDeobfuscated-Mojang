@@ -15,6 +15,7 @@ import java.util.concurrent.CompletableFuture;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
+import net.minecraft.tags.BlockTags;
 
 public class BlockStateArgument
 implements ArgumentType<BlockInput> {
@@ -44,7 +45,7 @@ implements ArgumentType<BlockInput> {
         } catch (CommandSyntaxException commandSyntaxException) {
             // empty catch block
         }
-        return blockStateParser.fillSuggestions(suggestionsBuilder);
+        return blockStateParser.fillSuggestions(suggestionsBuilder, BlockTags.getAllTags());
     }
 
     @Override

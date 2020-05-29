@@ -36,7 +36,7 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractVillager
@@ -52,6 +52,8 @@ Merchant {
 
     public AbstractVillager(EntityType<? extends AbstractVillager> entityType, Level level) {
         super((EntityType<? extends AgableMob>)entityType, level);
+        this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0f);
+        this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0f);
     }
 
     @Override
@@ -182,7 +184,7 @@ Merchant {
 
     @Override
     @Nullable
-    public Entity changeDimension(ResourceKey<DimensionType> resourceKey) {
+    public Entity changeDimension(ResourceKey<Level> resourceKey) {
         this.stopTrading();
         return super.changeDimension(resourceKey);
     }

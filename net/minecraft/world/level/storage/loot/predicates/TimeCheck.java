@@ -6,12 +6,13 @@ package net.minecraft.world.level.storage.loot.predicates;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.RandomValueBounds;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 import org.jetbrains.annotations.Nullable;
 
 public class TimeCheck
@@ -23,6 +24,11 @@ implements LootItemCondition {
     private TimeCheck(@Nullable Long long_, RandomValueBounds randomValueBounds) {
         this.period = long_;
         this.value = randomValueBounds;
+    }
+
+    @Override
+    public LootItemConditionType getType() {
+        return LootItemConditions.TIME_CHECK;
     }
 
     @Override
@@ -41,11 +47,7 @@ implements LootItemCondition {
     }
 
     public static class Serializer
-    extends LootItemCondition.Serializer<TimeCheck> {
-        public Serializer() {
-            super(new ResourceLocation("time_check"), TimeCheck.class);
-        }
-
+    implements net.minecraft.world.level.storage.loot.Serializer<TimeCheck> {
         @Override
         public void serialize(JsonObject jsonObject, TimeCheck timeCheck, JsonSerializationContext jsonSerializationContext) {
             jsonObject.addProperty("period", timeCheck.period);
@@ -60,7 +62,7 @@ implements LootItemCondition {
         }
 
         @Override
-        public /* synthetic */ LootItemCondition deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             return this.deserialize(jsonObject, jsonDeserializationContext);
         }
     }

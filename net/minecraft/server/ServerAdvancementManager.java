@@ -6,6 +6,7 @@ package net.minecraft.server;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import java.util.Collection;
@@ -38,12 +39,12 @@ extends SimpleJsonResourceReloadListener {
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonObject> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+    protected void apply(Map<ResourceLocation, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         HashMap<ResourceLocation, Advancement.Builder> map2 = Maps.newHashMap();
-        map.forEach((resourceLocation, jsonObject) -> {
+        map.forEach((resourceLocation, jsonElement) -> {
             try {
-                JsonObject jsonObject2 = GsonHelper.convertToJsonObject(jsonObject, "advancement");
-                Advancement.Builder builder = Advancement.Builder.fromJson(jsonObject2, new DeserializationContext((ResourceLocation)resourceLocation, this.predicateManager));
+                JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "advancement");
+                Advancement.Builder builder = Advancement.Builder.fromJson(jsonObject, new DeserializationContext((ResourceLocation)resourceLocation, this.predicateManager));
                 map2.put((ResourceLocation)resourceLocation, builder);
             } catch (JsonParseException | IllegalArgumentException runtimeException) {
                 LOGGER.error("Parsing error loading custom advancement {}: {}", resourceLocation, (Object)runtimeException.getMessage());

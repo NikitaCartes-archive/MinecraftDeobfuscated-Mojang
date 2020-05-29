@@ -97,7 +97,7 @@ implements SimpleWaterloggedBlock {
             level.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         }
         this.playSound(player, level, blockPos, blockState.getValue(OPEN));
-        return InteractionResult.SUCCESS;
+        return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
     protected void playSound(@Nullable Player player, Level level, BlockPos blockPos, boolean bl) {

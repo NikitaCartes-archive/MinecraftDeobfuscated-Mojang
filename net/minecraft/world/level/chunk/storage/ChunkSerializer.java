@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import net.minecraft.SharedConstants;
@@ -324,35 +325,35 @@ public class ChunkSerializer {
         }
     }
 
-    private static CompoundTag packStructureData(ChunkPos chunkPos, Map<String, StructureStart<?>> map, Map<String, LongSet> map2) {
+    private static CompoundTag packStructureData(ChunkPos chunkPos, Map<StructureFeature<?>, StructureStart<?>> map, Map<StructureFeature<?>, LongSet> map2) {
         CompoundTag compoundTag = new CompoundTag();
         CompoundTag compoundTag2 = new CompoundTag();
-        for (Map.Entry<String, StructureStart<?>> entry : map.entrySet()) {
-            compoundTag2.put(entry.getKey(), entry.getValue().createTag(chunkPos.x, chunkPos.z));
+        for (Map.Entry<StructureFeature<?>, StructureStart<?>> entry : map.entrySet()) {
+            compoundTag2.put(entry.getKey().getFeatureName(), entry.getValue().createTag(chunkPos.x, chunkPos.z));
         }
         compoundTag.put("Starts", compoundTag2);
         CompoundTag compoundTag3 = new CompoundTag();
-        for (Map.Entry<String, LongSet> entry2 : map2.entrySet()) {
-            compoundTag3.put(entry2.getKey(), new LongArrayTag(entry2.getValue()));
+        for (Map.Entry<StructureFeature<?>, LongSet> entry2 : map2.entrySet()) {
+            compoundTag3.put(entry2.getKey().getFeatureName(), new LongArrayTag(entry2.getValue()));
         }
         compoundTag.put("References", compoundTag3);
         return compoundTag;
     }
 
-    private static Map<String, StructureStart<?>> unpackStructureStart(StructureManager structureManager, CompoundTag compoundTag, long l) {
-        HashMap<String, StructureStart<?>> map = Maps.newHashMap();
+    private static Map<StructureFeature<?>, StructureStart<?>> unpackStructureStart(StructureManager structureManager, CompoundTag compoundTag, long l) {
+        HashMap<StructureFeature<?>, StructureStart<?>> map = Maps.newHashMap();
         CompoundTag compoundTag2 = compoundTag.getCompound("Starts");
         for (String string : compoundTag2.getAllKeys()) {
-            map.put(string, StructureFeature.loadStaticStart(structureManager, compoundTag2.getCompound(string), l));
+            map.put((StructureFeature<?>)StructureFeature.STRUCTURES_REGISTRY.get(string.toLowerCase(Locale.ROOT)), StructureFeature.loadStaticStart(structureManager, compoundTag2.getCompound(string), l));
         }
         return map;
     }
 
-    private static Map<String, LongSet> unpackStructureReferences(ChunkPos chunkPos, CompoundTag compoundTag) {
-        HashMap<String, LongSet> map = Maps.newHashMap();
+    private static Map<StructureFeature<?>, LongSet> unpackStructureReferences(ChunkPos chunkPos, CompoundTag compoundTag) {
+        HashMap<StructureFeature<?>, LongSet> map = Maps.newHashMap();
         CompoundTag compoundTag2 = compoundTag.getCompound("References");
         for (String string : compoundTag2.getAllKeys()) {
-            map.put(string, new LongOpenHashSet(Arrays.stream(compoundTag2.getLongArray(string)).filter(l -> {
+            map.put((StructureFeature<?>)StructureFeature.STRUCTURES_REGISTRY.get(string.toLowerCase(Locale.ROOT)), new LongOpenHashSet(Arrays.stream(compoundTag2.getLongArray(string)).filter(l -> {
                 ChunkPos chunkPos2 = new ChunkPos(l);
                 if (chunkPos2.getChessboardDistance(chunkPos) > 8) {
                     LOGGER.warn("Found invalid structure reference [ {} @ {} ] for chunk {}.", (Object)string, (Object)chunkPos2, (Object)chunkPos);

@@ -38,20 +38,20 @@ extends Item {
             AreaEffectCloud areaEffectCloud2 = list.get(0);
             areaEffectCloud2.setRadius(areaEffectCloud2.getRadius() - 0.5f);
             level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOTTLE_FILL_DRAGONBREATH, SoundSource.NEUTRAL, 1.0f, 1.0f);
-            return InteractionResultHolder.success(this.turnBottleIntoItem(itemStack, player, new ItemStack(Items.DRAGON_BREATH)));
+            return InteractionResultHolder.sidedSuccess(this.turnBottleIntoItem(itemStack, player, new ItemStack(Items.DRAGON_BREATH)), level.isClientSide());
         }
-        HitResult hitResult = BottleItem.getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
-        if (hitResult.getType() == HitResult.Type.MISS) {
+        BlockHitResult hitResult = BottleItem.getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
+        if (((HitResult)hitResult).getType() == HitResult.Type.MISS) {
             return InteractionResultHolder.pass(itemStack);
         }
-        if (hitResult.getType() == HitResult.Type.BLOCK) {
-            BlockPos blockPos = ((BlockHitResult)hitResult).getBlockPos();
+        if (((HitResult)hitResult).getType() == HitResult.Type.BLOCK) {
+            BlockPos blockPos = hitResult.getBlockPos();
             if (!level.mayInteract(player, blockPos)) {
                 return InteractionResultHolder.pass(itemStack);
             }
             if (level.getFluidState(blockPos).is(FluidTags.WATER)) {
                 level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.NEUTRAL, 1.0f, 1.0f);
-                return InteractionResultHolder.success(this.turnBottleIntoItem(itemStack, player, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER)));
+                return InteractionResultHolder.sidedSuccess(this.turnBottleIntoItem(itemStack, player, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER)), level.isClientSide());
             }
         }
         return InteractionResultHolder.pass(itemStack);

@@ -30,7 +30,7 @@ import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.DimensionTypeArgument;
+import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.NbtPathArgument;
@@ -119,7 +119,7 @@ public class ExecuteCommand {
                 list.add(((CommandSourceStack)commandContext.getSource()).facing(entity, anchor));
             }
             return list;
-        }))))).then(Commands.argument("pos", Vec3Argument.vec3()).redirect(literalCommandNode, commandContext -> ((CommandSourceStack)commandContext.getSource()).facing(Vec3Argument.getVec3(commandContext, "pos")))))).then(Commands.literal("align").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("axes", SwizzleArgument.swizzle()).redirect(literalCommandNode, commandContext -> ((CommandSourceStack)commandContext.getSource()).withPosition(((CommandSourceStack)commandContext.getSource()).getPosition().align(SwizzleArgument.getSwizzle(commandContext, "axes"))))))).then(Commands.literal("anchored").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("anchor", EntityAnchorArgument.anchor()).redirect(literalCommandNode, commandContext -> ((CommandSourceStack)commandContext.getSource()).withAnchor(EntityAnchorArgument.getAnchor(commandContext, "anchor")))))).then(Commands.literal("in").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("dimension", DimensionTypeArgument.dimension()).redirect(literalCommandNode, commandContext -> ((CommandSourceStack)commandContext.getSource()).withLevel(((CommandSourceStack)commandContext.getSource()).getServer().getLevel(DimensionTypeArgument.getDimension(commandContext, "dimension")))))));
+        }))))).then(Commands.argument("pos", Vec3Argument.vec3()).redirect(literalCommandNode, commandContext -> ((CommandSourceStack)commandContext.getSource()).facing(Vec3Argument.getVec3(commandContext, "pos")))))).then(Commands.literal("align").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("axes", SwizzleArgument.swizzle()).redirect(literalCommandNode, commandContext -> ((CommandSourceStack)commandContext.getSource()).withPosition(((CommandSourceStack)commandContext.getSource()).getPosition().align(SwizzleArgument.getSwizzle(commandContext, "axes"))))))).then(Commands.literal("anchored").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("anchor", EntityAnchorArgument.anchor()).redirect(literalCommandNode, commandContext -> ((CommandSourceStack)commandContext.getSource()).withAnchor(EntityAnchorArgument.getAnchor(commandContext, "anchor")))))).then(Commands.literal("in").then((ArgumentBuilder<CommandSourceStack, ?>)Commands.argument("dimension", DimensionArgument.dimension()).redirect(literalCommandNode, commandContext -> ((CommandSourceStack)commandContext.getSource()).withLevel(((CommandSourceStack)commandContext.getSource()).getServer().getLevel(DimensionArgument.getDimension(commandContext, "dimension")))))));
     }
 
     private static ArgumentBuilder<CommandSourceStack, ?> wrapStores(LiteralCommandNode<CommandSourceStack> literalCommandNode, LiteralArgumentBuilder<CommandSourceStack> literalArgumentBuilder, boolean bl) {

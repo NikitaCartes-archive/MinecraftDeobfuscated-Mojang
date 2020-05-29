@@ -156,34 +156,14 @@ Nameable {
         }
     }
 
-    public int clearInventory(Predicate<ItemStack> predicate, int i) {
-        int k;
+    public int clearOrCountMatchingItems(Predicate<ItemStack> predicate, int i, Container container) {
         int j = 0;
-        for (k = 0; k < this.getContainerSize(); ++k) {
-            ItemStack itemStack = this.getItem(k);
-            if (itemStack.isEmpty() || !predicate.test(itemStack)) continue;
-            int l = i <= 0 ? itemStack.getCount() : Math.min(i - j, itemStack.getCount());
-            j += l;
-            if (i == 0) continue;
-            itemStack.shrink(l);
-            if (itemStack.isEmpty()) {
-                this.setItem(k, ItemStack.EMPTY);
-            }
-            if (i <= 0 || j < i) continue;
-            return j;
-        }
-        if (!this.carried.isEmpty() && predicate.test(this.carried)) {
-            k = i <= 0 ? this.carried.getCount() : Math.min(i - j, this.carried.getCount());
-            j += k;
-            if (i != 0) {
-                this.carried.shrink(k);
-                if (this.carried.isEmpty()) {
-                    this.carried = ItemStack.EMPTY;
-                }
-                if (i > 0 && j >= i) {
-                    return j;
-                }
-            }
+        boolean bl = i == 0;
+        j += ContainerHelper.clearOrCountMatchingItems(this, predicate, i - j, bl);
+        j += ContainerHelper.clearOrCountMatchingItems(container, predicate, i - j, bl);
+        j += ContainerHelper.clearOrCountMatchingItems(this.carried, predicate, i - j, bl);
+        if (this.carried.isEmpty()) {
+            this.carried = ItemStack.EMPTY;
         }
         return j;
     }
@@ -466,10 +446,6 @@ Nameable {
     @Override
     public Component getName() {
         return new TranslatableComponent("container.inventory");
-    }
-
-    public boolean canDestroy(BlockState blockState) {
-        return this.getItem(this.selected).canDestroySpecial(blockState);
     }
 
     @Environment(value=EnvType.CLIENT)

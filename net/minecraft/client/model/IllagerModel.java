@@ -14,7 +14,6 @@ import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.AbstractIllager;
 
 @Environment(value=EnvType.CLIENT)
@@ -113,27 +112,7 @@ HeadedModel {
         }
         AbstractIllager.IllagerArmPose illagerArmPose = ((AbstractIllager)abstractIllager).getArmPose();
         if (illagerArmPose == AbstractIllager.IllagerArmPose.ATTACKING) {
-            float k = Mth.sin(this.attackTime * (float)Math.PI);
-            float l = Mth.sin((1.0f - (1.0f - this.attackTime) * (1.0f - this.attackTime)) * (float)Math.PI);
-            this.rightArm.zRot = 0.0f;
-            this.leftArm.zRot = 0.0f;
-            this.rightArm.yRot = 0.15707964f;
-            this.leftArm.yRot = -0.15707964f;
-            if (((Mob)abstractIllager).getMainArm() == HumanoidArm.RIGHT) {
-                this.rightArm.xRot = -1.8849558f + Mth.cos(h * 0.09f) * 0.15f;
-                this.leftArm.xRot = -0.0f + Mth.cos(h * 0.19f) * 0.5f;
-                this.rightArm.xRot += k * 2.2f - l * 0.4f;
-                this.leftArm.xRot += k * 1.2f - l * 0.4f;
-            } else {
-                this.rightArm.xRot = -0.0f + Mth.cos(h * 0.19f) * 0.5f;
-                this.leftArm.xRot = -1.8849558f + Mth.cos(h * 0.09f) * 0.15f;
-                this.rightArm.xRot += k * 1.2f - l * 0.4f;
-                this.leftArm.xRot += k * 2.2f - l * 0.4f;
-            }
-            this.rightArm.zRot += Mth.cos(h * 0.09f) * 0.05f + 0.05f;
-            this.leftArm.zRot -= Mth.cos(h * 0.09f) * 0.05f + 0.05f;
-            this.rightArm.xRot += Mth.sin(h * 0.067f) * 0.05f;
-            this.leftArm.xRot -= Mth.sin(h * 0.067f) * 0.05f;
+            AnimationUtils.swingWeaponDown(this.rightArm, this.leftArm, abstractIllager, this.attackTime, h);
         } else if (illagerArmPose == AbstractIllager.IllagerArmPose.SPELLCASTING) {
             this.rightArm.z = 0.0f;
             this.rightArm.x = -5.0f;

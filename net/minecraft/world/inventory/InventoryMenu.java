@@ -191,5 +191,9 @@ extends RecipeBookMenu<CraftingContainer> {
     public int getSize() {
         return 5;
     }
+
+    public CraftingContainer getCraftSlots() {
+        return this.craftSlots;
+    }
 }
 

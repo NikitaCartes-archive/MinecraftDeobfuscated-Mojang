@@ -114,7 +114,6 @@ implements FlyingAnimal {
         this.moveControl = new FlyingMoveControl(this, 20, true);
         this.lookControl = new BeeLookControl(this);
         this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, -1.0f);
-        this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0f);
         this.setPathfindingMalus(BlockPathTypes.WATER, -1.0f);
         this.setPathfindingMalus(BlockPathTypes.COCOA, -1.0f);
         this.setPathfindingMalus(BlockPathTypes.FENCE, -1.0f);

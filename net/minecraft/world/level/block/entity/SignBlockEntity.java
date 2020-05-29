@@ -13,6 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
@@ -33,7 +34,7 @@ extends BlockEntity {
     private final Component[] messages = new Component[]{TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY};
     private boolean isEditable = true;
     private Player playerWhoMayEdit;
-    private final Component[] renderMessages = new Component[4];
+    private final FormattedText[] renderMessages = new FormattedText[4];
     private DyeColor color = DyeColor.BLACK;
 
     public SignBlockEntity() {
@@ -72,11 +73,6 @@ extends BlockEntity {
         }
     }
 
-    @Environment(value=EnvType.CLIENT)
-    public Component getMessage(int i) {
-        return this.messages[i];
-    }
-
     public void setMessage(int i, Component component) {
         this.messages[i] = component;
         this.renderMessages[i] = null;
@@ -84,9 +80,9 @@ extends BlockEntity {
 
     @Nullable
     @Environment(value=EnvType.CLIENT)
-    public Component getRenderMessage(int i, UnaryOperator<Component> unaryOperator) {
+    public FormattedText getRenderMessage(int i, UnaryOperator<FormattedText> unaryOperator) {
         if (this.renderMessages[i] == null && this.messages[i] != null) {
-            this.renderMessages[i] = (Component)unaryOperator.apply(this.messages[i]);
+            this.renderMessages[i] = (FormattedText)unaryOperator.apply(this.messages[i]);
         }
         return this.renderMessages[i];
     }

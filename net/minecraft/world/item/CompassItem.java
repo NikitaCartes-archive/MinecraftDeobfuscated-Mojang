@@ -5,7 +5,6 @@ package net.minecraft.world.item;
 
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
@@ -24,7 +23,6 @@ import net.minecraft.world.item.UseOnContext;
 import net.minecraft.world.item.Vanishable;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.dimension.DimensionType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,8 +45,8 @@ implements Vanishable {
         return CompassItem.isLodestoneCompass(itemStack) || super.isFoil(itemStack);
     }
 
-    public static Optional<ResourceKey<DimensionType>> getLodestoneDimension(CompoundTag compoundTag) {
-        return DimensionType.RESOURCE_KEY_CODEC.parse(NbtOps.INSTANCE, compoundTag.get("LodestoneDimension")).result();
+    public static Optional<ResourceKey<Level>> getLodestoneDimension(CompoundTag compoundTag) {
+        return Level.RESOURCE_KEY_CODEC.parse(NbtOps.INSTANCE, compoundTag.get("LodestoneDimension")).result();
     }
 
     @Override
@@ -61,7 +59,7 @@ implements Vanishable {
             if (compoundTag.contains("LodestoneTracked") && !compoundTag.getBoolean("LodestoneTracked")) {
                 return;
             }
-            Optional<ResourceKey<DimensionType>> optional = CompassItem.getLodestoneDimension(compoundTag);
+            Optional<ResourceKey<Level>> optional = CompassItem.getLodestoneDimension(compoundTag);
             if (optional.isPresent() && optional.get() == level.dimension() && compoundTag.contains("LodestonePos") && !((ServerLevel)level).getPoiManager().existsAtPosition(PoiType.LODESTONE, NbtUtils.readBlockPos(compoundTag.getCompound("LodestonePos")))) {
                 compoundTag.remove("LodestonePos");
             }
@@ -76,7 +74,7 @@ implements Vanishable {
             useOnContext.level.playSound(null, blockPos, SoundEvents.LODESTONE_COMPASS_LOCK, SoundSource.PLAYERS, 1.0f, 1.0f);
             boolean bl2 = bl = !useOnContext.player.abilities.instabuild && useOnContext.itemStack.getCount() == 1;
             if (bl) {
-                this.addLodestoneTags(useOnContext.level.registryAccess(), useOnContext.level.dimensionType(), blockPos, useOnContext.itemStack.getOrCreateTag());
+                this.addLodestoneTags(useOnContext.level.dimension(), blockPos, useOnContext.itemStack.getOrCreateTag());
             } else {
                 ItemStack itemStack = new ItemStack(Items.COMPASS, 1);
                 CompoundTag compoundTag = useOnContext.itemStack.hasTag() ? useOnContext.itemStack.getTag().copy() : new CompoundTag();
@@ -84,19 +82,19 @@ implements Vanishable {
                 if (!useOnContext.player.abilities.instabuild) {
                     useOnContext.itemStack.shrink(1);
                 }
-                this.addLodestoneTags(useOnContext.level.registryAccess(), useOnContext.level.dimensionType(), blockPos, compoundTag);
+                this.addLodestoneTags(useOnContext.level.dimension(), blockPos, compoundTag);
                 if (!useOnContext.player.inventory.add(itemStack)) {
                     useOnContext.player.drop(itemStack, false);
                 }
             }
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(useOnContext.level.isClientSide);
         }
         return super.useOn(useOnContext);
     }
 
-    private void addLodestoneTags(RegistryAccess registryAccess, DimensionType dimensionType, BlockPos blockPos, CompoundTag compoundTag) {
+    private void addLodestoneTags(ResourceKey<Level> resourceKey, BlockPos blockPos, CompoundTag compoundTag) {
         compoundTag.put("LodestonePos", NbtUtils.writeBlockPos(blockPos));
-        registryAccess.dimensionTypes().encodeStart(NbtOps.INSTANCE, dimensionType).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("LodestoneDimension", (Tag)tag));
+        Level.RESOURCE_KEY_CODEC.encodeStart(NbtOps.INSTANCE, resourceKey).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("LodestoneDimension", (Tag)tag));
         compoundTag.putBoolean("LodestoneTracked", true);
     }
 

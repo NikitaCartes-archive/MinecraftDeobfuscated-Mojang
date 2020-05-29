@@ -15,6 +15,7 @@ import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerType;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class MegaPineFoliagePlacer
 extends FoliagePlacer {
@@ -34,14 +35,14 @@ extends FoliagePlacer {
     }
 
     @Override
-    protected void createFoliage(LevelSimulatedRW levelSimulatedRW, Random random, TreeConfiguration treeConfiguration, int i, FoliagePlacer.FoliageAttachment foliageAttachment, int j, int k, Set<BlockPos> set, int l) {
+    protected void createFoliage(LevelSimulatedRW levelSimulatedRW, Random random, TreeConfiguration treeConfiguration, int i, FoliagePlacer.FoliageAttachment foliageAttachment, int j, int k, Set<BlockPos> set, int l, BoundingBox boundingBox) {
         BlockPos blockPos = foliageAttachment.foliagePos();
         int m = 0;
         for (int n = blockPos.getY() - j + l; n <= blockPos.getY() + l; ++n) {
             int o = blockPos.getY() - n;
             int p = k + foliageAttachment.radiusOffset() + Mth.floor((float)o / (float)j * 3.5f);
             int q = o > 0 && p == m && (n & 1) == 0 ? p + 1 : p;
-            this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, new BlockPos(blockPos.getX(), n, blockPos.getZ()), q, set, 0, foliageAttachment.doubleTrunk());
+            this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, new BlockPos(blockPos.getX(), n, blockPos.getZ()), q, set, 0, foliageAttachment.doubleTrunk(), boundingBox);
             m = p;
         }
     }

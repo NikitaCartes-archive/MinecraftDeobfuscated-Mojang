@@ -14,6 +14,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 
@@ -144,8 +145,8 @@ extends Screen {
             if (chatComponent.handleChatQueueClicked(d, e)) {
                 return true;
             }
-            Component component = chatComponent.getClickedComponentAt(d, e);
-            if (component != null && this.handleComponentClicked(component)) {
+            Style style = chatComponent.getClickedComponentStyleAt(d, e);
+            if (style != null && this.handleComponentClicked(style)) {
                 return true;
             }
         }
@@ -190,9 +191,9 @@ extends Screen {
         ChatScreen.fill(poseStack, 2, this.height - 14, this.width - 2, this.height - 2, this.minecraft.options.getBackgroundColor(Integer.MIN_VALUE));
         this.input.render(poseStack, i, j, f);
         this.commandSuggestions.render(poseStack, i, j);
-        Component component = this.minecraft.gui.getChat().getClickedComponentAt(i, j);
-        if (component != null && component.getStyle().getHoverEvent() != null) {
-            this.renderComponentHoverEffect(poseStack, component, i, j);
+        Style style = this.minecraft.gui.getChat().getClickedComponentStyleAt(i, j);
+        if (style != null && style.getHoverEvent() != null) {
+            this.renderComponentHoverEffect(poseStack, style, i, j);
         }
         super.render(poseStack, i, j, f);
     }

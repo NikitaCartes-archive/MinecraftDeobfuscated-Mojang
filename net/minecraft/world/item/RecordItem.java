@@ -58,7 +58,7 @@ extends Item {
                 player.awardStat(Stats.PLAY_RECORD);
             }
         }
-        return InteractionResult.SUCCESS;
+        return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
     public int getAnalogOutput() {

@@ -11,6 +11,8 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,8 +21,13 @@ implements LootItemCondition {
     private static final Logger LOGGER = LogManager.getLogger();
     private final ResourceLocation name;
 
-    public ConditionReference(ResourceLocation resourceLocation) {
+    private ConditionReference(ResourceLocation resourceLocation) {
         this.name = resourceLocation;
+    }
+
+    @Override
+    public LootItemConditionType getType() {
+        return LootItemConditions.REFERENCE;
     }
 
     @Override
@@ -62,11 +69,7 @@ implements LootItemCondition {
     }
 
     public static class Serializer
-    extends LootItemCondition.Serializer<ConditionReference> {
-        protected Serializer() {
-            super(new ResourceLocation("reference"), ConditionReference.class);
-        }
-
+    implements net.minecraft.world.level.storage.loot.Serializer<ConditionReference> {
         @Override
         public void serialize(JsonObject jsonObject, ConditionReference conditionReference, JsonSerializationContext jsonSerializationContext) {
             jsonObject.addProperty("name", conditionReference.name.toString());
@@ -79,7 +82,7 @@ implements LootItemCondition {
         }
 
         @Override
-        public /* synthetic */ LootItemCondition deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             return this.deserialize(jsonObject, jsonDeserializationContext);
         }
     }

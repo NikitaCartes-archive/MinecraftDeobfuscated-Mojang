@@ -47,7 +47,7 @@ extends Item {
     @Override
     public InteractionResult useOn(UseOnContext useOnContext) {
         InteractionResult interactionResult = this.place(new BlockPlaceContext(useOnContext));
-        if (interactionResult != InteractionResult.SUCCESS && this.isEdible()) {
+        if (!interactionResult.consumesAction() && this.isEdible()) {
             return this.use(useOnContext.level, useOnContext.player, useOnContext.hand).getResult();
         }
         return interactionResult;
@@ -85,7 +85,7 @@ extends Item {
         SoundType soundType = blockState2.getSoundType();
         level.playSound(player, blockPos, this.getPlaceSound(blockState2), SoundSource.BLOCKS, (soundType.getVolume() + 1.0f) / 2.0f, soundType.getPitch() * 0.8f);
         itemStack.shrink(1);
-        return InteractionResult.SUCCESS;
+        return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
     protected SoundEvent getPlaceSound(BlockState blockState) {

@@ -11,18 +11,24 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntries;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class DynamicLoot
 extends LootPoolSingletonContainer {
-    public static final ResourceLocation TYPE = new ResourceLocation("dynamic");
     private final ResourceLocation name;
 
     private DynamicLoot(ResourceLocation resourceLocation, int i, int j, LootItemCondition[] lootItemConditions, LootItemFunction[] lootItemFunctions) {
         super(i, j, lootItemConditions, lootItemFunctions);
         this.name = resourceLocation;
+    }
+
+    @Override
+    public LootPoolEntryType getType() {
+        return LootPoolEntries.DYNAMIC;
     }
 
     @Override
@@ -36,13 +42,9 @@ extends LootPoolSingletonContainer {
 
     public static class Serializer
     extends LootPoolSingletonContainer.Serializer<DynamicLoot> {
-        public Serializer() {
-            super(new ResourceLocation("dynamic"), DynamicLoot.class);
-        }
-
         @Override
-        public void serialize(JsonObject jsonObject, DynamicLoot dynamicLoot, JsonSerializationContext jsonSerializationContext) {
-            super.serialize(jsonObject, dynamicLoot, jsonSerializationContext);
+        public void serializeCustom(JsonObject jsonObject, DynamicLoot dynamicLoot, JsonSerializationContext jsonSerializationContext) {
+            super.serializeCustom(jsonObject, dynamicLoot, jsonSerializationContext);
             jsonObject.addProperty("name", dynamicLoot.name.toString());
         }
 

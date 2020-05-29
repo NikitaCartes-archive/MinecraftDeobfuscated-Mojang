@@ -61,7 +61,7 @@ extends WaterAnimal {
 
     @Override
     public boolean requiresCustomPersistence() {
-        return this.fromBucket();
+        return super.requiresCustomPersistence() || this.fromBucket();
     }
 
     public static boolean checkFishSpawnRules(EntityType<? extends AbstractFish> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {

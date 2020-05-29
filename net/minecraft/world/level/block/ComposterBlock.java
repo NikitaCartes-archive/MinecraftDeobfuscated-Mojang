@@ -201,11 +201,11 @@ implements WorldlyContainerHolder {
                     itemStack.shrink(1);
                 }
             }
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         if (i == 8) {
             ComposterBlock.extractProduce(blockState, level, blockPos);
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         return InteractionResult.PASS;
     }

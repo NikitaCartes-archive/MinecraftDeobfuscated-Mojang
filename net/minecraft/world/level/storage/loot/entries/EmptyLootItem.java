@@ -6,9 +6,10 @@ package net.minecraft.world.level.storage.loot.entries;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import java.util.function.Consumer;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntries;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -17,6 +18,11 @@ public class EmptyLootItem
 extends LootPoolSingletonContainer {
     private EmptyLootItem(int i, int j, LootItemCondition[] lootItemConditions, LootItemFunction[] lootItemFunctions) {
         super(i, j, lootItemConditions, lootItemFunctions);
+    }
+
+    @Override
+    public LootPoolEntryType getType() {
+        return LootPoolEntries.EMPTY;
     }
 
     @Override
@@ -29,17 +35,13 @@ extends LootPoolSingletonContainer {
 
     public static class Serializer
     extends LootPoolSingletonContainer.Serializer<EmptyLootItem> {
-        public Serializer() {
-            super(new ResourceLocation("empty"), EmptyLootItem.class);
-        }
-
         @Override
-        protected EmptyLootItem deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, int i, int j, LootItemCondition[] lootItemConditions, LootItemFunction[] lootItemFunctions) {
+        public EmptyLootItem deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, int i, int j, LootItemCondition[] lootItemConditions, LootItemFunction[] lootItemFunctions) {
             return new EmptyLootItem(i, j, lootItemConditions, lootItemFunctions);
         }
 
         @Override
-        protected /* synthetic */ LootPoolSingletonContainer deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, int i, int j, LootItemCondition[] lootItemConditions, LootItemFunction[] lootItemFunctions) {
+        public /* synthetic */ LootPoolSingletonContainer deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, int i, int j, LootItemCondition[] lootItemConditions, LootItemFunction[] lootItemFunctions) {
             return this.deserialize(jsonObject, jsonDeserializationContext, i, j, lootItemConditions, lootItemFunctions);
         }
     }

@@ -10,7 +10,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.SerializationTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
@@ -42,7 +42,7 @@ public abstract class EntityTypePredicate {
         String string = GsonHelper.convertToString(jsonElement, "type");
         if (string.startsWith("#")) {
             ResourceLocation resourceLocation = new ResourceLocation(string.substring(1));
-            return new TagPredicate(EntityTypeTags.getAllTags().getTagOrEmpty(resourceLocation));
+            return new TagPredicate(SerializationTags.getInstance().getEntityTypes().getTagOrEmpty(resourceLocation));
         }
         ResourceLocation resourceLocation = new ResourceLocation(string);
         EntityType entityType = (EntityType)Registry.ENTITY_TYPE.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown entity type '" + resourceLocation + "', valid types are: " + COMMA_JOINER.join(Registry.ENTITY_TYPE.keySet())));
@@ -72,7 +72,7 @@ public abstract class EntityTypePredicate {
 
         @Override
         public JsonElement serializeToJson() {
-            return new JsonPrimitive("#" + EntityTypeTags.getAllTags().getIdOrThrow(this.tag));
+            return new JsonPrimitive("#" + SerializationTags.getInstance().getEntityTypes().getIdOrThrow(this.tag));
         }
     }
 

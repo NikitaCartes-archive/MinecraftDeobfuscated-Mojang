@@ -529,7 +529,6 @@ extends Screen {
         if (string.isEmpty()) {
             return DisplayCache.EMPTY;
         }
-        String string2 = this.font.isBidirectional() ? this.font.bidirectionalShaping(string) : string;
         int i2 = this.pageEdit.getCursorPos();
         int j2 = this.pageEdit.getSelectionPos();
         IntArrayList intList = new IntArrayList();
@@ -537,9 +536,9 @@ extends Screen {
         MutableInt mutableInt = new MutableInt();
         MutableBoolean mutableBoolean = new MutableBoolean();
         StringSplitter stringSplitter = this.font.getSplitter();
-        stringSplitter.splitLines(string2, 114, Style.EMPTY, true, (style, i, j) -> {
+        stringSplitter.splitLines(string, 114, Style.EMPTY, true, (style, i, j) -> {
             int k = mutableInt.getAndIncrement();
-            String string2 = string2.substring(i, j);
+            String string2 = string.substring(i, j);
             mutableBoolean.setValue(string2.endsWith("\n"));
             String string3 = StringUtils.stripEnd(string2, " \n");
             int l = k * this.font.lineHeight;
@@ -548,12 +547,12 @@ extends Screen {
             list.add(new LineInfo(style, string3, pos2i.x, pos2i.y));
         });
         int[] is = intList.toIntArray();
-        boolean bl2 = bl = i2 == string2.length();
+        boolean bl2 = bl = i2 == string.length();
         if (bl && mutableBoolean.isTrue()) {
             pos2i = new Pos2i(0, list.size() * this.font.lineHeight);
         } else {
             int k = BookEditScreen.findLineFromPos(is, i2);
-            l = this.font.width(string2.substring(is[k], i2));
+            l = this.font.width(string.substring(is[k], i2));
             pos2i = new Pos2i(l, k * this.font.lineHeight);
         }
         ArrayList<Rect2i> list2 = Lists.newArrayList();
@@ -565,20 +564,20 @@ extends Screen {
             if (n == (o = BookEditScreen.findLineFromPos(is, m))) {
                 int p = n * this.font.lineHeight;
                 int q = is[n];
-                list2.add(this.createPartialLineSelection(string2, stringSplitter, l, m, p, q));
+                list2.add(this.createPartialLineSelection(string, stringSplitter, l, m, p, q));
             } else {
-                int p = n + 1 > is.length ? string2.length() : is[n + 1];
-                list2.add(this.createPartialLineSelection(string2, stringSplitter, l, p, n * this.font.lineHeight, is[n]));
+                int p = n + 1 > is.length ? string.length() : is[n + 1];
+                list2.add(this.createPartialLineSelection(string, stringSplitter, l, p, n * this.font.lineHeight, is[n]));
                 for (int q = n + 1; q < o; ++q) {
                     int r = q * this.font.lineHeight;
-                    String string3 = string2.substring(is[q], is[q + 1]);
-                    int s = (int)stringSplitter.stringWidth(string3);
+                    String string2 = string.substring(is[q], is[q + 1]);
+                    int s = (int)stringSplitter.stringWidth(string2);
                     list2.add(this.createSelection(new Pos2i(0, r), new Pos2i(s, r + this.font.lineHeight)));
                 }
-                list2.add(this.createPartialLineSelection(string2, stringSplitter, is[o], m, o * this.font.lineHeight, is[o]));
+                list2.add(this.createPartialLineSelection(string, stringSplitter, is[o], m, o * this.font.lineHeight, is[o]));
             }
         }
-        return new DisplayCache(string2, pos2i, bl, is, list.toArray(new LineInfo[0]), list2.toArray(new Rect2i[0]));
+        return new DisplayCache(string, pos2i, bl, is, list.toArray(new LineInfo[0]), list2.toArray(new Rect2i[0]));
     }
 
     private static int findLineFromPos(int[] is, int i) {

@@ -3,8 +3,10 @@
  */
 package net.minecraft.tags;
 
+import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.StaticTagHelper;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagCollection;
@@ -30,6 +32,10 @@ public class FluidTags {
 
     public static TagCollection<Fluid> getAllTags() {
         return HELPER.getAllTags();
+    }
+
+    public static Set<ResourceLocation> getMissingTags(TagCollection<Fluid> tagCollection) {
+        return HELPER.getMissingTags(tagCollection);
     }
 }
 

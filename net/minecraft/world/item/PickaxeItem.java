@@ -23,7 +23,7 @@ extends DiggerItem {
     }
 
     @Override
-    public boolean canDestroySpecial(BlockState blockState) {
+    public boolean isCorrectToolForDrops(BlockState blockState) {
         int i = this.getTier().getLevel();
         if (blockState.is(Blocks.OBSIDIAN) || blockState.is(Blocks.CRYING_OBSIDIAN) || blockState.is(Blocks.NETHERITE_BLOCK) || blockState.is(Blocks.RESPAWN_ANCHOR) || blockState.is(Blocks.ANCIENT_DEBRIS)) {
             return i >= 3;

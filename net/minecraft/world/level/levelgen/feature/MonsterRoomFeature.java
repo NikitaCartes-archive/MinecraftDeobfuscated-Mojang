@@ -75,12 +75,13 @@ extends Feature<NoneFeatureConfiguration> {
             for (t = 3; t >= -1; --t) {
                 for (u = p; u <= q; ++u) {
                     blockPos2 = blockPos.offset(s, t, u);
+                    BlockState blockState = worldGenLevel.getBlockState(blockPos2);
                     if (s == k || t == -1 || u == p || s == l || t == 4 || u == q) {
                         if (blockPos2.getY() >= 0 && !worldGenLevel.getBlockState(blockPos2.below()).getMaterial().isSolid()) {
                             worldGenLevel.setBlock(blockPos2, AIR, 2);
                             continue;
                         }
-                        if (!worldGenLevel.getBlockState(blockPos2).getMaterial().isSolid() || worldGenLevel.getBlockState(blockPos2).is(Blocks.CHEST)) continue;
+                        if (!blockState.getMaterial().isSolid() || blockState.is(Blocks.CHEST)) continue;
                         if (t == -1 && random.nextInt(4) != 0) {
                             worldGenLevel.setBlock(blockPos2, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), 2);
                             continue;
@@ -88,7 +89,7 @@ extends Feature<NoneFeatureConfiguration> {
                         worldGenLevel.setBlock(blockPos2, Blocks.COBBLESTONE.defaultBlockState(), 2);
                         continue;
                     }
-                    if (worldGenLevel.getBlockState(blockPos2).is(Blocks.CHEST)) continue;
+                    if (blockState.is(Blocks.CHEST) || blockState.is(Blocks.SPAWNER)) continue;
                     worldGenLevel.setBlock(blockPos2, AIR, 2);
                 }
             }

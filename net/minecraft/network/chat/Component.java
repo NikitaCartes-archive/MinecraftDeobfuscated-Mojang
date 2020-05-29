@@ -26,6 +26,7 @@ import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.KeybindComponent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.NbtComponent;
@@ -37,13 +38,11 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.LowerCaseEnumTypeAdapterFactory;
-import net.minecraft.util.Unit;
 import org.jetbrains.annotations.Nullable;
 
 public interface Component
-extends Message {
-    public static final Optional<Unit> STOP_ITERATION = Optional.of(Unit.INSTANCE);
-
+extends Message,
+FormattedText {
     public Style getStyle();
 
     public String getContents();
@@ -77,8 +76,9 @@ extends Message {
 
     public MutableComponent mutableCopy();
 
+    @Override
     @Environment(value=EnvType.CLIENT)
-    default public <T> Optional<T> visit(StyledContentConsumer<T> styledContentConsumer, Style style) {
+    default public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
         Style style2 = this.getStyle().applyTo(style);
         Optional<T> optional = this.visitSelf(styledContentConsumer, style2);
         if (optional.isPresent()) {
@@ -92,7 +92,8 @@ extends Message {
         return Optional.empty();
     }
 
-    default public <T> Optional<T> visit(ContentConsumer<T> contentConsumer) {
+    @Override
+    default public <T> Optional<T> visit(FormattedText.ContentConsumer<T> contentConsumer) {
         Optional<T> optional = this.visitSelf(contentConsumer);
         if (optional.isPresent()) {
             return optional;
@@ -106,11 +107,11 @@ extends Message {
     }
 
     @Environment(value=EnvType.CLIENT)
-    default public <T> Optional<T> visitSelf(StyledContentConsumer<T> styledContentConsumer, Style style) {
+    default public <T> Optional<T> visitSelf(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
         return styledContentConsumer.accept(style, this.getContents());
     }
 
-    default public <T> Optional<T> visitSelf(ContentConsumer<T> contentConsumer) {
+    default public <T> Optional<T> visitSelf(FormattedText.ContentConsumer<T> contentConsumer) {
         return contentConsumer.accept(this.getContents());
     }
 
@@ -356,15 +357,6 @@ extends Message {
         public /* synthetic */ Object deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             return this.deserialize(jsonElement, type, jsonDeserializationContext);
         }
-    }
-
-    public static interface ContentConsumer<T> {
-        public Optional<T> accept(String var1);
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static interface StyledContentConsumer<T> {
-        public Optional<T> accept(Style var1, String var2);
     }
 }
 

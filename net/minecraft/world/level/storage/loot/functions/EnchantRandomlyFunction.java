@@ -31,6 +31,8 @@ import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,6 +45,11 @@ extends LootItemConditionalFunction {
     private EnchantRandomlyFunction(LootItemCondition[] lootItemConditions, Collection<Enchantment> collection) {
         super(lootItemConditions);
         this.enchantments = ImmutableList.copyOf(collection);
+    }
+
+    @Override
+    public LootItemFunctionType getType() {
+        return LootItemFunctions.ENCHANT_RANDOMLY;
     }
 
     @Override
@@ -80,10 +87,6 @@ extends LootItemConditionalFunction {
 
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<EnchantRandomlyFunction> {
-        public Serializer() {
-            super(new ResourceLocation("enchant_randomly"), EnchantRandomlyFunction.class);
-        }
-
         @Override
         public void serialize(JsonObject jsonObject, EnchantRandomlyFunction enchantRandomlyFunction, JsonSerializationContext jsonSerializationContext) {
             super.serialize(jsonObject, enchantRandomlyFunction, jsonSerializationContext);

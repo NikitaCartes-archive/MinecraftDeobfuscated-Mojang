@@ -70,7 +70,7 @@ extends BaseEntityBlock {
             player.openMenu((BrewingStandBlockEntity)blockEntity);
             player.awardStat(Stats.INTERACT_WITH_BREWINGSTAND);
         }
-        return InteractionResult.SUCCESS;
+        return InteractionResult.CONSUME;
     }
 
     @Override

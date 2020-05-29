@@ -22,10 +22,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.storage.LevelResource;
@@ -34,19 +32,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-public class StructureManager
-implements ResourceManagerReloadListener {
+public class StructureManager {
     private static final Logger LOGGER = LogManager.getLogger();
     private final Map<ResourceLocation, StructureTemplate> structureRepository = Maps.newHashMap();
     private final DataFixer fixerUpper;
-    private final MinecraftServer server;
+    private ResourceManager resourceManager;
     private final Path generatedDir;
 
-    public StructureManager(MinecraftServer minecraftServer, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer) {
-        this.server = minecraftServer;
+    public StructureManager(ResourceManager resourceManager, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer) {
+        this.resourceManager = resourceManager;
         this.fixerUpper = dataFixer;
         this.generatedDir = levelStorageAccess.getLevelPath(LevelResource.GENERATED_DIR).normalize();
-        minecraftServer.getResources().registerReloadListener(this);
     }
 
     public StructureTemplate getOrCreate(ResourceLocation resourceLocation) {
@@ -66,8 +62,8 @@ implements ResourceManagerReloadListener {
         });
     }
 
-    @Override
     public void onResourceManagerReload(ResourceManager resourceManager) {
+        this.resourceManager = resourceManager;
         this.structureRepository.clear();
     }
 
@@ -79,7 +75,7 @@ implements ResourceManagerReloadListener {
     @Nullable
     private StructureTemplate loadFromResource(ResourceLocation resourceLocation) {
         ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), "structures/" + resourceLocation.getPath() + ".nbt");
-        try (Resource resource = this.server.getResources().getResource(resourceLocation2);){
+        try (Resource resource = this.resourceManager.getResource(resourceLocation2);){
             StructureTemplate structureTemplate = this.readStructure(resource.getInputStream());
             return structureTemplate;
         } catch (FileNotFoundException fileNotFoundException) {

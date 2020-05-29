@@ -1634,12 +1634,9 @@ extends Entity {
     }
 
     public void travel(Vec3 vec3) {
-        double r;
-        double e;
-        double d;
         if (this.isEffectiveAi() || this.isControlledByLocalInstance()) {
             boolean bl;
-            d = 0.08;
+            double d = 0.08;
             boolean bl2 = bl = this.getDeltaMovement().y <= 0.0;
             if (bl && this.hasEffect(MobEffects.SLOW_FALLING)) {
                 d = 0.01;
@@ -1647,7 +1644,7 @@ extends Entity {
             }
             FluidState fluidState = this.level.getFluidState(this.blockPosition());
             if (!(!this.isInWater() || this instanceof Player && ((Player)this).abilities.flying || this.canStandOnFluid(fluidState.getType()))) {
-                double e2 = this.getY();
+                double e = this.getY();
                 float f = this.isSprinting() ? 0.9f : this.getWaterSlowDown();
                 float g = 0.02f;
                 float h = EnchantmentHelper.getDepthStrider(this);
@@ -1673,11 +1670,11 @@ extends Entity {
                 this.setDeltaMovement(vec32.multiply(f, 0.8f, f));
                 Vec3 vec33 = this.getFluidFallingAdjustedMovement(d, bl, this.getDeltaMovement());
                 this.setDeltaMovement(vec33);
-                if (this.horizontalCollision && this.isFree(vec33.x, vec33.y + (double)0.6f - this.getY() + e2, vec33.z)) {
+                if (this.horizontalCollision && this.isFree(vec33.x, vec33.y + (double)0.6f - this.getY() + e, vec33.z)) {
                     this.setDeltaMovement(vec33.x, 0.3f, vec33.z);
                 }
             } else if (!(!this.isInLava() || this instanceof Player && ((Player)this).abilities.flying || this.canStandOnFluid(fluidState.getType()))) {
-                double e3 = this.getY();
+                double e = this.getY();
                 this.moveRelative(0.02f, vec3);
                 this.move(MoverType.SELF, this.getDeltaMovement());
                 this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
@@ -1685,7 +1682,7 @@ extends Entity {
                     this.setDeltaMovement(this.getDeltaMovement().add(0.0, -d / 4.0, 0.0));
                 }
                 Vec3 vec34 = this.getDeltaMovement();
-                if (this.horizontalCollision && this.isFree(vec34.x, vec34.y + (double)0.6f - this.getY() + e3, vec34.z)) {
+                if (this.horizontalCollision && this.isFree(vec34.x, vec34.y + (double)0.6f - this.getY() + e, vec34.z)) {
                     this.setDeltaMovement(vec34.x, 0.3f, vec34.z);
                 }
             } else if (this.isFallFlying()) {
@@ -1743,14 +1740,20 @@ extends Entity {
                 this.setDeltaMovement(vec37.x * (double)f, q * (double)0.98f, vec37.z * (double)f);
             }
         }
-        this.animationSpeedOld = this.animationSpeed;
-        d = this.getX() - this.xo;
-        float f = Mth.sqrt(d * d + (e = this instanceof FlyingAnimal ? this.getY() - this.yo : 0.0) * e + (r = this.getZ() - this.zo) * r) * 4.0f;
-        if (f > 1.0f) {
-            f = 1.0f;
+        this.calculateEntityAnimation(this, this instanceof FlyingAnimal);
+    }
+
+    public void calculateEntityAnimation(LivingEntity livingEntity, boolean bl) {
+        double f;
+        double e;
+        livingEntity.animationSpeedOld = livingEntity.animationSpeed;
+        double d = livingEntity.getX() - livingEntity.xo;
+        float g = Mth.sqrt(d * d + (e = bl ? livingEntity.getY() - livingEntity.yo : 0.0) * e + (f = livingEntity.getZ() - livingEntity.zo) * f) * 4.0f;
+        if (g > 1.0f) {
+            g = 1.0f;
         }
-        this.animationSpeed += (f - this.animationSpeed) * 0.4f;
-        this.animationPosition += this.animationSpeed;
+        livingEntity.animationSpeed += (g - livingEntity.animationSpeed) * 0.4f;
+        livingEntity.animationPosition += livingEntity.animationSpeed;
     }
 
     public Vec3 handleRelativeFrictionAndCalculateMovement(Vec3 vec3, float f) {
@@ -2012,14 +2015,14 @@ extends Entity {
         this.level.getProfiler().pop();
         this.level.getProfiler().push("jump");
         if (this.jumping) {
-            boolean bl;
             double k = this.getFluidHeight(FluidTags.WATER);
-            boolean bl2 = bl = this.isInWater() && k > 0.0;
-            if (bl && (!this.onGround || k > 0.4)) {
+            boolean bl = this.isInWater() && k > 0.0;
+            double l = this.getFluidJumpThreshold();
+            if (bl && (!this.onGround || k > l)) {
                 this.jumpInLiquid(FluidTags.WATER);
             } else if (this.isInLava()) {
                 this.jumpInLiquid(FluidTags.LAVA);
-            } else if ((this.onGround || bl && k <= 0.4) && this.noJumpDelay == 0) {
+            } else if ((this.onGround || bl && k <= l) && this.noJumpDelay == 0) {
                 this.jumpFromGround();
                 this.noJumpDelay = 10;
             }

@@ -41,7 +41,7 @@ extends Item {
             if (player2 != null) {
                 useOnContext.getItemInHand().hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(useOnContext.getHand()));
             }
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(levelAccessor.isClientSide());
         }
         BlockPos blockPos2 = blockPos.relative(useOnContext.getClickedFace());
         if (FlintAndSteelItem.canUse(levelAccessor.getBlockState(blockPos2), levelAccessor, blockPos2)) {
@@ -53,7 +53,7 @@ extends Item {
                 CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer)player2, blockPos2, itemStack);
                 itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(useOnContext.getHand()));
             }
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(levelAccessor.isClientSide());
         }
         return InteractionResult.FAIL;
     }

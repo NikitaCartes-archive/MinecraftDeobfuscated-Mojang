@@ -86,7 +86,7 @@ implements TickableBlockEntity {
 
     private List<Entity> releaseAllOccupants(BlockState blockState, BeeReleaseStatus beeReleaseStatus) {
         ArrayList<Entity> list = Lists.newArrayList();
-        this.stored.removeIf(beeData -> this.releaseOccupant(blockState, ((BeeData)beeData).entityData, list, beeReleaseStatus));
+        this.stored.removeIf(beeData -> this.releaseOccupant(blockState, (BeeData)beeData, (List<Entity>)list, beeReleaseStatus));
         return list;
     }
 
@@ -130,12 +130,13 @@ implements TickableBlockEntity {
         entity.remove();
     }
 
-    private boolean releaseOccupant(BlockState blockState, CompoundTag compoundTag, @Nullable List<Entity> list, BeeReleaseStatus beeReleaseStatus) {
+    private boolean releaseOccupant(BlockState blockState, BeeData beeData, @Nullable List<Entity> list, BeeReleaseStatus beeReleaseStatus) {
         boolean bl;
-        BlockPos blockPos = this.getBlockPos();
         if ((this.level.isNight() || this.level.isRaining()) && beeReleaseStatus != BeeReleaseStatus.EMERGENCY) {
             return false;
         }
+        BlockPos blockPos = this.getBlockPos();
+        CompoundTag compoundTag = beeData.entityData;
         compoundTag.remove("Passengers");
         compoundTag.remove("Leash");
         compoundTag.remove("UUID");
@@ -147,22 +148,16 @@ implements TickableBlockEntity {
         }
         Entity entity2 = EntityType.loadEntityRecursive(compoundTag, this.level, entity -> entity);
         if (entity2 != null) {
-            float f = entity2.getBbWidth();
-            double d = bl ? 0.0 : 0.55 + (double)(f / 2.0f);
-            double e = (double)blockPos.getX() + 0.5 + d * (double)direction.getStepX();
-            double g = (double)blockPos.getY() + 0.5 - (double)(entity2.getBbHeight() / 2.0f);
-            double h = (double)blockPos.getZ() + 0.5 + d * (double)direction.getStepZ();
-            entity2.moveTo(e, g, h, entity2.yRot, entity2.xRot);
             if (!entity2.getType().is(EntityTypeTags.BEEHIVE_INHABITORS)) {
                 return false;
             }
             if (entity2 instanceof Bee) {
+                int i;
                 Bee bee = (Bee)entity2;
                 if (this.hasSavedFlowerPos() && !bee.hasSavedFlowerPos() && this.level.random.nextFloat() < 0.9f) {
                     bee.setSavedFlowerPos(this.savedFlowerPos);
                 }
                 if (beeReleaseStatus == BeeReleaseStatus.HONEY_DELIVERED) {
-                    int i;
                     bee.dropOffNectar();
                     if (blockState.getBlock().is(BlockTags.BEEHIVES) && (i = BeehiveBlockEntity.getHoneyLevel(blockState)) < 5) {
                         int j;
@@ -173,13 +168,21 @@ implements TickableBlockEntity {
                         this.level.setBlockAndUpdate(this.getBlockPos(), (BlockState)blockState.setValue(BeehiveBlock.HONEY_LEVEL, i + j));
                     }
                 }
+                i = beeData.ticksInHive;
+                bee.ageUp(i);
+                bee.setInLoveTime(Math.max(0, bee.getInLoveTime() - i));
                 bee.resetTicksWithoutNectarSinceExitingHive();
                 if (list != null) {
                     list.add(bee);
                 }
+                float f = entity2.getBbWidth();
+                double d = bl ? 0.0 : 0.55 + (double)(f / 2.0f);
+                double e = (double)blockPos.getX() + 0.5 + d * (double)direction.getStepX();
+                double g = (double)blockPos.getY() + 0.5 - (double)(entity2.getBbHeight() / 2.0f);
+                double h = (double)blockPos.getZ() + 0.5 + d * (double)direction.getStepZ();
+                entity2.moveTo(e, g, h, entity2.yRot, entity2.xRot);
             }
-            BlockPos blockPos3 = this.getBlockPos();
-            this.level.playSound(null, blockPos3.getX(), blockPos3.getY(), blockPos3.getZ(), SoundEvents.BEEHIVE_EXIT, SoundSource.BLOCKS, 1.0f, 1.0f);
+            this.level.playSound(null, blockPos, SoundEvents.BEEHIVE_EXIT, SoundSource.BLOCKS, 1.0f, 1.0f);
             return this.level.addFreshEntity(entity2);
         }
         return false;
@@ -195,9 +198,8 @@ implements TickableBlockEntity {
         while (iterator.hasNext()) {
             BeeData beeData = iterator.next();
             if (beeData.ticksInHive > beeData.minOccupationTicks) {
-                CompoundTag compoundTag;
-                BeeReleaseStatus beeReleaseStatus = (compoundTag = beeData.entityData).getBoolean("HasNectar") ? BeeReleaseStatus.HONEY_DELIVERED : BeeReleaseStatus.BEE_RELEASED;
-                if (!this.releaseOccupant(blockState, compoundTag, null, beeReleaseStatus)) continue;
+                BeeReleaseStatus beeReleaseStatus = beeData.entityData.getBoolean("HasNectar") ? BeeReleaseStatus.HONEY_DELIVERED : BeeReleaseStatus.BEE_RELEASED;
+                if (!this.releaseOccupant(blockState, beeData, null, beeReleaseStatus)) continue;
                 iterator.remove();
                 continue;
             }

@@ -11,6 +11,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
+import net.minecraft.world.item.Items;
 
 public class StopHoldingItemIfNoLongerAdmiring<E extends Piglin>
 extends Behavior<E> {
@@ -20,7 +21,7 @@ extends Behavior<E> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, E piglin) {
-        return !((LivingEntity)piglin).getOffhandItem().isEmpty();
+        return !((LivingEntity)piglin).getOffhandItem().isEmpty() && ((LivingEntity)piglin).getOffhandItem().getItem() != Items.SHIELD;
     }
 
     @Override

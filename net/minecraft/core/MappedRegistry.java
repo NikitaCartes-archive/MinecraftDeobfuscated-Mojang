@@ -12,9 +12,12 @@ import com.mojang.serialization.Lifecycle;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
@@ -68,12 +71,9 @@ extends WritableRegistry<T> {
     }
 
     @Override
-    public ResourceKey<T> getResourceKey(T object) {
-        ResourceKey resourceKey = (ResourceKey)this.keyStorage.inverse().get(object);
-        if (resourceKey == null) {
-            throw new IllegalStateException("Unregistered registry element: " + object + " in " + this);
-        }
-        return resourceKey;
+    @Environment(value=EnvType.CLIENT)
+    public Optional<ResourceKey<T>> getResourceKey(T object) {
+        return Optional.ofNullable(this.keyStorage.inverse().get(object));
     }
 
     @Override
@@ -83,6 +83,7 @@ extends WritableRegistry<T> {
 
     @Override
     @Nullable
+    @Environment(value=EnvType.CLIENT)
     public T get(@Nullable ResourceKey<T> resourceKey) {
         return (T)this.keyStorage.get(resourceKey);
     }
@@ -132,11 +133,6 @@ extends WritableRegistry<T> {
     }
 
     @Override
-    public boolean containsKey(ResourceKey<T> resourceKey) {
-        return this.keyStorage.containsKey(resourceKey);
-    }
-
-    @Override
     public boolean containsId(int i) {
         return this.map.contains(i);
     }
@@ -150,8 +146,8 @@ extends WritableRegistry<T> {
             return mappedRegistry;
         }, mappedRegistry -> {
             ImmutableList.Builder builder = ImmutableList.builder();
-            for (Object object : mappedRegistry) {
-                builder.add(Pair.of(mappedRegistry.getResourceKey(object), object));
+            for (Map.Entry entry : mappedRegistry.keyStorage.entrySet()) {
+                builder.add(Pair.of(entry.getKey(), entry.getValue()));
             }
             return builder.build();
         });

@@ -38,6 +38,7 @@ import net.minecraft.world.level.chunk.ProtoTickList;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
@@ -64,8 +65,8 @@ implements ChunkAccess {
     private final List<CompoundTag> entities = Lists.newArrayList();
     private final List<BlockPos> lights = Lists.newArrayList();
     private final ShortList[] postProcessing = new ShortList[16];
-    private final Map<String, StructureStart<?>> structureStarts = Maps.newHashMap();
-    private final Map<String, LongSet> structuresRefences = Maps.newHashMap();
+    private final Map<StructureFeature<?>, StructureStart<?>> structureStarts = Maps.newHashMap();
+    private final Map<StructureFeature<?>, LongSet> structuresRefences = Maps.newHashMap();
     private final UpgradeData upgradeData;
     private final ProtoTickList<Block> blockTicks;
     private final ProtoTickList<Fluid> liquidTicks;
@@ -302,46 +303,46 @@ implements ChunkAccess {
 
     @Override
     @Nullable
-    public StructureStart<?> getStartForFeature(String string) {
-        return this.structureStarts.get(string);
+    public StructureStart<?> getStartForFeature(StructureFeature<?> structureFeature) {
+        return this.structureStarts.get(structureFeature);
     }
 
     @Override
-    public void setStartForFeature(String string, StructureStart<?> structureStart) {
-        this.structureStarts.put(string, structureStart);
+    public void setStartForFeature(StructureFeature<?> structureFeature, StructureStart<?> structureStart) {
+        this.structureStarts.put(structureFeature, structureStart);
         this.isDirty = true;
     }
 
     @Override
-    public Map<String, StructureStart<?>> getAllStarts() {
+    public Map<StructureFeature<?>, StructureStart<?>> getAllStarts() {
         return Collections.unmodifiableMap(this.structureStarts);
     }
 
     @Override
-    public void setAllStarts(Map<String, StructureStart<?>> map) {
+    public void setAllStarts(Map<StructureFeature<?>, StructureStart<?>> map) {
         this.structureStarts.clear();
         this.structureStarts.putAll(map);
         this.isDirty = true;
     }
 
     @Override
-    public LongSet getReferencesForFeature(String string2) {
-        return this.structuresRefences.computeIfAbsent(string2, string -> new LongOpenHashSet());
+    public LongSet getReferencesForFeature(StructureFeature<?> structureFeature2) {
+        return this.structuresRefences.computeIfAbsent(structureFeature2, structureFeature -> new LongOpenHashSet());
     }
 
     @Override
-    public void addReferenceForFeature(String string2, long l) {
-        this.structuresRefences.computeIfAbsent(string2, string -> new LongOpenHashSet()).add(l);
+    public void addReferenceForFeature(StructureFeature<?> structureFeature2, long l) {
+        this.structuresRefences.computeIfAbsent(structureFeature2, structureFeature -> new LongOpenHashSet()).add(l);
         this.isDirty = true;
     }
 
     @Override
-    public Map<String, LongSet> getAllReferences() {
+    public Map<StructureFeature<?>, LongSet> getAllReferences() {
         return Collections.unmodifiableMap(this.structuresRefences);
     }
 
     @Override
-    public void setAllReferences(Map<String, LongSet> map) {
+    public void setAllReferences(Map<StructureFeature<?>, LongSet> map) {
         this.structuresRefences.clear();
         this.structuresRefences.putAll(map);
         this.isDirty = true;

@@ -10,6 +10,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +19,7 @@ public class DisconnectedScreen
 extends Screen {
     private final Component reason;
     @Nullable
-    private List<Component> lines;
+    private List<FormattedText> lines;
     private final Screen parent;
     private int textHeight;
 
@@ -46,8 +47,8 @@ extends Screen {
         this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, this.height / 2 - this.textHeight / 2 - this.font.lineHeight * 2, 0xAAAAAA);
         int k = this.height / 2 - this.textHeight / 2;
         if (this.lines != null) {
-            for (Component component : this.lines) {
-                this.drawCenteredString(poseStack, this.font, component, this.width / 2, k, 0xFFFFFF);
+            for (FormattedText formattedText : this.lines) {
+                this.drawCenteredString(poseStack, this.font, formattedText, this.width / 2, k, 0xFFFFFF);
                 k += this.font.lineHeight;
             }
         }

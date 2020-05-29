@@ -7,7 +7,6 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.Random;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -16,6 +15,8 @@ import net.minecraft.world.level.storage.loot.RandomIntGenerator;
 import net.minecraft.world.level.storage.loot.RandomIntGenerators;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class EnchantWithLevelsFunction
@@ -30,6 +31,11 @@ extends LootItemConditionalFunction {
     }
 
     @Override
+    public LootItemFunctionType getType() {
+        return LootItemFunctions.ENCHANT_WITH_LEVELS;
+    }
+
+    @Override
     public ItemStack run(ItemStack itemStack, LootContext lootContext) {
         Random random = lootContext.getRandom();
         return EnchantmentHelper.enchantItem(random, itemStack, this.levels.getInt(random), this.treasure);
@@ -41,10 +47,6 @@ extends LootItemConditionalFunction {
 
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<EnchantWithLevelsFunction> {
-        public Serializer() {
-            super(new ResourceLocation("enchant_with_levels"), EnchantWithLevelsFunction.class);
-        }
-
         @Override
         public void serialize(JsonObject jsonObject, EnchantWithLevelsFunction enchantWithLevelsFunction, JsonSerializationContext jsonSerializationContext) {
             super.serialize(jsonObject, enchantWithLevelsFunction, jsonSerializationContext);

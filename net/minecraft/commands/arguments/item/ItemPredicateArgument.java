@@ -20,6 +20,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -65,7 +66,7 @@ implements ArgumentType<Result> {
         } catch (CommandSyntaxException commandSyntaxException) {
             // empty catch block
         }
-        return itemParser.fillSuggestions(suggestionsBuilder);
+        return itemParser.fillSuggestions(suggestionsBuilder, ItemTags.getAllTags());
     }
 
     @Override

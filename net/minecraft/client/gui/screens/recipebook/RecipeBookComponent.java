@@ -27,7 +27,7 @@ import net.minecraft.client.gui.screens.recipebook.RecipeBookPage;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookTabButton;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
 import net.minecraft.client.gui.screens.recipebook.RecipeShownListener;
-import net.minecraft.client.resources.language.Language;
+import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.network.chat.Component;
@@ -390,14 +390,13 @@ PlaceRecipe<Ingredient> {
     private void pirateSpeechForThePeople(String string) {
         if ("excitedze".equals(string)) {
             LanguageManager languageManager = this.minecraft.getLanguageManager();
-            Language language = languageManager.getLanguage("en_pt");
-            if (languageManager.getSelected().compareTo(language) == 0) {
+            LanguageInfo languageInfo = languageManager.getLanguage("en_pt");
+            if (languageManager.getSelected().compareTo(languageInfo) == 0) {
                 return;
             }
-            languageManager.setSelected(language);
-            this.minecraft.options.languageCode = language.getCode();
+            languageManager.setSelected(languageInfo);
+            this.minecraft.options.languageCode = languageInfo.getCode();
             this.minecraft.reloadResourcePacks();
-            this.minecraft.font.setBidirectional(languageManager.isBidirectional());
             this.minecraft.options.save();
         }
     }

@@ -19,6 +19,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.ARBFramebufferObject;
+import org.lwjgl.opengl.EXTFramebufferBlit;
 import org.lwjgl.opengl.EXTFramebufferObject;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -53,6 +54,7 @@ public class GlStateManager {
     private static final ColorMask COLOR_MASK;
     private static final Color COLOR;
     private static FboMode fboMode;
+    private static FboBlitMode fboBlitMode;
 
     @Deprecated
     public static void _pushLightingAttributes() {
@@ -219,6 +221,7 @@ public class GlStateManager {
 
     public static String _init_fbo(GLCapabilities gLCapabilities) {
         RenderSystem.assertThread(RenderSystem::isInInitPhase);
+        fboBlitMode = gLCapabilities.OpenGL30 ? FboBlitMode.BASE : (gLCapabilities.GL_EXT_framebuffer_blit ? FboBlitMode.EXT : FboBlitMode.NONE);
         if (gLCapabilities.OpenGL30) {
             fboMode = FboMode.BASE;
             GlConst.GL_FRAMEBUFFER = 36160;
@@ -406,6 +409,11 @@ public class GlStateManager {
         GL15.glDeleteBuffers(i);
     }
 
+    public static void _glCopyTexSubImage2D(int i, int j, int k, int l, int m, int n, int o, int p) {
+        RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+        GL20.glCopyTexSubImage2D(i, j, k, l, m, n, o, p);
+    }
+
     public static void _glBindFramebuffer(int i, int j) {
         RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
         switch (fboMode) {
@@ -423,36 +431,35 @@ public class GlStateManager {
         }
     }
 
-    public static void _glBindRenderbuffer(int i, int j) {
+    public static int getFramebufferDepthTexture() {
         RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
         switch (fboMode) {
             case BASE: {
-                GL30.glBindRenderbuffer(i, j);
-                break;
+                if (GL30.glGetFramebufferAttachmentParameteri(36160, 36096, 36048) != 5890) break;
+                return GL30.glGetFramebufferAttachmentParameteri(36160, 36096, 36049);
             }
             case ARB: {
-                ARBFramebufferObject.glBindRenderbuffer(i, j);
-                break;
+                if (ARBFramebufferObject.glGetFramebufferAttachmentParameteri(36160, 36096, 36048) != 5890) break;
+                return ARBFramebufferObject.glGetFramebufferAttachmentParameteri(36160, 36096, 36049);
             }
             case EXT: {
-                EXTFramebufferObject.glBindRenderbufferEXT(i, j);
+                if (EXTFramebufferObject.glGetFramebufferAttachmentParameteriEXT(36160, 36096, 36048) != 5890) break;
+                return EXTFramebufferObject.glGetFramebufferAttachmentParameteriEXT(36160, 36096, 36049);
             }
         }
+        return 0;
     }
 
-    public static void _glDeleteRenderbuffers(int i) {
+    public static void _glBlitFrameBuffer(int i, int j, int k, int l, int m, int n, int o, int p, int q, int r) {
         RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-        switch (fboMode) {
+        switch (fboBlitMode) {
             case BASE: {
-                GL30.glDeleteRenderbuffers(i);
-                break;
-            }
-            case ARB: {
-                ARBFramebufferObject.glDeleteRenderbuffers(i);
+                GL30.glBlitFramebuffer(i, j, k, l, m, n, o, p, q, r);
                 break;
             }
             case EXT: {
-                EXTFramebufferObject.glDeleteRenderbuffersEXT(i);
+                EXTFramebufferBlit.glBlitFramebufferEXT(i, j, k, l, m, n, o, p, q, r);
+                break;
             }
         }
     }
@@ -490,56 +497,6 @@ public class GlStateManager {
         return -1;
     }
 
-    public static int glGenRenderbuffers() {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-        switch (fboMode) {
-            case BASE: {
-                return GL30.glGenRenderbuffers();
-            }
-            case ARB: {
-                return ARBFramebufferObject.glGenRenderbuffers();
-            }
-            case EXT: {
-                return EXTFramebufferObject.glGenRenderbuffersEXT();
-            }
-        }
-        return -1;
-    }
-
-    public static void _glRenderbufferStorage(int i, int j, int k, int l) {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-        switch (fboMode) {
-            case BASE: {
-                GL30.glRenderbufferStorage(i, j, k, l);
-                break;
-            }
-            case ARB: {
-                ARBFramebufferObject.glRenderbufferStorage(i, j, k, l);
-                break;
-            }
-            case EXT: {
-                EXTFramebufferObject.glRenderbufferStorageEXT(i, j, k, l);
-            }
-        }
-    }
-
-    public static void _glFramebufferRenderbuffer(int i, int j, int k, int l) {
-        RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-        switch (fboMode) {
-            case BASE: {
-                GL30.glFramebufferRenderbuffer(i, j, k, l);
-                break;
-            }
-            case ARB: {
-                ARBFramebufferObject.glFramebufferRenderbuffer(i, j, k, l);
-                break;
-            }
-            case EXT: {
-                EXTFramebufferObject.glFramebufferRenderbufferEXT(i, j, k, l);
-            }
-        }
-    }
-
     public static int glCheckFramebufferStatus(int i) {
         RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
         switch (fboMode) {
@@ -571,6 +528,11 @@ public class GlStateManager {
                 EXTFramebufferObject.glFramebufferTexture2DEXT(i, j, k, l, m);
             }
         }
+    }
+
+    @Deprecated
+    public static int getActiveTextureName() {
+        return GlStateManager.TEXTURES[GlStateManager.activeTexture].binding;
     }
 
     public static void glActiveTexture(int i) {
@@ -1287,8 +1249,12 @@ public class GlStateManager {
         return GL11.glGetInteger(i);
     }
 
+    public static boolean supportsFramebufferBlit() {
+        return fboBlitMode != FboBlitMode.NONE;
+    }
+
     static {
-        TEXTURES = (TextureState[])IntStream.range(0, 8).mapToObj(i -> new TextureState()).toArray(TextureState[]::new);
+        TEXTURES = (TextureState[])IntStream.range(0, 12).mapToObj(i -> new TextureState()).toArray(TextureState[]::new);
         shadeModel = 7425;
         RESCALE_NORMAL = new BooleanState(32826);
         COLOR_MASK = new ColorMask();
@@ -1565,6 +1531,14 @@ public class GlStateManager {
 
         private TextureState() {
         }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static enum FboBlitMode {
+        BASE,
+        EXT,
+        NONE;
+
     }
 
     @Environment(value=EnvType.CLIENT)

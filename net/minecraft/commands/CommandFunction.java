@@ -4,6 +4,7 @@
 package net.minecraft.commands;
 
 import com.google.common.collect.Lists;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -34,7 +35,7 @@ public class CommandFunction {
         return this.entries;
     }
 
-    public static CommandFunction fromLines(ResourceLocation resourceLocation, ServerFunctionManager serverFunctionManager, List<String> list) {
+    public static CommandFunction fromLines(ResourceLocation resourceLocation, CommandDispatcher<CommandSourceStack> commandDispatcher, CommandSourceStack commandSourceStack, List<String> list) {
         ArrayList<CommandEntry> list2 = Lists.newArrayListWithCapacity(list.size());
         for (int i = 0; i < list.size(); ++i) {
             int j = i + 1;
@@ -50,7 +51,7 @@ public class CommandFunction {
                 throw new IllegalArgumentException("Unknown or invalid command '" + string + "' on line " + j + " (did you mean '" + string2 + "'? Do not use a preceding forwards slash.)");
             }
             try {
-                ParseResults<CommandSourceStack> parseResults = serverFunctionManager.getServer().getCommands().getDispatcher().parse(stringReader, serverFunctionManager.getCompilationContext());
+                ParseResults<CommandSourceStack> parseResults = commandDispatcher.parse(stringReader, commandSourceStack);
                 if (parseResults.getReader().canRead()) {
                     throw Commands.getParseException(parseResults);
                 }

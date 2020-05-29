@@ -144,7 +144,7 @@ extends BaseEntityBlock {
             player.openMenu((HopperBlockEntity)blockEntity);
             player.awardStat(Stats.INSPECT_HOPPER);
         }
-        return InteractionResult.SUCCESS;
+        return InteractionResult.CONSUME;
     }
 
     @Override

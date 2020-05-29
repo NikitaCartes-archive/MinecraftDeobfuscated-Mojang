@@ -25,9 +25,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import org.apache.commons.io.IOUtils;
@@ -45,7 +44,7 @@ extends Screen {
     private final boolean poem;
     private final Runnable onFinished;
     private float time;
-    private List<Component> lines;
+    private List<FormattedText> lines;
     private IntSet centeredLines;
     private int totalScrollLength;
     private float scrollSpeed = 0.5f;
@@ -110,11 +109,11 @@ extends Screen {
                         string = string2 + (Object)((Object)ChatFormatting.WHITE) + (Object)((Object)ChatFormatting.OBFUSCATED) + "XXXXXXXX".substring(0, random.nextInt(4) + 3) + string3;
                     }
                     this.lines.addAll(this.minecraft.font.getSplitter().splitLines(string, 274, Style.EMPTY));
-                    this.lines.add(TextComponent.EMPTY);
+                    this.lines.add(FormattedText.EMPTY);
                 }
                 inputStream.close();
                 for (j = 0; j < 8; ++j) {
-                    this.lines.add(TextComponent.EMPTY);
+                    this.lines.add(FormattedText.EMPTY);
                 }
             }
             inputStream = this.minecraft.getResourceManager().getResource(new ResourceLocation("texts/credits.txt")).getInputStream();
@@ -128,14 +127,14 @@ extends Screen {
                 } else {
                     bl = false;
                 }
-                List<Component> list = this.minecraft.font.getSplitter().splitLines(string4, 274, Style.EMPTY);
-                for (Component component : list) {
+                List<FormattedText> list = this.minecraft.font.getSplitter().splitLines(string4, 274, Style.EMPTY);
+                for (FormattedText formattedText : list) {
                     if (bl) {
                         this.centeredLines.add(this.lines.size());
                     }
-                    this.lines.add(component);
+                    this.lines.add(formattedText);
                 }
-                this.lines.add(TextComponent.EMPTY);
+                this.lines.add(FormattedText.EMPTY);
             }
             inputStream.close();
             this.totalScrollLength = this.lines.size() * 12;
@@ -188,8 +187,12 @@ extends Screen {
         this.minecraft.getTextureManager().bind(LOGO_LOCATION);
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.enableAlphaTest();
-        this.blit(poseStack, l, m, 0, 0, 155, 44);
-        this.blit(poseStack, l + 155, m, 0, 45, 155, 44);
+        RenderSystem.enableBlend();
+        this.blitOutlineBlack(l, m, (integer, integer2) -> {
+            this.blit(poseStack, integer + 0, (int)integer2, 0, 0, 155, 44);
+            this.blit(poseStack, integer + 155, (int)integer2, 0, 45, 155, 44);
+        });
+        RenderSystem.disableBlend();
         this.minecraft.getTextureManager().bind(EDITION_LOCATION);
         WinScreen.blit(poseStack, l + 88, m + 37, 0.0f, 0.0f, 98, 14, 128, 16);
         RenderSystem.disableAlphaTest();
@@ -200,12 +203,12 @@ extends Screen {
                 RenderSystem.translatef(0.0f, -h, 0.0f);
             }
             if ((float)n + g + 12.0f + 8.0f > 0.0f && (float)n + g < (float)this.height) {
-                Component component = this.lines.get(o);
+                FormattedText formattedText = this.lines.get(o);
                 if (this.centeredLines.contains(o)) {
-                    this.font.drawShadow(poseStack, component, (float)(l + (274 - this.font.width(component)) / 2), (float)n, 0xFFFFFF);
+                    this.font.drawShadow(poseStack, formattedText, (float)(l + (274 - this.font.width(formattedText)) / 2), (float)n, 0xFFFFFF);
                 } else {
                     this.font.random.setSeed((long)((float)((long)o * 4238972211L) + this.time / 4.0f));
-                    this.font.drawShadow(poseStack, component, (float)l, (float)n, 0xFFFFFF);
+                    this.font.drawShadow(poseStack, formattedText, (float)l, (float)n, 0xFFFFFF);
                 }
             }
             n += 12;

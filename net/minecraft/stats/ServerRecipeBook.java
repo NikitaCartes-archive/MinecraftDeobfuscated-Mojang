@@ -27,11 +27,6 @@ import org.apache.logging.log4j.Logger;
 public class ServerRecipeBook
 extends RecipeBook {
     private static final Logger LOGGER = LogManager.getLogger();
-    private final RecipeManager manager;
-
-    public ServerRecipeBook(RecipeManager recipeManager) {
-        this.manager = recipeManager;
-    }
 
     public int addRecipes(Collection<Recipe<?>> collection, ServerPlayer serverPlayer) {
         ArrayList<ResourceLocation> list = Lists.newArrayList();
@@ -90,7 +85,7 @@ extends RecipeBook {
         return compoundTag;
     }
 
-    public void fromNbt(CompoundTag compoundTag) {
+    public void fromNbt(CompoundTag compoundTag, RecipeManager recipeManager) {
         this.guiOpen = compoundTag.getBoolean("isGuiOpen");
         this.filteringCraftable = compoundTag.getBoolean("isFilteringCraftable");
         this.furnaceGuiOpen = compoundTag.getBoolean("isFurnaceGuiOpen");
@@ -100,17 +95,17 @@ extends RecipeBook {
         this.smokerGuiOpen = compoundTag.getBoolean("isSmokerGuiOpen");
         this.smokerFilteringCraftable = compoundTag.getBoolean("isSmokerFilteringCraftable");
         ListTag listTag = compoundTag.getList("recipes", 8);
-        this.loadRecipes(listTag, this::add);
+        this.loadRecipes(listTag, this::add, recipeManager);
         ListTag listTag2 = compoundTag.getList("toBeDisplayed", 8);
-        this.loadRecipes(listTag2, this::addHighlight);
+        this.loadRecipes(listTag2, this::addHighlight, recipeManager);
     }
 
-    private void loadRecipes(ListTag listTag, Consumer<Recipe<?>> consumer) {
+    private void loadRecipes(ListTag listTag, Consumer<Recipe<?>> consumer, RecipeManager recipeManager) {
         for (int i = 0; i < listTag.size(); ++i) {
             String string = listTag.getString(i);
             try {
                 ResourceLocation resourceLocation = new ResourceLocation(string);
-                Optional<Recipe<?>> optional = this.manager.byKey(resourceLocation);
+                Optional<Recipe<?>> optional = recipeManager.byKey(resourceLocation);
                 if (!optional.isPresent()) {
                     LOGGER.error("Tried to load unrecognized recipe: {} removed now.", (Object)resourceLocation);
                     continue;

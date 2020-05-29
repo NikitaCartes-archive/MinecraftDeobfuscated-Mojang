@@ -265,6 +265,7 @@ extends Block {
         if (blockState2.is(blockState.getBlock()) || level.isClientSide) {
             return;
         }
+        level.setBlock(blockPos, this.getConnectionState(level, this.defaultBlockState(), blockPos), 2);
         this.updatePowerStrength(level, blockPos, blockState);
         for (Direction direction : Direction.Plane.VERTICAL) {
             level.updateNeighborsAt(blockPos.relative(direction), this);
@@ -439,6 +440,9 @@ extends Block {
 
     @Override
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+        if (!player.abilities.mayBuild) {
+            return InteractionResult.PASS;
+        }
         if (RedStoneWireBlock.isCross(blockState) || RedStoneWireBlock.isDot(blockState)) {
             BlockState blockState2 = RedStoneWireBlock.isCross(blockState) ? this.dotState : this.defaultBlockState();
             blockState2 = (BlockState)blockState2.setValue(POWER, blockState.getValue(POWER));

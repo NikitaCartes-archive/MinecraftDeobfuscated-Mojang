@@ -24,7 +24,6 @@ import net.minecraft.commands.arguments.NbtPathArgument;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
@@ -32,6 +31,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -47,6 +48,11 @@ extends LootItemConditionalFunction {
         super(lootItemConditions);
         this.source = dataSource;
         this.operations = ImmutableList.copyOf(list);
+    }
+
+    @Override
+    public LootItemFunctionType getType() {
+        return LootItemFunctions.COPY_NBT;
     }
 
     private static NbtPathArgument.NbtPath compileNbtPath(String string) {
@@ -85,10 +91,6 @@ extends LootItemConditionalFunction {
 
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<CopyNbtFunction> {
-        public Serializer() {
-            super(new ResourceLocation("copy_nbt"), CopyNbtFunction.class);
-        }
-
         @Override
         public void serialize(JsonObject jsonObject, CopyNbtFunction copyNbtFunction, JsonSerializationContext jsonSerializationContext) {
             super.serialize(jsonObject, copyNbtFunction, jsonSerializationContext);

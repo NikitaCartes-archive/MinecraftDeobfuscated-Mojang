@@ -49,6 +49,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.NarrationHelper;
@@ -675,7 +676,7 @@ extends RealmsScreen {
         int k = this.popupX0();
         int l = this.popupY0();
         TranslatableComponent component = new TranslatableComponent("mco.selectServer.popup");
-        List<Component> list = this.font.split(component, 100);
+        List<FormattedText> list = this.font.split(component, 100);
         if (!this.showingPopup) {
             RealmSelectionList guiEventListener;
             this.carouselIndex = 0;
@@ -714,9 +715,9 @@ extends RealmsScreen {
             }
         }
         int o = 0;
-        for (Component component2 : list) {
+        for (FormattedText formattedText : list) {
             int p = l + 10 * ++o - 3;
-            this.font.draw(poseStack, component2, (float)(this.width / 2 + 52), (float)p, 0x4C4C4C);
+            this.font.draw(poseStack, formattedText, (float)(this.width / 2 + 52), (float)p, 0x4C4C4C);
         }
     }
 

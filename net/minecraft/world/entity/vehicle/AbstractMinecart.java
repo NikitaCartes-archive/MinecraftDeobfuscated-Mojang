@@ -167,7 +167,7 @@ extends Entity {
     }
 
     @Override
-    public double getRideHeight() {
+    public double getPassengersRidingOffset() {
         return 0.0;
     }
 

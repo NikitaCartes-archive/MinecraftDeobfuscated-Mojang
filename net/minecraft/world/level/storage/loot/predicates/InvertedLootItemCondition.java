@@ -7,12 +7,13 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.Set;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 
 public class InvertedLootItemCondition
 implements LootItemCondition {
@@ -20,6 +21,11 @@ implements LootItemCondition {
 
     private InvertedLootItemCondition(LootItemCondition lootItemCondition) {
         this.term = lootItemCondition;
+    }
+
+    @Override
+    public LootItemConditionType getType() {
+        return LootItemConditions.INVERTED;
     }
 
     @Override
@@ -49,11 +55,7 @@ implements LootItemCondition {
     }
 
     public static class Serializer
-    extends LootItemCondition.Serializer<InvertedLootItemCondition> {
-        public Serializer() {
-            super(new ResourceLocation("inverted"), InvertedLootItemCondition.class);
-        }
-
+    implements net.minecraft.world.level.storage.loot.Serializer<InvertedLootItemCondition> {
         @Override
         public void serialize(JsonObject jsonObject, InvertedLootItemCondition invertedLootItemCondition, JsonSerializationContext jsonSerializationContext) {
             jsonObject.add("term", jsonSerializationContext.serialize(invertedLootItemCondition.term));
@@ -66,7 +68,7 @@ implements LootItemCondition {
         }
 
         @Override
-        public /* synthetic */ LootItemCondition deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             return this.deserialize(jsonObject, jsonDeserializationContext);
         }
     }

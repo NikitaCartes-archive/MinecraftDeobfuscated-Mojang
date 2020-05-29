@@ -70,7 +70,7 @@ extends Monster {
     }
 
     @Override
-    public double getRideHeight() {
+    public double getPassengersRidingOffset() {
         return this.getBbHeight() * 0.5f;
     }
 

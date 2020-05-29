@@ -32,7 +32,7 @@ extends Item {
             if (!level.isClientSide && player != null) {
                 LeadItem.bindPlayerMobs(player, level, blockPos);
             }
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         return InteractionResult.PASS;
     }

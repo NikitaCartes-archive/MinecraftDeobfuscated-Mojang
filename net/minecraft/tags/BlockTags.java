@@ -3,8 +3,10 @@
  */
 package net.minecraft.tags;
 
+import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.StaticTagHelper;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagCollection;
@@ -90,6 +92,8 @@ public class BlockTags {
     public static final Tag.Named<Block> CAMPFIRES = BlockTags.bind("campfires");
     public static final Tag.Named<Block> GUARDED_BY_PIGLINS = BlockTags.bind("guarded_by_piglins");
     public static final Tag.Named<Block> PREVENT_MOB_SPAWNING_INSIDE = BlockTags.bind("prevent_mob_spawning_inside");
+    public static final Tag.Named<Block> FENCE_GATES = BlockTags.bind("fence_gates");
+    public static final Tag.Named<Block> UNSTABLE_BOTTOM_CENTER = BlockTags.bind("unstable_bottom_center");
 
     private static Tag.Named<Block> bind(String string) {
         return HELPER.bind(string);
@@ -106,6 +110,10 @@ public class BlockTags {
 
     public static TagCollection<Block> getAllTags() {
         return HELPER.getAllTags();
+    }
+
+    public static Set<ResourceLocation> getMissingTags(TagCollection<Block> tagCollection) {
+        return HELPER.getMissingTags(tagCollection);
     }
 }
 

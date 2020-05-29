@@ -45,7 +45,7 @@ extends Block {
     public InteractionResult use(BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
         if (level.isClientSide) {
             ItemStack itemStack = player.getItemInHand(interactionHand);
-            if (this.eat(level, blockPos, blockState, player) == InteractionResult.SUCCESS) {
+            if (this.eat(level, blockPos, blockState, player).consumesAction()) {
                 return InteractionResult.SUCCESS;
             }
             if (itemStack.isEmpty()) {

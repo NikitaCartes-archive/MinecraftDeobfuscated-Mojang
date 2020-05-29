@@ -46,7 +46,7 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -153,7 +153,7 @@ implements ItemLike {
         return false;
     }
 
-    public boolean canDestroySpecial(BlockState blockState) {
+    public boolean isCorrectToolForDrops(BlockState blockState) {
         return false;
     }
 
@@ -254,7 +254,7 @@ implements ItemLike {
         return this.getMaxStackSize() == 1 && this.canBeDepleted();
     }
 
-    protected static HitResult getPlayerPOVHitResult(Level level, Player player, ClipContext.Fluid fluid) {
+    protected static BlockHitResult getPlayerPOVHitResult(Level level, Player player, ClipContext.Fluid fluid) {
         float f = player.xRot;
         float g = player.yRot;
         Vec3 vec3 = player.getEyePosition(1.0f);

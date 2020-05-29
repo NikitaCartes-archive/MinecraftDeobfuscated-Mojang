@@ -57,7 +57,7 @@ extends BaseEntityBlock {
             player.awardStat(Stats.OPEN_BARREL);
             PiglinAi.angerNearbyPiglinsThatSee(player);
         }
-        return InteractionResult.SUCCESS;
+        return InteractionResult.CONSUME;
     }
 
     @Override

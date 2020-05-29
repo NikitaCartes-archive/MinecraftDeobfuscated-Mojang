@@ -16,6 +16,8 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.IdMap;
@@ -51,6 +53,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Biomes;
@@ -78,6 +81,12 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntries;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -136,7 +145,11 @@ IdMap<T> {
     public static final ResourceKey<Registry<SensorType<?>>> SENSOR_TYPE_REGISTRY = Registry.createRegistryKey("sensor_type");
     public static final ResourceKey<Registry<Schedule>> SCHEDULE_REGISTRY = Registry.createRegistryKey("schedule");
     public static final ResourceKey<Registry<Activity>> ACTIVITY_REGISTRY = Registry.createRegistryKey("activity");
+    public static final ResourceKey<Registry<LootPoolEntryType>> LOOT_ENTRY_REGISTRY = Registry.createRegistryKey("loot_pool_entry_type");
+    public static final ResourceKey<Registry<LootItemFunctionType>> LOOT_FUNCTION_REGISTRY = Registry.createRegistryKey("loot_function_type");
+    public static final ResourceKey<Registry<LootItemConditionType>> LOOT_ITEM_REGISTRY = Registry.createRegistryKey("loot_condition_type");
     public static final ResourceKey<Registry<DimensionType>> DIMENSION_TYPE_REGISTRY = Registry.createRegistryKey("dimension_type");
+    public static final ResourceKey<Registry<Level>> DIMENSION_REGISTRY = Registry.createRegistryKey("dimension");
     public static final Registry<SoundEvent> SOUND_EVENT = Registry.registerSimple(SOUND_EVENT_REGISTRY, () -> SoundEvents.ITEM_PICKUP);
     public static final DefaultedRegistry<Fluid> FLUID = Registry.registerDefaulted(FLUID_REGISTRY, "empty", () -> Fluids.EMPTY);
     public static final Registry<MobEffect> MOB_EFFECT = Registry.registerSimple(MOB_EFFECT_REGISTRY, () -> MobEffects.LUCK);
@@ -181,6 +194,9 @@ IdMap<T> {
     public static final DefaultedRegistry<SensorType<?>> SENSOR_TYPE = Registry.registerDefaulted(SENSOR_TYPE_REGISTRY, "dummy", () -> SensorType.DUMMY);
     public static final Registry<Schedule> SCHEDULE = Registry.registerSimple(SCHEDULE_REGISTRY, () -> Schedule.EMPTY);
     public static final Registry<Activity> ACTIVITY = Registry.registerSimple(ACTIVITY_REGISTRY, () -> Activity.IDLE);
+    public static final Registry<LootPoolEntryType> LOOT_POOL_ENTRY_TYPE = Registry.registerSimple(LOOT_ENTRY_REGISTRY, () -> LootPoolEntries.EMPTY);
+    public static final Registry<LootItemFunctionType> LOOT_FUNCTION_TYPE = Registry.registerSimple(LOOT_FUNCTION_REGISTRY, () -> LootItemFunctions.SET_COUNT);
+    public static final Registry<LootItemConditionType> LOOT_CONDITION_TYPE = Registry.registerSimple(LOOT_ITEM_REGISTRY, () -> LootItemConditions.INVERTED);
     private final ResourceKey<Registry<T>> key;
     private final Lifecycle lifecycle;
 
@@ -270,11 +286,13 @@ IdMap<T> {
     @Nullable
     public abstract ResourceLocation getKey(T var1);
 
-    public abstract ResourceKey<T> getResourceKey(T var1);
+    @Environment(value=EnvType.CLIENT)
+    public abstract Optional<ResourceKey<T>> getResourceKey(T var1);
 
     public abstract int getId(@Nullable T var1);
 
     @Nullable
+    @Environment(value=EnvType.CLIENT)
     public abstract T get(@Nullable ResourceKey<T> var1);
 
     @Nullable
@@ -289,8 +307,6 @@ IdMap<T> {
     }
 
     public abstract boolean containsKey(ResourceLocation var1);
-
-    public abstract boolean containsKey(ResourceKey<T> var1);
 
     public abstract boolean containsId(int var1);
 

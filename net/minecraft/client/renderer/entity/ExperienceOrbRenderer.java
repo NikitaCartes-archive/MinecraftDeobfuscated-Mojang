@@ -24,7 +24,7 @@ import net.minecraft.world.entity.ExperienceOrb;
 public class ExperienceOrbRenderer
 extends EntityRenderer<ExperienceOrb> {
     private static final ResourceLocation EXPERIENCE_ORB_LOCATION = new ResourceLocation("textures/entity/experience_orb.png");
-    private static final RenderType RENDER_TYPE = RenderType.entityTranslucent(EXPERIENCE_ORB_LOCATION);
+    private static final RenderType RENDER_TYPE = RenderType.itemEntityTranslucentCull(EXPERIENCE_ORB_LOCATION);
 
     public ExperienceOrbRenderer(EntityRenderDispatcher entityRenderDispatcher) {
         super(entityRenderDispatcher);

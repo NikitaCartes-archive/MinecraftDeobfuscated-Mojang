@@ -71,7 +71,7 @@ extends Zombie {
 
     @Override
     protected void doUnderWaterConversion() {
-        this.convertTo(EntityType.ZOMBIE);
+        this.convertToZombieType(EntityType.ZOMBIE);
         if (!this.isSilent()) {
             this.level.levelEvent(null, 1041, this.blockPosition(), 0);
         }

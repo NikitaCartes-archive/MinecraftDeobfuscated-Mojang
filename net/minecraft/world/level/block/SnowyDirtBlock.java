@@ -34,7 +34,7 @@ extends Block {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-        BlockState blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos());
+        BlockState blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos().above());
         return (BlockState)this.defaultBlockState().setValue(SNOWY, blockState.is(Blocks.SNOW_BLOCK) || blockState.is(Blocks.SNOW));
     }
 

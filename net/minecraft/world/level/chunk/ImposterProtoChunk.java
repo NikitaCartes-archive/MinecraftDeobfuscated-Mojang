@@ -25,6 +25,7 @@ import net.minecraft.world.level.chunk.ProtoTickList;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
@@ -122,39 +123,39 @@ extends ProtoChunk {
 
     @Override
     @Nullable
-    public StructureStart<?> getStartForFeature(String string) {
-        return this.wrapped.getStartForFeature(string);
+    public StructureStart<?> getStartForFeature(StructureFeature<?> structureFeature) {
+        return this.wrapped.getStartForFeature(structureFeature);
     }
 
     @Override
-    public void setStartForFeature(String string, StructureStart<?> structureStart) {
+    public void setStartForFeature(StructureFeature<?> structureFeature, StructureStart<?> structureStart) {
     }
 
     @Override
-    public Map<String, StructureStart<?>> getAllStarts() {
+    public Map<StructureFeature<?>, StructureStart<?>> getAllStarts() {
         return this.wrapped.getAllStarts();
     }
 
     @Override
-    public void setAllStarts(Map<String, StructureStart<?>> map) {
+    public void setAllStarts(Map<StructureFeature<?>, StructureStart<?>> map) {
     }
 
     @Override
-    public LongSet getReferencesForFeature(String string) {
-        return this.wrapped.getReferencesForFeature(string);
+    public LongSet getReferencesForFeature(StructureFeature<?> structureFeature) {
+        return this.wrapped.getReferencesForFeature(structureFeature);
     }
 
     @Override
-    public void addReferenceForFeature(String string, long l) {
+    public void addReferenceForFeature(StructureFeature<?> structureFeature, long l) {
     }
 
     @Override
-    public Map<String, LongSet> getAllReferences() {
+    public Map<StructureFeature<?>, LongSet> getAllReferences() {
         return this.wrapped.getAllReferences();
     }
 
     @Override
-    public void setAllReferences(Map<String, LongSet> map) {
+    public void setAllReferences(Map<StructureFeature<?>, LongSet> map) {
     }
 
     @Override

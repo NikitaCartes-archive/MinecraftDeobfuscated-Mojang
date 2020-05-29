@@ -4,76 +4,80 @@
 package net.minecraft.server.packs.repository;
 
 import com.google.common.base.Functions;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import net.minecraft.server.packs.Pack;
 import net.minecraft.server.packs.repository.RepositorySource;
 import net.minecraft.server.packs.repository.UnopenedPack;
 import org.jetbrains.annotations.Nullable;
 
 public class PackRepository<T extends UnopenedPack>
 implements AutoCloseable {
-    private final Set<RepositorySource> sources = Sets.newHashSet();
-    private final Map<String, T> available = Maps.newLinkedHashMap();
-    private final List<T> selected = Lists.newLinkedList();
+    private final Set<RepositorySource> sources;
+    private Map<String, T> available = ImmutableMap.of();
+    private List<T> selected = ImmutableList.of();
     private final UnopenedPack.UnopenedPackConstructor<T> constructor;
 
-    public PackRepository(UnopenedPack.UnopenedPackConstructor<T> unopenedPackConstructor) {
+    public PackRepository(UnopenedPack.UnopenedPackConstructor<T> unopenedPackConstructor, RepositorySource ... repositorySources) {
         this.constructor = unopenedPackConstructor;
+        this.sources = ImmutableSet.copyOf(repositorySources);
     }
 
     public void reload() {
+        List list = this.selected.stream().map(UnopenedPack::getId).collect(ImmutableList.toImmutableList());
         this.close();
-        Set set = this.selected.stream().map(UnopenedPack::getId).collect(Collectors.toCollection(LinkedHashSet::new));
-        this.available.clear();
-        this.selected.clear();
+        this.available = this.discoverAvailable();
+        this.selected = this.rebuildSelected(list);
+    }
+
+    private Map<String, T> discoverAvailable() {
+        TreeMap map = Maps.newTreeMap();
         for (RepositorySource repositorySource : this.sources) {
-            repositorySource.loadPacks(this.available, this.constructor);
+            repositorySource.loadPacks(map, this.constructor);
         }
-        this.sortAvailable();
-        this.selected.addAll(set.stream().map(this.available::get).filter(Objects::nonNull).collect(Collectors.toCollection(LinkedHashSet::new)));
+        return ImmutableMap.copyOf(map);
+    }
+
+    public void setSelected(Collection<String> collection) {
+        this.selected = this.rebuildSelected(collection);
+    }
+
+    private List<T> rebuildSelected(Collection<String> collection) {
+        List list = this.getAvailablePacks(collection).collect(Collectors.toList());
         for (UnopenedPack unopenedPack : this.available.values()) {
-            if (!unopenedPack.isRequired() || this.selected.contains(unopenedPack)) continue;
-            unopenedPack.getDefaultPosition().insert(this.selected, unopenedPack, Functions.identity(), false);
+            if (!unopenedPack.isRequired() || list.contains(unopenedPack)) continue;
+            unopenedPack.getDefaultPosition().insert(list, unopenedPack, Functions.identity(), false);
         }
+        return ImmutableList.copyOf(list);
     }
 
-    private void sortAvailable() {
-        ArrayList<Map.Entry<String, T>> list = Lists.newArrayList(this.available.entrySet());
-        this.available.clear();
-        list.stream().sorted(Map.Entry.comparingByKey()).forEachOrdered(entry -> {
-            UnopenedPack cfr_ignored_0 = (UnopenedPack)this.available.put((String)entry.getKey(), (T)entry.getValue());
-        });
+    private Stream<T> getAvailablePacks(Collection<String> collection) {
+        return collection.stream().map(this.available::get).filter(Objects::nonNull);
     }
 
-    public void setSelected(Collection<T> collection) {
-        this.selected.clear();
-        this.selected.addAll(collection);
-        for (UnopenedPack unopenedPack : this.available.values()) {
-            if (!unopenedPack.isRequired() || this.selected.contains(unopenedPack)) continue;
-            unopenedPack.getDefaultPosition().insert(this.selected, unopenedPack, Functions.identity(), false);
-        }
+    public Collection<String> getAvailableIds() {
+        return this.available.keySet();
     }
 
-    public Collection<T> getAvailable() {
+    public Collection<T> getAvailablePacks() {
         return this.available.values();
     }
 
-    public Collection<T> getUnselected() {
-        ArrayList<T> collection = Lists.newArrayList(this.available.values());
-        collection.removeAll(this.selected);
-        return collection;
+    public Collection<String> getSelectedIds() {
+        return this.selected.stream().map(UnopenedPack::getId).collect(ImmutableSet.toImmutableSet());
     }
 
-    public Collection<T> getSelected() {
+    public Collection<T> getSelectedPacks() {
         return this.selected;
     }
 
@@ -82,13 +86,17 @@ implements AutoCloseable {
         return (T)((UnopenedPack)this.available.get(string));
     }
 
-    public void addSource(RepositorySource repositorySource) {
-        this.sources.add(repositorySource);
-    }
-
     @Override
     public void close() {
         this.available.values().forEach(UnopenedPack::close);
+    }
+
+    public boolean isAvailable(String string) {
+        return this.available.containsKey(string);
+    }
+
+    public List<Pack> openAllSelected() {
+        return this.selected.stream().map(UnopenedPack::open).collect(ImmutableList.toImmutableList());
     }
 }
 

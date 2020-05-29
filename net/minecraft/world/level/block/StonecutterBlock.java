@@ -55,7 +55,7 @@ extends Block {
         }
         player.openMenu(blockState.getMenuProvider(level, blockPos));
         player.awardStat(Stats.INTERACT_WITH_STONECUTTER);
-        return InteractionResult.SUCCESS;
+        return InteractionResult.CONSUME;
     }
 
     @Override

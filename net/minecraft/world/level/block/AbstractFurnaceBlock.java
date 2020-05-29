@@ -48,7 +48,7 @@ extends BaseEntityBlock {
             return InteractionResult.SUCCESS;
         }
         this.openContainer(level, blockPos, player);
-        return InteractionResult.SUCCESS;
+        return InteractionResult.CONSUME;
     }
 
     protected abstract void openContainer(Level var1, BlockPos var2, Player var3);

@@ -15,7 +15,7 @@ import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 
@@ -37,7 +37,7 @@ implements Toast {
         toastComponent.blit(poseStack, 0, 0, 0, 0, this.width(), this.height());
         if (displayInfo != null) {
             int i;
-            List<Component> list = toastComponent.getMinecraft().font.split(displayInfo.getTitle(), 125);
+            List<FormattedText> list = toastComponent.getMinecraft().font.split(displayInfo.getTitle(), 125);
             int n = i = displayInfo.getFrame() == FrameType.CHALLENGE ? 0xFF88FF : 0xFFFF00;
             if (list.size() == 1) {
                 toastComponent.getMinecraft().font.draw(poseStack, I18n.get("advancements.toast." + displayInfo.getFrame().getName(), new Object[0]), 30.0f, 7.0f, i | 0xFF000000);
@@ -51,8 +51,8 @@ implements Toast {
                 } else {
                     int k = Mth.floor(Mth.clamp((float)(l - 1500L) / 300.0f, 0.0f, 1.0f) * 252.0f) << 24 | 0x4000000;
                     int m = this.height() / 2 - list.size() * toastComponent.getMinecraft().font.lineHeight / 2;
-                    for (Component component : list) {
-                        toastComponent.getMinecraft().font.draw(poseStack, component, 30.0f, (float)m, 0xFFFFFF | k);
+                    for (FormattedText formattedText : list) {
+                        toastComponent.getMinecraft().font.draw(poseStack, formattedText, 30.0f, (float)m, 0xFFFFFF | k);
                         m += toastComponent.getMinecraft().font.lineHeight;
                     }
                 }

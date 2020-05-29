@@ -110,6 +110,9 @@ extends AbstractHorse {
 
     @Override
     protected void updateContainerEquipment() {
+        if (this.level.isClientSide) {
+            return;
+        }
         super.updateContainerEquipment();
         this.setArmorEquipment(this.inventory.getItem(1));
         this.setDropChance(EquipmentSlot.CHEST, 0.0f);

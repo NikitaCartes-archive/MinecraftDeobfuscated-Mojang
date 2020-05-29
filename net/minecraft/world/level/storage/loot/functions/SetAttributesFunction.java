@@ -27,6 +27,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.RandomValueBounds;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,6 +39,11 @@ extends LootItemConditionalFunction {
     private SetAttributesFunction(LootItemCondition[] lootItemConditions, List<Modifier> list) {
         super(lootItemConditions);
         this.modifiers = ImmutableList.copyOf(list);
+    }
+
+    @Override
+    public LootItemFunctionType getType() {
+        return LootItemFunctions.SET_ATTRIBUTES;
     }
 
     @Override
@@ -162,10 +169,6 @@ extends LootItemConditionalFunction {
 
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<SetAttributesFunction> {
-        public Serializer() {
-            super(new ResourceLocation("set_attributes"), SetAttributesFunction.class);
-        }
-
         @Override
         public void serialize(JsonObject jsonObject, SetAttributesFunction setAttributesFunction, JsonSerializationContext jsonSerializationContext) {
             super.serialize(jsonObject, setAttributesFunction, jsonSerializationContext);

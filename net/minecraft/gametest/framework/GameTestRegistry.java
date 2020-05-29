@@ -20,6 +20,7 @@ public class GameTestRegistry {
     private static final Collection<TestFunction> testFunctions = Lists.newArrayList();
     private static final Set<String> testClassNames = Sets.newHashSet();
     private static final Map<String, Consumer<ServerLevel>> beforeBatchFunctions = Maps.newHashMap();
+    private static final Collection<TestFunction> lastFailedTests = Sets.newHashSet();
 
     public static Collection<TestFunction> getTestFunctionsForClassName(String string) {
         return testFunctions.stream().filter(testFunction -> GameTestRegistry.isTestFunctionPartOfClass(testFunction, string)).collect(Collectors.toList());
@@ -56,6 +57,18 @@ public class GameTestRegistry {
 
     private static boolean isTestFunctionPartOfClass(TestFunction testFunction, String string) {
         return testFunction.getTestName().toLowerCase().startsWith(string.toLowerCase() + ".");
+    }
+
+    public static Collection<TestFunction> getLastFailedTests() {
+        return lastFailedTests;
+    }
+
+    public static void rememberFailedTest(TestFunction testFunction) {
+        lastFailedTests.add(testFunction);
+    }
+
+    public static void forgetFailedTests() {
+        lastFailedTests.clear();
     }
 }
 

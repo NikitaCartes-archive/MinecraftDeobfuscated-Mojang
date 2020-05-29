@@ -91,7 +91,7 @@ extends Item {
             level.addFreshEntity(abstractMinecart);
         }
         itemStack.shrink(1);
-        return InteractionResult.SUCCESS;
+        return InteractionResult.sidedSuccess(level.isClientSide);
     }
 }
 

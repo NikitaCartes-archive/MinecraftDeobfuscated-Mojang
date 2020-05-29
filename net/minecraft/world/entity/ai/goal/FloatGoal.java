@@ -20,8 +20,7 @@ extends Goal {
 
     @Override
     public boolean canUse() {
-        double d = (double)this.mob.getEyeHeight() < 0.4 ? 0.2 : 0.4;
-        return this.mob.isInWater() && this.mob.getFluidHeight(FluidTags.WATER) > d || this.mob.isInLava();
+        return this.mob.isInWater() && this.mob.getFluidHeight(FluidTags.WATER) > this.mob.getFluidJumpThreshold() || this.mob.isInLava();
     }
 
     @Override

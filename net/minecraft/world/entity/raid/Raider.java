@@ -258,7 +258,7 @@ extends PatrollingMonster {
 
     @Override
     public boolean requiresCustomPersistence() {
-        return this.getCurrentRaid() != null;
+        return super.requiresCustomPersistence() || this.getCurrentRaid() != null;
     }
 
     public int getTicksOutsideRaid() {

@@ -39,7 +39,7 @@ extends Item {
         if (!player.abilities.instabuild) {
             itemStack.shrink(1);
         }
-        return InteractionResultHolder.success(itemStack);
+        return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
     }
 }
 

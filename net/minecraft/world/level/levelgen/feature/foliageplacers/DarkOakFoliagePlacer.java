@@ -12,6 +12,7 @@ import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerType;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class DarkOakFoliagePlacer
 extends FoliagePlacer {
@@ -27,19 +28,19 @@ extends FoliagePlacer {
     }
 
     @Override
-    protected void createFoliage(LevelSimulatedRW levelSimulatedRW, Random random, TreeConfiguration treeConfiguration, int i, FoliagePlacer.FoliageAttachment foliageAttachment, int j, int k, Set<BlockPos> set, int l) {
+    protected void createFoliage(LevelSimulatedRW levelSimulatedRW, Random random, TreeConfiguration treeConfiguration, int i, FoliagePlacer.FoliageAttachment foliageAttachment, int j, int k, Set<BlockPos> set, int l, BoundingBox boundingBox) {
         BlockPos blockPos = foliageAttachment.foliagePos().above(l);
         boolean bl = foliageAttachment.doubleTrunk();
         if (bl) {
-            this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 2, set, -1, bl);
-            this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 3, set, 0, bl);
-            this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 2, set, 1, bl);
+            this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 2, set, -1, bl, boundingBox);
+            this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 3, set, 0, bl, boundingBox);
+            this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 2, set, 1, bl, boundingBox);
             if (random.nextBoolean()) {
-                this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k, set, 2, bl);
+                this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k, set, 2, bl, boundingBox);
             }
         } else {
-            this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 2, set, -1, bl);
-            this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 1, set, 0, bl);
+            this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 2, set, -1, bl, boundingBox);
+            this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 1, set, 0, bl, boundingBox);
         }
     }
 

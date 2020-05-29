@@ -18,10 +18,10 @@ public final class Material {
     public static final Material WATER = Builder.method_15808(new Builder(MaterialColor.WATER).noCollider()).nonSolid().destroyOnPush().replaceable().liquid().build();
     public static final Material BUBBLE_COLUMN = Builder.method_15808(new Builder(MaterialColor.WATER).noCollider()).nonSolid().destroyOnPush().replaceable().liquid().build();
     public static final Material LAVA = Builder.method_15808(new Builder(MaterialColor.FIRE).noCollider()).nonSolid().destroyOnPush().replaceable().liquid().build();
-    public static final Material TOP_SNOW = Builder.method_15808(new Builder(MaterialColor.SNOW).noCollider()).nonSolid().destroyOnPush().replaceable().notAlwaysDestroyable().build();
+    public static final Material TOP_SNOW = Builder.method_15808(new Builder(MaterialColor.SNOW).noCollider()).nonSolid().destroyOnPush().replaceable().build();
     public static final Material FIRE = Builder.method_15808(new Builder(MaterialColor.NONE).noCollider()).nonSolid().destroyOnPush().replaceable().build();
     public static final Material DECORATION = Builder.method_15808(new Builder(MaterialColor.NONE).noCollider()).nonSolid().destroyOnPush().build();
-    public static final Material WEB = Builder.method_15808(new Builder(MaterialColor.WOOL).noCollider()).destroyOnPush().notAlwaysDestroyable().build();
+    public static final Material WEB = Builder.method_15808(new Builder(MaterialColor.WOOL).noCollider()).destroyOnPush().build();
     public static final Material BUILDABLE_GLASS = new Builder(MaterialColor.NONE).build();
     public static final Material CLAY = new Builder(MaterialColor.CLAY).build();
     public static final Material DIRT = new Builder(MaterialColor.DIRT).build();
@@ -40,11 +40,11 @@ public final class Material {
     public static final Material GLASS = Builder.method_15808(new Builder(MaterialColor.NONE)).build();
     public static final Material ICE = Builder.method_15808(new Builder(MaterialColor.ICE)).build();
     public static final Material CACTUS = Builder.method_15808(new Builder(MaterialColor.PLANT)).destroyOnPush().build();
-    public static final Material STONE = new Builder(MaterialColor.STONE).notAlwaysDestroyable().build();
-    public static final Material METAL = new Builder(MaterialColor.METAL).notAlwaysDestroyable().build();
-    public static final Material SNOW = new Builder(MaterialColor.SNOW).notAlwaysDestroyable().build();
-    public static final Material HEAVY_METAL = new Builder(MaterialColor.METAL).notAlwaysDestroyable().notPushable().build();
-    public static final Material BARRIER = new Builder(MaterialColor.NONE).notAlwaysDestroyable().notPushable().build();
+    public static final Material STONE = new Builder(MaterialColor.STONE).build();
+    public static final Material METAL = new Builder(MaterialColor.METAL).build();
+    public static final Material SNOW = new Builder(MaterialColor.SNOW).build();
+    public static final Material HEAVY_METAL = new Builder(MaterialColor.METAL).notPushable().build();
+    public static final Material BARRIER = new Builder(MaterialColor.NONE).notPushable().build();
     public static final Material PISTON = new Builder(MaterialColor.STONE).notPushable().build();
     public static final Material CORAL = new Builder(MaterialColor.PLANT).destroyOnPush().build();
     public static final Material VEGETABLE = new Builder(MaterialColor.PLANT).destroyOnPush().build();
@@ -54,21 +54,19 @@ public final class Material {
     private final PushReaction pushReaction;
     private final boolean blocksMotion;
     private final boolean flammable;
-    private final boolean alwaysDestroyable;
     private final boolean liquid;
     private final boolean solidBlocking;
     private final boolean replaceable;
     private final boolean solid;
 
-    public Material(MaterialColor materialColor, boolean bl, boolean bl2, boolean bl3, boolean bl4, boolean bl5, boolean bl6, boolean bl7, PushReaction pushReaction) {
+    public Material(MaterialColor materialColor, boolean bl, boolean bl2, boolean bl3, boolean bl4, boolean bl5, boolean bl6, PushReaction pushReaction) {
         this.color = materialColor;
         this.liquid = bl;
         this.solid = bl2;
         this.blocksMotion = bl3;
         this.solidBlocking = bl4;
-        this.alwaysDestroyable = bl5;
-        this.flammable = bl6;
-        this.replaceable = bl7;
+        this.flammable = bl5;
+        this.replaceable = bl6;
         this.pushReaction = pushReaction;
     }
 
@@ -96,10 +94,6 @@ public final class Material {
         return this.solidBlocking;
     }
 
-    public boolean isAlwaysDestroyable() {
-        return this.alwaysDestroyable;
-    }
-
     public PushReaction getPushReaction() {
         return this.pushReaction;
     }
@@ -112,7 +106,6 @@ public final class Material {
         private PushReaction pushReaction = PushReaction.NORMAL;
         private boolean blocksMotion = true;
         private boolean flammable;
-        private boolean isAlwaysDestroyable = true;
         private boolean liquid;
         private boolean replaceable;
         private boolean solid = true;
@@ -143,11 +136,6 @@ public final class Material {
             return this;
         }
 
-        protected Builder notAlwaysDestroyable() {
-            this.isAlwaysDestroyable = false;
-            return this;
-        }
-
         protected Builder flammable() {
             this.flammable = true;
             return this;
@@ -169,7 +157,7 @@ public final class Material {
         }
 
         public Material build() {
-            return new Material(this.color, this.liquid, this.solid, this.blocksMotion, this.solidBlocking, this.isAlwaysDestroyable, this.flammable, this.replaceable, this.pushReaction);
+            return new Material(this.color, this.liquid, this.solid, this.blocksMotion, this.solidBlocking, this.flammable, this.replaceable, this.pushReaction);
         }
 
         static /* synthetic */ Builder method_15808(Builder builder) {

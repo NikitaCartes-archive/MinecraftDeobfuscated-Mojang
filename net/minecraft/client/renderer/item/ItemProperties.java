@@ -31,7 +31,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -178,7 +177,7 @@ public class ItemProperties {
 
             @Nullable
             private BlockPos getLodestonePosition(Level level, CompoundTag compoundTag) {
-                Optional<ResourceKey<DimensionType>> optional;
+                Optional<ResourceKey<Level>> optional;
                 boolean bl = compoundTag.contains("LodestonePos");
                 boolean bl2 = compoundTag.contains("LodestoneDimension");
                 if (bl && bl2 && (optional = CompassItem.getLodestoneDimension(compoundTag)).isPresent() && level.dimension() == optional.get()) {

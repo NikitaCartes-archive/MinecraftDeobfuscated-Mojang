@@ -15,6 +15,7 @@ import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.levelgen.feature.TreeFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerType;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public abstract class FoliagePlacer {
     public static final Codec<FoliagePlacer> CODEC = Registry.FOLIAGE_PLACER_TYPES.dispatch(FoliagePlacer::type, FoliagePlacerType::codec);
@@ -36,11 +37,11 @@ public abstract class FoliagePlacer {
 
     protected abstract FoliagePlacerType<?> type();
 
-    public void createFoliage(LevelSimulatedRW levelSimulatedRW, Random random, TreeConfiguration treeConfiguration, int i, FoliageAttachment foliageAttachment, int j, int k, Set<BlockPos> set) {
-        this.createFoliage(levelSimulatedRW, random, treeConfiguration, i, foliageAttachment, j, k, set, this.offset(random));
+    public void createFoliage(LevelSimulatedRW levelSimulatedRW, Random random, TreeConfiguration treeConfiguration, int i, FoliageAttachment foliageAttachment, int j, int k, Set<BlockPos> set, BoundingBox boundingBox) {
+        this.createFoliage(levelSimulatedRW, random, treeConfiguration, i, foliageAttachment, j, k, set, this.offset(random), boundingBox);
     }
 
-    protected abstract void createFoliage(LevelSimulatedRW var1, Random var2, TreeConfiguration var3, int var4, FoliageAttachment var5, int var6, int var7, Set<BlockPos> var8, int var9);
+    protected abstract void createFoliage(LevelSimulatedRW var1, Random var2, TreeConfiguration var3, int var4, FoliageAttachment var5, int var6, int var7, Set<BlockPos> var8, int var9, BoundingBox var10);
 
     public abstract int foliageHeight(Random var1, int var2, TreeConfiguration var3);
 
@@ -67,7 +68,7 @@ public abstract class FoliagePlacer {
         return this.shouldSkipLocation(random, m, j, n, l, bl);
     }
 
-    protected void placeLeavesRow(LevelSimulatedRW levelSimulatedRW, Random random, TreeConfiguration treeConfiguration, BlockPos blockPos, int i, Set<BlockPos> set, int j, boolean bl) {
+    protected void placeLeavesRow(LevelSimulatedRW levelSimulatedRW, Random random, TreeConfiguration treeConfiguration, BlockPos blockPos, int i, Set<BlockPos> set, int j, boolean bl, BoundingBox boundingBox) {
         int k = bl ? 1 : 0;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int l = -i; l <= i + k; ++l) {
@@ -76,6 +77,7 @@ public abstract class FoliagePlacer {
                 mutableBlockPos.setWithOffset(blockPos, l, j, m);
                 if (!TreeFeature.validTreePos(levelSimulatedRW, mutableBlockPos)) continue;
                 levelSimulatedRW.setBlock(mutableBlockPos, treeConfiguration.leavesProvider.getState(random, mutableBlockPos), 19);
+                boundingBox.expand(new BoundingBox(mutableBlockPos, mutableBlockPos));
                 set.add(mutableBlockPos.immutable());
             }
         }

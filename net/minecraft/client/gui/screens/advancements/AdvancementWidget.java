@@ -18,6 +18,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.advancements.AdvancementTab;
 import net.minecraft.client.gui.screens.advancements.AdvancementWidgetType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -31,9 +32,9 @@ extends GuiComponent {
     private final AdvancementTab tab;
     private final Advancement advancement;
     private final DisplayInfo display;
-    private final Component title;
+    private final FormattedText title;
     private final int width;
-    private final List<Component> description;
+    private final List<FormattedText> description;
     private final Minecraft minecraft;
     private AdvancementWidget parent;
     private final List<AdvancementWidget> children = Lists.newArrayList();
@@ -54,22 +55,22 @@ extends GuiComponent {
         int k = i > 1 ? minecraft.font.width("  ") + minecraft.font.width("0") * j * 2 + minecraft.font.width("/") : 0;
         int l = 29 + minecraft.font.width(this.title) + k;
         this.description = this.findOptimalLines(displayInfo.getDescription().mutableCopy().withStyle(displayInfo.getFrame().getChatColor()), l);
-        for (Component component : this.description) {
-            l = Math.max(l, minecraft.font.width(component));
+        for (FormattedText formattedText : this.description) {
+            l = Math.max(l, minecraft.font.width(formattedText));
         }
         this.width = l + 3 + 5;
     }
 
-    private static float getMaxWidth(StringSplitter stringSplitter, List<Component> list) {
+    private static float getMaxWidth(StringSplitter stringSplitter, List<FormattedText> list) {
         return (float)list.stream().mapToDouble(stringSplitter::stringWidth).max().orElse(0.0);
     }
 
-    private List<Component> findOptimalLines(Component component, int i) {
+    private List<FormattedText> findOptimalLines(Component component, int i) {
         StringSplitter stringSplitter = this.minecraft.font.getSplitter();
-        List<Component> list = null;
+        List<FormattedText> list = null;
         float f = Float.MAX_VALUE;
         for (int j : TEST_SPLIT_OFFSETS) {
-            List<Component> list2 = stringSplitter.splitLines(component, i - j, Style.EMPTY);
+            List<FormattedText> list2 = stringSplitter.splitLines(component, i - j, Style.EMPTY);
             float g = Math.abs(AdvancementWidget.getMaxWidth(stringSplitter, list2) - (float)i);
             if (g <= 10.0f) {
                 return list2;

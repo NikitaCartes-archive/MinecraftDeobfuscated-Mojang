@@ -20,6 +20,8 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -34,6 +36,11 @@ extends LootItemConditionalFunction {
         super(lootItemConditions);
         this.enchantment = enchantment;
         this.formula = formula;
+    }
+
+    @Override
+    public LootItemFunctionType getType() {
+        return LootItemFunctions.APPLY_BONUS;
     }
 
     @Override
@@ -76,10 +83,6 @@ extends LootItemConditionalFunction {
 
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<ApplyBonusCount> {
-        public Serializer() {
-            super(new ResourceLocation("apply_bonus"), ApplyBonusCount.class);
-        }
-
         @Override
         public void serialize(JsonObject jsonObject, ApplyBonusCount applyBonusCount, JsonSerializationContext jsonSerializationContext) {
             super.serialize(jsonObject, applyBonusCount, jsonSerializationContext);

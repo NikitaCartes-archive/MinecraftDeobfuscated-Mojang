@@ -5,6 +5,7 @@ package net.minecraft.client.renderer;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -34,8 +35,8 @@ public abstract class DimensionSpecialEffects {
         this.renderNormalSky = bl2;
     }
 
-    public static DimensionSpecialEffects forType(@Nullable ResourceKey<DimensionType> resourceKey) {
-        return (DimensionSpecialEffects)EFFECTS.get(resourceKey);
+    public static DimensionSpecialEffects forType(Optional<ResourceKey<DimensionType>> optional) {
+        return (DimensionSpecialEffects)EFFECTS.get(optional.orElse(DimensionType.OVERWORLD_LOCATION));
     }
 
     @Nullable

@@ -87,11 +87,11 @@ implements SimpleWaterloggedBlock {
         PlayerEnderChestContainer playerEnderChestContainer = player2.getEnderChestInventory();
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (playerEnderChestContainer == null || !(blockEntity instanceof EnderChestBlockEntity)) {
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         BlockPos blockPos2 = blockPos.above();
         if (level.getBlockState(blockPos2).isRedstoneConductor(level, blockPos2)) {
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
@@ -101,7 +101,7 @@ implements SimpleWaterloggedBlock {
         player2.openMenu(new SimpleMenuProvider((i, inventory, player) -> ChestMenu.threeRows(i, inventory, playerEnderChestContainer), CONTAINER_TITLE));
         player2.awardStat(Stats.OPEN_ENDERCHEST);
         PiglinAi.angerNearbyPiglinsThatSee(player2);
-        return InteractionResult.SUCCESS;
+        return InteractionResult.CONSUME;
     }
 
     @Override

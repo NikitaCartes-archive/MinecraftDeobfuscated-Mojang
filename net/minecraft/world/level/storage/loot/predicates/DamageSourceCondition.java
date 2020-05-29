@@ -10,12 +10,13 @@ import com.google.gson.JsonSerializationContext;
 import java.util.Set;
 import net.minecraft.advancements.critereon.DamageSourcePredicate;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 import net.minecraft.world.phys.Vec3;
 
 public class DamageSourceCondition
@@ -24,6 +25,11 @@ implements LootItemCondition {
 
     private DamageSourceCondition(DamageSourcePredicate damageSourcePredicate) {
         this.predicate = damageSourcePredicate;
+    }
+
+    @Override
+    public LootItemConditionType getType() {
+        return LootItemConditions.DAMAGE_SOURCE_PROPERTIES;
     }
 
     @Override
@@ -48,11 +54,7 @@ implements LootItemCondition {
     }
 
     public static class Serializer
-    extends LootItemCondition.Serializer<DamageSourceCondition> {
-        protected Serializer() {
-            super(new ResourceLocation("damage_source_properties"), DamageSourceCondition.class);
-        }
-
+    implements net.minecraft.world.level.storage.loot.Serializer<DamageSourceCondition> {
         @Override
         public void serialize(JsonObject jsonObject, DamageSourceCondition damageSourceCondition, JsonSerializationContext jsonSerializationContext) {
             jsonObject.add("predicate", damageSourceCondition.predicate.serializeToJson());
@@ -65,7 +67,7 @@ implements LootItemCondition {
         }
 
         @Override
-        public /* synthetic */ LootItemCondition deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+        public /* synthetic */ Object deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
             return this.deserialize(jsonObject, jsonDeserializationContext);
         }
     }

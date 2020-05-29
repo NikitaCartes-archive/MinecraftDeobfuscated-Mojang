@@ -274,7 +274,7 @@ implements SimpleWaterloggedBlock {
             player.awardStat(this.getOpenChestStat());
             PiglinAi.angerNearbyPiglinsThatSee(player);
         }
-        return InteractionResult.SUCCESS;
+        return InteractionResult.CONSUME;
     }
 
     protected Stat<ResourceLocation> getOpenChestStat() {

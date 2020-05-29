@@ -3,17 +3,23 @@
  */
 package net.minecraft.network.chat;
 
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.BaseComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import org.jetbrains.annotations.Nullable;
 
 public class TextComponent
 extends BaseComponent {
     public static final Component EMPTY = new TextComponent("");
     private final String text;
+    @Nullable
+    private Language decomposedWith;
+    private String reorderedText;
 
     public TextComponent(String string) {
         this.text = string;
+        this.reorderedText = string;
     }
 
     public String getText() {
@@ -22,7 +28,15 @@ extends BaseComponent {
 
     @Override
     public String getContents() {
-        return this.text;
+        if (this.text.isEmpty()) {
+            return this.text;
+        }
+        Language language = Language.getInstance();
+        if (this.decomposedWith != language) {
+            this.reorderedText = language.reorder(this.text, false);
+            this.decomposedWith = language;
+        }
+        return this.reorderedText;
     }
 
     @Override

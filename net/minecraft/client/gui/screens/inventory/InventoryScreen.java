@@ -41,6 +41,7 @@ implements RecipeUpdateListener {
     public InventoryScreen(Player player) {
         super(player.inventoryMenu, player.inventory, new TranslatableComponent("container.crafting"));
         this.passEvents = true;
+        this.titleLabelX = 97;
     }
 
     @Override
@@ -76,7 +77,7 @@ implements RecipeUpdateListener {
 
     @Override
     protected void renderLabels(PoseStack poseStack, int i, int j) {
-        this.font.draw(poseStack, this.title, 97.0f, 8.0f, 0x404040);
+        this.font.draw(poseStack, this.title, (float)this.titleLabelX, (float)this.titleLabelY, 0x404040);
     }
 
     @Override

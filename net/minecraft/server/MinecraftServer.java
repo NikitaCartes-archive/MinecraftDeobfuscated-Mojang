@@ -7,6 +7,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
@@ -39,16 +40,21 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
 import javax.imageio.ImageIO;
@@ -62,6 +68,7 @@ import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.gametest.framework.GameTestTicker;
 import net.minecraft.network.chat.Component;
@@ -74,6 +81,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ServerAdvancementManager;
 import net.minecraft.server.ServerFunctionManager;
+import net.minecraft.server.ServerResources;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.bossevents.CustomBossEvents;
@@ -85,14 +93,10 @@ import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.network.ServerConnectionListener;
-import net.minecraft.server.packs.Pack;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.FolderRepositorySource;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.packs.repository.UnopenedPack;
-import net.minecraft.server.packs.resources.ReloadableResourceManager;
-import net.minecraft.server.packs.resources.SimpleReloadableResourceManager;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.ServerOpListEntry;
@@ -122,12 +126,12 @@ import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -168,7 +172,6 @@ AutoCloseable,
 Runnable {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final File USERID_CACHE_FILE = new File("usercache.json");
-    private static final CompletableFuture<Unit> DATA_RELOAD_INITIAL_TASK = CompletableFuture.completedFuture(Unit.INSTANCE);
     public static final LevelSettings DEMO_SETTINGS = new LevelSettings("Demo World", GameType.SURVIVAL, false, Difficulty.NORMAL, false, new GameRules(), WorldGenSettings.DEMO_SETTINGS);
     protected final LevelStorageSource.LevelStorageAccess storageSource;
     protected final PlayerDataStorage playerDataStorage;
@@ -177,14 +180,14 @@ Runnable {
     private ContinuousProfiler continousProfiler = new ContinuousProfiler(Util.timeSource, this::getTickCount);
     private ProfilerFiller profiler = InactiveProfiler.INSTANCE;
     private final ServerConnectionListener connection;
-    protected final ChunkProgressListenerFactory progressListenerFactory;
+    private final ChunkProgressListenerFactory progressListenerFactory;
     private final ServerStatus status = new ServerStatus();
     private final Random random = new Random();
     private final DataFixer fixerUpper;
     private String localIp;
     private int port = -1;
     protected final RegistryAccess.RegistryHolder registryHolder = new RegistryAccess.RegistryHolder();
-    private final Map<ResourceKey<DimensionType>, ServerLevel> levels = Maps.newLinkedHashMap();
+    private final Map<ResourceKey<Level>, ServerLevel> levels = Maps.newLinkedHashMap();
     private PlayerList playerList;
     private volatile boolean running = true;
     private boolean stopped;
@@ -214,41 +217,34 @@ Runnable {
     private final GameProfileRepository profileRepository;
     private final GameProfileCache profileCache;
     private long lastServerStatus;
-    protected final Thread serverThread = Util.make(new Thread((Runnable)this, "Server thread"), thread2 -> thread2.setUncaughtExceptionHandler((thread, throwable) -> LOGGER.error(throwable)));
+    private final Thread serverThread = Util.make(new Thread((Runnable)this, "Server thread"), thread2 -> thread2.setUncaughtExceptionHandler((thread, throwable) -> LOGGER.error(throwable)));
     private long nextTickTime = Util.getMillis();
     private long delayedTasksMaxNextTickTime;
     private boolean mayHaveDelayedTasks;
     @Environment(value=EnvType.CLIENT)
     private boolean hasWorldScreenshot;
-    private final ReloadableResourceManager resources = new SimpleReloadableResourceManager(PackType.SERVER_DATA, this.serverThread);
-    private final PackRepository<UnopenedPack> packRepository = new PackRepository<UnopenedPack>(UnopenedPack::new);
-    @Nullable
-    private FolderRepositorySource folderPackSource;
-    private final Commands commands;
-    private final RecipeManager recipes = new RecipeManager();
-    private final TagManager tags = new TagManager();
+    private final PackRepository<UnopenedPack> packRepository;
     private final ServerScoreboard scoreboard = new ServerScoreboard(this);
     @Nullable
     private CommandStorage commandStorage;
-    private final CustomBossEvents customBossEvents = new CustomBossEvents(this);
-    private final PredicateManager predicateManager = new PredicateManager();
-    private final LootTables lootTables = new LootTables(this.predicateManager);
-    private final ServerAdvancementManager advancements = new ServerAdvancementManager(this.predicateManager);
-    private final ServerFunctionManager functions = new ServerFunctionManager(this);
+    private final CustomBossEvents customBossEvents = new CustomBossEvents();
+    private final ServerFunctionManager functionManager;
     private final FrameTimer frameTimer = new FrameTimer();
     private boolean enforceWhitelist;
     private float averageTickTime;
     private final Executor executor;
     @Nullable
     private String serverId;
+    private ServerResources resources;
     private final StructureManager structureManager;
     protected final WorldData worldData;
 
-    public MinecraftServer(LevelStorageSource.LevelStorageAccess levelStorageAccess, WorldData worldData, Proxy proxy, DataFixer dataFixer, Commands commands, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory) {
+    public MinecraftServer(LevelStorageSource.LevelStorageAccess levelStorageAccess, WorldData worldData, PackRepository<UnopenedPack> packRepository, Proxy proxy, DataFixer dataFixer, ServerResources serverResources, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory) {
         super("Server");
         this.worldData = worldData;
         this.proxy = proxy;
-        this.commands = commands;
+        this.packRepository = packRepository;
+        this.resources = serverResources;
         this.sessionService = minecraftSessionService;
         this.profileRepository = gameProfileRepository;
         this.profileCache = gameProfileCache;
@@ -257,14 +253,9 @@ Runnable {
         this.storageSource = levelStorageAccess;
         this.playerDataStorage = levelStorageAccess.createPlayerStorage();
         this.fixerUpper = dataFixer;
-        this.resources.registerReloadListener(this.tags);
-        this.resources.registerReloadListener(this.predicateManager);
-        this.resources.registerReloadListener(this.recipes);
-        this.resources.registerReloadListener(this.lootTables);
-        this.resources.registerReloadListener(this.functions);
-        this.resources.registerReloadListener(this.advancements);
+        this.functionManager = new ServerFunctionManager(this, serverResources.getFunctionLibrary());
+        this.structureManager = new StructureManager(serverResources.getResourceManager(), levelStorageAccess, dataFixer);
         this.executor = Util.backgroundExecutor();
-        this.structureManager = new StructureManager(this, levelStorageAccess, dataFixer);
     }
 
     private void readScoreboard(DimensionDataStorage dimensionDataStorage) {
@@ -313,7 +304,6 @@ Runnable {
     protected void loadLevel() {
         this.detectBundledResources();
         this.worldData.setModdedInfo(this.getServerModName(), this.getModdedStatus().isPresent());
-        this.loadDataPacks();
         ChunkProgressListener chunkProgressListener = this.progressListenerFactory.create(11);
         this.createLevels(chunkProgressListener);
         this.forceDifficulty();
@@ -332,18 +322,18 @@ Runnable {
         long l = worldGenSettings.seed();
         long m = BiomeManager.obfuscateSeed(l);
         ImmutableList<CustomSpawner> list = ImmutableList.of(new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(serverLevelData));
-        LinkedHashMap<ResourceKey<DimensionType>, Pair<DimensionType, ChunkGenerator>> linkedHashMap = worldGenSettings.dimensions();
-        Pair<DimensionType, ChunkGenerator> pair = linkedHashMap.get(DimensionType.OVERWORLD_LOCATION);
+        LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> linkedHashMap = worldGenSettings.dimensions();
+        Pair<DimensionType, ChunkGenerator> pair = linkedHashMap.get(Level.OVERWORLD);
         if (pair == null) {
-            dimensionType = DimensionType.defaultOverworld();
+            dimensionType = DimensionType.makeDefaultOverworld();
             chunkGenerator = WorldGenSettings.makeDefaultOverworld(new Random().nextLong());
         } else {
             dimensionType = pair.getFirst();
             chunkGenerator = pair.getSecond();
         }
         this.registryHolder.registerDimension(DimensionType.OVERWORLD_LOCATION, dimensionType);
-        ServerLevel serverLevel = new ServerLevel(this, this.executor, this.storageSource, serverLevelData, dimensionType, chunkProgressListener, chunkGenerator, bl, m, list, true);
-        this.levels.put(DimensionType.OVERWORLD_LOCATION, serverLevel);
+        ServerLevel serverLevel = new ServerLevel(this, this.executor, this.storageSource, serverLevelData, Level.OVERWORLD, DimensionType.OVERWORLD_LOCATION, dimensionType, chunkProgressListener, chunkGenerator, bl, m, list, true);
+        this.levels.put(Level.OVERWORLD, serverLevel);
         DimensionDataStorage dimensionDataStorage = serverLevel.getDataStorage();
         this.readScoreboard(dimensionDataStorage);
         this.commandStorage = new CommandStorage(dimensionDataStorage);
@@ -371,14 +361,15 @@ Runnable {
         if (this.worldData.getCustomBossEvents() != null) {
             this.getCustomBossEvents().load(this.worldData.getCustomBossEvents());
         }
-        for (Map.Entry<ResourceKey<DimensionType>, Pair<DimensionType, ChunkGenerator>> entry : linkedHashMap.entrySet()) {
-            ResourceKey<DimensionType> resourceKey = entry.getKey();
-            if (resourceKey == DimensionType.OVERWORLD_LOCATION) continue;
+        for (Map.Entry<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> entry : linkedHashMap.entrySet()) {
+            ResourceKey<Level> resourceKey = entry.getKey();
+            if (resourceKey == Level.OVERWORLD) continue;
             DimensionType dimensionType2 = entry.getValue().getFirst();
-            this.registryHolder.registerDimension(resourceKey, dimensionType2);
+            ResourceKey<DimensionType> resourceKey2 = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, resourceKey.location());
+            this.registryHolder.registerDimension(resourceKey2, dimensionType2);
             ChunkGenerator chunkGenerator2 = entry.getValue().getSecond();
             DerivedLevelData derivedLevelData = new DerivedLevelData(dimensionType2, this.worldData, serverLevelData);
-            ServerLevel serverLevel2 = new ServerLevel(this, this.executor, this.storageSource, derivedLevelData, dimensionType2, chunkProgressListener, chunkGenerator2, bl, m, ImmutableList.of(), false);
+            ServerLevel serverLevel2 = new ServerLevel(this, this.executor, this.storageSource, derivedLevelData, resourceKey, resourceKey2, dimensionType2, chunkProgressListener, chunkGenerator2, bl, m, ImmutableList.of(), false);
             worldBorder.addListener(new BorderChangeListener.DelegateBorderChangeListener(serverLevel2.getWorldBorder()));
             this.levels.put(resourceKey, serverLevel2);
         }
@@ -446,27 +437,8 @@ Runnable {
         serverLevelData.setGameType(GameType.SPECTATOR);
     }
 
-    private void loadDataPacks() {
-        this.packRepository.addSource(new ServerPacksSource());
-        this.folderPackSource = new FolderRepositorySource(this.storageSource.getLevelPath(LevelResource.DATAPACK_DIR).toFile());
-        this.packRepository.addSource(this.folderPackSource);
-        this.packRepository.reload();
-        ArrayList<UnopenedPack> list = Lists.newArrayList();
-        for (String string : this.worldData.getEnabledDataPacks()) {
-            UnopenedPack unopenedPack = this.packRepository.getPack(string);
-            if (unopenedPack != null) {
-                list.add(unopenedPack);
-                continue;
-            }
-            LOGGER.warn("Missing data pack {}", (Object)string);
-        }
-        this.packRepository.setSelected(list);
-        this.updateSelectedPacks();
-        this.refreshRegistries();
-    }
-
     private void prepareLevels(ChunkProgressListener chunkProgressListener) {
-        ServerLevel serverLevel = this.getLevel(DimensionType.OVERWORLD_LOCATION);
+        ServerLevel serverLevel = this.getLevel(Level.OVERWORLD);
         LOGGER.info("Preparing start region for dimension {}", (Object)serverLevel.dimension().location());
         BlockPos blockPos = serverLevel.getSharedSpawnPos();
         chunkProgressListener.updateSpawnPos(new ChunkPos(blockPos));
@@ -532,7 +504,7 @@ Runnable {
             serverLevel.save(null, bl2, serverLevel.noSave && !bl3);
             bl4 = true;
         }
-        ServerLevel serverLevel2 = this.getLevel(DimensionType.OVERWORLD_LOCATION);
+        ServerLevel serverLevel2 = this.getLevel(Level.OVERWORLD);
         ServerLevelData serverLevelData = this.worldData.overworldData();
         serverLevelData.setWorldBorder(serverLevel2.getWorldBorder().createSettings());
         this.worldData.setCustomBossEvents(this.getCustomBossEvents().save());
@@ -709,7 +681,7 @@ Runnable {
     /*
      * WARNING - Removed try catching itself - possible behaviour change.
      */
-    public void updateStatusIcon(ServerStatus serverStatus) {
+    private void updateStatusIcon(ServerStatus serverStatus) {
         File file = this.getFile("server-icon.png");
         if (!file.exists()) {
             file = this.storageSource.getIconFile();
@@ -855,8 +827,12 @@ Runnable {
         return new File(this.getServerDirectory(), string);
     }
 
-    public ServerLevel getLevel(ResourceKey<DimensionType> resourceKey) {
+    public ServerLevel getLevel(ResourceKey<Level> resourceKey) {
         return this.levels.get(resourceKey);
+    }
+
+    public Set<ResourceKey<Level>> levelKeys() {
+        return this.levels.keySet();
     }
 
     public Iterable<ServerLevel> getAllLevels() {
@@ -889,7 +865,7 @@ Runnable {
         }
         crashReport.getSystemDetails().setDetail("Data Packs", () -> {
             StringBuilder stringBuilder = new StringBuilder();
-            for (UnopenedPack unopenedPack : this.packRepository.getSelected()) {
+            for (UnopenedPack unopenedPack : this.packRepository.getSelectedPacks()) {
                 if (stringBuilder.length() > 0) {
                     stringBuilder.append(", ");
                 }
@@ -1208,50 +1184,66 @@ Runnable {
     }
 
     public ServerAdvancementManager getAdvancements() {
-        return this.advancements;
+        return this.resources.getAdvancements();
     }
 
     public ServerFunctionManager getFunctions() {
-        return this.functions;
+        return this.functionManager;
     }
 
-    public void reloadResources() {
-        if (!this.isSameThread()) {
-            this.execute(this::reloadResources);
-            return;
+    public CompletableFuture<Void> reloadResources(Collection<String> collection) {
+        CompletionStage completableFuture = ((CompletableFuture)CompletableFuture.supplyAsync(() -> collection.stream().map(this.packRepository::getPack).filter(Objects::nonNull).map(UnopenedPack::open).collect(ImmutableList.toImmutableList()), this).thenCompose(immutableList -> ServerResources.loadResources(immutableList, this.isDedicatedServer(), this.getFunctionCompilationLevel(), this.executor, this))).thenAcceptAsync(serverResources -> {
+            this.resources = serverResources;
+            this.packRepository.setSelected(collection);
+            MinecraftServer.storeSelectedPacks(this.packRepository, this.worldData);
+            serverResources.updateGlobals();
+            this.getPlayerList().saveAll();
+            this.getPlayerList().reloadResources();
+            this.functionManager.replaceLibrary(this.resources.getFunctionLibrary());
+            this.structureManager.onResourceManagerReload(this.resources.getResourceManager());
+        }, (Executor)this);
+        if (this.isSameThread()) {
+            this.managedBlock(((CompletableFuture)completableFuture)::isDone);
         }
-        this.getPlayerList().saveAll();
-        this.packRepository.reload();
-        this.updateSelectedPacks();
-        this.getPlayerList().reloadResources();
-        this.refreshRegistries();
+        return completableFuture;
     }
 
-    private void updateSelectedPacks() {
-        ArrayList<UnopenedPack> list = Lists.newArrayList(this.packRepository.getSelected());
-        for (UnopenedPack unopenedPack2 : this.packRepository.getAvailable()) {
-            if (this.worldData.getDisabledDataPacks().contains(unopenedPack2.getId()) || list.contains(unopenedPack2)) continue;
-            LOGGER.info("Found new data pack {}, loading it automatically", (Object)unopenedPack2.getId());
-            unopenedPack2.getDefaultPosition().insert(list, unopenedPack2, unopenedPack -> unopenedPack, false);
+    public static PackRepository<UnopenedPack> createPackRepository(Path path, WorldData worldData, boolean bl) {
+        PackRepository<UnopenedPack> packRepository = new PackRepository<UnopenedPack>(UnopenedPack::new, new ServerPacksSource(), new FolderRepositorySource(path.toFile()));
+        packRepository.reload();
+        if (bl) {
+            packRepository.setSelected(Collections.singleton("vanilla"));
+            return packRepository;
         }
-        this.packRepository.setSelected(list);
-        ArrayList<Pack> list2 = Lists.newArrayList();
-        this.packRepository.getSelected().forEach(unopenedPack -> list2.add(unopenedPack.open()));
-        CompletableFuture<Unit> completableFuture = this.resources.reload(this.executor, this, list2, DATA_RELOAD_INITIAL_TASK);
-        this.managedBlock(completableFuture::isDone);
-        try {
-            completableFuture.get();
-        } catch (Exception exception) {
-            LOGGER.error("Failed to reload data packs", (Throwable)exception);
-        }
-        this.worldData.getEnabledDataPacks().clear();
-        this.worldData.getDisabledDataPacks().clear();
-        this.packRepository.getSelected().forEach(unopenedPack -> this.worldData.getEnabledDataPacks().add(unopenedPack.getId()));
-        this.packRepository.getAvailable().forEach(unopenedPack -> {
-            if (!this.packRepository.getSelected().contains(unopenedPack)) {
-                this.worldData.getDisabledDataPacks().add(unopenedPack.getId());
+        LinkedHashSet<String> set = Sets.newLinkedHashSet();
+        for (String string : worldData.getEnabledDataPacks()) {
+            if (packRepository.isAvailable(string)) {
+                set.add(string);
+                continue;
             }
-        });
+            LOGGER.warn("Missing data pack {}", (Object)string);
+        }
+        for (String string : packRepository.getAvailableIds()) {
+            if (worldData.getDisabledDataPacks().contains(string) || set.contains(string)) continue;
+            LOGGER.info("Found new data pack {}, loading it automatically", (Object)string);
+            set.add(string);
+        }
+        if (set.isEmpty()) {
+            LOGGER.info("No datapacks selected, forcing vanilla");
+            set.add("vanilla");
+        }
+        packRepository.setSelected(set);
+        MinecraftServer.storeSelectedPacks(packRepository, worldData);
+        return packRepository;
+    }
+
+    private static void storeSelectedPacks(PackRepository<?> packRepository, WorldData worldData) {
+        Set<String> set = worldData.getEnabledDataPacks();
+        Set<String> set2 = worldData.getDisabledDataPacks();
+        set.clear();
+        set2.clear();
+        set.addAll(packRepository.getSelectedIds());
+        packRepository.getAvailableIds().stream().filter(string -> !set.contains(string)).forEach(set2::add);
     }
 
     public void kickUnlistedPlayers(CommandSourceStack commandSourceStack) {
@@ -1270,20 +1262,17 @@ Runnable {
         }
     }
 
-    public ReloadableResourceManager getResources() {
-        return this.resources;
-    }
-
     public PackRepository<UnopenedPack> getPackRepository() {
         return this.packRepository;
     }
 
     public Commands getCommands() {
-        return this.commands;
+        return this.resources.getCommands();
     }
 
     public CommandSourceStack createCommandSourceStack() {
-        return new CommandSourceStack(this, this.getLevel(DimensionType.OVERWORLD_LOCATION) == null ? Vec3.ZERO : Vec3.atLowerCornerOf(this.getLevel(DimensionType.OVERWORLD_LOCATION).getSharedSpawnPos()), Vec2.ZERO, this.getLevel(DimensionType.OVERWORLD_LOCATION), 4, "Server", new TextComponent("Server"), this, null);
+        ServerLevel serverLevel = this.getLevel(Level.OVERWORLD);
+        return new CommandSourceStack(this, serverLevel == null ? Vec3.ZERO : Vec3.atLowerCornerOf(serverLevel.getSharedSpawnPos()), Vec2.ZERO, serverLevel, 4, "Server", new TextComponent("Server"), this, null);
     }
 
     @Override
@@ -1297,11 +1286,11 @@ Runnable {
     }
 
     public RecipeManager getRecipeManager() {
-        return this.recipes;
+        return this.resources.getRecipeManager();
     }
 
     public TagManager getTags() {
-        return this.tags;
+        return this.resources.getTags();
     }
 
     public ServerScoreboard getScoreboard() {
@@ -1316,15 +1305,15 @@ Runnable {
     }
 
     public LootTables getLootTables() {
-        return this.lootTables;
+        return this.resources.getLootTables();
     }
 
     public PredicateManager getPredicateManager() {
-        return this.predicateManager;
+        return this.resources.getPredicateManager();
     }
 
     public GameRules getGameRules() {
-        return this.getLevel(DimensionType.OVERWORLD_LOCATION).getGameRules();
+        return this.getLevel(Level.OVERWORLD).getGameRules();
     }
 
     public CustomBossEvents getCustomBossEvents() {
@@ -1369,15 +1358,11 @@ Runnable {
         return this.profiler;
     }
 
-    public Executor getBackgroundTaskExecutor() {
-        return this.executor;
-    }
-
     public abstract boolean isSingleplayerOwner(GameProfile var1);
 
     public void saveDebugReport(Path path) throws IOException {
         Path path2 = path.resolve("levels");
-        for (Map.Entry<ResourceKey<DimensionType>, ServerLevel> entry : this.levels.entrySet()) {
+        for (Map.Entry<ResourceKey<Level>, ServerLevel> entry : this.levels.entrySet()) {
             ResourceLocation resourceLocation = entry.getKey().location();
             Path path3 = path2.resolve(resourceLocation.getNamespace()).resolve(resourceLocation.getPath());
             Files.createDirectories(path3, new FileAttribute[0]);
@@ -1447,10 +1432,6 @@ Runnable {
         }
     }
 
-    private void refreshRegistries() {
-        Blocks.rebuildCache();
-    }
-
     private void startProfilerTick(@Nullable SingleTickProfiler singleTickProfiler) {
         if (this.delayProfilerStart) {
             this.delayProfilerStart = false;
@@ -1494,10 +1475,6 @@ Runnable {
 
     public WorldData getWorldData() {
         return this.worldData;
-    }
-
-    public RegistryAccess registryAccess() {
-        return this.registryHolder;
     }
 
     @Override

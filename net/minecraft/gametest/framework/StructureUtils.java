@@ -27,6 +27,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -43,20 +45,49 @@ import org.jetbrains.annotations.Nullable;
 public class StructureUtils {
     public static String testStructuresDir = "gameteststructures";
 
+    public static Rotation getRotationForRotationSteps(int i) {
+        switch (i) {
+            case 0: {
+                return Rotation.NONE;
+            }
+            case 1: {
+                return Rotation.CLOCKWISE_90;
+            }
+            case 2: {
+                return Rotation.CLOCKWISE_180;
+            }
+            case 3: {
+                return Rotation.COUNTERCLOCKWISE_90;
+            }
+        }
+        throw new IllegalArgumentException("rotationSteps must be a value from 0-3. Got value " + i);
+    }
+
     public static AABB getStructureBounds(StructureBlockEntity structureBlockEntity) {
-        BlockPos blockPos = structureBlockEntity.getBlockPos().offset(structureBlockEntity.getStructurePos());
-        return new AABB(blockPos, blockPos.offset(structureBlockEntity.getStructureSize()));
+        BlockPos blockPos = structureBlockEntity.getBlockPos();
+        BlockPos blockPos2 = blockPos.offset(structureBlockEntity.getStructureSize().offset(-1, -1, -1));
+        BlockPos blockPos3 = StructureTemplate.transform(blockPos2, Mirror.NONE, structureBlockEntity.getRotation(), blockPos);
+        return new AABB(blockPos, blockPos3);
     }
 
-    public static void addCommandBlockAndButtonToStartTest(BlockPos blockPos, ServerLevel serverLevel) {
-        serverLevel.setBlockAndUpdate(blockPos, Blocks.COMMAND_BLOCK.defaultBlockState());
-        CommandBlockEntity commandBlockEntity = (CommandBlockEntity)serverLevel.getBlockEntity(blockPos);
+    public static BoundingBox getStructureBoundingBox(StructureBlockEntity structureBlockEntity) {
+        BlockPos blockPos = structureBlockEntity.getBlockPos();
+        BlockPos blockPos2 = blockPos.offset(structureBlockEntity.getStructureSize().offset(-1, -1, -1));
+        BlockPos blockPos3 = StructureTemplate.transform(blockPos2, Mirror.NONE, structureBlockEntity.getRotation(), blockPos);
+        return new BoundingBox(blockPos, blockPos3);
+    }
+
+    public static void addCommandBlockAndButtonToStartTest(BlockPos blockPos, BlockPos blockPos2, Rotation rotation, ServerLevel serverLevel) {
+        BlockPos blockPos3 = StructureTemplate.transform(blockPos.offset(blockPos2), Mirror.NONE, rotation, blockPos);
+        serverLevel.setBlockAndUpdate(blockPos3, Blocks.COMMAND_BLOCK.defaultBlockState());
+        CommandBlockEntity commandBlockEntity = (CommandBlockEntity)serverLevel.getBlockEntity(blockPos3);
         commandBlockEntity.getCommandBlock().setCommand("test runthis");
-        serverLevel.setBlockAndUpdate(blockPos.offset(0, 0, -1), Blocks.STONE_BUTTON.defaultBlockState());
+        BlockPos blockPos4 = StructureTemplate.transform(blockPos3.offset(0, 0, -1), Mirror.NONE, rotation, blockPos3);
+        serverLevel.setBlockAndUpdate(blockPos4, Blocks.STONE_BUTTON.defaultBlockState().rotate(rotation));
     }
 
-    public static void createNewEmptyStructureBlock(String string, BlockPos blockPos, BlockPos blockPos2, int i, ServerLevel serverLevel) {
-        BoundingBox boundingBox = StructureUtils.createStructureBoundingBox(blockPos, blockPos2, i);
+    public static void createNewEmptyStructureBlock(String string, BlockPos blockPos, BlockPos blockPos2, Rotation rotation, ServerLevel serverLevel) {
+        BoundingBox boundingBox = StructureUtils.getStructureBoundingBox(blockPos, blockPos2, rotation);
         StructureUtils.clearSpaceForStructure(boundingBox, blockPos.getY(), serverLevel);
         serverLevel.setBlockAndUpdate(blockPos, Blocks.STRUCTURE_BLOCK.defaultBlockState());
         StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPos);
@@ -67,11 +98,24 @@ public class StructureUtils {
         structureBlockEntity.setShowBoundingBox(true);
     }
 
-    public static StructureBlockEntity spawnStructure(String string, BlockPos blockPos, int i, ServerLevel serverLevel, boolean bl) {
-        BoundingBox boundingBox = StructureUtils.createStructureBoundingBox(blockPos, StructureUtils.getStructureTemplate(string, serverLevel).getSize(), i);
+    public static StructureBlockEntity spawnStructure(String string, BlockPos blockPos, Rotation rotation, int i, ServerLevel serverLevel, boolean bl) {
+        BlockPos blockPos3;
+        BlockPos blockPos2 = StructureUtils.getStructureTemplate(string, serverLevel).getSize();
+        BoundingBox boundingBox = StructureUtils.getStructureBoundingBox(blockPos, blockPos2, rotation);
+        if (rotation == Rotation.NONE) {
+            blockPos3 = blockPos;
+        } else if (rotation == Rotation.CLOCKWISE_90) {
+            blockPos3 = blockPos.offset(blockPos2.getZ() - 1, 0, 0);
+        } else if (rotation == Rotation.CLOCKWISE_180) {
+            blockPos3 = blockPos.offset(blockPos2.getX() - 1, 0, blockPos2.getZ() - 1);
+        } else if (rotation == Rotation.COUNTERCLOCKWISE_90) {
+            blockPos3 = blockPos.offset(0, 0, blockPos2.getX() - 1);
+        } else {
+            throw new IllegalArgumentException("Invalid rotation: " + (Object)((Object)rotation));
+        }
         StructureUtils.forceLoadChunks(blockPos, serverLevel);
         StructureUtils.clearSpaceForStructure(boundingBox, blockPos.getY(), serverLevel);
-        StructureBlockEntity structureBlockEntity = StructureUtils.createStructureBlock(string, blockPos, serverLevel, bl);
+        StructureBlockEntity structureBlockEntity = StructureUtils.createStructureBlock(string, blockPos3, rotation, serverLevel, bl);
         ((ServerTickList)serverLevel.getBlockTicks()).fetchTicksInArea(boundingBox, true, false);
         serverLevel.clearBlockEvents(boundingBox);
         return structureBlockEntity;
@@ -89,18 +133,24 @@ public class StructureUtils {
     }
 
     public static void clearSpaceForStructure(BoundingBox boundingBox, int i, ServerLevel serverLevel) {
-        BlockPos.betweenClosedStream(boundingBox).forEach(blockPos -> StructureUtils.clearBlock(i, blockPos, serverLevel));
-        ((ServerTickList)serverLevel.getBlockTicks()).fetchTicksInArea(boundingBox, true, false);
-        serverLevel.clearBlockEvents(boundingBox);
-        AABB aABB = new AABB(boundingBox.x0, boundingBox.y0, boundingBox.z0, boundingBox.x1, boundingBox.y1, boundingBox.z1);
+        BoundingBox boundingBox2 = new BoundingBox(boundingBox.x0 - 2, boundingBox.y0 - 3, boundingBox.z0 - 3, boundingBox.x1 + 3, boundingBox.y1 + 20, boundingBox.z1 + 3);
+        BlockPos.betweenClosedStream(boundingBox2).forEach(blockPos -> StructureUtils.clearBlock(i, blockPos, serverLevel));
+        ((ServerTickList)serverLevel.getBlockTicks()).fetchTicksInArea(boundingBox2, true, false);
+        serverLevel.clearBlockEvents(boundingBox2);
+        AABB aABB = new AABB(boundingBox2.x0, boundingBox2.y0, boundingBox2.z0, boundingBox2.x1, boundingBox2.y1, boundingBox2.z1);
         List<Entity> list = serverLevel.getEntitiesOfClass(Entity.class, aABB, entity -> !(entity instanceof Player));
         list.forEach(Entity::remove);
     }
 
-    public static BoundingBox createStructureBoundingBox(BlockPos blockPos, BlockPos blockPos2, int i) {
-        BlockPos blockPos3 = blockPos.offset(-i, -3, -i);
-        BlockPos blockPos4 = blockPos.offset(blockPos2).offset(i - 1, 30, i - 1);
-        return BoundingBox.createProper(blockPos3.getX(), blockPos3.getY(), blockPos3.getZ(), blockPos4.getX(), blockPos4.getY(), blockPos4.getZ());
+    public static BoundingBox getStructureBoundingBox(BlockPos blockPos, BlockPos blockPos2, Rotation rotation) {
+        BlockPos blockPos3 = blockPos.offset(blockPos2).offset(-1, -1, -1);
+        BlockPos blockPos4 = StructureTemplate.transform(blockPos3, Mirror.NONE, rotation, blockPos);
+        BoundingBox boundingBox = BoundingBox.createProper(blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos4.getX(), blockPos4.getY(), blockPos4.getZ());
+        int i = Math.min(boundingBox.x0, boundingBox.x1);
+        int j = Math.min(boundingBox.z0, boundingBox.z1);
+        BlockPos blockPos5 = new BlockPos(blockPos.getX() - i, 0, blockPos.getZ() - j);
+        boundingBox.move(blockPos5);
+        return boundingBox;
     }
 
     public static Optional<BlockPos> findStructureBlockContainingPos(BlockPos blockPos, int i, ServerLevel serverLevel) {
@@ -147,10 +197,11 @@ public class StructureUtils {
         return structureManager.readStructure(compoundTag);
     }
 
-    private static StructureBlockEntity createStructureBlock(String string, BlockPos blockPos, ServerLevel serverLevel, boolean bl) {
+    private static StructureBlockEntity createStructureBlock(String string, BlockPos blockPos, Rotation rotation, ServerLevel serverLevel, boolean bl) {
         serverLevel.setBlockAndUpdate(blockPos, Blocks.STRUCTURE_BLOCK.defaultBlockState());
         StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPos);
         structureBlockEntity.setMode(StructureMode.LOAD);
+        structureBlockEntity.setRotation(rotation);
         structureBlockEntity.setIgnoreEntities(false);
         structureBlockEntity.setStructureName(new ResourceLocation(string));
         structureBlockEntity.loadStructure(bl);
@@ -179,9 +230,21 @@ public class StructureUtils {
     }
 
     private static void clearBlock(int i, BlockPos blockPos, ServerLevel serverLevel) {
+        BlockState blockState = null;
         FlatLevelGeneratorSettings flatLevelGeneratorSettings = FlatLevelGeneratorSettings.getDefault();
-        BlockState[] blockStates = flatLevelGeneratorSettings.getLayers();
-        BlockState blockState = blockPos.getY() < i ? blockStates[blockPos.getY() - 1] : Blocks.AIR.defaultBlockState();
+        if (flatLevelGeneratorSettings instanceof FlatLevelGeneratorSettings) {
+            BlockState[] blockStates = flatLevelGeneratorSettings.getLayers();
+            if (blockPos.getY() < i && blockPos.getY() <= blockStates.length) {
+                blockState = blockStates[blockPos.getY() - 1];
+            }
+        } else if (blockPos.getY() == i - 1) {
+            blockState = serverLevel.getBiome(blockPos).getSurfaceBuilderConfig().getTopMaterial();
+        } else if (blockPos.getY() < i - 1) {
+            blockState = serverLevel.getBiome(blockPos).getSurfaceBuilderConfig().getUnderMaterial();
+        }
+        if (blockState == null) {
+            blockState = Blocks.AIR.defaultBlockState();
+        }
         BlockInput blockInput = new BlockInput(blockState, Collections.emptySet(), null);
         blockInput.place(serverLevel, blockPos, 2);
         serverLevel.blockUpdated(blockPos, blockState.getBlock());
@@ -189,8 +252,8 @@ public class StructureUtils {
 
     private static boolean doesStructureContain(BlockPos blockPos, BlockPos blockPos2, ServerLevel serverLevel) {
         StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPos);
-        AABB aABB = StructureUtils.getStructureBounds(structureBlockEntity);
-        return aABB.contains(Vec3.atLowerCornerOf(blockPos2));
+        AABB aABB = StructureUtils.getStructureBounds(structureBlockEntity).inflate(1.0);
+        return aABB.contains(Vec3.atCenterOf(blockPos2));
     }
 }
 

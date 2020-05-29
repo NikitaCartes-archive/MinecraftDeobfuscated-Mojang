@@ -14,7 +14,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
-import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 public class ChangeDimensionTrigger
@@ -28,12 +28,12 @@ extends SimpleCriterionTrigger<TriggerInstance> {
 
     @Override
     public TriggerInstance createInstance(JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext) {
-        ResourceKey<DimensionType> resourceKey = jsonObject.has("from") ? ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, new ResourceLocation(GsonHelper.getAsString(jsonObject, "from"))) : null;
-        ResourceKey<DimensionType> resourceKey2 = jsonObject.has("to") ? ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, new ResourceLocation(GsonHelper.getAsString(jsonObject, "to"))) : null;
+        ResourceKey<Level> resourceKey = jsonObject.has("from") ? ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(GsonHelper.getAsString(jsonObject, "from"))) : null;
+        ResourceKey<Level> resourceKey2 = jsonObject.has("to") ? ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(GsonHelper.getAsString(jsonObject, "to"))) : null;
         return new TriggerInstance(composite, resourceKey, resourceKey2);
     }
 
-    public void trigger(ServerPlayer serverPlayer, ResourceKey<DimensionType> resourceKey, ResourceKey<DimensionType> resourceKey2) {
+    public void trigger(ServerPlayer serverPlayer, ResourceKey<Level> resourceKey, ResourceKey<Level> resourceKey2) {
         this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(resourceKey, resourceKey2));
     }
 
@@ -45,21 +45,21 @@ extends SimpleCriterionTrigger<TriggerInstance> {
     public static class TriggerInstance
     extends AbstractCriterionTriggerInstance {
         @Nullable
-        private final ResourceKey<DimensionType> from;
+        private final ResourceKey<Level> from;
         @Nullable
-        private final ResourceKey<DimensionType> to;
+        private final ResourceKey<Level> to;
 
-        public TriggerInstance(EntityPredicate.Composite composite, @Nullable ResourceKey<DimensionType> resourceKey, @Nullable ResourceKey<DimensionType> resourceKey2) {
+        public TriggerInstance(EntityPredicate.Composite composite, @Nullable ResourceKey<Level> resourceKey, @Nullable ResourceKey<Level> resourceKey2) {
             super(ID, composite);
             this.from = resourceKey;
             this.to = resourceKey2;
         }
 
-        public static TriggerInstance changedDimensionTo(ResourceKey<DimensionType> resourceKey) {
+        public static TriggerInstance changedDimensionTo(ResourceKey<Level> resourceKey) {
             return new TriggerInstance(EntityPredicate.Composite.ANY, null, resourceKey);
         }
 
-        public boolean matches(ResourceKey<DimensionType> resourceKey, ResourceKey<DimensionType> resourceKey2) {
+        public boolean matches(ResourceKey<Level> resourceKey, ResourceKey<Level> resourceKey2) {
             if (this.from != null && this.from != resourceKey) {
                 return false;
             }

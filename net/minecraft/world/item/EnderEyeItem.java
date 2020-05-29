@@ -62,15 +62,15 @@ extends Item {
             }
             level.globalLevelEvent(1038, blockPos2.offset(1, 0, 1), 0);
         }
-        return InteractionResult.SUCCESS;
+        return InteractionResult.CONSUME;
     }
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
         BlockPos blockPos;
         ItemStack itemStack = player.getItemInHand(interactionHand);
-        HitResult hitResult = EnderEyeItem.getPlayerPOVHitResult(level, player, ClipContext.Fluid.NONE);
-        if (hitResult.getType() == HitResult.Type.BLOCK && level.getBlockState(((BlockHitResult)hitResult).getBlockPos()).is(Blocks.END_PORTAL_FRAME)) {
+        BlockHitResult hitResult = EnderEyeItem.getPlayerPOVHitResult(level, player, ClipContext.Fluid.NONE);
+        if (((HitResult)hitResult).getType() == HitResult.Type.BLOCK && level.getBlockState(hitResult.getBlockPos()).is(Blocks.END_PORTAL_FRAME)) {
             return InteractionResultHolder.pass(itemStack);
         }
         player.startUsingItem(interactionHand);

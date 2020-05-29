@@ -31,8 +31,7 @@ public class ClearInventoryCommands {
     private static int clearInventory(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, Predicate<ItemStack> predicate, int i) throws CommandSyntaxException {
         int j = 0;
         for (ServerPlayer serverPlayer : collection) {
-            j += serverPlayer.inventory.clearInventory(predicate, i);
-            serverPlayer.inventoryMenu.clearCraftingContent();
+            j += serverPlayer.inventory.clearOrCountMatchingItems(predicate, i, serverPlayer.inventoryMenu.getCraftSlots());
             serverPlayer.containerMenu.broadcastChanges();
             serverPlayer.inventoryMenu.slotsChanged(serverPlayer.inventory);
             serverPlayer.broadcastCarriedItem();

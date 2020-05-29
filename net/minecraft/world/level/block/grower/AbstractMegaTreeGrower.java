@@ -37,6 +37,7 @@ extends AbstractTreeGrower {
         if (configuredFeature == null) {
             return false;
         }
+        ((TreeConfiguration)configuredFeature.config).setFromSapling();
         BlockState blockState2 = Blocks.AIR.defaultBlockState();
         serverLevel.setBlock(blockPos.offset(i, 0, j), blockState2, 4);
         serverLevel.setBlock(blockPos.offset(i + 1, 0, j), blockState2, 4);

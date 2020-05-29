@@ -46,13 +46,13 @@ extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
-        HitResult hitResult = BucketItem.getPlayerPOVHitResult(level, player, this.content == Fluids.EMPTY ? ClipContext.Fluid.SOURCE_ONLY : ClipContext.Fluid.NONE);
-        if (hitResult.getType() == HitResult.Type.MISS) {
+        BlockHitResult hitResult = BucketItem.getPlayerPOVHitResult(level, player, this.content == Fluids.EMPTY ? ClipContext.Fluid.SOURCE_ONLY : ClipContext.Fluid.NONE);
+        if (((HitResult)hitResult).getType() == HitResult.Type.MISS) {
             return InteractionResultHolder.pass(itemStack);
         }
-        if (hitResult.getType() == HitResult.Type.BLOCK) {
+        if (((HitResult)hitResult).getType() == HitResult.Type.BLOCK) {
             BlockPos blockPos3;
-            BlockHitResult blockHitResult = (BlockHitResult)hitResult;
+            BlockHitResult blockHitResult = hitResult;
             BlockPos blockPos = blockHitResult.getBlockPos();
             Direction direction = blockHitResult.getDirection();
             BlockPos blockPos2 = blockPos.relative(direction);
@@ -69,7 +69,7 @@ extends Item {
                     if (!level.isClientSide) {
                         CriteriaTriggers.FILLED_BUCKET.trigger((ServerPlayer)player, new ItemStack(fluid.getBucket()));
                     }
-                    return InteractionResultHolder.success(itemStack2);
+                    return InteractionResultHolder.sidedSuccess(itemStack2, level.isClientSide());
                 }
                 return InteractionResultHolder.fail(itemStack);
             }
@@ -81,7 +81,7 @@ extends Item {
                     CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer)player, blockPos3, itemStack);
                 }
                 player.awardStat(Stats.ITEM_USED.get(this));
-                return InteractionResultHolder.success(this.getEmptySuccessItem(itemStack, player));
+                return InteractionResultHolder.sidedSuccess(this.getEmptySuccessItem(itemStack, player), level.isClientSide());
             }
             return InteractionResultHolder.fail(itemStack);
         }

@@ -4,13 +4,13 @@
 package net.minecraft.world.level.block.entity;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.TickableBlockEntity;
 import net.minecraft.world.phys.AABB;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 public class BellBlockEntity
 extends BlockEntity
@@ -125,7 +126,7 @@ implements TickableBlockEntity {
             return;
         }
         BlockPos blockPos = this.getBlockPos();
-        AtomicInteger atomicInteger = new AtomicInteger(16700985);
+        MutableInt mutableInt = new MutableInt(16700985);
         int i = (int)this.nearbyEntities.stream().filter(livingEntity -> blockPos.closerThan(livingEntity.position(), 48.0)).count();
         this.nearbyEntities.stream().filter(this::isRaiderWithinRange).forEach(livingEntity -> {
             float f = 1.0f;
@@ -134,11 +135,11 @@ implements TickableBlockEntity {
             double e = (double)((float)blockPos.getZ() + 0.5f) + (double)(1.0f / g) * (livingEntity.getZ() - (double)blockPos.getZ());
             int j = Mth.clamp((i - 21) / -2, 3, 15);
             for (int k = 0; k < j; ++k) {
-                atomicInteger.addAndGet(5);
-                double h = (double)(atomicInteger.get() >> 16 & 0xFF) / 255.0;
-                double l = (double)(atomicInteger.get() >> 8 & 0xFF) / 255.0;
-                double m = (double)(atomicInteger.get() & 0xFF) / 255.0;
-                level.addParticle(ParticleTypes.ENTITY_EFFECT, d, (float)blockPos.getY() + 0.5f, e, h, l, m);
+                int l = mutableInt.addAndGet(5);
+                double h = (double)FastColor.ARGB32.red(l) / 255.0;
+                double m = (double)FastColor.ARGB32.green(l) / 255.0;
+                double n = (double)FastColor.ARGB32.blue(l) / 255.0;
+                level.addParticle(ParticleTypes.ENTITY_EFFECT, d, (float)blockPos.getY() + 0.5f, e, h, m, n);
             }
         });
     }

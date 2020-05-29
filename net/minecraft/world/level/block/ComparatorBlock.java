@@ -114,7 +114,7 @@ implements EntityBlock {
         level.playSound(player, blockPos, SoundEvents.COMPARATOR_CLICK, SoundSource.BLOCKS, 0.3f, f);
         level.setBlock(blockPos, blockState, 2);
         this.refreshOutputState(level, blockPos, blockState);
-        return InteractionResult.SUCCESS;
+        return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
     @Override

@@ -47,6 +47,7 @@ implements RecipeUpdateListener {
             this.leftPos = this.recipeBookComponent.updateScreenPosition(this.widthTooNarrow, this.width, this.imageWidth);
             ((ImageButton)button).setPosition(this.leftPos + 20, this.height / 2 - 49);
         }));
+        this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
     }
 
     @Override
@@ -68,12 +69,6 @@ implements RecipeUpdateListener {
         }
         this.renderTooltip(poseStack, i, j);
         this.recipeBookComponent.renderTooltip(poseStack, this.leftPos, this.topPos, i, j);
-    }
-
-    @Override
-    protected void renderLabels(PoseStack poseStack, int i, int j) {
-        this.font.draw(poseStack, this.title, (float)(this.imageWidth / 2 - this.font.width(this.title) / 2), 6.0f, 0x404040);
-        this.font.draw(poseStack, this.inventory.getDisplayName(), 8.0f, (float)(this.imageHeight - 96 + 2), 0x404040);
     }
 
     @Override

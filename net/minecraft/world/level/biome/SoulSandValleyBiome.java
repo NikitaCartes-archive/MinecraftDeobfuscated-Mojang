@@ -38,7 +38,7 @@ extends Biome {
         this.addStructureStart(BiomeDefaultFeatures.BASTION_REMNANT);
         this.addCarver(GenerationStep.Carving.AIR, SoulSandValleyBiome.makeCarver(WorldCarver.NETHER_CAVE, new ProbabilityFeatureConfiguration(0.2f)));
         this.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, Feature.SPRING.configured(BiomeDefaultFeatures.LAVA_SPRING_CONFIG).decorated(FeatureDecorator.COUNT_VERY_BIASED_RANGE.configured(new CountRangeDecoratorConfiguration(20, 8, 16, 256))));
-        this.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.BASALT_PILLAR.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(10, 0, 0, 128))));
+        this.addFeature(GenerationStep.Decoration.LOCAL_MODIFICATIONS, Feature.BASALT_PILLAR.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(10, 0, 0, 128))));
         this.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.SPRING.configured(BiomeDefaultFeatures.OPEN_NETHER_SPRING_CONFIG).decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(8, 4, 8, 128))));
         this.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.GLOWSTONE_BLOB.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.LIGHT_GEM_CHANCE.configured(new FrequencyDecoratorConfiguration(10))));
         this.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.GLOWSTONE_BLOB.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(10, 0, 0, 128))));

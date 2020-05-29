@@ -27,6 +27,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -41,7 +42,7 @@ extends Screen {
     private final Set<RuleEntry> invalidEntries = Sets.newHashSet();
     private Button doneButton;
     @Nullable
-    private List<Component> tooltip;
+    private List<FormattedText> tooltip;
     private final GameRules gameRules;
 
     public EditGameRulesScreen(GameRules gameRules, Consumer<Optional<GameRules>> consumer) {
@@ -81,7 +82,7 @@ extends Screen {
         }
     }
 
-    private void setTooltip(@Nullable List<Component> list) {
+    private void setTooltip(@Nullable List<FormattedText> list) {
         this.tooltip = list;
     }
 
@@ -136,7 +137,7 @@ extends Screen {
                         list = ImmutableList.of(component2, component3);
                         string3 = component3.getString();
                     }
-                    map.computeIfAbsent(key.getCategory(), category -> Maps.newHashMap()).put(key, entryFactory.create(component, (List<Component>)((Object)list), string3, value));
+                    map.computeIfAbsent(key.getCategory(), category -> Maps.newHashMap()).put(key, entryFactory.create(component, (List<FormattedText>)((Object)list), string3, value));
                 }
             });
             map.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(entry2 -> {
@@ -162,7 +163,7 @@ extends Screen {
         private final EditBox input;
         private final List<? extends GuiEventListener> children;
 
-        public IntegerRuleEntry(Component component, List<Component> list, String string2, GameRules.IntegerValue integerValue) {
+        public IntegerRuleEntry(Component component, List<FormattedText> list, String string2, GameRules.IntegerValue integerValue) {
             super(list);
             this.label = component;
             this.input = new EditBox(((EditGameRulesScreen)EditGameRulesScreen.this).minecraft.font, 10, 5, 42, 20, component.mutableCopy().append("\n").append(string2).append("\n"));
@@ -196,7 +197,7 @@ extends Screen {
     @FunctionalInterface
     @Environment(value=EnvType.CLIENT)
     static interface EntryFactory<T extends GameRules.Value<T>> {
-        public RuleEntry create(Component var1, List<Component> var2, String var3, T var4);
+        public RuleEntry create(Component var1, List<FormattedText> var2, String var3, T var4);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -205,7 +206,7 @@ extends Screen {
         private final Button checkbox;
         private final List<? extends GuiEventListener> children;
 
-        public BooleanRuleEntry(Component component, List<Component> list, final String string, GameRules.BooleanValue booleanValue) {
+        public BooleanRuleEntry(Component component, List<FormattedText> list, final String string, GameRules.BooleanValue booleanValue) {
             super(list);
             this.checkbox = new Button(10, 5, 220, 20, this.getMessage(component, booleanValue.get()), button -> {
                 boolean bl = !booleanValue.get();
@@ -263,9 +264,9 @@ extends Screen {
     public abstract class RuleEntry
     extends ContainerObjectSelectionList.Entry<RuleEntry> {
         @Nullable
-        private final List<Component> tooltip;
+        private final List<FormattedText> tooltip;
 
-        public RuleEntry(List<Component> list) {
+        public RuleEntry(List<FormattedText> list) {
             this.tooltip = list;
         }
     }

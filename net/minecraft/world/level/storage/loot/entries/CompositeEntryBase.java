@@ -7,7 +7,6 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.function.Consumer;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.ValidationContext;
@@ -48,39 +47,25 @@ extends LootPoolEntryContainer {
         return this.composedChildren.expand(lootContext, consumer);
     }
 
-    public static <T extends CompositeEntryBase> Serializer<T> createSerializer(ResourceLocation resourceLocation, Class<T> class_, final CompositeEntryConstructor<T> compositeEntryConstructor) {
-        return new Serializer<T>(resourceLocation, class_){
+    public static <T extends CompositeEntryBase> LootPoolEntryContainer.Serializer<T> createSerializer(final CompositeEntryConstructor<T> compositeEntryConstructor) {
+        return new LootPoolEntryContainer.Serializer<T>(){
 
             @Override
-            protected T deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootPoolEntryContainer[] lootPoolEntryContainers, LootItemCondition[] lootItemConditions) {
+            public void serializeCustom(JsonObject jsonObject, T compositeEntryBase, JsonSerializationContext jsonSerializationContext) {
+                jsonObject.add("children", jsonSerializationContext.serialize(((CompositeEntryBase)compositeEntryBase).children));
+            }
+
+            @Override
+            public final T deserializeCustom(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
+                LootPoolEntryContainer[] lootPoolEntryContainers = GsonHelper.getAsObject(jsonObject, "children", jsonDeserializationContext, LootPoolEntryContainer[].class);
                 return compositeEntryConstructor.create(lootPoolEntryContainers, lootItemConditions);
             }
+
+            @Override
+            public /* synthetic */ LootPoolEntryContainer deserializeCustom(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
+                return this.deserializeCustom(jsonObject, jsonDeserializationContext, lootItemConditions);
+            }
         };
-    }
-
-    public static abstract class Serializer<T extends CompositeEntryBase>
-    extends LootPoolEntryContainer.Serializer<T> {
-        public Serializer(ResourceLocation resourceLocation, Class<T> class_) {
-            super(resourceLocation, class_);
-        }
-
-        @Override
-        public void serialize(JsonObject jsonObject, T compositeEntryBase, JsonSerializationContext jsonSerializationContext) {
-            jsonObject.add("children", jsonSerializationContext.serialize(((CompositeEntryBase)compositeEntryBase).children));
-        }
-
-        @Override
-        public final T deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            LootPoolEntryContainer[] lootPoolEntryContainers = GsonHelper.getAsObject(jsonObject, "children", jsonDeserializationContext, LootPoolEntryContainer[].class);
-            return this.deserialize(jsonObject, jsonDeserializationContext, lootPoolEntryContainers, lootItemConditions);
-        }
-
-        protected abstract T deserialize(JsonObject var1, JsonDeserializationContext var2, LootPoolEntryContainer[] var3, LootItemCondition[] var4);
-
-        @Override
-        public /* synthetic */ LootPoolEntryContainer deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
-            return this.deserialize(jsonObject, jsonDeserializationContext, lootItemConditions);
-        }
     }
 
     @FunctionalInterface

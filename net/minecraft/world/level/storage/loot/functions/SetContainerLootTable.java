@@ -14,6 +14,8 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class SetContainerLootTable
@@ -25,6 +27,11 @@ extends LootItemConditionalFunction {
         super(lootItemConditions);
         this.name = resourceLocation;
         this.seed = l;
+    }
+
+    @Override
+    public LootItemFunctionType getType() {
+        return LootItemFunctions.SET_LOOT_TABLE;
     }
 
     @Override
@@ -58,10 +65,6 @@ extends LootItemConditionalFunction {
 
     public static class Serializer
     extends LootItemConditionalFunction.Serializer<SetContainerLootTable> {
-        protected Serializer() {
-            super(new ResourceLocation("set_loot_table"), SetContainerLootTable.class);
-        }
-
         @Override
         public void serialize(JsonObject jsonObject, SetContainerLootTable setContainerLootTable, JsonSerializationContext jsonSerializationContext) {
             super.serialize(jsonObject, setContainerLootTable, jsonSerializationContext);
