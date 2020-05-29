@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.Random;
 import java.util.Set;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -15,6 +14,11 @@ public class ExplosionCondition implements LootItemCondition {
 	private static final ExplosionCondition INSTANCE = new ExplosionCondition();
 
 	private ExplosionCondition() {
+	}
+
+	@Override
+	public LootItemConditionType getType() {
+		return LootItemConditions.SURVIVES_EXPLOSION;
 	}
 
 	@Override
@@ -37,11 +41,7 @@ public class ExplosionCondition implements LootItemCondition {
 		return () -> INSTANCE;
 	}
 
-	public static class Serializer extends LootItemCondition.Serializer<ExplosionCondition> {
-		protected Serializer() {
-			super(new ResourceLocation("survives_explosion"), ExplosionCondition.class);
-		}
-
+	public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<ExplosionCondition> {
 		public void serialize(JsonObject jsonObject, ExplosionCondition explosionCondition, JsonSerializationContext jsonSerializationContext) {
 		}
 

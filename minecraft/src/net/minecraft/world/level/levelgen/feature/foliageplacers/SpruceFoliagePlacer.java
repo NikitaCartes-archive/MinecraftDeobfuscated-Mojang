@@ -7,6 +7,7 @@ import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class SpruceFoliagePlacer extends FoliagePlacer {
 	public static final Codec<SpruceFoliagePlacer> CODEC = RecordCodecBuilder.create(
@@ -43,7 +44,8 @@ public class SpruceFoliagePlacer extends FoliagePlacer {
 		int j,
 		int k,
 		Set<BlockPos> set,
-		int l
+		int l,
+		BoundingBox boundingBox
 	) {
 		BlockPos blockPos = foliageAttachment.foliagePos();
 		int m = random.nextInt(2);
@@ -51,7 +53,7 @@ public class SpruceFoliagePlacer extends FoliagePlacer {
 		int o = 0;
 
 		for (int p = l; p >= -j; p--) {
-			this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, m, set, p, foliageAttachment.doubleTrunk());
+			this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, m, set, p, foliageAttachment.doubleTrunk(), boundingBox);
 			if (m >= n) {
 				m = o;
 				o = 1;

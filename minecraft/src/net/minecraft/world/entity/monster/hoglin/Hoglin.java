@@ -37,7 +37,6 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Zoglin;
-import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -46,7 +45,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
 
 public class Hoglin extends Animal implements Enemy, HoglinBase {
 	private static final EntityDataAccessor<Boolean> DATA_IMMUNE_TO_ZOMBIFICATION = SynchedEntityData.defineId(Hoglin.class, EntityDataSerializers.BOOLEAN);
@@ -80,8 +78,6 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	public Hoglin(EntityType<? extends Hoglin> entityType, Level level) {
 		super(entityType, level);
 		this.xpReward = 5;
-		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0F);
-		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
 	}
 
 	@Override
@@ -222,6 +218,11 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	}
 
 	@Override
+	public double getPassengersRidingOffset() {
+		return (double)this.getBbHeight() - (this.isBaby() ? 0.2 : 0.15);
+	}
+
+	@Override
 	public boolean mobInteract(Player player, InteractionHand interactionHand) {
 		boolean bl = super.mobInteract(player, interactionHand);
 		if (bl) {
@@ -259,27 +260,8 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	}
 
 	private void finishConversion(ServerLevel serverLevel) {
-		Zoglin zoglin = EntityType.ZOGLIN.create(serverLevel);
-		if (zoglin != null) {
-			zoglin.copyPosition(this);
-			zoglin.finalizeSpawn(
-				serverLevel, serverLevel.getCurrentDifficultyAt(zoglin.blockPosition()), MobSpawnType.CONVERSION, new Zombie.ZombieGroupData(this.isBaby()), null
-			);
-			zoglin.setBaby(this.isBaby());
-			zoglin.setNoAi(this.isNoAi());
-			if (this.hasCustomName()) {
-				zoglin.setCustomName(this.getCustomName());
-				zoglin.setCustomNameVisible(this.isCustomNameVisible());
-			}
-
-			if (this.isPersistenceRequired()) {
-				zoglin.setPersistenceRequired();
-			}
-
-			this.remove();
-			serverLevel.addFreshEntity(zoglin);
-			zoglin.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
-		}
+		Zoglin zoglin = this.convertTo(EntityType.ZOGLIN);
+		zoglin.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
 	}
 
 	@Override
@@ -318,7 +300,7 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 		this.setCannotBeHunted(compoundTag.getBoolean("CannotBeHunted"));
 	}
 
-	private void setImmuneToZombification(boolean bl) {
+	public void setImmuneToZombification(boolean bl) {
 		this.getEntityData().set(DATA_IMMUNE_TO_ZOMBIFICATION, bl);
 	}
 

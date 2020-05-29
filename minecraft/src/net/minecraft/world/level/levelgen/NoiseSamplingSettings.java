@@ -2,14 +2,16 @@ package net.minecraft.world.level.levelgen;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.util.Codecs;
 
 public class NoiseSamplingSettings {
+	private static final Codec<Double> SCALE_RANGE = Codecs.doubleRange(0.001, 1000.0);
 	public static final Codec<NoiseSamplingSettings> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					Codec.DOUBLE.fieldOf("xz_scale").forGetter(NoiseSamplingSettings::xzScale),
-					Codec.DOUBLE.fieldOf("y_scale").forGetter(NoiseSamplingSettings::yScale),
-					Codec.DOUBLE.fieldOf("xz_factor").forGetter(NoiseSamplingSettings::xzFactor),
-					Codec.DOUBLE.fieldOf("y_factor").forGetter(NoiseSamplingSettings::yFactor)
+					SCALE_RANGE.fieldOf("xz_scale").forGetter(NoiseSamplingSettings::xzScale),
+					SCALE_RANGE.fieldOf("y_scale").forGetter(NoiseSamplingSettings::yScale),
+					SCALE_RANGE.fieldOf("xz_factor").forGetter(NoiseSamplingSettings::xzFactor),
+					SCALE_RANGE.fieldOf("y_factor").forGetter(NoiseSamplingSettings::yFactor)
 				)
 				.apply(instance, NoiseSamplingSettings::new)
 	);

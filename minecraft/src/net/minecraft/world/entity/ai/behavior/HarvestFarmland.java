@@ -26,7 +26,6 @@ import net.minecraft.world.level.block.state.BlockState;
 public class HarvestFarmland extends Behavior<Villager> {
 	@Nullable
 	private BlockPos aboveFarmlandPos;
-	private boolean canPlantStuff;
 	private long nextOkStartTime;
 	private int timeWorkedSoFar;
 	private final List<BlockPos> validFarmlandAroundVillager = Lists.<BlockPos>newArrayList();
@@ -50,7 +49,6 @@ public class HarvestFarmland extends Behavior<Villager> {
 		} else if (villager.getVillagerData().getProfession() != VillagerProfession.FARMER) {
 			return false;
 		} else {
-			this.canPlantStuff = villager.hasFarmSeeds();
 			BlockPos.MutableBlockPos mutableBlockPos = villager.blockPosition().mutable();
 			this.validFarmlandAroundVillager.clear();
 
@@ -66,7 +64,7 @@ public class HarvestFarmland extends Behavior<Villager> {
 			}
 
 			this.aboveFarmlandPos = this.getValidFarmland(serverLevel);
-			return this.canPlantStuff && this.aboveFarmlandPos != null;
+			return this.aboveFarmlandPos != null;
 		}
 	}
 
@@ -81,7 +79,7 @@ public class HarvestFarmland extends Behavior<Villager> {
 		BlockState blockState = serverLevel.getBlockState(blockPos);
 		Block block = blockState.getBlock();
 		Block block2 = serverLevel.getBlockState(blockPos.below()).getBlock();
-		return block instanceof CropBlock && ((CropBlock)block).isMaxAge(blockState) || blockState.isAir() && block2 instanceof FarmBlock && this.canPlantStuff;
+		return block instanceof CropBlock && ((CropBlock)block).isMaxAge(blockState) || blockState.isAir() && block2 instanceof FarmBlock;
 	}
 
 	protected void start(ServerLevel serverLevel, Villager villager, long l) {
@@ -108,7 +106,7 @@ public class HarvestFarmland extends Behavior<Villager> {
 					serverLevel.destroyBlock(this.aboveFarmlandPos, true, villager);
 				}
 
-				if (blockState.isAir() && block2 instanceof FarmBlock && this.canPlantStuff) {
+				if (blockState.isAir() && block2 instanceof FarmBlock && villager.hasFarmSeeds()) {
 					SimpleContainer simpleContainer = villager.getInventory();
 
 					for (int i = 0; i < simpleContainer.getContainerSize(); i++) {

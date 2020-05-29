@@ -43,13 +43,15 @@ public class RespawnAnchorBlock extends Block {
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.getItem() == Items.GLOWSTONE && (Integer)blockState.getValue(CHARGE) < 4) {
+		if (interactionHand == InteractionHand.MAIN_HAND && !isRespawnFuel(itemStack) && isRespawnFuel(player.getItemInHand(InteractionHand.OFF_HAND))) {
+			return InteractionResult.PASS;
+		} else if (isRespawnFuel(itemStack) && canBeCharged(blockState)) {
 			charge(level, blockPos, blockState);
 			if (!player.abilities.instabuild) {
 				itemStack.shrink(1);
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else if ((Integer)blockState.getValue(CHARGE) == 0) {
 			return InteractionResult.PASS;
 		} else if (!canSetSpawn(level)) {
@@ -67,7 +69,7 @@ public class RespawnAnchorBlock extends Block {
 				);
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			if (!level.isClientSide) {
 				ServerPlayer serverPlayer = (ServerPlayer)player;
@@ -87,8 +89,16 @@ public class RespawnAnchorBlock extends Block {
 				}
 			}
 
-			return blockState.getValue(CHARGE) < 4 ? InteractionResult.PASS : InteractionResult.CONSUME;
+			return canBeCharged(blockState) ? InteractionResult.PASS : InteractionResult.CONSUME;
 		}
+	}
+
+	private static boolean isRespawnFuel(ItemStack itemStack) {
+		return itemStack.getItem() == Items.GLOWSTONE;
+	}
+
+	private static boolean canBeCharged(BlockState blockState) {
+		return (Integer)blockState.getValue(CHARGE) < 4;
 	}
 
 	public static boolean canSetSpawn(Level level) {

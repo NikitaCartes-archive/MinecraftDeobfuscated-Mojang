@@ -7,11 +7,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
 public class RconConsoleSource implements CommandSource {
+	private static final TextComponent RCON_COMPONENT = new TextComponent("Rcon");
 	private final StringBuffer buffer = new StringBuffer();
 	private final MinecraftServer server;
 
@@ -28,9 +29,9 @@ public class RconConsoleSource implements CommandSource {
 	}
 
 	public CommandSourceStack createCommandSourceStack() {
-		ServerLevel serverLevel = this.server.getLevel(DimensionType.OVERWORLD_LOCATION);
+		ServerLevel serverLevel = this.server.getLevel(Level.OVERWORLD);
 		return new CommandSourceStack(
-			this, Vec3.atLowerCornerOf(serverLevel.getSharedSpawnPos()), Vec2.ZERO, serverLevel, 4, "Recon", new TextComponent("Rcon"), this.server, null
+			this, Vec3.atLowerCornerOf(serverLevel.getSharedSpawnPos()), Vec2.ZERO, serverLevel, 4, "Rcon", RCON_COMPONENT, this.server, null
 		);
 	}
 

@@ -11,7 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.Level;
 
 public class SetSpawnCommand {
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
@@ -45,7 +45,7 @@ public class SetSpawnCommand {
 	}
 
 	private static int setSpawn(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, BlockPos blockPos) {
-		ResourceKey<DimensionType> resourceKey = commandSourceStack.getLevel().dimension();
+		ResourceKey<Level> resourceKey = commandSourceStack.getLevel().dimension();
 
 		for (ServerPlayer serverPlayer : collection) {
 			serverPlayer.setRespawnPosition(resourceKey, blockPos, true, false);

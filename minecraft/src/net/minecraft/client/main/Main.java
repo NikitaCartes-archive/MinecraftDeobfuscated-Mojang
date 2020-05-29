@@ -28,6 +28,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.server.Bootstrap;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.player.Player;
 import org.apache.logging.log4j.LogManager;
@@ -114,6 +115,9 @@ public class Main {
 		String string8 = parseArgument(optionSet, optionSpec);
 		Integer integer = parseArgument(optionSet, optionSpec2);
 		CrashReport.preload();
+		Bootstrap.bootStrap();
+		Bootstrap.validate();
+		Util.startTimerHackThread();
 		User user = new User(optionSpec10.value(optionSet), string6, optionSpec12.value(optionSet), optionSpec21.value(optionSet));
 		GameConfig gameConfig = new GameConfig(
 			new GameConfig.UserData(user, propertyMap, propertyMap2, proxy),

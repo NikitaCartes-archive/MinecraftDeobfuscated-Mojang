@@ -32,6 +32,11 @@ public class CopyBlockState extends LootItemConditionalFunction {
 	}
 
 	@Override
+	public LootItemFunctionType getType() {
+		return LootItemFunctions.COPY_STATE;
+	}
+
+	@Override
 	public Set<LootContextParam<?>> getReferencedContextParams() {
 		return ImmutableSet.of(LootContextParams.BLOCK_STATE);
 	}
@@ -92,10 +97,6 @@ public class CopyBlockState extends LootItemConditionalFunction {
 	}
 
 	public static class Serializer extends LootItemConditionalFunction.Serializer<CopyBlockState> {
-		public Serializer() {
-			super(new ResourceLocation("copy_state"), CopyBlockState.class);
-		}
-
 		public void serialize(JsonObject jsonObject, CopyBlockState copyBlockState, JsonSerializationContext jsonSerializationContext) {
 			super.serialize(jsonObject, copyBlockState, jsonSerializationContext);
 			jsonObject.addProperty("block", Registry.BLOCK.getKey(copyBlockState.block).toString());

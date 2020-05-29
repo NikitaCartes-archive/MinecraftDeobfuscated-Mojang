@@ -19,8 +19,8 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -38,14 +38,14 @@ public class BookViewScreen extends Screen {
 		}
 
 		@Override
-		public Component getPageRaw(int i) {
-			return TextComponent.EMPTY;
+		public FormattedText getPageRaw(int i) {
+			return FormattedText.EMPTY;
 		}
 	};
 	public static final ResourceLocation BOOK_LOCATION = new ResourceLocation("textures/gui/book.png");
 	private BookViewScreen.BookAccess bookAccess;
 	private int currentPage;
-	private List<Component> cachedPageComponents = Collections.emptyList();
+	private List<FormattedText> cachedPageComponents = Collections.emptyList();
 	private int cachedPage = -1;
 	private PageButton forwardButton;
 	private PageButton backButton;
@@ -159,8 +159,8 @@ public class BookViewScreen extends Screen {
 		this.blit(poseStack, k, 2, 0, 0, 192, 192);
 		String string = I18n.get("book.pageIndicator", this.currentPage + 1, Math.max(this.getNumPages(), 1));
 		if (this.cachedPage != this.currentPage) {
-			Component component = this.bookAccess.getPage(this.currentPage);
-			this.cachedPageComponents = this.font.getSplitter().splitLines(component, 114, Style.EMPTY);
+			FormattedText formattedText = this.bookAccess.getPage(this.currentPage);
+			this.cachedPageComponents = this.font.getSplitter().splitLines(formattedText, 114, Style.EMPTY);
 		}
 
 		this.cachedPage = this.currentPage;
@@ -169,13 +169,13 @@ public class BookViewScreen extends Screen {
 		int n = Math.min(128 / 9, this.cachedPageComponents.size());
 
 		for (int o = 0; o < n; o++) {
-			Component component2 = (Component)this.cachedPageComponents.get(o);
-			this.font.draw(poseStack, component2, (float)(k + 36), (float)(32 + o * 9), 0);
+			FormattedText formattedText2 = (FormattedText)this.cachedPageComponents.get(o);
+			this.font.draw(poseStack, formattedText2, (float)(k + 36), (float)(32 + o * 9), 0);
 		}
 
-		Component component3 = this.getClickedComponentAt((double)i, (double)j);
-		if (component3 != null) {
-			this.renderComponentHoverEffect(poseStack, component3, i, j);
+		Style style = this.getClickedComponentStyleAt((double)i, (double)j);
+		if (style != null) {
+			this.renderComponentHoverEffect(poseStack, style, i, j);
 		}
 
 		super.render(poseStack, i, j, f);
@@ -188,8 +188,8 @@ public class BookViewScreen extends Screen {
 	@Override
 	public boolean mouseClicked(double d, double e, int i) {
 		if (i == 0) {
-			Component component = this.getClickedComponentAt(d, e);
-			if (component != null && this.handleComponentClicked(component)) {
+			Style style = this.getClickedComponentStyleAt(d, e);
+			if (style != null && this.handleComponentClicked(style)) {
 				return true;
 			}
 		}
@@ -198,8 +198,8 @@ public class BookViewScreen extends Screen {
 	}
 
 	@Override
-	public boolean handleComponentClicked(Component component) {
-		ClickEvent clickEvent = component.getStyle().getClickEvent();
+	public boolean handleComponentClicked(Style style) {
+		ClickEvent clickEvent = style.getClickEvent();
 		if (clickEvent == null) {
 			return false;
 		} else if (clickEvent.getAction() == ClickEvent.Action.CHANGE_PAGE) {
@@ -212,7 +212,7 @@ public class BookViewScreen extends Screen {
 				return false;
 			}
 		} else {
-			boolean bl = super.handleComponentClicked(component);
+			boolean bl = super.handleComponentClicked(style);
 			if (bl && clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
 				this.minecraft.setScreen(null);
 			}
@@ -222,7 +222,7 @@ public class BookViewScreen extends Screen {
 	}
 
 	@Nullable
-	public Component getClickedComponentAt(double d, double e) {
+	public Style getClickedComponentStyleAt(double d, double e) {
 		if (this.cachedPageComponents == null) {
 			return null;
 		} else {
@@ -233,8 +233,8 @@ public class BookViewScreen extends Screen {
 				if (i <= 114 && j < 9 * k + k) {
 					int l = j / 9;
 					if (l >= 0 && l < this.cachedPageComponents.size()) {
-						Component component = (Component)this.cachedPageComponents.get(l);
-						return this.minecraft.font.getSplitter().componentAtWidth(component, i);
+						FormattedText formattedText = (FormattedText)this.cachedPageComponents.get(l);
+						return this.minecraft.font.getSplitter().componentStyleAtWidth(formattedText, i);
 					} else {
 						return null;
 					}
@@ -262,10 +262,10 @@ public class BookViewScreen extends Screen {
 	public interface BookAccess {
 		int getPageCount();
 
-		Component getPageRaw(int i);
+		FormattedText getPageRaw(int i);
 
-		default Component getPage(int i) {
-			return i >= 0 && i < this.getPageCount() ? this.getPageRaw(i) : TextComponent.EMPTY;
+		default FormattedText getPage(int i) {
+			return i >= 0 && i < this.getPageCount() ? this.getPageRaw(i) : FormattedText.EMPTY;
 		}
 
 		static BookViewScreen.BookAccess fromItem(ItemStack itemStack) {
@@ -297,8 +297,8 @@ public class BookViewScreen extends Screen {
 		}
 
 		@Override
-		public Component getPageRaw(int i) {
-			return new TextComponent((String)this.pages.get(i));
+		public FormattedText getPageRaw(int i) {
+			return FormattedText.of((String)this.pages.get(i));
 		}
 	}
 
@@ -323,18 +323,18 @@ public class BookViewScreen extends Screen {
 		}
 
 		@Override
-		public Component getPageRaw(int i) {
+		public FormattedText getPageRaw(int i) {
 			String string = (String)this.pages.get(i);
 
 			try {
-				Component component = Component.Serializer.fromJson(string);
-				if (component != null) {
-					return component;
+				FormattedText formattedText = Component.Serializer.fromJson(string);
+				if (formattedText != null) {
+					return formattedText;
 				}
 			} catch (Exception var4) {
 			}
 
-			return new TextComponent(string);
+			return FormattedText.of(string);
 		}
 	}
 }

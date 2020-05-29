@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
 import java.util.BitSet;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
@@ -13,6 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
 import net.minecraft.world.level.material.Fluids;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public class NetherWorldCarver extends CaveWorldCarver {
 	public NetherWorldCarver(Codec<ProbabilityFeatureConfiguration> codec) {
@@ -76,7 +76,7 @@ public class NetherWorldCarver extends CaveWorldCarver {
 		int n,
 		int o,
 		int p,
-		AtomicBoolean atomicBoolean
+		MutableBoolean mutableBoolean
 	) {
 		int q = n | p << 4 | o << 8;
 		if (bitSet.get(q)) {

@@ -188,6 +188,7 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 			this.level.removeBlock(blockPos, false);
 		} else if (CampfireBlock.isLitCampfire(blockState)) {
 			this.level.levelEvent(null, 1009, blockPos, 0);
+			CampfireBlock.dowse(this.level, blockPos, blockState);
 			this.level.setBlockAndUpdate(blockPos, blockState.setValue(CampfireBlock.LIT, Boolean.valueOf(false)));
 		}
 	}

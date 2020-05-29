@@ -78,25 +78,28 @@ public class LoadingOverlay extends Overlay {
 			o = 1.0F;
 		}
 
-		int n = (this.minecraft.getWindow().getGuiScaledWidth() - 322) / 2;
-		int p = (this.minecraft.getWindow().getGuiScaledHeight() + 161) / 4;
+		int n = (int)((double)this.minecraft.getWindow().getGuiScaledWidth() * 0.5);
+		int p = (int)((double)this.minecraft.getWindow().getGuiScaledHeight() * 0.5);
+		double d = Math.min((double)this.minecraft.getWindow().getGuiScaledWidth() * 0.75, (double)this.minecraft.getWindow().getGuiScaledHeight()) * 0.25;
+		int q = (int)(d * 0.5);
+		double e = d * 4.0;
+		int r = (int)(e * 0.5);
 		this.minecraft.getTextureManager().bind(MOJANG_STUDIOS_LOGO_LOCATION);
 		RenderSystem.enableBlend();
 		RenderSystem.blendEquation(32774);
 		RenderSystem.blendFunc(770, 1);
 		RenderSystem.alphaFunc(516, 0.0F);
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, o);
-		float q = 0.0625F;
-		blit(poseStack, n, p, 161, 80, -0.0625F, 0.0F, 161, 80, 161, 161);
-		blit(poseStack, n + 161, p, 161, 80, 0.0625F, 80.5F, 161, 80, 161, 161);
+		blit(poseStack, n - r, p - q, r, (int)d, -0.0625F, 0.0F, 120, 60, 120, 120);
+		blit(poseStack, n, p - q, r, (int)d, 0.0625F, 60.0F, 120, 60, 120, 120);
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.defaultAlphaFunc();
 		RenderSystem.disableBlend();
-		float r = this.reload.getActualProgress();
-		this.currentProgress = Mth.clamp(this.currentProgress * 0.95F + r * 0.050000012F, 0.0F, 1.0F);
+		int s = (int)((double)this.minecraft.getWindow().getGuiScaledHeight() * 0.8325);
+		float t = this.reload.getActualProgress();
+		this.currentProgress = Mth.clamp(this.currentProgress * 0.95F + t * 0.050000012F, 0.0F, 1.0F);
 		if (g < 1.0F) {
-			int s = l * 648 / 801;
-			this.drawProgressBar(poseStack, k / 2 - 161, s, k / 2 + 161, s + 12, 1.0F - Mth.clamp(g, 0.0F, 1.0F));
+			this.drawProgressBar(poseStack, k / 2 - r, s - 5, k / 2 + r, s + 5, 1.0F - Mth.clamp(g, 0.0F, 1.0F));
 		}
 
 		if (g >= 2.0F) {
@@ -107,8 +110,8 @@ public class LoadingOverlay extends Overlay {
 			try {
 				this.reload.checkExceptions();
 				this.onFinish.accept(Optional.empty());
-			} catch (Throwable var17) {
-				this.onFinish.accept(Optional.of(var17));
+			} catch (Throwable var23) {
+				this.onFinish.accept(Optional.of(var23));
 			}
 
 			this.fadeOutStart = Util.getMillis();
@@ -122,8 +125,10 @@ public class LoadingOverlay extends Overlay {
 		int m = Mth.ceil((float)(k - i - 2) * this.currentProgress);
 		int n = Math.round(f * 255.0F);
 		int o = FastColor.ARGB32.color(n, 255, 255, 255);
-		fill(poseStack, i, j, k, l, o);
-		fill(poseStack, i + 1, j + 1, k - 1, l - 1, BRAND_BACKGROUND_NO_ALPHA | n << 24);
+		fill(poseStack, i, j, k, j + 1, o);
+		fill(poseStack, i, l, k, l - 1, o);
+		fill(poseStack, i, j, i + 1, l, o);
+		fill(poseStack, k, j, k - 1, l, o);
 		fill(poseStack, i + 2, j + 2, i + m, l - 2, o);
 	}
 

@@ -65,7 +65,7 @@ public class SpawnEggItem extends Item {
 					blockEntity.setChanged();
 					level.sendBlockUpdated(blockPos, blockState, blockState, 3);
 					itemStack.shrink(1);
-					return InteractionResult.SUCCESS;
+					return InteractionResult.CONSUME;
 				}
 			}
 
@@ -84,7 +84,7 @@ public class SpawnEggItem extends Item {
 				itemStack.shrink(1);
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		}
 	}
 
@@ -111,7 +111,7 @@ public class SpawnEggItem extends Item {
 					}
 
 					player.awardStat(Stats.ITEM_USED.get(this));
-					return InteractionResultHolder.success(itemStack);
+					return InteractionResultHolder.consume(itemStack);
 				}
 			} else {
 				return InteractionResultHolder.fail(itemStack);

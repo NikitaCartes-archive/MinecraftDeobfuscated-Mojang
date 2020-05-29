@@ -117,7 +117,7 @@ public class BlockRenderDispatcher implements ResourceManagerReloadListener {
 					float g = (float)(k >> 8 & 0xFF) / 255.0F;
 					float h = (float)(k & 0xFF) / 255.0F;
 					this.modelRenderer
-						.renderModel(poseStack.last(), multiBufferSource.getBuffer(ItemBlockRenderTypes.getRenderType(blockState)), blockState, bakedModel, f, g, h, i, j);
+						.renderModel(poseStack.last(), multiBufferSource.getBuffer(ItemBlockRenderTypes.getRenderType(blockState, false)), blockState, bakedModel, f, g, h, i, j);
 					break;
 				case ENTITYBLOCK_ANIMATED:
 					BlockEntityWithoutLevelRenderer.instance.renderByItem(new ItemStack(blockState.getBlock()), poseStack, multiBufferSource, i, j);

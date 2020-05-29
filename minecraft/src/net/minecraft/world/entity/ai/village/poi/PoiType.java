@@ -1,14 +1,16 @@
 package net.minecraft.world.entity.ai.village.poi;
 
+import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -20,11 +22,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 
 public class PoiType {
-	private static final Predicate<PoiType> ALL_JOBS = poiType -> ((Set)Registry.VILLAGER_PROFESSION
-				.stream()
-				.map(VillagerProfession::getJobPoiType)
-				.collect(Collectors.toSet()))
-			.contains(poiType);
+	private static final Supplier<Set<PoiType>> ALL_JOB_POI_TYPES = Suppliers.memoize(
+		() -> (Set<PoiType>)Registry.VILLAGER_PROFESSION.stream().map(VillagerProfession::getJobPoiType).collect(Collectors.toSet())
+	);
+	public static final Predicate<PoiType> ALL_JOBS = poiType -> ((Set)ALL_JOB_POI_TYPES.get()).contains(poiType);
 	public static final Predicate<PoiType> ALL = poiType -> true;
 	private static final Set<BlockState> BEDS = (Set<BlockState>)ImmutableList.of(
 			Blocks.RED_BED,
@@ -70,6 +71,7 @@ public class PoiType {
 	public static final PoiType BEE_NEST = register("bee_nest", getBlockStates(Blocks.BEE_NEST), 0, 1);
 	public static final PoiType NETHER_PORTAL = register("nether_portal", getBlockStates(Blocks.NETHER_PORTAL), 0, 1);
 	public static final PoiType LODESTONE = register("lodestone", getBlockStates(Blocks.LODESTONE), 0, 1);
+	protected static final Set<BlockState> ALL_STATES = new ObjectOpenHashSet<>(TYPE_BY_STATE.keySet());
 	private final String name;
 	private final Set<BlockState> matchingStates;
 	private final int maxTickets;
@@ -132,9 +134,5 @@ public class PoiType {
 
 	public static Optional<PoiType> forState(BlockState blockState) {
 		return Optional.ofNullable(TYPE_BY_STATE.get(blockState));
-	}
-
-	public static Stream<BlockState> allPoiStates() {
-		return TYPE_BY_STATE.keySet().stream();
 	}
 }

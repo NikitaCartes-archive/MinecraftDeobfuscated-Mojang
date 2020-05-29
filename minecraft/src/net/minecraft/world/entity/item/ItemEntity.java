@@ -28,7 +28,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec3;
 
 public class ItemEntity extends Entity {
@@ -38,10 +37,11 @@ public class ItemEntity extends Entity {
 	private int health = 5;
 	private UUID thrower;
 	private UUID owner;
-	public final float bobOffs = (float)(Math.random() * Math.PI * 2.0);
+	public final float bobOffs;
 
 	public ItemEntity(EntityType<? extends ItemEntity> entityType, Level level) {
 		super(entityType, level);
+		this.bobOffs = (float)(Math.random() * Math.PI * 2.0);
 	}
 
 	public ItemEntity(Level level, double d, double e, double f) {
@@ -54,6 +54,15 @@ public class ItemEntity extends Entity {
 	public ItemEntity(Level level, double d, double e, double f, ItemStack itemStack) {
 		this(level, d, e, f);
 		this.setItem(itemStack);
+	}
+
+	@Environment(EnvType.CLIENT)
+	private ItemEntity(ItemEntity itemEntity) {
+		super(itemEntity.getType(), itemEntity.level);
+		this.setItem(itemEntity.getItem().copy());
+		this.copyPosition(itemEntity);
+		this.age = itemEntity.age;
+		this.bobOffs = itemEntity.bobOffs;
 	}
 
 	@Override
@@ -309,7 +318,7 @@ public class ItemEntity extends Entity {
 
 	@Nullable
 	@Override
-	public Entity changeDimension(ResourceKey<DimensionType> resourceKey) {
+	public Entity changeDimension(ResourceKey<Level> resourceKey) {
 		Entity entity = super.changeDimension(resourceKey);
 		if (!this.level.isClientSide && entity instanceof ItemEntity) {
 			((ItemEntity)entity).mergeWithNeighbours();
@@ -394,5 +403,10 @@ public class ItemEntity extends Entity {
 	@Override
 	public Packet<?> getAddEntityPacket() {
 		return new ClientboundAddEntityPacket(this);
+	}
+
+	@Environment(EnvType.CLIENT)
+	public ItemEntity copy() {
+		return new ItemEntity(this);
 	}
 }

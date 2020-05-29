@@ -15,12 +15,13 @@ public class SmithingScreen extends ItemCombinerScreen<SmithingMenu> {
 
 	public SmithingScreen(SmithingMenu smithingMenu, Inventory inventory, Component component) {
 		super(smithingMenu, inventory, component, SMITHING_LOCATION);
+		this.titleLabelX = 60;
+		this.titleLabelY = 18;
 	}
 
 	@Override
 	protected void renderLabels(PoseStack poseStack, int i, int j) {
 		RenderSystem.disableBlend();
-		this.font.draw(poseStack, this.title, 60.0F, 20.0F, 4210752);
-		this.font.draw(poseStack, this.inventory.getDisplayName(), 8.0F, (float)(this.imageHeight - 96 + 2), 4210752);
+		super.renderLabels(poseStack, i, j);
 	}
 }

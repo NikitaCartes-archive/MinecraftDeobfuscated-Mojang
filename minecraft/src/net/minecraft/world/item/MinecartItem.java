@@ -105,7 +105,7 @@ public class MinecartItem extends Item {
 			}
 
 			itemStack.shrink(1);
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
 	}
 }

@@ -70,7 +70,7 @@ public class DispenserBlock extends BaseEntityBlock {
 				}
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		}
 	}
 

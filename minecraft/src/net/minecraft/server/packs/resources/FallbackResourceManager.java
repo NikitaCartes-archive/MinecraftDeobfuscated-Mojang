@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
@@ -131,6 +132,12 @@ public class FallbackResourceManager implements ResourceManager {
 
 		Collections.sort(list);
 		return list;
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public Stream<Pack> listPacks() {
+		return this.fallbacks.stream();
 	}
 
 	static ResourceLocation getMetadataLocation(ResourceLocation resourceLocation) {

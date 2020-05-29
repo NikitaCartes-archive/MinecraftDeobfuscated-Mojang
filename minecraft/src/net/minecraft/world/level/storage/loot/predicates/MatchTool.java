@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.Set;
 import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
@@ -17,6 +16,11 @@ public class MatchTool implements LootItemCondition {
 
 	public MatchTool(ItemPredicate itemPredicate) {
 		this.predicate = itemPredicate;
+	}
+
+	@Override
+	public LootItemConditionType getType() {
+		return LootItemConditions.MATCH_TOOL;
 	}
 
 	@Override
@@ -33,11 +37,7 @@ public class MatchTool implements LootItemCondition {
 		return () -> new MatchTool(builder.build());
 	}
 
-	public static class Serializer extends LootItemCondition.Serializer<MatchTool> {
-		protected Serializer() {
-			super(new ResourceLocation("match_tool"), MatchTool.class);
-		}
-
+	public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<MatchTool> {
 		public void serialize(JsonObject jsonObject, MatchTool matchTool, JsonSerializationContext jsonSerializationContext) {
 			jsonObject.add("predicate", matchTool.predicate.serializeToJson());
 		}

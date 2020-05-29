@@ -9,7 +9,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import javax.annotation.Nullable;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Registry;
@@ -17,7 +17,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagCollection;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.state.properties.Property;
 
@@ -28,7 +28,7 @@ public class ItemParser {
 	public static final DynamicCommandExceptionType ERROR_UNKNOWN_ITEM = new DynamicCommandExceptionType(
 		object -> new TranslatableComponent("argument.item.id.invalid", object)
 	);
-	private static final Function<SuggestionsBuilder, CompletableFuture<Suggestions>> SUGGEST_NOTHING = SuggestionsBuilder::buildFuture;
+	private static final BiFunction<SuggestionsBuilder, TagCollection<Item>, CompletableFuture<Suggestions>> SUGGEST_NOTHING = (suggestionsBuilder, tagCollection) -> suggestionsBuilder.buildFuture();
 	private final StringReader reader;
 	private final boolean forTesting;
 	private final Map<Property<?>, Comparable<?>> properties = Maps.<Property<?>, Comparable<?>>newHashMap();
@@ -37,7 +37,7 @@ public class ItemParser {
 	private CompoundTag nbt;
 	private ResourceLocation tag = new ResourceLocation("");
 	private int tagCursor;
-	private Function<SuggestionsBuilder, CompletableFuture<Suggestions>> suggestions = SUGGEST_NOTHING;
+	private BiFunction<SuggestionsBuilder, TagCollection<Item>, CompletableFuture<Suggestions>> suggestions = SUGGEST_NOTHING;
 
 	public ItemParser(StringReader stringReader, boolean bl) {
 		this.reader = stringReader;
@@ -98,7 +98,7 @@ public class ItemParser {
 		return this;
 	}
 
-	private CompletableFuture<Suggestions> suggestOpenNbt(SuggestionsBuilder suggestionsBuilder) {
+	private CompletableFuture<Suggestions> suggestOpenNbt(SuggestionsBuilder suggestionsBuilder, TagCollection<Item> tagCollection) {
 		if (suggestionsBuilder.getRemaining().isEmpty()) {
 			suggestionsBuilder.suggest(String.valueOf('{'));
 		}
@@ -106,19 +106,19 @@ public class ItemParser {
 		return suggestionsBuilder.buildFuture();
 	}
 
-	private CompletableFuture<Suggestions> suggestTag(SuggestionsBuilder suggestionsBuilder) {
-		return SharedSuggestionProvider.suggestResource(ItemTags.getAllTags().getAvailableTags(), suggestionsBuilder.createOffset(this.tagCursor));
+	private CompletableFuture<Suggestions> suggestTag(SuggestionsBuilder suggestionsBuilder, TagCollection<Item> tagCollection) {
+		return SharedSuggestionProvider.suggestResource(tagCollection.getAvailableTags(), suggestionsBuilder.createOffset(this.tagCursor));
 	}
 
-	private CompletableFuture<Suggestions> suggestItemIdOrTag(SuggestionsBuilder suggestionsBuilder) {
+	private CompletableFuture<Suggestions> suggestItemIdOrTag(SuggestionsBuilder suggestionsBuilder, TagCollection<Item> tagCollection) {
 		if (this.forTesting) {
-			SharedSuggestionProvider.suggestResource(ItemTags.getAllTags().getAvailableTags(), suggestionsBuilder, String.valueOf('#'));
+			SharedSuggestionProvider.suggestResource(tagCollection.getAvailableTags(), suggestionsBuilder, String.valueOf('#'));
 		}
 
 		return SharedSuggestionProvider.suggestResource(Registry.ITEM.keySet(), suggestionsBuilder);
 	}
 
-	public CompletableFuture<Suggestions> fillSuggestions(SuggestionsBuilder suggestionsBuilder) {
-		return (CompletableFuture<Suggestions>)this.suggestions.apply(suggestionsBuilder.createOffset(this.reader.getCursor()));
+	public CompletableFuture<Suggestions> fillSuggestions(SuggestionsBuilder suggestionsBuilder, TagCollection<Item> tagCollection) {
+		return (CompletableFuture<Suggestions>)this.suggestions.apply(suggestionsBuilder.createOffset(this.reader.getCursor()), tagCollection);
 	}
 }

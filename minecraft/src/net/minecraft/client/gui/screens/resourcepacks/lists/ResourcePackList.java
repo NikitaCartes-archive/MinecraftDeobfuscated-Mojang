@@ -14,6 +14,7 @@ import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.resourcepacks.ResourcePackSelectScreen;
 import net.minecraft.client.resources.UnopenedResourcePack;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -152,17 +153,19 @@ public abstract class ResourcePackList extends ObjectSelectionList<ResourcePackL
 
 			int px = this.minecraft.font.width(component);
 			if (px > 157) {
-				Component component3 = this.minecraft.font.substrByWidth(component, 157 - this.minecraft.font.width("...")).append("...");
-				this.minecraft.font.drawShadow(poseStack, component3, (float)(k + 32 + 2), (float)(j + 1), 16777215);
+				FormattedText formattedText = FormattedText.composite(
+					this.minecraft.font.substrByWidth(component, 157 - this.minecraft.font.width("...")), FormattedText.of("...")
+				);
+				this.minecraft.font.drawShadow(poseStack, formattedText, (float)(k + 32 + 2), (float)(j + 1), 16777215);
 			} else {
 				this.minecraft.font.drawShadow(poseStack, component, (float)(k + 32 + 2), (float)(j + 1), 16777215);
 			}
 
 			this.minecraft.font.drawShadow(poseStack, component, (float)(k + 32 + 2), (float)(j + 1), 16777215);
-			List<Component> list = this.minecraft.font.split(component2, 157);
+			List<FormattedText> list = this.minecraft.font.split(component2, 157);
 
 			for (int r = 0; r < 2 && r < list.size(); r++) {
-				this.minecraft.font.drawShadow(poseStack, (Component)list.get(r), (float)(k + 32 + 2), (float)(j + 12 + 10 * r), 8421504);
+				this.minecraft.font.drawShadow(poseStack, (FormattedText)list.get(r), (float)(k + 32 + 2), (float)(j + 12 + 10 * r), 8421504);
 			}
 		}
 

@@ -23,6 +23,7 @@ import net.minecraft.advancements.critereon.TameAnimalTrigger;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.item.Item;
@@ -246,7 +247,7 @@ public class HusbandryAdvancements implements Consumer<Consumer<Advancement>> {
 			.addCriterion(
 				"safely_harvest_honey",
 				ItemUsedOnBlockTrigger.TriggerInstance.itemUsedOnBlock(
-					LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(Blocks.BEEHIVE).build()).setSmokey(true),
+					LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(BlockTags.BEEHIVES).build()).setSmokey(true),
 					ItemPredicate.Builder.item().of(Items.GLASS_BOTTLE)
 				)
 			)

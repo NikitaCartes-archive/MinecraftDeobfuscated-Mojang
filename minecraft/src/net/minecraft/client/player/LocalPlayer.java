@@ -118,13 +118,21 @@ public class LocalPlayer extends AbstractClientPlayer {
 	private boolean showDeathScreen = true;
 
 	public LocalPlayer(
-		Minecraft minecraft, ClientLevel clientLevel, ClientPacketListener clientPacketListener, StatsCounter statsCounter, ClientRecipeBook clientRecipeBook
+		Minecraft minecraft,
+		ClientLevel clientLevel,
+		ClientPacketListener clientPacketListener,
+		StatsCounter statsCounter,
+		ClientRecipeBook clientRecipeBook,
+		boolean bl,
+		boolean bl2
 	) {
 		super(clientLevel, clientPacketListener.getLocalGameProfile());
+		this.minecraft = minecraft;
 		this.connection = clientPacketListener;
 		this.stats = statsCounter;
 		this.recipeBook = clientRecipeBook;
-		this.minecraft = minecraft;
+		this.wasShiftKeyDown = bl;
+		this.wasSprinting = bl2;
 		this.ambientSoundHandlers.add(new UnderwaterAmbientSoundHandler(this, minecraft.getSoundManager()));
 		this.ambientSoundHandlers.add(new BubbleColumnAmbientSoundHandler(this));
 		this.ambientSoundHandlers.add(new BiomeAmbientSoundsHandler(this, minecraft.getSoundManager(), clientLevel.getBiomeManager()));

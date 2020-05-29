@@ -833,13 +833,11 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.dropSelf(Blocks.LODESTONE);
 		this.dropSelf(Blocks.WARPED_STEM);
 		this.dropSelf(Blocks.WARPED_HYPHAE);
-		this.dropSelf(Blocks.WARPED_NYLIUM);
 		this.dropSelf(Blocks.WARPED_FUNGUS);
 		this.dropSelf(Blocks.WARPED_WART_BLOCK);
 		this.dropSelf(Blocks.WARPED_ROOTS);
 		this.dropSelf(Blocks.CRIMSON_STEM);
 		this.dropSelf(Blocks.CRIMSON_HYPHAE);
-		this.dropSelf(Blocks.CRIMSON_NYLIUM);
 		this.dropSelf(Blocks.CRIMSON_FUNGUS);
 		this.dropSelf(Blocks.SHROOMLIGHT);
 		this.dropSelf(Blocks.CRIMSON_ROOTS);
@@ -892,6 +890,8 @@ public class BlockLoot implements Consumer<BiConsumer<ResourceLocation, LootTabl
 		this.add(Blocks.BUBBLE_CORAL_BLOCK, blockx -> createSingleItemTableWithSilkTouch(blockx, Blocks.DEAD_BUBBLE_CORAL_BLOCK));
 		this.add(Blocks.FIRE_CORAL_BLOCK, blockx -> createSingleItemTableWithSilkTouch(blockx, Blocks.DEAD_FIRE_CORAL_BLOCK));
 		this.add(Blocks.HORN_CORAL_BLOCK, blockx -> createSingleItemTableWithSilkTouch(blockx, Blocks.DEAD_HORN_CORAL_BLOCK));
+		this.add(Blocks.CRIMSON_NYLIUM, blockx -> createSingleItemTableWithSilkTouch(blockx, Blocks.NETHERRACK));
+		this.add(Blocks.WARPED_NYLIUM, blockx -> createSingleItemTableWithSilkTouch(blockx, Blocks.NETHERRACK));
 		this.add(Blocks.BOOKSHELF, blockx -> createSingleItemTableWithSilkTouch(blockx, Items.BOOK, ConstantIntValue.exactly(3)));
 		this.add(Blocks.CLAY, blockx -> createSingleItemTableWithSilkTouch(blockx, Items.CLAY_BALL, ConstantIntValue.exactly(4)));
 		this.add(Blocks.ENDER_CHEST, blockx -> createSingleItemTableWithSilkTouch(blockx, Blocks.OBSIDIAN, ConstantIntValue.exactly(8)));

@@ -5,6 +5,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.item.Items;
 
 public class StopHoldingItemIfNoLongerAdmiring<E extends Piglin> extends Behavior<E> {
 	public StopHoldingItemIfNoLongerAdmiring() {
@@ -12,7 +13,7 @@ public class StopHoldingItemIfNoLongerAdmiring<E extends Piglin> extends Behavio
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, E piglin) {
-		return !piglin.getOffhandItem().isEmpty();
+		return !piglin.getOffhandItem().isEmpty() && piglin.getOffhandItem().getItem() != Items.SHIELD;
 	}
 
 	protected void start(ServerLevel serverLevel, E piglin, long l) {

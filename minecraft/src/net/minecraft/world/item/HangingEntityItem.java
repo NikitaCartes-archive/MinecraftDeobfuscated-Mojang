@@ -35,7 +35,7 @@ public class HangingEntityItem extends Item {
 				hangingEntity = new Painting(level, blockPos2, direction);
 			} else {
 				if (this.type != EntityType.ITEM_FRAME) {
-					return InteractionResult.SUCCESS;
+					return InteractionResult.sidedSuccess(level.isClientSide);
 				}
 
 				hangingEntity = new ItemFrame(level, blockPos2, direction);
@@ -53,7 +53,7 @@ public class HangingEntityItem extends Item {
 				}
 
 				itemStack.shrink(1);
-				return InteractionResult.SUCCESS;
+				return InteractionResult.sidedSuccess(level.isClientSide);
 			} else {
 				return InteractionResult.CONSUME;
 			}

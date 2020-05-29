@@ -814,7 +814,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	@Nullable
 	private CompoundTag readChunk(ChunkPos chunkPos) throws IOException {
 		CompoundTag compoundTag = this.read(chunkPos);
-		return compoundTag == null ? null : this.upgradeChunkTag(this.level.dimensionType(), this.overworldDataStorage, compoundTag);
+		return compoundTag == null ? null : this.upgradeChunkTag(this.level.dimension(), this.overworldDataStorage, compoundTag);
 	}
 
 	boolean noPlayersCloseForSpawning(ChunkPos chunkPos) {

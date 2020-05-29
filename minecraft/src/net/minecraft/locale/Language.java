@@ -1,6 +1,7 @@
 package net.minecraft.locale;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -11,82 +12,99 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.util.GsonHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class Language {
+public abstract class Language {
 	private static final Logger LOGGER = LogManager.getLogger();
-	private static final Pattern UNSUPPORTED_FORMAT_PATTERN = Pattern.compile("%(\\d+\\$)?[\\d\\.]*[df]");
-	private static final Language SINGLETON = new Language();
-	private final Map<String, String> storage = Maps.<String, String>newHashMap();
-	private long lastUpdateTime;
+	private static final Gson GSON = new Gson();
+	private static final Pattern UNSUPPORTED_FORMAT_PATTERN = Pattern.compile("%(\\d+\\$)?[\\d.]*[df]");
+	private static volatile Language instance = loadDefault();
 
-	public Language() {
+	private static Language loadDefault() {
+		Builder<String, String> builder = ImmutableMap.builder();
+		BiConsumer<String, String> biConsumer = builder::put;
+
 		try {
 			InputStream inputStream = Language.class.getResourceAsStream("/assets/minecraft/lang/en_us.json");
-			Throwable var2 = null;
+			Throwable var3 = null;
 
 			try {
-				JsonElement jsonElement = new Gson().fromJson(new InputStreamReader(inputStream, StandardCharsets.UTF_8), JsonElement.class);
-				JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "strings");
-
-				for (Entry<String, JsonElement> entry : jsonObject.entrySet()) {
-					String string = UNSUPPORTED_FORMAT_PATTERN.matcher(GsonHelper.convertToString((JsonElement)entry.getValue(), (String)entry.getKey())).replaceAll("%$1s");
-					this.storage.put(entry.getKey(), string);
-				}
-
-				this.lastUpdateTime = Util.getMillis();
-			} catch (Throwable var16) {
-				var2 = var16;
-				throw var16;
+				loadFromJson(inputStream, biConsumer);
+			} catch (Throwable var13) {
+				var3 = var13;
+				throw var13;
 			} finally {
 				if (inputStream != null) {
-					if (var2 != null) {
+					if (var3 != null) {
 						try {
 							inputStream.close();
-						} catch (Throwable var15) {
-							var2.addSuppressed(var15);
+						} catch (Throwable var12) {
+							var3.addSuppressed(var12);
 						}
 					} else {
 						inputStream.close();
 					}
 				}
 			}
-		} catch (JsonParseException | IOException var18) {
-			LOGGER.error("Couldn't read strings from /assets/minecraft/lang/en_us.json", (Throwable)var18);
+		} catch (JsonParseException | IOException var15) {
+			LOGGER.error("Couldn't read strings from /assets/minecraft/lang/en_us.json", (Throwable)var15);
+		}
+
+		final Map<String, String> map = builder.build();
+		return new Language() {
+			@Override
+			public String getOrDefault(String string) {
+				return (String)map.getOrDefault(string, string);
+			}
+
+			@Override
+			public boolean has(String string) {
+				return map.containsKey(string);
+			}
+
+			@Environment(EnvType.CLIENT)
+			@Override
+			public boolean requiresReordering() {
+				return false;
+			}
+
+			@Override
+			public String reorder(String string, boolean bl) {
+				return string;
+			}
+		};
+	}
+
+	public static void loadFromJson(InputStream inputStream, BiConsumer<String, String> biConsumer) {
+		JsonObject jsonObject = GSON.fromJson(new InputStreamReader(inputStream, StandardCharsets.UTF_8), JsonObject.class);
+
+		for (Entry<String, JsonElement> entry : jsonObject.entrySet()) {
+			String string = UNSUPPORTED_FORMAT_PATTERN.matcher(GsonHelper.convertToString((JsonElement)entry.getValue(), (String)entry.getKey())).replaceAll("%$1s");
+			biConsumer.accept(entry.getKey(), string);
 		}
 	}
 
 	public static Language getInstance() {
-		return SINGLETON;
+		return instance;
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static synchronized void forceData(Map<String, String> map) {
-		SINGLETON.storage.clear();
-		SINGLETON.storage.putAll(map);
-		SINGLETON.lastUpdateTime = Util.getMillis();
+	public static void inject(Language language) {
+		instance = language;
 	}
 
-	public synchronized String getElement(String string) {
-		return this.getProperty(string);
-	}
+	public abstract String getOrDefault(String string);
 
-	private String getProperty(String string) {
-		String string2 = (String)this.storage.get(string);
-		return string2 == null ? string : string2;
-	}
+	public abstract boolean has(String string);
 
-	public synchronized boolean exists(String string) {
-		return this.storage.containsKey(string);
-	}
+	@Environment(EnvType.CLIENT)
+	public abstract boolean requiresReordering();
 
-	public long getLastUpdateTime() {
-		return this.lastUpdateTime;
-	}
+	public abstract String reorder(String string, boolean bl);
 }

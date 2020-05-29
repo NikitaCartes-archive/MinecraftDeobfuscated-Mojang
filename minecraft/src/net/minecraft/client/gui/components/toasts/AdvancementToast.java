@@ -10,7 +10,7 @@ import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 
@@ -30,11 +30,11 @@ public class AdvancementToast implements Toast {
 		DisplayInfo displayInfo = this.advancement.getDisplay();
 		toastComponent.blit(poseStack, 0, 0, 0, 0, this.width(), this.height());
 		if (displayInfo != null) {
-			List<Component> list = toastComponent.getMinecraft().font.split(displayInfo.getTitle(), 125);
+			List<FormattedText> list = toastComponent.getMinecraft().font.split(displayInfo.getTitle(), 125);
 			int i = displayInfo.getFrame() == FrameType.CHALLENGE ? 16746751 : 16776960;
 			if (list.size() == 1) {
 				toastComponent.getMinecraft().font.draw(poseStack, I18n.get("advancements.toast." + displayInfo.getFrame().getName()), 30.0F, 7.0F, i | 0xFF000000);
-				toastComponent.getMinecraft().font.draw(poseStack, (Component)list.get(0), 30.0F, 18.0F, -1);
+				toastComponent.getMinecraft().font.draw(poseStack, (FormattedText)list.get(0), 30.0F, 18.0F, -1);
 			} else {
 				int j = 1500;
 				float f = 300.0F;
@@ -45,8 +45,8 @@ public class AdvancementToast implements Toast {
 					int k = Mth.floor(Mth.clamp((float)(l - 1500L) / 300.0F, 0.0F, 1.0F) * 252.0F) << 24 | 67108864;
 					int m = this.height() / 2 - list.size() * 9 / 2;
 
-					for (Component component : list) {
-						toastComponent.getMinecraft().font.draw(poseStack, component, 30.0F, (float)m, 16777215 | k);
+					for (FormattedText formattedText : list) {
+						toastComponent.getMinecraft().font.draw(poseStack, formattedText, 30.0F, (float)m, 16777215 | k);
 						m += 9;
 					}
 				}

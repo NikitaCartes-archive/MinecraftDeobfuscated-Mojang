@@ -18,6 +18,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.Mth;
@@ -102,30 +103,30 @@ public class PlayerTabOverlay extends GuiComponent {
 		int q = i / 2 - (p * l + (l - 1) * 5) / 2;
 		int r = 10;
 		int s = p * l + (l - 1) * 5;
-		List<Component> list2 = null;
+		List<FormattedText> list2 = null;
 		if (this.header != null) {
 			list2 = this.minecraft.font.split(this.header, i - 50);
 
-			for (Component component : list2) {
-				s = Math.max(s, this.minecraft.font.width(component));
+			for (FormattedText formattedText : list2) {
+				s = Math.max(s, this.minecraft.font.width(formattedText));
 			}
 		}
 
-		List<Component> list3 = null;
+		List<FormattedText> list3 = null;
 		if (this.footer != null) {
 			list3 = this.minecraft.font.split(this.footer, i - 50);
 
-			for (Component component2 : list3) {
-				s = Math.max(s, this.minecraft.font.width(component2));
+			for (FormattedText formattedText2 : list3) {
+				s = Math.max(s, this.minecraft.font.width(formattedText2));
 			}
 		}
 
 		if (list2 != null) {
 			fill(poseStack, i / 2 - s / 2 - 1, r - 1, i / 2 + s / 2 + 1, r + list2.size() * 9, Integer.MIN_VALUE);
 
-			for (Component component2 : list2) {
-				int t = this.minecraft.font.width(component2);
-				this.minecraft.font.drawShadow(poseStack, component2, (float)(i / 2 - t / 2), (float)r, -1);
+			for (FormattedText formattedText2 : list2) {
+				int t = this.minecraft.font.width(formattedText2);
+				this.minecraft.font.drawShadow(poseStack, formattedText2, (float)(i / 2 - t / 2), (float)r, -1);
 				r += 9;
 			}
 
@@ -185,9 +186,9 @@ public class PlayerTabOverlay extends GuiComponent {
 			r += n * 9 + 1;
 			fill(poseStack, i / 2 - s / 2 - 1, r - 1, i / 2 + s / 2 + 1, r + list3.size() * 9, Integer.MIN_VALUE);
 
-			for (Component component3 : list3) {
-				int w = this.minecraft.font.width(component3);
-				this.minecraft.font.drawShadow(poseStack, component3, (float)(i / 2 - w / 2), (float)r, -1);
+			for (FormattedText formattedText3 : list3) {
+				int w = this.minecraft.font.width(formattedText3);
+				this.minecraft.font.drawShadow(poseStack, formattedText3, (float)(i / 2 - w / 2), (float)r, -1);
 				r += 9;
 			}
 		}

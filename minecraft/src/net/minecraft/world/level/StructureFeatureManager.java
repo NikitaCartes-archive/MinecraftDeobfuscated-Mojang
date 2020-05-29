@@ -24,7 +24,7 @@ public class StructureFeatureManager {
 	public Stream<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature) {
 		return this.level
 			.getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_REFERENCES)
-			.getReferencesForFeature(structureFeature.getFeatureName())
+			.getReferencesForFeature(structureFeature)
 			.stream()
 			.map(long_ -> SectionPos.of(new ChunkPos(long_), 0))
 			.map(
@@ -35,15 +35,15 @@ public class StructureFeatureManager {
 
 	@Nullable
 	public StructureStart<?> getStartForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature, FeatureAccess featureAccess) {
-		return featureAccess.getStartForFeature(structureFeature.getFeatureName());
+		return featureAccess.getStartForFeature(structureFeature);
 	}
 
 	public void setStartForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature, StructureStart<?> structureStart, FeatureAccess featureAccess) {
-		featureAccess.setStartForFeature(structureFeature.getFeatureName(), structureStart);
+		featureAccess.setStartForFeature(structureFeature, structureStart);
 	}
 
 	public void addReferenceForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature, long l, FeatureAccess featureAccess) {
-		featureAccess.addReferenceForFeature(structureFeature.getFeatureName(), l);
+		featureAccess.addReferenceForFeature(structureFeature, l);
 	}
 
 	public boolean shouldGenerateFeatures() {

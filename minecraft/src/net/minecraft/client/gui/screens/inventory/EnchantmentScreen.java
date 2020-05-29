@@ -17,6 +17,7 @@ import net.minecraft.client.model.BookModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -44,12 +45,6 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 
 	public EnchantmentScreen(EnchantmentMenu enchantmentMenu, Inventory inventory, Component component) {
 		super(enchantmentMenu, inventory, component);
-	}
-
-	@Override
-	protected void renderLabels(PoseStack poseStack, int i, int j) {
-		this.font.draw(poseStack, this.title, 12.0F, 5.0F, 4210752);
-		this.font.draw(poseStack, this.inventory.getDisplayName(), 8.0F, (float)(this.imageHeight - 96 + 2), 4210752);
 	}
 
 	@Override
@@ -153,12 +148,12 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 			} else {
 				String string = "" + u;
 				int v = 86 - this.font.width(string);
-				Component component = EnchantmentNames.getInstance().getRandomName(this.font, v);
+				FormattedText formattedText = EnchantmentNames.getInstance().getRandomName(this.font, v);
 				int w = 6839882;
 				if ((q < r + 1 || this.minecraft.player.experienceLevel < u) && !this.minecraft.player.abilities.instabuild) {
 					this.blit(poseStack, s, l + 14 + 19 * r, 0, 185, 108, 19);
 					this.blit(poseStack, s + 1, l + 15 + 19 * r, 16 * r, 239, 16, 16);
-					this.font.drawWordWrap(component, t, l + 16 + 19 * r, v, (w & 16711422) >> 1);
+					this.font.drawWordWrap(formattedText, t, l + 16 + 19 * r, v, (w & 16711422) >> 1);
 					w = 4226832;
 				} else {
 					int x = i - (k + 60);
@@ -171,7 +166,7 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 					}
 
 					this.blit(poseStack, s + 1, l + 15 + 19 * r, 16 * r, 223, 16, 16);
-					this.font.drawWordWrap(component, t, l + 16 + 19 * r, v, w);
+					this.font.drawWordWrap(formattedText, t, l + 16 + 19 * r, v, w);
 					w = 8453920;
 				}
 

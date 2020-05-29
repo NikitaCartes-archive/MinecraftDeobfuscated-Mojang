@@ -56,21 +56,24 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 
 			boolean bl = !hugeFungusConfiguration.planted && random.nextFloat() < 0.06F;
 			worldGenLevel.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 4);
-			this.placeHat(worldGenLevel, random, hugeFungusConfiguration, blockPos2, i, bl);
 			this.placeStem(worldGenLevel, random, hugeFungusConfiguration, blockPos2, i, bl);
+			this.placeHat(worldGenLevel, random, hugeFungusConfiguration, blockPos2, i, bl);
 			return true;
 		}
 	}
 
-	public static boolean isReplaceablePlant(LevelAccessor levelAccessor, BlockPos blockPos) {
-		return levelAccessor.isStateAtPosition(blockPos, blockState -> {
-			Material material = blockState.getMaterial();
-			return material == Material.REPLACEABLE_PLANT;
-		});
-	}
-
-	private static boolean isReplaceable(LevelAccessor levelAccessor, BlockPos blockPos) {
-		return levelAccessor.getBlockState(blockPos).isAir() || !levelAccessor.getFluidState(blockPos).isEmpty() || isReplaceablePlant(levelAccessor, blockPos);
+	private static boolean isReplaceable(LevelAccessor levelAccessor, BlockPos blockPos, boolean bl) {
+		return levelAccessor.isStateAtPosition(
+			blockPos,
+			blockState -> {
+				Material material = blockState.getMaterial();
+				return blockState.isAir()
+					|| blockState.is(Blocks.WATER)
+					|| blockState.is(Blocks.LAVA)
+					|| material == Material.REPLACEABLE_PLANT
+					|| bl && material == Material.PLANT;
+			}
+		);
 	}
 
 	private void placeStem(LevelAccessor levelAccessor, Random random, HugeFungusConfiguration hugeFungusConfiguration, BlockPos blockPos, int i, boolean bl) {
@@ -84,7 +87,7 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 
 				for (int m = 0; m < i; m++) {
 					mutableBlockPos.setWithOffset(blockPos, k, m, l);
-					if (isReplaceable(levelAccessor, mutableBlockPos)) {
+					if (isReplaceable(levelAccessor, mutableBlockPos, true)) {
 						if (hugeFungusConfiguration.planted) {
 							if (!levelAccessor.getBlockState(mutableBlockPos.below()).isAir()) {
 								levelAccessor.destroyBlock(mutableBlockPos, true);
@@ -128,7 +131,7 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 					boolean bl6 = bl3 && bl4;
 					boolean bl7 = l < k + 3;
 					mutableBlockPos.setWithOffset(blockPos, n, l, o);
-					if (isReplaceable(levelAccessor, mutableBlockPos)) {
+					if (isReplaceable(levelAccessor, mutableBlockPos, false)) {
 						if (hugeFungusConfiguration.planted && !levelAccessor.getBlockState(mutableBlockPos.below()).isAir()) {
 							levelAccessor.destroyBlock(mutableBlockPos, true);
 						}

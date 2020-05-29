@@ -15,6 +15,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.ChatVisiblity;
@@ -148,22 +150,22 @@ public class ChatComponent extends GuiComponent {
 		LOGGER.info("[CHAT] {}", component.getString().replaceAll("\r", "\\\\r").replaceAll("\n", "\\\\n"));
 	}
 
-	private void addMessage(Component component, int i, int j, boolean bl) {
+	private void addMessage(FormattedText formattedText, int i, int j, boolean bl) {
 		if (i != 0) {
 			this.removeById(i);
 		}
 
 		int k = Mth.floor((double)this.getWidth() / this.getScale());
-		List<Component> list = ComponentRenderUtils.wrapComponents(component, k, this.minecraft.font);
+		List<FormattedText> list = ComponentRenderUtils.wrapComponents(formattedText, k, this.minecraft.font);
 		boolean bl2 = this.isChatFocused();
 
-		for (Component component2 : list) {
+		for (FormattedText formattedText2 : list) {
 			if (bl2 && this.chatScrollbarPos > 0) {
 				this.newMessageSinceScroll = true;
 				this.scrollChat(1.0);
 			}
 
-			this.trimmedMessages.add(0, new GuiMessage(j, component2, i));
+			this.trimmedMessages.add(0, new GuiMessage(j, formattedText2, i));
 		}
 
 		while (this.trimmedMessages.size() > 100) {
@@ -171,7 +173,7 @@ public class ChatComponent extends GuiComponent {
 		}
 
 		if (!bl) {
-			this.allMessages.add(0, new GuiMessage(j, component, i));
+			this.allMessages.add(0, new GuiMessage(j, formattedText, i));
 
 			while (this.allMessages.size() > 100) {
 				this.allMessages.remove(this.allMessages.size() - 1);
@@ -234,7 +236,7 @@ public class ChatComponent extends GuiComponent {
 	}
 
 	@Nullable
-	public Component getClickedComponentAt(double d, double e) {
+	public Style getClickedComponentStyleAt(double d, double e) {
 		if (this.isChatFocused() && !this.minecraft.options.hideGui && !this.isChatHidden()) {
 			double f = d - 2.0;
 			double g = (double)this.minecraft.getWindow().getGuiScaledHeight() - e - 40.0;
@@ -246,7 +248,7 @@ public class ChatComponent extends GuiComponent {
 					int j = (int)(g / 9.0 + (double)this.chatScrollbarPos);
 					if (j >= 0 && j < this.trimmedMessages.size()) {
 						GuiMessage guiMessage = (GuiMessage)this.trimmedMessages.get(j);
-						return this.minecraft.font.getSplitter().componentAtWidth(guiMessage.getMessage(), (int)f);
+						return this.minecraft.font.getSplitter().componentStyleAtWidth(guiMessage.getMessage(), (int)f);
 					}
 				}
 

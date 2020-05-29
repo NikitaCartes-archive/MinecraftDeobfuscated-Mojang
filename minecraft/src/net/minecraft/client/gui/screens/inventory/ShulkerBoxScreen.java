@@ -26,12 +26,6 @@ public class ShulkerBoxScreen extends AbstractContainerScreen<ShulkerBoxMenu> {
 	}
 
 	@Override
-	protected void renderLabels(PoseStack poseStack, int i, int j) {
-		this.font.draw(poseStack, this.title, 8.0F, 6.0F, 4210752);
-		this.font.draw(poseStack, this.inventory.getDisplayName(), 8.0F, (float)(this.imageHeight - 96 + 2), 4210752);
-	}
-
-	@Override
 	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.minecraft.getTextureManager().bind(CONTAINER_TEXTURE);

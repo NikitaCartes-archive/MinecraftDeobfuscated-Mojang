@@ -18,12 +18,6 @@ public class GrindstoneScreen extends AbstractContainerScreen<GrindstoneMenu> {
 	}
 
 	@Override
-	protected void renderLabels(PoseStack poseStack, int i, int j) {
-		this.font.draw(poseStack, this.title, 8.0F, 6.0F, 4210752);
-		this.font.draw(poseStack, this.inventory.getDisplayName(), 8.0F, (float)(this.imageHeight - 96 + 2), 4210752);
-	}
-
-	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
 		this.renderBg(poseStack, f, i, j);

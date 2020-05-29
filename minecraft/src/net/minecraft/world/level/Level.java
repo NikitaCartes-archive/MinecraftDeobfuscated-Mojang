@@ -1,6 +1,7 @@
 package net.minecraft.world.level;
 
 import com.google.common.collect.Lists;
+import com.mojang.serialization.Codec;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
@@ -19,11 +20,11 @@ import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.sounds.SoundEvent;
@@ -72,6 +73,11 @@ import org.apache.logging.log4j.Logger;
 
 public abstract class Level implements LevelAccessor, AutoCloseable {
 	protected static final Logger LOGGER = LogManager.getLogger();
+	public static final Codec<ResourceKey<Level>> RESOURCE_KEY_CODEC = ResourceLocation.CODEC
+		.xmap(ResourceKey.elementKey(Registry.DIMENSION_REGISTRY), ResourceKey::location);
+	public static final ResourceKey<Level> OVERWORLD = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("overworld"));
+	public static final ResourceKey<Level> NETHER = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("the_nether"));
+	public static final ResourceKey<Level> END = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("the_end"));
 	private static final Direction[] DIRECTIONS = Direction.values();
 	public final List<BlockEntity> blockEntityList = Lists.<BlockEntity>newArrayList();
 	public final List<BlockEntity> tickableBlockEntities = Lists.<BlockEntity>newArrayList();
@@ -94,11 +100,24 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	protected boolean updatingBlockEntities;
 	private final WorldBorder worldBorder;
 	private final BiomeManager biomeManager;
+	private final ResourceKey<Level> dimension;
+	private final ResourceKey<DimensionType> dimensionTypeKey;
 
-	protected Level(WritableLevelData writableLevelData, DimensionType dimensionType, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l) {
+	protected Level(
+		WritableLevelData writableLevelData,
+		ResourceKey<Level> resourceKey,
+		ResourceKey<DimensionType> resourceKey2,
+		DimensionType dimensionType,
+		Supplier<ProfilerFiller> supplier,
+		boolean bl,
+		boolean bl2,
+		long l
+	) {
 		this.profiler = supplier;
 		this.levelData = writableLevelData;
 		this.dimensionType = dimensionType;
+		this.dimension = resourceKey;
+		this.dimensionTypeKey = resourceKey2;
 		this.isClientSide = bl;
 		if (dimensionType.shrunk()) {
 			this.worldBorder = new WorldBorder() {
@@ -1137,8 +1156,12 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		return this.dimensionType;
 	}
 
-	public ResourceKey<DimensionType> dimension() {
-		return this.registryAccess().dimensionTypes().getResourceKey(this.dimensionType);
+	public ResourceKey<DimensionType> dimensionTypeKey() {
+		return this.dimensionTypeKey;
+	}
+
+	public ResourceKey<Level> dimension() {
+		return this.dimension;
 	}
 
 	@Override
@@ -1181,6 +1204,4 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	public final boolean isDebug() {
 		return this.isDebug;
 	}
-
-	public abstract RegistryAccess registryAccess();
 }

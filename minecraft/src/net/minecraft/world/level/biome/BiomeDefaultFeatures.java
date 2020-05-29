@@ -283,7 +283,7 @@ public class BiomeDefaultFeatures {
 			new SimpleStateProvider(SPRUCE_LOG),
 			new SimpleStateProvider(SPRUCE_LEAVES),
 			new SpruceFoliagePlacer(2, 1, 0, 2, 1, 1),
-			new StraightTrunkPlacer(4, 3, 2),
+			new StraightTrunkPlacer(5, 2, 1),
 			new TwoLayersFeatureSize(2, 0, 2)
 		)
 		.ignoreVines()
@@ -649,18 +649,18 @@ public class BiomeDefaultFeatures {
 
 	public static void addDefaultLakes(Biome biome) {
 		biome.addFeature(
-			GenerationStep.Decoration.LOCAL_MODIFICATIONS,
+			GenerationStep.Decoration.LAKES,
 			Feature.LAKE.configured(new BlockStateConfiguration(WATER)).decorated(FeatureDecorator.WATER_LAKE.configured(new ChanceDecoratorConfiguration(4)))
 		);
 		biome.addFeature(
-			GenerationStep.Decoration.LOCAL_MODIFICATIONS,
+			GenerationStep.Decoration.LAKES,
 			Feature.LAKE.configured(new BlockStateConfiguration(LAVA)).decorated(FeatureDecorator.LAVA_LAKE.configured(new ChanceDecoratorConfiguration(80)))
 		);
 	}
 
 	public static void addDesertLakes(Biome biome) {
 		biome.addFeature(
-			GenerationStep.Decoration.LOCAL_MODIFICATIONS,
+			GenerationStep.Decoration.LAKES,
 			Feature.LAKE.configured(new BlockStateConfiguration(LAVA)).decorated(FeatureDecorator.LAVA_LAKE.configured(new ChanceDecoratorConfiguration(80)))
 		);
 	}
@@ -1376,15 +1376,11 @@ public class BiomeDefaultFeatures {
 			GenerationStep.Decoration.SURFACE_STRUCTURES,
 			Feature.DESERT_WELL.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.CHANCE_HEIGHTMAP.configured(new ChanceDecoratorConfiguration(1000)))
 		);
-		biome.addFeature(
-			GenerationStep.Decoration.UNDERGROUND_DECORATION,
-			Feature.FOSSIL.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.CHANCE_PASSTHROUGH.configured(new ChanceDecoratorConfiguration(64)))
-		);
 	}
 
-	public static void addSwampExtraDecoration(Biome biome) {
+	public static void addFossilDecoration(Biome biome) {
 		biome.addFeature(
-			GenerationStep.Decoration.UNDERGROUND_DECORATION,
+			GenerationStep.Decoration.UNDERGROUND_STRUCTURES,
 			Feature.FOSSIL.configured(FeatureConfiguration.NONE).decorated(FeatureDecorator.CHANCE_PASSTHROUGH.configured(new ChanceDecoratorConfiguration(64)))
 		);
 	}

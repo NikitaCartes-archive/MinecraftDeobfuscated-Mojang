@@ -9,7 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.SerializationTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.material.Fluid;
@@ -57,7 +57,7 @@ public class FluidPredicate {
 			Tag<Fluid> tag = null;
 			if (jsonObject.has("tag")) {
 				ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));
-				tag = FluidTags.getAllTags().getTag(resourceLocation2);
+				tag = SerializationTags.getInstance().getFluids().getTag(resourceLocation2);
 				if (tag == null) {
 					throw new JsonSyntaxException("Unknown fluid tag '" + resourceLocation2 + "'");
 				}
@@ -80,7 +80,7 @@ public class FluidPredicate {
 			}
 
 			if (this.tag != null) {
-				jsonObject.addProperty("tag", FluidTags.getAllTags().getIdOrThrow(this.tag).toString());
+				jsonObject.addProperty("tag", SerializationTags.getInstance().getFluids().getIdOrThrow(this.tag).toString());
 			}
 
 			jsonObject.add("state", this.properties.serializeToJson());

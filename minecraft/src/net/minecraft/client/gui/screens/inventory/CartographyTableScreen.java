@@ -23,18 +23,13 @@ public class CartographyTableScreen extends AbstractContainerScreen<CartographyT
 
 	public CartographyTableScreen(CartographyTableMenu cartographyTableMenu, Inventory inventory, Component component) {
 		super(cartographyTableMenu, inventory, component);
+		this.titleLabelY -= 2;
 	}
 
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		super.render(poseStack, i, j, f);
 		this.renderTooltip(poseStack, i, j);
-	}
-
-	@Override
-	protected void renderLabels(PoseStack poseStack, int i, int j) {
-		this.font.draw(poseStack, this.title, 8.0F, 4.0F, 4210752);
-		this.font.draw(poseStack, this.inventory.getDisplayName(), 8.0F, (float)(this.imageHeight - 96 + 2), 4210752);
 	}
 
 	@Override

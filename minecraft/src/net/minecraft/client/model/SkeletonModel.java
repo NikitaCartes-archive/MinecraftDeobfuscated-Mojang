@@ -67,10 +67,7 @@ public class SkeletonModel<T extends Mob & RangedAttackMob> extends HumanoidMode
 			this.leftArm.xRot = (float) (-Math.PI / 2);
 			this.rightArm.xRot -= k * 1.2F - l * 0.4F;
 			this.leftArm.xRot -= k * 1.2F - l * 0.4F;
-			this.rightArm.zRot = this.rightArm.zRot + Mth.cos(h * 0.09F) * 0.05F + 0.05F;
-			this.leftArm.zRot = this.leftArm.zRot - (Mth.cos(h * 0.09F) * 0.05F + 0.05F);
-			this.rightArm.xRot = this.rightArm.xRot + Mth.sin(h * 0.067F) * 0.05F;
-			this.leftArm.xRot = this.leftArm.xRot - Mth.sin(h * 0.067F) * 0.05F;
+			AnimationUtils.bobArms(this.rightArm, this.leftArm, h);
 		}
 	}
 

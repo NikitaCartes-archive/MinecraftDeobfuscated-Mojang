@@ -1968,17 +1968,21 @@ public abstract class LivingEntity extends Entity {
 			}
 		}
 
-		this.animationSpeedOld = this.animationSpeed;
-		double dx = this.getX() - this.xo;
-		double r = this.getZ() - this.zo;
-		double exx = this instanceof FlyingAnimal ? this.getY() - this.yo : 0.0;
-		float fxx = Mth.sqrt(dx * dx + exx * exx + r * r) * 4.0F;
-		if (fxx > 1.0F) {
-			fxx = 1.0F;
+		this.calculateEntityAnimation(this, this instanceof FlyingAnimal);
+	}
+
+	public void calculateEntityAnimation(LivingEntity livingEntity, boolean bl) {
+		livingEntity.animationSpeedOld = livingEntity.animationSpeed;
+		double d = livingEntity.getX() - livingEntity.xo;
+		double e = bl ? livingEntity.getY() - livingEntity.yo : 0.0;
+		double f = livingEntity.getZ() - livingEntity.zo;
+		float g = Mth.sqrt(d * d + e * e + f * f) * 4.0F;
+		if (g > 1.0F) {
+			g = 1.0F;
 		}
 
-		this.animationSpeed = this.animationSpeed + (fxx - this.animationSpeed) * 0.4F;
-		this.animationPosition = this.animationPosition + this.animationSpeed;
+		livingEntity.animationSpeed = livingEntity.animationSpeed + (g - livingEntity.animationSpeed) * 0.4F;
+		livingEntity.animationPosition = livingEntity.animationPosition + livingEntity.animationSpeed;
 	}
 
 	public Vec3 handleRelativeFrictionAndCalculateMovement(Vec3 vec3, float f) {
@@ -2288,10 +2292,11 @@ public abstract class LivingEntity extends Entity {
 		if (this.jumping) {
 			double k = this.getFluidHeight(FluidTags.WATER);
 			boolean bl = this.isInWater() && k > 0.0;
-			if (!bl || this.onGround && !(k > 0.4)) {
+			double l = this.getFluidJumpThreshold();
+			if (!bl || this.onGround && !(k > l)) {
 				if (this.isInLava()) {
 					this.jumpInLiquid(FluidTags.LAVA);
-				} else if ((this.onGround || bl && k <= 0.4) && this.noJumpDelay == 0) {
+				} else if ((this.onGround || bl && k <= l) && this.noJumpDelay == 0) {
 					this.jumpFromGround();
 					this.noJumpDelay = 10;
 				}

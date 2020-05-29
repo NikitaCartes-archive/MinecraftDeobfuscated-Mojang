@@ -6,7 +6,6 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Random;
-import java.util.Map.Entry;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -265,8 +264,7 @@ public abstract class ChunkGenerator {
 			for (int o = k - 8; o <= k + 8; o++) {
 				long p = ChunkPos.asLong(n, o);
 
-				for (Entry<String, StructureStart<?>> entry : levelAccessor.getChunk(n, o).getAllStarts().entrySet()) {
-					StructureStart<?> structureStart = (StructureStart<?>)entry.getValue();
+				for (StructureStart<?> structureStart : levelAccessor.getChunk(n, o).getAllStarts().values()) {
 					if (structureStart != StructureStart.INVALID_START && structureStart.getBoundingBox().intersects(l, m, l + 15, m + 15)) {
 						structureFeatureManager.addReferenceForFeature(sectionPos, structureStart.getFeature(), p, chunkAccess);
 						DebugPackets.sendStructurePacket(levelAccessor, structureStart);

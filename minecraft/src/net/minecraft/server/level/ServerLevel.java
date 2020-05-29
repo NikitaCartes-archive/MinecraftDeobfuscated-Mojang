@@ -39,7 +39,6 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
@@ -57,6 +56,7 @@ import net.minecraft.network.protocol.game.ClientboundSetDefaultSpawnPositionPac
 import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.DebugPackets;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.progress.ChunkProgressListener;
@@ -174,6 +174,8 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		Executor executor,
 		LevelStorageSource.LevelStorageAccess levelStorageAccess,
 		ServerLevelData serverLevelData,
+		ResourceKey<Level> resourceKey,
+		ResourceKey<DimensionType> resourceKey2,
 		DimensionType dimensionType,
 		ChunkProgressListener chunkProgressListener,
 		ChunkGenerator chunkGenerator,
@@ -182,7 +184,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		List<CustomSpawner> list,
 		boolean bl2
 	) {
-		super(serverLevelData, dimensionType, minecraftServer::getProfiler, false, bl, l);
+		super(serverLevelData, resourceKey, resourceKey2, dimensionType, minecraftServer::getProfiler, false, bl, l);
 		this.tickTime = bl2;
 		this.server = minecraftServer;
 		this.customSpawners = list;
@@ -197,7 +199,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			minecraftServer.getPlayerList().getViewDistance(),
 			minecraftServer.forceSynchronousWrites(),
 			chunkProgressListener,
-			() -> minecraftServer.getLevel(DimensionType.OVERWORLD_LOCATION).getDataStorage()
+			() -> minecraftServer.getLevel(Level.OVERWORLD).getDataStorage()
 		);
 		this.portalForcer = new PortalForcer(this);
 		this.updateSkyBrightness();
@@ -210,7 +212,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 		this.structureFeatureManager = new StructureFeatureManager(this, minecraftServer.getWorldData().worldGenSettings());
 		if (this.dimensionType().createDragonFight()) {
-			this.dragonFight = new EndDragonFight(this, minecraftServer.getWorldData().endDragonFightData());
+			this.dragonFight = new EndDragonFight(this, minecraftServer.getWorldData().worldGenSettings().seed(), minecraftServer.getWorldData().endDragonFightData());
 		} else {
 			this.dragonFight = null;
 		}
@@ -597,7 +599,9 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	public void tickNonPassenger(Entity entity) {
-		if (entity instanceof Player || this.getChunkSource().isEntityTickingChunk(entity)) {
+		if (!(entity instanceof Player) && !this.getChunkSource().isEntityTickingChunk(entity)) {
+			this.updateChunkPos(entity);
+		} else {
 			entity.setPosAndOldPos(entity.getX(), entity.getY(), entity.getZ());
 			entity.yRotO = entity.yRot;
 			entity.xRotO = entity.xRot;
@@ -645,23 +649,29 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	public void updateChunkPos(Entity entity) {
-		this.getProfiler().push("chunkCheck");
-		int i = Mth.floor(entity.getX() / 16.0);
-		int j = Mth.floor(entity.getY() / 16.0);
-		int k = Mth.floor(entity.getZ() / 16.0);
-		if (!entity.inChunk || entity.xChunk != i || entity.yChunk != j || entity.zChunk != k) {
-			if (entity.inChunk && this.hasChunk(entity.xChunk, entity.zChunk)) {
-				this.getChunk(entity.xChunk, entity.zChunk).removeEntity(entity, entity.yChunk);
+		if (entity.checkAndResetUpdateChunkPos()) {
+			this.getProfiler().push("chunkCheck");
+			int i = Mth.floor(entity.getX() / 16.0);
+			int j = Mth.floor(entity.getY() / 16.0);
+			int k = Mth.floor(entity.getZ() / 16.0);
+			if (!entity.inChunk || entity.xChunk != i || entity.yChunk != j || entity.zChunk != k) {
+				if (entity.inChunk && this.hasChunk(entity.xChunk, entity.zChunk)) {
+					this.getChunk(entity.xChunk, entity.zChunk).removeEntity(entity, entity.yChunk);
+				}
+
+				if (!entity.checkAndResetForcedChunkAdditionFlag() && !this.hasChunk(i, k)) {
+					if (entity.inChunk) {
+						LOGGER.warn("Entity {} left loaded chunk area", entity);
+					}
+
+					entity.inChunk = false;
+				} else {
+					this.getChunk(i, k).addEntity(entity);
+				}
 			}
 
-			if (!entity.checkAndResetTeleportedFlag() && !this.hasChunk(i, k)) {
-				entity.inChunk = false;
-			} else {
-				this.getChunk(i, k).addEntity(entity);
-			}
+			this.getProfiler().pop();
 		}
-
-		this.getProfiler().pop();
 	}
 
 	@Override
@@ -1152,11 +1162,6 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		return this.noSave;
 	}
 
-	@Override
-	public RegistryAccess registryAccess() {
-		return this.server.registryAccess();
-	}
-
 	public DimensionDataStorage getDataStorage() {
 		return this.getChunkSource().getDataStorage();
 	}
@@ -1164,21 +1169,17 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	@Nullable
 	@Override
 	public MapItemSavedData getMapData(String string) {
-		return this.getServer().getLevel(DimensionType.OVERWORLD_LOCATION).getDataStorage().get(() -> new MapItemSavedData(string), string);
+		return this.getServer().getLevel(Level.OVERWORLD).getDataStorage().get(() -> new MapItemSavedData(string), string);
 	}
 
 	@Override
 	public void setMapData(MapItemSavedData mapItemSavedData) {
-		this.getServer().getLevel(DimensionType.OVERWORLD_LOCATION).getDataStorage().set(mapItemSavedData);
+		this.getServer().getLevel(Level.OVERWORLD).getDataStorage().set(mapItemSavedData);
 	}
 
 	@Override
 	public int getFreeMapId() {
-		return this.getServer()
-			.getLevel(DimensionType.OVERWORLD_LOCATION)
-			.getDataStorage()
-			.<MapIndex>computeIfAbsent(MapIndex::new, "idcounts")
-			.getFreeAuxValueForMap();
+		return this.getServer().getLevel(Level.OVERWORLD).getDataStorage().<MapIndex>computeIfAbsent(MapIndex::new, "idcounts").getFreeAuxValueForMap();
 	}
 
 	public void setDefaultSpawnPos(BlockPos blockPos) {

@@ -1,9 +1,13 @@
 package net.minecraft.tags;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -34,6 +38,12 @@ public class StaticTagHelper<T> {
 
 	public TagCollection<T> getAllTags() {
 		return this.source;
+	}
+
+	public Set<ResourceLocation> getMissingTags(TagCollection<T> tagCollection) {
+		Set<ResourceLocation> set = (Set<ResourceLocation>)this.wrappers.stream().map(StaticTagHelper.Wrapper::getName).collect(Collectors.toSet());
+		ImmutableSet<ResourceLocation> immutableSet = ImmutableSet.copyOf(tagCollection.getAvailableTags());
+		return Sets.<ResourceLocation>difference(set, immutableSet);
 	}
 
 	static class Wrapper<T> implements Tag.Named<T> {

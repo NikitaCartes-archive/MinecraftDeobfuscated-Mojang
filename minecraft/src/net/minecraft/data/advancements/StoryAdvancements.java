@@ -18,8 +18,8 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 
 public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
@@ -216,7 +216,7 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 				true,
 				false
 			)
-			.addCriterion("entered_nether", ChangeDimensionTrigger.TriggerInstance.changedDimensionTo(DimensionType.NETHER_LOCATION))
+			.addCriterion("entered_nether", ChangeDimensionTrigger.TriggerInstance.changedDimensionTo(Level.NETHER))
 			.save(consumer, "story/enter_the_nether");
 		Advancement.Builder.advancement()
 			.parent(advancement10)
@@ -258,7 +258,7 @@ public class StoryAdvancements implements Consumer<Consumer<Advancement>> {
 				true,
 				false
 			)
-			.addCriterion("entered_end", ChangeDimensionTrigger.TriggerInstance.changedDimensionTo(DimensionType.END_LOCATION))
+			.addCriterion("entered_end", ChangeDimensionTrigger.TriggerInstance.changedDimensionTo(Level.END))
 			.save(consumer, "story/enter_the_end");
 	}
 }

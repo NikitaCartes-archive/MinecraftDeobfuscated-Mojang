@@ -51,7 +51,7 @@ public class BarrelBlock extends BaseEntityBlock {
 				PiglinAi.angerNearbyPiglinsThatSee(player);
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		}
 	}
 

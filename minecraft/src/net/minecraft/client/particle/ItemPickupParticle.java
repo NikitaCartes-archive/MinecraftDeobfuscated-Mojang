@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
@@ -30,9 +31,13 @@ public class ItemPickupParticle extends Particle {
 	) {
 		super(clientLevel, entity.getX(), entity.getY(), entity.getZ(), vec3.x, vec3.y, vec3.z);
 		this.renderBuffers = renderBuffers;
-		this.itemEntity = entity;
+		this.itemEntity = this.getSafeCopy(entity);
 		this.target = entity2;
 		this.entityRenderDispatcher = entityRenderDispatcher;
+	}
+
+	private Entity getSafeCopy(Entity entity) {
+		return (Entity)(!(entity instanceof ItemEntity) ? entity : ((ItemEntity)entity).copy());
 	}
 
 	@Override

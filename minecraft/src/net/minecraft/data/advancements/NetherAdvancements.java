@@ -34,11 +34,11 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyCondition;
@@ -60,7 +60,7 @@ public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
 				false,
 				false
 			)
-			.addCriterion("entered_nether", ChangeDimensionTrigger.TriggerInstance.changedDimensionTo(DimensionType.NETHER_LOCATION))
+			.addCriterion("entered_nether", ChangeDimensionTrigger.TriggerInstance.changedDimensionTo(Level.NETHER))
 			.save(consumer, "nether/root");
 		Advancement advancement2 = Advancement.Builder.advancement()
 			.parent(advancement)
@@ -128,7 +128,7 @@ public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
 			.addCriterion(
 				"killed_ghast",
 				KilledTrigger.TriggerInstance.playerKilledEntity(
-					EntityPredicate.Builder.entity().of(EntityType.GHAST).located(LocationPredicate.inDimension(DimensionType.OVERWORLD_LOCATION))
+					EntityPredicate.Builder.entity().of(EntityType.GHAST).located(LocationPredicate.inDimension(Level.OVERWORLD))
 				)
 			)
 			.save(consumer, "nether/uneasy_alliance");

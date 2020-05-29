@@ -8,7 +8,6 @@ import java.util.Locale;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
@@ -43,6 +42,11 @@ public class ExplorationMapFunction extends LootItemConditionalFunction {
 		this.zoom = b;
 		this.searchRadius = i;
 		this.skipKnownStructures = bl;
+	}
+
+	@Override
+	public LootItemFunctionType getType() {
+		return LootItemFunctions.EXPLORATION_MAP;
 	}
 
 	@Override
@@ -114,10 +118,6 @@ public class ExplorationMapFunction extends LootItemConditionalFunction {
 	}
 
 	public static class Serializer extends LootItemConditionalFunction.Serializer<ExplorationMapFunction> {
-		protected Serializer() {
-			super(new ResourceLocation("exploration_map"), ExplorationMapFunction.class);
-		}
-
 		public void serialize(JsonObject jsonObject, ExplorationMapFunction explorationMapFunction, JsonSerializationContext jsonSerializationContext) {
 			super.serialize(jsonObject, explorationMapFunction, jsonSerializationContext);
 			if (!explorationMapFunction.destination.equals(ExplorationMapFunction.DEFAULT_FEATURE)) {

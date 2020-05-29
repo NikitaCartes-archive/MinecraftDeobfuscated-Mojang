@@ -77,7 +77,7 @@ public class DaylightDetectorBlock extends BaseEntityBlock {
 				BlockState blockState2 = blockState.cycle(INVERTED);
 				level.setBlock(blockPos, blockState2, 4);
 				updateSignalStrength(blockState2, level, blockPos);
-				return InteractionResult.SUCCESS;
+				return InteractionResult.CONSUME;
 			}
 		} else {
 			return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);

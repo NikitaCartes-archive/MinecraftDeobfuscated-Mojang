@@ -150,7 +150,7 @@ public class Chicken extends Animal {
 
 	@Override
 	public boolean removeWhenFarAway(double d) {
-		return this.isChickenJockey() && !this.isVehicle();
+		return this.isChickenJockey();
 	}
 
 	@Override
@@ -160,7 +160,7 @@ public class Chicken extends Animal {
 		float g = Mth.cos(this.yBodyRot * (float) (Math.PI / 180.0));
 		float h = 0.1F;
 		float i = 0.0F;
-		entity.setPos(this.getX() + (double)(0.1F * f), this.getY(0.5) + entity.getRidingHeight() + 0.0, this.getZ() - (double)(0.1F * g));
+		entity.setPos(this.getX() + (double)(0.1F * f), this.getY(0.5) + entity.getMyRidingOffset() + 0.0, this.getZ() - (double)(0.1F * g));
 		if (entity instanceof LivingEntity) {
 			((LivingEntity)entity).yBodyRot = this.yBodyRot;
 		}

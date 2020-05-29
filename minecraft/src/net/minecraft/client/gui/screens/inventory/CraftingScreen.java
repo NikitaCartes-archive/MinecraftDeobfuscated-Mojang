@@ -39,6 +39,7 @@ public class CraftingScreen extends AbstractContainerScreen<CraftingMenu> implem
 			this.leftPos = this.recipeBookComponent.updateScreenPosition(this.widthTooNarrow, this.width, this.imageWidth);
 			((ImageButton)button).setPosition(this.leftPos + 5, this.height / 2 - 49);
 		}));
+		this.titleLabelX = 29;
 	}
 
 	@Override
@@ -61,12 +62,6 @@ public class CraftingScreen extends AbstractContainerScreen<CraftingMenu> implem
 
 		this.renderTooltip(poseStack, i, j);
 		this.recipeBookComponent.renderTooltip(poseStack, this.leftPos, this.topPos, i, j);
-	}
-
-	@Override
-	protected void renderLabels(PoseStack poseStack, int i, int j) {
-		this.font.draw(poseStack, this.title, 28.0F, 6.0F, 4210752);
-		this.font.draw(poseStack, this.inventory.getDisplayName(), 8.0F, (float)(this.imageHeight - 96 + 2), 4210752);
 	}
 
 	@Override

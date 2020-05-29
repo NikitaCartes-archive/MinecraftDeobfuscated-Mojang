@@ -41,7 +41,7 @@ public class TagCollection<T> {
 	private static final Gson GSON = new Gson();
 	private static final int PATH_SUFFIX_LENGTH = ".json".length();
 	private final Tag<T> empty = Tag.fromSet(ImmutableSet.of());
-	private BiMap<ResourceLocation, Tag<T>> tags = HashBiMap.create();
+	private volatile BiMap<ResourceLocation, Tag<T>> tags = HashBiMap.create();
 	private final Function<ResourceLocation, Optional<T>> idToValue;
 	private final String directory;
 	private final String name;

@@ -28,7 +28,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.MaterialColor;
@@ -68,7 +67,7 @@ public class MapItem extends ComplexItem {
 	}
 
 	private static MapItemSavedData createAndStoreSavedData(
-		ItemStack itemStack, Level level, int i, int j, int k, boolean bl, boolean bl2, ResourceKey<DimensionType> resourceKey
+		ItemStack itemStack, Level level, int i, int j, int k, boolean bl, boolean bl2, ResourceKey<Level> resourceKey
 	) {
 		int l = level.getFreeMapId();
 		MapItemSavedData mapItemSavedData = new MapItemSavedData(makeKey(l));
@@ -411,7 +410,7 @@ public class MapItem extends ComplexItem {
 				mapItemSavedData.toggleBanner(useOnContext.getLevel(), useOnContext.getClickedPos());
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(useOnContext.level.isClientSide);
 		} else {
 			return super.useOn(useOnContext);
 		}

@@ -224,7 +224,7 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 	}
 
 	@Override
-	public double getRidingHeight() {
+	public double getMyRidingOffset() {
 		return -0.6;
 	}
 }

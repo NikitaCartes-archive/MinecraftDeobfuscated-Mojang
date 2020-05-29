@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
@@ -30,16 +29,16 @@ public class LootTables extends SimpleJsonResourceReloadListener {
 		return (LootTable)this.tables.getOrDefault(resourceLocation, LootTable.EMPTY);
 	}
 
-	protected void apply(Map<ResourceLocation, JsonObject> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+	protected void apply(Map<ResourceLocation, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
 		Builder<ResourceLocation, LootTable> builder = ImmutableMap.builder();
-		JsonObject jsonObject = (JsonObject)map.remove(BuiltInLootTables.EMPTY);
-		if (jsonObject != null) {
+		JsonElement jsonElement = (JsonElement)map.remove(BuiltInLootTables.EMPTY);
+		if (jsonElement != null) {
 			LOGGER.warn("Datapack tried to redefine {} loot table, ignoring", BuiltInLootTables.EMPTY);
 		}
 
-		map.forEach((resourceLocation, jsonObjectx) -> {
+		map.forEach((resourceLocation, jsonElementx) -> {
 			try {
-				LootTable lootTable = GSON.fromJson(jsonObjectx, LootTable.class);
+				LootTable lootTable = GSON.fromJson(jsonElementx, LootTable.class);
 				builder.put(resourceLocation, lootTable);
 			} catch (Exception var4x) {
 				LOGGER.error("Couldn't parse loot table {}", resourceLocation, var4x);

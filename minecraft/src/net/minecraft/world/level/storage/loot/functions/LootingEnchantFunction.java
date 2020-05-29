@@ -5,7 +5,6 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.Set;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -25,6 +24,11 @@ public class LootingEnchantFunction extends LootItemConditionalFunction {
 		super(lootItemConditions);
 		this.value = randomValueBounds;
 		this.limit = i;
+	}
+
+	@Override
+	public LootItemFunctionType getType() {
+		return LootItemFunctions.LOOTING_ENCHANT;
 	}
 
 	@Override
@@ -83,10 +87,6 @@ public class LootingEnchantFunction extends LootItemConditionalFunction {
 	}
 
 	public static class Serializer extends LootItemConditionalFunction.Serializer<LootingEnchantFunction> {
-		protected Serializer() {
-			super(new ResourceLocation("looting_enchant"), LootingEnchantFunction.class);
-		}
-
 		public void serialize(JsonObject jsonObject, LootingEnchantFunction lootingEnchantFunction, JsonSerializationContext jsonSerializationContext) {
 			super.serialize(jsonObject, lootingEnchantFunction, jsonSerializationContext);
 			jsonObject.add("count", jsonSerializationContext.serialize(lootingEnchantFunction.value));

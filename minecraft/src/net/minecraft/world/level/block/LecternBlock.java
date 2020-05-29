@@ -255,7 +255,7 @@ public class LecternBlock extends BaseEntityBlock {
 				this.openScreen(level, blockPos, player);
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			ItemStack itemStack = player.getItemInHand(interactionHand);
 			return !itemStack.isEmpty() && !itemStack.getItem().is(ItemTags.LECTERN_BOOKS) ? InteractionResult.CONSUME : InteractionResult.PASS;

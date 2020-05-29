@@ -1,21 +1,28 @@
 package net.minecraft.network.protocol.game;
 
+import com.google.common.collect.Sets;
 import java.io.IOException;
+import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.DimensionType;
 
 public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> {
 	private int playerId;
 	private long seed;
 	private boolean hardcore;
 	private GameType gameType;
+	private Set<ResourceKey<Level>> levels;
 	private RegistryAccess.RegistryHolder registryHolder;
-	private ResourceLocation dimension;
+	private ResourceKey<DimensionType> dimensionType;
+	private ResourceKey<Level> dimension;
 	private int maxPlayers;
 	private int chunkRadius;
 	private boolean reducedDebugInfo;
@@ -31,8 +38,10 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 		GameType gameType,
 		long l,
 		boolean bl,
+		Set<ResourceKey<Level>> set,
 		RegistryAccess.RegistryHolder registryHolder,
-		ResourceLocation resourceLocation,
+		ResourceKey<DimensionType> resourceKey,
+		ResourceKey<Level> resourceKey2,
 		int j,
 		int k,
 		boolean bl2,
@@ -41,8 +50,10 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 		boolean bl5
 	) {
 		this.playerId = i;
+		this.levels = set;
 		this.registryHolder = registryHolder;
-		this.dimension = resourceLocation;
+		this.dimensionType = resourceKey;
+		this.dimension = resourceKey2;
 		this.seed = l;
 		this.gameType = gameType;
 		this.maxPlayers = j;
@@ -61,8 +72,16 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 		this.hardcore = (i & 8) == 8;
 		i &= -9;
 		this.gameType = GameType.byId(i);
+		int j = friendlyByteBuf.readVarInt();
+		this.levels = Sets.<ResourceKey<Level>>newHashSet();
+
+		for (int k = 0; k < j; k++) {
+			this.levels.add(ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation()));
+		}
+
 		this.registryHolder = friendlyByteBuf.readWithCodec(RegistryAccess.RegistryHolder.CODEC);
-		this.dimension = friendlyByteBuf.readResourceLocation();
+		this.dimensionType = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, friendlyByteBuf.readResourceLocation());
+		this.dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation());
 		this.seed = friendlyByteBuf.readLong();
 		this.maxPlayers = friendlyByteBuf.readUnsignedByte();
 		this.chunkRadius = friendlyByteBuf.readVarInt();
@@ -81,8 +100,15 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 		}
 
 		friendlyByteBuf.writeByte(i);
+		friendlyByteBuf.writeVarInt(this.levels.size());
+
+		for (ResourceKey<Level> resourceKey : this.levels) {
+			friendlyByteBuf.writeResourceLocation(resourceKey.location());
+		}
+
 		friendlyByteBuf.writeWithCodec(RegistryAccess.RegistryHolder.CODEC, this.registryHolder);
-		friendlyByteBuf.writeResourceLocation(this.dimension);
+		friendlyByteBuf.writeResourceLocation(this.dimensionType.location());
+		friendlyByteBuf.writeResourceLocation(this.dimension.location());
 		friendlyByteBuf.writeLong(this.seed);
 		friendlyByteBuf.writeByte(this.maxPlayers);
 		friendlyByteBuf.writeVarInt(this.chunkRadius);
@@ -117,12 +143,22 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 	}
 
 	@Environment(EnvType.CLIENT)
+	public Set<ResourceKey<Level>> levels() {
+		return this.levels;
+	}
+
+	@Environment(EnvType.CLIENT)
 	public RegistryAccess registryAccess() {
 		return this.registryHolder;
 	}
 
 	@Environment(EnvType.CLIENT)
-	public ResourceLocation getDimension() {
+	public ResourceKey<DimensionType> getDimensionType() {
+		return this.dimensionType;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public ResourceKey<Level> getDimension() {
 		return this.dimension;
 	}
 

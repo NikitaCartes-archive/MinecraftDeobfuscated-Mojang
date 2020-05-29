@@ -569,6 +569,18 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 			.addTag(BlockTags.SHULKER_BOXES)
 			.addTag(BlockTags.GOLD_ORES);
 		this.tag(BlockTags.PREVENT_MOB_SPAWNING_INSIDE).addTag(BlockTags.RAILS).add(Blocks.SWEET_BERRY_BUSH);
+		this.tag(BlockTags.FENCE_GATES)
+			.add(
+				Blocks.ACACIA_FENCE_GATE,
+				Blocks.BIRCH_FENCE_GATE,
+				Blocks.DARK_OAK_FENCE_GATE,
+				Blocks.JUNGLE_FENCE_GATE,
+				Blocks.OAK_FENCE_GATE,
+				Blocks.SPRUCE_FENCE_GATE,
+				Blocks.CRIMSON_FENCE_GATE,
+				Blocks.WARPED_FENCE_GATE
+			);
+		this.tag(BlockTags.UNSTABLE_BOTTOM_CENTER).addTag(BlockTags.FENCE_GATES);
 	}
 
 	@Override

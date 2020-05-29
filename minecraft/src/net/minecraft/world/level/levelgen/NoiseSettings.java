@@ -3,16 +3,17 @@ package net.minecraft.world.level.levelgen;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.util.Codecs;
 
 public class NoiseSettings {
 	public static final Codec<NoiseSettings> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					Codec.INT.fieldOf("height").forGetter(NoiseSettings::height),
+					Codecs.intRange(0, 256).fieldOf("height").forGetter(NoiseSettings::height),
 					NoiseSamplingSettings.CODEC.fieldOf("sampling").forGetter(NoiseSettings::noiseSamplingSettings),
 					NoiseSlideSettings.CODEC.fieldOf("top_slide").forGetter(NoiseSettings::topSlideSettings),
 					NoiseSlideSettings.CODEC.fieldOf("bottom_slide").forGetter(NoiseSettings::bottomSlideSettings),
-					Codec.INT.fieldOf("size_horizontal").forGetter(NoiseSettings::noiseSizeHorizontal),
-					Codec.INT.fieldOf("size_vertical").forGetter(NoiseSettings::noiseSizeVertical),
+					Codecs.intRange(1, 4).fieldOf("size_horizontal").forGetter(NoiseSettings::noiseSizeHorizontal),
+					Codecs.intRange(1, 4).fieldOf("size_vertical").forGetter(NoiseSettings::noiseSizeVertical),
 					Codec.DOUBLE.fieldOf("density_factor").forGetter(NoiseSettings::densityFactor),
 					Codec.DOUBLE.fieldOf("density_offset").forGetter(NoiseSettings::densityOffset),
 					Codec.BOOL.fieldOf("simplex_surface_noise").forGetter(NoiseSettings::useSimplexSurfaceNoise),

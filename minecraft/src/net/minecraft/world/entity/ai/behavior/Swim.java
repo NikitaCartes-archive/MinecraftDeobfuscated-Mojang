@@ -6,17 +6,15 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Mob;
 
 public class Swim extends Behavior<Mob> {
-	private final float height;
 	private final float chance;
 
-	public Swim(float f, float g) {
+	public Swim(float f) {
 		super(ImmutableMap.of());
-		this.height = f;
-		this.chance = g;
+		this.chance = f;
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Mob mob) {
-		return mob.isInWater() && mob.getFluidHeight(FluidTags.WATER) > (double)this.height || mob.isInLava();
+		return mob.isInWater() && mob.getFluidHeight(FluidTags.WATER) > mob.getFluidJumpThreshold() || mob.isInLava();
 	}
 
 	protected boolean canStillUse(ServerLevel serverLevel, Mob mob, long l) {

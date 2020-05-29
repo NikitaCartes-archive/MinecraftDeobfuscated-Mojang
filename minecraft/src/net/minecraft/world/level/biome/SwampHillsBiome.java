@@ -39,7 +39,7 @@ public final class SwampHillsBiome extends Biome {
 		BiomeDefaultFeatures.addDefaultMushrooms(this);
 		BiomeDefaultFeatures.addSwampExtraVegetation(this);
 		BiomeDefaultFeatures.addDefaultSprings(this);
-		BiomeDefaultFeatures.addSwampExtraDecoration(this);
+		BiomeDefaultFeatures.addFossilDecoration(this);
 		BiomeDefaultFeatures.addSurfaceFreezing(this);
 		this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.SHEEP, 12, 4, 4));
 		this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.PIG, 10, 4, 4));

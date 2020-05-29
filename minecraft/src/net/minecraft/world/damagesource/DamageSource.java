@@ -7,8 +7,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+import net.minecraft.world.entity.projectile.Fireball;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.entity.projectile.WitherSkull;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.phys.Vec3;
 
@@ -73,10 +74,14 @@ public class DamageSource {
 		return new IndirectEntityDamageSource("fireworks", fireworkRocketEntity, entity).setExplosion();
 	}
 
-	public static DamageSource fireball(AbstractHurtingProjectile abstractHurtingProjectile, @Nullable Entity entity) {
+	public static DamageSource fireball(Fireball fireball, @Nullable Entity entity) {
 		return entity == null
-			? new IndirectEntityDamageSource("onFire", abstractHurtingProjectile, abstractHurtingProjectile).setIsFire().setProjectile()
-			: new IndirectEntityDamageSource("fireball", abstractHurtingProjectile, entity).setIsFire().setProjectile();
+			? new IndirectEntityDamageSource("onFire", fireball, fireball).setIsFire().setProjectile()
+			: new IndirectEntityDamageSource("fireball", fireball, entity).setIsFire().setProjectile();
+	}
+
+	public static DamageSource witherSkull(WitherSkull witherSkull, Entity entity) {
+		return new IndirectEntityDamageSource("witherSkull", witherSkull, entity).setProjectile();
 	}
 
 	public static DamageSource thrown(Entity entity, @Nullable Entity entity2) {
@@ -92,9 +97,7 @@ public class DamageSource {
 	}
 
 	public static DamageSource explosion(@Nullable Explosion explosion) {
-		return explosion != null && explosion.getSourceMob() != null
-			? new EntityDamageSource("explosion.player", explosion.getSourceMob()).setScalesWithDifficulty().setExplosion()
-			: new DamageSource("explosion").setScalesWithDifficulty().setExplosion();
+		return explosion(explosion != null ? explosion.getSourceMob() : null);
 	}
 
 	public static DamageSource explosion(@Nullable LivingEntity livingEntity) {

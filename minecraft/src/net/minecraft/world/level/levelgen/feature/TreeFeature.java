@@ -153,7 +153,8 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 			List<FoliagePlacer.FoliageAttachment> list = treeConfiguration.trunkPlacer
 				.placeTrunk(levelSimulatedRW, random, p, blockPos2, set, boundingBox, treeConfiguration);
 			list.forEach(
-				foliageAttachment -> treeConfiguration.foliagePlacer.createFoliage(levelSimulatedRW, random, treeConfiguration, p, foliageAttachment, j, l, set2)
+				foliageAttachment -> treeConfiguration.foliagePlacer
+						.createFoliage(levelSimulatedRW, random, treeConfiguration, p, foliageAttachment, j, l, set2, boundingBox)
 			);
 			return true;
 		}

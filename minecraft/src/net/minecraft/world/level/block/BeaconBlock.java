@@ -44,7 +44,7 @@ public class BeaconBlock extends BaseEntityBlock implements BeaconBeamBlock {
 				player.awardStat(Stats.INTERACT_WITH_BEACON);
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		}
 	}
 

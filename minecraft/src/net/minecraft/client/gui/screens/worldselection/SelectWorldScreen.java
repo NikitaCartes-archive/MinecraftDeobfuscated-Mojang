@@ -8,13 +8,13 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class SelectWorldScreen extends Screen {
 	protected final Screen lastScreen;
-	private List<Component> toolTip;
+	private List<FormattedText> toolTip;
 	private Button deleteButton;
 	private Button selectButton;
 	private Button renameButton;
@@ -127,7 +127,7 @@ public class SelectWorldScreen extends Screen {
 		}
 	}
 
-	public void setToolTip(List<Component> list) {
+	public void setToolTip(List<FormattedText> list) {
 		this.toolTip = list;
 	}
 

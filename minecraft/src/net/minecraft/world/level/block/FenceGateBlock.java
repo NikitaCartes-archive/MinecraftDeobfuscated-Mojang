@@ -135,7 +135,7 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 		}
 
 		level.levelEvent(player, blockState.getValue(OPEN) ? 1008 : 1014, blockPos, 0);
-		return InteractionResult.SUCCESS;
+		return InteractionResult.sidedSuccess(level.isClientSide);
 	}
 
 	@Override

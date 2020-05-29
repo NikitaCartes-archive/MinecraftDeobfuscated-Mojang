@@ -47,7 +47,7 @@ public class FishingRodItem extends Item implements Vanishable {
 			player.awardStat(Stats.ITEM_USED.get(this));
 		}
 
-		return InteractionResultHolder.success(itemStack);
+		return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
 	}
 
 	@Override

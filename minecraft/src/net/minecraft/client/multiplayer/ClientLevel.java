@@ -34,12 +34,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Cursor3D;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
@@ -98,6 +98,8 @@ public class ClientLevel extends Level {
 	public ClientLevel(
 		ClientPacketListener clientPacketListener,
 		ClientLevel.ClientLevelData clientLevelData,
+		ResourceKey<Level> resourceKey,
+		ResourceKey<DimensionType> resourceKey2,
 		DimensionType dimensionType,
 		int i,
 		Supplier<ProfilerFiller> supplier,
@@ -105,7 +107,7 @@ public class ClientLevel extends Level {
 		boolean bl,
 		long l
 	) {
-		super(clientLevelData, dimensionType, supplier, true, bl, l);
+		super(clientLevelData, resourceKey, resourceKey2, dimensionType, supplier, true, bl, l);
 		this.chunkSource = new ClientChunkCache(this, i);
 		this.clientLevelData = clientLevelData;
 		this.connection = clientPacketListener;
@@ -199,7 +201,9 @@ public class ClientLevel extends Level {
 	}
 
 	public void tickNonPassenger(Entity entity) {
-		if (entity instanceof Player || this.getChunkSource().isEntityTickingChunk(entity)) {
+		if (!(entity instanceof Player) && !this.getChunkSource().isEntityTickingChunk(entity)) {
+			this.updateChunkPos(entity);
+		} else {
 			entity.setPosAndOldPos(entity.getX(), entity.getY(), entity.getZ());
 			entity.yRotO = entity.yRot;
 			entity.xRotO = entity.xRot;
@@ -240,24 +244,30 @@ public class ClientLevel extends Level {
 		}
 	}
 
-	public void updateChunkPos(Entity entity) {
-		this.getProfiler().push("chunkCheck");
-		int i = Mth.floor(entity.getX() / 16.0);
-		int j = Mth.floor(entity.getY() / 16.0);
-		int k = Mth.floor(entity.getZ() / 16.0);
-		if (!entity.inChunk || entity.xChunk != i || entity.yChunk != j || entity.zChunk != k) {
-			if (entity.inChunk && this.hasChunk(entity.xChunk, entity.zChunk)) {
-				this.getChunk(entity.xChunk, entity.zChunk).removeEntity(entity, entity.yChunk);
+	private void updateChunkPos(Entity entity) {
+		if (entity.checkAndResetUpdateChunkPos()) {
+			this.getProfiler().push("chunkCheck");
+			int i = Mth.floor(entity.getX() / 16.0);
+			int j = Mth.floor(entity.getY() / 16.0);
+			int k = Mth.floor(entity.getZ() / 16.0);
+			if (!entity.inChunk || entity.xChunk != i || entity.yChunk != j || entity.zChunk != k) {
+				if (entity.inChunk && this.hasChunk(entity.xChunk, entity.zChunk)) {
+					this.getChunk(entity.xChunk, entity.zChunk).removeEntity(entity, entity.yChunk);
+				}
+
+				if (!entity.checkAndResetForcedChunkAdditionFlag() && !this.hasChunk(i, k)) {
+					if (entity.inChunk) {
+						LOGGER.warn("Entity {} left loaded chunk area", entity);
+					}
+
+					entity.inChunk = false;
+				} else {
+					this.getChunk(i, k).addEntity(entity);
+				}
 			}
 
-			if (!entity.checkAndResetTeleportedFlag() && !this.hasChunk(i, k)) {
-				entity.inChunk = false;
-			} else {
-				this.getChunk(i, k).addEntity(entity);
-			}
+			this.getProfiler().pop();
 		}
-
-		this.getProfiler().pop();
 	}
 
 	public void unload(LevelChunk levelChunk) {
@@ -566,11 +576,6 @@ public class ClientLevel extends Level {
 	@Override
 	public TagManager getTagManager() {
 		return this.connection.getTags();
-	}
-
-	@Override
-	public RegistryAccess registryAccess() {
-		return this.connection.registryAccess();
 	}
 
 	@Override

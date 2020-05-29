@@ -32,7 +32,7 @@ public class DragonEggBlock extends FallingBlock {
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		this.teleport(blockState, level, blockPos);
-		return InteractionResult.SUCCESS;
+		return InteractionResult.sidedSuccess(level.isClientSide);
 	}
 
 	@Override

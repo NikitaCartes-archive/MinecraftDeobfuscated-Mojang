@@ -26,6 +26,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.OverworldBiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -40,7 +41,7 @@ public class WorldGenSettings {
 						Codec.BOOL.fieldOf("generate_features").withDefault(true).stable().forGetter(WorldGenSettings::generateFeatures),
 						Codec.BOOL.fieldOf("bonus_chest").withDefault(false).stable().forGetter(WorldGenSettings::generateBonusChest),
 						Codec.unboundedMap(
-								ResourceLocation.CODEC.xmap(ResourceKey.elementKey(Registry.DIMENSION_TYPE_REGISTRY), ResourceKey::location),
+								ResourceLocation.CODEC.xmap(ResourceKey.elementKey(Registry.DIMENSION_REGISTRY), ResourceKey::location),
 								Codec.mapPair(DimensionType.CODEC.fieldOf("type"), ChunkGenerator.CODEC.fieldOf("generator")).codec()
 							)
 							.xmap(DimensionType::sortMap, Function.identity())
@@ -62,7 +63,7 @@ public class WorldGenSettings {
 	private final long seed;
 	private final boolean generateFeatures;
 	private final boolean generateBonusChest;
-	private final LinkedHashMap<ResourceKey<DimensionType>, Pair<DimensionType, ChunkGenerator>> dimensions;
+	private final LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> dimensions;
 	private final Optional<String> legacyCustomOptions;
 
 	private DataResult<WorldGenSettings> guardExperimental() {
@@ -73,12 +74,12 @@ public class WorldGenSettings {
 		return DimensionType.stable(this.seed, this.dimensions);
 	}
 
-	public WorldGenSettings(long l, boolean bl, boolean bl2, LinkedHashMap<ResourceKey<DimensionType>, Pair<DimensionType, ChunkGenerator>> linkedHashMap) {
+	public WorldGenSettings(long l, boolean bl, boolean bl2, LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> linkedHashMap) {
 		this(l, bl, bl2, linkedHashMap, Optional.empty());
 	}
 
 	private WorldGenSettings(
-		long l, boolean bl, boolean bl2, LinkedHashMap<ResourceKey<DimensionType>, Pair<DimensionType, ChunkGenerator>> linkedHashMap, Optional<String> optional
+		long l, boolean bl, boolean bl2, LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> linkedHashMap, Optional<String> optional
 	) {
 		this.seed = l;
 		this.generateFeatures = bl;
@@ -108,16 +109,16 @@ public class WorldGenSettings {
 		return this.generateBonusChest;
 	}
 
-	public static LinkedHashMap<ResourceKey<DimensionType>, Pair<DimensionType, ChunkGenerator>> withOverworld(
-		LinkedHashMap<ResourceKey<DimensionType>, Pair<DimensionType, ChunkGenerator>> linkedHashMap, ChunkGenerator chunkGenerator
+	public static LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> withOverworld(
+		LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> linkedHashMap, ChunkGenerator chunkGenerator
 	) {
-		LinkedHashMap<ResourceKey<DimensionType>, Pair<DimensionType, ChunkGenerator>> linkedHashMap2 = Maps.newLinkedHashMap();
+		LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> linkedHashMap2 = Maps.newLinkedHashMap();
 		Pair<DimensionType, ChunkGenerator> pair = (Pair<DimensionType, ChunkGenerator>)linkedHashMap.get(DimensionType.OVERWORLD_LOCATION);
-		DimensionType dimensionType = pair == null ? DimensionType.defaultOverworld() : pair.getFirst();
-		linkedHashMap2.put(DimensionType.OVERWORLD_LOCATION, Pair.of(dimensionType, chunkGenerator));
+		DimensionType dimensionType = pair == null ? DimensionType.makeDefaultOverworld() : pair.getFirst();
+		linkedHashMap2.put(Level.OVERWORLD, Pair.of(dimensionType, chunkGenerator));
 
-		for (Entry<ResourceKey<DimensionType>, Pair<DimensionType, ChunkGenerator>> entry : linkedHashMap.entrySet()) {
-			if (!Objects.equals(entry.getKey(), DimensionType.OVERWORLD_LOCATION)) {
+		for (Entry<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> entry : linkedHashMap.entrySet()) {
+			if (entry.getKey() != Level.OVERWORLD) {
 				linkedHashMap2.put(entry.getKey(), entry.getValue());
 			}
 		}
@@ -125,7 +126,7 @@ public class WorldGenSettings {
 		return linkedHashMap2;
 	}
 
-	public LinkedHashMap<ResourceKey<DimensionType>, Pair<DimensionType, ChunkGenerator>> dimensions() {
+	public LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> dimensions() {
 		return this.dimensions;
 	}
 
@@ -184,7 +185,7 @@ public class WorldGenSettings {
 			}
 		}
 
-		LinkedHashMap<ResourceKey<DimensionType>, Pair<DimensionType, ChunkGenerator>> linkedHashMap = DimensionType.defaultDimensions(l);
+		LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> linkedHashMap = DimensionType.defaultDimensions(l);
 		switch (string5) {
 			case "flat":
 				JsonObject jsonObject = !string.isEmpty() ? GsonHelper.parse(string) : new JsonObject();
@@ -213,12 +214,12 @@ public class WorldGenSettings {
 	@Environment(EnvType.CLIENT)
 	public WorldGenSettings withSeed(boolean bl, OptionalLong optionalLong) {
 		long l = optionalLong.orElse(this.seed);
-		LinkedHashMap<ResourceKey<DimensionType>, Pair<DimensionType, ChunkGenerator>> linkedHashMap;
+		LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> linkedHashMap;
 		if (optionalLong.isPresent()) {
 			linkedHashMap = Maps.newLinkedHashMap();
 			long m = optionalLong.getAsLong();
 
-			for (Entry<ResourceKey<DimensionType>, Pair<DimensionType, ChunkGenerator>> entry : this.dimensions.entrySet()) {
+			for (Entry<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> entry : this.dimensions.entrySet()) {
 				linkedHashMap.put(entry.getKey(), Pair.of(((Pair)entry.getValue()).getFirst(), ((ChunkGenerator)((Pair)entry.getValue()).getSecond()).withSeed(m)));
 			}
 		} else {

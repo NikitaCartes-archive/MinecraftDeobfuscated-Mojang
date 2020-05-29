@@ -157,7 +157,7 @@ public class GrindstoneBlock extends FaceAttachedHorizontalDirectionalBlock {
 		} else {
 			player.openMenu(blockState.getMenuProvider(level, blockPos));
 			player.awardStat(Stats.INTERACT_WITH_GRINDSTONE);
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		}
 	}
 

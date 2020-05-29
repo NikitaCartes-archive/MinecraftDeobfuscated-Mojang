@@ -30,6 +30,7 @@ public final class DesertBiome extends Biome {
 		this.addStructureStart(BiomeDefaultFeatures.VILLAGE_DESERT);
 		this.addStructureStart(BiomeDefaultFeatures.PILLAGER_OUTPOST);
 		this.addStructureStart(BiomeDefaultFeatures.DESERT_PYRAMID);
+		BiomeDefaultFeatures.addFossilDecoration(this);
 		BiomeDefaultFeatures.addDefaultOverworldLandStructures(this);
 		this.addStructureStart(BiomeDefaultFeatures.RUINED_PORTAL_DESERT);
 		BiomeDefaultFeatures.addDefaultCarvers(this);

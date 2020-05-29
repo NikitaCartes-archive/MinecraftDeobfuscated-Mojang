@@ -16,11 +16,14 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SkullBlockEntity extends BlockEntity implements TickableBlockEntity {
+	@Nullable
+	private static GameProfileCache profileCache;
+	@Nullable
+	private static MinecraftSessionService sessionService;
+	@Nullable
 	private GameProfile owner;
 	private int mouthTickCount;
 	private boolean isMovingMouth;
-	private static GameProfileCache profileCache;
-	private static MinecraftSessionService sessionService;
 
 	public SkullBlockEntity() {
 		super(BlockEntityType.SKULL);
@@ -104,7 +107,8 @@ public class SkullBlockEntity extends BlockEntity implements TickableBlockEntity
 		this.setChanged();
 	}
 
-	public static GameProfile updateGameprofile(GameProfile gameProfile) {
+	@Nullable
+	public static GameProfile updateGameprofile(@Nullable GameProfile gameProfile) {
 		if (gameProfile != null && !StringUtil.isNullOrEmpty(gameProfile.getName())) {
 			if (gameProfile.isComplete() && gameProfile.getProperties().containsKey("textures")) {
 				return gameProfile;

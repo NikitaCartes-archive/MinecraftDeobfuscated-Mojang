@@ -1,6 +1,7 @@
 package net.minecraft.commands;
 
 import com.google.common.collect.Lists;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -28,7 +29,9 @@ public class CommandFunction {
 		return this.entries;
 	}
 
-	public static CommandFunction fromLines(ResourceLocation resourceLocation, ServerFunctionManager serverFunctionManager, List<String> list) {
+	public static CommandFunction fromLines(
+		ResourceLocation resourceLocation, CommandDispatcher<CommandSourceStack> commandDispatcher, CommandSourceStack commandSourceStack, List<String> list
+	) {
 		List<CommandFunction.Entry> list2 = Lists.<CommandFunction.Entry>newArrayListWithCapacity(list.size());
 
 		for (int i = 0; i < list.size(); i++) {
@@ -49,17 +52,14 @@ public class CommandFunction {
 				}
 
 				try {
-					ParseResults<CommandSourceStack> parseResults = serverFunctionManager.getServer()
-						.getCommands()
-						.getDispatcher()
-						.parse(stringReader, serverFunctionManager.getCompilationContext());
+					ParseResults<CommandSourceStack> parseResults = commandDispatcher.parse(stringReader, commandSourceStack);
 					if (parseResults.getReader().canRead()) {
 						throw Commands.getParseException(parseResults);
 					}
 
 					list2.add(new CommandFunction.CommandEntry(parseResults));
-				} catch (CommandSyntaxException var9) {
-					throw new IllegalArgumentException("Whilst parsing command on line " + j + ": " + var9.getMessage());
+				} catch (CommandSyntaxException var10) {
+					throw new IllegalArgumentException("Whilst parsing command on line " + j + ": " + var10.getMessage());
 				}
 			}
 		}

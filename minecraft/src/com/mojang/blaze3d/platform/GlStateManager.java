@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.lwjgl.opengl.ARBFramebufferObject;
+import org.lwjgl.opengl.EXTFramebufferBlit;
 import org.lwjgl.opengl.EXTFramebufferObject;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -44,7 +45,7 @@ public class GlStateManager {
 	private static final GlStateManager.StencilState STENCIL = new GlStateManager.StencilState();
 	private static final FloatBuffer FLOAT_ARG_BUFFER = MemoryTracker.createFloatBuffer(4);
 	private static int activeTexture;
-	private static final GlStateManager.TextureState[] TEXTURES = (GlStateManager.TextureState[])IntStream.range(0, 8)
+	private static final GlStateManager.TextureState[] TEXTURES = (GlStateManager.TextureState[])IntStream.range(0, 12)
 		.mapToObj(i -> new GlStateManager.TextureState())
 		.toArray(GlStateManager.TextureState[]::new);
 	private static int shadeModel = 7425;
@@ -52,6 +53,7 @@ public class GlStateManager {
 	private static final GlStateManager.ColorMask COLOR_MASK = new GlStateManager.ColorMask();
 	private static final GlStateManager.Color COLOR = new GlStateManager.Color();
 	private static GlStateManager.FboMode fboMode;
+	private static GlStateManager.FboBlitMode fboBlitMode;
 
 	@Deprecated
 	public static void _pushLightingAttributes() {
@@ -218,6 +220,14 @@ public class GlStateManager {
 
 	public static String _init_fbo(GLCapabilities gLCapabilities) {
 		RenderSystem.assertThread(RenderSystem::isInInitPhase);
+		if (gLCapabilities.OpenGL30) {
+			fboBlitMode = GlStateManager.FboBlitMode.BASE;
+		} else if (gLCapabilities.GL_EXT_framebuffer_blit) {
+			fboBlitMode = GlStateManager.FboBlitMode.EXT;
+		} else {
+			fboBlitMode = GlStateManager.FboBlitMode.NONE;
+		}
+
 		if (gLCapabilities.OpenGL30) {
 			fboMode = GlStateManager.FboMode.BASE;
 			GlConst.GL_FRAMEBUFFER = 36160;
@@ -404,6 +414,11 @@ public class GlStateManager {
 		GL15.glDeleteBuffers(i);
 	}
 
+	public static void _glCopyTexSubImage2D(int i, int j, int k, int l, int m, int n, int o, int p) {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		GL20.glCopyTexSubImage2D(i, j, k, l, m, n, o, p);
+	}
+
 	public static void _glBindFramebuffer(int i, int j) {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
 		switch (fboMode) {
@@ -418,31 +433,37 @@ public class GlStateManager {
 		}
 	}
 
-	public static void _glBindRenderbuffer(int i, int j) {
+	public static int getFramebufferDepthTexture() {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
 		switch (fboMode) {
 			case BASE:
-				GL30.glBindRenderbuffer(i, j);
+				if (GL30.glGetFramebufferAttachmentParameteri(36160, 36096, 36048) == 5890) {
+					return GL30.glGetFramebufferAttachmentParameteri(36160, 36096, 36049);
+				}
 				break;
 			case ARB:
-				ARBFramebufferObject.glBindRenderbuffer(i, j);
+				if (ARBFramebufferObject.glGetFramebufferAttachmentParameteri(36160, 36096, 36048) == 5890) {
+					return ARBFramebufferObject.glGetFramebufferAttachmentParameteri(36160, 36096, 36049);
+				}
 				break;
 			case EXT:
-				EXTFramebufferObject.glBindRenderbufferEXT(i, j);
+				if (EXTFramebufferObject.glGetFramebufferAttachmentParameteriEXT(36160, 36096, 36048) == 5890) {
+					return EXTFramebufferObject.glGetFramebufferAttachmentParameteriEXT(36160, 36096, 36049);
+				}
 		}
+
+		return 0;
 	}
 
-	public static void _glDeleteRenderbuffers(int i) {
+	public static void _glBlitFrameBuffer(int i, int j, int k, int l, int m, int n, int o, int p, int q, int r) {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-		switch (fboMode) {
+		switch (fboBlitMode) {
 			case BASE:
-				GL30.glDeleteRenderbuffers(i);
-				break;
-			case ARB:
-				ARBFramebufferObject.glDeleteRenderbuffers(i);
+				GL30.glBlitFramebuffer(i, j, k, l, m, n, o, p, q, r);
 				break;
 			case EXT:
-				EXTFramebufferObject.glDeleteRenderbuffersEXT(i);
+				EXTFramebufferBlit.glBlitFramebufferEXT(i, j, k, l, m, n, o, p, q, r);
+			case NONE:
 		}
 	}
 
@@ -474,48 +495,6 @@ public class GlStateManager {
 		}
 	}
 
-	public static int glGenRenderbuffers() {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-		switch (fboMode) {
-			case BASE:
-				return GL30.glGenRenderbuffers();
-			case ARB:
-				return ARBFramebufferObject.glGenRenderbuffers();
-			case EXT:
-				return EXTFramebufferObject.glGenRenderbuffersEXT();
-			default:
-				return -1;
-		}
-	}
-
-	public static void _glRenderbufferStorage(int i, int j, int k, int l) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-		switch (fboMode) {
-			case BASE:
-				GL30.glRenderbufferStorage(i, j, k, l);
-				break;
-			case ARB:
-				ARBFramebufferObject.glRenderbufferStorage(i, j, k, l);
-				break;
-			case EXT:
-				EXTFramebufferObject.glRenderbufferStorageEXT(i, j, k, l);
-		}
-	}
-
-	public static void _glFramebufferRenderbuffer(int i, int j, int k, int l) {
-		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-		switch (fboMode) {
-			case BASE:
-				GL30.glFramebufferRenderbuffer(i, j, k, l);
-				break;
-			case ARB:
-				ARBFramebufferObject.glFramebufferRenderbuffer(i, j, k, l);
-				break;
-			case EXT:
-				EXTFramebufferObject.glFramebufferRenderbufferEXT(i, j, k, l);
-		}
-	}
-
 	public static int glCheckFramebufferStatus(int i) {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
 		switch (fboMode) {
@@ -542,6 +521,11 @@ public class GlStateManager {
 			case EXT:
 				EXTFramebufferObject.glFramebufferTexture2DEXT(i, j, k, l, m);
 		}
+	}
+
+	@Deprecated
+	public static int getActiveTextureName() {
+		return TEXTURES[activeTexture].binding;
 	}
 
 	public static void glActiveTexture(int i) {
@@ -1257,6 +1241,10 @@ public class GlStateManager {
 		return GL11.glGetInteger(i);
 	}
 
+	public static boolean supportsFramebufferBlit() {
+		return fboBlitMode != GlStateManager.FboBlitMode.NONE;
+	}
+
 	@Deprecated
 	@Environment(EnvType.CLIENT)
 	static class AlphaState {
@@ -1412,6 +1400,13 @@ public class GlStateManager {
 		private DestFactor(int j) {
 			this.value = j;
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static enum FboBlitMode {
+		BASE,
+		EXT,
+		NONE;
 	}
 
 	@Environment(EnvType.CLIENT)

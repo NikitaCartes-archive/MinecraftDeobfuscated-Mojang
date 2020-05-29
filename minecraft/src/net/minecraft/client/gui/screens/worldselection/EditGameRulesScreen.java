@@ -24,6 +24,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -36,7 +37,7 @@ public class EditGameRulesScreen extends Screen {
 	private final Set<EditGameRulesScreen.RuleEntry> invalidEntries = Sets.<EditGameRulesScreen.RuleEntry>newHashSet();
 	private Button doneButton;
 	@Nullable
-	private List<Component> tooltip;
+	private List<FormattedText> tooltip;
 	private final GameRules gameRules;
 
 	public EditGameRulesScreen(GameRules gameRules, Consumer<Optional<GameRules>> consumer) {
@@ -80,7 +81,7 @@ public class EditGameRulesScreen extends Screen {
 		}
 	}
 
-	private void setTooltip(@Nullable List<Component> list) {
+	private void setTooltip(@Nullable List<FormattedText> list) {
 		this.tooltip = list;
 	}
 
@@ -103,7 +104,7 @@ public class EditGameRulesScreen extends Screen {
 		private final Button checkbox;
 		private final List<? extends GuiEventListener> children;
 
-		public BooleanRuleEntry(Component component, List<Component> list, String string, GameRules.BooleanValue booleanValue) {
+		public BooleanRuleEntry(Component component, List<FormattedText> list, String string, GameRules.BooleanValue booleanValue) {
 			super(list);
 			this.checkbox = new Button(10, 5, 220, 20, this.getMessage(component, booleanValue.get()), button -> {
 				boolean bl = !booleanValue.get();
@@ -158,7 +159,7 @@ public class EditGameRulesScreen extends Screen {
 	@FunctionalInterface
 	@Environment(EnvType.CLIENT)
 	interface EntryFactory<T extends GameRules.Value<T>> {
-		EditGameRulesScreen.RuleEntry create(Component component, List<Component> list, String string, T value);
+		EditGameRulesScreen.RuleEntry create(Component component, List<FormattedText> list, String string, T value);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -167,7 +168,7 @@ public class EditGameRulesScreen extends Screen {
 		private final EditBox input;
 		private final List<? extends GuiEventListener> children;
 
-		public IntegerRuleEntry(Component component, List<Component> list, String string, GameRules.IntegerValue integerValue) {
+		public IntegerRuleEntry(Component component, List<FormattedText> list, String string, GameRules.IntegerValue integerValue) {
 			super(list);
 			this.label = component;
 			this.input = new EditBox(EditGameRulesScreen.this.minecraft.font, 10, 5, 42, 20, component.mutableCopy().append("\n").append(string).append("\n"));
@@ -201,9 +202,9 @@ public class EditGameRulesScreen extends Screen {
 	@Environment(EnvType.CLIENT)
 	public abstract class RuleEntry extends ContainerObjectSelectionList.Entry<EditGameRulesScreen.RuleEntry> {
 		@Nullable
-		private final List<Component> tooltip;
+		private final List<FormattedText> tooltip;
 
-		public RuleEntry(@Nullable List<Component> list) {
+		public RuleEntry(@Nullable List<FormattedText> list) {
 			this.tooltip = list;
 		}
 	}
@@ -231,10 +232,10 @@ public class EditGameRulesScreen extends Screen {
 					String string = value.serialize();
 					Component component3 = new TranslatableComponent("editGamerule.default", new TextComponent(string)).withStyle(ChatFormatting.GRAY);
 					String string2 = key.getDescriptionId() + ".description";
-					List<Component> list;
+					List<FormattedText> list;
 					String string3;
 					if (I18n.exists(string2)) {
-						Builder<Component> builder = ImmutableList.<Component>builder().add(component2);
+						Builder<FormattedText> builder = ImmutableList.<FormattedText>builder().add(component2);
 						Component component4 = new TranslatableComponent(string2);
 						EditGameRulesScreen.this.font.split(component4, 150).forEach(builder::add);
 						list = builder.add(component3).build();

@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class MegaPineFoliagePlacer extends FoliagePlacer {
 	public static final Codec<MegaPineFoliagePlacer> CODEC = RecordCodecBuilder.create(
@@ -44,7 +45,8 @@ public class MegaPineFoliagePlacer extends FoliagePlacer {
 		int j,
 		int k,
 		Set<BlockPos> set,
-		int l
+		int l,
+		BoundingBox boundingBox
 	) {
 		BlockPos blockPos = foliageAttachment.foliagePos();
 		int m = 0;
@@ -60,7 +62,7 @@ public class MegaPineFoliagePlacer extends FoliagePlacer {
 			}
 
 			this.placeLeavesRow(
-				levelSimulatedRW, random, treeConfiguration, new BlockPos(blockPos.getX(), n, blockPos.getZ()), q, set, 0, foliageAttachment.doubleTrunk()
+				levelSimulatedRW, random, treeConfiguration, new BlockPos(blockPos.getX(), n, blockPos.getZ()), q, set, 0, foliageAttachment.doubleTrunk(), boundingBox
 			);
 			m = p;
 		}

@@ -39,7 +39,7 @@ public abstract class AbstractFurnaceBlock extends BaseEntityBlock {
 			return InteractionResult.SUCCESS;
 		} else {
 			this.openContainer(level, blockPos, player);
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		}
 	}
 

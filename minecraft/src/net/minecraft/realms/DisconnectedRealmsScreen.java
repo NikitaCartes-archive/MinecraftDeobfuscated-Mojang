@@ -11,13 +11,14 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 
 @Environment(EnvType.CLIENT)
 public class DisconnectedRealmsScreen extends RealmsScreen {
 	private final String title;
 	private final Component reason;
 	@Nullable
-	private List<Component> lines;
+	private List<FormattedText> lines;
 	private final Screen parent;
 	private int textHeight;
 
@@ -56,8 +57,8 @@ public class DisconnectedRealmsScreen extends RealmsScreen {
 		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, this.height / 2 - this.textHeight / 2 - 9 * 2, 11184810);
 		int k = this.height / 2 - this.textHeight / 2;
 		if (this.lines != null) {
-			for (Component component : this.lines) {
-				this.drawCenteredString(poseStack, this.font, component, this.width / 2, k, 16777215);
+			for (FormattedText formattedText : this.lines) {
+				this.drawCenteredString(poseStack, this.font, formattedText, this.width / 2, k, 16777215);
 				k += 9;
 			}
 		}

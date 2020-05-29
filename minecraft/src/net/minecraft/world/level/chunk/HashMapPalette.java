@@ -1,6 +1,7 @@
 package net.minecraft.world.level.chunk;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -41,8 +42,14 @@ public class HashMapPalette<T> implements Palette<T> {
 	}
 
 	@Override
-	public boolean maybeHas(T object) {
-		return this.values.getId(object) != -1;
+	public boolean maybeHas(Predicate<T> predicate) {
+		for (int i = 0; i < this.getSize(); i++) {
+			if (predicate.test(this.values.byId(i))) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	@Nullable

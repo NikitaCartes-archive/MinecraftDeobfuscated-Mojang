@@ -80,7 +80,7 @@ public class EnderChestBlock extends AbstractChestBlock<EnderChestBlockEntity> i
 		if (playerEnderChestContainer != null && blockEntity instanceof EnderChestBlockEntity) {
 			BlockPos blockPos2 = blockPos.above();
 			if (level.getBlockState(blockPos2).isRedstoneConductor(level, blockPos2)) {
-				return InteractionResult.SUCCESS;
+				return InteractionResult.sidedSuccess(level.isClientSide);
 			} else if (level.isClientSide) {
 				return InteractionResult.SUCCESS;
 			} else {
@@ -89,10 +89,10 @@ public class EnderChestBlock extends AbstractChestBlock<EnderChestBlockEntity> i
 				player.openMenu(new SimpleMenuProvider((i, inventory, playerx) -> ChestMenu.threeRows(i, inventory, playerEnderChestContainer), CONTAINER_TITLE));
 				player.awardStat(Stats.OPEN_ENDERCHEST);
 				PiglinAi.angerNearbyPiglinsThatSee(player);
-				return InteractionResult.SUCCESS;
+				return InteractionResult.CONSUME;
 			}
 		} else {
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
 	}
 

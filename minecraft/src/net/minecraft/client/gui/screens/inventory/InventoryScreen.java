@@ -33,6 +33,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 	public InventoryScreen(Player player) {
 		super(player.inventoryMenu, player.inventory, new TranslatableComponent("container.crafting"));
 		this.passEvents = true;
+		this.titleLabelX = 97;
 	}
 
 	@Override
@@ -68,7 +69,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 
 	@Override
 	protected void renderLabels(PoseStack poseStack, int i, int j) {
-		this.font.draw(poseStack, this.title, 97.0F, 8.0F, 4210752);
+		this.font.draw(poseStack, this.title, (float)this.titleLabelX, (float)this.titleLabelY, 4210752);
 	}
 
 	@Override

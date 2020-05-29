@@ -8,9 +8,10 @@ import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.LegacyStructureDataHandler;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 
@@ -25,14 +26,14 @@ public class ChunkStorage implements AutoCloseable {
 		this.worker = new IOWorker(file, bl, "chunk");
 	}
 
-	public CompoundTag upgradeChunkTag(DimensionType dimensionType, Supplier<DimensionDataStorage> supplier, CompoundTag compoundTag) {
+	public CompoundTag upgradeChunkTag(ResourceKey<Level> resourceKey, Supplier<DimensionDataStorage> supplier, CompoundTag compoundTag) {
 		int i = getVersion(compoundTag);
 		int j = 1493;
 		if (i < 1493) {
 			compoundTag = NbtUtils.update(this.fixerUpper, DataFixTypes.CHUNK, compoundTag, i, 1493);
 			if (compoundTag.getCompound("Level").getBoolean("hasLegacyStructureData")) {
 				if (this.legacyStructureHandler == null) {
-					this.legacyStructureHandler = LegacyStructureDataHandler.getLegacyStructureHandler(dimensionType, (DimensionDataStorage)supplier.get());
+					this.legacyStructureHandler = LegacyStructureDataHandler.getLegacyStructureHandler(resourceKey, (DimensionDataStorage)supplier.get());
 				}
 
 				compoundTag = this.legacyStructureHandler.updateFromLegacy(compoundTag);

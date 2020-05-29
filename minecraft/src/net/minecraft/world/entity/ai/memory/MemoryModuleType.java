@@ -26,6 +26,7 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<Void> DUMMY = register("dummy");
 	public static final MemoryModuleType<GlobalPos> HOME = register("home", GlobalPos.CODEC);
 	public static final MemoryModuleType<GlobalPos> JOB_SITE = register("job_site", GlobalPos.CODEC);
+	public static final MemoryModuleType<GlobalPos> POTENTIAL_JOB_SITE = register("potential_job_site", GlobalPos.CODEC);
 	public static final MemoryModuleType<GlobalPos> MEETING_POINT = register("meeting_point", GlobalPos.CODEC);
 	public static final MemoryModuleType<List<GlobalPos>> SECONDARY_JOB_SITE = register("secondary_job_site");
 	public static final MemoryModuleType<List<LivingEntity>> LIVING_ENTITIES = register("mobs");
@@ -62,6 +63,7 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<Boolean> ADMIRING_DISABLED = register("admiring_disabled", Codec.BOOL);
 	public static final MemoryModuleType<Boolean> HUNTED_RECENTLY = register("hunted_recently", Codec.BOOL);
 	public static final MemoryModuleType<BlockPos> CELEBRATE_LOCATION = register("celebrate_location");
+	public static final MemoryModuleType<Boolean> DANCING = register("dancing");
 	public static final MemoryModuleType<WitherSkeleton> NEAREST_VISIBLE_WITHER_SKELETON = register("nearest_visible_wither_skeleton");
 	public static final MemoryModuleType<Hoglin> NEAREST_VISIBLE_HUNTABLE_HOGLIN = register("nearest_visible_huntable_hoglin");
 	public static final MemoryModuleType<Hoglin> NEAREST_VISIBLE_BABY_HOGLIN = register("nearest_visible_baby_hoglin");

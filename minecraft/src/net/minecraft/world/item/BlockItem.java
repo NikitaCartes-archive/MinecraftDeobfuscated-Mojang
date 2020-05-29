@@ -37,7 +37,7 @@ public class BlockItem extends Item {
 	@Override
 	public InteractionResult useOn(UseOnContext useOnContext) {
 		InteractionResult interactionResult = this.place(new BlockPlaceContext(useOnContext));
-		return interactionResult != InteractionResult.SUCCESS && this.isEdible()
+		return !interactionResult.consumesAction() && this.isEdible()
 			? this.use(useOnContext.level, useOnContext.player, useOnContext.hand).getResult()
 			: interactionResult;
 	}
@@ -74,7 +74,7 @@ public class BlockItem extends Item {
 					SoundType soundType = blockState2.getSoundType();
 					level.playSound(player, blockPos, this.getPlaceSound(blockState2), SoundSource.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
 					itemStack.shrink(1);
-					return InteractionResult.SUCCESS;
+					return InteractionResult.sidedSuccess(level.isClientSide);
 				}
 			}
 		}

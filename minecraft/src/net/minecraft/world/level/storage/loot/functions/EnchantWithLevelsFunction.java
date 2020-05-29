@@ -4,7 +4,6 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.Random;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -21,6 +20,11 @@ public class EnchantWithLevelsFunction extends LootItemConditionalFunction {
 		super(lootItemConditions);
 		this.levels = randomIntGenerator;
 		this.treasure = bl;
+	}
+
+	@Override
+	public LootItemFunctionType getType() {
+		return LootItemFunctions.ENCHANT_WITH_LEVELS;
 	}
 
 	@Override
@@ -57,10 +61,6 @@ public class EnchantWithLevelsFunction extends LootItemConditionalFunction {
 	}
 
 	public static class Serializer extends LootItemConditionalFunction.Serializer<EnchantWithLevelsFunction> {
-		public Serializer() {
-			super(new ResourceLocation("enchant_with_levels"), EnchantWithLevelsFunction.class);
-		}
-
 		public void serialize(JsonObject jsonObject, EnchantWithLevelsFunction enchantWithLevelsFunction, JsonSerializationContext jsonSerializationContext) {
 			super.serialize(jsonObject, enchantWithLevelsFunction, jsonSerializationContext);
 			jsonObject.add("levels", RandomIntGenerators.serialize(enchantWithLevelsFunction.levels, jsonSerializationContext));

@@ -54,8 +54,8 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 	}
 
 	@Override
-	public double getRideHeight() {
-		return super.getRideHeight() - 0.25;
+	public double getPassengersRidingOffset() {
+		return super.getPassengersRidingOffset() - 0.25;
 	}
 
 	@Override

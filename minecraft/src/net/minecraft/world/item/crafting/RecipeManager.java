@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
@@ -44,15 +45,15 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 		super(GSON, "recipes");
 	}
 
-	protected void apply(Map<ResourceLocation, JsonObject> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+	protected void apply(Map<ResourceLocation, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
 		this.hasErrors = false;
 		Map<RecipeType<?>, Builder<ResourceLocation, Recipe<?>>> map2 = Maps.<RecipeType<?>, Builder<ResourceLocation, Recipe<?>>>newHashMap();
 
-		for (Entry<ResourceLocation, JsonObject> entry : map.entrySet()) {
+		for (Entry<ResourceLocation, JsonElement> entry : map.entrySet()) {
 			ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
 
 			try {
-				Recipe<?> recipe = fromJson(resourceLocation, (JsonObject)entry.getValue());
+				Recipe<?> recipe = fromJson(resourceLocation, GsonHelper.convertToJsonObject((JsonElement)entry.getValue(), "top element"));
 				((Builder)map2.computeIfAbsent(recipe.getType(), recipeType -> ImmutableMap.builder())).put(resourceLocation, recipe);
 			} catch (IllegalArgumentException | JsonParseException var9) {
 				LOGGER.error("Parsing error loading recipe {}", resourceLocation, var9);

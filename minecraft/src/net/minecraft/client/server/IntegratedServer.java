@@ -16,10 +16,12 @@ import net.minecraft.CrashReportDetail;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
-import net.minecraft.commands.Commands;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerResources;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
+import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.packs.repository.UnopenedPack;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -42,6 +44,8 @@ public class IntegratedServer extends MinecraftServer {
 	public IntegratedServer(
 		Minecraft minecraft,
 		LevelStorageSource.LevelStorageAccess levelStorageAccess,
+		PackRepository<UnopenedPack> packRepository,
+		ServerResources serverResources,
 		WorldData worldData,
 		MinecraftSessionService minecraftSessionService,
 		GameProfileRepository gameProfileRepository,
@@ -51,9 +55,10 @@ public class IntegratedServer extends MinecraftServer {
 		super(
 			levelStorageAccess,
 			worldData,
+			packRepository,
 			minecraft.getProxy(),
 			minecraft.getFixerUpper(),
-			new Commands(false),
+			serverResources,
 			minecraftSessionService,
 			gameProfileRepository,
 			gameProfileCache,

@@ -84,7 +84,9 @@ public class WrittenBookItem extends Item {
 		BlockPos blockPos = useOnContext.getClickedPos();
 		BlockState blockState = level.getBlockState(blockPos);
 		if (blockState.is(Blocks.LECTERN)) {
-			return LecternBlock.tryPlaceBook(level, blockPos, blockState, useOnContext.getItemInHand()) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+			return LecternBlock.tryPlaceBook(level, blockPos, blockState, useOnContext.getItemInHand())
+				? InteractionResult.sidedSuccess(level.isClientSide)
+				: InteractionResult.PASS;
 		} else {
 			return InteractionResult.PASS;
 		}
@@ -95,7 +97,7 @@ public class WrittenBookItem extends Item {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		player.openItemGui(itemStack, interactionHand);
 		player.awardStat(Stats.ITEM_USED.get(this));
-		return InteractionResultHolder.success(itemStack);
+		return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
 	}
 
 	public static boolean resolveBookComponents(ItemStack itemStack, @Nullable CommandSourceStack commandSourceStack, @Nullable Player player) {

@@ -8,6 +8,11 @@ public class EntryGroup extends CompositeEntryBase {
 	}
 
 	@Override
+	public LootPoolEntryType getType() {
+		return LootPoolEntries.GROUP;
+	}
+
+	@Override
 	protected ComposableEntryContainer compose(ComposableEntryContainer[] composableEntryContainers) {
 		switch (composableEntryContainers.length) {
 			case 0:

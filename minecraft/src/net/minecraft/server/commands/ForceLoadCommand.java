@@ -15,7 +15,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ColumnPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.Level;
 
 public class ForceLoadCommand {
 	private static final Dynamic2CommandExceptionType ERROR_TOO_MANY_CHUNKS = new Dynamic2CommandExceptionType(
@@ -85,7 +85,7 @@ public class ForceLoadCommand {
 
 	private static int queryForceLoad(CommandSourceStack commandSourceStack, ColumnPos columnPos) throws CommandSyntaxException {
 		ChunkPos chunkPos = new ChunkPos(columnPos.x >> 4, columnPos.z >> 4);
-		ResourceKey<DimensionType> resourceKey = commandSourceStack.getLevel().dimension();
+		ResourceKey<Level> resourceKey = commandSourceStack.getLevel().dimension();
 		boolean bl = commandSourceStack.getServer().getLevel(resourceKey).getForcedChunks().contains(chunkPos.toLong());
 		if (bl) {
 			commandSourceStack.sendSuccess(new TranslatableComponent("commands.forceload.query.success", chunkPos, resourceKey.location()), false);
@@ -96,7 +96,7 @@ public class ForceLoadCommand {
 	}
 
 	private static int listForceLoad(CommandSourceStack commandSourceStack) {
-		ResourceKey<DimensionType> resourceKey = commandSourceStack.getLevel().dimension();
+		ResourceKey<Level> resourceKey = commandSourceStack.getLevel().dimension();
 		LongSet longSet = commandSourceStack.getServer().getLevel(resourceKey).getForcedChunks();
 		int i = longSet.size();
 		if (i > 0) {
@@ -114,7 +114,7 @@ public class ForceLoadCommand {
 	}
 
 	private static int removeAll(CommandSourceStack commandSourceStack) {
-		ResourceKey<DimensionType> resourceKey = commandSourceStack.getLevel().dimension();
+		ResourceKey<Level> resourceKey = commandSourceStack.getLevel().dimension();
 		ServerLevel serverLevel = commandSourceStack.getServer().getLevel(resourceKey);
 		LongSet longSet = serverLevel.getForcedChunks();
 		longSet.forEach(l -> serverLevel.setChunkForced(ChunkPos.getX(l), ChunkPos.getZ(l), false));
@@ -136,7 +136,7 @@ public class ForceLoadCommand {
 			if (q > 256L) {
 				throw ERROR_TOO_MANY_CHUNKS.create(256, q);
 			} else {
-				ResourceKey<DimensionType> resourceKey = commandSourceStack.getLevel().dimension();
+				ResourceKey<Level> resourceKey = commandSourceStack.getLevel().dimension();
 				ServerLevel serverLevel = commandSourceStack.getServer().getLevel(resourceKey);
 				ChunkPos chunkPos = null;
 				int r = 0;

@@ -42,7 +42,7 @@ public class PortalForcer {
 			Vec3 vec33 = portalInfo.speed;
 			entity.setDeltaMovement(vec33);
 			entity.yRot = f + (float)portalInfo.angle;
-			entity.forceMove(vec32.x, vec32.y, vec32.z);
+			entity.moveTo(vec32.x, vec32.y, vec32.z);
 			return true;
 		}
 	}

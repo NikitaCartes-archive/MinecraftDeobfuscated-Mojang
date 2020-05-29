@@ -62,6 +62,9 @@ public abstract class RenderType extends RenderStateShard {
 			.createCompositeState(true)
 	);
 	private static final RenderType TRANSLUCENT = create("translucent", DefaultVertexFormat.BLOCK, 7, 262144, true, true, translucentState());
+	private static final RenderType TRANSLUCENT_MOVING_BLOCK = create(
+		"translucent_moving_block", DefaultVertexFormat.BLOCK, 7, 262144, false, false, translucentMovingBlockState()
+	);
 	private static final RenderType TRANSLUCENT_NO_CRUMBLING = create(
 		"translucent_no_crumbling", DefaultVertexFormat.BLOCK, 7, 262144, false, true, translucentState()
 	);
@@ -145,7 +148,7 @@ public abstract class RenderType extends RenderStateShard {
 		false,
 		true,
 		RenderType.CompositeState.builder()
-			.setWriteMaskState(COLOR_WRITE)
+			.setWriteMaskState(COLOR_DEPTH_WRITE)
 			.setTransparencyState(LIGHTNING_TRANSPARENCY)
 			.setShadeModelState(SMOOTH_SHADE)
 			.createCompositeState(false)
@@ -159,7 +162,7 @@ public abstract class RenderType extends RenderStateShard {
 			.setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
 			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
 			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-			.setWriteMaskState(COLOR_WRITE)
+			.setWriteMaskState(COLOR_DEPTH_WRITE)
 			.createCompositeState(false)
 	);
 	private final VertexFormat format;
@@ -187,11 +190,25 @@ public abstract class RenderType extends RenderStateShard {
 			.setLightmapState(LIGHTMAP)
 			.setTextureState(BLOCK_SHEET_MIPPED)
 			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+			.setOutputState(TRANSLUCENT_TARGET)
 			.createCompositeState(true);
 	}
 
 	public static RenderType translucent() {
 		return TRANSLUCENT;
+	}
+
+	private static RenderType.CompositeState translucentMovingBlockState() {
+		return RenderType.CompositeState.builder()
+			.setShadeModelState(SMOOTH_SHADE)
+			.setLightmapState(LIGHTMAP)
+			.setTextureState(BLOCK_SHEET_MIPPED)
+			.setTransparencyState(ITEM_TRANSPARENCY)
+			.createCompositeState(true);
+	}
+
+	public static RenderType translucentMovingBlock() {
+		return TRANSLUCENT_MOVING_BLOCK;
 	}
 
 	public static RenderType translucentNoCrumbling() {
@@ -268,6 +285,19 @@ public abstract class RenderType extends RenderStateShard {
 
 	public static RenderType entityCutoutNoCullZOffset(ResourceLocation resourceLocation) {
 		return entityCutoutNoCullZOffset(resourceLocation, true);
+	}
+
+	public static RenderType itemEntityTranslucentCull(ResourceLocation resourceLocation) {
+		RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+			.setTransparencyState(ITEM_TRANSPARENCY)
+			.setDiffuseLightingState(DIFFUSE_LIGHTING)
+			.setAlphaState(DEFAULT_ALPHA)
+			.setLightmapState(LIGHTMAP)
+			.setOverlayState(OVERLAY)
+			.setWriteMaskState(RenderStateShard.COLOR_DEPTH_WRITE)
+			.createCompositeState(true);
+		return create("item_entity_translucent_cull", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, true, compositeState);
 	}
 
 	public static RenderType entityTranslucentCull(ResourceLocation resourceLocation) {

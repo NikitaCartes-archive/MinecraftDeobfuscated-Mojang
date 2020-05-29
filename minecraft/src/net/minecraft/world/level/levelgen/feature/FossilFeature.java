@@ -54,9 +54,8 @@ public class FossilFeature extends Feature<NoneFeatureConfiguration> {
 		BlockPos blockPos,
 		NoneFeatureConfiguration noneFeatureConfiguration
 	) {
-		Random random2 = worldGenLevel.getRandom();
-		Rotation rotation = Rotation.getRandom(random2);
-		int i = random2.nextInt(fossils.length);
+		Rotation rotation = Rotation.getRandom(random);
+		int i = random.nextInt(fossils.length);
 		StructureManager structureManager = ((ServerLevel)worldGenLevel.getLevel()).getServer().getStructureManager();
 		StructureTemplate structureTemplate = structureManager.getOrCreate(fossils[i]);
 		StructureTemplate structureTemplate2 = structureManager.getOrCreate(fossilsCoal[i]);
@@ -65,11 +64,11 @@ public class FossilFeature extends Feature<NoneFeatureConfiguration> {
 		StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings()
 			.setRotation(rotation)
 			.setBoundingBox(boundingBox)
-			.setRandom(random2)
+			.setRandom(random)
 			.addProcessor(BlockIgnoreProcessor.STRUCTURE_AND_AIR);
 		BlockPos blockPos2 = structureTemplate.getSize(rotation);
-		int j = random2.nextInt(16 - blockPos2.getX());
-		int k = random2.nextInt(16 - blockPos2.getZ());
+		int j = random.nextInt(16 - blockPos2.getX());
+		int k = random.nextInt(16 - blockPos2.getZ());
 		int l = 256;
 
 		for (int m = 0; m < blockPos2.getX(); m++) {
@@ -78,15 +77,15 @@ public class FossilFeature extends Feature<NoneFeatureConfiguration> {
 			}
 		}
 
-		int m = Math.max(l - 15 - random2.nextInt(10), 10);
+		int m = Math.max(l - 15 - random.nextInt(10), 10);
 		BlockPos blockPos3 = structureTemplate.getZeroPositionWithTransform(blockPos.offset(j, m, k), Mirror.NONE, rotation);
 		BlockRotProcessor blockRotProcessor = new BlockRotProcessor(0.9F);
 		structurePlaceSettings.clearProcessors().addProcessor(blockRotProcessor);
-		structureTemplate.placeInWorld(worldGenLevel, blockPos3, blockPos3, structurePlaceSettings, 4);
+		structureTemplate.placeInWorld(worldGenLevel, blockPos3, blockPos3, structurePlaceSettings, random, 4);
 		structurePlaceSettings.popProcessor(blockRotProcessor);
 		BlockRotProcessor blockRotProcessor2 = new BlockRotProcessor(0.1F);
 		structurePlaceSettings.clearProcessors().addProcessor(blockRotProcessor2);
-		structureTemplate2.placeInWorld(worldGenLevel, blockPos3, blockPos3, structurePlaceSettings, 4);
+		structureTemplate2.placeInWorld(worldGenLevel, blockPos3, blockPos3, structurePlaceSettings, random, 4);
 		return true;
 	}
 }

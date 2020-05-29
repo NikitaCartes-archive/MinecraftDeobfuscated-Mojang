@@ -98,7 +98,7 @@ public class EnchantmentTableBlock extends BaseEntityBlock {
 			return InteractionResult.SUCCESS;
 		} else {
 			player.openMenu(blockState.getMenuProvider(level, blockPos));
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		}
 	}
 

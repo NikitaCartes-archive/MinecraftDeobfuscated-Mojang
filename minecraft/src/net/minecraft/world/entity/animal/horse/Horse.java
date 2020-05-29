@@ -105,9 +105,11 @@ public class Horse extends AbstractHorse {
 
 	@Override
 	protected void updateContainerEquipment() {
-		super.updateContainerEquipment();
-		this.setArmorEquipment(this.inventory.getItem(1));
-		this.setDropChance(EquipmentSlot.CHEST, 0.0F);
+		if (!this.level.isClientSide) {
+			super.updateContainerEquipment();
+			this.setArmorEquipment(this.inventory.getItem(1));
+			this.setDropChance(EquipmentSlot.CHEST, 0.0F);
+		}
 	}
 
 	private void setArmorEquipment(ItemStack itemStack) {

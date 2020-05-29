@@ -80,7 +80,7 @@ public class BellBlock extends BaseEntityBlock {
 	public InteractionResult use(
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		return this.onHit(level, blockState, blockHitResult, player, true) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+		return this.onHit(level, blockState, blockHitResult, player, true) ? InteractionResult.sidedSuccess(level.isClientSide) : InteractionResult.PASS;
 	}
 
 	public boolean onHit(Level level, BlockState blockState, BlockHitResult blockHitResult, @Nullable Player player, boolean bl) {
@@ -232,7 +232,10 @@ public class BellBlock extends BaseEntityBlock {
 
 	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
-		return FaceAttachedHorizontalDirectionalBlock.canAttach(levelReader, blockPos, getConnectedDirection(blockState).getOpposite());
+		Direction direction = getConnectedDirection(blockState).getOpposite();
+		return direction == Direction.UP
+			? Block.canSupportCenter(levelReader, blockPos.above(), Direction.DOWN)
+			: FaceAttachedHorizontalDirectionalBlock.canAttach(levelReader, blockPos, direction);
 	}
 
 	private static Direction getConnectedDirection(BlockState blockState) {

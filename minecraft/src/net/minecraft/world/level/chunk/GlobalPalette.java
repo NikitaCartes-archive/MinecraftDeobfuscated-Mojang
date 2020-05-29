@@ -1,5 +1,6 @@
 package net.minecraft.world.level.chunk;
 
+import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.IdMapper;
@@ -22,7 +23,7 @@ public class GlobalPalette<T> implements Palette<T> {
 	}
 
 	@Override
-	public boolean maybeHas(T object) {
+	public boolean maybeHas(Predicate<T> predicate) {
 		return true;
 	}
 

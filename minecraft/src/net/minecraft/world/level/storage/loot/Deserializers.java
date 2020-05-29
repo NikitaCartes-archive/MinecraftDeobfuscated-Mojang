@@ -14,15 +14,15 @@ public class Deserializers {
 			.registerTypeAdapter(RandomValueBounds.class, new RandomValueBounds.Serializer())
 			.registerTypeAdapter(BinomialDistributionGenerator.class, new BinomialDistributionGenerator.Serializer())
 			.registerTypeAdapter(ConstantIntValue.class, new ConstantIntValue.Serializer())
-			.registerTypeHierarchyAdapter(LootItemCondition.class, new LootItemConditions.Serializer())
+			.registerTypeHierarchyAdapter(LootItemCondition.class, LootItemConditions.createGsonAdapter())
 			.registerTypeHierarchyAdapter(LootContext.EntityTarget.class, new LootContext.EntityTarget.Serializer());
 	}
 
 	public static GsonBuilder createFunctionSerializer() {
 		return createConditionSerializer()
 			.registerTypeAdapter(IntLimiter.class, new IntLimiter.Serializer())
-			.registerTypeHierarchyAdapter(LootPoolEntryContainer.class, new LootPoolEntries.Serializer())
-			.registerTypeHierarchyAdapter(LootItemFunction.class, new LootItemFunctions.Serializer());
+			.registerTypeHierarchyAdapter(LootPoolEntryContainer.class, LootPoolEntries.createGsonAdapter())
+			.registerTypeHierarchyAdapter(LootItemFunction.class, LootItemFunctions.createGsonAdapter());
 	}
 
 	public static GsonBuilder createLootTableSerializer() {

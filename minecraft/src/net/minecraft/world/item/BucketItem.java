@@ -63,7 +63,7 @@ public class BucketItem extends Item {
 							CriteriaTriggers.FILLED_BUCKET.trigger((ServerPlayer)player, new ItemStack(fluid.getBucket()));
 						}
 
-						return InteractionResultHolder.success(itemStack2);
+						return InteractionResultHolder.sidedSuccess(itemStack2, level.isClientSide());
 					}
 				}
 
@@ -78,7 +78,7 @@ public class BucketItem extends Item {
 					}
 
 					player.awardStat(Stats.ITEM_USED.get(this));
-					return InteractionResultHolder.success(this.getEmptySuccessItem(itemStack, player));
+					return InteractionResultHolder.sidedSuccess(this.getEmptySuccessItem(itemStack, player), level.isClientSide());
 				} else {
 					return InteractionResultHolder.fail(itemStack);
 				}

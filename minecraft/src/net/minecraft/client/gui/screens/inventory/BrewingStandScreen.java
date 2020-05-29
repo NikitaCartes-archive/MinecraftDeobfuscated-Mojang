@@ -20,16 +20,16 @@ public class BrewingStandScreen extends AbstractContainerScreen<BrewingStandMenu
 	}
 
 	@Override
+	protected void init() {
+		super.init();
+		this.titleLabelX = (this.imageWidth - this.font.width(this.title)) / 2;
+	}
+
+	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
 		super.render(poseStack, i, j, f);
 		this.renderTooltip(poseStack, i, j);
-	}
-
-	@Override
-	protected void renderLabels(PoseStack poseStack, int i, int j) {
-		this.font.draw(poseStack, this.title, (float)(this.imageWidth / 2 - this.font.width(this.title) / 2), 6.0F, 4210752);
-		this.font.draw(poseStack, this.inventory.getDisplayName(), 8.0F, (float)(this.imageHeight - 96 + 2), 4210752);
 	}
 
 	@Override

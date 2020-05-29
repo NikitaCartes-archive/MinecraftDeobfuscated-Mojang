@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -273,7 +272,7 @@ public class TitleScreen extends Screen {
 			this.minecraft.getTextureManager().bind(MINECRAFT_LOGO);
 			RenderSystem.color4f(1.0F, 1.0F, 1.0F, h);
 			if (this.minceraftEasterEgg) {
-				this.blitOutline(l, 30, (integer, integer2) -> {
+				this.blitOutlineBlack(l, 30, (integer, integer2) -> {
 					this.blit(poseStack, integer + 0, integer2, 0, 0, 99, 44);
 					this.blit(poseStack, integer + 99, integer2, 129, 0, 27, 44);
 					this.blit(poseStack, integer + 99 + 26, integer2, 126, 0, 3, 44);
@@ -281,7 +280,7 @@ public class TitleScreen extends Screen {
 					this.blit(poseStack, integer + 155, integer2, 0, 45, 155, 44);
 				});
 			} else {
-				this.blitOutline(l, 30, (integer, integer2) -> {
+				this.blitOutlineBlack(l, 30, (integer, integer2) -> {
 					this.blit(poseStack, integer + 0, integer2, 0, 0, 155, 44);
 					this.blit(poseStack, integer + 155, integer2, 0, 45, 155, 44);
 				});
@@ -326,14 +325,6 @@ public class TitleScreen extends Screen {
 				this.realmsNotificationsScreen.render(poseStack, i, j, f);
 			}
 		}
-	}
-
-	private void blitOutline(int i, int j, BiConsumer<Integer, Integer> biConsumer) {
-		biConsumer.accept(i + 1, j);
-		biConsumer.accept(i - 1, j);
-		biConsumer.accept(i, j + 1);
-		biConsumer.accept(i, j - 1);
-		biConsumer.accept(i, j);
 	}
 
 	@Override

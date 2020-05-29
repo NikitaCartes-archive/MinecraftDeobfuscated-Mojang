@@ -30,6 +30,7 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 	public MerchantScreen(MerchantMenu merchantMenu, Inventory inventory, Component component) {
 		super(merchantMenu, inventory, component);
 		this.imageWidth = 276;
+		this.inventoryLabelX = 107;
 	}
 
 	private void postButtonClick() {
@@ -59,24 +60,22 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 	@Override
 	protected void renderLabels(PoseStack poseStack, int i, int j) {
 		int k = this.menu.getTraderLevel();
-		int l = this.imageHeight - 94;
 		if (k > 0 && k <= 5 && this.menu.showProgressBar()) {
 			String string = "- " + I18n.get("merchant.level." + k);
-			int m = this.font.width(this.title);
-			int n = this.font.width(string);
-			int o = m + n + 3;
-			int p = 49 + this.imageWidth / 2 - o / 2;
-			this.font.draw(poseStack, this.title, (float)p, 6.0F, 4210752);
-			this.font.draw(poseStack, this.inventory.getDisplayName(), 107.0F, (float)l, 4210752);
-			this.font.draw(poseStack, string, (float)(p + m + 3), 6.0F, 4210752);
+			int l = this.font.width(this.title);
+			int m = this.font.width(string);
+			int n = l + m + 3;
+			int o = 49 + this.imageWidth / 2 - n / 2;
+			this.font.draw(poseStack, this.title, (float)o, 6.0F, 4210752);
+			this.font.draw(poseStack, string, (float)(o + l + 3), 6.0F, 4210752);
 		} else {
 			this.font.draw(poseStack, this.title, (float)(49 + this.imageWidth / 2 - this.font.width(this.title) / 2), 6.0F, 4210752);
-			this.font.draw(poseStack, this.inventory.getDisplayName(), 107.0F, (float)l, 4210752);
 		}
 
+		this.font.draw(poseStack, this.inventory.getDisplayName(), (float)this.inventoryLabelX, (float)this.inventoryLabelY, 4210752);
 		String string = I18n.get("merchant.trades");
-		int m = this.font.width(string);
-		this.font.draw(poseStack, string, (float)(5 - m / 2 + 48), 6.0F, 4210752);
+		int l = this.font.width(string);
+		this.font.draw(poseStack, string, (float)(5 - l / 2 + 48), 6.0F, 4210752);
 	}
 
 	@Override
@@ -111,7 +110,7 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 			int m = VillagerData.getMinXpPerLevel(k);
 			if (l >= m && VillagerData.canLevelUp(k)) {
 				int n = 100;
-				float f = (float)(100 / (VillagerData.getMaxXpPerLevel(k) - m));
+				float f = 100.0F / (float)(VillagerData.getMaxXpPerLevel(k) - m);
 				int o = Math.min(Mth.floor(f * (float)(l - m)), 100);
 				blit(poseStack, i + 136, j + 16, this.getBlitOffset(), 0.0F, 191.0F, o + 1, 5, 256, 512);
 				int p = this.menu.getFutureTraderXp();
@@ -166,12 +165,12 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 					int p = m + 2;
 					this.renderAndDecorateCostA(poseStack, itemStack2, itemStack, n, p);
 					if (!itemStack3.isEmpty()) {
-						this.itemRenderer.renderAndDecorateItem(itemStack3, k + 5 + 35, p);
+						this.itemRenderer.renderAndDecorateFakeItem(itemStack3, k + 5 + 35, p);
 						this.itemRenderer.renderGuiItemDecorations(this.font, itemStack3, k + 5 + 35, p);
 					}
 
 					this.renderButtonArrows(poseStack, merchantOffer, k, p);
-					this.itemRenderer.renderAndDecorateItem(itemStack4, k + 5 + 68, p);
+					this.itemRenderer.renderAndDecorateFakeItem(itemStack4, k + 5 + 68, p);
 					this.itemRenderer.renderGuiItemDecorations(this.font, itemStack4, k + 5 + 68, p);
 					this.itemRenderer.blitOffset = 0.0F;
 					m += 20;
@@ -217,7 +216,7 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 	}
 
 	private void renderAndDecorateCostA(PoseStack poseStack, ItemStack itemStack, ItemStack itemStack2, int i, int j) {
-		this.itemRenderer.renderAndDecorateItem(itemStack, i, j);
+		this.itemRenderer.renderAndDecorateFakeItem(itemStack, i, j);
 		if (itemStack2.getCount() == itemStack.getCount()) {
 			this.itemRenderer.renderGuiItemDecorations(this.font, itemStack, i, j);
 		} else {

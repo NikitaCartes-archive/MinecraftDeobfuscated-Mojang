@@ -123,7 +123,7 @@ public class Ravager extends Raider {
 	}
 
 	@Override
-	public double getRideHeight() {
+	public double getPassengersRidingOffset() {
 		return 2.1;
 	}
 

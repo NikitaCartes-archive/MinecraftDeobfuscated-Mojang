@@ -28,6 +28,7 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.server.LanServer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -250,10 +251,10 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			boolean bl3 = this.serverData.protocol < SharedConstants.getCurrentVersion().getProtocolVersion();
 			boolean bl4 = bl2 || bl3;
 			this.minecraft.font.draw(poseStack, this.serverData.name, (float)(k + 32 + 3), (float)(j + 1), 16777215);
-			List<Component> list = this.minecraft.font.split(this.serverData.motd, l - 32 - 2);
+			List<FormattedText> list = this.minecraft.font.split(this.serverData.motd, l - 32 - 2);
 
 			for (int p = 0; p < Math.min(list.size(), 2); p++) {
-				this.minecraft.font.draw(poseStack, (Component)list.get(p), (float)(k + 32 + 3), (float)(j + 12 + 9 * p), 8421504);
+				this.minecraft.font.draw(poseStack, (FormattedText)list.get(p), (float)(k + 32 + 3), (float)(j + 12 + 9 * p), 8421504);
 			}
 
 			Component component = (Component)(bl4 ? this.serverData.version.mutableCopy().withStyle(ChatFormatting.DARK_RED) : this.serverData.status);

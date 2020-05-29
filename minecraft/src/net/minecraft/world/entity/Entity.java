@@ -29,7 +29,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -174,6 +173,7 @@ public abstract class Entity implements Nameable, CommandSource {
 	public int xChunk;
 	public int yChunk;
 	public int zChunk;
+	private boolean movedSinceLastChunkCheck;
 	public long xp;
 	public long yp;
 	public long zp;
@@ -190,7 +190,7 @@ public abstract class Entity implements Nameable, CommandSource {
 	protected String stringUUID = this.uuid.toString();
 	protected boolean glowing;
 	private final Set<String> tags = Sets.<String>newHashSet();
-	private boolean teleported;
+	private boolean forceChunkAddition;
 	private final double[] pistonDeltas = new double[]{0.0, 0.0, 0.0};
 	private long pistonDeltasGameTime;
 	private EntityDimensions dimensions;
@@ -968,7 +968,7 @@ public abstract class Entity implements Nameable, CommandSource {
 	}
 
 	private void updateUnderWaterState() {
-		this.wasUnderWater = this.isUnderLiquid(FluidTags.WATER, true);
+		this.wasUnderWater = this.isUnderLiquid(FluidTags.WATER);
 	}
 
 	protected void doWaterSplashEffect() {
@@ -1040,22 +1040,7 @@ public abstract class Entity implements Nameable, CommandSource {
 	}
 
 	public boolean isUnderLiquid(Tag<Fluid> tag) {
-		return this.isUnderLiquid(tag, false);
-	}
-
-	public boolean isUnderLiquid(Tag<Fluid> tag, boolean bl) {
-		if (this.getVehicle() instanceof Boat) {
-			return false;
-		} else {
-			double d = this.getEyeY();
-			BlockPos blockPos = new BlockPos(this.getX(), d, this.getZ());
-			if (bl && !this.level.hasChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4)) {
-				return false;
-			} else {
-				FluidState fluidState = this.level.getFluidState(blockPos);
-				return fluidState.is(tag) && d < (double)((float)blockPos.getY() + fluidState.getHeight(this.level, blockPos) + 0.11111111F);
-			}
-		}
+		return (double)this.getEyeHeight() < this.getFluidHeight(tag);
 	}
 
 	public void setInLava() {
@@ -1108,6 +1093,10 @@ public abstract class Entity implements Nameable, CommandSource {
 		this.xRot = Mth.clamp(h, -90.0F, 90.0F) % 360.0F;
 		this.yRotO = this.yRot;
 		this.xRotO = this.xRot;
+	}
+
+	public void moveTo(double d, double e, double f) {
+		this.moveTo(d, e, f, this.yRot, this.xRot);
 	}
 
 	public void moveTo(BlockPos blockPos, float f, float g) {
@@ -1309,7 +1298,12 @@ public abstract class Entity implements Nameable, CommandSource {
 
 	public CompoundTag saveWithoutId(CompoundTag compoundTag) {
 		try {
-			compoundTag.put("Pos", this.newDoubleList(this.getX(), this.getY(), this.getZ()));
+			if (this.vehicle != null) {
+				compoundTag.put("Pos", this.newDoubleList(this.vehicle.getX(), this.vehicle.getY(), this.vehicle.getZ()));
+			} else {
+				compoundTag.put("Pos", this.newDoubleList(this.getX(), this.getY(), this.getZ()));
+			}
+
 			Vec3 vec3 = this.getDeltaMovement();
 			compoundTag.put("Motion", this.newDoubleList(vec3.x, vec3.y, vec3.z));
 			compoundTag.put("Rotation", this.newFloatList(this.yRot, this.xRot));
@@ -1552,9 +1546,10 @@ public abstract class Entity implements Nameable, CommandSource {
 		this.positionRider(entity, Entity::setPos);
 	}
 
-	public void positionRider(Entity entity, Entity.MoveCallback moveCallback) {
+	private void positionRider(Entity entity, Entity.MoveFunction moveFunction) {
 		if (this.hasPassenger(entity)) {
-			moveCallback.accept(entity, this.getX(), this.getY() + this.getRideHeight() + entity.getRidingHeight(), this.getZ());
+			double d = this.getY() + this.getPassengersRidingOffset() + entity.getMyRidingOffset();
+			moveFunction.accept(entity, this.getX(), d, this.getZ());
 		}
 	}
 
@@ -1562,11 +1557,11 @@ public abstract class Entity implements Nameable, CommandSource {
 	public void onPassengerTurned(Entity entity) {
 	}
 
-	public double getRidingHeight() {
+	public double getMyRidingOffset() {
 		return 0.0;
 	}
 
-	public double getRideHeight() {
+	public double getPassengersRidingOffset() {
 		return (double)this.dimensions.height * 0.75;
 	}
 
@@ -1601,11 +1596,11 @@ public abstract class Entity implements Nameable, CommandSource {
 	}
 
 	protected boolean canRide(Entity entity) {
-		return this.boardingCooldown <= 0;
+		return !this.isShiftKeyDown() && this.boardingCooldown <= 0;
 	}
 
 	protected boolean canEnterPose(Pose pose) {
-		return this.level.noCollision(this, this.getBoundingBoxForPose(pose));
+		return this.level.noCollision(this, this.getBoundingBoxForPose(pose).deflate(1.0E-7));
 	}
 
 	public void ejectPassengers() {
@@ -1614,12 +1609,16 @@ public abstract class Entity implements Nameable, CommandSource {
 		}
 	}
 
-	public void stopRiding() {
+	public void removeVehicle() {
 		if (this.vehicle != null) {
 			Entity entity = this.vehicle;
 			this.vehicle = null;
 			entity.removePassenger(this);
 		}
+	}
+
+	public void stopRiding() {
+		this.removeVehicle();
 	}
 
 	protected void addPassenger(Entity entity) {
@@ -1722,7 +1721,7 @@ public abstract class Entity implements Nameable, CommandSource {
 					this.level.getProfiler().push("portal");
 					this.portalTime = i;
 					this.changingDimensionDelay = this.getDimensionChangingDelay();
-					ResourceKey<DimensionType> resourceKey = this.level.dimensionType().isNether() ? DimensionType.OVERWORLD_LOCATION : DimensionType.NETHER_LOCATION;
+					ResourceKey<Level> resourceKey = this.level.dimensionType().isNether() ? Level.OVERWORLD : Level.NETHER;
 					this.changeDimension(resourceKey);
 					this.level.getProfiler().pop();
 				}
@@ -2035,7 +2034,7 @@ public abstract class Entity implements Nameable, CommandSource {
 			Locale.ROOT,
 			"%s['%s'/%d, l='%s', x=%.2f, y=%.2f, z=%.2f]",
 			this.getClass().getSimpleName(),
-			this.getName().getContents(),
+			this.getName().getString(),
 			this.id,
 			this.level == null ? "~NULL~" : this.level.toString(),
 			this.getX(),
@@ -2071,11 +2070,11 @@ public abstract class Entity implements Nameable, CommandSource {
 	}
 
 	@Nullable
-	public Entity changeDimension(ResourceKey<DimensionType> resourceKey) {
+	public Entity changeDimension(ResourceKey<Level> resourceKey) {
 		if (!this.level.isClientSide && !this.removed) {
 			this.level.getProfiler().push("changeDimension");
 			MinecraftServer minecraftServer = this.getServer();
-			ResourceKey<DimensionType> resourceKey2 = this.level.dimension();
+			ResourceKey<Level> resourceKey2 = this.level.dimension();
 			ServerLevel serverLevel = minecraftServer.getLevel(resourceKey2);
 			ServerLevel serverLevel2 = minecraftServer.getLevel(resourceKey);
 			this.unRide();
@@ -2083,16 +2082,15 @@ public abstract class Entity implements Nameable, CommandSource {
 			Vec3 vec3 = this.getDeltaMovement();
 			float f = 0.0F;
 			BlockPos blockPos;
-			if (resourceKey2 == DimensionType.END_LOCATION && resourceKey == DimensionType.OVERWORLD_LOCATION) {
+			if (resourceKey2 == Level.END && resourceKey == Level.OVERWORLD) {
 				blockPos = serverLevel2.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, serverLevel2.getSharedSpawnPos());
-			} else if (resourceKey == DimensionType.END_LOCATION) {
+			} else if (resourceKey == Level.END) {
 				blockPos = ServerLevel.END_SPAWN_POINT;
 			} else {
 				double d = this.getX();
 				double e = this.getZ();
-				Registry<DimensionType> registry = minecraftServer.registryAccess().dimensionTypes();
-				DimensionType dimensionType = registry.get(resourceKey2);
-				DimensionType dimensionType2 = registry.get(resourceKey);
+				DimensionType dimensionType = serverLevel.dimensionType();
+				DimensionType dimensionType2 = serverLevel2.dimensionType();
 				double g = 8.0;
 				if (!dimensionType.shrunk() && dimensionType2.shrunk()) {
 					d /= 8.0;
@@ -2128,7 +2126,7 @@ public abstract class Entity implements Nameable, CommandSource {
 				entity.moveTo(blockPos, entity.yRot + f, entity.xRot);
 				entity.setDeltaMovement(vec3);
 				serverLevel2.addFromAnotherDimension(entity);
-				if (resourceKey == DimensionType.END_LOCATION) {
+				if (resourceKey == Level.END) {
 					ServerLevel.makeObsidianPlatform(serverLevel2);
 				}
 			}
@@ -2270,8 +2268,11 @@ public abstract class Entity implements Nameable, CommandSource {
 			this.moveTo(d, e, f, this.yRot, this.xRot);
 			this.getSelfAndPassengers().forEach(entity -> {
 				serverLevel.updateChunkPos(entity);
-				entity.teleported = true;
-				entity.repositionDirectPassengers(Entity::forceMove);
+				entity.forceChunkAddition = true;
+
+				for (Entity entity2 : entity.passengers) {
+					entity.positionRider(entity2, Entity::moveTo);
+				}
 			});
 		}
 	}
@@ -2436,9 +2437,15 @@ public abstract class Entity implements Nameable, CommandSource {
 		return false;
 	}
 
-	public boolean checkAndResetTeleportedFlag() {
-		boolean bl = this.teleported;
-		this.teleported = false;
+	public boolean checkAndResetForcedChunkAdditionFlag() {
+		boolean bl = this.forceChunkAddition;
+		this.forceChunkAddition = false;
+		return bl;
+	}
+
+	public boolean checkAndResetUpdateChunkPos() {
+		boolean bl = this.movedSinceLastChunkCheck;
+		this.movedSinceLastChunkCheck = false;
 		return bl;
 	}
 
@@ -2529,12 +2536,6 @@ public abstract class Entity implements Nameable, CommandSource {
 		}
 
 		return false;
-	}
-
-	public void repositionDirectPassengers(Entity.MoveCallback moveCallback) {
-		for (Entity entity : this.passengers) {
-			this.positionRider(entity, moveCallback);
-		}
 	}
 
 	public boolean isControlledByLocalInstance() {
@@ -2685,6 +2686,10 @@ public abstract class Entity implements Nameable, CommandSource {
 		return this.fluidHeight.getDouble(tag);
 	}
 
+	public double getFluidJumpThreshold() {
+		return (double)this.getEyeHeight() < 0.4 ? 0.0 : 0.4;
+	}
+
 	public final float getBbWidth() {
 		return this.dimensions.width;
 	}
@@ -2768,18 +2773,16 @@ public abstract class Entity implements Nameable, CommandSource {
 			if (i != this.blockPosition.getX() || j != this.blockPosition.getY() || k != this.blockPosition.getZ()) {
 				this.blockPosition = new BlockPos(i, j, k);
 			}
+
+			this.movedSinceLastChunkCheck = true;
 		}
 	}
 
 	public void checkDespawn() {
 	}
 
-	public void forceMove(double d, double e, double f) {
-		this.moveTo(d, e, f, this.yRot, this.xRot);
-	}
-
 	@FunctionalInterface
-	public interface MoveCallback {
+	public interface MoveFunction {
 		void accept(Entity entity, double d, double e, double f);
 	}
 }

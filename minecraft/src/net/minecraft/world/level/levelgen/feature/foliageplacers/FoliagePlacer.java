@@ -11,6 +11,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.levelgen.feature.TreeFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public abstract class FoliagePlacer {
 	public static final Codec<FoliagePlacer> CODEC = Registry.FOLIAGE_PLACER_TYPES.dispatch(FoliagePlacer::type, FoliagePlacerType::codec);
@@ -45,9 +46,10 @@ public abstract class FoliagePlacer {
 		FoliagePlacer.FoliageAttachment foliageAttachment,
 		int j,
 		int k,
-		Set<BlockPos> set
+		Set<BlockPos> set,
+		BoundingBox boundingBox
 	) {
-		this.createFoliage(levelSimulatedRW, random, treeConfiguration, i, foliageAttachment, j, k, set, this.offset(random));
+		this.createFoliage(levelSimulatedRW, random, treeConfiguration, i, foliageAttachment, j, k, set, this.offset(random), boundingBox);
 	}
 
 	protected abstract void createFoliage(
@@ -59,7 +61,8 @@ public abstract class FoliagePlacer {
 		int j,
 		int k,
 		Set<BlockPos> set,
-		int l
+		int l,
+		BoundingBox boundingBox
 	);
 
 	public abstract int foliageHeight(Random random, int i, TreeConfiguration treeConfiguration);
@@ -89,7 +92,15 @@ public abstract class FoliagePlacer {
 	}
 
 	protected void placeLeavesRow(
-		LevelSimulatedRW levelSimulatedRW, Random random, TreeConfiguration treeConfiguration, BlockPos blockPos, int i, Set<BlockPos> set, int j, boolean bl
+		LevelSimulatedRW levelSimulatedRW,
+		Random random,
+		TreeConfiguration treeConfiguration,
+		BlockPos blockPos,
+		int i,
+		Set<BlockPos> set,
+		int j,
+		boolean bl,
+		BoundingBox boundingBox
 	) {
 		int k = bl ? 1 : 0;
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
@@ -100,6 +111,7 @@ public abstract class FoliagePlacer {
 					mutableBlockPos.setWithOffset(blockPos, l, j, m);
 					if (TreeFeature.validTreePos(levelSimulatedRW, mutableBlockPos)) {
 						levelSimulatedRW.setBlock(mutableBlockPos, treeConfiguration.leavesProvider.getState(random, mutableBlockPos), 19);
+						boundingBox.expand(new BoundingBox(mutableBlockPos, mutableBlockPos));
 						set.add(mutableBlockPos.immutable());
 					}
 				}

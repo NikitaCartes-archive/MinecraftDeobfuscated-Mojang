@@ -25,6 +25,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 
 public abstract class Animal extends AgableMob {
 	private int inLove;
@@ -32,6 +33,8 @@ public abstract class Animal extends AgableMob {
 
 	protected Animal(EntityType<? extends Animal> entityType, Level level) {
 		super(entityType, level);
+		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0F);
+		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
 	}
 
 	@Override
@@ -86,7 +89,7 @@ public abstract class Animal extends AgableMob {
 	}
 
 	@Override
-	public double getRidingHeight() {
+	public double getMyRidingOffset() {
 		return 0.14;
 	}
 
@@ -164,6 +167,10 @@ public abstract class Animal extends AgableMob {
 
 	public void setInLoveTime(int i) {
 		this.inLove = i;
+	}
+
+	public int getInLoveTime() {
+		return this.inLove;
 	}
 
 	@Nullable

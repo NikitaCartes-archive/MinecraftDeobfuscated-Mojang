@@ -2,6 +2,7 @@ package net.minecraft.client.multiplayer;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import io.netty.buffer.Unpooled;
@@ -11,11 +12,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
@@ -266,9 +270,9 @@ import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import net.minecraft.world.level.block.entity.BedBlockEntity;
@@ -320,6 +324,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	private CommandDispatcher<SharedSuggestionProvider> commands = new CommandDispatcher<>();
 	private final RecipeManager recipeManager = new RecipeManager();
 	private final UUID id = UUID.randomUUID();
+	private Set<ResourceKey<Level>> levels;
 	private RegistryAccess registryAccess = RegistryAccess.builtin();
 
 	public ClientPacketListener(Minecraft minecraft, Screen screen, Connection connection, GameProfile gameProfile) {
@@ -354,8 +359,13 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			EntityTypeTags.resetToEmpty();
 		}
 
+		ArrayList<ResourceKey<Level>> arrayList = Lists.newArrayList(clientboundLoginPacket.levels());
+		Collections.shuffle(arrayList);
+		this.levels = Sets.<ResourceKey<Level>>newLinkedHashSet(arrayList);
 		this.registryAccess = clientboundLoginPacket.registryAccess();
-		DimensionType dimensionType = this.registryAccess.dimensionTypes().get(clientboundLoginPacket.getDimension());
+		ResourceKey<DimensionType> resourceKey = clientboundLoginPacket.getDimensionType();
+		ResourceKey<Level> resourceKey2 = clientboundLoginPacket.getDimension();
+		DimensionType dimensionType = this.registryAccess.dimensionTypes().get(resourceKey);
 		this.serverChunkRadius = clientboundLoginPacket.getChunkRadius();
 		boolean bl = clientboundLoginPacket.isDebug();
 		boolean bl2 = clientboundLoginPacket.isFlat();
@@ -364,6 +374,8 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		this.level = new ClientLevel(
 			this,
 			clientLevelData,
+			resourceKey2,
+			resourceKey,
 			dimensionType,
 			this.serverChunkRadius,
 			this.minecraft::getProfiler,
@@ -713,6 +725,10 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			player.zOld = i;
 		}
 
+		if (player.tickCount > 0 && player.getVehicle() != null) {
+			player.removeVehicle();
+		}
+
 		player.setPosRaw(e, g, i);
 		player.xo = e;
 		player.yo = g;
@@ -1051,12 +1067,13 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	@Override
 	public void handleRespawn(ClientboundRespawnPacket clientboundRespawnPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundRespawnPacket, this, this.minecraft);
-		ResourceKey<DimensionType> resourceKey = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, clientboundRespawnPacket.getDimension());
+		ResourceKey<DimensionType> resourceKey = clientboundRespawnPacket.getDimensionType();
+		ResourceKey<Level> resourceKey2 = clientboundRespawnPacket.getDimension();
 		DimensionType dimensionType = this.registryAccess.dimensionTypes().get(resourceKey);
 		LocalPlayer localPlayer = this.minecraft.player;
 		int i = localPlayer.getId();
 		this.started = false;
-		if (resourceKey != localPlayer.level.dimension()) {
+		if (resourceKey2 != localPlayer.level.dimension()) {
 			Scoreboard scoreboard = this.level.getScoreboard();
 			boolean bl = clientboundRespawnPacket.isDebug();
 			boolean bl2 = clientboundRespawnPacket.isFlat();
@@ -1065,6 +1082,8 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			this.level = new ClientLevel(
 				this,
 				clientLevelData,
+				resourceKey2,
+				resourceKey,
 				dimensionType,
 				this.serverChunkRadius,
 				this.minecraft::getProfiler,
@@ -1080,7 +1099,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		this.level.removeAllPendingEntityRemovals();
 		String string = localPlayer.getServerBrand();
 		this.minecraft.cameraEntity = null;
-		LocalPlayer localPlayer2 = this.minecraft.gameMode.createPlayer(this.level, localPlayer.getStats(), localPlayer.getRecipeBook());
+		LocalPlayer localPlayer2 = this.minecraft
+			.gameMode
+			.createPlayer(this.level, localPlayer.getStats(), localPlayer.getRecipeBook(), localPlayer.isShiftKeyDown(), localPlayer.isSprinting());
 		localPlayer2.setId(i);
 		this.minecraft.player = localPlayer2;
 		this.minecraft.cameraEntity = localPlayer2;
@@ -1547,11 +1568,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		PacketUtils.ensureRunningOnSameThread(clientboundUpdateTagsPacket, this, this.minecraft);
 		this.tags = clientboundUpdateTagsPacket.getTags();
 		if (!this.connection.isMemoryConnection()) {
-			BlockTags.reset(this.tags.getBlocks());
-			ItemTags.reset(this.tags.getItems());
-			FluidTags.reset(this.tags.getFluids());
-			EntityTypeTags.reset(this.tags.getEntityTypes());
-			Blocks.rebuildCache();
+			this.tags.bindToGlobal();
 		}
 
 		this.minecraft.getSearchTree(SearchRegistry.CREATIVE_TAGS).refresh();
@@ -2044,6 +2061,13 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				int v = friendlyByteBuf.readInt();
 
 				for (int w = 0; w < v; w++) {
+					BlockPos blockPos4 = friendlyByteBuf.readBlockPos();
+					brainDump.potentialPois.add(blockPos4);
+				}
+
+				int w = friendlyByteBuf.readInt();
+
+				for (int x = 0; x < w; x++) {
 					String string9 = friendlyByteBuf.readUtf();
 					brainDump.gossips.add(string9);
 				}
@@ -2057,37 +2081,37 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				UUID uUID = friendlyByteBuf.readUUID();
 				int o = friendlyByteBuf.readInt();
 				boolean bl4 = friendlyByteBuf.readBoolean();
-				BlockPos blockPos4 = null;
-				if (bl4) {
-					blockPos4 = friendlyByteBuf.readBlockPos();
-				}
-
-				boolean bl5 = friendlyByteBuf.readBoolean();
 				BlockPos blockPos5 = null;
-				if (bl5) {
+				if (bl4) {
 					blockPos5 = friendlyByteBuf.readBlockPos();
 				}
 
-				int x = friendlyByteBuf.readInt();
+				boolean bl5 = friendlyByteBuf.readBoolean();
+				BlockPos blockPos6 = null;
+				if (bl5) {
+					blockPos6 = friendlyByteBuf.readBlockPos();
+				}
+
+				int y = friendlyByteBuf.readInt();
 				boolean bl6 = friendlyByteBuf.readBoolean();
 				Path path3 = null;
 				if (bl6) {
 					path3 = Path.createFromStream(friendlyByteBuf);
 				}
 
-				BeeDebugRenderer.BeeInfo beeInfo = new BeeDebugRenderer.BeeInfo(uUID, o, position, path3, blockPos4, blockPos5, x);
-				int y = friendlyByteBuf.readInt();
+				BeeDebugRenderer.BeeInfo beeInfo = new BeeDebugRenderer.BeeInfo(uUID, o, position, path3, blockPos5, blockPos6, y);
+				int z = friendlyByteBuf.readInt();
 
-				for (int z = 0; z < y; z++) {
+				for (int aa = 0; aa < z; aa++) {
 					String string10 = friendlyByteBuf.readUtf();
 					beeInfo.goals.add(string10);
 				}
 
-				int z = friendlyByteBuf.readInt();
+				int aa = friendlyByteBuf.readInt();
 
-				for (int r = 0; r < z; r++) {
-					BlockPos blockPos6 = friendlyByteBuf.readBlockPos();
-					beeInfo.blacklistedHives.add(blockPos6);
+				for (int r = 0; r < aa; r++) {
+					BlockPos blockPos7 = friendlyByteBuf.readBlockPos();
+					beeInfo.blacklistedHives.add(blockPos7);
 				}
 
 				this.minecraft.debugRenderer.beeDebugRenderer.addOrUpdateBeeInfo(beeInfo);
@@ -2095,9 +2119,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
 				String string = friendlyByteBuf.readUtf();
 				int m = friendlyByteBuf.readInt();
-				int aa = friendlyByteBuf.readInt();
+				int ab = friendlyByteBuf.readInt();
 				boolean bl7 = friendlyByteBuf.readBoolean();
-				BeeDebugRenderer.HiveInfo hiveInfo = new BeeDebugRenderer.HiveInfo(blockPos2, string, m, aa, bl7, this.level.getGameTime());
+				BeeDebugRenderer.HiveInfo hiveInfo = new BeeDebugRenderer.HiveInfo(blockPos2, string, m, ab, bl7, this.level.getGameTime());
 				this.minecraft.debugRenderer.beeDebugRenderer.addOrUpdateHiveInfo(hiveInfo);
 			} else if (ClientboundCustomPayloadPacket.DEBUG_GAME_TEST_CLEAR.equals(resourceLocation)) {
 				this.minecraft.debugRenderer.gameTestDebugRenderer.clear();
@@ -2105,8 +2129,8 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				BlockPos blockPos2 = friendlyByteBuf.readBlockPos();
 				int j = friendlyByteBuf.readInt();
 				String string11 = friendlyByteBuf.readUtf();
-				int aa = friendlyByteBuf.readInt();
-				this.minecraft.debugRenderer.gameTestDebugRenderer.addMarker(blockPos2, j, string11, aa);
+				int ab = friendlyByteBuf.readInt();
+				this.minecraft.debugRenderer.gameTestDebugRenderer.addMarker(blockPos2, j, string11, ab);
 			} else {
 				LOGGER.warn("Unknown custom packed identifier: {}", resourceLocation);
 			}
@@ -2418,6 +2442,10 @@ public class ClientPacketListener implements ClientGamePacketListener {
 
 	public UUID getId() {
 		return this.id;
+	}
+
+	public Set<ResourceKey<Level>> levels() {
+		return this.levels;
 	}
 
 	public RegistryAccess registryAccess() {

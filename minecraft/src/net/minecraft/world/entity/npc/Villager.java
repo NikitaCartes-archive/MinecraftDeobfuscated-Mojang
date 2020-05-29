@@ -37,6 +37,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
@@ -101,9 +102,11 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	private long lastRestockGameTime;
 	private int numberOfRestocksToday;
 	private long lastRestockCheckDayTime;
+	private boolean assignProfessionWhenSpawned;
 	private static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
 		MemoryModuleType.HOME,
 		MemoryModuleType.JOB_SITE,
+		MemoryModuleType.POTENTIAL_JOB_SITE,
 		MemoryModuleType.MEETING_POINT,
 		MemoryModuleType.LIVING_ENTITIES,
 		MemoryModuleType.VISIBLE_LIVING_ENTITIES,
@@ -149,6 +152,8 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		(villager, poiType) -> poiType == PoiType.HOME,
 		MemoryModuleType.JOB_SITE,
 		(villager, poiType) -> villager.getVillagerData().getProfession().getJobPoiType() == poiType,
+		MemoryModuleType.POTENTIAL_JOB_SITE,
+		(villager, poiType) -> PoiType.ALL_JOBS.test(poiType),
 		MemoryModuleType.MEETING_POINT,
 		(villager, poiType) -> poiType == PoiType.MEETING
 	);
@@ -191,7 +196,6 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 
 	private void registerBrainGoals(Brain<Villager> brain) {
 		VillagerProfession villagerProfession = this.getVillagerData().getProfession();
-		float f = 0.5F;
 		if (this.isBaby()) {
 			brain.setSchedule(Schedule.VILLAGER_BABY);
 			brain.addActivity(Activity.PLAY, VillagerGoalPackages.getPlayPackage(0.5F));
@@ -234,11 +238,19 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.5).add(Attributes.FOLLOW_RANGE, 48.0);
 	}
 
+	public boolean assignProfessionWhenSpawned() {
+		return this.assignProfessionWhenSpawned;
+	}
+
 	@Override
 	protected void customServerAiStep() {
 		this.level.getProfiler().push("villagerBrain");
 		this.getBrain().tick((ServerLevel)this.level, this);
 		this.level.getProfiler().pop();
+		if (this.assignProfessionWhenSpawned) {
+			this.assignProfessionWhenSpawned = false;
+		}
+
 		if (!this.isTrading() && this.updateMerchantTimer > 0) {
 			this.updateMerchantTimer--;
 			if (this.updateMerchantTimer <= 0) {
@@ -450,6 +462,9 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		compoundTag.putLong("LastRestock", this.lastRestockGameTime);
 		compoundTag.putLong("LastGossipDecay", this.lastGossipDecayTime);
 		compoundTag.putInt("RestocksToday", this.numberOfRestocksToday);
+		if (this.assignProfessionWhenSpawned) {
+			compoundTag.putBoolean("AssignProfessionWhenSpawned", true);
+		}
 	}
 
 	@Override
@@ -482,6 +497,9 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		}
 
 		this.numberOfRestocksToday = compoundTag.getInt("RestocksToday");
+		if (compoundTag.contains("AssignProfessionWhenSpawned")) {
+			this.assignProfessionWhenSpawned = compoundTag.getBoolean("AssignProfessionWhenSpawned");
+		}
 	}
 
 	@Override
@@ -702,6 +720,10 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(levelAccessor.getBiome(this.blockPosition()))));
 		}
 
+		if (mobSpawnType == MobSpawnType.STRUCTURE) {
+			this.assignProfessionWhenSpawned = true;
+		}
+
 		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
@@ -723,17 +745,26 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 
 	@Override
 	public void thunderHit(LightningBolt lightningBolt) {
-		Witch witch = EntityType.WITCH.create(this.level);
-		witch.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
-		witch.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(witch.blockPosition()), MobSpawnType.CONVERSION, null, null);
-		witch.setNoAi(this.isNoAi());
-		if (this.hasCustomName()) {
-			witch.setCustomName(this.getCustomName());
-			witch.setCustomNameVisible(this.isCustomNameVisible());
-		}
+		if (this.level.getDifficulty() != Difficulty.PEACEFUL) {
+			LOGGER.info("Villager {} was struck by lightning {}.", this, lightningBolt);
+			Witch witch = EntityType.WITCH.create(this.level);
+			witch.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
+			witch.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(witch.blockPosition()), MobSpawnType.CONVERSION, null, null);
+			witch.setNoAi(this.isNoAi());
+			if (this.hasCustomName()) {
+				witch.setCustomName(this.getCustomName());
+				witch.setCustomNameVisible(this.isCustomNameVisible());
+			}
 
-		this.level.addFreshEntity(witch);
-		this.remove();
+			if (this.getVillagerXp() > 0) {
+				witch.setPersistenceRequired();
+			}
+
+			this.level.addFreshEntity(witch);
+			this.remove();
+		} else {
+			super.thunderHit(lightningBolt);
+		}
 	}
 
 	@Override
@@ -925,6 +956,8 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	public void startSleeping(BlockPos blockPos) {
 		super.startSleeping(blockPos);
 		this.brain.setMemory(MemoryModuleType.LAST_SLEPT, SerializableLong.of(this.level.getGameTime()));
+		this.brain.eraseMemory(MemoryModuleType.WALK_TARGET);
+		this.brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
 	}
 
 	@Override

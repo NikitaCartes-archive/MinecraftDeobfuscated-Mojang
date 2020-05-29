@@ -237,7 +237,7 @@ public class ServerPlayerGameMode {
 				} else {
 					ItemStack itemStack = this.player.getMainHandItem();
 					ItemStack itemStack2 = itemStack.copy();
-					boolean bl2 = this.player.canDestroy(blockState);
+					boolean bl2 = this.player.hasCorrectToolForDrops(blockState);
 					itemStack.mineBlock(this.level, blockState, blockPos, this.player);
 					if (bl && bl2) {
 						block.playerDestroy(this.level, this.player, blockPos, blockState, blockEntity, itemStack2);
@@ -302,11 +302,8 @@ public class ServerPlayerGameMode {
 			ItemStack itemStack2 = itemStack.copy();
 			if (!bl2) {
 				InteractionResult interactionResult = blockState.use(level, serverPlayer, interactionHand, blockHitResult);
-				if (interactionResult == InteractionResult.SUCCESS) {
-					CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, blockPos, itemStack2);
-				}
-
 				if (interactionResult.consumesAction()) {
+					CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, blockPos, itemStack2);
 					return interactionResult;
 				}
 			}
@@ -322,7 +319,7 @@ public class ServerPlayerGameMode {
 					interactionResult2 = itemStack.useOn(useOnContext);
 				}
 
-				if (interactionResult2 == InteractionResult.SUCCESS) {
+				if (interactionResult2.consumesAction()) {
 					CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, blockPos, itemStack2);
 				}
 

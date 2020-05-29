@@ -22,7 +22,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -116,7 +115,7 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
 
 	@Nullable
 	@Override
-	public Entity changeDimension(ResourceKey<DimensionType> resourceKey) {
+	public Entity changeDimension(ResourceKey<Level> resourceKey) {
 		this.dropEquipment = false;
 		return super.changeDimension(resourceKey);
 	}

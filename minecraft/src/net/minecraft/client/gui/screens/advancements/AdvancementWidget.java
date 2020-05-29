@@ -14,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.StringSplitter;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -25,9 +26,9 @@ public class AdvancementWidget extends GuiComponent {
 	private final AdvancementTab tab;
 	private final Advancement advancement;
 	private final DisplayInfo display;
-	private final Component title;
+	private final FormattedText title;
 	private final int width;
-	private final List<Component> description;
+	private final List<FormattedText> description;
 	private final Minecraft minecraft;
 	private AdvancementWidget parent;
 	private final List<AdvancementWidget> children = Lists.<AdvancementWidget>newArrayList();
@@ -49,24 +50,24 @@ public class AdvancementWidget extends GuiComponent {
 		int l = 29 + minecraft.font.width(this.title) + k;
 		this.description = this.findOptimalLines(displayInfo.getDescription().mutableCopy().withStyle(displayInfo.getFrame().getChatColor()), l);
 
-		for (Component component : this.description) {
-			l = Math.max(l, minecraft.font.width(component));
+		for (FormattedText formattedText : this.description) {
+			l = Math.max(l, minecraft.font.width(formattedText));
 		}
 
 		this.width = l + 3 + 5;
 	}
 
-	private static float getMaxWidth(StringSplitter stringSplitter, List<Component> list) {
+	private static float getMaxWidth(StringSplitter stringSplitter, List<FormattedText> list) {
 		return (float)list.stream().mapToDouble(stringSplitter::stringWidth).max().orElse(0.0);
 	}
 
-	private List<Component> findOptimalLines(Component component, int i) {
+	private List<FormattedText> findOptimalLines(Component component, int i) {
 		StringSplitter stringSplitter = this.minecraft.font.getSplitter();
-		List<Component> list = null;
+		List<FormattedText> list = null;
 		float f = Float.MAX_VALUE;
 
 		for (int j : TEST_SPLIT_OFFSETS) {
-			List<Component> list2 = stringSplitter.splitLines(component, i - j, Style.EMPTY);
+			List<FormattedText> list2 = stringSplitter.splitLines(component, i - j, Style.EMPTY);
 			float g = Math.abs(getMaxWidth(stringSplitter, list2) - (float)i);
 			if (g <= 10.0F) {
 				return list2;
@@ -216,11 +217,11 @@ public class AdvancementWidget extends GuiComponent {
 
 		if (bl2) {
 			for (int s = 0; s < this.description.size(); s++) {
-				this.minecraft.font.draw(poseStack, (Component)this.description.get(s), (float)(q + 5), (float)(p + 26 - r + 7 + s * 9), -5592406);
+				this.minecraft.font.draw(poseStack, (FormattedText)this.description.get(s), (float)(q + 5), (float)(p + 26 - r + 7 + s * 9), -5592406);
 			}
 		} else {
 			for (int s = 0; s < this.description.size(); s++) {
-				this.minecraft.font.draw(poseStack, (Component)this.description.get(s), (float)(q + 5), (float)(j + this.y + 9 + 17 + s * 9), -5592406);
+				this.minecraft.font.draw(poseStack, (FormattedText)this.description.get(s), (float)(q + 5), (float)(j + this.y + 9 + 17 + s * 9), -5592406);
 			}
 		}
 

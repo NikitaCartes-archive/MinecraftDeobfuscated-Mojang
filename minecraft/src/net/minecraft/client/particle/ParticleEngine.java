@@ -409,6 +409,7 @@ public class ParticleEngine implements PreparableReloadListener {
 
 		RenderSystem.popMatrix();
 		RenderSystem.depthMask(true);
+		RenderSystem.depthFunc(515);
 		RenderSystem.disableBlend();
 		RenderSystem.defaultAlphaFunc();
 		lightTexture.turnOffLightLayer();

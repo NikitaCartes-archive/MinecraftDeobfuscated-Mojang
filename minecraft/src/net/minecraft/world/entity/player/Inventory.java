@@ -170,40 +170,14 @@ public class Inventory implements Container, Nameable {
 		}
 	}
 
-	public int clearInventory(Predicate<ItemStack> predicate, int i) {
+	public int clearOrCountMatchingItems(Predicate<ItemStack> predicate, int i, Container container) {
 		int j = 0;
-
-		for (int k = 0; k < this.getContainerSize(); k++) {
-			ItemStack itemStack = this.getItem(k);
-			if (!itemStack.isEmpty() && predicate.test(itemStack)) {
-				int l = i <= 0 ? itemStack.getCount() : Math.min(i - j, itemStack.getCount());
-				j += l;
-				if (i != 0) {
-					itemStack.shrink(l);
-					if (itemStack.isEmpty()) {
-						this.setItem(k, ItemStack.EMPTY);
-					}
-
-					if (i > 0 && j >= i) {
-						return j;
-					}
-				}
-			}
-		}
-
-		if (!this.carried.isEmpty() && predicate.test(this.carried)) {
-			int kx = i <= 0 ? this.carried.getCount() : Math.min(i - j, this.carried.getCount());
-			j += kx;
-			if (i != 0) {
-				this.carried.shrink(kx);
-				if (this.carried.isEmpty()) {
-					this.carried = ItemStack.EMPTY;
-				}
-
-				if (i > 0 && j >= i) {
-					return j;
-				}
-			}
+		boolean bl = i == 0;
+		j += ContainerHelper.clearOrCountMatchingItems(this, predicate, i - j, bl);
+		j += ContainerHelper.clearOrCountMatchingItems(container, predicate, i - j, bl);
+		j += ContainerHelper.clearOrCountMatchingItems(this.carried, predicate, i - j, bl);
+		if (this.carried.isEmpty()) {
+			this.carried = ItemStack.EMPTY;
 		}
 
 		return j;
@@ -521,10 +495,6 @@ public class Inventory implements Container, Nameable {
 	@Override
 	public Component getName() {
 		return new TranslatableComponent("container.inventory");
-	}
-
-	public boolean canDestroy(BlockState blockState) {
-		return this.getItem(this.selected).canDestroySpecial(blockState);
 	}
 
 	@Environment(EnvType.CLIENT)

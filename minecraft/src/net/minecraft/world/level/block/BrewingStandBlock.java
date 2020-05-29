@@ -73,7 +73,7 @@ public class BrewingStandBlock extends BaseEntityBlock {
 				player.awardStat(Stats.INTERACT_WITH_BREWINGSTAND);
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		}
 	}
 

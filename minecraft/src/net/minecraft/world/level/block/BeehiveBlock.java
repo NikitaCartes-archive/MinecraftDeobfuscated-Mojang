@@ -140,7 +140,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 				this.resetHoneyLevel(level, blockState, blockPos);
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
 		}

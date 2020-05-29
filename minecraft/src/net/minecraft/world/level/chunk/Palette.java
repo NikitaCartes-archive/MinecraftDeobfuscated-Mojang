@@ -1,5 +1,6 @@
 package net.minecraft.world.level.chunk;
 
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -9,7 +10,7 @@ import net.minecraft.network.FriendlyByteBuf;
 public interface Palette<T> {
 	int idFor(T object);
 
-	boolean maybeHas(T object);
+	boolean maybeHas(Predicate<T> predicate);
 
 	@Nullable
 	T valueFor(int i);

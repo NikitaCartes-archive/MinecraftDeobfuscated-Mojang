@@ -55,7 +55,12 @@ public interface ParticleRenderType {
 			RenderSystem.depthMask(true);
 			textureManager.bind(TextureAtlas.LOCATION_PARTICLES);
 			RenderSystem.enableBlend();
-			RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+			RenderSystem.blendFuncSeparate(
+				GlStateManager.SourceFactor.SRC_ALPHA,
+				GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+				GlStateManager.SourceFactor.ONE,
+				GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA
+			);
 			RenderSystem.alphaFunc(516, 0.003921569F);
 			bufferBuilder.begin(7, DefaultVertexFormat.PARTICLE);
 		}

@@ -26,7 +26,7 @@ public class LeadItem extends Item {
 				bindPlayerMobs(player, level, blockPos);
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			return InteractionResult.PASS;
 		}

@@ -77,7 +77,7 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 		"Swamp_Hut", new SwamplandHutFeature(NoneFeatureConfiguration.CODEC), GenerationStep.Decoration.SURFACE_STRUCTURES
 	);
 	public static final StructureFeature<NoneFeatureConfiguration> STRONGHOLD = register(
-		"Stronghold", new StrongholdFeature(NoneFeatureConfiguration.CODEC), GenerationStep.Decoration.UNDERGROUND_STRUCTURES
+		"Stronghold", new StrongholdFeature(NoneFeatureConfiguration.CODEC), GenerationStep.Decoration.STRONGHOLDS
 	);
 	public static final StructureFeature<NoneFeatureConfiguration> OCEAN_MONUMENT = register(
 		"Monument", new OceanMonumentFeature(NoneFeatureConfiguration.CODEC), GenerationStep.Decoration.SURFACE_STRUCTURES

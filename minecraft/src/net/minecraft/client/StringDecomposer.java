@@ -4,7 +4,7 @@ import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.Unit;
 
@@ -128,8 +128,8 @@ public class StringDecomposer {
 		return true;
 	}
 
-	public static boolean iterateFormatted(Component component, Style style, StringDecomposer.Output output) {
-		return !component.visit((stylex, string) -> iterateFormatted(string, 0, stylex, output) ? Optional.empty() : STOP_ITERATION, style).isPresent();
+	public static boolean iterateFormatted(FormattedText formattedText, Style style, StringDecomposer.Output output) {
+		return !formattedText.visit((stylex, string) -> iterateFormatted(string, 0, stylex, output) ? Optional.empty() : STOP_ITERATION, style).isPresent();
 	}
 
 	public static String filterBrokenSurrogates(String string) {

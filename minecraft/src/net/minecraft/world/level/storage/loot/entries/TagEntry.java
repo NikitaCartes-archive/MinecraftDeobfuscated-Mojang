@@ -6,7 +6,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import java.util.function.Consumer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.SerializationTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
@@ -23,6 +23,11 @@ public class TagEntry extends LootPoolSingletonContainer {
 		super(i, j, lootItemConditions, lootItemFunctions);
 		this.tag = tag;
 		this.expand = bl;
+	}
+
+	@Override
+	public LootPoolEntryType getType() {
+		return LootPoolEntries.TAG;
 	}
 
 	@Override
@@ -57,13 +62,9 @@ public class TagEntry extends LootPoolSingletonContainer {
 	}
 
 	public static class Serializer extends LootPoolSingletonContainer.Serializer<TagEntry> {
-		public Serializer() {
-			super(new ResourceLocation("tag"), TagEntry.class);
-		}
-
-		public void serialize(JsonObject jsonObject, TagEntry tagEntry, JsonSerializationContext jsonSerializationContext) {
-			super.serialize(jsonObject, tagEntry, jsonSerializationContext);
-			jsonObject.addProperty("name", ItemTags.getAllTags().getIdOrThrow(tagEntry.tag).toString());
+		public void serializeCustom(JsonObject jsonObject, TagEntry tagEntry, JsonSerializationContext jsonSerializationContext) {
+			super.serializeCustom(jsonObject, tagEntry, jsonSerializationContext);
+			jsonObject.addProperty("name", SerializationTags.getInstance().getItems().getIdOrThrow(tagEntry.tag).toString());
 			jsonObject.addProperty("expand", tagEntry.expand);
 		}
 
@@ -76,7 +77,7 @@ public class TagEntry extends LootPoolSingletonContainer {
 			LootItemFunction[] lootItemFunctions
 		) {
 			ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "name"));
-			Tag<Item> tag = ItemTags.getAllTags().getTag(resourceLocation);
+			Tag<Item> tag = SerializationTags.getInstance().getItems().getTag(resourceLocation);
 			if (tag == null) {
 				throw new JsonParseException("Can't find tag: " + resourceLocation);
 			} else {

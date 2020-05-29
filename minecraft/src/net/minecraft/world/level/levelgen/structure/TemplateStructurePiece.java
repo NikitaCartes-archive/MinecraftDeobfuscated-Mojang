@@ -64,7 +64,7 @@ public abstract class TemplateStructurePiece extends StructurePiece {
 	) {
 		this.placeSettings.setBoundingBox(boundingBox);
 		this.boundingBox = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
-		if (this.template.placeInWorld(worldGenLevel, this.templatePosition, blockPos, this.placeSettings, 2)) {
+		if (this.template.placeInWorld(worldGenLevel, this.templatePosition, blockPos, this.placeSettings, random, 2)) {
 			for (StructureTemplate.StructureBlockInfo structureBlockInfo : this.template.filterBlocks(this.templatePosition, this.placeSettings, Blocks.STRUCTURE_BLOCK)) {
 				if (structureBlockInfo.nbt != null) {
 					StructureMode structureMode = StructureMode.valueOf(structureBlockInfo.nbt.getString("mode"));

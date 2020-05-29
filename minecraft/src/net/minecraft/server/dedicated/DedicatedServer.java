@@ -26,15 +26,17 @@ import net.minecraft.DefaultUncaughtExceptionHandlerWithName;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.ConsoleInput;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerInterface;
+import net.minecraft.server.ServerResources;
 import net.minecraft.server.gui.MinecraftServerGui;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
+import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.packs.repository.UnopenedPack;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.OldUsersConverter;
 import net.minecraft.server.rcon.RconConsoleSource;
@@ -49,8 +51,8 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
 import org.apache.logging.log4j.LogManager;
@@ -69,6 +71,8 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 
 	public DedicatedServer(
 		LevelStorageSource.LevelStorageAccess levelStorageAccess,
+		PackRepository<UnopenedPack> packRepository,
+		ServerResources serverResources,
 		WorldData worldData,
 		DedicatedServerSettings dedicatedServerSettings,
 		DataFixer dataFixer,
@@ -80,9 +84,10 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 		super(
 			levelStorageAccess,
 			worldData,
+			packRepository,
 			Proxy.NO_PROXY,
 			dataFixer,
-			new Commands(true),
+			serverResources,
 			minecraftSessionService,
 			gameProfileRepository,
 			gameProfileCache,
@@ -90,22 +95,6 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 		);
 		this.settings = dedicatedServerSettings;
 		this.rconConsoleSource = new RconConsoleSource(this);
-		new Thread("Server Infinisleeper") {
-			{
-				this.setDaemon(true);
-				this.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(DedicatedServer.LOGGER));
-				this.start();
-			}
-
-			public void run() {
-				while (true) {
-					try {
-						Thread.sleep(2147483647L);
-					} catch (InterruptedException var2) {
-					}
-				}
-			}
-		};
 	}
 
 	@Override
@@ -409,7 +398,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 
 	@Override
 	public boolean isUnderSpawnProtection(ServerLevel serverLevel, BlockPos blockPos, Player player) {
-		if (serverLevel.dimension() != DimensionType.OVERWORLD_LOCATION) {
+		if (serverLevel.dimension() != Level.OVERWORLD) {
 			return false;
 		} else if (this.getPlayerList().getOps().isEmpty()) {
 			return false;

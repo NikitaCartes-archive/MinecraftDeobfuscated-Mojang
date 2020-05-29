@@ -111,7 +111,7 @@ public class ArmorItem extends Item implements Wearable {
 		if (itemStack2.isEmpty()) {
 			player.setItemSlot(equipmentSlot, itemStack.copy());
 			itemStack.setCount(0);
-			return InteractionResultHolder.success(itemStack);
+			return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
 		} else {
 			return InteractionResultHolder.fail(itemStack);
 		}

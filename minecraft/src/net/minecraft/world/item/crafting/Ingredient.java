@@ -22,7 +22,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.SerializationTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.player.StackedContents;
@@ -168,7 +168,7 @@ public final class Ingredient implements Predicate<ItemStack> {
 			return new Ingredient.ItemValue(new ItemStack(item));
 		} else if (jsonObject.has("tag")) {
 			ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));
-			Tag<Item> tag = ItemTags.getAllTags().getTag(resourceLocation);
+			Tag<Item> tag = SerializationTags.getInstance().getItems().getTag(resourceLocation);
 			if (tag == null) {
 				throw new JsonSyntaxException("Unknown item tag '" + resourceLocation + "'");
 			} else {
@@ -220,7 +220,7 @@ public final class Ingredient implements Predicate<ItemStack> {
 		@Override
 		public JsonObject serialize() {
 			JsonObject jsonObject = new JsonObject();
-			jsonObject.addProperty("tag", ItemTags.getAllTags().getIdOrThrow(this.tag).toString());
+			jsonObject.addProperty("tag", SerializationTags.getInstance().getItems().getIdOrThrow(this.tag).toString());
 			return jsonObject;
 		}
 	}

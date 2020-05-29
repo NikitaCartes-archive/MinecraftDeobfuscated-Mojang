@@ -102,8 +102,8 @@ public class SkeletonHorse extends AbstractHorse {
 	}
 
 	@Override
-	public double getRideHeight() {
-		return super.getRideHeight() - 0.1875;
+	public double getPassengersRidingOffset() {
+		return super.getPassengersRidingOffset() - 0.1875;
 	}
 
 	@Override

@@ -12,12 +12,12 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.Level;
 
 public class InteractableDoorsSensor extends Sensor<LivingEntity> {
 	@Override
 	protected void doTick(ServerLevel serverLevel, LivingEntity livingEntity) {
-		ResourceKey<DimensionType> resourceKey = serverLevel.dimension();
+		ResourceKey<Level> resourceKey = serverLevel.dimension();
 		BlockPos blockPos = livingEntity.blockPosition();
 		List<GlobalPos> list = Lists.<GlobalPos>newArrayList();
 

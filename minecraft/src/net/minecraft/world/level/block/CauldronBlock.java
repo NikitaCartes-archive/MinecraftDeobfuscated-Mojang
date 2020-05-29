@@ -88,7 +88,7 @@ public class CauldronBlock extends Block {
 					level.playSound(null, blockPos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
 				}
 
-				return InteractionResult.SUCCESS;
+				return InteractionResult.sidedSuccess(level.isClientSide);
 			} else if (item == Items.BUCKET) {
 				if (i == 3 && !level.isClientSide) {
 					if (!player.abilities.instabuild) {
@@ -105,7 +105,7 @@ public class CauldronBlock extends Block {
 					level.playSound(null, blockPos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
 				}
 
-				return InteractionResult.SUCCESS;
+				return InteractionResult.sidedSuccess(level.isClientSide);
 			} else if (item == Items.GLASS_BOTTLE) {
 				if (i > 0 && !level.isClientSide) {
 					if (!player.abilities.instabuild) {
@@ -125,7 +125,7 @@ public class CauldronBlock extends Block {
 					this.setWaterLevel(level, blockPos, blockState, i - 1);
 				}
 
-				return InteractionResult.SUCCESS;
+				return InteractionResult.sidedSuccess(level.isClientSide);
 			} else if (item == Items.POTION && PotionUtils.getPotion(itemStack) == Potions.WATER) {
 				if (i < 3 && !level.isClientSide) {
 					if (!player.abilities.instabuild) {
@@ -141,7 +141,7 @@ public class CauldronBlock extends Block {
 					this.setWaterLevel(level, blockPos, blockState, i + 1);
 				}
 
-				return InteractionResult.SUCCESS;
+				return InteractionResult.sidedSuccess(level.isClientSide);
 			} else {
 				if (i > 0 && item instanceof DyeableLeatherItem) {
 					DyeableLeatherItem dyeableLeatherItem = (DyeableLeatherItem)item;
@@ -173,7 +173,7 @@ public class CauldronBlock extends Block {
 						}
 					}
 
-					return InteractionResult.SUCCESS;
+					return InteractionResult.sidedSuccess(level.isClientSide);
 				} else if (i > 0 && item instanceof BlockItem) {
 					Block block = ((BlockItem)item).getBlock();
 					if (block instanceof ShulkerBoxBlock && !level.isClientSide()) {

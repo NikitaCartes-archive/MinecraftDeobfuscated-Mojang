@@ -5,7 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -88,7 +88,7 @@ public class EnchantmentNames {
 		return INSTANCE;
 	}
 
-	public MutableComponent getRandomName(Font font, int i) {
+	public FormattedText getRandomName(Font font, int i) {
 		StringBuilder stringBuilder = new StringBuilder();
 		int j = this.random.nextInt(2) + 3;
 

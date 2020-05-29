@@ -40,7 +40,7 @@ public class ArmorStandItem extends Item {
 				}
 
 				itemStack.shrink(1);
-				return InteractionResult.SUCCESS;
+				return InteractionResult.sidedSuccess(level.isClientSide);
 			} else {
 				return InteractionResult.FAIL;
 			}

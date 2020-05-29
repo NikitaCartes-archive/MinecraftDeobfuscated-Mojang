@@ -63,7 +63,7 @@ public class Spider extends Monster {
 	}
 
 	@Override
-	public double getRideHeight() {
+	public double getPassengersRidingOffset() {
 		return (double)(this.getBbHeight() * 0.5F);
 	}
 

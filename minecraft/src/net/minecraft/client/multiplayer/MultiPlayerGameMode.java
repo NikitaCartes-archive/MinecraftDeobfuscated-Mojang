@@ -310,7 +310,11 @@ public class MultiPlayerGameMode {
 	}
 
 	public LocalPlayer createPlayer(ClientLevel clientLevel, StatsCounter statsCounter, ClientRecipeBook clientRecipeBook) {
-		return new LocalPlayer(this.minecraft, clientLevel, this.connection, statsCounter, clientRecipeBook);
+		return this.createPlayer(clientLevel, statsCounter, clientRecipeBook, false, false);
+	}
+
+	public LocalPlayer createPlayer(ClientLevel clientLevel, StatsCounter statsCounter, ClientRecipeBook clientRecipeBook, boolean bl, boolean bl2) {
+		return new LocalPlayer(this.minecraft, clientLevel, this.connection, statsCounter, clientRecipeBook, bl, bl2);
 	}
 
 	public void attack(Player player, Entity entity) {
@@ -416,7 +420,9 @@ public class MultiPlayerGameMode {
 
 	public void handleBlockBreakAck(ClientLevel clientLevel, BlockPos blockPos, BlockState blockState, ServerboundPlayerActionPacket.Action action, boolean bl) {
 		PosAndRot posAndRot = this.unAckedActions.remove(Pair.of(blockPos, action));
-		if (posAndRot == null || !bl || action != ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK && clientLevel.getBlockState(blockPos) != blockState) {
+		BlockState blockState2 = clientLevel.getBlockState(blockPos);
+		if ((posAndRot == null || !bl || action != ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK && blockState2 != blockState)
+			&& blockState2 != blockState) {
 			clientLevel.setKnownState(blockPos, blockState);
 			if (posAndRot != null) {
 				Vec3 vec3 = posAndRot.pos();

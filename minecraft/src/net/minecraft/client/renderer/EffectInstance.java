@@ -14,6 +14,8 @@ import com.mojang.blaze3d.shaders.Program;
 import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -293,32 +295,33 @@ public class EffectInstance implements Effect, AutoCloseable {
 
 	private void updateLocations() {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
-		int i = 0;
+		IntList intList = new IntArrayList();
 
-		for (int j = 0; i < this.samplerNames.size(); j++) {
+		for (int i = 0; i < this.samplerNames.size(); i++) {
 			String string = (String)this.samplerNames.get(i);
-			int k = Uniform.glGetUniformLocation(this.programId, string);
-			if (k == -1) {
-				LOGGER.warn("Shader {}could not find sampler named {} in the specified shader program.", this.name, string);
+			int j = Uniform.glGetUniformLocation(this.programId, string);
+			if (j == -1) {
+				LOGGER.warn("Shader {} could not find sampler named {} in the specified shader program.", this.name, string);
 				this.samplerMap.remove(string);
-				this.samplerNames.remove(j);
-				j--;
+				intList.add(i);
 			} else {
-				this.samplerLocations.add(k);
+				this.samplerLocations.add(j);
 			}
+		}
 
-			i++;
+		for (int ix = intList.size() - 1; ix >= 0; ix--) {
+			this.samplerNames.remove(intList.getInt(ix));
 		}
 
 		for (Uniform uniform : this.uniforms) {
-			String string = uniform.getName();
-			int k = Uniform.glGetUniformLocation(this.programId, string);
+			String string2 = uniform.getName();
+			int k = Uniform.glGetUniformLocation(this.programId, string2);
 			if (k == -1) {
-				LOGGER.warn("Could not find uniform named {} in the specified shader program.", string);
+				LOGGER.warn("Could not find uniform named {} in the specified shader program.", string2);
 			} else {
 				this.uniformLocations.add(k);
 				uniform.setLocation(k);
-				this.uniformMap.put(string, uniform);
+				this.uniformMap.put(string2, uniform);
 			}
 		}
 	}

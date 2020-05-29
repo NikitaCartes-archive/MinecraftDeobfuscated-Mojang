@@ -36,7 +36,9 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import org.apache.logging.log4j.LogManager;
@@ -122,16 +124,16 @@ public abstract class Screen extends AbstractContainerEventHandler implements Ti
 		);
 	}
 
-	public void renderTooltip(PoseStack poseStack, Component component, int i, int j) {
-		this.renderTooltip(poseStack, Arrays.asList(component), i, j);
+	public void renderTooltip(PoseStack poseStack, FormattedText formattedText, int i, int j) {
+		this.renderTooltip(poseStack, Arrays.asList(formattedText), i, j);
 	}
 
-	public void renderTooltip(PoseStack poseStack, List<Component> list, int i, int j) {
+	public void renderTooltip(PoseStack poseStack, List<? extends FormattedText> list, int i, int j) {
 		if (!list.isEmpty()) {
 			int k = 0;
 
-			for (Component component : list) {
-				int l = this.font.width(component);
+			for (FormattedText formattedText : list) {
+				int l = this.font.width(formattedText);
 				if (l > k) {
 					k = l;
 				}
@@ -153,24 +155,23 @@ public abstract class Screen extends AbstractContainerEventHandler implements Ti
 			}
 
 			poseStack.pushPose();
-			this.itemRenderer.blitOffset = 300.0F;
 			int p = -267386864;
 			int q = 1347420415;
 			int r = 1344798847;
-			int s = 300;
+			int s = 400;
 			Tesselator tesselator = Tesselator.getInstance();
 			BufferBuilder bufferBuilder = tesselator.getBuilder();
 			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
 			Matrix4f matrix4f = poseStack.last().pose();
-			fillGradient(matrix4f, bufferBuilder, m - 3, n - 4, m + k + 3, n - 3, 300, -267386864, -267386864);
-			fillGradient(matrix4f, bufferBuilder, m - 3, n + o + 3, m + k + 3, n + o + 4, 300, -267386864, -267386864);
-			fillGradient(matrix4f, bufferBuilder, m - 3, n - 3, m + k + 3, n + o + 3, 300, -267386864, -267386864);
-			fillGradient(matrix4f, bufferBuilder, m - 4, n - 3, m - 3, n + o + 3, 300, -267386864, -267386864);
-			fillGradient(matrix4f, bufferBuilder, m + k + 3, n - 3, m + k + 4, n + o + 3, 300, -267386864, -267386864);
-			fillGradient(matrix4f, bufferBuilder, m - 3, n - 3 + 1, m - 3 + 1, n + o + 3 - 1, 300, 1347420415, 1344798847);
-			fillGradient(matrix4f, bufferBuilder, m + k + 2, n - 3 + 1, m + k + 3, n + o + 3 - 1, 300, 1347420415, 1344798847);
-			fillGradient(matrix4f, bufferBuilder, m - 3, n - 3, m + k + 3, n - 3 + 1, 300, 1347420415, 1347420415);
-			fillGradient(matrix4f, bufferBuilder, m - 3, n + o + 2, m + k + 3, n + o + 3, 300, 1344798847, 1344798847);
+			fillGradient(matrix4f, bufferBuilder, m - 3, n - 4, m + k + 3, n - 3, 400, -267386864, -267386864);
+			fillGradient(matrix4f, bufferBuilder, m - 3, n + o + 3, m + k + 3, n + o + 4, 400, -267386864, -267386864);
+			fillGradient(matrix4f, bufferBuilder, m - 3, n - 3, m + k + 3, n + o + 3, 400, -267386864, -267386864);
+			fillGradient(matrix4f, bufferBuilder, m - 4, n - 3, m - 3, n + o + 3, 400, -267386864, -267386864);
+			fillGradient(matrix4f, bufferBuilder, m + k + 3, n - 3, m + k + 4, n + o + 3, 400, -267386864, -267386864);
+			fillGradient(matrix4f, bufferBuilder, m - 3, n - 3 + 1, m - 3 + 1, n + o + 3 - 1, 400, 1347420415, 1344798847);
+			fillGradient(matrix4f, bufferBuilder, m + k + 2, n - 3 + 1, m + k + 3, n + o + 3 - 1, 400, 1347420415, 1344798847);
+			fillGradient(matrix4f, bufferBuilder, m - 3, n - 3, m + k + 3, n - 3 + 1, 400, 1347420415, 1347420415);
+			fillGradient(matrix4f, bufferBuilder, m - 3, n + o + 2, m + k + 3, n + o + 3, 400, 1344798847, 1344798847);
 			RenderSystem.enableDepthTest();
 			RenderSystem.disableTexture();
 			RenderSystem.enableBlend();
@@ -182,12 +183,12 @@ public abstract class Screen extends AbstractContainerEventHandler implements Ti
 			RenderSystem.disableBlend();
 			RenderSystem.enableTexture();
 			MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-			poseStack.translate(0.0, 0.0, (double)this.itemRenderer.blitOffset);
+			poseStack.translate(0.0, 0.0, 400.0);
 
 			for (int t = 0; t < list.size(); t++) {
-				Component component2 = (Component)list.get(t);
-				if (component2 != null) {
-					this.font.drawInBatch(component2, (float)m, (float)n, -1, true, matrix4f, bufferSource, false, 0, 15728880);
+				FormattedText formattedText2 = (FormattedText)list.get(t);
+				if (formattedText2 != null) {
+					this.font.drawInBatch(formattedText2, (float)m, (float)n, -1, true, matrix4f, bufferSource, false, 0, 15728880);
 				}
 
 				if (t == 0) {
@@ -199,13 +200,12 @@ public abstract class Screen extends AbstractContainerEventHandler implements Ti
 
 			bufferSource.endBatch();
 			poseStack.popPose();
-			this.itemRenderer.blitOffset = 0.0F;
 		}
 	}
 
-	protected void renderComponentHoverEffect(PoseStack poseStack, @Nullable Component component, int i, int j) {
-		if (component != null && component.getStyle().getHoverEvent() != null) {
-			HoverEvent hoverEvent = component.getStyle().getHoverEvent();
+	protected void renderComponentHoverEffect(PoseStack poseStack, @Nullable Style style, int i, int j) {
+		if (style != null && style.getHoverEvent() != null) {
+			HoverEvent hoverEvent = style.getHoverEvent();
 			HoverEvent.ItemStackInfo itemStackInfo = hoverEvent.getValue(HoverEvent.Action.SHOW_ITEM);
 			if (itemStackInfo != null) {
 				this.renderTooltip(poseStack, itemStackInfo.getItemStack(), i, j);
@@ -216,9 +216,9 @@ public abstract class Screen extends AbstractContainerEventHandler implements Ti
 						this.renderTooltip(poseStack, entityTooltipInfo.getTooltipLines(), i, j);
 					}
 				} else {
-					Component component2 = hoverEvent.getValue(HoverEvent.Action.SHOW_TEXT);
-					if (component2 != null) {
-						this.renderTooltip(poseStack, this.minecraft.font.split(component2, Math.max(this.width / 2, 200)), i, j);
+					Component component = hoverEvent.getValue(HoverEvent.Action.SHOW_TEXT);
+					if (component != null) {
+						this.renderTooltip(poseStack, this.minecraft.font.split(component, Math.max(this.width / 2, 200)), i, j);
 					}
 				}
 			}
@@ -228,14 +228,14 @@ public abstract class Screen extends AbstractContainerEventHandler implements Ti
 	protected void insertText(String string, boolean bl) {
 	}
 
-	public boolean handleComponentClicked(Component component) {
-		if (component == null) {
+	public boolean handleComponentClicked(@Nullable Style style) {
+		if (style == null) {
 			return false;
 		} else {
-			ClickEvent clickEvent = component.getStyle().getClickEvent();
+			ClickEvent clickEvent = style.getClickEvent();
 			if (hasShiftDown()) {
-				if (component.getStyle().getInsertion() != null) {
-					this.insertText(component.getStyle().getInsertion(), false);
+				if (style.getInsertion() != null) {
+					this.insertText(style.getInsertion(), false);
 				}
 			} else if (clickEvent != null) {
 				if (clickEvent.getAction() == ClickEvent.Action.OPEN_URL) {

@@ -32,7 +32,7 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 
 public abstract class AbstractVillager extends AgableMob implements Npc, Merchant {
 	private static final EntityDataAccessor<Integer> DATA_UNHAPPY_COUNTER = SynchedEntityData.defineId(AbstractVillager.class, EntityDataSerializers.INT);
@@ -44,6 +44,8 @@ public abstract class AbstractVillager extends AgableMob implements Npc, Merchan
 
 	public AbstractVillager(EntityType<? extends AbstractVillager> entityType, Level level) {
 		super(entityType, level);
+		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0F);
+		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
 	}
 
 	@Override
@@ -181,7 +183,7 @@ public abstract class AbstractVillager extends AgableMob implements Npc, Merchan
 
 	@Nullable
 	@Override
-	public Entity changeDimension(ResourceKey<DimensionType> resourceKey) {
+	public Entity changeDimension(ResourceKey<Level> resourceKey) {
 		this.stopTrading();
 		return super.changeDimension(resourceKey);
 	}

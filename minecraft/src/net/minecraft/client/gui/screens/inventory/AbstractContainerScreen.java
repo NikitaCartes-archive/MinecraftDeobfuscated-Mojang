@@ -27,6 +27,10 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 	public static final ResourceLocation INVENTORY_LOCATION = new ResourceLocation("textures/gui/container/inventory.png");
 	protected int imageWidth = 176;
 	protected int imageHeight = 166;
+	protected int titleLabelX;
+	protected int titleLabelY;
+	protected int inventoryLabelX;
+	protected int inventoryLabelY;
 	protected final T menu;
 	protected final Inventory inventory;
 	protected int leftPos;
@@ -59,6 +63,10 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		this.menu = abstractContainerMenu;
 		this.inventory = inventory;
 		this.skipNextRelease = true;
+		this.titleLabelX = 8;
+		this.titleLabelY = 6;
+		this.inventoryLabelX = 8;
+		this.inventoryLabelY = this.imageHeight - 94;
 	}
 
 	@Override
@@ -160,6 +168,8 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 	}
 
 	protected void renderLabels(PoseStack poseStack, int i, int j) {
+		this.font.draw(poseStack, this.title, (float)this.titleLabelX, (float)this.titleLabelY, 4210752);
+		this.font.draw(poseStack, this.inventory.getDisplayName(), (float)this.inventoryLabelX, (float)this.inventoryLabelY, 4210752);
 	}
 
 	protected abstract void renderBg(PoseStack poseStack, float f, int i, int j);

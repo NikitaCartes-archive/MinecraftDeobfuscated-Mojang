@@ -71,7 +71,7 @@ public class FlowerPotBlock extends Block {
 				level.setBlock(blockPos, Blocks.FLOWER_POT.defaultBlockState(), 3);
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			return InteractionResult.CONSUME;
 		}

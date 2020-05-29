@@ -47,7 +47,7 @@ public class EndCrystalItem extends Item {
 					}
 
 					useOnContext.getItemInHand().shrink(1);
-					return InteractionResult.SUCCESS;
+					return InteractionResult.sidedSuccess(level.isClientSide);
 				}
 			}
 		}

@@ -755,9 +755,8 @@ public class Options {
 		return this.useNativeTransport;
 	}
 
-	public void loadResourcePacks(PackRepository<UnopenedResourcePack> packRepository) {
-		packRepository.reload();
-		Set<UnopenedResourcePack> set = Sets.<UnopenedResourcePack>newLinkedHashSet();
+	public void loadSelectedResourcePacks(PackRepository<UnopenedResourcePack> packRepository) {
+		Set<String> set = Sets.<String>newLinkedHashSet();
 		Iterator<String> iterator = this.resourcePacks.iterator();
 
 		while (iterator.hasNext()) {
@@ -777,7 +776,7 @@ public class Options {
 				LOGGER.info("Removed resource pack {} from incompatibility list because it's now compatible", string);
 				this.incompatibleResourcePacks.remove(string);
 			} else {
-				set.add(unopenedResourcePack);
+				set.add(unopenedResourcePack.getId());
 			}
 		}
 

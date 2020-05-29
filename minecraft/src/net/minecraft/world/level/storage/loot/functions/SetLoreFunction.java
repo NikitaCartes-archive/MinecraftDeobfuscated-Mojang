@@ -15,7 +15,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -33,6 +32,11 @@ public class SetLoreFunction extends LootItemConditionalFunction {
 		this.replace = bl;
 		this.lore = ImmutableList.copyOf(list);
 		this.resolutionContext = entityTarget;
+	}
+
+	@Override
+	public LootItemFunctionType getType() {
+		return LootItemFunctions.SET_LORE;
 	}
 
 	@Override
@@ -93,10 +97,6 @@ public class SetLoreFunction extends LootItemConditionalFunction {
 	}
 
 	public static class Serializer extends LootItemConditionalFunction.Serializer<SetLoreFunction> {
-		public Serializer() {
-			super(new ResourceLocation("set_lore"), SetLoreFunction.class);
-		}
-
 		public void serialize(JsonObject jsonObject, SetLoreFunction setLoreFunction, JsonSerializationContext jsonSerializationContext) {
 			super.serialize(jsonObject, setLoreFunction, jsonSerializationContext);
 			jsonObject.addProperty("replace", setLoreFunction.replace);

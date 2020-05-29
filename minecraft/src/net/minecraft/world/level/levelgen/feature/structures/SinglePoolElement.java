@@ -130,7 +130,7 @@ public class SinglePoolElement extends StructurePoolElement {
 	) {
 		StructureTemplate structureTemplate = this.getTemplate(structureManager);
 		StructurePlaceSettings structurePlaceSettings = this.getSettings(rotation, boundingBox, bl);
-		if (!structureTemplate.placeInWorld(worldGenLevel, blockPos, blockPos2, structurePlaceSettings, 18)) {
+		if (!structureTemplate.placeInWorld(worldGenLevel, blockPos, blockPos2, structurePlaceSettings, random, 18)) {
 			return false;
 		} else {
 			for (StructureTemplate.StructureBlockInfo structureBlockInfo : StructureTemplate.processBlockInfos(

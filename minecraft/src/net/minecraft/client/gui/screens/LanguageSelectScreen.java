@@ -12,7 +12,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.OptionButton;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.client.resources.language.Language;
+import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -47,7 +47,6 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 				this.languageManager.setSelected(entry.language);
 				this.options.languageCode = entry.language.getCode();
 				this.minecraft.reloadResourcePacks();
-				this.font.setBidirectional(this.languageManager.isBidirectional());
 				this.doneButton.setMessage(CommonComponents.GUI_DONE);
 				this.forceUnicodeButton.setMessage(Option.FORCE_UNICODE_FONT.getMessage(this.options));
 				this.options.save();
@@ -71,10 +70,10 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 		public LanguageSelectionList(Minecraft minecraft) {
 			super(minecraft, LanguageSelectScreen.this.width, LanguageSelectScreen.this.height, 32, LanguageSelectScreen.this.height - 65 + 4, 18);
 
-			for (Language language : LanguageSelectScreen.this.languageManager.getLanguages()) {
-				LanguageSelectScreen.LanguageSelectionList.Entry entry = new LanguageSelectScreen.LanguageSelectionList.Entry(language);
+			for (LanguageInfo languageInfo : LanguageSelectScreen.this.languageManager.getLanguages()) {
+				LanguageSelectScreen.LanguageSelectionList.Entry entry = new LanguageSelectScreen.LanguageSelectionList.Entry(languageInfo);
 				this.addEntry(entry);
-				if (LanguageSelectScreen.this.languageManager.getSelected().getCode().equals(language.getCode())) {
+				if (LanguageSelectScreen.this.languageManager.getSelected().getCode().equals(languageInfo.getCode())) {
 					this.setSelected(entry);
 				}
 			}
@@ -113,19 +112,19 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 
 		@Environment(EnvType.CLIENT)
 		public class Entry extends ObjectSelectionList.Entry<LanguageSelectScreen.LanguageSelectionList.Entry> {
-			private final Language language;
+			private final LanguageInfo language;
 
-			public Entry(Language language) {
-				this.language = language;
+			public Entry(LanguageInfo languageInfo) {
+				this.language = languageInfo;
 			}
 
 			@Override
 			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-				LanguageSelectScreen.this.font.setBidirectional(true);
-				LanguageSelectionList.this.drawCenteredString(
-					poseStack, LanguageSelectScreen.this.font, this.language.toString(), LanguageSelectionList.this.width / 2, j + 1, 16777215
-				);
-				LanguageSelectScreen.this.font.setBidirectional(LanguageSelectScreen.this.languageManager.getSelected().isBidirectional());
+				String string = this.language.toString();
+				LanguageSelectScreen.this.font
+					.drawShadow(
+						poseStack, string, (float)(LanguageSelectionList.this.width / 2 - LanguageSelectScreen.this.font.width(string) / 2), (float)(j + 1), 16777215, true
+					);
 			}
 
 			@Override

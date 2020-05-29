@@ -66,7 +66,7 @@ public class HoeItem extends DiggerItem {
 					}
 				}
 
-				return InteractionResult.SUCCESS;
+				return InteractionResult.sidedSuccess(level.isClientSide);
 			}
 		}
 

@@ -27,11 +27,8 @@ import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.LowerCaseEnumTypeAdapterFactory;
-import net.minecraft.util.Unit;
 
-public interface Component extends Message {
-	Optional<Unit> STOP_ITERATION = Optional.of(Unit.INSTANCE);
-
+public interface Component extends Message, FormattedText {
 	Style getStyle();
 
 	String getContents();
@@ -67,7 +64,8 @@ public interface Component extends Message {
 	MutableComponent mutableCopy();
 
 	@Environment(EnvType.CLIENT)
-	default <T> Optional<T> visit(Component.StyledContentConsumer<T> styledContentConsumer, Style style) {
+	@Override
+	default <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
 		Style style2 = this.getStyle().applyTo(style);
 		Optional<T> optional = this.visitSelf(styledContentConsumer, style2);
 		if (optional.isPresent()) {
@@ -84,7 +82,8 @@ public interface Component extends Message {
 		}
 	}
 
-	default <T> Optional<T> visit(Component.ContentConsumer<T> contentConsumer) {
+	@Override
+	default <T> Optional<T> visit(FormattedText.ContentConsumer<T> contentConsumer) {
 		Optional<T> optional = this.visitSelf(contentConsumer);
 		if (optional.isPresent()) {
 			return optional;
@@ -101,16 +100,12 @@ public interface Component extends Message {
 	}
 
 	@Environment(EnvType.CLIENT)
-	default <T> Optional<T> visitSelf(Component.StyledContentConsumer<T> styledContentConsumer, Style style) {
+	default <T> Optional<T> visitSelf(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
 		return styledContentConsumer.accept(style, this.getContents());
 	}
 
-	default <T> Optional<T> visitSelf(Component.ContentConsumer<T> contentConsumer) {
+	default <T> Optional<T> visitSelf(FormattedText.ContentConsumer<T> contentConsumer) {
 		return contentConsumer.accept(this.getContents());
-	}
-
-	public interface ContentConsumer<T> {
-		Optional<T> accept(String string);
 	}
 
 	public static class Serializer implements JsonDeserializer<MutableComponent>, JsonSerializer<Component> {
@@ -362,10 +357,5 @@ public interface Component extends Message {
 				throw new IllegalStateException("Couldn't read position of JsonReader", var2);
 			}
 		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	public interface StyledContentConsumer<T> {
-		Optional<T> accept(Style style, String string);
 	}
 }

@@ -38,7 +38,7 @@ public class StructureBlock extends BaseEntityBlock {
 	) {
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
 		if (blockEntity instanceof StructureBlockEntity) {
-			return ((StructureBlockEntity)blockEntity).usedBy(player) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+			return ((StructureBlockEntity)blockEntity).usedBy(player) ? InteractionResult.sidedSuccess(level.isClientSide) : InteractionResult.PASS;
 		} else {
 			return InteractionResult.PASS;
 		}

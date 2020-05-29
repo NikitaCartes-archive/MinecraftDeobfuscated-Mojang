@@ -56,7 +56,7 @@ public abstract class AbstractFish extends WaterAnimal {
 
 	@Override
 	public boolean requiresCustomPersistence() {
-		return this.fromBucket();
+		return super.requiresCustomPersistence() || this.fromBucket();
 	}
 
 	public static boolean checkFishSpawnRules(

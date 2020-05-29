@@ -37,7 +37,9 @@ public abstract class RenderStateShard {
 		"lightning_transparency", () -> {
 			RenderSystem.enableBlend();
 			RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
+			Minecraft.getInstance().levelRenderer.getWeatherTarget().bindWrite(false);
 		}, () -> {
+			Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
 			RenderSystem.disableBlend();
 			RenderSystem.defaultBlendFunc();
 		}
@@ -63,10 +65,34 @@ public abstract class RenderStateShard {
 		}
 	);
 	protected static final RenderStateShard.TransparencyStateShard TRANSLUCENT_TRANSPARENCY = new RenderStateShard.TransparencyStateShard(
-		"translucent_transparency", () -> {
+		"translucent_transparency",
+		() -> {
 			RenderSystem.enableBlend();
-			RenderSystem.defaultBlendFunc();
-		}, () -> RenderSystem.disableBlend()
+			RenderSystem.blendFuncSeparate(
+				GlStateManager.SourceFactor.SRC_ALPHA,
+				GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+				GlStateManager.SourceFactor.ONE,
+				GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA
+			);
+		},
+		() -> RenderSystem.disableBlend()
+	);
+	protected static final RenderStateShard.TransparencyStateShard ITEM_TRANSPARENCY = new RenderStateShard.TransparencyStateShard(
+		"item_transparency",
+		() -> {
+			RenderSystem.enableBlend();
+			RenderSystem.blendFuncSeparate(
+				GlStateManager.SourceFactor.SRC_ALPHA,
+				GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+				GlStateManager.SourceFactor.ONE,
+				GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA
+			);
+			Minecraft.getInstance().levelRenderer.getItemEntityTarget().bindWrite(false);
+		},
+		() -> {
+			Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
+			RenderSystem.disableBlend();
+		}
 	);
 	protected static final RenderStateShard.AlphaStateShard NO_ALPHA = new RenderStateShard.AlphaStateShard(0.0F);
 	protected static final RenderStateShard.AlphaStateShard DEFAULT_ALPHA = new RenderStateShard.AlphaStateShard(0.003921569F);
@@ -148,6 +174,26 @@ public abstract class RenderStateShard {
 	protected static final RenderStateShard.OutputStateShard OUTLINE_TARGET = new RenderStateShard.OutputStateShard(
 		"outline_target",
 		() -> Minecraft.getInstance().levelRenderer.entityTarget().bindWrite(false),
+		() -> Minecraft.getInstance().getMainRenderTarget().bindWrite(false)
+	);
+	protected static final RenderStateShard.OutputStateShard TRANSLUCENT_TARGET = new RenderStateShard.OutputStateShard(
+		"translucent_target",
+		() -> Minecraft.getInstance().levelRenderer.getTranslucentTarget().bindWrite(false),
+		() -> Minecraft.getInstance().getMainRenderTarget().bindWrite(false)
+	);
+	protected static final RenderStateShard.OutputStateShard PARTICLES_TARGET = new RenderStateShard.OutputStateShard(
+		"particles_target",
+		() -> Minecraft.getInstance().levelRenderer.getParticlesTarget().bindWrite(false),
+		() -> Minecraft.getInstance().getMainRenderTarget().bindWrite(false)
+	);
+	protected static final RenderStateShard.OutputStateShard WEATHER_TARGET = new RenderStateShard.OutputStateShard(
+		"weather_target",
+		() -> Minecraft.getInstance().levelRenderer.getWeatherTarget().bindWrite(false),
+		() -> Minecraft.getInstance().getMainRenderTarget().bindWrite(false)
+	);
+	protected static final RenderStateShard.OutputStateShard CLOUDS_TARGET = new RenderStateShard.OutputStateShard(
+		"clouds_target",
+		() -> Minecraft.getInstance().levelRenderer.getCloudsTarget().bindWrite(false),
 		() -> Minecraft.getInstance().getMainRenderTarget().bindWrite(false)
 	);
 	protected static final RenderStateShard.LineStateShard DEFAULT_LINE = new RenderStateShard.LineStateShard(OptionalDouble.of(1.0));

@@ -17,17 +17,22 @@ import net.minecraft.world.entity.npc.VillagerProfession;
 public class VillagerGoalPackages {
 	public static ImmutableList<Pair<Integer, ? extends Behavior<? super Villager>>> getCorePackage(VillagerProfession villagerProfession, float f) {
 		return ImmutableList.of(
-			Pair.of(0, new Swim(0.4F, 0.8F)),
+			Pair.of(0, new Swim(0.8F)),
 			Pair.of(0, new InteractWithDoor()),
 			Pair.of(0, new LookAtTargetSink(45, 90)),
 			Pair.of(0, new VillagerPanicTrigger()),
 			Pair.of(0, new WakeUp()),
 			Pair.of(0, new ReactToBell()),
 			Pair.of(0, new SetRaidStatus()),
+			Pair.of(0, new ValidateNearbyPoi(villagerProfession.getJobPoiType(), MemoryModuleType.JOB_SITE)),
+			Pair.of(0, new ValidateNearbyPoi(villagerProfession.getJobPoiType(), MemoryModuleType.POTENTIAL_JOB_SITE)),
 			Pair.of(1, new MoveToTargetSink(200)),
-			Pair.of(2, new LookAndFollowTradingPlayerSink(f)),
-			Pair.of(5, new GoToWantedItem<>(0.5F, false, 4)),
-			Pair.of(10, new AcquirePoi(villagerProfession.getJobPoiType(), MemoryModuleType.JOB_SITE, true)),
+			Pair.of(2, new PoiCompetitorScan(villagerProfession)),
+			Pair.of(3, new LookAndFollowTradingPlayerSink(f)),
+			Pair.of(5, new GoToWantedItem(f, false, 4)),
+			Pair.of(6, new AcquirePoi(villagerProfession.getJobPoiType(), MemoryModuleType.JOB_SITE, MemoryModuleType.POTENTIAL_JOB_SITE, true)),
+			Pair.of(6, new GoToPotentialJobSite(f)),
+			Pair.of(7, new YieldJobSite(f)),
 			Pair.of(10, new AcquirePoi(PoiType.HOME, MemoryModuleType.HOME, false)),
 			Pair.of(10, new AcquirePoi(PoiType.MEETING, MemoryModuleType.MEETING_POINT, true)),
 			Pair.of(10, new AssignProfessionFromJobSite()),
@@ -62,7 +67,6 @@ public class VillagerGoalPackages {
 			Pair.of(10, new SetLookAndInteract(EntityType.PLAYER, 4)),
 			Pair.of(2, new SetWalkTargetFromBlockMemory(MemoryModuleType.JOB_SITE, f, 9, 100, 1200)),
 			Pair.of(3, new GiveGiftToHero(100)),
-			Pair.of(3, new ValidateNearbyPoi(villagerProfession.getJobPoiType(), MemoryModuleType.JOB_SITE)),
 			Pair.of(99, new UpdateActivityFromSchedule())
 		);
 	}

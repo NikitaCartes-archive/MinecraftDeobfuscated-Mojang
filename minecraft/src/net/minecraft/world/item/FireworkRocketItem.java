@@ -46,7 +46,7 @@ public class FireworkRocketItem extends Item {
 			itemStack.shrink(1);
 		}
 
-		return InteractionResult.SUCCESS;
+		return InteractionResult.sidedSuccess(level.isClientSide);
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class FireworkRocketItem extends Item {
 				}
 			}
 
-			return InteractionResultHolder.success(player.getItemInHand(interactionHand));
+			return InteractionResultHolder.sidedSuccess(player.getItemInHand(interactionHand), level.isClientSide());
 		} else {
 			return InteractionResultHolder.pass(player.getItemInHand(interactionHand));
 		}

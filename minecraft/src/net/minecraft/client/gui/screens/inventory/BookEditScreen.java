@@ -533,7 +533,6 @@ public class BookEditScreen extends Screen {
 		if (string.isEmpty()) {
 			return BookEditScreen.DisplayCache.EMPTY;
 		} else {
-			String string2 = this.font.isBidirectional() ? this.font.bidirectionalShaping(string) : string;
 			int i = this.pageEdit.getCursorPos();
 			int j = this.pageEdit.getSelectionPos();
 			IntList intList = new IntArrayList();
@@ -541,24 +540,24 @@ public class BookEditScreen extends Screen {
 			MutableInt mutableInt = new MutableInt();
 			MutableBoolean mutableBoolean = new MutableBoolean();
 			StringSplitter stringSplitter = this.font.getSplitter();
-			stringSplitter.splitLines(string2, 114, Style.EMPTY, true, (style, ix, jx) -> {
+			stringSplitter.splitLines(string, 114, Style.EMPTY, true, (style, ix, jx) -> {
 				int k = mutableInt.getAndIncrement();
-				String string2x = string2.substring(ix, jx);
+				String string2x = string.substring(ix, jx);
 				mutableBoolean.setValue(string2x.endsWith("\n"));
-				String string3x = StringUtils.stripEnd(string2x, " \n");
+				String string3 = StringUtils.stripEnd(string2x, " \n");
 				int lx = k * 9;
 				BookEditScreen.Pos2i pos2ix = this.convertLocalToScreen(new BookEditScreen.Pos2i(0, lx));
 				intList.add(ix);
-				list.add(new BookEditScreen.LineInfo(style, string3x, pos2ix.x, pos2ix.y));
+				list.add(new BookEditScreen.LineInfo(style, string3, pos2ix.x, pos2ix.y));
 			});
 			int[] is = intList.toIntArray();
-			boolean bl = i == string2.length();
+			boolean bl = i == string.length();
 			BookEditScreen.Pos2i pos2i;
 			if (bl && mutableBoolean.isTrue()) {
 				pos2i = new BookEditScreen.Pos2i(0, list.size() * 9);
 			} else {
 				int k = findLineFromPos(is, i);
-				int l = this.font.width(string2.substring(is[k], i));
+				int l = this.font.width(string.substring(is[k], i));
 				pos2i = new BookEditScreen.Pos2i(l, k * 9);
 			}
 
@@ -571,24 +570,24 @@ public class BookEditScreen extends Screen {
 				if (n == o) {
 					int p = n * 9;
 					int q = is[n];
-					list2.add(this.createPartialLineSelection(string2, stringSplitter, l, m, p, q));
+					list2.add(this.createPartialLineSelection(string, stringSplitter, l, m, p, q));
 				} else {
-					int p = n + 1 > is.length ? string2.length() : is[n + 1];
-					list2.add(this.createPartialLineSelection(string2, stringSplitter, l, p, n * 9, is[n]));
+					int p = n + 1 > is.length ? string.length() : is[n + 1];
+					list2.add(this.createPartialLineSelection(string, stringSplitter, l, p, n * 9, is[n]));
 
 					for (int q = n + 1; q < o; q++) {
 						int r = q * 9;
-						String string3 = string2.substring(is[q], is[q + 1]);
-						int s = (int)stringSplitter.stringWidth(string3);
+						String string2 = string.substring(is[q], is[q + 1]);
+						int s = (int)stringSplitter.stringWidth(string2);
 						list2.add(this.createSelection(new BookEditScreen.Pos2i(0, r), new BookEditScreen.Pos2i(s, r + 9)));
 					}
 
-					list2.add(this.createPartialLineSelection(string2, stringSplitter, is[o], m, o * 9, is[o]));
+					list2.add(this.createPartialLineSelection(string, stringSplitter, is[o], m, o * 9, is[o]));
 				}
 			}
 
 			return new BookEditScreen.DisplayCache(
-				string2, pos2i, bl, is, (BookEditScreen.LineInfo[])list.toArray(new BookEditScreen.LineInfo[0]), (Rect2i[])list2.toArray(new Rect2i[0])
+				string, pos2i, bl, is, (BookEditScreen.LineInfo[])list.toArray(new BookEditScreen.LineInfo[0]), (Rect2i[])list2.toArray(new Rect2i[0])
 			);
 		}
 	}

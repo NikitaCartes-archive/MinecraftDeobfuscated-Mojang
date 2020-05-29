@@ -10,7 +10,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.SerializationTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.block.Block;
@@ -73,7 +73,7 @@ public class BlockPredicate {
 			Tag<Block> tag = null;
 			if (jsonObject.has("tag")) {
 				ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "tag"));
-				tag = BlockTags.getAllTags().getTag(resourceLocation2);
+				tag = SerializationTags.getInstance().getBlocks().getTag(resourceLocation2);
 				if (tag == null) {
 					throw new JsonSyntaxException("Unknown block tag '" + resourceLocation2 + "'");
 				}
@@ -96,7 +96,7 @@ public class BlockPredicate {
 			}
 
 			if (this.tag != null) {
-				jsonObject.addProperty("tag", BlockTags.getAllTags().getIdOrThrow(this.tag).toString());
+				jsonObject.addProperty("tag", SerializationTags.getInstance().getBlocks().getIdOrThrow(this.tag).toString());
 			}
 
 			jsonObject.add("nbt", this.nbt.serializeToJson());
@@ -122,6 +122,11 @@ public class BlockPredicate {
 
 		public BlockPredicate.Builder of(Block block) {
 			this.block = block;
+			return this;
+		}
+
+		public BlockPredicate.Builder of(Tag<Block> tag) {
+			this.blocks = tag;
 			return this;
 		}
 

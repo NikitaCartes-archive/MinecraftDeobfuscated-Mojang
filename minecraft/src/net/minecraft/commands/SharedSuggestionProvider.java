@@ -10,13 +10,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 
 public interface SharedSuggestionProvider {
 	Collection<String> getOnlinePlayerNames();
@@ -41,7 +43,7 @@ public interface SharedSuggestionProvider {
 		return Collections.singleton(SharedSuggestionProvider.TextCoordinates.DEFAULT_GLOBAL);
 	}
 
-	RegistryAccess registryAccess();
+	Set<ResourceKey<Level>> levels();
 
 	boolean hasPermission(int i);
 

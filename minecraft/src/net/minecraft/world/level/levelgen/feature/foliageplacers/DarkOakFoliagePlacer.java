@@ -7,6 +7,7 @@ import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class DarkOakFoliagePlacer extends FoliagePlacer {
 	public static final Codec<DarkOakFoliagePlacer> CODEC = RecordCodecBuilder.create(
@@ -32,20 +33,21 @@ public class DarkOakFoliagePlacer extends FoliagePlacer {
 		int j,
 		int k,
 		Set<BlockPos> set,
-		int l
+		int l,
+		BoundingBox boundingBox
 	) {
 		BlockPos blockPos = foliageAttachment.foliagePos().above(l);
 		boolean bl = foliageAttachment.doubleTrunk();
 		if (bl) {
-			this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 2, set, -1, bl);
-			this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 3, set, 0, bl);
-			this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 2, set, 1, bl);
+			this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 2, set, -1, bl, boundingBox);
+			this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 3, set, 0, bl, boundingBox);
+			this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 2, set, 1, bl, boundingBox);
 			if (random.nextBoolean()) {
-				this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k, set, 2, bl);
+				this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k, set, 2, bl, boundingBox);
 			}
 		} else {
-			this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 2, set, -1, bl);
-			this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 1, set, 0, bl);
+			this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 2, set, -1, bl, boundingBox);
+			this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + 1, set, 0, bl, boundingBox);
 		}
 	}
 

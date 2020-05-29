@@ -330,6 +330,11 @@ public class EnderMan extends Monster {
 		this.entityData.set(DATA_STARED_AT, true);
 	}
 
+	@Override
+	public boolean requiresCustomPersistence() {
+		return super.requiresCustomPersistence() || this.getCarriedBlock() != null;
+	}
+
 	static class EndermanFreezeWhenLookedAt extends Goal {
 		private final EnderMan enderman;
 		private LivingEntity target;

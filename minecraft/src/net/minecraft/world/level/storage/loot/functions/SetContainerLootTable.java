@@ -23,6 +23,11 @@ public class SetContainerLootTable extends LootItemConditionalFunction {
 	}
 
 	@Override
+	public LootItemFunctionType getType() {
+		return LootItemFunctions.SET_LOOT_TABLE;
+	}
+
+	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
 		if (itemStack.isEmpty()) {
 			return itemStack;
@@ -54,10 +59,6 @@ public class SetContainerLootTable extends LootItemConditionalFunction {
 	}
 
 	public static class Serializer extends LootItemConditionalFunction.Serializer<SetContainerLootTable> {
-		protected Serializer() {
-			super(new ResourceLocation("set_loot_table"), SetContainerLootTable.class);
-		}
-
 		public void serialize(JsonObject jsonObject, SetContainerLootTable setContainerLootTable, JsonSerializationContext jsonSerializationContext) {
 			super.serialize(jsonObject, setContainerLootTable, jsonSerializationContext);
 			jsonObject.addProperty("name", setContainerLootTable.name.toString());

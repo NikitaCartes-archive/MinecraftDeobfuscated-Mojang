@@ -13,7 +13,10 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.Map.Entry;
 import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -64,14 +67,10 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 		return (ResourceLocation)this.storage.inverse().get(object);
 	}
 
+	@Environment(EnvType.CLIENT)
 	@Override
-	public ResourceKey<T> getResourceKey(T object) {
-		ResourceKey<T> resourceKey = (ResourceKey<T>)this.keyStorage.inverse().get(object);
-		if (resourceKey == null) {
-			throw new IllegalStateException("Unregistered registry element: " + object + " in " + this);
-		} else {
-			return resourceKey;
-		}
+	public Optional<ResourceKey<T>> getResourceKey(T object) {
+		return Optional.ofNullable(this.keyStorage.inverse().get(object));
 	}
 
 	@Override
@@ -80,6 +79,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	}
 
 	@Nullable
+	@Environment(EnvType.CLIENT)
 	@Override
 	public T get(@Nullable ResourceKey<T> resourceKey) {
 		return (T)this.keyStorage.get(resourceKey);
@@ -131,11 +131,6 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	}
 
 	@Override
-	public boolean containsKey(ResourceKey<T> resourceKey) {
-		return this.keyStorage.containsKey(resourceKey);
-	}
-
-	@Override
 	public boolean containsId(int i) {
 		return this.map.contains(i);
 	}
@@ -155,8 +150,8 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 			}, mappedRegistry -> {
 				Builder<Pair<ResourceKey<T>, T>> builder = ImmutableList.builder();
 
-				for (T object : mappedRegistry) {
-					builder.add(Pair.of(mappedRegistry.getResourceKey(object), object));
+				for (Entry<ResourceKey<T>, T> entry : mappedRegistry.keyStorage.entrySet()) {
+					builder.add(Pair.of((ResourceKey<T>)entry.getKey(), (T)entry.getValue()));
 				}
 
 				return builder.build();

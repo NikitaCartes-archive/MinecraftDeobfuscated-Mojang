@@ -31,6 +31,7 @@ import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -56,6 +57,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -241,43 +243,17 @@ public class Zombie extends Monster {
 	}
 
 	protected void doUnderWaterConversion() {
-		this.convertTo(EntityType.DROWNED);
+		this.convertToZombieType(EntityType.DROWNED);
 		if (!this.isSilent()) {
 			this.level.levelEvent(null, 1040, this.blockPosition(), 0);
 		}
 	}
 
-	protected void convertTo(EntityType<? extends Zombie> entityType) {
-		if (!this.removed) {
-			Zombie zombie = entityType.create(this.level);
-			zombie.copyPosition(this);
-			zombie.setCanPickUpLoot(this.canPickUpLoot());
-			zombie.setCanBreakDoors(zombie.supportsBreakDoorGoal() && this.canBreakDoors());
+	protected void convertToZombieType(EntityType<? extends Zombie> entityType) {
+		Zombie zombie = this.convertTo(entityType);
+		if (zombie != null) {
 			zombie.handleAttributes(zombie.level.getCurrentDifficultyAt(zombie.blockPosition()).getSpecialMultiplier());
-			zombie.setBaby(this.isBaby());
-			zombie.setNoAi(this.isNoAi());
-
-			for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-				ItemStack itemStack = this.getItemBySlot(equipmentSlot);
-				if (!itemStack.isEmpty()) {
-					zombie.setItemSlot(equipmentSlot, itemStack.copy());
-					zombie.setDropChance(equipmentSlot, this.getEquipmentDropChance(equipmentSlot));
-					itemStack.setCount(0);
-				}
-			}
-
-			if (this.hasCustomName()) {
-				zombie.setCustomName(this.getCustomName());
-				zombie.setCustomNameVisible(this.isCustomNameVisible());
-			}
-
-			if (this.isPersistenceRequired()) {
-				zombie.setPersistenceRequired();
-			}
-
-			zombie.setInvulnerable(this.isInvulnerable());
-			this.level.addFreshEntity(zombie);
-			this.remove();
+			zombie.setCanBreakDoors(zombie.supportsBreakDoorGoal() && this.canBreakDoors());
 		}
 	}
 
@@ -306,8 +282,11 @@ public class Zombie extends Monster {
 					int m = i + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
 					int n = j + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
 					int o = k + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
-					BlockPos blockPos = new BlockPos(m, n - 1, o);
-					if (this.level.getBlockState(blockPos).entityCanStandOn(this.level, blockPos, zombie) && this.level.getMaxLocalRawBrightness(new BlockPos(m, n, o)) < 10) {
+					BlockPos blockPos = new BlockPos(m, n, o);
+					EntityType<?> entityType = zombie.getType();
+					SpawnPlacements.Type type = SpawnPlacements.getPlacementType(entityType);
+					if (NaturalSpawner.isSpawnPositionOk(type, this.level, blockPos, entityType)
+						&& SpawnPlacements.checkSpawnRules(entityType, this.level, MobSpawnType.REINFORCEMENT, blockPos, this.level.random)) {
 						zombie.setPos((double)m, (double)n, (double)o);
 						if (!this.level.hasNearbyAlivePlayer((double)m, (double)n, (double)o, 7.0)
 							&& this.level.isUnobstructed(zombie)
@@ -439,7 +418,7 @@ public class Zombie extends Monster {
 				zombieVillager.setCustomNameVisible(villager.isCustomNameVisible());
 			}
 
-			if (this.isPersistenceRequired()) {
+			if (villager.isPersistenceRequired()) {
 				zombieVillager.setPersistenceRequired();
 			}
 
@@ -541,7 +520,7 @@ public class Zombie extends Monster {
 	}
 
 	@Override
-	public double getRidingHeight() {
+	public double getMyRidingOffset() {
 		return this.isBaby() ? 0.0 : -0.45;
 	}
 

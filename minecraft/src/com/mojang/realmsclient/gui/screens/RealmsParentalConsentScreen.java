@@ -10,6 +10,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
@@ -38,11 +39,11 @@ public class RealmsParentalConsentScreen extends RealmsScreen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		List<Component> list = this.minecraft.font.split(new TranslatableComponent("mco.account.privacyinfo"), (int)Math.round((double)this.width * 0.9));
+		List<FormattedText> list = this.minecraft.font.split(new TranslatableComponent("mco.account.privacyinfo"), (int)Math.round((double)this.width * 0.9));
 		int k = 15;
 
-		for (Component component : list) {
-			this.drawCenteredString(poseStack, this.font, component, this.width / 2, k, 16777215);
+		for (FormattedText formattedText : list) {
+			this.drawCenteredString(poseStack, this.font, formattedText, this.width / 2, k, 16777215);
 			k += 15;
 		}
 

@@ -57,7 +57,7 @@ public class SoulSandValleyBiome extends Biome {
 				.decorated(FeatureDecorator.COUNT_VERY_BIASED_RANGE.configured(new CountRangeDecoratorConfiguration(20, 8, 16, 256)))
 		);
 		this.addFeature(
-			GenerationStep.Decoration.UNDERGROUND_DECORATION,
+			GenerationStep.Decoration.LOCAL_MODIFICATIONS,
 			Feature.BASALT_PILLAR
 				.configured(FeatureConfiguration.NONE)
 				.decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(10, 0, 0, 128)))

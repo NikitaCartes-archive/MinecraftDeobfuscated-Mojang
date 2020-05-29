@@ -1,8 +1,11 @@
 package net.minecraft.tags;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -12,6 +15,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 
 public class TagManager implements PreparableReloadListener {
@@ -69,15 +73,34 @@ public class TagManager implements PreparableReloadListener {
 		CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture4 = this.entityTypes.prepare(resourceManager, executor);
 		return CompletableFuture.allOf(completableFuture, completableFuture2, completableFuture3, completableFuture4)
 			.thenCompose(preparationBarrier::wait)
-			.thenAcceptAsync(void_ -> {
-				this.blocks.load((Map<ResourceLocation, Tag.Builder>)completableFuture.join());
-				this.items.load((Map<ResourceLocation, Tag.Builder>)completableFuture2.join());
-				this.fluids.load((Map<ResourceLocation, Tag.Builder>)completableFuture3.join());
-				this.entityTypes.load((Map<ResourceLocation, Tag.Builder>)completableFuture4.join());
-				BlockTags.reset(this.blocks);
-				ItemTags.reset(this.items);
-				FluidTags.reset(this.fluids);
-				EntityTypeTags.reset(this.entityTypes);
-			}, executor2);
+			.thenAcceptAsync(
+				void_ -> {
+					this.blocks.load((Map<ResourceLocation, Tag.Builder>)completableFuture.join());
+					this.items.load((Map<ResourceLocation, Tag.Builder>)completableFuture2.join());
+					this.fluids.load((Map<ResourceLocation, Tag.Builder>)completableFuture3.join());
+					this.entityTypes.load((Map<ResourceLocation, Tag.Builder>)completableFuture4.join());
+					SerializationTags.bind(this.blocks, this.items, this.fluids, this.entityTypes);
+					Multimap<String, ResourceLocation> multimap = HashMultimap.create();
+					multimap.putAll("blocks", BlockTags.getMissingTags(this.blocks));
+					multimap.putAll("items", ItemTags.getMissingTags(this.items));
+					multimap.putAll("fluids", FluidTags.getMissingTags(this.fluids));
+					multimap.putAll("entity_types", EntityTypeTags.getMissingTags(this.entityTypes));
+					if (!multimap.isEmpty()) {
+						throw new IllegalStateException(
+							"Missing required tags: "
+								+ (String)multimap.entries().stream().map(entry -> (String)entry.getKey() + ":" + entry.getValue()).sorted().collect(Collectors.joining(","))
+						);
+					}
+				},
+				executor2
+			);
+	}
+
+	public void bindToGlobal() {
+		BlockTags.reset(this.blocks);
+		ItemTags.reset(this.items);
+		FluidTags.reset(this.fluids);
+		EntityTypeTags.reset(this.entityTypes);
+		Blocks.rebuildCache();
 	}
 }

@@ -7,12 +7,13 @@ import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
+import net.minecraft.util.Codecs;
 
 public class CheckerboardColumnBiomeSource extends BiomeSource {
 	public static final Codec<CheckerboardColumnBiomeSource> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					Registry.BIOME.listOf().fieldOf("biomes").forGetter(checkerboardColumnBiomeSource -> checkerboardColumnBiomeSource.allowedBiomes),
-					Codec.INT.fieldOf("scale").withDefault(2).forGetter(checkerboardColumnBiomeSource -> checkerboardColumnBiomeSource.size)
+					Codecs.intRange(0, 62).fieldOf("scale").withDefault(2).forGetter(checkerboardColumnBiomeSource -> checkerboardColumnBiomeSource.size)
 				)
 				.apply(instance, CheckerboardColumnBiomeSource::new)
 	);

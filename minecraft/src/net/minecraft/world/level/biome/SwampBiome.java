@@ -36,6 +36,7 @@ public final class SwampBiome extends Biome {
 		this.addStructureStart(BiomeDefaultFeatures.MINESHAFT);
 		this.addStructureStart(BiomeDefaultFeatures.RUINED_PORTAL_SWAMP);
 		BiomeDefaultFeatures.addDefaultCarvers(this);
+		BiomeDefaultFeatures.addFossilDecoration(this);
 		BiomeDefaultFeatures.addDefaultLakes(this);
 		BiomeDefaultFeatures.addDefaultMonsterRoom(this);
 		BiomeDefaultFeatures.addDefaultUndergroundVariety(this);
@@ -51,7 +52,6 @@ public final class SwampBiome extends Biome {
 				.configured(new SeagrassFeatureConfiguration(64, 0.6))
 				.decorated(FeatureDecorator.TOP_SOLID_HEIGHTMAP.configured(DecoratorConfiguration.NONE))
 		);
-		BiomeDefaultFeatures.addSwampExtraDecoration(this);
 		BiomeDefaultFeatures.addSurfaceFreezing(this);
 		this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.SHEEP, 12, 4, 4));
 		this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.PIG, 10, 4, 4));

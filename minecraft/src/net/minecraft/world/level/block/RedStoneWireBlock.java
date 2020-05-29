@@ -327,6 +327,7 @@ public class RedStoneWireBlock extends Block {
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState2.is(blockState.getBlock()) && !level.isClientSide) {
+			level.setBlock(blockPos, this.getConnectionState(level, this.defaultBlockState(), blockPos), 2);
 			this.updatePowerStrength(level, blockPos, blockState);
 
 			for (Direction direction : Direction.Plane.VERTICAL) {
@@ -516,18 +517,22 @@ public class RedStoneWireBlock extends Block {
 	public InteractionResult use(
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		if (isCross(blockState) || isDot(blockState)) {
-			BlockState blockState2 = isCross(blockState) ? this.dotState : this.defaultBlockState();
-			blockState2 = blockState2.setValue(POWER, blockState.getValue(POWER));
-			blockState2 = this.getConnectionState(level, blockState2, blockPos);
-			if (blockState2 != blockState) {
-				level.setBlock(blockPos, blockState2, 3);
-				this.updatesOnShapeChange(level, blockPos, blockState, blockState2);
-				return InteractionResult.SUCCESS;
+		if (!player.abilities.mayBuild) {
+			return InteractionResult.PASS;
+		} else {
+			if (isCross(blockState) || isDot(blockState)) {
+				BlockState blockState2 = isCross(blockState) ? this.dotState : this.defaultBlockState();
+				blockState2 = blockState2.setValue(POWER, blockState.getValue(POWER));
+				blockState2 = this.getConnectionState(level, blockState2, blockPos);
+				if (blockState2 != blockState) {
+					level.setBlock(blockPos, blockState2, 3);
+					this.updatesOnShapeChange(level, blockPos, blockState, blockState2);
+					return InteractionResult.SUCCESS;
+				}
 			}
-		}
 
-		return InteractionResult.PASS;
+			return InteractionResult.PASS;
+		}
 	}
 
 	private void updatesOnShapeChange(Level level, BlockPos blockPos, BlockState blockState, BlockState blockState2) {

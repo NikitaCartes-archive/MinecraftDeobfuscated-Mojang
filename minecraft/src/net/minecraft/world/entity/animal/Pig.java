@@ -10,7 +10,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
@@ -213,34 +213,28 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 
 	@Override
 	public void thunderHit(LightningBolt lightningBolt) {
-		ZombifiedPiglin zombifiedPiglin = EntityType.ZOMBIFIED_PIGLIN.create(this.level);
-		zombifiedPiglin.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_SWORD));
-		zombifiedPiglin.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
-		zombifiedPiglin.setNoAi(this.isNoAi());
-		zombifiedPiglin.setBaby(this.isBaby());
-		if (this.hasCustomName()) {
-			zombifiedPiglin.setCustomName(this.getCustomName());
-			zombifiedPiglin.setCustomNameVisible(this.isCustomNameVisible());
-		}
+		if (this.level.getDifficulty() != Difficulty.PEACEFUL) {
+			ZombifiedPiglin zombifiedPiglin = EntityType.ZOMBIFIED_PIGLIN.create(this.level);
+			zombifiedPiglin.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_SWORD));
+			zombifiedPiglin.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
+			zombifiedPiglin.setNoAi(this.isNoAi());
+			zombifiedPiglin.setBaby(this.isBaby());
+			if (this.hasCustomName()) {
+				zombifiedPiglin.setCustomName(this.getCustomName());
+				zombifiedPiglin.setCustomNameVisible(this.isCustomNameVisible());
+			}
 
-		this.level.addFreshEntity(zombifiedPiglin);
-		this.remove();
+			this.level.addFreshEntity(zombifiedPiglin);
+			this.remove();
+		} else {
+			super.thunderHit(lightningBolt);
+		}
 	}
 
 	@Override
 	public void travel(Vec3 vec3) {
-		if (this.travel(this, this.steering, vec3)) {
-			this.animationSpeedOld = this.animationSpeed;
-			double d = this.getX() - this.xo;
-			double e = this.getZ() - this.zo;
-			float f = Mth.sqrt(d * d + e * e) * 4.0F;
-			if (f > 1.0F) {
-				f = 1.0F;
-			}
-
-			this.animationSpeed = this.animationSpeed + (f - this.animationSpeed) * 0.4F;
-			this.animationPosition = this.animationPosition + this.animationSpeed;
-		}
+		this.setSpeed(this.getSteeringSpeed());
+		this.travel(this, this.steering, vec3);
 	}
 
 	@Override

@@ -38,6 +38,7 @@ public class Sheets {
 	private static final RenderType CHEST_SHEET_TYPE = RenderType.entityCutout(CHEST_SHEET);
 	private static final RenderType SOLID_BLOCK_SHEET = RenderType.entitySolid(TextureAtlas.LOCATION_BLOCKS);
 	private static final RenderType CUTOUT_BLOCK_SHEET = RenderType.entityCutout(TextureAtlas.LOCATION_BLOCKS);
+	private static final RenderType TRANSLUCENT_ITEM_CULL_BLOCK_SHEET = RenderType.itemEntityTranslucentCull(TextureAtlas.LOCATION_BLOCKS);
 	private static final RenderType TRANSLUCENT_CULL_BLOCK_SHEET = RenderType.entityTranslucentCull(TextureAtlas.LOCATION_BLOCKS);
 	public static final Material DEFAULT_SHULKER_TEXTURE_LOCATION = new Material(SHULKER_SHEET, new ResourceLocation("entity/shulker/shulker"));
 	public static final List<Material> SHULKER_TEXTURE_LOCATION = (List<Material>)Stream.of(
@@ -92,6 +93,10 @@ public class Sheets {
 
 	public static RenderType cutoutBlockSheet() {
 		return CUTOUT_BLOCK_SHEET;
+	}
+
+	public static RenderType translucentItemSheet() {
+		return TRANSLUCENT_ITEM_CULL_BLOCK_SHEET;
 	}
 
 	public static RenderType translucentCullBlockSheet() {

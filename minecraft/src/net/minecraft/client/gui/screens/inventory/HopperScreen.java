@@ -17,6 +17,7 @@ public class HopperScreen extends AbstractContainerScreen<HopperMenu> {
 		super(hopperMenu, inventory, component);
 		this.passEvents = false;
 		this.imageHeight = 133;
+		this.inventoryLabelY = this.imageHeight - 94;
 	}
 
 	@Override
@@ -24,12 +25,6 @@ public class HopperScreen extends AbstractContainerScreen<HopperMenu> {
 		this.renderBackground(poseStack);
 		super.render(poseStack, i, j, f);
 		this.renderTooltip(poseStack, i, j);
-	}
-
-	@Override
-	protected void renderLabels(PoseStack poseStack, int i, int j) {
-		this.font.draw(poseStack, this.title, 8.0F, 6.0F, 4210752);
-		this.font.draw(poseStack, this.inventory.getDisplayName(), 8.0F, (float)(this.imageHeight - 96 + 2), 4210752);
 	}
 
 	@Override

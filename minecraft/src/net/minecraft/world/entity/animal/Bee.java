@@ -107,7 +107,6 @@ public class Bee extends Animal implements FlyingAnimal {
 		this.moveControl = new FlyingMoveControl(this, 20, true);
 		this.lookControl = new Bee.BeeLookControl(this);
 		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, -1.0F);
-		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
 		this.setPathfindingMalus(BlockPathTypes.WATER, -1.0F);
 		this.setPathfindingMalus(BlockPathTypes.COCOA, -1.0F);
 		this.setPathfindingMalus(BlockPathTypes.FENCE, -1.0F);

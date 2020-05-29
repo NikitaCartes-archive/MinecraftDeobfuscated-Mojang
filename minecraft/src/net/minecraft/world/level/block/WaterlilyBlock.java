@@ -37,6 +37,7 @@ public class WaterlilyBlock extends BushBlock {
 	@Override
 	protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		FluidState fluidState = blockGetter.getFluidState(blockPos);
-		return fluidState.getType() == Fluids.WATER || blockState.getMaterial() == Material.ICE;
+		FluidState fluidState2 = blockGetter.getFluidState(blockPos.above());
+		return (fluidState.getType() == Fluids.WATER || blockState.getMaterial() == Material.ICE) && fluidState2.getType() == Fluids.EMPTY;
 	}
 }

@@ -9,12 +9,13 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 
 @Environment(EnvType.CLIENT)
 public class AlertScreen extends Screen {
 	private final Runnable callback;
 	protected final Component text;
-	private final List<Component> lines = Lists.<Component>newArrayList();
+	private final List<FormattedText> lines = Lists.<FormattedText>newArrayList();
 	protected final Component okButton;
 	private int delayTicker;
 
@@ -43,8 +44,8 @@ public class AlertScreen extends Screen {
 		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 70, 16777215);
 		int k = 90;
 
-		for (Component component : this.lines) {
-			this.drawCenteredString(poseStack, this.font, component, this.width / 2, k, 16777215);
+		for (FormattedText formattedText : this.lines) {
+			this.drawCenteredString(poseStack, this.font, formattedText, this.width / 2, k, 16777215);
 			k += 9;
 		}
 

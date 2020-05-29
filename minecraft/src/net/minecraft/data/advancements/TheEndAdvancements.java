@@ -19,8 +19,8 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 
 public class TheEndAdvancements implements Consumer<Consumer<Advancement>> {
@@ -36,7 +36,7 @@ public class TheEndAdvancements implements Consumer<Consumer<Advancement>> {
 				false,
 				false
 			)
-			.addCriterion("entered_end", ChangeDimensionTrigger.TriggerInstance.changedDimensionTo(DimensionType.END_LOCATION))
+			.addCriterion("entered_end", ChangeDimensionTrigger.TriggerInstance.changedDimensionTo(Level.END))
 			.save(consumer, "end/root");
 		Advancement advancement2 = Advancement.Builder.advancement()
 			.parent(advancement)

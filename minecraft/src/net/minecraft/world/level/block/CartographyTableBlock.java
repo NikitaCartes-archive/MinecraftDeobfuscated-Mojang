@@ -32,7 +32,7 @@ public class CartographyTableBlock extends Block {
 		} else {
 			player.openMenu(blockState.getMenuProvider(level, blockPos));
 			player.awardStat(Stats.INTERACT_WITH_CARTOGRAPHY_TABLE);
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		}
 	}
 

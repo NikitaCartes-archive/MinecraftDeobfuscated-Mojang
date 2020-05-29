@@ -40,7 +40,7 @@ public class FallingBlockRenderer extends EntityRenderer<FallingBlockEntity> {
 						blockState,
 						blockPos,
 						poseStack,
-						multiBufferSource.getBuffer(ItemBlockRenderTypes.getChunkRenderType(blockState)),
+						multiBufferSource.getBuffer(ItemBlockRenderTypes.getMovingBlockRenderType(blockState)),
 						false,
 						new Random(),
 						blockState.getSeed(fallingBlockEntity.getStartPos()),

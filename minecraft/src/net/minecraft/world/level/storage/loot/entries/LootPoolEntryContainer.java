@@ -6,12 +6,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.List;
 import java.util.function.Predicate;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.predicates.ConditionUserBuilder;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
+import org.apache.commons.lang3.ArrayUtils;
 
 public abstract class LootPoolEntryContainer implements ComposableEntryContainer {
 	protected final LootItemCondition[] conditions;
@@ -31,6 +32,8 @@ public abstract class LootPoolEntryContainer implements ComposableEntryContainer
 	protected final boolean canRun(LootContext lootContext) {
 		return this.compositeCondition.test(lootContext);
 	}
+
+	public abstract LootPoolEntryType getType();
 
 	public abstract static class Builder<T extends LootPoolEntryContainer.Builder<T>> implements ConditionUserBuilder<T> {
 		private final List<LootItemCondition> conditions = Lists.<LootItemCondition>newArrayList();
@@ -57,25 +60,24 @@ public abstract class LootPoolEntryContainer implements ComposableEntryContainer
 		public abstract LootPoolEntryContainer build();
 	}
 
-	public abstract static class Serializer<T extends LootPoolEntryContainer> {
-		private final ResourceLocation name;
-		private final Class<T> clazz;
+	public abstract static class Serializer<T extends LootPoolEntryContainer> implements net.minecraft.world.level.storage.loot.Serializer<T> {
+		public final void serialize(JsonObject jsonObject, T lootPoolEntryContainer, JsonSerializationContext jsonSerializationContext) {
+			if (!ArrayUtils.isEmpty((Object[])lootPoolEntryContainer.conditions)) {
+				jsonObject.add("conditions", jsonSerializationContext.serialize(lootPoolEntryContainer.conditions));
+			}
 
-		protected Serializer(ResourceLocation resourceLocation, Class<T> class_) {
-			this.name = resourceLocation;
-			this.clazz = class_;
+			this.serializeCustom(jsonObject, lootPoolEntryContainer, jsonSerializationContext);
 		}
 
-		public ResourceLocation getName() {
-			return this.name;
+		public final T deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+			LootItemCondition[] lootItemConditions = GsonHelper.getAsObject(
+				jsonObject, "conditions", new LootItemCondition[0], jsonDeserializationContext, LootItemCondition[].class
+			);
+			return this.deserializeCustom(jsonObject, jsonDeserializationContext, lootItemConditions);
 		}
 
-		public Class<T> getContainerClass() {
-			return this.clazz;
-		}
+		public abstract void serializeCustom(JsonObject jsonObject, T lootPoolEntryContainer, JsonSerializationContext jsonSerializationContext);
 
-		public abstract void serialize(JsonObject jsonObject, T lootPoolEntryContainer, JsonSerializationContext jsonSerializationContext);
-
-		public abstract T deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions);
+		public abstract T deserializeCustom(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions);
 	}
 }

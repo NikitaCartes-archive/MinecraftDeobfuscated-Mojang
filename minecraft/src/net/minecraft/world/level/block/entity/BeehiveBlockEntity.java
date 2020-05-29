@@ -83,7 +83,7 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 
 	private List<Entity> releaseAllOccupants(BlockState blockState, BeehiveBlockEntity.BeeReleaseStatus beeReleaseStatus) {
 		List<Entity> list = Lists.<Entity>newArrayList();
-		this.stored.removeIf(beeData -> this.releaseOccupant(blockState, beeData.entityData, list, beeReleaseStatus));
+		this.stored.removeIf(beeData -> this.releaseOccupant(blockState, beeData, list, beeReleaseStatus));
 		return list;
 	}
 
@@ -132,12 +132,13 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 	}
 
 	private boolean releaseOccupant(
-		BlockState blockState, CompoundTag compoundTag, @Nullable List<Entity> list, BeehiveBlockEntity.BeeReleaseStatus beeReleaseStatus
+		BlockState blockState, BeehiveBlockEntity.BeeData beeData, @Nullable List<Entity> list, BeehiveBlockEntity.BeeReleaseStatus beeReleaseStatus
 	) {
-		BlockPos blockPos = this.getBlockPos();
 		if ((this.level.isNight() || this.level.isRaining()) && beeReleaseStatus != BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY) {
 			return false;
 		} else {
+			BlockPos blockPos = this.getBlockPos();
+			CompoundTag compoundTag = beeData.entityData;
 			compoundTag.remove("Passengers");
 			compoundTag.remove("Leash");
 			compoundTag.remove("UUID");
@@ -149,12 +150,6 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 			} else {
 				Entity entity = EntityType.loadEntityRecursive(compoundTag, this.level, entityx -> entityx);
 				if (entity != null) {
-					float f = entity.getBbWidth();
-					double d = bl ? 0.0 : 0.55 + (double)(f / 2.0F);
-					double e = (double)blockPos.getX() + 0.5 + d * (double)direction.getStepX();
-					double g = (double)blockPos.getY() + 0.5 - (double)(entity.getBbHeight() / 2.0F);
-					double h = (double)blockPos.getZ() + 0.5 + d * (double)direction.getStepZ();
-					entity.moveTo(e, g, h, entity.yRot, entity.xRot);
 					if (!entity.getType().is(EntityTypeTags.BEEHIVE_INHABITORS)) {
 						return false;
 					} else {
@@ -179,15 +174,23 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 								}
 							}
 
+							int i = beeData.ticksInHive;
+							bee.ageUp(i);
+							bee.setInLoveTime(Math.max(0, bee.getInLoveTime() - i));
 							bee.resetTicksWithoutNectarSinceExitingHive();
 							if (list != null) {
 								list.add(bee);
 							}
+
+							float f = entity.getBbWidth();
+							double d = bl ? 0.0 : 0.55 + (double)(f / 2.0F);
+							double e = (double)blockPos.getX() + 0.5 + d * (double)direction.getStepX();
+							double g = (double)blockPos.getY() + 0.5 - (double)(entity.getBbHeight() / 2.0F);
+							double h = (double)blockPos.getZ() + 0.5 + d * (double)direction.getStepZ();
+							entity.moveTo(e, g, h, entity.yRot, entity.xRot);
 						}
 
-						BlockPos blockPos3 = this.getBlockPos();
-						this.level
-							.playSound(null, (double)blockPos3.getX(), (double)blockPos3.getY(), (double)blockPos3.getZ(), SoundEvents.BEEHIVE_EXIT, SoundSource.BLOCKS, 1.0F, 1.0F);
+						this.level.playSound(null, blockPos, SoundEvents.BEEHIVE_EXIT, SoundSource.BLOCKS, 1.0F, 1.0F);
 						return this.level.addFreshEntity(entity);
 					}
 				} else {
@@ -208,11 +211,10 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 		while (iterator.hasNext()) {
 			BeehiveBlockEntity.BeeData beeData = (BeehiveBlockEntity.BeeData)iterator.next();
 			if (beeData.ticksInHive > beeData.minOccupationTicks) {
-				CompoundTag compoundTag = beeData.entityData;
-				BeehiveBlockEntity.BeeReleaseStatus beeReleaseStatus = compoundTag.getBoolean("HasNectar")
+				BeehiveBlockEntity.BeeReleaseStatus beeReleaseStatus = beeData.entityData.getBoolean("HasNectar")
 					? BeehiveBlockEntity.BeeReleaseStatus.HONEY_DELIVERED
 					: BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED;
-				if (this.releaseOccupant(blockState, compoundTag, null, beeReleaseStatus)) {
+				if (this.releaseOccupant(blockState, beeData, null, beeReleaseStatus)) {
 					iterator.remove();
 				}
 			} else {

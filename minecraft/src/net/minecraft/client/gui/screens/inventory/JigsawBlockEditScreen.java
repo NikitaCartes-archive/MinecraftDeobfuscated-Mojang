@@ -29,6 +29,7 @@ public class JigsawBlockEditScreen extends Screen {
 	private EditBox poolEdit;
 	private EditBox finalStateEdit;
 	private int levels;
+	private boolean keepJigsaws = true;
 	private Button jointButton;
 	private Button doneButton;
 	private JigsawBlockEntity.JointType joint;
@@ -71,7 +72,7 @@ public class JigsawBlockEditScreen extends Screen {
 	}
 
 	private void sendGenerate() {
-		this.minecraft.getConnection().send(new ServerboundJigsawGeneratePacket(this.jigsawEntity.getBlockPos(), this.levels));
+		this.minecraft.getConnection().send(new ServerboundJigsawGeneratePacket(this.jigsawEntity.getBlockPos(), this.levels, this.keepJigsaws));
 	}
 
 	@Override
@@ -82,8 +83,6 @@ public class JigsawBlockEditScreen extends Screen {
 	@Override
 	protected void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		this.doneButton = this.addButton(new Button(this.width / 2 - 4 - 150, 210, 150, 20, CommonComponents.GUI_DONE, button -> this.onDone()));
-		this.addButton(new Button(this.width / 2 + 4, 210, 150, 20, CommonComponents.GUI_CANCEL, button -> this.onCancel()));
 		this.poolEdit = new EditBox(this.font, this.width / 2 - 152, 20, 300, 20, new TranslatableComponent("jigsaw_block.pool"));
 		this.poolEdit.setMaxLength(128);
 		this.poolEdit.setValue(this.jigsawEntity.getPool().toString());
@@ -103,7 +102,18 @@ public class JigsawBlockEditScreen extends Screen {
 		this.finalStateEdit.setMaxLength(256);
 		this.finalStateEdit.setValue(this.jigsawEntity.getFinalState());
 		this.children.add(this.finalStateEdit);
-		this.addButton(new AbstractSliderButton(this.width / 2 - 152, 180, 150, 20, TextComponent.EMPTY, 0.0) {
+		this.joint = this.jigsawEntity.getJoint();
+		int i = this.font.width(I18n.get("jigsaw_block.joint_label")) + 10;
+		this.jointButton = this.addButton(new Button(this.width / 2 - 152 + i, 150, 300 - i, 20, this.getJointText(), button -> {
+			JigsawBlockEntity.JointType[] jointTypes = JigsawBlockEntity.JointType.values();
+			int ix = (this.joint.ordinal() + 1) % jointTypes.length;
+			this.joint = jointTypes[ix];
+			button.setMessage(this.getJointText());
+		}));
+		boolean bl = JigsawBlock.getFrontFacing(this.jigsawEntity.getBlockState()).getAxis().isVertical();
+		this.jointButton.active = bl;
+		this.jointButton.visible = bl;
+		this.addButton(new AbstractSliderButton(this.width / 2 - 154, 180, 100, 20, TextComponent.EMPTY, 0.0) {
 			{
 				this.updateMessage();
 			}
@@ -118,18 +128,18 @@ public class JigsawBlockEditScreen extends Screen {
 				JigsawBlockEditScreen.this.levels = Mth.floor(Mth.clampedLerp(0.0, 7.0, this.value));
 			}
 		});
-		this.addButton(new Button(this.width / 2 + 4, 180, 150, 20, new TranslatableComponent("jigsaw_block.generate"), button -> this.sendGenerate()));
-		this.joint = this.jigsawEntity.getJoint();
-		int i = this.font.width(I18n.get("jigsaw_block.joint_label")) + 10;
-		this.jointButton = this.addButton(new Button(this.width / 2 - 152 + i, 150, 300 - i, 20, this.getJointText(), button -> {
-			JigsawBlockEntity.JointType[] jointTypes = JigsawBlockEntity.JointType.values();
-			int ix = (this.joint.ordinal() + 1) % jointTypes.length;
-			this.joint = jointTypes[ix];
-			button.setMessage(this.getJointText());
-		}));
-		boolean bl = JigsawBlock.getFrontFacing(this.jigsawEntity.getBlockState()).getAxis().isVertical();
-		this.jointButton.active = bl;
-		this.jointButton.visible = bl;
+		this.addButton(new Button(this.width / 2 - 50, 180, 100, 20, new TranslatableComponent("jigsaw_block.keep_jigsaws"), button -> {
+			this.keepJigsaws = !this.keepJigsaws;
+			button.queueNarration(250);
+		}) {
+			@Override
+			public Component getMessage() {
+				return super.getMessage().mutableCopy().append(" ").append(CommonComponents.optionStatus(JigsawBlockEditScreen.this.keepJigsaws));
+			}
+		});
+		this.addButton(new Button(this.width / 2 + 54, 180, 100, 20, new TranslatableComponent("jigsaw_block.generate"), button -> this.sendGenerate()));
+		this.doneButton = this.addButton(new Button(this.width / 2 - 4 - 150, 210, 150, 20, CommonComponents.GUI_DONE, button -> this.onDone()));
+		this.addButton(new Button(this.width / 2 + 4, 210, 150, 20, CommonComponents.GUI_CANCEL, button -> this.onCancel()));
 		this.setInitialFocus(this.poolEdit);
 		this.updateValidity();
 	}

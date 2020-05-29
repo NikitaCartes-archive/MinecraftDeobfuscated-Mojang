@@ -2,21 +2,21 @@ package net.minecraft.client;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 
 @Environment(EnvType.CLIENT)
 public class GuiMessage {
 	private final int addedTime;
-	private final Component message;
+	private final FormattedText message;
 	private final int id;
 
-	public GuiMessage(int i, Component component, int j) {
-		this.message = component;
+	public GuiMessage(int i, FormattedText formattedText, int j) {
+		this.message = formattedText;
 		this.addedTime = i;
 		this.id = j;
 	}
 
-	public Component getMessage() {
+	public FormattedText getMessage() {
 		return this.message;
 	}
 

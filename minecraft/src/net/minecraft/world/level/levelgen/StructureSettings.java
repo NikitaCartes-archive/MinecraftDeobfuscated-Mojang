@@ -33,6 +33,8 @@ public class StructureSettings {
 		.put(StructureFeature.OCEAN_MONUMENT, new StructureFeatureConfiguration(32, 5, 10387313))
 		.put(StructureFeature.END_CITY, new StructureFeatureConfiguration(20, 11, 10387313))
 		.put(StructureFeature.WOODLAND_MANSION, new StructureFeatureConfiguration(80, 20, 10387319))
+		.put(StructureFeature.BURIED_TREASURE, new StructureFeatureConfiguration(1, 0, 0))
+		.put(StructureFeature.MINESHAFT, new StructureFeatureConfiguration(1, 0, 0))
 		.put(StructureFeature.RUINED_PORTAL, new StructureFeatureConfiguration(40, 15, 34222645))
 		.put(StructureFeature.SHIPWRECK, new StructureFeatureConfiguration(24, 4, 165745295))
 		.put(StructureFeature.OCEAN_RUIN, new StructureFeatureConfiguration(20, 8, 14357621))
@@ -40,7 +42,7 @@ public class StructureSettings {
 		.put(StructureFeature.NETHER_BRIDGE, new StructureFeatureConfiguration(30, 4, 30084232))
 		.put(StructureFeature.NETHER_FOSSIL, new StructureFeatureConfiguration(2, 1, 14357921))
 		.build();
-	public static final StrongholdConfiguration DEFAULT_STRONGHOLD = new StrongholdConfiguration(32, 3, 128);
+	public static final StrongholdConfiguration DEFAULT_STRONGHOLD;
 	private final Map<StructureFeature<?>, StructureFeatureConfiguration> structureConfig;
 	@Nullable
 	private final StrongholdConfiguration stronghold;
@@ -66,5 +68,15 @@ public class StructureSettings {
 	@Nullable
 	public StrongholdConfiguration stronghold() {
 		return this.stronghold;
+	}
+
+	static {
+		for (StructureFeature<?> structureFeature : Registry.STRUCTURE_FEATURE) {
+			if (!DEFAULTS.containsKey(structureFeature)) {
+				throw new IllegalStateException("Structure feature without default settings: " + Registry.STRUCTURE_FEATURE.getKey(structureFeature));
+			}
+		}
+
+		DEFAULT_STRONGHOLD = new StrongholdConfiguration(32, 3, 128);
 	}
 }

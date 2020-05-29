@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -220,8 +221,8 @@ public class PalettedContainer<T> implements PaletteResize<T> {
 		return 1 + this.palette.getSerializedSize() + FriendlyByteBuf.getVarIntSize(this.storage.getSize()) + this.storage.getRaw().length * 8;
 	}
 
-	public boolean maybeHas(T object) {
-		return this.palette.maybeHas(object);
+	public boolean maybeHas(Predicate<T> predicate) {
+		return this.palette.maybeHas(predicate);
 	}
 
 	public void count(PalettedContainer.CountConsumer<T> countConsumer) {

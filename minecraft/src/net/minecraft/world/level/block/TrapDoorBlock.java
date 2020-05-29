@@ -97,7 +97,7 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 			}
 
 			this.playSound(player, level, blockPos, (Boolean)blockState.getValue(OPEN));
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
 	}
 

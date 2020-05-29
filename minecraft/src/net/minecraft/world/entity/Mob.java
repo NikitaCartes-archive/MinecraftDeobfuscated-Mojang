@@ -150,6 +150,10 @@ public abstract class Mob extends LivingEntity {
 		this.pathfindingMalus.put(blockPathTypes, f);
 	}
 
+	public boolean canCutCorner(BlockPathTypes blockPathTypes) {
+		return blockPathTypes != BlockPathTypes.DANGER_FIRE && blockPathTypes != BlockPathTypes.DANGER_CACTUS && blockPathTypes != BlockPathTypes.DANGER_OTHER;
+	}
+
 	protected BodyRotationControl createBodyControl() {
 		return new BodyRotationControl(this);
 	}
@@ -1090,6 +1094,42 @@ public abstract class Mob extends LivingEntity {
 
 	public boolean hasRestriction() {
 		return this.restrictRadius != -1.0F;
+	}
+
+	@Nullable
+	protected <T extends Mob> T convertTo(EntityType<T> entityType) {
+		if (this.removed) {
+			return null;
+		} else {
+			T mob = (T)entityType.create(this.level);
+			mob.copyPosition(this);
+			mob.setCanPickUpLoot(this.canPickUpLoot());
+			mob.setBaby(this.isBaby());
+			mob.setNoAi(this.isNoAi());
+			if (this.hasCustomName()) {
+				mob.setCustomName(this.getCustomName());
+				mob.setCustomNameVisible(this.isCustomNameVisible());
+			}
+
+			if (this.isPersistenceRequired()) {
+				mob.setPersistenceRequired();
+			}
+
+			mob.setInvulnerable(this.isInvulnerable());
+
+			for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+				ItemStack itemStack = this.getItemBySlot(equipmentSlot);
+				if (!itemStack.isEmpty()) {
+					mob.setItemSlot(equipmentSlot, itemStack.copy());
+					mob.setDropChance(equipmentSlot, this.getEquipmentDropChance(equipmentSlot));
+					itemStack.setCount(0);
+				}
+			}
+
+			this.level.addFreshEntity(mob);
+			this.remove();
+			return mob;
+		}
 	}
 
 	protected void tickLeash() {

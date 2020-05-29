@@ -110,7 +110,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 			bakedModel.getTransforms().getTransform(transformType).apply(bl, poseStack);
 			poseStack.translate(-0.5, -0.5, -0.5);
 			if (!bakedModel.isCustomRenderer() && (itemStack.getItem() != Items.TRIDENT || bl3)) {
-				RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack);
+				RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack, transformType != ItemTransforms.TransformType.GROUND);
 				VertexConsumer vertexConsumer = getFoilBuffer(multiBufferSource, renderType, true, itemStack.hasFoil());
 				this.renderModelLists(bakedModel, itemStack, i, j, poseStack, vertexConsumer);
 			} else {

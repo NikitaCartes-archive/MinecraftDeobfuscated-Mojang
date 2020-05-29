@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.material.Fluid;
 import org.apache.logging.log4j.LogManager;
@@ -65,9 +66,9 @@ public interface ChunkAccess extends BlockGetter, FeatureAccess {
 
 	void setLastSaveTime(long l);
 
-	Map<String, StructureStart<?>> getAllStarts();
+	Map<StructureFeature<?>, StructureStart<?>> getAllStarts();
 
-	void setAllStarts(Map<String, StructureStart<?>> map);
+	void setAllStarts(Map<StructureFeature<?>, StructureStart<?>> map);
 
 	default boolean isYSpaceEmpty(int i, int j) {
 		if (i < 0) {

@@ -126,6 +126,10 @@ public class BoundingBox {
 		return new BoundingBox(this.x0 + i, this.y0 + j, this.z0 + k, this.x1 + i, this.y1 + j, this.z1 + k);
 	}
 
+	public void move(Vec3i vec3i) {
+		this.move(vec3i.getX(), vec3i.getY(), vec3i.getZ());
+	}
+
 	public boolean isInside(Vec3i vec3i) {
 		return vec3i.getX() >= this.x0
 			&& vec3i.getX() <= this.x1

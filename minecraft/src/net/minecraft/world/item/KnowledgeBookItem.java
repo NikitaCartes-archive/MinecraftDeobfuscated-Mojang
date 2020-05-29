@@ -52,7 +52,7 @@ public class KnowledgeBookItem extends Item {
 				player.awardStat(Stats.ITEM_USED.get(this));
 			}
 
-			return InteractionResultHolder.success(itemStack);
+			return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
 		} else {
 			LOGGER.error("Tag not valid: {}", compoundTag);
 			return InteractionResultHolder.fail(itemStack);

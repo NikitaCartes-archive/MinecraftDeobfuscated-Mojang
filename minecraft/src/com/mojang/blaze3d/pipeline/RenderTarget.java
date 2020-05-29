@@ -61,7 +61,7 @@ public class RenderTarget {
 		this.unbindRead();
 		this.unbindWrite();
 		if (this.depthBufferId > -1) {
-			GlStateManager._glDeleteRenderbuffers(this.depthBufferId);
+			TextureUtil.releaseTextureId(this.depthBufferId);
 			this.depthBufferId = -1;
 		}
 
@@ -77,6 +77,27 @@ public class RenderTarget {
 		}
 	}
 
+	public void copyDepthFrom(RenderTarget renderTarget) {
+		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+		if (GlStateManager.supportsFramebufferBlit()) {
+			GlStateManager._glBindFramebuffer(36008, renderTarget.frameBufferId);
+			GlStateManager._glBindFramebuffer(36009, this.frameBufferId);
+			GlStateManager._glBlitFrameBuffer(0, 0, renderTarget.width, renderTarget.height, 0, 0, this.width, this.height, 256, 9728);
+		} else {
+			GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, this.frameBufferId);
+			int i = GlStateManager.getFramebufferDepthTexture();
+			if (i != 0) {
+				int j = GlStateManager.getActiveTextureName();
+				GlStateManager._bindTexture(i);
+				GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, renderTarget.frameBufferId);
+				GlStateManager._glCopyTexSubImage2D(3553, 0, 0, 0, 0, 0, Math.min(this.width, renderTarget.width), Math.min(this.height, renderTarget.height));
+				GlStateManager._bindTexture(j);
+			}
+		}
+
+		GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, 0);
+	}
+
 	public void createBuffers(int i, int j, boolean bl) {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
 		this.viewWidth = i;
@@ -86,7 +107,14 @@ public class RenderTarget {
 		this.frameBufferId = GlStateManager.glGenFramebuffers();
 		this.colorTextureId = TextureUtil.generateTextureId();
 		if (this.useDepth) {
-			this.depthBufferId = GlStateManager.glGenRenderbuffers();
+			this.depthBufferId = TextureUtil.generateTextureId();
+			GlStateManager._bindTexture(this.depthBufferId);
+			GlStateManager._texParameter(3553, 10241, 9728);
+			GlStateManager._texParameter(3553, 10240, 9728);
+			GlStateManager._texParameter(3553, 10242, 10496);
+			GlStateManager._texParameter(3553, 10243, 10496);
+			GlStateManager._texParameter(3553, 34892, 0);
+			GlStateManager._texImage2D(3553, 0, 6402, this.width, this.height, 0, 6402, 5126, null);
 		}
 
 		this.setFilterMode(9728);
@@ -95,9 +123,7 @@ public class RenderTarget {
 		GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, this.frameBufferId);
 		GlStateManager._glFramebufferTexture2D(GlConst.GL_FRAMEBUFFER, GlConst.GL_COLOR_ATTACHMENT0, 3553, this.colorTextureId, 0);
 		if (this.useDepth) {
-			GlStateManager._glBindRenderbuffer(GlConst.GL_RENDERBUFFER, this.depthBufferId);
-			GlStateManager._glRenderbufferStorage(GlConst.GL_RENDERBUFFER, 33190, this.width, this.height);
-			GlStateManager._glFramebufferRenderbuffer(GlConst.GL_FRAMEBUFFER, GlConst.GL_DEPTH_ATTACHMENT, GlConst.GL_RENDERBUFFER, this.depthBufferId);
+			GlStateManager._glFramebufferTexture2D(GlConst.GL_FRAMEBUFFER, GlConst.GL_DEPTH_ATTACHMENT, 3553, this.depthBufferId, 0);
 		}
 
 		this.checkStatus();

@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.Level;
 
 public class SecondaryPoiSensor extends Sensor<Villager> {
 	public SecondaryPoiSensor() {
@@ -19,7 +19,7 @@ public class SecondaryPoiSensor extends Sensor<Villager> {
 	}
 
 	protected void doTick(ServerLevel serverLevel, Villager villager) {
-		ResourceKey<DimensionType> resourceKey = serverLevel.dimension();
+		ResourceKey<Level> resourceKey = serverLevel.dimension();
 		BlockPos blockPos = villager.blockPosition();
 		List<GlobalPos> list = Lists.<GlobalPos>newArrayList();
 		int i = 4;
