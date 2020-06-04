@@ -111,11 +111,12 @@ public class Blaze extends Monster {
 	}
 
 	@Override
-	protected void customServerAiStep() {
-		if (this.isInWaterRainOrBubble()) {
-			this.hurt(DamageSource.DROWN, 1.0F);
-		}
+	public boolean isSensitiveToWater() {
+		return true;
+	}
 
+	@Override
+	protected void customServerAiStep() {
 		this.nextHeightOffsetChangeTick--;
 		if (this.nextHeightOffsetChangeTick <= 0) {
 			this.nextHeightOffsetChangeTick = 100;

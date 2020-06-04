@@ -95,6 +95,11 @@ public class BucketItem extends Item {
 
 	private ItemStack createResultItem(ItemStack itemStack, Player player, Item item) {
 		if (player.abilities.instabuild) {
+			ItemStack itemStack2 = new ItemStack(item);
+			if (!player.inventory.contains(itemStack2)) {
+				player.inventory.add(itemStack2);
+			}
+
 			return itemStack;
 		} else {
 			itemStack.shrink(1);

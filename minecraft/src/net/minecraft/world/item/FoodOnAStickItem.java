@@ -30,14 +30,13 @@ public class FoodOnAStickItem<T extends Entity & ItemSteerable> extends Item {
 				ItemSteerable itemSteerable = (ItemSteerable)entity;
 				if (itemSteerable.boost()) {
 					itemStack.hurtAndBreak(this.consumeItemDamage, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
-					player.swing(interactionHand, true);
 					if (itemStack.isEmpty()) {
 						ItemStack itemStack2 = new ItemStack(Items.FISHING_ROD);
 						itemStack2.setTag(itemStack.getTag());
-						return InteractionResultHolder.consume(itemStack2);
+						return InteractionResultHolder.success(itemStack2);
 					}
 
-					return InteractionResultHolder.consume(itemStack);
+					return InteractionResultHolder.success(itemStack);
 				}
 			}
 

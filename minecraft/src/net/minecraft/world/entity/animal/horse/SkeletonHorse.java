@@ -6,6 +6,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.EntityType;
@@ -15,7 +16,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
 
 public class SkeletonHorse extends AbstractHorse {
@@ -160,33 +160,32 @@ public class SkeletonHorse extends AbstractHorse {
 	}
 
 	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.getItem() instanceof SpawnEggItem) {
-			return super.mobInteract(player, interactionHand);
-		} else if (!this.isTamed()) {
-			return false;
+		if (!this.isTamed()) {
+			return InteractionResult.PASS;
 		} else if (this.isBaby()) {
 			return super.mobInteract(player, interactionHand);
 		} else if (player.isSecondaryUseActive()) {
 			this.openInventory(player);
-			return true;
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		} else if (this.isVehicle()) {
 			return super.mobInteract(player, interactionHand);
 		} else {
 			if (!itemStack.isEmpty()) {
 				if (itemStack.getItem() == Items.SADDLE && !this.isSaddled()) {
 					this.openInventory(player);
-					return true;
+					return InteractionResult.sidedSuccess(this.level.isClientSide);
 				}
 
-				if (itemStack.interactEnemy(player, this, interactionHand)) {
-					return true;
+				InteractionResult interactionResult = itemStack.interactLivingEntity(player, this, interactionHand);
+				if (interactionResult.consumesAction()) {
+					return interactionResult;
 				}
 			}
 
 			this.doPlayerRide(player);
-			return true;
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		}
 	}
 }

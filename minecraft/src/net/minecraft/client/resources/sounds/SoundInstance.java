@@ -29,11 +29,11 @@ public interface SoundInstance {
 
 	float getPitch();
 
-	float getX();
+	double getX();
 
-	float getY();
+	double getY();
 
-	float getZ();
+	double getZ();
 
 	SoundInstance.Attenuation getAttenuation();
 

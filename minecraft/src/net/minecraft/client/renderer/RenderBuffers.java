@@ -25,7 +25,9 @@ public class RenderBuffers {
 		put(object2ObjectLinkedOpenHashMap, RenderType.armorGlint());
 		put(object2ObjectLinkedOpenHashMap, RenderType.armorEntityGlint());
 		put(object2ObjectLinkedOpenHashMap, RenderType.glint());
+		put(object2ObjectLinkedOpenHashMap, RenderType.glintDirect());
 		put(object2ObjectLinkedOpenHashMap, RenderType.entityGlint());
+		put(object2ObjectLinkedOpenHashMap, RenderType.entityGlintDirect());
 		put(object2ObjectLinkedOpenHashMap, RenderType.waterMask());
 		ModelBakery.DESTROY_TYPES.forEach(renderType -> put(object2ObjectLinkedOpenHashMap, renderType));
 	});

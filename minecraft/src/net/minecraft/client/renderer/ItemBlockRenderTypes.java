@@ -218,6 +218,8 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.POTTED_WARPED_FUNGUS, renderType2);
 		hashMap.put(Blocks.POTTED_CRIMSON_ROOTS, renderType2);
 		hashMap.put(Blocks.POTTED_WARPED_ROOTS, renderType2);
+		hashMap.put(Blocks.CRIMSON_DOOR, renderType2);
+		hashMap.put(Blocks.WARPED_DOOR, renderType2);
 		RenderType renderType3 = RenderType.translucent();
 		hashMap.put(Blocks.ICE, renderType3);
 		hashMap.put(Blocks.NETHER_PORTAL, renderType3);

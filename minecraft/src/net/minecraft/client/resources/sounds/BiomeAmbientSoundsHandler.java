@@ -99,10 +99,7 @@ public class BiomeAmbientSoundsHandler implements AmbientSoundHandler {
 						double l = (double)Mth.sqrt(g * g + h * h + k * k);
 						double m = l + ambientMoodSettings.getSoundPositionOffset();
 						SimpleSoundInstance simpleSoundInstance = SimpleSoundInstance.forAmbientMood(
-							ambientMoodSettings.getSoundEvent(),
-							(float)(this.player.getX() + g / l * m),
-							(float)(this.player.getEyeY() + h / l * m),
-							(float)(this.player.getZ() + k / l * m)
+							ambientMoodSettings.getSoundEvent(), this.player.getX() + g / l * m, this.player.getEyeY() + h / l * m, this.player.getZ() + k / l * m
 						);
 						this.soundManager.play(simpleSoundInstance);
 						this.moodiness = 0.0F;

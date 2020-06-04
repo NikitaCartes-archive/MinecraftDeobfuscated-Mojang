@@ -21,6 +21,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.EntityDimensions;
@@ -218,17 +219,19 @@ public class Sheep extends Animal implements Shearable {
 	}
 
 	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
-		if (!this.level.isClientSide) {
-			ItemStack itemStack = player.getItemInHand(interactionHand);
-			if (itemStack.getItem() == Items.SHEARS && this.readyForShearing()) {
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
+		ItemStack itemStack = player.getItemInHand(interactionHand);
+		if (itemStack.getItem() == Items.SHEARS) {
+			if (!this.level.isClientSide && this.readyForShearing()) {
 				this.shear(SoundSource.PLAYERS);
 				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
-				return true;
+				return InteractionResult.SUCCESS;
+			} else {
+				return InteractionResult.CONSUME;
 			}
+		} else {
+			return super.mobInteract(player, interactionHand);
 		}
-
-		return super.mobInteract(player, interactionHand);
 	}
 
 	@Override

@@ -20,12 +20,12 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class FolderResourcePack extends AbstractResourcePack {
+public class FolderPackResources extends AbstractPackResources {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final boolean ON_WINDOWS = Util.getPlatform() == Util.OS.WINDOWS;
 	private static final CharMatcher BACKSLASH_MATCHER = CharMatcher.is('\\');
 
-	public FolderResourcePack(File file) {
+	public FolderPackResources(File file) {
 		super(file);
 	}
 
@@ -85,7 +85,8 @@ public class FolderResourcePack extends AbstractResourcePack {
 		return set;
 	}
 
-	public void close() throws IOException {
+	@Override
+	public void close() {
 	}
 
 	@Override

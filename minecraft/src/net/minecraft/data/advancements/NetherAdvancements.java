@@ -321,6 +321,7 @@ public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
 				true,
 				false
 			)
+			.rewards(AdvancementRewards.Builder.experience(100))
 			.addCriterion(
 				"netherite_armor",
 				InventoryChangeTrigger.TriggerInstance.hasItems(Items.NETHERITE_HELMET, Items.NETHERITE_CHESTPLATE, Items.NETHERITE_LEGGINGS, Items.NETHERITE_BOOTS)
@@ -418,6 +419,7 @@ public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
 				true,
 				false
 			)
+			.rewards(AdvancementRewards.Builder.experience(500))
 			.save(consumer, "nether/explore_nether");
 		Advancement advancement13 = Advancement.Builder.advancement()
 			.parent(advancement)

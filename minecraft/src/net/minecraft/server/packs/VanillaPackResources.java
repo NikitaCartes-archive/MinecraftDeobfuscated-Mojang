@@ -33,14 +33,14 @@ import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class VanillaPack implements Pack {
+public class VanillaPackResources implements PackResources {
 	public static Path generatedDir;
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static Class<?> clientObject;
 	private static final Map<PackType, FileSystem> JAR_FILESYSTEM_BY_TYPE = Util.make(Maps.<PackType, FileSystem>newHashMap(), hashMap -> {
-		synchronized (VanillaPack.class) {
+		synchronized (VanillaPackResources.class) {
 			for (PackType packType : PackType.values()) {
-				URL uRL = VanillaPack.class.getResource("/" + packType.getDirectory() + "/.mcassetsroot");
+				URL uRL = VanillaPackResources.class.getResource("/" + packType.getDirectory() + "/.mcassetsroot");
 
 				try {
 					URI uRI = uRL.toURI();
@@ -62,7 +62,7 @@ public class VanillaPack implements Pack {
 	});
 	public final Set<String> namespaces;
 
-	public VanillaPack(String... strings) {
+	public VanillaPackResources(String... strings) {
 		this.namespaces = ImmutableSet.copyOf(strings);
 	}
 
@@ -122,7 +122,7 @@ public class VanillaPack implements Pack {
 		}
 
 		try {
-			URL uRL = VanillaPack.class.getResource("/" + packType.getDirectory() + "/.mcassetsroot");
+			URL uRL = VanillaPackResources.class.getResource("/" + packType.getDirectory() + "/.mcassetsroot");
 			if (uRL == null) {
 				LOGGER.error("Couldn't find .mcassetsroot, cannot load vanilla resources");
 				return set;
@@ -188,10 +188,10 @@ public class VanillaPack implements Pack {
 		}
 
 		try {
-			URL uRL = VanillaPack.class.getResource(string);
+			URL uRL = VanillaPackResources.class.getResource(string);
 			return isResourceUrlValid(string, uRL) ? uRL.openStream() : null;
 		} catch (IOException var6) {
-			return VanillaPack.class.getResourceAsStream(string);
+			return VanillaPackResources.class.getResourceAsStream(string);
 		}
 	}
 
@@ -200,12 +200,12 @@ public class VanillaPack implements Pack {
 	}
 
 	private static boolean isResourceUrlValid(String string, @Nullable URL uRL) throws IOException {
-		return uRL != null && (uRL.getProtocol().equals("jar") || FolderResourcePack.validatePath(new File(uRL.getFile()), string));
+		return uRL != null && (uRL.getProtocol().equals("jar") || FolderPackResources.validatePath(new File(uRL.getFile()), string));
 	}
 
 	@Nullable
 	protected InputStream getResourceAsStream(String string) {
-		return VanillaPack.class.getResourceAsStream("/" + string);
+		return VanillaPackResources.class.getResourceAsStream("/" + string);
 	}
 
 	@Override
@@ -219,7 +219,7 @@ public class VanillaPack implements Pack {
 		}
 
 		try {
-			URL uRL = VanillaPack.class.getResource(string);
+			URL uRL = VanillaPackResources.class.getResource(string);
 			return isResourceUrlValid(string, uRL);
 		} catch (IOException var5) {
 			return false;
@@ -240,7 +240,7 @@ public class VanillaPack implements Pack {
 
 			Object var4;
 			try {
-				var4 = AbstractResourcePack.getMetadataFromStream(metadataSectionSerializer, inputStream);
+				var4 = AbstractPackResources.getMetadataFromStream(metadataSectionSerializer, inputStream);
 			} catch (Throwable var14) {
 				var3 = var14;
 				throw var14;
@@ -269,6 +269,7 @@ public class VanillaPack implements Pack {
 		return "Default";
 	}
 
+	@Override
 	public void close() {
 	}
 }

@@ -12,6 +12,7 @@ import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -120,7 +121,8 @@ public class BlockRenderDispatcher implements ResourceManagerReloadListener {
 						.renderModel(poseStack.last(), multiBufferSource.getBuffer(ItemBlockRenderTypes.getRenderType(blockState, false)), blockState, bakedModel, f, g, h, i, j);
 					break;
 				case ENTITYBLOCK_ANIMATED:
-					BlockEntityWithoutLevelRenderer.instance.renderByItem(new ItemStack(blockState.getBlock()), poseStack, multiBufferSource, i, j);
+					BlockEntityWithoutLevelRenderer.instance
+						.renderByItem(new ItemStack(blockState.getBlock()), ItemTransforms.TransformType.NONE, poseStack, multiBufferSource, i, j);
 			}
 		}
 	}

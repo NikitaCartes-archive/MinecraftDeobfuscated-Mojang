@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.EntityDimensions;
@@ -74,18 +75,21 @@ public class Cow extends Animal {
 	}
 
 	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.getItem() == Items.BUCKET && !player.abilities.instabuild && !this.isBaby()) {
+		if (itemStack.getItem() == Items.BUCKET && !this.isBaby()) {
 			player.playSound(SoundEvents.COW_MILK, 1.0F, 1.0F);
-			itemStack.shrink(1);
+			if (!player.abilities.instabuild) {
+				itemStack.shrink(1);
+			}
+
 			if (itemStack.isEmpty()) {
 				player.setItemInHand(interactionHand, new ItemStack(Items.MILK_BUCKET));
 			} else if (!player.inventory.add(new ItemStack(Items.MILK_BUCKET))) {
 				player.drop(new ItemStack(Items.MILK_BUCKET), false);
 			}
 
-			return true;
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		} else {
 			return super.mobInteract(player, interactionHand);
 		}

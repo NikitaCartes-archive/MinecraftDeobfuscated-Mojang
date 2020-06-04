@@ -19,6 +19,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -721,11 +722,17 @@ public class Boat extends Entity {
 	}
 
 	@Override
-	public boolean interact(Player player, InteractionHand interactionHand) {
+	public InteractionResult interact(Player player, InteractionHand interactionHand) {
 		if (player.isSecondaryUseActive()) {
-			return false;
+			return InteractionResult.PASS;
+		} else if (this.outOfControlTicks < 60.0F) {
+			if (!this.level.isClientSide) {
+				return player.startRiding(this) ? InteractionResult.CONSUME : InteractionResult.PASS;
+			} else {
+				return InteractionResult.SUCCESS;
+			}
 		} else {
-			return !this.level.isClientSide && this.outOfControlTicks < 60.0F ? player.startRiding(this) : false;
+			return InteractionResult.PASS;
 		}
 	}
 

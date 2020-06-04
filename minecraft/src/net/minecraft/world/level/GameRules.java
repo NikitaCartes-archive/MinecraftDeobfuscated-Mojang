@@ -131,6 +131,12 @@ public class GameRules {
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_DO_TRADER_SPAWNING = register(
 		"doTraderSpawning", GameRules.Category.SPAWNING, GameRules.BooleanValue.create(true)
 	);
+	public static final GameRules.Key<GameRules.BooleanValue> RULE_FORGIVE_DEAD_PLAYERS = register(
+		"forgiveDeadPlayers", GameRules.Category.MOBS, GameRules.BooleanValue.create(true)
+	);
+	public static final GameRules.Key<GameRules.BooleanValue> RULE_UNIVERSAL_ANGER = register(
+		"universalAnger", GameRules.Category.MOBS, GameRules.BooleanValue.create(false)
+	);
 	private final Map<GameRules.Key<?>, GameRules.Value<?>> rules;
 
 	private static <T extends GameRules.Value<T>> GameRules.Key<T> register(String string, GameRules.Category category, GameRules.Type<T> type) {

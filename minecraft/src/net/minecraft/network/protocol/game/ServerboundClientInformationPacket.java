@@ -53,10 +53,6 @@ public class ServerboundClientInformationPacket implements Packet<ServerGamePack
 		serverGamePacketListener.handleClientInformation(this);
 	}
 
-	public String getLanguage() {
-		return this.language;
-	}
-
 	public ChatVisiblity getChatVisibility() {
 		return this.chatVisibility;
 	}

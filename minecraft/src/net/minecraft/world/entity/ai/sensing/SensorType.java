@@ -18,6 +18,7 @@ public class SensorType<U extends Sensor<?>> {
 	public static final SensorType<GolemSensor> GOLEM_LAST_SEEN = register("golem_last_seen", GolemSensor::new);
 	public static final SensorType<PiglinSpecificSensor> PIGLIN_SPECIFIC_SENSOR = register("piglin_specific_sensor", PiglinSpecificSensor::new);
 	public static final SensorType<HoglinSpecificSensor> HOGLIN_SPECIFIC_SENSOR = register("hoglin_specific_sensor", HoglinSpecificSensor::new);
+	public static final SensorType<AdultSensor> NEAREST_ADULT = register("nearest_adult", AdultSensor::new);
 	private final Supplier<U> factory;
 
 	private SensorType(Supplier<U> supplier) {

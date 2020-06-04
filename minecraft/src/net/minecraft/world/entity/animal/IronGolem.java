@@ -3,7 +3,9 @@ package net.minecraft.world.entity.animal;
 import com.google.common.collect.ImmutableList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -15,13 +17,17 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.IntRange;
 import net.minecraft.util.Mth;
+import net.minecraft.util.TimeUtil;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.GolemRandomStrollInVillageGoal;
@@ -46,10 +52,13 @@ import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 
-public class IronGolem extends AbstractGolem {
+public class IronGolem extends AbstractGolem implements NeutralMob {
 	protected static final EntityDataAccessor<Byte> DATA_FLAGS_ID = SynchedEntityData.defineId(IronGolem.class, EntityDataSerializers.BYTE);
 	private int attackAnimationTick;
 	private int offerFlowerTick;
+	private static final IntRange PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+	private int remainingPersistentAngerTime;
+	private UUID persistentAngerTarget;
 
 	public IronGolem(EntityType<? extends IronGolem> entityType, Level level) {
 		super(entityType, level);
@@ -67,6 +76,7 @@ public class IronGolem extends AbstractGolem {
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 		this.targetSelector.addGoal(1, new DefendVillageTargetGoal(this));
 		this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
+		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, Player.class, 10, true, false, this::isAngryAt));
 		this.targetSelector
 			.addGoal(
 				3, new NearestAttackableTargetGoal(this, Mob.class, 5, false, false, livingEntity -> livingEntity instanceof Enemy && !(livingEntity instanceof Creeper))
@@ -130,6 +140,10 @@ public class IronGolem extends AbstractGolem {
 					);
 			}
 		}
+
+		if (!this.level.isClientSide) {
+			this.updatePersistentAnger();
+		}
 	}
 
 	@Override
@@ -145,12 +159,39 @@ public class IronGolem extends AbstractGolem {
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putBoolean("PlayerCreated", this.isPlayerCreated());
+		this.addPersistentAngerSaveData(compoundTag);
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
 		this.setPlayerCreated(compoundTag.getBoolean("PlayerCreated"));
+		this.readPersistentAngerSaveData(this.level, compoundTag);
+	}
+
+	@Override
+	public void startPersistentAngerTimer() {
+		this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.randomValue(this.random));
+	}
+
+	@Override
+	public void setRemainingPersistentAngerTime(int i) {
+		this.remainingPersistentAngerTime = i;
+	}
+
+	@Override
+	public int getRemainingPersistentAngerTime() {
+		return this.remainingPersistentAngerTime;
+	}
+
+	@Override
+	public void setPersistentAngerTarget(@Nullable UUID uUID) {
+		this.persistentAngerTarget = uUID;
+	}
+
+	@Override
+	public UUID getPersistentAngerTarget() {
+		return this.persistentAngerTarget;
 	}
 
 	private float getAttackDamage() {
@@ -229,16 +270,16 @@ public class IronGolem extends AbstractGolem {
 	}
 
 	@Override
-	protected boolean mobInteract(Player player, InteractionHand interactionHand) {
+	protected InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		Item item = itemStack.getItem();
 		if (item != Items.IRON_INGOT) {
-			return false;
+			return InteractionResult.PASS;
 		} else {
 			float f = this.getHealth();
 			this.heal(25.0F);
 			if (this.getHealth() == f) {
-				return false;
+				return InteractionResult.PASS;
 			} else {
 				float g = 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F;
 				this.playSound(SoundEvents.IRON_GOLEM_REPAIR, 1.0F, g);
@@ -246,7 +287,7 @@ public class IronGolem extends AbstractGolem {
 					itemStack.shrink(1);
 				}
 
-				return true;
+				return InteractionResult.sidedSuccess(this.level.isClientSide);
 			}
 		}
 	}

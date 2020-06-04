@@ -20,7 +20,7 @@ public class LootContextParamSets {
 		"selector", builder -> builder.required(LootContextParams.BLOCK_POS).required(LootContextParams.THIS_ENTITY)
 	);
 	public static final LootContextParamSet FISHING = register(
-		"fishing", builder -> builder.required(LootContextParams.BLOCK_POS).required(LootContextParams.TOOL).required(LootContextParams.THIS_ENTITY)
+		"fishing", builder -> builder.required(LootContextParams.BLOCK_POS).required(LootContextParams.TOOL).optional(LootContextParams.THIS_ENTITY)
 	);
 	public static final LootContextParamSet ENTITY = register(
 		"entity",

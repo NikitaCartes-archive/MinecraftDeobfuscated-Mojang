@@ -18,11 +18,11 @@ import java.util.zip.ZipFile;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.io.IOUtils;
 
-public class FileResourcePack extends AbstractResourcePack {
+public class FilePackResources extends AbstractPackResources {
 	public static final Splitter SPLITTER = Splitter.on('/').omitEmptyStrings().limit(3);
 	private ZipFile zipFile;
 
-	public FileResourcePack(File file) {
+	public FilePackResources(File file) {
 		super(file);
 	}
 
@@ -90,6 +90,7 @@ public class FileResourcePack extends AbstractResourcePack {
 		super.finalize();
 	}
 
+	@Override
 	public void close() {
 		if (this.zipFile != null) {
 			IOUtils.closeQuietly(this.zipFile);

@@ -11,6 +11,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BaseCommandBlock;
@@ -79,9 +80,8 @@ public class MinecartCommandBlock extends AbstractMinecart {
 	}
 
 	@Override
-	public boolean interact(Player player, InteractionHand interactionHand) {
-		this.commandBlock.usedBy(player);
-		return true;
+	public InteractionResult interact(Player player, InteractionHand interactionHand) {
+		return this.commandBlock.usedBy(player);
 	}
 
 	@Override

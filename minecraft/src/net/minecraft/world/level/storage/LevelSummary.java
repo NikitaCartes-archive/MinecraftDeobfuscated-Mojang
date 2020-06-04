@@ -1,6 +1,5 @@
 package net.minecraft.world.level.storage;
 
-import com.mojang.serialization.Lifecycle;
 import java.io.File;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -14,10 +13,8 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.apache.commons.lang3.StringUtils;
 
-@Environment(EnvType.CLIENT)
 public class LevelSummary implements Comparable<LevelSummary> {
 	private final LevelSettings settings;
 	private final LevelVersion levelVersion;
@@ -25,36 +22,40 @@ public class LevelSummary implements Comparable<LevelSummary> {
 	private final boolean requiresConversion;
 	private final boolean locked;
 	private final File icon;
-	private final Lifecycle lifecycle;
 	@Nullable
+	@Environment(EnvType.CLIENT)
 	private Component info;
 
-	public LevelSummary(LevelSettings levelSettings, LevelVersion levelVersion, String string, boolean bl, boolean bl2, File file, Lifecycle lifecycle) {
+	public LevelSummary(LevelSettings levelSettings, LevelVersion levelVersion, String string, boolean bl, boolean bl2, File file) {
 		this.settings = levelSettings;
 		this.levelVersion = levelVersion;
 		this.levelId = string;
 		this.locked = bl2;
 		this.icon = file;
 		this.requiresConversion = bl;
-		this.lifecycle = lifecycle;
 	}
 
+	@Environment(EnvType.CLIENT)
 	public String getLevelId() {
 		return this.levelId;
 	}
 
+	@Environment(EnvType.CLIENT)
 	public String getLevelName() {
 		return StringUtils.isEmpty(this.settings.levelName()) ? this.levelId : this.settings.levelName();
 	}
 
+	@Environment(EnvType.CLIENT)
 	public File getIcon() {
 		return this.icon;
 	}
 
+	@Environment(EnvType.CLIENT)
 	public boolean isRequiresConversion() {
 		return this.requiresConversion;
 	}
 
+	@Environment(EnvType.CLIENT)
 	public long getLastPlayed() {
 		return this.levelVersion.lastPlayed();
 	}
@@ -67,56 +68,53 @@ public class LevelSummary implements Comparable<LevelSummary> {
 		}
 	}
 
+	@Environment(EnvType.CLIENT)
 	public GameType getGameMode() {
 		return this.settings.gameType();
 	}
 
+	@Environment(EnvType.CLIENT)
 	public boolean isHardcore() {
 		return this.settings.hardcore();
 	}
 
+	@Environment(EnvType.CLIENT)
 	public boolean hasCheats() {
 		return this.settings.allowCommands();
 	}
 
+	@Environment(EnvType.CLIENT)
 	public MutableComponent getWorldVersionName() {
 		return (MutableComponent)(StringUtil.isNullOrEmpty(this.levelVersion.minecraftVersionName())
 			? new TranslatableComponent("selectWorld.versionUnknown")
 			: new TextComponent(this.levelVersion.minecraftVersionName()));
 	}
 
-	public boolean markVersionInList() {
-		return this.askToOpenWorld()
-			|| !SharedConstants.getCurrentVersion().isStable() && !this.levelVersion.snapshot()
-			|| this.shouldBackup()
-			|| this.isOldCustomizedWorld()
-			|| this.experimental();
+	public LevelVersion levelVersion() {
+		return this.levelVersion;
 	}
 
+	@Environment(EnvType.CLIENT)
+	public boolean markVersionInList() {
+		return this.askToOpenWorld() || !SharedConstants.getCurrentVersion().isStable() && !this.levelVersion.snapshot() || this.shouldBackup();
+	}
+
+	@Environment(EnvType.CLIENT)
 	public boolean askToOpenWorld() {
 		return this.levelVersion.minecraftVersion() > SharedConstants.getCurrentVersion().getWorldVersion();
 	}
 
-	public boolean isOldCustomizedWorld() {
-		return this.settings.worldGenSettings().isOldCustomizedWorld() && this.levelVersion.minecraftVersion() < 1466;
-	}
-
-	protected WorldGenSettings worldGenSettings() {
-		return this.settings.worldGenSettings();
-	}
-
-	public boolean experimental() {
-		return this.lifecycle != Lifecycle.stable();
-	}
-
+	@Environment(EnvType.CLIENT)
 	public boolean shouldBackup() {
 		return this.levelVersion.minecraftVersion() < SharedConstants.getCurrentVersion().getWorldVersion();
 	}
 
+	@Environment(EnvType.CLIENT)
 	public boolean isLocked() {
 		return this.locked;
 	}
 
+	@Environment(EnvType.CLIENT)
 	public Component getInfo() {
 		if (this.info == null) {
 			this.info = this.createInfo();
@@ -125,6 +123,7 @@ public class LevelSummary implements Comparable<LevelSummary> {
 		return this.info;
 	}
 
+	@Environment(EnvType.CLIENT)
 	private Component createInfo() {
 		if (this.isLocked()) {
 			return new TranslatableComponent("selectWorld.locked").withStyle(ChatFormatting.RED);

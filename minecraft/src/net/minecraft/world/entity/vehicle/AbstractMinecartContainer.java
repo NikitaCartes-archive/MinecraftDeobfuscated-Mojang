@@ -12,6 +12,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -155,9 +156,9 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
 	}
 
 	@Override
-	public boolean interact(Player player, InteractionHand interactionHand) {
+	public InteractionResult interact(Player player, InteractionHand interactionHand) {
 		player.openMenu(this);
-		return true;
+		return InteractionResult.sidedSuccess(this.level.isClientSide);
 	}
 
 	@Override

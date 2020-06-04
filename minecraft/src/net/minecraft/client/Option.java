@@ -1,13 +1,17 @@
 package net.minecraft.client;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
+import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.ChatVisiblity;
@@ -217,12 +221,30 @@ public abstract class Option {
 	public static final CycleOption GRAPHICS = new CycleOption(
 		"options.graphics",
 		(options, integer) -> {
-			options.fancyGraphics = !options.fancyGraphics;
+			options.graphicsMode = options.graphicsMode.cycleNext();
+			if (options.graphicsMode == GraphicsStatus.FABULOUS && !GlStateManager.supportsFramebufferBlit()) {
+				options.graphicsMode = GraphicsStatus.FAST;
+			}
+
 			Minecraft.getInstance().levelRenderer.allChanged();
 		},
-		(options, cycleOption) -> options.fancyGraphics
-				? cycleOption.createCaption().append(new TranslatableComponent("options.graphics.fancy"))
-				: cycleOption.createCaption().append(new TranslatableComponent("options.graphics.fast"))
+		(options, cycleOption) -> {
+			switch (options.graphicsMode) {
+				case FAST:
+					cycleOption.setTooltip("options.graphics.fast.tooltip");
+					break;
+				case FANCY:
+					cycleOption.setTooltip("options.graphics.fancy.tooltip");
+					break;
+				case FABULOUS:
+					cycleOption.setTooltip("options.graphics.fabulous.tooltip");
+			}
+
+			TranslatableComponent translatableComponent = new TranslatableComponent(options.graphicsMode.getKey());
+			return options.graphicsMode == GraphicsStatus.FABULOUS
+				? cycleOption.createCaption().append(new TextComponent("").append(translatableComponent).withStyle(ChatFormatting.ITALIC))
+				: cycleOption.createCaption().append(translatableComponent);
+		}
 	);
 	public static final CycleOption GUI_SCALE = new CycleOption(
 		"options.guiScale",
@@ -261,11 +283,12 @@ public abstract class Option {
 		(options, integer) -> options.particles = ParticleStatus.byId(options.particles.getId() + integer),
 		(options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.particles.getKey()))
 	);
-	public static final CycleOption RENDER_CLOUDS = new CycleOption(
-		"options.renderClouds",
-		(options, integer) -> options.renderClouds = CloudStatus.byId(options.renderClouds.getId() + integer),
-		(options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.renderClouds.getKey()))
-	);
+	public static final CycleOption RENDER_CLOUDS = new CycleOption("options.renderClouds", (options, integer) -> {
+		options.renderClouds = CloudStatus.byId(options.renderClouds.getId() + integer);
+		if (Minecraft.useShaderTransparency()) {
+			Minecraft.getInstance().levelRenderer.getCloudsTarget().clear(Minecraft.ON_OSX);
+		}
+	}, (options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.renderClouds.getKey())));
 	public static final CycleOption TEXT_BACKGROUND = new CycleOption(
 		"options.accessibility.text_background",
 		(options, integer) -> options.backgroundForChatOnly = !options.backgroundForChatOnly,
@@ -355,14 +378,24 @@ public abstract class Option {
 		"options.viewBobbing", options -> options.bobView, (options, boolean_) -> options.bobView = boolean_
 	);
 	private final String captionId;
+	private Optional<TranslatableComponent> toolTip;
 
 	public Option(String string) {
 		this.captionId = string;
+		this.toolTip = Optional.empty();
 	}
 
 	public abstract AbstractWidget createButton(Options options, int i, int j, int k);
 
 	public MutableComponent createCaption() {
 		return new TranslatableComponent(this.captionId).append(": ");
+	}
+
+	public void setTooltip(String string) {
+		this.toolTip = Optional.of(new TranslatableComponent(string));
+	}
+
+	public Optional<TranslatableComponent> getTooltip() {
+		return this.toolTip;
 	}
 }

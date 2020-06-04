@@ -19,6 +19,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -93,7 +94,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 
 			for (Bee bee : list) {
 				if (bee.getTarget() == null) {
-					bee.makeAngry((Entity)list2.get(level.random.nextInt(i)));
+					bee.setTarget((LivingEntity)list2.get(level.random.nextInt(i)));
 				}
 			}
 		}

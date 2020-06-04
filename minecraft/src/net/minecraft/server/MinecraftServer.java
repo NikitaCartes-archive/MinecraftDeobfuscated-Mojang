@@ -9,7 +9,6 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
-import com.mojang.datafixers.util.Pair;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
@@ -36,7 +35,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -47,7 +45,9 @@ import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
@@ -62,6 +62,7 @@ import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.gametest.framework.GameTestTicker;
@@ -82,10 +83,8 @@ import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.network.ServerConnectionListener;
-import net.minecraft.server.packs.repository.FolderRepositorySource;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.server.packs.repository.ServerPacksSource;
-import net.minecraft.server.packs.repository.UnopenedPack;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.ServerOpListEntry;
@@ -112,6 +111,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CustomSpawner;
+import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
@@ -125,6 +125,7 @@ import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.PatrolSpawner;
 import net.minecraft.world.level.levelgen.PhantomSpawner;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
@@ -151,11 +152,11 @@ import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTask> implements SnooperPopulator, CommandSource, AutoCloseable, Runnable {
+public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTask> implements SnooperPopulator, CommandSource, AutoCloseable {
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final File USERID_CACHE_FILE = new File("usercache.json");
 	public static final LevelSettings DEMO_SETTINGS = new LevelSettings(
-		"Demo World", GameType.SURVIVAL, false, Difficulty.NORMAL, false, new GameRules(), WorldGenSettings.DEMO_SETTINGS
+		"Demo World", GameType.SURVIVAL, false, Difficulty.NORMAL, false, new GameRules(), DataPackConfig.DEFAULT
 	);
 	protected final LevelStorageSource.LevelStorageAccess storageSource;
 	protected final PlayerDataStorage playerDataStorage;
@@ -170,7 +171,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	private final DataFixer fixerUpper;
 	private String localIp;
 	private int port = -1;
-	protected final RegistryAccess.RegistryHolder registryHolder = new RegistryAccess.RegistryHolder();
+	protected final RegistryAccess.RegistryHolder registryHolder;
 	private final Map<ResourceKey<Level>, ServerLevel> levels = Maps.<ResourceKey<Level>, ServerLevel>newLinkedHashMap();
 	private PlayerList playerList;
 	private volatile boolean running = true;
@@ -201,15 +202,13 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	private final GameProfileRepository profileRepository;
 	private final GameProfileCache profileCache;
 	private long lastServerStatus;
-	private final Thread serverThread = Util.make(
-		new Thread(this, "Server thread"), thread -> thread.setUncaughtExceptionHandler((threadx, throwable) -> LOGGER.error(throwable))
-	);
+	private final Thread serverThread;
 	private long nextTickTime = Util.getMillis();
 	private long delayedTasksMaxNextTickTime;
 	private boolean mayHaveDelayedTasks;
 	@Environment(EnvType.CLIENT)
 	private boolean hasWorldScreenshot;
-	private final PackRepository<UnopenedPack> packRepository;
+	private final PackRepository<Pack> packRepository;
 	private final ServerScoreboard scoreboard = new ServerScoreboard(this);
 	@Nullable
 	private CommandStorage commandStorage;
@@ -225,10 +224,22 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	private final StructureManager structureManager;
 	protected final WorldData worldData;
 
+	public static <S extends MinecraftServer> S spin(Function<Thread, S> function) {
+		AtomicReference<S> atomicReference = new AtomicReference();
+		Thread thread = new Thread(() -> ((MinecraftServer)atomicReference.get()).runServer(), "Server thread");
+		thread.setUncaughtExceptionHandler((threadx, throwable) -> LOGGER.error(throwable));
+		S minecraftServer = (S)function.apply(thread);
+		atomicReference.set(minecraftServer);
+		thread.start();
+		return minecraftServer;
+	}
+
 	public MinecraftServer(
+		Thread thread,
+		RegistryAccess.RegistryHolder registryHolder,
 		LevelStorageSource.LevelStorageAccess levelStorageAccess,
 		WorldData worldData,
-		PackRepository<UnopenedPack> packRepository,
+		PackRepository<Pack> packRepository,
 		Proxy proxy,
 		DataFixer dataFixer,
 		ServerResources serverResources,
@@ -238,6 +249,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		ChunkProgressListenerFactory chunkProgressListenerFactory
 	) {
 		super("Server");
+		this.registryHolder = registryHolder;
 		this.worldData = worldData;
 		this.proxy = proxy;
 		this.packRepository = packRepository;
@@ -252,6 +264,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		this.fixerUpper = dataFixer;
 		this.functionManager = new ServerFunctionManager(this, serverResources.getFunctionLibrary());
 		this.structureManager = new StructureManager(serverResources.getResourceManager(), levelStorageAccess, dataFixer);
+		this.serverThread = thread;
 		this.executor = Util.backgroundExecutor();
 	}
 
@@ -319,19 +332,18 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		List<CustomSpawner> list = ImmutableList.of(
 			new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(serverLevelData)
 		);
-		LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> linkedHashMap = worldGenSettings.dimensions();
-		Pair<DimensionType, ChunkGenerator> pair = (Pair<DimensionType, ChunkGenerator>)linkedHashMap.get(Level.OVERWORLD);
+		MappedRegistry<LevelStem> mappedRegistry = worldGenSettings.dimensions();
+		LevelStem levelStem = mappedRegistry.get(LevelStem.OVERWORLD);
 		ChunkGenerator chunkGenerator;
 		DimensionType dimensionType;
-		if (pair == null) {
-			dimensionType = DimensionType.makeDefaultOverworld();
+		if (levelStem == null) {
+			dimensionType = DimensionType.defaultOverworld();
 			chunkGenerator = WorldGenSettings.makeDefaultOverworld(new Random().nextLong());
 		} else {
-			dimensionType = pair.getFirst();
-			chunkGenerator = pair.getSecond();
+			dimensionType = levelStem.type();
+			chunkGenerator = levelStem.generator();
 		}
 
-		this.registryHolder.registerDimension(DimensionType.OVERWORLD_LOCATION, dimensionType);
 		ServerLevel serverLevel = new ServerLevel(
 			this,
 			this.executor,
@@ -360,12 +372,12 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				if (bl) {
 					this.setupDebugLevel(this.worldData);
 				}
-			} catch (Throwable var26) {
-				CrashReport crashReport = CrashReport.forThrowable(var26, "Exception initializing level");
+			} catch (Throwable var27) {
+				CrashReport crashReport = CrashReport.forThrowable(var27, "Exception initializing level");
 
 				try {
 					serverLevel.fillReportDetails(crashReport);
-				} catch (Throwable var25) {
+				} catch (Throwable var26) {
 				}
 
 				throw new ReportedException(crashReport);
@@ -379,21 +391,24 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			this.getCustomBossEvents().load(this.worldData.getCustomBossEvents());
 		}
 
-		for (Entry<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> entry : linkedHashMap.entrySet()) {
-			ResourceKey<Level> resourceKey = (ResourceKey<Level>)entry.getKey();
-			if (resourceKey != Level.OVERWORLD) {
-				DimensionType dimensionType2 = (DimensionType)((Pair)entry.getValue()).getFirst();
-				ResourceKey<DimensionType> resourceKey2 = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, resourceKey.location());
-				this.registryHolder.registerDimension(resourceKey2, dimensionType2);
-				ChunkGenerator chunkGenerator2 = (ChunkGenerator)((Pair)entry.getValue()).getSecond();
-				DerivedLevelData derivedLevelData = new DerivedLevelData(dimensionType2, this.worldData, serverLevelData);
+		for (Entry<ResourceKey<LevelStem>, LevelStem> entry : mappedRegistry.entrySet()) {
+			ResourceKey<LevelStem> resourceKey = (ResourceKey<LevelStem>)entry.getKey();
+			if (resourceKey != LevelStem.OVERWORLD) {
+				ResourceKey<Level> resourceKey2 = ResourceKey.create(Registry.DIMENSION_REGISTRY, resourceKey.location());
+				DimensionType dimensionType2 = ((LevelStem)entry.getValue()).type();
+				ResourceKey<DimensionType> resourceKey3 = (ResourceKey<DimensionType>)this.registryHolder
+					.dimensionTypes()
+					.getResourceKey(dimensionType2)
+					.orElseThrow(() -> new IllegalStateException("Unregistered dimension type: " + dimensionType2));
+				ChunkGenerator chunkGenerator2 = ((LevelStem)entry.getValue()).generator();
+				DerivedLevelData derivedLevelData = new DerivedLevelData(this.worldData, serverLevelData);
 				ServerLevel serverLevel2 = new ServerLevel(
 					this,
 					this.executor,
 					this.storageSource,
 					derivedLevelData,
-					resourceKey,
 					resourceKey2,
+					resourceKey3,
 					dimensionType2,
 					chunkProgressListener,
 					chunkGenerator2,
@@ -403,7 +418,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 					false
 				);
 				worldBorder.addListener(new BorderChangeListener.DelegateBorderChangeListener(serverLevel2.getWorldBorder()));
-				this.levels.put(resourceKey, serverLevel2);
+				this.levels.put(resourceKey2, serverLevel2);
 			}
 		}
 	}
@@ -564,7 +579,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		ServerLevelData serverLevelData = this.worldData.overworldData();
 		serverLevelData.setWorldBorder(serverLevel2.getWorldBorder().createSettings());
 		this.worldData.setCustomBossEvents(this.getCustomBossEvents().save());
-		this.storageSource.saveDataTag(this.worldData, this.getPlayerList().getSingleplayerData());
+		this.storageSource.saveDataTag(this.registryHolder, this.worldData, this.getPlayerList().getSingleplayerData());
 		return bl4;
 	}
 
@@ -609,6 +624,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			this.snooper.interrupt();
 		}
 
+		this.resources.close();
+
 		try {
 			this.storageSource.close();
 		} catch (IOException var4) {
@@ -639,7 +656,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		}
 	}
 
-	public void run() {
+	protected void runServer() {
 		try {
 			if (this.initServer()) {
 				this.nextTickTime = Util.getMillis();
@@ -902,10 +919,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		this.serverId = string;
 	}
 
-	public void forkAndRun() {
-		this.serverThread.start();
-	}
-
 	@Environment(EnvType.CLIENT)
 	public boolean isShutdown() {
 		return !this.serverThread.isAlive();
@@ -959,13 +972,13 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		crashReport.getSystemDetails().setDetail("Data Packs", (CrashReportDetail<String>)(() -> {
 			StringBuilder stringBuilder = new StringBuilder();
 
-			for (UnopenedPack unopenedPack : this.packRepository.getSelectedPacks()) {
+			for (Pack pack : this.packRepository.getSelectedPacks()) {
 				if (stringBuilder.length() > 0) {
 					stringBuilder.append(", ");
 				}
 
-				stringBuilder.append(unopenedPack.getId());
-				if (!unopenedPack.getCompatibility().isCompatible()) {
+				stringBuilder.append(pack.getId());
+				if (!pack.getCompatibility().isCompatible()) {
 					stringBuilder.append(" (incompatible)");
 				}
 			}
@@ -1294,17 +1307,24 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				() -> (ImmutableList)collection.stream()
 						.map(this.packRepository::getPack)
 						.filter(Objects::nonNull)
-						.map(UnopenedPack::open)
+						.map(Pack::open)
 						.collect(ImmutableList.toImmutableList()),
 				this
 			)
 			.thenCompose(
-				immutableList -> ServerResources.loadResources(immutableList, this.isDedicatedServer(), this.getFunctionCompilationLevel(), this.executor, this)
+				immutableList -> ServerResources.loadResources(
+						immutableList,
+						this.isDedicatedServer() ? Commands.CommandSelection.DEDICATED : Commands.CommandSelection.INTEGRATED,
+						this.getFunctionCompilationLevel(),
+						this.executor,
+						this
+					)
 			)
 			.thenAcceptAsync(serverResources -> {
+				this.resources.close();
 				this.resources = serverResources;
 				this.packRepository.setSelected(collection);
-				storeSelectedPacks(this.packRepository, this.worldData);
+				this.worldData.setDataPackConfig(getSelectedPacks(this.packRepository));
 				serverResources.updateGlobals();
 				this.getPlayerList().saveAll();
 				this.getPlayerList().reloadResources();
@@ -1318,16 +1338,15 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return completableFuture;
 	}
 
-	public static PackRepository<UnopenedPack> createPackRepository(Path path, WorldData worldData, boolean bl) {
-		PackRepository<UnopenedPack> packRepository = new PackRepository<>(UnopenedPack::new, new ServerPacksSource(), new FolderRepositorySource(path.toFile()));
+	public static DataPackConfig configurePackRepository(PackRepository<Pack> packRepository, DataPackConfig dataPackConfig, boolean bl) {
 		packRepository.reload();
 		if (bl) {
 			packRepository.setSelected(Collections.singleton("vanilla"));
-			return packRepository;
+			return new DataPackConfig(ImmutableList.of("vanilla"), ImmutableList.of());
 		} else {
 			Set<String> set = Sets.<String>newLinkedHashSet();
 
-			for (String string : worldData.getEnabledDataPacks()) {
+			for (String string : dataPackConfig.getEnabled()) {
 				if (packRepository.isAvailable(string)) {
 					set.add(string);
 				} else {
@@ -1335,10 +1354,11 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				}
 			}
 
-			for (String stringx : packRepository.getAvailableIds()) {
-				if (!worldData.getDisabledDataPacks().contains(stringx) && !set.contains(stringx)) {
-					LOGGER.info("Found new data pack {}, loading it automatically", stringx);
-					set.add(stringx);
+			for (Pack pack : packRepository.getAvailablePacks()) {
+				String string2 = pack.getId();
+				if (!dataPackConfig.getDisabled().contains(string2) && !set.contains(string2)) {
+					LOGGER.info("Found new data pack {}, loading it automatically", string2);
+					set.add(string2);
 				}
 			}
 
@@ -1348,35 +1368,34 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			}
 
 			packRepository.setSelected(set);
-			storeSelectedPacks(packRepository, worldData);
-			return packRepository;
+			return getSelectedPacks(packRepository);
 		}
 	}
 
-	private static void storeSelectedPacks(PackRepository<?> packRepository, WorldData worldData) {
-		Set<String> set = worldData.getEnabledDataPacks();
-		Set<String> set2 = worldData.getDisabledDataPacks();
-		set.clear();
-		set2.clear();
-		set.addAll(packRepository.getSelectedIds());
-		packRepository.getAvailableIds().stream().filter(string -> !set.contains(string)).forEach(set2::add);
+	private static DataPackConfig getSelectedPacks(PackRepository<?> packRepository) {
+		Collection<String> collection = packRepository.getSelectedIds();
+		List<String> list = ImmutableList.copyOf(collection);
+		List<String> list2 = (List<String>)packRepository.getAvailableIds()
+			.stream()
+			.filter(string -> !collection.contains(string))
+			.collect(ImmutableList.toImmutableList());
+		return new DataPackConfig(list, list2);
 	}
 
 	public void kickUnlistedPlayers(CommandSourceStack commandSourceStack) {
 		if (this.isEnforceWhitelist()) {
 			PlayerList playerList = commandSourceStack.getServer().getPlayerList();
 			UserWhiteList userWhiteList = playerList.getWhiteList();
-			if (userWhiteList.isEnabled()) {
-				for (ServerPlayer serverPlayer : Lists.newArrayList(playerList.getPlayers())) {
-					if (!userWhiteList.isWhiteListed(serverPlayer.getGameProfile())) {
-						serverPlayer.connection.disconnect(new TranslatableComponent("multiplayer.disconnect.not_whitelisted"));
-					}
+
+			for (ServerPlayer serverPlayer : Lists.newArrayList(playerList.getPlayers())) {
+				if (!userWhiteList.isWhiteListed(serverPlayer.getGameProfile())) {
+					serverPlayer.connection.disconnect(new TranslatableComponent("multiplayer.disconnect.not_whitelisted"));
 				}
 			}
 		}
 	}
 
-	public PackRepository<UnopenedPack> getPackRepository() {
+	public PackRepository<Pack> getPackRepository() {
 		return this.packRepository;
 	}
 

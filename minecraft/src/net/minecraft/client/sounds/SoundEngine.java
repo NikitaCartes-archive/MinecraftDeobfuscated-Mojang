@@ -181,7 +181,7 @@ public class SoundEngine {
 			} else {
 				float f = this.calculateVolume(tickableSoundInstance);
 				float g = this.calculatePitch(tickableSoundInstance);
-				Vec3 vec3 = new Vec3((double)tickableSoundInstance.getX(), (double)tickableSoundInstance.getY(), (double)tickableSoundInstance.getZ());
+				Vec3 vec3 = new Vec3(tickableSoundInstance.getX(), tickableSoundInstance.getY(), tickableSoundInstance.getZ());
 				ChannelAccess.ChannelHandle channelHandle = (ChannelAccess.ChannelHandle)this.instanceToChannel.get(tickableSoundInstance);
 				if (channelHandle != null) {
 					channelHandle.execute(channel -> {
@@ -290,7 +290,7 @@ public class SoundEngine {
 						if (h == 0.0F && !soundInstance.canStartSilent()) {
 							LOGGER.debug(MARKER, "Skipped playing sound {}, volume was zero.", sound.getLocation());
 						} else {
-							Vec3 vec3 = new Vec3((double)soundInstance.getX(), (double)soundInstance.getY(), (double)soundInstance.getZ());
+							Vec3 vec3 = new Vec3(soundInstance.getX(), soundInstance.getY(), soundInstance.getZ());
 							if (!this.listeners.isEmpty()) {
 								boolean bl2 = bl || attenuation == SoundInstance.Attenuation.NONE || this.listener.getListenerPosition().distanceToSqr(vec3) < (double)(g * g);
 								if (bl2) {

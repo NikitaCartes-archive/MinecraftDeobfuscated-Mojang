@@ -1,29 +1,21 @@
 package net.minecraft.world.level.dimension;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Either;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.io.File;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.Map.Entry;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import java.util.function.Supplier;
+import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -38,9 +30,9 @@ import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 
 public class DimensionType {
-	public static final Codec<ResourceKey<DimensionType>> RESOURCE_KEY_CODEC = ResourceLocation.CODEC
+	private static final Codec<ResourceKey<DimensionType>> RESOURCE_KEY_CODEC = ResourceLocation.CODEC
 		.xmap(ResourceKey.elementKey(Registry.DIMENSION_TYPE_REGISTRY), ResourceKey::location);
-	private static final Codec<DimensionType> DIRECT_CODEC = RecordCodecBuilder.create(
+	public static final Codec<DimensionType> DIRECT_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					Codec.LONG
 						.optionalFieldOf("fixed_time")
@@ -62,9 +54,17 @@ public class DimensionType {
 	public static final ResourceKey<DimensionType> OVERWORLD_LOCATION = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, new ResourceLocation("overworld"));
 	public static final ResourceKey<DimensionType> NETHER_LOCATION = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, new ResourceLocation("the_nether"));
 	public static final ResourceKey<DimensionType> END_LOCATION = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, new ResourceLocation("the_end"));
-	private static final LinkedHashSet<ResourceKey<Level>> BUILTIN_ORDER = Sets.newLinkedHashSet(ImmutableList.of(Level.OVERWORLD, Level.NETHER, Level.END));
+	private static final DimensionType DEFAULT_OVERWORLD = new DimensionType(
+		"", OptionalLong.empty(), true, false, false, true, false, false, FuzzyOffsetConstantColumnBiomeZoomer.INSTANCE, Optional.of(OVERWORLD_LOCATION), 0.0F
+	);
+	private static final DimensionType DEFAULT_NETHER = new DimensionType(
+		"_nether", OptionalLong.of(18000L), false, true, true, false, true, false, FuzzyOffsetBiomeZoomer.INSTANCE, Optional.of(NETHER_LOCATION), 0.1F
+	);
+	private static final DimensionType DEFAULT_END = new DimensionType(
+		"_end", OptionalLong.of(6000L), false, false, false, false, false, true, FuzzyOffsetBiomeZoomer.INSTANCE, Optional.of(END_LOCATION), 0.0F
+	);
 	private static final Map<ResourceKey<DimensionType>, DimensionType> BUILTIN = ImmutableMap.of(
-		OVERWORLD_LOCATION, makeDefaultOverworld(), NETHER_LOCATION, makeDefaultNether(), END_LOCATION, makeDefaultEnd()
+		OVERWORLD_LOCATION, defaultOverworld(), NETHER_LOCATION, DEFAULT_NETHER, END_LOCATION, DEFAULT_END
 	);
 	private static final Codec<DimensionType> BUILTIN_CODEC = RESOURCE_KEY_CODEC.<DimensionType>flatXmap(
 			resourceKey -> (DataResult)Optional.ofNullable(BUILTIN.get(resourceKey))
@@ -75,13 +75,14 @@ public class DimensionType {
 					.orElseGet(() -> DataResult.error("Unknown builtin dimension: " + dimensionType))
 		)
 		.stable();
-	public static final Codec<DimensionType> CODEC = Codec.either(BUILTIN_CODEC, DIRECT_CODEC)
+	private static final Codec<DimensionType> BUILTIN_OR_DIRECT_CODEC = Codec.either(BUILTIN_CODEC, DIRECT_CODEC)
 		.flatXmap(
 			either -> either.map(dimensionType -> DataResult.success(dimensionType, Lifecycle.stable()), DataResult::success),
 			dimensionType -> dimensionType.builtinKey.isPresent()
 					? DataResult.success(Either.left(dimensionType), Lifecycle.stable())
 					: DataResult.success(Either.right(dimensionType))
 		);
+	public static final Codec<Supplier<DimensionType>> CODEC = RegistryFileCodec.create(Registry.DIMENSION_TYPE_REGISTRY, BUILTIN_OR_DIRECT_CODEC);
 	private final String fileSuffix;
 	private final OptionalLong fixedTime;
 	private final boolean hasSkylight;
@@ -95,22 +96,8 @@ public class DimensionType {
 	private final float ambientLight;
 	private final transient float[] brightnessRamp;
 
-	public static DimensionType makeDefaultOverworld() {
-		return new DimensionType(
-			"", OptionalLong.empty(), true, false, false, true, false, false, FuzzyOffsetConstantColumnBiomeZoomer.INSTANCE, Optional.of(OVERWORLD_LOCATION), 0.0F
-		);
-	}
-
-	private static DimensionType makeDefaultNether() {
-		return new DimensionType(
-			"_nether", OptionalLong.of(18000L), false, true, true, false, true, false, FuzzyOffsetBiomeZoomer.INSTANCE, Optional.of(NETHER_LOCATION), 0.1F
-		);
-	}
-
-	private static DimensionType makeDefaultEnd() {
-		return new DimensionType(
-			"_end", OptionalLong.of(6000L), false, false, false, false, false, true, FuzzyOffsetBiomeZoomer.INSTANCE, Optional.of(END_LOCATION), 0.0F
-		);
+	public static DimensionType defaultOverworld() {
+		return DEFAULT_OVERWORLD;
 	}
 
 	protected DimensionType(OptionalLong optionalLong, boolean bl, boolean bl2, boolean bl3, boolean bl4, boolean bl5, float f) {
@@ -168,11 +155,10 @@ public class DimensionType {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static RegistryAccess.RegistryHolder registerBuiltin(RegistryAccess.RegistryHolder registryHolder) {
-		registryHolder.registerDimension(OVERWORLD_LOCATION, makeDefaultOverworld());
-		registryHolder.registerDimension(NETHER_LOCATION, makeDefaultNether());
-		registryHolder.registerDimension(END_LOCATION, makeDefaultEnd());
+		registryHolder.registerDimension(OVERWORLD_LOCATION, defaultOverworld());
+		registryHolder.registerDimension(NETHER_LOCATION, DEFAULT_NETHER);
+		registryHolder.registerDimension(END_LOCATION, DEFAULT_END);
 		return registryHolder;
 	}
 
@@ -184,54 +170,11 @@ public class DimensionType {
 		return new NoiseBasedChunkGenerator(MultiNoiseBiomeSource.Preset.NETHER.biomeSource(l), l, NoiseGeneratorSettings.Preset.NETHER.settings());
 	}
 
-	public static LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> defaultDimensions(long l) {
-		LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> linkedHashMap = Maps.newLinkedHashMap();
-		linkedHashMap.put(Level.NETHER, Pair.of(makeDefaultNether(), defaultNetherGenerator(l)));
-		linkedHashMap.put(Level.END, Pair.of(makeDefaultEnd(), defaultEndGenerator(l)));
-		return linkedHashMap;
-	}
-
-	public static boolean stable(long l, LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> linkedHashMap) {
-		List<Entry<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>>> list = Lists.<Entry<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>>>newArrayList(
-			linkedHashMap.entrySet()
-		);
-		if (list.size() != 3) {
-			return false;
-		} else {
-			Entry<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> entry = (Entry<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>>)list.get(0);
-			Entry<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> entry2 = (Entry<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>>)list.get(1);
-			Entry<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> entry3 = (Entry<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>>)list.get(2);
-			if (entry.getKey() != Level.OVERWORLD || entry2.getKey() != Level.NETHER || entry3.getKey() != Level.END) {
-				return false;
-			} else if (!((DimensionType)((Pair)entry.getValue()).getFirst()).isOverworld()
-				|| !((DimensionType)((Pair)entry2.getValue()).getFirst()).isNether()
-				|| !((DimensionType)((Pair)entry3.getValue()).getFirst()).isEnd()) {
-				return false;
-			} else if (((Pair)entry2.getValue()).getSecond() instanceof NoiseBasedChunkGenerator
-				&& ((Pair)entry3.getValue()).getSecond() instanceof NoiseBasedChunkGenerator) {
-				NoiseBasedChunkGenerator noiseBasedChunkGenerator = (NoiseBasedChunkGenerator)((Pair)entry2.getValue()).getSecond();
-				NoiseBasedChunkGenerator noiseBasedChunkGenerator2 = (NoiseBasedChunkGenerator)((Pair)entry3.getValue()).getSecond();
-				if (!noiseBasedChunkGenerator.stable(l, NoiseGeneratorSettings.Preset.NETHER)) {
-					return false;
-				} else if (!noiseBasedChunkGenerator2.stable(l, NoiseGeneratorSettings.Preset.END)) {
-					return false;
-				} else if (!(noiseBasedChunkGenerator.getBiomeSource() instanceof MultiNoiseBiomeSource)) {
-					return false;
-				} else {
-					MultiNoiseBiomeSource multiNoiseBiomeSource = (MultiNoiseBiomeSource)noiseBasedChunkGenerator.getBiomeSource();
-					if (!multiNoiseBiomeSource.stable(l)) {
-						return false;
-					} else if (!(noiseBasedChunkGenerator2.getBiomeSource() instanceof TheEndBiomeSource)) {
-						return false;
-					} else {
-						TheEndBiomeSource theEndBiomeSource = (TheEndBiomeSource)noiseBasedChunkGenerator2.getBiomeSource();
-						return theEndBiomeSource.stable(l);
-					}
-				}
-			} else {
-				return false;
-			}
-		}
+	public static MappedRegistry<LevelStem> defaultDimensions(long l) {
+		MappedRegistry<LevelStem> mappedRegistry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental());
+		mappedRegistry.register(LevelStem.NETHER, new LevelStem(() -> DEFAULT_NETHER, defaultNetherGenerator(l)));
+		mappedRegistry.register(LevelStem.END, new LevelStem(() -> DEFAULT_END, defaultEndGenerator(l)));
+		return mappedRegistry;
 	}
 
 	public String getFileSuffix() {
@@ -302,24 +245,5 @@ public class DimensionType {
 
 	public boolean isEnd() {
 		return this.builtinKey.equals(Optional.of(END_LOCATION));
-	}
-
-	public static LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> sortMap(Map<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> map) {
-		LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> linkedHashMap = Maps.newLinkedHashMap();
-
-		for (ResourceKey<Level> resourceKey : BUILTIN_ORDER) {
-			Pair<DimensionType, ChunkGenerator> pair = (Pair<DimensionType, ChunkGenerator>)map.get(resourceKey);
-			if (pair != null) {
-				linkedHashMap.put(resourceKey, pair);
-			}
-		}
-
-		for (Entry<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> entry : map.entrySet()) {
-			if (!BUILTIN_ORDER.contains(entry.getKey())) {
-				linkedHashMap.put(entry.getKey(), entry.getValue());
-			}
-		}
-
-		return linkedHashMap;
 	}
 }

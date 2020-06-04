@@ -23,6 +23,14 @@ public class IntRange {
 		return this.minInclusive == this.maxInclusive ? this.minInclusive : random.nextInt(this.maxInclusive - this.minInclusive + 1) + this.minInclusive;
 	}
 
+	public int getMinInclusive() {
+		return this.minInclusive;
+	}
+
+	public int getMaxInclusive() {
+		return this.maxInclusive;
+	}
+
 	public String toString() {
 		return "IntRange[" + this.minInclusive + "-" + this.maxInclusive + "]";
 	}

@@ -114,7 +114,7 @@ public class FollowOwnerGoal extends Goal {
 		} else if (!this.canTeleportTo(new BlockPos(i, j, k))) {
 			return false;
 		} else {
-			this.tamable.moveTo((double)((float)i + 0.5F), (double)j, (double)((float)k + 0.5F), this.tamable.yRot, this.tamable.xRot);
+			this.tamable.moveTo((double)i + 0.5, (double)j, (double)k + 0.5, this.tamable.yRot, this.tamable.xRot);
 			this.navigation.stop();
 			return true;
 		}

@@ -11,13 +11,13 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.VanillaPack;
+import net.minecraft.server.packs.VanillaPackResources;
 
 @Environment(EnvType.CLIENT)
-public class DefaultClientResourcePack extends VanillaPack {
+public class DefaultClientPackResources extends VanillaPackResources {
 	private final AssetIndex assetIndex;
 
-	public DefaultClientResourcePack(AssetIndex assetIndex) {
+	public DefaultClientPackResources(AssetIndex assetIndex) {
 		super("minecraft", "realms");
 		this.assetIndex = assetIndex;
 	}

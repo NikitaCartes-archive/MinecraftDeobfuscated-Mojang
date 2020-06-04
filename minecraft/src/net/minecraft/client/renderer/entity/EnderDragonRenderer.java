@@ -49,7 +49,7 @@ public class EnderDragonRenderer extends EntityRenderer<EnderDragon> {
 		this.model.prepareMobModel(enderDragon, 0.0F, 0.0F, g);
 		if (enderDragon.dragonDeathTime > 0) {
 			float k = (float)enderDragon.dragonDeathTime / 200.0F;
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityAlpha(DRAGON_EXPLODING_LOCATION, k));
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.dragonExplosionAlpha(DRAGON_EXPLODING_LOCATION, k));
 			this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 			VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(DECAL);
 			this.model.renderToBuffer(poseStack, vertexConsumer2, i, OverlayTexture.pack(0.0F, bl), 1.0F, 1.0F, 1.0F, 1.0F);

@@ -11,6 +11,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -77,16 +78,17 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 	}
 
 	@Override
+	public boolean isSensitiveToWater() {
+		return true;
+	}
+
+	@Override
 	public void aiStep() {
 		super.aiStep();
 		if (!this.level.isClientSide) {
 			int i = Mth.floor(this.getX());
 			int j = Mth.floor(this.getY());
 			int k = Mth.floor(this.getZ());
-			if (this.isInWaterRainOrBubble()) {
-				this.hurt(DamageSource.DROWN, 1.0F);
-			}
-
 			if (this.level.getBiome(new BlockPos(i, 0, k)).getTemperature(new BlockPos(i, j, k)) > 1.0F) {
 				this.hurt(DamageSource.ON_FIRE, 1.0F);
 			}
@@ -130,7 +132,7 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 	}
 
 	@Override
-	protected boolean mobInteract(Player player, InteractionHand interactionHand) {
+	protected InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (itemStack.getItem() == Items.SHEARS && this.readyForShearing()) {
 			this.shear(SoundSource.PLAYERS);
@@ -138,9 +140,9 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
 			}
 
-			return true;
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		} else {
-			return false;
+			return InteractionResult.PASS;
 		}
 	}
 

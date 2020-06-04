@@ -13,6 +13,7 @@ public interface RecipeType<T extends Recipe<?>> {
 	RecipeType<SmokingRecipe> SMOKING = register("smoking");
 	RecipeType<CampfireCookingRecipe> CAMPFIRE_COOKING = register("campfire_cooking");
 	RecipeType<StonecutterRecipe> STONECUTTING = register("stonecutting");
+	RecipeType<UpgradeRecipe> SMITHING = register("smithing");
 
 	static <T extends Recipe<?>> RecipeType<T> register(String string) {
 		return Registry.register(Registry.RECIPE_TYPE, new ResourceLocation(string), new RecipeType<T>() {

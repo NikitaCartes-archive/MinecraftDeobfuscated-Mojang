@@ -15,6 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.AnimalMakeLove;
+import net.minecraft.world.entity.ai.behavior.BabyFollowAdult;
 import net.minecraft.world.entity.ai.behavior.BecomePassiveIfMemoryPresent;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
@@ -38,6 +39,7 @@ import net.minecraft.world.entity.schedule.Activity;
 
 public class HoglinAi {
 	private static final IntRange RETREAT_DURATION = TimeUtil.rangeOfSeconds(5, 20);
+	private static final IntRange ADULT_FOLLOW_RANGE = IntRange.of(5, 16);
 
 	protected static Brain<?> makeBrain(Brain<Hoglin> brain) {
 		initCoreActivity(brain);
@@ -67,6 +69,7 @@ public class HoglinAi {
 					Hoglin::isAdult, (Behavior<? super PathfinderMob>)SetWalkTargetAwayFrom.entity(MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLIN, 0.4F, 8, false)
 				),
 				new RunSometimes<LivingEntity>(new SetEntityLookTarget(8.0F), IntRange.of(30, 60)),
+				new BabyFollowAdult(ADULT_FOLLOW_RANGE, 0.6F),
 				createIdleMovementBehaviors()
 			)
 		);
@@ -94,7 +97,7 @@ public class HoglinAi {
 			Activity.AVOID,
 			10,
 			ImmutableList.of(
-				SetWalkTargetAwayFrom.entity(MemoryModuleType.AVOID_TARGET, 1.0F, 15, false),
+				SetWalkTargetAwayFrom.entity(MemoryModuleType.AVOID_TARGET, 1.3F, 15, false),
 				createIdleMovementBehaviors(),
 				new RunSometimes<LivingEntity>(new SetEntityLookTarget(8.0F), IntRange.of(30, 60)),
 				new EraseMemoryIf(HoglinAi::wantsToStopFleeing, MemoryModuleType.AVOID_TARGET)
@@ -145,6 +148,7 @@ public class HoglinAi {
 
 	private static void setAvoidTarget(Hoglin hoglin, LivingEntity livingEntity) {
 		hoglin.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
+		hoglin.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
 		hoglin.getBrain().setMemoryWithExpiry(MemoryModuleType.AVOID_TARGET, livingEntity, (long)RETREAT_DURATION.randomValue(hoglin.level.random));
 	}
 
@@ -207,9 +211,11 @@ public class HoglinAi {
 	}
 
 	private static void setAttackTargetIfCloserThanCurrent(Hoglin hoglin, LivingEntity livingEntity) {
-		Optional<LivingEntity> optional = hoglin.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET);
-		LivingEntity livingEntity2 = BehaviorUtils.getNearestTarget(hoglin, optional, livingEntity);
-		setAttackTarget(hoglin, livingEntity2);
+		if (!isPacified(hoglin)) {
+			Optional<LivingEntity> optional = hoglin.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET);
+			LivingEntity livingEntity2 = BehaviorUtils.getNearestTarget(hoglin, optional, livingEntity);
+			setAttackTarget(hoglin, livingEntity2);
+		}
 	}
 
 	private static void playActivitySound(Hoglin hoglin) {

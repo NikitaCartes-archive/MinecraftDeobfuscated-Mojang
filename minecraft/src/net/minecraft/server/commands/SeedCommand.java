@@ -12,10 +12,10 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
 public class SeedCommand {
-	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, boolean bl) {
 		commandDispatcher.register(
 			Commands.literal("seed")
-				.requires(commandSourceStack -> commandSourceStack.getServer().isSingleplayer() || commandSourceStack.hasPermission(2))
+				.requires(commandSourceStack -> !bl || commandSourceStack.hasPermission(2))
 				.executes(
 					commandContext -> {
 						long l = commandContext.getSource().getLevel().getSeed();

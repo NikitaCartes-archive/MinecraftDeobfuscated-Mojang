@@ -152,14 +152,14 @@ public class DetectorRailBlock extends BaseRailBlock {
 	}
 
 	private AABB getSearchBB(BlockPos blockPos) {
-		float f = 0.2F;
+		double d = 0.2;
 		return new AABB(
-			(double)((float)blockPos.getX() + 0.2F),
+			(double)blockPos.getX() + 0.2,
 			(double)blockPos.getY(),
-			(double)((float)blockPos.getZ() + 0.2F),
-			(double)((float)(blockPos.getX() + 1) - 0.2F),
-			(double)((float)(blockPos.getY() + 1) - 0.2F),
-			(double)((float)(blockPos.getZ() + 1) - 0.2F)
+			(double)blockPos.getZ() + 0.2,
+			(double)(blockPos.getX() + 1) - 0.2,
+			(double)(blockPos.getY() + 1) - 0.2,
+			(double)(blockPos.getZ() + 1) - 0.2
 		);
 	}
 

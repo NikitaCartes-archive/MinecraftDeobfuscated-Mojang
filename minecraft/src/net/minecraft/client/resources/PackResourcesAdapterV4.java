@@ -18,13 +18,13 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.Pack;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.world.level.block.state.properties.ChestType;
 
 @Environment(EnvType.CLIENT)
-public class PackAdapterV4 implements Pack {
+public class PackResourcesAdapterV4 implements PackResources {
 	private static final Map<String, Pair<ChestType, ResourceLocation>> CHESTS = Util.make(
 		Maps.<String, Pair<ChestType, ResourceLocation>>newHashMap(), hashMap -> {
 			hashMap.put("textures/entity/chest/normal_left.png", new Pair<>(ChestType.LEFT, new ResourceLocation("textures/entity/chest/normal_double.png")));
@@ -90,10 +90,10 @@ public class PackAdapterV4 implements Pack {
 	public static final ResourceLocation SHIELD_BASE = new ResourceLocation("textures/entity/shield_base.png");
 	public static final ResourceLocation BANNER_BASE = new ResourceLocation("textures/entity/banner_base.png");
 	public static final ResourceLocation OLD_IRON_GOLEM_LOCATION = new ResourceLocation("textures/entity/iron_golem.png");
-	private final Pack pack;
+	private final PackResources pack;
 
-	public PackAdapterV4(Pack pack) {
-		this.pack = pack;
+	public PackResourcesAdapterV4(PackResources packResources) {
+		this.pack = packResources;
 	}
 
 	@Override
@@ -348,7 +348,8 @@ public class PackAdapterV4 implements Pack {
 		return this.pack.getName();
 	}
 
-	public void close() throws IOException {
+	@Override
+	public void close() {
 		this.pack.close();
 	}
 

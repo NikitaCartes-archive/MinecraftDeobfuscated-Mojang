@@ -13,6 +13,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -88,9 +89,9 @@ public class LeashFenceKnotEntity extends HangingEntity {
 	}
 
 	@Override
-	public boolean interact(Player player, InteractionHand interactionHand) {
+	public InteractionResult interact(Player player, InteractionHand interactionHand) {
 		if (this.level.isClientSide) {
-			return true;
+			return InteractionResult.SUCCESS;
 		} else {
 			boolean bl = false;
 			double d = 7.0;
@@ -115,7 +116,7 @@ public class LeashFenceKnotEntity extends HangingEntity {
 				}
 			}
 
-			return true;
+			return InteractionResult.CONSUME;
 		}
 	}
 

@@ -21,6 +21,6 @@ public class RememberIfHoglinWasKilled<E extends Piglin> extends Behavior<E> {
 
 	private boolean isAttackTargetDeadHoglin(E piglin) {
 		LivingEntity livingEntity = (LivingEntity)piglin.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get();
-		return livingEntity.getType() == EntityType.HOGLIN && livingEntity.getHealth() <= 0.0F;
+		return livingEntity.getType() == EntityType.HOGLIN && livingEntity.isDeadOrDying();
 	}
 }

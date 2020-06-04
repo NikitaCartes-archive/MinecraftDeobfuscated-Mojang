@@ -484,6 +484,7 @@ public class LootCommand {
 		LootContext lootContext = new LootContext.Builder(commandSourceStack.getLevel())
 			.withParameter(LootContextParams.BLOCK_POS, blockPos)
 			.withParameter(LootContextParams.TOOL, itemStack)
+			.withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity())
 			.create(LootContextParamSets.FISHING);
 		return drop(commandContext, resourceLocation, lootContext, dropConsumer);
 	}

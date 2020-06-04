@@ -111,14 +111,13 @@ public class SubtitleOverlay extends GuiComponent implements SoundEventListener 
 			if (!this.subtitles.isEmpty()) {
 				for (SubtitleOverlay.Subtitle subtitle : this.subtitles) {
 					if (subtitle.getText().equals(component)) {
-						subtitle.refresh(new Vec3((double)soundInstance.getX(), (double)soundInstance.getY(), (double)soundInstance.getZ()));
+						subtitle.refresh(new Vec3(soundInstance.getX(), soundInstance.getY(), soundInstance.getZ()));
 						return;
 					}
 				}
 			}
 
-			this.subtitles
-				.add(new SubtitleOverlay.Subtitle(component, new Vec3((double)soundInstance.getX(), (double)soundInstance.getY(), (double)soundInstance.getZ())));
+			this.subtitles.add(new SubtitleOverlay.Subtitle(component, new Vec3(soundInstance.getX(), soundInstance.getY(), soundInstance.getZ())));
 		}
 	}
 

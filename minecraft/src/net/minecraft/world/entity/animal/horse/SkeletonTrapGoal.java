@@ -1,12 +1,11 @@
 package net.minecraft.world.entity.animal.horse;
 
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -30,7 +29,10 @@ public class SkeletonTrapGoal extends Goal {
 		this.horse.setTrap(false);
 		this.horse.setTamed(true);
 		this.horse.setAge(0);
-		((ServerLevel)this.horse.level).addGlobalEntity(new LightningBolt(this.horse.level, this.horse.getX(), this.horse.getY(), this.horse.getZ(), true));
+		LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(this.horse.level);
+		lightningBolt.moveTo(this.horse.getX(), this.horse.getY(), this.horse.getZ());
+		lightningBolt.setVisualOnly(true);
+		this.horse.level.addFreshEntity(lightningBolt);
 		Skeleton skeleton = this.createSkeleton(difficultyInstance, this.horse);
 		skeleton.startRiding(this.horse);
 

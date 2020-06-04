@@ -13,8 +13,11 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.IntRange;
 import net.minecraft.util.Mth;
+import net.minecraft.util.TimeUtil;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
@@ -22,6 +25,7 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -54,14 +58,14 @@ import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public class Wolf extends TamableAnimal {
+public class Wolf extends TamableAnimal implements NeutralMob {
 	private static final EntityDataAccessor<Boolean> DATA_INTERESTED_ID = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.INT);
 	public static final Predicate<LivingEntity> PREY_SELECTOR = livingEntity -> {
 		EntityType<?> entityType = livingEntity.getType();
 		return entityType == EntityType.SHEEP || entityType == EntityType.RABBIT || entityType == EntityType.FOX;
@@ -72,6 +76,8 @@ public class Wolf extends TamableAnimal {
 	private boolean isShaking;
 	private float shakeAnim;
 	private float shakeAnimO;
+	private static final IntRange PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+	private UUID persistentAngerTarget;
 
 	public Wolf(EntityType<? extends Wolf> entityType, Level level) {
 		super(entityType, level);
@@ -94,9 +100,10 @@ public class Wolf extends TamableAnimal {
 		this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
 		this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
 		this.targetSelector.addGoal(3, new HurtByTargetGoal(this).setAlertOthers());
-		this.targetSelector.addGoal(4, new NonTameRandomTargetGoal(this, Animal.class, false, PREY_SELECTOR));
-		this.targetSelector.addGoal(4, new NonTameRandomTargetGoal(this, Turtle.class, false, Turtle.BABY_ON_LAND_SELECTOR));
-		this.targetSelector.addGoal(5, new NearestAttackableTargetGoal(this, AbstractSkeleton.class, false));
+		this.targetSelector.addGoal(4, new NearestAttackableTargetGoal(this, Player.class, 10, true, false, this::isAngryAt));
+		this.targetSelector.addGoal(5, new NonTameRandomTargetGoal(this, Animal.class, false, PREY_SELECTOR));
+		this.targetSelector.addGoal(6, new NonTameRandomTargetGoal(this, Turtle.class, false, Turtle.BABY_ON_LAND_SELECTOR));
+		this.targetSelector.addGoal(7, new NearestAttackableTargetGoal(this, AbstractSkeleton.class, false));
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -104,20 +111,11 @@ public class Wolf extends TamableAnimal {
 	}
 
 	@Override
-	public void setTarget(@Nullable LivingEntity livingEntity) {
-		super.setTarget(livingEntity);
-		if (livingEntity == null) {
-			this.setAngry(false);
-		} else if (!this.isTame()) {
-			this.setAngry(true);
-		}
-	}
-
-	@Override
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		this.entityData.define(DATA_INTERESTED_ID, false);
 		this.entityData.define(DATA_COLLAR_COLOR, DyeColor.RED.getId());
+		this.entityData.define(DATA_REMAINING_ANGER_TIME, 0);
 	}
 
 	@Override
@@ -128,17 +126,18 @@ public class Wolf extends TamableAnimal {
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		compoundTag.putBoolean("Angry", this.isAngry());
 		compoundTag.putByte("CollarColor", (byte)this.getCollarColor().getId());
+		this.addPersistentAngerSaveData(compoundTag);
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		this.setAngry(compoundTag.getBoolean("Angry"));
 		if (compoundTag.contains("CollarColor", 99)) {
 			this.setCollarColor(DyeColor.byId(compoundTag.getInt("CollarColor")));
 		}
+
+		this.readPersistentAngerSaveData(this.level, compoundTag);
 	}
 
 	@Override
@@ -177,8 +176,8 @@ public class Wolf extends TamableAnimal {
 			this.level.broadcastEntityEvent(this, (byte)8);
 		}
 
-		if (!this.level.isClientSide && this.getTarget() == null && this.isAngry()) {
-			this.setAngry(false);
+		if (!this.level.isClientSide) {
+			this.updatePersistentAnger();
 		}
 	}
 
@@ -312,13 +311,12 @@ public class Wolf extends TamableAnimal {
 	}
 
 	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		Item item = itemStack.getItem();
-		if (itemStack.getItem() instanceof SpawnEggItem) {
-			return super.mobInteract(player, interactionHand);
-		} else if (this.level.isClientSide) {
-			return this.isOwnedBy(player) || item == Items.BONE && !this.isTame() && !this.isAngry();
+		if (this.level.isClientSide) {
+			boolean bl = this.isOwnedBy(player) || this.isTame() || item == Items.BONE && !this.isTame() && !this.isAngry();
+			return bl ? InteractionResult.CONSUME : InteractionResult.PASS;
 		} else {
 			if (this.isTame()) {
 				if (this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
@@ -327,19 +325,20 @@ public class Wolf extends TamableAnimal {
 					}
 
 					this.heal((float)item.getFoodProperties().getNutrition());
-					return true;
+					return InteractionResult.SUCCESS;
 				}
 
 				if (!(item instanceof DyeItem)) {
-					boolean bl = super.mobInteract(player, interactionHand);
-					if ((!bl || this.isBaby()) && this.isOwnedBy(player) && !this.isFood(itemStack)) {
+					InteractionResult interactionResult = super.mobInteract(player, interactionHand);
+					if ((!interactionResult.consumesAction() || this.isBaby()) && this.isOwnedBy(player)) {
 						this.setOrderedToSit(!this.isOrderedToSit());
 						this.jumping = false;
 						this.navigation.stop();
 						this.setTarget(null);
+						return InteractionResult.SUCCESS;
 					}
 
-					return bl;
+					return interactionResult;
 				}
 
 				DyeColor dyeColor = ((DyeItem)item).getDyeColor();
@@ -349,7 +348,7 @@ public class Wolf extends TamableAnimal {
 						itemStack.shrink(1);
 					}
 
-					return true;
+					return InteractionResult.SUCCESS;
 				}
 			} else if (item == Items.BONE && !this.isAngry()) {
 				if (!player.abilities.instabuild) {
@@ -366,7 +365,7 @@ public class Wolf extends TamableAnimal {
 					this.level.broadcastEntityEvent(this, (byte)6);
 				}
 
-				return true;
+				return InteractionResult.SUCCESS;
 			}
 
 			return super.mobInteract(player, interactionHand);
@@ -405,17 +404,30 @@ public class Wolf extends TamableAnimal {
 		return 8;
 	}
 
-	public boolean isAngry() {
-		return (this.entityData.get(DATA_FLAGS_ID) & 2) != 0;
+	@Override
+	public int getRemainingPersistentAngerTime() {
+		return this.entityData.get(DATA_REMAINING_ANGER_TIME);
 	}
 
-	public void setAngry(boolean bl) {
-		byte b = this.entityData.get(DATA_FLAGS_ID);
-		if (bl) {
-			this.entityData.set(DATA_FLAGS_ID, (byte)(b | 2));
-		} else {
-			this.entityData.set(DATA_FLAGS_ID, (byte)(b & -3));
-		}
+	@Override
+	public void setRemainingPersistentAngerTime(int i) {
+		this.entityData.set(DATA_REMAINING_ANGER_TIME, i);
+	}
+
+	@Override
+	public void startPersistentAngerTimer() {
+		this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.randomValue(this.random));
+	}
+
+	@Nullable
+	@Override
+	public UUID getPersistentAngerTarget() {
+		return this.persistentAngerTarget;
+	}
+
+	@Override
+	public void setPersistentAngerTarget(@Nullable UUID uUID) {
+		this.persistentAngerTarget = uUID;
 	}
 
 	public DyeColor getCollarColor() {

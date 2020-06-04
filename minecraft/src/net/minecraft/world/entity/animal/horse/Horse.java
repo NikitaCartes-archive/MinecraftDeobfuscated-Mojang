@@ -12,6 +12,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Container;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.EntityType;
@@ -25,7 +26,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.HorseArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.SoundType;
@@ -175,54 +175,51 @@ public class Horse extends AbstractHorse {
 	}
 
 	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		boolean bl = !itemStack.isEmpty();
-		if (bl && itemStack.getItem() instanceof SpawnEggItem) {
+		if (!this.isBaby()) {
+			if (this.isTamed() && player.isSecondaryUseActive()) {
+				this.openInventory(player);
+				return InteractionResult.sidedSuccess(this.level.isClientSide);
+			}
+
+			if (this.isVehicle()) {
+				return super.mobInteract(player, interactionHand);
+			}
+		}
+
+		if (!itemStack.isEmpty()) {
+			if (this.isFood(itemStack)) {
+				boolean bl = this.handleEating(player, itemStack);
+				if (!player.abilities.instabuild) {
+					itemStack.shrink(1);
+				}
+
+				return bl ? InteractionResult.sidedSuccess(this.level.isClientSide) : InteractionResult.CONSUME;
+			}
+
+			InteractionResult interactionResult = itemStack.interactLivingEntity(player, this, interactionHand);
+			if (interactionResult.consumesAction()) {
+				return interactionResult;
+			}
+
+			if (!this.isTamed()) {
+				this.makeMad();
+				return InteractionResult.sidedSuccess(this.level.isClientSide);
+			}
+
+			boolean bl2 = !this.isBaby() && !this.isSaddled() && itemStack.getItem() == Items.SADDLE;
+			if (this.isArmor(itemStack) || bl2) {
+				this.openInventory(player);
+				return InteractionResult.sidedSuccess(this.level.isClientSide);
+			}
+		}
+
+		if (this.isBaby()) {
 			return super.mobInteract(player, interactionHand);
 		} else {
-			if (!this.isBaby()) {
-				if (this.isTamed() && player.isSecondaryUseActive()) {
-					this.openInventory(player);
-					return true;
-				}
-
-				if (this.isVehicle()) {
-					return super.mobInteract(player, interactionHand);
-				}
-			}
-
-			if (bl) {
-				if (this.handleEating(player, itemStack)) {
-					if (!player.abilities.instabuild) {
-						itemStack.shrink(1);
-					}
-
-					return true;
-				}
-
-				if (itemStack.interactEnemy(player, this, interactionHand)) {
-					return true;
-				}
-
-				if (!this.isTamed()) {
-					this.makeMad();
-					return true;
-				}
-
-				boolean bl2 = !this.isBaby() && !this.isSaddled() && itemStack.getItem() == Items.SADDLE;
-				if (this.isArmor(itemStack) || bl2) {
-					this.openInventory(player);
-					return true;
-				}
-			}
-
-			if (this.isBaby()) {
-				return super.mobInteract(player, interactionHand);
-			} else {
-				this.doPlayerRide(player);
-				return true;
-			}
+			this.doPlayerRide(player);
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		}
 	}
 

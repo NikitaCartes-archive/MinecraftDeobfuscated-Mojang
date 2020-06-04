@@ -44,13 +44,7 @@ public class WitherRoseBlock extends FlowerBlock {
 		for (int i = 0; i < 3; i++) {
 			if (random.nextBoolean()) {
 				level.addParticle(
-					ParticleTypes.SMOKE,
-					d + (double)(random.nextFloat() / 5.0F),
-					(double)blockPos.getY() + (0.5 - (double)random.nextFloat()),
-					e + (double)(random.nextFloat() / 5.0F),
-					0.0,
-					0.0,
-					0.0
+					ParticleTypes.SMOKE, d + random.nextDouble() / 5.0, (double)blockPos.getY() + (0.5 - random.nextDouble()), e + random.nextDouble() / 5.0, 0.0, 0.0, 0.0
 				);
 			}
 		}

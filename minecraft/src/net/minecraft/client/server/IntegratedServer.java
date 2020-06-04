@@ -16,12 +16,13 @@ import net.minecraft.CrashReportDetail;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerResources;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.server.packs.repository.UnopenedPack;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -42,9 +43,11 @@ public class IntegratedServer extends MinecraftServer {
 	private UUID uuid;
 
 	public IntegratedServer(
+		Thread thread,
 		Minecraft minecraft,
+		RegistryAccess.RegistryHolder registryHolder,
 		LevelStorageSource.LevelStorageAccess levelStorageAccess,
-		PackRepository<UnopenedPack> packRepository,
+		PackRepository<Pack> packRepository,
 		ServerResources serverResources,
 		WorldData worldData,
 		MinecraftSessionService minecraftSessionService,
@@ -53,6 +56,8 @@ public class IntegratedServer extends MinecraftServer {
 		ChunkProgressListenerFactory chunkProgressListenerFactory
 	) {
 		super(
+			thread,
+			registryHolder,
 			levelStorageAccess,
 			worldData,
 			packRepository,

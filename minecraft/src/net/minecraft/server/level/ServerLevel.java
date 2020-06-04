@@ -44,7 +44,6 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddGlobalEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
@@ -73,6 +72,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
@@ -86,7 +86,6 @@ import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.animal.horse.SkeletonHorse;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
-import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.npc.Npc;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raid;
@@ -96,6 +95,7 @@ import net.minecraft.world.level.BlockEventData;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -140,7 +140,6 @@ import org.apache.logging.log4j.Logger;
 public class ServerLevel extends Level implements WorldGenLevel {
 	public static final BlockPos END_SPAWN_POINT = new BlockPos(100, 50, 0);
 	private static final Logger LOGGER = LogManager.getLogger();
-	private final List<Entity> globalEntities = Lists.<Entity>newArrayList();
 	private final Int2ObjectMap<Entity> entitiesById = new Int2ObjectLinkedOpenHashMap<>();
 	private final Map<UUID, Entity> entitiesByUuid = Maps.<UUID, Entity>newHashMap();
 	private final Queue<Entity> toAddAfterTick = Queues.<Entity>newArrayDeque();
@@ -360,60 +359,46 @@ public class ServerLevel extends Level implements WorldGenLevel {
 				this.dragonFight.tick();
 			}
 
-			profilerFiller.push("global");
-
-			for (int j = 0; j < this.globalEntities.size(); j++) {
-				Entity entity = (Entity)this.globalEntities.get(j);
-				this.guardEntityTick(entityx -> {
-					entityx.tickCount++;
-					entityx.tick();
-				}, entity);
-				if (entity.removed) {
-					this.globalEntities.remove(j--);
-				}
-			}
-
-			profilerFiller.popPush("regular");
 			this.tickingEntities = true;
 			ObjectIterator<Entry<Entity>> objectIterator = this.entitiesById.int2ObjectEntrySet().iterator();
 
 			while (objectIterator.hasNext()) {
 				Entry<Entity> entry = (Entry<Entity>)objectIterator.next();
-				Entity entity2 = (Entity)entry.getValue();
-				Entity entity3 = entity2.getVehicle();
-				if (!this.server.isSpawningAnimals() && (entity2 instanceof Animal || entity2 instanceof WaterAnimal)) {
-					entity2.remove();
+				Entity entity = (Entity)entry.getValue();
+				Entity entity2 = entity.getVehicle();
+				if (!this.server.isSpawningAnimals() && (entity instanceof Animal || entity instanceof WaterAnimal)) {
+					entity.remove();
 				}
 
-				if (!this.server.areNpcsEnabled() && entity2 instanceof Npc) {
-					entity2.remove();
+				if (!this.server.areNpcsEnabled() && entity instanceof Npc) {
+					entity.remove();
 				}
 
 				profilerFiller.push("checkDespawn");
-				if (!entity2.removed) {
-					entity2.checkDespawn();
+				if (!entity.removed) {
+					entity.checkDespawn();
 				}
 
 				profilerFiller.pop();
-				if (entity3 != null) {
-					if (!entity3.removed && entity3.hasPassenger(entity2)) {
+				if (entity2 != null) {
+					if (!entity2.removed && entity2.hasPassenger(entity)) {
 						continue;
 					}
 
-					entity2.stopRiding();
+					entity.stopRiding();
 				}
 
 				profilerFiller.push("tick");
-				if (!entity2.removed && !(entity2 instanceof EnderDragonPart)) {
-					this.guardEntityTick(this::tickNonPassenger, entity2);
+				if (!entity.removed && !(entity instanceof EnderDragonPart)) {
+					this.guardEntityTick(this::tickNonPassenger, entity);
 				}
 
 				profilerFiller.pop();
 				profilerFiller.push("remove");
-				if (entity2.removed) {
-					this.removeFromChunk(entity2);
+				if (entity.removed) {
+					this.removeFromChunk(entity);
 					objectIterator.remove();
-					this.onEntityRemoved(entity2);
+					this.onEntityRemoved(entity);
 				}
 
 				profilerFiller.pop();
@@ -421,12 +406,11 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 			this.tickingEntities = false;
 
-			Entity entity;
-			while ((entity = (Entity)this.toAddAfterTick.poll()) != null) {
-				this.add(entity);
+			Entity entity3;
+			while ((entity3 = (Entity)this.toAddAfterTick.poll()) != null) {
+				this.add(entity3);
 			}
 
-			profilerFiller.pop();
 			this.tickBlockEntities();
 		}
 
@@ -480,7 +464,10 @@ public class ServerLevel extends Level implements WorldGenLevel {
 					this.addFreshEntity(skeletonHorse);
 				}
 
-				this.addGlobalEntity(new LightningBolt(this, (double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, bl2));
+				LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(this);
+				lightningBolt.moveTo(Vec3.atBottomCenterOf(blockPos));
+				lightningBolt.setVisualOnly(bl2);
+				this.addFreshEntity(lightningBolt);
 			}
 		}
 
@@ -919,15 +906,6 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		this.updateSleepingPlayerList();
 	}
 
-	public void addGlobalEntity(LightningBolt lightningBolt) {
-		this.globalEntities.add(lightningBolt);
-		this.server
-			.getPlayerList()
-			.broadcast(
-				null, lightningBolt.getX(), lightningBolt.getY(), lightningBolt.getZ(), 512.0, this.dimension(), new ClientboundAddGlobalEntityPacket(lightningBolt)
-			);
-	}
-
 	@Override
 	public void destroyBlockProgress(int i, BlockPos blockPos, int j) {
 		for (ServerPlayer serverPlayer : this.server.getPlayerList().getPlayers()) {
@@ -1009,13 +987,17 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 	@Override
 	public Explosion explode(
-		@Nullable Entity entity, @Nullable DamageSource damageSource, double d, double e, double f, float g, boolean bl, Explosion.BlockInteraction blockInteraction
+		@Nullable Entity entity,
+		@Nullable DamageSource damageSource,
+		@Nullable ExplosionDamageCalculator explosionDamageCalculator,
+		double d,
+		double e,
+		double f,
+		float g,
+		boolean bl,
+		Explosion.BlockInteraction blockInteraction
 	) {
-		Explosion explosion = new Explosion(this, entity, d, e, f, g, bl, blockInteraction);
-		if (damageSource != null) {
-			explosion.setDamageSource(damageSource);
-		}
-
+		Explosion explosion = new Explosion(this, entity, damageSource, explosionDamageCalculator, d, e, f, g, bl, blockInteraction);
 		explosion.explode();
 		explosion.finalizeExplosion(false);
 		if (blockInteraction == Explosion.BlockInteraction.NONE) {
@@ -1305,16 +1287,16 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			writer.write(String.format("fluid_ticks: %d\n", this.getLiquidTicks().size()));
 			writer.write("distance_manager: " + chunkMap.getDistanceManager().getDebugStatus() + "\n");
 			writer.write(String.format("pending_tasks: %d\n", this.getChunkSource().getPendingTasksCount()));
-		} catch (Throwable var165) {
-			path2 = var165;
-			throw var165;
+		} catch (Throwable var121) {
+			path2 = var121;
+			throw var121;
 		} finally {
 			if (writer != null) {
 				if (path2 != null) {
 					try {
 						writer.close();
-					} catch (Throwable var154) {
-						path2.addSuppressed(var154);
+					} catch (Throwable var112) {
+						path2.addSuppressed(var112);
 					}
 				} else {
 					writer.close();
@@ -1325,20 +1307,20 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		CrashReport crashReport = new CrashReport("Level dump", new Exception("dummy"));
 		this.fillReportDetails(crashReport);
 		Writer writer2 = Files.newBufferedWriter(path.resolve("example_crash.txt"));
-		Throwable var170 = null;
+		Throwable var126 = null;
 
 		try {
 			writer2.write(crashReport.getFriendlyReport());
-		} catch (Throwable var159) {
-			var170 = var159;
-			throw var159;
+		} catch (Throwable var116) {
+			var126 = var116;
+			throw var116;
 		} finally {
 			if (writer2 != null) {
-				if (var170 != null) {
+				if (var126 != null) {
 					try {
 						writer2.close();
-					} catch (Throwable var153) {
-						var170.addSuppressed(var153);
+					} catch (Throwable var111) {
+						var126.addSuppressed(var111);
 					}
 				} else {
 					writer2.close();
@@ -1348,20 +1330,20 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 		Path path2x = path.resolve("chunks.csv");
 		Writer writer3 = Files.newBufferedWriter(path2x);
-		Throwable var173 = null;
+		Throwable var129 = null;
 
 		try {
 			chunkMap.dumpChunks(writer3);
-		} catch (Throwable var158) {
-			var173 = var158;
-			throw var158;
+		} catch (Throwable var115) {
+			var129 = var115;
+			throw var115;
 		} finally {
 			if (writer3 != null) {
-				if (var173 != null) {
+				if (var129 != null) {
 					try {
 						writer3.close();
-					} catch (Throwable var152) {
-						var173.addSuppressed(var152);
+					} catch (Throwable var110) {
+						var129.addSuppressed(var110);
 					}
 				} else {
 					writer3.close();
@@ -1371,20 +1353,20 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 		Path path3 = path.resolve("entities.csv");
 		Writer writer4 = Files.newBufferedWriter(path3);
-		Throwable var176 = null;
+		Throwable var132 = null;
 
 		try {
 			dumpEntities(writer4, this.entitiesById.values());
-		} catch (Throwable var157) {
-			var176 = var157;
-			throw var157;
+		} catch (Throwable var114) {
+			var132 = var114;
+			throw var114;
 		} finally {
 			if (writer4 != null) {
-				if (var176 != null) {
+				if (var132 != null) {
 					try {
 						writer4.close();
-					} catch (Throwable var151) {
-						var176.addSuppressed(var151);
+					} catch (Throwable var109) {
+						var132.addSuppressed(var109);
 					}
 				} else {
 					writer4.close();
@@ -1392,48 +1374,25 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			}
 		}
 
-		Path path4 = path.resolve("global_entities.csv");
+		Path path4 = path.resolve("block_entities.csv");
 		Writer writer5 = Files.newBufferedWriter(path4);
-		Throwable writer6 = null;
+		Throwable var8 = null;
 
 		try {
-			dumpEntities(writer5, this.globalEntities);
-		} catch (Throwable var156) {
-			writer6 = var156;
-			throw var156;
+			this.dumpBlockEntities(writer5);
+		} catch (Throwable var113) {
+			var8 = var113;
+			throw var113;
 		} finally {
 			if (writer5 != null) {
-				if (writer6 != null) {
+				if (var8 != null) {
 					try {
 						writer5.close();
-					} catch (Throwable var150) {
-						writer6.addSuppressed(var150);
+					} catch (Throwable var108) {
+						var8.addSuppressed(var108);
 					}
 				} else {
 					writer5.close();
-				}
-			}
-		}
-
-		Path path5 = path.resolve("block_entities.csv");
-		Writer writer6x = Files.newBufferedWriter(path5);
-		Throwable var9 = null;
-
-		try {
-			this.dumpBlockEntities(writer6x);
-		} catch (Throwable var155) {
-			var9 = var155;
-			throw var155;
-		} finally {
-			if (writer6x != null) {
-				if (var9 != null) {
-					try {
-						writer6x.close();
-					} catch (Throwable var149) {
-						var9.addSuppressed(var149);
-					}
-				} else {
-					writer6x.close();
 				}
 			}
 		}

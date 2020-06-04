@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.VanillaPack;
+import net.minecraft.server.packs.VanillaPackResources;
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.FastColor;
@@ -125,8 +125,8 @@ public class LoadingOverlay extends Overlay {
 		int m = Mth.ceil((float)(k - i - 2) * this.currentProgress);
 		int n = Math.round(f * 255.0F);
 		int o = FastColor.ARGB32.color(n, 255, 255, 255);
-		fill(poseStack, i, j, k, j + 1, o);
-		fill(poseStack, i, l, k, l - 1, o);
+		fill(poseStack, i + 1, j, k - 1, j + 1, o);
+		fill(poseStack, i + 1, l, k - 1, l - 1, o);
 		fill(poseStack, i, j, i + 1, l, o);
 		fill(poseStack, k, j, k - 1, l, o);
 		fill(poseStack, i + 2, j + 2, i + m, l - 2, o);
@@ -146,10 +146,10 @@ public class LoadingOverlay extends Overlay {
 		@Override
 		protected SimpleTexture.TextureImage getTextureImage(ResourceManager resourceManager) {
 			Minecraft minecraft = Minecraft.getInstance();
-			VanillaPack vanillaPack = minecraft.getClientPackSource().getVanillaPack();
+			VanillaPackResources vanillaPackResources = minecraft.getClientPackSource().getVanillaPack();
 
 			try {
-				InputStream inputStream = vanillaPack.getResource(PackType.CLIENT_RESOURCES, LoadingOverlay.MOJANG_STUDIOS_LOGO_LOCATION);
+				InputStream inputStream = vanillaPackResources.getResource(PackType.CLIENT_RESOURCES, LoadingOverlay.MOJANG_STUDIOS_LOGO_LOCATION);
 				Throwable var5 = null;
 
 				SimpleTexture.TextureImage var6;

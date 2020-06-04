@@ -90,7 +90,6 @@ import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
-import net.minecraft.network.protocol.game.ClientboundAddGlobalEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.protocol.game.ClientboundAddPaintingPacket;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
@@ -190,6 +189,7 @@ import net.minecraft.realms.DisconnectedRealmsScreen;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stat;
@@ -209,6 +209,7 @@ import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -223,7 +224,6 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.decoration.Painting;
-import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
@@ -507,6 +507,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			entity = new FallingBlockEntity(this.level, d, e, f, Block.stateById(clientboundAddEntityPacket.getData()));
 		} else if (entityType == EntityType.AREA_EFFECT_CLOUD) {
 			entity = new AreaEffectCloud(this.level, d, e, f);
+		} else if (entityType == EntityType.LIGHTNING_BOLT) {
+			entity = new LightningBolt(EntityType.LIGHTNING_BOLT, this.level);
+			entity.moveTo(d, e, f);
 		} else {
 			entity = null;
 		}
@@ -537,22 +540,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		entity.xRot = 0.0F;
 		entity.setId(clientboundAddExperienceOrbPacket.getId());
 		this.level.putNonPlayerEntity(clientboundAddExperienceOrbPacket.getId(), entity);
-	}
-
-	@Override
-	public void handleAddGlobalEntity(ClientboundAddGlobalEntityPacket clientboundAddGlobalEntityPacket) {
-		PacketUtils.ensureRunningOnSameThread(clientboundAddGlobalEntityPacket, this, this.minecraft);
-		double d = clientboundAddGlobalEntityPacket.getX();
-		double e = clientboundAddGlobalEntityPacket.getY();
-		double f = clientboundAddGlobalEntityPacket.getZ();
-		if (clientboundAddGlobalEntityPacket.getType() == 1) {
-			LightningBolt lightningBolt = new LightningBolt(this.level, d, e, f, false);
-			lightningBolt.setPacketCoordinates(d, e, f);
-			lightningBolt.yRot = 0.0F;
-			lightningBolt.xRot = 0.0F;
-			lightningBolt.setId(clientboundAddGlobalEntityPacket.getId());
-			this.level.addLightning(lightningBolt);
-		}
 	}
 
 	@Override
@@ -1757,9 +1744,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 					false,
 					0,
 					SoundInstance.Attenuation.LINEAR,
-					(float)clientboundCustomSoundPacket.getX(),
-					(float)clientboundCustomSoundPacket.getY(),
-					(float)clientboundCustomSoundPacket.getZ(),
+					clientboundCustomSoundPacket.getX(),
+					clientboundCustomSoundPacket.getY(),
+					clientboundCustomSoundPacket.getZ(),
 					false
 				)
 			);
@@ -1777,7 +1764,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 					File file2 = new File(file, string3);
 					if (file2.isFile()) {
 						this.send(ServerboundResourcePackPacket.Action.ACCEPTED);
-						CompletableFuture<?> completableFuture = this.minecraft.getClientPackSource().setServerPack(file2);
+						CompletableFuture<?> completableFuture = this.minecraft.getClientPackSource().setServerPack(file2, PackSource.WORLD);
 						this.downloadCallback(completableFuture);
 						return;
 					}

@@ -29,7 +29,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagManager;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -49,7 +48,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.TickableBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.predicate.BlockMaterialPredicate;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
@@ -60,7 +58,6 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.WritableLevelData;
@@ -581,108 +578,26 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		}
 	}
 
-	public boolean containsAnyBlocks(AABB aABB) {
-		int i = Mth.floor(aABB.minX);
-		int j = Mth.ceil(aABB.maxX);
-		int k = Mth.floor(aABB.minY);
-		int l = Mth.ceil(aABB.maxY);
-		int m = Mth.floor(aABB.minZ);
-		int n = Mth.ceil(aABB.maxZ);
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-
-		for (int o = i; o < j; o++) {
-			for (int p = k; p < l; p++) {
-				for (int q = m; q < n; q++) {
-					BlockState blockState = this.getBlockState(mutableBlockPos.set(o, p, q));
-					if (!blockState.isAir()) {
-						return true;
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
-	public boolean containsFireBlock(AABB aABB) {
-		int i = Mth.floor(aABB.minX);
-		int j = Mth.ceil(aABB.maxX);
-		int k = Mth.floor(aABB.minY);
-		int l = Mth.ceil(aABB.maxY);
-		int m = Mth.floor(aABB.minZ);
-		int n = Mth.ceil(aABB.maxZ);
-		if (this.hasChunksAt(i, k, m, j, l, n)) {
-			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-
-			for (int o = i; o < j; o++) {
-				for (int p = k; p < l; p++) {
-					for (int q = m; q < n; q++) {
-						BlockState blockState = this.getBlockState(mutableBlockPos.set(o, p, q));
-						if (blockState.is(BlockTags.FIRE) || blockState.is(Blocks.LAVA)) {
-							return true;
-						}
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
-	@Nullable
-	@Environment(EnvType.CLIENT)
-	public BlockState containsBlock(AABB aABB, Block block) {
-		int i = Mth.floor(aABB.minX);
-		int j = Mth.ceil(aABB.maxX);
-		int k = Mth.floor(aABB.minY);
-		int l = Mth.ceil(aABB.maxY);
-		int m = Mth.floor(aABB.minZ);
-		int n = Mth.ceil(aABB.maxZ);
-		if (this.hasChunksAt(i, k, m, j, l, n)) {
-			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-
-			for (int o = i; o < j; o++) {
-				for (int p = k; p < l; p++) {
-					for (int q = m; q < n; q++) {
-						BlockState blockState = this.getBlockState(mutableBlockPos.set(o, p, q));
-						if (blockState.is(block)) {
-							return blockState;
-						}
-					}
-				}
-			}
-		}
-
-		return null;
-	}
-
-	public boolean containsMaterial(AABB aABB, Material material) {
-		int i = Mth.floor(aABB.minX);
-		int j = Mth.ceil(aABB.maxX);
-		int k = Mth.floor(aABB.minY);
-		int l = Mth.ceil(aABB.maxY);
-		int m = Mth.floor(aABB.minZ);
-		int n = Mth.ceil(aABB.maxZ);
-		BlockMaterialPredicate blockMaterialPredicate = BlockMaterialPredicate.forMaterial(material);
-		return BlockPos.betweenClosedStream(i, k, m, j - 1, l - 1, n - 1).anyMatch(blockPos -> blockMaterialPredicate.test(this.getBlockState(blockPos)));
-	}
-
 	public Explosion explode(@Nullable Entity entity, double d, double e, double f, float g, Explosion.BlockInteraction blockInteraction) {
-		return this.explode(entity, null, d, e, f, g, false, blockInteraction);
+		return this.explode(entity, null, null, d, e, f, g, false, blockInteraction);
 	}
 
 	public Explosion explode(@Nullable Entity entity, double d, double e, double f, float g, boolean bl, Explosion.BlockInteraction blockInteraction) {
-		return this.explode(entity, null, d, e, f, g, bl, blockInteraction);
+		return this.explode(entity, null, null, d, e, f, g, bl, blockInteraction);
 	}
 
 	public Explosion explode(
-		@Nullable Entity entity, @Nullable DamageSource damageSource, double d, double e, double f, float g, boolean bl, Explosion.BlockInteraction blockInteraction
+		@Nullable Entity entity,
+		@Nullable DamageSource damageSource,
+		@Nullable ExplosionDamageCalculator explosionDamageCalculator,
+		double d,
+		double e,
+		double f,
+		float g,
+		boolean bl,
+		Explosion.BlockInteraction blockInteraction
 	) {
-		Explosion explosion = new Explosion(this, entity, d, e, f, g, bl, blockInteraction);
-		if (damageSource != null) {
-			explosion.setDamageSource(damageSource);
-		}
-
+		Explosion explosion = new Explosion(this, entity, damageSource, explosionDamageCalculator, d, e, f, g, bl, blockInteraction);
 		explosion.explode();
 		explosion.finalizeExplosion(true);
 		return explosion;

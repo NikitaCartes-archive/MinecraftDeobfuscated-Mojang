@@ -62,7 +62,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
@@ -565,7 +564,10 @@ public abstract class Entity implements Nameable, CommandSource {
 
 			float i = this.getBlockSpeedFactor();
 			this.setDeltaMovement(this.getDeltaMovement().multiply((double)i, 1.0, (double)i));
-			if (!this.level.containsFireBlock(this.getBoundingBox().deflate(0.001)) && this.remainingFireTicks <= 0) {
+			if (this.level
+					.getBlockStatesIfLoaded(this.getBoundingBox().deflate(0.001))
+					.noneMatch(blockStatex -> blockStatex.is(BlockTags.FIRE) || blockStatex.is(Blocks.LAVA))
+				&& this.remainingFireTicks <= 0) {
 				this.remainingFireTicks = -this.getFireImmuneTicks();
 			}
 
@@ -989,24 +991,15 @@ public abstract class Entity implements Nameable, CommandSource {
 		float h = (float)Mth.floor(this.getY());
 
 		for (int i = 0; (float)i < 1.0F + this.dimensions.width * 20.0F; i++) {
-			float j = (this.random.nextFloat() * 2.0F - 1.0F) * this.dimensions.width;
-			float k = (this.random.nextFloat() * 2.0F - 1.0F) * this.dimensions.width;
-			this.level
-				.addParticle(
-					ParticleTypes.BUBBLE,
-					this.getX() + (double)j,
-					(double)(h + 1.0F),
-					this.getZ() + (double)k,
-					vec3.x,
-					vec3.y - (double)(this.random.nextFloat() * 0.2F),
-					vec3.z
-				);
+			double d = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width;
+			double e = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width;
+			this.level.addParticle(ParticleTypes.BUBBLE, this.getX() + d, (double)(h + 1.0F), this.getZ() + e, vec3.x, vec3.y - this.random.nextDouble() * 0.2F, vec3.z);
 		}
 
 		for (int i = 0; (float)i < 1.0F + this.dimensions.width * 20.0F; i++) {
-			float j = (this.random.nextFloat() * 2.0F - 1.0F) * this.dimensions.width;
-			float k = (this.random.nextFloat() * 2.0F - 1.0F) * this.dimensions.width;
-			this.level.addParticle(ParticleTypes.SPLASH, this.getX() + (double)j, (double)(h + 1.0F), this.getZ() + (double)k, vec3.x, vec3.y, vec3.z);
+			double d = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width;
+			double e = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width;
+			this.level.addParticle(ParticleTypes.SPLASH, this.getX() + d, (double)(h + 1.0F), this.getZ() + e, vec3.x, vec3.y, vec3.z);
 		}
 	}
 
@@ -1029,9 +1022,9 @@ public abstract class Entity implements Nameable, CommandSource {
 			this.level
 				.addParticle(
 					new BlockParticleOption(ParticleTypes.BLOCK, blockState),
-					this.getX() + ((double)this.random.nextFloat() - 0.5) * (double)this.dimensions.width,
+					this.getX() + (this.random.nextDouble() - 0.5) * (double)this.dimensions.width,
 					this.getY() + 0.1,
-					this.getZ() + ((double)this.random.nextFloat() - 0.5) * (double)this.dimensions.width,
+					this.getZ() + (this.random.nextDouble() - 0.5) * (double)this.dimensions.width,
 					vec3.x * -4.0,
 					1.5,
 					vec3.z * -4.0
@@ -1093,6 +1086,10 @@ public abstract class Entity implements Nameable, CommandSource {
 		this.xRot = Mth.clamp(h, -90.0F, 90.0F) % 360.0F;
 		this.yRotO = this.yRot;
 		this.xRotO = this.xRot;
+	}
+
+	public void moveTo(Vec3 vec3) {
+		this.moveTo(vec3.x, vec3.y, vec3.z);
 	}
 
 	public void moveTo(double d, double e, double f) {
@@ -1525,8 +1522,8 @@ public abstract class Entity implements Nameable, CommandSource {
 		}
 	}
 
-	public boolean interact(Player player, InteractionHand interactionHand) {
-		return false;
+	public InteractionResult interact(Player player, InteractionHand interactionHand) {
+		return InteractionResult.PASS;
 	}
 
 	@Nullable

@@ -144,7 +144,11 @@ public class TurtleNodeEvaluator extends WalkNodeEvaluator {
 			}
 
 			if (blockPathTypes != BlockPathTypes.WATER && blockPathTypes != BlockPathTypes.WALKABLE) {
-				if (node == null && l > 0 && blockPathTypes != BlockPathTypes.FENCE && blockPathTypes != BlockPathTypes.TRAPDOOR) {
+				if (node == null
+					&& l > 0
+					&& blockPathTypes != BlockPathTypes.FENCE
+					&& blockPathTypes != BlockPathTypes.UNPASSABLE_RAIL
+					&& blockPathTypes != BlockPathTypes.TRAPDOOR) {
 					node = this.getAcceptedNode(i, j + 1, k, l - 1, d);
 				}
 
@@ -212,7 +216,7 @@ public class TurtleNodeEvaluator extends WalkNodeEvaluator {
 		if (blockPathTypes == BlockPathTypes.RAIL
 			&& !(blockGetter.getBlockState(blockPos).getBlock() instanceof BaseRailBlock)
 			&& !(blockGetter.getBlockState(blockPos.below()).getBlock() instanceof BaseRailBlock)) {
-			blockPathTypes = BlockPathTypes.FENCE;
+			blockPathTypes = BlockPathTypes.UNPASSABLE_RAIL;
 		}
 
 		if (blockPathTypes == BlockPathTypes.DOOR_OPEN || blockPathTypes == BlockPathTypes.DOOR_WOOD_CLOSED || blockPathTypes == BlockPathTypes.DOOR_IRON_CLOSED) {

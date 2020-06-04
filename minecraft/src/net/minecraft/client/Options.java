@@ -25,7 +25,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.resources.UnopenedResourcePack;
+import net.minecraft.client.resources.ResourcePack;
 import net.minecraft.client.tutorial.TutorialSteps;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -54,7 +54,7 @@ public class Options {
 	public float entityDistanceScaling = 1.0F;
 	public int framerateLimit = 120;
 	public CloudStatus renderClouds = CloudStatus.FANCY;
-	public boolean fancyGraphics = true;
+	public GraphicsStatus graphicsMode = GraphicsStatus.FANCY;
 	public AmbientOcclusionStatus ambientOcclusion = AmbientOcclusionStatus.MAX;
 	public List<String> resourcePacks = Lists.<String>newArrayList();
 	public List<String> incompatibleResourcePacks = Lists.<String>newArrayList();
@@ -256,6 +256,13 @@ public class Options {
 			}
 
 			CompoundTag compoundTag2 = this.dataFix(compoundTag);
+			if (!compoundTag2.contains("graphicsMode") && compoundTag2.contains("fancyGraphics")) {
+				if ("true".equals(compoundTag2.getString("fancyGraphics"))) {
+					this.graphicsMode = GraphicsStatus.FANCY;
+				} else {
+					this.graphicsMode = GraphicsStatus.FAST;
+				}
+			}
 
 			for (String string : compoundTag2.getAllKeys()) {
 				String string2 = compoundTag2.getString(string);
@@ -376,8 +383,8 @@ public class Options {
 						this.difficulty = Difficulty.byId(Integer.parseInt(string2));
 					}
 
-					if ("fancyGraphics".equals(string)) {
-						this.fancyGraphics = "true".equals(string2);
+					if ("graphicsMode".equals(string)) {
+						this.graphicsMode = GraphicsStatus.byId(Integer.parseInt(string2));
 					}
 
 					if ("tutorialStep".equals(string)) {
@@ -616,7 +623,7 @@ public class Options {
 				printWriter.println("particles:" + this.particles.getId());
 				printWriter.println("maxFps:" + this.framerateLimit);
 				printWriter.println("difficulty:" + this.difficulty.getId());
-				printWriter.println("fancyGraphics:" + this.fancyGraphics);
+				printWriter.println("graphicsMode:" + this.graphicsMode.getId());
 				printWriter.println("ao:" + this.ambientOcclusion.getId());
 				printWriter.println("biomeBlendRadius:" + this.biomeBlendRadius);
 				switch (this.renderClouds) {
@@ -755,28 +762,28 @@ public class Options {
 		return this.useNativeTransport;
 	}
 
-	public void loadSelectedResourcePacks(PackRepository<UnopenedResourcePack> packRepository) {
+	public void loadSelectedResourcePacks(PackRepository<ResourcePack> packRepository) {
 		Set<String> set = Sets.<String>newLinkedHashSet();
 		Iterator<String> iterator = this.resourcePacks.iterator();
 
 		while (iterator.hasNext()) {
 			String string = (String)iterator.next();
-			UnopenedResourcePack unopenedResourcePack = packRepository.getPack(string);
-			if (unopenedResourcePack == null && !string.startsWith("file/")) {
-				unopenedResourcePack = packRepository.getPack("file/" + string);
+			ResourcePack resourcePack = packRepository.getPack(string);
+			if (resourcePack == null && !string.startsWith("file/")) {
+				resourcePack = packRepository.getPack("file/" + string);
 			}
 
-			if (unopenedResourcePack == null) {
+			if (resourcePack == null) {
 				LOGGER.warn("Removed resource pack {} from options because it doesn't seem to exist anymore", string);
 				iterator.remove();
-			} else if (!unopenedResourcePack.getCompatibility().isCompatible() && !this.incompatibleResourcePacks.contains(string)) {
+			} else if (!resourcePack.getCompatibility().isCompatible() && !this.incompatibleResourcePacks.contains(string)) {
 				LOGGER.warn("Removed resource pack {} from options because it is no longer compatible", string);
 				iterator.remove();
-			} else if (unopenedResourcePack.getCompatibility().isCompatible() && this.incompatibleResourcePacks.contains(string)) {
+			} else if (resourcePack.getCompatibility().isCompatible() && this.incompatibleResourcePacks.contains(string)) {
 				LOGGER.info("Removed resource pack {} from incompatibility list because it's now compatible", string);
 				this.incompatibleResourcePacks.remove(string);
 			} else {
-				set.add(unopenedResourcePack.getId());
+				set.add(resourcePack.getId());
 			}
 		}
 

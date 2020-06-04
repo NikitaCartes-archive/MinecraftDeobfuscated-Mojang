@@ -17,8 +17,11 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
@@ -29,11 +32,21 @@ import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerResources;
+import net.minecraft.server.packs.repository.FolderRepositorySource;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.packs.repository.PackSource;
+import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -53,17 +66,20 @@ public class WorldGenSettingsComponent implements TickableWidget, Widget {
 	private Button typeButton;
 	private Button customizeTypeButton;
 	private Button importSettingsButton;
+	private RegistryAccess.RegistryHolder registryHolder;
 	private WorldGenSettings settings;
 	private Optional<WorldPreset> preset;
 	private String initSeed;
 
 	public WorldGenSettingsComponent() {
+		this.registryHolder = RegistryAccess.builtin();
 		this.settings = WorldGenSettings.makeDefault();
 		this.preset = Optional.of(WorldPreset.NORMAL);
 		this.initSeed = "";
 	}
 
-	public WorldGenSettingsComponent(WorldGenSettings worldGenSettings) {
+	public WorldGenSettingsComponent(RegistryAccess.RegistryHolder registryHolder, WorldGenSettings worldGenSettings) {
+		this.registryHolder = registryHolder;
 		this.settings = worldGenSettings;
 		this.preset = WorldPreset.of(worldGenSettings);
 		this.initSeed = Long.toString(worldGenSettings.seed());
@@ -76,32 +92,32 @@ public class WorldGenSettingsComponent implements TickableWidget, Widget {
 		this.seedEdit.setValue(this.initSeed);
 		this.seedEdit.setResponder(string -> this.initSeed = this.seedEdit.getValue());
 		createWorldScreen.addWidget(this.seedEdit);
-		this.featuresButton = createWorldScreen.addButton(
-			new Button(this.width / 2 - 155, 100, 150, 20, new TranslatableComponent("selectWorld.mapFeatures"), button -> {
-				this.settings = this.settings.withFeaturesToggled();
-				button.queueNarration(250);
-			}) {
-				@Override
-				public Component getMessage() {
-					return super.getMessage().mutableCopy().append(" ").append(CommonComponents.optionStatus(WorldGenSettingsComponent.this.settings.generateFeatures()));
-				}
-
-				@Override
-				protected MutableComponent createNarrationMessage() {
-					return super.createNarrationMessage().append(". ").append(new TranslatableComponent("selectWorld.mapFeatures.info"));
-				}
+		int i = this.width / 2 - 155;
+		int j = this.width / 2 + 5;
+		this.featuresButton = createWorldScreen.addButton(new Button(i, 100, 150, 20, new TranslatableComponent("selectWorld.mapFeatures"), button -> {
+			this.settings = this.settings.withFeaturesToggled();
+			button.queueNarration(250);
+		}) {
+			@Override
+			public Component getMessage() {
+				return super.getMessage().mutableCopy().append(" ").append(CommonComponents.optionStatus(WorldGenSettingsComponent.this.settings.generateFeatures()));
 			}
-		);
+
+			@Override
+			protected MutableComponent createNarrationMessage() {
+				return super.createNarrationMessage().append(". ").append(new TranslatableComponent("selectWorld.mapFeatures.info"));
+			}
+		});
 		this.featuresButton.visible = false;
 		this.typeButton = createWorldScreen.addButton(
-			new Button(this.width / 2 + 5, 100, 150, 20, new TranslatableComponent("selectWorld.mapType"), button -> {
+			new Button(j, 100, 150, 20, new TranslatableComponent("selectWorld.mapType"), button -> {
 				while (this.preset.isPresent()) {
-					int i = WorldPreset.PRESETS.indexOf(this.preset.get()) + 1;
-					if (i >= WorldPreset.PRESETS.size()) {
-						i = 0;
+					int ix = WorldPreset.PRESETS.indexOf(this.preset.get()) + 1;
+					if (ix >= WorldPreset.PRESETS.size()) {
+						ix = 0;
 					}
 
-					WorldPreset worldPreset = (WorldPreset)WorldPreset.PRESETS.get(i);
+					WorldPreset worldPreset = (WorldPreset)WorldPreset.PRESETS.get(ix);
 					this.preset = Optional.of(worldPreset);
 					this.settings = worldPreset.create(this.settings.seed(), this.settings.generateFeatures(), this.settings.generateBonusChest());
 					if (!this.settings.isDebug() || Screen.hasShiftDown()) {
@@ -130,17 +146,15 @@ public class WorldGenSettingsComponent implements TickableWidget, Widget {
 		);
 		this.typeButton.visible = false;
 		this.typeButton.active = this.preset.isPresent();
-		this.customizeTypeButton = createWorldScreen.addButton(
-			new Button(createWorldScreen.width / 2 + 5, 120, 150, 20, new TranslatableComponent("selectWorld.customizeType"), button -> {
-				WorldPreset.PresetEditor presetEditor = (WorldPreset.PresetEditor)WorldPreset.EDITORS.get(this.preset);
-				if (presetEditor != null) {
-					minecraft.setScreen(presetEditor.createEditScreen(createWorldScreen, this.settings));
-				}
-			})
-		);
+		this.customizeTypeButton = createWorldScreen.addButton(new Button(j, 120, 150, 20, new TranslatableComponent("selectWorld.customizeType"), button -> {
+			WorldPreset.PresetEditor presetEditor = (WorldPreset.PresetEditor)WorldPreset.EDITORS.get(this.preset);
+			if (presetEditor != null) {
+				minecraft.setScreen(presetEditor.createEditScreen(createWorldScreen, this.settings));
+			}
+		}));
 		this.customizeTypeButton.visible = false;
 		this.bonusItemsButton = createWorldScreen.addButton(
-			new Button(createWorldScreen.width / 2 - 155, 151, 150, 20, new TranslatableComponent("selectWorld.bonusItems"), button -> {
+			new Button(i, 151, 150, 20, new TranslatableComponent("selectWorld.bonusItems"), button -> {
 				this.settings = this.settings.withBonusChestToggled();
 				button.queueNarration(250);
 			}) {
@@ -156,7 +170,7 @@ public class WorldGenSettingsComponent implements TickableWidget, Widget {
 		this.bonusItemsButton.visible = false;
 		this.importSettingsButton = createWorldScreen.addButton(
 			new Button(
-				this.width / 2 - 155,
+				i,
 				185,
 				150,
 				20,
@@ -165,6 +179,29 @@ public class WorldGenSettingsComponent implements TickableWidget, Widget {
 					TranslatableComponent translatableComponent = new TranslatableComponent("selectWorld.import_worldgen_settings.select_file");
 					String string = TinyFileDialogs.tinyfd_openFileDialog(translatableComponent.getString(), null, null, null, false);
 					if (string != null) {
+						RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
+						PackRepository<Pack> packRepository = new PackRepository<>(
+							Pack::new, new ServerPacksSource(), new FolderRepositorySource(createWorldScreen.getTempDataPackDir().toFile(), PackSource.WORLD)
+						);
+
+						ServerResources serverResources;
+						try {
+							MinecraftServer.configurePackRepository(packRepository, createWorldScreen.dataPacks, false);
+							CompletableFuture<ServerResources> completableFuture = ServerResources.loadResources(
+								packRepository.openAllSelected(), Commands.CommandSelection.INTEGRATED, 2, Util.backgroundExecutor(), minecraft
+							);
+							minecraft.managedBlock(completableFuture::isDone);
+							serverResources = (ServerResources)completableFuture.get();
+						} catch (ExecutionException | InterruptedException var25) {
+							LOGGER.error("Error loading data packs when importing world settings", (Throwable)var25);
+							Component component = new TranslatableComponent("selectWorld.import_worldgen_settings.failure");
+							Component component2 = new TextComponent(var25.getMessage());
+							minecraft.getToasts().addToast(SystemToast.multiline(minecraft, SystemToast.SystemToastIds.WORLD_GEN_SETTINGS_TRANSFER, component, component2));
+							packRepository.close();
+							return;
+						}
+
+						RegistryReadOps<JsonElement> registryReadOps = RegistryReadOps.create(JsonOps.INSTANCE, serverResources.getResourceManager(), registryHolder);
 						JsonParser jsonParser = new JsonParser();
 
 						DataResult<WorldGenSettings> dataResult;
@@ -174,33 +211,33 @@ public class WorldGenSettingsComponent implements TickableWidget, Widget {
 
 							try {
 								JsonElement jsonElement = jsonParser.parse(bufferedReader);
-								dataResult = WorldGenSettings.CODEC.parse(JsonOps.INSTANCE, jsonElement);
-							} catch (Throwable var19) {
-								string2 = var19;
-								throw var19;
+								dataResult = WorldGenSettings.CODEC.parse(registryReadOps, jsonElement);
+							} catch (Throwable var24) {
+								string2 = var24;
+								throw var24;
 							} finally {
 								if (bufferedReader != null) {
 									if (string2 != null) {
 										try {
 											bufferedReader.close();
-										} catch (Throwable var18) {
-											string2.addSuppressed(var18);
+										} catch (Throwable var23) {
+											string2.addSuppressed(var23);
 										}
 									} else {
 										bufferedReader.close();
 									}
 								}
 							}
-						} catch (JsonIOException | JsonSyntaxException | IOException var21) {
-							dataResult = DataResult.error("Failed to parse file: " + var21.getMessage());
+						} catch (JsonIOException | JsonSyntaxException | IOException var27) {
+							dataResult = DataResult.error("Failed to parse file: " + var27.getMessage());
 						}
 
 						if (dataResult.error().isPresent()) {
-							Component component = new TranslatableComponent("selectWorld.import_worldgen_settings.failure");
+							Component component3 = new TranslatableComponent("selectWorld.import_worldgen_settings.failure");
 							String string2 = ((PartialResult)dataResult.error().get()).message();
 							LOGGER.error("Error parsing world settings: {}", string2);
-							Component component2 = new TextComponent(string2);
-							minecraft.getToasts().addToast(SystemToast.multiline(SystemToast.SystemToastIds.WORLD_GEN_SETTINGS_TRANSFER, component, component2));
+							Component component4 = new TextComponent(string2);
+							minecraft.getToasts().addToast(SystemToast.multiline(minecraft, SystemToast.SystemToastIds.WORLD_GEN_SETTINGS_TRANSFER, component3, component4));
 						}
 
 						Lifecycle lifecycle = dataResult.lifecycle();
@@ -210,11 +247,11 @@ public class WorldGenSettingsComponent implements TickableWidget, Widget {
 									BooleanConsumer booleanConsumer = bl -> {
 										minecraft.setScreen(createWorldScreen);
 										if (bl) {
-											this.importSettings(worldGenSettings);
+											this.importSettings(registryHolder, worldGenSettings);
 										}
 									};
 									if (lifecycle == Lifecycle.stable()) {
-										this.importSettings(worldGenSettings);
+										this.importSettings(registryHolder, worldGenSettings);
 									} else if (lifecycle == Lifecycle.experimental()) {
 										minecraft.setScreen(
 											new ConfirmScreen(
@@ -241,7 +278,8 @@ public class WorldGenSettingsComponent implements TickableWidget, Widget {
 		this.importSettingsButton.visible = false;
 	}
 
-	private void importSettings(WorldGenSettings worldGenSettings) {
+	private void importSettings(RegistryAccess.RegistryHolder registryHolder, WorldGenSettings worldGenSettings) {
+		this.registryHolder = registryHolder;
 		this.settings = worldGenSettings;
 		this.preset = WorldPreset.of(worldGenSettings);
 		this.initSeed = Long.toString(worldGenSettings.seed());
@@ -314,5 +352,9 @@ public class WorldGenSettingsComponent implements TickableWidget, Widget {
 		}
 
 		this.seedEdit.setVisible(bl);
+	}
+
+	public RegistryAccess.RegistryHolder registryHolder() {
+		return this.registryHolder;
 	}
 }

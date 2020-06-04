@@ -84,9 +84,9 @@ public class RepeaterBlock extends DiodeBlock {
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		if ((Boolean)blockState.getValue(POWERED)) {
 			Direction direction = blockState.getValue(FACING);
-			double d = (double)((float)blockPos.getX() + 0.5F) + (double)(random.nextFloat() - 0.5F) * 0.2;
-			double e = (double)((float)blockPos.getY() + 0.4F) + (double)(random.nextFloat() - 0.5F) * 0.2;
-			double f = (double)((float)blockPos.getZ() + 0.5F) + (double)(random.nextFloat() - 0.5F) * 0.2;
+			double d = (double)blockPos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.2;
+			double e = (double)blockPos.getY() + 0.4 + (random.nextDouble() - 0.5) * 0.2;
+			double f = (double)blockPos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.2;
 			float g = -5.0F;
 			if (random.nextBoolean()) {
 				g = (float)((Integer)blockState.getValue(DELAY) * 2 - 1);

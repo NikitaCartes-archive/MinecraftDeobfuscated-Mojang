@@ -243,7 +243,7 @@ public class MineShaftPieces {
 				BlockState blockState = Blocks.RAIL.defaultBlockState().setValue(RailBlock.SHAPE, random.nextBoolean() ? RailShape.NORTH_SOUTH : RailShape.EAST_WEST);
 				this.placeBlock(levelAccessor, blockState, i, j, k, boundingBox);
 				MinecartChest minecartChest = new MinecartChest(
-					levelAccessor.getLevel(), (double)((float)blockPos.getX() + 0.5F), (double)((float)blockPos.getY() + 0.5F), (double)((float)blockPos.getZ() + 0.5F)
+					levelAccessor.getLevel(), (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5
 				);
 				minecartChest.setLootTable(resourceLocation, random.nextLong());
 				levelAccessor.addFreshEntity(minecartChest);

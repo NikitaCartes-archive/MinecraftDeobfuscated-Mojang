@@ -16,11 +16,6 @@ public class DedicatedPlayerList extends PlayerList {
 		DedicatedServerProperties dedicatedServerProperties = dedicatedServer.getProperties();
 		this.setViewDistance(dedicatedServerProperties.viewDistance);
 		super.setUsingWhiteList(dedicatedServerProperties.whiteList.get());
-		if (!dedicatedServer.isSingleplayer()) {
-			this.getBans().setEnabled(true);
-			this.getIpBans().setEnabled(true);
-		}
-
 		this.loadUserBanList();
 		this.saveUserBanList();
 		this.loadIpBanList();

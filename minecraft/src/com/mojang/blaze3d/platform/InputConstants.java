@@ -20,6 +20,7 @@ import net.minecraft.util.LazyLoadedValue;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWCharModsCallbackI;
 import org.lwjgl.glfw.GLFWCursorPosCallbackI;
+import org.lwjgl.glfw.GLFWDropCallbackI;
 import org.lwjgl.glfw.GLFWKeyCallbackI;
 import org.lwjgl.glfw.GLFWMouseButtonCallbackI;
 import org.lwjgl.glfw.GLFWScrollCallbackI;
@@ -60,11 +61,16 @@ public class InputConstants {
 	}
 
 	public static void setupMouseCallbacks(
-		long l, GLFWCursorPosCallbackI gLFWCursorPosCallbackI, GLFWMouseButtonCallbackI gLFWMouseButtonCallbackI, GLFWScrollCallbackI gLFWScrollCallbackI
+		long l,
+		GLFWCursorPosCallbackI gLFWCursorPosCallbackI,
+		GLFWMouseButtonCallbackI gLFWMouseButtonCallbackI,
+		GLFWScrollCallbackI gLFWScrollCallbackI,
+		GLFWDropCallbackI gLFWDropCallbackI
 	) {
 		GLFW.glfwSetCursorPosCallback(l, gLFWCursorPosCallbackI);
 		GLFW.glfwSetMouseButtonCallback(l, gLFWMouseButtonCallbackI);
 		GLFW.glfwSetScrollCallback(l, gLFWScrollCallbackI);
+		GLFW.glfwSetDropCallback(l, gLFWDropCallbackI);
 	}
 
 	public static void grabOrReleaseMouse(long l, int i, double d, double e) {

@@ -71,7 +71,7 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 					Bee bee = (Bee)entity;
 					if (player.position().distanceToSqr(entity.position()) <= 16.0) {
 						if (!this.isSedated()) {
-							bee.makeAngry(player);
+							bee.setTarget(player);
 						} else {
 							bee.setStayOutOfHiveCountdown(400);
 						}
@@ -174,10 +174,7 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 								}
 							}
 
-							int i = beeData.ticksInHive;
-							bee.ageUp(i);
-							bee.setInLoveTime(Math.max(0, bee.getInLoveTime() - i));
-							bee.resetTicksWithoutNectarSinceExitingHive();
+							this.setBeeReleaseData(beeData.ticksInHive, bee);
 							if (list != null) {
 								list.add(bee);
 							}
@@ -200,6 +197,18 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 		}
 	}
 
+	private void setBeeReleaseData(int i, Bee bee) {
+		int j = bee.getAge();
+		if (j < 0) {
+			bee.setAge(Math.min(0, j + i));
+		} else if (j > 0) {
+			bee.setAge(Math.max(0, j - i));
+		}
+
+		bee.setInLoveTime(Math.max(0, bee.getInLoveTime() - i));
+		bee.resetTicksWithoutNectarSinceExitingHive();
+	}
+
 	private boolean hasSavedFlowerPos() {
 		return this.savedFlowerPos != null;
 	}
@@ -217,9 +226,9 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 				if (this.releaseOccupant(blockState, beeData, null, beeReleaseStatus)) {
 					iterator.remove();
 				}
-			} else {
-				beeData.ticksInHive++;
 			}
+
+			beeData.ticksInHive++;
 		}
 	}
 

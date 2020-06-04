@@ -251,7 +251,7 @@ public class StructureTemplate {
 									structureBlockInfo.nbt.putInt("y", blockPos3.getY());
 									structureBlockInfo.nbt.putInt("z", blockPos3.getZ());
 									if (blockEntity instanceof RandomizableContainerBlockEntity) {
-										structureBlockInfo.nbt.putLong("LootTable", random.nextLong());
+										structureBlockInfo.nbt.putLong("LootTableSeed", random.nextLong());
 									}
 
 									blockEntity.load(structureBlockInfo.state, structureBlockInfo.nbt);

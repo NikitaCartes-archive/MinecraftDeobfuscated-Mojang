@@ -45,9 +45,9 @@ public class BubbleColumnBlock extends Block implements BucketPickup {
 				for (int i = 0; i < 2; i++) {
 					serverLevel.sendParticles(
 						ParticleTypes.SPLASH,
-						(double)((float)blockPos.getX() + level.random.nextFloat()),
+						(double)blockPos.getX() + level.random.nextDouble(),
 						(double)(blockPos.getY() + 1),
-						(double)((float)blockPos.getZ() + level.random.nextFloat()),
+						(double)blockPos.getZ() + level.random.nextDouble(),
 						1,
 						0.0,
 						0.0,
@@ -56,9 +56,9 @@ public class BubbleColumnBlock extends Block implements BucketPickup {
 					);
 					serverLevel.sendParticles(
 						ParticleTypes.BUBBLE,
-						(double)((float)blockPos.getX() + level.random.nextFloat()),
+						(double)blockPos.getX() + level.random.nextDouble(),
 						(double)(blockPos.getY() + 1),
-						(double)((float)blockPos.getZ() + level.random.nextFloat()),
+						(double)blockPos.getZ() + level.random.nextDouble(),
 						1,
 						0.0,
 						0.01,

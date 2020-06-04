@@ -144,7 +144,9 @@ public class Blocks {
 	);
 	public static final Block NETHER_GOLD_ORE = register(
 		"nether_gold_ore",
-		new OreBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.0F, 3.0F).sound(SoundType.NETHER_GOLD_ORE))
+		new OreBlock(
+			BlockBehaviour.Properties.of(Material.STONE, MaterialColor.NETHER).requiresCorrectToolForDrops().strength(3.0F, 3.0F).sound(SoundType.NETHER_GOLD_ORE)
+		)
 	);
 	public static final Block OAK_LOG = register("oak_log", log(MaterialColor.WOOD, MaterialColor.PODZOL));
 	public static final Block SPRUCE_LOG = register("spruce_log", log(MaterialColor.PODZOL, MaterialColor.COLOR_BROWN));
@@ -2721,7 +2723,6 @@ public class Blocks {
 				.requiresCorrectToolForDrops()
 				.strength(50.0F, 1200.0F)
 				.lightLevel(blockStatex -> RespawnAnchorBlock.getScaledChargeLevel(blockStatex, 15))
-				.noOcclusion()
 		)
 	);
 	public static final Block POTTED_CRIMSON_FUNGUS = register(

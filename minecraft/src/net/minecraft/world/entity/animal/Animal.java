@@ -12,6 +12,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.EntityType;
@@ -126,20 +127,24 @@ public abstract class Animal extends AgableMob {
 	}
 
 	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (this.isFood(itemStack)) {
-			if (!this.level.isClientSide && this.getAge() == 0 && this.canFallInLove()) {
+			int i = this.getAge();
+			if (!this.level.isClientSide && i == 0 && this.canFallInLove()) {
 				this.usePlayerItem(player, itemStack);
 				this.setInLove(player);
-				player.swing(interactionHand, true);
-				return true;
+				return InteractionResult.SUCCESS;
 			}
 
 			if (this.isBaby()) {
 				this.usePlayerItem(player, itemStack);
-				this.ageUp((int)((float)(-this.getAge() / 20) * 0.1F), true);
-				return true;
+				this.ageUp((int)((float)(-i / 20) * 0.1F), true);
+				return InteractionResult.sidedSuccess(this.level.isClientSide);
+			}
+
+			if (this.level.isClientSide) {
+				return InteractionResult.CONSUME;
 			}
 		}
 

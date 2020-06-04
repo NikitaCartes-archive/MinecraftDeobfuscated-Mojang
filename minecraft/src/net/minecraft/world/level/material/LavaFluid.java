@@ -46,9 +46,9 @@ public abstract class LavaFluid extends FlowingFluid {
 		BlockPos blockPos2 = blockPos.above();
 		if (level.getBlockState(blockPos2).isAir() && !level.getBlockState(blockPos2).isSolidRender(level, blockPos2)) {
 			if (random.nextInt(100) == 0) {
-				double d = (double)((float)blockPos.getX() + random.nextFloat());
-				double e = (double)(blockPos.getY() + 1);
-				double f = (double)((float)blockPos.getZ() + random.nextFloat());
+				double d = (double)blockPos.getX() + random.nextDouble();
+				double e = (double)blockPos.getY() + 1.0;
+				double f = (double)blockPos.getZ() + random.nextDouble();
 				level.addParticle(ParticleTypes.LAVA, d, e, f, 0.0, 0.0, 0.0);
 				level.playLocalSound(d, e, f, SoundEvents.LAVA_POP, SoundSource.BLOCKS, 0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
 			}

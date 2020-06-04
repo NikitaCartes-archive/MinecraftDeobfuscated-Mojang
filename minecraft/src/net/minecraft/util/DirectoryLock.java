@@ -1,6 +1,8 @@
 package net.minecraft.util;
 
+import com.google.common.base.Charsets;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.AccessDeniedException;
@@ -15,6 +17,7 @@ import net.fabricmc.api.Environment;
 public class DirectoryLock implements AutoCloseable {
 	private final FileChannel lockFile;
 	private final FileLock lock;
+	private static final ByteBuffer DUMMY;
 
 	public static DirectoryLock create(Path path) throws IOException {
 		Path path2 = path.resolve("session.lock");
@@ -25,6 +28,8 @@ public class DirectoryLock implements AutoCloseable {
 		FileChannel fileChannel = FileChannel.open(path2, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.DELETE_ON_CLOSE);
 
 		try {
+			fileChannel.write(DUMMY.duplicate());
+			fileChannel.force(true);
 			FileLock fileLock = fileChannel.tryLock();
 			if (fileLock == null) {
 				throw DirectoryLock.LockException.alreadyLocked(path2);
@@ -117,6 +122,13 @@ public class DirectoryLock implements AutoCloseable {
 		} catch (NoSuchFileException var38) {
 			return false;
 		}
+	}
+
+	static {
+		byte[] bs = "☃".getBytes(Charsets.UTF_8);
+		DUMMY = ByteBuffer.allocateDirect(bs.length);
+		DUMMY.put(bs);
+		DUMMY.flip();
 	}
 
 	public static class LockException extends IOException {

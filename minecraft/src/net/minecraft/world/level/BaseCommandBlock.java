@@ -18,6 +18,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.StringUtil;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
@@ -177,15 +178,15 @@ public abstract class BaseCommandBlock implements CommandSource {
 		return this.trackOutput;
 	}
 
-	public boolean usedBy(Player player) {
+	public InteractionResult usedBy(Player player) {
 		if (!player.canUseGameMasterBlocks()) {
-			return false;
+			return InteractionResult.PASS;
 		} else {
 			if (player.getCommandSenderWorld().isClientSide) {
 				player.openMinecartCommandBlock(this);
 			}
 
-			return true;
+			return InteractionResult.sidedSuccess(player.level.isClientSide);
 		}
 	}
 

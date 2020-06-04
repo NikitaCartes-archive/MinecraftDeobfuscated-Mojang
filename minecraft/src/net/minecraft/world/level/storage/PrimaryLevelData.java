@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.serialization.Dynamic;
-import com.mojang.serialization.OptionalDynamic;
+import com.mojang.serialization.Lifecycle;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -16,6 +16,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SerializableUUID;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -23,9 +24,11 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryWriteOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
@@ -39,6 +42,8 @@ import org.apache.logging.log4j.Logger;
 public class PrimaryLevelData implements ServerLevelData, WorldData {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private LevelSettings settings;
+	private final WorldGenSettings worldGenSettings;
+	private final Lifecycle worldGenSettingsLifecycle;
 	private int xSpawn;
 	private int ySpawn;
 	private int zSpawn;
@@ -59,8 +64,6 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	private boolean initialized;
 	private boolean difficultyLocked;
 	private WorldBorder.Settings worldBorder;
-	private final Set<String> disabledDataPacks;
-	private final Set<String> enabledDataPacks;
 	private CompoundTag endDragonFightData;
 	@Nullable
 	private CompoundTag customBossEvents;
@@ -95,16 +98,15 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		int t,
 		@Nullable UUID uUID,
 		LinkedHashSet<String> linkedHashSet,
-		LinkedHashSet<String> linkedHashSet2,
-		Set<String> set,
 		TimerQueue<MinecraftServer> timerQueue,
 		@Nullable CompoundTag compoundTag2,
 		CompoundTag compoundTag3,
-		LevelSettings levelSettings
+		LevelSettings levelSettings,
+		WorldGenSettings worldGenSettings,
+		Lifecycle lifecycle
 	) {
 		this.fixerUpper = dataFixer;
 		this.wasModded = bl;
-		this.settings = levelSettings;
 		this.xSpawn = j;
 		this.ySpawn = k;
 		this.zSpawn = l;
@@ -126,13 +128,14 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		this.loadedPlayerTag = compoundTag;
 		this.playerDataVersion = i;
 		this.scheduledEvents = timerQueue;
-		this.enabledDataPacks = linkedHashSet2;
-		this.disabledDataPacks = set;
 		this.customBossEvents = compoundTag2;
 		this.endDragonFightData = compoundTag3;
+		this.settings = levelSettings;
+		this.worldGenSettings = worldGenSettings;
+		this.worldGenSettingsLifecycle = lifecycle;
 	}
 
-	public PrimaryLevelData(LevelSettings levelSettings) {
+	public PrimaryLevelData(LevelSettings levelSettings, WorldGenSettings worldGenSettings, Lifecycle lifecycle) {
 		this(
 			null,
 			SharedConstants.getCurrentVersion().getWorldVersion(),
@@ -156,20 +159,26 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 			0,
 			null,
 			Sets.newLinkedHashSet(),
-			Sets.newLinkedHashSet(),
-			Sets.<String>newHashSet(),
 			new TimerQueue<>(TimerCallbacks.SERVER_CALLBACKS),
 			null,
 			new CompoundTag(),
-			levelSettings.copy()
+			levelSettings.copy(),
+			worldGenSettings,
+			lifecycle
 		);
 	}
 
 	public static PrimaryLevelData parse(
-		Dynamic<Tag> dynamic, DataFixer dataFixer, int i, @Nullable CompoundTag compoundTag, LevelSettings levelSettings, LevelVersion levelVersion
+		Dynamic<Tag> dynamic,
+		DataFixer dataFixer,
+		int i,
+		@Nullable CompoundTag compoundTag,
+		LevelSettings levelSettings,
+		LevelVersion levelVersion,
+		WorldGenSettings worldGenSettings,
+		Lifecycle lifecycle
 	) {
 		long l = dynamic.get("Time").asLong(0L);
-		OptionalDynamic<?> optionalDynamic = dynamic.get("DataPacks");
 		CompoundTag compoundTag2 = (CompoundTag)dynamic.get("DragonFight")
 			.result()
 			.map(Dynamic::getValue)
@@ -195,36 +204,33 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 			WorldBorder.Settings.read(dynamic, WorldBorder.DEFAULT_SETTINGS),
 			dynamic.get("WanderingTraderSpawnDelay").asInt(0),
 			dynamic.get("WanderingTraderSpawnChance").asInt(0),
-			(UUID)dynamic.get("WanderingTraderId").read(SerializableUUID.CODEC).result().map(SerializableUUID::value).orElse(null),
+			(UUID)dynamic.get("WanderingTraderId").read(SerializableUUID.CODEC).result().orElse(null),
 			(LinkedHashSet<String>)dynamic.get("ServerBrands")
 				.asStream()
 				.flatMap(dynamicx -> Util.toStream(dynamicx.asString().result()))
 				.collect(Collectors.toCollection(Sets::newLinkedHashSet)),
-			(LinkedHashSet<String>)optionalDynamic.get("Enabled")
-				.asStream()
-				.flatMap(dynamicx -> Util.toStream(dynamicx.asString().result()))
-				.collect(Collectors.toCollection(Sets::newLinkedHashSet)),
-			(Set<String>)optionalDynamic.get("Disabled").asStream().flatMap(dynamicx -> Util.toStream(dynamicx.asString().result())).collect(Collectors.toSet()),
 			new TimerQueue<>(TimerCallbacks.SERVER_CALLBACKS, dynamic.get("ScheduledEvents").asStream()),
 			(CompoundTag)dynamic.get("CustomBossEvents").orElseEmptyMap().getValue(),
 			compoundTag2,
-			levelSettings
+			levelSettings,
+			worldGenSettings,
+			lifecycle
 		);
 	}
 
 	@Override
-	public CompoundTag createTag(@Nullable CompoundTag compoundTag) {
+	public CompoundTag createTag(RegistryAccess registryAccess, @Nullable CompoundTag compoundTag) {
 		this.updatePlayerTag();
 		if (compoundTag == null) {
 			compoundTag = this.loadedPlayerTag;
 		}
 
 		CompoundTag compoundTag2 = new CompoundTag();
-		this.setTagData(compoundTag2, compoundTag);
+		this.setTagData(registryAccess, compoundTag2, compoundTag);
 		return compoundTag2;
 	}
 
-	private void setTagData(CompoundTag compoundTag, CompoundTag compoundTag2) {
+	private void setTagData(RegistryAccess registryAccess, CompoundTag compoundTag, @Nullable CompoundTag compoundTag2) {
 		ListTag listTag = new ListTag();
 		this.knownServerBrands.stream().map(StringTag::valueOf).forEach(listTag::add);
 		compoundTag.put("ServerBrands", listTag);
@@ -235,8 +241,9 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		compoundTag3.putBoolean("Snapshot", !SharedConstants.getCurrentVersion().isStable());
 		compoundTag.put("Version", compoundTag3);
 		compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
+		RegistryWriteOps<Tag> registryWriteOps = RegistryWriteOps.create(NbtOps.INSTANCE, registryAccess);
 		WorldGenSettings.CODEC
-			.encodeStart(NbtOps.INSTANCE, this.settings.worldGenSettings())
+			.encodeStart(registryWriteOps, this.worldGenSettings)
 			.resultOrPartial(Util.prefix("WorldGenSettings: ", LOGGER::error))
 			.ifPresent(tag -> compoundTag.put("WorldGenSettings", tag));
 		compoundTag.putInt("GameType", this.settings.gameType().getId());
@@ -265,22 +272,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 			compoundTag.put("Player", compoundTag2);
 		}
 
-		CompoundTag compoundTag4 = new CompoundTag();
-		ListTag listTag2 = new ListTag();
-
-		for (String string : this.enabledDataPacks) {
-			listTag2.add(StringTag.valueOf(string));
-		}
-
-		compoundTag4.put("Enabled", listTag2);
-		ListTag listTag3 = new ListTag();
-
-		for (String string2 : this.disabledDataPacks) {
-			listTag3.add(StringTag.valueOf(string2));
-		}
-
-		compoundTag4.put("Disabled", listTag3);
-		compoundTag.put("DataPacks", compoundTag4);
+		DataPackConfig.CODEC.encodeStart(NbtOps.INSTANCE, this.settings.getDataPackConfig()).result().ifPresent(tag -> compoundTag.put("DataPacks", tag));
 		if (this.customBossEvents != null) {
 			compoundTag.put("CustomBossEvents", this.customBossEvents);
 		}
@@ -508,7 +500,13 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 
 	@Override
 	public WorldGenSettings worldGenSettings() {
-		return this.settings.worldGenSettings();
+		return this.worldGenSettings;
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public Lifecycle worldGenSettingsLifecycle() {
+		return this.worldGenSettingsLifecycle;
 	}
 
 	@Override
@@ -522,13 +520,13 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	}
 
 	@Override
-	public Set<String> getDisabledDataPacks() {
-		return this.disabledDataPacks;
+	public DataPackConfig getDataPackConfig() {
+		return this.settings.getDataPackConfig();
 	}
 
 	@Override
-	public Set<String> getEnabledDataPacks() {
-		return this.enabledDataPacks;
+	public void setDataPackConfig(DataPackConfig dataPackConfig) {
+		this.settings = this.settings.withDataPackConfig(dataPackConfig);
 	}
 
 	@Nullable

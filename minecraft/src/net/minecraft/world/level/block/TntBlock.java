@@ -61,9 +61,7 @@ public class TntBlock extends Block {
 	@Override
 	public void wasExploded(Level level, BlockPos blockPos, Explosion explosion) {
 		if (!level.isClientSide) {
-			PrimedTnt primedTnt = new PrimedTnt(
-				level, (double)((float)blockPos.getX() + 0.5F), (double)blockPos.getY(), (double)((float)blockPos.getZ() + 0.5F), explosion.getSourceMob()
-			);
+			PrimedTnt primedTnt = new PrimedTnt(level, (double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, explosion.getSourceMob());
 			primedTnt.setFuse((short)(level.random.nextInt(primedTnt.getLife() / 4) + primedTnt.getLife() / 8));
 			level.addFreshEntity(primedTnt);
 		}

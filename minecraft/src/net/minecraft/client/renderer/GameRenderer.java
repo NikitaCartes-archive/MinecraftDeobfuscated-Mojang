@@ -319,7 +319,7 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 				d *= (double)Mth.lerp(f, this.oldFov, this.fov);
 			}
 
-			if (camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).getHealth() <= 0.0F) {
+			if (camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).isDeadOrDying()) {
 				float g = Math.min((float)((LivingEntity)camera.getEntity()).deathTime + f, 20.0F);
 				d /= (double)((1.0F - 500.0F / (g + 500.0F)) * 2.0F + 1.0F);
 			}
@@ -337,7 +337,7 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 		if (this.minecraft.getCameraEntity() instanceof LivingEntity) {
 			LivingEntity livingEntity = (LivingEntity)this.minecraft.getCameraEntity();
 			float g = (float)livingEntity.hurtTime - f;
-			if (livingEntity.getHealth() <= 0.0F) {
+			if (livingEntity.isDeadOrDying()) {
 				float h = Math.min((float)livingEntity.deathTime + f, 20.0F);
 				poseStack.mulPose(Vector3f.ZP.rotationDegrees(40.0F - 8000.0F / (h + 200.0F)));
 			}

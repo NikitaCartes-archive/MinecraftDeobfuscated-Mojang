@@ -469,10 +469,14 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		return bl;
 	}
 
+	private void bindEntryToSelf(AbstractSelectionList.Entry<E> entry) {
+		entry.list = this;
+	}
+
 	@Environment(EnvType.CLIENT)
 	public abstract static class Entry<E extends AbstractSelectionList.Entry<E>> implements GuiEventListener {
 		@Deprecated
-		AbstractSelectionList<E> list;
+		private AbstractSelectionList<E> list;
 
 		public abstract void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f);
 
@@ -499,13 +503,13 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 
 		public E set(int i, E entry) {
 			E entry2 = (E)this.delegate.set(i, entry);
-			entry.list = AbstractSelectionList.this;
+			AbstractSelectionList.this.bindEntryToSelf(entry);
 			return entry2;
 		}
 
 		public void add(int i, E entry) {
 			this.delegate.add(i, entry);
-			entry.list = AbstractSelectionList.this;
+			AbstractSelectionList.this.bindEntryToSelf(entry);
 		}
 
 		public E remove(int i) {

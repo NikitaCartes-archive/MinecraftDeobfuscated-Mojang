@@ -13,6 +13,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
@@ -143,7 +144,7 @@ public abstract class AbstractFish extends WaterAnimal {
 	}
 
 	@Override
-	protected boolean mobInteract(Player player, InteractionHand interactionHand) {
+	protected InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (itemStack.getItem() == Items.WATER_BUCKET && this.isAlive()) {
 			this.playSound(SoundEvents.BUCKET_FILL_FISH, 1.0F, 1.0F);
@@ -161,7 +162,7 @@ public abstract class AbstractFish extends WaterAnimal {
 			}
 
 			this.remove();
-			return true;
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		} else {
 			return super.mobInteract(player, interactionHand);
 		}

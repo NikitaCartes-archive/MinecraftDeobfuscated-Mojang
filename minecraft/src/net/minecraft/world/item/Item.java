@@ -145,8 +145,8 @@ public class Item implements ItemLike {
 		return false;
 	}
 
-	public boolean interactEnemy(ItemStack itemStack, Player player, LivingEntity livingEntity, InteractionHand interactionHand) {
-		return false;
+	public InteractionResult interactLivingEntity(ItemStack itemStack, Player player, LivingEntity livingEntity, InteractionHand interactionHand) {
+		return InteractionResult.PASS;
 	}
 
 	@Environment(EnvType.CLIENT)

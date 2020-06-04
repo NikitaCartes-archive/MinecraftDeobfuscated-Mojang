@@ -11,20 +11,21 @@ import java.io.PrintStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.Pack;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class FallbackResourceManager implements ResourceManager {
 	private static final Logger LOGGER = LogManager.getLogger();
-	protected final List<Pack> fallbacks = Lists.<Pack>newArrayList();
+	protected final List<PackResources> fallbacks = Lists.<PackResources>newArrayList();
 	private final PackType type;
 	private final String namespace;
 
@@ -33,8 +34,8 @@ public class FallbackResourceManager implements ResourceManager {
 		this.namespace = string;
 	}
 
-	public void add(Pack pack) {
-		this.fallbacks.add(pack);
+	public void add(PackResources packResources) {
+		this.fallbacks.add(packResources);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -46,22 +47,22 @@ public class FallbackResourceManager implements ResourceManager {
 	@Override
 	public Resource getResource(ResourceLocation resourceLocation) throws IOException {
 		this.validateLocation(resourceLocation);
-		Pack pack = null;
+		PackResources packResources = null;
 		ResourceLocation resourceLocation2 = getMetadataLocation(resourceLocation);
 
 		for (int i = this.fallbacks.size() - 1; i >= 0; i--) {
-			Pack pack2 = (Pack)this.fallbacks.get(i);
-			if (pack == null && pack2.hasResource(this.type, resourceLocation2)) {
-				pack = pack2;
+			PackResources packResources2 = (PackResources)this.fallbacks.get(i);
+			if (packResources == null && packResources2.hasResource(this.type, resourceLocation2)) {
+				packResources = packResources2;
 			}
 
-			if (pack2.hasResource(this.type, resourceLocation)) {
+			if (packResources2.hasResource(this.type, resourceLocation)) {
 				InputStream inputStream = null;
-				if (pack != null) {
-					inputStream = this.getWrappedResource(resourceLocation2, pack);
+				if (packResources != null) {
+					inputStream = this.getWrappedResource(resourceLocation2, packResources);
 				}
 
-				return new SimpleResource(pack2.getName(), resourceLocation, this.getWrappedResource(resourceLocation, pack2), inputStream);
+				return new SimpleResource(packResources2.getName(), resourceLocation, this.getWrappedResource(resourceLocation, packResources2), inputStream);
 			}
 		}
 
@@ -75,8 +76,8 @@ public class FallbackResourceManager implements ResourceManager {
 			return false;
 		} else {
 			for (int i = this.fallbacks.size() - 1; i >= 0; i--) {
-				Pack pack = (Pack)this.fallbacks.get(i);
-				if (pack.hasResource(this.type, resourceLocation)) {
+				PackResources packResources = (PackResources)this.fallbacks.get(i);
+				if (packResources.hasResource(this.type, resourceLocation)) {
 					return true;
 				}
 			}
@@ -85,10 +86,10 @@ public class FallbackResourceManager implements ResourceManager {
 		}
 	}
 
-	protected InputStream getWrappedResource(ResourceLocation resourceLocation, Pack pack) throws IOException {
-		InputStream inputStream = pack.getResource(this.type, resourceLocation);
+	protected InputStream getWrappedResource(ResourceLocation resourceLocation, PackResources packResources) throws IOException {
+		InputStream inputStream = packResources.getResource(this.type, resourceLocation);
 		return (InputStream)(LOGGER.isDebugEnabled()
-			? new FallbackResourceManager.LeakedResourceWarningInputStream(inputStream, resourceLocation, pack.getName())
+			? new FallbackResourceManager.LeakedResourceWarningInputStream(inputStream, resourceLocation, packResources.getName())
 			: inputStream);
 	}
 
@@ -108,10 +109,10 @@ public class FallbackResourceManager implements ResourceManager {
 		List<Resource> list = Lists.<Resource>newArrayList();
 		ResourceLocation resourceLocation2 = getMetadataLocation(resourceLocation);
 
-		for (Pack pack : this.fallbacks) {
-			if (pack.hasResource(this.type, resourceLocation)) {
-				InputStream inputStream = pack.hasResource(this.type, resourceLocation2) ? this.getWrappedResource(resourceLocation2, pack) : null;
-				list.add(new SimpleResource(pack.getName(), resourceLocation, this.getWrappedResource(resourceLocation, pack), inputStream));
+		for (PackResources packResources : this.fallbacks) {
+			if (packResources.hasResource(this.type, resourceLocation)) {
+				InputStream inputStream = packResources.hasResource(this.type, resourceLocation2) ? this.getWrappedResource(resourceLocation2, packResources) : null;
+				list.add(new SimpleResource(packResources.getName(), resourceLocation, this.getWrappedResource(resourceLocation, packResources), inputStream));
 			}
 		}
 
@@ -123,11 +124,18 @@ public class FallbackResourceManager implements ResourceManager {
 	}
 
 	@Override
+	public Collection<ResourceLocation> listResources(ResourceLocation resourceLocation, Predicate<String> predicate) {
+		return (Collection<ResourceLocation>)(Objects.equals(resourceLocation.getNamespace(), this.namespace)
+			? this.listResources(resourceLocation.getPath(), predicate)
+			: ImmutableSet.<ResourceLocation>of());
+	}
+
+	@Override
 	public Collection<ResourceLocation> listResources(String string, Predicate<String> predicate) {
 		List<ResourceLocation> list = Lists.<ResourceLocation>newArrayList();
 
-		for (Pack pack : this.fallbacks) {
-			list.addAll(pack.getResources(this.type, this.namespace, string, Integer.MAX_VALUE, predicate));
+		for (PackResources packResources : this.fallbacks) {
+			list.addAll(packResources.getResources(this.type, this.namespace, string, Integer.MAX_VALUE, predicate));
 		}
 
 		Collections.sort(list);
@@ -136,7 +144,7 @@ public class FallbackResourceManager implements ResourceManager {
 
 	@Environment(EnvType.CLIENT)
 	@Override
-	public Stream<Pack> listPacks() {
+	public Stream<PackResources> listPacks() {
 		return this.fallbacks.stream();
 	}
 

@@ -301,6 +301,7 @@ public class ItemEntity extends Entity {
 				}
 
 				player.awardStat(Stats.ITEM_PICKED_UP.get(item), i);
+				player.onItemPickup(this);
 			}
 		}
 	}

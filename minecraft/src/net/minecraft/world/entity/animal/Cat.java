@@ -20,6 +20,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
@@ -55,7 +56,6 @@ import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -382,13 +382,15 @@ public class Cat extends TamableAnimal {
 	}
 
 	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		Item item = itemStack.getItem();
-		if (itemStack.getItem() instanceof SpawnEggItem) {
-			return super.mobInteract(player, interactionHand);
-		} else if (this.level.isClientSide) {
-			return this.isTame() && this.isOwnedBy(player) || this.isFood(itemStack);
+		if (this.level.isClientSide) {
+			if (this.isTame() && this.isOwnedBy(player)) {
+				return InteractionResult.SUCCESS;
+			} else {
+				return !this.isFood(itemStack) || !(this.getHealth() < this.getMaxHealth()) && this.isTame() ? InteractionResult.PASS : InteractionResult.SUCCESS;
+			}
 		} else {
 			if (this.isTame()) {
 				if (this.isOwnedBy(player)) {
@@ -396,15 +398,15 @@ public class Cat extends TamableAnimal {
 						if (item.isEdible() && this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
 							this.usePlayerItem(player, itemStack);
 							this.heal((float)item.getFoodProperties().getNutrition());
-							return true;
+							return InteractionResult.CONSUME;
 						}
 
-						boolean bl = super.mobInteract(player, interactionHand);
-						if (!bl || this.isBaby()) {
+						InteractionResult interactionResult = super.mobInteract(player, interactionHand);
+						if (!interactionResult.consumesAction() || this.isBaby()) {
 							this.setOrderedToSit(!this.isOrderedToSit());
 						}
 
-						return bl;
+						return interactionResult;
 					}
 
 					DyeColor dyeColor = ((DyeItem)item).getDyeColor();
@@ -415,7 +417,7 @@ public class Cat extends TamableAnimal {
 						}
 
 						this.setPersistenceRequired();
-						return true;
+						return InteractionResult.CONSUME;
 					}
 				}
 			} else if (this.isFood(itemStack)) {
@@ -429,15 +431,15 @@ public class Cat extends TamableAnimal {
 				}
 
 				this.setPersistenceRequired();
-				return true;
+				return InteractionResult.CONSUME;
 			}
 
-			boolean bl = super.mobInteract(player, interactionHand);
-			if (bl) {
+			InteractionResult interactionResult = super.mobInteract(player, interactionHand);
+			if (interactionResult.consumesAction()) {
 				this.setPersistenceRequired();
 			}
 
-			return bl;
+			return interactionResult;
 		}
 	}
 
@@ -594,9 +596,9 @@ public class Cat extends TamableAnimal {
 					.addFreshEntity(
 						new ItemEntity(
 							this.cat.level,
-							(double)((float)mutableBlockPos.getX() - Mth.sin(this.cat.yBodyRot * (float) (Math.PI / 180.0))),
+							(double)mutableBlockPos.getX() - (double)Mth.sin(this.cat.yBodyRot * (float) (Math.PI / 180.0)),
 							(double)mutableBlockPos.getY(),
-							(double)((float)mutableBlockPos.getZ() + Mth.cos(this.cat.yBodyRot * (float) (Math.PI / 180.0))),
+							(double)mutableBlockPos.getZ() + (double)Mth.cos(this.cat.yBodyRot * (float) (Math.PI / 180.0)),
 							itemStack
 						)
 					);

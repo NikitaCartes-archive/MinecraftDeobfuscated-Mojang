@@ -1,16 +1,16 @@
 package net.minecraft.server.packs.repository;
 
-import java.util.Map;
-import net.minecraft.server.packs.VanillaPack;
+import java.util.function.Consumer;
+import net.minecraft.server.packs.VanillaPackResources;
 
 public class ServerPacksSource implements RepositorySource {
-	private final VanillaPack vanillaPack = new VanillaPack("minecraft");
+	private final VanillaPackResources vanillaPack = new VanillaPackResources("minecraft");
 
 	@Override
-	public <T extends UnopenedPack> void loadPacks(Map<String, T> map, UnopenedPack.UnopenedPackConstructor<T> unopenedPackConstructor) {
-		T unopenedPack = UnopenedPack.create("vanilla", false, () -> this.vanillaPack, unopenedPackConstructor, UnopenedPack.Position.BOTTOM);
-		if (unopenedPack != null) {
-			map.put("vanilla", unopenedPack);
+	public <T extends Pack> void loadPacks(Consumer<T> consumer, Pack.PackConstructor<T> packConstructor) {
+		T pack = Pack.create("vanilla", false, () -> this.vanillaPack, packConstructor, Pack.Position.BOTTOM, PackSource.BUILT_IN);
+		if (pack != null) {
+			consumer.accept(pack);
 		}
 	}
 }

@@ -13,7 +13,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.metadata.language.LanguageMetadataSection;
 import net.minecraft.locale.Language;
-import net.minecraft.server.packs.Pack;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import org.apache.logging.log4j.LogManager;
@@ -31,18 +31,18 @@ public class LanguageManager implements ResourceManagerReloadListener {
 		this.currentCode = string;
 	}
 
-	private static Map<String, LanguageInfo> extractLanguages(Stream<Pack> stream) {
+	private static Map<String, LanguageInfo> extractLanguages(Stream<PackResources> stream) {
 		Map<String, LanguageInfo> map = Maps.<String, LanguageInfo>newHashMap();
-		stream.forEach(pack -> {
+		stream.forEach(packResources -> {
 			try {
-				LanguageMetadataSection languageMetadataSection = pack.getMetadataSection(LanguageMetadataSection.SERIALIZER);
+				LanguageMetadataSection languageMetadataSection = packResources.getMetadataSection(LanguageMetadataSection.SERIALIZER);
 				if (languageMetadataSection != null) {
 					for (LanguageInfo languageInfo : languageMetadataSection.getLanguages()) {
 						map.putIfAbsent(languageInfo.getCode(), languageInfo);
 					}
 				}
 			} catch (IOException | RuntimeException var5) {
-				LOGGER.warn("Unable to parse language metadata section of resourcepack: {}", pack.getName(), var5);
+				LOGGER.warn("Unable to parse language metadata section of resourcepack: {}", packResources.getName(), var5);
 			}
 		});
 		return ImmutableMap.copyOf(map);

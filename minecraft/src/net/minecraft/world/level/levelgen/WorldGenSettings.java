@@ -1,17 +1,15 @@
 package net.minecraft.world.level.levelgen;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -22,14 +20,15 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.OverworldBiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,11 +39,8 @@ public class WorldGenSettings {
 						Codec.LONG.fieldOf("seed").stable().forGetter(WorldGenSettings::seed),
 						Codec.BOOL.fieldOf("generate_features").withDefault(true).stable().forGetter(WorldGenSettings::generateFeatures),
 						Codec.BOOL.fieldOf("bonus_chest").withDefault(false).stable().forGetter(WorldGenSettings::generateBonusChest),
-						Codec.unboundedMap(
-								ResourceLocation.CODEC.xmap(ResourceKey.elementKey(Registry.DIMENSION_REGISTRY), ResourceKey::location),
-								Codec.mapPair(DimensionType.CODEC.fieldOf("type"), ChunkGenerator.CODEC.fieldOf("generator")).codec()
-							)
-							.xmap(DimensionType::sortMap, Function.identity())
+						MappedRegistry.dataPackCodec(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), LevelStem.CODEC)
+							.xmap(LevelStem::sortMap, Function.identity())
 							.fieldOf("dimensions")
 							.forGetter(WorldGenSettings::dimensions),
 						Codec.STRING.optionalFieldOf("legacy_custom_options").stable().forGetter(worldGenSettings -> worldGenSettings.legacyCustomOptions)
@@ -57,13 +53,10 @@ public class WorldGenSettings {
 	public static final WorldGenSettings DEMO_SETTINGS = new WorldGenSettings(
 		(long)DEMO_SEED, true, true, withOverworld(DimensionType.defaultDimensions((long)DEMO_SEED), makeDefaultOverworld((long)DEMO_SEED))
 	);
-	public static final WorldGenSettings TEST_SETTINGS = new WorldGenSettings(
-		0L, false, false, withOverworld(DimensionType.defaultDimensions(0L), new FlatLevelSource(FlatLevelGeneratorSettings.getDefault()))
-	);
 	private final long seed;
 	private final boolean generateFeatures;
 	private final boolean generateBonusChest;
-	private final LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> dimensions;
+	private final MappedRegistry<LevelStem> dimensions;
 	private final Optional<String> legacyCustomOptions;
 
 	private DataResult<WorldGenSettings> guardExperimental() {
@@ -71,20 +64,18 @@ public class WorldGenSettings {
 	}
 
 	private boolean stable() {
-		return DimensionType.stable(this.seed, this.dimensions);
+		return LevelStem.stable(this.seed, this.dimensions);
 	}
 
-	public WorldGenSettings(long l, boolean bl, boolean bl2, LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> linkedHashMap) {
-		this(l, bl, bl2, linkedHashMap, Optional.empty());
+	public WorldGenSettings(long l, boolean bl, boolean bl2, MappedRegistry<LevelStem> mappedRegistry) {
+		this(l, bl, bl2, mappedRegistry, Optional.empty());
 	}
 
-	private WorldGenSettings(
-		long l, boolean bl, boolean bl2, LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> linkedHashMap, Optional<String> optional
-	) {
+	private WorldGenSettings(long l, boolean bl, boolean bl2, MappedRegistry<LevelStem> mappedRegistry, Optional<String> optional) {
 		this.seed = l;
 		this.generateFeatures = bl;
 		this.generateBonusChest = bl2;
-		this.dimensions = linkedHashMap;
+		this.dimensions = mappedRegistry;
 		this.legacyCustomOptions = optional;
 	}
 
@@ -109,30 +100,40 @@ public class WorldGenSettings {
 		return this.generateBonusChest;
 	}
 
-	public static LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> withOverworld(
-		LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> linkedHashMap, ChunkGenerator chunkGenerator
-	) {
-		LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> linkedHashMap2 = Maps.newLinkedHashMap();
-		Pair<DimensionType, ChunkGenerator> pair = (Pair<DimensionType, ChunkGenerator>)linkedHashMap.get(DimensionType.OVERWORLD_LOCATION);
-		DimensionType dimensionType = pair == null ? DimensionType.makeDefaultOverworld() : pair.getFirst();
-		linkedHashMap2.put(Level.OVERWORLD, Pair.of(dimensionType, chunkGenerator));
+	public static MappedRegistry<LevelStem> withOverworld(MappedRegistry<LevelStem> mappedRegistry, ChunkGenerator chunkGenerator) {
+		MappedRegistry<LevelStem> mappedRegistry2 = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental());
+		LevelStem levelStem = mappedRegistry.get(LevelStem.OVERWORLD);
+		DimensionType dimensionType = levelStem == null ? DimensionType.defaultOverworld() : levelStem.type();
+		mappedRegistry2.register(LevelStem.OVERWORLD, new LevelStem(() -> dimensionType, chunkGenerator));
 
-		for (Entry<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> entry : linkedHashMap.entrySet()) {
-			if (entry.getKey() != Level.OVERWORLD) {
-				linkedHashMap2.put(entry.getKey(), entry.getValue());
+		for (Entry<ResourceKey<LevelStem>, LevelStem> entry : mappedRegistry.entrySet()) {
+			ResourceKey<LevelStem> resourceKey = (ResourceKey<LevelStem>)entry.getKey();
+			if (resourceKey != LevelStem.OVERWORLD) {
+				mappedRegistry2.register(resourceKey, entry.getValue());
+				if (mappedRegistry.persistent(resourceKey)) {
+					mappedRegistry2.setPersistent(resourceKey);
+				}
 			}
 		}
 
-		return linkedHashMap2;
+		return mappedRegistry2;
 	}
 
-	public LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> dimensions() {
+	public MappedRegistry<LevelStem> dimensions() {
 		return this.dimensions;
 	}
 
 	public ChunkGenerator overworld() {
-		Pair<DimensionType, ChunkGenerator> pair = (Pair<DimensionType, ChunkGenerator>)this.dimensions.get(DimensionType.OVERWORLD_LOCATION);
-		return (ChunkGenerator)(pair == null ? makeDefaultOverworld(new Random().nextLong()) : pair.getSecond());
+		LevelStem levelStem = this.dimensions.get(LevelStem.OVERWORLD);
+		return (ChunkGenerator)(levelStem == null ? makeDefaultOverworld(new Random().nextLong()) : levelStem.generator());
+	}
+
+	public ImmutableSet<ResourceKey<Level>> levels() {
+		return (ImmutableSet<ResourceKey<Level>>)this.dimensions()
+			.entrySet()
+			.stream()
+			.map(entry -> ResourceKey.create(Registry.DIMENSION_REGISTRY, ((ResourceKey)entry.getKey()).location()))
+			.collect(ImmutableSet.toImmutableSet());
 	}
 
 	public boolean isDebug() {
@@ -162,6 +163,11 @@ public class WorldGenSettings {
 		return new WorldGenSettings(this.seed, this.generateFeatures, !this.generateBonusChest, this.dimensions);
 	}
 
+	@Environment(EnvType.CLIENT)
+	public WorldGenSettings withDimensions(MappedRegistry<LevelStem> mappedRegistry) {
+		return new WorldGenSettings(this.seed, this.generateFeatures, this.generateBonusChest, mappedRegistry);
+	}
+
 	public static WorldGenSettings create(Properties properties) {
 		String string = MoreObjects.firstNonNull((String)properties.get("generator-settings"), "");
 		properties.put("generator-settings", string);
@@ -185,7 +191,7 @@ public class WorldGenSettings {
 			}
 		}
 
-		LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> linkedHashMap = DimensionType.defaultDimensions(l);
+		MappedRegistry<LevelStem> mappedRegistry = DimensionType.defaultDimensions(l);
 		switch (string5) {
 			case "flat":
 				JsonObject jsonObject = !string.isEmpty() ? GsonHelper.parse(string) : new JsonObject();
@@ -195,7 +201,7 @@ public class WorldGenSettings {
 					bl,
 					false,
 					withOverworld(
-						linkedHashMap,
+						mappedRegistry,
 						new FlatLevelSource(
 							(FlatLevelGeneratorSettings)FlatLevelGeneratorSettings.CODEC
 								.parse(dynamic)
@@ -205,32 +211,36 @@ public class WorldGenSettings {
 					)
 				);
 			case "debug_all_block_states":
-				return new WorldGenSettings(l, bl, false, withOverworld(linkedHashMap, DebugLevelSource.INSTANCE));
+				return new WorldGenSettings(l, bl, false, withOverworld(mappedRegistry, DebugLevelSource.INSTANCE));
 			default:
-				return new WorldGenSettings(l, bl, false, withOverworld(linkedHashMap, makeDefaultOverworld(l)));
+				return new WorldGenSettings(l, bl, false, withOverworld(mappedRegistry, makeDefaultOverworld(l)));
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
 	public WorldGenSettings withSeed(boolean bl, OptionalLong optionalLong) {
 		long l = optionalLong.orElse(this.seed);
-		LinkedHashMap<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> linkedHashMap;
+		MappedRegistry<LevelStem> mappedRegistry;
 		if (optionalLong.isPresent()) {
-			linkedHashMap = Maps.newLinkedHashMap();
+			mappedRegistry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental());
 			long m = optionalLong.getAsLong();
 
-			for (Entry<ResourceKey<Level>, Pair<DimensionType, ChunkGenerator>> entry : this.dimensions.entrySet()) {
-				linkedHashMap.put(entry.getKey(), Pair.of(((Pair)entry.getValue()).getFirst(), ((ChunkGenerator)((Pair)entry.getValue()).getSecond()).withSeed(m)));
+			for (Entry<ResourceKey<LevelStem>, LevelStem> entry : this.dimensions.entrySet()) {
+				ResourceKey<LevelStem> resourceKey = (ResourceKey<LevelStem>)entry.getKey();
+				mappedRegistry.register(resourceKey, new LevelStem(((LevelStem)entry.getValue()).typeSupplier(), ((LevelStem)entry.getValue()).generator().withSeed(m)));
+				if (this.dimensions.persistent(resourceKey)) {
+					mappedRegistry.setPersistent(resourceKey);
+				}
 			}
 		} else {
-			linkedHashMap = this.dimensions;
+			mappedRegistry = this.dimensions;
 		}
 
 		WorldGenSettings worldGenSettings;
 		if (this.isDebug()) {
-			worldGenSettings = new WorldGenSettings(l, false, false, linkedHashMap);
+			worldGenSettings = new WorldGenSettings(l, false, false, mappedRegistry);
 		} else {
-			worldGenSettings = new WorldGenSettings(l, this.generateFeatures(), this.generateBonusChest() && !bl, linkedHashMap);
+			worldGenSettings = new WorldGenSettings(l, this.generateFeatures(), this.generateBonusChest() && !bl, mappedRegistry);
 		}
 
 		return worldGenSettings;

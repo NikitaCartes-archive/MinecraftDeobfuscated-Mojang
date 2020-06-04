@@ -303,8 +303,8 @@ public final class ItemStack {
 		return this.getItem().isCorrectToolForDrops(blockState);
 	}
 
-	public boolean interactEnemy(Player player, LivingEntity livingEntity, InteractionHand interactionHand) {
-		return this.getItem().interactEnemy(this, player, livingEntity, interactionHand);
+	public InteractionResult interactLivingEntity(Player player, LivingEntity livingEntity, InteractionHand interactionHand) {
+		return this.getItem().interactLivingEntity(this, player, livingEntity, interactionHand);
 	}
 
 	public ItemStack copy() {

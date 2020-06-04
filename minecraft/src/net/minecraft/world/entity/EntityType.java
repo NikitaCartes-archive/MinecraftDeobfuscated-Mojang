@@ -1,5 +1,6 @@
 package net.minecraft.world.entity;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -17,6 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.Mth;
 import net.minecraft.util.datafix.fixes.References;
@@ -58,7 +60,6 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.decoration.Painting;
-import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
@@ -128,6 +129,10 @@ import net.minecraft.world.entity.vehicle.MinecartTNT;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -216,7 +221,9 @@ public class EntityType<T extends Entity> {
 		"firework_rocket",
 		EntityType.Builder.<FireworkRocketEntity>of(FireworkRocketEntity::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10)
 	);
-	public static final EntityType<Fox> FOX = register("fox", EntityType.Builder.of(Fox::new, MobCategory.CREATURE).sized(0.6F, 0.7F).clientTrackingRange(8));
+	public static final EntityType<Fox> FOX = register(
+		"fox", EntityType.Builder.of(Fox::new, MobCategory.CREATURE).sized(0.6F, 0.7F).clientTrackingRange(8).immuneTo(Blocks.SWEET_BERRY_BUSH)
+	);
 	public static final EntityType<Ghast> GHAST = register(
 		"ghast", EntityType.Builder.of(Ghast::new, MobCategory.MONSTER).fireImmune().sized(4.0F, 4.0F).clientTrackingRange(10)
 	);
@@ -255,6 +262,10 @@ public class EntityType<T extends Entity> {
 			.sized(0.5F, 0.5F)
 			.clientTrackingRange(10)
 			.updateInterval(Integer.MAX_VALUE)
+	);
+	public static final EntityType<LightningBolt> LIGHTNING_BOLT = register(
+		"lightning_bolt",
+		EntityType.Builder.of(LightningBolt::new, MobCategory.MISC).noSave().sized(0.0F, 0.0F).clientTrackingRange(16).updateInterval(Integer.MAX_VALUE)
 	);
 	public static final EntityType<Llama> LLAMA = register(
 		"llama", EntityType.Builder.of(Llama::new, MobCategory.CREATURE).sized(0.9F, 1.87F).clientTrackingRange(10)
@@ -419,10 +430,11 @@ public class EntityType<T extends Entity> {
 		"witch", EntityType.Builder.of(Witch::new, MobCategory.MONSTER).sized(0.6F, 1.95F).clientTrackingRange(8)
 	);
 	public static final EntityType<WitherBoss> WITHER = register(
-		"wither", EntityType.Builder.of(WitherBoss::new, MobCategory.MONSTER).fireImmune().sized(0.9F, 3.5F).clientTrackingRange(10)
+		"wither", EntityType.Builder.of(WitherBoss::new, MobCategory.MONSTER).fireImmune().immuneTo(Blocks.WITHER_ROSE).sized(0.9F, 3.5F).clientTrackingRange(10)
 	);
 	public static final EntityType<WitherSkeleton> WITHER_SKELETON = register(
-		"wither_skeleton", EntityType.Builder.of(WitherSkeleton::new, MobCategory.MONSTER).fireImmune().sized(0.7F, 2.4F).clientTrackingRange(8)
+		"wither_skeleton",
+		EntityType.Builder.of(WitherSkeleton::new, MobCategory.MONSTER).fireImmune().immuneTo(Blocks.WITHER_ROSE).sized(0.7F, 2.4F).clientTrackingRange(8)
 	);
 	public static final EntityType<WitherSkull> WITHER_SKULL = register(
 		"wither_skull", EntityType.Builder.<WitherSkull>of(WitherSkull::new, MobCategory.MISC).sized(0.3125F, 0.3125F).clientTrackingRange(4).updateInterval(10)
@@ -443,9 +455,6 @@ public class EntityType<T extends Entity> {
 	public static final EntityType<ZombifiedPiglin> ZOMBIFIED_PIGLIN = register(
 		"zombified_piglin", EntityType.Builder.of(ZombifiedPiglin::new, MobCategory.MONSTER).fireImmune().sized(0.6F, 1.95F).clientTrackingRange(8)
 	);
-	public static final EntityType<LightningBolt> LIGHTNING_BOLT = register(
-		"lightning_bolt", EntityType.Builder.<LightningBolt>createNothing(MobCategory.MISC).noSave().sized(0.0F, 0.0F)
-	);
 	public static final EntityType<Player> PLAYER = register(
 		"player", EntityType.Builder.<Player>createNothing(MobCategory.MISC).noSave().noSummon().sized(0.6F, 1.8F).clientTrackingRange(32).updateInterval(2)
 	);
@@ -455,6 +464,7 @@ public class EntityType<T extends Entity> {
 	);
 	private final EntityType.EntityFactory<T> factory;
 	private final MobCategory category;
+	private final ImmutableSet<Block> immuneTo;
 	private final boolean serialize;
 	private final boolean summon;
 	private final boolean fireImmune;
@@ -488,6 +498,7 @@ public class EntityType<T extends Entity> {
 		boolean bl2,
 		boolean bl3,
 		boolean bl4,
+		ImmutableSet<Block> immutableSet,
 		EntityDimensions entityDimensions,
 		int i,
 		int j
@@ -498,6 +509,7 @@ public class EntityType<T extends Entity> {
 		this.serialize = bl;
 		this.summon = bl2;
 		this.fireImmune = bl3;
+		this.immuneTo = immutableSet;
 		this.dimensions = entityDimensions;
 		this.clientTrackingRange = i;
 		this.updateInterval = j;
@@ -688,6 +700,17 @@ public class EntityType<T extends Entity> {
 		return new AABB(d - (double)g, e, f - (double)g, d + (double)g, e + (double)this.getHeight(), f + (double)g);
 	}
 
+	public boolean isBlockDangerous(BlockState blockState) {
+		if (this.immuneTo.contains(blockState.getBlock())) {
+			return false;
+		} else {
+			return this.fireImmune
+					|| !blockState.is(BlockTags.FIRE) && !blockState.is(Blocks.MAGMA_BLOCK) && !CampfireBlock.isLitCampfire(blockState) && !blockState.is(Blocks.LAVA)
+				? blockState.is(Blocks.WITHER_ROSE) || blockState.is(Blocks.SWEET_BERRY_BUSH) || blockState.is(Blocks.CACTUS)
+				: true;
+		}
+	}
+
 	public EntityDimensions getDimensions() {
 		return this.dimensions;
 	}
@@ -750,6 +773,7 @@ public class EntityType<T extends Entity> {
 	public static class Builder<T extends Entity> {
 		private final EntityType.EntityFactory<T> factory;
 		private final MobCategory category;
+		private ImmutableSet<Block> immuneTo = ImmutableSet.of();
 		private boolean serialize = true;
 		private boolean summon = true;
 		private boolean fireImmune;
@@ -792,6 +816,11 @@ public class EntityType<T extends Entity> {
 			return this;
 		}
 
+		public EntityType.Builder<T> immuneTo(Block... blocks) {
+			this.immuneTo = ImmutableSet.copyOf(blocks);
+			return this;
+		}
+
 		public EntityType.Builder<T> canSpawnFarFromPlayer() {
 			this.canSpawnFarFromPlayer = true;
 			return this;
@@ -819,6 +848,7 @@ public class EntityType<T extends Entity> {
 				this.summon,
 				this.fireImmune,
 				this.canSpawnFarFromPlayer,
+				this.immuneTo,
 				this.dimensions,
 				this.clientTrackingRange,
 				this.updateInterval

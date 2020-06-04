@@ -32,15 +32,13 @@ import net.minecraft.world.level.chunk.storage.ChunkStorage;
 import net.minecraft.world.level.chunk.storage.RegionFile;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.WorldData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class WorldUpgrader {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final ThreadFactory THREAD_FACTORY = new ThreadFactoryBuilder().setDaemon(true).build();
-	private final String levelName;
-	private final ImmutableSet<ResourceKey<Level>> dimensionTypes;
+	private final ImmutableSet<ResourceKey<Level>> levels;
 	private final boolean eraseCache;
 	private final LevelStorageSource.LevelStorageAccess levelStorage;
 	private final Thread thread;
@@ -56,13 +54,11 @@ public class WorldUpgrader {
 	private static final Pattern REGEX = Pattern.compile("^r\\.(-?[0-9]+)\\.(-?[0-9]+)\\.mca$");
 	private final DimensionDataStorage overworldDataStorage;
 
-	public WorldUpgrader(LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, WorldData worldData, boolean bl) {
-		this.levelName = worldData.getLevelName();
-		this.dimensionTypes = (ImmutableSet<ResourceKey<Level>>)worldData.worldGenSettings().dimensions().keySet().stream().collect(ImmutableSet.toImmutableSet());
+	public WorldUpgrader(LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, ImmutableSet<ResourceKey<Level>> immutableSet, boolean bl) {
+		this.levels = immutableSet;
 		this.eraseCache = bl;
 		this.dataFixer = dataFixer;
 		this.levelStorage = levelStorageAccess;
-		levelStorageAccess.saveDataTag(worldData);
 		this.overworldDataStorage = new DimensionDataStorage(new File(this.levelStorage.getDimensionPath(Level.OVERWORLD), "data"), dataFixer);
 		this.thread = THREAD_FACTORY.newThread(this::work);
 		this.thread.setUncaughtExceptionHandler((thread, throwable) -> {
@@ -86,7 +82,7 @@ public class WorldUpgrader {
 		this.totalChunks = 0;
 		Builder<ResourceKey<Level>, ListIterator<ChunkPos>> builder = ImmutableMap.builder();
 
-		for (ResourceKey<Level> resourceKey : this.dimensionTypes) {
+		for (ResourceKey<Level> resourceKey : this.levels) {
 			List<ChunkPos> list = this.getAllChunkPos(resourceKey);
 			builder.put(resourceKey, list.listIterator());
 			this.totalChunks = this.totalChunks + list.size();
@@ -99,7 +95,7 @@ public class WorldUpgrader {
 			ImmutableMap<ResourceKey<Level>, ListIterator<ChunkPos>> immutableMap = builder.build();
 			Builder<ResourceKey<Level>, ChunkStorage> builder2 = ImmutableMap.builder();
 
-			for (ResourceKey<Level> resourceKey2 : this.dimensionTypes) {
+			for (ResourceKey<Level> resourceKey2 : this.levels) {
 				File file = this.levelStorage.getDimensionPath(resourceKey2);
 				builder2.put(resourceKey2, new ChunkStorage(new File(file, "region"), this.dataFixer, true));
 			}
@@ -112,7 +108,7 @@ public class WorldUpgrader {
 				boolean bl = false;
 				float g = 0.0F;
 
-				for (ResourceKey<Level> resourceKey3 : this.dimensionTypes) {
+				for (ResourceKey<Level> resourceKey3 : this.levels) {
 					ListIterator<ChunkPos> listIterator = immutableMap.get(resourceKey3);
 					ChunkStorage chunkStorage = immutableMap2.get(resourceKey3);
 					if (listIterator.hasNext()) {
@@ -229,8 +225,8 @@ public class WorldUpgrader {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public ImmutableSet<ResourceKey<Level>> dimensionTypes() {
-		return this.dimensionTypes;
+	public ImmutableSet<ResourceKey<Level>> levels() {
+		return this.levels;
 	}
 
 	@Environment(EnvType.CLIENT)

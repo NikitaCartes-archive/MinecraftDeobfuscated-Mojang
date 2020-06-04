@@ -54,7 +54,7 @@ public class BredAnimalsTrigger extends SimpleCriterionTrigger<BredAnimalsTrigge
 
 		public static BredAnimalsTrigger.TriggerInstance bredAnimals(EntityPredicate.Builder builder) {
 			return new BredAnimalsTrigger.TriggerInstance(
-				EntityPredicate.Composite.ANY, EntityPredicate.Composite.wrap(builder.build()), EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY
+				EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY, EntityPredicate.Composite.wrap(builder.build())
 			);
 		}
 

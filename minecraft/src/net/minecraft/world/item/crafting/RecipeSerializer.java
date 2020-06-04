@@ -40,6 +40,7 @@ public interface RecipeSerializer<T extends Recipe<?>> {
 		"campfire_cooking", new SimpleCookingSerializer<>(CampfireCookingRecipe::new, 100)
 	);
 	RecipeSerializer<StonecutterRecipe> STONECUTTER = register("stonecutting", new SingleItemRecipe.Serializer<>(StonecutterRecipe::new));
+	RecipeSerializer<UpgradeRecipe> SMITHING = register("smithing", new UpgradeRecipe.Serializer());
 
 	T fromJson(ResourceLocation resourceLocation, JsonObject jsonObject);
 

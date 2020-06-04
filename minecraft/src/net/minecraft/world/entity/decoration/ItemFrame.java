@@ -13,6 +13,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -339,24 +340,28 @@ public class ItemFrame extends HangingEntity {
 	}
 
 	@Override
-	public boolean interact(Player player, InteractionHand interactionHand) {
+	public InteractionResult interact(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		boolean bl = !this.getItem().isEmpty();
 		boolean bl2 = !itemStack.isEmpty();
-		if (this.level.isClientSide) {
-			return bl || bl2;
-		} else {
-			if (this.fixed || bl) {
+		if (this.fixed) {
+			return InteractionResult.PASS;
+		} else if (!this.level.isClientSide) {
+			if (!bl) {
+				if (bl2 && !this.removed) {
+					this.setItem(itemStack);
+					if (!player.abilities.instabuild) {
+						itemStack.shrink(1);
+					}
+				}
+			} else {
 				this.playSound(SoundEvents.ITEM_FRAME_ROTATE_ITEM, 1.0F, 1.0F);
 				this.setRotation(this.getRotation() + 1);
-			} else if (bl2 && !this.removed) {
-				this.setItem(itemStack);
-				if (!player.abilities.instabuild) {
-					itemStack.shrink(1);
-				}
 			}
 
-			return true;
+			return InteractionResult.CONSUME;
+		} else {
+			return !bl && !bl2 ? InteractionResult.PASS : InteractionResult.SUCCESS;
 		}
 	}
 

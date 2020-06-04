@@ -15,83 +15,62 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.server.packs.Pack;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class UnopenedPack implements AutoCloseable {
+public class Pack implements AutoCloseable {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final PackMetadataSection BROKEN_ASSETS_FALLBACK = new PackMetadataSection(
 		new TranslatableComponent("resourcePack.broken_assets").withStyle(new ChatFormatting[]{ChatFormatting.RED, ChatFormatting.ITALIC}),
 		SharedConstants.getCurrentVersion().getPackVersion()
 	);
 	private final String id;
-	private final Supplier<Pack> supplier;
+	private final Supplier<PackResources> supplier;
 	private final Component title;
 	private final Component description;
 	private final PackCompatibility compatibility;
-	private final UnopenedPack.Position defaultPosition;
+	private final Pack.Position defaultPosition;
 	private final boolean required;
 	private final boolean fixedPosition;
+	private final PackSource packSource;
 
 	@Nullable
-	public static <T extends UnopenedPack> T create(
-		String string, boolean bl, Supplier<Pack> supplier, UnopenedPack.UnopenedPackConstructor<T> unopenedPackConstructor, UnopenedPack.Position position
+	public static <T extends Pack> T create(
+		String string, boolean bl, Supplier<PackResources> supplier, Pack.PackConstructor<T> packConstructor, Pack.Position position, PackSource packSource
 	) {
-		try {
-			Pack pack = (Pack)supplier.get();
-			Throwable var6 = null;
-
-			UnopenedPack var8;
-			try {
-				PackMetadataSection packMetadataSection = pack.getMetadataSection(PackMetadataSection.SERIALIZER);
-				if (bl && packMetadataSection == null) {
-					LOGGER.error(
-						"Broken/missing pack.mcmeta detected, fudging it into existance. Please check that your launcher has downloaded all assets for the game correctly!"
-					);
-					packMetadataSection = BROKEN_ASSETS_FALLBACK;
-				}
-
-				if (packMetadataSection == null) {
-					LOGGER.warn("Couldn't find pack meta for pack {}", string);
-					return null;
-				}
-
-				var8 = unopenedPackConstructor.create(string, bl, supplier, pack, packMetadataSection, position);
-			} catch (Throwable var19) {
-				var6 = var19;
-				throw var19;
-			} finally {
-				if (pack != null) {
-					if (var6 != null) {
-						try {
-							pack.close();
-						} catch (Throwable var18) {
-							var6.addSuppressed(var18);
-						}
-					} else {
-						pack.close();
-					}
-				}
+		try (PackResources packResources = (PackResources)supplier.get()) {
+			PackMetadataSection packMetadataSection = packResources.getMetadataSection(PackMetadataSection.SERIALIZER);
+			if (bl && packMetadataSection == null) {
+				LOGGER.error(
+					"Broken/missing pack.mcmeta detected, fudging it into existance. Please check that your launcher has downloaded all assets for the game correctly!"
+				);
+				packMetadataSection = BROKEN_ASSETS_FALLBACK;
 			}
 
-			return (T)var8;
-		} catch (IOException var21) {
-			LOGGER.warn("Couldn't get pack info for: {}", var21.toString());
-			return null;
+			if (packMetadataSection != null) {
+				return packConstructor.create(string, bl, supplier, packResources, packMetadataSection, position, packSource);
+			}
+
+			LOGGER.warn("Couldn't find pack meta for pack {}", string);
+		} catch (IOException var22) {
+			LOGGER.warn("Couldn't get pack info for: {}", var22.toString());
 		}
+
+		return null;
 	}
 
-	public UnopenedPack(
+	public Pack(
 		String string,
 		boolean bl,
-		Supplier<Pack> supplier,
+		Supplier<PackResources> supplier,
 		Component component,
 		Component component2,
 		PackCompatibility packCompatibility,
-		UnopenedPack.Position position,
-		boolean bl2
+		Pack.Position position,
+		boolean bl2,
+		PackSource packSource
 	) {
 		this.id = string;
 		this.supplier = supplier;
@@ -101,18 +80,28 @@ public class UnopenedPack implements AutoCloseable {
 		this.required = bl;
 		this.defaultPosition = position;
 		this.fixedPosition = bl2;
+		this.packSource = packSource;
 	}
 
-	public UnopenedPack(String string, boolean bl, Supplier<Pack> supplier, Pack pack, PackMetadataSection packMetadataSection, UnopenedPack.Position position) {
+	public Pack(
+		String string,
+		boolean bl,
+		Supplier<PackResources> supplier,
+		PackResources packResources,
+		PackMetadataSection packMetadataSection,
+		Pack.Position position,
+		PackSource packSource
+	) {
 		this(
 			string,
 			bl,
 			supplier,
-			new TextComponent(pack.getName()),
+			new TextComponent(packResources.getName()),
 			packMetadataSection.getDescription(),
 			PackCompatibility.forFormat(packMetadataSection.getPackFormat()),
 			position,
-			false
+			false,
+			packSource
 		);
 	}
 
@@ -127,7 +116,7 @@ public class UnopenedPack implements AutoCloseable {
 	}
 
 	public Component getChatLink(boolean bl) {
-		return ComponentUtils.wrapInSquareBrackets(new TextComponent(this.id))
+		return ComponentUtils.wrapInSquareBrackets(this.packSource.decorate(new TextComponent(this.id)))
 			.withStyle(
 				style -> style.withColor(bl ? ChatFormatting.GREEN : ChatFormatting.RED)
 						.withInsertion(StringArgumentType.escapeIfRequired(this.id))
@@ -139,8 +128,8 @@ public class UnopenedPack implements AutoCloseable {
 		return this.compatibility;
 	}
 
-	public Pack open() {
-		return (Pack)this.supplier.get();
+	public PackResources open() {
+		return (PackResources)this.supplier.get();
 	}
 
 	public String getId() {
@@ -155,18 +144,23 @@ public class UnopenedPack implements AutoCloseable {
 		return this.fixedPosition;
 	}
 
-	public UnopenedPack.Position getDefaultPosition() {
+	public Pack.Position getDefaultPosition() {
 		return this.defaultPosition;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public PackSource getPackSource() {
+		return this.packSource;
 	}
 
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
-		} else if (!(object instanceof UnopenedPack)) {
+		} else if (!(object instanceof Pack)) {
 			return false;
 		} else {
-			UnopenedPack unopenedPack = (UnopenedPack)object;
-			return this.id.equals(unopenedPack.id);
+			Pack pack = (Pack)object;
+			return this.id.equals(pack.id);
 		}
 	}
 
@@ -177,17 +171,31 @@ public class UnopenedPack implements AutoCloseable {
 	public void close() {
 	}
 
+	@FunctionalInterface
+	public interface PackConstructor<T extends Pack> {
+		@Nullable
+		T create(
+			String string,
+			boolean bl,
+			Supplier<PackResources> supplier,
+			PackResources packResources,
+			PackMetadataSection packMetadataSection,
+			Pack.Position position,
+			PackSource packSource
+		);
+	}
+
 	public static enum Position {
 		TOP,
 		BOTTOM;
 
-		public <T, P extends UnopenedPack> int insert(List<T> list, T object, Function<T, P> function, boolean bl) {
-			UnopenedPack.Position position = bl ? this.opposite() : this;
+		public <T, P extends Pack> int insert(List<T> list, T object, Function<T, P> function, boolean bl) {
+			Pack.Position position = bl ? this.opposite() : this;
 			if (position == BOTTOM) {
 				int i;
 				for (i = 0; i < list.size(); i++) {
-					P unopenedPack = (P)function.apply(list.get(i));
-					if (!unopenedPack.isFixedPosition() || unopenedPack.getDefaultPosition() != this) {
+					P pack = (P)function.apply(list.get(i));
+					if (!pack.isFixedPosition() || pack.getDefaultPosition() != this) {
 						break;
 					}
 				}
@@ -197,8 +205,8 @@ public class UnopenedPack implements AutoCloseable {
 			} else {
 				int i;
 				for (i = list.size() - 1; i >= 0; i--) {
-					P unopenedPack = (P)function.apply(list.get(i));
-					if (!unopenedPack.isFixedPosition() || unopenedPack.getDefaultPosition() != this) {
+					P pack = (P)function.apply(list.get(i));
+					if (!pack.isFixedPosition() || pack.getDefaultPosition() != this) {
 						break;
 					}
 				}
@@ -208,14 +216,8 @@ public class UnopenedPack implements AutoCloseable {
 			}
 		}
 
-		public UnopenedPack.Position opposite() {
+		public Pack.Position opposite() {
 			return this == TOP ? BOTTOM : TOP;
 		}
-	}
-
-	@FunctionalInterface
-	public interface UnopenedPackConstructor<T extends UnopenedPack> {
-		@Nullable
-		T create(String string, boolean bl, Supplier<Pack> supplier, Pack pack, PackMetadataSection packMetadataSection, UnopenedPack.Position position);
 	}
 }

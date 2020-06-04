@@ -328,14 +328,14 @@ public class MapItemSavedData extends SavedData {
 	}
 
 	public void toggleBanner(LevelAccessor levelAccessor, BlockPos blockPos) {
-		float f = (float)blockPos.getX() + 0.5F;
-		float g = (float)blockPos.getZ() + 0.5F;
+		double d = (double)blockPos.getX() + 0.5;
+		double e = (double)blockPos.getZ() + 0.5;
 		int i = 1 << this.scale;
-		float h = (f - (float)this.x) / (float)i;
-		float j = (g - (float)this.z) / (float)i;
-		int k = 63;
+		double f = (d - (double)this.x) / (double)i;
+		double g = (e - (double)this.z) / (double)i;
+		int j = 63;
 		boolean bl = false;
-		if (h >= -63.0F && j >= -63.0F && h <= 63.0F && j <= 63.0F) {
+		if (f >= -63.0 && g >= -63.0 && f <= 63.0 && g <= 63.0) {
 			MapBanner mapBanner = MapBanner.fromWorld(levelAccessor, blockPos);
 			if (mapBanner == null) {
 				return;
@@ -351,7 +351,7 @@ public class MapItemSavedData extends SavedData {
 
 			if (bl2) {
 				this.bannerMarkers.put(mapBanner.getId(), mapBanner);
-				this.addDecoration(mapBanner.getDecoration(), levelAccessor, mapBanner.getId(), (double)f, (double)g, 180.0, mapBanner.getName());
+				this.addDecoration(mapBanner.getDecoration(), levelAccessor, mapBanner.getId(), d, e, 180.0, mapBanner.getName());
 				bl = true;
 			}
 

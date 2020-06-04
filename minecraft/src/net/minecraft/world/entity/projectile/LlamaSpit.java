@@ -13,7 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -62,7 +62,7 @@ public class LlamaSpit extends Projectile {
 		this.updateRotation();
 		float g = 0.99F;
 		float h = 0.06F;
-		if (!this.level.containsMaterial(this.getBoundingBox(), Material.AIR)) {
+		if (this.level.getBlockStates(this.getBoundingBox()).noneMatch(BlockBehaviour.BlockStateBase::isAir)) {
 			this.remove();
 		} else if (this.isInWaterOrBubble()) {
 			this.remove();

@@ -2,12 +2,17 @@ package net.minecraft.client;
 
 import com.mojang.blaze3d.Blaze3D;
 import com.mojang.blaze3d.platform.InputConstants;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
 import net.minecraft.util.SmoothDouble;
+import org.lwjgl.glfw.GLFWDropCallback;
 
 @Environment(EnvType.CLIENT)
 public class MouseHandler {
@@ -142,12 +147,27 @@ public class MouseHandler {
 		}
 	}
 
+	private void onDrop(long l, List<Path> list) {
+		if (this.minecraft.screen != null) {
+			this.minecraft.screen.onFilesDrop(list);
+		}
+	}
+
 	public void setup(long l) {
 		InputConstants.setupMouseCallbacks(
 			l,
 			(lx, d, e) -> this.minecraft.execute(() -> this.onMove(lx, d, e)),
 			(lx, i, j, k) -> this.minecraft.execute(() -> this.onPress(lx, i, j, k)),
-			(lx, d, e) -> this.minecraft.execute(() -> this.onScroll(lx, d, e))
+			(lx, d, e) -> this.minecraft.execute(() -> this.onScroll(lx, d, e)),
+			(lx, i, m) -> {
+				Path[] paths = new Path[i];
+
+				for (int j = 0; j < i; j++) {
+					paths[j] = Paths.get(GLFWDropCallback.getName(m, j));
+				}
+
+				this.minecraft.execute(() -> this.onDrop(lx, Arrays.asList(paths)));
+			}
 		);
 	}
 

@@ -18,13 +18,16 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.IntRange;
 import net.minecraft.util.Mth;
+import net.minecraft.util.TimeUtil;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -53,7 +56,7 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
-public class EnderMan extends Monster {
+public class EnderMan extends Monster implements NeutralMob {
 	private static final UUID SPEED_MODIFIER_ATTACKING_UUID = UUID.fromString("020E0DFB-87AE-4653-9556-831010E291A0");
 	private static final AttributeModifier SPEED_MODIFIER_ATTACKING = new AttributeModifier(
 		SPEED_MODIFIER_ATTACKING_UUID, "Attacking speed boost", 0.15F, AttributeModifier.Operation.ADDITION
@@ -65,6 +68,9 @@ public class EnderMan extends Monster {
 			&& ((Endermite)livingEntity).isPlayerSpawned();
 	private int lastStareSound = Integer.MIN_VALUE;
 	private int targetChangeTime;
+	private static final IntRange PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+	private int remainingPersistentAngerTime;
+	private UUID persistentAngerTarget;
 
 	public EnderMan(EntityType<? extends EnderMan> entityType, Level level) {
 		super(entityType, level);
@@ -82,9 +88,10 @@ public class EnderMan extends Monster {
 		this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 		this.goalSelector.addGoal(10, new EnderMan.EndermanLeaveBlockGoal(this));
 		this.goalSelector.addGoal(11, new EnderMan.EndermanTakeBlockGoal(this));
-		this.targetSelector.addGoal(1, new EnderMan.EndermanLookForPlayerGoal(this));
-		this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
-		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, Endermite.class, 10, true, false, ENDERMITE_SELECTOR));
+		this.targetSelector.addGoal(1, new NearestAttackableTargetGoal(this, Player.class, 10, true, false, this::isAngryAt));
+		this.targetSelector.addGoal(2, new EnderMan.EndermanLookForPlayerGoal(this));
+		this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
+		this.targetSelector.addGoal(4, new NearestAttackableTargetGoal(this, Endermite.class, 10, true, false, ENDERMITE_SELECTOR));
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -121,6 +128,31 @@ public class EnderMan extends Monster {
 		this.entityData.define(DATA_STARED_AT, false);
 	}
 
+	@Override
+	public void startPersistentAngerTimer() {
+		this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.randomValue(this.random));
+	}
+
+	@Override
+	public void setRemainingPersistentAngerTime(int i) {
+		this.remainingPersistentAngerTime = i;
+	}
+
+	@Override
+	public int getRemainingPersistentAngerTime() {
+		return this.remainingPersistentAngerTime;
+	}
+
+	@Override
+	public void setPersistentAngerTarget(@Nullable UUID uUID) {
+		this.persistentAngerTarget = uUID;
+	}
+
+	@Override
+	public UUID getPersistentAngerTarget() {
+		return this.persistentAngerTarget;
+	}
+
 	public void playStareSound() {
 		if (this.tickCount >= this.lastStareSound + 400) {
 			this.lastStareSound = this.tickCount;
@@ -146,6 +178,8 @@ public class EnderMan extends Monster {
 		if (blockState != null) {
 			compoundTag.put("carriedBlockState", NbtUtils.writeBlockState(blockState));
 		}
+
+		this.addPersistentAngerSaveData(compoundTag);
 	}
 
 	@Override
@@ -160,6 +194,7 @@ public class EnderMan extends Monster {
 		}
 
 		this.setCarriedBlock(blockState);
+		this.readPersistentAngerSaveData(this.level, compoundTag);
 	}
 
 	private boolean isLookingAtMe(Player player) {
@@ -199,15 +234,20 @@ public class EnderMan extends Monster {
 		}
 
 		this.jumping = false;
+		if (!this.level.isClientSide) {
+			this.updatePersistentAnger();
+		}
+
 		super.aiStep();
 	}
 
 	@Override
-	protected void customServerAiStep() {
-		if (this.isInWaterRainOrBubble()) {
-			this.hurt(DamageSource.DROWN, 1.0F);
-		}
+	public boolean isSensitiveToWater() {
+		return true;
+	}
 
+	@Override
+	protected void customServerAiStep() {
 		if (this.level.isDay() && this.tickCount >= this.targetChangeTime + 600) {
 			float f = this.getBrightness();
 			if (f > 0.5F && this.level.canSeeSky(this.blockPosition()) && this.random.nextFloat() * 30.0F < (f - 0.4F) * 2.0F) {

@@ -21,6 +21,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
@@ -53,7 +54,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -586,15 +586,13 @@ public class Panda extends Animal {
 	}
 
 	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.getItem() instanceof SpawnEggItem) {
-			return super.mobInteract(player, interactionHand);
-		} else if (this.isScared()) {
-			return false;
+		if (this.isScared()) {
+			return InteractionResult.PASS;
 		} else if (this.isOnBack()) {
 			this.setOnBack(false);
-			return true;
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		} else if (this.isFood(itemStack)) {
 			if (this.getTarget() != null) {
 				this.gotBamboo = true;
@@ -608,7 +606,7 @@ public class Panda extends Animal {
 				this.setInLove(player);
 			} else {
 				if (this.level.isClientSide || this.isSitting() || this.isInWater()) {
-					return false;
+					return InteractionResult.PASS;
 				}
 
 				this.tryToSit();
@@ -622,10 +620,9 @@ public class Panda extends Animal {
 				this.usePlayerItem(player, itemStack);
 			}
 
-			player.swing(interactionHand, true);
-			return true;
+			return InteractionResult.SUCCESS;
 		} else {
-			return false;
+			return InteractionResult.PASS;
 		}
 	}
 

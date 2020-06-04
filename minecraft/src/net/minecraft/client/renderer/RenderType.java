@@ -63,7 +63,7 @@ public abstract class RenderType extends RenderStateShard {
 	);
 	private static final RenderType TRANSLUCENT = create("translucent", DefaultVertexFormat.BLOCK, 7, 262144, true, true, translucentState());
 	private static final RenderType TRANSLUCENT_MOVING_BLOCK = create(
-		"translucent_moving_block", DefaultVertexFormat.BLOCK, 7, 262144, false, false, translucentMovingBlockState()
+		"translucent_moving_block", DefaultVertexFormat.BLOCK, 7, 262144, false, true, translucentMovingBlockState()
 	);
 	private static final RenderType TRANSLUCENT_NO_CRUMBLING = create(
 		"translucent_no_crumbling", DefaultVertexFormat.BLOCK, 7, 262144, false, true, translucentState()
@@ -92,7 +92,7 @@ public abstract class RenderType extends RenderStateShard {
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
-			.setTransparencyState(GLINT_TRANSPARENCY)
+			.setTransparencyState(GLINT_DIRECT_TRANSPARENCY)
 			.setTexturingState(GLINT_TEXTURING)
 			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
 			.createCompositeState(false)
@@ -107,7 +107,7 @@ public abstract class RenderType extends RenderStateShard {
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
-			.setTransparencyState(GLINT_TRANSPARENCY)
+			.setTransparencyState(GLINT_DIRECT_TRANSPARENCY)
 			.setTexturingState(ENTITY_GLINT_TEXTURING)
 			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
 			.createCompositeState(false)
@@ -126,6 +126,20 @@ public abstract class RenderType extends RenderStateShard {
 			.setTexturingState(GLINT_TEXTURING)
 			.createCompositeState(false)
 	);
+	private static final RenderType GLINT_DIRECT = create(
+		"glint_direct",
+		DefaultVertexFormat.POSITION_TEX,
+		7,
+		256,
+		RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, true, false))
+			.setWriteMaskState(COLOR_WRITE)
+			.setCullState(NO_CULL)
+			.setDepthTestState(EQUAL_DEPTH_TEST)
+			.setTransparencyState(GLINT_DIRECT_TRANSPARENCY)
+			.setTexturingState(GLINT_TEXTURING)
+			.createCompositeState(false)
+	);
 	private static final RenderType ENTITY_GLINT = create(
 		"entity_glint",
 		DefaultVertexFormat.POSITION_TEX,
@@ -137,6 +151,20 @@ public abstract class RenderType extends RenderStateShard {
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
 			.setTransparencyState(GLINT_TRANSPARENCY)
+			.setTexturingState(ENTITY_GLINT_TEXTURING)
+			.createCompositeState(false)
+	);
+	private static final RenderType ENTITY_GLINT_DIRECT = create(
+		"entity_glint_direct",
+		DefaultVertexFormat.POSITION_TEX,
+		7,
+		256,
+		RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, true, false))
+			.setWriteMaskState(COLOR_WRITE)
+			.setCullState(NO_CULL)
+			.setDepthTestState(EQUAL_DEPTH_TEST)
+			.setTransparencyState(GLINT_DIRECT_TRANSPARENCY)
 			.setTexturingState(ENTITY_GLINT_TEXTURING)
 			.createCompositeState(false)
 	);
@@ -161,7 +189,7 @@ public abstract class RenderType extends RenderStateShard {
 		RenderType.CompositeState.builder()
 			.setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
 			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
-			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+			.setTransparencyState(ITEM_TRANSPARENCY)
 			.setWriteMaskState(COLOR_DEPTH_WRITE)
 			.createCompositeState(false)
 	);
@@ -394,8 +422,9 @@ public abstract class RenderType extends RenderStateShard {
 		return create("entity_shadow", DefaultVertexFormat.NEW_ENTITY, 7, 256, false, false, compositeState);
 	}
 
-	public static RenderType entityAlpha(ResourceLocation resourceLocation, float f) {
+	public static RenderType dragonExplosionAlpha(ResourceLocation resourceLocation, float f) {
 		RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
+			.setTransparencyState(DRAGON_EXPLOSION_TRANSPARENCY)
 			.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
 			.setAlphaState(new RenderStateShard.AlphaStateShard(f))
 			.setCullState(NO_CULL)
@@ -485,8 +514,16 @@ public abstract class RenderType extends RenderStateShard {
 		return GLINT;
 	}
 
+	public static RenderType glintDirect() {
+		return GLINT_DIRECT;
+	}
+
 	public static RenderType entityGlint() {
 		return ENTITY_GLINT;
+	}
+
+	public static RenderType entityGlintDirect() {
+		return ENTITY_GLINT_DIRECT;
 	}
 
 	public static RenderType crumbling(ResourceLocation resourceLocation) {

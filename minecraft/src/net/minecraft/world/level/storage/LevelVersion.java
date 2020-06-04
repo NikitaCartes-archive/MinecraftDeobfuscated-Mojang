@@ -40,7 +40,6 @@ public class LevelVersion {
 		return this.levelDataVersion;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public long lastPlayed() {
 		return this.lastPlayed;
 	}

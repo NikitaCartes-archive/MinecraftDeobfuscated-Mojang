@@ -13,6 +13,7 @@ import com.mojang.math.Matrix4f;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -430,5 +431,8 @@ public abstract class Screen extends AbstractContainerEventHandler implements Ti
 	@Override
 	public boolean isMouseOver(double d, double e) {
 		return true;
+	}
+
+	public void onFilesDrop(List<Path> list) {
 	}
 }

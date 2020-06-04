@@ -18,6 +18,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -52,7 +53,7 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	private int timeInOverworld = 0;
 	private boolean cannotBeHunted = false;
 	protected static final ImmutableList<? extends SensorType<? extends Sensor<? super Hoglin>>> SENSOR_TYPES = ImmutableList.of(
-		SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.HOGLIN_SPECIFIC_SENSOR
+		SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ADULT, SensorType.HOGLIN_SPECIFIC_SENSOR
 	);
 	protected static final ImmutableList<? extends MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
 		MemoryModuleType.BREED_TARGET,
@@ -71,6 +72,7 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 		MemoryModuleType.VISIBLE_ADULT_PIGLIN_COUNT,
 		MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT,
 		MemoryModuleType.NEAREST_VISIBLE_ADULT_HOGLINS,
+		MemoryModuleType.NEAREST_VISIBLE_ADULT,
 		MemoryModuleType.NEAREST_REPELLENT,
 		MemoryModuleType.PACIFIED
 	);
@@ -223,13 +225,13 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	}
 
 	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
-		boolean bl = super.mobInteract(player, interactionHand);
-		if (bl) {
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
+		InteractionResult interactionResult = super.mobInteract(player, interactionHand);
+		if (interactionResult.consumesAction()) {
 			this.setPersistenceRequired();
 		}
 
-		return bl;
+		return interactionResult;
 	}
 
 	@Environment(EnvType.CLIENT)

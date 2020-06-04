@@ -34,6 +34,8 @@ import net.minecraft.world.level.block.Blocks;
 public class HusbandryAdvancements implements Consumer<Consumer<Advancement>> {
 	private static final EntityType<?>[] BREEDABLE_ANIMALS = new EntityType[]{
 		EntityType.HORSE,
+		EntityType.DONKEY,
+		EntityType.MULE,
 		EntityType.SHEEP,
 		EntityType.COW,
 		EntityType.MOOSHROOM,
@@ -171,7 +173,7 @@ public class HusbandryAdvancements implements Consumer<Consumer<Advancement>> {
 			)
 			.rewards(AdvancementRewards.Builder.experience(100))
 			.addCriterion("netherite_hoe", InventoryChangeTrigger.TriggerInstance.hasItems(Items.NETHERITE_HOE))
-			.save(consumer, "husbandry/break_diamond_hoe");
+			.save(consumer, "husbandry/obtain_netherite_hoe");
 		Advancement advancement4 = Advancement.Builder.advancement()
 			.parent(advancement)
 			.display(

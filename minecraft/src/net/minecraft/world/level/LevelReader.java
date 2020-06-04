@@ -1,5 +1,6 @@
 package net.minecraft.world.level;
 
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -31,6 +32,16 @@ public interface LevelReader extends BlockAndTintGetter, CollisionGetter, BiomeM
 
 	default Biome getBiome(BlockPos blockPos) {
 		return this.getBiomeManager().getBiome(blockPos);
+	}
+
+	default Stream<BlockState> getBlockStatesIfLoaded(AABB aABB) {
+		int i = Mth.floor(aABB.minX);
+		int j = Mth.floor(aABB.maxX);
+		int k = Mth.floor(aABB.minY);
+		int l = Mth.floor(aABB.maxY);
+		int m = Mth.floor(aABB.minZ);
+		int n = Mth.floor(aABB.maxZ);
+		return this.hasChunksAt(i, k, m, j, l, n) ? this.getBlockStates(aABB) : Stream.empty();
 	}
 
 	@Environment(EnvType.CLIENT)

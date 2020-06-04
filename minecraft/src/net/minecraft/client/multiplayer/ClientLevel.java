@@ -1,6 +1,5 @@
 package net.minecraft.client.multiplayer;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -48,7 +47,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -77,7 +75,6 @@ import net.minecraft.world.scores.Scoreboard;
 
 @Environment(EnvType.CLIENT)
 public class ClientLevel extends Level {
-	private final List<Entity> globalEntities = Lists.<Entity>newArrayList();
 	private final Int2ObjectMap<Entity> entitiesById = new Int2ObjectOpenHashMap<>();
 	private final ClientPacketListener connection;
 	private final LevelRenderer levelRenderer;
@@ -153,49 +150,34 @@ public class ClientLevel extends Level {
 	}
 
 	public Iterable<Entity> entitiesForRendering() {
-		return Iterables.concat(this.entitiesById.values(), this.globalEntities);
+		return this.entitiesById.values();
 	}
 
 	public void tickEntities() {
 		ProfilerFiller profilerFiller = this.getProfiler();
 		profilerFiller.push("entities");
-		profilerFiller.push("global");
-
-		for (int i = 0; i < this.globalEntities.size(); i++) {
-			Entity entity = (Entity)this.globalEntities.get(i);
-			this.guardEntityTick(entityx -> {
-				entityx.tickCount++;
-				entityx.tick();
-			}, entity);
-			if (entity.removed) {
-				this.globalEntities.remove(i--);
-			}
-		}
-
-		profilerFiller.popPush("regular");
 		ObjectIterator<Entry<Entity>> objectIterator = this.entitiesById.int2ObjectEntrySet().iterator();
 
 		while (objectIterator.hasNext()) {
 			Entry<Entity> entry = (Entry<Entity>)objectIterator.next();
-			Entity entity2 = (Entity)entry.getValue();
-			if (!entity2.isPassenger()) {
+			Entity entity = (Entity)entry.getValue();
+			if (!entity.isPassenger()) {
 				profilerFiller.push("tick");
-				if (!entity2.removed) {
-					this.guardEntityTick(this::tickNonPassenger, entity2);
+				if (!entity.removed) {
+					this.guardEntityTick(this::tickNonPassenger, entity);
 				}
 
 				profilerFiller.pop();
 				profilerFiller.push("remove");
-				if (entity2.removed) {
+				if (entity.removed) {
 					objectIterator.remove();
-					this.onEntityRemoved(entity2);
+					this.onEntityRemoved(entity);
 				}
 
 				profilerFiller.pop();
 			}
 		}
 
-		profilerFiller.pop();
 		this.tickBlockEntities();
 		profilerFiller.pop();
 	}
@@ -290,10 +272,6 @@ public class ClientLevel extends Level {
 
 	public int getEntityCount() {
 		return this.entitiesById.size();
-	}
-
-	public void addLightning(LightningBolt lightningBolt) {
-		this.globalEntities.add(lightningBolt);
 	}
 
 	public void addPlayer(int i, AbstractClientPlayer abstractClientPlayer) {
@@ -405,9 +383,9 @@ public class ClientLevel extends Level {
 						if (ambientParticleSettings.canSpawn(this.random)) {
 							this.addParticle(
 								ambientParticleSettings.getOptions(),
-								(double)((float)mutableBlockPos.getX() + this.random.nextFloat()),
-								(double)((float)mutableBlockPos.getY() + this.random.nextFloat()),
-								(double)((float)mutableBlockPos.getZ() + this.random.nextFloat()),
+								(double)mutableBlockPos.getX() + this.random.nextDouble(),
+								(double)mutableBlockPos.getY() + this.random.nextDouble(),
+								(double)mutableBlockPos.getZ() + this.random.nextDouble(),
 								0.0,
 								0.0,
 								0.0
@@ -510,7 +488,7 @@ public class ClientLevel extends Level {
 	@Override
 	public void playLocalSound(double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h, boolean bl) {
 		double i = this.minecraft.gameRenderer.getMainCamera().getPosition().distanceToSqr(d, e, f);
-		SimpleSoundInstance simpleSoundInstance = new SimpleSoundInstance(soundEvent, soundSource, g, h, (float)d, (float)e, (float)f);
+		SimpleSoundInstance simpleSoundInstance = new SimpleSoundInstance(soundEvent, soundSource, g, h, d, e, f);
 		if (bl && i > 100.0) {
 			double j = Math.sqrt(i) / 40.0;
 			this.minecraft.getSoundManager().playDelayed(simpleSoundInstance, (int)(j * 20.0));

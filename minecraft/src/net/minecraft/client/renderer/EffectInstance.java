@@ -235,6 +235,7 @@ public class EffectInstance implements Effect, AutoCloseable {
 		for (int i = 0; i < this.samplerLocations.size(); i++) {
 			if (this.samplerMap.get(this.samplerNames.get(i)) != null) {
 				GlStateManager._activeTexture(33984 + i);
+				GlStateManager._disableTexture();
 				GlStateManager._bindTexture(0);
 			}
 		}
@@ -266,7 +267,7 @@ public class EffectInstance implements Effect, AutoCloseable {
 
 				if (j != -1) {
 					RenderSystem.bindTexture(j);
-					Uniform.uploadInteger(Uniform.glGetUniformLocation(this.programId, (CharSequence)this.samplerNames.get(i)), i);
+					Uniform.uploadInteger((Integer)this.samplerLocations.get(i), i);
 				}
 			}
 		}

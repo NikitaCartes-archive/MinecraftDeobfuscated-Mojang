@@ -126,9 +126,9 @@ public class NetherPortalBlock extends Block {
 		}
 
 		for (int i = 0; i < 4; i++) {
-			double d = (double)blockPos.getX() + (double)random.nextFloat();
-			double e = (double)blockPos.getY() + (double)random.nextFloat();
-			double f = (double)blockPos.getZ() + (double)random.nextFloat();
+			double d = (double)blockPos.getX() + random.nextDouble();
+			double e = (double)blockPos.getY() + random.nextDouble();
+			double f = (double)blockPos.getZ() + random.nextDouble();
 			double g = ((double)random.nextFloat() - 0.5) * 0.5;
 			double h = ((double)random.nextFloat() - 0.5) * 0.5;
 			double j = ((double)random.nextFloat() - 0.5) * 0.5;

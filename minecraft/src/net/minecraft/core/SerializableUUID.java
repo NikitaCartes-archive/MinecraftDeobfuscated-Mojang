@@ -6,24 +6,8 @@ import java.util.UUID;
 import net.minecraft.Util;
 
 public final class SerializableUUID {
-	public static final Codec<SerializableUUID> CODEC = Codec.INT_STREAM
-		.comapFlatMap(
-			intStream -> Util.fixedSize(intStream, 4).map(is -> new SerializableUUID(uuidFromIntArray(is))),
-			serializableUUID -> Arrays.stream(uuidToIntArray(serializableUUID.value))
-		);
-	private final UUID value;
-
-	public SerializableUUID(UUID uUID) {
-		this.value = uUID;
-	}
-
-	public UUID value() {
-		return this.value;
-	}
-
-	public String toString() {
-		return this.value.toString();
-	}
+	public static final Codec<UUID> CODEC = Codec.INT_STREAM
+		.comapFlatMap(intStream -> Util.fixedSize(intStream, 4).map(SerializableUUID::uuidFromIntArray), uUID -> Arrays.stream(uuidToIntArray(uUID)));
 
 	public static UUID uuidFromIntArray(int[] is) {
 		return new UUID((long)is[0] << 32 | (long)is[1] & 4294967295L, (long)is[2] << 32 | (long)is[3] & 4294967295L);
@@ -35,7 +19,7 @@ public final class SerializableUUID {
 		return leastMostToIntArray(l, m);
 	}
 
-	public static int[] leastMostToIntArray(long l, long m) {
+	private static int[] leastMostToIntArray(long l, long m) {
 		return new int[]{(int)(l >> 32), (int)l, (int)(m >> 32), (int)m};
 	}
 }

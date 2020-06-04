@@ -9,7 +9,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.LockIconButton;
 import net.minecraft.client.gui.components.OptionButton;
 import net.minecraft.client.gui.screens.controls.ControlsScreen;
-import net.minecraft.client.gui.screens.resourcepacks.ResourcePackSelectScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -161,7 +160,8 @@ public class OptionsScreen extends Screen {
 				150,
 				20,
 				new TranslatableComponent("options.resourcepack"),
-				button -> this.minecraft.setScreen(new ResourcePackSelectScreen(this, this.options))
+				button -> this.minecraft
+						.setScreen(new ResourcePackSelectScreen(this, this.options, this.minecraft.getResourcePackRepository(), this.minecraft::reloadResourcePacks))
 			)
 		);
 		this.addButton(

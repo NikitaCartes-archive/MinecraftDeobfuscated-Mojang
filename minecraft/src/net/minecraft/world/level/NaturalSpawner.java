@@ -28,7 +28,6 @@ import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.NearestNeighborBiomeZoomer;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -145,12 +144,12 @@ public final class NaturalSpawner {
 					l += serverLevel.random.nextInt(6) - serverLevel.random.nextInt(6);
 					m += serverLevel.random.nextInt(6) - serverLevel.random.nextInt(6);
 					mutableBlockPos.set(l, i, m);
-					float f = (float)l + 0.5F;
-					float g = (float)m + 0.5F;
-					Player player = serverLevel.getNearestPlayer((double)f, (double)i, (double)g, -1.0, false);
+					double d = (double)l + 0.5;
+					double e = (double)m + 0.5;
+					Player player = serverLevel.getNearestPlayer(d, (double)i, e, -1.0, false);
 					if (player != null) {
-						double d = player.distanceToSqr((double)f, (double)i, (double)g);
-						if (isRightDistanceToPlayerAndSpawnPoint(serverLevel, chunkAccess, mutableBlockPos, d)) {
+						double f = player.distanceToSqr(d, (double)i, e);
+						if (isRightDistanceToPlayerAndSpawnPoint(serverLevel, chunkAccess, mutableBlockPos, f)) {
 							if (spawnerData == null) {
 								spawnerData = getRandomSpawnMobAt(serverLevel, structureFeatureManager, chunkGenerator, mobCategory, serverLevel.random, mutableBlockPos);
 								if (spawnerData == null) {
@@ -160,15 +159,15 @@ public final class NaturalSpawner {
 								o = spawnerData.minCount + serverLevel.random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
 							}
 
-							if (isValidSpawnPostitionForType(serverLevel, mobCategory, structureFeatureManager, chunkGenerator, spawnerData, mutableBlockPos, d)
+							if (isValidSpawnPostitionForType(serverLevel, mobCategory, structureFeatureManager, chunkGenerator, spawnerData, mutableBlockPos, f)
 								&& spawnPredicate.test(spawnerData.type, mutableBlockPos, chunkAccess)) {
 								Mob mob = getMobForSpawn(serverLevel, spawnerData.type);
 								if (mob == null) {
 									return;
 								}
 
-								mob.moveTo((double)f, (double)i, (double)g, serverLevel.random.nextFloat() * 360.0F, 0.0F);
-								if (isValidPositionForMob(serverLevel, mob, d)) {
+								mob.moveTo(d, (double)i, e, serverLevel.random.nextFloat() * 360.0F, 0.0F);
+								if (isValidPositionForMob(serverLevel, mob, f)) {
 									spawnGroupData = mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.NATURAL, spawnGroupData, null);
 									j++;
 									p++;
@@ -196,7 +195,7 @@ public final class NaturalSpawner {
 		if (d <= 576.0) {
 			return false;
 		} else if (serverLevel.getSharedSpawnPos()
-			.closerThan(new Vec3((double)((float)mutableBlockPos.getX() + 0.5F), (double)mutableBlockPos.getY(), (double)((float)mutableBlockPos.getZ() + 0.5F)), 24.0)) {
+			.closerThan(new Vec3((double)mutableBlockPos.getX() + 0.5, (double)mutableBlockPos.getY(), (double)mutableBlockPos.getZ() + 0.5), 24.0)) {
 			return false;
 		} else {
 			ChunkPos chunkPos = new ChunkPos(mutableBlockPos);
@@ -227,9 +226,7 @@ public final class NaturalSpawner {
 			} else {
 				return !SpawnPlacements.checkSpawnRules(entityType, serverLevel, MobSpawnType.NATURAL, mutableBlockPos, serverLevel.random)
 					? false
-					: serverLevel.noCollision(
-						entityType.getAABB((double)((float)mutableBlockPos.getX() + 0.5F), (double)mutableBlockPos.getY(), (double)((float)mutableBlockPos.getZ() + 0.5F))
-					);
+					: serverLevel.noCollision(entityType.getAABB((double)mutableBlockPos.getX() + 0.5, (double)mutableBlockPos.getY(), (double)mutableBlockPos.getZ() + 0.5));
 			}
 		} else {
 			return false;
@@ -298,7 +295,7 @@ public final class NaturalSpawner {
 		} else if (!fluidState.isEmpty()) {
 			return false;
 		} else {
-			return blockState.is(BlockTags.PREVENT_MOB_SPAWNING_INSIDE) ? false : !blockState.is(Blocks.WITHER_ROSE) || entityType == EntityType.WITHER_SKELETON;
+			return blockState.is(BlockTags.PREVENT_MOB_SPAWNING_INSIDE) ? false : !entityType.isBlockDangerous(blockState);
 		}
 	}
 

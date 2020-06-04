@@ -17,11 +17,11 @@ import net.minecraft.util.GsonHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class AbstractResourcePack implements Pack {
+public abstract class AbstractPackResources implements PackResources {
 	private static final Logger LOGGER = LogManager.getLogger();
 	protected final File file;
 
-	public AbstractResourcePack(File file) {
+	public AbstractPackResources(File file) {
 		this.file = file;
 	}
 

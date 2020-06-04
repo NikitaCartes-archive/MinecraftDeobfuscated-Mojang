@@ -295,6 +295,7 @@ public class KeyboardHandler {
 				if (this.minecraft.options.keyFullscreen.matches(i, j)) {
 					this.minecraft.getWindow().toggleFullScreen();
 					this.minecraft.options.fullscreen = this.minecraft.getWindow().isFullscreen();
+					this.minecraft.options.save();
 					return;
 				}
 

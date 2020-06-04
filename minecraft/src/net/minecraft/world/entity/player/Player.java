@@ -517,7 +517,7 @@ public abstract class Player extends LivingEntity {
 
 		this.setSpeed((float)attributeInstance.getValue());
 		float f;
-		if (this.onGround && !(this.getHealth() <= 0.0F) && !this.isSwimming()) {
+		if (this.onGround && !this.isDeadOrDying() && !this.isSwimming()) {
 			f = Math.min(0.1F, Mth.sqrt(getHorizontalDistanceSqr(this.getDeltaMovement())));
 		} else {
 			f = 0.0F;
@@ -829,7 +829,7 @@ public abstract class Player extends LivingEntity {
 			return false;
 		} else {
 			this.noActionTime = 0;
-			if (this.getHealth() <= 0.0F) {
+			if (this.isDeadOrDying()) {
 				return false;
 			} else {
 				this.removeEntitiesOnShoulder();
@@ -967,24 +967,26 @@ public abstract class Player extends LivingEntity {
 		} else {
 			ItemStack itemStack = this.getItemInHand(interactionHand);
 			ItemStack itemStack2 = itemStack.copy();
-			if (entity.interact(this, interactionHand)) {
+			InteractionResult interactionResult = entity.interact(this, interactionHand);
+			if (interactionResult.consumesAction()) {
 				if (this.abilities.instabuild && itemStack == this.getItemInHand(interactionHand) && itemStack.getCount() < itemStack2.getCount()) {
 					itemStack.setCount(itemStack2.getCount());
 				}
 
-				return InteractionResult.SUCCESS;
+				return interactionResult;
 			} else {
 				if (!itemStack.isEmpty() && entity instanceof LivingEntity) {
 					if (this.abilities.instabuild) {
 						itemStack = itemStack2;
 					}
 
-					if (itemStack.interactEnemy(this, (LivingEntity)entity, interactionHand)) {
+					InteractionResult interactionResult2 = itemStack.interactLivingEntity(this, (LivingEntity)entity, interactionHand);
+					if (interactionResult2.consumesAction()) {
 						if (itemStack.isEmpty() && !this.abilities.instabuild) {
 							this.setItemInHand(interactionHand, ItemStack.EMPTY);
 						}
 
-						return InteractionResult.SUCCESS;
+						return interactionResult2;
 					}
 				}
 
@@ -2015,6 +2017,11 @@ public abstract class Player extends LivingEntity {
 		}
 
 		return super.eat(level, itemStack);
+	}
+
+	@Override
+	protected boolean shouldRemoveSoulSpeed(BlockState blockState) {
+		return this.abilities.flying || super.shouldRemoveSoulSpeed(blockState);
 	}
 
 	public static enum BedSleepingProblem {

@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Optional;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -36,7 +35,7 @@ public class SetWalkTargetAwayFrom<T> extends Behavior<PathfinderMob> {
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, PathfinderMob pathfinderMob) {
-		return this.alreadyWalkingAwayFromPos(pathfinderMob)
+		return this.alreadyWalkingAwayFromPosWithSameSpeed(pathfinderMob)
 			? false
 			: pathfinderMob.position().closerThan(this.getPosToAvoid(pathfinderMob), (double)this.desiredDistance);
 	}
@@ -45,13 +44,18 @@ public class SetWalkTargetAwayFrom<T> extends Behavior<PathfinderMob> {
 		return (Vec3)this.toPosition.apply(pathfinderMob.getBrain().getMemory(this.walkAwayFromMemory).get());
 	}
 
-	private boolean alreadyWalkingAwayFromPos(PathfinderMob pathfinderMob) {
+	private boolean alreadyWalkingAwayFromPosWithSameSpeed(PathfinderMob pathfinderMob) {
 		if (!pathfinderMob.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET)) {
 			return false;
 		} else {
-			Optional<WalkTarget> optional = pathfinderMob.getBrain().getMemory(MemoryModuleType.WALK_TARGET);
-			PositionTracker positionTracker = ((WalkTarget)optional.get()).getTarget();
-			return optional.isPresent() && !positionTracker.currentBlockPosition().closerThan(this.getPosToAvoid(pathfinderMob), (double)this.desiredDistance);
+			WalkTarget walkTarget = (WalkTarget)pathfinderMob.getBrain().getMemory(MemoryModuleType.WALK_TARGET).get();
+			if (walkTarget.getSpeedModifier() != this.speedModifier) {
+				return false;
+			} else {
+				Vec3 vec3 = walkTarget.getTarget().currentPosition().subtract(pathfinderMob.position());
+				Vec3 vec32 = this.getPosToAvoid(pathfinderMob).subtract(pathfinderMob.position());
+				return vec3.dot(vec32) < 0.0;
+			}
 		}
 	}
 

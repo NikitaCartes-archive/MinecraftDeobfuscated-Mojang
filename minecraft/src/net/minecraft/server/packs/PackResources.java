@@ -1,6 +1,5 @@
 package net.minecraft.server.packs;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -12,7 +11,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 
-public interface Pack extends Closeable {
+public interface PackResources extends AutoCloseable {
 	@Environment(EnvType.CLIENT)
 	InputStream getRootResource(String string) throws IOException;
 
@@ -28,4 +27,6 @@ public interface Pack extends Closeable {
 	<T> T getMetadataSection(MetadataSectionSerializer<T> metadataSectionSerializer) throws IOException;
 
 	String getName();
+
+	void close();
 }

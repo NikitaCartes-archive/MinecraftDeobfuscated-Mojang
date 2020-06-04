@@ -12,6 +12,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
@@ -19,6 +20,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ItemBasedSteering;
 import net.minecraft.world.entity.ItemSteerable;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
@@ -33,7 +35,6 @@ import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
-import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.DismountHelper;
@@ -138,20 +139,22 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 	}
 
 	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
-		if (!super.mobInteract(player, interactionHand)) {
-			if (this.isSaddled() && !this.isVehicle()) {
-				if (!this.level.isClientSide) {
-					player.startRiding(this);
-				}
-
-				return true;
-			} else {
-				ItemStack itemStack = player.getItemInHand(interactionHand);
-				return itemStack.getItem() == Items.SADDLE && itemStack.interactEnemy(player, this, interactionHand);
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
+		boolean bl = this.isFood(player.getItemInHand(interactionHand));
+		if (!bl && this.isSaddled() && !this.isVehicle()) {
+			if (!this.level.isClientSide) {
+				player.startRiding(this);
 			}
+
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		} else {
-			return true;
+			InteractionResult interactionResult = super.mobInteract(player, interactionHand);
+			if (!interactionResult.consumesAction()) {
+				ItemStack itemStack = player.getItemInHand(interactionHand);
+				return itemStack.getItem() == Items.SADDLE ? itemStack.interactLivingEntity(player, this, interactionHand) : InteractionResult.PASS;
+			} else {
+				return interactionResult;
+			}
 		}
 	}
 
@@ -224,6 +227,7 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 				zombifiedPiglin.setCustomNameVisible(this.isCustomNameVisible());
 			}
 
+			zombifiedPiglin.setPersistenceRequired();
 			this.level.addFreshEntity(zombifiedPiglin);
 			this.remove();
 		} else {

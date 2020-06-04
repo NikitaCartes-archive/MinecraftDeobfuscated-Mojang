@@ -1,4 +1,4 @@
-package net.minecraft.world.entity.global;
+package net.minecraft.world.entity;
 
 import java.util.List;
 import javax.annotation.Nullable;
@@ -8,13 +8,11 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddGlobalEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
@@ -25,22 +23,20 @@ public class LightningBolt extends Entity {
 	private int life;
 	public long seed;
 	private int flashes;
-	private final boolean visualOnly;
+	private boolean visualOnly;
 	@Nullable
 	private ServerPlayer cause;
 
-	public LightningBolt(Level level, double d, double e, double f, boolean bl) {
-		super(EntityType.LIGHTNING_BOLT, level);
+	public LightningBolt(EntityType<? extends LightningBolt> entityType, Level level) {
+		super(entityType, level);
 		this.noCulling = true;
-		this.moveTo(d, e, f, 0.0F, 0.0F);
 		this.life = 2;
 		this.seed = this.random.nextLong();
 		this.flashes = this.random.nextInt(3) + 1;
+	}
+
+	public void setVisualOnly(boolean bl) {
 		this.visualOnly = bl;
-		Difficulty difficulty = level.getDifficulty();
-		if (difficulty == Difficulty.NORMAL || difficulty == Difficulty.HARD) {
-			this.spawnFire(4);
-		}
 	}
 
 	@Override
@@ -56,6 +52,11 @@ public class LightningBolt extends Entity {
 	public void tick() {
 		super.tick();
 		if (this.life == 2) {
+			Difficulty difficulty = this.level.getDifficulty();
+			if (difficulty == Difficulty.NORMAL || difficulty == Difficulty.HARD) {
+				this.spawnFire(4);
+			}
+
 			this.level
 				.playSound(
 					null, this.getX(), this.getY(), this.getZ(), SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.WEATHER, 10000.0F, 0.8F + this.random.nextFloat() * 0.2F
@@ -136,6 +137,6 @@ public class LightningBolt extends Entity {
 
 	@Override
 	public Packet<?> getAddEntityPacket() {
-		return new ClientboundAddGlobalEntityPacket(this);
+		return new ClientboundAddEntityPacket(this);
 	}
 }

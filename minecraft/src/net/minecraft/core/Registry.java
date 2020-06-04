@@ -14,8 +14,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
@@ -57,6 +55,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -140,6 +139,7 @@ public abstract class Registry<T> implements Codec<T>, Keyable, IdMap<T> {
 	public static final ResourceKey<Registry<LootItemConditionType>> LOOT_ITEM_REGISTRY = createRegistryKey("loot_condition_type");
 	public static final ResourceKey<Registry<DimensionType>> DIMENSION_TYPE_REGISTRY = createRegistryKey("dimension_type");
 	public static final ResourceKey<Registry<Level>> DIMENSION_REGISTRY = createRegistryKey("dimension");
+	public static final ResourceKey<Registry<LevelStem>> LEVEL_STEM_REGISTRY = createRegistryKey("dimension");
 	public static final Registry<SoundEvent> SOUND_EVENT = registerSimple(SOUND_EVENT_REGISTRY, () -> SoundEvents.ITEM_PICKUP);
 	public static final DefaultedRegistry<Fluid> FLUID = registerDefaulted(FLUID_REGISTRY, "empty", () -> Fluids.EMPTY);
 	public static final Registry<MobEffect> MOB_EFFECT = registerSimple(MOB_EFFECT_REGISTRY, () -> MobEffects.LUCK);
@@ -254,6 +254,10 @@ public abstract class Registry<T> implements Codec<T>, Keyable, IdMap<T> {
 		this.lifecycle = lifecycle;
 	}
 
+	public String toString() {
+		return "Registry[" + this.key + " (" + this.lifecycle + ")]";
+	}
+
 	@Override
 	public <U> DataResult<Pair<T, U>> decode(DynamicOps<U> dynamicOps, U object) {
 		return dynamicOps.compressMaps()
@@ -296,13 +300,11 @@ public abstract class Registry<T> implements Codec<T>, Keyable, IdMap<T> {
 	@Nullable
 	public abstract ResourceLocation getKey(T object);
 
-	@Environment(EnvType.CLIENT)
 	public abstract Optional<ResourceKey<T>> getResourceKey(T object);
 
 	public abstract int getId(@Nullable T object);
 
 	@Nullable
-	@Environment(EnvType.CLIENT)
 	public abstract T get(@Nullable ResourceKey<T> resourceKey);
 
 	@Nullable
