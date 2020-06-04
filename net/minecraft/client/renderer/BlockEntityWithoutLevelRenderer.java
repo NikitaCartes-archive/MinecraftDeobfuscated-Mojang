@@ -15,6 +15,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.ShieldModel;
 import net.minecraft.client.model.TridentModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.BannerRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
@@ -61,7 +62,7 @@ public class BlockEntityWithoutLevelRenderer {
     private final ShieldModel shieldModel = new ShieldModel();
     private final TridentModel tridentModel = new TridentModel();
 
-    public void renderByItem(ItemStack itemStack, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
+    public void renderByItem(ItemStack itemStack, ItemTransforms.TransformType transformType, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
         Item item = itemStack.getItem();
         if (item instanceof BlockItem) {
             BlockEntity blockEntity;
@@ -110,7 +111,7 @@ public class BlockEntityWithoutLevelRenderer {
             poseStack.pushPose();
             poseStack.scale(1.0f, -1.0f, -1.0f);
             Material material = bl ? ModelBakery.SHIELD_BASE : ModelBakery.NO_PATTERN_SHIELD;
-            VertexConsumer vertexConsumer = material.sprite().wrap(ItemRenderer.getFoilBuffer(multiBufferSource, this.shieldModel.renderType(material.atlasLocation()), false, itemStack.hasFoil()));
+            VertexConsumer vertexConsumer = material.sprite().wrap(ItemRenderer.getFoilBufferDirect(multiBufferSource, this.shieldModel.renderType(material.atlasLocation()), false, itemStack.hasFoil()));
             this.shieldModel.handle().render(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f, 1.0f);
             if (bl) {
                 List<Pair<BannerPattern, DyeColor>> list = BannerBlockEntity.createPatterns(ShieldItem.getColor(itemStack), BannerBlockEntity.getItemPatterns(itemStack));
@@ -122,7 +123,7 @@ public class BlockEntityWithoutLevelRenderer {
         } else if (item == Items.TRIDENT) {
             poseStack.pushPose();
             poseStack.scale(1.0f, -1.0f, -1.0f);
-            VertexConsumer vertexConsumer2 = ItemRenderer.getFoilBuffer(multiBufferSource, this.tridentModel.renderType(TridentModel.TEXTURE), false, itemStack.hasFoil());
+            VertexConsumer vertexConsumer2 = transformType == ItemTransforms.TransformType.GUI || transformType == ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND || transformType == ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND || transformType == ItemTransforms.TransformType.FIXED ? ItemRenderer.getFoilBufferDirect(multiBufferSource, this.tridentModel.renderType(TridentModel.TEXTURE), false, itemStack.hasFoil()) : ItemRenderer.getFoilBuffer(multiBufferSource, this.tridentModel.renderType(TridentModel.TEXTURE), false, itemStack.hasFoil());
             this.tridentModel.renderToBuffer(poseStack, vertexConsumer2, i, j, 1.0f, 1.0f, 1.0f, 1.0f);
             poseStack.popPose();
         }

@@ -63,7 +63,7 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         }
 
         public static TriggerInstance bredAnimals(EntityPredicate.Builder builder) {
-            return new TriggerInstance(EntityPredicate.Composite.ANY, EntityPredicate.Composite.wrap(builder.build()), EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY);
+            return new TriggerInstance(EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY, EntityPredicate.Composite.ANY, EntityPredicate.Composite.wrap(builder.build()));
         }
 
         public boolean matches(LootContext lootContext, LootContext lootContext2, @Nullable LootContext lootContext3) {

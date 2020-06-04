@@ -128,8 +128,6 @@ public abstract class PlayerList {
         this.registryHolder = registryHolder;
         this.maxPlayers = i;
         this.playerIo = playerDataStorage;
-        this.getBans().setEnabled(true);
-        this.getIpBans().setEnabled(true);
     }
 
     public void placeNewPlayer(Connection connection, ServerPlayer serverPlayer) {

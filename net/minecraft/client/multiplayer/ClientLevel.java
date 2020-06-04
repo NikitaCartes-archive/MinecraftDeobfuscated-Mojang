@@ -3,7 +3,6 @@
  */
 package net.minecraft.client.multiplayer;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -51,7 +50,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -84,7 +82,6 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class ClientLevel
 extends Level {
-    private final List<Entity> globalEntities = Lists.newArrayList();
     private final Int2ObjectMap<Entity> entitiesById = new Int2ObjectOpenHashMap<Entity>();
     private final ClientPacketListener connection;
     private final LevelRenderer levelRenderer;
@@ -148,41 +145,29 @@ extends Level {
     }
 
     public Iterable<Entity> entitiesForRendering() {
-        return Iterables.concat(this.entitiesById.values(), this.globalEntities);
+        return this.entitiesById.values();
     }
 
     public void tickEntities() {
         ProfilerFiller profilerFiller = this.getProfiler();
         profilerFiller.push("entities");
-        profilerFiller.push("global");
-        for (int i = 0; i < this.globalEntities.size(); ++i) {
-            Entity entity2 = this.globalEntities.get(i);
-            this.guardEntityTick(entity -> {
-                ++entity.tickCount;
-                entity.tick();
-            }, entity2);
-            if (!entity2.removed) continue;
-            this.globalEntities.remove(i--);
-        }
-        profilerFiller.popPush("regular");
         Iterator objectIterator = this.entitiesById.int2ObjectEntrySet().iterator();
         while (objectIterator.hasNext()) {
             Int2ObjectMap.Entry entry = (Int2ObjectMap.Entry)objectIterator.next();
-            Entity entity2 = (Entity)entry.getValue();
-            if (entity2.isPassenger()) continue;
+            Entity entity = (Entity)entry.getValue();
+            if (entity.isPassenger()) continue;
             profilerFiller.push("tick");
-            if (!entity2.removed) {
-                this.guardEntityTick(this::tickNonPassenger, entity2);
+            if (!entity.removed) {
+                this.guardEntityTick(this::tickNonPassenger, entity);
             }
             profilerFiller.pop();
             profilerFiller.push("remove");
-            if (entity2.removed) {
+            if (entity.removed) {
                 objectIterator.remove();
-                this.onEntityRemoved(entity2);
+                this.onEntityRemoved(entity);
             }
             profilerFiller.pop();
         }
-        profilerFiller.pop();
         this.tickBlockEntities();
         profilerFiller.pop();
     }
@@ -276,10 +261,6 @@ extends Level {
 
     public int getEntityCount() {
         return this.entitiesById.size();
-    }
-
-    public void addLightning(LightningBolt lightningBolt) {
-        this.globalEntities.add(lightningBolt);
     }
 
     public void addPlayer(int i, AbstractClientPlayer abstractClientPlayer) {
@@ -379,7 +360,7 @@ extends Level {
         if (!blockState.isCollisionShapeFullBlock(this, mutableBlockPos)) {
             this.getBiome(mutableBlockPos).getAmbientParticle().ifPresent(ambientParticleSettings -> {
                 if (ambientParticleSettings.canSpawn(this.random)) {
-                    this.addParticle(ambientParticleSettings.getOptions(), (float)mutableBlockPos.getX() + this.random.nextFloat(), (float)mutableBlockPos.getY() + this.random.nextFloat(), (float)mutableBlockPos.getZ() + this.random.nextFloat(), 0.0, 0.0, 0.0);
+                    this.addParticle(ambientParticleSettings.getOptions(), (double)mutableBlockPos.getX() + this.random.nextDouble(), (double)mutableBlockPos.getY() + this.random.nextDouble(), (double)mutableBlockPos.getZ() + this.random.nextDouble(), 0.0, 0.0, 0.0);
                 }
             });
         }
@@ -459,7 +440,7 @@ extends Level {
     @Override
     public void playLocalSound(double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h, boolean bl) {
         double i = this.minecraft.gameRenderer.getMainCamera().getPosition().distanceToSqr(d, e, f);
-        SimpleSoundInstance simpleSoundInstance = new SimpleSoundInstance(soundEvent, soundSource, g, h, (float)d, (float)e, (float)f);
+        SimpleSoundInstance simpleSoundInstance = new SimpleSoundInstance(soundEvent, soundSource, g, h, d, e, f);
         if (bl && i > 100.0) {
             double j = Math.sqrt(i) / 40.0;
             this.minecraft.getSoundManager().playDelayed(simpleSoundInstance, (int)(j * 20.0));

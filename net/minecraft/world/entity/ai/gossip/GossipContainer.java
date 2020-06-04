@@ -73,7 +73,7 @@ public class GossipContainer {
         collection.forEach(gossipEntry -> {
             int i = gossipEntry.value - gossipEntry.type.decayPerTransfer;
             if (i >= 2) {
-                this.getOrCreate(gossipEntry.target.value()).entries.mergeInt(gossipEntry.type, i, GossipContainer::mergeValuesForTransfer);
+                this.getOrCreate(gossipEntry.target).entries.mergeInt(gossipEntry.type, i, GossipContainer::mergeValuesForTransfer);
             }
         });
     }
@@ -97,7 +97,7 @@ public class GossipContainer {
     }
 
     public void update(Dynamic<?> dynamic) {
-        dynamic.asStream().map(GossipEntry::load).flatMap(dataResult -> Util.toStream(dataResult.result())).forEach(gossipEntry -> this.getOrCreate(gossipEntry.target.value()).entries.put(gossipEntry.type, gossipEntry.value));
+        dynamic.asStream().map(GossipEntry::load).flatMap(dataResult -> Util.toStream(dataResult.result())).forEach(gossipEntry -> this.getOrCreate(gossipEntry.target).entries.put(gossipEntry.type, gossipEntry.value));
     }
 
     private static int mergeValuesForTransfer(int i, int j) {
@@ -156,16 +156,12 @@ public class GossipContainer {
     }
 
     static class GossipEntry {
-        public final SerializableUUID target;
+        public final UUID target;
         public final GossipType type;
         public final int value;
 
         public GossipEntry(UUID uUID, GossipType gossipType, int i) {
-            this(new SerializableUUID(uUID), gossipType, i);
-        }
-
-        public GossipEntry(SerializableUUID serializableUUID, GossipType gossipType, int i) {
-            this.target = serializableUUID;
+            this.target = uUID;
             this.type = gossipType;
             this.value = i;
         }

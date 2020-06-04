@@ -16,7 +16,7 @@ import net.minecraft.server.players.PlayerList;
 
 public class BanListCommands {
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
-        commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("banlist").requires(commandSourceStack -> (commandSourceStack.getServer().getPlayerList().getBans().isEnabled() || commandSourceStack.getServer().getPlayerList().getIpBans().isEnabled()) && commandSourceStack.hasPermission(3))).executes(commandContext -> {
+        commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("banlist").requires(commandSourceStack -> commandSourceStack.hasPermission(3))).executes(commandContext -> {
             PlayerList playerList = ((CommandSourceStack)commandContext.getSource()).getServer().getPlayerList();
             return BanListCommands.showList((CommandSourceStack)commandContext.getSource(), Lists.newArrayList(Iterables.concat(playerList.getBans().getEntries(), playerList.getIpBans().getEntries())));
         })).then(Commands.literal("ips").executes(commandContext -> BanListCommands.showList((CommandSourceStack)commandContext.getSource(), ((CommandSourceStack)commandContext.getSource()).getServer().getPlayerList().getIpBans().getEntries())))).then(Commands.literal("players").executes(commandContext -> BanListCommands.showList((CommandSourceStack)commandContext.getSource(), ((CommandSourceStack)commandContext.getSource()).getServer().getPlayerList().getBans().getEntries()))));

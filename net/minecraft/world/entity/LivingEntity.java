@@ -162,6 +162,7 @@ extends Entity {
     public float yHeadRot;
     public float yHeadRotO;
     public float flyingSpeed = 0.02f;
+    @Nullable
     protected Player lastHurtByPlayer;
     protected int lastHurtByPlayerTime;
     protected boolean dead;
@@ -261,6 +262,10 @@ extends Entity {
         if (!this.isInWater()) {
             this.updateInWaterStateAndDoWaterCurrentPushing();
         }
+        if (!this.level.isClientSide && bl && this.fallDistance > 0.0f) {
+            this.removeSoulSpeed();
+            this.tryAddSoulSpeed();
+        }
         if (!this.level.isClientSide && this.fallDistance > 3.0f && bl) {
             float f = Mth.ceil(this.fallDistance - 3.0f);
             if (!blockState.isAir()) {
@@ -316,10 +321,10 @@ extends Entity {
                         this.setAirSupply(0);
                         Vec3 vec3 = this.getDeltaMovement();
                         for (int i = 0; i < 8; ++i) {
-                            float f = this.random.nextFloat() - this.random.nextFloat();
-                            float g = this.random.nextFloat() - this.random.nextFloat();
-                            float h = this.random.nextFloat() - this.random.nextFloat();
-                            this.level.addParticle(ParticleTypes.BUBBLE, this.getX() + (double)f, this.getY() + (double)g, this.getZ() + (double)h, vec3.x, vec3.y, vec3.z);
+                            double f = this.random.nextDouble() - this.random.nextDouble();
+                            double g = this.random.nextDouble() - this.random.nextDouble();
+                            double h = this.random.nextDouble() - this.random.nextDouble();
+                            this.level.addParticle(ParticleTypes.BUBBLE, this.getX() + f, this.getY() + g, this.getZ() + h, vec3.x, vec3.y, vec3.z);
                         }
                         this.hurt(DamageSource.DROWN, 2.0f);
                     }
@@ -344,7 +349,7 @@ extends Entity {
         if (this.invulnerableTime > 0 && !(this instanceof ServerPlayer)) {
             --this.invulnerableTime;
         }
-        if (this.getHealth() <= 0.0f) {
+        if (this.isDeadOrDying()) {
             this.tickDeath();
         }
         if (this.lastHurtByPlayerTime > 0) {
@@ -394,25 +399,44 @@ extends Entity {
         return super.getBlockSpeedFactor();
     }
 
+    protected boolean shouldRemoveSoulSpeed(BlockState blockState) {
+        return !blockState.isAir() || this.isFallFlying();
+    }
+
+    protected void removeSoulSpeed() {
+        AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
+        if (attributeInstance == null) {
+            return;
+        }
+        if (attributeInstance.getModifier(SPEED_MODIFIER_SOUL_SPEED_UUID) != null) {
+            attributeInstance.removeModifier(SPEED_MODIFIER_SOUL_SPEED_UUID);
+        }
+    }
+
+    protected void tryAddSoulSpeed() {
+        int i;
+        if (!this.getBlockStateOn().isAir() && (i = EnchantmentHelper.getEnchantmentLevel(Enchantments.SOUL_SPEED, this)) > 0 && this.onSoulSpeedBlock()) {
+            AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
+            if (attributeInstance == null) {
+                return;
+            }
+            attributeInstance.addTransientModifier(new AttributeModifier(SPEED_MODIFIER_SOUL_SPEED_UUID, "Soul speed boost", (double)(0.03f * (1.0f + (float)i * 0.35f)), AttributeModifier.Operation.ADDITION));
+            if (this.getRandom().nextFloat() < 0.04f) {
+                ItemStack itemStack = this.getItemBySlot(EquipmentSlot.FEET);
+                itemStack.hurtAndBreak(1, this, livingEntity -> livingEntity.broadcastBreakEvent(EquipmentSlot.FEET));
+            }
+        }
+    }
+
     protected void onChangedBlock(BlockPos blockPos) {
         int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.FROST_WALKER, this);
         if (i > 0) {
             FrostWalkerEnchantment.onEntityMoved(this, this.level, blockPos, i);
         }
-        if (!this.getBlockStateOn().isAir()) {
-            int j;
-            AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
-            if (attributeInstance.getModifier(SPEED_MODIFIER_SOUL_SPEED_UUID) != null) {
-                attributeInstance.removeModifier(SPEED_MODIFIER_SOUL_SPEED_UUID);
-            }
-            if ((j = EnchantmentHelper.getEnchantmentLevel(Enchantments.SOUL_SPEED, this)) > 0 && this.onSoulSpeedBlock()) {
-                attributeInstance.addTransientModifier(new AttributeModifier(SPEED_MODIFIER_SOUL_SPEED_UUID, "Soul speed boost", (double)(0.03f * (1.0f + (float)j * 0.35f)), AttributeModifier.Operation.ADDITION));
-                if (this.getRandom().nextFloat() < 0.04f) {
-                    ItemStack itemStack = this.getItemBySlot(EquipmentSlot.FEET);
-                    itemStack.hurtAndBreak(1, this, livingEntity -> livingEntity.broadcastBreakEvent(EquipmentSlot.FEET));
-                }
-            }
+        if (this.shouldRemoveSoulSpeed(this.getBlockStateOn())) {
+            this.removeSoulSpeed();
         }
+        this.tryAddSoulSpeed();
     }
 
     public boolean isBaby() {
@@ -480,6 +504,11 @@ extends Entity {
 
     public int getLastHurtByMobTimestamp() {
         return this.lastHurtByMobTimestamp;
+    }
+
+    public void setLastHurtByPlayer(@Nullable Player player) {
+        this.lastHurtByPlayer = player;
+        this.lastHurtByPlayerTime = this.tickCount;
     }
 
     public void setLastHurtByMob(@Nullable LivingEntity livingEntity) {
@@ -812,6 +841,10 @@ extends Entity {
         this.entityData.set(DATA_HEALTH_ID, Float.valueOf(Mth.clamp(f, 0.0f, this.getMaxHealth())));
     }
 
+    public boolean isDeadOrDying() {
+        return this.getHealth() <= 0.0f;
+    }
+
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
         boolean bl3;
@@ -821,7 +854,7 @@ extends Entity {
         if (this.level.isClientSide) {
             return false;
         }
-        if (this.getHealth() <= 0.0f) {
+        if (this.isDeadOrDying()) {
             return false;
         }
         if (damageSource.isFire() && this.hasEffect(MobEffects.FIRE_RESISTANCE)) {
@@ -865,7 +898,7 @@ extends Entity {
         }
         this.hurtDir = 0.0f;
         Entity entity2 = damageSource.getEntity();
-        if (entity2 != null) {
+        if (entity2 != null && EntitySelector.ATTACK_ALLOWED.test(entity2)) {
             Wolf wolf;
             if (entity2 instanceof LivingEntity) {
                 this.setLastHurtByMob((LivingEntity)entity2);
@@ -904,7 +937,7 @@ extends Entity {
                 this.hurtDir = (int)(Math.random() * 2.0) * 180;
             }
         }
-        if (this.getHealth() <= 0.0f) {
+        if (this.isDeadOrDying()) {
             if (!this.checkTotemDeathProtection(damageSource)) {
                 SoundEvent soundEvent = this.getDeathSound();
                 if (bl2 && soundEvent != null) {
@@ -1577,7 +1610,7 @@ extends Entity {
     }
 
     protected boolean isImmobile() {
-        return this.getHealth() <= 0.0f;
+        return this.isDeadOrDying();
     }
 
     @Override
@@ -2044,6 +2077,13 @@ extends Entity {
         }
         this.pushEntities();
         this.level.getProfiler().pop();
+        if (!this.level.isClientSide && this.isSensitiveToWater() && this.isInWaterRainOrBubble()) {
+            this.hurt(DamageSource.DROWN, 1.0f);
+        }
+    }
+
+    public boolean isSensitiveToWater() {
+        return false;
     }
 
     private void updateFallFlying() {
@@ -2166,6 +2206,14 @@ extends Entity {
 
     public void setJumping(boolean bl) {
         this.jumping = bl;
+    }
+
+    public void onItemPickup(ItemEntity itemEntity) {
+        Player player;
+        Player player2 = player = itemEntity.getThrower() != null ? this.level.getPlayerByUUID(itemEntity.getThrower()) : null;
+        if (player instanceof ServerPlayer) {
+            CriteriaTriggers.ITEM_PICKED_UP_BY_ENTITY.trigger((ServerPlayer)player, itemEntity.getItem(), this);
+        }
     }
 
     public void take(Entity entity, int i) {
@@ -2545,7 +2593,7 @@ extends Entity {
     }
 
     private void setPosToBed(BlockPos blockPos) {
-        this.setPos((double)blockPos.getX() + 0.5, (float)blockPos.getY() + 0.6875f, (double)blockPos.getZ() + 0.5);
+        this.setPos((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.6875, (double)blockPos.getZ() + 0.5);
     }
 
     private boolean checkBedExists() {
@@ -2564,7 +2612,9 @@ extends Entity {
                 this.setPos(vec3.x, vec3.y, vec3.z);
             }
         });
+        Vec3 vec3 = this.position();
         this.setPose(Pose.STANDING);
+        this.setPos(vec3.x, vec3.y, vec3.z);
         this.clearSleepingPos();
     }
 

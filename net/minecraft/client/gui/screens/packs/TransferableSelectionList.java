@@ -1,7 +1,7 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.client.gui.screens.resourcepacks.lists;
+package net.minecraft.client.gui.screens.packs;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -14,9 +14,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.ConfirmScreen;
-import net.minecraft.client.gui.screens.resourcepacks.ResourcePackSelectScreen;
-import net.minecraft.client.gui.screens.resourcepacks.lists.SelectedResourcePackList;
-import net.minecraft.client.resources.UnopenedResourcePack;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.packs.PackSelectionModel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
@@ -26,21 +25,19 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.PackCompatibility;
 
 @Environment(value=EnvType.CLIENT)
-public abstract class ResourcePackList
-extends ObjectSelectionList<ResourcePackEntry> {
+public class TransferableSelectionList
+extends ObjectSelectionList<PackEntry> {
     private static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/resource_packs.png");
-    private static final Component INCOMPATIBLE_TITLE = new TranslatableComponent("resourcePack.incompatible");
-    private static final Component INCOMPATIBLE_CONFIRM_TITLE = new TranslatableComponent("resourcePack.incompatible.confirm.title");
-    protected final Minecraft minecraft;
+    private static final Component INCOMPATIBLE_TITLE = new TranslatableComponent("pack.incompatible");
+    private static final Component INCOMPATIBLE_CONFIRM_TITLE = new TranslatableComponent("pack.incompatible.confirm.title");
     private final Component title;
 
-    public ResourcePackList(Minecraft minecraft, int i, int j, Component component) {
+    public TransferableSelectionList(Minecraft minecraft, int i, int j, Component component) {
         super(minecraft, i, j, 32, j - 55 + 4, 36);
-        this.minecraft = minecraft;
+        this.title = component;
         this.centerListVertically = false;
         minecraft.font.getClass();
         this.setRenderHeader(true, (int)(9.0f * 1.5f));
-        this.title = component;
     }
 
     @Override
@@ -59,60 +56,34 @@ extends ObjectSelectionList<ResourcePackEntry> {
         return this.x1 - 6;
     }
 
-    public void addResourcePackEntry(ResourcePackEntry resourcePackEntry) {
-        this.addEntry(resourcePackEntry);
-        resourcePackEntry.parent = this;
-    }
-
     @Environment(value=EnvType.CLIENT)
-    public static class ResourcePackEntry
-    extends ObjectSelectionList.Entry<ResourcePackEntry> {
-        private ResourcePackList parent;
+    public static class PackEntry
+    extends ObjectSelectionList.Entry<PackEntry> {
+        private TransferableSelectionList parent;
         protected final Minecraft minecraft;
-        protected final ResourcePackSelectScreen screen;
-        private final UnopenedResourcePack resourcePack;
+        protected final Screen screen;
+        private final PackSelectionModel.Entry pack;
 
-        public ResourcePackEntry(ResourcePackList resourcePackList, ResourcePackSelectScreen resourcePackSelectScreen, UnopenedResourcePack unopenedResourcePack) {
-            this.screen = resourcePackSelectScreen;
-            this.minecraft = Minecraft.getInstance();
-            this.resourcePack = unopenedResourcePack;
-            this.parent = resourcePackList;
-        }
-
-        public void addToList(SelectedResourcePackList selectedResourcePackList) {
-            this.getResourcePack().getDefaultPosition().insert(selectedResourcePackList.children(), this, ResourcePackEntry::getResourcePack, true);
-            this.updateParentList(selectedResourcePackList);
-        }
-
-        public void updateParentList(SelectedResourcePackList selectedResourcePackList) {
-            this.parent = selectedResourcePackList;
-        }
-
-        protected void bindToIcon() {
-            this.resourcePack.bindIcon(this.minecraft.getTextureManager());
-        }
-
-        protected PackCompatibility getCompatibility() {
-            return this.resourcePack.getCompatibility();
-        }
-
-        public UnopenedResourcePack getResourcePack() {
-            return this.resourcePack;
+        public PackEntry(Minecraft minecraft, TransferableSelectionList transferableSelectionList, Screen screen, PackSelectionModel.Entry entry) {
+            this.minecraft = minecraft;
+            this.screen = screen;
+            this.pack = entry;
+            this.parent = transferableSelectionList;
         }
 
         @Override
         public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
             int p;
-            PackCompatibility packCompatibility = this.getCompatibility();
+            PackCompatibility packCompatibility = this.pack.getCompatibility();
             if (!packCompatibility.isCompatible()) {
                 RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
                 GuiComponent.fill(poseStack, k - 1, j - 1, k + l - 9, j + m + 1, -8978432);
             }
-            this.bindToIcon();
+            this.pack.bindIcon(this.minecraft.getTextureManager());
             RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
             GuiComponent.blit(poseStack, k, j, 0.0f, 0.0f, 32, 32, 32, 32);
-            Component component = this.resourcePack.getTitle();
-            Component component2 = this.resourcePack.getDescription();
+            Component component = this.pack.getTitle();
+            FormattedText formattedText = this.pack.getExtendedDescription();
             if (this.showHoverOverlay() && (this.minecraft.options.touchscreen || bl)) {
                 this.minecraft.getTextureManager().bind(ICON_OVERLAY_LOCATION);
                 GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
@@ -121,30 +92,30 @@ extends ObjectSelectionList<ResourcePackEntry> {
                 int q = o - j;
                 if (!packCompatibility.isCompatible()) {
                     component = INCOMPATIBLE_TITLE;
-                    component2 = packCompatibility.getDescription();
+                    formattedText = packCompatibility.getDescription();
                 }
-                if (this.canMoveRight()) {
+                if (this.pack.canSelect()) {
                     if (p < 32) {
                         GuiComponent.blit(poseStack, k, j, 0.0f, 32.0f, 32, 32, 256, 256);
                     } else {
                         GuiComponent.blit(poseStack, k, j, 0.0f, 0.0f, 32, 32, 256, 256);
                     }
                 } else {
-                    if (this.canMoveLeft()) {
+                    if (this.pack.canUnselect()) {
                         if (p < 16) {
                             GuiComponent.blit(poseStack, k, j, 32.0f, 32.0f, 32, 32, 256, 256);
                         } else {
                             GuiComponent.blit(poseStack, k, j, 32.0f, 0.0f, 32, 32, 256, 256);
                         }
                     }
-                    if (this.canMoveUp()) {
+                    if (this.pack.canMoveUp()) {
                         if (p < 32 && p > 16 && q < 16) {
                             GuiComponent.blit(poseStack, k, j, 96.0f, 32.0f, 32, 32, 256, 256);
                         } else {
                             GuiComponent.blit(poseStack, k, j, 96.0f, 0.0f, 32, 32, 256, 256);
                         }
                     }
-                    if (this.canMoveDown()) {
+                    if (this.pack.canMoveDown()) {
                         if (p < 32 && p > 16 && q > 16) {
                             GuiComponent.blit(poseStack, k, j, 64.0f, 32.0f, 32, 32, 256, 256);
                         } else {
@@ -154,40 +125,20 @@ extends ObjectSelectionList<ResourcePackEntry> {
                 }
             }
             if ((p = this.minecraft.font.width(component)) > 157) {
-                FormattedText formattedText = FormattedText.composite(this.minecraft.font.substrByWidth(component, 157 - this.minecraft.font.width("...")), FormattedText.of("..."));
-                this.minecraft.font.drawShadow(poseStack, formattedText, (float)(k + 32 + 2), (float)(j + 1), 0xFFFFFF);
+                FormattedText formattedText2 = FormattedText.composite(this.minecraft.font.substrByWidth(component, 157 - this.minecraft.font.width("...")), FormattedText.of("..."));
+                this.minecraft.font.drawShadow(poseStack, formattedText2, (float)(k + 32 + 2), (float)(j + 1), 0xFFFFFF);
             } else {
                 this.minecraft.font.drawShadow(poseStack, component, (float)(k + 32 + 2), (float)(j + 1), 0xFFFFFF);
             }
             this.minecraft.font.drawShadow(poseStack, component, (float)(k + 32 + 2), (float)(j + 1), 0xFFFFFF);
-            List<FormattedText> list = this.minecraft.font.split(component2, 157);
+            List<FormattedText> list = this.minecraft.font.split(formattedText, 157);
             for (int r = 0; r < 2 && r < list.size(); ++r) {
                 this.minecraft.font.drawShadow(poseStack, list.get(r), (float)(k + 32 + 2), (float)(j + 12 + 10 * r), 0x808080);
             }
         }
 
-        protected boolean showHoverOverlay() {
-            return !this.resourcePack.isFixedPosition() || !this.resourcePack.isRequired();
-        }
-
-        protected boolean canMoveRight() {
-            return !this.screen.isSelected(this);
-        }
-
-        protected boolean canMoveLeft() {
-            return this.screen.isSelected(this) && !this.resourcePack.isRequired();
-        }
-
-        protected boolean canMoveUp() {
-            List list = this.parent.children();
-            int i = list.indexOf(this);
-            return i > 0 && !((ResourcePackEntry)list.get((int)(i - 1))).resourcePack.isFixedPosition();
-        }
-
-        protected boolean canMoveDown() {
-            List list = this.parent.children();
-            int i = list.indexOf(this);
-            return i >= 0 && i < list.size() - 1 && !((ResourcePackEntry)list.get((int)(i + 1))).resourcePack.isFixedPosition();
+        private boolean showHoverOverlay() {
+            return !this.pack.isFixedPosition() || !this.pack.isRequired();
         }
 
         @Override
@@ -195,48 +146,35 @@ extends ObjectSelectionList<ResourcePackEntry> {
             double f = d - (double)this.parent.getRowLeft();
             double g = e - (double)this.parent.getRowTop(this.parent.children().indexOf(this));
             if (this.showHoverOverlay() && f <= 32.0) {
-                if (this.canMoveRight()) {
-                    this.getScreen().setChanged();
-                    PackCompatibility packCompatibility = this.getCompatibility();
+                if (this.pack.canSelect()) {
+                    PackCompatibility packCompatibility = this.pack.getCompatibility();
                     if (packCompatibility.isCompatible()) {
-                        this.getScreen().select(this);
+                        this.pack.select();
                     } else {
                         Component component = packCompatibility.getConfirmation();
                         this.minecraft.setScreen(new ConfirmScreen(bl -> {
-                            this.minecraft.setScreen(this.getScreen());
+                            this.minecraft.setScreen(this.screen);
                             if (bl) {
-                                this.getScreen().select(this);
+                                this.pack.select();
                             }
                         }, INCOMPATIBLE_CONFIRM_TITLE, component));
                     }
                     return true;
                 }
-                if (f < 16.0 && this.canMoveLeft()) {
-                    this.getScreen().deselect(this);
+                if (f < 16.0 && this.pack.canUnselect()) {
+                    this.pack.unselect();
                     return true;
                 }
-                if (f > 16.0 && g < 16.0 && this.canMoveUp()) {
-                    List<ResourcePackEntry> list = this.parent.children();
-                    int j = list.indexOf(this);
-                    list.remove(j);
-                    list.add(j - 1, this);
-                    this.getScreen().setChanged();
+                if (f > 16.0 && g < 16.0 && this.pack.canMoveUp()) {
+                    this.pack.moveUp();
                     return true;
                 }
-                if (f > 16.0 && g > 16.0 && this.canMoveDown()) {
-                    List<ResourcePackEntry> list = this.parent.children();
-                    int j = list.indexOf(this);
-                    list.remove(j);
-                    list.add(j + 1, this);
-                    this.getScreen().setChanged();
+                if (f > 16.0 && g > 16.0 && this.pack.canMoveDown()) {
+                    this.pack.moveDown();
                     return true;
                 }
             }
             return false;
-        }
-
-        public ResourcePackSelectScreen getScreen() {
-            return this.screen;
         }
     }
 }

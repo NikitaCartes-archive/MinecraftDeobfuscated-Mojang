@@ -19,13 +19,14 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Shearable;
 import net.minecraft.world.entity.animal.Cow;
-import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -81,11 +82,13 @@ implements Shearable {
     }
 
     @Override
-    public boolean mobInteract(Player player2, InteractionHand interactionHand) {
+    public InteractionResult mobInteract(Player player2, InteractionHand interactionHand) {
         ItemStack itemStack = player2.getItemInHand(interactionHand);
-        if (itemStack.getItem() == Items.BOWL && !this.isBaby() && !player2.abilities.instabuild) {
+        if (itemStack.getItem() == Items.BOWL && !this.isBaby()) {
             ItemStack itemStack2;
-            itemStack.shrink(1);
+            if (!player2.abilities.instabuild) {
+                itemStack.shrink(1);
+            }
             boolean bl = false;
             if (this.effect != null) {
                 bl = true;
@@ -103,19 +106,19 @@ implements Shearable {
             }
             SoundEvent soundEvent = bl ? SoundEvents.MOOSHROOM_MILK_SUSPICIOUSLY : SoundEvents.MOOSHROOM_MILK;
             this.playSound(soundEvent, 1.0f, 1.0f);
-            return true;
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
         if (itemStack.getItem() == Items.SHEARS && this.readyForShearing()) {
             this.shear(SoundSource.PLAYERS);
             if (!this.level.isClientSide) {
                 itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(interactionHand));
             }
-            return true;
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
         if (this.getMushroomType() == MushroomType.BROWN && itemStack.getItem().is(ItemTags.SMALL_FLOWERS)) {
             if (this.effect != null) {
                 for (int i = 0; i < 2; ++i) {
-                    this.level.addParticle(ParticleTypes.SMOKE, this.getX() + (double)(this.random.nextFloat() / 2.0f), this.getY(0.5), this.getZ() + (double)(this.random.nextFloat() / 2.0f), 0.0, this.random.nextFloat() / 5.0f, 0.0);
+                    this.level.addParticle(ParticleTypes.SMOKE, this.getX() + this.random.nextDouble() / 2.0, this.getY(0.5), this.getZ() + this.random.nextDouble() / 2.0, 0.0, this.random.nextDouble() / 5.0, 0.0);
                 }
             } else {
                 Pair<MobEffect, Integer> pair = this.getEffectFromItemStack(itemStack);
@@ -123,12 +126,13 @@ implements Shearable {
                     itemStack.shrink(1);
                 }
                 for (int j = 0; j < 4; ++j) {
-                    this.level.addParticle(ParticleTypes.EFFECT, this.getX() + (double)(this.random.nextFloat() / 2.0f), this.getY(0.5), this.getZ() + (double)(this.random.nextFloat() / 2.0f), 0.0, this.random.nextFloat() / 5.0f, 0.0);
+                    this.level.addParticle(ParticleTypes.EFFECT, this.getX() + this.random.nextDouble() / 2.0, this.getY(0.5), this.getZ() + this.random.nextDouble() / 2.0, 0.0, this.random.nextDouble() / 5.0, 0.0);
                 }
                 this.effect = pair.getLeft();
                 this.effectDuration = pair.getRight();
                 this.playSound(SoundEvents.MOOSHROOM_EAT, 2.0f, 1.0f);
             }
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
         return super.mobInteract(player2, interactionHand);
     }

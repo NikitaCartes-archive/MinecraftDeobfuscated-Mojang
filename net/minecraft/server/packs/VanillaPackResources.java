@@ -33,24 +33,24 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.AbstractResourcePack;
-import net.minecraft.server.packs.FolderResourcePack;
-import net.minecraft.server.packs.Pack;
+import net.minecraft.server.packs.AbstractPackResources;
+import net.minecraft.server.packs.FolderPackResources;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-public class VanillaPack
-implements Pack {
+public class VanillaPackResources
+implements PackResources {
     public static Path generatedDir;
     private static final Logger LOGGER;
     public static Class<?> clientObject;
     private static final Map<PackType, FileSystem> JAR_FILESYSTEM_BY_TYPE;
     public final Set<String> namespaces;
 
-    public VanillaPack(String ... strings) {
+    public VanillaPackResources(String ... strings) {
         this.namespaces = ImmutableSet.copyOf(strings);
     }
 
@@ -81,7 +81,7 @@ implements Pack {
         HashSet<ResourceLocation> set = Sets.newHashSet();
         if (generatedDir != null) {
             try {
-                VanillaPack.getResources(set, i, string, generatedDir.resolve(packType.getDirectory()), string2, predicate);
+                VanillaPackResources.getResources(set, i, string, generatedDir.resolve(packType.getDirectory()), string2, predicate);
             } catch (IOException iOException) {
                 // empty catch block
             }
@@ -96,13 +96,13 @@ implements Pack {
                     try {
                         uRI = ((URL)enumeration.nextElement()).toURI();
                         if (!"file".equals(uRI.getScheme())) continue;
-                        VanillaPack.getResources(set, i, string, Paths.get(uRI), string2, predicate);
+                        VanillaPackResources.getResources(set, i, string, Paths.get(uRI), string2, predicate);
                     } catch (IOException | URISyntaxException uRI2) {}
                 }
             }
         }
         try {
-            URL uRL = VanillaPack.class.getResource("/" + packType.getDirectory() + "/.mcassetsroot");
+            URL uRL = VanillaPackResources.class.getResource("/" + packType.getDirectory() + "/.mcassetsroot");
             if (uRL == null) {
                 LOGGER.error("Couldn't find .mcassetsroot, cannot load vanilla resources");
                 return set;
@@ -111,10 +111,10 @@ implements Pack {
             if ("file".equals(uRI.getScheme())) {
                 URL uRL2 = new URL(uRL.toString().substring(0, uRL.toString().length() - ".mcassetsroot".length()));
                 Path path = Paths.get(uRL2.toURI());
-                VanillaPack.getResources(set, i, string, path, string2, predicate);
+                VanillaPackResources.getResources(set, i, string, path, string2, predicate);
             } else if ("jar".equals(uRI.getScheme())) {
                 Path path2 = JAR_FILESYSTEM_BY_TYPE.get((Object)packType).getPath("/" + packType.getDirectory(), new String[0]);
-                VanillaPack.getResources(set, i, "minecraft", path2, string2, predicate);
+                VanillaPackResources.getResources(set, i, "minecraft", path2, string2, predicate);
             } else {
                 LOGGER.error("Unsupported scheme {} trying to list vanilla resources (NYI?)", (Object)uRI);
             }
@@ -135,7 +135,7 @@ implements Pack {
     @Nullable
     protected InputStream getResourceAsStream(PackType packType, ResourceLocation resourceLocation) {
         Path path;
-        String string = VanillaPack.createPath(packType, resourceLocation);
+        String string = VanillaPackResources.createPath(packType, resourceLocation);
         if (generatedDir != null && Files.exists(path = generatedDir.resolve(packType.getDirectory() + "/" + resourceLocation.getNamespace() + "/" + resourceLocation.getPath()), new LinkOption[0])) {
             try {
                 return Files.newInputStream(path, new OpenOption[0]);
@@ -144,12 +144,12 @@ implements Pack {
             }
         }
         try {
-            URL uRL = VanillaPack.class.getResource(string);
-            if (VanillaPack.isResourceUrlValid(string, uRL)) {
+            URL uRL = VanillaPackResources.class.getResource(string);
+            if (VanillaPackResources.isResourceUrlValid(string, uRL)) {
                 return uRL.openStream();
             }
         } catch (IOException iOException) {
-            return VanillaPack.class.getResourceAsStream(string);
+            return VanillaPackResources.class.getResourceAsStream(string);
         }
         return null;
     }
@@ -159,24 +159,24 @@ implements Pack {
     }
 
     private static boolean isResourceUrlValid(String string, @Nullable URL uRL) throws IOException {
-        return uRL != null && (uRL.getProtocol().equals("jar") || FolderResourcePack.validatePath(new File(uRL.getFile()), string));
+        return uRL != null && (uRL.getProtocol().equals("jar") || FolderPackResources.validatePath(new File(uRL.getFile()), string));
     }
 
     @Nullable
     protected InputStream getResourceAsStream(String string) {
-        return VanillaPack.class.getResourceAsStream("/" + string);
+        return VanillaPackResources.class.getResourceAsStream("/" + string);
     }
 
     @Override
     public boolean hasResource(PackType packType, ResourceLocation resourceLocation) {
         Path path;
-        String string = VanillaPack.createPath(packType, resourceLocation);
+        String string = VanillaPackResources.createPath(packType, resourceLocation);
         if (generatedDir != null && Files.exists(path = generatedDir.resolve(packType.getDirectory() + "/" + resourceLocation.getNamespace() + "/" + resourceLocation.getPath()), new LinkOption[0])) {
             return true;
         }
         try {
-            URL uRL = VanillaPack.class.getResource(string);
-            return VanillaPack.isResourceUrlValid(string, uRL);
+            URL uRL = VanillaPackResources.class.getResource(string);
+            return VanillaPackResources.isResourceUrlValid(string, uRL);
         } catch (IOException iOException) {
             return false;
         }
@@ -196,7 +196,7 @@ implements Pack {
     @Nullable
     public <T> T getMetadataSection(MetadataSectionSerializer<T> metadataSectionSerializer) throws IOException {
         try (InputStream inputStream = this.getRootResource("pack.mcmeta");){
-            T t = AbstractResourcePack.getMetadataFromStream(metadataSectionSerializer, inputStream);
+            T t = AbstractPackResources.getMetadataFromStream(metadataSectionSerializer, inputStream);
             return t;
         } catch (FileNotFoundException | RuntimeException exception) {
             return null;
@@ -215,10 +215,10 @@ implements Pack {
     static {
         LOGGER = LogManager.getLogger();
         JAR_FILESYSTEM_BY_TYPE = Util.make(Maps.newHashMap(), hashMap -> {
-            Class<VanillaPack> clazz = VanillaPack.class;
-            synchronized (VanillaPack.class) {
+            Class<VanillaPackResources> clazz = VanillaPackResources.class;
+            synchronized (VanillaPackResources.class) {
                 for (PackType packType : PackType.values()) {
-                    URL uRL = VanillaPack.class.getResource("/" + packType.getDirectory() + "/.mcassetsroot");
+                    URL uRL = VanillaPackResources.class.getResource("/" + packType.getDirectory() + "/.mcassetsroot");
                     try {
                         FileSystem fileSystem;
                         URI uRI = uRL.toURI();

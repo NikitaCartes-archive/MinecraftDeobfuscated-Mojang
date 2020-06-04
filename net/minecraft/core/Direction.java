@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -332,6 +333,10 @@ public enum Direction implements StringRepresentable
         @Override
         public Iterator<Direction> iterator() {
             return Iterators.forArray(this.faces);
+        }
+
+        public Stream<Direction> stream() {
+            return Arrays.stream(this.faces);
         }
 
         @Override

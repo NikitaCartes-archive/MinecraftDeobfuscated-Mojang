@@ -3,7 +3,9 @@
  */
 package net.minecraft.util;
 
+import com.google.common.base.Charsets;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.Files;
@@ -18,6 +20,7 @@ public class DirectoryLock
 implements AutoCloseable {
     private final FileChannel lockFile;
     private final FileLock lock;
+    private static final ByteBuffer DUMMY;
 
     public static DirectoryLock create(Path path) throws IOException {
         Path path2 = path.resolve("session.lock");
@@ -26,6 +29,8 @@ implements AutoCloseable {
         }
         FileChannel fileChannel = FileChannel.open(path2, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.DELETE_ON_CLOSE);
         try {
+            fileChannel.write(DUMMY.duplicate());
+            fileChannel.force(true);
             FileLock fileLock = fileChannel.tryLock();
             if (fileLock == null) {
                 throw LockException.alreadyLocked(path2);
@@ -115,6 +120,13 @@ implements AutoCloseable {
          *     at java.base/java.lang.Thread.run(Thread.java:833)
          */
         throw new IllegalStateException("Decompilation failed");
+    }
+
+    static {
+        byte[] bs = "\u2603".getBytes(Charsets.UTF_8);
+        DUMMY = ByteBuffer.allocateDirect(bs.length);
+        DUMMY.put(bs);
+        DUMMY.flip();
     }
 
     public static class LockException

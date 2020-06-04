@@ -293,7 +293,7 @@ AutoCloseable {
             d = this.minecraft.options.fov;
             d *= (double)Mth.lerp(f, this.oldFov, this.fov);
         }
-        if (camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).getHealth() <= 0.0f) {
+        if (camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).isDeadOrDying()) {
             float g = Math.min((float)((LivingEntity)camera.getEntity()).deathTime + f, 20.0f);
             d /= (double)((1.0f - 500.0f / (g + 500.0f)) * 2.0f + 1.0f);
         }
@@ -308,7 +308,7 @@ AutoCloseable {
             float h;
             LivingEntity livingEntity = (LivingEntity)this.minecraft.getCameraEntity();
             float g = (float)livingEntity.hurtTime - f;
-            if (livingEntity.getHealth() <= 0.0f) {
+            if (livingEntity.isDeadOrDying()) {
                 h = Math.min((float)livingEntity.deathTime + f, 20.0f);
                 poseStack.mulPose(Vector3f.ZP.rotationDegrees(40.0f - 8000.0f / (h + 200.0f)));
             }

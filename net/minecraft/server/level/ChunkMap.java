@@ -78,7 +78,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.boss.EnderDragonPart;
-import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
@@ -841,9 +840,6 @@ implements ChunkHolder.PlayerProvider {
 
     protected void addEntity(Entity entity) {
         if (entity instanceof EnderDragonPart) {
-            return;
-        }
-        if (entity instanceof LightningBolt) {
             return;
         }
         EntityType<?> entityType = entity.getType();

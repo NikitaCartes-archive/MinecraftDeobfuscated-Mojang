@@ -9,7 +9,7 @@ import java.util.concurrent.Executor;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.ServerAdvancementManager;
 import net.minecraft.server.ServerFunctionLibrary;
-import net.minecraft.server.packs.Pack;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -20,7 +20,8 @@ import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.world.level.storage.loot.PredicateManager;
 
-public class ServerResources {
+public class ServerResources
+implements AutoCloseable {
     private static final CompletableFuture<Unit> DATA_RELOAD_INITIAL_TASK = CompletableFuture.completedFuture(Unit.INSTANCE);
     private final ReloadableResourceManager resources = new SimpleReloadableResourceManager(PackType.SERVER_DATA);
     private final Commands commands;
@@ -31,8 +32,8 @@ public class ServerResources {
     private final ServerAdvancementManager advancements = new ServerAdvancementManager(this.predicateManager);
     private final ServerFunctionLibrary functionLibrary;
 
-    public ServerResources(boolean bl, int i) {
-        this.commands = new Commands(bl);
+    public ServerResources(Commands.CommandSelection commandSelection, int i) {
+        this.commands = new Commands(commandSelection);
         this.functionLibrary = new ServerFunctionLibrary(i, this.commands.getDispatcher());
         this.resources.registerReloadListener(this.tags);
         this.resources.registerReloadListener(this.predicateManager);
@@ -74,14 +75,23 @@ public class ServerResources {
         return this.resources;
     }
 
-    public static CompletableFuture<ServerResources> loadResources(List<Pack> list, boolean bl, int i, Executor executor, Executor executor2) {
-        ServerResources serverResources = new ServerResources(bl, i);
+    public static CompletableFuture<ServerResources> loadResources(List<PackResources> list, Commands.CommandSelection commandSelection, int i, Executor executor, Executor executor2) {
+        ServerResources serverResources = new ServerResources(commandSelection, i);
         CompletableFuture<Unit> completableFuture = serverResources.resources.reload(executor, executor2, list, DATA_RELOAD_INITIAL_TASK);
-        return completableFuture.thenApply(unit -> serverResources);
+        return ((CompletableFuture)completableFuture.whenComplete((unit, throwable) -> {
+            if (throwable != null) {
+                serverResources.close();
+            }
+        })).thenApply(unit -> serverResources);
     }
 
     public void updateGlobals() {
         this.tags.bindToGlobal();
+    }
+
+    @Override
+    public void close() {
+        this.resources.close();
     }
 }
 

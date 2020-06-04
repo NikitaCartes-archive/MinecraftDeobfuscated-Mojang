@@ -3,14 +3,23 @@
  */
 package net.minecraft.client.gui.screens.worldselection;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonIOException;
+import com.google.gson.stream.JsonWriter;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -23,13 +32,16 @@ import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.OptimizeWorldScreen;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.RegistryWriteOps;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.WorldData;
+import net.minecraft.world.level.storage.LevelSummary;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,6 +50,7 @@ import org.apache.logging.log4j.Logger;
 public class EditWorldScreen
 extends Screen {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final Gson WORLD_GEN_SETTINGS_GSON = new GsonBuilder().setPrettyPrinting().serializeNulls().disableHtmlEscaping().create();
     private Button renameButton;
     private final BooleanConsumer callback;
     private EditBox nameEdit;
@@ -80,20 +93,36 @@ extends Screen {
             if (bl) {
                 EditWorldScreen.makeBackupAndShowToast(this.levelAccess);
             }
-            this.minecraft.setScreen(OptimizeWorldScreen.create(this.callback, this.minecraft.getFixerUpper(), this.levelAccess, bl2));
+            this.minecraft.setScreen(OptimizeWorldScreen.create(this.minecraft, this.callback, this.minecraft.getFixerUpper(), this.levelAccess, bl2));
         }, new TranslatableComponent("optimizeWorld.confirm.title"), new TranslatableComponent("optimizeWorld.confirm.description"), true))));
         this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 5, 200, 20, new TranslatableComponent("selectWorld.edit.export_worldgen_settings"), button -> {
-            DataResult<String> dataResult = this.levelAccess.exportWorldGenSettings();
-            TextComponent component = new TextComponent(dataResult.get().map(Function.identity(), DataResult.PartialResult::message));
-            TranslatableComponent component2 = new TranslatableComponent(dataResult.result().isPresent() ? "selectWorld.edit.export_worldgen_settings.success" : "selectWorld.edit.export_worldgen_settings.failure");
-            dataResult.error().ifPresent(partialResult -> LOGGER.error("Error exporting world settings: {}", partialResult));
-            this.minecraft.getToasts().addToast(SystemToast.multiline(SystemToast.SystemToastIds.WORLD_GEN_SETTINGS_TRANSFER, component2, component));
+            DataResult<Object> dataResult2;
+            RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
+            try (Minecraft.ServerStem serverStem = this.minecraft.makeServerStem(registryHolder, Minecraft::loadDataPacks, Minecraft::loadWorldData, false, this.levelAccess);){
+                RegistryWriteOps<JsonElement> dynamicOps = RegistryWriteOps.create(JsonOps.INSTANCE, registryHolder);
+                DataResult<JsonElement> dataResult = WorldGenSettings.CODEC.encodeStart(dynamicOps, serverStem.worldData().worldGenSettings());
+                dataResult2 = dataResult.flatMap(jsonElement -> {
+                    Path path = this.levelAccess.getLevelPath(LevelResource.ROOT).resolve("worldgen_settings_export.json");
+                    try (JsonWriter jsonWriter = WORLD_GEN_SETTINGS_GSON.newJsonWriter(Files.newBufferedWriter(path, StandardCharsets.UTF_8, new OpenOption[0]));){
+                        WORLD_GEN_SETTINGS_GSON.toJson((JsonElement)jsonElement, jsonWriter);
+                    } catch (JsonIOException | IOException exception) {
+                        return DataResult.error("Error writing file: " + exception.getMessage());
+                    }
+                    return DataResult.success(path.toString());
+                });
+            } catch (InterruptedException | ExecutionException exception) {
+                dataResult2 = DataResult.error("Could not parse level data!");
+            }
+            TextComponent component = new TextComponent(dataResult2.get().map(Function.identity(), DataResult.PartialResult::message));
+            TranslatableComponent component2 = new TranslatableComponent(dataResult2.result().isPresent() ? "selectWorld.edit.export_worldgen_settings.success" : "selectWorld.edit.export_worldgen_settings.failure");
+            dataResult2.error().ifPresent(partialResult -> LOGGER.error("Error exporting world settings: {}", partialResult));
+            this.minecraft.getToasts().addToast(SystemToast.multiline(this.minecraft, SystemToast.SystemToastIds.WORLD_GEN_SETTINGS_TRANSFER, component2, component));
         }));
         this.renameButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 144 + 5, 98, 20, new TranslatableComponent("selectWorld.edit.save"), button -> this.onRename()));
         this.addButton(new Button(this.width / 2 + 2, this.height / 4 + 144 + 5, 98, 20, CommonComponents.GUI_CANCEL, button -> this.callback.accept(false)));
         button2.active = this.levelAccess.getIconFile().isFile();
-        WorldData worldData = this.levelAccess.getDataTag();
-        String string2 = worldData == null ? "" : worldData.getLevelName();
+        LevelSummary levelSummary = this.levelAccess.getSummary();
+        String string2 = levelSummary == null ? "" : levelSummary.getLevelName();
         this.nameEdit = new EditBox(this.font, this.width / 2 - 100, 38, 200, 20, new TranslatableComponent("selectWorld.enterName"));
         this.nameEdit.setValue(string2);
         this.nameEdit.setResponder(string -> {

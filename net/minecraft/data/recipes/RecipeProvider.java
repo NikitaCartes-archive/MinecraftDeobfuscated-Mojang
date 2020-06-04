@@ -35,6 +35,7 @@ import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.data.recipes.SingleItemRecipeBuilder;
 import net.minecraft.data.recipes.SpecialRecipeBuilder;
+import net.minecraft.data.recipes.UpgradeRecipeBuilder;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.world.item.Item;
@@ -942,6 +943,19 @@ implements DataProvider {
         SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.POLISHED_BLACKSTONE_BRICKS), Blocks.POLISHED_BLACKSTONE_BRICK_SLAB, 2).unlocks("has_polished_blackstone_bricks", RecipeProvider.has(Blocks.POLISHED_BLACKSTONE_BRICKS)).save(consumer, "polished_blackstone_brick_slab_from_polished_blackstone_bricks_stonecutting");
         SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.POLISHED_BLACKSTONE_BRICKS), Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS).unlocks("has_polished_blackstone_bricks", RecipeProvider.has(Blocks.POLISHED_BLACKSTONE_BRICKS)).save(consumer, "polished_blackstone_brick_stairs_from_polished_blackstone_bricks_stonecutting");
         SingleItemRecipeBuilder.stonecutting(Ingredient.of(Blocks.POLISHED_BLACKSTONE_BRICKS), Blocks.POLISHED_BLACKSTONE_BRICK_WALL).unlocks("has_polished_blackstone_bricks", RecipeProvider.has(Blocks.POLISHED_BLACKSTONE_BRICKS)).save(consumer, "polished_blackstone_brick_wall_from_polished_blackstone_bricks_stonecutting");
+        RecipeProvider.netheriteSmithing(consumer, Items.DIAMOND_CHESTPLATE, Items.NETHERITE_CHESTPLATE);
+        RecipeProvider.netheriteSmithing(consumer, Items.DIAMOND_LEGGINGS, Items.NETHERITE_LEGGINGS);
+        RecipeProvider.netheriteSmithing(consumer, Items.DIAMOND_HELMET, Items.NETHERITE_HELMET);
+        RecipeProvider.netheriteSmithing(consumer, Items.DIAMOND_BOOTS, Items.NETHERITE_BOOTS);
+        RecipeProvider.netheriteSmithing(consumer, Items.DIAMOND_SWORD, Items.NETHERITE_SWORD);
+        RecipeProvider.netheriteSmithing(consumer, Items.DIAMOND_AXE, Items.NETHERITE_AXE);
+        RecipeProvider.netheriteSmithing(consumer, Items.DIAMOND_PICKAXE, Items.NETHERITE_PICKAXE);
+        RecipeProvider.netheriteSmithing(consumer, Items.DIAMOND_HOE, Items.NETHERITE_HOE);
+        RecipeProvider.netheriteSmithing(consumer, Items.DIAMOND_SHOVEL, Items.NETHERITE_SHOVEL);
+    }
+
+    private static void netheriteSmithing(Consumer<FinishedRecipe> consumer, Item item, Item item2) {
+        UpgradeRecipeBuilder.smithing(Ingredient.of(item), Ingredient.of(Items.NETHERITE_INGOT), item2).unlocks("has_netherite_ingot", RecipeProvider.has(Items.NETHERITE_INGOT)).save(consumer, Registry.ITEM.getKey(item2.asItem()).getPath() + "_smithing");
     }
 
     private static void planksFromLog(Consumer<FinishedRecipe> consumer, ItemLike itemLike, Tag<Item> tag) {

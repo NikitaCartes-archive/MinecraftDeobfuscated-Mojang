@@ -3,53 +3,53 @@
  */
 package net.minecraft.client.gui.components.toasts;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.Arrays;
+import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import org.apache.commons.lang3.text.WordUtils;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class SystemToast
 implements Toast {
     private final SystemToastIds id;
-    private String title;
-    private String[] messageLines;
+    private FormattedText title;
+    private List<FormattedText> messageLines;
     private long lastChanged;
     private boolean changed;
     private final int width;
 
     public SystemToast(SystemToastIds systemToastIds, Component component, @Nullable Component component2) {
-        String[] stringArray;
-        if (component2 == null) {
-            stringArray = new String[]{};
-        } else {
-            String[] stringArray2 = new String[1];
-            stringArray = stringArray2;
-            stringArray2[0] = component2.getString();
-        }
-        this(systemToastIds, component, stringArray, 160);
+        this(systemToastIds, component, SystemToast.nullToEmpty(component2), 160);
     }
 
-    public static SystemToast multiline(SystemToastIds systemToastIds, Component component, Component component2) {
-        String[] strings = WordUtils.wrap(component2.getString(), 80).split("\n");
-        int i = Math.max(130, Arrays.stream(strings).mapToInt(string -> Minecraft.getInstance().font.width((String)string)).max().orElse(130));
-        return new SystemToast(systemToastIds, component, strings, i + 30);
+    public static SystemToast multiline(Minecraft minecraft, SystemToastIds systemToastIds, Component component, Component component2) {
+        Font font = minecraft.font;
+        List<FormattedText> list = font.getSplitter().splitLines(component2, 200, Style.EMPTY);
+        int i = Math.max(200, list.stream().mapToInt(font::width).max().orElse(200));
+        return new SystemToast(systemToastIds, component, list, i + 30);
     }
 
-    private SystemToast(SystemToastIds systemToastIds, Component component, String[] strings, int i) {
+    private SystemToast(SystemToastIds systemToastIds, Component component, List<FormattedText> list, int i) {
         this.id = systemToastIds;
-        this.title = component.getString();
-        this.messageLines = strings;
+        this.title = component;
+        this.messageLines = list;
         this.width = i;
+    }
+
+    private static ImmutableList<FormattedText> nullToEmpty(@Nullable Component component) {
+        return component == null ? ImmutableList.of() : ImmutableList.of(component);
     }
 
     @Override
@@ -68,10 +68,10 @@ implements Toast {
         RenderSystem.color3f(1.0f, 1.0f, 1.0f);
         int i = this.width();
         int j = 12;
-        if (i == 160 && this.messageLines.length <= 1) {
+        if (i == 160 && this.messageLines.size() <= 1) {
             toastComponent.blit(poseStack, 0, 0, 0, 64, i, this.height());
         } else {
-            k = this.height() + Math.max(0, this.messageLines.length - 1) * 12;
+            k = this.height() + Math.max(0, this.messageLines.size() - 1) * 12;
             int m = 28;
             int n = Math.min(4, k - 28);
             this.renderBackgroundRow(poseStack, toastComponent, i, 0, 0, 28);
@@ -84,9 +84,8 @@ implements Toast {
             toastComponent.getMinecraft().font.draw(poseStack, this.title, 18.0f, 12.0f, -256);
         } else {
             toastComponent.getMinecraft().font.draw(poseStack, this.title, 18.0f, 7.0f, -256);
-            for (k = 0; k < this.messageLines.length; ++k) {
-                String string = this.messageLines[k];
-                toastComponent.getMinecraft().font.draw(poseStack, string, 18.0f, (float)(18 + k * 12), -1);
+            for (k = 0; k < this.messageLines.size(); ++k) {
+                toastComponent.getMinecraft().font.draw(poseStack, this.messageLines.get(k), 18.0f, (float)(18 + k * 12), -1);
             }
         }
         return l - this.lastChanged < 5000L ? Toast.Visibility.SHOW : Toast.Visibility.HIDE;
@@ -103,16 +102,8 @@ implements Toast {
     }
 
     public void reset(Component component, @Nullable Component component2) {
-        String[] stringArray;
-        this.title = component.getString();
-        if (component2 == null) {
-            stringArray = new String[]{};
-        } else {
-            String[] stringArray2 = new String[1];
-            stringArray = stringArray2;
-            stringArray2[0] = component2.getString();
-        }
-        this.messageLines = stringArray;
+        this.title = component;
+        this.messageLines = SystemToast.nullToEmpty(component2);
         this.changed = true;
     }
 
@@ -141,6 +132,10 @@ implements Toast {
         SystemToast.add(minecraft.getToasts(), SystemToastIds.WORLD_ACCESS_FAILURE, new TranslatableComponent("selectWorld.delete_failure"), new TextComponent(string));
     }
 
+    public static void onPackCopyFailure(Minecraft minecraft, String string) {
+        SystemToast.add(minecraft.getToasts(), SystemToastIds.PACK_COPY_FAILURE, new TranslatableComponent("pack.copyFailure"), new TextComponent(string));
+    }
+
     @Override
     public /* synthetic */ Object getToken() {
         return this.getToken();
@@ -153,7 +148,8 @@ implements Toast {
         WORLD_BACKUP,
         WORLD_GEN_SETTINGS_TRANSFER,
         PACK_LOAD_FAILURE,
-        WORLD_ACCESS_FAILURE;
+        WORLD_ACCESS_FAILURE,
+        PACK_COPY_FAILURE;
 
     }
 }

@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level;
 
+import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -41,6 +42,19 @@ BiomeManager.NoiseBiomeSource {
 
     default public Biome getBiome(BlockPos blockPos) {
         return this.getBiomeManager().getBiome(blockPos);
+    }
+
+    default public Stream<BlockState> getBlockStatesIfLoaded(AABB aABB) {
+        int n;
+        int i = Mth.floor(aABB.minX);
+        int j = Mth.floor(aABB.maxX);
+        int k = Mth.floor(aABB.minY);
+        int l = Mth.floor(aABB.maxY);
+        int m = Mth.floor(aABB.minZ);
+        if (this.hasChunksAt(i, k, m, j, l, n = Mth.floor(aABB.maxZ))) {
+            return this.getBlockStates(aABB);
+        }
+        return Stream.empty();
     }
 
     @Override

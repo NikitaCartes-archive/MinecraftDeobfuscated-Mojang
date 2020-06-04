@@ -53,6 +53,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Option;
+import net.minecraft.client.Options;
 import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -257,7 +258,7 @@ AutoCloseable {
         RenderSystem.defaultBlendFunc();
         RenderSystem.defaultAlphaFunc();
         int l = 5;
-        if (this.minecraft.options.fancyGraphics) {
+        if (Minecraft.useFancyGraphics()) {
             l = 10;
         }
         int m = -1;
@@ -352,7 +353,7 @@ AutoCloseable {
     }
 
     public void tickRain(Camera camera) {
-        float f = this.minecraft.level.getRainLevel(1.0f) / (this.minecraft.options.fancyGraphics ? 1.0f : 2.0f);
+        float f = this.minecraft.level.getRainLevel(1.0f) / (Minecraft.useFancyGraphics() ? 1.0f : 2.0f);
         if (f <= 0.0f) {
             return;
         }
@@ -369,16 +370,16 @@ AutoCloseable {
             if (blockPos3.getY() <= 0 || blockPos3.getY() > blockPos.getY() + 10 || blockPos3.getY() < blockPos.getY() - 10 || biome.getPrecipitation() != Biome.Precipitation.RAIN || !(biome.getTemperature(blockPos3) >= 0.15f)) continue;
             blockPos2 = blockPos3;
             if (this.minecraft.options.particles == ParticleStatus.MINIMAL) break;
-            float g = random.nextFloat();
-            float h = random.nextFloat();
+            double d = random.nextDouble();
+            double e = random.nextDouble();
             BlockState blockState = levelReader.getBlockState((BlockPos)blockPos2);
             FluidState fluidState = levelReader.getFluidState((BlockPos)blockPos2);
             VoxelShape voxelShape = blockState.getCollisionShape(levelReader, (BlockPos)blockPos2);
-            float m = (float)voxelShape.max(Direction.Axis.Y, g, h);
-            float n = fluidState.getHeight(levelReader, (BlockPos)blockPos2);
-            float o = Math.max(m, n);
+            double g = voxelShape.max(Direction.Axis.Y, d, e);
+            double h = fluidState.getHeight(levelReader, (BlockPos)blockPos2);
+            double m = Math.max(g, h);
             SimpleParticleType particleOptions = fluidState.is(FluidTags.LAVA) || blockState.is(Blocks.MAGMA_BLOCK) || CampfireBlock.isLitCampfire(blockState) ? ParticleTypes.SMOKE : ParticleTypes.RAIN;
-            this.minecraft.level.addParticle(particleOptions, (float)blockPos2.getX() + g, (float)blockPos2.getY() + o, (float)blockPos2.getZ() + h, 0.0, 0.0, 0.0);
+            this.minecraft.level.addParticle(particleOptions, (double)blockPos2.getX() + d, (double)blockPos2.getY() + m, (double)blockPos2.getZ() + e, 0.0, 0.0, 0.0);
         }
         if (blockPos2 != null && random.nextInt(3) < this.rainSoundTime++) {
             this.rainSoundTime = 0;
@@ -407,7 +408,9 @@ AutoCloseable {
         RenderSystem.texParameter(3553, 10243, 10497);
         RenderSystem.bindTexture(0);
         this.initOutline();
-        this.initTransparency();
+        if (Minecraft.useShaderTransparency()) {
+            this.initTransparency();
+        }
     }
 
     public void initOutline() {
@@ -431,22 +434,47 @@ AutoCloseable {
     }
 
     private void initTransparency() {
-        if (this.transparencyChain != null) {
-            this.transparencyChain.close();
-        }
+        this.deinitTransparency();
         ResourceLocation resourceLocation = new ResourceLocation("shaders/post/transparency.json");
         try {
-            this.transparencyChain = new PostChain(this.minecraft.getTextureManager(), this.minecraft.getResourceManager(), this.minecraft.getMainRenderTarget(), resourceLocation);
-            this.transparencyChain.resize(this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
-            this.translucentTarget = this.transparencyChain.getTempTarget("translucent");
-            this.itemEntityTarget = this.transparencyChain.getTempTarget("itemEntity");
-            this.particlesTarget = this.transparencyChain.getTempTarget("particles");
-            this.weatherTarget = this.transparencyChain.getTempTarget("weather");
-            this.cloudsTarget = this.transparencyChain.getTempTarget("clouds");
+            PostChain postChain = new PostChain(this.minecraft.getTextureManager(), this.minecraft.getResourceManager(), this.minecraft.getMainRenderTarget(), resourceLocation);
+            postChain.resize(this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
+            RenderTarget renderTarget = postChain.getTempTarget("translucent");
+            RenderTarget renderTarget2 = postChain.getTempTarget("itemEntity");
+            RenderTarget renderTarget3 = postChain.getTempTarget("particles");
+            RenderTarget renderTarget4 = postChain.getTempTarget("weather");
+            RenderTarget renderTarget5 = postChain.getTempTarget("clouds");
+            this.transparencyChain = postChain;
+            this.translucentTarget = renderTarget;
+            this.itemEntityTarget = renderTarget2;
+            this.particlesTarget = renderTarget3;
+            this.weatherTarget = renderTarget4;
+            this.cloudsTarget = renderTarget5;
         } catch (IOException iOException) {
+            Options options = Minecraft.getInstance().options;
+            options.graphicsMode = options.graphicsMode.cyclePrevious();
             throw new TranparencyShaderException("Failed to load shader: " + resourceLocation, iOException);
         } catch (JsonSyntaxException jsonSyntaxException) {
+            Options options = Minecraft.getInstance().options;
+            options.graphicsMode = options.graphicsMode.cyclePrevious();
             throw new TranparencyShaderException("Failed to parse shader: " + resourceLocation, jsonSyntaxException);
+        }
+    }
+
+    private void deinitTransparency() {
+        if (this.transparencyChain != null) {
+            this.transparencyChain.close();
+            this.translucentTarget.destroyBuffers();
+            this.itemEntityTarget.destroyBuffers();
+            this.particlesTarget.destroyBuffers();
+            this.weatherTarget.destroyBuffers();
+            this.cloudsTarget.destroyBuffers();
+            this.transparencyChain = null;
+            this.translucentTarget = null;
+            this.itemEntityTarget = null;
+            this.particlesTarget = null;
+            this.weatherTarget = null;
+            this.cloudsTarget = null;
         }
     }
 
@@ -594,6 +622,11 @@ AutoCloseable {
         if (this.level == null) {
             return;
         }
+        if (Minecraft.useShaderTransparency()) {
+            this.initTransparency();
+        } else {
+            this.deinitTransparency();
+        }
         this.level.clearTintCaches();
         if (this.chunkRenderDispatcher == null) {
             this.chunkRenderDispatcher = new ChunkRenderDispatcher(this.level, this, Util.backgroundExecutor(), this.minecraft.is64Bit(), this.renderBuffers.fixedBufferPack());
@@ -602,7 +635,7 @@ AutoCloseable {
         }
         this.needsUpdate = true;
         this.generateClouds = true;
-        ItemBlockRenderTypes.setFancy(this.minecraft.options.fancyGraphics);
+        ItemBlockRenderTypes.setFancy(Minecraft.useFancyGraphics());
         this.lastViewDistance = this.minecraft.options.renderDistance;
         if (this.viewArea != null) {
             this.viewArea.releaseAllBuffers();
@@ -865,6 +898,9 @@ AutoCloseable {
             this.itemEntityTarget.copyDepthFrom(this.minecraft.getMainRenderTarget());
             this.minecraft.getMainRenderTarget().bindWrite(false);
         }
+        if (this.weatherTarget != null) {
+            this.weatherTarget.clear(Minecraft.ON_OSX);
+        }
         if (this.shouldShowEntityOutlines()) {
             this.entityTarget.clear(Minecraft.ON_OSX);
             this.minecraft.getMainRenderTarget().bindWrite(false);
@@ -989,53 +1025,51 @@ AutoCloseable {
         this.renderBuffers.crumblingBufferSource().endBatch();
         bufferSource.endBatch(RenderType.lines());
         bufferSource.endBatch();
-        profilerFiller.popPush("translucent");
-        if (this.translucentTarget != null) {
+        if (this.transparencyChain != null) {
             this.translucentTarget.clear(Minecraft.ON_OSX);
             this.translucentTarget.copyDepthFrom(this.minecraft.getMainRenderTarget());
-        }
-        this.renderChunkLayer(RenderType.translucent(), poseStack, d, e, g);
-        profilerFiller.popPush("particles");
-        if (this.particlesTarget != null) {
+            profilerFiller.popPush("translucent");
+            this.renderChunkLayer(RenderType.translucent(), poseStack, d, e, g);
             this.particlesTarget.clear(Minecraft.ON_OSX);
             this.particlesTarget.copyDepthFrom(this.minecraft.getMainRenderTarget());
             RenderStateShard.PARTICLES_TARGET.setupRenderState();
-        }
-        this.minecraft.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
-        if (this.particlesTarget != null) {
+            profilerFiller.popPush("particles");
+            this.minecraft.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
             RenderStateShard.PARTICLES_TARGET.clearRenderState();
+        } else {
+            profilerFiller.popPush("translucent");
+            this.renderChunkLayer(RenderType.translucent(), poseStack, d, e, g);
+            profilerFiller.popPush("particles");
+            this.minecraft.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
         }
         RenderSystem.pushMatrix();
         RenderSystem.multMatrix(poseStack.last().pose());
-        profilerFiller.popPush("cloudsLayers");
         if (this.minecraft.options.getCloudsType() != CloudStatus.OFF) {
-            profilerFiller.popPush("clouds");
-            if (this.cloudsTarget != null) {
+            if (this.transparencyChain != null) {
                 this.cloudsTarget.clear(Minecraft.ON_OSX);
                 RenderStateShard.CLOUDS_TARGET.setupRenderState();
-            }
-            this.renderClouds(poseStack, f, d, e, g);
-            if (this.cloudsTarget != null) {
+                profilerFiller.popPush("clouds");
+                this.renderClouds(poseStack, f, d, e, g);
                 RenderStateShard.CLOUDS_TARGET.clearRenderState();
+            } else {
+                profilerFiller.popPush("clouds");
+                this.renderClouds(poseStack, f, d, e, g);
             }
-        }
-        profilerFiller.popPush("weather");
-        if (this.weatherTarget != null) {
-            this.weatherTarget.clear(Minecraft.ON_OSX);
-            RenderStateShard.WEATHER_TARGET.setupRenderState();
-        } else {
-            RenderSystem.depthMask(false);
-        }
-        this.renderSnowAndRain(lightTexture, f, d, e, g);
-        this.renderWorldBounds(camera);
-        if (this.weatherTarget != null) {
-            RenderStateShard.WEATHER_TARGET.clearRenderState();
-        } else {
-            RenderSystem.depthMask(true);
         }
         if (this.transparencyChain != null) {
+            RenderStateShard.WEATHER_TARGET.setupRenderState();
+            profilerFiller.popPush("weather");
+            this.renderSnowAndRain(lightTexture, f, d, e, g);
+            this.renderWorldBounds(camera);
+            RenderStateShard.WEATHER_TARGET.clearRenderState();
             this.transparencyChain.process(f);
             this.minecraft.getMainRenderTarget().bindWrite(false);
+        } else {
+            RenderSystem.depthMask(false);
+            profilerFiller.popPush("weather");
+            this.renderSnowAndRain(lightTexture, f, d, e, g);
+            this.renderWorldBounds(camera);
+            RenderSystem.depthMask(true);
         }
         this.renderDebug(camera);
         RenderSystem.shadeModel(7424);
@@ -2109,7 +2143,7 @@ AutoCloseable {
                     particle.setColor(w * z, x * z, y * z);
                     particle.setPower((float)g);
                 }
-                this.level.playLocalSound(blockPos, SoundEvents.SPLASH_POTION_BREAK, SoundSource.NEUTRAL, 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f, false);
+                this.level.playLocalSound(blockPos, SoundEvents.SPLASH_POTION_BREAK, SoundSource.NEUTRAL, 1.0f, random.nextFloat() * 0.1f + 0.9f, false);
                 break;
             }
             case 2001: {
@@ -2123,9 +2157,9 @@ AutoCloseable {
             }
             case 2004: {
                 for (int k = 0; k < 20; ++k) {
-                    double u = (double)blockPos.getX() + 0.5 + ((double)this.level.random.nextFloat() - 0.5) * 2.0;
-                    double d = (double)blockPos.getY() + 0.5 + ((double)this.level.random.nextFloat() - 0.5) * 2.0;
-                    double e = (double)blockPos.getZ() + 0.5 + ((double)this.level.random.nextFloat() - 0.5) * 2.0;
+                    double u = (double)blockPos.getX() + 0.5 + (random.nextDouble() - 0.5) * 2.0;
+                    double d = (double)blockPos.getY() + 0.5 + (random.nextDouble() - 0.5) * 2.0;
+                    double e = (double)blockPos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 2.0;
                     this.level.addParticle(ParticleTypes.SMOKE, u, d, e, 0.0, 0.0, 0.0);
                     this.level.addParticle(ParticleTypes.FLAME, u, d, e, 0.0, 0.0, 0.0);
                 }
@@ -2144,14 +2178,14 @@ AutoCloseable {
                 break;
             }
             case 1501: {
-                this.level.playLocalSound(blockPos, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.5f, 2.6f + (this.level.getRandom().nextFloat() - this.level.getRandom().nextFloat()) * 0.8f, false);
+                this.level.playLocalSound(blockPos, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.5f, 2.6f + (random.nextFloat() - random.nextFloat()) * 0.8f, false);
                 for (int k = 0; k < 8; ++k) {
-                    this.level.addParticle(ParticleTypes.LARGE_SMOKE, (double)blockPos.getX() + Math.random(), (double)blockPos.getY() + 1.2, (double)blockPos.getZ() + Math.random(), 0.0, 0.0, 0.0);
+                    this.level.addParticle(ParticleTypes.LARGE_SMOKE, (double)blockPos.getX() + random.nextDouble(), (double)blockPos.getY() + 1.2, (double)blockPos.getZ() + random.nextDouble(), 0.0, 0.0, 0.0);
                 }
                 break;
             }
             case 1502: {
-                this.level.playLocalSound(blockPos, SoundEvents.REDSTONE_TORCH_BURNOUT, SoundSource.BLOCKS, 0.5f, 2.6f + (this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.8f, false);
+                this.level.playLocalSound(blockPos, SoundEvents.REDSTONE_TORCH_BURNOUT, SoundSource.BLOCKS, 0.5f, 2.6f + (random.nextFloat() - random.nextFloat()) * 0.8f, false);
                 for (int k = 0; k < 5; ++k) {
                     double u = (double)blockPos.getX() + random.nextDouble() * 0.6 + 0.2;
                     double d = (double)blockPos.getY() + random.nextDouble() * 0.6 + 0.2;
@@ -2163,75 +2197,72 @@ AutoCloseable {
             case 1503: {
                 this.level.playLocalSound(blockPos, SoundEvents.END_PORTAL_FRAME_FILL, SoundSource.BLOCKS, 1.0f, 1.0f, false);
                 for (int k = 0; k < 16; ++k) {
-                    double u = (float)blockPos.getX() + (5.0f + random.nextFloat() * 6.0f) / 16.0f;
-                    double d = (float)blockPos.getY() + 0.8125f;
-                    double e = (float)blockPos.getZ() + (5.0f + random.nextFloat() * 6.0f) / 16.0f;
-                    double f = 0.0;
-                    double aa = 0.0;
-                    double ab = 0.0;
+                    double u = (double)blockPos.getX() + (5.0 + random.nextDouble() * 6.0) / 16.0;
+                    double d = (double)blockPos.getY() + 0.8125;
+                    double e = (double)blockPos.getZ() + (5.0 + random.nextDouble() * 6.0) / 16.0;
                     this.level.addParticle(ParticleTypes.SMOKE, u, d, e, 0.0, 0.0, 0.0);
                 }
                 break;
             }
             case 2006: {
                 for (int k = 0; k < 200; ++k) {
-                    float ac = random.nextFloat() * 4.0f;
-                    float ad = random.nextFloat() * ((float)Math.PI * 2);
-                    double d = Mth.cos(ad) * ac;
+                    float aa = random.nextFloat() * 4.0f;
+                    float ab = random.nextFloat() * ((float)Math.PI * 2);
+                    double d = Mth.cos(ab) * aa;
                     double e = 0.01 + random.nextDouble() * 0.5;
-                    double f = Mth.sin(ad) * ac;
+                    double f = Mth.sin(ab) * aa;
                     Particle particle2 = this.addParticleInternal(ParticleTypes.DRAGON_BREATH, false, (double)blockPos.getX() + d * 0.1, (double)blockPos.getY() + 0.3, (double)blockPos.getZ() + f * 0.1, d, e, f);
                     if (particle2 == null) continue;
-                    particle2.setPower(ac);
+                    particle2.setPower(aa);
                 }
                 if (j != 1) break;
-                this.level.playLocalSound(blockPos, SoundEvents.DRAGON_FIREBALL_EXPLODE, SoundSource.HOSTILE, 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f, false);
+                this.level.playLocalSound(blockPos, SoundEvents.DRAGON_FIREBALL_EXPLODE, SoundSource.HOSTILE, 1.0f, random.nextFloat() * 0.1f + 0.9f, false);
                 break;
             }
             case 2009: {
                 for (int k = 0; k < 8; ++k) {
-                    this.level.addParticle(ParticleTypes.CLOUD, (double)blockPos.getX() + Math.random(), (double)blockPos.getY() + 1.2, (double)blockPos.getZ() + Math.random(), 0.0, 0.0, 0.0);
+                    this.level.addParticle(ParticleTypes.CLOUD, (double)blockPos.getX() + random.nextDouble(), (double)blockPos.getY() + 1.2, (double)blockPos.getZ() + random.nextDouble(), 0.0, 0.0, 0.0);
                 }
                 break;
             }
             case 1012: {
-                this.level.playLocalSound(blockPos, SoundEvents.WOODEN_DOOR_CLOSE, SoundSource.BLOCKS, 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f, false);
+                this.level.playLocalSound(blockPos, SoundEvents.WOODEN_DOOR_CLOSE, SoundSource.BLOCKS, 1.0f, random.nextFloat() * 0.1f + 0.9f, false);
                 break;
             }
             case 1036: {
-                this.level.playLocalSound(blockPos, SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f, false);
+                this.level.playLocalSound(blockPos, SoundEvents.IRON_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 1.0f, random.nextFloat() * 0.1f + 0.9f, false);
                 break;
             }
             case 1013: {
-                this.level.playLocalSound(blockPos, SoundEvents.WOODEN_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f, false);
+                this.level.playLocalSound(blockPos, SoundEvents.WOODEN_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 1.0f, random.nextFloat() * 0.1f + 0.9f, false);
                 break;
             }
             case 1014: {
-                this.level.playLocalSound(blockPos, SoundEvents.FENCE_GATE_CLOSE, SoundSource.BLOCKS, 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f, false);
+                this.level.playLocalSound(blockPos, SoundEvents.FENCE_GATE_CLOSE, SoundSource.BLOCKS, 1.0f, random.nextFloat() * 0.1f + 0.9f, false);
                 break;
             }
             case 1011: {
-                this.level.playLocalSound(blockPos, SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f, false);
+                this.level.playLocalSound(blockPos, SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 1.0f, random.nextFloat() * 0.1f + 0.9f, false);
                 break;
             }
             case 1006: {
-                this.level.playLocalSound(blockPos, SoundEvents.WOODEN_DOOR_OPEN, SoundSource.BLOCKS, 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f, false);
+                this.level.playLocalSound(blockPos, SoundEvents.WOODEN_DOOR_OPEN, SoundSource.BLOCKS, 1.0f, random.nextFloat() * 0.1f + 0.9f, false);
                 break;
             }
             case 1007: {
-                this.level.playLocalSound(blockPos, SoundEvents.WOODEN_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f, false);
+                this.level.playLocalSound(blockPos, SoundEvents.WOODEN_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.0f, random.nextFloat() * 0.1f + 0.9f, false);
                 break;
             }
             case 1037: {
-                this.level.playLocalSound(blockPos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f, false);
+                this.level.playLocalSound(blockPos, SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.0f, random.nextFloat() * 0.1f + 0.9f, false);
                 break;
             }
             case 1008: {
-                this.level.playLocalSound(blockPos, SoundEvents.FENCE_GATE_OPEN, SoundSource.BLOCKS, 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f, false);
+                this.level.playLocalSound(blockPos, SoundEvents.FENCE_GATE_OPEN, SoundSource.BLOCKS, 1.0f, random.nextFloat() * 0.1f + 0.9f, false);
                 break;
             }
             case 1005: {
-                this.level.playLocalSound(blockPos, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f, false);
+                this.level.playLocalSound(blockPos, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 1.0f, random.nextFloat() * 0.1f + 0.9f, false);
                 break;
             }
             case 1009: {
@@ -2239,11 +2270,11 @@ AutoCloseable {
                 break;
             }
             case 1029: {
-                this.level.playLocalSound(blockPos, SoundEvents.ANVIL_DESTROY, SoundSource.BLOCKS, 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f, false);
+                this.level.playLocalSound(blockPos, SoundEvents.ANVIL_DESTROY, SoundSource.BLOCKS, 1.0f, random.nextFloat() * 0.1f + 0.9f, false);
                 break;
             }
             case 1030: {
-                this.level.playLocalSound(blockPos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0f, this.level.random.nextFloat() * 0.1f + 0.9f, false);
+                this.level.playLocalSound(blockPos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0f, random.nextFloat() * 0.1f + 0.9f, false);
                 break;
             }
             case 1044: {

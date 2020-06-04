@@ -185,7 +185,7 @@ implements Enemy {
     @Override
     public void remove() {
         int i = this.getSize();
-        if (!this.level.isClientSide && i > 1 && this.getHealth() <= 0.0f) {
+        if (!this.level.isClientSide && i > 1 && this.isDeadOrDying()) {
             Component component = this.getCustomName();
             boolean bl = this.isNoAi();
             float f = (float)i / 4.0f;

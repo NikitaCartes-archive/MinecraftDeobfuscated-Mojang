@@ -81,9 +81,9 @@ extends DiodeBlock {
             return;
         }
         Direction direction = blockState.getValue(FACING);
-        double d = (double)((float)blockPos.getX() + 0.5f) + (double)(random.nextFloat() - 0.5f) * 0.2;
-        double e = (double)((float)blockPos.getY() + 0.4f) + (double)(random.nextFloat() - 0.5f) * 0.2;
-        double f = (double)((float)blockPos.getZ() + 0.5f) + (double)(random.nextFloat() - 0.5f) * 0.2;
+        double d = (double)blockPos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.2;
+        double e = (double)blockPos.getY() + 0.4 + (random.nextDouble() - 0.5) * 0.2;
+        double f = (double)blockPos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.2;
         float g = -5.0f;
         if (random.nextBoolean()) {
             g = blockState.getValue(DELAY) * 2 - 1;

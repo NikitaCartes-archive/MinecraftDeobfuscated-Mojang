@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.gui.screens.worldselection;
 
+import com.google.common.collect.ImmutableSet;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.DataFixer;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
@@ -11,21 +12,28 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class OptimizeWorldScreen
 extends Screen {
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final Object2IntMap<ResourceKey<Level>> DIMENSION_COLORS = Util.make(new Object2IntOpenCustomHashMap(Util.identityStrategy()), object2IntOpenCustomHashMap -> {
         object2IntOpenCustomHashMap.put(Level.OVERWORLD, -13408734);
         object2IntOpenCustomHashMap.put(Level.NETHER, -10075085);
@@ -35,15 +43,30 @@ extends Screen {
     private final BooleanConsumer callback;
     private final WorldUpgrader upgrader;
 
-    public static OptimizeWorldScreen create(BooleanConsumer booleanConsumer, DataFixer dataFixer, LevelStorageSource.LevelStorageAccess levelStorageAccess, boolean bl) {
-        WorldData worldData = levelStorageAccess.getDataTag();
-        return new OptimizeWorldScreen(booleanConsumer, dataFixer, levelStorageAccess, worldData, bl);
+    /*
+     * Enabled aggressive block sorting
+     * Enabled unnecessary exception pruning
+     * Enabled aggressive exception aggregation
+     */
+    @Nullable
+    public static OptimizeWorldScreen create(Minecraft minecraft, BooleanConsumer booleanConsumer, DataFixer dataFixer, LevelStorageSource.LevelStorageAccess levelStorageAccess, boolean bl) {
+        RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
+        try (Minecraft.ServerStem serverStem = minecraft.makeServerStem(registryHolder, Minecraft::loadDataPacks, Minecraft::loadWorldData, false, levelStorageAccess);){
+            WorldData worldData = serverStem.worldData();
+            levelStorageAccess.saveDataTag(registryHolder, worldData);
+            ImmutableSet<ResourceKey<Level>> immutableSet = worldData.worldGenSettings().levels();
+            OptimizeWorldScreen optimizeWorldScreen = new OptimizeWorldScreen(booleanConsumer, dataFixer, levelStorageAccess, worldData.getLevelSettings(), bl, immutableSet);
+            return optimizeWorldScreen;
+        } catch (Exception exception) {
+            LOGGER.warn("Failed to load datapacks, can't optimize world", (Throwable)exception);
+            return null;
+        }
     }
 
-    private OptimizeWorldScreen(BooleanConsumer booleanConsumer, DataFixer dataFixer, LevelStorageSource.LevelStorageAccess levelStorageAccess, WorldData worldData, boolean bl) {
-        super(new TranslatableComponent("optimizeWorld.title", worldData.getLevelName()));
+    private OptimizeWorldScreen(BooleanConsumer booleanConsumer, DataFixer dataFixer, LevelStorageSource.LevelStorageAccess levelStorageAccess, LevelSettings levelSettings, boolean bl, ImmutableSet<ResourceKey<Level>> immutableSet) {
+        super(new TranslatableComponent("optimizeWorld.title", levelSettings.levelName()));
         this.callback = booleanConsumer;
-        this.upgrader = new WorldUpgrader(levelStorageAccess, dataFixer, worldData, bl);
+        this.upgrader = new WorldUpgrader(levelStorageAccess, dataFixer, immutableSet, bl);
     }
 
     @Override
@@ -87,7 +110,7 @@ extends Screen {
             this.drawString(poseStack, this.font, I18n.get("optimizeWorld.info.skipped", this.upgrader.getSkipped()), k, 40 + this.font.lineHeight + 3, 0xA0A0A0);
             this.drawString(poseStack, this.font, I18n.get("optimizeWorld.info.total", this.upgrader.getTotalChunks()), k, 40 + (this.font.lineHeight + 3) * 2, 0xA0A0A0);
             int o = 0;
-            for (ResourceKey resourceKey : this.upgrader.dimensionTypes()) {
+            for (ResourceKey resourceKey : this.upgrader.levels()) {
                 int p = Mth.floor(this.upgrader.dimensionProgress(resourceKey) * (float)(l - k));
                 OptimizeWorldScreen.fill(poseStack, k + o, m, k + o + p, n, DIMENSION_COLORS.getInt(resourceKey));
                 o += p;

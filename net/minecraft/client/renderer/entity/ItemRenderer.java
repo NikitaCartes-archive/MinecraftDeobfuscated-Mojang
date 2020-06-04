@@ -88,23 +88,23 @@ implements ResourceManagerReloadListener {
     }
 
     public void render(ItemStack itemStack, ItemTransforms.TransformType transformType, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, BakedModel bakedModel) {
-        boolean bl3;
+        boolean bl2;
         if (itemStack.isEmpty()) {
             return;
         }
         poseStack.pushPose();
-        boolean bl2 = transformType == ItemTransforms.TransformType.GUI;
-        boolean bl4 = bl3 = bl2 || transformType == ItemTransforms.TransformType.GROUND || transformType == ItemTransforms.TransformType.FIXED;
-        if (itemStack.getItem() == Items.TRIDENT && bl3) {
+        boolean bl3 = bl2 = transformType == ItemTransforms.TransformType.GUI || transformType == ItemTransforms.TransformType.GROUND || transformType == ItemTransforms.TransformType.FIXED;
+        if (itemStack.getItem() == Items.TRIDENT && bl2) {
             bakedModel = this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:trident#inventory"));
         }
         bakedModel.getTransforms().getTransform(transformType).apply(bl, poseStack);
         poseStack.translate(-0.5, -0.5, -0.5);
-        if (bakedModel.isCustomRenderer() || itemStack.getItem() == Items.TRIDENT && !bl3) {
-            BlockEntityWithoutLevelRenderer.instance.renderByItem(itemStack, poseStack, multiBufferSource, i, j);
+        if (bakedModel.isCustomRenderer() || itemStack.getItem() == Items.TRIDENT && !bl2) {
+            BlockEntityWithoutLevelRenderer.instance.renderByItem(itemStack, transformType, poseStack, multiBufferSource, i, j);
         } else {
-            RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack, transformType != ItemTransforms.TransformType.GROUND);
-            VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, renderType, true, itemStack.hasFoil());
+            boolean bl32 = transformType == ItemTransforms.TransformType.GUI || transformType == ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND || transformType == ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND || transformType == ItemTransforms.TransformType.FIXED;
+            RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack, bl32);
+            VertexConsumer vertexConsumer = bl32 ? ItemRenderer.getFoilBufferDirect(multiBufferSource, renderType, true, itemStack.hasFoil()) : ItemRenderer.getFoilBuffer(multiBufferSource, renderType, true, itemStack.hasFoil());
             this.renderModelLists(bakedModel, itemStack, i, j, poseStack, vertexConsumer);
         }
         poseStack.popPose();
@@ -120,6 +120,13 @@ implements ResourceManagerReloadListener {
     public static VertexConsumer getFoilBuffer(MultiBufferSource multiBufferSource, RenderType renderType, boolean bl, boolean bl2) {
         if (bl2) {
             return VertexMultiConsumer.create(multiBufferSource.getBuffer(bl ? RenderType.glint() : RenderType.entityGlint()), multiBufferSource.getBuffer(renderType));
+        }
+        return multiBufferSource.getBuffer(renderType);
+    }
+
+    public static VertexConsumer getFoilBufferDirect(MultiBufferSource multiBufferSource, RenderType renderType, boolean bl, boolean bl2) {
+        if (bl2) {
+            return VertexMultiConsumer.create(multiBufferSource.getBuffer(bl ? RenderType.glintDirect() : RenderType.entityGlintDirect()), multiBufferSource.getBuffer(renderType));
         }
         return multiBufferSource.getBuffer(renderType);
     }

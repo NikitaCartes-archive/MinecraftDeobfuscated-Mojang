@@ -38,7 +38,7 @@ public class PoiSection {
     private boolean isValid;
 
     public static Codec<PoiSection> codec(Runnable runnable) {
-        return RecordCodecBuilder.create(instance -> instance.group(RecordCodecBuilder.point(runnable), ((MapCodec)Codec.BOOL.fieldOf("Valid")).forGetter(poiSection -> poiSection.isValid), ((MapCodec)PoiRecord.codec(runnable).listOf().fieldOf("Records")).forGetter(poiSection -> ImmutableList.copyOf(poiSection.records.values()))).apply((Applicative<PoiSection, ?>)instance, PoiSection::new)).withDefault(Util.prefix("Failed to read POI section: ", LOGGER::error), () -> new PoiSection(runnable, false, ImmutableList.of()));
+        return RecordCodecBuilder.create(instance -> instance.group(RecordCodecBuilder.point(runnable), Codec.BOOL.optionalFieldOf("Valid", false).forGetter(poiSection -> poiSection.isValid), ((MapCodec)PoiRecord.codec(runnable).listOf().fieldOf("Records")).forGetter(poiSection -> ImmutableList.copyOf(poiSection.records.values()))).apply((Applicative<PoiSection, ?>)instance, PoiSection::new)).withDefault(Util.prefix("Failed to read POI section: ", LOGGER::error), () -> new PoiSection(runnable, false, ImmutableList.of()));
     }
 
     public PoiSection(Runnable runnable) {

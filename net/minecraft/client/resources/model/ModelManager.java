@@ -21,12 +21,14 @@ import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class ModelManager
 extends SimplePreparableReloadListener<ModelBakery>
 implements AutoCloseable {
     private Map<ResourceLocation, BakedModel> bakedRegistry;
+    @Nullable
     private AtlasSet atlases;
     private final BlockModelShaper blockModelShaper;
     private final TextureManager textureManager;
@@ -99,7 +101,9 @@ implements AutoCloseable {
 
     @Override
     public void close() {
-        this.atlases.close();
+        if (this.atlases != null) {
+            this.atlases.close();
+        }
     }
 
     public void updateMaxMipLevel(int i) {

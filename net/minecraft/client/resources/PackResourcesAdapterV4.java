@@ -20,15 +20,15 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.Pack;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
-public class PackAdapterV4
-implements Pack {
+public class PackResourcesAdapterV4
+implements PackResources {
     private static final Map<String, Pair<ChestType, ResourceLocation>> CHESTS = Util.make(Maps.newHashMap(), hashMap -> {
         hashMap.put("textures/entity/chest/normal_left.png", new Pair<ChestType, ResourceLocation>(ChestType.LEFT, new ResourceLocation("textures/entity/chest/normal_double.png")));
         hashMap.put("textures/entity/chest/normal_right.png", new Pair<ChestType, ResourceLocation>(ChestType.RIGHT, new ResourceLocation("textures/entity/chest/normal_double.png")));
@@ -47,10 +47,10 @@ implements Pack {
     public static final ResourceLocation SHIELD_BASE = new ResourceLocation("textures/entity/shield_base.png");
     public static final ResourceLocation BANNER_BASE = new ResourceLocation("textures/entity/banner_base.png");
     public static final ResourceLocation OLD_IRON_GOLEM_LOCATION = new ResourceLocation("textures/entity/iron_golem.png");
-    private final Pack pack;
+    private final PackResources pack;
 
-    public PackAdapterV4(Pack pack) {
-        this.pack = pack;
+    public PackResourcesAdapterV4(PackResources packResources) {
+        this.pack = packResources;
     }
 
     @Override
@@ -96,12 +96,12 @@ implements Pack {
             return this.pack.getResource(packType, OLD_IRON_GOLEM_LOCATION);
         }
         if (SHIELDS.contains(string)) {
-            InputStream inputStream = PackAdapterV4.fixPattern(this.pack.getResource(packType, SHIELD_BASE), this.pack.getResource(packType, resourceLocation), 64, 2, 2, 12, 22);
+            InputStream inputStream = PackResourcesAdapterV4.fixPattern(this.pack.getResource(packType, SHIELD_BASE), this.pack.getResource(packType, resourceLocation), 64, 2, 2, 12, 22);
             if (inputStream != null) {
                 return inputStream;
             }
         } else if (BANNERS.contains(string)) {
-            InputStream inputStream = PackAdapterV4.fixPattern(this.pack.getResource(packType, BANNER_BASE), this.pack.getResource(packType, resourceLocation), 64, 0, 0, 42, 41);
+            InputStream inputStream = PackResourcesAdapterV4.fixPattern(this.pack.getResource(packType, BANNER_BASE), this.pack.getResource(packType, resourceLocation), 64, 0, 0, 42, 41);
             if (inputStream != null) {
                 return inputStream;
             }
@@ -119,20 +119,20 @@ implements Pack {
                 }
             }
             if ("textures/entity/conduit/closed_eye.png".equals(string) || "textures/entity/conduit/open_eye.png".equals(string)) {
-                return PackAdapterV4.fixConduitEyeTexture(this.pack.getResource(packType, resourceLocation));
+                return PackResourcesAdapterV4.fixConduitEyeTexture(this.pack.getResource(packType, resourceLocation));
             }
             Pair<ChestType, ResourceLocation> pair = CHESTS.get(string);
             if (pair != null) {
                 ChestType chestType = pair.getFirst();
                 InputStream inputStream2 = this.pack.getResource(packType, pair.getSecond());
                 if (chestType == ChestType.SINGLE) {
-                    return PackAdapterV4.fixSingleChest(inputStream2);
+                    return PackResourcesAdapterV4.fixSingleChest(inputStream2);
                 }
                 if (chestType == ChestType.LEFT) {
-                    return PackAdapterV4.fixLeftChest(inputStream2);
+                    return PackResourcesAdapterV4.fixLeftChest(inputStream2);
                 }
                 if (chestType == ChestType.RIGHT) {
-                    return PackAdapterV4.fixRightChest(inputStream2);
+                    return PackResourcesAdapterV4.fixRightChest(inputStream2);
                 }
             }
         }
@@ -412,7 +412,7 @@ implements Pack {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         this.pack.close();
     }
 

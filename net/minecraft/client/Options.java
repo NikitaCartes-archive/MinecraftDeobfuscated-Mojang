@@ -31,13 +31,14 @@ import net.minecraft.SharedConstants;
 import net.minecraft.client.AmbientOcclusionStatus;
 import net.minecraft.client.AttackIndicatorStatus;
 import net.minecraft.client.CloudStatus;
+import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.NarratorStatus;
 import net.minecraft.client.Option;
 import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.ToggleKeyMapping;
-import net.minecraft.client.resources.UnopenedResourcePack;
+import net.minecraft.client.resources.ResourcePack;
 import net.minecraft.client.tutorial.TutorialSteps;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -66,7 +67,7 @@ public class Options {
     public float entityDistanceScaling = 1.0f;
     public int framerateLimit = 120;
     public CloudStatus renderClouds = CloudStatus.FANCY;
-    public boolean fancyGraphics = true;
+    public GraphicsStatus graphicsMode = GraphicsStatus.FANCY;
     public AmbientOcclusionStatus ambientOcclusion = AmbientOcclusionStatus.MAX;
     public List<String> resourcePacks = Lists.newArrayList();
     public List<String> incompatibleResourcePacks = Lists.newArrayList();
@@ -226,6 +227,9 @@ public class Options {
                 }
             }
             CompoundTag compoundTag2 = this.dataFix(compoundTag);
+            if (!compoundTag2.contains("graphicsMode") && compoundTag2.contains("fancyGraphics")) {
+                this.graphicsMode = "true".equals(compoundTag2.getString("fancyGraphics")) ? GraphicsStatus.FANCY : GraphicsStatus.FAST;
+            }
             for (String string2 : compoundTag2.getAllKeys()) {
                 String string22 = compoundTag2.getString(string2);
                 try {
@@ -316,8 +320,8 @@ public class Options {
                     if ("difficulty".equals(string2)) {
                         this.difficulty = Difficulty.byId(Integer.parseInt(string22));
                     }
-                    if ("fancyGraphics".equals(string2)) {
-                        this.fancyGraphics = "true".equals(string22);
+                    if ("graphicsMode".equals(string2)) {
+                        this.graphicsMode = GraphicsStatus.byId(Integer.parseInt(string22));
                     }
                     if ("tutorialStep".equals(string2)) {
                         this.tutorialStep = TutorialSteps.getByName(string22);
@@ -506,7 +510,7 @@ public class Options {
             printWriter.println("particles:" + this.particles.getId());
             printWriter.println("maxFps:" + this.framerateLimit);
             printWriter.println("difficulty:" + this.difficulty.getId());
-            printWriter.println("fancyGraphics:" + this.fancyGraphics);
+            printWriter.println("graphicsMode:" + this.graphicsMode.getId());
             printWriter.println("ao:" + this.ambientOcclusion.getId());
             printWriter.println("biomeBlendRadius:" + this.biomeBlendRadius);
             switch (this.renderClouds) {
@@ -625,31 +629,31 @@ public class Options {
         return this.useNativeTransport;
     }
 
-    public void loadSelectedResourcePacks(PackRepository<UnopenedResourcePack> packRepository) {
+    public void loadSelectedResourcePacks(PackRepository<ResourcePack> packRepository) {
         LinkedHashSet<String> set = Sets.newLinkedHashSet();
         Iterator<String> iterator = this.resourcePacks.iterator();
         while (iterator.hasNext()) {
             String string = iterator.next();
-            UnopenedResourcePack unopenedResourcePack = packRepository.getPack(string);
-            if (unopenedResourcePack == null && !string.startsWith("file/")) {
-                unopenedResourcePack = packRepository.getPack("file/" + string);
+            ResourcePack resourcePack = packRepository.getPack(string);
+            if (resourcePack == null && !string.startsWith("file/")) {
+                resourcePack = packRepository.getPack("file/" + string);
             }
-            if (unopenedResourcePack == null) {
+            if (resourcePack == null) {
                 LOGGER.warn("Removed resource pack {} from options because it doesn't seem to exist anymore", (Object)string);
                 iterator.remove();
                 continue;
             }
-            if (!unopenedResourcePack.getCompatibility().isCompatible() && !this.incompatibleResourcePacks.contains(string)) {
+            if (!resourcePack.getCompatibility().isCompatible() && !this.incompatibleResourcePacks.contains(string)) {
                 LOGGER.warn("Removed resource pack {} from options because it is no longer compatible", (Object)string);
                 iterator.remove();
                 continue;
             }
-            if (unopenedResourcePack.getCompatibility().isCompatible() && this.incompatibleResourcePacks.contains(string)) {
+            if (resourcePack.getCompatibility().isCompatible() && this.incompatibleResourcePacks.contains(string)) {
                 LOGGER.info("Removed resource pack {} from incompatibility list because it's now compatible", (Object)string);
                 this.incompatibleResourcePacks.remove(string);
                 continue;
             }
-            set.add(unopenedResourcePack.getId());
+            set.add(resourcePack.getId());
         }
         packRepository.setSelected(set);
     }

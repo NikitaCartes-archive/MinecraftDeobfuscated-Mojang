@@ -16,8 +16,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.IdMap;
@@ -63,6 +61,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -150,6 +149,7 @@ IdMap<T> {
     public static final ResourceKey<Registry<LootItemConditionType>> LOOT_ITEM_REGISTRY = Registry.createRegistryKey("loot_condition_type");
     public static final ResourceKey<Registry<DimensionType>> DIMENSION_TYPE_REGISTRY = Registry.createRegistryKey("dimension_type");
     public static final ResourceKey<Registry<Level>> DIMENSION_REGISTRY = Registry.createRegistryKey("dimension");
+    public static final ResourceKey<Registry<LevelStem>> LEVEL_STEM_REGISTRY = Registry.createRegistryKey("dimension");
     public static final Registry<SoundEvent> SOUND_EVENT = Registry.registerSimple(SOUND_EVENT_REGISTRY, () -> SoundEvents.ITEM_PICKUP);
     public static final DefaultedRegistry<Fluid> FLUID = Registry.registerDefaulted(FLUID_REGISTRY, "empty", () -> Fluids.EMPTY);
     public static final Registry<MobEffect> MOB_EFFECT = Registry.registerSimple(MOB_EFFECT_REGISTRY, () -> MobEffects.LUCK);
@@ -247,6 +247,10 @@ IdMap<T> {
         this.lifecycle = lifecycle;
     }
 
+    public String toString() {
+        return "Registry[" + this.key + " (" + this.lifecycle + ")]";
+    }
+
     @Override
     public <U> DataResult<Pair<T, U>> decode(DynamicOps<U> dynamicOps, U object2) {
         if (dynamicOps.compressMaps()) {
@@ -286,13 +290,11 @@ IdMap<T> {
     @Nullable
     public abstract ResourceLocation getKey(T var1);
 
-    @Environment(value=EnvType.CLIENT)
     public abstract Optional<ResourceKey<T>> getResourceKey(T var1);
 
     public abstract int getId(@Nullable T var1);
 
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public abstract T get(@Nullable ResourceKey<T> var1);
 
     @Nullable

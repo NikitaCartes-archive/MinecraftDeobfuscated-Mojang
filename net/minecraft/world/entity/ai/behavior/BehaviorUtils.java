@@ -11,7 +11,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
-import net.minecraft.core.SerializableUUID;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -136,9 +135,9 @@ public class BehaviorUtils {
         return livingEntity.distanceToSqr(vec3) < livingEntity.distanceToSqr(vec32) ? livingEntity2 : livingEntity3;
     }
 
-    public static Optional<LivingEntity> getLivingEntityFromUUIDMemory(LivingEntity livingEntity, MemoryModuleType<SerializableUUID> memoryModuleType) {
-        Optional<SerializableUUID> optional = livingEntity.getBrain().getMemory(memoryModuleType);
-        return optional.map(SerializableUUID::value).map(uUID -> (LivingEntity)((ServerLevel)livingEntity.level).getEntity((UUID)uUID));
+    public static Optional<LivingEntity> getLivingEntityFromUUIDMemory(LivingEntity livingEntity, MemoryModuleType<UUID> memoryModuleType) {
+        Optional<UUID> optional = livingEntity.getBrain().getMemory(memoryModuleType);
+        return optional.map(uUID -> (LivingEntity)((ServerLevel)livingEntity.level).getEntity((UUID)uUID));
     }
 
     public static Stream<Villager> getNearbyVillagersWithCondition(Villager villager, Predicate<Villager> predicate) {

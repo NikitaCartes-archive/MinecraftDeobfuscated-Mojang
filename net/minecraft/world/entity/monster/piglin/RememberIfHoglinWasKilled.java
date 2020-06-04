@@ -28,7 +28,7 @@ extends Behavior<E> {
 
     private boolean isAttackTargetDeadHoglin(E piglin) {
         LivingEntity livingEntity = ((Piglin)piglin).getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get();
-        return livingEntity.getType() == EntityType.HOGLIN && livingEntity.getHealth() <= 0.0f;
+        return livingEntity.getType() == EntityType.HOGLIN && livingEntity.isDeadOrDying();
     }
 }
 

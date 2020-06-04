@@ -31,6 +31,7 @@ import net.minecraft.world.item.crafting.SmokingRecipe;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import net.minecraft.world.item.crafting.SuspiciousStewRecipe;
 import net.minecraft.world.item.crafting.TippedArrowRecipe;
+import net.minecraft.world.item.crafting.UpgradeRecipe;
 
 public interface RecipeSerializer<T extends Recipe<?>> {
     public static final RecipeSerializer<ShapedRecipe> SHAPED_RECIPE = RecipeSerializer.register("crafting_shaped", new ShapedRecipe.Serializer());
@@ -53,6 +54,7 @@ public interface RecipeSerializer<T extends Recipe<?>> {
     public static final SimpleCookingSerializer<SmokingRecipe> SMOKING_RECIPE = RecipeSerializer.register("smoking", new SimpleCookingSerializer<SmokingRecipe>(SmokingRecipe::new, 100));
     public static final SimpleCookingSerializer<CampfireCookingRecipe> CAMPFIRE_COOKING_RECIPE = RecipeSerializer.register("campfire_cooking", new SimpleCookingSerializer<CampfireCookingRecipe>(CampfireCookingRecipe::new, 100));
     public static final RecipeSerializer<StonecutterRecipe> STONECUTTER = RecipeSerializer.register("stonecutting", new SingleItemRecipe.Serializer<StonecutterRecipe>(StonecutterRecipe::new));
+    public static final RecipeSerializer<UpgradeRecipe> SMITHING = RecipeSerializer.register("smithing", new UpgradeRecipe.Serializer());
 
     public T fromJson(ResourceLocation var1, JsonObject var2);
 

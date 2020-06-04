@@ -16,9 +16,5 @@ extends Registry<T> {
     public abstract <V extends T> V registerMapping(int var1, ResourceKey<T> var2, V var3);
 
     public abstract <V extends T> V register(ResourceKey<T> var1, V var2);
-
-    public String toString() {
-        return "Registry[" + WRITABLE_REGISTRY.getKey(this) + "]";
-    }
 }
 

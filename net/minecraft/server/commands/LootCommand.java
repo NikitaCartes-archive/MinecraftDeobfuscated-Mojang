@@ -241,7 +241,7 @@ public class LootCommand {
 
     private static int dropFishingLoot(CommandContext<CommandSourceStack> commandContext, ResourceLocation resourceLocation, BlockPos blockPos, ItemStack itemStack, DropConsumer dropConsumer) throws CommandSyntaxException {
         CommandSourceStack commandSourceStack = commandContext.getSource();
-        LootContext lootContext = new LootContext.Builder(commandSourceStack.getLevel()).withParameter(LootContextParams.BLOCK_POS, blockPos).withParameter(LootContextParams.TOOL, itemStack).create(LootContextParamSets.FISHING);
+        LootContext lootContext = new LootContext.Builder(commandSourceStack.getLevel()).withParameter(LootContextParams.BLOCK_POS, blockPos).withParameter(LootContextParams.TOOL, itemStack).withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity()).create(LootContextParamSets.FISHING);
         return LootCommand.drop(commandContext, resourceLocation, lootContext, dropConsumer);
     }
 

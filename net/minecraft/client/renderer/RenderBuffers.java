@@ -33,7 +33,9 @@ public class RenderBuffers {
         RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.armorGlint());
         RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.armorEntityGlint());
         RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.glint());
+        RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.glintDirect());
         RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.entityGlint());
+        RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.entityGlintDirect());
         RenderBuffers.put(object2ObjectLinkedOpenHashMap, RenderType.waterMask());
         ModelBakery.DESTROY_TYPES.forEach(renderType -> RenderBuffers.put(object2ObjectLinkedOpenHashMap, renderType));
     });

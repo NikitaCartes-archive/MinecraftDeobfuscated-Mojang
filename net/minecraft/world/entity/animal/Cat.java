@@ -23,6 +23,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
@@ -62,7 +63,6 @@ import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -377,19 +377,18 @@ extends TamableAnimal {
      * Enabled aggressive block sorting
      */
     @Override
-    public boolean mobInteract(Player player, InteractionHand interactionHand) {
-        boolean bl;
+    public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
+        InteractionResult interactionResult;
         ItemStack itemStack = player.getItemInHand(interactionHand);
         Item item = itemStack.getItem();
-        if (itemStack.getItem() instanceof SpawnEggItem) {
-            return super.mobInteract(player, interactionHand);
-        }
         if (this.level.isClientSide) {
-            if (this.isTame()) {
-                if (this.isOwnedBy(player)) return true;
+            if (this.isTame() && this.isOwnedBy(player)) {
+                return InteractionResult.SUCCESS;
             }
-            if (this.isFood(itemStack)) return true;
-            return false;
+            if (this.isFood(itemStack) && (this.getHealth() < this.getMaxHealth() || !this.isTame())) {
+                return InteractionResult.SUCCESS;
+            }
+            return InteractionResult.PASS;
         }
         if (this.isTame()) {
             if (this.isOwnedBy(player)) {
@@ -401,20 +400,19 @@ extends TamableAnimal {
                             itemStack.shrink(1);
                         }
                         this.setPersistenceRequired();
-                        return true;
+                        return InteractionResult.CONSUME;
                     }
                 } else {
                     if (item.isEdible() && this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
                         this.usePlayerItem(player, itemStack);
                         this.heal(item.getFoodProperties().getNutrition());
-                        return true;
+                        return InteractionResult.CONSUME;
                     }
-                    boolean bl2 = super.mobInteract(player, interactionHand);
-                    if (bl2) {
-                        if (!this.isBaby()) return bl2;
+                    InteractionResult interactionResult2 = super.mobInteract(player, interactionHand);
+                    if (!interactionResult2.consumesAction() || this.isBaby()) {
+                        this.setOrderedToSit(!this.isOrderedToSit());
                     }
-                    this.setOrderedToSit(!this.isOrderedToSit());
-                    return bl2;
+                    return interactionResult2;
                 }
             }
         } else if (this.isFood(itemStack)) {
@@ -427,11 +425,12 @@ extends TamableAnimal {
                 this.level.broadcastEntityEvent(this, (byte)6);
             }
             this.setPersistenceRequired();
-            return true;
+            return InteractionResult.CONSUME;
         }
-        if (!(bl = super.mobInteract(player, interactionHand))) return bl;
-        this.setPersistenceRequired();
-        return bl;
+        if ((interactionResult = super.mobInteract(player, interactionHand)).consumesAction()) {
+            this.setPersistenceRequired();
+        }
+        return interactionResult;
     }
 
     @Override
@@ -547,7 +546,7 @@ extends TamableAnimal {
             LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.cat.level).withParameter(LootContextParams.BLOCK_POS, mutableBlockPos).withParameter(LootContextParams.THIS_ENTITY, this.cat).withRandom(random);
             List<ItemStack> list = lootTable.getRandomItems(builder.create(LootContextParamSets.GIFT));
             for (ItemStack itemStack : list) {
-                this.cat.level.addFreshEntity(new ItemEntity(this.cat.level, (float)mutableBlockPos.getX() - Mth.sin(this.cat.yBodyRot * ((float)Math.PI / 180)), mutableBlockPos.getY(), (float)mutableBlockPos.getZ() + Mth.cos(this.cat.yBodyRot * ((float)Math.PI / 180)), itemStack));
+                this.cat.level.addFreshEntity(new ItemEntity(this.cat.level, (double)mutableBlockPos.getX() - (double)Mth.sin(this.cat.yBodyRot * ((float)Math.PI / 180)), mutableBlockPos.getY(), (double)mutableBlockPos.getZ() + (double)Mth.cos(this.cat.yBodyRot * ((float)Math.PI / 180)), itemStack));
             }
         }
 

@@ -76,7 +76,7 @@ implements TickableBlockEntity {
                 Bee bee = (Bee)entity;
                 if (!(player.position().distanceToSqr(entity.position()) <= 16.0)) continue;
                 if (!this.isSedated()) {
-                    bee.makeAngry(player);
+                    bee.setTarget(player);
                     continue;
                 }
                 bee.setStayOutOfHiveCountdown(400);
@@ -152,12 +152,12 @@ implements TickableBlockEntity {
                 return false;
             }
             if (entity2 instanceof Bee) {
-                int i;
                 Bee bee = (Bee)entity2;
                 if (this.hasSavedFlowerPos() && !bee.hasSavedFlowerPos() && this.level.random.nextFloat() < 0.9f) {
                     bee.setSavedFlowerPos(this.savedFlowerPos);
                 }
                 if (beeReleaseStatus == BeeReleaseStatus.HONEY_DELIVERED) {
+                    int i;
                     bee.dropOffNectar();
                     if (blockState.getBlock().is(BlockTags.BEEHIVES) && (i = BeehiveBlockEntity.getHoneyLevel(blockState)) < 5) {
                         int j;
@@ -168,10 +168,7 @@ implements TickableBlockEntity {
                         this.level.setBlockAndUpdate(this.getBlockPos(), (BlockState)blockState.setValue(BeehiveBlock.HONEY_LEVEL, i + j));
                     }
                 }
-                i = beeData.ticksInHive;
-                bee.ageUp(i);
-                bee.setInLoveTime(Math.max(0, bee.getInLoveTime() - i));
-                bee.resetTicksWithoutNectarSinceExitingHive();
+                this.setBeeReleaseData(beeData.ticksInHive, bee);
                 if (list != null) {
                     list.add(bee);
                 }
@@ -188,6 +185,17 @@ implements TickableBlockEntity {
         return false;
     }
 
+    private void setBeeReleaseData(int i, Bee bee) {
+        int j = bee.getAge();
+        if (j < 0) {
+            bee.setAge(Math.min(0, j + i));
+        } else if (j > 0) {
+            bee.setAge(Math.max(0, j - i));
+        }
+        bee.setInLoveTime(Math.max(0, bee.getInLoveTime() - i));
+        bee.resetTicksWithoutNectarSinceExitingHive();
+    }
+
     private boolean hasSavedFlowerPos() {
         return this.savedFlowerPos != null;
     }
@@ -198,10 +206,11 @@ implements TickableBlockEntity {
         while (iterator.hasNext()) {
             BeeData beeData = iterator.next();
             if (beeData.ticksInHive > beeData.minOccupationTicks) {
-                BeeReleaseStatus beeReleaseStatus = beeData.entityData.getBoolean("HasNectar") ? BeeReleaseStatus.HONEY_DELIVERED : BeeReleaseStatus.BEE_RELEASED;
-                if (!this.releaseOccupant(blockState, beeData, null, beeReleaseStatus)) continue;
-                iterator.remove();
-                continue;
+                BeeReleaseStatus beeReleaseStatus;
+                BeeReleaseStatus beeReleaseStatus2 = beeReleaseStatus = beeData.entityData.getBoolean("HasNectar") ? BeeReleaseStatus.HONEY_DELIVERED : BeeReleaseStatus.BEE_RELEASED;
+                if (this.releaseOccupant(blockState, beeData, null, beeReleaseStatus)) {
+                    iterator.remove();
+                }
             }
             beeData.ticksInHive++;
         }

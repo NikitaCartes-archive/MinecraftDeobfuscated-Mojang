@@ -20,7 +20,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.client.resources.metadata.language.LanguageMetadataSection;
 import net.minecraft.locale.Language;
-import net.minecraft.server.packs.Pack;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import org.apache.logging.log4j.LogManager;
@@ -39,18 +39,18 @@ implements ResourceManagerReloadListener {
         this.currentCode = string;
     }
 
-    private static Map<String, LanguageInfo> extractLanguages(Stream<Pack> stream) {
+    private static Map<String, LanguageInfo> extractLanguages(Stream<PackResources> stream) {
         HashMap map = Maps.newHashMap();
-        stream.forEach(pack -> {
+        stream.forEach(packResources -> {
             try {
-                LanguageMetadataSection languageMetadataSection = pack.getMetadataSection(LanguageMetadataSection.SERIALIZER);
+                LanguageMetadataSection languageMetadataSection = packResources.getMetadataSection(LanguageMetadataSection.SERIALIZER);
                 if (languageMetadataSection != null) {
                     for (LanguageInfo languageInfo : languageMetadataSection.getLanguages()) {
                         map.putIfAbsent(languageInfo.getCode(), languageInfo);
                     }
                 }
             } catch (IOException | RuntimeException exception) {
-                LOGGER.warn("Unable to parse language metadata section of resourcepack: {}", (Object)pack.getName(), (Object)exception);
+                LOGGER.warn("Unable to parse language metadata section of resourcepack: {}", (Object)packResources.getName(), (Object)exception);
             }
         });
         return ImmutableMap.copyOf(map);

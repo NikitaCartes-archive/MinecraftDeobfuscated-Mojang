@@ -101,7 +101,7 @@ extends BaseEntityBlock {
             int i = list2.size();
             for (Bee bee : list) {
                 if (bee.getTarget() != null) continue;
-                bee.makeAngry(list2.get(level.random.nextInt(i)));
+                bee.setTarget(list2.get(level.random.nextInt(i)));
             }
         }
     }

@@ -3,10 +3,12 @@
  */
 package net.minecraft.server;
 
+import com.google.common.collect.ImmutableSet;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
+import com.mojang.serialization.Lifecycle;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.net.Proxy;
@@ -25,7 +27,13 @@ import joptsimple.OptionSpecBuilder;
 import net.minecraft.CrashReport;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.Util;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.server.Eula;
 import net.minecraft.server.MinecraftServer;
@@ -34,14 +42,20 @@ import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
 import net.minecraft.server.level.progress.LoggerChunkProgressListener;
+import net.minecraft.server.packs.repository.FolderRepositorySource;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.server.packs.repository.UnopenedPack;
+import net.minecraft.server.packs.repository.PackSource;
+import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.Mth;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.worldupdate.WorldUpgrader;
+import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
@@ -69,10 +83,7 @@ public class Main {
         ArgumentAcceptingOptionSpec<String> optionSpec13 = optionParser.accepts("serverId").withRequiredArg();
         NonOptionArgumentSpec<String> optionSpec14 = optionParser.nonOptions();
         try {
-            boolean bl2;
             ServerResources serverResources;
-            boolean bl;
-            WorldData worldData;
             OptionSet optionSet = optionParser.parse(strings);
             if (optionSet.has(optionSpec8)) {
                 optionParser.printHelpOn(System.err);
@@ -104,24 +115,14 @@ public class Main {
             LevelStorageSource levelStorageSource = LevelStorageSource.createDefault(file.toPath());
             LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(string);
             MinecraftServer.convertFromRegionFormatIfNeeded(levelStorageAccess);
-            if (optionSet.has(optionSpec5)) {
-                Main.forceUpgrade(levelStorageAccess, DataFixers.getDataFixer(), optionSet.has(optionSpec6), () -> true);
-            }
-            if ((worldData = levelStorageAccess.getDataTag()) == null) {
-                LevelSettings levelSettings;
-                if (optionSet.has(optionSpec3)) {
-                    levelSettings = MinecraftServer.DEMO_SETTINGS;
-                } else {
-                    DedicatedServerProperties dedicatedServerProperties = dedicatedServerSettings.getProperties();
-                    levelSettings = new LevelSettings(dedicatedServerProperties.levelName, dedicatedServerProperties.gamemode, dedicatedServerProperties.hardcore, dedicatedServerProperties.difficulty, false, new GameRules(), optionSet.has(optionSpec4) ? dedicatedServerProperties.worldGenSettings.withBonusChest() : dedicatedServerProperties.worldGenSettings);
-                }
-                worldData = new PrimaryLevelData(levelSettings);
-            }
-            if (bl = optionSet.has(optionSpec7)) {
+            DataPackConfig dataPackConfig = levelStorageAccess.getDataPacks();
+            boolean bl = optionSet.has(optionSpec7);
+            if (bl) {
                 LOGGER.warn("Safe mode active, only vanilla datapack will be loaded");
             }
-            PackRepository<UnopenedPack> packRepository = MinecraftServer.createPackRepository(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR), worldData, bl);
-            CompletableFuture<ServerResources> completableFuture = ServerResources.loadResources(packRepository.openAllSelected(), true, dedicatedServerSettings.getProperties().functionPermissionLevel, Util.backgroundExecutor(), Runnable::run);
+            PackRepository<Pack> packRepository = new PackRepository<Pack>(Pack::new, new ServerPacksSource(), new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD));
+            DataPackConfig dataPackConfig2 = MinecraftServer.configurePackRepository(packRepository, dataPackConfig == null ? DataPackConfig.DEFAULT : dataPackConfig, bl);
+            CompletableFuture<ServerResources> completableFuture = ServerResources.loadResources(packRepository.openAllSelected(), Commands.CommandSelection.DEDICATED, dedicatedServerSettings.getProperties().functionPermissionLevel, Util.backgroundExecutor(), Runnable::run);
             try {
                 serverResources = completableFuture.get();
             } catch (Exception exception) {
@@ -130,55 +131,76 @@ public class Main {
                 return;
             }
             serverResources.updateGlobals();
-            final DedicatedServer dedicatedServer = new DedicatedServer(levelStorageAccess, packRepository, serverResources, worldData, dedicatedServerSettings, DataFixers.getDataFixer(), minecraftSessionService, gameProfileRepository, gameProfileCache, LoggerChunkProgressListener::new);
-            dedicatedServer.setSingleplayerName(optionSet.valueOf(optionSpec9));
-            dedicatedServer.setPort(optionSet.valueOf(optionSpec12));
-            dedicatedServer.setDemo(optionSet.has(optionSpec3));
-            dedicatedServer.setId(optionSet.valueOf(optionSpec13));
-            boolean bl3 = bl2 = !optionSet.has(optionSpec) && !optionSet.valuesOf(optionSpec14).contains("nogui");
-            if (bl2 && !GraphicsEnvironment.isHeadless()) {
-                dedicatedServer.showGui();
+            RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
+            RegistryReadOps<Tag> registryReadOps = RegistryReadOps.create(NbtOps.INSTANCE, serverResources.getResourceManager(), registryHolder);
+            WorldData worldData = levelStorageAccess.getDataTag(registryReadOps, dataPackConfig2);
+            if (worldData == null) {
+                WorldGenSettings worldGenSettings;
+                LevelSettings levelSettings;
+                if (optionSet.has(optionSpec3)) {
+                    levelSettings = MinecraftServer.DEMO_SETTINGS;
+                    worldGenSettings = WorldGenSettings.DEMO_SETTINGS;
+                } else {
+                    DedicatedServerProperties dedicatedServerProperties = dedicatedServerSettings.getProperties();
+                    levelSettings = new LevelSettings(dedicatedServerProperties.levelName, dedicatedServerProperties.gamemode, dedicatedServerProperties.hardcore, dedicatedServerProperties.difficulty, false, new GameRules(), dataPackConfig2);
+                    worldGenSettings = optionSet.has(optionSpec4) ? dedicatedServerProperties.worldGenSettings.withBonusChest() : dedicatedServerProperties.worldGenSettings;
+                }
+                worldData = new PrimaryLevelData(levelSettings, worldGenSettings, Lifecycle.stable());
             }
-            dedicatedServer.forkAndRun();
-            Thread thread = new Thread("Server Shutdown Thread"){
+            if (optionSet.has(optionSpec5)) {
+                Main.forceUpgrade(levelStorageAccess, DataFixers.getDataFixer(), optionSet.has(optionSpec6), () -> true, worldData.worldGenSettings().levels());
+            }
+            levelStorageAccess.saveDataTag(registryHolder, worldData);
+            WorldData worldData2 = worldData;
+            final DedicatedServer dedicatedServer = MinecraftServer.spin(thread -> {
+                boolean bl;
+                DedicatedServer dedicatedServer = new DedicatedServer((Thread)thread, registryHolder, levelStorageAccess, packRepository, serverResources, worldData2, dedicatedServerSettings, DataFixers.getDataFixer(), minecraftSessionService, gameProfileRepository, gameProfileCache, LoggerChunkProgressListener::new);
+                dedicatedServer.setSingleplayerName((String)optionSet.valueOf(optionSpec9));
+                dedicatedServer.setPort((Integer)optionSet.valueOf(optionSpec12));
+                dedicatedServer.setDemo(optionSet.has(optionSpec3));
+                dedicatedServer.setId((String)optionSet.valueOf(optionSpec13));
+                boolean bl2 = bl = !optionSet.has(optionSpec) && !optionSet.valuesOf(optionSpec14).contains("nogui");
+                if (bl && !GraphicsEnvironment.isHeadless()) {
+                    dedicatedServer.showGui();
+                }
+                return dedicatedServer;
+            });
+            Thread thread2 = new Thread("Server Shutdown Thread"){
 
                 @Override
                 public void run() {
                     dedicatedServer.halt(true);
                 }
             };
-            thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
-            Runtime.getRuntime().addShutdownHook(thread);
+            thread2.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
+            Runtime.getRuntime().addShutdownHook(thread2);
         } catch (Exception exception2) {
             LOGGER.fatal("Failed to start the minecraft server", (Throwable)exception2);
         }
     }
 
-    private static void forceUpgrade(LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, boolean bl, BooleanSupplier booleanSupplier) {
+    private static void forceUpgrade(LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, boolean bl, BooleanSupplier booleanSupplier, ImmutableSet<ResourceKey<Level>> immutableSet) {
         LOGGER.info("Forcing world upgrade!");
-        WorldData worldData = levelStorageAccess.getDataTag();
-        if (worldData != null) {
-            WorldUpgrader worldUpgrader = new WorldUpgrader(levelStorageAccess, dataFixer, worldData, bl);
-            Component component = null;
-            while (!worldUpgrader.isFinished()) {
-                int i;
-                Component component2 = worldUpgrader.getStatus();
-                if (component != component2) {
-                    component = component2;
-                    LOGGER.info(worldUpgrader.getStatus().getString());
-                }
-                if ((i = worldUpgrader.getTotalChunks()) > 0) {
-                    int j = worldUpgrader.getConverted() + worldUpgrader.getSkipped();
-                    LOGGER.info("{}% completed ({} / {} chunks)...", (Object)Mth.floor((float)j / (float)i * 100.0f), (Object)j, (Object)i);
-                }
-                if (!booleanSupplier.getAsBoolean()) {
-                    worldUpgrader.cancel();
-                    continue;
-                }
-                try {
-                    Thread.sleep(1000L);
-                } catch (InterruptedException interruptedException) {}
+        WorldUpgrader worldUpgrader = new WorldUpgrader(levelStorageAccess, dataFixer, immutableSet, bl);
+        Component component = null;
+        while (!worldUpgrader.isFinished()) {
+            int i;
+            Component component2 = worldUpgrader.getStatus();
+            if (component != component2) {
+                component = component2;
+                LOGGER.info(worldUpgrader.getStatus().getString());
             }
+            if ((i = worldUpgrader.getTotalChunks()) > 0) {
+                int j = worldUpgrader.getConverted() + worldUpgrader.getSkipped();
+                LOGGER.info("{}% completed ({} / {} chunks)...", (Object)Mth.floor((float)j / (float)i * 100.0f), (Object)j, (Object)i);
+            }
+            if (!booleanSupplier.getAsBoolean()) {
+                worldUpgrader.cancel();
+                continue;
+            }
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException interruptedException) {}
         }
     }
 }

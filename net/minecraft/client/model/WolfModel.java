@@ -74,7 +74,7 @@ extends ColorableAgeableListModel<T> {
 
     @Override
     public void prepareMobModel(T wolf, float f, float g, float h) {
-        this.tail.yRot = ((Wolf)wolf).isAngry() ? 0.0f : Mth.cos(f * 0.6662f) * 1.4f * g;
+        this.tail.yRot = wolf.isAngry() ? 0.0f : Mth.cos(f * 0.6662f) * 1.4f * g;
         if (((TamableAnimal)wolf).isInSittingPose()) {
             this.upperBody.setPos(-1.0f, 16.0f, -3.0f);
             this.upperBody.xRot = 1.2566371f;

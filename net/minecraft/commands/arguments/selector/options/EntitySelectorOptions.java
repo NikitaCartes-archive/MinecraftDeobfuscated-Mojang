@@ -38,7 +38,6 @@ import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.tags.Tag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -261,12 +260,7 @@ public class EntitySelectorOptions {
             }
             if (entitySelectorParser.isTag()) {
                 ResourceLocation resourceLocation = ResourceLocation.read(entitySelectorParser.getReader());
-                Tag<EntityType<?>> tag = EntityTypeTags.getAllTags().getTag(resourceLocation);
-                if (tag == null) {
-                    entitySelectorParser.getReader().setCursor(i);
-                    throw ERROR_ENTITY_TYPE_INVALID.createWithContext(entitySelectorParser.getReader(), resourceLocation.toString());
-                }
-                entitySelectorParser.addPredicate(entity -> tag.contains(entity.getType()) != bl);
+                entitySelectorParser.addPredicate(entity -> entity.getServer().getTags().getEntityTypes().getTagOrEmpty(resourceLocation).contains(entity.getType()) != bl);
             } else {
                 ResourceLocation resourceLocation = ResourceLocation.read(entitySelectorParser.getReader());
                 EntityType entityType = (EntityType)Registry.ENTITY_TYPE.getOptional(resourceLocation).orElseThrow(() -> {

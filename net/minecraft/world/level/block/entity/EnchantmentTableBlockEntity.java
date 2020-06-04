@@ -59,7 +59,7 @@ TickableBlockEntity {
         float g;
         this.oOpen = this.open;
         this.oRot = this.rot;
-        Player player = this.level.getNearestPlayer((double)((float)this.worldPosition.getX() + 0.5f), (double)((float)this.worldPosition.getY() + 0.5f), (double)((float)this.worldPosition.getZ() + 0.5f), 3.0, false);
+        Player player = this.level.getNearestPlayer((double)this.worldPosition.getX() + 0.5, (double)this.worldPosition.getY() + 0.5, (double)this.worldPosition.getZ() + 0.5, 3.0, false);
         if (player != null) {
             double d = player.getX() - ((double)this.worldPosition.getX() + 0.5);
             double e = player.getZ() - ((double)this.worldPosition.getZ() + 0.5);

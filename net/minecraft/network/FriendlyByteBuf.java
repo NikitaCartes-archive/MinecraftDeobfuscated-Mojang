@@ -351,7 +351,7 @@ extends ByteBuf {
         float g = this.readFloat();
         float h = this.readFloat();
         boolean bl = this.readBoolean();
-        return new BlockHitResult(new Vec3((float)blockPos.getX() + f, (float)blockPos.getY() + g, (float)blockPos.getZ() + h), direction, blockPos, bl);
+        return new BlockHitResult(new Vec3((double)blockPos.getX() + (double)f, (double)blockPos.getY() + (double)g, (double)blockPos.getZ() + (double)h), direction, blockPos, bl);
     }
 
     public void writeBlockHitResult(BlockHitResult blockHitResult) {

@@ -64,6 +64,7 @@ extends AbstractHurtingProjectile {
 
     @Override
     protected void onHitEntity(EntityHitResult entityHitResult) {
+        boolean bl;
         super.onHitEntity(entityHitResult);
         if (this.level.isClientSide) {
             return;
@@ -72,7 +73,8 @@ extends AbstractHurtingProjectile {
         Entity entity2 = this.getOwner();
         if (entity2 instanceof LivingEntity) {
             LivingEntity livingEntity = (LivingEntity)entity2;
-            if (entity.hurt(DamageSource.witherSkull(this, livingEntity), 8.0f)) {
+            bl = entity.hurt(DamageSource.witherSkull(this, livingEntity), 8.0f);
+            if (bl) {
                 if (entity.isAlive()) {
                     this.doEnchantDamageEffects(livingEntity, entity);
                 } else {
@@ -80,9 +82,9 @@ extends AbstractHurtingProjectile {
                 }
             }
         } else {
-            entity.hurt(DamageSource.MAGIC, 5.0f);
+            bl = entity.hurt(DamageSource.MAGIC, 5.0f);
         }
-        if (entity instanceof LivingEntity) {
+        if (bl && entity instanceof LivingEntity) {
             int i = 0;
             if (this.level.getDifficulty() == Difficulty.NORMAL) {
                 i = 10;

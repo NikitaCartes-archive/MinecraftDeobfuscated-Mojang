@@ -21,9 +21,9 @@ implements SoundInstance {
     protected final ResourceLocation location;
     protected float volume = 1.0f;
     protected float pitch = 1.0f;
-    protected float x;
-    protected float y;
-    protected float z;
+    protected double x;
+    protected double y;
+    protected double z;
     protected boolean looping;
     protected int delay;
     protected SoundInstance.Attenuation attenuation = SoundInstance.Attenuation.LINEAR;
@@ -82,17 +82,17 @@ implements SoundInstance {
     }
 
     @Override
-    public float getX() {
+    public double getX() {
         return this.x;
     }
 
     @Override
-    public float getY() {
+    public double getY() {
         return this.y;
     }
 
     @Override
-    public float getZ() {
+    public double getZ() {
         return this.z;
     }
 

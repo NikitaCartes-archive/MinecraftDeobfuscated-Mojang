@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -34,7 +35,6 @@ import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.ErrorScreen;
 import net.minecraft.client.gui.screens.ProgressScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
@@ -42,6 +42,7 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -49,10 +50,12 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageException;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
-import net.minecraft.world.level.storage.WorldData;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
@@ -198,19 +201,7 @@ extends ObjectSelectionList<WorldListEntry> {
                     }
                 } else if (this.summary.markVersionInList()) {
                     GuiComponent.blit(poseStack, k, j, 32.0f, q, 32, 32, 256, 256);
-                    if (this.summary.isOldCustomizedWorld()) {
-                        GuiComponent.blit(poseStack, k, j, 96.0f, q, 32, 32, 256, 256);
-                        if (bl2) {
-                            MutableComponent formattedText = new TranslatableComponent("selectWorld.tooltip.unsupported", this.summary.getWorldVersionName()).withStyle(ChatFormatting.RED);
-                            this.screen.setToolTip(this.minecraft.font.split(formattedText, 175));
-                        }
-                    } else if (this.summary.experimental()) {
-                        GuiComponent.blit(poseStack, k, j, 96.0f, q, 32, 32, 256, 256);
-                        if (bl2) {
-                            MutableComponent component2 = new TranslatableComponent("selectWorld.tooltip.experimental").withStyle(ChatFormatting.RED);
-                            this.screen.setToolTip(this.minecraft.font.split(component2, 175));
-                        }
-                    } else if (this.summary.askToOpenWorld()) {
+                    if (this.summary.askToOpenWorld()) {
                         GuiComponent.blit(poseStack, k, j, 96.0f, q, 32, 32, 256, 256);
                         if (bl2) {
                             this.screen.setToolTip(Arrays.asList(new TranslatableComponent("selectWorld.tooltip.fromNewerVersion1").withStyle(ChatFormatting.RED), new TranslatableComponent("selectWorld.tooltip.fromNewerVersion2").withStyle(ChatFormatting.RED)));
@@ -250,19 +241,9 @@ extends ObjectSelectionList<WorldListEntry> {
             if (this.summary.isLocked()) {
                 return;
             }
-            if (this.summary.shouldBackup() || this.summary.isOldCustomizedWorld() || this.summary.experimental()) {
-                TranslatableComponent component2;
-                TranslatableComponent component;
-                if (this.summary.isOldCustomizedWorld()) {
-                    component = new TranslatableComponent("selectWorld.backupQuestion.customized");
-                    component2 = new TranslatableComponent("selectWorld.backupWarning.customized");
-                } else if (this.summary.experimental()) {
-                    component = new TranslatableComponent("selectWorld.backupQuestion.experimental");
-                    component2 = new TranslatableComponent("selectWorld.backupWarning.experimental");
-                } else {
-                    component = new TranslatableComponent("selectWorld.backupQuestion");
-                    component2 = new TranslatableComponent("selectWorld.backupWarning", this.summary.getWorldVersionName(), SharedConstants.getCurrentVersion().getName());
-                }
+            if (this.summary.shouldBackup()) {
+                TranslatableComponent component = new TranslatableComponent("selectWorld.backupQuestion");
+                TranslatableComponent component2 = new TranslatableComponent("selectWorld.backupWarning", this.summary.getWorldVersionName(), SharedConstants.getCurrentVersion().getName());
                 this.minecraft.setScreen(new BackupConfirmScreen(this.screen, (bl, bl2) -> {
                     if (bl) {
                         String string = this.summary.getLevelId();
@@ -334,18 +315,16 @@ extends ObjectSelectionList<WorldListEntry> {
         }
 
         public void recreateWorld() {
-            try {
-                this.minecraft.setScreen(new ProgressScreen());
-                try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(this.summary.getLevelId());){
-                    WorldData worldData = levelStorageAccess.getDataTag();
-                    if (worldData != null) {
-                        CreateWorldScreen createWorldScreen = new CreateWorldScreen((Screen)this.screen, worldData);
-                        if (this.summary.isOldCustomizedWorld()) {
-                            this.minecraft.setScreen(new ConfirmScreen(bl -> this.minecraft.setScreen(bl ? createWorldScreen : this.screen), new TranslatableComponent("selectWorld.recreate.customized.title"), new TranslatableComponent("selectWorld.recreate.customized.text"), CommonComponents.GUI_PROCEED, CommonComponents.GUI_CANCEL));
-                        } else {
-                            this.minecraft.setScreen(createWorldScreen);
-                        }
-                    }
+            RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
+            try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(this.summary.getLevelId());
+                 Minecraft.ServerStem serverStem = this.minecraft.makeServerStem(registryHolder, Minecraft::loadDataPacks, Minecraft::loadWorldData, false, levelStorageAccess);){
+                LevelSettings levelSettings = serverStem.worldData().getLevelSettings();
+                WorldGenSettings worldGenSettings = serverStem.worldData().worldGenSettings();
+                Path path = CreateWorldScreen.createTempDataPackDirFromExistingWorld(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR), this.minecraft);
+                if (worldGenSettings.isOldCustomizedWorld()) {
+                    this.minecraft.setScreen(new ConfirmScreen(bl -> this.minecraft.setScreen(bl ? new CreateWorldScreen(this.screen, levelSettings, worldGenSettings, path, registryHolder) : this.screen), new TranslatableComponent("selectWorld.recreate.customized.title"), new TranslatableComponent("selectWorld.recreate.customized.text"), CommonComponents.GUI_PROCEED, CommonComponents.GUI_CANCEL));
+                } else {
+                    this.minecraft.setScreen(new CreateWorldScreen(this.screen, levelSettings, worldGenSettings, path, registryHolder));
                 }
             } catch (Exception exception) {
                 LOGGER.error("Unable to recreate world", (Throwable)exception);
@@ -356,7 +335,7 @@ extends ObjectSelectionList<WorldListEntry> {
         private void loadWorld() {
             this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
             if (this.minecraft.getLevelSource().levelExists(this.summary.getLevelId())) {
-                this.minecraft.selectLevel(this.summary.getLevelId(), null);
+                this.minecraft.loadLevel(this.summary.getLevelId());
             }
         }
 

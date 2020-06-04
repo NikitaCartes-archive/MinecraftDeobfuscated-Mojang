@@ -3,6 +3,9 @@
  */
 package net.minecraft.server.packs.resources;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -12,7 +15,7 @@ import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.Pack;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.Resource;
 
 public interface ResourceManager {
@@ -26,9 +29,55 @@ public interface ResourceManager {
 
     public List<Resource> getResources(ResourceLocation var1) throws IOException;
 
+    public Collection<ResourceLocation> listResources(ResourceLocation var1, Predicate<String> var2);
+
     public Collection<ResourceLocation> listResources(String var1, Predicate<String> var2);
 
     @Environment(value=EnvType.CLIENT)
-    public Stream<Pack> listPacks();
+    public Stream<PackResources> listPacks();
+
+    public static enum Empty implements ResourceManager
+    {
+        INSTANCE;
+
+
+        @Override
+        @Environment(value=EnvType.CLIENT)
+        public Set<String> getNamespaces() {
+            return ImmutableSet.of();
+        }
+
+        @Override
+        public Resource getResource(ResourceLocation resourceLocation) throws IOException {
+            throw new FileNotFoundException(resourceLocation.toString());
+        }
+
+        @Override
+        @Environment(value=EnvType.CLIENT)
+        public boolean hasResource(ResourceLocation resourceLocation) {
+            return false;
+        }
+
+        @Override
+        public List<Resource> getResources(ResourceLocation resourceLocation) {
+            return ImmutableList.of();
+        }
+
+        @Override
+        public Collection<ResourceLocation> listResources(ResourceLocation resourceLocation, Predicate<String> predicate) {
+            return ImmutableSet.of();
+        }
+
+        @Override
+        public Collection<ResourceLocation> listResources(String string, Predicate<String> predicate) {
+            return ImmutableSet.of();
+        }
+
+        @Override
+        @Environment(value=EnvType.CLIENT)
+        public Stream<PackResources> listPacks() {
+            return Stream.of(new PackResources[0]);
+        }
+    }
 }
 

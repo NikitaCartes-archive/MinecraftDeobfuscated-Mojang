@@ -15,6 +15,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -335,15 +336,18 @@ extends HangingEntity {
     }
 
     @Override
-    public boolean interact(Player player, InteractionHand interactionHand) {
+    public InteractionResult interact(Player player, InteractionHand interactionHand) {
         boolean bl2;
         ItemStack itemStack = player.getItemInHand(interactionHand);
         boolean bl = !this.getItem().isEmpty();
         boolean bl3 = bl2 = !itemStack.isEmpty();
-        if (this.level.isClientSide) {
-            return bl || bl2;
+        if (this.fixed) {
+            return InteractionResult.PASS;
         }
-        if (!this.fixed && !bl) {
+        if (this.level.isClientSide) {
+            return bl || bl2 ? InteractionResult.SUCCESS : InteractionResult.PASS;
+        }
+        if (!bl) {
             if (bl2 && !this.removed) {
                 this.setItem(itemStack);
                 if (!player.abilities.instabuild) {
@@ -354,7 +358,7 @@ extends HangingEntity {
             this.playSound(SoundEvents.ITEM_FRAME_ROTATE_ITEM, 1.0f, 1.0f);
             this.setRotation(this.getRotation() + 1);
         }
-        return true;
+        return InteractionResult.CONSUME;
     }
 
     public int getAnalogOutput() {

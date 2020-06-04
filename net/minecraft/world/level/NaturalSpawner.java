@@ -37,7 +37,6 @@ import net.minecraft.world.level.PotentialCalculator;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.NearestNeighborBiomeZoomer;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -116,24 +115,24 @@ public final class NaturalSpawner {
             int o = Mth.ceil(serverLevel.random.nextFloat() * 4.0f);
             int p = 0;
             for (int q = 0; q < o; ++q) {
-                double d;
+                double f;
                 mutableBlockPos.set(l += serverLevel.random.nextInt(6) - serverLevel.random.nextInt(6), i, m += serverLevel.random.nextInt(6) - serverLevel.random.nextInt(6));
-                float f = (float)l + 0.5f;
-                float g = (float)m + 0.5f;
-                Player player = serverLevel.getNearestPlayer((double)f, (double)i, (double)g, -1.0, false);
-                if (player == null || !NaturalSpawner.isRightDistanceToPlayerAndSpawnPoint(serverLevel, chunkAccess, mutableBlockPos, d = player.distanceToSqr(f, i, g))) continue;
+                double d = (double)l + 0.5;
+                double e = (double)m + 0.5;
+                Player player = serverLevel.getNearestPlayer(d, (double)i, e, -1.0, false);
+                if (player == null || !NaturalSpawner.isRightDistanceToPlayerAndSpawnPoint(serverLevel, chunkAccess, mutableBlockPos, f = player.distanceToSqr(d, i, e))) continue;
                 if (spawnerData == null) {
                     spawnerData = NaturalSpawner.getRandomSpawnMobAt(serverLevel, structureFeatureManager, chunkGenerator, mobCategory, serverLevel.random, mutableBlockPos);
                     if (spawnerData == null) continue block0;
                     o = spawnerData.minCount + serverLevel.random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
                 }
-                if (!NaturalSpawner.isValidSpawnPostitionForType(serverLevel, mobCategory, structureFeatureManager, chunkGenerator, spawnerData, mutableBlockPos, d) || !spawnPredicate.test(spawnerData.type, mutableBlockPos, chunkAccess)) continue;
+                if (!NaturalSpawner.isValidSpawnPostitionForType(serverLevel, mobCategory, structureFeatureManager, chunkGenerator, spawnerData, mutableBlockPos, f) || !spawnPredicate.test(spawnerData.type, mutableBlockPos, chunkAccess)) continue;
                 Mob mob = NaturalSpawner.getMobForSpawn(serverLevel, spawnerData.type);
                 if (mob == null) {
                     return;
                 }
-                mob.moveTo(f, i, g, serverLevel.random.nextFloat() * 360.0f, 0.0f);
-                if (!NaturalSpawner.isValidPositionForMob(serverLevel, mob, d)) continue;
+                mob.moveTo(d, i, e, serverLevel.random.nextFloat() * 360.0f, 0.0f);
+                if (!NaturalSpawner.isValidPositionForMob(serverLevel, mob, f)) continue;
                 spawnGroupData = mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.NATURAL, spawnGroupData, null);
                 ++p;
                 serverLevel.addFreshEntity(mob);
@@ -150,7 +149,7 @@ public final class NaturalSpawner {
         if (d <= 576.0) {
             return false;
         }
-        if (serverLevel.getSharedSpawnPos().closerThan(new Vec3((float)mutableBlockPos.getX() + 0.5f, mutableBlockPos.getY(), (float)mutableBlockPos.getZ() + 0.5f), 24.0)) {
+        if (serverLevel.getSharedSpawnPos().closerThan(new Vec3((double)mutableBlockPos.getX() + 0.5, mutableBlockPos.getY(), (double)mutableBlockPos.getZ() + 0.5), 24.0)) {
             return false;
         }
         ChunkPos chunkPos = new ChunkPos(mutableBlockPos);
@@ -175,7 +174,7 @@ public final class NaturalSpawner {
         if (!SpawnPlacements.checkSpawnRules(entityType, serverLevel, MobSpawnType.NATURAL, mutableBlockPos, serverLevel.random)) {
             return false;
         }
-        return serverLevel.noCollision(entityType.getAABB((float)mutableBlockPos.getX() + 0.5f, mutableBlockPos.getY(), (float)mutableBlockPos.getZ() + 0.5f));
+        return serverLevel.noCollision(entityType.getAABB((double)mutableBlockPos.getX() + 0.5, mutableBlockPos.getY(), (double)mutableBlockPos.getZ() + 0.5));
     }
 
     @Nullable
@@ -236,7 +235,7 @@ public final class NaturalSpawner {
         if (blockState.is(BlockTags.PREVENT_MOB_SPAWNING_INSIDE)) {
             return false;
         }
-        return !blockState.is(Blocks.WITHER_ROSE) || entityType == EntityType.WITHER_SKELETON;
+        return !entityType.isBlockDangerous(blockState);
     }
 
     public static boolean isSpawnPositionOk(SpawnPlacements.Type type, LevelReader levelReader, BlockPos blockPos, @Nullable EntityType<?> entityType) {

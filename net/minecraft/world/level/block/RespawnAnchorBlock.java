@@ -8,10 +8,12 @@ import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -21,16 +23,20 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.DefaultExplosionDamageCalculator;
 import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -70,8 +76,7 @@ extends Block {
             return RespawnAnchorBlock.canBeCharged(blockState) ? InteractionResult.PASS : InteractionResult.CONSUME;
         }
         if (!level.isClientSide) {
-            level.removeBlock(blockPos, false);
-            level.explode(null, DamageSource.badRespawnPointExplosion(), (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 5.0f, true, Explosion.BlockInteraction.DESTROY);
+            this.explode(blockState, level, blockPos);
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
@@ -82,6 +87,44 @@ extends Block {
 
     private static boolean canBeCharged(BlockState blockState) {
         return blockState.getValue(CHARGE) < 4;
+    }
+
+    private static boolean isWaterThatWouldFlow(BlockPos blockPos, Level level) {
+        FluidState fluidState = level.getFluidState(blockPos);
+        if (!fluidState.is(FluidTags.WATER)) {
+            return false;
+        }
+        if (fluidState.isSource()) {
+            return true;
+        }
+        float f = fluidState.getAmount();
+        if (f < 2.0f) {
+            return false;
+        }
+        FluidState fluidState2 = level.getFluidState(blockPos.below());
+        return !fluidState2.is(FluidTags.WATER);
+    }
+
+    private void explode(BlockState blockState, Level level, final BlockPos blockPos2) {
+        level.removeBlock(blockPos2, false);
+        boolean bl = Direction.Plane.HORIZONTAL.stream().map(blockPos2::relative).anyMatch(blockPos -> RespawnAnchorBlock.isWaterThatWouldFlow(blockPos, level));
+        final boolean bl2 = bl || level.getFluidState(blockPos2.above()).is(FluidTags.WATER);
+        ExplosionDamageCalculator explosionDamageCalculator = new ExplosionDamageCalculator(){
+
+            @Override
+            public Optional<Float> getBlockExplosionResistance(Explosion explosion, BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, FluidState fluidState) {
+                if (blockPos.equals(blockPos2) && bl2) {
+                    return Optional.of(Float.valueOf(Blocks.WATER.getExplosionResistance()));
+                }
+                return DefaultExplosionDamageCalculator.INSTANCE.getBlockExplosionResistance(explosion, blockGetter, blockPos, blockState, fluidState);
+            }
+
+            @Override
+            public boolean shouldBlockExplode(Explosion explosion, BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, float f) {
+                return DefaultExplosionDamageCalculator.INSTANCE.shouldBlockExplode(explosion, blockGetter, blockPos, blockState, f);
+            }
+        };
+        level.explode(null, DamageSource.badRespawnPointExplosion(), explosionDamageCalculator, (double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.5, (double)blockPos2.getZ() + 0.5, 5.0f, true, Explosion.BlockInteraction.DESTROY);
     }
 
     public static boolean canSetSpawn(Level level) {
@@ -102,9 +145,9 @@ extends Block {
         if (random.nextInt(100) == 0) {
             level.playSound(null, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, SoundEvents.RESPAWN_ANCHOR_AMBIENT, SoundSource.BLOCKS, 1.0f, 1.0f);
         }
-        double d = (double)blockPos.getX() + 0.5 + (double)(0.5f - random.nextFloat());
+        double d = (double)blockPos.getX() + 0.5 + (0.5 - random.nextDouble());
         double e = (double)blockPos.getY() + 1.0;
-        double f = (double)blockPos.getZ() + 0.5 + (double)(0.5f - random.nextFloat());
+        double f = (double)blockPos.getZ() + 0.5 + (0.5 - random.nextDouble());
         double g = (double)random.nextFloat() * 0.04;
         level.addParticle(ParticleTypes.REVERSE_PORTAL, d, e, f, 0.0, g, 0.0);
     }

@@ -208,7 +208,7 @@ extends Animal {
 
     @Override
     protected boolean isImmobile() {
-        return this.getHealth() <= 0.0f;
+        return this.isDeadOrDying();
     }
 
     private boolean canEat(ItemStack itemStack) {

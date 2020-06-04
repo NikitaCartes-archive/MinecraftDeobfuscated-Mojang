@@ -47,7 +47,6 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddGlobalEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockEventPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
@@ -80,6 +79,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
@@ -93,7 +93,6 @@ import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.animal.horse.SkeletonHorse;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
-import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.npc.Npc;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raid;
@@ -103,6 +102,7 @@ import net.minecraft.world.level.BlockEventData;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -154,7 +154,6 @@ extends Level
 implements WorldGenLevel {
     public static final BlockPos END_SPAWN_POINT = new BlockPos(100, 50, 0);
     private static final Logger LOGGER = LogManager.getLogger();
-    private final List<Entity> globalEntities = Lists.newArrayList();
     private final Int2ObjectMap<Entity> entitiesById = new Int2ObjectLinkedOpenHashMap<Entity>();
     private final Map<UUID, Entity> entitiesByUuid = Maps.newHashMap();
     private final Queue<Entity> toAddAfterTick = Queues.newArrayDeque();
@@ -217,7 +216,6 @@ implements WorldGenLevel {
 
     public void tick(BooleanSupplier booleanSupplier) {
         boolean bl4;
-        int j;
         ProfilerFiller profilerFiller = this.getProfiler();
         this.handlingTick = true;
         profilerFiller.push("world border");
@@ -227,7 +225,7 @@ implements WorldGenLevel {
         if (this.dimensionType().hasSkyLight()) {
             if (this.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE)) {
                 int i = this.serverLevelData.getClearWeatherTime();
-                j = this.serverLevelData.getThunderTime();
+                int j = this.serverLevelData.getThunderTime();
                 int k = this.serverLevelData.getRainTime();
                 boolean bl2 = this.levelData.isThundering();
                 boolean bl3 = this.levelData.isRaining();
@@ -312,60 +310,48 @@ implements WorldGenLevel {
             this.resetEmptyTime();
         }
         if (bl4 || this.emptyTime++ < 300) {
-            Entity entity2;
+            Entity entity3;
             if (this.dragonFight != null) {
                 this.dragonFight.tick();
             }
-            profilerFiller.push("global");
-            for (j = 0; j < this.globalEntities.size(); ++j) {
-                Entity entity3 = this.globalEntities.get(j);
-                this.guardEntityTick(entity -> {
-                    ++entity.tickCount;
-                    entity.tick();
-                }, entity3);
-                if (!entity3.removed) continue;
-                this.globalEntities.remove(j--);
-            }
-            profilerFiller.popPush("regular");
             this.tickingEntities = true;
             Iterator objectIterator = this.entitiesById.int2ObjectEntrySet().iterator();
             while (objectIterator.hasNext()) {
                 Int2ObjectMap.Entry entry = (Int2ObjectMap.Entry)objectIterator.next();
-                Entity entity22 = (Entity)entry.getValue();
-                Entity entity3 = entity22.getVehicle();
-                if (!this.server.isSpawningAnimals() && (entity22 instanceof Animal || entity22 instanceof WaterAnimal)) {
-                    entity22.remove();
+                Entity entity = (Entity)entry.getValue();
+                Entity entity2 = entity.getVehicle();
+                if (!this.server.isSpawningAnimals() && (entity instanceof Animal || entity instanceof WaterAnimal)) {
+                    entity.remove();
                 }
-                if (!this.server.areNpcsEnabled() && entity22 instanceof Npc) {
-                    entity22.remove();
+                if (!this.server.areNpcsEnabled() && entity instanceof Npc) {
+                    entity.remove();
                 }
                 profilerFiller.push("checkDespawn");
-                if (!entity22.removed) {
-                    entity22.checkDespawn();
+                if (!entity.removed) {
+                    entity.checkDespawn();
                 }
                 profilerFiller.pop();
-                if (entity3 != null) {
-                    if (!entity3.removed && entity3.hasPassenger(entity22)) continue;
-                    entity22.stopRiding();
+                if (entity2 != null) {
+                    if (!entity2.removed && entity2.hasPassenger(entity)) continue;
+                    entity.stopRiding();
                 }
                 profilerFiller.push("tick");
-                if (!entity22.removed && !(entity22 instanceof EnderDragonPart)) {
-                    this.guardEntityTick(this::tickNonPassenger, entity22);
+                if (!entity.removed && !(entity instanceof EnderDragonPart)) {
+                    this.guardEntityTick(this::tickNonPassenger, entity);
                 }
                 profilerFiller.pop();
                 profilerFiller.push("remove");
-                if (entity22.removed) {
-                    this.removeFromChunk(entity22);
+                if (entity.removed) {
+                    this.removeFromChunk(entity);
                     objectIterator.remove();
-                    this.onEntityRemoved(entity22);
+                    this.onEntityRemoved(entity);
                 }
                 profilerFiller.pop();
             }
             this.tickingEntities = false;
-            while ((entity2 = this.toAddAfterTick.poll()) != null) {
-                this.add(entity2);
+            while ((entity3 = this.toAddAfterTick.poll()) != null) {
+                this.add(entity3);
             }
-            profilerFiller.pop();
             this.tickBlockEntities();
         }
         profilerFiller.pop();
@@ -416,7 +402,10 @@ implements WorldGenLevel {
                 skeletonHorse.setPos(blockPos.getX(), blockPos.getY(), blockPos.getZ());
                 this.addFreshEntity(skeletonHorse);
             }
-            this.addGlobalEntity(new LightningBolt(this, (double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5, bl2));
+            LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(this);
+            lightningBolt.moveTo(Vec3.atBottomCenterOf(blockPos));
+            lightningBolt.setVisualOnly(bl2);
+            this.addFreshEntity(lightningBolt);
         }
         profilerFiller.popPush("iceandsnow");
         if (this.random.nextInt(16) == 0) {
@@ -816,11 +805,6 @@ implements WorldGenLevel {
         this.updateSleepingPlayerList();
     }
 
-    public void addGlobalEntity(LightningBolt lightningBolt) {
-        this.globalEntities.add(lightningBolt);
-        this.server.getPlayerList().broadcast(null, lightningBolt.getX(), lightningBolt.getY(), lightningBolt.getZ(), 512.0, this.dimension(), new ClientboundAddGlobalEntityPacket(lightningBolt));
-    }
-
     @Override
     public void destroyBlockProgress(int i, BlockPos blockPos, int j) {
         for (ServerPlayer serverPlayer : this.server.getPlayerList().getPlayers()) {
@@ -877,11 +861,8 @@ implements WorldGenLevel {
     }
 
     @Override
-    public Explosion explode(@Nullable Entity entity, @Nullable DamageSource damageSource, double d, double e, double f, float g, boolean bl, Explosion.BlockInteraction blockInteraction) {
-        Explosion explosion = new Explosion(this, entity, d, e, f, g, bl, blockInteraction);
-        if (damageSource != null) {
-            explosion.setDamageSource(damageSource);
-        }
+    public Explosion explode(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionDamageCalculator explosionDamageCalculator, double d, double e, double f, float g, boolean bl, Explosion.BlockInteraction blockInteraction) {
+        Explosion explosion = new Explosion(this, entity, damageSource, explosionDamageCalculator, d, e, f, g, bl, blockInteraction);
         explosion.explode();
         explosion.finalizeExplosion(false);
         if (blockInteraction == Explosion.BlockInteraction.NONE) {
@@ -1196,13 +1177,9 @@ implements WorldGenLevel {
             Throwable throwable3 = throwable2;
             throw throwable2;
         }
-        Path path4 = path.resolve("global_entities.csv");
+        Path path4 = path.resolve("block_entities.csv");
         try (BufferedWriter bufferedWriter = Files.newBufferedWriter(path4, new OpenOption[0]);){
-            ServerLevel.dumpEntities(bufferedWriter, this.globalEntities);
-        }
-        Path path5 = path.resolve("block_entities.csv");
-        try (BufferedWriter writer6 = Files.newBufferedWriter(path5, new OpenOption[0]);){
-            this.dumpBlockEntities(writer6);
+            this.dumpBlockEntities(bufferedWriter);
         }
     }
 

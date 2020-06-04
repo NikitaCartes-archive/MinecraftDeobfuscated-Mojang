@@ -13,6 +13,7 @@ public enum BlockPathTypes {
     WATER(8.0f),
     WATER_BORDER(8.0f),
     RAIL(0.0f),
+    UNPASSABLE_RAIL(-1.0f),
     DANGER_FIRE(8.0f),
     DAMAGE_FIRE(16.0f),
     DANGER_CACTUS(8.0f),

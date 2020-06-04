@@ -3,6 +3,7 @@
  */
 package net.minecraft.server.packs.resources;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -23,7 +24,7 @@ import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.Pack;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.FallbackResourceManager;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -44,23 +45,23 @@ implements ReloadableResourceManager {
     private final List<PreparableReloadListener> listeners = Lists.newArrayList();
     private final List<PreparableReloadListener> recentlyRegistered = Lists.newArrayList();
     private final Set<String> namespaces = Sets.newLinkedHashSet();
-    private final List<Pack> packs = Lists.newArrayList();
+    private final List<PackResources> packs = Lists.newArrayList();
     private final PackType type;
 
     public SimpleReloadableResourceManager(PackType packType) {
         this.type = packType;
     }
 
-    public void add(Pack pack) {
-        this.packs.add(pack);
-        for (String string : pack.getNamespaces(this.type)) {
+    public void add(PackResources packResources) {
+        this.packs.add(packResources);
+        for (String string : packResources.getNamespaces(this.type)) {
             this.namespaces.add(string);
             FallbackResourceManager fallbackResourceManager = this.namespacedPacks.get(string);
             if (fallbackResourceManager == null) {
                 fallbackResourceManager = new FallbackResourceManager(this.type, string);
                 this.namespacedPacks.put(string, fallbackResourceManager);
             }
-            fallbackResourceManager.add(pack);
+            fallbackResourceManager.add(packResources);
         }
     }
 
@@ -99,6 +100,15 @@ implements ReloadableResourceManager {
     }
 
     @Override
+    public Collection<ResourceLocation> listResources(ResourceLocation resourceLocation, Predicate<String> predicate) {
+        ResourceManager resourceManager = this.namespacedPacks.get(resourceLocation.getNamespace());
+        if (resourceManager != null) {
+            return resourceManager.listResources(resourceLocation.getPath(), predicate);
+        }
+        return ImmutableSet.of();
+    }
+
+    @Override
     public Collection<ResourceLocation> listResources(String string, Predicate<String> predicate) {
         HashSet<ResourceLocation> set = Sets.newHashSet();
         for (FallbackResourceManager fallbackResourceManager : this.namespacedPacks.values()) {
@@ -112,7 +122,13 @@ implements ReloadableResourceManager {
     private void clear() {
         this.namespacedPacks.clear();
         this.namespaces.clear();
+        this.packs.forEach(PackResources::close);
         this.packs.clear();
+    }
+
+    @Override
+    public void close() {
+        this.clear();
     }
 
     @Override
@@ -128,15 +144,15 @@ implements ReloadableResourceManager {
     }
 
     @Override
-    public ReloadInstance createFullReload(Executor executor, Executor executor2, CompletableFuture<Unit> completableFuture, List<Pack> list) {
+    public ReloadInstance createFullReload(Executor executor, Executor executor2, CompletableFuture<Unit> completableFuture, List<PackResources> list) {
         this.clear();
-        LOGGER.info("Reloading ResourceManager: {}", (Object)list.stream().map(Pack::getName).collect(Collectors.joining(", ")));
-        for (Pack pack : list) {
+        LOGGER.info("Reloading ResourceManager: {}", () -> list.stream().map(PackResources::getName).collect(Collectors.joining(", ")));
+        for (PackResources packResources : list) {
             try {
-                this.add(pack);
+                this.add(packResources);
             } catch (Exception exception) {
-                LOGGER.error("Failed to add resource pack {}", (Object)pack.getName(), (Object)exception);
-                return new FailingReloadInstance(new ResourcePackLoadingFailure(pack, (Throwable)exception));
+                LOGGER.error("Failed to add resource pack {}", (Object)packResources.getName(), (Object)exception);
+                return new FailingReloadInstance(new ResourcePackLoadingFailure(packResources, (Throwable)exception));
             }
         }
         return this.createReload(executor, executor2, this.listeners, completableFuture);
@@ -144,7 +160,7 @@ implements ReloadableResourceManager {
 
     @Override
     @Environment(value=EnvType.CLIENT)
-    public Stream<Pack> listPacks() {
+    public Stream<PackResources> listPacks() {
         return this.packs.stream();
     }
 
@@ -191,15 +207,15 @@ implements ReloadableResourceManager {
 
     public static class ResourcePackLoadingFailure
     extends RuntimeException {
-        private final Pack pack;
+        private final PackResources pack;
 
-        public ResourcePackLoadingFailure(Pack pack, Throwable throwable) {
-            super(pack.getName(), throwable);
-            this.pack = pack;
+        public ResourcePackLoadingFailure(PackResources packResources, Throwable throwable) {
+            super(packResources.getName(), throwable);
+            this.pack = packResources;
         }
 
         @Environment(value=EnvType.CLIENT)
-        public Pack getPack() {
+        public PackResources getPack() {
             return this.pack;
         }
     }

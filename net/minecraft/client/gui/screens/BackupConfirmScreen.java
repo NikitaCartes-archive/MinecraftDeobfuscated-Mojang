@@ -15,10 +15,12 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TranslatableComponent;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class BackupConfirmScreen
 extends Screen {
+    @Nullable
     private final Screen lastScreen;
     protected final Listener listener;
     private final Component description;
@@ -26,7 +28,7 @@ extends Screen {
     private final List<FormattedText> lines = Lists.newArrayList();
     private Checkbox eraseCache;
 
-    public BackupConfirmScreen(Screen screen, Listener listener, Component component, Component component2, boolean bl) {
+    public BackupConfirmScreen(@Nullable Screen screen, Listener listener, Component component, Component component2, boolean bl) {
         super(component);
         this.lastScreen = screen;
         this.listener = listener;

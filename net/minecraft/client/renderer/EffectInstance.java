@@ -214,6 +214,7 @@ AutoCloseable {
         for (int i = 0; i < this.samplerLocations.size(); ++i) {
             if (this.samplerMap.get(this.samplerNames.get(i)) == null) continue;
             GlStateManager._activeTexture(33984 + i);
+            GlStateManager._disableTexture();
             GlStateManager._bindTexture(0);
         }
     }
@@ -242,7 +243,7 @@ AutoCloseable {
             }
             if (j == -1) continue;
             RenderSystem.bindTexture(j);
-            Uniform.uploadInteger(Uniform.glGetUniformLocation(this.programId, this.samplerNames.get(i)), i);
+            Uniform.uploadInteger(this.samplerLocations.get(i), i);
         }
         for (Uniform uniform : this.uniforms) {
             uniform.upload();

@@ -20,7 +20,7 @@ import java.util.function.Predicate;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.AbstractResourcePack;
+import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.ResourcePackFileNotFoundException;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -28,13 +28,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-public class FolderResourcePack
-extends AbstractResourcePack {
+public class FolderPackResources
+extends AbstractPackResources {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final boolean ON_WINDOWS = Util.getPlatform() == Util.OS.WINDOWS;
     private static final CharMatcher BACKSLASH_MATCHER = CharMatcher.is('\\');
 
-    public FolderResourcePack(File file) {
+    public FolderPackResources(File file) {
         super(file);
     }
 
@@ -64,7 +64,7 @@ extends AbstractResourcePack {
     private File getFile(String string) {
         try {
             File file = new File(this.file, string);
-            if (file.isFile() && FolderResourcePack.validatePath(file, string)) {
+            if (file.isFile() && FolderPackResources.validatePath(file, string)) {
                 return file;
             }
         } catch (IOException iOException) {
@@ -80,7 +80,7 @@ extends AbstractResourcePack {
         File[] files = file.listFiles(DirectoryFileFilter.DIRECTORY);
         if (files != null) {
             for (File file2 : files) {
-                String string = FolderResourcePack.getRelativePath(file, file2);
+                String string = FolderPackResources.getRelativePath(file, file2);
                 if (string.equals(string.toLowerCase(Locale.ROOT))) {
                     set.add(string.substring(0, string.length() - 1));
                     continue;
@@ -92,7 +92,7 @@ extends AbstractResourcePack {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
     }
 
     @Override

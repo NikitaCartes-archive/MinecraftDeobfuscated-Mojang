@@ -121,7 +121,7 @@ extends Item {
             return;
         }
         double d = 0.5;
-        if (!blockState.getFluidState().isEmpty()) {
+        if (blockState.is(Blocks.WATER)) {
             i *= 3;
             e = 1.0;
             d = 3.0;

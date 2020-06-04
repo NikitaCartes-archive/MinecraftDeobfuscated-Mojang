@@ -21,12 +21,13 @@ import net.minecraft.client.ClientBrandRetriever;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedPlayerList;
 import net.minecraft.client.server.LanServerPinger;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerResources;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.server.packs.repository.UnopenedPack;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -47,8 +48,8 @@ extends MinecraftServer {
     private LanServerPinger lanPinger;
     private UUID uuid;
 
-    public IntegratedServer(Minecraft minecraft, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository<UnopenedPack> packRepository, ServerResources serverResources, WorldData worldData, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory) {
-        super(levelStorageAccess, worldData, packRepository, minecraft.getProxy(), minecraft.getFixerUpper(), serverResources, minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
+    public IntegratedServer(Thread thread, Minecraft minecraft, RegistryAccess.RegistryHolder registryHolder, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository<Pack> packRepository, ServerResources serverResources, WorldData worldData, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory) {
+        super(thread, registryHolder, levelStorageAccess, worldData, packRepository, minecraft.getProxy(), minecraft.getFixerUpper(), serverResources, minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
         this.setSingleplayerName(minecraft.getUser().getName());
         this.setDemo(minecraft.isDemo());
         this.setMaxBuildHeight(256);

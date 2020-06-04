@@ -96,7 +96,7 @@ implements EntityBlock {
             if (level.getBlockState(blockPos2).is(this)) {
                 level.removeBlock(blockPos2, false);
             }
-            level.explode(null, DamageSource.badRespawnPointExplosion(), (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 5.0f, true, Explosion.BlockInteraction.DESTROY);
+            level.explode(null, DamageSource.badRespawnPointExplosion(), null, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 5.0f, true, Explosion.BlockInteraction.DESTROY);
             return InteractionResult.SUCCESS;
         }
         if (blockState.getValue(OCCUPIED).booleanValue()) {
@@ -272,10 +272,12 @@ implements EntityBlock {
         if ((double)blockPos.getY() - d > 2.0) {
             return Optional.empty();
         }
-        float f = entityType.getWidth() / 2.0f;
         Vec3 vec3 = new Vec3((double)mutableBlockPos.getX() + 0.5, d, (double)mutableBlockPos.getZ() + 0.5);
-        if (levelReader.noCollision(new AABB(vec3.x - (double)f, vec3.y, vec3.z - (double)f, vec3.x + (double)f, vec3.y + (double)entityType.getHeight(), vec3.z + (double)f))) {
-            return Optional.of(vec3);
+        AABB aABB = entityType.getAABB(vec3.x, vec3.y, vec3.z);
+        if (levelReader.noCollision(aABB)) {
+            if (levelReader.getBlockStates(aABB.expandTowards(0.0, -0.2f, 0.0)).noneMatch(entityType::isBlockDangerous)) {
+                return Optional.of(vec3);
+            }
         }
         return Optional.empty();
     }

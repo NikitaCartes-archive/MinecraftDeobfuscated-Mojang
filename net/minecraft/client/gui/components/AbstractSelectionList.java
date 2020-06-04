@@ -443,6 +443,10 @@ implements Widget {
         return bl;
     }
 
+    private void bindEntryToSelf(Entry<E> entry) {
+        ((Entry)entry).list = this;
+    }
+
     @Override
     @Nullable
     public /* synthetic */ GuiEventListener getFocused() {
@@ -470,14 +474,14 @@ implements Widget {
         @Override
         public E set(int i, E entry) {
             Entry entry2 = (Entry)this.delegate.set(i, entry);
-            ((Entry)entry).list = AbstractSelectionList.this;
+            AbstractSelectionList.this.bindEntryToSelf(entry);
             return entry2;
         }
 
         @Override
         public void add(int i, E entry) {
             this.delegate.add(i, entry);
-            ((Entry)entry).list = AbstractSelectionList.this;
+            AbstractSelectionList.this.bindEntryToSelf(entry);
         }
 
         @Override
@@ -510,7 +514,7 @@ implements Widget {
     public static abstract class Entry<E extends Entry<E>>
     implements GuiEventListener {
         @Deprecated
-        AbstractSelectionList<E> list;
+        private AbstractSelectionList<E> list;
 
         public abstract void render(PoseStack var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, boolean var9, float var10);
 

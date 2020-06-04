@@ -23,6 +23,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.EntityDimensions;
@@ -238,12 +239,15 @@ implements Shearable {
     }
 
     @Override
-    public boolean mobInteract(Player player2, InteractionHand interactionHand) {
-        ItemStack itemStack;
-        if (!this.level.isClientSide && (itemStack = player2.getItemInHand(interactionHand)).getItem() == Items.SHEARS && this.readyForShearing()) {
-            this.shear(SoundSource.PLAYERS);
-            itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(interactionHand));
-            return true;
+    public InteractionResult mobInteract(Player player2, InteractionHand interactionHand) {
+        ItemStack itemStack = player2.getItemInHand(interactionHand);
+        if (itemStack.getItem() == Items.SHEARS) {
+            if (!this.level.isClientSide && this.readyForShearing()) {
+                this.shear(SoundSource.PLAYERS);
+                itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(interactionHand));
+                return InteractionResult.SUCCESS;
+            }
+            return InteractionResult.CONSUME;
         }
         return super.mobInteract(player2, interactionHand);
     }

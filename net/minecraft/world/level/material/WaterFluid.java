@@ -56,7 +56,7 @@ extends FlowingFluid {
                 level.playLocalSound((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, SoundEvents.WATER_AMBIENT, SoundSource.BLOCKS, random.nextFloat() * 0.25f + 0.75f, random.nextFloat() + 0.5f, false);
             }
         } else if (random.nextInt(10) == 0) {
-            level.addParticle(ParticleTypes.UNDERWATER, (double)blockPos.getX() + (double)random.nextFloat(), (double)blockPos.getY() + (double)random.nextFloat(), (double)blockPos.getZ() + (double)random.nextFloat(), 0.0, 0.0, 0.0);
+            level.addParticle(ParticleTypes.UNDERWATER, (double)blockPos.getX() + random.nextDouble(), (double)blockPos.getY() + random.nextDouble(), (double)blockPos.getZ() + random.nextDouble(), 0.0, 0.0, 0.0);
         }
     }
 

@@ -21,17 +21,17 @@ import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.AbstractResourcePack;
+import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.ResourcePackFileNotFoundException;
 import org.apache.commons.io.IOUtils;
 
-public class FileResourcePack
-extends AbstractResourcePack {
+public class FilePackResources
+extends AbstractPackResources {
     public static final Splitter SPLITTER = Splitter.on('/').omitEmptyStrings().limit(3);
     private ZipFile zipFile;
 
-    public FileResourcePack(File file) {
+    public FilePackResources(File file) {
         super(file);
     }
 

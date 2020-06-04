@@ -21,6 +21,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -654,14 +655,17 @@ extends Entity {
     }
 
     @Override
-    public boolean interact(Player player, InteractionHand interactionHand) {
+    public InteractionResult interact(Player player, InteractionHand interactionHand) {
         if (player.isSecondaryUseActive()) {
-            return false;
+            return InteractionResult.PASS;
         }
-        if (!this.level.isClientSide && this.outOfControlTicks < 60.0f) {
-            return player.startRiding(this);
+        if (this.outOfControlTicks < 60.0f) {
+            if (!this.level.isClientSide) {
+                return player.startRiding(this) ? InteractionResult.CONSUME : InteractionResult.PASS;
+            }
+            return InteractionResult.SUCCESS;
         }
-        return false;
+        return InteractionResult.PASS;
     }
 
     @Override

@@ -13,6 +13,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -85,15 +86,17 @@ RangedAttackMob {
     }
 
     @Override
+    public boolean isSensitiveToWater() {
+        return true;
+    }
+
+    @Override
     public void aiStep() {
         super.aiStep();
         if (!this.level.isClientSide) {
             int i = Mth.floor(this.getX());
             int j = Mth.floor(this.getY());
             int k = Mth.floor(this.getZ());
-            if (this.isInWaterRainOrBubble()) {
-                this.hurt(DamageSource.DROWN, 1.0f);
-            }
             BlockPos blockPos = new BlockPos(i, 0, k);
             BlockPos blockPos2 = new BlockPos(i, j, k);
             if (this.level.getBiome(blockPos).getTemperature(blockPos2) > 1.0f) {
@@ -131,16 +134,16 @@ RangedAttackMob {
     }
 
     @Override
-    protected boolean mobInteract(Player player2, InteractionHand interactionHand) {
+    protected InteractionResult mobInteract(Player player2, InteractionHand interactionHand) {
         ItemStack itemStack = player2.getItemInHand(interactionHand);
         if (itemStack.getItem() == Items.SHEARS && this.readyForShearing()) {
             this.shear(SoundSource.PLAYERS);
             if (!this.level.isClientSide) {
                 itemStack.hurtAndBreak(1, player2, player -> player.broadcastBreakEvent(interactionHand));
             }
-            return true;
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
-        return false;
+        return InteractionResult.PASS;
     }
 
     @Override

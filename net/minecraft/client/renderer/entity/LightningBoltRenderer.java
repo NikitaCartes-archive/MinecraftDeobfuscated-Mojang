@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.global.LightningBolt;
+import net.minecraft.world.entity.LightningBolt;
 
 @Environment(value=EnvType.CLIENT)
 public class LightningBoltRenderer

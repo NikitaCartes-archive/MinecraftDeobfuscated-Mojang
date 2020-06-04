@@ -27,6 +27,7 @@ import net.minecraft.util.profiling.ProfileResults;
 import net.minecraft.util.profiling.ProfilerPathEntry;
 import net.minecraft.util.profiling.ResultField;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -210,7 +211,7 @@ implements ProfileResults {
 
     private void appendProfilerResults(int i, String string2, StringBuilder stringBuilder) {
         List<ResultField> list = this.getTimes(string2);
-        Object2LongMap<String> object2LongMap = this.entries.get(string2).getCounters();
+        Object2LongMap<String> object2LongMap = ObjectUtils.firstNonNull(this.entries.get(string2), EMPTY).getCounters();
         object2LongMap.forEach((string, long_) -> FilledProfileResults.indentLine(stringBuilder, i).append('#').append((String)string).append(' ').append(long_).append('/').append(long_ / (long)this.tickDuration).append('\n'));
         if (list.size() < 3) {
             return;

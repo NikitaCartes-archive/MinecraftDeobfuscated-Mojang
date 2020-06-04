@@ -135,7 +135,7 @@ extends WalkNodeEvaluator {
             }
             return node;
         }
-        if (node == null && l > 0 && blockPathTypes != BlockPathTypes.FENCE && blockPathTypes != BlockPathTypes.TRAPDOOR) {
+        if (node == null && l > 0 && blockPathTypes != BlockPathTypes.FENCE && blockPathTypes != BlockPathTypes.UNPASSABLE_RAIL && blockPathTypes != BlockPathTypes.TRAPDOOR) {
             node = this.getAcceptedNode(i, j + 1, k, l - 1, d);
         }
         if (blockPathTypes == BlockPathTypes.OPEN) {
@@ -180,7 +180,7 @@ extends WalkNodeEvaluator {
     @Override
     protected BlockPathTypes evaluateBlockPathType(BlockGetter blockGetter, boolean bl, boolean bl2, BlockPos blockPos, BlockPathTypes blockPathTypes) {
         if (blockPathTypes == BlockPathTypes.RAIL && !(blockGetter.getBlockState(blockPos).getBlock() instanceof BaseRailBlock) && !(blockGetter.getBlockState(blockPos.below()).getBlock() instanceof BaseRailBlock)) {
-            blockPathTypes = BlockPathTypes.FENCE;
+            blockPathTypes = BlockPathTypes.UNPASSABLE_RAIL;
         }
         if (blockPathTypes == BlockPathTypes.DOOR_OPEN || blockPathTypes == BlockPathTypes.DOOR_WOOD_CLOSED || blockPathTypes == BlockPathTypes.DOOR_IRON_CLOSED) {
             blockPathTypes = BlockPathTypes.BLOCKED;

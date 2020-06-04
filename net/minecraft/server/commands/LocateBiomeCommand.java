@@ -5,7 +5,6 @@ package net.minecraft.server.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.commands.CommandSourceStack;
@@ -24,21 +23,18 @@ public class LocateBiomeCommand {
     private static final DynamicCommandExceptionType ERROR_BIOME_NOT_FOUND = new DynamicCommandExceptionType(object -> new TranslatableComponent("commands.locatebiome.notFound", object));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
-        commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("locatebiome").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.argument("biome", ResourceLocationArgument.id()).suggests(SuggestionProviders.AVAILABLE_BIOMES).executes(commandContext -> LocateBiomeCommand.locateBiome((CommandSourceStack)commandContext.getSource(), LocateBiomeCommand.getBiome(commandContext, "biome")))));
+        commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("locatebiome").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).then(Commands.argument("biome", ResourceLocationArgument.id()).suggests(SuggestionProviders.AVAILABLE_BIOMES).executes(commandContext -> LocateBiomeCommand.locateBiome((CommandSourceStack)commandContext.getSource(), commandContext.getArgument("biome", ResourceLocation.class)))));
     }
 
-    private static int locateBiome(CommandSourceStack commandSourceStack, Biome biome) throws CommandSyntaxException {
+    private static int locateBiome(CommandSourceStack commandSourceStack, ResourceLocation resourceLocation) throws CommandSyntaxException {
+        Biome biome = Registry.BIOME.getOptional(resourceLocation).orElseThrow(() -> ERROR_INVALID_BIOME.create(resourceLocation));
         BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
         BlockPos blockPos2 = commandSourceStack.getLevel().findNearestBiome(biome, blockPos, 6400, 8);
+        String string = resourceLocation.toString();
         if (blockPos2 == null) {
-            throw ERROR_BIOME_NOT_FOUND.create(biome.getName().getString());
+            throw ERROR_BIOME_NOT_FOUND.create(string);
         }
-        return LocateCommand.showLocateResult(commandSourceStack, biome.getName().getString(), blockPos, blockPos2, "commands.locatebiome.success");
-    }
-
-    private static Biome getBiome(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-        ResourceLocation resourceLocation = commandContext.getArgument(string, ResourceLocation.class);
-        return Registry.BIOME.getOptional(resourceLocation).orElseThrow(() -> ERROR_INVALID_BIOME.create(resourceLocation));
+        return LocateCommand.showLocateResult(commandSourceStack, string, blockPos, blockPos2, "commands.locatebiome.success");
     }
 }
 

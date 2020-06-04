@@ -4,14 +4,12 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Optional;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.behavior.Behavior;
-import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
@@ -43,7 +41,7 @@ extends Behavior<PathfinderMob> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, PathfinderMob pathfinderMob) {
-        if (this.alreadyWalkingAwayFromPos(pathfinderMob)) {
+        if (this.alreadyWalkingAwayFromPosWithSameSpeed(pathfinderMob)) {
             return false;
         }
         return pathfinderMob.position().closerThan(this.getPosToAvoid(pathfinderMob), this.desiredDistance);
@@ -53,13 +51,17 @@ extends Behavior<PathfinderMob> {
         return this.toPosition.apply(pathfinderMob.getBrain().getMemory(this.walkAwayFromMemory).get());
     }
 
-    private boolean alreadyWalkingAwayFromPos(PathfinderMob pathfinderMob) {
+    private boolean alreadyWalkingAwayFromPosWithSameSpeed(PathfinderMob pathfinderMob) {
+        Vec3 vec32;
         if (!pathfinderMob.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET)) {
             return false;
         }
-        Optional<WalkTarget> optional = pathfinderMob.getBrain().getMemory(MemoryModuleType.WALK_TARGET);
-        PositionTracker positionTracker = optional.get().getTarget();
-        return optional.isPresent() && !positionTracker.currentBlockPosition().closerThan(this.getPosToAvoid(pathfinderMob), (double)this.desiredDistance);
+        WalkTarget walkTarget = pathfinderMob.getBrain().getMemory(MemoryModuleType.WALK_TARGET).get();
+        if (walkTarget.getSpeedModifier() != this.speedModifier) {
+            return false;
+        }
+        Vec3 vec3 = walkTarget.getTarget().currentPosition().subtract(pathfinderMob.position());
+        return vec3.dot(vec32 = this.getPosToAvoid(pathfinderMob).subtract(pathfinderMob.position())) < 0.0;
     }
 
     @Override

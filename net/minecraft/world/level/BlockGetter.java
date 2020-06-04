@@ -5,6 +5,7 @@ package net.minecraft.world.level;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -12,6 +13,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -35,6 +37,10 @@ public interface BlockGetter {
 
     default public int getMaxBuildHeight() {
         return 256;
+    }
+
+    default public Stream<BlockState> getBlockStates(AABB aABB) {
+        return BlockPos.betweenClosedStream(aABB).map(this::getBlockState);
     }
 
     default public BlockHitResult clip(ClipContext clipContext2) {

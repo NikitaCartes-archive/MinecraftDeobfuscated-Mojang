@@ -6,6 +6,8 @@ package net.minecraft.core;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Lifecycle;
@@ -16,11 +18,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
+import net.minecraft.resources.RegistryDataPackCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
@@ -34,7 +35,8 @@ extends WritableRegistry<T> {
     protected static final Logger LOGGER = LogManager.getLogger();
     protected final CrudeIncrementalIntIdentityHashBiMap<T> map = new CrudeIncrementalIntIdentityHashBiMap(256);
     protected final BiMap<ResourceLocation, T> storage = HashBiMap.create();
-    protected final BiMap<ResourceKey<T>, T> keyStorage = HashBiMap.create();
+    private final BiMap<ResourceKey<T>, T> keyStorage = HashBiMap.create();
+    private final Set<ResourceKey<T>> persistent = Sets.newIdentityHashSet();
     protected Object[] randomCache;
     private int nextId;
 
@@ -71,7 +73,6 @@ extends WritableRegistry<T> {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public Optional<ResourceKey<T>> getResourceKey(T object) {
         return Optional.ofNullable(this.keyStorage.inverse().get(object));
     }
@@ -83,7 +84,6 @@ extends WritableRegistry<T> {
 
     @Override
     @Nullable
-    @Environment(value=EnvType.CLIENT)
     public T get(@Nullable ResourceKey<T> resourceKey) {
         return (T)this.keyStorage.get(resourceKey);
     }
@@ -115,6 +115,10 @@ extends WritableRegistry<T> {
         return Collections.unmodifiableSet(this.storage.keySet());
     }
 
+    public Set<Map.Entry<ResourceKey<T>, T>> entrySet() {
+        return Collections.unmodifiableMap(this.keyStorage).entrySet();
+    }
+
     @Nullable
     public T getRandom(Random random) {
         if (this.randomCache == null) {
@@ -137,7 +141,15 @@ extends WritableRegistry<T> {
         return this.map.contains(i);
     }
 
-    public static <T> Codec<MappedRegistry<T>> codec(ResourceKey<Registry<T>> resourceKey, Lifecycle lifecycle, Codec<T> codec) {
+    public boolean persistent(ResourceKey<T> resourceKey) {
+        return this.persistent.contains(resourceKey);
+    }
+
+    public void setPersistent(ResourceKey<T> resourceKey) {
+        this.persistent.add(resourceKey);
+    }
+
+    public static <T> Codec<MappedRegistry<T>> networkCodec(ResourceKey<Registry<T>> resourceKey, Lifecycle lifecycle, Codec<T> codec) {
         return Codec.mapPair(ResourceLocation.CODEC.xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location).fieldOf("key"), codec.fieldOf("element")).codec().listOf().xmap(list -> {
             MappedRegistry mappedRegistry = new MappedRegistry(resourceKey, lifecycle);
             for (Pair pair : list) {
@@ -146,9 +158,28 @@ extends WritableRegistry<T> {
             return mappedRegistry;
         }, mappedRegistry -> {
             ImmutableList.Builder builder = ImmutableList.builder();
-            for (Map.Entry entry : mappedRegistry.keyStorage.entrySet()) {
-                builder.add(Pair.of(entry.getKey(), entry.getValue()));
+            for (Object object : mappedRegistry.map) {
+                builder.add(Pair.of(mappedRegistry.getResourceKey(object).get(), object));
             }
+            return builder.build();
+        });
+    }
+
+    public static <T> Codec<MappedRegistry<T>> dataPackCodec(ResourceKey<Registry<T>> resourceKey, Lifecycle lifecycle, Codec<T> codec) {
+        return RegistryDataPackCodec.create(resourceKey, lifecycle, codec);
+    }
+
+    public static <T> Codec<MappedRegistry<T>> directCodec(ResourceKey<Registry<T>> resourceKey, Lifecycle lifecycle, Codec<T> codec) {
+        return Codec.unboundedMap(ResourceLocation.CODEC.xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location), codec).xmap(map -> {
+            MappedRegistry mappedRegistry = new MappedRegistry(resourceKey, lifecycle);
+            map.forEach((? super K resourceKey, ? super V object) -> {
+                mappedRegistry.registerMapping(mappedRegistry.nextId, (ResourceKey)resourceKey, (Object)object);
+                mappedRegistry.setPersistent((ResourceKey)resourceKey);
+            });
+            return mappedRegistry;
+        }, mappedRegistry -> {
+            ImmutableMap.Builder builder = ImmutableMap.builder();
+            mappedRegistry.keyStorage.entrySet().stream().filter(entry -> mappedRegistry.persistent((ResourceKey)entry.getKey())).forEach(builder::put);
             return builder.build();
         });
     }

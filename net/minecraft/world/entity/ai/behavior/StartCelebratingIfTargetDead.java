@@ -6,10 +6,12 @@ package net.minecraft.world.entity.ai.behavior;
 import com.google.common.collect.ImmutableMap;
 import java.util.function.BiPredicate;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.level.GameRules;
 
 public class StartCelebratingIfTargetDead
 extends Behavior<LivingEntity> {
@@ -24,7 +26,7 @@ extends Behavior<LivingEntity> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity) {
-        return this.getAttackTarget(livingEntity).getHealth() <= 0.0f;
+        return this.getAttackTarget(livingEntity).isDeadOrDying();
     }
 
     @Override
@@ -34,8 +36,10 @@ extends Behavior<LivingEntity> {
             livingEntity.getBrain().setMemoryWithExpiry(MemoryModuleType.DANCING, true, this.celebrateDuration);
         }
         livingEntity.getBrain().setMemoryWithExpiry(MemoryModuleType.CELEBRATE_LOCATION, livingEntity2.blockPosition(), this.celebrateDuration);
-        livingEntity.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
-        livingEntity.getBrain().eraseMemory(MemoryModuleType.ANGRY_AT);
+        if (livingEntity2.getType() != EntityType.PLAYER || serverLevel.getGameRules().getBoolean(GameRules.RULE_FORGIVE_DEAD_PLAYERS)) {
+            livingEntity.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
+            livingEntity.getBrain().eraseMemory(MemoryModuleType.ANGRY_AT);
+        }
     }
 
     private LivingEntity getAttackTarget(LivingEntity livingEntity) {

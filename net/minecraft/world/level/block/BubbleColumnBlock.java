@@ -51,8 +51,8 @@ implements BucketPickup {
             if (!level.isClientSide) {
                 ServerLevel serverLevel = (ServerLevel)level;
                 for (int i = 0; i < 2; ++i) {
-                    serverLevel.sendParticles(ParticleTypes.SPLASH, (float)blockPos.getX() + level.random.nextFloat(), blockPos.getY() + 1, (float)blockPos.getZ() + level.random.nextFloat(), 1, 0.0, 0.0, 0.0, 1.0);
-                    serverLevel.sendParticles(ParticleTypes.BUBBLE, (float)blockPos.getX() + level.random.nextFloat(), blockPos.getY() + 1, (float)blockPos.getZ() + level.random.nextFloat(), 1, 0.0, 0.01, 0.0, 0.2);
+                    serverLevel.sendParticles(ParticleTypes.SPLASH, (double)blockPos.getX() + level.random.nextDouble(), blockPos.getY() + 1, (double)blockPos.getZ() + level.random.nextDouble(), 1, 0.0, 0.0, 0.0, 1.0);
+                    serverLevel.sendParticles(ParticleTypes.BUBBLE, (double)blockPos.getX() + level.random.nextDouble(), blockPos.getY() + 1, (double)blockPos.getZ() + level.random.nextDouble(), 1, 0.0, 0.01, 0.0, 0.2);
                 }
             }
         } else {

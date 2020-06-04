@@ -61,8 +61,8 @@ extends AbstractClientPlayer {
         }
         this.oBob = this.bob;
         this.updateSwingTime();
-        float g = !this.onGround || this.getHealth() <= 0.0f ? 0.0f : Math.min(0.1f, Mth.sqrt(RemotePlayer.getHorizontalDistanceSqr(this.getDeltaMovement())));
-        if (this.onGround || this.getHealth() <= 0.0f) {
+        float g = !this.onGround || this.isDeadOrDying() ? 0.0f : Math.min(0.1f, Mth.sqrt(RemotePlayer.getHorizontalDistanceSqr(this.getDeltaMovement())));
+        if (this.onGround || this.isDeadOrDying()) {
             float h = 0.0f;
         } else {
             float h = (float)Math.atan(-this.getDeltaMovement().y * (double)0.2f) * 15.0f;

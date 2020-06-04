@@ -110,7 +110,7 @@ public class Commands {
     private static final Logger LOGGER = LogManager.getLogger();
     private final CommandDispatcher<CommandSourceStack> dispatcher = new CommandDispatcher();
 
-    public Commands(boolean bl2) {
+    public Commands(CommandSelection commandSelection) {
         AdvancementCommands.register(this.dispatcher);
         AttributeCommand.register(this.dispatcher);
         ExecuteCommand.register(this.dispatcher);
@@ -142,14 +142,13 @@ public class Commands {
         MsgCommand.register(this.dispatcher);
         ParticleCommand.register(this.dispatcher);
         PlaySoundCommand.register(this.dispatcher);
-        PublishCommand.register(this.dispatcher);
         ReloadCommand.register(this.dispatcher);
         RecipeCommand.register(this.dispatcher);
         ReplaceItemCommand.register(this.dispatcher);
         SayCommand.register(this.dispatcher);
         ScheduleCommand.register(this.dispatcher);
         ScoreboardCommand.register(this.dispatcher);
-        SeedCommand.register(this.dispatcher);
+        SeedCommand.register(this.dispatcher, commandSelection == CommandSelection.INTEGRATED);
         SetBlockCommand.register(this.dispatcher);
         SetSpawnCommand.register(this.dispatcher);
         SetWorldSpawnCommand.register(this.dispatcher);
@@ -170,7 +169,7 @@ public class Commands {
         if (SharedConstants.IS_RUNNING_IN_IDE) {
             TestCommand.register(this.dispatcher);
         }
-        if (bl2) {
+        if (commandSelection.includeDedicated) {
             BanIpCommands.register(this.dispatcher);
             BanListCommands.register(this.dispatcher);
             BanPlayerCommands.register(this.dispatcher);
@@ -184,6 +183,9 @@ public class Commands {
             SetPlayerIdleTimeoutCommand.register(this.dispatcher);
             StopCommand.register(this.dispatcher);
             WhitelistCommand.register(this.dispatcher);
+        }
+        if (commandSelection.includeIntegrated) {
+            PublishCommand.register(this.dispatcher);
         }
         this.dispatcher.findAmbiguities((commandNode, commandNode2, commandNode3, collection) -> LOGGER.warn("Ambiguity between arguments {} and {} with inputs: {}", (Object)this.dispatcher.getPath(commandNode2), (Object)this.dispatcher.getPath(commandNode3), (Object)collection));
         this.dispatcher.setConsumer((commandContext, bl, i) -> ((CommandSourceStack)commandContext.getSource()).onCommandComplete(commandContext, bl, i));
@@ -311,6 +313,20 @@ public class Commands {
             return CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().createWithContext(parseResults.getReader());
         }
         return CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parseResults.getReader());
+    }
+
+    public static enum CommandSelection {
+        ALL(true, true),
+        DEDICATED(false, true),
+        INTEGRATED(true, false);
+
+        private final boolean includeIntegrated;
+        private final boolean includeDedicated;
+
+        private CommandSelection(boolean bl, boolean bl2) {
+            this.includeIntegrated = bl;
+            this.includeDedicated = bl2;
+        }
     }
 
     @FunctionalInterface

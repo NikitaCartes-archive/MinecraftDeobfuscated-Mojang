@@ -105,11 +105,13 @@ extends Monster {
     }
 
     @Override
+    public boolean isSensitiveToWater() {
+        return true;
+    }
+
+    @Override
     protected void customServerAiStep() {
         LivingEntity livingEntity;
-        if (this.isInWaterRainOrBubble()) {
-            this.hurt(DamageSource.DROWN, 1.0f);
-        }
         --this.nextHeightOffsetChangeTick;
         if (this.nextHeightOffsetChangeTick <= 0) {
             this.nextHeightOffsetChangeTick = 100;

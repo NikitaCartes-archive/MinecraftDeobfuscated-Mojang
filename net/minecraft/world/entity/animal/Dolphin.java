@@ -24,6 +24,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -294,7 +295,7 @@ extends WaterAnimal {
     }
 
     @Override
-    protected boolean mobInteract(Player player, InteractionHand interactionHand) {
+    protected InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if (!itemStack.isEmpty() && itemStack.getItem().is(ItemTags.FISHES)) {
             if (!this.level.isClientSide) {
@@ -304,7 +305,7 @@ extends WaterAnimal {
             if (!player.abilities.instabuild) {
                 itemStack.shrink(1);
             }
-            return true;
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
         return super.mobInteract(player, interactionHand);
     }

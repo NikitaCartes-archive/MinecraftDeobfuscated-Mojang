@@ -3,14 +3,18 @@
  */
 package net.minecraft.client;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
+import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.AmbientOcclusionStatus;
 import net.minecraft.client.AttackIndicatorStatus;
 import net.minecraft.client.BooleanOption;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.CycleOption;
+import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.LogaritmicProgressOption;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.NarratorStatus;
@@ -22,6 +26,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.ChatVisiblity;
@@ -189,13 +194,30 @@ public abstract class Option {
         options.chatVisibility = ChatVisiblity.byId((options.chatVisibility.getId() + integer) % 3);
     }, (options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.chatVisibility.getKey())));
     public static final CycleOption GRAPHICS = new CycleOption("options.graphics", (options, integer) -> {
-        options.fancyGraphics = !options.fancyGraphics;
+        options.graphicsMode = options.graphicsMode.cycleNext();
+        if (options.graphicsMode == GraphicsStatus.FABULOUS && !GlStateManager.supportsFramebufferBlit()) {
+            options.graphicsMode = GraphicsStatus.FAST;
+        }
         Minecraft.getInstance().levelRenderer.allChanged();
     }, (options, cycleOption) -> {
-        if (options.fancyGraphics) {
-            return cycleOption.createCaption().append(new TranslatableComponent("options.graphics.fancy"));
+        switch (options.graphicsMode) {
+            case FAST: {
+                cycleOption.setTooltip("options.graphics.fast.tooltip");
+                break;
+            }
+            case FANCY: {
+                cycleOption.setTooltip("options.graphics.fancy.tooltip");
+                break;
+            }
+            case FABULOUS: {
+                cycleOption.setTooltip("options.graphics.fabulous.tooltip");
+            }
         }
-        return cycleOption.createCaption().append(new TranslatableComponent("options.graphics.fast"));
+        TranslatableComponent translatableComponent = new TranslatableComponent(options.graphicsMode.getKey());
+        if (options.graphicsMode == GraphicsStatus.FABULOUS) {
+            return cycleOption.createCaption().append(new TextComponent("").append(translatableComponent).withStyle(ChatFormatting.ITALIC));
+        }
+        return cycleOption.createCaption().append(translatableComponent);
     });
     public static final CycleOption GUI_SCALE = new CycleOption("options.guiScale", (options, integer) -> {
         options.guiScale = Integer.remainderUnsigned(options.guiScale + integer, Minecraft.getInstance().getWindow().calculateScale(0, Minecraft.getInstance().isEnforceUnicode()) + 1);
@@ -223,6 +245,9 @@ public abstract class Option {
     }, (options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.particles.getKey())));
     public static final CycleOption RENDER_CLOUDS = new CycleOption("options.renderClouds", (options, integer) -> {
         options.renderClouds = CloudStatus.byId(options.renderClouds.getId() + integer);
+        if (Minecraft.useShaderTransparency()) {
+            Minecraft.getInstance().levelRenderer.getCloudsTarget().clear(Minecraft.ON_OSX);
+        }
     }, (options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.renderClouds.getKey())));
     public static final CycleOption TEXT_BACKGROUND = new CycleOption("options.accessibility.text_background", (options, integer) -> {
         options.backgroundForChatOnly = !options.backgroundForChatOnly;
@@ -302,15 +327,25 @@ public abstract class Option {
         options.bobView = boolean_;
     });
     private final String captionId;
+    private Optional<TranslatableComponent> toolTip;
 
     public Option(String string) {
         this.captionId = string;
+        this.toolTip = Optional.empty();
     }
 
     public abstract AbstractWidget createButton(Options var1, int var2, int var3, int var4);
 
     public MutableComponent createCaption() {
         return new TranslatableComponent(this.captionId).append(": ");
+    }
+
+    public void setTooltip(String string) {
+        this.toolTip = Optional.of(new TranslatableComponent(string));
+    }
+
+    public Optional<TranslatableComponent> getTooltip() {
+        return this.toolTip;
     }
 }
 

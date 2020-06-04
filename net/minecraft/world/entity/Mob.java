@@ -12,7 +12,6 @@ import java.util.Random;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
@@ -26,13 +25,13 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -485,14 +484,6 @@ extends LivingEntity {
             this.onItemPickup(itemEntity);
             this.take(itemEntity, itemStack.getCount());
             itemEntity.remove();
-        }
-    }
-
-    protected void onItemPickup(ItemEntity itemEntity) {
-        Player player;
-        Player player2 = player = itemEntity.getThrower() != null ? this.level.getPlayerByUUID(itemEntity.getThrower()) : null;
-        if (player instanceof ServerPlayer) {
-            CriteriaTriggers.ITEM_PICKED_UP_BY_ENTITY.trigger((ServerPlayer)player, itemEntity.getItem(), this);
         }
     }
 
@@ -1002,42 +993,53 @@ extends LivingEntity {
     }
 
     @Override
-    public final boolean interact(Player player, InteractionHand interactionHand) {
+    public final InteractionResult interact(Player player, InteractionHand interactionHand) {
         if (!this.isAlive()) {
-            return false;
+            return InteractionResult.PASS;
         }
         if (this.getLeashHolder() == player) {
             this.dropLeash(true, !player.abilities.instabuild);
-            return true;
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
+        InteractionResult interactionResult = this.checkAndHandleImportantInteractions(player, interactionHand);
+        if (interactionResult.consumesAction()) {
+            return interactionResult;
+        }
+        interactionResult = this.mobInteract(player, interactionHand);
+        if (interactionResult.consumesAction()) {
+            return interactionResult;
+        }
+        return super.interact(player, interactionHand);
+    }
+
+    private InteractionResult checkAndHandleImportantInteractions(Player player, InteractionHand interactionHand) {
+        InteractionResult interactionResult;
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if (itemStack.getItem() == Items.LEAD && this.canBeLeashed(player)) {
             this.setLeashedTo(player, true);
             itemStack.shrink(1);
-            return true;
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
-        if (itemStack.getItem() == Items.NAME_TAG) {
-            itemStack.interactEnemy(player, this, interactionHand);
-            return true;
+        if (itemStack.getItem() == Items.NAME_TAG && (interactionResult = itemStack.interactLivingEntity(player, this, interactionHand)).consumesAction()) {
+            return interactionResult;
         }
-        if (this.mobInteract(player, interactionHand)) {
-            return true;
+        if (itemStack.getItem() instanceof SpawnEggItem) {
+            if (!this.level.isClientSide) {
+                SpawnEggItem spawnEggItem = (SpawnEggItem)itemStack.getItem();
+                Optional<Mob> optional = spawnEggItem.spawnOffspringFromSpawnEgg(player, this, this.getType(), this.level, this.position(), itemStack);
+                optional.ifPresent(mob -> this.onOffspringSpawnedFromEgg(player, (Mob)mob));
+                return optional.isPresent() ? InteractionResult.SUCCESS : InteractionResult.PASS;
+            }
+            return InteractionResult.CONSUME;
         }
-        return super.interact(player, interactionHand);
+        return InteractionResult.PASS;
     }
 
     protected void onOffspringSpawnedFromEgg(Player player, Mob mob) {
     }
 
-    protected boolean mobInteract(Player player, InteractionHand interactionHand) {
-        ItemStack itemStack = player.getItemInHand(interactionHand);
-        Item item = itemStack.getItem();
-        if (!this.level.isClientSide && item instanceof SpawnEggItem) {
-            SpawnEggItem spawnEggItem = (SpawnEggItem)item;
-            Optional<Mob> optional = spawnEggItem.spawnOffspringFromSpawnEgg(player, this, this.getType(), this.level, this.position(), itemStack);
-            optional.ifPresent(mob -> this.onOffspringSpawnedFromEgg(player, (Mob)mob));
-        }
-        return false;
+    protected InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
+        return InteractionResult.PASS;
     }
 
     public boolean isWithinRestriction() {

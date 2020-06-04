@@ -3,12 +3,15 @@
  */
 package net.minecraft.world.level.storage;
 
+import com.mojang.serialization.Lifecycle;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReportCategory;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
@@ -17,9 +20,9 @@ import net.minecraft.world.level.storage.ServerLevelData;
 import org.jetbrains.annotations.Nullable;
 
 public interface WorldData {
-    public Set<String> getDisabledDataPacks();
+    public DataPackConfig getDataPackConfig();
 
-    public Set<String> getEnabledDataPacks();
+    public void setDataPackConfig(DataPackConfig var1);
 
     public boolean wasModded();
 
@@ -58,7 +61,7 @@ public interface WorldData {
     @Environment(value=EnvType.CLIENT)
     public LevelSettings getLevelSettings();
 
-    public CompoundTag createTag(@Nullable CompoundTag var1);
+    public CompoundTag createTag(RegistryAccess var1, @Nullable CompoundTag var2);
 
     public boolean isHardcore();
 
@@ -89,5 +92,8 @@ public interface WorldData {
     public void setEndDragonFightData(CompoundTag var1);
 
     public WorldGenSettings worldGenSettings();
+
+    @Environment(value=EnvType.CLIENT)
+    public Lifecycle worldGenSettingsLifecycle();
 }
 

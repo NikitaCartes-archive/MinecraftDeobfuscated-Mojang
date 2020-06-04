@@ -36,13 +36,12 @@ extends Item {
         Entity entity = player2.getVehicle();
         if (player2.isPassenger() && entity instanceof ItemSteerable && entity.getType() == this.canInteractWith && (itemSteerable = (ItemSteerable)((Object)entity)).boost()) {
             itemStack.hurtAndBreak(this.consumeItemDamage, player2, player -> player.broadcastBreakEvent(interactionHand));
-            player2.swing(interactionHand, true);
             if (itemStack.isEmpty()) {
                 ItemStack itemStack2 = new ItemStack(Items.FISHING_ROD);
                 itemStack2.setTag(itemStack.getTag());
-                return InteractionResultHolder.consume(itemStack2);
+                return InteractionResultHolder.success(itemStack2);
             }
-            return InteractionResultHolder.consume(itemStack);
+            return InteractionResultHolder.success(itemStack);
         }
         player2.awardStat(Stats.ITEM_USED.get(this));
         return InteractionResultHolder.pass(itemStack);

@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.Pack;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.util.GsonHelper;
@@ -22,12 +22,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class AbstractResourcePack
-implements Pack {
+public abstract class AbstractPackResources
+implements PackResources {
     private static final Logger LOGGER = LogManager.getLogger();
     protected final File file;
 
-    public AbstractResourcePack(File file) {
+    public AbstractPackResources(File file) {
         this.file = file;
     }
 
@@ -41,12 +41,12 @@ implements Pack {
 
     @Override
     public InputStream getResource(PackType packType, ResourceLocation resourceLocation) throws IOException {
-        return this.getResource(AbstractResourcePack.getPathFromLocation(packType, resourceLocation));
+        return this.getResource(AbstractPackResources.getPathFromLocation(packType, resourceLocation));
     }
 
     @Override
     public boolean hasResource(PackType packType, ResourceLocation resourceLocation) {
-        return this.hasResource(AbstractResourcePack.getPathFromLocation(packType, resourceLocation));
+        return this.hasResource(AbstractPackResources.getPathFromLocation(packType, resourceLocation));
     }
 
     protected abstract InputStream getResource(String var1) throws IOException;
@@ -70,7 +70,7 @@ implements Pack {
     @Nullable
     public <T> T getMetadataSection(MetadataSectionSerializer<T> metadataSectionSerializer) throws IOException {
         try (InputStream inputStream = this.getResource("pack.mcmeta");){
-            T t = AbstractResourcePack.getMetadataFromStream(metadataSectionSerializer, inputStream);
+            T t = AbstractPackResources.getMetadataFromStream(metadataSectionSerializer, inputStream);
             return t;
         }
     }

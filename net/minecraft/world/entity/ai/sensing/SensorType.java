@@ -6,6 +6,7 @@ package net.minecraft.world.entity.ai.sensing;
 import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.sensing.AdultSensor;
 import net.minecraft.world.entity.ai.sensing.DummySensor;
 import net.minecraft.world.entity.ai.sensing.GolemSensor;
 import net.minecraft.world.entity.ai.sensing.HoglinSpecificSensor;
@@ -35,6 +36,7 @@ public class SensorType<U extends Sensor<?>> {
     public static final SensorType<GolemSensor> GOLEM_LAST_SEEN = SensorType.register("golem_last_seen", GolemSensor::new);
     public static final SensorType<PiglinSpecificSensor> PIGLIN_SPECIFIC_SENSOR = SensorType.register("piglin_specific_sensor", PiglinSpecificSensor::new);
     public static final SensorType<HoglinSpecificSensor> HOGLIN_SPECIFIC_SENSOR = SensorType.register("hoglin_specific_sensor", HoglinSpecificSensor::new);
+    public static final SensorType<AdultSensor> NEAREST_ADULT = SensorType.register("nearest_adult", AdultSensor::new);
     private final Supplier<U> factory;
 
     private SensorType(Supplier<U> supplier) {

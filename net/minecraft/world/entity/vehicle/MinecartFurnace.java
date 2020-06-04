@@ -12,6 +12,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -115,7 +116,7 @@ extends AbstractMinecart {
     }
 
     @Override
-    public boolean interact(Player player, InteractionHand interactionHand) {
+    public InteractionResult interact(Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if (INGREDIENT.test(itemStack) && this.fuel + 3600 <= 32000) {
             if (!player.abilities.instabuild) {
@@ -127,7 +128,7 @@ extends AbstractMinecart {
             this.xPush = this.getX() - player.getX();
             this.zPush = this.getZ() - player.getZ();
         }
-        return true;
+        return InteractionResult.sidedSuccess(this.level.isClientSide);
     }
 
     @Override

@@ -33,11 +33,11 @@ public interface SoundInstance {
 
     public float getPitch();
 
-    public float getX();
+    public double getX();
 
-    public float getY();
+    public double getY();
 
-    public float getZ();
+    public double getZ();
 
     public Attenuation getAttenuation();
 

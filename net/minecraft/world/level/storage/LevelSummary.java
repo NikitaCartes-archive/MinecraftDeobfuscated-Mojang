@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.level.storage;
 
-import com.mojang.serialization.Lifecycle;
 import java.io.File;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -16,12 +15,10 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelVersion;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
-@Environment(value=EnvType.CLIENT)
 public class LevelSummary
 implements Comparable<LevelSummary> {
     private final LevelSettings settings;
@@ -30,36 +27,40 @@ implements Comparable<LevelSummary> {
     private final boolean requiresConversion;
     private final boolean locked;
     private final File icon;
-    private final Lifecycle lifecycle;
     @Nullable
+    @Environment(value=EnvType.CLIENT)
     private Component info;
 
-    public LevelSummary(LevelSettings levelSettings, LevelVersion levelVersion, String string, boolean bl, boolean bl2, File file, Lifecycle lifecycle) {
+    public LevelSummary(LevelSettings levelSettings, LevelVersion levelVersion, String string, boolean bl, boolean bl2, File file) {
         this.settings = levelSettings;
         this.levelVersion = levelVersion;
         this.levelId = string;
         this.locked = bl2;
         this.icon = file;
         this.requiresConversion = bl;
-        this.lifecycle = lifecycle;
     }
 
+    @Environment(value=EnvType.CLIENT)
     public String getLevelId() {
         return this.levelId;
     }
 
+    @Environment(value=EnvType.CLIENT)
     public String getLevelName() {
         return StringUtils.isEmpty(this.settings.levelName()) ? this.levelId : this.settings.levelName();
     }
 
+    @Environment(value=EnvType.CLIENT)
     public File getIcon() {
         return this.icon;
     }
 
+    @Environment(value=EnvType.CLIENT)
     public boolean isRequiresConversion() {
         return this.requiresConversion;
     }
 
+    @Environment(value=EnvType.CLIENT)
     public long getLastPlayed() {
         return this.levelVersion.lastPlayed();
     }
@@ -75,18 +76,22 @@ implements Comparable<LevelSummary> {
         return this.levelId.compareTo(levelSummary.levelId);
     }
 
+    @Environment(value=EnvType.CLIENT)
     public GameType getGameMode() {
         return this.settings.gameType();
     }
 
+    @Environment(value=EnvType.CLIENT)
     public boolean isHardcore() {
         return this.settings.hardcore();
     }
 
+    @Environment(value=EnvType.CLIENT)
     public boolean hasCheats() {
         return this.settings.allowCommands();
     }
 
+    @Environment(value=EnvType.CLIENT)
     public MutableComponent getWorldVersionName() {
         if (StringUtil.isNullOrEmpty(this.levelVersion.minecraftVersionName())) {
             return new TranslatableComponent("selectWorld.versionUnknown");
@@ -94,34 +99,31 @@ implements Comparable<LevelSummary> {
         return new TextComponent(this.levelVersion.minecraftVersionName());
     }
 
-    public boolean markVersionInList() {
-        return this.askToOpenWorld() || !SharedConstants.getCurrentVersion().isStable() && !this.levelVersion.snapshot() || this.shouldBackup() || this.isOldCustomizedWorld() || this.experimental();
+    public LevelVersion levelVersion() {
+        return this.levelVersion;
     }
 
+    @Environment(value=EnvType.CLIENT)
+    public boolean markVersionInList() {
+        return this.askToOpenWorld() || !SharedConstants.getCurrentVersion().isStable() && !this.levelVersion.snapshot() || this.shouldBackup();
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public boolean askToOpenWorld() {
         return this.levelVersion.minecraftVersion() > SharedConstants.getCurrentVersion().getWorldVersion();
     }
 
-    public boolean isOldCustomizedWorld() {
-        return this.settings.worldGenSettings().isOldCustomizedWorld() && this.levelVersion.minecraftVersion() < 1466;
-    }
-
-    protected WorldGenSettings worldGenSettings() {
-        return this.settings.worldGenSettings();
-    }
-
-    public boolean experimental() {
-        return this.lifecycle != Lifecycle.stable();
-    }
-
+    @Environment(value=EnvType.CLIENT)
     public boolean shouldBackup() {
         return this.levelVersion.minecraftVersion() < SharedConstants.getCurrentVersion().getWorldVersion();
     }
 
+    @Environment(value=EnvType.CLIENT)
     public boolean isLocked() {
         return this.locked;
     }
 
+    @Environment(value=EnvType.CLIENT)
     public Component getInfo() {
         if (this.info == null) {
             this.info = this.createInfo();
@@ -129,6 +131,7 @@ implements Comparable<LevelSummary> {
         return this.info;
     }
 
+    @Environment(value=EnvType.CLIENT)
     private Component createInfo() {
         MutableComponent mutableComponent;
         if (this.isLocked()) {

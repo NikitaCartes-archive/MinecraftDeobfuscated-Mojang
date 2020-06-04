@@ -118,7 +118,7 @@ extends AgeableListModel<T> {
             this.bone.yRot = 0.0f;
             this.bone.zRot = 0.0f;
         }
-        if (!((Bee)bee).isAngry()) {
+        if (!bee.isAngry()) {
             this.bone.xRot = 0.0f;
             this.bone.yRot = 0.0f;
             this.bone.zRot = 0.0f;

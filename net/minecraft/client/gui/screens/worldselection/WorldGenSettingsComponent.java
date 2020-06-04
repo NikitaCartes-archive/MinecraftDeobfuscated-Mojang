@@ -19,8 +19,11 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
@@ -33,11 +36,21 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldPreset;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerResources;
+import net.minecraft.server.packs.repository.FolderRepositorySource;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.packs.repository.PackSource;
+import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -59,17 +72,20 @@ Widget {
     private Button typeButton;
     private Button customizeTypeButton;
     private Button importSettingsButton;
+    private RegistryAccess.RegistryHolder registryHolder;
     private WorldGenSettings settings;
     private Optional<WorldPreset> preset;
     private String initSeed;
 
     public WorldGenSettingsComponent() {
+        this.registryHolder = RegistryAccess.builtin();
         this.settings = WorldGenSettings.makeDefault();
         this.preset = Optional.of(WorldPreset.NORMAL);
         this.initSeed = "";
     }
 
-    public WorldGenSettingsComponent(WorldGenSettings worldGenSettings) {
+    public WorldGenSettingsComponent(RegistryAccess.RegistryHolder registryHolder, WorldGenSettings worldGenSettings) {
+        this.registryHolder = registryHolder;
         this.settings = worldGenSettings;
         this.preset = WorldPreset.of(worldGenSettings);
         this.initSeed = Long.toString(worldGenSettings.seed());
@@ -84,7 +100,9 @@ Widget {
             this.initSeed = this.seedEdit.getValue();
         });
         createWorldScreen.addWidget(this.seedEdit);
-        this.featuresButton = createWorldScreen.addButton(new Button(this.width / 2 - 155, 100, 150, 20, new TranslatableComponent("selectWorld.mapFeatures"), button -> {
+        int i = this.width / 2 - 155;
+        int j = this.width / 2 + 5;
+        this.featuresButton = createWorldScreen.addButton(new Button(i, 100, 150, 20, new TranslatableComponent("selectWorld.mapFeatures"), button -> {
             this.settings = this.settings.withFeaturesToggled();
             button.queueNarration(250);
         }){
@@ -100,7 +118,7 @@ Widget {
             }
         });
         this.featuresButton.visible = false;
-        this.typeButton = createWorldScreen.addButton(new Button(this.width / 2 + 5, 100, 150, 20, new TranslatableComponent("selectWorld.mapType"), button -> {
+        this.typeButton = createWorldScreen.addButton(new Button(j, 100, 150, 20, new TranslatableComponent("selectWorld.mapType"), button -> {
             while (this.preset.isPresent()) {
                 int i = WorldPreset.PRESETS.indexOf(this.preset.get()) + 1;
                 if (i >= WorldPreset.PRESETS.size()) {
@@ -130,14 +148,14 @@ Widget {
         });
         this.typeButton.visible = false;
         this.typeButton.active = this.preset.isPresent();
-        this.customizeTypeButton = createWorldScreen.addButton(new Button(createWorldScreen.width / 2 + 5, 120, 150, 20, new TranslatableComponent("selectWorld.customizeType"), button -> {
+        this.customizeTypeButton = createWorldScreen.addButton(new Button(j, 120, 150, 20, new TranslatableComponent("selectWorld.customizeType"), button -> {
             WorldPreset.PresetEditor presetEditor = WorldPreset.EDITORS.get(this.preset);
             if (presetEditor != null) {
                 minecraft.setScreen(presetEditor.createEditScreen(createWorldScreen, this.settings));
             }
         }));
         this.customizeTypeButton.visible = false;
-        this.bonusItemsButton = createWorldScreen.addButton(new Button(createWorldScreen.width / 2 - 155, 151, 150, 20, new TranslatableComponent("selectWorld.bonusItems"), button -> {
+        this.bonusItemsButton = createWorldScreen.addButton(new Button(i, 151, 150, 20, new TranslatableComponent("selectWorld.bonusItems"), button -> {
             this.settings = this.settings.withBonusChestToggled();
             button.queueNarration(250);
         }){
@@ -148,37 +166,54 @@ Widget {
             }
         });
         this.bonusItemsButton.visible = false;
-        this.importSettingsButton = createWorldScreen.addButton(new Button(this.width / 2 - 155, 185, 150, 20, new TranslatableComponent("selectWorld.import_worldgen_settings"), button -> {
+        this.importSettingsButton = createWorldScreen.addButton(new Button(i, 185, 150, 20, new TranslatableComponent("selectWorld.import_worldgen_settings"), button -> {
             DataResult<Object> dataResult;
+            ServerResources serverResources;
             TranslatableComponent translatableComponent = new TranslatableComponent("selectWorld.import_worldgen_settings.select_file");
             String string = TinyFileDialogs.tinyfd_openFileDialog(translatableComponent.getString(), null, null, null, false);
             if (string == null) {
                 return;
             }
+            RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
+            PackRepository<Pack> packRepository = new PackRepository<Pack>(Pack::new, new ServerPacksSource(), new FolderRepositorySource(createWorldScreen.getTempDataPackDir().toFile(), PackSource.WORLD));
+            try {
+                MinecraftServer.configurePackRepository(packRepository, createWorldScreen.dataPacks, false);
+                CompletableFuture<ServerResources> completableFuture = ServerResources.loadResources(packRepository.openAllSelected(), Commands.CommandSelection.INTEGRATED, 2, Util.backgroundExecutor(), minecraft);
+                minecraft.managedBlock(completableFuture::isDone);
+                serverResources = completableFuture.get();
+            } catch (InterruptedException | ExecutionException exception) {
+                LOGGER.error("Error loading data packs when importing world settings", (Throwable)exception);
+                TranslatableComponent component = new TranslatableComponent("selectWorld.import_worldgen_settings.failure");
+                TextComponent component2 = new TextComponent(exception.getMessage());
+                minecraft.getToasts().addToast(SystemToast.multiline(minecraft, SystemToast.SystemToastIds.WORLD_GEN_SETTINGS_TRANSFER, component, component2));
+                packRepository.close();
+                return;
+            }
+            RegistryReadOps<JsonElement> registryReadOps = RegistryReadOps.create(JsonOps.INSTANCE, serverResources.getResourceManager(), registryHolder);
             JsonParser jsonParser = new JsonParser();
             try (BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(string, new String[0]));){
                 JsonElement jsonElement = jsonParser.parse(bufferedReader);
-                dataResult = WorldGenSettings.CODEC.parse(JsonOps.INSTANCE, jsonElement);
-            } catch (JsonIOException | JsonSyntaxException | IOException exception) {
-                dataResult = DataResult.error("Failed to parse file: " + exception.getMessage());
+                dataResult = WorldGenSettings.CODEC.parse(registryReadOps, jsonElement);
+            } catch (JsonIOException | JsonSyntaxException | IOException exception2) {
+                dataResult = DataResult.error("Failed to parse file: " + exception2.getMessage());
             }
             if (dataResult.error().isPresent()) {
-                TranslatableComponent component = new TranslatableComponent("selectWorld.import_worldgen_settings.failure");
+                TranslatableComponent component3 = new TranslatableComponent("selectWorld.import_worldgen_settings.failure");
                 String string2 = dataResult.error().get().message();
                 LOGGER.error("Error parsing world settings: {}", (Object)string2);
-                TextComponent component2 = new TextComponent(string2);
-                minecraft.getToasts().addToast(SystemToast.multiline(SystemToast.SystemToastIds.WORLD_GEN_SETTINGS_TRANSFER, component, component2));
+                TextComponent component4 = new TextComponent(string2);
+                minecraft.getToasts().addToast(SystemToast.multiline(minecraft, SystemToast.SystemToastIds.WORLD_GEN_SETTINGS_TRANSFER, component3, component4));
             }
             Lifecycle lifecycle = dataResult.lifecycle();
             dataResult.resultOrPartial(LOGGER::error).ifPresent(worldGenSettings -> {
                 BooleanConsumer booleanConsumer = bl -> {
                     minecraft.setScreen(createWorldScreen);
                     if (bl) {
-                        this.importSettings((WorldGenSettings)worldGenSettings);
+                        this.importSettings(registryHolder, (WorldGenSettings)worldGenSettings);
                     }
                 };
                 if (lifecycle == Lifecycle.stable()) {
-                    this.importSettings((WorldGenSettings)worldGenSettings);
+                    this.importSettings(registryHolder, (WorldGenSettings)worldGenSettings);
                 } else if (lifecycle == Lifecycle.experimental()) {
                     minecraft.setScreen(new ConfirmScreen(booleanConsumer, new TranslatableComponent("selectWorld.import_worldgen_settings.experimental.title"), new TranslatableComponent("selectWorld.import_worldgen_settings.experimental.question")));
                 } else {
@@ -189,7 +224,8 @@ Widget {
         this.importSettingsButton.visible = false;
     }
 
-    private void importSettings(WorldGenSettings worldGenSettings) {
+    private void importSettings(RegistryAccess.RegistryHolder registryHolder, WorldGenSettings worldGenSettings) {
+        this.registryHolder = registryHolder;
         this.settings = worldGenSettings;
         this.preset = WorldPreset.of(worldGenSettings);
         this.initSeed = Long.toString(worldGenSettings.seed());
@@ -250,6 +286,10 @@ Widget {
             this.importSettingsButton.visible = bl;
         }
         this.seedEdit.setVisible(bl);
+    }
+
+    public RegistryAccess.RegistryHolder registryHolder() {
+        return this.registryHolder;
     }
 }
 

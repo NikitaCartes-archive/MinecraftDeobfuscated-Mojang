@@ -157,8 +157,8 @@ extends BaseRailBlock {
     }
 
     private AABB getSearchBB(BlockPos blockPos) {
-        float f = 0.2f;
-        return new AABB((float)blockPos.getX() + 0.2f, blockPos.getY(), (float)blockPos.getZ() + 0.2f, (float)(blockPos.getX() + 1) - 0.2f, (float)(blockPos.getY() + 1) - 0.2f, (float)(blockPos.getZ() + 1) - 0.2f);
+        double d = 0.2;
+        return new AABB((double)blockPos.getX() + 0.2, blockPos.getY(), (double)blockPos.getZ() + 0.2, (double)(blockPos.getX() + 1) - 0.2, (double)(blockPos.getY() + 1) - 0.2, (double)(blockPos.getZ() + 1) - 0.2);
     }
 
     @Override

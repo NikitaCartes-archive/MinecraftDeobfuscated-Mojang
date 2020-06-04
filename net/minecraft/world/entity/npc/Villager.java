@@ -21,7 +21,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.SerializableLong;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -42,6 +41,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -50,6 +50,7 @@ import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
@@ -70,7 +71,6 @@ import net.minecraft.world.entity.ai.village.ReputationEventType;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.npc.AbstractVillager;
@@ -233,12 +233,12 @@ VillagerDataHolder {
     }
 
     @Override
-    public boolean mobInteract(Player player, InteractionHand interactionHand) {
+    public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if (itemStack.getItem() != Items.VILLAGER_SPAWN_EGG && this.isAlive() && !this.isTrading() && !this.isSleeping()) {
             if (this.isBaby()) {
                 this.setUnhappy();
-                return super.mobInteract(player, interactionHand);
+                return InteractionResult.sidedSuccess(this.level.isClientSide);
             }
             boolean bl = this.getOffers().isEmpty();
             if (interactionHand == InteractionHand.MAIN_HAND) {
@@ -248,12 +248,12 @@ VillagerDataHolder {
                 player.awardStat(Stats.TALKED_TO_VILLAGER);
             }
             if (bl) {
-                return super.mobInteract(player, interactionHand);
+                return InteractionResult.sidedSuccess(this.level.isClientSide);
             }
             if (!this.level.isClientSide && !this.offers.isEmpty()) {
                 this.startTrading(player);
             }
-            return true;
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
         return super.mobInteract(player, interactionHand);
     }
@@ -649,9 +649,7 @@ VillagerDataHolder {
                 witch.setCustomName(this.getCustomName());
                 witch.setCustomNameVisible(this.isCustomNameVisible());
             }
-            if (this.getVillagerXp() > 0) {
-                witch.setPersistenceRequired();
-            }
+            witch.setPersistenceRequired();
             this.level.addFreshEntity(witch);
             this.remove();
         } else {
@@ -847,7 +845,7 @@ VillagerDataHolder {
     @Override
     public void startSleeping(BlockPos blockPos) {
         super.startSleeping(blockPos);
-        this.brain.setMemory(MemoryModuleType.LAST_SLEPT, SerializableLong.of(this.level.getGameTime()));
+        this.brain.setMemory(MemoryModuleType.LAST_SLEPT, this.level.getGameTime());
         this.brain.eraseMemory(MemoryModuleType.WALK_TARGET);
         this.brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
     }
@@ -855,13 +853,13 @@ VillagerDataHolder {
     @Override
     public void stopSleeping() {
         super.stopSleeping();
-        this.brain.setMemory(MemoryModuleType.LAST_WOKEN, SerializableLong.of(this.level.getGameTime()));
+        this.brain.setMemory(MemoryModuleType.LAST_WOKEN, this.level.getGameTime());
     }
 
     private boolean golemSpawnConditionsMet(long l) {
-        Optional<SerializableLong> optional = this.brain.getMemory(MemoryModuleType.LAST_SLEPT);
+        Optional<Long> optional = this.brain.getMemory(MemoryModuleType.LAST_SLEPT);
         if (optional.isPresent()) {
-            return l - optional.get().value() < 24000L;
+            return l - optional.get() < 24000L;
         }
         return false;
     }

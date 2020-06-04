@@ -8,7 +8,6 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.SerializableLong;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
@@ -40,8 +39,8 @@ extends Behavior<LivingEntity> {
         if (serverLevel.dimension() != globalPos.dimension()) {
             return false;
         }
-        Optional<SerializableLong> optional = brain.getMemory(MemoryModuleType.LAST_WOKEN);
-        if (optional.isPresent() && (l = serverLevel.getGameTime() - optional.get().value()) > 0L && l < 100L) {
+        Optional<Long> optional = brain.getMemory(MemoryModuleType.LAST_WOKEN);
+        if (optional.isPresent() && (l = serverLevel.getGameTime() - optional.get()) > 0L && l < 100L) {
             return false;
         }
         BlockState blockState = serverLevel.getBlockState(globalPos.pos());

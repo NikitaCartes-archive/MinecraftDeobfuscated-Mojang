@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -31,6 +31,7 @@ public class GameModeSwitcherScreen
 extends Screen {
     private static final ResourceLocation GAMEMODE_SWITCHER_LOCATION = new ResourceLocation("textures/gui/container/gamemode_switcher.png");
     private static final int ALL_SLOTS_WIDTH = GameModeIcon.values().length * 30 - 5;
+    private static final Component SELECT_KEY = new TranslatableComponent("debug.gamemodes.select_next", new TranslatableComponent("debug.gamemodes.press_f4").withStyle(ChatFormatting.AQUA));
     private final Optional<GameModeIcon> previousHovered;
     private Optional<GameModeIcon> currentlyHovered = Optional.empty();
     private int firstMouseX;
@@ -67,8 +68,7 @@ extends Screen {
         poseStack.popPose();
         super.render(poseStack, i, j, f);
         this.currentlyHovered.ifPresent(gameModeIcon -> this.drawCenteredString(poseStack, this.font, ((GameModeIcon)gameModeIcon).getName(), this.width / 2, this.height / 2 - 30 - 20, -1));
-        int m = this.font.width(I18n.get("debug.gamemodes.press_f4", new Object[0]));
-        this.drawKeyOption(poseStack, I18n.get("debug.gamemodes.press_f4", new Object[0]), I18n.get("debug.gamemodes.select_next", new Object[0]), 5, m);
+        this.drawCenteredString(poseStack, this.font, SELECT_KEY, this.width / 2, this.height / 2 + 5, 0xFFFFFF);
         if (!this.setFirstMousePos) {
             this.firstMouseX = i;
             this.firstMouseY = j;
@@ -81,15 +81,6 @@ extends Screen {
             if (bl || !gameModeSlot.isHovered()) continue;
             this.currentlyHovered = Optional.of(gameModeSlot.icon);
         }
-    }
-
-    private void drawKeyOption(PoseStack poseStack, String string, String string2, int i, int j) {
-        int k = 0x55FFFF;
-        int l = 0xFFFFFF;
-        this.drawString(poseStack, this.font, "[", this.width / 2 - j - 18, this.height / 2 + i, 0x55FFFF);
-        this.drawCenteredString(poseStack, this.font, string, this.width / 2 - j / 2 - 10, this.height / 2 + i, 0x55FFFF);
-        this.drawCenteredString(poseStack, this.font, "]", this.width / 2 - 5, this.height / 2 + i, 0x55FFFF);
-        this.drawString(poseStack, this.font, string2, this.width / 2 + 5, this.height / 2 + i, 0xFFFFFF);
     }
 
     private void switchToHoveredGameMode() {

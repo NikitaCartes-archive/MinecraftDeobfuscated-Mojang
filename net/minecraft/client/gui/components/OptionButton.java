@@ -18,5 +18,9 @@ extends Button {
         super(i, j, k, l, component, onPress);
         this.option = option;
     }
+
+    public Option getOption() {
+        return this.option;
+    }
 }
 

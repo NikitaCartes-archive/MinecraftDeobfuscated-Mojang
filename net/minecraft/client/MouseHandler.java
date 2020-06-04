@@ -5,6 +5,10 @@ package net.minecraft.client;
 
 import com.mojang.blaze3d.Blaze3D;
 import com.mojang.blaze3d.platform.InputConstants;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.KeyMapping;
@@ -12,6 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
 import net.minecraft.util.SmoothDouble;
+import org.lwjgl.glfw.GLFWDropCallback;
 
 @Environment(value=EnvType.CLIENT)
 public class MouseHandler {
@@ -140,8 +145,20 @@ public class MouseHandler {
         }
     }
 
+    private void onDrop(long l, List<Path> list) {
+        if (this.minecraft.screen != null) {
+            this.minecraft.screen.onFilesDrop(list);
+        }
+    }
+
     public void setup(long l2) {
-        InputConstants.setupMouseCallbacks(l2, (l, d, e) -> this.minecraft.execute(() -> this.onMove(l, d, e)), (l, i, j, k) -> this.minecraft.execute(() -> this.onPress(l, i, j, k)), (l, d, e) -> this.minecraft.execute(() -> this.onScroll(l, d, e)));
+        InputConstants.setupMouseCallbacks(l2, (l, d, e) -> this.minecraft.execute(() -> this.onMove(l, d, e)), (l, i, j, k) -> this.minecraft.execute(() -> this.onPress(l, i, j, k)), (l, d, e) -> this.minecraft.execute(() -> this.onScroll(l, d, e)), (l, i, m) -> {
+            Path[] paths = new Path[i];
+            for (int j = 0; j < i; ++j) {
+                paths[j] = Paths.get(GLFWDropCallback.getName(m, j), new String[0]);
+            }
+            this.minecraft.execute(() -> this.onDrop(l, Arrays.asList(paths)));
+        });
     }
 
     private void onMove(long l, double d, double e) {

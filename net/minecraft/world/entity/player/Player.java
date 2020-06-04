@@ -462,7 +462,7 @@ extends LivingEntity {
             this.flyingSpeed = (float)((double)this.flyingSpeed + 0.005999999865889549);
         }
         this.setSpeed((float)attributeInstance.getValue());
-        float f = !this.onGround || this.getHealth() <= 0.0f || this.isSwimming() ? 0.0f : Math.min(0.1f, Mth.sqrt(Player.getHorizontalDistanceSqr(this.getDeltaMovement())));
+        float f = !this.onGround || this.isDeadOrDying() || this.isSwimming() ? 0.0f : Math.min(0.1f, Mth.sqrt(Player.getHorizontalDistanceSqr(this.getDeltaMovement())));
         this.bob += (f - this.bob) * 0.4f;
         if (this.getHealth() > 0.0f && !this.isSpectator()) {
             AABB aABB = this.isPassenger() && !this.getVehicle().removed ? this.getBoundingBox().minmax(this.getVehicle().getBoundingBox()).inflate(1.0, 0.0, 1.0) : this.getBoundingBox().inflate(1.0, 0.5, 1.0);
@@ -727,7 +727,7 @@ extends LivingEntity {
             return false;
         }
         this.noActionTime = 0;
-        if (this.getHealth() <= 0.0f) {
+        if (this.isDeadOrDying()) {
             return false;
         }
         this.removeEntitiesOnShoulder();
@@ -864,21 +864,23 @@ extends LivingEntity {
         }
         ItemStack itemStack = this.getItemInHand(interactionHand);
         ItemStack itemStack2 = itemStack.copy();
-        if (entity.interact(this, interactionHand)) {
+        InteractionResult interactionResult = entity.interact(this, interactionHand);
+        if (interactionResult.consumesAction()) {
             if (this.abilities.instabuild && itemStack == this.getItemInHand(interactionHand) && itemStack.getCount() < itemStack2.getCount()) {
                 itemStack.setCount(itemStack2.getCount());
             }
-            return InteractionResult.SUCCESS;
+            return interactionResult;
         }
         if (!itemStack.isEmpty() && entity instanceof LivingEntity) {
+            InteractionResult interactionResult2;
             if (this.abilities.instabuild) {
                 itemStack = itemStack2;
             }
-            if (itemStack.interactEnemy(this, (LivingEntity)entity, interactionHand)) {
+            if ((interactionResult2 = itemStack.interactLivingEntity(this, (LivingEntity)entity, interactionHand)).consumesAction()) {
                 if (itemStack.isEmpty() && !this.abilities.instabuild) {
                     this.setItemInHand(interactionHand, ItemStack.EMPTY);
                 }
-                return InteractionResult.SUCCESS;
+                return interactionResult2;
             }
         }
         return InteractionResult.PASS;
@@ -1827,6 +1829,11 @@ extends LivingEntity {
             CriteriaTriggers.CONSUME_ITEM.trigger((ServerPlayer)this, itemStack);
         }
         return super.eat(level, itemStack);
+    }
+
+    @Override
+    protected boolean shouldRemoveSoulSpeed(BlockState blockState) {
+        return this.abilities.flying || super.shouldRemoveSoulSpeed(blockState);
     }
 
     public static enum BedSleepingProblem {

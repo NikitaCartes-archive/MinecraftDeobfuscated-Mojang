@@ -67,10 +67,10 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
@@ -503,8 +503,8 @@ CommandSource {
         this.verticalCollision = vec3.y != vec32.y;
         this.onGround = this.verticalCollision && vec3.y < 0.0;
         BlockPos blockPos = this.getOnPos();
-        BlockState blockState = this.level.getBlockState(blockPos);
-        this.checkFallDamage(vec32.y, this.onGround, blockState, blockPos);
+        BlockState blockState2 = this.level.getBlockState(blockPos);
+        this.checkFallDamage(vec32.y, this.onGround, blockState2, blockPos);
         Vec3 vec33 = this.getDeltaMovement();
         if (vec3.x != vec32.x) {
             this.setDeltaMovement(0.0, vec33.y, vec33.z);
@@ -512,7 +512,7 @@ CommandSource {
         if (vec3.z != vec32.z) {
             this.setDeltaMovement(vec33.x, vec33.y, 0.0);
         }
-        Block block = blockState.getBlock();
+        Block block = blockState2.getBlock();
         if (vec3.y != vec32.y) {
             block.updateEntityAfterFallOn(this.level, this);
         }
@@ -528,7 +528,7 @@ CommandSource {
             }
             this.walkDist = (float)((double)this.walkDist + (double)Mth.sqrt(Entity.getHorizontalDistanceSqr(vec32)) * 0.6);
             this.moveDist = (float)((double)this.moveDist + (double)Mth.sqrt(d * d + e * e + f * f) * 0.6);
-            if (this.moveDist > this.nextStep && !blockState.isAir()) {
+            if (this.moveDist > this.nextStep && !blockState2.isAir()) {
                 this.nextStep = this.nextStep();
                 if (this.isInWater()) {
                     Entity entity = this.isVehicle() && this.getControllingPassenger() != null ? this.getControllingPassenger() : this;
@@ -540,9 +540,9 @@ CommandSource {
                     }
                     this.playSwimSound(h);
                 } else {
-                    this.playStepSound(blockPos, blockState);
+                    this.playStepSound(blockPos, blockState2);
                 }
-            } else if (this.moveDist > this.nextFlap && this.makeFlySound() && blockState.isAir()) {
+            } else if (this.moveDist > this.nextFlap && this.makeFlySound() && blockState2.isAir()) {
                 this.nextFlap = this.playFlySound(this.moveDist);
             }
         }
@@ -557,7 +557,7 @@ CommandSource {
         }
         float i = this.getBlockSpeedFactor();
         this.setDeltaMovement(this.getDeltaMovement().multiply(i, 1.0, i));
-        if (!this.level.containsFireBlock(this.getBoundingBox().deflate(0.001)) && this.remainingFireTicks <= 0) {
+        if (this.level.getBlockStatesIfLoaded(this.getBoundingBox().deflate(0.001)).noneMatch(blockState -> blockState.is(BlockTags.FIRE) || blockState.is(Blocks.LAVA)) && this.remainingFireTicks <= 0) {
             this.remainingFireTicks = -this.getFireImmuneTicks();
         }
         if (this.isInWaterRainOrBubble() && this.isOnFire()) {
@@ -921,8 +921,8 @@ CommandSource {
     }
 
     protected void doWaterSplashEffect() {
-        float k;
-        float j;
+        double e;
+        double d;
         Entity entity = this.isVehicle() && this.getControllingPassenger() != null ? this.getControllingPassenger() : this;
         float f = entity == this ? 0.2f : 0.9f;
         Vec3 vec3 = entity.getDeltaMovement();
@@ -938,16 +938,16 @@ CommandSource {
         float h = Mth.floor(this.getY());
         int i = 0;
         while ((float)i < 1.0f + this.dimensions.width * 20.0f) {
-            j = (this.random.nextFloat() * 2.0f - 1.0f) * this.dimensions.width;
-            k = (this.random.nextFloat() * 2.0f - 1.0f) * this.dimensions.width;
-            this.level.addParticle(ParticleTypes.BUBBLE, this.getX() + (double)j, h + 1.0f, this.getZ() + (double)k, vec3.x, vec3.y - (double)(this.random.nextFloat() * 0.2f), vec3.z);
+            d = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width;
+            e = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width;
+            this.level.addParticle(ParticleTypes.BUBBLE, this.getX() + d, h + 1.0f, this.getZ() + e, vec3.x, vec3.y - this.random.nextDouble() * (double)0.2f, vec3.z);
             ++i;
         }
         i = 0;
         while ((float)i < 1.0f + this.dimensions.width * 20.0f) {
-            j = (this.random.nextFloat() * 2.0f - 1.0f) * this.dimensions.width;
-            k = (this.random.nextFloat() * 2.0f - 1.0f) * this.dimensions.width;
-            this.level.addParticle(ParticleTypes.SPLASH, this.getX() + (double)j, h + 1.0f, this.getZ() + (double)k, vec3.x, vec3.y, vec3.z);
+            d = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width;
+            e = (this.random.nextDouble() * 2.0 - 1.0) * (double)this.dimensions.width;
+            this.level.addParticle(ParticleTypes.SPLASH, this.getX() + d, h + 1.0f, this.getZ() + e, vec3.x, vec3.y, vec3.z);
             ++i;
         }
     }
@@ -968,7 +968,7 @@ CommandSource {
         BlockState blockState = this.level.getBlockState(blockPos);
         if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
             Vec3 vec3 = this.getDeltaMovement();
-            this.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockState), this.getX() + ((double)this.random.nextFloat() - 0.5) * (double)this.dimensions.width, this.getY() + 0.1, this.getZ() + ((double)this.random.nextFloat() - 0.5) * (double)this.dimensions.width, vec3.x * -4.0, 1.5, vec3.z * -4.0);
+            this.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockState), this.getX() + (this.random.nextDouble() - 0.5) * (double)this.dimensions.width, this.getY() + 0.1, this.getZ() + (this.random.nextDouble() - 0.5) * (double)this.dimensions.width, vec3.x * -4.0, 1.5, vec3.z * -4.0);
         }
     }
 
@@ -1024,6 +1024,10 @@ CommandSource {
         this.xRot = Mth.clamp(h, -90.0f, 90.0f) % 360.0f;
         this.yRotO = this.yRot;
         this.xRotO = this.xRot;
+    }
+
+    public void moveTo(Vec3 vec3) {
+        this.moveTo(vec3.x, vec3.y, vec3.z);
     }
 
     public void moveTo(double d, double e, double f) {
@@ -1435,8 +1439,8 @@ CommandSource {
         return false;
     }
 
-    public boolean interact(Player player, InteractionHand interactionHand) {
-        return false;
+    public InteractionResult interact(Player player, InteractionHand interactionHand) {
+        return InteractionResult.PASS;
     }
 
     @Nullable

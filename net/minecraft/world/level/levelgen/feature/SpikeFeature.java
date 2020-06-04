@@ -94,7 +94,7 @@ extends Feature<SpikeConfiguration> {
         EndCrystal endCrystal = EntityType.END_CRYSTAL.create(levelAccessor.getLevel());
         endCrystal.setBeamTarget(spikeConfiguration.getCrystalBeamTarget());
         endCrystal.setInvulnerable(spikeConfiguration.isCrystalInvulnerable());
-        endCrystal.moveTo((float)endSpike.getCenterX() + 0.5f, endSpike.getHeight() + 1, (float)endSpike.getCenterZ() + 0.5f, random.nextFloat() * 360.0f, 0.0f);
+        endCrystal.moveTo((double)endSpike.getCenterX() + 0.5, endSpike.getHeight() + 1, (double)endSpike.getCenterZ() + 0.5, random.nextFloat() * 360.0f, 0.0f);
         levelAccessor.addFreshEntity(endCrystal);
         this.setBlock(levelAccessor, new BlockPos(endSpike.getCenterX(), endSpike.getHeight(), endSpike.getCenterZ()), Blocks.BEDROCK.defaultBlockState());
     }

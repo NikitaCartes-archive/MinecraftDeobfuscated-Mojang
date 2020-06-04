@@ -5,13 +5,14 @@ package net.minecraft.server.packs.repository;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
-import net.minecraft.server.packs.FileResourcePack;
-import net.minecraft.server.packs.FolderResourcePack;
-import net.minecraft.server.packs.Pack;
+import net.minecraft.server.packs.FilePackResources;
+import net.minecraft.server.packs.FolderPackResources;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.RepositorySource;
-import net.minecraft.server.packs.repository.UnopenedPack;
 
 public class FolderRepositorySource
 implements RepositorySource {
@@ -21,13 +22,15 @@ implements RepositorySource {
         return bl || bl2;
     };
     private final File folder;
+    private final PackSource packSource;
 
-    public FolderRepositorySource(File file) {
+    public FolderRepositorySource(File file, PackSource packSource) {
         this.folder = file;
+        this.packSource = packSource;
     }
 
     @Override
-    public <T extends UnopenedPack> void loadPacks(Map<String, T> map, UnopenedPack.UnopenedPackConstructor<T> unopenedPackConstructor) {
+    public <T extends Pack> void loadPacks(Consumer<T> consumer, Pack.PackConstructor<T> packConstructor) {
         File[] files;
         if (!this.folder.isDirectory()) {
             this.folder.mkdirs();
@@ -37,17 +40,17 @@ implements RepositorySource {
         }
         for (File file : files) {
             String string = "file/" + file.getName();
-            T unopenedPack = UnopenedPack.create(string, false, this.createSupplier(file), unopenedPackConstructor, UnopenedPack.Position.TOP);
-            if (unopenedPack == null) continue;
-            map.put(string, unopenedPack);
+            T pack = Pack.create(string, false, this.createSupplier(file), packConstructor, Pack.Position.TOP, this.packSource);
+            if (pack == null) continue;
+            consumer.accept(pack);
         }
     }
 
-    private Supplier<Pack> createSupplier(File file) {
+    private Supplier<PackResources> createSupplier(File file) {
         if (file.isDirectory()) {
-            return () -> new FolderResourcePack(file);
+            return () -> new FolderPackResources(file);
         }
-        return () -> new FileResourcePack(file);
+        return () -> new FilePackResources(file);
     }
 }
 

@@ -6,6 +6,7 @@ package net.minecraft.client.gui.components;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
+import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -46,6 +47,16 @@ extends ContainerObjectSelectionList<Entry> {
     @Override
     protected int getScrollbarPosition() {
         return super.getScrollbarPosition() + 32;
+    }
+
+    public Optional<AbstractWidget> getMouseOver(double d, double e) {
+        for (Entry entry : this.children()) {
+            for (AbstractWidget abstractWidget : entry.children) {
+                if (!abstractWidget.isMouseOver(d, e)) continue;
+                return Optional.of(abstractWidget);
+            }
+        }
+        return Optional.empty();
     }
 
     @Environment(value=EnvType.CLIENT)

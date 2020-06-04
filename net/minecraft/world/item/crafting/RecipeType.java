@@ -14,6 +14,7 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.item.crafting.SmokingRecipe;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
+import net.minecraft.world.item.crafting.UpgradeRecipe;
 import net.minecraft.world.level.Level;
 
 public interface RecipeType<T extends Recipe<?>> {
@@ -23,6 +24,7 @@ public interface RecipeType<T extends Recipe<?>> {
     public static final RecipeType<SmokingRecipe> SMOKING = RecipeType.register("smoking");
     public static final RecipeType<CampfireCookingRecipe> CAMPFIRE_COOKING = RecipeType.register("campfire_cooking");
     public static final RecipeType<StonecutterRecipe> STONECUTTING = RecipeType.register("stonecutting");
+    public static final RecipeType<UpgradeRecipe> SMITHING = RecipeType.register("smithing");
 
     public static <T extends Recipe<?>> RecipeType<T> register(final String string) {
         return Registry.register(Registry.RECIPE_TYPE, new ResourceLocation(string), new RecipeType<T>(){

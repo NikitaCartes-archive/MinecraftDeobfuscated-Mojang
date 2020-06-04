@@ -11,19 +11,16 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
 import net.minecraft.world.level.timers.TimerQueue;
 
 public class DerivedLevelData
 implements ServerLevelData {
-    private final DimensionType dimensionType;
     private final WorldData worldData;
     private final ServerLevelData wrapped;
 
-    public DerivedLevelData(DimensionType dimensionType, WorldData worldData, ServerLevelData serverLevelData) {
-        this.dimensionType = dimensionType;
+    public DerivedLevelData(WorldData worldData, ServerLevelData serverLevelData) {
         this.worldData = worldData;
         this.wrapped = serverLevelData;
     }

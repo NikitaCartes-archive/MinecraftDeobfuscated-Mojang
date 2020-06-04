@@ -119,7 +119,7 @@ implements Enemy {
     }
 
     public double[] getLatencyPos(int i, float f) {
-        if (this.getHealth() <= 0.0f) {
+        if (this.isDeadOrDying()) {
             f = 0.0f;
         }
         f = 1.0f - f;
@@ -161,7 +161,7 @@ implements Enemy {
             }
         }
         this.oFlapTime = this.flapTime;
-        if (this.getHealth() <= 0.0f) {
+        if (this.isDeadOrDying()) {
             f = (this.random.nextFloat() - 0.5f) * 8.0f;
             g = (this.random.nextFloat() - 0.5f) * 4.0f;
             float h = (this.random.nextFloat() - 0.5f) * 8.0f;
@@ -409,7 +409,7 @@ implements Enemy {
         if (damageSource.getEntity() instanceof Player || damageSource.isExplosion()) {
             float g = this.getHealth();
             this.reallyHurt(damageSource, f);
-            if (this.getHealth() <= 0.0f && !this.phaseManager.getCurrentPhase().isSitting()) {
+            if (this.isDeadOrDying() && !this.phaseManager.getCurrentPhase().isSitting()) {
                 this.setHealth(1.0f);
                 this.phaseManager.setPhase(EnderDragonPhase.DYING);
             }

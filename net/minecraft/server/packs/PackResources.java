@@ -3,7 +3,6 @@
  */
 package net.minecraft.server.packs;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -16,8 +15,8 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import org.jetbrains.annotations.Nullable;
 
-public interface Pack
-extends Closeable {
+public interface PackResources
+extends AutoCloseable {
     @Environment(value=EnvType.CLIENT)
     public InputStream getRootResource(String var1) throws IOException;
 
@@ -33,5 +32,8 @@ extends Closeable {
     public <T> T getMetadataSection(MetadataSectionSerializer<T> var1) throws IOException;
 
     public String getName();
+
+    @Override
+    public void close();
 }
 

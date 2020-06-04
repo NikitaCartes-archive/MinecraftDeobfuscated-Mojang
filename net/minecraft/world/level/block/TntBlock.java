@@ -69,7 +69,7 @@ extends Block {
         if (level.isClientSide) {
             return;
         }
-        PrimedTnt primedTnt = new PrimedTnt(level, (float)blockPos.getX() + 0.5f, blockPos.getY(), (float)blockPos.getZ() + 0.5f, explosion.getSourceMob());
+        PrimedTnt primedTnt = new PrimedTnt(level, (double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5, explosion.getSourceMob());
         primedTnt.setFuse((short)(level.random.nextInt(primedTnt.getLife() / 4) + primedTnt.getLife() / 8));
         level.addFreshEntity(primedTnt);
     }

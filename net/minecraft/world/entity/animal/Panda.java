@@ -23,6 +23,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
@@ -57,7 +58,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -545,17 +545,14 @@ extends Animal {
     }
 
     @Override
-    public boolean mobInteract(Player player, InteractionHand interactionHand) {
+    public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
-        if (itemStack.getItem() instanceof SpawnEggItem) {
-            return super.mobInteract(player, interactionHand);
-        }
         if (this.isScared()) {
-            return false;
+            return InteractionResult.PASS;
         }
         if (this.isOnBack()) {
             this.setOnBack(false);
-            return true;
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
         if (this.isFood(itemStack)) {
             if (this.getTarget() != null) {
@@ -577,12 +574,11 @@ extends Animal {
                 this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(itemStack.getItem(), 1));
                 this.usePlayerItem(player, itemStack);
             } else {
-                return false;
+                return InteractionResult.PASS;
             }
-            player.swing(interactionHand, true);
-            return true;
+            return InteractionResult.SUCCESS;
         }
-        return false;
+        return InteractionResult.PASS;
     }
 
     @Override

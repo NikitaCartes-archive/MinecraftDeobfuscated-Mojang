@@ -119,9 +119,9 @@ extends Block {
             level.playLocalSound((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, SoundEvents.PORTAL_AMBIENT, SoundSource.BLOCKS, 0.5f, random.nextFloat() * 0.4f + 0.8f, false);
         }
         for (int i = 0; i < 4; ++i) {
-            double d = (double)blockPos.getX() + (double)random.nextFloat();
-            double e = (double)blockPos.getY() + (double)random.nextFloat();
-            double f = (double)blockPos.getZ() + (double)random.nextFloat();
+            double d = (double)blockPos.getX() + random.nextDouble();
+            double e = (double)blockPos.getY() + random.nextDouble();
+            double f = (double)blockPos.getZ() + random.nextDouble();
             double g = ((double)random.nextFloat() - 0.5) * 0.5;
             double h = ((double)random.nextFloat() - 0.5) * 0.5;
             double j = ((double)random.nextFloat() - 0.5) * 0.5;

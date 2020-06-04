@@ -107,9 +107,9 @@ extends Block {
         if (blockState2.canOcclude() && blockState2.isFaceSturdy(level, blockPos2, Direction.UP)) {
             return;
         }
-        double d = (float)blockPos.getX() + random.nextFloat();
+        double d = (double)blockPos.getX() + random.nextDouble();
         double e = (double)blockPos.getY() - 0.05;
-        double f = (float)blockPos.getZ() + random.nextFloat();
+        double f = (double)blockPos.getZ() + random.nextDouble();
         level.addParticle(ParticleTypes.DRIPPING_WATER, d, e, f, 0.0, 0.0, 0.0);
     }
 

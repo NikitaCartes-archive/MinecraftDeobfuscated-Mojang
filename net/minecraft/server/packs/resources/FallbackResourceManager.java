@@ -15,13 +15,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.Pack;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -32,7 +33,7 @@ import org.apache.logging.log4j.Logger;
 public class FallbackResourceManager
 implements ResourceManager {
     private static final Logger LOGGER = LogManager.getLogger();
-    protected final List<Pack> fallbacks = Lists.newArrayList();
+    protected final List<PackResources> fallbacks = Lists.newArrayList();
     private final PackType type;
     private final String namespace;
 
@@ -41,8 +42,8 @@ implements ResourceManager {
         this.namespace = string;
     }
 
-    public void add(Pack pack) {
-        this.fallbacks.add(pack);
+    public void add(PackResources packResources) {
+        this.fallbacks.add(packResources);
     }
 
     @Override
@@ -54,19 +55,19 @@ implements ResourceManager {
     @Override
     public Resource getResource(ResourceLocation resourceLocation) throws IOException {
         this.validateLocation(resourceLocation);
-        Pack pack = null;
+        PackResources packResources = null;
         ResourceLocation resourceLocation2 = FallbackResourceManager.getMetadataLocation(resourceLocation);
         for (int i = this.fallbacks.size() - 1; i >= 0; --i) {
-            Pack pack2 = this.fallbacks.get(i);
-            if (pack == null && pack2.hasResource(this.type, resourceLocation2)) {
-                pack = pack2;
+            PackResources packResources2 = this.fallbacks.get(i);
+            if (packResources == null && packResources2.hasResource(this.type, resourceLocation2)) {
+                packResources = packResources2;
             }
-            if (!pack2.hasResource(this.type, resourceLocation)) continue;
+            if (!packResources2.hasResource(this.type, resourceLocation)) continue;
             InputStream inputStream = null;
-            if (pack != null) {
-                inputStream = this.getWrappedResource(resourceLocation2, pack);
+            if (packResources != null) {
+                inputStream = this.getWrappedResource(resourceLocation2, packResources);
             }
-            return new SimpleResource(pack2.getName(), resourceLocation, this.getWrappedResource(resourceLocation, pack2), inputStream);
+            return new SimpleResource(packResources2.getName(), resourceLocation, this.getWrappedResource(resourceLocation, packResources2), inputStream);
         }
         throw new FileNotFoundException(resourceLocation.toString());
     }
@@ -78,16 +79,16 @@ implements ResourceManager {
             return false;
         }
         for (int i = this.fallbacks.size() - 1; i >= 0; --i) {
-            Pack pack = this.fallbacks.get(i);
-            if (!pack.hasResource(this.type, resourceLocation)) continue;
+            PackResources packResources = this.fallbacks.get(i);
+            if (!packResources.hasResource(this.type, resourceLocation)) continue;
             return true;
         }
         return false;
     }
 
-    protected InputStream getWrappedResource(ResourceLocation resourceLocation, Pack pack) throws IOException {
-        InputStream inputStream = pack.getResource(this.type, resourceLocation);
-        return LOGGER.isDebugEnabled() ? new LeakedResourceWarningInputStream(inputStream, resourceLocation, pack.getName()) : inputStream;
+    protected InputStream getWrappedResource(ResourceLocation resourceLocation, PackResources packResources) throws IOException {
+        InputStream inputStream = packResources.getResource(this.type, resourceLocation);
+        return LOGGER.isDebugEnabled() ? new LeakedResourceWarningInputStream(inputStream, resourceLocation, packResources.getName()) : inputStream;
     }
 
     private void validateLocation(ResourceLocation resourceLocation) throws IOException {
@@ -105,10 +106,10 @@ implements ResourceManager {
         this.validateLocation(resourceLocation);
         ArrayList<Resource> list = Lists.newArrayList();
         ResourceLocation resourceLocation2 = FallbackResourceManager.getMetadataLocation(resourceLocation);
-        for (Pack pack : this.fallbacks) {
-            if (!pack.hasResource(this.type, resourceLocation)) continue;
-            InputStream inputStream = pack.hasResource(this.type, resourceLocation2) ? this.getWrappedResource(resourceLocation2, pack) : null;
-            list.add(new SimpleResource(pack.getName(), resourceLocation, this.getWrappedResource(resourceLocation, pack), inputStream));
+        for (PackResources packResources : this.fallbacks) {
+            if (!packResources.hasResource(this.type, resourceLocation)) continue;
+            InputStream inputStream = packResources.hasResource(this.type, resourceLocation2) ? this.getWrappedResource(resourceLocation2, packResources) : null;
+            list.add(new SimpleResource(packResources.getName(), resourceLocation, this.getWrappedResource(resourceLocation, packResources), inputStream));
         }
         if (list.isEmpty()) {
             throw new FileNotFoundException(resourceLocation.toString());
@@ -117,10 +118,18 @@ implements ResourceManager {
     }
 
     @Override
+    public Collection<ResourceLocation> listResources(ResourceLocation resourceLocation, Predicate<String> predicate) {
+        if (Objects.equals(resourceLocation.getNamespace(), this.namespace)) {
+            return this.listResources(resourceLocation.getPath(), predicate);
+        }
+        return ImmutableSet.of();
+    }
+
+    @Override
     public Collection<ResourceLocation> listResources(String string, Predicate<String> predicate) {
         ArrayList<ResourceLocation> list = Lists.newArrayList();
-        for (Pack pack : this.fallbacks) {
-            list.addAll(pack.getResources(this.type, this.namespace, string, Integer.MAX_VALUE, predicate));
+        for (PackResources packResources : this.fallbacks) {
+            list.addAll(packResources.getResources(this.type, this.namespace, string, Integer.MAX_VALUE, predicate));
         }
         Collections.sort(list);
         return list;
@@ -128,7 +137,7 @@ implements ResourceManager {
 
     @Override
     @Environment(value=EnvType.CLIENT)
-    public Stream<Pack> listPacks() {
+    public Stream<PackResources> listPacks() {
         return this.fallbacks.stream();
     }
 

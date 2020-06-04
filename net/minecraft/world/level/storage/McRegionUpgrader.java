@@ -11,10 +11,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Biomes;
@@ -49,14 +55,16 @@ public class McRegionUpgrader {
         }
         int i = list.size() + list2.size() + list3.size();
         LOGGER.info("Total conversion count is {}", (Object)i);
-        WorldData worldData = levelStorageAccess.getDataTag();
+        RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
+        RegistryReadOps<Tag> registryReadOps = RegistryReadOps.create(NbtOps.INSTANCE, ResourceManager.Empty.INSTANCE, registryHolder);
+        WorldData worldData = levelStorageAccess.getDataTag(registryReadOps, DataPackConfig.DEFAULT);
         long l = worldData != null ? worldData.worldGenSettings().seed() : 0L;
         BiomeSource biomeSource = worldData != null && worldData.worldGenSettings().isFlatWorld() ? new FixedBiomeSource(Biomes.PLAINS) : new OverworldBiomeSource(l, false, false);
         McRegionUpgrader.convertRegions(new File(file, "region"), list, biomeSource, 0, i, progressListener);
         McRegionUpgrader.convertRegions(new File(file2, "region"), list2, new FixedBiomeSource(Biomes.NETHER_WASTES), list.size(), i, progressListener);
         McRegionUpgrader.convertRegions(new File(file3, "region"), list3, new FixedBiomeSource(Biomes.THE_END), list.size() + list2.size(), i, progressListener);
         McRegionUpgrader.makeMcrLevelDatBackup(levelStorageAccess);
-        levelStorageAccess.saveDataTag(worldData);
+        levelStorageAccess.saveDataTag(registryHolder, worldData);
         return true;
     }
 

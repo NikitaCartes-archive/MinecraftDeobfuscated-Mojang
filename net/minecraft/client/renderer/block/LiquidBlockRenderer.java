@@ -19,7 +19,8 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.StainedGlassBlock;
+import net.minecraft.world.level.block.HalfTransparentBlock;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -47,15 +48,27 @@ public class LiquidBlockRenderer {
         return fluidState2.getType().isSame(fluidState.getType());
     }
 
-    private static boolean isFaceOccluded(BlockGetter blockGetter, BlockPos blockPos, Direction direction, float f) {
-        BlockPos blockPos2 = blockPos.relative(direction);
-        BlockState blockState = blockGetter.getBlockState(blockPos2);
+    private static boolean isFaceOccludedByState(BlockGetter blockGetter, Direction direction, float f, BlockPos blockPos, BlockState blockState) {
         if (blockState.canOcclude()) {
             VoxelShape voxelShape = Shapes.box(0.0, 0.0, 0.0, 1.0, f, 1.0);
-            VoxelShape voxelShape2 = blockState.getOcclusionShape(blockGetter, blockPos2);
+            VoxelShape voxelShape2 = blockState.getOcclusionShape(blockGetter, blockPos);
             return Shapes.blockOccudes(voxelShape, voxelShape2, direction);
         }
         return false;
+    }
+
+    private static boolean isFaceOccludedByNeighbor(BlockGetter blockGetter, BlockPos blockPos, Direction direction, float f) {
+        BlockPos blockPos2 = blockPos.relative(direction);
+        BlockState blockState = blockGetter.getBlockState(blockPos2);
+        return LiquidBlockRenderer.isFaceOccludedByState(blockGetter, direction, f, blockPos2, blockState);
+    }
+
+    private static boolean isFaceOccludedBySelf(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, Direction direction) {
+        return LiquidBlockRenderer.isFaceOccludedByState(blockGetter, direction.getOpposite(), 1.0f, blockPos, blockState);
+    }
+
+    public static boolean shouldRenderFace(BlockAndTintGetter blockAndTintGetter, BlockPos blockPos, FluidState fluidState, BlockState blockState, Direction direction) {
+        return !LiquidBlockRenderer.isFaceOccludedBySelf(blockAndTintGetter, blockPos, blockState, direction) && !LiquidBlockRenderer.isNeighborSameFluid(blockAndTintGetter, blockPos, direction, fluidState);
     }
 
     public boolean tesselate(BlockAndTintGetter blockAndTintGetter, BlockPos blockPos, VertexConsumer vertexConsumer, FluidState fluidState) {
@@ -70,23 +83,23 @@ public class LiquidBlockRenderer {
         float w;
         float u;
         float t;
-        boolean bl7;
         boolean bl = fluidState.is(FluidTags.LAVA);
         TextureAtlasSprite[] textureAtlasSprites = bl ? this.lavaIcons : this.waterIcons;
+        BlockState blockState = blockAndTintGetter.getBlockState(blockPos);
         int i = bl ? 0xFFFFFF : BiomeColors.getAverageWaterColor(blockAndTintGetter, blockPos);
         float f = (float)(i >> 16 & 0xFF) / 255.0f;
         float g = (float)(i >> 8 & 0xFF) / 255.0f;
         float h = (float)(i & 0xFF) / 255.0f;
         boolean bl2 = !LiquidBlockRenderer.isNeighborSameFluid(blockAndTintGetter, blockPos, Direction.UP, fluidState);
-        boolean bl3 = !LiquidBlockRenderer.isNeighborSameFluid(blockAndTintGetter, blockPos, Direction.DOWN, fluidState) && !LiquidBlockRenderer.isFaceOccluded(blockAndTintGetter, blockPos, Direction.DOWN, 0.8888889f);
-        boolean bl4 = !LiquidBlockRenderer.isNeighborSameFluid(blockAndTintGetter, blockPos, Direction.NORTH, fluidState);
-        boolean bl5 = !LiquidBlockRenderer.isNeighborSameFluid(blockAndTintGetter, blockPos, Direction.SOUTH, fluidState);
-        boolean bl6 = !LiquidBlockRenderer.isNeighborSameFluid(blockAndTintGetter, blockPos, Direction.WEST, fluidState);
-        boolean bl8 = bl7 = !LiquidBlockRenderer.isNeighborSameFluid(blockAndTintGetter, blockPos, Direction.EAST, fluidState);
+        boolean bl3 = LiquidBlockRenderer.shouldRenderFace(blockAndTintGetter, blockPos, fluidState, blockState, Direction.DOWN) && !LiquidBlockRenderer.isFaceOccludedByNeighbor(blockAndTintGetter, blockPos, Direction.DOWN, 0.8888889f);
+        boolean bl4 = LiquidBlockRenderer.shouldRenderFace(blockAndTintGetter, blockPos, fluidState, blockState, Direction.NORTH);
+        boolean bl5 = LiquidBlockRenderer.shouldRenderFace(blockAndTintGetter, blockPos, fluidState, blockState, Direction.SOUTH);
+        boolean bl6 = LiquidBlockRenderer.shouldRenderFace(blockAndTintGetter, blockPos, fluidState, blockState, Direction.WEST);
+        boolean bl7 = LiquidBlockRenderer.shouldRenderFace(blockAndTintGetter, blockPos, fluidState, blockState, Direction.EAST);
         if (!(bl2 || bl3 || bl7 || bl6 || bl4 || bl5)) {
             return false;
         }
-        boolean bl82 = false;
+        boolean bl8 = false;
         float j = blockAndTintGetter.getShade(Direction.DOWN, true);
         float k = blockAndTintGetter.getShade(Direction.UP, true);
         float l = blockAndTintGetter.getShade(Direction.NORTH, true);
@@ -100,14 +113,14 @@ public class LiquidBlockRenderer {
         double r = blockPos.getZ() & 0xF;
         float s = 0.001f;
         float f2 = t = bl3 ? 0.001f : 0.0f;
-        if (bl2 && !LiquidBlockRenderer.isFaceOccluded(blockAndTintGetter, blockPos, Direction.UP, Math.min(Math.min(n, o), Math.min(p, q)))) {
+        if (bl2 && !LiquidBlockRenderer.isFaceOccludedByNeighbor(blockAndTintGetter, blockPos, Direction.UP, Math.min(Math.min(n, o), Math.min(p, q)))) {
             float af;
             float ae;
             float ad;
             float ac;
             float v;
             TextureAtlasSprite textureAtlasSprite;
-            bl82 = true;
+            bl8 = true;
             n -= 0.001f;
             o -= 0.001f;
             p -= 0.001f;
@@ -179,7 +192,7 @@ public class LiquidBlockRenderer {
             this.vertex(vertexConsumer, d, e + (double)t, r, x, z, ab, u, y, al);
             this.vertex(vertexConsumer, d + 1.0, e + (double)t, r, x, z, ab, w, y, al);
             this.vertex(vertexConsumer, d + 1.0, e + (double)t, r + 1.0, x, z, ab, w, aa, al);
-            bl82 = true;
+            bl8 = true;
         }
         for (int am = 0; am < 4; ++am) {
             Block block;
@@ -226,11 +239,11 @@ public class LiquidBlockRenderer {
                 direction = Direction.EAST;
                 bl9 = bl7;
             }
-            if (!bl9 || LiquidBlockRenderer.isFaceOccluded(blockAndTintGetter, blockPos, direction, Math.max(w, y))) continue;
-            bl82 = true;
+            if (!bl9 || LiquidBlockRenderer.isFaceOccludedByNeighbor(blockAndTintGetter, blockPos, direction, Math.max(w, y))) continue;
+            bl8 = true;
             BlockPos blockPos2 = blockPos.relative(direction);
             TextureAtlasSprite textureAtlasSprite2 = textureAtlasSprites[1];
-            if (!bl && ((block = blockAndTintGetter.getBlockState(blockPos2).getBlock()) == Blocks.GLASS || block instanceof StainedGlassBlock)) {
+            if (!bl && ((block = blockAndTintGetter.getBlockState(blockPos2).getBlock()) instanceof HalfTransparentBlock || block instanceof LeavesBlock)) {
                 textureAtlasSprite2 = this.waterOverlay;
             }
             ai = textureAtlasSprite2.getU(0.0);
@@ -253,7 +266,7 @@ public class LiquidBlockRenderer {
             this.vertex(vertexConsumer, ao, e + (double)y, aq, av, aw, ax, aj, ar, at);
             this.vertex(vertexConsumer, an, e + (double)w, ap, av, aw, ax, ai, ak, at);
         }
-        return bl82;
+        return bl8;
     }
 
     private void vertex(VertexConsumer vertexConsumer, double d, double e, double f, float g, float h, float i, float j, float k, int l) {
