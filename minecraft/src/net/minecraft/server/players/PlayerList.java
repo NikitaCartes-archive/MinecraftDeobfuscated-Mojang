@@ -130,7 +130,15 @@ public abstract class PlayerList {
 				.orElse(Level.OVERWORLD)
 			: Level.OVERWORLD;
 		ServerLevel serverLevel = this.server.getLevel(resourceKey);
-		serverPlayer.setLevel(serverLevel);
+		ServerLevel serverLevel2;
+		if (serverLevel == null) {
+			LOGGER.warn("Unknown respawn dimension {}, defaulting to overworld", resourceKey);
+			serverLevel2 = this.server.getLevel(Level.OVERWORLD);
+		} else {
+			serverLevel2 = serverLevel;
+		}
+
+		serverPlayer.setLevel(serverLevel2);
 		serverPlayer.gameMode.setLevel((ServerLevel)serverPlayer.level);
 		String string2 = "local";
 		if (connection.getRemoteAddress() != null) {
@@ -146,28 +154,28 @@ public abstract class PlayerList {
 			serverPlayer.getY(),
 			serverPlayer.getZ()
 		);
-		LevelData levelData = serverLevel.getLevelData();
-		this.updatePlayerGameMode(serverPlayer, null, serverLevel);
+		LevelData levelData = serverLevel2.getLevelData();
+		this.updatePlayerGameMode(serverPlayer, null, serverLevel2);
 		ServerGamePacketListenerImpl serverGamePacketListenerImpl = new ServerGamePacketListenerImpl(this.server, connection, serverPlayer);
-		GameRules gameRules = serverLevel.getGameRules();
+		GameRules gameRules = serverLevel2.getGameRules();
 		boolean bl = gameRules.getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN);
 		boolean bl2 = gameRules.getBoolean(GameRules.RULE_REDUCEDDEBUGINFO);
 		serverGamePacketListenerImpl.send(
 			new ClientboundLoginPacket(
 				serverPlayer.getId(),
 				serverPlayer.gameMode.getGameModeForPlayer(),
-				BiomeManager.obfuscateSeed(serverLevel.getSeed()),
+				BiomeManager.obfuscateSeed(serverLevel2.getSeed()),
 				levelData.isHardcore(),
 				this.server.levelKeys(),
 				this.registryHolder,
-				serverLevel.dimensionTypeKey(),
-				serverLevel.dimension(),
+				serverLevel2.dimensionTypeKey(),
+				serverLevel2.dimension(),
 				this.getMaxPlayers(),
 				this.viewDistance,
 				bl2,
 				!bl,
-				serverLevel.isDebug(),
-				serverLevel.isFlat()
+				serverLevel2.isDebug(),
+				serverLevel2.isFlat()
 			)
 		);
 		serverGamePacketListenerImpl.send(
@@ -183,7 +191,7 @@ public abstract class PlayerList {
 		this.sendPlayerPermissionLevel(serverPlayer);
 		serverPlayer.getStats().markAllDirty();
 		serverPlayer.getRecipeBook().sendInitialRecipeBook(serverPlayer);
-		this.updateEntireScoreboard(serverLevel.getScoreboard(), serverPlayer);
+		this.updateEntireScoreboard(serverLevel2.getScoreboard(), serverPlayer);
 		this.server.invalidateStatus();
 		MutableComponent mutableComponent;
 		if (serverPlayer.getGameProfile().getName().equalsIgnoreCase(string)) {
@@ -202,9 +210,9 @@ public abstract class PlayerList {
 			serverPlayer.connection.send(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, (ServerPlayer)this.players.get(i)));
 		}
 
-		serverLevel.addNewPlayer(serverPlayer);
+		serverLevel2.addNewPlayer(serverPlayer);
 		this.server.getCustomBossEvents().onPlayerConnect(serverPlayer);
-		this.sendLevelInfo(serverPlayer, serverLevel);
+		this.sendLevelInfo(serverPlayer, serverLevel2);
 		if (!this.server.getResourcePack().isEmpty()) {
 			serverPlayer.sendTexturePack(this.server.getResourcePack(), this.server.getResourcePackHash());
 		}
@@ -216,7 +224,7 @@ public abstract class PlayerList {
 		if (compoundTag != null && compoundTag.contains("RootVehicle", 10)) {
 			CompoundTag compoundTag2 = compoundTag.getCompound("RootVehicle");
 			Entity entity = EntityType.loadEntityRecursive(
-				compoundTag2.getCompound("Entity"), serverLevel, entityx -> !serverLevel.addWithUUID(entityx) ? null : entityx
+				compoundTag2.getCompound("Entity"), serverLevel2, entityx -> !serverLevel2.addWithUUID(entityx) ? null : entityx
 			);
 			if (entity != null) {
 				UUID uUID;
@@ -239,10 +247,10 @@ public abstract class PlayerList {
 
 				if (!serverPlayer.isPassenger()) {
 					LOGGER.warn("Couldn't reattach entity to player");
-					serverLevel.despawn(entity);
+					serverLevel2.despawn(entity);
 
 					for (Entity entity2x : entity.getIndirectPassengers()) {
-						serverLevel.despawn(entity2x);
+						serverLevel2.despawn(entity2x);
 					}
 				}
 			}

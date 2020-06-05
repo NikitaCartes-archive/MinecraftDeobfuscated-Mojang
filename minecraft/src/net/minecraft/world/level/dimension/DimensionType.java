@@ -174,6 +174,8 @@ public class DimensionType {
 		MappedRegistry<LevelStem> mappedRegistry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental());
 		mappedRegistry.register(LevelStem.NETHER, new LevelStem(() -> DEFAULT_NETHER, defaultNetherGenerator(l)));
 		mappedRegistry.register(LevelStem.END, new LevelStem(() -> DEFAULT_END, defaultEndGenerator(l)));
+		mappedRegistry.setPersistent(LevelStem.NETHER);
+		mappedRegistry.setPersistent(LevelStem.END);
 		return mappedRegistry;
 	}
 

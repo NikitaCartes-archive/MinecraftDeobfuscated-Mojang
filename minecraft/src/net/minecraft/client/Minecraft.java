@@ -1716,10 +1716,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.pendingConnection = connection;
 		} else {
 			this.displayExperimentalConfirmationDialog(
-				experimentalDialogType,
-				levelStorageAccess,
-				bl2,
-				() -> this.doLoadLevel(string, registryHolder, function, function4, bl, Minecraft.ExperimentalDialogType.NONE)
+				experimentalDialogType, string, bl2, () -> this.doLoadLevel(string, registryHolder, function, function4, bl, Minecraft.ExperimentalDialogType.NONE)
 			);
 			serverStem.close();
 
@@ -1731,9 +1728,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}
 	}
 
-	private void displayExperimentalConfirmationDialog(
-		Minecraft.ExperimentalDialogType experimentalDialogType, LevelStorageSource.LevelStorageAccess levelStorageAccess, boolean bl, Runnable runnable
-	) {
+	private void displayExperimentalConfirmationDialog(Minecraft.ExperimentalDialogType experimentalDialogType, String string, boolean bl, Runnable runnable) {
 		if (experimentalDialogType == Minecraft.ExperimentalDialogType.BACKUP) {
 			Component component;
 			Component component2;
@@ -1747,7 +1742,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 			this.setScreen(new BackupConfirmScreen(null, (blx, bl2) -> {
 				if (blx) {
-					EditWorldScreen.makeBackupAndShowToast(levelStorageAccess);
+					EditWorldScreen.makeBackupAndShowToast(this.levelSource, string);
 				}
 
 				runnable.run();
