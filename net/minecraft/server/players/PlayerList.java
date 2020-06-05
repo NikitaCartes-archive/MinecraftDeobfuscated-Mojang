@@ -133,6 +133,7 @@ public abstract class PlayerList {
     public void placeNewPlayer(Connection connection, ServerPlayer serverPlayer) {
         CompoundTag compoundTag2;
         Entity entity2;
+        ServerLevel serverLevel2;
         GameProfile gameProfile = serverPlayer.getGameProfile();
         GameProfileCache gameProfileCache = this.server.getProfileCache();
         GameProfile gameProfile2 = gameProfileCache.get(gameProfile.getId());
@@ -141,20 +142,26 @@ public abstract class PlayerList {
         CompoundTag compoundTag = this.load(serverPlayer);
         ResourceKey<Level> resourceKey = compoundTag != null ? DimensionType.parseLegacy(new Dynamic<Tag>(NbtOps.INSTANCE, compoundTag.get("Dimension"))).resultOrPartial(LOGGER::error).orElse(Level.OVERWORLD) : Level.OVERWORLD;
         ServerLevel serverLevel = this.server.getLevel(resourceKey);
-        serverPlayer.setLevel(serverLevel);
+        if (serverLevel == null) {
+            LOGGER.warn("Unknown respawn dimension {}, defaulting to overworld", (Object)resourceKey);
+            serverLevel2 = this.server.getLevel(Level.OVERWORLD);
+        } else {
+            serverLevel2 = serverLevel;
+        }
+        serverPlayer.setLevel(serverLevel2);
         serverPlayer.gameMode.setLevel((ServerLevel)serverPlayer.level);
         String string2 = "local";
         if (connection.getRemoteAddress() != null) {
             string2 = connection.getRemoteAddress().toString();
         }
         LOGGER.info("{}[{}] logged in with entity id {} at ({}, {}, {})", (Object)serverPlayer.getName().getString(), (Object)string2, (Object)serverPlayer.getId(), (Object)serverPlayer.getX(), (Object)serverPlayer.getY(), (Object)serverPlayer.getZ());
-        LevelData levelData = serverLevel.getLevelData();
-        this.updatePlayerGameMode(serverPlayer, null, serverLevel);
+        LevelData levelData = serverLevel2.getLevelData();
+        this.updatePlayerGameMode(serverPlayer, null, serverLevel2);
         ServerGamePacketListenerImpl serverGamePacketListenerImpl = new ServerGamePacketListenerImpl(this.server, connection, serverPlayer);
-        GameRules gameRules = serverLevel.getGameRules();
+        GameRules gameRules = serverLevel2.getGameRules();
         boolean bl = gameRules.getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN);
         boolean bl2 = gameRules.getBoolean(GameRules.RULE_REDUCEDDEBUGINFO);
-        serverGamePacketListenerImpl.send(new ClientboundLoginPacket(serverPlayer.getId(), serverPlayer.gameMode.getGameModeForPlayer(), BiomeManager.obfuscateSeed(serverLevel.getSeed()), levelData.isHardcore(), this.server.levelKeys(), this.registryHolder, serverLevel.dimensionTypeKey(), serverLevel.dimension(), this.getMaxPlayers(), this.viewDistance, bl2, !bl, serverLevel.isDebug(), serverLevel.isFlat()));
+        serverGamePacketListenerImpl.send(new ClientboundLoginPacket(serverPlayer.getId(), serverPlayer.gameMode.getGameModeForPlayer(), BiomeManager.obfuscateSeed(serverLevel2.getSeed()), levelData.isHardcore(), this.server.levelKeys(), this.registryHolder, serverLevel2.dimensionTypeKey(), serverLevel2.dimension(), this.getMaxPlayers(), this.viewDistance, bl2, !bl, serverLevel2.isDebug(), serverLevel2.isFlat()));
         serverGamePacketListenerImpl.send(new ClientboundCustomPayloadPacket(ClientboundCustomPayloadPacket.BRAND, new FriendlyByteBuf(Unpooled.buffer()).writeUtf(this.getServer().getServerModName())));
         serverGamePacketListenerImpl.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
         serverGamePacketListenerImpl.send(new ClientboundPlayerAbilitiesPacket(serverPlayer.abilities));
@@ -164,7 +171,7 @@ public abstract class PlayerList {
         this.sendPlayerPermissionLevel(serverPlayer);
         serverPlayer.getStats().markAllDirty();
         serverPlayer.getRecipeBook().sendInitialRecipeBook(serverPlayer);
-        this.updateEntireScoreboard(serverLevel.getScoreboard(), serverPlayer);
+        this.updateEntireScoreboard(serverLevel2.getScoreboard(), serverPlayer);
         this.server.invalidateStatus();
         TranslatableComponent mutableComponent = serverPlayer.getGameProfile().getName().equalsIgnoreCase(string) ? new TranslatableComponent("multiplayer.player.joined", serverPlayer.getDisplayName()) : new TranslatableComponent("multiplayer.player.joined.renamed", serverPlayer.getDisplayName(), string);
         this.broadcastMessage(mutableComponent.withStyle(ChatFormatting.YELLOW), ChatType.SYSTEM, Util.NIL_UUID);
@@ -175,17 +182,17 @@ public abstract class PlayerList {
         for (int i = 0; i < this.players.size(); ++i) {
             serverPlayer.connection.send(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, this.players.get(i)));
         }
-        serverLevel.addNewPlayer(serverPlayer);
+        serverLevel2.addNewPlayer(serverPlayer);
         this.server.getCustomBossEvents().onPlayerConnect(serverPlayer);
-        this.sendLevelInfo(serverPlayer, serverLevel);
+        this.sendLevelInfo(serverPlayer, serverLevel2);
         if (!this.server.getResourcePack().isEmpty()) {
             serverPlayer.sendTexturePack(this.server.getResourcePack(), this.server.getResourcePackHash());
         }
         for (MobEffectInstance mobEffectInstance : serverPlayer.getActiveEffects()) {
             serverGamePacketListenerImpl.send(new ClientboundUpdateMobEffectPacket(serverPlayer.getId(), mobEffectInstance));
         }
-        if (compoundTag != null && compoundTag.contains("RootVehicle", 10) && (entity2 = EntityType.loadEntityRecursive((compoundTag2 = compoundTag.getCompound("RootVehicle")).getCompound("Entity"), serverLevel, entity -> {
-            if (!serverLevel.addWithUUID((Entity)entity)) {
+        if (compoundTag != null && compoundTag.contains("RootVehicle", 10) && (entity2 = EntityType.loadEntityRecursive((compoundTag2 = compoundTag.getCompound("RootVehicle")).getCompound("Entity"), serverLevel2, entity -> {
+            if (!serverLevel2.addWithUUID((Entity)entity)) {
                 return null;
             }
             return entity;
@@ -202,9 +209,9 @@ public abstract class PlayerList {
             }
             if (!serverPlayer.isPassenger()) {
                 LOGGER.warn("Couldn't reattach entity to player");
-                serverLevel.despawn(entity2);
+                serverLevel2.despawn(entity2);
                 for (Entity entity22 : entity2.getIndirectPassengers()) {
-                    serverLevel.despawn(entity22);
+                    serverLevel2.despawn(entity22);
                 }
             }
         }

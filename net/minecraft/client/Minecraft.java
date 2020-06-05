@@ -1462,7 +1462,7 @@ WindowEventHandler {
         boolean bl2 = worldData.worldGenSettings().isOldCustomizedWorld();
         boolean bl4 = bl3 = worldData.worldGenSettingsLifecycle() != Lifecycle.stable();
         if (experimentalDialogType != ExperimentalDialogType.NONE && (bl2 || bl3)) {
-            this.displayExperimentalConfirmationDialog(experimentalDialogType, levelStorageAccess, bl2, () -> this.doLoadLevel(string, registryHolder, function, function4, bl, ExperimentalDialogType.NONE));
+            this.displayExperimentalConfirmationDialog(experimentalDialogType, string, bl2, () -> this.doLoadLevel(string, registryHolder, function, function4, bl, ExperimentalDialogType.NONE));
             serverStem.close();
             try {
                 levelStorageAccess.close();
@@ -1524,7 +1524,7 @@ WindowEventHandler {
         this.pendingConnection = connection;
     }
 
-    private void displayExperimentalConfirmationDialog(ExperimentalDialogType experimentalDialogType, LevelStorageSource.LevelStorageAccess levelStorageAccess, boolean bl3, Runnable runnable) {
+    private void displayExperimentalConfirmationDialog(ExperimentalDialogType experimentalDialogType, String string, boolean bl3, Runnable runnable) {
         if (experimentalDialogType == ExperimentalDialogType.BACKUP) {
             TranslatableComponent component2;
             TranslatableComponent component;
@@ -1537,7 +1537,7 @@ WindowEventHandler {
             }
             this.setScreen(new BackupConfirmScreen(null, (bl, bl2) -> {
                 if (bl) {
-                    EditWorldScreen.makeBackupAndShowToast(levelStorageAccess);
+                    EditWorldScreen.makeBackupAndShowToast(this.levelSource, string);
                 }
                 runnable.run();
             }, component, component2, false));

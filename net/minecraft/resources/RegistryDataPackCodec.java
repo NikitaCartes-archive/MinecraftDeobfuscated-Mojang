@@ -44,7 +44,7 @@ implements Codec<MappedRegistry<E>> {
     }
 
     public String toString() {
-        return "RegistryFileCodec[" + this.registryKey + " " + this.elementCodec + "]";
+        return "RegistryDapaPackCodec[" + this.directCodec + " " + this.registryKey + " " + this.elementCodec + "]";
     }
 
     @Override

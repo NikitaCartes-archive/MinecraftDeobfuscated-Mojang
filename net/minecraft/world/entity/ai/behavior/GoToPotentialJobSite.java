@@ -14,6 +14,7 @@ import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.schedule.Activity;
 
@@ -46,7 +47,10 @@ extends Behavior<Villager> {
         Optional<GlobalPos> optional = villager.getBrain().getMemory(MemoryModuleType.POTENTIAL_JOB_SITE);
         optional.ifPresent(globalPos -> {
             BlockPos blockPos = globalPos.pos();
-            serverLevel.getPoiManager().release(blockPos);
+            PoiManager poiManager = serverLevel.getServer().getLevel(globalPos.dimension()).getPoiManager();
+            if (poiManager.exists(blockPos, poiType -> true)) {
+                poiManager.release(blockPos);
+            }
             DebugPackets.sendPoiTicketCountPacket(serverLevel, blockPos);
         });
         villager.getBrain().eraseMemory(MemoryModuleType.POTENTIAL_JOB_SITE);
