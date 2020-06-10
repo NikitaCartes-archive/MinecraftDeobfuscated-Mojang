@@ -39,10 +39,6 @@ extends Node {
         this.reached = true;
     }
 
-    public boolean isReached() {
-        return this.reached;
-    }
-
     @Environment(value=EnvType.CLIENT)
     public static Target createFromStream(FriendlyByteBuf friendlyByteBuf) {
         Target target = new Target(friendlyByteBuf.readInt(), friendlyByteBuf.readInt(), friendlyByteBuf.readInt());

@@ -21,6 +21,7 @@ implements Packet<ServerGamePacketListener> {
     private Action action;
     private Vec3 location;
     private InteractionHand hand;
+    private boolean usingSecondaryAction;
 
     public ServerboundInteractPacket() {
     }
@@ -31,18 +32,20 @@ implements Packet<ServerGamePacketListener> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public ServerboundInteractPacket(Entity entity, InteractionHand interactionHand) {
+    public ServerboundInteractPacket(Entity entity, InteractionHand interactionHand, boolean bl) {
         this.entityId = entity.getId();
         this.action = Action.INTERACT;
         this.hand = interactionHand;
+        this.usingSecondaryAction = bl;
     }
 
     @Environment(value=EnvType.CLIENT)
-    public ServerboundInteractPacket(Entity entity, InteractionHand interactionHand, Vec3 vec3) {
+    public ServerboundInteractPacket(Entity entity, InteractionHand interactionHand, Vec3 vec3, boolean bl) {
         this.entityId = entity.getId();
         this.action = Action.INTERACT_AT;
         this.hand = interactionHand;
         this.location = vec3;
+        this.usingSecondaryAction = bl;
     }
 
     @Override
@@ -54,6 +57,7 @@ implements Packet<ServerGamePacketListener> {
         }
         if (this.action == Action.INTERACT || this.action == Action.INTERACT_AT) {
             this.hand = friendlyByteBuf.readEnum(InteractionHand.class);
+            this.usingSecondaryAction = friendlyByteBuf.readBoolean();
         }
     }
 
@@ -68,6 +72,7 @@ implements Packet<ServerGamePacketListener> {
         }
         if (this.action == Action.INTERACT || this.action == Action.INTERACT_AT) {
             friendlyByteBuf.writeEnum(this.hand);
+            friendlyByteBuf.writeBoolean(this.usingSecondaryAction);
         }
     }
 
@@ -91,6 +96,10 @@ implements Packet<ServerGamePacketListener> {
 
     public Vec3 getLocation() {
         return this.location;
+    }
+
+    public boolean isUsingSecondaryAction() {
+        return this.usingSecondaryAction;
     }
 
     public static enum Action {

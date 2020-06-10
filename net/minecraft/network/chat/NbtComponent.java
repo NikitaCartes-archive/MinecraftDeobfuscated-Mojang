@@ -116,7 +116,7 @@ implements ContextAwareComponent {
         }
 
         @Override
-        public StorageNbtComponent toMutable() {
+        public StorageNbtComponent plainCopy() {
             return new StorageNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.id);
         }
 
@@ -144,13 +144,13 @@ implements ContextAwareComponent {
         }
 
         @Override
-        public /* synthetic */ BaseComponent toMutable() {
-            return this.toMutable();
+        public /* synthetic */ BaseComponent plainCopy() {
+            return this.plainCopy();
         }
 
         @Override
-        public /* synthetic */ MutableComponent toMutable() {
-            return this.toMutable();
+        public /* synthetic */ MutableComponent plainCopy() {
+            return this.plainCopy();
         }
     }
 
@@ -187,7 +187,7 @@ implements ContextAwareComponent {
         }
 
         @Override
-        public BlockNbtComponent toMutable() {
+        public BlockNbtComponent plainCopy() {
             return new BlockNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.posPattern, this.compiledPos);
         }
 
@@ -220,13 +220,13 @@ implements ContextAwareComponent {
         }
 
         @Override
-        public /* synthetic */ BaseComponent toMutable() {
-            return this.toMutable();
+        public /* synthetic */ BaseComponent plainCopy() {
+            return this.plainCopy();
         }
 
         @Override
-        public /* synthetic */ MutableComponent toMutable() {
-            return this.toMutable();
+        public /* synthetic */ MutableComponent plainCopy() {
+            return this.plainCopy();
         }
     }
 
@@ -263,7 +263,7 @@ implements ContextAwareComponent {
         }
 
         @Override
-        public EntityNbtComponent toMutable() {
+        public EntityNbtComponent plainCopy() {
             return new EntityNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.selectorPattern, this.compiledSelector);
         }
 
@@ -294,13 +294,13 @@ implements ContextAwareComponent {
         }
 
         @Override
-        public /* synthetic */ BaseComponent toMutable() {
-            return this.toMutable();
+        public /* synthetic */ BaseComponent plainCopy() {
+            return this.plainCopy();
         }
 
         @Override
-        public /* synthetic */ MutableComponent toMutable() {
-            return this.toMutable();
+        public /* synthetic */ MutableComponent plainCopy() {
+            return this.plainCopy();
         }
     }
 }

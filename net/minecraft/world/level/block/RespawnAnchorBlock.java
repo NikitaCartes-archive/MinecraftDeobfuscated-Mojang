@@ -128,7 +128,7 @@ extends Block {
     }
 
     public static boolean canSetSpawn(Level level) {
-        return level.dimensionType().isNether();
+        return level.dimensionType().respawnAnchorWorks();
     }
 
     public static void charge(Level level, BlockPos blockPos, BlockState blockState) {
@@ -178,11 +178,6 @@ extends Block {
             return optional;
         }
         return Optional.empty();
-    }
-
-    @Override
-    public boolean useShapeForLightOcclusion(BlockState blockState) {
-        return true;
     }
 
     @Override

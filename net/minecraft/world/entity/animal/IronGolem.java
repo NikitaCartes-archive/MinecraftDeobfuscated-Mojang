@@ -17,6 +17,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.IntRange;
@@ -43,6 +44,7 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.target.DefendVillageTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.animal.AbstractGolem;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
@@ -55,6 +57,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class IronGolem
@@ -85,6 +88,7 @@ implements NeutralMob {
         this.targetSelector.addGoal(2, new HurtByTargetGoal(this, new Class[0]));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<Player>(this, Player.class, 10, true, false, this::isAngryAt));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<Mob>(this, Mob.class, 5, false, false, livingEntity -> livingEntity instanceof Enemy && !(livingEntity instanceof Creeper)));
+        this.targetSelector.addGoal(4, new ResetUniversalAngerTargetGoal<IronGolem>(this, false));
     }
 
     @Override
@@ -127,7 +131,7 @@ implements NeutralMob {
             this.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockState), this.getX() + ((double)this.random.nextFloat() - 0.5) * (double)this.getBbWidth(), this.getY() + 0.1, this.getZ() + ((double)this.random.nextFloat() - 0.5) * (double)this.getBbWidth(), 4.0 * ((double)this.random.nextFloat() - 0.5), 0.5, ((double)this.random.nextFloat() - 0.5) * 4.0);
         }
         if (!this.level.isClientSide) {
-            this.updatePersistentAnger();
+            this.updatePersistentAnger((ServerLevel)this.level, true);
         }
     }
 
@@ -153,7 +157,7 @@ implements NeutralMob {
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
         this.setPlayerCreated(compoundTag.getBoolean("PlayerCreated"));
-        this.readPersistentAngerSaveData(this.level, compoundTag);
+        this.readPersistentAngerSaveData((ServerLevel)this.level, compoundTag);
     }
 
     @Override
@@ -317,6 +321,12 @@ implements NeutralMob {
             return NaturalSpawner.isValidEmptySpawnBlock(levelReader, blockPos, levelReader.getBlockState(blockPos), Fluids.EMPTY.defaultFluidState(), EntityType.IRON_GOLEM) && levelReader.isUnobstructed(this);
         }
         return false;
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public Vec3 getLeashOffset() {
+        return new Vec3(0.0, 0.875f * this.getEyeHeight(), this.getBbWidth() * 0.4f);
     }
 
     public static enum Crackiness {

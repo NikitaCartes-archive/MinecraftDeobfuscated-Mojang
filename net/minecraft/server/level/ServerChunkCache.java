@@ -397,17 +397,7 @@ extends ChunkSource {
         int i = blockPos.getX() >> 4;
         ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(ChunkPos.asLong(i, j = blockPos.getZ() >> 4));
         if (chunkHolder != null) {
-            chunkHolder.blockChanged(this, blockPos.getX() & 0xF, blockPos.getY(), blockPos.getZ() & 0xF);
-        }
-    }
-
-    protected void notifyNeighborsOfLightChange(int i, int j) {
-        for (int k = -1; k <= 1; ++k) {
-            for (int l = -1; l <= 1; ++l) {
-                ChunkHolder chunkHolder;
-                if (k == 0 && l == 0 || (chunkHolder = this.getVisibleChunkIfPresent(ChunkPos.asLong(i + k, j + l))) == null) continue;
-                chunkHolder.forceSendLight();
-            }
+            chunkHolder.blockChanged(blockPos.getX() & 0xF, blockPos.getY(), blockPos.getZ() & 0xF);
         }
     }
 

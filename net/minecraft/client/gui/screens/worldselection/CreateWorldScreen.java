@@ -3,13 +3,16 @@
  */
 package net.minecraft.client.gui.screens.worldselection;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -36,8 +39,11 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.ServerResources;
+import net.minecraft.server.packs.repository.FolderRepositorySource;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.packs.repository.PackSource;
+import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
@@ -66,7 +72,6 @@ extends Screen {
     private boolean commands;
     private boolean commandsChanged;
     public boolean hardCore;
-    private boolean done;
     protected DataPackConfig dataPacks = DataPackConfig.DEFAULT;
     @Nullable
     private Path tempDataPackDir;
@@ -157,7 +162,7 @@ extends Screen {
 
             @Override
             public Component getMessage() {
-                return super.getMessage().mutableCopy().append(": ").append(new TranslatableComponent("selectWorld.gameMode." + CreateWorldScreen.this.gameMode.name));
+                return super.getMessage().copy().append(": ").append(new TranslatableComponent("selectWorld.gameMode." + CreateWorldScreen.this.gameMode.name));
             }
 
             @Override
@@ -183,7 +188,7 @@ extends Screen {
 
             @Override
             public Component getMessage() {
-                return super.getMessage().mutableCopy().append(" ").append(CommonComponents.optionStatus(CreateWorldScreen.this.commands && !CreateWorldScreen.this.hardCore));
+                return super.getMessage().copy().append(" ").append(CommonComponents.optionStatus(CreateWorldScreen.this.commands && !CreateWorldScreen.this.hardCore));
             }
 
             @Override
@@ -241,11 +246,7 @@ extends Screen {
 
     private void onCreate() {
         LevelSettings levelSettings;
-        this.minecraft.setScreen(null);
-        if (this.done) {
-            return;
-        }
-        this.done = true;
+        this.minecraft.forceSetScreen(new GenericDirtMessageScreen(new TranslatableComponent("createWorld.preparing")));
         if (!this.copyTempDataPackDirToNewWorld()) {
             return;
         }
@@ -389,11 +390,22 @@ extends Screen {
     private void openDataPackSelectionScreen() {
         Path path = this.getTempDataPackDir();
         if (path != null) {
-            this.minecraft.setScreen(new DataPackSelectScreen((Screen)this, this.dataPacks, this::tryApplyNewDataPacks, path.toFile()));
+            File file = path.toFile();
+            PackRepository<Pack> packRepository = new PackRepository<Pack>(Pack::new, new ServerPacksSource(), new FolderRepositorySource(file, PackSource.DEFAULT));
+            packRepository.reload();
+            packRepository.setSelected(this.dataPacks.getEnabled());
+            this.minecraft.setScreen(new DataPackSelectScreen((Screen)this, packRepository, this::tryApplyNewDataPacks, file));
         }
     }
 
-    private void tryApplyNewDataPacks(DataPackConfig dataPackConfig, PackRepository<Pack> packRepository) {
+    private void tryApplyNewDataPacks(PackRepository<Pack> packRepository) {
+        ImmutableList<String> list = ImmutableList.copyOf(packRepository.getSelectedIds());
+        List list2 = packRepository.getAvailableIds().stream().filter(string -> !list.contains(string)).collect(ImmutableList.toImmutableList());
+        DataPackConfig dataPackConfig = new DataPackConfig(list, list2);
+        if (list.equals(this.dataPacks.getEnabled())) {
+            this.dataPacks = dataPackConfig;
+            return;
+        }
         this.minecraft.tell(() -> this.minecraft.setScreen(new GenericDirtMessageScreen(new TranslatableComponent("dataPack.validation.working"))));
         ServerResources.loadResources(packRepository.openAllSelected(), Commands.CommandSelection.INTEGRATED, 2, Util.backgroundExecutor(), this.minecraft).handle((serverResources, throwable) -> {
             if (throwable != null) {

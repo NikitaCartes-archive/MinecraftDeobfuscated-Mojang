@@ -35,8 +35,9 @@ public class ForceLoadCommand {
 
     private static int queryForceLoad(CommandSourceStack commandSourceStack, ColumnPos columnPos) throws CommandSyntaxException {
         ChunkPos chunkPos = new ChunkPos(columnPos.x >> 4, columnPos.z >> 4);
-        ResourceKey<Level> resourceKey = commandSourceStack.getLevel().dimension();
-        boolean bl = commandSourceStack.getServer().getLevel(resourceKey).getForcedChunks().contains(chunkPos.toLong());
+        ServerLevel serverLevel = commandSourceStack.getLevel();
+        ResourceKey<Level> resourceKey = serverLevel.dimension();
+        boolean bl = serverLevel.getForcedChunks().contains(chunkPos.toLong());
         if (bl) {
             commandSourceStack.sendSuccess(new TranslatableComponent("commands.forceload.query.success", chunkPos, resourceKey.location()), false);
             return 1;
@@ -45,8 +46,9 @@ public class ForceLoadCommand {
     }
 
     private static int listForceLoad(CommandSourceStack commandSourceStack) {
-        ResourceKey<Level> resourceKey = commandSourceStack.getLevel().dimension();
-        LongSet longSet = commandSourceStack.getServer().getLevel(resourceKey).getForcedChunks();
+        ServerLevel serverLevel = commandSourceStack.getLevel();
+        ResourceKey<Level> resourceKey = serverLevel.dimension();
+        LongSet longSet = serverLevel.getForcedChunks();
         int i = longSet.size();
         if (i > 0) {
             String string = Joiner.on(", ").join(longSet.stream().sorted().map(ChunkPos::new).map(ChunkPos::toString).iterator());
@@ -62,8 +64,8 @@ public class ForceLoadCommand {
     }
 
     private static int removeAll(CommandSourceStack commandSourceStack) {
-        ResourceKey<Level> resourceKey = commandSourceStack.getLevel().dimension();
-        ServerLevel serverLevel = commandSourceStack.getServer().getLevel(resourceKey);
+        ServerLevel serverLevel = commandSourceStack.getLevel();
+        ResourceKey<Level> resourceKey = serverLevel.dimension();
         LongSet longSet = serverLevel.getForcedChunks();
         longSet.forEach(l -> serverLevel.setChunkForced(ChunkPos.getX(l), ChunkPos.getZ(l), false));
         commandSourceStack.sendSuccess(new TranslatableComponent("commands.forceload.removed.all", resourceKey.location()), true);
@@ -86,8 +88,8 @@ public class ForceLoadCommand {
         if (q > 256L) {
             throw ERROR_TOO_MANY_CHUNKS.create(256, q);
         }
-        ResourceKey<Level> resourceKey = commandSourceStack.getLevel().dimension();
-        ServerLevel serverLevel = commandSourceStack.getServer().getLevel(resourceKey);
+        ServerLevel serverLevel = commandSourceStack.getLevel();
+        ResourceKey<Level> resourceKey = serverLevel.dimension();
         ChunkPos chunkPos = null;
         int r = 0;
         for (int s = m; s <= o; ++s) {

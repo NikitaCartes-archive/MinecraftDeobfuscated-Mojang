@@ -13,7 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -184,9 +184,9 @@ Merchant {
 
     @Override
     @Nullable
-    public Entity changeDimension(ResourceKey<Level> resourceKey) {
+    public Entity changeDimension(ServerLevel serverLevel) {
         this.stopTrading();
-        return super.changeDimension(resourceKey);
+        return super.changeDimension(serverLevel);
     }
 
     protected void stopTrading() {

@@ -40,10 +40,8 @@ extends BaseComponent {
     }
 
     @Override
-    public TextComponent toMutable() {
-        TextComponent textComponent = new TextComponent(this.text);
-        textComponent.setStyle(this.getStyle());
-        return textComponent;
+    public TextComponent plainCopy() {
+        return new TextComponent(this.text);
     }
 
     @Override
@@ -64,13 +62,13 @@ extends BaseComponent {
     }
 
     @Override
-    public /* synthetic */ BaseComponent toMutable() {
-        return this.toMutable();
+    public /* synthetic */ BaseComponent plainCopy() {
+        return this.plainCopy();
     }
 
     @Override
-    public /* synthetic */ MutableComponent toMutable() {
-        return this.toMutable();
+    public /* synthetic */ MutableComponent plainCopy() {
+        return this.plainCopy();
     }
 }
 

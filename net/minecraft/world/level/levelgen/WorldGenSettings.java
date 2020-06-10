@@ -22,6 +22,7 @@ import java.util.OptionalLong;
 import java.util.Properties;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.MappedRegistry;
@@ -97,10 +98,14 @@ public class WorldGenSettings {
     }
 
     public static MappedRegistry<LevelStem> withOverworld(MappedRegistry<LevelStem> mappedRegistry, ChunkGenerator chunkGenerator) {
-        MappedRegistry<LevelStem> mappedRegistry2 = new MappedRegistry<LevelStem>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental());
         LevelStem levelStem = mappedRegistry.get(LevelStem.OVERWORLD);
-        DimensionType dimensionType = levelStem == null ? DimensionType.defaultOverworld() : levelStem.type();
-        mappedRegistry2.register(LevelStem.OVERWORLD, new LevelStem(() -> dimensionType, chunkGenerator));
+        Supplier<DimensionType> supplier = () -> levelStem == null ? DimensionType.defaultOverworld() : levelStem.type();
+        return WorldGenSettings.withOverworld(mappedRegistry, supplier, chunkGenerator);
+    }
+
+    public static MappedRegistry<LevelStem> withOverworld(MappedRegistry<LevelStem> mappedRegistry, Supplier<DimensionType> supplier, ChunkGenerator chunkGenerator) {
+        MappedRegistry<LevelStem> mappedRegistry2 = new MappedRegistry<LevelStem>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental());
+        mappedRegistry2.register(LevelStem.OVERWORLD, new LevelStem(supplier, chunkGenerator));
         mappedRegistry2.setPersistent(LevelStem.OVERWORLD);
         for (Map.Entry<ResourceKey<LevelStem>, LevelStem> entry : mappedRegistry.entrySet()) {
             ResourceKey<LevelStem> resourceKey = entry.getKey();

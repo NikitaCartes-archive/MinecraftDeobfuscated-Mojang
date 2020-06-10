@@ -108,7 +108,7 @@ implements TickableWidget {
         }
         Component component = bl2 ? (bl ? TextComponent.EMPTY : new TextComponent(" ").append(string).append(" ").append(realmsServer.minigameName)) : new TextComponent(" ").append(string);
         TranslatableComponent component2 = action == Action.JOIN ? new TranslatableComponent("mco.configure.world.slot.tooltip.active") : (bl2 ? new TranslatableComponent("mco.configure.world.slot.tooltip.minigame") : new TranslatableComponent("mco.configure.world.slot.tooltip"));
-        MutableComponent component3 = component2.mutableCopy().append(component);
+        MutableComponent component3 = component2.copy().append(component);
         return Pair.of(component2, component3);
     }
 

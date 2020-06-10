@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.pathfinder;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
@@ -13,7 +14,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.PathNavigationRegion;
@@ -48,21 +48,25 @@ public class PathFinder {
 
     @Nullable
     private Path findPath(Node node, Map<Target, BlockPos> map, float f, int i, float g) {
-        Stream<Path> stream;
         Optional<Path> optional;
         Set<Target> set = map.keySet();
         node.g = 0.0f;
         node.f = node.h = this.getBestH(node, set);
         this.openSet.clear();
         this.openSet.insert(node);
-        HashSet set2 = Sets.newHashSet();
+        ImmutableSet set2 = ImmutableSet.of();
         int j = 0;
+        HashSet<Target> set3 = Sets.newHashSetWithExpectedSize(set.size());
         int k = (int)((float)this.maxVisitedNodes * g);
         while (!this.openSet.isEmpty() && ++j < k) {
             Node node2 = this.openSet.pop();
             node2.closed = true;
-            set.stream().filter(target -> node2.distanceManhattan((Node)target) <= (float)i).forEach(Target::setReached);
-            if (set.stream().anyMatch(Target::isReached)) break;
+            for (Target target2 : set) {
+                if (!(node2.distanceManhattan(target2) <= (float)i)) continue;
+                target2.setReached();
+                set3.add(target2);
+            }
+            if (!set3.isEmpty()) break;
             if (node2.distanceTo(node) >= f) continue;
             int l = this.nodeEvaluator.getNeighbors(this.neighbors, node2);
             for (int m = 0; m < l; ++m) {
@@ -82,7 +86,8 @@ public class PathFinder {
                 this.openSet.insert(node3);
             }
         }
-        if (!(optional = (stream = set.stream().anyMatch(Target::isReached) ? set.stream().filter(Target::isReached).map(target -> this.reconstructPath(target.getBestNode(), (BlockPos)map.get(target), true)).sorted(Comparator.comparingInt(Path::getSize)) : set.stream().map(target -> this.reconstructPath(target.getBestNode(), (BlockPos)map.get(target), false)).sorted(Comparator.comparingDouble(Path::getDistToTarget).thenComparingInt(Path::getSize))).findFirst()).isPresent()) {
+        Optional<Path> optional2 = optional = !set3.isEmpty() ? set3.stream().map(target -> this.reconstructPath(target.getBestNode(), (BlockPos)map.get(target), true)).min(Comparator.comparingInt(Path::getSize)) : set.stream().map(target -> this.reconstructPath(target.getBestNode(), (BlockPos)map.get(target), false)).min(Comparator.comparingDouble(Path::getDistToTarget).thenComparingInt(Path::getSize));
+        if (!optional.isPresent()) {
             return null;
         }
         Path path = optional.get();

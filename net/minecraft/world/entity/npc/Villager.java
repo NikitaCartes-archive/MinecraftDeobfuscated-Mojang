@@ -528,6 +528,9 @@ VillagerDataHolder {
         MinecraftServer minecraftServer = ((ServerLevel)this.level).getServer();
         this.brain.getMemory(memoryModuleType).ifPresent(globalPos -> {
             ServerLevel serverLevel = minecraftServer.getLevel(globalPos.dimension());
+            if (serverLevel == null) {
+                return;
+            }
             PoiManager poiManager = serverLevel.getPoiManager();
             Optional<PoiType> optional = poiManager.getType(globalPos.pos());
             BiPredicate<Villager, PoiType> biPredicate = POI_MEMORIES.get(memoryModuleType);

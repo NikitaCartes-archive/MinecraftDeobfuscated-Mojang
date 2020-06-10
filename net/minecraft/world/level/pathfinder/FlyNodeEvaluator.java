@@ -154,28 +154,28 @@ extends WalkNodeEvaluator {
         if (this.isOpen(node19 = this.getNode(node.x - 1, node.y, node.z + 1)) && this.hasMalus(node2) && this.hasMalus(node3)) {
             nodes[i++] = node19;
         }
-        if (this.isOpen(node20 = this.getNode(node.x + 1, node.y + 1, node.z - 1)) && this.hasMalus(node16) && this.hasMalus(node11) && this.hasMalus(node10)) {
+        if (this.isOpen(node20 = this.getNode(node.x + 1, node.y + 1, node.z - 1)) && this.hasMalus(node16) && this.hasMalus(node5) && this.hasMalus(node4) && this.hasMalus(node6) && this.hasMalus(node11) && this.hasMalus(node10)) {
             nodes[i++] = node20;
         }
-        if (this.isOpen(node21 = this.getNode(node.x + 1, node.y + 1, node.z + 1)) && this.hasMalus(node17) && this.hasMalus(node8) && this.hasMalus(node10)) {
+        if (this.isOpen(node21 = this.getNode(node.x + 1, node.y + 1, node.z + 1)) && this.hasMalus(node17) && this.hasMalus(node2) && this.hasMalus(node4) && this.hasMalus(node6) && this.hasMalus(node8) && this.hasMalus(node10)) {
             nodes[i++] = node21;
         }
-        if (this.isOpen(node22 = this.getNode(node.x - 1, node.y + 1, node.z - 1)) && this.hasMalus(node18) && this.hasMalus(node11) && this.hasMalus(node9)) {
+        if (this.isOpen(node22 = this.getNode(node.x - 1, node.y + 1, node.z - 1)) && this.hasMalus(node18) && this.hasMalus(node5) && this.hasMalus(node3) & this.hasMalus(node6) && this.hasMalus(node11) && this.hasMalus(node9)) {
             nodes[i++] = node22;
         }
-        if (this.isOpen(node23 = this.getNode(node.x - 1, node.y + 1, node.z + 1)) && this.hasMalus(node19) && this.hasMalus(node8) && this.hasMalus(node9)) {
+        if (this.isOpen(node23 = this.getNode(node.x - 1, node.y + 1, node.z + 1)) && this.hasMalus(node19) && this.hasMalus(node2) && this.hasMalus(node3) & this.hasMalus(node6) && this.hasMalus(node8) && this.hasMalus(node9)) {
             nodes[i++] = node23;
         }
-        if (this.isOpen(node24 = this.getNode(node.x + 1, node.y - 1, node.z - 1)) && this.hasMalus(node16) && this.hasMalus(node15) && this.hasMalus(node14)) {
+        if (this.isOpen(node24 = this.getNode(node.x + 1, node.y - 1, node.z - 1)) && this.hasMalus(node16) && this.hasMalus(node5) && this.hasMalus(node4) && this.hasMalus(node7) && this.hasMalus(node15) && this.hasMalus(node14)) {
             nodes[i++] = node24;
         }
-        if (this.isOpen(node25 = this.getNode(node.x + 1, node.y - 1, node.z + 1)) && this.hasMalus(node17) && this.hasMalus(node12) && this.hasMalus(node14)) {
+        if (this.isOpen(node25 = this.getNode(node.x + 1, node.y - 1, node.z + 1)) && this.hasMalus(node17) && this.hasMalus(node2) && this.hasMalus(node4) && this.hasMalus(node7) && this.hasMalus(node12) && this.hasMalus(node14)) {
             nodes[i++] = node25;
         }
-        if (this.isOpen(node26 = this.getNode(node.x - 1, node.y - 1, node.z - 1)) && this.hasMalus(node18) && this.hasMalus(node15) && this.hasMalus(node13)) {
+        if (this.isOpen(node26 = this.getNode(node.x - 1, node.y - 1, node.z - 1)) && this.hasMalus(node18) && this.hasMalus(node5) && this.hasMalus(node3) && this.hasMalus(node7) && this.hasMalus(node15) && this.hasMalus(node13)) {
             nodes[i++] = node26;
         }
-        if (this.isOpen(node27 = this.getNode(node.x - 1, node.y - 1, node.z + 1)) && this.hasMalus(node19) && this.hasMalus(node12) && this.hasMalus(node13)) {
+        if (this.isOpen(node27 = this.getNode(node.x - 1, node.y - 1, node.z + 1)) && this.hasMalus(node19) && this.hasMalus(node2) && this.hasMalus(node3) && this.hasMalus(node7) && this.hasMalus(node12) && this.hasMalus(node13)) {
             nodes[i++] = node27;
         }
         return i;

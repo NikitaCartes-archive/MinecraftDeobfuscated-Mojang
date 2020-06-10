@@ -5,6 +5,7 @@ package net.minecraft.world.entity.ai.goal.target;
 
 import java.util.EnumSet;
 import java.util.List;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
@@ -12,6 +13,7 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.phys.AABB;
 
 public class HurtByTargetGoal
@@ -33,6 +35,9 @@ extends TargetGoal {
         int i = this.mob.getLastHurtByMobTimestamp();
         LivingEntity livingEntity = this.mob.getLastHurtByMob();
         if (i == this.timestamp || livingEntity == null) {
+            return false;
+        }
+        if (livingEntity.getType() == EntityType.PLAYER && this.mob.level.getGameRules().getBoolean(GameRules.RULE_UNIVERSAL_ANGER)) {
             return false;
         }
         for (Class<?> class_ : this.toIgnoreDamage) {
@@ -62,7 +67,8 @@ extends TargetGoal {
 
     protected void alertOthers() {
         double d = this.getFollowDistance();
-        List<?> list = this.mob.level.getLoadedEntitiesOfClass(this.mob.getClass(), new AABB(this.mob.getX(), this.mob.getY(), this.mob.getZ(), this.mob.getX() + 1.0, this.mob.getY() + 1.0, this.mob.getZ() + 1.0).inflate(d, 10.0, d));
+        AABB aABB = AABB.unitCubeFromLowerCorner(this.mob.position()).inflate(d, 10.0, d);
+        List<?> list = this.mob.level.getLoadedEntitiesOfClass(this.mob.getClass(), aABB);
         for (Mob mob : list) {
             if (this.mob == mob || mob.getTarget() != null || this.mob instanceof TamableAnimal && ((TamableAnimal)this.mob).getOwner() != ((TamableAnimal)mob).getOwner() || mob.isAlliedTo(this.mob.getLastHurtByMob())) continue;
             if (this.toIgnoreAlert != null) {

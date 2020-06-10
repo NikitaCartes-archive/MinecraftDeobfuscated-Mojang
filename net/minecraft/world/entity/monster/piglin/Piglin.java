@@ -270,7 +270,7 @@ implements CrossbowAttackMob {
     }
 
     public boolean isConverting() {
-        return !this.level.dimensionType().isNether() && !this.isImmuneToZombification() && !this.isNoAi();
+        return !this.level.dimensionType().piglinSafe() && !this.isImmuneToZombification() && !this.isNoAi();
     }
 
     @Override

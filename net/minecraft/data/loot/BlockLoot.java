@@ -920,6 +920,7 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.SPAWNER, BlockLoot.noDrop());
         this.add(Blocks.FIRE, BlockLoot.noDrop());
         this.add(Blocks.SOUL_FIRE, BlockLoot.noDrop());
+        this.add(Blocks.NETHER_PORTAL, BlockLoot.noDrop());
         HashSet<ResourceLocation> set = Sets.newHashSet();
         for (Block block2 : Registry.BLOCK) {
             ResourceLocation resourceLocation = block2.getLootTable();

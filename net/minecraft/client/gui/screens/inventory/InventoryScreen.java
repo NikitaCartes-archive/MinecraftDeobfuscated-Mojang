@@ -136,7 +136,7 @@ implements RecipeUpdateListener {
         entityRenderDispatcher.overrideCameraOrientation(quaternion2);
         entityRenderDispatcher.setRenderShadow(false);
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0f, 1.0f, poseStack, bufferSource, 0xF000F0);
+        RenderSystem.runAsFancy(() -> entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0f, 1.0f, poseStack, bufferSource, 0xF000F0));
         bufferSource.endBatch();
         entityRenderDispatcher.setRenderShadow(true);
         livingEntity.yBodyRot = m;
@@ -155,6 +155,7 @@ implements RecipeUpdateListener {
     @Override
     public boolean mouseClicked(double d, double e, int i) {
         if (this.recipeBookComponent.mouseClicked(d, e, i)) {
+            this.setFocused(this.recipeBookComponent);
             return true;
         }
         if (this.widthTooNarrow && this.recipeBookComponent.isVisible()) {

@@ -33,32 +33,35 @@ implements BlockAndTintGetter {
 
     @Nullable
     public static RenderChunkRegion createIfNotEmpty(Level level, BlockPos blockPos, BlockPos blockPos2, int i) {
-        int o;
+        int n;
         int j = blockPos.getX() - i >> 4;
         int k = blockPos.getZ() - i >> 4;
         int l = blockPos2.getX() + i >> 4;
         int m = blockPos2.getZ() + i >> 4;
         LevelChunk[][] levelChunks = new LevelChunk[l - j + 1][m - k + 1];
-        for (int n = j; n <= l; ++n) {
-            for (o = k; o <= m; ++o) {
+        for (n = j; n <= l; ++n) {
+            for (int o = k; o <= m; ++o) {
                 levelChunks[n - j][o - k] = level.getChunk(n, o);
             }
         }
-        boolean bl = true;
-        for (o = blockPos.getX() >> 4; o <= blockPos2.getX() >> 4; ++o) {
-            for (int p = blockPos.getZ() >> 4; p <= blockPos2.getZ() >> 4; ++p) {
-                LevelChunk levelChunk = levelChunks[o - j][p - k];
-                if (levelChunk.isYSpaceEmpty(blockPos.getY(), blockPos2.getY())) continue;
-                bl = false;
-            }
-        }
-        if (bl) {
+        if (RenderChunkRegion.isAllEmpty(blockPos, blockPos2, j, k, levelChunks)) {
             return null;
         }
-        o = 1;
+        n = 1;
         BlockPos blockPos3 = blockPos.offset(-1, -1, -1);
         BlockPos blockPos4 = blockPos2.offset(1, 1, 1);
         return new RenderChunkRegion(level, j, k, levelChunks, blockPos3, blockPos4);
+    }
+
+    public static boolean isAllEmpty(BlockPos blockPos, BlockPos blockPos2, int i, int j, LevelChunk[][] levelChunks) {
+        for (int k = blockPos.getX() >> 4; k <= blockPos2.getX() >> 4; ++k) {
+            for (int l = blockPos.getZ() >> 4; l <= blockPos2.getZ() >> 4; ++l) {
+                LevelChunk levelChunk = levelChunks[k - i][l - j];
+                if (levelChunk.isYSpaceEmpty(blockPos.getY(), blockPos2.getY())) continue;
+                return false;
+            }
+        }
+        return true;
     }
 
     public RenderChunkRegion(Level level, int i, int j, LevelChunk[][] levelChunks, BlockPos blockPos, BlockPos blockPos2) {

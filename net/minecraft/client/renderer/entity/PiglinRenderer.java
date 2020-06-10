@@ -9,7 +9,7 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PiglinModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
-import net.minecraft.client.renderer.entity.layers.PiglinArmorLayer;
+import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -23,7 +23,7 @@ extends HumanoidMobRenderer<Mob, PiglinModel<Mob>> {
 
     public PiglinRenderer(EntityRenderDispatcher entityRenderDispatcher, boolean bl) {
         super(entityRenderDispatcher, PiglinRenderer.createModel(bl), 0.5f, 1.0019531f, 1.0f, 1.0019531f);
-        this.addLayer(new PiglinArmorLayer(this, new HumanoidModel(0.5f), new HumanoidModel(1.0f), PiglinRenderer.makeHelmetHeadModel()));
+        this.addLayer(new HumanoidArmorLayer(this, new HumanoidModel(0.5f), new HumanoidModel(1.02f)));
     }
 
     private static PiglinModel<Mob> createModel(boolean bl) {
@@ -31,13 +31,6 @@ extends HumanoidMobRenderer<Mob, PiglinModel<Mob>> {
         if (bl) {
             piglinModel.earLeft.visible = false;
         }
-        return piglinModel;
-    }
-
-    private static <T extends Mob> PiglinModel<T> makeHelmetHeadModel() {
-        PiglinModel piglinModel = new PiglinModel(1.0f, 64, 16);
-        piglinModel.earLeft.visible = false;
-        piglinModel.earRight.visible = false;
         return piglinModel;
     }
 

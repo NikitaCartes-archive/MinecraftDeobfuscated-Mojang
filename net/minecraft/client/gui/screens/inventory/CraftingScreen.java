@@ -87,6 +87,7 @@ implements RecipeUpdateListener {
     @Override
     public boolean mouseClicked(double d, double e, int i) {
         if (this.recipeBookComponent.mouseClicked(d, e, i)) {
+            this.setFocused(this.recipeBookComponent);
             return true;
         }
         if (this.widthTooNarrow && this.recipeBookComponent.isVisible()) {

@@ -115,7 +115,7 @@ public class BlockEntityWithoutLevelRenderer {
             this.shieldModel.handle().render(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f, 1.0f);
             if (bl) {
                 List<Pair<BannerPattern, DyeColor>> list = BannerBlockEntity.createPatterns(ShieldItem.getColor(itemStack), BannerBlockEntity.getItemPatterns(itemStack));
-                BannerRenderer.renderPatterns(poseStack, multiBufferSource, i, j, this.shieldModel.plate(), material, false, list);
+                BannerRenderer.renderPatterns(poseStack, multiBufferSource, i, j, this.shieldModel.plate(), material, false, list, itemStack.hasFoil());
             } else {
                 this.shieldModel.plate().render(poseStack, vertexConsumer, i, j, 1.0f, 1.0f, 1.0f, 1.0f);
             }
@@ -123,7 +123,7 @@ public class BlockEntityWithoutLevelRenderer {
         } else if (item == Items.TRIDENT) {
             poseStack.pushPose();
             poseStack.scale(1.0f, -1.0f, -1.0f);
-            VertexConsumer vertexConsumer2 = transformType == ItemTransforms.TransformType.GUI || transformType == ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND || transformType == ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND || transformType == ItemTransforms.TransformType.FIXED ? ItemRenderer.getFoilBufferDirect(multiBufferSource, this.tridentModel.renderType(TridentModel.TEXTURE), false, itemStack.hasFoil()) : ItemRenderer.getFoilBuffer(multiBufferSource, this.tridentModel.renderType(TridentModel.TEXTURE), false, itemStack.hasFoil());
+            VertexConsumer vertexConsumer2 = ItemRenderer.getFoilBufferDirect(multiBufferSource, this.tridentModel.renderType(TridentModel.TEXTURE), false, itemStack.hasFoil());
             this.tridentModel.renderToBuffer(poseStack, vertexConsumer2, i, j, 1.0f, 1.0f, 1.0f, 1.0f);
             poseStack.popPose();
         }

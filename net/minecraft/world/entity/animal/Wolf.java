@@ -13,6 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.IntRange;
@@ -48,6 +49,7 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NonTameRandomTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
@@ -111,6 +113,7 @@ implements NeutralMob {
         this.targetSelector.addGoal(5, new NonTameRandomTargetGoal<Animal>(this, Animal.class, false, PREY_SELECTOR));
         this.targetSelector.addGoal(6, new NonTameRandomTargetGoal<Turtle>(this, Turtle.class, false, Turtle.BABY_ON_LAND_SELECTOR));
         this.targetSelector.addGoal(7, new NearestAttackableTargetGoal<AbstractSkeleton>((Mob)this, AbstractSkeleton.class, false));
+        this.targetSelector.addGoal(8, new ResetUniversalAngerTargetGoal<Wolf>(this, true));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -143,7 +146,7 @@ implements NeutralMob {
         if (compoundTag.contains("CollarColor", 99)) {
             this.setCollarColor(DyeColor.byId(compoundTag.getInt("CollarColor")));
         }
-        this.readPersistentAngerSaveData(this.level, compoundTag);
+        this.readPersistentAngerSaveData((ServerLevel)this.level, compoundTag);
     }
 
     @Override
@@ -185,7 +188,7 @@ implements NeutralMob {
             this.level.broadcastEntityEvent(this, (byte)8);
         }
         if (!this.level.isClientSide) {
-            this.updatePersistentAnger();
+            this.updatePersistentAnger((ServerLevel)this.level, true);
         }
     }
 
@@ -491,6 +494,12 @@ implements NeutralMob {
     @Override
     public boolean canBeLeashed(Player player) {
         return !this.isAngry() && super.canBeLeashed(player);
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public Vec3 getLeashOffset() {
+        return new Vec3(0.0, 0.6f * this.getEyeHeight(), this.getBbWidth() * 0.4f);
     }
 
     @Override

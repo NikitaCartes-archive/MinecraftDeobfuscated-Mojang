@@ -677,7 +677,7 @@ extends Level {
 
     @Override
     public float getShade(Direction direction, boolean bl) {
-        boolean bl2 = this.dimensionType().isNether();
+        boolean bl2 = this.effects().constantAmbientLight();
         if (!bl) {
             return bl2 ? 0.9f : 1.0f;
         }

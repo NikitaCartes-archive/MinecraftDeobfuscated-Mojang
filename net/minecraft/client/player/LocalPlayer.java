@@ -162,8 +162,8 @@ extends AbstractClientPlayer {
     }
 
     @Override
-    public void stopRiding() {
-        super.stopRiding();
+    public void removeVehicle() {
+        super.removeVehicle();
         this.handsBusy = false;
     }
 
@@ -716,14 +716,14 @@ extends AbstractClientPlayer {
             this.connection.send(new ServerboundPlayerCommandPacket(this, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
         }
         this.wasFallFlying = this.isFallFlying();
-        if (this.isInWater() && this.input.shiftKeyDown) {
+        if (this.isInWater() && this.input.shiftKeyDown && this.isAffectedByFluids()) {
             this.goDownInWater();
         }
-        if (this.isUnderLiquid(FluidTags.WATER)) {
+        if (this.isEyeInFluid(FluidTags.WATER)) {
             i = this.isSpectator() ? 10 : 1;
             this.waterVisionTime = Mth.clamp(this.waterVisionTime + i, 0, 600);
         } else if (this.waterVisionTime > 0) {
-            this.isUnderLiquid(FluidTags.WATER);
+            this.isEyeInFluid(FluidTags.WATER);
             this.waterVisionTime = Mth.clamp(this.waterVisionTime - 10, 0, 600);
         }
         if (this.abilities.flying && this.isControlledCamera()) {
@@ -944,7 +944,7 @@ extends AbstractClientPlayer {
     }
 
     public float getWaterVision() {
-        if (!this.isUnderLiquid(FluidTags.WATER)) {
+        if (!this.isEyeInFluid(FluidTags.WATER)) {
             return 0.0f;
         }
         float f = 600.0f;

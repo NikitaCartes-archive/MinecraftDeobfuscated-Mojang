@@ -134,7 +134,7 @@ implements RangedAttackMob {
                 }
             } else {
                 Potion potion = null;
-                if (this.random.nextFloat() < 0.15f && this.isUnderLiquid(FluidTags.WATER) && !this.hasEffect(MobEffects.WATER_BREATHING)) {
+                if (this.random.nextFloat() < 0.15f && this.isEyeInFluid(FluidTags.WATER) && !this.hasEffect(MobEffects.WATER_BREATHING)) {
                     potion = Potions.WATER_BREATHING;
                 } else if (this.random.nextFloat() < 0.15f && (this.isOnFire() || this.getLastDamageSource() != null && this.getLastDamageSource().isFire()) && !this.hasEffect(MobEffects.FIRE_RESISTANCE)) {
                     potion = Potions.FIRE_RESISTANCE;

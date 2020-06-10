@@ -57,7 +57,7 @@ extends SkullBlock {
         }
         BlockState blockState = skullBlockEntity.getBlockState();
         boolean bl2 = bl = blockState.is(Blocks.WITHER_SKELETON_SKULL) || blockState.is(Blocks.WITHER_SKELETON_WALL_SKULL);
-        if (!bl || blockPos.getY() < 2 || level.getDifficulty() == Difficulty.PEACEFUL) {
+        if (!bl || blockPos.getY() < 0 || level.getDifficulty() == Difficulty.PEACEFUL) {
             return;
         }
         BlockPattern blockPattern = WitherSkullBlock.getOrCreateWitherFull();

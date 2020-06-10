@@ -80,7 +80,7 @@ public class Bootstrap {
 
     public static Set<String> getMissingTranslations() {
         TreeSet<String> set = new TreeSet<String>();
-        Bootstrap.checkTranslations(Registry.ATTRIBUTES, Attribute::getDescriptionId, set);
+        Bootstrap.checkTranslations(Registry.ATTRIBUTE, Attribute::getDescriptionId, set);
         Bootstrap.checkTranslations(Registry.ENTITY_TYPE, EntityType::getDescriptionId, set);
         Bootstrap.checkTranslations(Registry.MOB_EFFECT, MobEffect::getDescriptionId, set);
         Bootstrap.checkTranslations(Registry.ITEM, Item::getDescriptionId, set);

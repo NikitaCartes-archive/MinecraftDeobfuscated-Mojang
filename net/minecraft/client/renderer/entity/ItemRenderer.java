@@ -46,10 +46,14 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.HalfTransparentBlock;
+import net.minecraft.world.level.block.StainedGlassPaneBlock;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -102,7 +106,8 @@ implements ResourceManagerReloadListener {
         if (bakedModel.isCustomRenderer() || itemStack.getItem() == Items.TRIDENT && !bl2) {
             BlockEntityWithoutLevelRenderer.instance.renderByItem(itemStack, transformType, poseStack, multiBufferSource, i, j);
         } else {
-            boolean bl32 = transformType == ItemTransforms.TransformType.GUI || transformType == ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND || transformType == ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND || transformType == ItemTransforms.TransformType.FIXED;
+            Block block;
+            boolean bl32 = transformType != ItemTransforms.TransformType.GUI && !transformType.firstPerson() && itemStack.getItem() instanceof BlockItem ? !((block = ((BlockItem)itemStack.getItem()).getBlock()) instanceof HalfTransparentBlock) && !(block instanceof StainedGlassPaneBlock) : true;
             RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack, bl32);
             VertexConsumer vertexConsumer = bl32 ? ItemRenderer.getFoilBufferDirect(multiBufferSource, renderType, true, itemStack.hasFoil()) : ItemRenderer.getFoilBuffer(multiBufferSource, renderType, true, itemStack.hasFoil());
             this.renderModelLists(bakedModel, itemStack, i, j, poseStack, vertexConsumer);

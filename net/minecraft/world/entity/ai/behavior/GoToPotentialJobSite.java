@@ -47,7 +47,11 @@ extends Behavior<Villager> {
         Optional<GlobalPos> optional = villager.getBrain().getMemory(MemoryModuleType.POTENTIAL_JOB_SITE);
         optional.ifPresent(globalPos -> {
             BlockPos blockPos = globalPos.pos();
-            PoiManager poiManager = serverLevel.getServer().getLevel(globalPos.dimension()).getPoiManager();
+            ServerLevel serverLevel2 = serverLevel.getServer().getLevel(globalPos.dimension());
+            if (serverLevel2 == null) {
+                return;
+            }
+            PoiManager poiManager = serverLevel2.getPoiManager();
             if (poiManager.exists(blockPos, poiType -> true)) {
                 poiManager.release(blockPos);
             }

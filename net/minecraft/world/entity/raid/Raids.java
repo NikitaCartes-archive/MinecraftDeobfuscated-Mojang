@@ -85,7 +85,7 @@ extends SavedData {
             return null;
         }
         DimensionType dimensionType = serverPlayer.level.dimensionType();
-        if (dimensionType.isNether()) {
+        if (!dimensionType.hasRaids()) {
             return null;
         }
         BlockPos blockPos = serverPlayer.blockPosition();

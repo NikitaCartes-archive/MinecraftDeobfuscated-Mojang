@@ -267,7 +267,7 @@ extends RealmsScreen {
                 if (this.warningURL != null) {
                     if (this.hoverWarning) {
                         m = 7107012;
-                        component = component.mutableCopy().withStyle(ChatFormatting.STRIKETHROUGH);
+                        component = component.copy().withStyle(ChatFormatting.STRIKETHROUGH);
                     } else {
                         m = 0x3366BB;
                     }

@@ -69,10 +69,7 @@ extends EntityRenderer<EnderDragon> {
         this.model.renderToBuffer(poseStack, vertexConsumer3, i, OverlayTexture.NO_OVERLAY, 1.0f, 1.0f, 1.0f, 1.0f);
         if (enderDragon.dragonDeathTime > 0) {
             float l = ((float)enderDragon.dragonDeathTime + g) / 200.0f;
-            float m = 0.0f;
-            if (l > 0.8f) {
-                m = (l - 0.8f) / 0.2f;
-            }
+            float m = Math.min(l > 0.8f ? (l - 0.8f) / 0.2f : 0.0f, 1.0f);
             Random random = new Random(432L);
             VertexConsumer vertexConsumer4 = multiBufferSource.getBuffer(RenderType.lightning());
             poseStack.pushPose();

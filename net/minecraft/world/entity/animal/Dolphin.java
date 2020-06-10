@@ -246,6 +246,7 @@ extends WaterAnimal {
     public void tick() {
         super.tick();
         if (this.isNoAi()) {
+            this.setAirSupply(this.getMaxAirSupply());
             return;
         }
         if (this.isInWaterRainOrBubble()) {

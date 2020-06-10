@@ -22,6 +22,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.phys.Vec3;
 
 @Environment(value=EnvType.CLIENT)
 public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>>
@@ -74,12 +75,13 @@ extends LivingEntityRenderer<T, M> {
         double l = Mth.lerp((double)f, entity.yo + (double)entity.getEyeHeight() * 0.7, entity.getY() + (double)entity.getEyeHeight() * 0.7) - i * 0.5 - 0.25;
         double m = Mth.lerp((double)f, entity.zo, entity.getZ()) - h * 0.7 + g * 0.5 * j;
         double n = (double)(Mth.lerp(f, ((Mob)mob).yBodyRot, ((Mob)mob).yBodyRotO) * ((float)Math.PI / 180)) + 1.5707963267948966;
-        g = Math.cos(n) * (double)((Entity)mob).getBbWidth() * 0.4;
-        h = Math.sin(n) * (double)((Entity)mob).getBbWidth() * 0.4;
+        Vec3 vec3 = ((Entity)mob).getLeashOffset();
+        g = Math.cos(n) * vec3.z + Math.sin(n) * vec3.x;
+        h = Math.sin(n) * vec3.z - Math.cos(n) * vec3.x;
         double o = Mth.lerp((double)f, ((Mob)mob).xo, ((Entity)mob).getX()) + g;
-        double p = Mth.lerp((double)f, ((Mob)mob).yo, ((Entity)mob).getY());
+        double p = Mth.lerp((double)f, ((Mob)mob).yo, ((Entity)mob).getY()) + vec3.y;
         double q = Mth.lerp((double)f, ((Mob)mob).zo, ((Entity)mob).getZ()) + h;
-        poseStack.translate(g, -(1.6 - (double)((Entity)mob).getBbHeight()) * 0.5, h);
+        poseStack.translate(g, vec3.y, h);
         float r = (float)(k - o);
         float s = (float)(l - p);
         float t = (float)(m - q);
@@ -123,7 +125,7 @@ extends LivingEntityRenderer<T, M> {
         }
         float s = (float)m / (float)l;
         float t = f * s;
-        float u = g * (s * s + s) * 0.5f + ((float)l - (float)m) / ((float)l * 0.75f) + 0.125f;
+        float u = g > 0.0f ? g * s * s : g - g * (1.0f - s) * (1.0f - s);
         float v = h * s;
         if (!bl) {
             vertexConsumer.vertex(matrix4f, t + n, u + j - k, v - o).color(p, q, r, 1.0f).uv2(i).endVertex();

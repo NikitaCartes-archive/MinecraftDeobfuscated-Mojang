@@ -34,6 +34,7 @@ import net.minecraft.client.gui.screens.AlertScreen;
 import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.ErrorScreen;
+import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.ProgressScreen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
@@ -315,6 +316,7 @@ extends ObjectSelectionList<WorldListEntry> {
         }
 
         public void recreateWorld() {
+            this.queueLoadScreen();
             RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
             try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(this.summary.getLevelId());
                  Minecraft.ServerStem serverStem = this.minecraft.makeServerStem(registryHolder, Minecraft::loadDataPacks, Minecraft::loadWorldData, false, levelStorageAccess);){
@@ -335,8 +337,13 @@ extends ObjectSelectionList<WorldListEntry> {
         private void loadWorld() {
             this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0f));
             if (this.minecraft.getLevelSource().levelExists(this.summary.getLevelId())) {
+                this.queueLoadScreen();
                 this.minecraft.loadLevel(this.summary.getLevelId());
             }
+        }
+
+        private void queueLoadScreen() {
+            this.minecraft.forceSetScreen(new GenericDirtMessageScreen(new TranslatableComponent("selectWorld.data_read")));
         }
 
         /*

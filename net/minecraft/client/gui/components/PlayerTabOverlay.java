@@ -51,7 +51,7 @@ extends GuiComponent {
 
     public Component getNameForDisplay(PlayerInfo playerInfo) {
         if (playerInfo.getTabListDisplayName() != null) {
-            return this.decorateName(playerInfo, playerInfo.getTabListDisplayName().mutableCopy());
+            return this.decorateName(playerInfo, playerInfo.getTabListDisplayName().copy());
         }
         return this.decorateName(playerInfo, PlayerTeam.formatNameForTeam(playerInfo.getTeam(), new TextComponent(playerInfo.getProfile().getName())));
     }

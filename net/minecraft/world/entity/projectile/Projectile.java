@@ -76,7 +76,7 @@ extends Entity {
     private boolean checkLeftOwner() {
         Entity entity2 = this.getOwner();
         if (entity2 != null) {
-            for (Entity entity22 : this.level.getEntities(this, this.getBoundingBox().inflate(1.0), entity -> !entity.isSpectator() && entity.isPickable())) {
+            for (Entity entity22 : this.level.getEntities(this, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0), entity -> !entity.isSpectator() && entity.isPickable())) {
                 if (entity22.getRootVehicle() != entity2.getRootVehicle()) continue;
                 return false;
             }

@@ -84,11 +84,13 @@ public abstract class Behavior<E extends LivingEntity> {
     }
 
     private boolean hasRequiredMemories(E livingEntity) {
-        return this.entryCondition.entrySet().stream().allMatch(entry -> {
-            MemoryModuleType memoryModuleType = (MemoryModuleType)entry.getKey();
-            MemoryStatus memoryStatus = (MemoryStatus)((Object)((Object)entry.getValue()));
-            return livingEntity.getBrain().checkMemory(memoryModuleType, memoryStatus);
-        });
+        for (Map.Entry<MemoryModuleType<?>, MemoryStatus> entry : this.entryCondition.entrySet()) {
+            MemoryModuleType<?> memoryModuleType = entry.getKey();
+            MemoryStatus memoryStatus = entry.getValue();
+            if (((LivingEntity)livingEntity).getBrain().checkMemory(memoryModuleType, memoryStatus)) continue;
+            return false;
+        }
+        return true;
     }
 
     public static enum Status {

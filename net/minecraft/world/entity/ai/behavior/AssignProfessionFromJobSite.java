@@ -4,6 +4,7 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
@@ -28,18 +29,18 @@ extends Behavior<Villager> {
     }
 
     @Override
-    protected void start(ServerLevel serverLevel, Villager villager, long l) {
+    protected void start(ServerLevel serverLevel2, Villager villager, long l) {
         GlobalPos globalPos = villager.getBrain().getMemory(MemoryModuleType.POTENTIAL_JOB_SITE).get();
         villager.getBrain().eraseMemory(MemoryModuleType.POTENTIAL_JOB_SITE);
         villager.getBrain().setMemory(MemoryModuleType.JOB_SITE, globalPos);
         if (villager.getVillagerData().getProfession() != VillagerProfession.NONE) {
             return;
         }
-        MinecraftServer minecraftServer = serverLevel.getServer();
-        minecraftServer.getLevel(globalPos.dimension()).getPoiManager().getType(globalPos.pos()).ifPresent(poiType -> Registry.VILLAGER_PROFESSION.stream().filter(villagerProfession -> villagerProfession.getJobPoiType() == poiType).findFirst().ifPresent(villagerProfession -> {
+        MinecraftServer minecraftServer = serverLevel2.getServer();
+        Optional.ofNullable(minecraftServer.getLevel(globalPos.dimension())).flatMap(serverLevel -> serverLevel.getPoiManager().getType(globalPos.pos())).flatMap(poiType -> Registry.VILLAGER_PROFESSION.stream().filter(villagerProfession -> villagerProfession.getJobPoiType() == poiType).findFirst()).ifPresent(villagerProfession -> {
             villager.setVillagerData(villager.getVillagerData().setProfession((VillagerProfession)villagerProfession));
-            villager.refreshBrain(serverLevel);
-        }));
+            villager.refreshBrain(serverLevel2);
+        });
     }
 }
 

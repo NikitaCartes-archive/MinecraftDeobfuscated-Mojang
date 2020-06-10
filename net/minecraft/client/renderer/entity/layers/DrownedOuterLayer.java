@@ -11,10 +11,10 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.Drowned;
 
 @Environment(value=EnvType.CLIENT)
-public class DrownedOuterLayer<T extends Zombie>
+public class DrownedOuterLayer<T extends Drowned>
 extends RenderLayer<T, DrownedModel<T>> {
     private static final ResourceLocation DROWNED_OUTER_LAYER_LOCATION = new ResourceLocation("textures/entity/zombie/drowned_outer_layer.png");
     private final DrownedModel<T> model = new DrownedModel(0.25f, 0.0f, 64, 64);
@@ -24,8 +24,8 @@ extends RenderLayer<T, DrownedModel<T>> {
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T zombie, float f, float g, float h, float j, float k, float l) {
-        DrownedOuterLayer.coloredCutoutModelCopyLayerRender(this.getParentModel(), this.model, DROWNED_OUTER_LAYER_LOCATION, poseStack, multiBufferSource, i, zombie, f, g, j, k, l, h, 1.0f, 1.0f, 1.0f);
+    public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T drowned, float f, float g, float h, float j, float k, float l) {
+        DrownedOuterLayer.coloredCutoutModelCopyLayerRender(this.getParentModel(), this.model, DROWNED_OUTER_LAYER_LOCATION, poseStack, multiBufferSource, i, drowned, f, g, j, k, l, h, 1.0f, 1.0f, 1.0f);
     }
 }
 

@@ -3,9 +3,10 @@
  */
 package net.minecraft.resources;
 
-import com.mojang.serialization.Codec;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.MapCodec;
 import java.util.Optional;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -13,6 +14,7 @@ import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.DelegatingOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Codecs;
 
 public class RegistryWriteOps<T>
 extends DelegatingOps<T> {
@@ -27,13 +29,18 @@ extends DelegatingOps<T> {
         this.registryHolder = registryAccess;
     }
 
-    protected <E> DataResult<T> encode(E object, T object2, ResourceKey<Registry<E>> resourceKey, Codec<E> codec) {
+    protected <E> DataResult<T> encode(E object, T object2, ResourceKey<Registry<E>> resourceKey, MapCodec<E> mapCodec) {
+        WritableRegistry<E> writableRegistry;
         Optional<ResourceKey<E>> optional2;
         Optional<WritableRegistry<E>> optional = this.registryHolder.registry(resourceKey);
-        if (optional.isPresent() && (optional2 = optional.get().getResourceKey(object)).isPresent()) {
-            return ResourceLocation.CODEC.encode(optional2.get().location(), this.delegate, object2);
+        if (optional.isPresent() && (optional2 = (writableRegistry = optional.get()).getResourceKey(object)).isPresent()) {
+            ResourceKey<E> resourceKey2 = optional2.get();
+            if (writableRegistry.persistent(resourceKey2)) {
+                return Codecs.withName(resourceKey, mapCodec).codec().encode(Pair.of(resourceKey2, object), this.delegate, object2);
+            }
+            return ResourceLocation.CODEC.encode(resourceKey2.location(), this.delegate, object2);
         }
-        return codec.encode(object, this.delegate, object2);
+        return mapCodec.codec().encode(object, this.delegate, object2);
     }
 }
 

@@ -14,12 +14,12 @@ import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.server.packs.resources.SimpleResource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -46,7 +46,7 @@ public class Screenshot {
         File file2 = new File(file, "screenshots");
         file2.mkdir();
         File file3 = string == null ? Screenshot.getFile(file2) : new File(file2, string);
-        SimpleResource.IO_EXECUTOR.execute(() -> {
+        Util.ioPool().execute(() -> {
             try {
                 nativeImage.writeToFile(file3);
                 MutableComponent component = new TextComponent(file3.getName()).withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file3.getAbsolutePath())));

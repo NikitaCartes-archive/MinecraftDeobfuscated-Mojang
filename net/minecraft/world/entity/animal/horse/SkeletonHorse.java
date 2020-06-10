@@ -49,7 +49,7 @@ extends AbstractHorse {
     @Override
     protected SoundEvent getAmbientSound() {
         super.getAmbientSound();
-        if (this.isUnderLiquid(FluidTags.WATER)) {
+        if (this.isEyeInFluid(FluidTags.WATER)) {
             return SoundEvents.SKELETON_HORSE_AMBIENT_WATER;
         }
         return SoundEvents.SKELETON_HORSE_AMBIENT;

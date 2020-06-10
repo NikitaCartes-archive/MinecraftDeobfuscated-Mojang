@@ -60,7 +60,7 @@ implements ArgumentType<ResourceLocation> {
 
     public static Attribute getAttribute(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
         ResourceLocation resourceLocation = commandContext.getArgument(string, ResourceLocation.class);
-        return Registry.ATTRIBUTES.getOptional(resourceLocation).orElseThrow(() -> ERROR_UNKNOWN_ATTRIBUTE.create(resourceLocation));
+        return Registry.ATTRIBUTE.getOptional(resourceLocation).orElseThrow(() -> ERROR_UNKNOWN_ATTRIBUTE.create(resourceLocation));
     }
 
     public static ResourceLocation getId(CommandContext<CommandSourceStack> commandContext, String string) {

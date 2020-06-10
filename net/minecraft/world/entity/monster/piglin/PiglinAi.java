@@ -176,9 +176,16 @@ public class PiglinAi {
     }
 
     protected static void pickUpItem(Piglin piglin, ItemEntity itemEntity) {
+        ItemStack itemStack;
         PiglinAi.stopWalking(piglin);
-        piglin.take(itemEntity, 1);
-        ItemStack itemStack = PiglinAi.removeOneItemFromItemEntity(itemEntity);
+        if (itemEntity.getItem().getItem() == Items.GOLD_NUGGET) {
+            piglin.take(itemEntity, itemEntity.getItem().getCount());
+            itemStack = itemEntity.getItem();
+            itemEntity.remove();
+        } else {
+            piglin.take(itemEntity, 1);
+            itemStack = PiglinAi.removeOneItemFromItemEntity(itemEntity);
+        }
         Item item = itemStack.getItem();
         if (PiglinAi.isLovedItem(item)) {
             if (PiglinAi.isHoldingItemInOffHand(piglin)) {
@@ -359,12 +366,15 @@ public class PiglinAi {
         return Optional.empty();
     }
 
-    public static void angerNearbyPiglinsThatSee(Player player) {
-        if (!PiglinAi.isAttackAllowed(player)) {
-            return;
-        }
+    public static void angerNearbyPiglins(Player player, boolean bl) {
         List<Piglin> list = player.level.getEntitiesOfClass(Piglin.class, player.getBoundingBox().inflate(16.0));
-        list.stream().filter(PiglinAi::isIdle).filter(piglin -> BehaviorUtils.canSee(piglin, player)).forEach(piglin -> PiglinAi.setAngerTarget(piglin, player));
+        list.stream().filter(PiglinAi::isIdle).filter(piglin -> !bl || BehaviorUtils.canSee(piglin, player)).forEach(piglin -> {
+            if (piglin.level.getGameRules().getBoolean(GameRules.RULE_UNIVERSAL_ANGER)) {
+                PiglinAi.setAngerTargetToNearestTargetablePlayerIfFound(piglin, player);
+            } else {
+                PiglinAi.setAngerTarget(piglin, player);
+            }
+        });
     }
 
     public static InteractionResult mobInteract(Piglin piglin, Player player, InteractionHand interactionHand) {
@@ -426,8 +436,13 @@ public class PiglinAi {
         if (BehaviorUtils.isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(piglin, livingEntity, 4.0)) {
             return;
         }
-        PiglinAi.setAngerTarget(piglin, livingEntity);
-        PiglinAi.broadcastAngerTarget(piglin, livingEntity);
+        if (livingEntity.getType() == EntityType.PLAYER && piglin.level.getGameRules().getBoolean(GameRules.RULE_UNIVERSAL_ANGER)) {
+            PiglinAi.setAngerTargetToNearestTargetablePlayerIfFound(piglin, livingEntity);
+            PiglinAi.broadcastUniversalAnger(piglin);
+        } else {
+            PiglinAi.setAngerTarget(piglin, livingEntity);
+            PiglinAi.broadcastAngerTarget(piglin, livingEntity);
+        }
     }
 
     private static void playActivitySound(Piglin piglin) {
@@ -504,11 +519,18 @@ public class PiglinAi {
         });
     }
 
+    protected static void broadcastUniversalAnger(Piglin piglin2) {
+        PiglinAi.getAdultPiglins(piglin2).forEach(piglin -> PiglinAi.getNearestVisibleTargetablePlayer(piglin).ifPresent(player -> PiglinAi.setAngerTarget(piglin, player)));
+    }
+
     protected static void broadcastDontKillAnyMoreHoglinsForAWhile(Piglin piglin) {
         PiglinAi.getVisibleAdultPiglins(piglin).forEach(PiglinAi::dontKillAnyMoreHoglinsForAWhile);
     }
 
     protected static void setAngerTarget(Piglin piglin, LivingEntity livingEntity) {
+        if (!PiglinAi.isAttackAllowed(livingEntity)) {
+            return;
+        }
         piglin.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
         piglin.getBrain().setMemoryWithExpiry(MemoryModuleType.ANGRY_AT, livingEntity.getUUID(), 600L);
         if (livingEntity.getType() == EntityType.HOGLIN) {
@@ -516,6 +538,15 @@ public class PiglinAi {
         }
         if (livingEntity.getType() == EntityType.PLAYER && piglin.level.getGameRules().getBoolean(GameRules.RULE_UNIVERSAL_ANGER)) {
             piglin.getBrain().setMemoryWithExpiry(MemoryModuleType.UNIVERSAL_ANGER, true, 600L);
+        }
+    }
+
+    private static void setAngerTargetToNearestTargetablePlayerIfFound(Piglin piglin, LivingEntity livingEntity) {
+        Optional<Player> optional = PiglinAi.getNearestVisibleTargetablePlayer(piglin);
+        if (optional.isPresent()) {
+            PiglinAi.setAngerTarget(piglin, optional.get());
+        } else {
+            PiglinAi.setAngerTarget(piglin, livingEntity);
         }
     }
 
@@ -535,6 +566,13 @@ public class PiglinAi {
     public static Optional<LivingEntity> getAvoidTarget(Piglin piglin) {
         if (piglin.getBrain().hasMemoryValue(MemoryModuleType.AVOID_TARGET)) {
             return piglin.getBrain().getMemory(MemoryModuleType.AVOID_TARGET);
+        }
+        return Optional.empty();
+    }
+
+    public static Optional<Player> getNearestVisibleTargetablePlayer(Piglin piglin) {
+        if (piglin.getBrain().hasMemoryValue(MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER)) {
+            return piglin.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER);
         }
         return Optional.empty();
     }

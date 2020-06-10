@@ -629,6 +629,12 @@ extends Animal {
     }
 
     @Override
+    @Environment(value=EnvType.CLIENT)
+    public Vec3 getLeashOffset() {
+        return new Vec3(0.0, 0.55f * this.getEyeHeight(), this.getBbWidth() * 0.4f);
+    }
+
+    @Override
     public /* synthetic */ AgableMob getBreedOffspring(AgableMob agableMob) {
         return this.getBreedOffspring(agableMob);
     }

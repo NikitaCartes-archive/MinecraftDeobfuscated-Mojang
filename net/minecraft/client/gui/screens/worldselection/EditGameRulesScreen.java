@@ -5,6 +5,7 @@ package net.minecraft.client.gui.screens.worldselection;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -158,15 +159,12 @@ extends Screen {
 
     @Environment(value=EnvType.CLIENT)
     public class IntegerRuleEntry
-    extends RuleEntry {
-        private final Component label;
+    extends GameRuleEntry {
         private final EditBox input;
-        private final List<? extends GuiEventListener> children;
 
         public IntegerRuleEntry(Component component, List<FormattedText> list, String string2, GameRules.IntegerValue integerValue) {
-            super(list);
-            this.label = component;
-            this.input = new EditBox(((EditGameRulesScreen)EditGameRulesScreen.this).minecraft.font, 10, 5, 42, 20, component.mutableCopy().append("\n").append(string2).append("\n"));
+            super(list, component);
+            this.input = new EditBox(((EditGameRulesScreen)EditGameRulesScreen.this).minecraft.font, 10, 5, 42, 20, component.copy().append("\n").append(string2).append("\n"));
             this.input.setValue(Integer.toString(integerValue.get()));
             this.input.setResponder(string -> {
                 if (integerValue.tryDeserialize((String)string)) {
@@ -177,20 +175,76 @@ extends Screen {
                     EditGameRulesScreen.this.markInvalid(this);
                 }
             });
-            this.children = ImmutableList.of(this.input);
+            this.children.add(this.input);
         }
 
         @Override
         public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            ((EditGameRulesScreen)EditGameRulesScreen.this).minecraft.font.draw(poseStack, this.label, (float)k, (float)(j + 5), 0xFFFFFF);
+            this.renderLabel(poseStack, j, k);
             this.input.x = k + l - 44;
             this.input.y = j;
             this.input.render(poseStack, n, o, f);
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public class BooleanRuleEntry
+    extends GameRuleEntry {
+        private final Button checkbox;
+
+        public BooleanRuleEntry(final Component component, List<FormattedText> list, final String string, final GameRules.BooleanValue booleanValue) {
+            super(list, component);
+            this.checkbox = new Button(10, 5, 44, 20, CommonComponents.optionStatus(booleanValue.get()), button -> {
+                boolean bl = !booleanValue.get();
+                booleanValue.set(bl, null);
+                button.setMessage(CommonComponents.optionStatus(booleanValue.get()));
+            }){
+
+                @Override
+                protected MutableComponent createNarrationMessage() {
+                    return BooleanRuleEntry.this.createFullMessage(component, booleanValue.get()).copy().append("\n").append(string);
+                }
+            };
+            this.children.add(this.checkbox);
+        }
+
+        private MutableComponent createFullMessage(Component component, boolean bl) {
+            return new TextComponent("").append(component).append(": ").append(CommonComponents.optionStatus(bl));
+        }
+
+        @Override
+        public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+            this.renderLabel(poseStack, j, k);
+            this.checkbox.x = k + l - 45;
+            this.checkbox.y = j;
+            this.checkbox.render(poseStack, n, o, f);
+        }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public abstract class GameRuleEntry
+    extends RuleEntry {
+        private final List<FormattedText> label;
+        protected final List<GuiEventListener> children;
+
+        public GameRuleEntry(List<FormattedText> list, Component component) {
+            super(list);
+            this.children = Lists.newArrayList();
+            this.label = ((EditGameRulesScreen)EditGameRulesScreen.this).minecraft.font.split(component, 175);
         }
 
         @Override
         public List<? extends GuiEventListener> children() {
             return this.children;
+        }
+
+        protected void renderLabel(PoseStack poseStack, int i, int j) {
+            if (this.label.size() == 1) {
+                ((EditGameRulesScreen)EditGameRulesScreen.this).minecraft.font.draw(poseStack, this.label.get(0), (float)j, (float)(i + 5), 0xFFFFFF);
+            } else if (this.label.size() >= 2) {
+                ((EditGameRulesScreen)EditGameRulesScreen.this).minecraft.font.draw(poseStack, this.label.get(0), (float)j, (float)i, 0xFFFFFF);
+                ((EditGameRulesScreen)EditGameRulesScreen.this).minecraft.font.draw(poseStack, this.label.get(1), (float)j, (float)(i + 10), 0xFFFFFF);
+            }
         }
     }
 
@@ -198,45 +252,6 @@ extends Screen {
     @Environment(value=EnvType.CLIENT)
     static interface EntryFactory<T extends GameRules.Value<T>> {
         public RuleEntry create(Component var1, List<FormattedText> var2, String var3, T var4);
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public class BooleanRuleEntry
-    extends RuleEntry {
-        private final Button checkbox;
-        private final List<? extends GuiEventListener> children;
-
-        public BooleanRuleEntry(Component component, List<FormattedText> list, final String string, GameRules.BooleanValue booleanValue) {
-            super(list);
-            this.checkbox = new Button(10, 5, 220, 20, this.getMessage(component, booleanValue.get()), button -> {
-                boolean bl = !booleanValue.get();
-                booleanValue.set(bl, null);
-                button.setMessage(this.getMessage(component, bl));
-            }){
-
-                @Override
-                protected MutableComponent createNarrationMessage() {
-                    return this.getMessage().mutableCopy().append("\n").append(string);
-                }
-            };
-            this.children = ImmutableList.of(this.checkbox);
-        }
-
-        private Component getMessage(Component component, boolean bl) {
-            return component.mutableCopy().append(": ").append(CommonComponents.optionStatus(bl));
-        }
-
-        @Override
-        public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            this.checkbox.x = k;
-            this.checkbox.y = j;
-            this.checkbox.render(poseStack, n, o, f);
-        }
-
-        @Override
-        public List<? extends GuiEventListener> children() {
-            return this.children;
-        }
     }
 
     @Environment(value=EnvType.CLIENT)

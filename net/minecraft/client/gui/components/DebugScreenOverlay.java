@@ -292,7 +292,7 @@ extends GuiComponent {
     }
 
     private Level getLevel() {
-        return DataFixUtils.orElse(Optional.ofNullable(this.minecraft.getSingleplayerServer()).map(integratedServer -> integratedServer.getLevel(this.minecraft.level.dimension())), this.minecraft.level);
+        return DataFixUtils.orElse(Optional.ofNullable(this.minecraft.getSingleplayerServer()).flatMap(integratedServer -> Optional.ofNullable(integratedServer.getLevel(this.minecraft.level.dimension()))), this.minecraft.level);
     }
 
     @Nullable

@@ -70,6 +70,7 @@ import org.jetbrains.annotations.Nullable;
 public class LevelChunk
 implements ChunkAccess {
     private static final Logger LOGGER = LogManager.getLogger();
+    @Nullable
     public static final LevelChunkSection EMPTY_SECTION = null;
     private final LevelChunkSection[] sections = new LevelChunkSection[16];
     private ChunkBiomeContainer biomes;
@@ -428,8 +429,11 @@ implements ChunkAccess {
         i = Mth.clamp(i, 0, this.entitySections.length - 1);
         j = Mth.clamp(j, 0, this.entitySections.length - 1);
         for (int k = i; k <= j; ++k) {
-            if (this.entitySections[k].isEmpty()) continue;
-            for (Entity entity2 : this.entitySections[k]) {
+            ClassInstanceMultiMap<Entity> classInstanceMultiMap = this.entitySections[k];
+            List<Entity> list2 = classInstanceMultiMap.getAllInstances();
+            int l = list2.size();
+            for (int m = 0; m < l; ++m) {
+                Entity entity2 = list2.get(m);
                 if (!entity2.getBoundingBox().intersects(aABB) || entity2 == entity) continue;
                 if (predicate == null || predicate.test(entity2)) {
                     list.add(entity2);

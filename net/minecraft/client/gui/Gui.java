@@ -792,7 +792,7 @@ extends GuiComponent {
         this.minecraft.getProfiler().popPush("air");
         z = player.getAirSupply();
         aa = player.getMaxAirSupply();
-        if (player.isUnderLiquid(FluidTags.WATER) || z < aa) {
+        if (player.isEyeInFluid(FluidTags.WATER) || z < aa) {
             ab = this.getVisibleVehicleHeartRows(y) - 1;
             t -= ab * 10;
             ac = Mth.ceil((double)(z - 2) * 10.0 / (double)aa);

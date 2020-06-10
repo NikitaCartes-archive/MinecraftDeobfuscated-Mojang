@@ -41,7 +41,7 @@ implements Packet<ClientGamePacketListener> {
         int i = friendlyByteBuf.readInt();
         for (int j = 0; j < i; ++j) {
             ResourceLocation resourceLocation = friendlyByteBuf.readResourceLocation();
-            Attribute attribute = Registry.ATTRIBUTES.get(resourceLocation);
+            Attribute attribute = Registry.ATTRIBUTE.get(resourceLocation);
             double d = friendlyByteBuf.readDouble();
             ArrayList<AttributeModifier> list = Lists.newArrayList();
             int k = friendlyByteBuf.readVarInt();
@@ -58,7 +58,7 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf.writeVarInt(this.entityId);
         friendlyByteBuf.writeInt(this.attributes.size());
         for (AttributeSnapshot attributeSnapshot : this.attributes) {
-            friendlyByteBuf.writeResourceLocation(Registry.ATTRIBUTES.getKey(attributeSnapshot.getAttribute()));
+            friendlyByteBuf.writeResourceLocation(Registry.ATTRIBUTE.getKey(attributeSnapshot.getAttribute()));
             friendlyByteBuf.writeDouble(attributeSnapshot.getBase());
             friendlyByteBuf.writeVarInt(attributeSnapshot.getModifiers().size());
             for (AttributeModifier attributeModifier : attributeSnapshot.getModifiers()) {

@@ -44,7 +44,6 @@ public class GlStateManager {
     private static final PolygonOffsetState POLY_OFFSET = new PolygonOffsetState();
     private static final ColorLogicState COLOR_LOGIC = new ColorLogicState();
     private static final TexGenState TEX_GEN = new TexGenState();
-    private static final ClearState CLEAR = new ClearState();
     private static final StencilState STENCIL = new StencilState();
     private static final FloatBuffer FLOAT_ARG_BUFFER = MemoryTracker.createFloatBuffer(4);
     private static int activeTexture;
@@ -1024,29 +1023,17 @@ public class GlStateManager {
 
     public static void _clearDepth(double d) {
         RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-        if (d != GlStateManager.CLEAR.depth) {
-            GlStateManager.CLEAR.depth = d;
-            GL11.glClearDepth(d);
-        }
+        GL11.glClearDepth(d);
     }
 
     public static void _clearColor(float f, float g, float h, float i) {
         RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-        if (f != GlStateManager.CLEAR.color.r || g != GlStateManager.CLEAR.color.g || h != GlStateManager.CLEAR.color.b || i != GlStateManager.CLEAR.color.a) {
-            GlStateManager.CLEAR.color.r = f;
-            GlStateManager.CLEAR.color.g = g;
-            GlStateManager.CLEAR.color.b = h;
-            GlStateManager.CLEAR.color.a = i;
-            GL11.glClearColor(f, g, h, i);
-        }
+        GL11.glClearColor(f, g, h, i);
     }
 
     public static void _clearStencil(int i) {
         RenderSystem.assertThread(RenderSystem::isOnRenderThread);
-        if (i != GlStateManager.CLEAR.stencil) {
-            GlStateManager.CLEAR.stencil = i;
-            GL11.glClearStencil(i);
-        }
+        GL11.glClearStencil(i);
     }
 
     public static void _clear(int i, boolean bl) {
@@ -1425,16 +1412,6 @@ public class GlStateManager {
         public int mask = -1;
 
         private StencilFunc() {
-        }
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    static class ClearState {
-        public double depth = 1.0;
-        public final Color color = new Color(0.0f, 0.0f, 0.0f, 0.0f);
-        public int stencil;
-
-        private ClearState() {
         }
     }
 

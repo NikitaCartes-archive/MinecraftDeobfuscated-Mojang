@@ -23,7 +23,7 @@ public class Attributes {
     public static final Attribute JUMP_STRENGTH = Attributes.register("horse.jump_strength", new RangedAttribute("attribute.name.horse.jump_strength", 0.7, 0.0, 2.0).setSyncable(true));
 
     private static Attribute register(String string, Attribute attribute) {
-        return Registry.register(Registry.ATTRIBUTES, string, attribute);
+        return Registry.register(Registry.ATTRIBUTE, string, attribute);
     }
 }
 

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -54,7 +55,7 @@ public class ServerStatusPinger {
     private static final Logger LOGGER = LogManager.getLogger();
     private final List<Connection> connections = Collections.synchronizedList(Lists.newArrayList());
 
-    public void pingServer(final ServerData serverData) throws UnknownHostException {
+    public void pingServer(final ServerData serverData, final Runnable runnable) throws UnknownHostException {
         ServerAddress serverAddress = ServerAddress.parseString(serverData.ip);
         final Connection connection = Connection.connectToServer(InetAddress.getByName(serverAddress.getHost()), serverAddress.getPort(), false);
         this.connections.add(connection);
@@ -97,15 +98,18 @@ public class ServerStatusPinger {
                 } else {
                     serverData.status = new TranslatableComponent("multiplayer.status.unknown").withStyle(ChatFormatting.DARK_GRAY);
                 }
+                String string = null;
                 if (serverStatus.getFavicon() != null) {
-                    String string = serverStatus.getFavicon();
-                    if (string.startsWith("data:image/png;base64,")) {
-                        serverData.setIconB64(string.substring("data:image/png;base64,".length()));
+                    String string2 = serverStatus.getFavicon();
+                    if (string2.startsWith("data:image/png;base64,")) {
+                        string = string2.substring("data:image/png;base64,".length());
                     } else {
                         LOGGER.error("Invalid server icon (unknown format)");
                     }
-                } else {
-                    serverData.setIconB64(null);
+                }
+                if (!Objects.equals(string, serverData.getIconB64())) {
+                    serverData.setIconB64(string);
+                    runnable.run();
                 }
                 this.pingStart = Util.getMillis();
                 connection.send(new ServerboundPingRequestPacket(this.pingStart));

@@ -153,7 +153,7 @@ extends FlowingFluid {
 
     @Override
     public int getTickDelay(LevelReader levelReader) {
-        return levelReader.dimensionType().hasCeiling() ? 10 : 30;
+        return levelReader.dimensionType().ultraWarm() ? 10 : 30;
     }
 
     @Override

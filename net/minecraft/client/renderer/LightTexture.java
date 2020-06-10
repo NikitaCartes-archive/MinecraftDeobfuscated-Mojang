@@ -105,7 +105,7 @@ implements AutoCloseable {
                 float q = o * ((o * 0.6f + 0.4f) * 0.6f + 0.4f);
                 float r = o * (o * o * 0.6f + 0.4f);
                 vector3f2.set(p, q, r);
-                if (clientLevel.dimensionType().isEnd()) {
+                if (clientLevel.effects().forceBrightLightmap()) {
                     vector3f2.lerp(new Vector3f(0.99f, 1.12f, 1.0f), 0.25f);
                 } else {
                     Vector3f vector3f3 = vector3f.copy();

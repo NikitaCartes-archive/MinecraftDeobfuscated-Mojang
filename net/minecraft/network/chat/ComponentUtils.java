@@ -10,6 +10,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Function;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
@@ -22,6 +24,7 @@ import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
 public class ComponentUtils {
+    @Environment(value=EnvType.CLIENT)
     public static MutableComponent mergeStyles(MutableComponent mutableComponent, Style style) {
         if (style.isEmpty()) {
             return mutableComponent;
@@ -38,13 +41,13 @@ public class ComponentUtils {
 
     public static MutableComponent updateForEntity(@Nullable CommandSourceStack commandSourceStack, Component component, @Nullable Entity entity, int i) throws CommandSyntaxException {
         if (i > 100) {
-            return component.mutableCopy();
+            return component.copy();
         }
-        MutableComponent mutableComponent = component instanceof ContextAwareComponent ? ((ContextAwareComponent)((Object)component)).resolve(commandSourceStack, entity, i + 1) : component.toMutable();
+        MutableComponent mutableComponent = component instanceof ContextAwareComponent ? ((ContextAwareComponent)((Object)component)).resolve(commandSourceStack, entity, i + 1) : component.plainCopy();
         for (Component component2 : component.getSiblings()) {
             mutableComponent.append(ComponentUtils.updateForEntity(commandSourceStack, component2, entity, i + 1));
         }
-        return ComponentUtils.mergeStyles(mutableComponent, ComponentUtils.resolveStyle(commandSourceStack, component.getStyle(), entity, i));
+        return mutableComponent.withStyle(ComponentUtils.resolveStyle(commandSourceStack, component.getStyle(), entity, i));
     }
 
     private static Style resolveStyle(@Nullable CommandSourceStack commandSourceStack, Style style, @Nullable Entity entity, int i) throws CommandSyntaxException {
@@ -88,7 +91,7 @@ public class ComponentUtils {
             return new TextComponent("");
         }
         if (collection.size() == 1) {
-            return function.apply(collection.iterator().next()).mutableCopy();
+            return function.apply(collection.iterator().next()).copy();
         }
         TextComponent mutableComponent = new TextComponent("");
         boolean bl = true;

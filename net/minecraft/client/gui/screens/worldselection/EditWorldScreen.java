@@ -160,27 +160,16 @@ extends Screen {
         }
     }
 
-    /*
-     * WARNING - Removed try catching itself - possible behaviour change.
-     */
-    public static boolean makeBackupAndShowToast(LevelStorageSource levelStorageSource, String string) {
-        LevelStorageSource.LevelStorageAccess levelStorageAccess;
-        try {
-            levelStorageAccess = levelStorageSource.createAccess(string);
+    public static void makeBackupAndShowToast(LevelStorageSource levelStorageSource, String string) {
+        boolean bl = false;
+        try (LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess(string);){
+            bl = true;
+            EditWorldScreen.makeBackupAndShowToast(levelStorageAccess);
         } catch (IOException iOException) {
-            LOGGER.warn("Failed to read level {} data", (Object)string, (Object)iOException);
-            SystemToast.onWorldAccessFailure(Minecraft.getInstance(), string);
-            return false;
-        }
-        try {
-            boolean bl = EditWorldScreen.makeBackupAndShowToast(levelStorageAccess);
-            return bl;
-        } finally {
-            try {
-                levelStorageAccess.close();
-            } catch (IOException iOException2) {
-                LOGGER.warn("Failed to unlock access to level {}", (Object)string, (Object)iOException2);
+            if (!bl) {
+                SystemToast.onWorldAccessFailure(Minecraft.getInstance(), string);
             }
+            LOGGER.warn("Failed to create backup of level {}", (Object)string, (Object)iOException);
         }
     }
 

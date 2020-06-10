@@ -6,6 +6,7 @@ package net.minecraft.world.entity;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonSyntaxException;
 import it.unimi.dsi.fastutil.objects.Object2DoubleArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import java.util.Arrays;
@@ -164,10 +165,12 @@ CommandSource {
     protected final Random random = new Random();
     public int tickCount;
     private int remainingFireTicks = -this.getFireImmuneTicks();
-    protected boolean wasInWater;
+    protected boolean wasTouchingWater;
     protected Object2DoubleMap<Tag<Fluid>> fluidHeight = new Object2DoubleArrayMap<Tag<Fluid>>(2);
-    protected boolean wasUnderWater;
-    protected boolean isInLava;
+    protected boolean wasEyeInWater;
+    @Nullable
+    protected Tag<Fluid> fluidOnEyes;
+    protected boolean isTouchingLava;
     public int invulnerableTime;
     protected boolean firstTick = true;
     protected final SynchedEntityData entityData;
@@ -386,7 +389,7 @@ CommandSource {
             this.spawnSprintParticle();
         }
         this.updateInWaterStateAndDoFluidPushing();
-        this.updateUnderWaterState();
+        this.updateFluidOnEyes();
         this.updateSwimming();
         if (this.level.isClientSide) {
             this.clearFire();
@@ -547,7 +550,7 @@ CommandSource {
             }
         }
         try {
-            this.isInLava = false;
+            this.isTouchingLava = false;
             this.checkInsideBlocks();
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Checking entity block collision");
@@ -855,7 +858,7 @@ CommandSource {
     }
 
     public boolean isInWater() {
-        return this.wasInWater;
+        return this.wasTouchingWater;
     }
 
     private boolean isInRain() {
@@ -880,7 +883,7 @@ CommandSource {
     }
 
     public boolean isUnderWater() {
-        return this.wasUnderWater && this.isInWater();
+        return this.wasEyeInWater && this.isInWater();
     }
 
     public void updateSwimming() {
@@ -897,27 +900,39 @@ CommandSource {
         if (this.isInWater()) {
             return true;
         }
-        double d = this.level.dimensionType().hasCeiling() ? 0.007 : 0.0023333333333333335;
+        double d = this.level.dimensionType().ultraWarm() ? 0.007 : 0.0023333333333333335;
         return this.updateFluidHeightAndDoFluidPushing(FluidTags.LAVA, d);
     }
 
     void updateInWaterStateAndDoWaterCurrentPushing() {
         if (this.getVehicle() instanceof Boat) {
-            this.wasInWater = false;
+            this.wasTouchingWater = false;
         } else if (this.updateFluidHeightAndDoFluidPushing(FluidTags.WATER, 0.014)) {
-            if (!this.wasInWater && !this.firstTick) {
+            if (!this.wasTouchingWater && !this.firstTick) {
                 this.doWaterSplashEffect();
             }
             this.fallDistance = 0.0f;
-            this.wasInWater = true;
+            this.wasTouchingWater = true;
             this.clearFire();
         } else {
-            this.wasInWater = false;
+            this.wasTouchingWater = false;
         }
     }
 
-    private void updateUnderWaterState() {
-        this.wasUnderWater = this.isUnderLiquid(FluidTags.WATER);
+    private void updateFluidOnEyes() {
+        this.wasEyeInWater = this.isEyeInFluid(FluidTags.WATER);
+        this.fluidOnEyes = null;
+        double d = this.getEyeY() - 0.1111111119389534;
+        BlockPos blockPos = new BlockPos(this.getX(), d, this.getZ());
+        FluidState fluidState = this.level.getFluidState(blockPos);
+        for (Tag tag : FluidTags.getWrappers()) {
+            if (!fluidState.is(tag)) continue;
+            double e = (float)blockPos.getY() + fluidState.getHeight(this.level, blockPos);
+            if (e > d) {
+                this.fluidOnEyes = tag;
+            }
+            return;
+        }
     }
 
     protected void doWaterSplashEffect() {
@@ -972,16 +987,16 @@ CommandSource {
         }
     }
 
-    public boolean isUnderLiquid(Tag<Fluid> tag) {
-        return (double)this.getEyeHeight() < this.getFluidHeight(tag);
+    public boolean isEyeInFluid(Tag<Fluid> tag) {
+        return this.fluidOnEyes == tag;
     }
 
     public void setInLava() {
-        this.isInLava = true;
+        this.isTouchingLava = true;
     }
 
     public boolean isInLava() {
-        return this.isInLava;
+        return this.isTouchingLava;
     }
 
     public void moveRelative(float f, Vec3 vec3) {
@@ -1332,7 +1347,12 @@ CommandSource {
             this.reapplyPosition();
             this.setRot(this.yRot, this.xRot);
             if (compoundTag.contains("CustomName", 8)) {
-                this.setCustomName(Component.Serializer.fromJson(compoundTag.getString("CustomName")));
+                String string = compoundTag.getString("CustomName");
+                try {
+                    this.setCustomName(Component.Serializer.fromJson(string));
+                } catch (JsonSyntaxException jsonSyntaxException) {
+                    LOGGER.warn("Failed to parse entity custom name {}", (Object)string, (Object)jsonSyntaxException);
+                }
             }
             this.setCustomNameVisible(compoundTag.getBoolean("CustomNameVisible"));
             this.setSilent(compoundTag.getBoolean("Silent"));
@@ -1610,13 +1630,16 @@ CommandSource {
             return;
         }
         int i = this.getPortalWaitTime();
+        ServerLevel serverLevel = (ServerLevel)this.level;
         if (this.isInsidePortal) {
-            if (this.level.getServer().isNetherEnabled() && !this.isPassenger() && this.portalTime++ >= i) {
+            ResourceKey<Level> resourceKey;
+            MinecraftServer minecraftServer = serverLevel.getServer();
+            ServerLevel serverLevel2 = minecraftServer.getLevel(resourceKey = this.level.dimension() == Level.NETHER ? Level.OVERWORLD : Level.NETHER);
+            if (serverLevel2 != null && minecraftServer.isNetherEnabled() && !this.isPassenger() && this.portalTime++ >= i) {
                 this.level.getProfiler().push("portal");
                 this.portalTime = i;
                 this.changingDimensionDelay = this.getDimensionChangingDelay();
-                ResourceKey<Level> resourceKey = this.level.dimensionType().isNether() ? Level.OVERWORLD : Level.NETHER;
-                this.changeDimension(resourceKey);
+                this.changeDimension(serverLevel2);
                 this.level.getProfiler().pop();
             }
             this.isInsidePortal = false;
@@ -1868,7 +1891,7 @@ CommandSource {
     }
 
     private static Component removeAction(Component component) {
-        MutableComponent mutableComponent = component.toMutable().withStyle(style -> style.withClickEvent(null));
+        MutableComponent mutableComponent = component.plainCopy().setStyle(component.getStyle().withClickEvent(null));
         for (Component component2 : component.getSiblings()) {
             mutableComponent.append(Entity.removeAction(component2));
         }
@@ -1941,29 +1964,25 @@ CommandSource {
     }
 
     @Nullable
-    public Entity changeDimension(ResourceKey<Level> resourceKey) {
+    public Entity changeDimension(ServerLevel serverLevel) {
         BlockPos blockPos;
-        if (this.level.isClientSide || this.removed) {
+        if (!(this.level instanceof ServerLevel) || this.removed) {
             return null;
         }
         this.level.getProfiler().push("changeDimension");
-        MinecraftServer minecraftServer = this.getServer();
-        ResourceKey<Level> resourceKey2 = this.level.dimension();
-        ServerLevel serverLevel = minecraftServer.getLevel(resourceKey2);
-        ServerLevel serverLevel2 = minecraftServer.getLevel(resourceKey);
         this.unRide();
         this.level.getProfiler().push("reposition");
         Vec3 vec3 = this.getDeltaMovement();
         float f = 0.0f;
-        if (resourceKey2 == Level.END && resourceKey == Level.OVERWORLD) {
-            blockPos = serverLevel2.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, serverLevel2.getSharedSpawnPos());
-        } else if (resourceKey == Level.END) {
+        if (this.level.dimension() == Level.END && serverLevel.dimension() == Level.OVERWORLD) {
+            blockPos = serverLevel.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, serverLevel.getSharedSpawnPos());
+        } else if (serverLevel.dimension() == Level.END) {
             blockPos = ServerLevel.END_SPAWN_POINT;
         } else {
             double d = this.getX();
             double e = this.getZ();
-            DimensionType dimensionType = serverLevel.dimensionType();
-            DimensionType dimensionType2 = serverLevel2.dimensionType();
+            DimensionType dimensionType = this.level.dimensionType();
+            DimensionType dimensionType2 = serverLevel.dimensionType();
             double g = 8.0;
             if (!dimensionType.shrunk() && dimensionType2.shrunk()) {
                 d /= 8.0;
@@ -1972,15 +1991,15 @@ CommandSource {
                 d *= 8.0;
                 e *= 8.0;
             }
-            double h = Math.min(-2.9999872E7, serverLevel2.getWorldBorder().getMinX() + 16.0);
-            double i = Math.min(-2.9999872E7, serverLevel2.getWorldBorder().getMinZ() + 16.0);
-            double j = Math.min(2.9999872E7, serverLevel2.getWorldBorder().getMaxX() - 16.0);
-            double k = Math.min(2.9999872E7, serverLevel2.getWorldBorder().getMaxZ() - 16.0);
+            double h = Math.min(-2.9999872E7, serverLevel.getWorldBorder().getMinX() + 16.0);
+            double i = Math.min(-2.9999872E7, serverLevel.getWorldBorder().getMinZ() + 16.0);
+            double j = Math.min(2.9999872E7, serverLevel.getWorldBorder().getMaxX() - 16.0);
+            double k = Math.min(2.9999872E7, serverLevel.getWorldBorder().getMaxZ() - 16.0);
             d = Mth.clamp(d, h, j);
             e = Mth.clamp(e, i, k);
             Vec3 vec32 = this.getPortalEntranceOffset();
             blockPos = new BlockPos(d, this.getY(), e);
-            BlockPattern.PortalInfo portalInfo = serverLevel2.getPortalForcer().findPortal(blockPos, vec3, this.getPortalEntranceForwards(), vec32.x, vec32.y, this instanceof Player);
+            BlockPattern.PortalInfo portalInfo = serverLevel.getPortalForcer().findPortal(blockPos, vec3, this.getPortalEntranceForwards(), vec32.x, vec32.y, this instanceof Player);
             if (portalInfo == null) {
                 return null;
             }
@@ -1989,20 +2008,20 @@ CommandSource {
             f = portalInfo.angle;
         }
         this.level.getProfiler().popPush("reloading");
-        Object entity = this.getType().create(serverLevel2);
+        Object entity = this.getType().create(serverLevel);
         if (entity != null) {
             ((Entity)entity).restoreFrom(this);
             ((Entity)entity).moveTo(blockPos, ((Entity)entity).yRot + f, ((Entity)entity).xRot);
             ((Entity)entity).setDeltaMovement(vec3);
-            serverLevel2.addFromAnotherDimension((Entity)entity);
-            if (resourceKey == Level.END) {
-                ServerLevel.makeObsidianPlatform(serverLevel2);
+            serverLevel.addFromAnotherDimension((Entity)entity);
+            if (serverLevel.dimension() == Level.END) {
+                ServerLevel.makeObsidianPlatform(serverLevel);
             }
         }
         this.removed = true;
         this.level.getProfiler().pop();
+        ((ServerLevel)this.level).resetEmptyTime();
         serverLevel.resetEmptyTime();
-        serverLevel2.resetEmptyTime();
         this.level.getProfiler().pop();
         return entity;
     }
@@ -2214,6 +2233,11 @@ CommandSource {
 
     public final float getEyeHeight() {
         return this.eyeHeight;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public Vec3 getLeashOffset() {
+        return new Vec3(0.0, this.getEyeHeight(), this.getBbWidth() * 0.4f);
     }
 
     public boolean setSlot(int i, ItemStack itemStack) {

@@ -30,7 +30,7 @@ extends StructureFeature<NoneFeatureConfiguration> {
 
     @Override
     protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos, NoneFeatureConfiguration noneFeatureConfiguration) {
-        return worldgenRandom.nextInt(6) < 2;
+        return worldgenRandom.nextInt(5) < 2;
     }
 
     @Override

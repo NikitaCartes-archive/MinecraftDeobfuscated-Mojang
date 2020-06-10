@@ -29,8 +29,10 @@ extends Item {
     public InteractionResult interactLivingEntity(ItemStack itemStack, Player player, LivingEntity livingEntity, InteractionHand interactionHand) {
         Sheep sheep;
         if (livingEntity instanceof Sheep && (sheep = (Sheep)livingEntity).isAlive() && !sheep.isSheared() && sheep.getColor() != this.dyeColor) {
-            sheep.setColor(this.dyeColor);
-            itemStack.shrink(1);
+            if (!player.level.isClientSide) {
+                sheep.setColor(this.dyeColor);
+                itemStack.shrink(1);
+            }
             return InteractionResult.sidedSuccess(player.level.isClientSide);
         }
         return InteractionResult.PASS;

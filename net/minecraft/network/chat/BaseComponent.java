@@ -43,11 +43,11 @@ implements MutableComponent {
     }
 
     @Override
-    public abstract BaseComponent toMutable();
+    public abstract BaseComponent plainCopy();
 
     @Override
-    public final MutableComponent mutableCopy() {
-        BaseComponent baseComponent = this.toMutable();
+    public final MutableComponent copy() {
+        BaseComponent baseComponent = this.plainCopy();
         baseComponent.siblings.addAll(this.siblings);
         baseComponent.setStyle(this.style);
         return baseComponent;
@@ -73,8 +73,8 @@ implements MutableComponent {
     }
 
     @Override
-    public /* synthetic */ MutableComponent toMutable() {
-        return this.toMutable();
+    public /* synthetic */ MutableComponent plainCopy() {
+        return this.plainCopy();
     }
 }
 

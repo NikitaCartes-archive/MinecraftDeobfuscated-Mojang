@@ -243,5 +243,10 @@ extends MinecraftServer {
     public int getScaledTrackingDistance(int i) {
         return (int)(this.minecraft.options.entityDistanceScaling * (float)i);
     }
+
+    @Override
+    public boolean forceSynchronousWrites() {
+        return this.minecraft.options.syncWrites;
+    }
 }
 

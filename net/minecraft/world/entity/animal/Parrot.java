@@ -420,5 +420,11 @@ implements FlyingAnimal {
     public boolean isFlying() {
         return !this.onGround;
     }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public Vec3 getLeashOffset() {
+        return new Vec3(0.0, 0.5f * this.getEyeHeight(), this.getBbWidth() * 0.4f);
+    }
 }
 

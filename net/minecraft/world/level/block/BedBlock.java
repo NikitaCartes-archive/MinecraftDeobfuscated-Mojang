@@ -90,7 +90,7 @@ implements EntityBlock {
         if (blockState.getValue(PART) != BedPart.HEAD && !(blockState = level.getBlockState(blockPos = blockPos.relative(blockState.getValue(FACING)))).is(this)) {
             return InteractionResult.CONSUME;
         }
-        if (!BedBlock.canSetSpawn(level, blockPos)) {
+        if (!BedBlock.canSetSpawn(level)) {
             level.removeBlock(blockPos, false);
             BlockPos blockPos2 = blockPos.relative(blockState.getValue(FACING).getOpposite());
             if (level.getBlockState(blockPos2).is(this)) {
@@ -113,8 +113,8 @@ implements EntityBlock {
         return InteractionResult.SUCCESS;
     }
 
-    public static boolean canSetSpawn(Level level, BlockPos blockPos) {
-        return level.dimensionType().isOverworld();
+    public static boolean canSetSpawn(Level level) {
+        return level.dimensionType().bedWorks();
     }
 
     private boolean kickVillagerOutOfBed(Level level, BlockPos blockPos) {

@@ -690,7 +690,7 @@ implements ClientGamePacketListener {
             player.zOld = i = clientboundPlayerPositionPacket.getZ();
         }
         if (player.tickCount > 0 && player.getVehicle() != null) {
-            player.removeVehicle();
+            ((Player)player).removeVehicle();
         }
         player.setPosRaw(e, g, i);
         player.xo = e;
@@ -989,6 +989,9 @@ implements ClientGamePacketListener {
         LocalPlayer localPlayer2 = this.minecraft.gameMode.createPlayer(this.level, localPlayer.getStats(), localPlayer.getRecipeBook(), localPlayer.isShiftKeyDown(), localPlayer.isSprinting());
         localPlayer2.setId(i);
         this.minecraft.player = localPlayer2;
+        if (resourceKey2 != localPlayer.level.dimension()) {
+            this.minecraft.getMusicManager().stopPlaying();
+        }
         this.minecraft.cameraEntity = localPlayer2;
         localPlayer2.getEntityData().assignValues(localPlayer.getEntityData().getAll());
         if (clientboundRespawnPacket.shouldKeepAllPlayerData()) {
@@ -1160,28 +1163,27 @@ implements ClientGamePacketListener {
     public void handleGameEvent(ClientboundGameEventPacket clientboundGameEventPacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundGameEventPacket, this, this.minecraft);
         LocalPlayer player = this.minecraft.player;
-        int i = clientboundGameEventPacket.getEvent();
+        ClientboundGameEventPacket.Type type = clientboundGameEventPacket.getEvent();
         float f = clientboundGameEventPacket.getParam();
-        int j = Mth.floor(f + 0.5f);
-        if (i >= 0 && i < ClientboundGameEventPacket.EVENT_LANGUAGE_ID.length && ClientboundGameEventPacket.EVENT_LANGUAGE_ID[i] != null) {
-            ((Player)player).displayClientMessage(new TranslatableComponent(ClientboundGameEventPacket.EVENT_LANGUAGE_ID[i]), false);
-        }
-        if (i == 1) {
+        int i = Mth.floor(f + 0.5f);
+        if (type == ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE) {
+            ((Player)player).displayClientMessage(new TranslatableComponent("block.minecraft.spawn.not_valid"), false);
+        } else if (type == ClientboundGameEventPacket.START_RAINING) {
             this.level.getLevelData().setRaining(true);
             this.level.setRainLevel(0.0f);
-        } else if (i == 2) {
+        } else if (type == ClientboundGameEventPacket.STOP_RAINING) {
             this.level.getLevelData().setRaining(false);
             this.level.setRainLevel(1.0f);
-        } else if (i == 3) {
-            this.minecraft.gameMode.setLocalMode(GameType.byId(j));
-        } else if (i == 4) {
-            if (j == 0) {
+        } else if (type == ClientboundGameEventPacket.CHANGE_GAME_MODE) {
+            this.minecraft.gameMode.setLocalMode(GameType.byId(i));
+        } else if (type == ClientboundGameEventPacket.WIN_GAME) {
+            if (i == 0) {
                 this.minecraft.player.connection.send(new ServerboundClientCommandPacket(ServerboundClientCommandPacket.Action.PERFORM_RESPAWN));
                 this.minecraft.setScreen(new ReceivingLevelScreen());
-            } else if (j == 1) {
+            } else if (i == 1) {
                 this.minecraft.setScreen(new WinScreen(true, () -> this.minecraft.player.connection.send(new ServerboundClientCommandPacket(ServerboundClientCommandPacket.Action.PERFORM_RESPAWN))));
             }
-        } else if (i == 5) {
+        } else if (type == ClientboundGameEventPacket.DEMO_EVENT) {
             Options options = this.minecraft.options;
             if (f == 0.0f) {
                 this.minecraft.setScreen(new DemoIntroScreen());
@@ -1194,20 +1196,20 @@ implements ClientGamePacketListener {
             } else if (f == 104.0f) {
                 this.minecraft.gui.getChat().addMessage(new TranslatableComponent("demo.day.6", options.keyScreenshot.getTranslatedKeyMessage()));
             }
-        } else if (i == 6) {
+        } else if (type == ClientboundGameEventPacket.ARROW_HIT_PLAYER) {
             this.level.playSound(player, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.ARROW_HIT_PLAYER, SoundSource.PLAYERS, 0.18f, 0.45f);
-        } else if (i == 7) {
+        } else if (type == ClientboundGameEventPacket.RAIN_LEVEL_CHANGE) {
             this.level.setRainLevel(f);
-        } else if (i == 8) {
+        } else if (type == ClientboundGameEventPacket.THUNDER_LEVEL_CHANGE) {
             this.level.setThunderLevel(f);
-        } else if (i == 9) {
+        } else if (type == ClientboundGameEventPacket.PUFFER_FISH_STING) {
             this.level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.PUFFER_FISH_STING, SoundSource.NEUTRAL, 1.0f, 1.0f);
-        } else if (i == 10) {
+        } else if (type == ClientboundGameEventPacket.GUARDIAN_ELDER_EFFECT) {
             this.level.addParticle(ParticleTypes.ELDER_GUARDIAN, player.getX(), player.getY(), player.getZ(), 0.0, 0.0, 0.0);
-            if (j == 1) {
+            if (i == 1) {
                 this.level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.ELDER_GUARDIAN_CURSE, SoundSource.HOSTILE, 1.0f, 1.0f);
             }
-        } else if (i == 11) {
+        } else if (type == ClientboundGameEventPacket.IMMEDIATE_RESPAWN) {
             this.minecraft.player.setShowDeathScreen(f == 0.0f);
         }
     }
@@ -1982,7 +1984,7 @@ implements ClientGamePacketListener {
         for (ClientboundUpdateAttributesPacket.AttributeSnapshot attributeSnapshot : clientboundUpdateAttributesPacket.getValues()) {
             AttributeInstance attributeInstance = attributeMap.getInstance(attributeSnapshot.getAttribute());
             if (attributeInstance == null) {
-                LOGGER.warn("Entity {} does not have attribute {}", (Object)entity, (Object)Registry.ATTRIBUTES.getKey(attributeSnapshot.getAttribute()));
+                LOGGER.warn("Entity {} does not have attribute {}", (Object)entity, (Object)Registry.ATTRIBUTE.getKey(attributeSnapshot.getAttribute()));
                 continue;
             }
             attributeInstance.setBaseValue(attributeSnapshot.getBase());
@@ -2017,11 +2019,11 @@ implements ClientGamePacketListener {
         int k = clientboundLightUpdatePacket.getSkyYMask();
         int l = clientboundLightUpdatePacket.getEmptySkyYMask();
         Iterator<byte[]> iterator = clientboundLightUpdatePacket.getSkyUpdates().iterator();
-        this.readSectionList(i, j, levelLightEngine, LightLayer.SKY, k, l, iterator);
+        this.readSectionList(i, j, levelLightEngine, LightLayer.SKY, k, l, iterator, clientboundLightUpdatePacket.getTrustEdges());
         int m = clientboundLightUpdatePacket.getBlockYMask();
         int n = clientboundLightUpdatePacket.getEmptyBlockYMask();
         Iterator<byte[]> iterator2 = clientboundLightUpdatePacket.getBlockUpdates().iterator();
-        this.readSectionList(i, j, levelLightEngine, LightLayer.BLOCK, m, n, iterator2);
+        this.readSectionList(i, j, levelLightEngine, LightLayer.BLOCK, m, n, iterator2, clientboundLightUpdatePacket.getTrustEdges());
     }
 
     @Override
@@ -2056,14 +2058,14 @@ implements ClientGamePacketListener {
         this.minecraft.gameMode.handleBlockBreakAck(this.level, clientboundBlockBreakAckPacket.getPos(), clientboundBlockBreakAckPacket.getState(), clientboundBlockBreakAckPacket.action(), clientboundBlockBreakAckPacket.allGood());
     }
 
-    private void readSectionList(int i, int j, LevelLightEngine levelLightEngine, LightLayer lightLayer, int k, int l, Iterator<byte[]> iterator) {
+    private void readSectionList(int i, int j, LevelLightEngine levelLightEngine, LightLayer lightLayer, int k, int l, Iterator<byte[]> iterator, boolean bl) {
         for (int m = 0; m < 18; ++m) {
-            boolean bl2;
+            boolean bl3;
             int n = -1 + m;
-            boolean bl = (k & 1 << m) != 0;
-            boolean bl3 = bl2 = (l & 1 << m) != 0;
-            if (!bl && !bl2) continue;
-            levelLightEngine.queueSectionData(lightLayer, SectionPos.of(i, n, j), bl ? new DataLayer((byte[])iterator.next().clone()) : new DataLayer());
+            boolean bl2 = (k & 1 << m) != 0;
+            boolean bl4 = bl3 = (l & 1 << m) != 0;
+            if (!bl2 && !bl3) continue;
+            levelLightEngine.queueSectionData(lightLayer, SectionPos.of(i, n, j), bl2 ? new DataLayer((byte[])iterator.next().clone()) : new DataLayer(), bl);
             this.level.setSectionDirtyWithNeighbors(i, n, j);
         }
     }

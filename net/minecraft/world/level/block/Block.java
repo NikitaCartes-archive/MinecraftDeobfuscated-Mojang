@@ -365,7 +365,7 @@ implements ItemLike {
     public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
         level.levelEvent(player, 2001, blockPos, Block.getId(blockState));
         if (this.is(BlockTags.GUARDED_BY_PIGLINS)) {
-            PiglinAi.angerNearbyPiglinsThatSee(player);
+            PiglinAi.angerNearbyPiglins(player, false);
         }
     }
 

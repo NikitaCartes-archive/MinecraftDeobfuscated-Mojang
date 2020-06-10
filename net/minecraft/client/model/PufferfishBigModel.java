@@ -83,7 +83,7 @@ extends ListModel<T> {
 
     @Override
     public Iterable<ModelPart> parts() {
-        return ImmutableList.of(this.cube, this.blueFin0, this.blueFin1, this.topFrontFin, this.topMidFin, this.topBackFin, this.sideFrontFin0, this.sideBackFin1, this.bottomFrontFin, this.bottomMidFin, this.bottomBackFin, this.sideBackFin0, new ModelPart[]{this.sideBackFin1});
+        return ImmutableList.of(this.cube, this.blueFin0, this.blueFin1, this.topFrontFin, this.topMidFin, this.topBackFin, this.sideFrontFin0, this.sideFrontFin1, this.bottomFrontFin, this.bottomMidFin, this.bottomBackFin, this.sideBackFin0, new ModelPart[]{this.sideBackFin1});
     }
 
     @Override

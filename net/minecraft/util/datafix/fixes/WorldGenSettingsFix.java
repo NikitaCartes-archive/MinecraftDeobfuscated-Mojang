@@ -55,7 +55,7 @@ extends DataFix {
 
     private static <T> Dynamic<T> fix(Dynamic<T> dynamic2) {
         Dynamic<T> dynamic22;
-        DynamicOps<Object> dynamicOps = dynamic2.getOps();
+        DynamicOps dynamicOps = dynamic2.getOps();
         long l = dynamic2.get("RandomSeed").asLong(0L);
         Optional<String> optional = dynamic2.get("generatorName").asString().map(string -> string.toLowerCase(Locale.ROOT)).result();
         Optional optional2 = dynamic2.get("legacy_custom_options").asString().result().map(Optional::of).orElseGet(() -> {
@@ -64,10 +64,11 @@ extends DataFix {
             }
             return Optional.empty();
         });
+        boolean bl = false;
         if (optional.equals(Optional.of("customized"))) {
-            dynamic22 = WorldGenSettingsFix.noise(l, dynamic2, dynamic2.createString("minecraft:overworld"), WorldGenSettingsFix.vanillaBiomeSource(dynamic2, l, false, false));
+            dynamic22 = WorldGenSettingsFix.defaultOverworld(dynamic2, l);
         } else if (!optional.isPresent()) {
-            dynamic22 = WorldGenSettingsFix.noise(l, dynamic2, dynamic2.createString("minecraft:overworld"), WorldGenSettingsFix.vanillaBiomeSource(dynamic2, l, false, false));
+            dynamic22 = WorldGenSettingsFix.defaultOverworld(dynamic2, l);
         } else {
             OptionalDynamic<T> optionalDynamic = dynamic2.get("generatorOptions");
             switch (optional.get()) {
@@ -82,9 +83,15 @@ extends DataFix {
                 }
                 case "buffet": {
                     Dynamic dynamic5;
+                    Dynamic dynamic3;
                     OptionalDynamic<T> optionalDynamic2 = optionalDynamic.get("chunk_generator");
                     Optional<String> optional3 = optionalDynamic2.get("type").asString().result();
-                    Dynamic dynamic3 = Objects.equals(optional3, Optional.of("minecraft:caves")) ? dynamic2.createString("minecraft:caves") : (Objects.equals(optional3, Optional.of("minecraft:floating_islands")) ? dynamic2.createString("minecraft:floating_islands") : dynamic2.createString("minecraft:overworld"));
+                    if (Objects.equals(optional3, Optional.of("minecraft:caves"))) {
+                        dynamic3 = dynamic2.createString("minecraft:caves");
+                        bl = true;
+                    } else {
+                        dynamic3 = Objects.equals(optional3, Optional.of("minecraft:floating_islands")) ? dynamic2.createString("minecraft:floating_islands") : dynamic2.createString("minecraft:overworld");
+                    }
                     Dynamic dynamic4 = optionalDynamic.get("biome_source").result().orElseGet(() -> dynamic2.createMap(ImmutableMap.of(dynamic2.createString("type"), dynamic2.createString("minecraft:fixed"))));
                     if (dynamic4.get("type").asString().result().equals(Optional.of("minecraft:fixed"))) {
                         String string2 = dynamic4.get("options").get("biomes").asStream().findFirst().flatMap(dynamic -> dynamic.asString().result()).orElse("minecraft:ocean");
@@ -96,23 +103,32 @@ extends DataFix {
                     break;
                 }
                 default: {
-                    boolean bl = optional.get().equals("default");
-                    boolean bl2 = optional.get().equals("default_1_1") || bl && dynamic2.get("generatorVersion").asInt(0) == 0;
-                    boolean bl3 = optional.get().equals("amplified");
-                    boolean bl4 = optional.get().equals("largebiomes");
-                    dynamic22 = WorldGenSettingsFix.noise(l, dynamic2, dynamic2.createString(bl3 ? "minecraft:amplified" : "minecraft:overworld"), WorldGenSettingsFix.vanillaBiomeSource(dynamic2, l, bl2, bl4));
+                    boolean bl2 = optional.get().equals("default");
+                    boolean bl3 = optional.get().equals("default_1_1") || bl2 && dynamic2.get("generatorVersion").asInt(0) == 0;
+                    boolean bl4 = optional.get().equals("amplified");
+                    boolean bl5 = optional.get().equals("largebiomes");
+                    dynamic22 = WorldGenSettingsFix.noise(l, dynamic2, dynamic2.createString(bl4 ? "minecraft:amplified" : "minecraft:overworld"), WorldGenSettingsFix.vanillaBiomeSource(dynamic2, l, bl3, bl5));
                 }
             }
         }
-        boolean bl5 = dynamic2.get("MapFeatures").asBoolean(true);
-        boolean bl6 = dynamic2.get("BonusChest").asBoolean(false);
+        boolean bl6 = dynamic2.get("MapFeatures").asBoolean(true);
+        boolean bl7 = dynamic2.get("BonusChest").asBoolean(false);
         ImmutableMap.Builder builder = ImmutableMap.builder();
         builder.put(dynamicOps.createString("seed"), dynamicOps.createLong(l));
-        builder.put(dynamicOps.createString("generate_features"), dynamicOps.createBoolean(bl5));
-        builder.put(dynamicOps.createString("bonus_chest"), dynamicOps.createBoolean(bl6));
-        builder.put(dynamicOps.createString("dimensions"), dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("minecraft:overworld"), dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("type"), dynamicOps.createString("minecraft:overworld"), dynamicOps.createString("generator"), dynamic22.getValue())), dynamicOps.createString("minecraft:the_nether"), dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("type"), dynamicOps.createString("minecraft:the_nether"), dynamicOps.createString("generator"), WorldGenSettingsFix.noise(l, dynamic2, dynamic2.createString("minecraft:nether"), dynamic2.createMap(ImmutableMap.of(dynamic2.createString("type"), dynamic2.createString("minecraft:multi_noise"), dynamic2.createString("seed"), dynamic2.createLong(l), dynamic2.createString("preset"), dynamic2.createString("minecraft:nether")))).getValue())), dynamicOps.createString("minecraft:the_end"), dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("type"), dynamicOps.createString("minecraft:the_end"), dynamicOps.createString("generator"), WorldGenSettingsFix.noise(l, dynamic2, dynamic2.createString("minecraft:end"), dynamic2.createMap(ImmutableMap.of(dynamic2.createString("type"), dynamic2.createString("minecraft:the_end"), dynamic2.createString("seed"), dynamic2.createLong(l)))).getValue())))));
+        builder.put(dynamicOps.createString("generate_features"), dynamicOps.createBoolean(bl6));
+        builder.put(dynamicOps.createString("bonus_chest"), dynamicOps.createBoolean(bl7));
+        builder.put(dynamicOps.createString("dimensions"), WorldGenSettingsFix.vanillaLevels(dynamic2, l, dynamic22, bl));
         optional2.ifPresent(string -> builder.put(dynamicOps.createString("legacy_custom_options"), dynamicOps.createString((String)string)));
         return new Dynamic(dynamicOps, dynamicOps.createMap(builder.build()));
+    }
+
+    protected static <T> Dynamic<T> defaultOverworld(Dynamic<T> dynamic, long l) {
+        return WorldGenSettingsFix.noise(l, dynamic, dynamic.createString("minecraft:overworld"), WorldGenSettingsFix.vanillaBiomeSource(dynamic, l, false, false));
+    }
+
+    protected static <T> T vanillaLevels(Dynamic<T> dynamic, long l, Dynamic<T> dynamic2, boolean bl) {
+        DynamicOps dynamicOps = dynamic.getOps();
+        return dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("minecraft:overworld"), dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("type"), dynamicOps.createString("minecraft:overworld" + (bl ? "_caves" : "")), dynamicOps.createString("generator"), dynamic2.getValue())), dynamicOps.createString("minecraft:the_nether"), dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("type"), dynamicOps.createString("minecraft:the_nether"), dynamicOps.createString("generator"), WorldGenSettingsFix.noise(l, dynamic, dynamic.createString("minecraft:nether"), dynamic.createMap(ImmutableMap.of(dynamic.createString("type"), dynamic.createString("minecraft:multi_noise"), dynamic.createString("seed"), dynamic.createLong(l), dynamic.createString("preset"), dynamic.createString("minecraft:nether")))).getValue())), dynamicOps.createString("minecraft:the_end"), dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("type"), dynamicOps.createString("minecraft:the_end"), dynamicOps.createString("generator"), WorldGenSettingsFix.noise(l, dynamic, dynamic.createString("minecraft:end"), dynamic.createMap(ImmutableMap.of(dynamic.createString("type"), dynamic.createString("minecraft:the_end"), dynamic.createString("seed"), dynamic.createLong(l)))).getValue()))));
     }
 
     private static <T> Map<Dynamic<T>, Dynamic<T>> fixFlatStructures(DynamicOps<T> dynamicOps, OptionalDynamic<T> optionalDynamic) {

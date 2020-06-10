@@ -19,6 +19,10 @@ public class PiglinModel<T extends Mob>
 extends PlayerModel<T> {
     public final ModelPart earRight;
     public final ModelPart earLeft;
+    private final ModelPart bodyDefault;
+    private final ModelPart headDefault;
+    private final ModelPart leftArmDefault;
+    private final ModelPart rightArmDefault;
 
     public PiglinModel(float f, int i, int j) {
         super(f, false);
@@ -40,10 +44,18 @@ extends PlayerModel<T> {
         this.earLeft.texOffs(39, 6).addBox(-1.0f, 0.0f, -2.0f, 1.0f, 5.0f, 4.0f, f);
         this.head.addChild(this.earLeft);
         this.hat = new ModelPart(this);
+        this.bodyDefault = this.body.createShallowCopy();
+        this.headDefault = this.head.createShallowCopy();
+        this.leftArmDefault = this.leftArm.createShallowCopy();
+        this.rightArmDefault = this.leftArm.createShallowCopy();
     }
 
     @Override
     public void setupAnim(T mob, float f, float g, float h, float i, float j) {
+        this.body.copyFrom(this.bodyDefault);
+        this.head.copyFrom(this.headDefault);
+        this.leftArm.copyFrom(this.leftArmDefault);
+        this.rightArm.copyFrom(this.rightArmDefault);
         super.setupAnim(mob, f, g, h, i, j);
         float k = 0.5235988f;
         float l = h * 0.1f + f * 0.5f;
@@ -58,9 +70,11 @@ extends PlayerModel<T> {
                 this.earLeft.zRot = 0.5235988f + (float)Math.PI / 180 * Mth.sin(n * 30.0f) * 10.0f;
                 this.earRight.zRot = -0.5235988f - (float)Math.PI / 180 * Mth.cos(n * 30.0f) * 10.0f;
                 this.head.x = Mth.sin(n * 10.0f);
-                this.head.y = Mth.sin(n * 40.0f);
+                this.head.y = Mth.sin(n * 40.0f) + 0.4f;
                 this.rightArm.zRot = (float)Math.PI / 180 * (70.0f + Mth.cos(n * 40.0f) * 10.0f);
                 this.leftArm.zRot = this.rightArm.zRot * -1.0f;
+                this.rightArm.y = Mth.sin(n * 40.0f) * 0.5f + 1.5f;
+                this.leftArm.y = Mth.sin(n * 40.0f) * 0.5f + 1.5f;
                 this.body.y = Mth.sin(n * 40.0f) * 0.35f;
             } else if (piglinArmPose == Piglin.PiglinArmPose.ATTACKING_WITH_MELEE_WEAPON && this.attackTime == 0.0f) {
                 this.holdWeaponHigh(mob);

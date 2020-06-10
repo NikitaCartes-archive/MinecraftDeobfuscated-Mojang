@@ -617,7 +617,7 @@ implements ServerGamePacketListener {
         BlockEntity blockEntity = this.player.level.getBlockEntity(blockPos);
         if (blockEntity instanceof JigsawBlockEntity) {
             JigsawBlockEntity jigsawBlockEntity = (JigsawBlockEntity)blockEntity;
-            jigsawBlockEntity.generate(this.server.getLevel(this.player.level.dimension()), serverboundJigsawGeneratePacket.levels(), serverboundJigsawGeneratePacket.keepJigsaws());
+            jigsawBlockEntity.generate(this.player.getLevel(), serverboundJigsawGeneratePacket.levels(), serverboundJigsawGeneratePacket.keepJigsaws());
         }
     }
 
@@ -694,6 +694,7 @@ implements ServerGamePacketListener {
 
     @Override
     public void handleMovePlayer(ServerboundMovePlayerPacket serverboundMovePlayerPacket) {
+        boolean bl;
         PacketUtils.ensureRunningOnSameThread(serverboundMovePlayerPacket, this, this.player.getLevel());
         if (ServerGamePacketListenerImpl.containsInvalidValues(serverboundMovePlayerPacket)) {
             this.disconnect(new TranslatableComponent("multiplayer.disconnect.invalid_player_movement"));
@@ -758,10 +759,8 @@ implements ServerGamePacketListener {
         m = h - this.lastGoodX;
         n = i - this.lastGoodY;
         o = j - this.lastGoodZ;
-        if (n > 0.0) {
-            this.player.fallDistance = 0.0f;
-        }
-        if (this.player.isOnGround() && !serverboundMovePlayerPacket.isOnGround() && n > 0.0) {
+        boolean bl2 = bl = n > 0.0;
+        if (this.player.isOnGround() && !serverboundMovePlayerPacket.isOnGround() && bl) {
             this.player.jumpFromGround();
         }
         this.player.move(MoverType.PLAYER, new Vec3(m, n, o));
@@ -773,13 +772,13 @@ implements ServerGamePacketListener {
         }
         o = j - this.player.getZ();
         q = m * m + n * n + o * o;
-        boolean bl = false;
+        boolean bl22 = false;
         if (!this.player.isChangingDimension() && q > 0.0625 && !this.player.isSleeping() && !this.player.gameMode.isCreative() && this.player.gameMode.getGameModeForPlayer() != GameType.SPECTATOR) {
-            bl = true;
+            bl22 = true;
             LOGGER.warn("{} moved wrongly!", (Object)this.player.getName().getString());
         }
         this.player.absMoveTo(h, i, j, k, l);
-        if (!this.player.noPhysics && !this.player.isSleeping() && (bl && serverLevel.noCollision(this.player, aABB) || this.isPlayerCollidingWithAnythingNew(serverLevel, aABB))) {
+        if (!this.player.noPhysics && !this.player.isSleeping() && (bl22 && serverLevel.noCollision(this.player, aABB) || this.isPlayerCollidingWithAnythingNew(serverLevel, aABB))) {
             this.teleport(d, e, f, k, l);
             return;
         }
@@ -787,6 +786,9 @@ implements ServerGamePacketListener {
         this.player.getLevel().getChunkSource().move(this.player);
         this.player.doCheckFallDamage(this.player.getY() - g, serverboundMovePlayerPacket.isOnGround());
         this.player.setOnGround(serverboundMovePlayerPacket.isOnGround());
+        if (bl) {
+            this.player.fallDistance = 0.0f;
+        }
         this.player.checkMovementStatistics(this.player.getX() - d, this.player.getY() - e, this.player.getZ() - f);
         this.lastGoodX = this.player.getX();
         this.lastGoodY = this.player.getY();
@@ -825,7 +827,7 @@ implements ServerGamePacketListener {
         this.player.resetLastActionTime();
         ServerboundPlayerActionPacket.Action action = serverboundPlayerActionPacket.getAction();
         switch (action) {
-            case SWAP_HELD_ITEMS: {
+            case SWAP_ITEM_WITH_OFFHAND: {
                 if (!this.player.isSpectator()) {
                     ItemStack itemStack = this.player.getItemInHand(InteractionHand.OFF_HAND);
                     this.player.setItemInHand(InteractionHand.OFF_HAND, this.player.getItemInHand(InteractionHand.MAIN_HAND));
@@ -1090,6 +1092,7 @@ implements ServerGamePacketListener {
         ServerLevel serverLevel = this.player.getLevel();
         Entity entity = serverboundInteractPacket.getTarget(serverLevel);
         this.player.resetLastActionTime();
+        this.player.setShiftKeyDown(serverboundInteractPacket.isUsingSecondaryAction());
         if (entity != null) {
             double d = 36.0;
             if (this.player.distanceToSqr(entity) < 36.0) {

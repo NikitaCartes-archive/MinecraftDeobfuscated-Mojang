@@ -159,7 +159,6 @@ extends SimpleChannelInboundHandler<Packet<?>> {
 
     public void setListener(PacketListener packetListener) {
         Validate.notNull(packetListener, "packetListener", new Object[0]);
-        LOGGER.debug("Set listener of {} to {}", (Object)this, (Object)packetListener);
         this.packetListener = packetListener;
     }
 

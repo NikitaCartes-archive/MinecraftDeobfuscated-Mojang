@@ -277,13 +277,13 @@ extends LivingEntity {
     }
 
     protected boolean updateIsUnderwater() {
-        this.wasUnderwater = this.isUnderLiquid(FluidTags.WATER);
+        this.wasUnderwater = this.isEyeInFluid(FluidTags.WATER);
         return this.wasUnderwater;
     }
 
     private void turtleHelmetTick() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.HEAD);
-        if (itemStack.getItem() == Items.TURTLE_HELMET && !this.isUnderLiquid(FluidTags.WATER)) {
+        if (itemStack.getItem() == Items.TURTLE_HELMET && !this.isEyeInFluid(FluidTags.WATER)) {
             this.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 200, 0, false, false, true));
         }
     }
@@ -636,7 +636,7 @@ extends LivingEntity {
             }
             f *= g;
         }
-        if (this.isUnderLiquid(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(this)) {
+        if (this.isEyeInFluid(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(this)) {
             f /= 5.0f;
         }
         if (!this.onGround) {
@@ -892,14 +892,19 @@ extends LivingEntity {
     }
 
     @Override
-    public void stopRiding() {
-        super.stopRiding();
+    public void removeVehicle() {
+        super.removeVehicle();
         this.boardingCooldown = 0;
     }
 
     @Override
     protected boolean isImmobile() {
         return super.isImmobile() || this.isSleeping();
+    }
+
+    @Override
+    public boolean isAffectedByFluids() {
+        return !this.abilities.flying;
     }
 
     @Override
@@ -1151,7 +1156,7 @@ extends LivingEntity {
             }
             return optional;
         }
-        if (block instanceof BedBlock && BedBlock.canSetSpawn(serverLevel, blockPos)) {
+        if (block instanceof BedBlock && BedBlock.canSetSpawn(serverLevel)) {
             return BedBlock.findStandUpPosition(EntityType.PLAYER, serverLevel, blockPos, 0);
         }
         if (!bl) {
@@ -1275,7 +1280,7 @@ extends LivingEntity {
                 this.awardStat(Stats.SWIM_ONE_CM, i);
                 this.causeFoodExhaustion(0.01f * (float)i * 0.01f);
             }
-        } else if (this.isUnderLiquid(FluidTags.WATER)) {
+        } else if (this.isEyeInFluid(FluidTags.WATER)) {
             int i = Math.round(Mth.sqrt(d * d + e * e + f * f) * 100.0f);
             if (i > 0) {
                 this.awardStat(Stats.WALK_UNDER_WATER_ONE_CM, i);

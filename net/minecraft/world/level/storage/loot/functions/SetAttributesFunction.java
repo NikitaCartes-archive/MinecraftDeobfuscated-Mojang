@@ -81,7 +81,7 @@ extends LootItemConditionalFunction {
         public JsonObject serialize(JsonSerializationContext jsonSerializationContext) {
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("name", this.name);
-            jsonObject.addProperty("attribute", Registry.ATTRIBUTES.getKey(this.attribute).toString());
+            jsonObject.addProperty("attribute", Registry.ATTRIBUTE.getKey(this.attribute).toString());
             jsonObject.addProperty("operation", Modifier.operationToString(this.operation));
             jsonObject.add("amount", jsonSerializationContext.serialize(this.amount));
             if (this.id != null) {
@@ -103,7 +103,7 @@ extends LootItemConditionalFunction {
             EquipmentSlot[] equipmentSlots;
             String string = GsonHelper.getAsString(jsonObject, "name");
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "attribute"));
-            Attribute attribute = Registry.ATTRIBUTES.get(resourceLocation);
+            Attribute attribute = Registry.ATTRIBUTE.get(resourceLocation);
             if (attribute == null) {
                 throw new JsonSyntaxException("Unknown attribute: " + resourceLocation);
             }

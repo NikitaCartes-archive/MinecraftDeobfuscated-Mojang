@@ -6,6 +6,7 @@ package net.minecraft.world.entity.monster;
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
@@ -196,7 +197,7 @@ extends Monster {
                     this.doUnderWaterConversion();
                 }
             } else if (this.convertsInWater()) {
-                if (this.isUnderLiquid(FluidTags.WATER)) {
+                if (this.isEyeInFluid(FluidTags.WATER)) {
                     ++this.inWaterTime;
                     if (this.inWaterTime >= 600) {
                         this.startUnderWaterConversion(300);
@@ -384,7 +385,7 @@ extends Monster {
             ZombieVillager zombieVillager = EntityType.ZOMBIE_VILLAGER.create(this.level);
             zombieVillager.copyPosition(villager);
             villager.remove();
-            zombieVillager.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(zombieVillager.blockPosition()), MobSpawnType.CONVERSION, new ZombieGroupData(false), null);
+            zombieVillager.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(zombieVillager.blockPosition()), MobSpawnType.CONVERSION, new ZombieGroupData(false, true), null);
             zombieVillager.setVillagerData(villager.getVillagerData());
             zombieVillager.setGossips(villager.getGossips().store(NbtOps.INSTANCE).getValue());
             zombieVillager.setTradeOffers(villager.getOffers().createTag());
@@ -426,26 +427,28 @@ extends Monster {
         float f = difficultyInstance.getSpecialMultiplier();
         this.setCanPickUpLoot(this.random.nextFloat() < 0.55f * f);
         if (spawnGroupData == null) {
-            spawnGroupData = new ZombieGroupData(levelAccessor.getRandom().nextFloat() < 0.05f);
+            spawnGroupData = new ZombieGroupData(Zombie.getSpawnAsBabyOdds(levelAccessor.getRandom()), true);
         }
         if (spawnGroupData instanceof ZombieGroupData) {
             ZombieGroupData zombieGroupData = (ZombieGroupData)spawnGroupData;
             if (zombieGroupData.isBaby) {
                 this.setBaby(true);
-                if ((double)levelAccessor.getRandom().nextFloat() < 0.05) {
-                    List<Entity> list = levelAccessor.getEntitiesOfClass(Chicken.class, this.getBoundingBox().inflate(5.0, 3.0, 5.0), EntitySelector.ENTITY_NOT_BEING_RIDDEN);
-                    if (!list.isEmpty()) {
-                        Chicken chicken = (Chicken)list.get(0);
-                        chicken.setChickenJockey(true);
-                        this.startRiding(chicken);
+                if (zombieGroupData.canSpawnJockey) {
+                    if ((double)levelAccessor.getRandom().nextFloat() < 0.05) {
+                        List<Entity> list = levelAccessor.getEntitiesOfClass(Chicken.class, this.getBoundingBox().inflate(5.0, 3.0, 5.0), EntitySelector.ENTITY_NOT_BEING_RIDDEN);
+                        if (!list.isEmpty()) {
+                            Chicken chicken = (Chicken)list.get(0);
+                            chicken.setChickenJockey(true);
+                            this.startRiding(chicken);
+                        }
+                    } else if ((double)levelAccessor.getRandom().nextFloat() < 0.05) {
+                        Chicken chicken2 = EntityType.CHICKEN.create(this.level);
+                        chicken2.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0f);
+                        chicken2.finalizeSpawn(levelAccessor, difficultyInstance, MobSpawnType.JOCKEY, null, null);
+                        chicken2.setChickenJockey(true);
+                        this.startRiding(chicken2);
+                        levelAccessor.addFreshEntity(chicken2);
                     }
-                } else if ((double)levelAccessor.getRandom().nextFloat() < 0.05) {
-                    Chicken chicken2 = EntityType.CHICKEN.create(this.level);
-                    chicken2.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0f);
-                    chicken2.finalizeSpawn(levelAccessor, difficultyInstance, MobSpawnType.JOCKEY, null, null);
-                    chicken2.setChickenJockey(true);
-                    this.startRiding(chicken2);
-                    levelAccessor.addFreshEntity(chicken2);
                 }
             }
             this.setCanBreakDoors(this.supportsBreakDoorGoal() && this.random.nextFloat() < f * 0.1f);
@@ -463,6 +466,10 @@ extends Monster {
         }
         this.handleAttributes(f);
         return spawnGroupData;
+    }
+
+    public static boolean getSpawnAsBabyOdds(Random random) {
+        return random.nextFloat() < 0.05f;
     }
 
     protected void handleAttributes(float f) {
@@ -531,9 +538,11 @@ extends Monster {
     public static class ZombieGroupData
     implements SpawnGroupData {
         public final boolean isBaby;
+        public final boolean canSpawnJockey;
 
-        public ZombieGroupData(boolean bl) {
+        public ZombieGroupData(boolean bl, boolean bl2) {
             this.isBaby = bl;
+            this.canSpawnJockey = bl2;
         }
     }
 }

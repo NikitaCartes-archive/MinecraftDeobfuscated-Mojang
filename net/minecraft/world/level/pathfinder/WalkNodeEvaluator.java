@@ -404,8 +404,11 @@ extends NodeEvaluator {
                     if (blockState.is(Blocks.SWEET_BERRY_BUSH)) {
                         return BlockPathTypes.DANGER_OTHER;
                     }
-                    if (!WalkNodeEvaluator.isBurningBlock(blockState)) continue;
-                    return BlockPathTypes.DANGER_FIRE;
+                    if (WalkNodeEvaluator.isBurningBlock(blockState)) {
+                        return BlockPathTypes.DANGER_FIRE;
+                    }
+                    if (!blockGetter.getFluidState(mutableBlockPos).is(FluidTags.WATER)) continue;
+                    return BlockPathTypes.WATER_BORDER;
                 }
             }
         }

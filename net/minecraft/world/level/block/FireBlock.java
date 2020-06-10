@@ -118,7 +118,7 @@ extends BaseFireBlock {
             serverLevel.removeBlock(blockPos, false);
         }
         BlockState blockState2 = serverLevel.getBlockState(blockPos.below());
-        boolean bl = serverLevel.dimensionType().isEnd() && blockState2.is(Blocks.BEDROCK) || blockState2.is(Blocks.NETHERRACK) || blockState2.is(Blocks.MAGMA_BLOCK);
+        boolean bl = blockState2.is(serverLevel.dimensionType().infiniburn());
         int i = blockState.getValue(AGE);
         if (!bl && serverLevel.isRaining() && this.isNearRain(serverLevel, blockPos) && random.nextFloat() < 0.2f + (float)i * 0.03f) {
             serverLevel.removeBlock(blockPos, false);

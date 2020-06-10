@@ -47,6 +47,10 @@ public class AABB {
         return new AABB(boundingBox.x0, boundingBox.y0, boundingBox.z0, boundingBox.x1 + 1, boundingBox.y1 + 1, boundingBox.z1 + 1);
     }
 
+    public static AABB unitCubeFromLowerCorner(Vec3 vec3) {
+        return new AABB(vec3.x, vec3.y, vec3.z, vec3.x + 1.0, vec3.y + 1.0, vec3.z + 1.0);
+    }
+
     public double min(Direction.Axis axis) {
         return axis.choose(this.minX, this.minY, this.minZ);
     }

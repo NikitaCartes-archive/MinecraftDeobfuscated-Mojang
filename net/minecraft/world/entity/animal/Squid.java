@@ -279,7 +279,7 @@ extends WaterAnimal {
             int i = this.squid.getNoActionTime();
             if (i > 100) {
                 this.squid.setMovementVector(0.0f, 0.0f, 0.0f);
-            } else if (this.squid.getRandom().nextInt(50) == 0 || !this.squid.wasInWater || !this.squid.hasMovementVector()) {
+            } else if (this.squid.getRandom().nextInt(50) == 0 || !this.squid.wasTouchingWater || !this.squid.hasMovementVector()) {
                 float f = this.squid.getRandom().nextFloat() * ((float)Math.PI * 2);
                 float g = Mth.cos(f) * 0.2f;
                 float h = -0.1f + this.squid.getRandom().nextFloat() * 0.2f;

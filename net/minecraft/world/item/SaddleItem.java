@@ -22,8 +22,10 @@ extends Item {
     public InteractionResult interactLivingEntity(ItemStack itemStack, Player player, LivingEntity livingEntity, InteractionHand interactionHand) {
         Saddleable saddleable;
         if (livingEntity instanceof Saddleable && livingEntity.isAlive() && !(saddleable = (Saddleable)((Object)livingEntity)).isSaddled() && saddleable.isSaddleable()) {
-            saddleable.equipSaddle(SoundSource.NEUTRAL);
-            itemStack.shrink(1);
+            if (!player.level.isClientSide) {
+                saddleable.equipSaddle(SoundSource.NEUTRAL);
+                itemStack.shrink(1);
+            }
             return InteractionResult.sidedSuccess(player.level.isClientSide);
         }
         return InteractionResult.PASS;

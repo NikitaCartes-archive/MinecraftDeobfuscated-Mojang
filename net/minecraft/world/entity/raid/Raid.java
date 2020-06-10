@@ -64,8 +64,8 @@ public class Raid {
     private static final TranslatableComponent RAID_NAME_COMPONENT = new TranslatableComponent("event.minecraft.raid");
     private static final TranslatableComponent VICTORY = new TranslatableComponent("event.minecraft.raid.victory");
     private static final TranslatableComponent DEFEAT = new TranslatableComponent("event.minecraft.raid.defeat");
-    private static final Component RAID_BAR_VICTORY_COMPONENT = RAID_NAME_COMPONENT.mutableCopy().append(" - ").append(VICTORY);
-    private static final Component RAID_BAR_DEFEAT_COMPONENT = RAID_NAME_COMPONENT.mutableCopy().append(" - ").append(DEFEAT);
+    private static final Component RAID_BAR_VICTORY_COMPONENT = RAID_NAME_COMPONENT.copy().append(" - ").append(VICTORY);
+    private static final Component RAID_BAR_DEFEAT_COMPONENT = RAID_NAME_COMPONENT.copy().append(" - ").append(DEFEAT);
     private final Map<Integer, Raider> groupToLeaderMap = Maps.newHashMap();
     private final Map<Integer, Set<Raider>> groupRaiderMap = Maps.newHashMap();
     private final Set<UUID> heroesOfTheVillage = Sets.newHashSet();
@@ -266,7 +266,7 @@ public class Raid {
                 this.updateRaiders();
                 if (i > 0) {
                     if (i <= 2) {
-                        this.raidEvent.setName(RAID_NAME_COMPONENT.mutableCopy().append(" - ").append(new TranslatableComponent("event.minecraft.raid.raiders_remaining", i)));
+                        this.raidEvent.setName(RAID_NAME_COMPONENT.copy().append(" - ").append(new TranslatableComponent("event.minecraft.raid.raiders_remaining", i)));
                     } else {
                         this.raidEvent.setName(RAID_NAME_COMPONENT);
                     }

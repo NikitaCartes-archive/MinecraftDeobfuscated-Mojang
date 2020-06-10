@@ -922,8 +922,8 @@ public class Items {
     public static final Item ZOGLIN_SPAWN_EGG = Items.registerItem("zoglin_spawn_egg", (Item)new SpawnEggItem(EntityType.ZOGLIN, 13004373, 0xE6E6E6, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item ZOMBIE_SPAWN_EGG = Items.registerItem("zombie_spawn_egg", (Item)new SpawnEggItem(EntityType.ZOMBIE, 44975, 7969893, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item ZOMBIE_HORSE_SPAWN_EGG = Items.registerItem("zombie_horse_spawn_egg", (Item)new SpawnEggItem(EntityType.ZOMBIE_HORSE, 3232308, 9945732, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
-    public static final Item ZOMBIFIED_PIGLIN_SPAWN_EGG = Items.registerItem("zombified_piglin_spawn_egg", (Item)new SpawnEggItem(EntityType.ZOMBIFIED_PIGLIN, 15373203, 5009705, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item ZOMBIE_VILLAGER_SPAWN_EGG = Items.registerItem("zombie_villager_spawn_egg", (Item)new SpawnEggItem(EntityType.ZOMBIE_VILLAGER, 5651507, 7969893, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+    public static final Item ZOMBIFIED_PIGLIN_SPAWN_EGG = Items.registerItem("zombified_piglin_spawn_egg", (Item)new SpawnEggItem(EntityType.ZOMBIFIED_PIGLIN, 15373203, 5009705, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item EXPERIENCE_BOTTLE = Items.registerItem("experience_bottle", (Item)new ExperienceBottleItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC).rarity(Rarity.UNCOMMON)));
     public static final Item FIRE_CHARGE = Items.registerItem("fire_charge", (Item)new FireChargeItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item WRITABLE_BOOK = Items.registerItem("writable_book", (Item)new WritableBookItem(new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_MISC)));

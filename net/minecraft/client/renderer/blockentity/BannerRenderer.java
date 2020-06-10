@@ -93,7 +93,11 @@ extends BlockEntityRenderer<BannerBlockEntity> {
     }
 
     public static void renderPatterns(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, ModelPart modelPart, Material material, boolean bl, List<Pair<BannerPattern, DyeColor>> list) {
-        modelPart.render(poseStack, material.buffer(multiBufferSource, RenderType::entitySolid), i, j);
+        BannerRenderer.renderPatterns(poseStack, multiBufferSource, i, j, modelPart, material, bl, list, false);
+    }
+
+    public static void renderPatterns(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, ModelPart modelPart, Material material, boolean bl, List<Pair<BannerPattern, DyeColor>> list, boolean bl2) {
+        modelPart.render(poseStack, material.buffer(multiBufferSource, RenderType::entitySolid, bl2), i, j);
         for (int k = 0; k < 17 && k < list.size(); ++k) {
             Pair<BannerPattern, DyeColor> pair = list.get(k);
             float[] fs = pair.getSecond().getTextureDiffuseColors();

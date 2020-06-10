@@ -75,23 +75,8 @@ extends BlockEntityRenderer<SkullBlockEntity> {
         if (direction == null) {
             poseStack.translate(0.5, 0.0, 0.5);
         } else {
-            switch (direction) {
-                case NORTH: {
-                    poseStack.translate(0.5, 0.25, 0.74f);
-                    break;
-                }
-                case SOUTH: {
-                    poseStack.translate(0.5, 0.25, 0.26f);
-                    break;
-                }
-                case WEST: {
-                    poseStack.translate(0.74f, 0.25, 0.5);
-                    break;
-                }
-                default: {
-                    poseStack.translate(0.26f, 0.25, 0.5);
-                }
-            }
+            float h = 0.25f;
+            poseStack.translate(0.5f - (float)direction.getStepX() * 0.25f, 0.25, 0.5f - (float)direction.getStepZ() * 0.25f);
         }
         poseStack.scale(-1.0f, -1.0f, 1.0f);
         VertexConsumer vertexConsumer = multiBufferSource.getBuffer(SkullBlockRenderer.getRenderType(type, gameProfile));

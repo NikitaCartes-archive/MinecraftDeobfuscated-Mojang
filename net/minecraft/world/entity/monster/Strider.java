@@ -6,6 +6,8 @@ package net.minecraft.world.entity.monster;
 import com.google.common.collect.Sets;
 import java.util.LinkedHashSet;
 import java.util.Random;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -46,6 +48,7 @@ import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.DismountHelper;
@@ -91,7 +94,11 @@ Saddleable {
     }
 
     public static boolean checkStriderSpawnRules(EntityType<Strider> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
-        return levelAccessor.getBlockState(blockPos.above()).isAir();
+        BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+        do {
+            mutableBlockPos.move(Direction.UP);
+        } while (levelAccessor.getFluidState(mutableBlockPos).is(FluidTags.LAVA));
+        return levelAccessor.getBlockState(mutableBlockPos).isAir();
     }
 
     @Override
@@ -299,7 +306,7 @@ Saddleable {
         }
         BlockState blockState = this.level.getBlockState(this.blockPosition());
         BlockState blockState2 = this.getBlockStateOn();
-        boolean bl = blockState.is(BlockTags.STRIDER_WARM_BLOCKS) || blockState2.is(BlockTags.STRIDER_WARM_BLOCKS);
+        boolean bl = blockState.is(BlockTags.STRIDER_WARM_BLOCKS) || blockState2.is(BlockTags.STRIDER_WARM_BLOCKS) || this.getFluidHeight(FluidTags.LAVA) > 0.0;
         this.setSuffocating(!bl);
         super.tick();
         this.floatStrider();
@@ -343,7 +350,7 @@ Saddleable {
 
     @Override
     protected boolean canAddPassenger(Entity entity) {
-        return this.getPassengers().isEmpty() && !this.isUnderLiquid(FluidTags.LAVA);
+        return this.getPassengers().isEmpty() && !this.isEyeInFluid(FluidTags.LAVA);
     }
 
     @Override
@@ -411,14 +418,26 @@ Saddleable {
     }
 
     @Override
+    @Environment(value=EnvType.CLIENT)
+    public Vec3 getLeashOffset() {
+        return new Vec3(0.0, 0.6f * this.getEyeHeight(), this.getBbWidth() * 0.4f);
+    }
+
+    @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         ZombifiedPiglin zombifiedPiglin;
         StriderGroupData.Rider rider;
+        Zombie.ZombieGroupData spawnGroupData2 = null;
         if (spawnGroupData instanceof StriderGroupData) {
             rider = ((StriderGroupData)spawnGroupData).rider;
         } else if (!this.isBaby()) {
-            rider = this.random.nextInt(30) == 0 ? StriderGroupData.Rider.PIGLIN_RIDER : (this.random.nextInt(10) == 0 ? StriderGroupData.Rider.BABY_RIDER : StriderGroupData.Rider.NO_RIDER);
+            if (this.random.nextInt(30) == 0) {
+                rider = StriderGroupData.Rider.PIGLIN_RIDER;
+                spawnGroupData2 = new Zombie.ZombieGroupData(Zombie.getSpawnAsBabyOdds(this.random), false);
+            } else {
+                rider = this.random.nextInt(10) == 0 ? StriderGroupData.Rider.BABY_RIDER : StriderGroupData.Rider.NO_RIDER;
+            }
             spawnGroupData = new StriderGroupData(rider);
             ((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(rider == StriderGroupData.Rider.NO_RIDER ? 0.5f : 0.0f);
         } else {
@@ -437,7 +456,7 @@ Saddleable {
         }
         if (mob != null) {
             mob.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0f);
-            mob.finalizeSpawn(levelAccessor, difficultyInstance, MobSpawnType.JOCKEY, null, null);
+            mob.finalizeSpawn(levelAccessor, difficultyInstance, MobSpawnType.JOCKEY, spawnGroupData2, null);
             mob.startRiding(this, true);
             levelAccessor.addFreshEntity(mob);
         }

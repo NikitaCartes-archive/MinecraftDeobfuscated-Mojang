@@ -125,7 +125,7 @@ public class FogRenderer {
             j2 = ((LivingEntity)camera.getEntity()).getEffect(MobEffects.BLINDNESS).getDuration();
             d = j2 < 20 ? (d *= (double)(1.0f - (float)j2 / 20.0f)) : 0.0;
         }
-        if (d < 1.0) {
+        if (d < 1.0 && !fluidState.is(FluidTags.LAVA)) {
             if (d < 0.0) {
                 d = 0.0;
             }
@@ -169,48 +169,52 @@ public class FogRenderer {
         FluidState fluidState = camera.getFluidInCamera();
         Entity entity = camera.getEntity();
         boolean bl3 = bl2 = fluidState.getType() != Fluids.EMPTY;
-        if (bl2) {
+        if (fluidState.is(FluidTags.WATER)) {
             float g = 1.0f;
-            if (fluidState.is(FluidTags.WATER)) {
-                g = 0.05f;
-                if (entity instanceof LocalPlayer) {
-                    LocalPlayer localPlayer = (LocalPlayer)entity;
-                    g -= localPlayer.getWaterVision() * localPlayer.getWaterVision() * 0.03f;
-                    Biome biome = localPlayer.level.getBiome(localPlayer.blockPosition());
-                    if (biome == Biomes.SWAMP || biome == Biomes.SWAMP_HILLS) {
-                        g += 0.005f;
-                    }
+            g = 0.05f;
+            if (entity instanceof LocalPlayer) {
+                LocalPlayer localPlayer = (LocalPlayer)entity;
+                g -= localPlayer.getWaterVision() * localPlayer.getWaterVision() * 0.03f;
+                Biome biome = localPlayer.level.getBiome(localPlayer.blockPosition());
+                if (biome == Biomes.SWAMP || biome == Biomes.SWAMP_HILLS) {
+                    g += 0.005f;
                 }
-            } else if (fluidState.is(FluidTags.LAVA)) {
-                g = 2.0f;
             }
             RenderSystem.fogDensity(g);
             RenderSystem.fogMode(GlStateManager.FogMode.EXP2);
         } else {
-            float j;
+            float h;
             float g;
-            if (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS)) {
+            if (fluidState.is(FluidTags.LAVA)) {
+                if (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.FIRE_RESISTANCE)) {
+                    g = 0.0f;
+                    h = 3.0f;
+                } else {
+                    g = 0.25f;
+                    h = 1.0f;
+                }
+            } else if (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS)) {
                 int i = ((LivingEntity)entity).getEffect(MobEffects.BLINDNESS).getDuration();
-                float h = Mth.lerp(Math.min(1.0f, (float)i / 20.0f), f, 5.0f);
+                float j = Mth.lerp(Math.min(1.0f, (float)i / 20.0f), f, 5.0f);
                 if (fogMode == FogMode.FOG_SKY) {
                     g = 0.0f;
-                    j = h * 0.8f;
+                    h = j * 0.8f;
                 } else {
-                    g = h * 0.25f;
-                    j = h;
+                    g = j * 0.25f;
+                    h = j;
                 }
             } else if (bl) {
                 g = f * 0.05f;
-                j = Math.min(f, 192.0f) * 0.5f;
+                h = Math.min(f, 192.0f) * 0.5f;
             } else if (fogMode == FogMode.FOG_SKY) {
                 g = 0.0f;
-                j = f;
+                h = f;
             } else {
                 g = f * 0.75f;
-                j = f;
+                h = f;
             }
             RenderSystem.fogStart(g);
-            RenderSystem.fogEnd(j);
+            RenderSystem.fogEnd(h);
             RenderSystem.fogMode(GlStateManager.FogMode.LINEAR);
             RenderSystem.setupNvFogDistance();
         }

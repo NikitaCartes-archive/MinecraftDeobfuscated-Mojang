@@ -120,7 +120,7 @@ implements ContextAwareComponent {
     }
 
     @Override
-    public TranslatableComponent toMutable() {
+    public TranslatableComponent plainCopy() {
         return new TranslatableComponent(this.key, this.args);
     }
 
@@ -191,13 +191,13 @@ implements ContextAwareComponent {
     }
 
     @Override
-    public /* synthetic */ BaseComponent toMutable() {
-        return this.toMutable();
+    public /* synthetic */ BaseComponent plainCopy() {
+        return this.plainCopy();
     }
 
     @Override
-    public /* synthetic */ MutableComponent toMutable() {
-        return this.toMutable();
+    public /* synthetic */ MutableComponent plainCopy() {
+        return this.plainCopy();
     }
 }
 

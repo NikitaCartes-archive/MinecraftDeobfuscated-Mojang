@@ -79,7 +79,7 @@ implements ContextAwareComponent {
     }
 
     @Override
-    public ScoreComponent toMutable() {
+    public ScoreComponent plainCopy() {
         return new ScoreComponent(this.name, this.selector, this.objective);
     }
 
@@ -111,13 +111,13 @@ implements ContextAwareComponent {
     }
 
     @Override
-    public /* synthetic */ BaseComponent toMutable() {
-        return this.toMutable();
+    public /* synthetic */ BaseComponent plainCopy() {
+        return this.plainCopy();
     }
 
     @Override
-    public /* synthetic */ MutableComponent toMutable() {
-        return this.toMutable();
+    public /* synthetic */ MutableComponent plainCopy() {
+        return this.plainCopy();
     }
 }
 

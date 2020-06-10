@@ -26,6 +26,7 @@ public class ServerData {
     public boolean pinged;
     public List<Component> playerList = Collections.emptyList();
     private ServerPackStatus packStatus = ServerPackStatus.PROMPT;
+    @Nullable
     private String iconB64;
     private boolean lan;
 

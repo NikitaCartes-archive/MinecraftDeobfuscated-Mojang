@@ -272,7 +272,7 @@ implements SimpleWaterloggedBlock {
         if (menuProvider != null) {
             player.openMenu(menuProvider);
             player.awardStat(this.getOpenChestStat());
-            PiglinAi.angerNearbyPiglinsThatSee(player);
+            PiglinAi.angerNearbyPiglins(player, true);
         }
         return InteractionResult.CONSUME;
     }

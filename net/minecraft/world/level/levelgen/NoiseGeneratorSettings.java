@@ -125,7 +125,7 @@ public final class NoiseGeneratorSettings {
         private static NoiseGeneratorSettings nether(StructureSettings structureSettings, BlockState blockState, BlockState blockState2, Preset preset) {
             HashMap<StructureFeature<?>, StructureFeatureConfiguration> map = Maps.newHashMap(StructureSettings.DEFAULTS);
             map.put(StructureFeature.RUINED_PORTAL, new StructureFeatureConfiguration(25, 10, 34222645));
-            return new NoiseGeneratorSettings(new StructureSettings(Optional.ofNullable(structureSettings.stronghold()), map), new NoiseSettings(128, new NoiseSamplingSettings(1.0, 3.0, 80.0, 60.0), new NoiseSlideSettings(120, 3, 0), new NoiseSlideSettings(320, 4, -1), 1, 2, 0.0, 0.019921875, false, false, false, false), blockState, blockState2, 0, 0, 32, true, Optional.of(preset));
+            return new NoiseGeneratorSettings(new StructureSettings(Optional.ofNullable(structureSettings.stronghold()), map), new NoiseSettings(128, new NoiseSamplingSettings(1.0, 3.0, 80.0, 60.0), new NoiseSlideSettings(120, 3, 0), new NoiseSlideSettings(320, 4, -1), 1, 2, 0.0, 0.019921875, false, false, false, false), blockState, blockState2, 0, 0, 32, false, Optional.of(preset));
         }
 
         private static NoiseGeneratorSettings overworld(StructureSettings structureSettings, boolean bl, Preset preset) {

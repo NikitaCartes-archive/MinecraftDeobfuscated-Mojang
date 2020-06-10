@@ -664,7 +664,6 @@ Saddleable {
                 float h = Mth.sin(this.yRot * ((float)Math.PI / 180));
                 float i = Mth.cos(this.yRot * ((float)Math.PI / 180));
                 this.setDeltaMovement(this.getDeltaMovement().add(-0.4f * h * this.playerJumpPendingScale, 0.0, 0.4f * i * this.playerJumpPendingScale));
-                this.playJumpSound();
             }
             this.playerJumpPendingScale = 0.0f;
         }
@@ -793,6 +792,7 @@ Saddleable {
     public void handleStartJump(int i) {
         this.allowStandSliding = true;
         this.stand();
+        this.playJumpSound();
     }
 
     @Override

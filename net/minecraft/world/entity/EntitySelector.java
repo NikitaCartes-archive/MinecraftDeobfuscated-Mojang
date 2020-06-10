@@ -67,11 +67,11 @@ public final class EntitySelector {
         };
     }
 
-    public static class MobCanWearArmourEntitySelector
+    public static class MobCanWearArmorEntitySelector
     implements Predicate<Entity> {
         private final ItemStack itemStack;
 
-        public MobCanWearArmourEntitySelector(ItemStack itemStack) {
+        public MobCanWearArmorEntitySelector(ItemStack itemStack) {
             this.itemStack = itemStack;
         }
 

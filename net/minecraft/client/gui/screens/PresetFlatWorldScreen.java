@@ -58,7 +58,7 @@ extends Screen {
     private PresetsList list;
     private Button selectButton;
     private EditBox export;
-    private StructureSettings structureSettings;
+    private FlatLevelGeneratorSettings settings;
 
     public PresetFlatWorldScreen(CreateFlatWorldScreen createFlatWorldScreen) {
         super(new TranslatableComponent("createWorld.customize.presets.title"));
@@ -113,18 +113,16 @@ extends Screen {
         return list;
     }
 
-    public static FlatLevelGeneratorSettings fromString(String string, StructureSettings structureSettings) {
+    public static FlatLevelGeneratorSettings fromString(String string, FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
         Iterator<String> iterator = Splitter.on(';').split(string).iterator();
         if (!iterator.hasNext()) {
             return FlatLevelGeneratorSettings.getDefault();
         }
-        FlatLevelGeneratorSettings flatLevelGeneratorSettings = new FlatLevelGeneratorSettings(structureSettings);
         List<FlatLayerInfo> list = PresetFlatWorldScreen.getLayersInfoFromString(iterator.next());
         if (list.isEmpty()) {
             return FlatLevelGeneratorSettings.getDefault();
         }
-        flatLevelGeneratorSettings.getLayersInfo().addAll(list);
-        flatLevelGeneratorSettings.updateLayers();
+        FlatLevelGeneratorSettings flatLevelGeneratorSettings2 = flatLevelGeneratorSettings.withLayers(list, flatLevelGeneratorSettings.structureSettings());
         Biome biome = Biomes.PLAINS;
         if (iterator.hasNext()) {
             try {
@@ -134,8 +132,8 @@ extends Screen {
                 LOGGER.error("Error while parsing flat world string => {}", (Object)exception.getMessage());
             }
         }
-        flatLevelGeneratorSettings.setBiome(biome);
-        return flatLevelGeneratorSettings;
+        flatLevelGeneratorSettings2.setBiome(biome);
+        return flatLevelGeneratorSettings2;
     }
 
     private static String save(FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
@@ -159,12 +157,12 @@ extends Screen {
         this.export = new EditBox(this.font, 50, 40, this.width - 100, 20, this.shareText);
         this.export.setMaxLength(1230);
         this.export.setValue(PresetFlatWorldScreen.save(this.parent.settings()));
-        this.structureSettings = this.parent.settings().structureSettings();
+        this.settings = this.parent.settings();
         this.children.add(this.export);
         this.list = new PresetsList();
         this.children.add(this.list);
         this.selectButton = this.addButton(new Button(this.width / 2 - 155, this.height - 28, 150, 20, new TranslatableComponent("createWorld.customize.presets.select"), button -> {
-            FlatLevelGeneratorSettings flatLevelGeneratorSettings = PresetFlatWorldScreen.fromString(this.export.getValue(), this.structureSettings);
+            FlatLevelGeneratorSettings flatLevelGeneratorSettings = PresetFlatWorldScreen.fromString(this.export.getValue(), this.settings);
             this.parent.setConfig(flatLevelGeneratorSettings);
             this.minecraft.setScreen(this.parent);
         }));
@@ -241,12 +239,12 @@ extends Screen {
 
     static {
         PresetFlatWorldScreen.preset(new TranslatableComponent("createWorld.customize.preset.classic_flat"), Blocks.GRASS_BLOCK, Biomes.PLAINS, Arrays.asList(StructureFeature.VILLAGE), false, false, false, new FlatLayerInfo(1, Blocks.GRASS_BLOCK), new FlatLayerInfo(2, Blocks.DIRT), new FlatLayerInfo(1, Blocks.BEDROCK));
-        PresetFlatWorldScreen.preset(new TranslatableComponent("createWorld.customize.preset.tunnelers_dream"), Blocks.STONE, Biomes.MOUNTAINS, Arrays.asList(StructureFeature.SWAMP_HUT, StructureFeature.DESERT_PYRAMID, StructureFeature.JUNGLE_TEMPLE, StructureFeature.IGLOO, StructureFeature.OCEAN_RUIN, StructureFeature.SHIPWRECK, StructureFeature.MINESHAFT), true, true, false, new FlatLayerInfo(1, Blocks.GRASS_BLOCK), new FlatLayerInfo(5, Blocks.DIRT), new FlatLayerInfo(230, Blocks.STONE), new FlatLayerInfo(1, Blocks.BEDROCK));
-        PresetFlatWorldScreen.preset(new TranslatableComponent("createWorld.customize.preset.water_world"), Items.WATER_BUCKET, Biomes.DEEP_OCEAN, Arrays.asList(StructureFeature.SWAMP_HUT, StructureFeature.DESERT_PYRAMID, StructureFeature.JUNGLE_TEMPLE, StructureFeature.IGLOO, StructureFeature.OCEAN_RUIN, StructureFeature.SHIPWRECK, StructureFeature.OCEAN_MONUMENT), false, false, false, new FlatLayerInfo(90, Blocks.WATER), new FlatLayerInfo(5, Blocks.SAND), new FlatLayerInfo(5, Blocks.DIRT), new FlatLayerInfo(5, Blocks.STONE), new FlatLayerInfo(1, Blocks.BEDROCK));
-        PresetFlatWorldScreen.preset(new TranslatableComponent("createWorld.customize.preset.overworld"), Blocks.GRASS, Biomes.PLAINS, Arrays.asList(StructureFeature.VILLAGE, StructureFeature.SWAMP_HUT, StructureFeature.DESERT_PYRAMID, StructureFeature.JUNGLE_TEMPLE, StructureFeature.IGLOO, StructureFeature.OCEAN_RUIN, StructureFeature.SHIPWRECK, StructureFeature.MINESHAFT, StructureFeature.PILLAGER_OUTPOST, StructureFeature.RUINED_PORTAL), true, true, true, new FlatLayerInfo(1, Blocks.GRASS_BLOCK), new FlatLayerInfo(3, Blocks.DIRT), new FlatLayerInfo(59, Blocks.STONE), new FlatLayerInfo(1, Blocks.BEDROCK));
-        PresetFlatWorldScreen.preset(new TranslatableComponent("createWorld.customize.preset.snowy_kingdom"), Blocks.SNOW, Biomes.SNOWY_TUNDRA, Arrays.asList(StructureFeature.VILLAGE, StructureFeature.SWAMP_HUT, StructureFeature.DESERT_PYRAMID, StructureFeature.JUNGLE_TEMPLE, StructureFeature.IGLOO, StructureFeature.OCEAN_RUIN, StructureFeature.SHIPWRECK), false, false, false, new FlatLayerInfo(1, Blocks.SNOW), new FlatLayerInfo(1, Blocks.GRASS_BLOCK), new FlatLayerInfo(3, Blocks.DIRT), new FlatLayerInfo(59, Blocks.STONE), new FlatLayerInfo(1, Blocks.BEDROCK));
-        PresetFlatWorldScreen.preset(new TranslatableComponent("createWorld.customize.preset.bottomless_pit"), Items.FEATHER, Biomes.PLAINS, Arrays.asList(StructureFeature.VILLAGE, StructureFeature.SWAMP_HUT, StructureFeature.DESERT_PYRAMID, StructureFeature.JUNGLE_TEMPLE, StructureFeature.IGLOO, StructureFeature.OCEAN_RUIN, StructureFeature.SHIPWRECK), false, false, false, new FlatLayerInfo(1, Blocks.GRASS_BLOCK), new FlatLayerInfo(3, Blocks.DIRT), new FlatLayerInfo(2, Blocks.COBBLESTONE));
-        PresetFlatWorldScreen.preset(new TranslatableComponent("createWorld.customize.preset.desert"), Blocks.SAND, Biomes.DESERT, Arrays.asList(StructureFeature.VILLAGE, StructureFeature.SWAMP_HUT, StructureFeature.DESERT_PYRAMID, StructureFeature.JUNGLE_TEMPLE, StructureFeature.IGLOO, StructureFeature.OCEAN_RUIN, StructureFeature.SHIPWRECK, StructureFeature.MINESHAFT), true, true, false, new FlatLayerInfo(8, Blocks.SAND), new FlatLayerInfo(52, Blocks.SANDSTONE), new FlatLayerInfo(3, Blocks.STONE), new FlatLayerInfo(1, Blocks.BEDROCK));
+        PresetFlatWorldScreen.preset(new TranslatableComponent("createWorld.customize.preset.tunnelers_dream"), Blocks.STONE, Biomes.MOUNTAINS, Arrays.asList(StructureFeature.MINESHAFT), true, true, false, new FlatLayerInfo(1, Blocks.GRASS_BLOCK), new FlatLayerInfo(5, Blocks.DIRT), new FlatLayerInfo(230, Blocks.STONE), new FlatLayerInfo(1, Blocks.BEDROCK));
+        PresetFlatWorldScreen.preset(new TranslatableComponent("createWorld.customize.preset.water_world"), Items.WATER_BUCKET, Biomes.DEEP_OCEAN, Arrays.asList(StructureFeature.OCEAN_RUIN, StructureFeature.SHIPWRECK, StructureFeature.OCEAN_MONUMENT), false, false, false, new FlatLayerInfo(90, Blocks.WATER), new FlatLayerInfo(5, Blocks.SAND), new FlatLayerInfo(5, Blocks.DIRT), new FlatLayerInfo(5, Blocks.STONE), new FlatLayerInfo(1, Blocks.BEDROCK));
+        PresetFlatWorldScreen.preset(new TranslatableComponent("createWorld.customize.preset.overworld"), Blocks.GRASS, Biomes.PLAINS, Arrays.asList(StructureFeature.VILLAGE, StructureFeature.MINESHAFT, StructureFeature.PILLAGER_OUTPOST, StructureFeature.RUINED_PORTAL), true, true, true, new FlatLayerInfo(1, Blocks.GRASS_BLOCK), new FlatLayerInfo(3, Blocks.DIRT), new FlatLayerInfo(59, Blocks.STONE), new FlatLayerInfo(1, Blocks.BEDROCK));
+        PresetFlatWorldScreen.preset(new TranslatableComponent("createWorld.customize.preset.snowy_kingdom"), Blocks.SNOW, Biomes.SNOWY_TUNDRA, Arrays.asList(StructureFeature.VILLAGE, StructureFeature.IGLOO), false, false, false, new FlatLayerInfo(1, Blocks.SNOW), new FlatLayerInfo(1, Blocks.GRASS_BLOCK), new FlatLayerInfo(3, Blocks.DIRT), new FlatLayerInfo(59, Blocks.STONE), new FlatLayerInfo(1, Blocks.BEDROCK));
+        PresetFlatWorldScreen.preset(new TranslatableComponent("createWorld.customize.preset.bottomless_pit"), Items.FEATHER, Biomes.PLAINS, Arrays.asList(StructureFeature.VILLAGE), false, false, false, new FlatLayerInfo(1, Blocks.GRASS_BLOCK), new FlatLayerInfo(3, Blocks.DIRT), new FlatLayerInfo(2, Blocks.COBBLESTONE));
+        PresetFlatWorldScreen.preset(new TranslatableComponent("createWorld.customize.preset.desert"), Blocks.SAND, Biomes.DESERT, Arrays.asList(StructureFeature.VILLAGE, StructureFeature.DESERT_PYRAMID, StructureFeature.MINESHAFT), true, true, false, new FlatLayerInfo(8, Blocks.SAND), new FlatLayerInfo(52, Blocks.SANDSTONE), new FlatLayerInfo(3, Blocks.STONE), new FlatLayerInfo(1, Blocks.BEDROCK));
         PresetFlatWorldScreen.preset(new TranslatableComponent("createWorld.customize.preset.redstone_ready"), Items.REDSTONE, Biomes.DESERT, Collections.emptyList(), false, false, false, new FlatLayerInfo(52, Blocks.SANDSTONE), new FlatLayerInfo(3, Blocks.STONE), new FlatLayerInfo(1, Blocks.BEDROCK));
         PresetFlatWorldScreen.preset(new TranslatableComponent("createWorld.customize.preset.the_void"), Blocks.BARRIER, Biomes.THE_VOID, Collections.emptyList(), false, true, false, new FlatLayerInfo(1, Blocks.AIR));
     }
@@ -332,7 +330,7 @@ extends Screen {
                 PresetInfo presetInfo = (PresetInfo)PRESETS.get(PresetsList.this.children().indexOf(this));
                 PresetFlatWorldScreen.this.export.setValue(PresetFlatWorldScreen.save(presetInfo.settings));
                 PresetFlatWorldScreen.this.export.moveCursorToStart();
-                PresetFlatWorldScreen.this.structureSettings = presetInfo.settings.structureSettings();
+                PresetFlatWorldScreen.this.settings = presetInfo.settings;
             }
 
             private void blitSlot(PoseStack poseStack, int i, int j, Item item) {

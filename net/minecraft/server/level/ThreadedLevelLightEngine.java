@@ -72,8 +72,8 @@ implements AutoCloseable {
             super.retainData(chunkPos, false);
             super.enableLightSources(chunkPos, false);
             for (i = -1; i < 17; ++i) {
-                super.queueSectionData(LightLayer.BLOCK, SectionPos.of(chunkPos, i), null);
-                super.queueSectionData(LightLayer.SKY, SectionPos.of(chunkPos, i), null);
+                super.queueSectionData(LightLayer.BLOCK, SectionPos.of(chunkPos, i), null, true);
+                super.queueSectionData(LightLayer.SKY, SectionPos.of(chunkPos, i), null, true);
             }
             for (i = 0; i < 16; ++i) {
                 super.updateSectionStatus(SectionPos.of(chunkPos, i), true);
@@ -92,8 +92,8 @@ implements AutoCloseable {
     }
 
     @Override
-    public void queueSectionData(LightLayer lightLayer, SectionPos sectionPos, @Nullable DataLayer dataLayer) {
-        this.addTask(sectionPos.x(), sectionPos.z(), () -> 0, TaskType.PRE_UPDATE, Util.name(() -> super.queueSectionData(lightLayer, sectionPos, dataLayer), () -> "queueData " + sectionPos));
+    public void queueSectionData(LightLayer lightLayer, SectionPos sectionPos, @Nullable DataLayer dataLayer, boolean bl) {
+        this.addTask(sectionPos.x(), sectionPos.z(), () -> 0, TaskType.PRE_UPDATE, Util.name(() -> super.queueSectionData(lightLayer, sectionPos, dataLayer, bl), () -> "queueData " + sectionPos));
     }
 
     private void addTask(int i, int j, TaskType taskType, Runnable runnable) {

@@ -28,6 +28,7 @@ import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.client.AmbientOcclusionStatus;
 import net.minecraft.client.AttackIndicatorStatus;
 import net.minecraft.client.CloudStatus;
@@ -128,7 +129,7 @@ public class Options {
     public final KeyMapping keyShift = new ToggleKeyMapping("key.sneak", 340, "key.categories.movement", () -> this.toggleCrouch);
     public final KeyMapping keySprint = new ToggleKeyMapping("key.sprint", 341, "key.categories.movement", () -> this.toggleSprint);
     public final KeyMapping keyInventory = new KeyMapping("key.inventory", 69, "key.categories.inventory");
-    public final KeyMapping keySwapHands = new KeyMapping("key.swapHands", 70, "key.categories.inventory");
+    public final KeyMapping keySwapOffhand = new KeyMapping("key.swapOffhand", 70, "key.categories.inventory");
     public final KeyMapping keyDrop = new KeyMapping("key.drop", 81, "key.categories.inventory");
     public final KeyMapping keyUse = new KeyMapping("key.use", InputConstants.Type.MOUSE, 1, "key.categories.gameplay");
     public final KeyMapping keyAttack = new KeyMapping("key.attack", InputConstants.Type.MOUSE, 0, "key.categories.gameplay");
@@ -145,7 +146,7 @@ public class Options {
     public final KeyMapping[] keyHotbarSlots = new KeyMapping[]{new KeyMapping("key.hotbar.1", 49, "key.categories.inventory"), new KeyMapping("key.hotbar.2", 50, "key.categories.inventory"), new KeyMapping("key.hotbar.3", 51, "key.categories.inventory"), new KeyMapping("key.hotbar.4", 52, "key.categories.inventory"), new KeyMapping("key.hotbar.5", 53, "key.categories.inventory"), new KeyMapping("key.hotbar.6", 54, "key.categories.inventory"), new KeyMapping("key.hotbar.7", 55, "key.categories.inventory"), new KeyMapping("key.hotbar.8", 56, "key.categories.inventory"), new KeyMapping("key.hotbar.9", 57, "key.categories.inventory")};
     public final KeyMapping keySaveHotbarActivator = new KeyMapping("key.saveToolbarActivator", 67, "key.categories.creative");
     public final KeyMapping keyLoadHotbarActivator = new KeyMapping("key.loadToolbarActivator", 88, "key.categories.creative");
-    public final KeyMapping[] keyMappings = ArrayUtils.addAll(new KeyMapping[]{this.keyAttack, this.keyUse, this.keyUp, this.keyLeft, this.keyDown, this.keyRight, this.keyJump, this.keyShift, this.keySprint, this.keyDrop, this.keyInventory, this.keyChat, this.keyPlayerList, this.keyPickItem, this.keyCommand, this.keyScreenshot, this.keyTogglePerspective, this.keySmoothCamera, this.keyFullscreen, this.keySpectatorOutlines, this.keySwapHands, this.keySaveHotbarActivator, this.keyLoadHotbarActivator, this.keyAdvancements}, this.keyHotbarSlots);
+    public final KeyMapping[] keyMappings = ArrayUtils.addAll(new KeyMapping[]{this.keyAttack, this.keyUse, this.keyUp, this.keyLeft, this.keyDown, this.keyRight, this.keyJump, this.keyShift, this.keySprint, this.keyDrop, this.keyInventory, this.keyChat, this.keyPlayerList, this.keyPickItem, this.keyCommand, this.keyScreenshot, this.keyTogglePerspective, this.keySmoothCamera, this.keyFullscreen, this.keySpectatorOutlines, this.keySwapOffhand, this.keySaveHotbarActivator, this.keyLoadHotbarActivator, this.keyAdvancements}, this.keyHotbarSlots);
     protected Minecraft minecraft;
     private final File optionsFile;
     public Difficulty difficulty = Difficulty.NORMAL;
@@ -162,6 +163,7 @@ public class Options {
     public ParticleStatus particles = ParticleStatus.ALL;
     public NarratorStatus narratorStatus = NarratorStatus.OFF;
     public String languageCode = "en_us";
+    public boolean syncWrites;
 
     public Options(Minecraft minecraft, File file) {
         this.minecraft = minecraft;
@@ -172,6 +174,7 @@ public class Options {
             Option.RENDER_DISTANCE.setMaxValue(16.0f);
         }
         this.renderDistance = minecraft.is64Bit() ? 12 : 8;
+        this.syncWrites = Util.getPlatform() == Util.OS.WINDOWS;
         this.load();
     }
 
@@ -437,6 +440,9 @@ public class Options {
                     if ("skipMultiplayerWarning".equals(string2)) {
                         this.skipMultiplayerWarning = "true".equals(string22);
                     }
+                    if ("syncChunkWrites".equals(string2)) {
+                        this.syncWrites = "true".equals(string22);
+                    }
                     for (KeyMapping keyMapping : this.keyMappings) {
                         if (!string2.equals("key_" + keyMapping.getName())) continue;
                         keyMapping.setKey(InputConstants.getKey(string22));
@@ -559,6 +565,7 @@ public class Options {
             printWriter.println("rawMouseInput:" + Option.RAW_MOUSE_INPUT.get(this));
             printWriter.println("glDebugVerbosity:" + this.glDebugVerbosity);
             printWriter.println("skipMultiplayerWarning:" + this.skipMultiplayerWarning);
+            printWriter.println("syncChunkWrites:" + this.syncWrites);
             for (KeyMapping keyMapping : this.keyMappings) {
                 printWriter.println("key_" + keyMapping.getName() + ":" + keyMapping.saveString());
             }

@@ -80,8 +80,8 @@ implements SimpleWaterloggedBlock {
         ItemStack itemStack;
         CampfireBlockEntity campfireBlockEntity;
         Optional<CampfireCookingRecipe> optional;
-        BlockEntity blockEntity;
-        if (blockState.getValue(LIT).booleanValue() && (blockEntity = level.getBlockEntity(blockPos)) instanceof CampfireBlockEntity && (optional = (campfireBlockEntity = (CampfireBlockEntity)blockEntity).getCookableRecipe(itemStack = player.getItemInHand(interactionHand))).isPresent()) {
+        BlockEntity blockEntity = level.getBlockEntity(blockPos);
+        if (blockEntity instanceof CampfireBlockEntity && (optional = (campfireBlockEntity = (CampfireBlockEntity)blockEntity).getCookableRecipe(itemStack = player.getItemInHand(interactionHand))).isPresent()) {
             if (!level.isClientSide && campfireBlockEntity.placeFood(player.abilities.instabuild ? itemStack.copy() : itemStack, optional.get().getCookingTime())) {
                 player.awardStat(Stats.INTERACT_WITH_CAMPFIRE);
                 return InteractionResult.SUCCESS;

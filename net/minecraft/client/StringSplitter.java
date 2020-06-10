@@ -156,7 +156,11 @@ public class StringSplitter {
         return list;
     }
 
-    public List<FormattedText> splitLines(FormattedText formattedText, int i, Style style2) {
+    public List<FormattedText> splitLines(FormattedText formattedText, int i, Style style) {
+        return this.splitLines(formattedText, i, style, null);
+    }
+
+    public List<FormattedText> splitLines(FormattedText formattedText, int i, Style style2, @Nullable FormattedText formattedText2) {
         ArrayList<FormattedText> list = Lists.newArrayList();
         ArrayList<LineComponent> list2 = Lists.newArrayList();
         formattedText.visit((style, string) -> {
@@ -168,32 +172,42 @@ public class StringSplitter {
         FlatComponents flatComponents = new FlatComponents(list2);
         boolean bl = true;
         boolean bl2 = false;
+        boolean bl3 = false;
         block0: while (bl) {
             bl = false;
             LineBreakFinder lineBreakFinder = new LineBreakFinder(i);
             for (LineComponent lineComponent : flatComponents.parts) {
-                boolean bl3 = StringDecomposer.iterateFormatted(lineComponent.contents, 0, lineComponent.style, style2, lineBreakFinder);
-                if (!bl3) {
+                boolean bl4 = StringDecomposer.iterateFormatted(lineComponent.contents, 0, lineComponent.style, style2, lineBreakFinder);
+                if (!bl4) {
                     int j = lineBreakFinder.getSplitPosition();
                     Style style22 = lineBreakFinder.getSplitStyle();
                     char c = flatComponents.charAt(j);
-                    boolean bl4 = c == '\n';
-                    boolean bl5 = bl4 || c == ' ';
-                    bl2 = bl4;
-                    list.add(flatComponents.splitAt(j, bl5 ? 1 : 0, style22));
+                    boolean bl5 = c == '\n';
+                    boolean bl6 = bl5 || c == ' ';
+                    bl2 = bl5;
+                    FormattedText formattedText3 = flatComponents.splitAt(j, bl6 ? 1 : 0, style22);
+                    list.add(this.formattedLine(formattedText3, bl3, formattedText2));
+                    bl3 = !bl5;
                     bl = true;
                     continue block0;
                 }
                 lineBreakFinder.addToOffset(lineComponent.contents.length());
             }
         }
-        FormattedText formattedText2 = flatComponents.getRemainder();
-        if (formattedText2 != null) {
-            list.add(formattedText2);
+        FormattedText formattedText4 = flatComponents.getRemainder();
+        if (formattedText4 != null) {
+            list.add(this.formattedLine(formattedText4, bl3, formattedText2));
         } else if (bl2) {
             list.add(FormattedText.EMPTY);
         }
         return list;
+    }
+
+    private FormattedText formattedLine(FormattedText formattedText, boolean bl, FormattedText formattedText2) {
+        if (bl && formattedText2 != null) {
+            return FormattedText.composite(formattedText2, formattedText);
+        }
+        return formattedText;
     }
 
     @Environment(value=EnvType.CLIENT)

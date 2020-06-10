@@ -135,7 +135,7 @@ IdMap<T> {
     public static final ResourceKey<Registry<MenuType<?>>> MENU_REGISTRY = Registry.createRegistryKey("menu");
     public static final ResourceKey<Registry<RecipeType<?>>> RECIPE_TYPE_REGISTRY = Registry.createRegistryKey("recipe_type");
     public static final ResourceKey<Registry<RecipeSerializer<?>>> RECIPE_SERIALIZER_REGISTRY = Registry.createRegistryKey("recipe_serializer");
-    public static final ResourceKey<Registry<Attribute>> ATTRIBUTES_REGISTRY = Registry.createRegistryKey("attributes");
+    public static final ResourceKey<Registry<Attribute>> ATTRIBUTE_REGISTRY = Registry.createRegistryKey("attribute");
     public static final ResourceKey<Registry<StatType<?>>> STAT_TYPE_REGISTRY = Registry.createRegistryKey("stat_type");
     public static final ResourceKey<Registry<VillagerType>> VILLAGER_TYPE_REGISTRY = Registry.createRegistryKey("villager_type");
     public static final ResourceKey<Registry<VillagerProfession>> VILLAGER_PROFESSION_REGISTRY = Registry.createRegistryKey("villager_profession");
@@ -185,7 +185,7 @@ IdMap<T> {
     public static final Registry<MenuType<?>> MENU = Registry.registerSimple(MENU_REGISTRY, () -> MenuType.ANVIL);
     public static final Registry<RecipeType<?>> RECIPE_TYPE = Registry.registerSimple(RECIPE_TYPE_REGISTRY, () -> RecipeType.CRAFTING);
     public static final Registry<RecipeSerializer<?>> RECIPE_SERIALIZER = Registry.registerSimple(RECIPE_SERIALIZER_REGISTRY, () -> RecipeSerializer.SHAPELESS_RECIPE);
-    public static final Registry<Attribute> ATTRIBUTES = Registry.registerSimple(ATTRIBUTES_REGISTRY, () -> Attributes.LUCK);
+    public static final Registry<Attribute> ATTRIBUTE = Registry.registerSimple(ATTRIBUTE_REGISTRY, () -> Attributes.LUCK);
     public static final Registry<StatType<?>> STAT_TYPE = Registry.registerSimple(STAT_TYPE_REGISTRY, () -> Stats.ITEM_USED);
     public static final DefaultedRegistry<VillagerType> VILLAGER_TYPE = Registry.registerDefaulted(VILLAGER_TYPE_REGISTRY, "plains", () -> VillagerType.PLAINS);
     public static final DefaultedRegistry<VillagerProfession> VILLAGER_PROFESSION = Registry.registerDefaulted(VILLAGER_PROFESSION_REGISTRY, "none", () -> VillagerProfession.NONE);
@@ -309,6 +309,8 @@ IdMap<T> {
     }
 
     public abstract boolean containsKey(ResourceLocation var1);
+
+    public abstract boolean persistent(ResourceKey<T> var1);
 
     public abstract boolean containsId(int var1);
 

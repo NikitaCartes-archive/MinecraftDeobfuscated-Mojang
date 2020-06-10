@@ -143,14 +143,6 @@ AutoCloseable {
         return null;
     }
 
-    public BlockState getTopBlockState(BlockPos blockPos) {
-        BlockPos blockPos2 = new BlockPos(blockPos.getX(), this.getSeaLevel(), blockPos.getZ());
-        while (!this.isEmptyBlock(blockPos2.above())) {
-            blockPos2 = blockPos2.above();
-        }
-        return this.getBlockState(blockPos2);
-    }
-
     public static boolean isInWorldBounds(BlockPos blockPos) {
         return !Level.isOutsideBuildHeight(blockPos) && Level.isInWorldBoundsHorizontal(blockPos);
     }
@@ -388,11 +380,11 @@ AutoCloseable {
     }
 
     public boolean isDay() {
-        return this.dimensionType().isOverworld() && this.skyDarken < 4;
+        return !this.dimensionType().hasFixedTime() && this.skyDarken < 4;
     }
 
     public boolean isNight() {
-        return this.dimensionType().isOverworld() && !this.isDay();
+        return !this.dimensionType().hasFixedTime() && !this.isDay();
     }
 
     @Override
@@ -673,9 +665,10 @@ AutoCloseable {
         int j = Mth.floor((aABB.maxX + 2.0) / 16.0);
         int k = Mth.floor((aABB.minZ - 2.0) / 16.0);
         int l = Mth.floor((aABB.maxZ + 2.0) / 16.0);
+        ChunkSource chunkSource = this.getChunkSource();
         for (int m = i; m <= j; ++m) {
             for (int n = k; n <= l; ++n) {
-                LevelChunk levelChunk = this.getChunkSource().getChunk(m, n, false);
+                LevelChunk levelChunk = chunkSource.getChunk(m, n, false);
                 if (levelChunk == null) continue;
                 levelChunk.getEntities(entity, aABB, list, predicate);
             }

@@ -26,7 +26,7 @@ extends SimpleCriterionTrigger<TriggerInstance> {
     }
 
     public void trigger(ServerPlayer serverPlayer) {
-        this.trigger(serverPlayer.getAdvancements());
+        this.trigger(serverPlayer, triggerInstance -> true);
     }
 
     @Override

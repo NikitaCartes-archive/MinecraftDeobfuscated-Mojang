@@ -52,7 +52,7 @@ extends Team {
     }
 
     public MutableComponent getFormattedDisplayName() {
-        MutableComponent mutableComponent = ComponentUtils.wrapInSquareBrackets(this.displayName.mutableCopy().withStyle(this.displayNameStyle));
+        MutableComponent mutableComponent = ComponentUtils.wrapInSquareBrackets(this.displayName.copy().withStyle(this.displayNameStyle));
         ChatFormatting chatFormatting = this.getColor();
         if (chatFormatting != ChatFormatting.RESET) {
             mutableComponent.withStyle(chatFormatting);
@@ -103,7 +103,7 @@ extends Team {
 
     public static MutableComponent formatNameForTeam(@Nullable Team team, Component component) {
         if (team == null) {
-            return component.mutableCopy();
+            return component.copy();
         }
         return team.getFormattedName(component);
     }

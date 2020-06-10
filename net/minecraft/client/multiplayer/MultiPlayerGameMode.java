@@ -315,7 +315,7 @@ public class MultiPlayerGameMode {
 
     public InteractionResult interact(Player player, Entity entity, InteractionHand interactionHand) {
         this.ensureHasSentCarriedItem();
-        this.connection.send(new ServerboundInteractPacket(entity, interactionHand));
+        this.connection.send(new ServerboundInteractPacket(entity, interactionHand, player.isShiftKeyDown()));
         if (this.localPlayerMode == GameType.SPECTATOR) {
             return InteractionResult.PASS;
         }
@@ -325,7 +325,7 @@ public class MultiPlayerGameMode {
     public InteractionResult interactAt(Player player, Entity entity, EntityHitResult entityHitResult, InteractionHand interactionHand) {
         this.ensureHasSentCarriedItem();
         Vec3 vec3 = entityHitResult.getLocation().subtract(entity.getX(), entity.getY(), entity.getZ());
-        this.connection.send(new ServerboundInteractPacket(entity, interactionHand, vec3));
+        this.connection.send(new ServerboundInteractPacket(entity, interactionHand, vec3, player.isShiftKeyDown()));
         if (this.localPlayerMode == GameType.SPECTATOR) {
             return InteractionResult.PASS;
         }

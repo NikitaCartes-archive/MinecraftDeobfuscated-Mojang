@@ -177,8 +177,8 @@ implements LayerLightEventListener {
         return i;
     }
 
-    protected void queueSectionData(long l, @Nullable DataLayer dataLayer) {
-        ((LayerLightSectionStorage)this.storage).queueSectionData(l, dataLayer);
+    protected void queueSectionData(long l, @Nullable DataLayer dataLayer, boolean bl) {
+        ((LayerLightSectionStorage)this.storage).queueSectionData(l, dataLayer, bl);
     }
 
     @Override

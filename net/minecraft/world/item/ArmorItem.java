@@ -51,7 +51,7 @@ implements Wearable {
 
     public static boolean dispenseArmor(BlockSource blockSource, ItemStack itemStack) {
         BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
-        List<Entity> list = blockSource.getLevel().getEntitiesOfClass(LivingEntity.class, new AABB(blockPos), EntitySelector.NO_SPECTATORS.and(new EntitySelector.MobCanWearArmourEntitySelector(itemStack)));
+        List<Entity> list = blockSource.getLevel().getEntitiesOfClass(LivingEntity.class, new AABB(blockPos), EntitySelector.NO_SPECTATORS.and(new EntitySelector.MobCanWearArmorEntitySelector(itemStack)));
         if (list.isEmpty()) {
             return false;
         }

@@ -8,6 +8,7 @@ import java.io.File;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.nbt.CompoundTag;
@@ -51,7 +52,11 @@ public class ServerList {
             }
             CompoundTag compoundTag = new CompoundTag();
             compoundTag.put("servers", listTag);
-            NbtIo.safeWrite(compoundTag, new File(this.minecraft.gameDirectory, "servers.dat"));
+            File file = File.createTempFile("servers", ".dat", this.minecraft.gameDirectory);
+            NbtIo.write(compoundTag, file);
+            File file2 = new File(this.minecraft.gameDirectory, "servers.dat_old");
+            File file3 = new File(this.minecraft.gameDirectory, "servers.dat");
+            Util.safeReplaceFile(file3, file, file2);
         } catch (Exception exception) {
             LOGGER.error("Couldn't save server list", (Throwable)exception);
         }

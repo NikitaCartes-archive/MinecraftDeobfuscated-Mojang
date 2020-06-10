@@ -22,7 +22,6 @@ import net.minecraft.network.protocol.game.ClientboundChunkBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkPacket;
 import net.minecraft.network.protocol.game.ClientboundLightUpdatePacket;
 import net.minecraft.server.level.ChunkMap;
-import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
@@ -56,13 +55,13 @@ public class ChunkHolder {
     private final short[] changedBlocks = new short[64];
     private int changes;
     private int changedSectionFilter;
+    private boolean forceSendLight;
     private int blockChangedLightSectionFilter;
     private int skyChangedLightSectionFilter;
     private final LevelLightEngine lightEngine;
     private final LevelChangeListener onLevelChange;
     private final PlayerProvider playerProvider;
     private boolean wasAccessibleSinceLastSave;
-    private boolean forceSendLight;
 
     public ChunkHolder(ChunkPos chunkPos, int i, LevelLightEngine levelLightEngine, LevelChangeListener levelChangeListener, PlayerProvider playerProvider) {
         this.pos = chunkPos;
@@ -136,7 +135,7 @@ public class ChunkHolder {
         return this.chunkToSave;
     }
 
-    public void blockChanged(ServerChunkCache serverChunkCache, int i, int j, int k) {
+    public void blockChanged(int i, int j, int k) {
         LevelChunk levelChunk = this.getTickingChunk();
         if (levelChunk == null) {
             return;
@@ -149,9 +148,6 @@ public class ChunkHolder {
                 return;
             }
             this.changedBlocks[this.changes++] = s;
-            if (this.changes == 64) {
-                serverChunkCache.notifyNeighborsOfLightChange(this.pos.x, this.pos.z);
-            }
         }
     }
 
@@ -173,8 +169,15 @@ public class ChunkHolder {
             return;
         }
         Level level = levelChunk.getLevel();
-        if (!(!this.forceSendLight && this.changes != 64 || this.skyChangedLightSectionFilter == 0 && this.blockChangedLightSectionFilter == 0)) {
-            this.broadcast(new ClientboundLightUpdatePacket(levelChunk.getPos(), this.lightEngine, this.skyChangedLightSectionFilter, this.blockChangedLightSectionFilter), false);
+        if (this.changes == 64) {
+            this.forceSendLight = true;
+        }
+        boolean bl = !this.forceSendLight;
+        boolean bl2 = this.forceSendLight = this.forceSendLight && this.lightEngine.hasLightWork();
+        if (this.skyChangedLightSectionFilter != 0 || this.blockChangedLightSectionFilter != 0) {
+            this.broadcast(new ClientboundLightUpdatePacket(levelChunk.getPos(), this.lightEngine, this.skyChangedLightSectionFilter, this.blockChangedLightSectionFilter, bl), bl);
+            this.skyChangedLightSectionFilter = 0;
+            this.blockChangedLightSectionFilter = 0;
         }
         if (this.changes == 1) {
             int i = (this.changedBlocks[0] >> 12 & 0xF) + this.pos.x * 16;
@@ -200,9 +203,6 @@ public class ChunkHolder {
         }
         this.changes = 0;
         this.changedSectionFilter = 0;
-        this.forceSendLight = false;
-        this.skyChangedLightSectionFilter = 0;
-        this.blockChangedLightSectionFilter = 0;
     }
 
     private void broadcastBlockEntity(Level level, BlockPos blockPos) {
@@ -355,10 +355,6 @@ public class ChunkHolder {
             this.futures.set(i, CompletableFuture.completedFuture(Either.left(imposterProtoChunk)));
         }
         this.updateChunkToSave(CompletableFuture.completedFuture(Either.left(imposterProtoChunk.getWrapped())));
-    }
-
-    public void forceSendLight() {
-        this.forceSendLight = true;
     }
 
     public static interface PlayerProvider {

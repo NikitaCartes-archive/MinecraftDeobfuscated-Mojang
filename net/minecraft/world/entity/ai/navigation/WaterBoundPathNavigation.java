@@ -82,8 +82,8 @@ extends PathNavigation {
             g = (float)((double)g * (vec32.length() * 6.0));
         }
         int i = 6;
-        Vec3 vec33 = Vec3.atCenterOf(this.path.currentPos());
-        if (Math.abs(this.mob.getX() - (vec33.x + 0.5)) < (double)g && Math.abs(this.mob.getZ() - (vec33.z + 0.5)) < (double)g && Math.abs(this.mob.getY() - vec33.y) < (double)(g * 2.0f)) {
+        Vec3 vec33 = Vec3.atBottomCenterOf(this.path.currentPos());
+        if (Math.abs(this.mob.getX() - vec33.x) < (double)g && Math.abs(this.mob.getZ() - vec33.z) < (double)g && Math.abs(this.mob.getY() - vec33.y) < (double)(g * 2.0f)) {
             this.path.next();
         }
         for (int j = Math.min(this.path.getIndex() + 6, this.path.getSize() - 1); j > this.path.getIndex(); --j) {

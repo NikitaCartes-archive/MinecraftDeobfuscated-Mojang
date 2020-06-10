@@ -38,7 +38,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.minecraft.server.packs.resources.SimpleResource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -475,7 +474,7 @@ AutoCloseable {
     private void takeAutoScreenshot() {
         if (this.minecraft.levelRenderer.countRenderedChunks() > 10 && this.minecraft.levelRenderer.hasRenderedAllChunks() && !this.minecraft.getSingleplayerServer().hasWorldScreenshot()) {
             NativeImage nativeImage = Screenshot.takeScreenshot(this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight(), this.minecraft.getMainRenderTarget());
-            SimpleResource.IO_EXECUTOR.execute(() -> {
+            Util.ioPool().execute(() -> {
                 int i = nativeImage.getWidth();
                 int j = nativeImage.getHeight();
                 int k = 0;

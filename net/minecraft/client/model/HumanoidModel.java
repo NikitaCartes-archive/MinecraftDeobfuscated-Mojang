@@ -146,6 +146,11 @@ HeadedModel {
             case ITEM: {
                 this.leftArm.xRot = this.leftArm.xRot * 0.5f - 0.31415927f;
                 this.leftArm.yRot = 0.0f;
+                break;
+            }
+            case THROW_SPEAR: {
+                this.leftArm.xRot = this.leftArm.xRot * 0.5f - (float)Math.PI;
+                this.leftArm.yRot = 0.0f;
             }
         }
         switch (this.rightArmPose) {
@@ -171,6 +176,10 @@ HeadedModel {
         if (this.leftArmPose == ArmPose.THROW_SPEAR && this.rightArmPose != ArmPose.BLOCK && this.rightArmPose != ArmPose.THROW_SPEAR && this.rightArmPose != ArmPose.BOW_AND_ARROW) {
             this.leftArm.xRot = this.leftArm.xRot * 0.5f - (float)Math.PI;
             this.leftArm.yRot = 0.0f;
+        }
+        if (this.rightArmPose == ArmPose.THROW_SPEAR && this.leftArmPose != ArmPose.BLOCK && this.leftArmPose != ArmPose.THROW_SPEAR && this.leftArmPose != ArmPose.BOW_AND_ARROW) {
+            this.rightArm.xRot = this.rightArm.xRot * 0.5f - (float)Math.PI;
+            this.rightArm.yRot = 0.0f;
         }
         this.setupAttackAnimation(livingEntity, h);
         if (this.crouching) {
@@ -219,36 +228,38 @@ HeadedModel {
             AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, false);
         }
         if (this.swimAmount > 0.0f) {
+            float o;
             float n;
-            float m;
             float l = f % 26.0f;
-            float f2 = m = this.attackTime > 0.0f ? 0.0f : this.swimAmount;
+            HumanoidArm humanoidArm = this.getAttackArm(livingEntity);
+            float m = humanoidArm == HumanoidArm.RIGHT && this.attackTime > 0.0f ? 0.0f : this.swimAmount;
+            float f2 = n = humanoidArm == HumanoidArm.LEFT && this.attackTime > 0.0f ? 0.0f : this.swimAmount;
             if (l < 14.0f) {
-                this.leftArm.xRot = this.rotlerpRad(this.leftArm.xRot, 0.0f, this.swimAmount);
+                this.leftArm.xRot = Mth.lerp(n, this.leftArm.xRot, 0.0f);
                 this.rightArm.xRot = Mth.lerp(m, this.rightArm.xRot, 0.0f);
-                this.leftArm.yRot = this.rotlerpRad(this.leftArm.yRot, (float)Math.PI, this.swimAmount);
+                this.leftArm.yRot = Mth.lerp(n, this.leftArm.yRot, (float)Math.PI);
                 this.rightArm.yRot = Mth.lerp(m, this.rightArm.yRot, (float)Math.PI);
-                this.leftArm.zRot = this.rotlerpRad(this.leftArm.zRot, (float)Math.PI + 1.8707964f * this.quadraticArmUpdate(l) / this.quadraticArmUpdate(14.0f), this.swimAmount);
+                this.leftArm.zRot = Mth.lerp(n, this.leftArm.zRot, (float)Math.PI + 1.8707964f * this.quadraticArmUpdate(l) / this.quadraticArmUpdate(14.0f));
                 this.rightArm.zRot = Mth.lerp(m, this.rightArm.zRot, (float)Math.PI - 1.8707964f * this.quadraticArmUpdate(l) / this.quadraticArmUpdate(14.0f));
             } else if (l >= 14.0f && l < 22.0f) {
-                n = (l - 14.0f) / 8.0f;
-                this.leftArm.xRot = this.rotlerpRad(this.leftArm.xRot, 1.5707964f * n, this.swimAmount);
-                this.rightArm.xRot = Mth.lerp(m, this.rightArm.xRot, 1.5707964f * n);
-                this.leftArm.yRot = this.rotlerpRad(this.leftArm.yRot, (float)Math.PI, this.swimAmount);
+                o = (l - 14.0f) / 8.0f;
+                this.leftArm.xRot = Mth.lerp(n, this.leftArm.xRot, 1.5707964f * o);
+                this.rightArm.xRot = Mth.lerp(m, this.rightArm.xRot, 1.5707964f * o);
+                this.leftArm.yRot = Mth.lerp(n, this.leftArm.yRot, (float)Math.PI);
                 this.rightArm.yRot = Mth.lerp(m, this.rightArm.yRot, (float)Math.PI);
-                this.leftArm.zRot = this.rotlerpRad(this.leftArm.zRot, 5.012389f - 1.8707964f * n, this.swimAmount);
-                this.rightArm.zRot = Mth.lerp(m, this.rightArm.zRot, 1.2707963f + 1.8707964f * n);
+                this.leftArm.zRot = Mth.lerp(n, this.leftArm.zRot, 5.012389f - 1.8707964f * o);
+                this.rightArm.zRot = Mth.lerp(m, this.rightArm.zRot, 1.2707963f + 1.8707964f * o);
             } else if (l >= 22.0f && l < 26.0f) {
-                n = (l - 22.0f) / 4.0f;
-                this.leftArm.xRot = this.rotlerpRad(this.leftArm.xRot, 1.5707964f - 1.5707964f * n, this.swimAmount);
-                this.rightArm.xRot = Mth.lerp(m, this.rightArm.xRot, 1.5707964f - 1.5707964f * n);
-                this.leftArm.yRot = this.rotlerpRad(this.leftArm.yRot, (float)Math.PI, this.swimAmount);
+                o = (l - 22.0f) / 4.0f;
+                this.leftArm.xRot = Mth.lerp(n, this.leftArm.xRot, 1.5707964f - 1.5707964f * o);
+                this.rightArm.xRot = Mth.lerp(m, this.rightArm.xRot, 1.5707964f - 1.5707964f * o);
+                this.leftArm.yRot = Mth.lerp(n, this.leftArm.yRot, (float)Math.PI);
                 this.rightArm.yRot = Mth.lerp(m, this.rightArm.yRot, (float)Math.PI);
-                this.leftArm.zRot = this.rotlerpRad(this.leftArm.zRot, (float)Math.PI, this.swimAmount);
+                this.leftArm.zRot = Mth.lerp(n, this.leftArm.zRot, (float)Math.PI);
                 this.rightArm.zRot = Mth.lerp(m, this.rightArm.zRot, (float)Math.PI);
             }
-            n = 0.3f;
-            float o = 0.33333334f;
+            o = 0.3f;
+            float p = 0.33333334f;
             this.leftLeg.xRot = Mth.lerp(this.swimAmount, this.leftLeg.xRot, 0.3f * Mth.cos(f * 0.33333334f + (float)Math.PI));
             this.rightLeg.xRot = Mth.lerp(this.swimAmount, this.rightLeg.xRot, 0.3f * Mth.cos(f * 0.33333334f));
         }
@@ -305,6 +316,13 @@ HeadedModel {
         humanoidModel.leftArmPose = this.leftArmPose;
         humanoidModel.rightArmPose = this.rightArmPose;
         humanoidModel.crouching = this.crouching;
+        humanoidModel.head.copyFrom(this.head);
+        humanoidModel.hat.copyFrom(this.hat);
+        humanoidModel.body.copyFrom(this.body);
+        humanoidModel.rightArm.copyFrom(this.rightArm);
+        humanoidModel.leftArm.copyFrom(this.leftArm);
+        humanoidModel.rightLeg.copyFrom(this.rightLeg);
+        humanoidModel.leftLeg.copyFrom(this.leftLeg);
     }
 
     public void setAllVisible(boolean bl) {

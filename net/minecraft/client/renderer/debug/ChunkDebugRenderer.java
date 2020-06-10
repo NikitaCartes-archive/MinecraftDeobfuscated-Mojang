@@ -103,6 +103,9 @@ implements DebugRenderer.SimpleDebugRenderer {
             this.clientData = builder.build();
             this.serverData = integratedServer.submit(() -> {
                 ServerLevel serverLevel = integratedServer.getLevel(resourceKey);
+                if (serverLevel == null) {
+                    return ImmutableMap.of();
+                }
                 ImmutableMap.Builder<ChunkPos, String> builder = ImmutableMap.builder();
                 ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
                 for (int k = i - 12; k <= i + 12; ++k) {

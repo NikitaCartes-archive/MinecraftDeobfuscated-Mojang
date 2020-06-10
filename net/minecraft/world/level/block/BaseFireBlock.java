@@ -145,7 +145,7 @@ extends Block {
         if (blockState2.is(blockState.getBlock())) {
             return;
         }
-        if ((level.dimensionType().isOverworld() || level.dimensionType().isNether()) && NetherPortalBlock.trySpawnPortal(level, blockPos)) {
+        if ((level.dimension() == Level.OVERWORLD || level.dimension() == Level.NETHER) && NetherPortalBlock.trySpawnPortal(level, blockPos)) {
             return;
         }
         if (!blockState.canSurvive(level, blockPos)) {

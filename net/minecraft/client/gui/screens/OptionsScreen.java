@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.gui.screens;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -21,11 +22,13 @@ import net.minecraft.client.gui.screens.SkinCustomizationScreen;
 import net.minecraft.client.gui.screens.SoundOptionsScreen;
 import net.minecraft.client.gui.screens.VideoSettingsScreen;
 import net.minecraft.client.gui.screens.controls.ControlsScreen;
+import net.minecraft.client.resources.ResourcePack;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ServerboundLockDifficultyPacket;
+import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.world.Difficulty;
 
 @Environment(value=EnvType.CLIENT)
@@ -82,9 +85,26 @@ extends Screen {
         this.addButton(new Button(this.width / 2 + 5, this.height / 6 + 72 - 6, 150, 20, new TranslatableComponent("options.controls"), button -> this.minecraft.setScreen(new ControlsScreen(this, this.options))));
         this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 96 - 6, 150, 20, new TranslatableComponent("options.language"), button -> this.minecraft.setScreen(new LanguageSelectScreen((Screen)this, this.options, this.minecraft.getLanguageManager()))));
         this.addButton(new Button(this.width / 2 + 5, this.height / 6 + 96 - 6, 150, 20, new TranslatableComponent("options.chat.title"), button -> this.minecraft.setScreen(new ChatOptionsScreen(this, this.options))));
-        this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 120 - 6, 150, 20, new TranslatableComponent("options.resourcepack"), button -> this.minecraft.setScreen(new ResourcePackSelectScreen((Screen)this, this.options, this.minecraft.getResourcePackRepository(), this.minecraft::reloadResourcePacks))));
+        this.addButton(new Button(this.width / 2 - 155, this.height / 6 + 120 - 6, 150, 20, new TranslatableComponent("options.resourcepack"), button -> this.minecraft.setScreen(new ResourcePackSelectScreen((Screen)this, this.minecraft.getResourcePackRepository(), this::updatePackList, this.minecraft.getResourcePackDirectory()))));
         this.addButton(new Button(this.width / 2 + 5, this.height / 6 + 120 - 6, 150, 20, new TranslatableComponent("options.accessibility.title"), button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.options))));
         this.addButton(new Button(this.width / 2 - 100, this.height / 6 + 168, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
+    }
+
+    private void updatePackList(PackRepository<ResourcePack> packRepository) {
+        ImmutableList<String> list = ImmutableList.copyOf(this.options.resourcePacks);
+        this.options.resourcePacks.clear();
+        this.options.incompatibleResourcePacks.clear();
+        for (ResourcePack resourcePack : packRepository.getSelectedPacks()) {
+            if (resourcePack.isFixedPosition()) continue;
+            this.options.resourcePacks.add(resourcePack.getId());
+            if (resourcePack.getCompatibility().isCompatible()) continue;
+            this.options.incompatibleResourcePacks.add(resourcePack.getId());
+        }
+        this.options.save();
+        ImmutableList<String> list2 = ImmutableList.copyOf(this.options.resourcePacks);
+        if (!list2.equals(list)) {
+            this.minecraft.reloadResourcePacks();
+        }
     }
 
     private Component getDifficultyText(Difficulty difficulty) {

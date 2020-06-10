@@ -42,7 +42,7 @@ extends Behavior<LivingEntity> {
         GlobalPos globalPos = brain.getMemory(this.memoryType).get();
         BlockPos blockPos = globalPos.pos();
         ServerLevel serverLevel2 = serverLevel.getServer().getLevel(globalPos.dimension());
-        if (this.poiDoesntExist(serverLevel2, blockPos)) {
+        if (serverLevel2 == null || this.poiDoesntExist(serverLevel2, blockPos)) {
             brain.eraseMemory(this.memoryType);
         } else if (this.bedIsOccupied(serverLevel2, blockPos, livingEntity)) {
             brain.eraseMemory(this.memoryType);

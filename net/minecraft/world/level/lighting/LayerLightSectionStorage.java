@@ -35,6 +35,7 @@ extends SectionTracker {
     protected final LongSet changedSections = new LongOpenHashSet();
     protected final LongSet sectionsAffectedByLightUpdates = new LongOpenHashSet();
     protected final Long2ObjectMap<DataLayer> queuedSections = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap());
+    private final LongSet untrustedSections = new LongOpenHashSet();
     private final LongSet columnsToRetainQueuedDataFor = new LongOpenHashSet();
     private final LongSet toRemove = new LongOpenHashSet();
     protected volatile boolean hasToRemove;
@@ -224,61 +225,72 @@ extends SectionTracker {
         ((DataLayerStorageMap)this.updatingSectionData).clearCache();
         if (!bl2) {
             for (long l2 : this.queuedSections.keySet()) {
-                if (!this.storingLightForSection(l2)) continue;
-                int i = SectionPos.sectionToBlockCoord(SectionPos.x(l2));
-                int j = SectionPos.sectionToBlockCoord(SectionPos.y(l2));
-                int k = SectionPos.sectionToBlockCoord(SectionPos.z(l2));
-                for (Direction direction : DIRECTIONS) {
-                    long n = SectionPos.offset(l2, direction);
-                    if (this.queuedSections.containsKey(n) || !this.storingLightForSection(n)) continue;
-                    for (int o = 0; o < 16; ++o) {
-                        for (int p = 0; p < 16; ++p) {
-                            long r;
-                            long q;
-                            switch (direction) {
-                                case DOWN: {
-                                    q = BlockPos.asLong(i + p, j, k + o);
-                                    r = BlockPos.asLong(i + p, j - 1, k + o);
-                                    break;
-                                }
-                                case UP: {
-                                    q = BlockPos.asLong(i + p, j + 16 - 1, k + o);
-                                    r = BlockPos.asLong(i + p, j + 16, k + o);
-                                    break;
-                                }
-                                case NORTH: {
-                                    q = BlockPos.asLong(i + o, j + p, k);
-                                    r = BlockPos.asLong(i + o, j + p, k - 1);
-                                    break;
-                                }
-                                case SOUTH: {
-                                    q = BlockPos.asLong(i + o, j + p, k + 16 - 1);
-                                    r = BlockPos.asLong(i + o, j + p, k + 16);
-                                    break;
-                                }
-                                case WEST: {
-                                    q = BlockPos.asLong(i, j + o, k + p);
-                                    r = BlockPos.asLong(i - 1, j + o, k + p);
-                                    break;
-                                }
-                                default: {
-                                    q = BlockPos.asLong(i + 16 - 1, j + o, k + p);
-                                    r = BlockPos.asLong(i + 16, j + o, k + p);
-                                }
-                            }
-                            layerLightEngine.checkEdge(q, r, layerLightEngine.computeLevelFromNeighbor(q, r, layerLightEngine.getLevel(q)), false);
-                            layerLightEngine.checkEdge(r, q, layerLightEngine.computeLevelFromNeighbor(r, q, layerLightEngine.getLevel(r)), false);
-                        }
-                    }
-                }
+                this.checkEdgesForSection(layerLightEngine, l2);
+            }
+        } else {
+            for (long l3 : this.untrustedSections) {
+                this.checkEdgesForSection(layerLightEngine, l3);
             }
         }
+        this.untrustedSections.clear();
         Iterator objectIterator = this.queuedSections.long2ObjectEntrySet().iterator();
         while (objectIterator.hasNext()) {
             Long2ObjectMap.Entry entry = (Long2ObjectMap.Entry)objectIterator.next();
             m = entry.getLongKey();
             if (!this.storingLightForSection(m)) continue;
             objectIterator.remove();
+        }
+    }
+
+    private void checkEdgesForSection(LayerLightEngine<M, ?> layerLightEngine, long l) {
+        if (!this.storingLightForSection(l)) {
+            return;
+        }
+        int i = SectionPos.sectionToBlockCoord(SectionPos.x(l));
+        int j = SectionPos.sectionToBlockCoord(SectionPos.y(l));
+        int k = SectionPos.sectionToBlockCoord(SectionPos.z(l));
+        for (Direction direction : DIRECTIONS) {
+            long m = SectionPos.offset(l, direction);
+            if (this.queuedSections.containsKey(m) || !this.storingLightForSection(m)) continue;
+            for (int n = 0; n < 16; ++n) {
+                for (int o = 0; o < 16; ++o) {
+                    long q;
+                    long p;
+                    switch (direction) {
+                        case DOWN: {
+                            p = BlockPos.asLong(i + o, j, k + n);
+                            q = BlockPos.asLong(i + o, j - 1, k + n);
+                            break;
+                        }
+                        case UP: {
+                            p = BlockPos.asLong(i + o, j + 16 - 1, k + n);
+                            q = BlockPos.asLong(i + o, j + 16, k + n);
+                            break;
+                        }
+                        case NORTH: {
+                            p = BlockPos.asLong(i + n, j + o, k);
+                            q = BlockPos.asLong(i + n, j + o, k - 1);
+                            break;
+                        }
+                        case SOUTH: {
+                            p = BlockPos.asLong(i + n, j + o, k + 16 - 1);
+                            q = BlockPos.asLong(i + n, j + o, k + 16);
+                            break;
+                        }
+                        case WEST: {
+                            p = BlockPos.asLong(i, j + n, k + o);
+                            q = BlockPos.asLong(i - 1, j + n, k + o);
+                            break;
+                        }
+                        default: {
+                            p = BlockPos.asLong(i + 16 - 1, j + n, k + o);
+                            q = BlockPos.asLong(i + 16, j + n, k + o);
+                        }
+                    }
+                    layerLightEngine.checkEdge(p, q, layerLightEngine.computeLevelFromNeighbor(p, q, layerLightEngine.getLevel(p)), false);
+                    layerLightEngine.checkEdge(q, p, layerLightEngine.computeLevelFromNeighbor(q, p, layerLightEngine.getLevel(q)), false);
+                }
+            }
         }
     }
 
@@ -299,9 +311,12 @@ extends SectionTracker {
         }
     }
 
-    protected void queueSectionData(long l, @Nullable DataLayer dataLayer) {
+    protected void queueSectionData(long l, @Nullable DataLayer dataLayer, boolean bl) {
         if (dataLayer != null) {
             this.queuedSections.put(l, dataLayer);
+            if (!bl) {
+                this.untrustedSections.add(l);
+            }
         } else {
             this.queuedSections.remove(l);
         }

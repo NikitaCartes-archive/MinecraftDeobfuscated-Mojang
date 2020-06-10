@@ -9,7 +9,6 @@ import net.minecraft.client.model.SkeletonModel;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
-import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 
@@ -20,7 +19,6 @@ extends HumanoidMobRenderer<AbstractSkeleton, SkeletonModel<AbstractSkeleton>> {
 
     public SkeletonRenderer(EntityRenderDispatcher entityRenderDispatcher) {
         super(entityRenderDispatcher, new SkeletonModel(), 0.5f);
-        this.addLayer(new ItemInHandLayer<AbstractSkeleton, SkeletonModel<AbstractSkeleton>>(this));
         this.addLayer(new HumanoidArmorLayer(this, new SkeletonModel(0.5f, true), new SkeletonModel(1.0f, true)));
     }
 

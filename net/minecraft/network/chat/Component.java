@@ -72,9 +72,9 @@ FormattedText {
 
     public List<Component> getSiblings();
 
-    public MutableComponent toMutable();
+    public MutableComponent plainCopy();
 
-    public MutableComponent mutableCopy();
+    public MutableComponent copy();
 
     @Override
     @Environment(value=EnvType.CLIENT)

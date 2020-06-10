@@ -45,10 +45,7 @@ extends Feature<TreeConfiguration> {
     }
 
     public static boolean isFree(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
-        return levelSimulatedReader.isStateAtPosition(blockPos, blockState -> {
-            Block block = blockState.getBlock();
-            return blockState.isAir() || blockState.is(BlockTags.LEAVES) || TreeFeature.isDirt(block) || blockState.is(BlockTags.LOGS) || blockState.is(BlockTags.SAPLINGS) || blockState.is(Blocks.VINE) || blockState.is(Blocks.WATER);
-        });
+        return TreeFeature.validTreePos(levelSimulatedReader, blockPos) || levelSimulatedReader.isStateAtPosition(blockPos, blockState -> blockState.is(BlockTags.LOGS));
     }
 
     private static boolean isVine(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
@@ -81,25 +78,24 @@ extends Feature<TreeConfiguration> {
         levelWriter.setBlock(blockPos, blockState, 19);
     }
 
-    public static boolean validTreePos(LevelSimulatedRW levelSimulatedRW, BlockPos blockPos) {
-        return TreeFeature.isAirOrLeaves(levelSimulatedRW, blockPos) || TreeFeature.isReplaceablePlant(levelSimulatedRW, blockPos) || TreeFeature.isBlockWater(levelSimulatedRW, blockPos);
+    public static boolean validTreePos(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
+        return TreeFeature.isAirOrLeaves(levelSimulatedReader, blockPos) || TreeFeature.isReplaceablePlant(levelSimulatedReader, blockPos) || TreeFeature.isBlockWater(levelSimulatedReader, blockPos);
     }
 
     private boolean doPlace(LevelSimulatedRW levelSimulatedRW, Random random, BlockPos blockPos, Set<BlockPos> set, Set<BlockPos> set2, BoundingBox boundingBox, TreeConfiguration treeConfiguration) {
-        int p;
         BlockPos blockPos2;
-        int o;
+        int n;
         int i = treeConfiguration.trunkPlacer.getTreeHeight(random);
         int j = treeConfiguration.foliagePlacer.foliageHeight(random, i, treeConfiguration);
         int k = i - j;
         int l = treeConfiguration.foliagePlacer.foliageRadius(random, k);
         if (!treeConfiguration.fromSapling) {
             int m = levelSimulatedRW.getHeightmapPos(Heightmap.Types.OCEAN_FLOOR, blockPos).getY();
-            int n = levelSimulatedRW.getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY();
+            n = levelSimulatedRW.getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY();
             if (n - m > treeConfiguration.maxWaterDepth) {
                 return false;
             }
-            o = treeConfiguration.heightmap == Heightmap.Types.OCEAN_FLOOR ? m : (treeConfiguration.heightmap == Heightmap.Types.WORLD_SURFACE ? n : levelSimulatedRW.getHeightmapPos(treeConfiguration.heightmap, blockPos).getY());
+            int o = treeConfiguration.heightmap == Heightmap.Types.OCEAN_FLOOR ? m : (treeConfiguration.heightmap == Heightmap.Types.WORLD_SURFACE ? n : levelSimulatedRW.getHeightmapPos(treeConfiguration.heightmap, blockPos).getY());
             blockPos2 = new BlockPos(blockPos.getX(), o, blockPos.getZ());
         } else {
             blockPos2 = blockPos;
@@ -110,27 +106,29 @@ extends Feature<TreeConfiguration> {
         if (!TreeFeature.isGrassOrDirtOrFarmland(levelSimulatedRW, blockPos2.below())) {
             return false;
         }
-        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         OptionalInt optionalInt = treeConfiguration.minimumSize.minClippedHeight();
-        o = i;
-        for (p = 0; p <= i + 1; ++p) {
-            int q = treeConfiguration.minimumSize.getSizeAtHeight(i, p);
-            block1: for (int r = -q; r <= q; ++r) {
-                for (int s = -q; s <= q; ++s) {
-                    mutableBlockPos.setWithOffset(blockPos2, r, p, s);
-                    if (TreeFeature.isFree(levelSimulatedRW, mutableBlockPos) && (treeConfiguration.ignoreVines || !TreeFeature.isVine(levelSimulatedRW, mutableBlockPos))) continue;
-                    if (optionalInt.isPresent() && p - 1 >= optionalInt.getAsInt() + 1) {
-                        o = p - 2;
-                        continue block1;
-                    }
-                    return false;
+        n = this.getMaxFreeTreeHeight(levelSimulatedRW, i, blockPos2, treeConfiguration);
+        if (!(n >= i || optionalInt.isPresent() && n >= optionalInt.getAsInt())) {
+            return false;
+        }
+        List<FoliagePlacer.FoliageAttachment> list = treeConfiguration.trunkPlacer.placeTrunk(levelSimulatedRW, random, n, blockPos2, set, boundingBox, treeConfiguration);
+        list.forEach(foliageAttachment -> treeConfiguration.foliagePlacer.createFoliage(levelSimulatedRW, random, treeConfiguration, n, (FoliagePlacer.FoliageAttachment)foliageAttachment, j, l, set2, boundingBox));
+        return true;
+    }
+
+    private int getMaxFreeTreeHeight(LevelSimulatedReader levelSimulatedReader, int i, BlockPos blockPos, TreeConfiguration treeConfiguration) {
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        for (int j = 0; j <= i + 1; ++j) {
+            int k = treeConfiguration.minimumSize.getSizeAtHeight(i, j);
+            for (int l = -k; l <= k; ++l) {
+                for (int m = -k; m <= k; ++m) {
+                    mutableBlockPos.setWithOffset(blockPos, l, j, m);
+                    if (TreeFeature.isFree(levelSimulatedReader, mutableBlockPos) && (treeConfiguration.ignoreVines || !TreeFeature.isVine(levelSimulatedReader, mutableBlockPos))) continue;
+                    return j - 2;
                 }
             }
         }
-        p = o;
-        List<FoliagePlacer.FoliageAttachment> list = treeConfiguration.trunkPlacer.placeTrunk(levelSimulatedRW, random, p, blockPos2, set, boundingBox, treeConfiguration);
-        list.forEach(foliageAttachment -> treeConfiguration.foliagePlacer.createFoliage(levelSimulatedRW, random, treeConfiguration, p, (FoliagePlacer.FoliageAttachment)foliageAttachment, j, l, set2, boundingBox));
-        return true;
+        return i;
     }
 
     @Override

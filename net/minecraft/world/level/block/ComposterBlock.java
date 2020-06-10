@@ -111,6 +111,7 @@ implements WorldlyContainerHolder {
         ComposterBlock.add(0.65f, Items.NETHER_WART);
         ComposterBlock.add(0.65f, Items.CRIMSON_ROOTS);
         ComposterBlock.add(0.65f, Items.WARPED_ROOTS);
+        ComposterBlock.add(0.65f, Items.SHROOMLIGHT);
         ComposterBlock.add(0.65f, Items.DANDELION);
         ComposterBlock.add(0.65f, Items.POPPY);
         ComposterBlock.add(0.65f, Items.BLUE_ORCHID);

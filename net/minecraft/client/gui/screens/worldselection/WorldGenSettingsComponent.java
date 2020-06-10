@@ -109,7 +109,7 @@ Widget {
 
             @Override
             public Component getMessage() {
-                return super.getMessage().mutableCopy().append(" ").append(CommonComponents.optionStatus(WorldGenSettingsComponent.this.settings.generateFeatures()));
+                return super.getMessage().copy().append(" ").append(CommonComponents.optionStatus(WorldGenSettingsComponent.this.settings.generateFeatures()));
             }
 
             @Override
@@ -126,7 +126,7 @@ Widget {
                 }
                 WorldPreset worldPreset = WorldPreset.PRESETS.get(i);
                 this.preset = Optional.of(worldPreset);
-                this.settings = worldPreset.create(this.settings.seed(), this.settings.generateFeatures(), this.settings.generateBonusChest());
+                this.settings = worldPreset.create(this.registryHolder, this.settings.seed(), this.settings.generateFeatures(), this.settings.generateBonusChest());
                 if (this.settings.isDebug() && !Screen.hasShiftDown()) continue;
             }
             createWorldScreen.updateDisplayOptions();
@@ -135,7 +135,7 @@ Widget {
 
             @Override
             public Component getMessage() {
-                return super.getMessage().mutableCopy().append(" ").append(WorldGenSettingsComponent.this.preset.map(WorldPreset::description).orElse(CUSTOM_WORLD_DESCRIPTION));
+                return super.getMessage().copy().append(" ").append(WorldGenSettingsComponent.this.preset.map(WorldPreset::description).orElse(CUSTOM_WORLD_DESCRIPTION));
             }
 
             @Override
@@ -162,7 +162,7 @@ Widget {
 
             @Override
             public Component getMessage() {
-                return super.getMessage().mutableCopy().append(" ").append(CommonComponents.optionStatus(WorldGenSettingsComponent.this.settings.generateBonusChest() && !createWorldScreen.hardCore));
+                return super.getMessage().copy().append(" ").append(CommonComponents.optionStatus(WorldGenSettingsComponent.this.settings.generateBonusChest() && !createWorldScreen.hardCore));
             }
         });
         this.bonusItemsButton.visible = false;

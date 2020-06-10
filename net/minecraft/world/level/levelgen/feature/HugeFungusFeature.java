@@ -47,7 +47,7 @@ extends Feature<HugeFungusConfiguration> {
             i *= 2;
         }
         if (!hugeFungusConfiguration.planted) {
-            int j = worldGenLevel.getHeight();
+            int j = chunkGenerator.getGenDepth();
             if (blockPos2.getY() + i + 1 >= j) {
                 return false;
             }

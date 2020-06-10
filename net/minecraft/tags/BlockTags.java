@@ -94,6 +94,9 @@ public class BlockTags {
     public static final Tag.Named<Block> PREVENT_MOB_SPAWNING_INSIDE = BlockTags.bind("prevent_mob_spawning_inside");
     public static final Tag.Named<Block> FENCE_GATES = BlockTags.bind("fence_gates");
     public static final Tag.Named<Block> UNSTABLE_BOTTOM_CENTER = BlockTags.bind("unstable_bottom_center");
+    public static final Tag.Named<Block> INFINIBURN_OVERWORLD = BlockTags.bind("infiniburn_overworld");
+    public static final Tag.Named<Block> INFINIBURN_NETHER = BlockTags.bind("infiniburn_nether");
+    public static final Tag.Named<Block> INFINIBURN_END = BlockTags.bind("infiniburn_end");
 
     private static Tag.Named<Block> bind(String string) {
         return HELPER.bind(string);

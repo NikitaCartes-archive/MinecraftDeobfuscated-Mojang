@@ -316,7 +316,7 @@ extends Projectile {
                 }
                 this.doPostHurtEffects(livingEntity);
                 if (entity2 != null && livingEntity != entity2 && livingEntity instanceof Player && entity2 instanceof ServerPlayer && !this.isSilent()) {
-                    ((ServerPlayer)entity2).connection.send(new ClientboundGameEventPacket(6, 0.0f));
+                    ((ServerPlayer)entity2).connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.ARROW_HIT_PLAYER, 0.0f));
                 }
                 if (!entity.isAlive() && this.piercedAndKilledEntities != null) {
                     this.piercedAndKilledEntities.add(livingEntity);

@@ -3,6 +3,8 @@
  */
 package net.minecraft.world.entity.animal;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -239,7 +241,6 @@ Saddleable {
 
     @Override
     public void travel(Vec3 vec3) {
-        this.setSpeed(this.getSteeringSpeed());
         this.travel(this, this.steering, vec3);
     }
 
@@ -266,6 +267,12 @@ Saddleable {
     @Override
     public boolean isFood(ItemStack itemStack) {
         return FOOD_ITEMS.test(itemStack);
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public Vec3 getLeashOffset() {
+        return new Vec3(0.0, 0.6f * this.getEyeHeight(), this.getBbWidth() * 0.4f);
     }
 
     @Override

@@ -33,6 +33,7 @@ extends TextureSheetParticle {
         this.setSize(0.01f, 0.01f);
         this.quadSize *= this.random.nextFloat() * 0.6f + 0.6f;
         this.lifetime = (int)(16.0 / (Math.random() * 0.8 + 0.2));
+        this.hasPhysics = false;
     }
 
     @Override

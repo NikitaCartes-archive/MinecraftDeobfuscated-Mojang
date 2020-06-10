@@ -33,7 +33,7 @@ extends Feature<BlockStateConfiguration> {
         int q;
         int p;
         int l;
-        blockPos = new BlockPos(blockPos.getX(), worldGenLevel.getSeaLevel(), blockPos.getZ());
+        blockPos = new BlockPos(blockPos.getX(), chunkGenerator.getSeaLevel(), blockPos.getZ());
         boolean bl = random.nextDouble() > 0.7;
         BlockState blockState = blockStateConfiguration.state;
         double d = random.nextDouble() * 2.0 * Math.PI;

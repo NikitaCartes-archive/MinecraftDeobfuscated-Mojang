@@ -100,7 +100,7 @@ implements SimpleWaterloggedBlock {
         playerEnderChestContainer.setActiveChest(enderChestBlockEntity);
         player2.openMenu(new SimpleMenuProvider((i, inventory, player) -> ChestMenu.threeRows(i, inventory, playerEnderChestContainer), CONTAINER_TITLE));
         player2.awardStat(Stats.OPEN_ENDERCHEST);
-        PiglinAi.angerNearbyPiglinsThatSee(player2);
+        PiglinAi.angerNearbyPiglins(player2, true);
         return InteractionResult.CONSUME;
     }
 

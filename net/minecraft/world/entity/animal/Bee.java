@@ -58,6 +58,7 @@ import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.util.RandomPos;
@@ -120,6 +121,7 @@ FlyingAnimal {
         this.lookControl = new BeeLookControl(this);
         this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, -1.0f);
         this.setPathfindingMalus(BlockPathTypes.WATER, -1.0f);
+        this.setPathfindingMalus(BlockPathTypes.WATER_BORDER, 16.0f);
         this.setPathfindingMalus(BlockPathTypes.COCOA, -1.0f);
         this.setPathfindingMalus(BlockPathTypes.FENCE, -1.0f);
     }
@@ -158,6 +160,7 @@ FlyingAnimal {
         this.goalSelector.addGoal(9, new FloatGoal(this));
         this.targetSelector.addGoal(1, new BeeHurtByOtherGoal(this).setAlertOthers(new Class[0]));
         this.targetSelector.addGoal(2, new BeeBecomeAngryTargetGoal(this));
+        this.targetSelector.addGoal(3, new ResetUniversalAngerTargetGoal<Bee>(this, true));
     }
 
     @Override
@@ -193,7 +196,7 @@ FlyingAnimal {
         this.ticksWithoutNectarSinceExitingHive = compoundTag.getInt("TicksSincePollination");
         this.stayOutOfHiveCountdown = compoundTag.getInt("CannotEnterHiveTicks");
         this.numCropsGrownSincePollination = compoundTag.getInt("CropsGrownSincePollination");
-        this.readPersistentAngerSaveData(this.level, compoundTag);
+        this.readPersistentAngerSaveData((ServerLevel)this.level, compoundTag);
     }
 
     @Override
@@ -214,7 +217,7 @@ FlyingAnimal {
                 }
             }
             this.setHasStung(true);
-            this.setTarget(null);
+            this.stopBeingAngry();
             this.playSound(SoundEvents.BEE_STING, 1.0f, 1.0f);
         }
         return bl;
@@ -278,7 +281,7 @@ FlyingAnimal {
     }
 
     private boolean wantsToEnterHive() {
-        if (this.stayOutOfHiveCountdown > 0 || this.beePollinateGoal.isPollinating() || this.hasStung()) {
+        if (this.stayOutOfHiveCountdown > 0 || this.beePollinateGoal.isPollinating() || this.hasStung() || this.getTarget() != null) {
             return false;
         }
         boolean bl = this.isTiredOfLookingForNectar() || this.level.isRaining() || this.level.isNight() || this.hasNectar();
@@ -312,9 +315,11 @@ FlyingAnimal {
                 this.hurt(DamageSource.GENERIC, this.getHealth());
             }
         }
-        this.updatePersistentAnger();
         if (!this.hasNectar()) {
             ++this.ticksWithoutNectarSinceExitingHive;
+        }
+        if (!this.level.isClientSide) {
+            this.updatePersistentAnger((ServerLevel)this.level, false);
         }
     }
 
@@ -574,6 +579,12 @@ FlyingAnimal {
     @Override
     protected void jumpInLiquid(Tag<Fluid> tag) {
         this.setDeltaMovement(this.getDeltaMovement().add(0.0, 0.01, 0.0));
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public Vec3 getLeashOffset() {
+        return new Vec3(0.0, 0.5f * this.getEyeHeight(), this.getBbWidth() * 0.2f);
     }
 
     private boolean closerThan(BlockPos blockPos, int i) {
@@ -1203,6 +1214,11 @@ FlyingAnimal {
     extends HurtByTargetGoal {
         BeeHurtByOtherGoal(Bee bee2) {
             super(bee2, new Class[0]);
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return Bee.this.isAngry() && super.canContinueToUse();
         }
 
         @Override
