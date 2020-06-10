@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
@@ -28,11 +29,13 @@ import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.NearestNeighborBiomeZoomer;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.Vec3;
@@ -263,8 +266,13 @@ public final class NaturalSpawner {
 		Random random,
 		BlockPos blockPos
 	) {
-		List<Biome.SpawnerData> list = chunkGenerator.getMobsAt(serverLevel.getBiome(blockPos), structureFeatureManager, mobCategory, blockPos);
-		return list.isEmpty() ? null : WeighedRandom.getRandomItem(random, list);
+		Biome biome = serverLevel.getBiome(blockPos);
+		if (mobCategory == MobCategory.WATER_AMBIENT && biome.getBiomeCategory() == Biome.BiomeCategory.RIVER && random.nextFloat() < 0.98F) {
+			return null;
+		} else {
+			List<Biome.SpawnerData> list = mobsAt(serverLevel, structureFeatureManager, chunkGenerator, mobCategory, blockPos, biome);
+			return list.isEmpty() ? null : WeighedRandom.getRandomItem(random, list);
+		}
 	}
 
 	private static boolean canSpawnMobAt(
@@ -275,7 +283,22 @@ public final class NaturalSpawner {
 		Biome.SpawnerData spawnerData,
 		BlockPos blockPos
 	) {
-		return chunkGenerator.getMobsAt(serverLevel.getBiome(blockPos), structureFeatureManager, mobCategory, blockPos).contains(spawnerData);
+		return mobsAt(serverLevel, structureFeatureManager, chunkGenerator, mobCategory, blockPos, null).contains(spawnerData);
+	}
+
+	private static List<Biome.SpawnerData> mobsAt(
+		ServerLevel serverLevel,
+		StructureFeatureManager structureFeatureManager,
+		ChunkGenerator chunkGenerator,
+		MobCategory mobCategory,
+		BlockPos blockPos,
+		@Nullable Biome biome
+	) {
+		return mobCategory == MobCategory.MONSTER
+				&& serverLevel.getBlockState(blockPos.below()).getBlock() == Blocks.NETHER_BRICKS
+				&& structureFeatureManager.getStructureAt(blockPos, false, StructureFeature.NETHER_BRIDGE).isValid()
+			? StructureFeature.NETHER_BRIDGE.getSpecialEnemies()
+			: chunkGenerator.getMobsAt(biome != null ? biome : serverLevel.getBiome(blockPos), structureFeatureManager, mobCategory, blockPos);
 	}
 
 	private static BlockPos getRandomPosWithin(Level level, LevelChunk levelChunk) {
@@ -313,9 +336,7 @@ public final class NaturalSpawner {
 						&& levelReader.getFluidState(blockPos3).is(FluidTags.WATER)
 						&& !levelReader.getBlockState(blockPos2).isRedstoneConductor(levelReader, blockPos2);
 				case IN_LAVA:
-					return fluidState.is(FluidTags.LAVA)
-						&& levelReader.getFluidState(blockPos3).is(FluidTags.LAVA)
-						&& !levelReader.getBlockState(blockPos2).isRedstoneConductor(levelReader, blockPos2);
+					return fluidState.is(FluidTags.LAVA);
 				case ON_GROUND:
 				default:
 					BlockState blockState2 = levelReader.getBlockState(blockPos3);
@@ -349,7 +370,7 @@ public final class NaturalSpawner {
 
 					for (int s = 0; !bl && s < 4; s++) {
 						BlockPos blockPos = getTopNonCollidingPos(levelAccessor, spawnerData.type, n, o);
-						if (spawnerData.type.canSummon() && isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, levelAccessor, blockPos, spawnerData.type)) {
+						if (spawnerData.type.canSummon() && isSpawnPositionOk(SpawnPlacements.getPlacementType(spawnerData.type), levelAccessor, blockPos, spawnerData.type)) {
 							float f = spawnerData.type.getWidth();
 							double d = Mth.clamp((double)n, (double)k + (double)f, (double)k + 16.0 - (double)f);
 							double e = Mth.clamp((double)o, (double)l + (double)f, (double)l + 16.0 - (double)f);
@@ -392,10 +413,27 @@ public final class NaturalSpawner {
 		}
 	}
 
-	private static BlockPos getTopNonCollidingPos(LevelReader levelReader, @Nullable EntityType<?> entityType, int i, int j) {
-		BlockPos blockPos = new BlockPos(i, levelReader.getHeight(SpawnPlacements.getHeightmapType(entityType), i, j), j);
-		BlockPos blockPos2 = blockPos.below();
-		return levelReader.getBlockState(blockPos2).isPathfindable(levelReader, blockPos2, PathComputationType.LAND) ? blockPos2 : blockPos;
+	private static BlockPos getTopNonCollidingPos(LevelReader levelReader, EntityType<?> entityType, int i, int j) {
+		int k = levelReader.getHeight(SpawnPlacements.getHeightmapType(entityType), i, j);
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, k, j);
+		if (levelReader.dimensionType().hasCeiling()) {
+			do {
+				mutableBlockPos.move(Direction.DOWN);
+			} while (!levelReader.getBlockState(mutableBlockPos).isAir());
+
+			do {
+				mutableBlockPos.move(Direction.DOWN);
+			} while (levelReader.getBlockState(mutableBlockPos).isAir() && mutableBlockPos.getY() > 0);
+		}
+
+		if (SpawnPlacements.getPlacementType(entityType) == SpawnPlacements.Type.ON_GROUND) {
+			BlockPos blockPos = mutableBlockPos.below();
+			if (levelReader.getBlockState(blockPos).isPathfindable(levelReader, blockPos, PathComputationType.LAND)) {
+				return blockPos;
+			}
+		}
+
+		return mutableBlockPos.immutable();
 	}
 
 	@FunctionalInterface

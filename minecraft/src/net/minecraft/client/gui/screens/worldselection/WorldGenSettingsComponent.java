@@ -100,7 +100,7 @@ public class WorldGenSettingsComponent implements TickableWidget, Widget {
 		}) {
 			@Override
 			public Component getMessage() {
-				return super.getMessage().mutableCopy().append(" ").append(CommonComponents.optionStatus(WorldGenSettingsComponent.this.settings.generateFeatures()));
+				return super.getMessage().copy().append(" ").append(CommonComponents.optionStatus(WorldGenSettingsComponent.this.settings.generateFeatures()));
 			}
 
 			@Override
@@ -119,7 +119,7 @@ public class WorldGenSettingsComponent implements TickableWidget, Widget {
 
 					WorldPreset worldPreset = (WorldPreset)WorldPreset.PRESETS.get(ix);
 					this.preset = Optional.of(worldPreset);
-					this.settings = worldPreset.create(this.settings.seed(), this.settings.generateFeatures(), this.settings.generateBonusChest());
+					this.settings = worldPreset.create(this.registryHolder, this.settings.seed(), this.settings.generateFeatures(), this.settings.generateBonusChest());
 					if (!this.settings.isDebug() || Screen.hasShiftDown()) {
 						break;
 					}
@@ -131,7 +131,7 @@ public class WorldGenSettingsComponent implements TickableWidget, Widget {
 				@Override
 				public Component getMessage() {
 					return super.getMessage()
-						.mutableCopy()
+						.copy()
 						.append(" ")
 						.append((Component)WorldGenSettingsComponent.this.preset.map(WorldPreset::description).orElse(WorldGenSettingsComponent.CUSTOM_WORLD_DESCRIPTION));
 				}
@@ -161,7 +161,7 @@ public class WorldGenSettingsComponent implements TickableWidget, Widget {
 				@Override
 				public Component getMessage() {
 					return super.getMessage()
-						.mutableCopy()
+						.copy()
 						.append(" ")
 						.append(CommonComponents.optionStatus(WorldGenSettingsComponent.this.settings.generateBonusChest() && !createWorldScreen.hardCore));
 				}

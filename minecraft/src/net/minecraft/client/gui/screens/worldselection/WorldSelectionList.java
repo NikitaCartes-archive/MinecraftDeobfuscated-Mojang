@@ -33,6 +33,7 @@ import net.minecraft.client.gui.screens.AlertScreen;
 import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.ErrorScreen;
+import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.ProgressScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -388,6 +389,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 		}
 
 		public void recreateWorld() {
+			this.queueLoadScreen();
 			RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
 
 			try (
@@ -428,8 +430,13 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 		private void loadWorld() {
 			this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 			if (this.minecraft.getLevelSource().levelExists(this.summary.getLevelId())) {
+				this.queueLoadScreen();
 				this.minecraft.loadLevel(this.summary.getLevelId());
 			}
+		}
+
+		private void queueLoadScreen() {
+			this.minecraft.forceSetScreen(new GenericDirtMessageScreen(new TranslatableComponent("selectWorld.data_read")));
 		}
 
 		@Nullable

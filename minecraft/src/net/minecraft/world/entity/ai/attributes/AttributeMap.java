@@ -119,7 +119,7 @@ public class AttributeMap {
 		for (int i = 0; i < listTag.size(); i++) {
 			CompoundTag compoundTag = listTag.getCompound(i);
 			String string = compoundTag.getString("Name");
-			Util.ifElse(Registry.ATTRIBUTES.getOptional(ResourceLocation.tryParse(string)), attribute -> {
+			Util.ifElse(Registry.ATTRIBUTE.getOptional(ResourceLocation.tryParse(string)), attribute -> {
 				AttributeInstance attributeInstance = this.getInstance(attribute);
 				if (attributeInstance != null) {
 					attributeInstance.load(compoundTag);

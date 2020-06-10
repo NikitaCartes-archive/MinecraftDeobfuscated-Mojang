@@ -138,6 +138,6 @@ public class BasaltDeltasBiome extends Biome {
 		BiomeDefaultFeatures.addAncientDebris(this);
 		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.GHAST, 40, 1, 1));
 		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.MAGMA_CUBE, 100, 2, 5));
-		this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.STRIDER, 60, 2, 4));
+		this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.STRIDER, 60, 1, 2));
 	}
 }

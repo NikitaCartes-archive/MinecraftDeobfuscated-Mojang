@@ -1,5 +1,6 @@
 package net.minecraft.tags;
 
+import java.util.List;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -26,6 +27,10 @@ public class FluidTags {
 
 	public static TagCollection<Fluid> getAllTags() {
 		return HELPER.getAllTags();
+	}
+
+	public static List<StaticTagHelper.Wrapper<Fluid>> getWrappers() {
+		return HELPER.getWrappers();
 	}
 
 	public static Set<ResourceLocation> getMissingTags(TagCollection<Fluid> tagCollection) {

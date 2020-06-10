@@ -45,7 +45,6 @@ public class HusbandryAdvancements implements Consumer<Consumer<Advancement>> {
 		EntityType.OCELOT,
 		EntityType.RABBIT,
 		EntityType.LLAMA,
-		EntityType.TURTLE,
 		EntityType.CAT,
 		EntityType.PANDA,
 		EntityType.FOX,
@@ -302,6 +301,12 @@ public class HusbandryAdvancements implements Consumer<Consumer<Advancement>> {
 			);
 		}
 
+		builder.addCriterion(
+			EntityType.getKey(EntityType.TURTLE).toString(),
+			BredAnimalsTrigger.TriggerInstance.bredAnimals(
+				EntityPredicate.Builder.entity().of(EntityType.TURTLE).build(), EntityPredicate.Builder.entity().of(EntityType.TURTLE).build(), EntityPredicate.ANY
+			)
+		);
 		return builder;
 	}
 

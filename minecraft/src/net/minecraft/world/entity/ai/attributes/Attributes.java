@@ -36,6 +36,6 @@ public class Attributes {
 	);
 
 	private static Attribute register(String string, Attribute attribute) {
-		return Registry.register(Registry.ATTRIBUTES, string, attribute);
+		return Registry.register(Registry.ATTRIBUTE, string, attribute);
 	}
 }

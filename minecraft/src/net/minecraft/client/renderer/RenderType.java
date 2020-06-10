@@ -123,6 +123,7 @@ public abstract class RenderType extends RenderStateShard {
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
 			.setTransparencyState(GLINT_TRANSPARENCY)
+			.setOutputState(ITEM_ENTITY_TARGET)
 			.setTexturingState(GLINT_TEXTURING)
 			.createCompositeState(false)
 	);
@@ -151,6 +152,7 @@ public abstract class RenderType extends RenderStateShard {
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
 			.setTransparencyState(GLINT_TRANSPARENCY)
+			.setOutputState(ITEM_ENTITY_TARGET)
 			.setTexturingState(ENTITY_GLINT_TEXTURING)
 			.createCompositeState(false)
 	);
@@ -178,9 +180,11 @@ public abstract class RenderType extends RenderStateShard {
 		RenderType.CompositeState.builder()
 			.setWriteMaskState(COLOR_DEPTH_WRITE)
 			.setTransparencyState(LIGHTNING_TRANSPARENCY)
+			.setOutputState(WEATHER_TARGET)
 			.setShadeModelState(SMOOTH_SHADE)
 			.createCompositeState(false)
 	);
+	private static final RenderType TRIPWIRE = create("tripwire", DefaultVertexFormat.BLOCK, 7, 262144, true, true, tripwireState());
 	public static final RenderType.CompositeRenderType LINES = create(
 		"lines",
 		DefaultVertexFormat.POSITION_COLOR,
@@ -189,7 +193,8 @@ public abstract class RenderType extends RenderStateShard {
 		RenderType.CompositeState.builder()
 			.setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
 			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
-			.setTransparencyState(ITEM_TRANSPARENCY)
+			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+			.setOutputState(ITEM_ENTITY_TARGET)
 			.setWriteMaskState(COLOR_DEPTH_WRITE)
 			.createCompositeState(false)
 	);
@@ -231,7 +236,8 @@ public abstract class RenderType extends RenderStateShard {
 			.setShadeModelState(SMOOTH_SHADE)
 			.setLightmapState(LIGHTMAP)
 			.setTextureState(BLOCK_SHEET_MIPPED)
-			.setTransparencyState(ITEM_TRANSPARENCY)
+			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+			.setOutputState(ITEM_ENTITY_TARGET)
 			.createCompositeState(true);
 	}
 
@@ -318,7 +324,8 @@ public abstract class RenderType extends RenderStateShard {
 	public static RenderType itemEntityTranslucentCull(ResourceLocation resourceLocation) {
 		RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 			.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
-			.setTransparencyState(ITEM_TRANSPARENCY)
+			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+			.setOutputState(ITEM_ENTITY_TARGET)
 			.setDiffuseLightingState(DIFFUSE_LIGHTING)
 			.setAlphaState(DEFAULT_ALPHA)
 			.setLightmapState(LIGHTMAP)
@@ -424,7 +431,6 @@ public abstract class RenderType extends RenderStateShard {
 
 	public static RenderType dragonExplosionAlpha(ResourceLocation resourceLocation, float f) {
 		RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
-			.setTransparencyState(DRAGON_EXPLOSION_TRANSPARENCY)
 			.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
 			.setAlphaState(new RenderStateShard.AlphaStateShard(f))
 			.setCullState(NO_CULL)
@@ -585,6 +591,20 @@ public abstract class RenderType extends RenderStateShard {
 		return LIGHTNING;
 	}
 
+	private static RenderType.CompositeState tripwireState() {
+		return RenderType.CompositeState.builder()
+			.setShadeModelState(SMOOTH_SHADE)
+			.setLightmapState(LIGHTMAP)
+			.setTextureState(BLOCK_SHEET_MIPPED)
+			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+			.setOutputState(WEATHER_TARGET)
+			.createCompositeState(true);
+	}
+
+	public static RenderType tripwire() {
+		return TRIPWIRE;
+	}
+
 	public static RenderType endPortal(int i) {
 		RenderStateShard.TransparencyStateShard transparencyStateShard;
 		RenderStateShard.TextureStateShard textureStateShard;
@@ -655,7 +675,7 @@ public abstract class RenderType extends RenderStateShard {
 	}
 
 	public static List<RenderType> chunkBufferLayers() {
-		return ImmutableList.of(solid(), cutoutMipped(), cutout(), translucent());
+		return ImmutableList.of(solid(), cutoutMipped(), cutout(), translucent(), tripwire());
 	}
 
 	public int bufferSize() {

@@ -9,8 +9,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -236,7 +238,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 				this.serverData.status = TextComponent.EMPTY;
 				ServerSelectionList.THREAD_POOL.submit(() -> {
 					try {
-						this.screen.getPinger().pingServer(this.serverData);
+						this.screen.getPinger().pingServer(this.serverData, () -> this.minecraft.execute(this::updateServerList));
 					} catch (UnknownHostException var2) {
 						this.serverData.ping = -1L;
 						this.serverData.motd = new TranslatableComponent("multiplayer.status.cannot_resolve").withStyle(ChatFormatting.DARK_RED);
@@ -257,7 +259,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 				this.minecraft.font.draw(poseStack, (FormattedText)list.get(p), (float)(k + 32 + 3), (float)(j + 12 + 9 * p), 8421504);
 			}
 
-			Component component = (Component)(bl4 ? this.serverData.version.mutableCopy().withStyle(ChatFormatting.DARK_RED) : this.serverData.status);
+			Component component = (Component)(bl4 ? this.serverData.version.copy().withStyle(ChatFormatting.DARK_RED) : this.serverData.status);
 			int q = this.minecraft.font.width(component);
 			this.minecraft.font.draw(poseStack, component, (float)(k + l - q - 15 - 2), (float)(j + 1), 8421504);
 			int r = 0;
@@ -304,10 +306,14 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			this.minecraft.getTextureManager().bind(GuiComponent.GUI_ICONS_LOCATION);
 			GuiComponent.blit(poseStack, k + l - 15, j, (float)(r * 10), (float)(176 + s * 8), 10, 8, 256, 256);
-			if (this.serverData.getIconB64() != null && !this.serverData.getIconB64().equals(this.lastIconB64)) {
-				this.lastIconB64 = this.serverData.getIconB64();
-				this.loadServerIcon();
-				this.screen.getServers().save();
+			String string = this.serverData.getIconB64();
+			if (!Objects.equals(string, this.lastIconB64)) {
+				if (this.uploadServerIcon(string)) {
+					this.lastIconB64 = string;
+				} else {
+					this.serverData.setIconB64(null);
+					this.updateServerList();
+				}
 			}
 
 			if (this.icon != null) {
@@ -356,6 +362,10 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			}
 		}
 
+		public void updateServerList() {
+			this.screen.getServers().save();
+		}
+
 		protected void drawIcon(PoseStack poseStack, int i, int j, ResourceLocation resourceLocation) {
 			this.minecraft.getTextureManager().bind(resourceLocation);
 			RenderSystem.enableBlend();
@@ -367,8 +377,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			return true;
 		}
 
-		private void loadServerIcon() {
-			String string = this.serverData.getIconB64();
+		private boolean uploadServerIcon(@Nullable String string) {
 			if (string == null) {
 				this.minecraft.getTextureManager().release(this.iconLocation);
 				if (this.icon != null && this.icon.getPixels() != null) {
@@ -391,9 +400,11 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 					this.minecraft.getTextureManager().register(this.iconLocation, this.icon);
 				} catch (Throwable var3) {
 					ServerSelectionList.LOGGER.error("Invalid icon for server {} ({})", this.serverData.name, this.serverData.ip, var3);
-					this.serverData.setIconB64(null);
+					return false;
 				}
 			}
+
+			return true;
 		}
 
 		@Override

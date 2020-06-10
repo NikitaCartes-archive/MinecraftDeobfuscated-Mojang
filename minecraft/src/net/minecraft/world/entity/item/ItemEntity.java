@@ -14,7 +14,7 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
@@ -89,9 +89,9 @@ public class ItemEntity extends Entity {
 			this.yo = this.getY();
 			this.zo = this.getZ();
 			Vec3 vec3 = this.getDeltaMovement();
-			if (this.isUnderLiquid(FluidTags.WATER)) {
+			if (this.isEyeInFluid(FluidTags.WATER)) {
 				this.setUnderwaterMovement();
-			} else if (this.isUnderLiquid(FluidTags.LAVA)) {
+			} else if (this.isEyeInFluid(FluidTags.LAVA)) {
 				this.setUnderLavaMovement();
 			} else if (!this.isNoGravity()) {
 				this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
@@ -319,8 +319,8 @@ public class ItemEntity extends Entity {
 
 	@Nullable
 	@Override
-	public Entity changeDimension(ResourceKey<Level> resourceKey) {
-		Entity entity = super.changeDimension(resourceKey);
+	public Entity changeDimension(ServerLevel serverLevel) {
+		Entity entity = super.changeDimension(serverLevel);
 		if (!this.level.isClientSide && entity instanceof ItemEntity) {
 			((ItemEntity)entity).mergeWithNeighbours();
 		}

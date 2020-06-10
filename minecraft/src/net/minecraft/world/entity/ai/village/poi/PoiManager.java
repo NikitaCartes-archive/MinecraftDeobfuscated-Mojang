@@ -67,11 +67,11 @@ public class PoiManager extends SectionStorage<PoiSection> {
 	}
 
 	public Stream<PoiRecord> getInChunk(Predicate<PoiType> predicate, ChunkPos chunkPos, PoiManager.Occupancy occupancy) {
-		return IntStream.range(0, 16).boxed().flatMap(integer -> this.getInSection(predicate, SectionPos.of(chunkPos, integer).asLong(), occupancy));
-	}
-
-	private Stream<PoiRecord> getInSection(Predicate<PoiType> predicate, long l, PoiManager.Occupancy occupancy) {
-		return (Stream<PoiRecord>)this.getOrLoad(l).map(poiSection -> poiSection.getRecords(predicate, occupancy)).orElseGet(Stream::empty);
+		return IntStream.range(0, 16)
+			.boxed()
+			.map(integer -> this.getOrLoad(SectionPos.of(chunkPos, integer).asLong()))
+			.filter(Optional::isPresent)
+			.flatMap(optional -> ((PoiSection)optional.get()).getRecords(predicate, occupancy));
 	}
 
 	public Stream<BlockPos> findAll(Predicate<PoiType> predicate, Predicate<BlockPos> predicate2, BlockPos blockPos, int i, PoiManager.Occupancy occupancy) {

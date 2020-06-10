@@ -11,10 +11,10 @@ import net.minecraft.world.level.block.Blocks;
 @Environment(EnvType.CLIENT)
 public enum RecipeBookCategories {
 	SEARCH(new ItemStack(Items.COMPASS)),
-	BUILDING_BLOCKS(new ItemStack(Blocks.BRICKS)),
-	REDSTONE(new ItemStack(Items.REDSTONE)),
-	EQUIPMENT(new ItemStack(Items.IRON_AXE), new ItemStack(Items.GOLDEN_SWORD)),
-	MISC(new ItemStack(Items.LAVA_BUCKET), new ItemStack(Items.APPLE)),
+	CRAFTING_BUILDING_BLOCKS(new ItemStack(Blocks.BRICKS)),
+	CRAFTING_REDSTONE(new ItemStack(Items.REDSTONE)),
+	CRAFTING_EQUIPMENT(new ItemStack(Items.IRON_AXE), new ItemStack(Items.GOLDEN_SWORD)),
+	CRAFTING_MISC(new ItemStack(Items.LAVA_BUCKET), new ItemStack(Items.APPLE)),
 	FURNACE_SEARCH(new ItemStack(Items.COMPASS)),
 	FURNACE_FOOD(new ItemStack(Items.PORKCHOP)),
 	FURNACE_BLOCKS(new ItemStack(Blocks.STONE)),
@@ -25,7 +25,9 @@ public enum RecipeBookCategories {
 	SMOKER_SEARCH(new ItemStack(Items.COMPASS)),
 	SMOKER_FOOD(new ItemStack(Items.PORKCHOP)),
 	STONECUTTER(new ItemStack(Items.CHISELED_STONE_BRICKS)),
-	CAMPFIRE(new ItemStack(Items.PORKCHOP));
+	SMITHING(new ItemStack(Items.NETHERITE_CHESTPLATE)),
+	CAMPFIRE(new ItemStack(Items.PORKCHOP)),
+	UNKNOWN(new ItemStack(Items.BARRIER));
 
 	private final List<ItemStack> itemIcons;
 

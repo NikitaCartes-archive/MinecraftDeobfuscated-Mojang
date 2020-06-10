@@ -57,7 +57,7 @@ public class ExperienceOrb extends Entity {
 		this.xo = this.getX();
 		this.yo = this.getY();
 		this.zo = this.getZ();
-		if (this.isUnderLiquid(FluidTags.WATER)) {
+		if (this.isEyeInFluid(FluidTags.WATER)) {
 			this.setUnderwaterMovement();
 		} else if (!this.isNoGravity()) {
 			this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.03, 0.0));

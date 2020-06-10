@@ -62,14 +62,16 @@ public interface EntityGetter {
 			return Stream.empty();
 		} else {
 			AABB aABB2 = aABB.inflate(1.0E-7);
-			return this.getEntities(entity, aABB2)
-				.stream()
-				.filter(predicate)
-				.filter(entity2 -> entity == null || !entity.isPassengerOfSameVehicle(entity2))
-				.flatMap(entity2 -> Stream.of(entity2.getCollideBox(), entity == null ? null : entity.getCollideAgainstBox(entity2)))
-				.filter(Objects::nonNull)
-				.filter(aABB2::intersects)
-				.map(Shapes::create);
+			return this.getEntities(entity, aABB2, predicate.and(entity2 -> entity == null || !entity.isPassengerOfSameVehicle(entity2))).stream().flatMap(entity2 -> {
+				if (entity != null) {
+					AABB aABB2x = entity.getCollideAgainstBox(entity2);
+					if (aABB2x != null && aABB2x.intersects(aABB2)) {
+						return Stream.of(entity2.getCollideBox(), aABB2x);
+					}
+				}
+
+				return Stream.of(entity2.getCollideBox());
+			}).filter(Objects::nonNull).map(Shapes::create);
 		}
 	}
 

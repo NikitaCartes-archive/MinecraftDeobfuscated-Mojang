@@ -59,14 +59,10 @@ public class ChunkStatus {
 		}
 	);
 	public static final ChunkStatus STRUCTURE_REFERENCES = registerSimple(
-		"structure_references",
-		STRUCTURE_STARTS,
-		8,
-		PRE_FEATURES,
-		ChunkStatus.ChunkType.PROTOCHUNK,
-		(serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.createReferences(
-				new WorldGenRegion(serverLevel, list), serverLevel.structureFeatureManager(), chunkAccess
-			)
+		"structure_references", STRUCTURE_STARTS, 8, PRE_FEATURES, ChunkStatus.ChunkType.PROTOCHUNK, (serverLevel, chunkGenerator, list, chunkAccess) -> {
+			WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list);
+			chunkGenerator.createReferences(worldGenRegion, serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess);
+		}
 	);
 	public static final ChunkStatus BIOMES = registerSimple(
 		"biomes",
@@ -77,14 +73,10 @@ public class ChunkStatus {
 		(serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.createBiomes(chunkAccess)
 	);
 	public static final ChunkStatus NOISE = registerSimple(
-		"noise",
-		BIOMES,
-		8,
-		PRE_FEATURES,
-		ChunkStatus.ChunkType.PROTOCHUNK,
-		(serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.fillFromNoise(
-				new WorldGenRegion(serverLevel, list), serverLevel.structureFeatureManager(), chunkAccess
-			)
+		"noise", BIOMES, 8, PRE_FEATURES, ChunkStatus.ChunkType.PROTOCHUNK, (serverLevel, chunkGenerator, list, chunkAccess) -> {
+			WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list);
+			chunkGenerator.fillFromNoise(worldGenRegion, serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess);
+		}
 	);
 	public static final ChunkStatus SURFACE = registerSimple(
 		"surface",
@@ -128,7 +120,8 @@ public class ChunkStatus {
 					chunkAccess,
 					EnumSet.of(Heightmap.Types.MOTION_BLOCKING, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Heightmap.Types.OCEAN_FLOOR, Heightmap.Types.WORLD_SURFACE)
 				);
-				chunkGenerator.applyBiomeDecoration(new WorldGenRegion(serverLevel, list), serverLevel.structureFeatureManager());
+				WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list);
+				chunkGenerator.applyBiomeDecoration(worldGenRegion, serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion));
 				protoChunk.setStatus(chunkStatus);
 			}
 

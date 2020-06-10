@@ -5,6 +5,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.IntRange;
@@ -25,6 +26,7 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.ZombieAttackGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -33,6 +35,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.phys.AABB;
 
 public class ZombifiedPiglin extends Zombie implements NeutralMob {
 	private static final UUID SPEED_MODIFIER_ATTACKING_UUID = UUID.fromString("49455A49-7EC5-45BA-B886-3B90B23A1718");
@@ -44,6 +47,8 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 	private static final IntRange PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
 	private int remainingPersistentAngerTime;
 	private UUID persistentAngerTarget;
+	private static final IntRange ALERT_INTERVAL = TimeUtil.rangeOfSeconds(4, 6);
+	private int ticksUntilNextAlert;
 
 	public ZombifiedPiglin(EntityType<? extends ZombifiedPiglin> entityType, Level level) {
 		super(entityType, level);
@@ -61,6 +66,7 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 		this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0));
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, Player.class, 10, true, false, this::isAngryAt));
+		this.targetSelector.addGoal(3, new ResetUniversalAngerTargetGoal<>(this, true));
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -75,7 +81,6 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 	@Override
 	protected void customServerAiStep() {
 		AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
-		LivingEntity livingEntity = this.getLastHurtByMob();
 		if (this.isAngry()) {
 			if (!this.isBaby() && !attributeInstance.hasModifier(SPEED_MODIFIER_ATTACKING)) {
 				attributeInstance.addTransientModifier(SPEED_MODIFIER_ATTACKING);
@@ -91,8 +96,36 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 			attributeInstance.removeModifier(SPEED_MODIFIER_ATTACKING);
 		}
 
-		this.updatePersistentAnger();
+		this.updatePersistentAnger((ServerLevel)this.level, true);
+		if (this.getTarget() != null) {
+			this.maybeAlertOthers();
+		}
+
 		super.customServerAiStep();
+	}
+
+	private void maybeAlertOthers() {
+		if (this.ticksUntilNextAlert > 0) {
+			this.ticksUntilNextAlert--;
+		} else {
+			if (this.getSensing().canSee(this.getTarget())) {
+				this.alertOthers();
+			}
+
+			this.ticksUntilNextAlert = ALERT_INTERVAL.randomValue(this.random);
+		}
+	}
+
+	private void alertOthers() {
+		double d = this.getAttributeValue(Attributes.FOLLOW_RANGE);
+		AABB aABB = AABB.unitCubeFromLowerCorner(this.position()).inflate(d, 10.0, d);
+		this.level
+			.getLoadedEntitiesOfClass(ZombifiedPiglin.class, aABB)
+			.stream()
+			.filter(zombifiedPiglin -> zombifiedPiglin != this)
+			.filter(zombifiedPiglin -> zombifiedPiglin.getTarget() == null)
+			.filter(zombifiedPiglin -> !zombifiedPiglin.isAlliedTo(this.getTarget()))
+			.forEach(zombifiedPiglin -> zombifiedPiglin.setTarget(this.getTarget()));
 	}
 
 	private void playAngerSound() {
@@ -104,9 +137,15 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 		if (this.getTarget() == null && livingEntity != null) {
 			this.playAngerSound();
 			this.playAngrySoundIn = ANGER_SOUND_INTERVAL.randomValue(this.random);
+			this.ticksUntilNextAlert = ALERT_INTERVAL.randomValue(this.random);
 		}
 
 		super.setTarget(livingEntity);
+	}
+
+	@Override
+	protected boolean isAlwaysExperienceDropper() {
+		return this.getTarget() != null;
 	}
 
 	@Override
@@ -134,7 +173,7 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		this.readPersistentAngerSaveData(this.level, compoundTag);
+		this.readPersistentAngerSaveData((ServerLevel)this.level, compoundTag);
 	}
 
 	@Override

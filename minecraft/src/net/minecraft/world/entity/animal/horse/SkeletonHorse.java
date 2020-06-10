@@ -43,7 +43,7 @@ public class SkeletonHorse extends AbstractHorse {
 	@Override
 	protected SoundEvent getAmbientSound() {
 		super.getAmbientSound();
-		return this.isUnderLiquid(FluidTags.WATER) ? SoundEvents.SKELETON_HORSE_AMBIENT_WATER : SoundEvents.SKELETON_HORSE_AMBIENT;
+		return this.isEyeInFluid(FluidTags.WATER) ? SoundEvents.SKELETON_HORSE_AMBIENT_WATER : SoundEvents.SKELETON_HORSE_AMBIENT;
 	}
 
 	@Override

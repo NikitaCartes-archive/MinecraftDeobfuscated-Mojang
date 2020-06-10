@@ -4,6 +4,8 @@ import com.google.common.collect.Sets;
 import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -84,7 +86,13 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	public static boolean checkStriderSpawnRules(
 		EntityType<Strider> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
-		return levelAccessor.getBlockState(blockPos.above()).isAir();
+		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+
+		do {
+			mutableBlockPos.move(Direction.UP);
+		} while (levelAccessor.getFluidState(mutableBlockPos).is(FluidTags.LAVA));
+
+		return levelAccessor.getBlockState(mutableBlockPos).isAir();
 	}
 
 	@Override
@@ -300,7 +308,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 
 		BlockState blockState = this.level.getBlockState(this.blockPosition());
 		BlockState blockState2 = this.getBlockStateOn();
-		boolean bl = blockState.is(BlockTags.STRIDER_WARM_BLOCKS) || blockState2.is(BlockTags.STRIDER_WARM_BLOCKS);
+		boolean bl = blockState.is(BlockTags.STRIDER_WARM_BLOCKS) || blockState2.is(BlockTags.STRIDER_WARM_BLOCKS) || this.getFluidHeight(FluidTags.LAVA) > 0.0;
 		this.setSuffocating(!bl);
 		super.tick();
 		this.floatStrider();
@@ -345,7 +353,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 
 	@Override
 	protected boolean canAddPassenger(Entity entity) {
-		return this.getPassengers().isEmpty() && !this.isUnderLiquid(FluidTags.LAVA);
+		return this.getPassengers().isEmpty() && !this.isEyeInFluid(FluidTags.LAVA);
 	}
 
 	@Override
@@ -419,6 +427,12 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 		}
 	}
 
+	@Environment(EnvType.CLIENT)
+	@Override
+	public Vec3 getLeashOffset() {
+		return new Vec3(0.0, (double)(0.6F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.4F));
+	}
+
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
@@ -428,12 +442,14 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
+		SpawnGroupData spawnGroupData2 = null;
 		Strider.StriderGroupData.Rider rider;
 		if (spawnGroupData instanceof Strider.StriderGroupData) {
 			rider = ((Strider.StriderGroupData)spawnGroupData).rider;
 		} else if (!this.isBaby()) {
 			if (this.random.nextInt(30) == 0) {
 				rider = Strider.StriderGroupData.Rider.PIGLIN_RIDER;
+				spawnGroupData2 = new Zombie.ZombieGroupData(Zombie.getSpawnAsBabyOdds(this.random), false);
 			} else if (this.random.nextInt(10) == 0) {
 				rider = Strider.StriderGroupData.Rider.BABY_RIDER;
 			} else {
@@ -463,7 +479,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 
 		if (mob != null) {
 			mob.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0F);
-			mob.finalizeSpawn(levelAccessor, difficultyInstance, MobSpawnType.JOCKEY, null, null);
+			mob.finalizeSpawn(levelAccessor, difficultyInstance, MobSpawnType.JOCKEY, spawnGroupData2, null);
 			mob.startRiding(this, true);
 			levelAccessor.addFreshEntity(mob);
 		}

@@ -96,7 +96,7 @@ public class WarpedForestBiome extends Biome {
 		BiomeDefaultFeatures.addWarpedForestVegetation(this);
 		BiomeDefaultFeatures.addNetherDefaultOres(this);
 		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.ENDERMAN, 1, 4, 4));
-		this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.STRIDER, 60, 2, 4));
+		this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.STRIDER, 60, 1, 2));
 		this.addMobCharge(EntityType.ENDERMAN, 1.0, 0.08);
 	}
 }

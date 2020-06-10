@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
@@ -27,19 +28,13 @@ public class AssignProfessionFromJobSite extends Behavior<Villager> {
 		villager.getBrain().setMemory(MemoryModuleType.JOB_SITE, globalPos);
 		if (villager.getVillagerData().getProfession() == VillagerProfession.NONE) {
 			MinecraftServer minecraftServer = serverLevel.getServer();
-			minecraftServer.getLevel(globalPos.dimension())
-				.getPoiManager()
-				.getType(globalPos.pos())
-				.ifPresent(
-					poiType -> Registry.VILLAGER_PROFESSION
-							.stream()
-							.filter(villagerProfession -> villagerProfession.getJobPoiType() == poiType)
-							.findFirst()
-							.ifPresent(villagerProfession -> {
-								villager.setVillagerData(villager.getVillagerData().setProfession(villagerProfession));
-								villager.refreshBrain(serverLevel);
-							})
-				);
+			Optional.ofNullable(minecraftServer.getLevel(globalPos.dimension()))
+				.flatMap(serverLevelx -> serverLevelx.getPoiManager().getType(globalPos.pos()))
+				.flatMap(poiType -> Registry.VILLAGER_PROFESSION.stream().filter(villagerProfession -> villagerProfession.getJobPoiType() == poiType).findFirst())
+				.ifPresent(villagerProfession -> {
+					villager.setVillagerData(villager.getVillagerData().setProfession(villagerProfession));
+					villager.refreshBrain(serverLevel);
+				});
 		}
 	}
 }

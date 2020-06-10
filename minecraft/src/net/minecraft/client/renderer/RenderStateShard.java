@@ -37,14 +37,7 @@ public abstract class RenderStateShard {
 		"lightning_transparency", () -> {
 			RenderSystem.enableBlend();
 			RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
-			if (Minecraft.useShaderTransparency()) {
-				Minecraft.getInstance().levelRenderer.getWeatherTarget().bindWrite(false);
-			}
 		}, () -> {
-			if (Minecraft.useShaderTransparency()) {
-				Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
-			}
-
 			RenderSystem.disableBlend();
 			RenderSystem.defaultBlendFunc();
 		}
@@ -52,14 +45,7 @@ public abstract class RenderStateShard {
 	protected static final RenderStateShard.TransparencyStateShard GLINT_TRANSPARENCY = new RenderStateShard.TransparencyStateShard("glint_transparency", () -> {
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_COLOR, GlStateManager.DestFactor.ONE);
-		if (Minecraft.useShaderTransparency()) {
-			Minecraft.getInstance().levelRenderer.getItemEntityTarget().bindWrite(false);
-		}
 	}, () -> {
-		if (Minecraft.useShaderTransparency()) {
-			Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
-		}
-
 		RenderSystem.disableBlend();
 		RenderSystem.defaultBlendFunc();
 	});
@@ -97,40 +83,6 @@ public abstract class RenderStateShard {
 			);
 		},
 		() -> {
-			RenderSystem.disableBlend();
-			RenderSystem.defaultBlendFunc();
-		}
-	);
-	protected static final RenderStateShard.TransparencyStateShard DRAGON_EXPLOSION_TRANSPARENCY = new RenderStateShard.TransparencyStateShard(
-		"dragon_explosion_transparency", () -> {
-			if (Minecraft.useShaderTransparency()) {
-				Minecraft.getInstance().levelRenderer.getWeatherTarget().bindWrite(false);
-			}
-		}, () -> {
-			if (Minecraft.useShaderTransparency()) {
-				Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
-			}
-		}
-	);
-	protected static final RenderStateShard.TransparencyStateShard ITEM_TRANSPARENCY = new RenderStateShard.TransparencyStateShard(
-		"item_transparency",
-		() -> {
-			RenderSystem.enableBlend();
-			RenderSystem.blendFuncSeparate(
-				GlStateManager.SourceFactor.SRC_ALPHA,
-				GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-				GlStateManager.SourceFactor.ONE,
-				GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA
-			);
-			if (Minecraft.useShaderTransparency()) {
-				Minecraft.getInstance().levelRenderer.getItemEntityTarget().bindWrite(false);
-			}
-		},
-		() -> {
-			if (Minecraft.useShaderTransparency()) {
-				Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
-			}
-
 			RenderSystem.disableBlend();
 			RenderSystem.defaultBlendFunc();
 		}
@@ -247,6 +199,15 @@ public abstract class RenderStateShard {
 	protected static final RenderStateShard.OutputStateShard CLOUDS_TARGET = new RenderStateShard.OutputStateShard("clouds_target", () -> {
 		if (Minecraft.useShaderTransparency()) {
 			Minecraft.getInstance().levelRenderer.getCloudsTarget().bindWrite(false);
+		}
+	}, () -> {
+		if (Minecraft.useShaderTransparency()) {
+			Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
+		}
+	});
+	protected static final RenderStateShard.OutputStateShard ITEM_ENTITY_TARGET = new RenderStateShard.OutputStateShard("item_entity_target", () -> {
+		if (Minecraft.useShaderTransparency()) {
+			Minecraft.getInstance().levelRenderer.getItemEntityTarget().bindWrite(false);
 		}
 	}, () -> {
 		if (Minecraft.useShaderTransparency()) {

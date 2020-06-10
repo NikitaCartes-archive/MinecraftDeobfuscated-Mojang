@@ -48,7 +48,7 @@ public class AdvancementWidget extends GuiComponent {
 		int j = String.valueOf(i).length();
 		int k = i > 1 ? minecraft.font.width("  ") + minecraft.font.width("0") * j * 2 + minecraft.font.width("/") : 0;
 		int l = 29 + minecraft.font.width(this.title) + k;
-		this.description = this.findOptimalLines(displayInfo.getDescription().mutableCopy().withStyle(displayInfo.getFrame().getChatColor()), l);
+		this.description = this.findOptimalLines(displayInfo.getDescription().copy().withStyle(displayInfo.getFrame().getChatColor()), l);
 
 		for (FormattedText formattedText : this.description) {
 			l = Math.max(l, minecraft.font.width(formattedText));

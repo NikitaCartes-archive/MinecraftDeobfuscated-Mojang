@@ -112,17 +112,21 @@ public class ChunkDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 			this.clientData = builder.build();
 			this.serverData = integratedServer.submit(() -> {
 				ServerLevel serverLevel = integratedServer.getLevel(resourceKey);
-				Builder<ChunkPos, String> builderx = ImmutableMap.builder();
-				ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
+				if (serverLevel == null) {
+					return ImmutableMap.of();
+				} else {
+					Builder<ChunkPos, String> builderx = ImmutableMap.builder();
+					ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
 
-				for (int kx = i - 12; kx <= i + 12; kx++) {
-					for (int lx = j - 12; lx <= j + 12; lx++) {
-						ChunkPos chunkPosx = new ChunkPos(kx, lx);
-						builderx.put(chunkPosx, "Server: " + serverChunkCache.getChunkDebugData(chunkPosx));
+					for (int kx = i - 12; kx <= i + 12; kx++) {
+						for (int lx = j - 12; lx <= j + 12; lx++) {
+							ChunkPos chunkPosx = new ChunkPos(kx, lx);
+							builderx.put(chunkPosx, "Server: " + serverChunkCache.getChunkDebugData(chunkPosx));
+						}
 					}
-				}
 
-				return builderx.build();
+					return builderx.build();
+				}
 			});
 		}
 	}

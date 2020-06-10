@@ -198,7 +198,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			minecraftServer.getPlayerList().getViewDistance(),
 			minecraftServer.forceSynchronousWrites(),
 			chunkProgressListener,
-			() -> minecraftServer.getLevel(Level.OVERWORLD).getDataStorage()
+			() -> minecraftServer.overworld().getDataStorage()
 		);
 		this.portalForcer = new PortalForcer(this);
 		this.updateSkyBrightness();
@@ -302,22 +302,24 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		}
 
 		if (this.oRainLevel != this.rainLevel) {
-			this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(7, this.rainLevel), this.dimension());
+			this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.RAIN_LEVEL_CHANGE, this.rainLevel), this.dimension());
 		}
 
 		if (this.oThunderLevel != this.thunderLevel) {
-			this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(8, this.thunderLevel), this.dimension());
+			this.server
+				.getPlayerList()
+				.broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.THUNDER_LEVEL_CHANGE, this.thunderLevel), this.dimension());
 		}
 
 		if (bl != this.isRaining()) {
 			if (bl) {
-				this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(2, 0.0F));
+				this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.STOP_RAINING, 0.0F));
 			} else {
-				this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(1, 0.0F));
+				this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.START_RAINING, 0.0F));
 			}
 
-			this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(7, this.rainLevel));
-			this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(8, this.thunderLevel));
+			this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.RAIN_LEVEL_CHANGE, this.rainLevel));
+			this.server.getPlayerList().broadcastAll(new ClientboundGameEventPacket(ClientboundGameEventPacket.THUNDER_LEVEL_CHANGE, this.thunderLevel));
 		}
 
 		if (this.allPlayersSleeping && this.players.stream().noneMatch(serverPlayer -> !serverPlayer.isSpectator() && !serverPlayer.isSleepingLongEnough())) {
@@ -1151,17 +1153,17 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	@Nullable
 	@Override
 	public MapItemSavedData getMapData(String string) {
-		return this.getServer().getLevel(Level.OVERWORLD).getDataStorage().get(() -> new MapItemSavedData(string), string);
+		return this.getServer().overworld().getDataStorage().get(() -> new MapItemSavedData(string), string);
 	}
 
 	@Override
 	public void setMapData(MapItemSavedData mapItemSavedData) {
-		this.getServer().getLevel(Level.OVERWORLD).getDataStorage().set(mapItemSavedData);
+		this.getServer().overworld().getDataStorage().set(mapItemSavedData);
 	}
 
 	@Override
 	public int getFreeMapId() {
-		return this.getServer().getLevel(Level.OVERWORLD).getDataStorage().<MapIndex>computeIfAbsent(MapIndex::new, "idcounts").getFreeAuxValueForMap();
+		return this.getServer().overworld().getDataStorage().<MapIndex>computeIfAbsent(MapIndex::new, "idcounts").getFreeAuxValueForMap();
 	}
 
 	public void setDefaultSpawnPos(BlockPos blockPos) {

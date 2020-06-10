@@ -1,6 +1,8 @@
 package net.minecraft.world.entity.animal;
 
 import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -237,7 +239,6 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 
 	@Override
 	public void travel(Vec3 vec3) {
-		this.setSpeed(this.getSteeringSpeed());
 		this.travel(this, this.steering, vec3);
 	}
 
@@ -263,5 +264,11 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 	@Override
 	public boolean isFood(ItemStack itemStack) {
 		return FOOD_ITEMS.test(itemStack);
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public Vec3 getLeashOffset() {
+		return new Vec3(0.0, (double)(0.6F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.4F));
 	}
 }

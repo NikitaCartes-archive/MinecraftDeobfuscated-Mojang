@@ -134,7 +134,7 @@ public class FogRenderer {
 			}
 		}
 
-		if (d < 1.0) {
+		if (d < 1.0 && !fluidState.is(FluidTags.LAVA)) {
 			if (d < 0.0) {
 				d = 0.0;
 			}
@@ -182,50 +182,54 @@ public class FogRenderer {
 		FluidState fluidState = camera.getFluidInCamera();
 		Entity entity = camera.getEntity();
 		boolean bl2 = fluidState.getType() != Fluids.EMPTY;
-		if (bl2) {
+		if (fluidState.is(FluidTags.WATER)) {
 			float g = 1.0F;
-			if (fluidState.is(FluidTags.WATER)) {
-				g = 0.05F;
-				if (entity instanceof LocalPlayer) {
-					LocalPlayer localPlayer = (LocalPlayer)entity;
-					g -= localPlayer.getWaterVision() * localPlayer.getWaterVision() * 0.03F;
-					Biome biome = localPlayer.level.getBiome(localPlayer.blockPosition());
-					if (biome == Biomes.SWAMP || biome == Biomes.SWAMP_HILLS) {
-						g += 0.005F;
-					}
+			g = 0.05F;
+			if (entity instanceof LocalPlayer) {
+				LocalPlayer localPlayer = (LocalPlayer)entity;
+				g -= localPlayer.getWaterVision() * localPlayer.getWaterVision() * 0.03F;
+				Biome biome = localPlayer.level.getBiome(localPlayer.blockPosition());
+				if (biome == Biomes.SWAMP || biome == Biomes.SWAMP_HILLS) {
+					g += 0.005F;
 				}
-			} else if (fluidState.is(FluidTags.LAVA)) {
-				g = 2.0F;
 			}
 
 			RenderSystem.fogDensity(g);
 			RenderSystem.fogMode(GlStateManager.FogMode.EXP2);
 		} else {
 			float g;
-			float j;
-			if (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS)) {
+			float h;
+			if (fluidState.is(FluidTags.LAVA)) {
+				if (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.FIRE_RESISTANCE)) {
+					g = 0.0F;
+					h = 3.0F;
+				} else {
+					g = 0.25F;
+					h = 1.0F;
+				}
+			} else if (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS)) {
 				int i = ((LivingEntity)entity).getEffect(MobEffects.BLINDNESS).getDuration();
-				float h = Mth.lerp(Math.min(1.0F, (float)i / 20.0F), f, 5.0F);
+				float j = Mth.lerp(Math.min(1.0F, (float)i / 20.0F), f, 5.0F);
 				if (fogMode == FogRenderer.FogMode.FOG_SKY) {
 					g = 0.0F;
-					j = h * 0.8F;
+					h = j * 0.8F;
 				} else {
-					g = h * 0.25F;
-					j = h;
+					g = j * 0.25F;
+					h = j;
 				}
 			} else if (bl) {
 				g = f * 0.05F;
-				j = Math.min(f, 192.0F) * 0.5F;
+				h = Math.min(f, 192.0F) * 0.5F;
 			} else if (fogMode == FogRenderer.FogMode.FOG_SKY) {
 				g = 0.0F;
-				j = f;
+				h = f;
 			} else {
 				g = f * 0.75F;
-				j = f;
+				h = f;
 			}
 
 			RenderSystem.fogStart(g);
-			RenderSystem.fogEnd(j);
+			RenderSystem.fogEnd(h);
 			RenderSystem.fogMode(GlStateManager.FogMode.LINEAR);
 			RenderSystem.setupNvFogDistance();
 		}

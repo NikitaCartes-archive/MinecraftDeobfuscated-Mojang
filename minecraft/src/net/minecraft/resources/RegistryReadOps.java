@@ -7,11 +7,11 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
+import com.mojang.serialization.MapCodec;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -26,6 +26,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.Codecs;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,24 +46,28 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 		this.registryHolder = registryAccess;
 	}
 
-	protected <E> DataResult<Pair<Supplier<E>, T>> decodeElement(T object, ResourceKey<Registry<E>> resourceKey, Codec<E> codec) {
-		DataResult<Pair<ResourceLocation, T>> dataResult = ResourceLocation.CODEC.decode(this.delegate, object);
-		if (!dataResult.result().isPresent()) {
-			return codec.decode(this.delegate, object).map(pairx -> pairx.mapFirst(objectx -> () -> objectx));
+	protected <E> DataResult<Pair<Supplier<E>, T>> decodeElement(T object, ResourceKey<Registry<E>> resourceKey, MapCodec<E> mapCodec) {
+		Optional<WritableRegistry<E>> optional = this.registryHolder.registry(resourceKey);
+		if (!optional.isPresent()) {
+			return DataResult.error("Unknown registry: " + resourceKey);
 		} else {
-			Optional<WritableRegistry<E>> optional = this.registryHolder.registry(resourceKey);
-			if (!optional.isPresent()) {
-				return DataResult.error("Unknown registry: " + resourceKey);
+			WritableRegistry<E> writableRegistry = (WritableRegistry<E>)optional.get();
+			DataResult<Pair<ResourceLocation, T>> dataResult = ResourceLocation.CODEC.decode(this.delegate, object);
+			if (!dataResult.result().isPresent()) {
+				return Codecs.withName(resourceKey, mapCodec).codec().decode(this.delegate, object).map(pairx -> pairx.mapFirst(pairxx -> {
+						writableRegistry.register((ResourceKey<E>)pairxx.getFirst(), pairxx.getSecond());
+						writableRegistry.setPersistent((ResourceKey<E>)pairxx.getFirst());
+						return pairxx::getSecond;
+					}));
 			} else {
 				Pair<ResourceLocation, T> pair = (Pair<ResourceLocation, T>)dataResult.result().get();
 				ResourceLocation resourceLocation = pair.getFirst();
-				return this.readAndRegisterElement(resourceKey, (WritableRegistry<E>)optional.get(), codec, resourceLocation)
-					.map(supplier -> Pair.of(supplier, pair.getSecond()));
+				return this.readAndRegisterElement(resourceKey, writableRegistry, mapCodec, resourceLocation).map(supplier -> Pair.of(supplier, pair.getSecond()));
 			}
 		}
 	}
 
-	public <E> DataResult<MappedRegistry<E>> decodeElements(MappedRegistry<E> mappedRegistry, ResourceKey<Registry<E>> resourceKey, Codec<E> codec) {
+	public <E> DataResult<MappedRegistry<E>> decodeElements(MappedRegistry<E> mappedRegistry, ResourceKey<Registry<E>> resourceKey, MapCodec<E> mapCodec) {
 		ResourceLocation resourceLocation = resourceKey.location();
 		Collection<ResourceLocation> collection = this.resourceManager.listResources(resourceLocation, stringx -> stringx.endsWith(".json"));
 		DataResult<MappedRegistry<E>> dataResult = DataResult.success(mappedRegistry, Lifecycle.stable());
@@ -83,7 +88,7 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 					String string4 = string2.substring(i + 1);
 					ResourceLocation resourceLocation3 = new ResourceLocation(string3, string4);
 					dataResult = dataResult.flatMap(
-						mappedRegistryx -> this.readAndRegisterElement(resourceKey, mappedRegistryx, codec, resourceLocation3).map(supplier -> mappedRegistryx)
+						mappedRegistryx -> this.readAndRegisterElement(resourceKey, mappedRegistryx, mapCodec, resourceLocation3).map(supplier -> mappedRegistryx)
 					);
 				}
 			}
@@ -93,7 +98,7 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 	}
 
 	private <E> DataResult<Supplier<E>> readAndRegisterElement(
-		ResourceKey<Registry<E>> resourceKey, WritableRegistry<E> writableRegistry, Codec<E> codec, ResourceLocation resourceLocation
+		ResourceKey<Registry<E>> resourceKey, WritableRegistry<E> writableRegistry, MapCodec<E> mapCodec, ResourceLocation resourceLocation
 	) {
 		ResourceKey<E> resourceKey2 = ResourceKey.create(resourceKey, resourceLocation);
 		E object = writableRegistry.get(resourceKey2);
@@ -114,7 +119,7 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 					}
 				});
 				readCache.values.put(resourceKey2, DataResult.success(supplier));
-				DataResult<E> dataResult2 = this.readElementFromFile(resourceKey, resourceKey2, codec);
+				DataResult<E> dataResult2 = this.readElementFromFile(resourceKey, resourceKey2, mapCodec);
 				dataResult2.result().ifPresent(objectx -> writableRegistry.register(resourceKey2, objectx));
 				DataResult<Supplier<E>> dataResult3 = dataResult2.map(objectx -> () -> objectx);
 				readCache.values.put(resourceKey2, dataResult3);
@@ -123,7 +128,7 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 		}
 	}
 
-	private <E> DataResult<E> readElementFromFile(ResourceKey<Registry<E>> resourceKey, ResourceKey<E> resourceKey2, Codec<E> codec) {
+	private <E> DataResult<E> readElementFromFile(ResourceKey<Registry<E>> resourceKey, ResourceKey<E> resourceKey2, MapCodec<E> mapCodec) {
 		ResourceLocation resourceLocation = new ResourceLocation(
 			resourceKey.location().getNamespace(),
 			resourceKey.location().getPath() + "/" + resourceKey2.location().getNamespace() + "/" + resourceKey2.location().getPath() + ".json"
@@ -141,7 +146,7 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 				try {
 					JsonParser jsonParser = new JsonParser();
 					JsonElement jsonElement = jsonParser.parse(reader);
-					var11 = codec.parse(new RegistryReadOps<>(JsonOps.INSTANCE, this.resourceManager, this.registryHolder), jsonElement);
+					var11 = mapCodec.codec().parse(new RegistryReadOps<>(JsonOps.INSTANCE, this.resourceManager, this.registryHolder), jsonElement);
 				} catch (Throwable var36) {
 					var8 = var36;
 					throw var36;

@@ -35,10 +35,6 @@ public enum GraphicsStatus {
 		return byId(this.getId() + 1);
 	}
 
-	public GraphicsStatus cyclePrevious() {
-		return byId(this.getId() - 1);
-	}
-
 	public String toString() {
 		switch (this) {
 			case FAST:

@@ -1,6 +1,9 @@
 package net.minecraft.world.level.levelgen;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.Decoder;
+import com.mojang.serialization.Encoder;
+import com.mojang.serialization.MapCodec;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -25,7 +28,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 
 public class DebugLevelSource extends ChunkGenerator {
 	public static final DebugLevelSource INSTANCE = new DebugLevelSource();
-	public static final Codec<DebugLevelSource> CODEC = Codec.<DebugLevelSource>unit((Supplier<DebugLevelSource>)(() -> INSTANCE)).stable();
+	public static final Codec<DebugLevelSource> CODEC = MapCodec.of(Encoder.empty(), Decoder.unit((Supplier<DebugLevelSource>)(() -> INSTANCE))).stable().codec();
 	private static final List<BlockState> ALL_BLOCKS = (List<BlockState>)StreamSupport.stream(Registry.BLOCK.spliterator(), false)
 		.flatMap(block -> block.getStateDefinition().getPossibleStates().stream())
 		.collect(Collectors.toList());

@@ -14,6 +14,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
@@ -41,6 +42,7 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -92,6 +94,7 @@ public class EnderMan extends Monster implements NeutralMob {
 		this.targetSelector.addGoal(2, new EnderMan.EndermanLookForPlayerGoal(this));
 		this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
 		this.targetSelector.addGoal(4, new NearestAttackableTargetGoal(this, Endermite.class, 10, true, false, ENDERMITE_SELECTOR));
+		this.targetSelector.addGoal(5, new ResetUniversalAngerTargetGoal<>(this, false));
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -194,7 +197,7 @@ public class EnderMan extends Monster implements NeutralMob {
 		}
 
 		this.setCarriedBlock(blockState);
-		this.readPersistentAngerSaveData(this.level, compoundTag);
+		this.readPersistentAngerSaveData((ServerLevel)this.level, compoundTag);
 	}
 
 	private boolean isLookingAtMe(Player player) {
@@ -235,7 +238,7 @@ public class EnderMan extends Monster implements NeutralMob {
 
 		this.jumping = false;
 		if (!this.level.isClientSide) {
-			this.updatePersistentAnger();
+			this.updatePersistentAnger((ServerLevel)this.level, true);
 		}
 
 		super.aiStep();

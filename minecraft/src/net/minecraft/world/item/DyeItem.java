@@ -23,8 +23,11 @@ public class DyeItem extends Item {
 		if (livingEntity instanceof Sheep) {
 			Sheep sheep = (Sheep)livingEntity;
 			if (sheep.isAlive() && !sheep.isSheared() && sheep.getColor() != this.dyeColor) {
-				sheep.setColor(this.dyeColor);
-				itemStack.shrink(1);
+				if (!player.level.isClientSide) {
+					sheep.setColor(this.dyeColor);
+					itemStack.shrink(1);
+				}
+
 				return InteractionResult.sidedSuccess(player.level.isClientSide);
 			}
 		}

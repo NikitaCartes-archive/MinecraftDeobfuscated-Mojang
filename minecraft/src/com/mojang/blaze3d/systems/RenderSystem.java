@@ -17,6 +17,9 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.GraphicsStatus;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.Options;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -805,5 +808,19 @@ public class RenderSystem {
 
 	public static void defaultAlphaFunc() {
 		alphaFunc(516, 0.1F);
+	}
+
+	@Deprecated
+	public static void runAsFancy(Runnable runnable) {
+		boolean bl = Minecraft.useShaderTransparency();
+		if (!bl) {
+			runnable.run();
+		} else {
+			Options options = Minecraft.getInstance().options;
+			GraphicsStatus graphicsStatus = options.graphicsMode;
+			options.graphicsMode = GraphicsStatus.FANCY;
+			runnable.run();
+			options.graphicsMode = graphicsStatus;
+		}
 	}
 }

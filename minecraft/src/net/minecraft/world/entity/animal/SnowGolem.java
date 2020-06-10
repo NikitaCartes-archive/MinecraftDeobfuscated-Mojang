@@ -1,6 +1,8 @@
 package net.minecraft.world.entity.animal;
 
 import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -36,6 +38,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackMob {
 	private static final EntityDataAccessor<Byte> DATA_PUMPKIN_ID = SynchedEntityData.defineId(SnowGolem.class, EntityDataSerializers.BYTE);
@@ -189,5 +192,11 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 	@Override
 	protected SoundEvent getDeathSound() {
 		return SoundEvents.SNOW_GOLEM_DEATH;
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public Vec3 getLeashOffset() {
+		return new Vec3(0.0, (double)(0.75F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.4F));
 	}
 }

@@ -73,7 +73,8 @@ public abstract class Projectile extends Entity {
 	private boolean checkLeftOwner() {
 		Entity entity = this.getOwner();
 		if (entity != null) {
-			for (Entity entity2 : this.level.getEntities(this, this.getBoundingBox().inflate(1.0), entityx -> !entityx.isSpectator() && entityx.isPickable())) {
+			for (Entity entity2 : this.level
+				.getEntities(this, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0), entityx -> !entityx.isSpectator() && entityx.isPickable())) {
 				if (entity2.getRootVehicle() == entity.getRootVehicle()) {
 					return false;
 				}

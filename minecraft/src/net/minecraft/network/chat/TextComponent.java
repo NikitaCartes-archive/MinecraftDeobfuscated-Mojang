@@ -34,10 +34,8 @@ public class TextComponent extends BaseComponent {
 		}
 	}
 
-	public TextComponent toMutable() {
-		TextComponent textComponent = new TextComponent(this.text);
-		textComponent.setStyle(this.getStyle());
-		return textComponent;
+	public TextComponent plainCopy() {
+		return new TextComponent(this.text);
 	}
 
 	@Override

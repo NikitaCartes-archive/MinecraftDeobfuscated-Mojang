@@ -59,6 +59,7 @@ import org.apache.logging.log4j.Logger;
 
 public class LevelChunk implements ChunkAccess {
 	private static final Logger LOGGER = LogManager.getLogger();
+	@Nullable
 	public static final LevelChunkSection EMPTY_SECTION = null;
 	private final LevelChunkSection[] sections = new LevelChunkSection[16];
 	private ChunkBiomeContainer biomes;
@@ -482,18 +483,21 @@ public class LevelChunk implements ChunkAccess {
 		j = Mth.clamp(j, 0, this.entitySections.length - 1);
 
 		for (int k = i; k <= j; k++) {
-			if (!this.entitySections[k].isEmpty()) {
-				for (Entity entity2 : this.entitySections[k]) {
-					if (entity2.getBoundingBox().intersects(aABB) && entity2 != entity) {
-						if (predicate == null || predicate.test(entity2)) {
-							list.add(entity2);
-						}
+			ClassInstanceMultiMap<Entity> classInstanceMultiMap = this.entitySections[k];
+			List<Entity> list2 = classInstanceMultiMap.getAllInstances();
+			int l = list2.size();
 
-						if (entity2 instanceof EnderDragon) {
-							for (EnderDragonPart enderDragonPart : ((EnderDragon)entity2).getSubEntities()) {
-								if (enderDragonPart != entity && enderDragonPart.getBoundingBox().intersects(aABB) && (predicate == null || predicate.test(enderDragonPart))) {
-									list.add(enderDragonPart);
-								}
+			for (int m = 0; m < l; m++) {
+				Entity entity2 = (Entity)list2.get(m);
+				if (entity2.getBoundingBox().intersects(aABB) && entity2 != entity) {
+					if (predicate == null || predicate.test(entity2)) {
+						list.add(entity2);
+					}
+
+					if (entity2 instanceof EnderDragon) {
+						for (EnderDragonPart enderDragonPart : ((EnderDragon)entity2).getSubEntities()) {
+							if (enderDragonPart != entity && enderDragonPart.getBoundingBox().intersects(aABB) && (predicate == null || predicate.test(enderDragonPart))) {
+								list.add(enderDragonPart);
 							}
 						}
 					}

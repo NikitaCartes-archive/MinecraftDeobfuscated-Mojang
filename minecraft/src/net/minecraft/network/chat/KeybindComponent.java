@@ -39,7 +39,7 @@ public class KeybindComponent extends BaseComponent {
 		return this.getNestedComponent().visit(styledContentConsumer, style);
 	}
 
-	public KeybindComponent toMutable() {
+	public KeybindComponent plainCopy() {
 		return new KeybindComponent(this.name);
 	}
 

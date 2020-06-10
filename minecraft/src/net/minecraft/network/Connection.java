@@ -149,7 +149,6 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 
 	public void setListener(PacketListener packetListener) {
 		Validate.notNull(packetListener, "packetListener");
-		LOGGER.debug("Set listener of {} to {}", this, packetListener);
 		this.packetListener = packetListener;
 	}
 

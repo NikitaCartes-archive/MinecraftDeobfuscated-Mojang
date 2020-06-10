@@ -47,7 +47,7 @@ public class WitherSkullBlock extends SkullBlock {
 		if (!level.isClientSide) {
 			BlockState blockState = skullBlockEntity.getBlockState();
 			boolean bl = blockState.is(Blocks.WITHER_SKELETON_SKULL) || blockState.is(Blocks.WITHER_SKELETON_WALL_SKULL);
-			if (bl && blockPos.getY() >= 2 && level.getDifficulty() != Difficulty.PEACEFUL) {
+			if (bl && blockPos.getY() >= 0 && level.getDifficulty() != Difficulty.PEACEFUL) {
 				BlockPattern blockPattern = getOrCreateWitherFull();
 				BlockPattern.BlockPatternMatch blockPatternMatch = blockPattern.find(level, blockPos);
 				if (blockPatternMatch != null) {

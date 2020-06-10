@@ -26,18 +26,7 @@ public class ComponentRenderUtils {
 			componentCollector.append(FormattedText.of(stripColor(string), style));
 			return Optional.empty();
 		}, Style.EMPTY);
-		List<FormattedText> list = font.getSplitter().splitLines(componentCollector.getResultOrEmpty(), i, Style.EMPTY);
-		if (list.isEmpty()) {
-			return Lists.<FormattedText>newArrayList(FormattedText.EMPTY);
-		} else {
-			List<FormattedText> list2 = Lists.<FormattedText>newArrayList();
-			list2.add(list.get(0));
-
-			for (int j = 1; j < list.size(); j++) {
-				list2.add(FormattedText.composite(INDENT, (FormattedText)list.get(j)));
-			}
-
-			return list2;
-		}
+		List<FormattedText> list = font.getSplitter().splitLines(componentCollector.getResultOrEmpty(), i, Style.EMPTY, INDENT);
+		return (List<FormattedText>)(list.isEmpty() ? Lists.<FormattedText>newArrayList(FormattedText.EMPTY) : list);
 	}
 }

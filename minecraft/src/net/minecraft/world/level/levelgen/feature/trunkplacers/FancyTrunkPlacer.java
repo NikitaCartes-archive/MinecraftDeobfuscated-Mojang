@@ -36,7 +36,10 @@ public class FancyTrunkPlacer extends TrunkPlacer {
 		int j = 5;
 		int k = i + 2;
 		int l = Mth.floor((double)k * 0.618);
-		setDirtAt(levelSimulatedRW, blockPos.below());
+		if (!treeConfiguration.fromSapling) {
+			setDirtAt(levelSimulatedRW, blockPos.below());
+		}
+
 		double d = 1.0;
 		int m = Math.min(1, Mth.floor(1.382 + Math.pow(1.0 * (double)k / 13.0, 2.0)));
 		int n = blockPos.getY() + l;

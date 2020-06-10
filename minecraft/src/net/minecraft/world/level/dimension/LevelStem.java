@@ -3,8 +3,8 @@ package net.minecraft.world.level.dimension;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.Lifecycle;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -21,7 +21,7 @@ import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 
 public final class LevelStem {
-	public static final Codec<LevelStem> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<LevelStem> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 					DimensionType.CODEC.fieldOf("type").forGetter(LevelStem::typeSupplier), ChunkGenerator.CODEC.fieldOf("generator").forGetter(LevelStem::generator)
 				)
@@ -87,9 +87,12 @@ public final class LevelStem {
 			Entry<ResourceKey<LevelStem>, LevelStem> entry3 = (Entry<ResourceKey<LevelStem>, LevelStem>)list.get(2);
 			if (entry.getKey() != OVERWORLD || entry2.getKey() != NETHER || entry3.getKey() != END) {
 				return false;
-			} else if (!((LevelStem)entry.getValue()).type().isOverworld()
-				|| !((LevelStem)entry2.getValue()).type().isNether()
-				|| !((LevelStem)entry3.getValue()).type().isEnd()) {
+			} else if (((LevelStem)entry.getValue()).type() != DimensionType.DEFAULT_OVERWORLD
+				&& ((LevelStem)entry.getValue()).type() != DimensionType.DEFAULT_OVERWORLD_CAVES) {
+				return false;
+			} else if (((LevelStem)entry2.getValue()).type() != DimensionType.DEFAULT_NETHER) {
+				return false;
+			} else if (((LevelStem)entry3.getValue()).type() != DimensionType.DEFAULT_END) {
 				return false;
 			} else if (((LevelStem)entry2.getValue()).generator() instanceof NoiseBasedChunkGenerator
 				&& ((LevelStem)entry3.getValue()).generator() instanceof NoiseBasedChunkGenerator) {

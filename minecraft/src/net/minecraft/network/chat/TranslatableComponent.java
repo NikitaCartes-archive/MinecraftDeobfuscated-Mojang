@@ -115,7 +115,7 @@ public class TranslatableComponent extends BaseComponent implements ContextAware
 		}
 	}
 
-	public TranslatableComponent toMutable() {
+	public TranslatableComponent plainCopy() {
 		return new TranslatableComponent(this.key, this.args);
 	}
 

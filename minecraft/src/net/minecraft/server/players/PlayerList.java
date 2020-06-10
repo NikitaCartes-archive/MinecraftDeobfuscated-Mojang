@@ -133,7 +133,7 @@ public abstract class PlayerList {
 		ServerLevel serverLevel2;
 		if (serverLevel == null) {
 			LOGGER.warn("Unknown respawn dimension {}, defaulting to overworld", resourceKey);
-			serverLevel2 = this.server.getLevel(Level.OVERWORLD);
+			serverLevel2 = this.server.overworld();
 		} else {
 			serverLevel2 = serverLevel;
 		}
@@ -427,7 +427,7 @@ public abstract class PlayerList {
 			serverPlayer3.connection.disconnect(new TranslatableComponent("multiplayer.disconnect.duplicate_login"));
 		}
 
-		ServerLevel serverLevel = this.server.getLevel(Level.OVERWORLD);
+		ServerLevel serverLevel = this.server.overworld();
 		ServerPlayerGameMode serverPlayerGameMode;
 		if (this.server.isDemo()) {
 			serverPlayerGameMode = new DemoMode(serverLevel);
@@ -443,23 +443,23 @@ public abstract class PlayerList {
 		serverPlayer.getLevel().removePlayerImmediately(serverPlayer);
 		BlockPos blockPos = serverPlayer.getRespawnPosition();
 		boolean bl2 = serverPlayer.isRespawnForced();
+		ServerLevel serverLevel = this.server.getLevel(serverPlayer.getRespawnDimension());
 		Optional<Vec3> optional;
-		if (blockPos != null) {
-			optional = Player.findRespawnPositionAndUseSpawnBlock(this.server.getLevel(serverPlayer.getRespawnDimension()), blockPos, bl2, bl);
+		if (serverLevel != null && blockPos != null) {
+			optional = Player.findRespawnPositionAndUseSpawnBlock(serverLevel, blockPos, bl2, bl);
 		} else {
 			optional = Optional.empty();
 		}
 
-		ResourceKey<Level> resourceKey = optional.isPresent() ? serverPlayer.getRespawnDimension() : Level.OVERWORLD;
-		ServerLevel serverLevel = this.server.getLevel(resourceKey);
+		ServerLevel serverLevel2 = serverLevel != null && optional.isPresent() ? serverLevel : this.server.overworld();
 		ServerPlayerGameMode serverPlayerGameMode;
 		if (this.server.isDemo()) {
-			serverPlayerGameMode = new DemoMode(serverLevel);
+			serverPlayerGameMode = new DemoMode(serverLevel2);
 		} else {
-			serverPlayerGameMode = new ServerPlayerGameMode(serverLevel);
+			serverPlayerGameMode = new ServerPlayerGameMode(serverLevel2);
 		}
 
-		ServerPlayer serverPlayer2 = new ServerPlayer(this.server, serverLevel, serverPlayer.getGameProfile(), serverPlayerGameMode);
+		ServerPlayer serverPlayer2 = new ServerPlayer(this.server, serverLevel2, serverPlayer.getGameProfile(), serverPlayerGameMode);
 		serverPlayer2.connection = serverPlayer.connection;
 		serverPlayer2.restoreFrom(serverPlayer, bl);
 		serverPlayer2.setId(serverPlayer.getId());
@@ -469,18 +469,18 @@ public abstract class PlayerList {
 			serverPlayer2.addTag(string);
 		}
 
-		this.updatePlayerGameMode(serverPlayer2, serverPlayer, serverLevel);
+		this.updatePlayerGameMode(serverPlayer2, serverPlayer, serverLevel2);
 		boolean bl3 = false;
 		if (optional.isPresent()) {
 			Vec3 vec3 = (Vec3)optional.get();
 			serverPlayer2.moveTo(vec3.x, vec3.y, vec3.z, 0.0F, 0.0F);
-			serverPlayer2.setRespawnPosition(resourceKey, blockPos, bl2, false);
-			bl3 = !bl && serverLevel.getBlockState(blockPos).getBlock() instanceof RespawnAnchorBlock;
+			serverPlayer2.setRespawnPosition(serverLevel2.dimension(), blockPos, bl2, false);
+			bl3 = !bl && serverLevel2.getBlockState(blockPos).getBlock() instanceof RespawnAnchorBlock;
 		} else if (blockPos != null) {
-			serverPlayer2.connection.send(new ClientboundGameEventPacket(0, 0.0F));
+			serverPlayer2.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE, 0.0F));
 		}
 
-		while (!serverLevel.noCollision(serverPlayer2) && serverPlayer2.getY() < 256.0) {
+		while (!serverLevel2.noCollision(serverPlayer2) && serverPlayer2.getY() < 256.0) {
 			serverPlayer2.setPos(serverPlayer2.getX(), serverPlayer2.getY() + 1.0, serverPlayer2.getZ());
 		}
 
@@ -498,13 +498,13 @@ public abstract class PlayerList {
 				)
 			);
 		serverPlayer2.connection.teleport(serverPlayer2.getX(), serverPlayer2.getY(), serverPlayer2.getZ(), serverPlayer2.yRot, serverPlayer2.xRot);
-		serverPlayer2.connection.send(new ClientboundSetDefaultSpawnPositionPacket(serverLevel.getSharedSpawnPos()));
+		serverPlayer2.connection.send(new ClientboundSetDefaultSpawnPositionPacket(serverLevel2.getSharedSpawnPos()));
 		serverPlayer2.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
 		serverPlayer2.connection
 			.send(new ClientboundSetExperiencePacket(serverPlayer2.experienceProgress, serverPlayer2.totalExperience, serverPlayer2.experienceLevel));
-		this.sendLevelInfo(serverPlayer2, serverLevel);
+		this.sendLevelInfo(serverPlayer2, serverLevel2);
 		this.sendPlayerPermissionLevel(serverPlayer2);
-		serverLevel.addRespawnedPlayer(serverPlayer2);
+		serverLevel2.addRespawnedPlayer(serverPlayer2);
 		this.players.add(serverPlayer2);
 		this.playersByUUID.put(serverPlayer2.getUUID(), serverPlayer2);
 		serverPlayer2.initMenu();
@@ -687,15 +687,15 @@ public abstract class PlayerList {
 	}
 
 	public void sendLevelInfo(ServerPlayer serverPlayer, ServerLevel serverLevel) {
-		WorldBorder worldBorder = this.server.getLevel(Level.OVERWORLD).getWorldBorder();
+		WorldBorder worldBorder = this.server.overworld().getWorldBorder();
 		serverPlayer.connection.send(new ClientboundSetBorderPacket(worldBorder, ClientboundSetBorderPacket.Type.INITIALIZE));
 		serverPlayer.connection
 			.send(new ClientboundSetTimePacket(serverLevel.getGameTime(), serverLevel.getDayTime(), serverLevel.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)));
 		serverPlayer.connection.send(new ClientboundSetDefaultSpawnPositionPacket(serverLevel.getSharedSpawnPos()));
 		if (serverLevel.isRaining()) {
-			serverPlayer.connection.send(new ClientboundGameEventPacket(1, 0.0F));
-			serverPlayer.connection.send(new ClientboundGameEventPacket(7, serverLevel.getRainLevel(1.0F)));
-			serverPlayer.connection.send(new ClientboundGameEventPacket(8, serverLevel.getThunderLevel(1.0F)));
+			serverPlayer.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.START_RAINING, 0.0F));
+			serverPlayer.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.RAIN_LEVEL_CHANGE, serverLevel.getRainLevel(1.0F)));
+			serverPlayer.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.THUNDER_LEVEL_CHANGE, serverLevel.getThunderLevel(1.0F)));
 		}
 	}
 
@@ -750,7 +750,7 @@ public abstract class PlayerList {
 		this.overrideGameMode = gameType;
 	}
 
-	private void updatePlayerGameMode(ServerPlayer serverPlayer, ServerPlayer serverPlayer2, ServerLevel serverLevel) {
+	private void updatePlayerGameMode(ServerPlayer serverPlayer, @Nullable ServerPlayer serverPlayer2, ServerLevel serverLevel) {
 		if (serverPlayer2 != null) {
 			serverPlayer.gameMode.setGameModeForPlayer(serverPlayer2.gameMode.getGameModeForPlayer());
 		} else if (this.overrideGameMode != null) {

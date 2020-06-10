@@ -55,7 +55,6 @@ public class MusicManager {
 		if (this.currentMusic != null) {
 			this.minecraft.getSoundManager().stop(this.currentMusic);
 			this.currentMusic = null;
-			this.nextSongDelay = 100;
 		}
 	}
 

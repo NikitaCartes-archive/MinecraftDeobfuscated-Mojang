@@ -201,7 +201,7 @@ public abstract class AbstractFish extends WaterAnimal {
 
 		@Override
 		public void tick() {
-			if (this.fish.isUnderLiquid(FluidTags.WATER)) {
+			if (this.fish.isEyeInFluid(FluidTags.WATER)) {
 				this.fish.setDeltaMovement(this.fish.getDeltaMovement().add(0.0, 0.005, 0.0));
 			}
 

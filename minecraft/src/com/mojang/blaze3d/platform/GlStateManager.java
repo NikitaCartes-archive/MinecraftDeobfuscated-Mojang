@@ -41,7 +41,6 @@ public class GlStateManager {
 	private static final GlStateManager.PolygonOffsetState POLY_OFFSET = new GlStateManager.PolygonOffsetState();
 	private static final GlStateManager.ColorLogicState COLOR_LOGIC = new GlStateManager.ColorLogicState();
 	private static final GlStateManager.TexGenState TEX_GEN = new GlStateManager.TexGenState();
-	private static final GlStateManager.ClearState CLEAR = new GlStateManager.ClearState();
 	private static final GlStateManager.StencilState STENCIL = new GlStateManager.StencilState();
 	private static final FloatBuffer FLOAT_ARG_BUFFER = MemoryTracker.createFloatBuffer(4);
 	private static int activeTexture;
@@ -1016,29 +1015,17 @@ public class GlStateManager {
 
 	public static void _clearDepth(double d) {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-		if (d != CLEAR.depth) {
-			CLEAR.depth = d;
-			GL11.glClearDepth(d);
-		}
+		GL11.glClearDepth(d);
 	}
 
 	public static void _clearColor(float f, float g, float h, float i) {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
-		if (f != CLEAR.color.r || g != CLEAR.color.g || h != CLEAR.color.b || i != CLEAR.color.a) {
-			CLEAR.color.r = f;
-			CLEAR.color.g = g;
-			CLEAR.color.b = h;
-			CLEAR.color.a = i;
-			GL11.glClearColor(f, g, h, i);
-		}
+		GL11.glClearColor(f, g, h, i);
 	}
 
 	public static void _clearStencil(int i) {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
-		if (i != CLEAR.stencil) {
-			CLEAR.stencil = i;
-			GL11.glClearStencil(i);
-		}
+		GL11.glClearStencil(i);
 	}
 
 	public static void _clear(int i, boolean bl) {
@@ -1295,16 +1282,6 @@ public class GlStateManager {
 					GL11.glDisable(this.state);
 				}
 			}
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	static class ClearState {
-		public double depth = 1.0;
-		public final GlStateManager.Color color = new GlStateManager.Color(0.0F, 0.0F, 0.0F, 0.0F);
-		public int stencil;
-
-		private ClearState() {
 		}
 	}
 

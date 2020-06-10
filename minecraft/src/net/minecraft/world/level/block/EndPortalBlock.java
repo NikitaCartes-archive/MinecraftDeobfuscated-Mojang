@@ -6,6 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -39,7 +40,7 @@ public class EndPortalBlock extends BaseEntityBlock {
 
 	@Override
 	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-		if (!level.isClientSide
+		if (level instanceof ServerLevel
 			&& !entity.isPassenger()
 			&& !entity.isVehicle()
 			&& entity.canChangeDimensions()
@@ -48,8 +49,13 @@ public class EndPortalBlock extends BaseEntityBlock {
 				blockState.getShape(level, blockPos),
 				BooleanOp.AND
 			)) {
-			ResourceKey<Level> resourceKey = level.dimensionType().isEnd() ? Level.OVERWORLD : Level.END;
-			entity.changeDimension(resourceKey);
+			ResourceKey<Level> resourceKey = level.dimension() == Level.END ? Level.OVERWORLD : Level.END;
+			ServerLevel serverLevel = ((ServerLevel)level).getServer().getLevel(resourceKey);
+			if (serverLevel == null) {
+				return;
+			}
+
+			entity.changeDimension(serverLevel);
 		}
 	}
 

@@ -125,7 +125,7 @@ public abstract class Registry<T> implements Codec<T>, Keyable, IdMap<T> {
 	public static final ResourceKey<Registry<MenuType<?>>> MENU_REGISTRY = createRegistryKey("menu");
 	public static final ResourceKey<Registry<RecipeType<?>>> RECIPE_TYPE_REGISTRY = createRegistryKey("recipe_type");
 	public static final ResourceKey<Registry<RecipeSerializer<?>>> RECIPE_SERIALIZER_REGISTRY = createRegistryKey("recipe_serializer");
-	public static final ResourceKey<Registry<Attribute>> ATTRIBUTES_REGISTRY = createRegistryKey("attributes");
+	public static final ResourceKey<Registry<Attribute>> ATTRIBUTE_REGISTRY = createRegistryKey("attribute");
 	public static final ResourceKey<Registry<StatType<?>>> STAT_TYPE_REGISTRY = createRegistryKey("stat_type");
 	public static final ResourceKey<Registry<VillagerType>> VILLAGER_TYPE_REGISTRY = createRegistryKey("villager_type");
 	public static final ResourceKey<Registry<VillagerProfession>> VILLAGER_PROFESSION_REGISTRY = createRegistryKey("villager_profession");
@@ -185,7 +185,7 @@ public abstract class Registry<T> implements Codec<T>, Keyable, IdMap<T> {
 	public static final Registry<MenuType<?>> MENU = registerSimple(MENU_REGISTRY, () -> MenuType.ANVIL);
 	public static final Registry<RecipeType<?>> RECIPE_TYPE = registerSimple(RECIPE_TYPE_REGISTRY, () -> RecipeType.CRAFTING);
 	public static final Registry<RecipeSerializer<?>> RECIPE_SERIALIZER = registerSimple(RECIPE_SERIALIZER_REGISTRY, () -> RecipeSerializer.SHAPELESS_RECIPE);
-	public static final Registry<Attribute> ATTRIBUTES = registerSimple(ATTRIBUTES_REGISTRY, () -> Attributes.LUCK);
+	public static final Registry<Attribute> ATTRIBUTE = registerSimple(ATTRIBUTE_REGISTRY, () -> Attributes.LUCK);
 	public static final Registry<StatType<?>> STAT_TYPE = registerSimple(STAT_TYPE_REGISTRY, () -> Stats.ITEM_USED);
 	public static final DefaultedRegistry<VillagerType> VILLAGER_TYPE = registerDefaulted(VILLAGER_TYPE_REGISTRY, "plains", () -> VillagerType.PLAINS);
 	public static final DefaultedRegistry<VillagerProfession> VILLAGER_PROFESSION = registerDefaulted(
@@ -319,6 +319,8 @@ public abstract class Registry<T> implements Codec<T>, Keyable, IdMap<T> {
 	}
 
 	public abstract boolean containsKey(ResourceLocation resourceLocation);
+
+	public abstract boolean persistent(ResourceKey<T> resourceKey);
 
 	public abstract boolean containsId(int i);
 

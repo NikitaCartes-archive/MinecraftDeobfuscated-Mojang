@@ -1,6 +1,5 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -48,7 +47,7 @@ public abstract class SimpleCriterionTrigger<T extends AbstractCriterionTriggerI
 	protected void trigger(ServerPlayer serverPlayer, Predicate<T> predicate) {
 		PlayerAdvancements playerAdvancements = serverPlayer.getAdvancements();
 		Set<CriterionTrigger.Listener<T>> set = (Set<CriterionTrigger.Listener<T>>)this.players.get(playerAdvancements);
-		if (set != null) {
+		if (set != null && !set.isEmpty()) {
 			LootContext lootContext = EntityPredicate.createContext(serverPlayer, serverPlayer);
 			List<CriterionTrigger.Listener<T>> list = null;
 
@@ -67,15 +66,6 @@ public abstract class SimpleCriterionTrigger<T extends AbstractCriterionTriggerI
 				for (CriterionTrigger.Listener<T> listenerx : list) {
 					listenerx.run(playerAdvancements);
 				}
-			}
-		}
-	}
-
-	protected void trigger(PlayerAdvancements playerAdvancements) {
-		Set<CriterionTrigger.Listener<T>> set = (Set<CriterionTrigger.Listener<T>>)this.players.get(playerAdvancements);
-		if (set != null && !set.isEmpty()) {
-			for (CriterionTrigger.Listener<T> listener : ImmutableSet.copyOf(set)) {
-				listener.run(playerAdvancements);
 			}
 		}
 	}

@@ -75,9 +75,9 @@ public class WaterBoundPathNavigation extends PathNavigation {
 			}
 
 			int i = 6;
-			Vec3 vec33 = Vec3.atCenterOf(this.path.currentPos());
-			if (Math.abs(this.mob.getX() - (vec33.x + 0.5)) < (double)g
-				&& Math.abs(this.mob.getZ() - (vec33.z + 0.5)) < (double)g
+			Vec3 vec33 = Vec3.atBottomCenterOf(this.path.currentPos());
+			if (Math.abs(this.mob.getX() - vec33.x) < (double)g
+				&& Math.abs(this.mob.getZ() - vec33.z) < (double)g
 				&& Math.abs(this.mob.getY() - vec33.y) < (double)(g * 2.0F)) {
 				this.path.next();
 			}

@@ -4,7 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PiglinModel;
-import net.minecraft.client.renderer.entity.layers.PiglinArmorLayer;
+import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.piglin.Piglin;
@@ -16,7 +16,7 @@ public class PiglinRenderer extends HumanoidMobRenderer<Mob, PiglinModel<Mob>> {
 
 	public PiglinRenderer(EntityRenderDispatcher entityRenderDispatcher, boolean bl) {
 		super(entityRenderDispatcher, createModel(bl), 0.5F, 1.0019531F, 1.0F, 1.0019531F);
-		this.addLayer(new PiglinArmorLayer<>(this, new HumanoidModel(0.5F), new HumanoidModel(1.0F), makeHelmetHeadModel()));
+		this.addLayer(new HumanoidArmorLayer<>(this, new HumanoidModel(0.5F), new HumanoidModel(1.02F)));
 	}
 
 	private static PiglinModel<Mob> createModel(boolean bl) {
@@ -25,13 +25,6 @@ public class PiglinRenderer extends HumanoidMobRenderer<Mob, PiglinModel<Mob>> {
 			piglinModel.earLeft.visible = false;
 		}
 
-		return piglinModel;
-	}
-
-	private static <T extends Mob> PiglinModel<T> makeHelmetHeadModel() {
-		PiglinModel<T> piglinModel = new PiglinModel<>(1.0F, 64, 16);
-		piglinModel.earLeft.visible = false;
-		piglinModel.earRight.visible = false;
 		return piglinModel;
 	}
 

@@ -46,7 +46,7 @@ public class SelectorComponent extends BaseComponent implements ContextAwareComp
 		return this.pattern;
 	}
 
-	public SelectorComponent toMutable() {
+	public SelectorComponent plainCopy() {
 		return new SelectorComponent(this.pattern);
 	}
 

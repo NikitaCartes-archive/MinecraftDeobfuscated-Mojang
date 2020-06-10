@@ -319,7 +319,7 @@ public abstract class LivingEntity extends Entity {
 
 		boolean bl2 = bl && ((Player)this).abilities.invulnerable;
 		if (this.isAlive()) {
-			if (this.isUnderLiquid(FluidTags.WATER) && !this.level.getBlockState(new BlockPos(this.getX(), this.getEyeY(), this.getZ())).is(Blocks.BUBBLE_COLUMN)) {
+			if (this.isEyeInFluid(FluidTags.WATER) && !this.level.getBlockState(new BlockPos(this.getX(), this.getEyeY(), this.getZ())).is(Blocks.BUBBLE_COLUMN)) {
 				if (!this.canBreatheUnderwater() && !MobEffectUtil.hasWaterBreathing(this) && !bl2) {
 					this.setAirSupply(this.decreaseAirSupply(this.getAirSupply()));
 					if (this.getAirSupply() == -20) {
@@ -484,6 +484,10 @@ public abstract class LivingEntity extends Entity {
 
 	public float getScale() {
 		return this.isBaby() ? 0.5F : 1.0F;
+	}
+
+	protected boolean isAffectedByFluids() {
+		return true;
 	}
 
 	@Override
@@ -986,7 +990,7 @@ public abstract class LivingEntity extends Entity {
 
 			this.hurtDir = 0.0F;
 			Entity entity2 = damageSource.getEntity();
-			if (entity2 != null && EntitySelector.ATTACK_ALLOWED.test(entity2)) {
+			if (entity2 != null) {
 				if (entity2 instanceof LivingEntity) {
 					this.setLastHurtByMob((LivingEntity)entity2);
 				}
@@ -1890,7 +1894,7 @@ public abstract class LivingEntity extends Entity {
 			}
 
 			FluidState fluidState = this.level.getFluidState(this.blockPosition());
-			if (this.isInWater() && (!(this instanceof Player) || !((Player)this).abilities.flying) && !this.canStandOnFluid(fluidState.getType())) {
+			if (this.isInWater() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidState.getType())) {
 				double e = this.getY();
 				float f = this.isSprinting() ? 0.9F : this.getWaterSlowDown();
 				float g = 0.02F;
@@ -1925,7 +1929,7 @@ public abstract class LivingEntity extends Entity {
 				if (this.horizontalCollision && this.isFree(vec33.x, vec33.y + 0.6F - this.getY() + e, vec33.z)) {
 					this.setDeltaMovement(vec33.x, 0.3F, vec33.z);
 				}
-			} else if (this.isInLava() && (!(this instanceof Player) || !((Player)this).abilities.flying) && !this.canStandOnFluid(fluidState.getType())) {
+			} else if (this.isInLava() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidState.getType())) {
 				double ex = this.getY();
 				this.moveRelative(0.02F, vec3);
 				this.move(MoverType.SELF, this.getDeltaMovement());
@@ -2325,7 +2329,7 @@ public abstract class LivingEntity extends Entity {
 
 		this.level.getProfiler().pop();
 		this.level.getProfiler().push("jump");
-		if (this.jumping) {
+		if (this.jumping && this.isAffectedByFluids()) {
 			double k = this.getFluidHeight(FluidTags.WATER);
 			boolean bl = this.isInWater() && k > 0.0;
 			double l = this.getFluidJumpThreshold();

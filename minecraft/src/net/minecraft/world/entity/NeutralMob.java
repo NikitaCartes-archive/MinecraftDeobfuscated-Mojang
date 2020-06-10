@@ -1,8 +1,10 @@
 package net.minecraft.world.entity;
 
+import java.util.Objects;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -26,44 +28,58 @@ public interface NeutralMob {
 		}
 	}
 
-	default void readPersistentAngerSaveData(Level level, CompoundTag compoundTag) {
+	default void readPersistentAngerSaveData(ServerLevel serverLevel, CompoundTag compoundTag) {
 		this.setRemainingPersistentAngerTime(compoundTag.getInt("AngerTime"));
-		if (compoundTag.hasUUID("AngryAt")) {
-			this.setPersistentAngerTarget(compoundTag.getUUID("AngryAt"));
-			UUID uUID = this.getPersistentAngerTarget();
-			Player player = uUID == null ? null : level.getPlayerByUUID(uUID);
-			if (player != null) {
-				this.setLastHurtByMob(player);
-				this.setLastHurtByPlayer(player);
+		if (!compoundTag.hasUUID("AngryAt")) {
+			this.setPersistentAngerTarget(null);
+		} else {
+			UUID uUID = compoundTag.getUUID("AngryAt");
+			this.setPersistentAngerTarget(uUID);
+			Entity entity = serverLevel.getEntity(uUID);
+			if (entity != null) {
+				if (entity instanceof Mob) {
+					this.setLastHurtByMob((Mob)entity);
+				}
+
+				if (entity.getType() == EntityType.PLAYER) {
+					this.setLastHurtByPlayer((Player)entity);
+				}
 			}
 		}
 	}
 
-	default void updatePersistentAnger() {
+	default void updatePersistentAnger(ServerLevel serverLevel, boolean bl) {
 		LivingEntity livingEntity = this.getTarget();
-		if (livingEntity != null && livingEntity.getType() == EntityType.PLAYER) {
-			this.setPersistentAngerTarget(livingEntity.getUUID());
-			if (this.getRemainingPersistentAngerTime() <= 0) {
+		UUID uUID = this.getPersistentAngerTarget();
+		if ((livingEntity == null || livingEntity.isDeadOrDying()) && uUID != null && serverLevel.getEntity(uUID) instanceof Mob) {
+			this.stopBeingAngry();
+		} else {
+			if (livingEntity != null && !Objects.equals(uUID, livingEntity.getUUID())) {
+				this.setPersistentAngerTarget(livingEntity.getUUID());
 				this.startPersistentAngerTimer();
 			}
-		} else {
-			int i = this.getRemainingPersistentAngerTime();
-			if (i > 0) {
-				this.setRemainingPersistentAngerTime(i - 1);
+
+			if (this.getRemainingPersistentAngerTime() > 0 && (livingEntity == null || livingEntity.getType() != EntityType.PLAYER || !bl)) {
+				this.setRemainingPersistentAngerTime(this.getRemainingPersistentAngerTime() - 1);
 				if (this.getRemainingPersistentAngerTime() == 0) {
-					this.setPersistentAngerTarget(null);
+					this.stopBeingAngry();
 				}
 			}
 		}
 	}
 
 	default boolean isAngryAt(LivingEntity livingEntity) {
-		if (livingEntity instanceof Player && EntitySelector.ATTACK_ALLOWED.test(livingEntity)) {
-			boolean bl = livingEntity.level.getGameRules().getBoolean(GameRules.RULE_UNIVERSAL_ANGER);
-			return bl ? this.isAngry() : livingEntity.getUUID().equals(this.getPersistentAngerTarget());
-		} else {
+		if (!EntitySelector.ATTACK_ALLOWED.test(livingEntity)) {
 			return false;
+		} else {
+			return livingEntity.getType() == EntityType.PLAYER && this.isAngryAtAllPlayers(livingEntity.level)
+				? true
+				: livingEntity.getUUID().equals(this.getPersistentAngerTarget());
 		}
+	}
+
+	default boolean isAngryAtAllPlayers(Level level) {
+		return level.getGameRules().getBoolean(GameRules.RULE_UNIVERSAL_ANGER) && this.isAngry() && this.getPersistentAngerTarget() == null;
 	}
 
 	default boolean isAngry() {
@@ -71,15 +87,23 @@ public interface NeutralMob {
 	}
 
 	default void playerDied(Player player) {
-		if (!player.level.getGameRules().getBoolean(GameRules.RULE_FORGIVE_DEAD_PLAYERS)) {
+		if (player.level.getGameRules().getBoolean(GameRules.RULE_FORGIVE_DEAD_PLAYERS)) {
+			if (player.getUUID().equals(this.getPersistentAngerTarget())) {
+				this.stopBeingAngry();
+			}
 		}
+	}
 
-		if (player.getUUID().equals(this.getPersistentAngerTarget())) {
-			this.setLastHurtByMob(null);
-			this.setPersistentAngerTarget(null);
-			this.setTarget(null);
-			this.setRemainingPersistentAngerTime(0);
-		}
+	default void forgetCurrentTargetAndRefreshUniversalAnger() {
+		this.stopBeingAngry();
+		this.startPersistentAngerTimer();
+	}
+
+	default void stopBeingAngry() {
+		this.setLastHurtByMob(null);
+		this.setPersistentAngerTarget(null);
+		this.setTarget(null);
+		this.setRemainingPersistentAngerTime(0);
 	}
 
 	void setLastHurtByMob(@Nullable LivingEntity livingEntity);

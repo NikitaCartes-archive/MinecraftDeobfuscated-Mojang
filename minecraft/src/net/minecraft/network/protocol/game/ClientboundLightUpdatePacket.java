@@ -22,13 +22,15 @@ public class ClientboundLightUpdatePacket implements Packet<ClientGamePacketList
 	private int emptyBlockYMask;
 	private List<byte[]> skyUpdates;
 	private List<byte[]> blockUpdates;
+	private boolean trustEdges;
 
 	public ClientboundLightUpdatePacket() {
 	}
 
-	public ClientboundLightUpdatePacket(ChunkPos chunkPos, LevelLightEngine levelLightEngine) {
+	public ClientboundLightUpdatePacket(ChunkPos chunkPos, LevelLightEngine levelLightEngine, boolean bl) {
 		this.x = chunkPos.x;
 		this.z = chunkPos.z;
+		this.trustEdges = bl;
 		this.skyUpdates = Lists.<byte[]>newArrayList();
 		this.blockUpdates = Lists.<byte[]>newArrayList();
 
@@ -55,9 +57,10 @@ public class ClientboundLightUpdatePacket implements Packet<ClientGamePacketList
 		}
 	}
 
-	public ClientboundLightUpdatePacket(ChunkPos chunkPos, LevelLightEngine levelLightEngine, int i, int j) {
+	public ClientboundLightUpdatePacket(ChunkPos chunkPos, LevelLightEngine levelLightEngine, int i, int j, boolean bl) {
 		this.x = chunkPos.x;
 		this.z = chunkPos.z;
+		this.trustEdges = bl;
 		this.skyYMask = i;
 		this.blockYMask = j;
 		this.skyUpdates = Lists.<byte[]>newArrayList();
@@ -94,6 +97,7 @@ public class ClientboundLightUpdatePacket implements Packet<ClientGamePacketList
 	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
 		this.x = friendlyByteBuf.readVarInt();
 		this.z = friendlyByteBuf.readVarInt();
+		this.trustEdges = friendlyByteBuf.readBoolean();
 		this.skyYMask = friendlyByteBuf.readVarInt();
 		this.blockYMask = friendlyByteBuf.readVarInt();
 		this.emptySkyYMask = friendlyByteBuf.readVarInt();
@@ -119,6 +123,7 @@ public class ClientboundLightUpdatePacket implements Packet<ClientGamePacketList
 	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
 		friendlyByteBuf.writeVarInt(this.x);
 		friendlyByteBuf.writeVarInt(this.z);
+		friendlyByteBuf.writeBoolean(this.trustEdges);
 		friendlyByteBuf.writeVarInt(this.skyYMask);
 		friendlyByteBuf.writeVarInt(this.blockYMask);
 		friendlyByteBuf.writeVarInt(this.emptySkyYMask);
@@ -175,5 +180,10 @@ public class ClientboundLightUpdatePacket implements Packet<ClientGamePacketList
 	@Environment(EnvType.CLIENT)
 	public List<byte[]> getBlockUpdates() {
 		return this.blockUpdates;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public boolean getTrustEdges() {
+		return this.trustEdges;
 	}
 }

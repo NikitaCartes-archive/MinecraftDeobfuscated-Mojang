@@ -51,7 +51,7 @@ public class PresetFlatWorldScreen extends Screen {
 	private PresetFlatWorldScreen.PresetsList list;
 	private Button selectButton;
 	private EditBox export;
-	private StructureSettings structureSettings;
+	private FlatLevelGeneratorSettings settings;
 
 	public PresetFlatWorldScreen(CreateFlatWorldScreen createFlatWorldScreen) {
 		super(new TranslatableComponent("createWorld.customize.presets.title"));
@@ -113,18 +113,16 @@ public class PresetFlatWorldScreen extends Screen {
 		return list;
 	}
 
-	public static FlatLevelGeneratorSettings fromString(String string, StructureSettings structureSettings) {
+	public static FlatLevelGeneratorSettings fromString(String string, FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
 		Iterator<String> iterator = Splitter.on(';').split(string).iterator();
 		if (!iterator.hasNext()) {
 			return FlatLevelGeneratorSettings.getDefault();
 		} else {
-			FlatLevelGeneratorSettings flatLevelGeneratorSettings = new FlatLevelGeneratorSettings(structureSettings);
 			List<FlatLayerInfo> list = getLayersInfoFromString((String)iterator.next());
 			if (list.isEmpty()) {
 				return FlatLevelGeneratorSettings.getDefault();
 			} else {
-				flatLevelGeneratorSettings.getLayersInfo().addAll(list);
-				flatLevelGeneratorSettings.updateLayers();
+				FlatLevelGeneratorSettings flatLevelGeneratorSettings2 = flatLevelGeneratorSettings.withLayers(list, flatLevelGeneratorSettings.structureSettings());
 				Biome biome = Biomes.PLAINS;
 				if (iterator.hasNext()) {
 					try {
@@ -135,8 +133,8 @@ public class PresetFlatWorldScreen extends Screen {
 					}
 				}
 
-				flatLevelGeneratorSettings.setBiome(biome);
-				return flatLevelGeneratorSettings;
+				flatLevelGeneratorSettings2.setBiome(biome);
+				return flatLevelGeneratorSettings2;
 			}
 		}
 	}
@@ -165,13 +163,13 @@ public class PresetFlatWorldScreen extends Screen {
 		this.export = new EditBox(this.font, 50, 40, this.width - 100, 20, this.shareText);
 		this.export.setMaxLength(1230);
 		this.export.setValue(save(this.parent.settings()));
-		this.structureSettings = this.parent.settings().structureSettings();
+		this.settings = this.parent.settings();
 		this.children.add(this.export);
 		this.list = new PresetFlatWorldScreen.PresetsList();
 		this.children.add(this.list);
 		this.selectButton = this.addButton(
 			new Button(this.width / 2 - 155, this.height - 28, 150, 20, new TranslatableComponent("createWorld.customize.presets.select"), button -> {
-				FlatLevelGeneratorSettings flatLevelGeneratorSettings = fromString(this.export.getValue(), this.structureSettings);
+				FlatLevelGeneratorSettings flatLevelGeneratorSettings = fromString(this.export.getValue(), this.settings);
 				this.parent.setConfig(flatLevelGeneratorSettings);
 				this.minecraft.setScreen(this.parent);
 			})
@@ -271,15 +269,7 @@ public class PresetFlatWorldScreen extends Screen {
 			new TranslatableComponent("createWorld.customize.preset.tunnelers_dream"),
 			Blocks.STONE,
 			Biomes.MOUNTAINS,
-			Arrays.asList(
-				StructureFeature.SWAMP_HUT,
-				StructureFeature.DESERT_PYRAMID,
-				StructureFeature.JUNGLE_TEMPLE,
-				StructureFeature.IGLOO,
-				StructureFeature.OCEAN_RUIN,
-				StructureFeature.SHIPWRECK,
-				StructureFeature.MINESHAFT
-			),
+			Arrays.asList(StructureFeature.MINESHAFT),
 			true,
 			true,
 			false,
@@ -292,15 +282,7 @@ public class PresetFlatWorldScreen extends Screen {
 			new TranslatableComponent("createWorld.customize.preset.water_world"),
 			Items.WATER_BUCKET,
 			Biomes.DEEP_OCEAN,
-			Arrays.asList(
-				StructureFeature.SWAMP_HUT,
-				StructureFeature.DESERT_PYRAMID,
-				StructureFeature.JUNGLE_TEMPLE,
-				StructureFeature.IGLOO,
-				StructureFeature.OCEAN_RUIN,
-				StructureFeature.SHIPWRECK,
-				StructureFeature.OCEAN_MONUMENT
-			),
+			Arrays.asList(StructureFeature.OCEAN_RUIN, StructureFeature.SHIPWRECK, StructureFeature.OCEAN_MONUMENT),
 			false,
 			false,
 			false,
@@ -314,18 +296,7 @@ public class PresetFlatWorldScreen extends Screen {
 			new TranslatableComponent("createWorld.customize.preset.overworld"),
 			Blocks.GRASS,
 			Biomes.PLAINS,
-			Arrays.asList(
-				StructureFeature.VILLAGE,
-				StructureFeature.SWAMP_HUT,
-				StructureFeature.DESERT_PYRAMID,
-				StructureFeature.JUNGLE_TEMPLE,
-				StructureFeature.IGLOO,
-				StructureFeature.OCEAN_RUIN,
-				StructureFeature.SHIPWRECK,
-				StructureFeature.MINESHAFT,
-				StructureFeature.PILLAGER_OUTPOST,
-				StructureFeature.RUINED_PORTAL
-			),
+			Arrays.asList(StructureFeature.VILLAGE, StructureFeature.MINESHAFT, StructureFeature.PILLAGER_OUTPOST, StructureFeature.RUINED_PORTAL),
 			true,
 			true,
 			true,
@@ -338,15 +309,7 @@ public class PresetFlatWorldScreen extends Screen {
 			new TranslatableComponent("createWorld.customize.preset.snowy_kingdom"),
 			Blocks.SNOW,
 			Biomes.SNOWY_TUNDRA,
-			Arrays.asList(
-				StructureFeature.VILLAGE,
-				StructureFeature.SWAMP_HUT,
-				StructureFeature.DESERT_PYRAMID,
-				StructureFeature.JUNGLE_TEMPLE,
-				StructureFeature.IGLOO,
-				StructureFeature.OCEAN_RUIN,
-				StructureFeature.SHIPWRECK
-			),
+			Arrays.asList(StructureFeature.VILLAGE, StructureFeature.IGLOO),
 			false,
 			false,
 			false,
@@ -360,15 +323,7 @@ public class PresetFlatWorldScreen extends Screen {
 			new TranslatableComponent("createWorld.customize.preset.bottomless_pit"),
 			Items.FEATHER,
 			Biomes.PLAINS,
-			Arrays.asList(
-				StructureFeature.VILLAGE,
-				StructureFeature.SWAMP_HUT,
-				StructureFeature.DESERT_PYRAMID,
-				StructureFeature.JUNGLE_TEMPLE,
-				StructureFeature.IGLOO,
-				StructureFeature.OCEAN_RUIN,
-				StructureFeature.SHIPWRECK
-			),
+			Arrays.asList(StructureFeature.VILLAGE),
 			false,
 			false,
 			false,
@@ -380,16 +335,7 @@ public class PresetFlatWorldScreen extends Screen {
 			new TranslatableComponent("createWorld.customize.preset.desert"),
 			Blocks.SAND,
 			Biomes.DESERT,
-			Arrays.asList(
-				StructureFeature.VILLAGE,
-				StructureFeature.SWAMP_HUT,
-				StructureFeature.DESERT_PYRAMID,
-				StructureFeature.JUNGLE_TEMPLE,
-				StructureFeature.IGLOO,
-				StructureFeature.OCEAN_RUIN,
-				StructureFeature.SHIPWRECK,
-				StructureFeature.MINESHAFT
-			),
+			Arrays.asList(StructureFeature.VILLAGE, StructureFeature.DESERT_PYRAMID, StructureFeature.MINESHAFT),
 			true,
 			true,
 			false,
@@ -513,7 +459,7 @@ public class PresetFlatWorldScreen extends Screen {
 					.get(PresetsList.this.children().indexOf(this));
 				PresetFlatWorldScreen.this.export.setValue(PresetFlatWorldScreen.save(presetInfo.settings));
 				PresetFlatWorldScreen.this.export.moveCursorToStart();
-				PresetFlatWorldScreen.this.structureSettings = presetInfo.settings.structureSettings();
+				PresetFlatWorldScreen.this.settings = presetInfo.settings;
 			}
 
 			private void blitSlot(PoseStack poseStack, int i, int j, Item item) {

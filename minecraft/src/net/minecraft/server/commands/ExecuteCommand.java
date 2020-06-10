@@ -203,11 +203,7 @@ public class ExecuteCommand {
 					Commands.literal("in")
 						.then(
 							Commands.argument("dimension", DimensionArgument.dimension())
-								.redirect(
-									literalCommandNode,
-									commandContext -> commandContext.getSource()
-											.withLevel(commandContext.getSource().getServer().getLevel(DimensionArgument.getDimension(commandContext, "dimension")))
-								)
+								.redirect(literalCommandNode, commandContext -> commandContext.getSource().withLevel(DimensionArgument.getDimension(commandContext, "dimension")))
 						)
 				)
 		);

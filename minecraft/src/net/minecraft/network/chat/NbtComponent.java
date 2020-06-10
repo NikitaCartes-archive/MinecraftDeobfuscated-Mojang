@@ -117,7 +117,7 @@ public abstract class NbtComponent extends BaseComponent implements ContextAware
 			return this.posPattern;
 		}
 
-		public NbtComponent.BlockNbtComponent toMutable() {
+		public NbtComponent.BlockNbtComponent plainCopy() {
 			return new NbtComponent.BlockNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.posPattern, this.compiledPos);
 		}
 
@@ -198,7 +198,7 @@ public abstract class NbtComponent extends BaseComponent implements ContextAware
 			return this.selectorPattern;
 		}
 
-		public NbtComponent.EntityNbtComponent toMutable() {
+		public NbtComponent.EntityNbtComponent plainCopy() {
 			return new NbtComponent.EntityNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.selectorPattern, this.compiledSelector);
 		}
 
@@ -259,7 +259,7 @@ public abstract class NbtComponent extends BaseComponent implements ContextAware
 			return this.id;
 		}
 
-		public NbtComponent.StorageNbtComponent toMutable() {
+		public NbtComponent.StorageNbtComponent plainCopy() {
 			return new NbtComponent.StorageNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.id);
 		}
 

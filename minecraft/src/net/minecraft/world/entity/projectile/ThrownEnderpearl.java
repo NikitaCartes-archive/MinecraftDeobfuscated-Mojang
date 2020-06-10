@@ -6,7 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -25,15 +25,12 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
 public class ThrownEnderpearl extends ThrowableItemProjectile {
-	private LivingEntity originalOwner;
-
 	public ThrownEnderpearl(EntityType<? extends ThrownEnderpearl> entityType, Level level) {
 		super(entityType, level);
 	}
 
 	public ThrownEnderpearl(Level level, LivingEntity livingEntity) {
 		super(EntityType.ENDER_PEARL, livingEntity, level);
-		this.originalOwner = livingEntity;
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -49,10 +46,7 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 	@Override
 	protected void onHitEntity(EntityHitResult entityHitResult) {
 		super.onHitEntity(entityHitResult);
-		Entity entity = entityHitResult.getEntity();
-		if (entity != this.originalOwner) {
-			entity.hurt(DamageSource.thrown(this, this.getOwner()), 0.0F);
-		}
+		entityHitResult.getEntity().hurt(DamageSource.thrown(this, this.getOwner()), 0.0F);
 	}
 
 	@Override
@@ -119,7 +113,7 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 	@Override
 	public void tick() {
 		Entity entity = this.getOwner();
-		if (entity != null && entity instanceof Player && !entity.isAlive()) {
+		if (entity instanceof Player && !entity.isAlive()) {
 			this.remove();
 		} else {
 			super.tick();
@@ -128,12 +122,12 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 
 	@Nullable
 	@Override
-	public Entity changeDimension(ResourceKey<Level> resourceKey) {
+	public Entity changeDimension(ServerLevel serverLevel) {
 		Entity entity = this.getOwner();
-		if (entity != null && entity.level.dimension() != resourceKey) {
+		if (entity != null && entity.level.dimension() != serverLevel.dimension()) {
 			this.setOwner(null);
 		}
 
-		return super.changeDimension(resourceKey);
+		return super.changeDimension(serverLevel);
 	}
 }

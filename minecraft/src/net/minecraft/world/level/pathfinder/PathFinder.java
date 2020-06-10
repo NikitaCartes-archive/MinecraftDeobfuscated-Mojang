@@ -1,5 +1,6 @@
 package net.minecraft.world.level.pathfinder;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.Comparator;
@@ -9,7 +10,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Mob;
@@ -48,8 +48,9 @@ public class PathFinder {
 		node.f = node.h;
 		this.openSet.clear();
 		this.openSet.insert(node);
-		Set<Node> set2 = Sets.<Node>newHashSet();
+		Set<Node> set2 = ImmutableSet.of();
 		int j = 0;
+		Set<Target> set3 = Sets.<Target>newHashSetWithExpectedSize(set.size());
 		int k = (int)((float)this.maxVisitedNodes * g);
 
 		while (!this.openSet.isEmpty()) {
@@ -59,8 +60,15 @@ public class PathFinder {
 
 			Node node2 = this.openSet.pop();
 			node2.closed = true;
-			set.stream().filter(target -> node2.distanceManhattan(target) <= (float)i).forEach(Target::setReached);
-			if (set.stream().anyMatch(Target::isReached)) {
+
+			for (Target target : set) {
+				if (node2.distanceManhattan(target) <= (float)i) {
+					target.setReached();
+					set3.add(target);
+				}
+			}
+
+			if (!set3.isEmpty()) {
 				break;
 			}
 
@@ -87,19 +95,11 @@ public class PathFinder {
 			}
 		}
 
-		Stream<Path> stream;
-		if (set.stream().anyMatch(Target::isReached)) {
-			stream = set.stream()
-				.filter(Target::isReached)
-				.map(target -> this.reconstructPath(target.getBestNode(), (BlockPos)map.get(target), true))
-				.sorted(Comparator.comparingInt(Path::getSize));
-		} else {
-			stream = set.stream()
-				.map(target -> this.reconstructPath(target.getBestNode(), (BlockPos)map.get(target), false))
-				.sorted(Comparator.comparingDouble(Path::getDistToTarget).thenComparingInt(Path::getSize));
-		}
-
-		Optional<Path> optional = stream.findFirst();
+		Optional<Path> optional = !set3.isEmpty()
+			? set3.stream().map(targetx -> this.reconstructPath(targetx.getBestNode(), (BlockPos)map.get(targetx), true)).min(Comparator.comparingInt(Path::getSize))
+			: set.stream()
+				.map(targetx -> this.reconstructPath(targetx.getBestNode(), (BlockPos)map.get(targetx), false))
+				.min(Comparator.comparingDouble(Path::getDistToTarget).thenComparingInt(Path::getSize));
 		return !optional.isPresent() ? null : (Path)optional.get();
 	}
 

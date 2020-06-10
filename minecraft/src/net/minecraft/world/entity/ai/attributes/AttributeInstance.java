@@ -167,7 +167,7 @@ public class AttributeInstance {
 
 	public CompoundTag save() {
 		CompoundTag compoundTag = new CompoundTag();
-		compoundTag.putString("Name", Registry.ATTRIBUTES.getKey(this.attribute).toString());
+		compoundTag.putString("Name", Registry.ATTRIBUTE.getKey(this.attribute).toString());
 		compoundTag.putDouble("Base", this.baseValue);
 		if (!this.permanentModifiers.isEmpty()) {
 			ListTag listTag = new ListTag();

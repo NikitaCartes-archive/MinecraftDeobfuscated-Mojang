@@ -173,6 +173,10 @@ public class StringSplitter {
 	}
 
 	public List<FormattedText> splitLines(FormattedText formattedText, int i, Style style) {
+		return this.splitLines(formattedText, i, style, null);
+	}
+
+	public List<FormattedText> splitLines(FormattedText formattedText, int i, Style style, @Nullable FormattedText formattedText2) {
 		List<FormattedText> list = Lists.<FormattedText>newArrayList();
 		List<StringSplitter.LineComponent> list2 = Lists.<StringSplitter.LineComponent>newArrayList();
 		formattedText.visit((stylex, string) -> {
@@ -185,21 +189,24 @@ public class StringSplitter {
 		StringSplitter.FlatComponents flatComponents = new StringSplitter.FlatComponents(list2);
 		boolean bl = true;
 		boolean bl2 = false;
+		boolean bl3 = false;
 
 		while (bl) {
 			bl = false;
 			StringSplitter.LineBreakFinder lineBreakFinder = new StringSplitter.LineBreakFinder((float)i);
 
 			for (StringSplitter.LineComponent lineComponent : flatComponents.parts) {
-				boolean bl3 = StringDecomposer.iterateFormatted(lineComponent.contents, 0, lineComponent.style, style, lineBreakFinder);
-				if (!bl3) {
+				boolean bl4 = StringDecomposer.iterateFormatted(lineComponent.contents, 0, lineComponent.style, style, lineBreakFinder);
+				if (!bl4) {
 					int j = lineBreakFinder.getSplitPosition();
 					Style style2 = lineBreakFinder.getSplitStyle();
 					char c = flatComponents.charAt(j);
-					boolean bl4 = c == '\n';
-					boolean bl5 = bl4 || c == ' ';
-					bl2 = bl4;
-					list.add(flatComponents.splitAt(j, bl5 ? 1 : 0, style2));
+					boolean bl5 = c == '\n';
+					boolean bl6 = bl5 || c == ' ';
+					bl2 = bl5;
+					FormattedText formattedText3 = flatComponents.splitAt(j, bl6 ? 1 : 0, style2);
+					list.add(this.formattedLine(formattedText3, bl3, formattedText2));
+					bl3 = !bl5;
 					bl = true;
 					break;
 				}
@@ -208,14 +215,18 @@ public class StringSplitter {
 			}
 		}
 
-		FormattedText formattedText2 = flatComponents.getRemainder();
-		if (formattedText2 != null) {
-			list.add(formattedText2);
+		FormattedText formattedText4 = flatComponents.getRemainder();
+		if (formattedText4 != null) {
+			list.add(this.formattedLine(formattedText4, bl3, formattedText2));
 		} else if (bl2) {
 			list.add(FormattedText.EMPTY);
 		}
 
 		return list;
+	}
+
+	private FormattedText formattedLine(FormattedText formattedText, boolean bl, FormattedText formattedText2) {
+		return bl && formattedText2 != null ? FormattedText.composite(formattedText2, formattedText) : formattedText;
 	}
 
 	@Environment(EnvType.CLIENT)

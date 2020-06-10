@@ -41,12 +41,15 @@ public class GoToPotentialJobSite extends Behavior<Villager> {
 		Optional<GlobalPos> optional = villager.getBrain().getMemory(MemoryModuleType.POTENTIAL_JOB_SITE);
 		optional.ifPresent(globalPos -> {
 			BlockPos blockPos = globalPos.pos();
-			PoiManager poiManager = serverLevel.getServer().getLevel(globalPos.dimension()).getPoiManager();
-			if (poiManager.exists(blockPos, poiType -> true)) {
-				poiManager.release(blockPos);
-			}
+			ServerLevel serverLevel2 = serverLevel.getServer().getLevel(globalPos.dimension());
+			if (serverLevel2 != null) {
+				PoiManager poiManager = serverLevel2.getPoiManager();
+				if (poiManager.exists(blockPos, poiType -> true)) {
+					poiManager.release(blockPos);
+				}
 
-			DebugPackets.sendPoiTicketCountPacket(serverLevel, blockPos);
+				DebugPackets.sendPoiTicketCountPacket(serverLevel, blockPos);
+			}
 		});
 		villager.getBrain().eraseMemory(MemoryModuleType.POTENTIAL_JOB_SITE);
 	}

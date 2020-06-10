@@ -344,13 +344,17 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			chunkGenerator = levelStem.generator();
 		}
 
+		ResourceKey<DimensionType> resourceKey = (ResourceKey<DimensionType>)this.registryHolder
+			.dimensionTypes()
+			.getResourceKey(dimensionType)
+			.orElseThrow(() -> new IllegalStateException("Unregistered dimension type: " + dimensionType));
 		ServerLevel serverLevel = new ServerLevel(
 			this,
 			this.executor,
 			this.storageSource,
 			serverLevelData,
 			Level.OVERWORLD,
-			DimensionType.OVERWORLD_LOCATION,
+			resourceKey,
 			dimensionType,
 			chunkProgressListener,
 			chunkGenerator,
@@ -372,12 +376,12 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				if (bl) {
 					this.setupDebugLevel(this.worldData);
 				}
-			} catch (Throwable var27) {
-				CrashReport crashReport = CrashReport.forThrowable(var27, "Exception initializing level");
+			} catch (Throwable var28) {
+				CrashReport crashReport = CrashReport.forThrowable(var28, "Exception initializing level");
 
 				try {
 					serverLevel.fillReportDetails(crashReport);
-				} catch (Throwable var26) {
+				} catch (Throwable var27) {
 				}
 
 				throw new ReportedException(crashReport);
@@ -392,11 +396,11 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		}
 
 		for (Entry<ResourceKey<LevelStem>, LevelStem> entry : mappedRegistry.entrySet()) {
-			ResourceKey<LevelStem> resourceKey = (ResourceKey<LevelStem>)entry.getKey();
-			if (resourceKey != LevelStem.OVERWORLD) {
-				ResourceKey<Level> resourceKey2 = ResourceKey.create(Registry.DIMENSION_REGISTRY, resourceKey.location());
+			ResourceKey<LevelStem> resourceKey2 = (ResourceKey<LevelStem>)entry.getKey();
+			if (resourceKey2 != LevelStem.OVERWORLD) {
+				ResourceKey<Level> resourceKey3 = ResourceKey.create(Registry.DIMENSION_REGISTRY, resourceKey2.location());
 				DimensionType dimensionType2 = ((LevelStem)entry.getValue()).type();
-				ResourceKey<DimensionType> resourceKey3 = (ResourceKey<DimensionType>)this.registryHolder
+				ResourceKey<DimensionType> resourceKey4 = (ResourceKey<DimensionType>)this.registryHolder
 					.dimensionTypes()
 					.getResourceKey(dimensionType2)
 					.orElseThrow(() -> new IllegalStateException("Unregistered dimension type: " + dimensionType2));
@@ -407,8 +411,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 					this.executor,
 					this.storageSource,
 					derivedLevelData,
-					resourceKey2,
 					resourceKey3,
+					resourceKey4,
 					dimensionType2,
 					chunkProgressListener,
 					chunkGenerator2,
@@ -418,7 +422,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 					false
 				);
 				worldBorder.addListener(new BorderChangeListener.DelegateBorderChangeListener(serverLevel2.getWorldBorder()));
-				this.levels.put(resourceKey2, serverLevel2);
+				this.levels.put(resourceKey3, serverLevel2);
 			}
 		}
 	}
@@ -499,7 +503,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	}
 
 	private void prepareLevels(ChunkProgressListener chunkProgressListener) {
-		ServerLevel serverLevel = this.getLevel(Level.OVERWORLD);
+		ServerLevel serverLevel = this.overworld();
 		LOGGER.info("Preparing start region for dimension {}", serverLevel.dimension().location());
 		BlockPos blockPos = serverLevel.getSharedSpawnPos();
 		chunkProgressListener.updateSpawnPos(new ChunkPos(blockPos));
@@ -575,7 +579,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			bl4 = true;
 		}
 
-		ServerLevel serverLevel2 = this.getLevel(Level.OVERWORLD);
+		ServerLevel serverLevel2 = this.overworld();
 		ServerLevelData serverLevelData = this.worldData.overworldData();
 		serverLevelData.setWorldBorder(serverLevel2.getWorldBorder().createSettings());
 		this.worldData.setCustomBossEvents(this.getCustomBossEvents().save());
@@ -863,31 +867,29 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		this.profiler.popPush("levels");
 
 		for (ServerLevel serverLevel : this.getAllLevels()) {
-			if (serverLevel.dimensionType().isOverworld() || this.isNetherEnabled()) {
-				this.profiler.push((Supplier<String>)(() -> serverLevel + " " + serverLevel.dimension().location()));
-				if (this.tickCount % 20 == 0) {
-					this.profiler.push("timeSync");
-					this.playerList
-						.broadcastAll(
-							new ClientboundSetTimePacket(serverLevel.getGameTime(), serverLevel.getDayTime(), serverLevel.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)),
-							serverLevel.dimension()
-						);
-					this.profiler.pop();
-				}
-
-				this.profiler.push("tick");
-
-				try {
-					serverLevel.tick(booleanSupplier);
-				} catch (Throwable var6) {
-					CrashReport crashReport = CrashReport.forThrowable(var6, "Exception ticking world");
-					serverLevel.fillReportDetails(crashReport);
-					throw new ReportedException(crashReport);
-				}
-
-				this.profiler.pop();
+			this.profiler.push((Supplier<String>)(() -> serverLevel + " " + serverLevel.dimension().location()));
+			if (this.tickCount % 20 == 0) {
+				this.profiler.push("timeSync");
+				this.playerList
+					.broadcastAll(
+						new ClientboundSetTimePacket(serverLevel.getGameTime(), serverLevel.getDayTime(), serverLevel.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)),
+						serverLevel.dimension()
+					);
 				this.profiler.pop();
 			}
+
+			this.profiler.push("tick");
+
+			try {
+				serverLevel.tick(booleanSupplier);
+			} catch (Throwable var6) {
+				CrashReport crashReport = CrashReport.forThrowable(var6, "Exception ticking world");
+				serverLevel.fillReportDetails(crashReport);
+				throw new ReportedException(crashReport);
+			}
+
+			this.profiler.pop();
+			this.profiler.pop();
 		}
 
 		this.profiler.popPush("connection");
@@ -928,6 +930,11 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return new File(this.getServerDirectory(), string);
 	}
 
+	public final ServerLevel overworld() {
+		return (ServerLevel)this.levels.get(Level.OVERWORLD);
+	}
+
+	@Nullable
 	public ServerLevel getLevel(ResourceKey<Level> resourceKey) {
 		return (ServerLevel)this.levels.get(resourceKey);
 	}
@@ -1404,7 +1411,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	}
 
 	public CommandSourceStack createCommandSourceStack() {
-		ServerLevel serverLevel = this.getLevel(Level.OVERWORLD);
+		ServerLevel serverLevel = this.overworld();
 		return new CommandSourceStack(
 			this,
 			serverLevel == null ? Vec3.ZERO : Vec3.atLowerCornerOf(serverLevel.getSharedSpawnPos()),
@@ -1457,7 +1464,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	}
 
 	public GameRules getGameRules() {
-		return this.getLevel(Level.OVERWORLD).getGameRules();
+		return this.overworld().getGameRules();
 	}
 
 	public CustomBossEvents getCustomBossEvents() {

@@ -59,9 +59,9 @@ public interface Component extends Message, FormattedText {
 
 	List<Component> getSiblings();
 
-	MutableComponent toMutable();
+	MutableComponent plainCopy();
 
-	MutableComponent mutableCopy();
+	MutableComponent copy();
 
 	@Environment(EnvType.CLIENT)
 	@Override

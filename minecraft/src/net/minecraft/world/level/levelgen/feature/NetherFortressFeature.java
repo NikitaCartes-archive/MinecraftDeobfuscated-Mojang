@@ -40,7 +40,7 @@ public class NetherFortressFeature extends StructureFeature<NoneFeatureConfigura
 		ChunkPos chunkPos,
 		NoneFeatureConfiguration noneFeatureConfiguration
 	) {
-		return worldgenRandom.nextInt(6) < 2;
+		return worldgenRandom.nextInt(5) < 2;
 	}
 
 	@Override

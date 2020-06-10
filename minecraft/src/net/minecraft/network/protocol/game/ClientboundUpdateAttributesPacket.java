@@ -42,7 +42,7 @@ public class ClientboundUpdateAttributesPacket implements Packet<ClientGamePacke
 
 		for (int j = 0; j < i; j++) {
 			ResourceLocation resourceLocation = friendlyByteBuf.readResourceLocation();
-			Attribute attribute = Registry.ATTRIBUTES.get(resourceLocation);
+			Attribute attribute = Registry.ATTRIBUTE.get(resourceLocation);
 			double d = friendlyByteBuf.readDouble();
 			List<AttributeModifier> list = Lists.<AttributeModifier>newArrayList();
 			int k = friendlyByteBuf.readVarInt();
@@ -66,7 +66,7 @@ public class ClientboundUpdateAttributesPacket implements Packet<ClientGamePacke
 		friendlyByteBuf.writeInt(this.attributes.size());
 
 		for (ClientboundUpdateAttributesPacket.AttributeSnapshot attributeSnapshot : this.attributes) {
-			friendlyByteBuf.writeResourceLocation(Registry.ATTRIBUTES.getKey(attributeSnapshot.getAttribute()));
+			friendlyByteBuf.writeResourceLocation(Registry.ATTRIBUTE.getKey(attributeSnapshot.getAttribute()));
 			friendlyByteBuf.writeDouble(attributeSnapshot.getBase());
 			friendlyByteBuf.writeVarInt(attributeSnapshot.getModifiers().size());
 

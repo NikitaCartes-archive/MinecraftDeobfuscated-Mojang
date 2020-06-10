@@ -32,6 +32,11 @@ public class CreateBuffetWorldScreen extends Screen {
 	}
 
 	@Override
+	public void onClose() {
+		this.minecraft.setScreen(this.parent);
+	}
+
+	@Override
 	protected void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		this.list = new CreateBuffetWorldScreen.BiomeList();

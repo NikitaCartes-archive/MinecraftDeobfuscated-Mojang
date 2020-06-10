@@ -16,6 +16,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> extends LivingEntityRenderer<T, M> {
@@ -62,12 +63,13 @@ public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> exten
 		double l = Mth.lerp((double)f, entity.yo + (double)entity.getEyeHeight() * 0.7, entity.getY() + (double)entity.getEyeHeight() * 0.7) - i * 0.5 - 0.25;
 		double m = Mth.lerp((double)f, entity.zo, entity.getZ()) - h * 0.7 + g * 0.5 * j;
 		double n = (double)(Mth.lerp(f, mob.yBodyRot, mob.yBodyRotO) * (float) (Math.PI / 180.0)) + (Math.PI / 2);
-		g = Math.cos(n) * (double)mob.getBbWidth() * 0.4;
-		h = Math.sin(n) * (double)mob.getBbWidth() * 0.4;
+		Vec3 vec3 = mob.getLeashOffset();
+		g = Math.cos(n) * vec3.z + Math.sin(n) * vec3.x;
+		h = Math.sin(n) * vec3.z - Math.cos(n) * vec3.x;
 		double o = Mth.lerp((double)f, mob.xo, mob.getX()) + g;
-		double p = Mth.lerp((double)f, mob.yo, mob.getY());
+		double p = Mth.lerp((double)f, mob.yo, mob.getY()) + vec3.y;
 		double q = Mth.lerp((double)f, mob.zo, mob.getZ()) + h;
-		poseStack.translate(g, -(1.6 - (double)mob.getBbHeight()) * 0.5, h);
+		poseStack.translate(g, vec3.y, h);
 		float r = (float)(k - o);
 		float s = (float)(l - p);
 		float t = (float)(m - q);
@@ -117,7 +119,7 @@ public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> exten
 
 		float s = (float)m / (float)l;
 		float t = f * s;
-		float u = g * (s * s + s) * 0.5F + ((float)l - (float)m) / ((float)l * 0.75F) + 0.125F;
+		float u = g > 0.0F ? g * s * s : g - g * (1.0F - s) * (1.0F - s);
 		float v = h * s;
 		if (!bl) {
 			vertexConsumer.vertex(matrix4f, t + n, u + j - k, v - o).color(p, q, r, 1.0F).uv2(i).endVertex();

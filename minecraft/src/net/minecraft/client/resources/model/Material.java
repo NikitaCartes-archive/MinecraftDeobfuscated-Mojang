@@ -9,6 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 
@@ -46,6 +47,10 @@ public class Material {
 
 	public VertexConsumer buffer(MultiBufferSource multiBufferSource, Function<ResourceLocation, RenderType> function) {
 		return this.sprite().wrap(multiBufferSource.getBuffer(this.renderType(function)));
+	}
+
+	public VertexConsumer buffer(MultiBufferSource multiBufferSource, Function<ResourceLocation, RenderType> function, boolean bl) {
+		return this.sprite().wrap(ItemRenderer.getFoilBufferDirect(multiBufferSource, this.renderType(function), false, bl));
 	}
 
 	public boolean equals(Object object) {

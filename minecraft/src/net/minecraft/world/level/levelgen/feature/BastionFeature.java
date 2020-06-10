@@ -28,7 +28,7 @@ public class BastionFeature extends StructureFeature<MultiJigsawConfiguration> {
 		ChunkPos chunkPos,
 		MultiJigsawConfiguration multiJigsawConfiguration
 	) {
-		return worldgenRandom.nextInt(6) >= 2;
+		return worldgenRandom.nextInt(5) >= 2;
 	}
 
 	@Override

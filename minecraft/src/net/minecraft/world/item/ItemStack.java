@@ -785,7 +785,7 @@ public final class ItemStack {
 			for (int i = 0; i < listTag.size(); i++) {
 				CompoundTag compoundTag = listTag.getCompound(i);
 				if (!compoundTag.contains("Slot", 8) || compoundTag.getString("Slot").equals(equipmentSlot.getName())) {
-					Optional<Attribute> optional = Registry.ATTRIBUTES.getOptional(ResourceLocation.tryParse(compoundTag.getString("AttributeName")));
+					Optional<Attribute> optional = Registry.ATTRIBUTE.getOptional(ResourceLocation.tryParse(compoundTag.getString("AttributeName")));
 					if (optional.isPresent()) {
 						AttributeModifier attributeModifier = AttributeModifier.load(compoundTag);
 						if (attributeModifier != null && attributeModifier.getId().getLeastSignificantBits() != 0L && attributeModifier.getId().getMostSignificantBits() != 0L) {
@@ -809,7 +809,7 @@ public final class ItemStack {
 
 		ListTag listTag = this.tag.getList("AttributeModifiers", 10);
 		CompoundTag compoundTag = attributeModifier.save();
-		compoundTag.putString("AttributeName", Registry.ATTRIBUTES.getKey(attribute).toString());
+		compoundTag.putString("AttributeName", Registry.ATTRIBUTE.getKey(attribute).toString());
 		if (equipmentSlot != null) {
 			compoundTag.putString("Slot", equipmentSlot.getName());
 		}

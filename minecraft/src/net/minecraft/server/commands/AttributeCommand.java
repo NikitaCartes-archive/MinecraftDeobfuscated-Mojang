@@ -26,7 +26,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 public class AttributeCommand {
 	private static final SuggestionProvider<CommandSourceStack> AVAILABLE_ATTRIBUTES = (commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(
-			Registry.ATTRIBUTES.keySet(), suggestionsBuilder
+			Registry.ATTRIBUTE.keySet(), suggestionsBuilder
 		);
 	private static final DynamicCommandExceptionType ERROR_NOT_LIVING_ENTITY = new DynamicCommandExceptionType(
 		object -> new TranslatableComponent("commands.attribute.failed.entity", object)

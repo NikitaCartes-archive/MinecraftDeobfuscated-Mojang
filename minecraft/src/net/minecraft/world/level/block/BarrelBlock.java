@@ -48,7 +48,7 @@ public class BarrelBlock extends BaseEntityBlock {
 			if (blockEntity instanceof BarrelBlockEntity) {
 				player.openMenu((BarrelBlockEntity)blockEntity);
 				player.awardStat(Stats.OPEN_BARREL);
-				PiglinAi.angerNearbyPiglinsThatSee(player);
+				PiglinAi.angerNearbyPiglins(player, true);
 			}
 
 			return InteractionResult.CONSUME;

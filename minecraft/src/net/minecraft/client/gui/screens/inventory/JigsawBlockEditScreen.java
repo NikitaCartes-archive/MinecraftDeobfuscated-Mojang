@@ -134,7 +134,7 @@ public class JigsawBlockEditScreen extends Screen {
 		}) {
 			@Override
 			public Component getMessage() {
-				return super.getMessage().mutableCopy().append(" ").append(CommonComponents.optionStatus(JigsawBlockEditScreen.this.keepJigsaws));
+				return super.getMessage().copy().append(" ").append(CommonComponents.optionStatus(JigsawBlockEditScreen.this.keepJigsaws));
 			}
 		});
 		this.addButton(new Button(this.width / 2 + 54, 180, 100, 20, new TranslatableComponent("jigsaw_block.generate"), button -> this.sendGenerate()));

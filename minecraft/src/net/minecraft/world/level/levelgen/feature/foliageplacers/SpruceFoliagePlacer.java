@@ -66,7 +66,7 @@ public class SpruceFoliagePlacer extends FoliagePlacer {
 
 	@Override
 	public int foliageHeight(Random random, int i, TreeConfiguration treeConfiguration) {
-		return i - this.trunkHeight - random.nextInt(this.trunkHeightRandom + 1);
+		return Math.max(4, i - this.trunkHeight - random.nextInt(this.trunkHeightRandom + 1));
 	}
 
 	@Override

@@ -74,21 +74,19 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 	public InteractionResult use(
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		if ((Boolean)blockState.getValue(LIT)) {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof CampfireBlockEntity) {
-				CampfireBlockEntity campfireBlockEntity = (CampfireBlockEntity)blockEntity;
-				ItemStack itemStack = player.getItemInHand(interactionHand);
-				Optional<CampfireCookingRecipe> optional = campfireBlockEntity.getCookableRecipe(itemStack);
-				if (optional.isPresent()) {
-					if (!level.isClientSide
-						&& campfireBlockEntity.placeFood(player.abilities.instabuild ? itemStack.copy() : itemStack, ((CampfireCookingRecipe)optional.get()).getCookingTime())) {
-						player.awardStat(Stats.INTERACT_WITH_CAMPFIRE);
-						return InteractionResult.SUCCESS;
-					}
-
-					return InteractionResult.CONSUME;
+		BlockEntity blockEntity = level.getBlockEntity(blockPos);
+		if (blockEntity instanceof CampfireBlockEntity) {
+			CampfireBlockEntity campfireBlockEntity = (CampfireBlockEntity)blockEntity;
+			ItemStack itemStack = player.getItemInHand(interactionHand);
+			Optional<CampfireCookingRecipe> optional = campfireBlockEntity.getCookableRecipe(itemStack);
+			if (optional.isPresent()) {
+				if (!level.isClientSide
+					&& campfireBlockEntity.placeFood(player.abilities.instabuild ? itemStack.copy() : itemStack, ((CampfireCookingRecipe)optional.get()).getCookingTime())) {
+					player.awardStat(Stats.INTERACT_WITH_CAMPFIRE);
+					return InteractionResult.SUCCESS;
 				}
+
+				return InteractionResult.CONSUME;
 			}
 		}
 

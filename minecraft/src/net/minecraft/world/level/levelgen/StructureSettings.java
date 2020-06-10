@@ -38,8 +38,8 @@ public class StructureSettings {
 		.put(StructureFeature.RUINED_PORTAL, new StructureFeatureConfiguration(40, 15, 34222645))
 		.put(StructureFeature.SHIPWRECK, new StructureFeatureConfiguration(24, 4, 165745295))
 		.put(StructureFeature.OCEAN_RUIN, new StructureFeatureConfiguration(20, 8, 14357621))
-		.put(StructureFeature.BASTION_REMNANT, new StructureFeatureConfiguration(30, 4, 30084232))
-		.put(StructureFeature.NETHER_BRIDGE, new StructureFeatureConfiguration(30, 4, 30084232))
+		.put(StructureFeature.BASTION_REMNANT, new StructureFeatureConfiguration(27, 4, 30084232))
+		.put(StructureFeature.NETHER_BRIDGE, new StructureFeatureConfiguration(27, 4, 30084232))
 		.put(StructureFeature.NETHER_FOSSIL, new StructureFeatureConfiguration(2, 1, 14357921))
 		.build();
 	public static final StrongholdConfiguration DEFAULT_STRONGHOLD;

@@ -5,15 +5,16 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Map.Entry;
-import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
+import net.minecraft.util.Codecs;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.biome.Biomes;
@@ -40,10 +41,8 @@ public class FlatLevelGeneratorSettings {
 			instance -> instance.group(
 						StructureSettings.CODEC.fieldOf("structures").forGetter(FlatLevelGeneratorSettings::structureSettings),
 						FlatLayerInfo.CODEC.listOf().fieldOf("layers").forGetter(FlatLevelGeneratorSettings::getLayersInfo),
-						Registry.BIOME.fieldOf("biome").withDefault((Supplier<? extends Biome>)(() -> {
-							LOGGER.error("Unknown biome, defaulting to plains");
-							return Biomes.PLAINS;
-						})).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.biome)
+						Codecs.withDefault(Registry.BIOME.fieldOf("biome"), Util.prefix("Unknown biome, defaulting to plains", LOGGER::error), () -> Biomes.PLAINS)
+							.forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.biome)
 					)
 					.apply(instance, FlatLevelGeneratorSettings::new)
 		)
@@ -95,14 +94,27 @@ public class FlatLevelGeneratorSettings {
 
 	@Environment(EnvType.CLIENT)
 	public FlatLevelGeneratorSettings withStructureSettings(StructureSettings structureSettings) {
+		return this.withLayers(this.layersInfo, structureSettings);
+	}
+
+	@Environment(EnvType.CLIENT)
+	public FlatLevelGeneratorSettings withLayers(List<FlatLayerInfo> list, StructureSettings structureSettings) {
 		FlatLevelGeneratorSettings flatLevelGeneratorSettings = new FlatLevelGeneratorSettings(structureSettings);
 
-		for (FlatLayerInfo flatLayerInfo : this.getLayersInfo()) {
-			flatLevelGeneratorSettings.getLayersInfo().add(new FlatLayerInfo(flatLayerInfo.getHeight(), flatLayerInfo.getBlockState().getBlock()));
+		for (FlatLayerInfo flatLayerInfo : list) {
+			flatLevelGeneratorSettings.layersInfo.add(new FlatLayerInfo(flatLayerInfo.getHeight(), flatLayerInfo.getBlockState().getBlock()));
 			flatLevelGeneratorSettings.updateLayers();
 		}
 
 		flatLevelGeneratorSettings.setBiome(this.biome);
+		if (this.decoration) {
+			flatLevelGeneratorSettings.setDecoration();
+		}
+
+		if (this.addLakes) {
+			flatLevelGeneratorSettings.setAddLakes();
+		}
+
 		return flatLevelGeneratorSettings;
 	}
 
@@ -189,6 +201,7 @@ public class FlatLevelGeneratorSettings {
 	}
 
 	public void updateLayers() {
+		Arrays.fill(this.layers, 0, this.layers.length, null);
 		int i = 0;
 
 		for (FlatLayerInfo flatLayerInfo : this.layersInfo) {

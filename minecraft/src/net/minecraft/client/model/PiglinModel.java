@@ -12,6 +12,10 @@ import net.minecraft.world.entity.monster.piglin.Piglin;
 public class PiglinModel<T extends Mob> extends PlayerModel<T> {
 	public final ModelPart earRight;
 	public final ModelPart earLeft;
+	private final ModelPart bodyDefault;
+	private final ModelPart headDefault;
+	private final ModelPart leftArmDefault;
+	private final ModelPart rightArmDefault;
 
 	public PiglinModel(float f, int i, int j) {
 		super(f, false);
@@ -33,9 +37,17 @@ public class PiglinModel<T extends Mob> extends PlayerModel<T> {
 		this.earLeft.texOffs(39, 6).addBox(-1.0F, 0.0F, -2.0F, 1.0F, 5.0F, 4.0F, f);
 		this.head.addChild(this.earLeft);
 		this.hat = new ModelPart(this);
+		this.bodyDefault = this.body.createShallowCopy();
+		this.headDefault = this.head.createShallowCopy();
+		this.leftArmDefault = this.leftArm.createShallowCopy();
+		this.rightArmDefault = this.leftArm.createShallowCopy();
 	}
 
 	public void setupAnim(T mob, float f, float g, float h, float i, float j) {
+		this.body.copyFrom(this.bodyDefault);
+		this.head.copyFrom(this.headDefault);
+		this.leftArm.copyFrom(this.leftArmDefault);
+		this.rightArm.copyFrom(this.rightArmDefault);
 		super.setupAnim(mob, f, g, h, i, j);
 		float k = (float) (Math.PI / 6);
 		float l = h * 0.1F + f * 0.5F;
@@ -50,9 +62,11 @@ public class PiglinModel<T extends Mob> extends PlayerModel<T> {
 				this.earLeft.zRot = (float) (Math.PI / 6) + (float) (Math.PI / 180.0) * Mth.sin(n * 30.0F) * 10.0F;
 				this.earRight.zRot = (float) (-Math.PI / 6) - (float) (Math.PI / 180.0) * Mth.cos(n * 30.0F) * 10.0F;
 				this.head.x = Mth.sin(n * 10.0F);
-				this.head.y = Mth.sin(n * 40.0F);
+				this.head.y = Mth.sin(n * 40.0F) + 0.4F;
 				this.rightArm.zRot = (float) (Math.PI / 180.0) * (70.0F + Mth.cos(n * 40.0F) * 10.0F);
 				this.leftArm.zRot = this.rightArm.zRot * -1.0F;
+				this.rightArm.y = Mth.sin(n * 40.0F) * 0.5F + 1.5F;
+				this.leftArm.y = Mth.sin(n * 40.0F) * 0.5F + 1.5F;
 				this.body.y = Mth.sin(n * 40.0F) * 0.35F;
 			} else if (piglinArmPose == Piglin.PiglinArmPose.ATTACKING_WITH_MELEE_WEAPON && this.attackTime == 0.0F) {
 				this.holdWeaponHigh(mob);

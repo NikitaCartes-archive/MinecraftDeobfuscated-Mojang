@@ -106,7 +106,6 @@ public class BastionHoglinStablePools {
 					new ResourceLocation("bastion/hoglin_stable/stairs"),
 					new ResourceLocation("empty"),
 					ImmutableList.of(
-						Pair.of(new SinglePoolElement("bastion/hoglin_stable/stairs/stairs_0_mirrored", immutableList), 1),
 						Pair.of(new SinglePoolElement("bastion/hoglin_stable/stairs/stairs_1_0", immutableList), 1),
 						Pair.of(new SinglePoolElement("bastion/hoglin_stable/stairs/stairs_1_1", immutableList), 1),
 						Pair.of(new SinglePoolElement("bastion/hoglin_stable/stairs/stairs_1_2", immutableList), 1),
@@ -163,7 +162,8 @@ public class BastionHoglinStablePools {
 						Pair.of(new SinglePoolElement("bastion/hoglin_stable/large_stables/inner_0", immutableList), 1),
 						Pair.of(new SinglePoolElement("bastion/hoglin_stable/large_stables/inner_1", immutableList), 1),
 						Pair.of(new SinglePoolElement("bastion/hoglin_stable/large_stables/inner_2", immutableList), 1),
-						Pair.of(new SinglePoolElement("bastion/hoglin_stable/large_stables/inner_3", immutableList), 1)
+						Pair.of(new SinglePoolElement("bastion/hoglin_stable/large_stables/inner_3", immutableList), 1),
+						Pair.of(new SinglePoolElement("bastion/hoglin_stable/large_stables/inner_4", immutableList), 1)
 					),
 					StructureTemplatePool.Projection.RIGID
 				)
@@ -177,7 +177,8 @@ public class BastionHoglinStablePools {
 						Pair.of(new SinglePoolElement("bastion/hoglin_stable/large_stables/outer_0", immutableList), 1),
 						Pair.of(new SinglePoolElement("bastion/hoglin_stable/large_stables/outer_1", immutableList), 1),
 						Pair.of(new SinglePoolElement("bastion/hoglin_stable/large_stables/outer_2", immutableList), 1),
-						Pair.of(new SinglePoolElement("bastion/hoglin_stable/large_stables/outer_3", immutableList), 1)
+						Pair.of(new SinglePoolElement("bastion/hoglin_stable/large_stables/outer_3", immutableList), 1),
+						Pair.of(new SinglePoolElement("bastion/hoglin_stable/large_stables/outer_4", immutableList), 1)
 					),
 					StructureTemplatePool.Projection.RIGID
 				)

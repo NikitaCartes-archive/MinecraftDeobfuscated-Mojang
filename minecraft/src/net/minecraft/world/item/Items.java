@@ -1177,11 +1177,11 @@ public class Items {
 	public static final Item ZOMBIE_HORSE_SPAWN_EGG = registerItem(
 		"zombie_horse_spawn_egg", new SpawnEggItem(EntityType.ZOMBIE_HORSE, 3232308, 9945732, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
-	public static final Item ZOMBIFIED_PIGLIN_SPAWN_EGG = registerItem(
-		"zombified_piglin_spawn_egg", new SpawnEggItem(EntityType.ZOMBIFIED_PIGLIN, 15373203, 5009705, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
-	);
 	public static final Item ZOMBIE_VILLAGER_SPAWN_EGG = registerItem(
 		"zombie_villager_spawn_egg", new SpawnEggItem(EntityType.ZOMBIE_VILLAGER, 5651507, 7969893, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
+	);
+	public static final Item ZOMBIFIED_PIGLIN_SPAWN_EGG = registerItem(
+		"zombified_piglin_spawn_egg", new SpawnEggItem(EntityType.ZOMBIFIED_PIGLIN, 15373203, 5009705, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
 	public static final Item EXPERIENCE_BOTTLE = registerItem(
 		"experience_bottle", new ExperienceBottleItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC).rarity(Rarity.UNCOMMON))

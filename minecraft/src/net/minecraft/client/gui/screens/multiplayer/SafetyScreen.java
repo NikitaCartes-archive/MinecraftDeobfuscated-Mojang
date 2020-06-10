@@ -21,7 +21,7 @@ public class SafetyScreen extends Screen {
 	private static final Component TITLE = new TranslatableComponent("multiplayerWarning.header").withStyle(ChatFormatting.BOLD);
 	private static final Component CONTENT = new TranslatableComponent("multiplayerWarning.message");
 	private static final Component CHECK = new TranslatableComponent("multiplayerWarning.check");
-	private static final Component NARRATION = TITLE.mutableCopy().append("\n").append(CONTENT);
+	private static final Component NARRATION = TITLE.copy().append("\n").append(CONTENT);
 	private Checkbox stopShowing;
 	private final List<FormattedText> lines = Lists.<FormattedText>newArrayList();
 

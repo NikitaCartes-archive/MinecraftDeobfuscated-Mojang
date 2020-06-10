@@ -104,11 +104,11 @@ public class ChunkSerializer {
 
 			if (bl) {
 				if (compoundTag3.contains("BlockLight", 7)) {
-					levelLightEngine.queueSectionData(LightLayer.BLOCK, SectionPos.of(chunkPos, k), new DataLayer(compoundTag3.getByteArray("BlockLight")));
+					levelLightEngine.queueSectionData(LightLayer.BLOCK, SectionPos.of(chunkPos, k), new DataLayer(compoundTag3.getByteArray("BlockLight")), true);
 				}
 
 				if (bl2 && compoundTag3.contains("SkyLight", 7)) {
-					levelLightEngine.queueSectionData(LightLayer.SKY, SectionPos.of(chunkPos, k), new DataLayer(compoundTag3.getByteArray("SkyLight")));
+					levelLightEngine.queueSectionData(LightLayer.SKY, SectionPos.of(chunkPos, k), new DataLayer(compoundTag3.getByteArray("SkyLight")), true);
 				}
 			}
 		}

@@ -8,11 +8,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.world.entity.Entity;
 
 public class ComponentUtils {
+	@Environment(EnvType.CLIENT)
 	public static MutableComponent mergeStyles(MutableComponent mutableComponent, Style style) {
 		if (style.isEmpty()) {
 			return mutableComponent;
@@ -28,17 +31,17 @@ public class ComponentUtils {
 
 	public static MutableComponent updateForEntity(@Nullable CommandSourceStack commandSourceStack, Component component, @Nullable Entity entity, int i) throws CommandSyntaxException {
 		if (i > 100) {
-			return component.mutableCopy();
+			return component.copy();
 		} else {
 			MutableComponent mutableComponent = component instanceof ContextAwareComponent
 				? ((ContextAwareComponent)component).resolve(commandSourceStack, entity, i + 1)
-				: component.toMutable();
+				: component.plainCopy();
 
 			for (Component component2 : component.getSiblings()) {
 				mutableComponent.append(updateForEntity(commandSourceStack, component2, entity, i + 1));
 			}
 
-			return mergeStyles(mutableComponent, resolveStyle(commandSourceStack, component.getStyle(), entity, i));
+			return mutableComponent.withStyle(resolveStyle(commandSourceStack, component.getStyle(), entity, i));
 		}
 	}
 
@@ -83,7 +86,7 @@ public class ComponentUtils {
 		if (collection.isEmpty()) {
 			return new TextComponent("");
 		} else if (collection.size() == 1) {
-			return ((Component)function.apply(collection.iterator().next())).mutableCopy();
+			return ((Component)function.apply(collection.iterator().next())).copy();
 		} else {
 			MutableComponent mutableComponent = new TextComponent("");
 			boolean bl = true;

@@ -24,6 +24,7 @@ public class SuspendedParticle extends TextureSheetParticle {
 		this.setSize(0.01F, 0.01F);
 		this.quadSize = this.quadSize * (this.random.nextFloat() * 0.6F + 0.6F);
 		this.lifetime = (int)(16.0 / (Math.random() * 0.8 + 0.2));
+		this.hasPhysics = false;
 	}
 
 	@Override

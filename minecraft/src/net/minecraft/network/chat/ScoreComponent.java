@@ -76,7 +76,7 @@ public class ScoreComponent extends BaseComponent implements ContextAwareCompone
 		return "";
 	}
 
-	public ScoreComponent toMutable() {
+	public ScoreComponent plainCopy() {
 		return new ScoreComponent(this.name, this.selector, this.objective);
 	}
 

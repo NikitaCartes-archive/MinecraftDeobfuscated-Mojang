@@ -191,10 +191,7 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 			int o = l + 1;
 			if (this.isHovering(60, 14 + 19 * l, 108, 17, (double)i, (double)j) && m > 0 && n >= 0 && enchantment != null) {
 				List<Component> list = Lists.<Component>newArrayList();
-				list.add(
-					new TranslatableComponent("container.enchant.clue", enchantment.getFullname(n))
-						.withStyle(new ChatFormatting[]{ChatFormatting.WHITE, ChatFormatting.ITALIC})
-				);
+				list.add(new TranslatableComponent("container.enchant.clue", enchantment.getFullname(n)).withStyle(ChatFormatting.WHITE));
 				if (!bl) {
 					list.add(TextComponent.EMPTY);
 					if (this.minecraft.player.experienceLevel < m) {

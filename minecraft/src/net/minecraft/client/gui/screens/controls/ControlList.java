@@ -143,13 +143,10 @@ public class ControlList extends ContainerObjectSelectionList<ControlList.Entry>
 			if (bl2) {
 				this.changeButton
 					.setMessage(
-						new TextComponent("> ")
-							.append(this.changeButton.getMessage().mutableCopy().withStyle(ChatFormatting.YELLOW))
-							.append(" <")
-							.withStyle(ChatFormatting.YELLOW)
+						new TextComponent("> ").append(this.changeButton.getMessage().copy().withStyle(ChatFormatting.YELLOW)).append(" <").withStyle(ChatFormatting.YELLOW)
 					);
 			} else if (bl3) {
-				this.changeButton.setMessage(this.changeButton.getMessage().mutableCopy().withStyle(ChatFormatting.RED));
+				this.changeButton.setMessage(this.changeButton.getMessage().copy().withStyle(ChatFormatting.RED));
 			}
 
 			this.changeButton.render(poseStack, n, o, f);

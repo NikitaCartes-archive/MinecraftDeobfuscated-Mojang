@@ -38,19 +38,7 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 	}
 
 	public static boolean isFree(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
-		return levelSimulatedReader.isStateAtPosition(
-			blockPos,
-			blockState -> {
-				Block block = blockState.getBlock();
-				return blockState.isAir()
-					|| blockState.is(BlockTags.LEAVES)
-					|| isDirt(block)
-					|| blockState.is(BlockTags.LOGS)
-					|| blockState.is(BlockTags.SAPLINGS)
-					|| blockState.is(Blocks.VINE)
-					|| blockState.is(Blocks.WATER);
-			}
-		);
+		return validTreePos(levelSimulatedReader, blockPos) || levelSimulatedReader.isStateAtPosition(blockPos, blockState -> blockState.is(BlockTags.LOGS));
 	}
 
 	private static boolean isVine(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
@@ -83,8 +71,8 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 		levelWriter.setBlock(blockPos, blockState, 19);
 	}
 
-	public static boolean validTreePos(LevelSimulatedRW levelSimulatedRW, BlockPos blockPos) {
-		return isAirOrLeaves(levelSimulatedRW, blockPos) || isReplaceablePlant(levelSimulatedRW, blockPos) || isBlockWater(levelSimulatedRW, blockPos);
+	public static boolean validTreePos(LevelSimulatedReader levelSimulatedReader, BlockPos blockPos) {
+		return isAirOrLeaves(levelSimulatedReader, blockPos) || isReplaceablePlant(levelSimulatedReader, blockPos) || isBlockWater(levelSimulatedReader, blockPos);
 	}
 
 	private boolean doPlace(
@@ -127,37 +115,39 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 		} else if (!isGrassOrDirtOrFarmland(levelSimulatedRW, blockPos2.below())) {
 			return false;
 		} else {
-			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 			OptionalInt optionalInt = treeConfiguration.minimumSize.minClippedHeight();
-			int o = i;
+			int nx = this.getMaxFreeTreeHeight(levelSimulatedRW, i, blockPos2, treeConfiguration);
+			if (nx >= i || optionalInt.isPresent() && nx >= optionalInt.getAsInt()) {
+				List<FoliagePlacer.FoliageAttachment> list = treeConfiguration.trunkPlacer
+					.placeTrunk(levelSimulatedRW, random, nx, blockPos2, set, boundingBox, treeConfiguration);
+				list.forEach(
+					foliageAttachment -> treeConfiguration.foliagePlacer
+							.createFoliage(levelSimulatedRW, random, treeConfiguration, n, foliageAttachment, j, l, set2, boundingBox)
+				);
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
 
-			for (int p = 0; p <= i + 1; p++) {
-				int q = treeConfiguration.minimumSize.getSizeAtHeight(i, p);
+	private int getMaxFreeTreeHeight(LevelSimulatedReader levelSimulatedReader, int i, BlockPos blockPos, TreeConfiguration treeConfiguration) {
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-				for (int r = -q; r <= q; r++) {
-					for (int s = -q; s <= q; s++) {
-						mutableBlockPos.setWithOffset(blockPos2, r, p, s);
-						if (!isFree(levelSimulatedRW, mutableBlockPos) || !treeConfiguration.ignoreVines && isVine(levelSimulatedRW, mutableBlockPos)) {
-							if (!optionalInt.isPresent() || p - 1 < optionalInt.getAsInt() + 1) {
-								return false;
-							}
+		for (int j = 0; j <= i + 1; j++) {
+			int k = treeConfiguration.minimumSize.getSizeAtHeight(i, j);
 
-							o = p - 2;
-							break;
-						}
+			for (int l = -k; l <= k; l++) {
+				for (int m = -k; m <= k; m++) {
+					mutableBlockPos.setWithOffset(blockPos, l, j, m);
+					if (!isFree(levelSimulatedReader, mutableBlockPos) || !treeConfiguration.ignoreVines && isVine(levelSimulatedReader, mutableBlockPos)) {
+						return j - 2;
 					}
 				}
 			}
-
-			int p = o;
-			List<FoliagePlacer.FoliageAttachment> list = treeConfiguration.trunkPlacer
-				.placeTrunk(levelSimulatedRW, random, p, blockPos2, set, boundingBox, treeConfiguration);
-			list.forEach(
-				foliageAttachment -> treeConfiguration.foliagePlacer
-						.createFoliage(levelSimulatedRW, random, treeConfiguration, p, foliageAttachment, j, l, set2, boundingBox)
-			);
-			return true;
 		}
+
+		return i;
 	}
 
 	@Override

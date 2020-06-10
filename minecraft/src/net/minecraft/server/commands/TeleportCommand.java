@@ -26,6 +26,7 @@ import net.minecraft.server.level.TicketType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
@@ -296,6 +297,10 @@ public class TeleportCommand {
 			if (!(entity instanceof LivingEntity) || !((LivingEntity)entity).isFallFlying()) {
 				entity.setDeltaMovement(entity.getDeltaMovement().multiply(1.0, 0.0, 1.0));
 				entity.setOnGround(true);
+			}
+
+			if (entity instanceof PathfinderMob) {
+				((PathfinderMob)entity).getNavigation().stop();
 			}
 		}
 	}

@@ -26,12 +26,16 @@ public abstract class DimensionSpecialEffects {
 	private final float[] sunriseCol = new float[4];
 	private final float cloudLevel;
 	private final boolean hasGround;
-	private final boolean renderNormalSky;
+	private final DimensionSpecialEffects.SkyType skyType;
+	private final boolean forceBrightLightmap;
+	private final boolean constantAmbientLight;
 
-	public DimensionSpecialEffects(float f, boolean bl, boolean bl2) {
+	public DimensionSpecialEffects(float f, boolean bl, DimensionSpecialEffects.SkyType skyType, boolean bl2, boolean bl3) {
 		this.cloudLevel = f;
 		this.hasGround = bl;
-		this.renderNormalSky = bl2;
+		this.skyType = skyType;
+		this.forceBrightLightmap = bl2;
+		this.constantAmbientLight = bl3;
 	}
 
 	public static DimensionSpecialEffects forType(Optional<ResourceKey<DimensionType>> optional) {
@@ -69,14 +73,22 @@ public abstract class DimensionSpecialEffects {
 
 	public abstract boolean isFoggyAt(int i, int j);
 
-	public boolean renderNormalSky() {
-		return this.renderNormalSky;
+	public DimensionSpecialEffects.SkyType skyType() {
+		return this.skyType;
+	}
+
+	public boolean forceBrightLightmap() {
+		return this.forceBrightLightmap;
+	}
+
+	public boolean constantAmbientLight() {
+		return this.constantAmbientLight;
 	}
 
 	@Environment(EnvType.CLIENT)
 	public static class EndEffects extends DimensionSpecialEffects {
 		public EndEffects() {
-			super(Float.NaN, false, false);
+			super(Float.NaN, false, DimensionSpecialEffects.SkyType.END, true, false);
 		}
 
 		@Override
@@ -99,7 +111,7 @@ public abstract class DimensionSpecialEffects {
 	@Environment(EnvType.CLIENT)
 	public static class NetherEffects extends DimensionSpecialEffects {
 		public NetherEffects() {
-			super(Float.NaN, true, false);
+			super(Float.NaN, true, DimensionSpecialEffects.SkyType.NONE, false, true);
 		}
 
 		@Override
@@ -116,7 +128,7 @@ public abstract class DimensionSpecialEffects {
 	@Environment(EnvType.CLIENT)
 	public static class OverworldEffects extends DimensionSpecialEffects {
 		public OverworldEffects() {
-			super(128.0F, true, true);
+			super(128.0F, true, DimensionSpecialEffects.SkyType.NORMAL, false, false);
 		}
 
 		@Override
@@ -128,5 +140,12 @@ public abstract class DimensionSpecialEffects {
 		public boolean isFoggyAt(int i, int j) {
 			return false;
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static enum SkyType {
+		NONE,
+		NORMAL,
+		END;
 	}
 }

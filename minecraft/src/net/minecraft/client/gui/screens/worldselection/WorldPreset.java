@@ -10,6 +10,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.CreateBuffetWorldScreen;
 import net.minecraft.client.gui.screens.CreateFlatWorldScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.biome.Biome;
@@ -60,14 +61,21 @@ public abstract class WorldPreset {
 	};
 	private static final WorldPreset SINGLE_BIOME_CAVES = new WorldPreset("single_biome_caves") {
 		@Override
+		public WorldGenSettings create(RegistryAccess.RegistryHolder registryHolder, long l, boolean bl, boolean bl2) {
+			return new WorldGenSettings(
+				l, bl, bl2, WorldGenSettings.withOverworld(DimensionType.defaultDimensions(l), DimensionType::defaultOverworldCaves, this.generator(l))
+			);
+		}
+
+		@Override
 		protected ChunkGenerator generator(long l) {
-			return new NoiseBasedChunkGenerator(new FixedBiomeSource(Biomes.OCEAN), l, NoiseGeneratorSettings.Preset.NETHER.settings());
+			return new NoiseBasedChunkGenerator(new FixedBiomeSource(Biomes.OCEAN), l, NoiseGeneratorSettings.Preset.CAVES.settings());
 		}
 	};
 	private static final WorldPreset SINGLE_BIOME_FLOATING_ISLANDS = new WorldPreset("single_biome_floating_islands") {
 		@Override
 		protected ChunkGenerator generator(long l) {
-			return new NoiseBasedChunkGenerator(new FixedBiomeSource(Biomes.OCEAN), l, NoiseGeneratorSettings.Preset.END.settings());
+			return new NoiseBasedChunkGenerator(new FixedBiomeSource(Biomes.OCEAN), l, NoiseGeneratorSettings.Preset.FLOATING_ISLANDS.settings());
 		}
 	};
 	private static final WorldPreset DEBUG = new WorldPreset("debug_all_block_states") {
@@ -158,7 +166,7 @@ public abstract class WorldPreset {
 		return this.description;
 	}
 
-	public WorldGenSettings create(long l, boolean bl, boolean bl2) {
+	public WorldGenSettings create(RegistryAccess.RegistryHolder registryHolder, long l, boolean bl, boolean bl2) {
 		return new WorldGenSettings(l, bl, bl2, WorldGenSettings.withOverworld(DimensionType.defaultDimensions(l), this.generator(l)));
 	}
 

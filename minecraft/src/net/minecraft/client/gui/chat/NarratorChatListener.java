@@ -58,7 +58,7 @@ public class NarratorChatListener implements ChatListener {
 
 	private void doSay(boolean bl, String string) {
 		if (SharedConstants.IS_RUNNING_IN_IDE) {
-			LOGGER.debug("Narrating: {}", string);
+			LOGGER.debug("Narrating: {}", string.replaceAll("\n", "\\\\n"));
 		}
 
 		this.narrator.say(string, bl);

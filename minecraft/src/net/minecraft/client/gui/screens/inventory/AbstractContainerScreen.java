@@ -540,7 +540,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 				this.minecraft.player.closeContainer();
 			}
 
-			this.checkNumkeyPressed(i, j);
+			this.checkHotbarKeyPressed(i, j);
 			if (this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
 				if (this.minecraft.options.keyPickItem.matches(i, j)) {
 					this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 0, ClickType.CLONE);
@@ -553,8 +553,13 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		}
 	}
 
-	protected boolean checkNumkeyPressed(int i, int j) {
+	protected boolean checkHotbarKeyPressed(int i, int j) {
 		if (this.minecraft.player.inventory.getCarried().isEmpty() && this.hoveredSlot != null) {
+			if (this.minecraft.options.keySwapOffhand.matches(i, j)) {
+				this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 40, ClickType.SWAP);
+				return true;
+			}
+
 			for (int k = 0; k < 9; k++) {
 				if (this.minecraft.options.keyHotbarSlots[k].matches(i, j)) {
 					this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, k, ClickType.SWAP);

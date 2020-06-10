@@ -820,7 +820,7 @@ public class Boat extends Entity {
 
 	@Override
 	protected boolean canAddPassenger(Entity entity) {
-		return this.getPassengers().size() < 2 && !this.isUnderLiquid(FluidTags.WATER);
+		return this.getPassengers().size() < 2 && !this.isEyeInFluid(FluidTags.WATER);
 	}
 
 	@Nullable

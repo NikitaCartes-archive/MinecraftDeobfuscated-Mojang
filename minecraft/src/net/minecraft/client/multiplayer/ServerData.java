@@ -23,6 +23,7 @@ public class ServerData {
 	public boolean pinged;
 	public List<Component> playerList = Collections.emptyList();
 	private ServerData.ServerPackStatus packStatus = ServerData.ServerPackStatus.PROMPT;
+	@Nullable
 	private String iconB64;
 	private boolean lan;
 

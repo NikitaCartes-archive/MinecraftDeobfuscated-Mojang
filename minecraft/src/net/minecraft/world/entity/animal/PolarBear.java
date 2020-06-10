@@ -10,6 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.IntRange;
@@ -38,6 +39,7 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -84,6 +86,7 @@ public class PolarBear extends Animal implements NeutralMob {
 		this.targetSelector.addGoal(2, new PolarBear.PolarBearAttackPlayersGoal());
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, Player.class, 10, true, false, this::isAngryAt));
 		this.targetSelector.addGoal(4, new NearestAttackableTargetGoal(this, Fox.class, 10, true, true, null));
+		this.targetSelector.addGoal(5, new ResetUniversalAngerTargetGoal<>(this, false));
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -106,7 +109,7 @@ public class PolarBear extends Animal implements NeutralMob {
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		this.readPersistentAngerSaveData(this.level, compoundTag);
+		this.readPersistentAngerSaveData((ServerLevel)this.level, compoundTag);
 	}
 
 	@Override
@@ -194,7 +197,7 @@ public class PolarBear extends Animal implements NeutralMob {
 		}
 
 		if (!this.level.isClientSide) {
-			this.updatePersistentAnger();
+			this.updatePersistentAnger((ServerLevel)this.level, true);
 		}
 	}
 

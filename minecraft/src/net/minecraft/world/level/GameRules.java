@@ -112,7 +112,7 @@ public class GameRules {
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_DO_IMMEDIATE_RESPAWN = register(
 		"doImmediateRespawn", GameRules.Category.PLAYER, GameRules.BooleanValue.create(false, (minecraftServer, booleanValue) -> {
 			for (ServerPlayer serverPlayer : minecraftServer.getPlayerList().getPlayers()) {
-				serverPlayer.connection.send(new ClientboundGameEventPacket(11, booleanValue.get() ? 1.0F : 0.0F));
+				serverPlayer.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.IMMEDIATE_RESPAWN, booleanValue.get() ? 1.0F : 0.0F));
 			}
 		})
 	);

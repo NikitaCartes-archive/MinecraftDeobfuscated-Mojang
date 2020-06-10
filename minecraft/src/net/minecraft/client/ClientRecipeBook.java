@@ -10,6 +10,7 @@ import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
+import net.minecraft.core.Registry;
 import net.minecraft.stats.RecipeBook;
 import net.minecraft.world.inventory.BlastFurnaceMenu;
 import net.minecraft.world.inventory.CraftingMenu;
@@ -23,9 +24,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ClientRecipeBook extends RecipeBook {
+	private static final Logger LOGGER = LogManager.getLogger();
 	private final RecipeManager recipes;
 	private final Map<RecipeBookCategories, List<RecipeCollection>> collectionsByTab = Maps.<RecipeBookCategories, List<RecipeCollection>>newHashMap();
 	private final List<RecipeCollection> collections = Lists.<RecipeCollection>newArrayList();
@@ -71,11 +75,10 @@ public class ClientRecipeBook extends RecipeBook {
 			this.addToCollection(RecipeBookCategories.BLAST_FURNACE_SEARCH, recipeCollection);
 		} else if (recipeBookCategories == RecipeBookCategories.SMOKER_FOOD) {
 			this.addToCollection(RecipeBookCategories.SMOKER_SEARCH, recipeCollection);
-		} else if (recipeBookCategories == RecipeBookCategories.STONECUTTER) {
-			this.addToCollection(RecipeBookCategories.STONECUTTER, recipeCollection);
-		} else if (recipeBookCategories == RecipeBookCategories.CAMPFIRE) {
-			this.addToCollection(RecipeBookCategories.CAMPFIRE, recipeCollection);
-		} else {
+		} else if (recipeBookCategories == RecipeBookCategories.CRAFTING_BUILDING_BLOCKS
+			|| recipeBookCategories == RecipeBookCategories.CRAFTING_REDSTONE
+			|| recipeBookCategories == RecipeBookCategories.CRAFTING_EQUIPMENT
+			|| recipeBookCategories == RecipeBookCategories.CRAFTING_MISC) {
 			this.addToCollection(RecipeBookCategories.SEARCH, recipeCollection);
 		}
 
@@ -88,7 +91,17 @@ public class ClientRecipeBook extends RecipeBook {
 
 	private static RecipeBookCategories getCategory(Recipe<?> recipe) {
 		RecipeType<?> recipeType = recipe.getType();
-		if (recipeType == RecipeType.SMELTING) {
+		if (recipeType == RecipeType.CRAFTING) {
+			ItemStack itemStack = recipe.getResultItem();
+			CreativeModeTab creativeModeTab = itemStack.getItem().getItemCategory();
+			if (creativeModeTab == CreativeModeTab.TAB_BUILDING_BLOCKS) {
+				return RecipeBookCategories.CRAFTING_BUILDING_BLOCKS;
+			} else if (creativeModeTab == CreativeModeTab.TAB_TOOLS || creativeModeTab == CreativeModeTab.TAB_COMBAT) {
+				return RecipeBookCategories.CRAFTING_EQUIPMENT;
+			} else {
+				return creativeModeTab == CreativeModeTab.TAB_REDSTONE ? RecipeBookCategories.CRAFTING_REDSTONE : RecipeBookCategories.CRAFTING_MISC;
+			}
+		} else if (recipeType == RecipeType.SMELTING) {
 			if (recipe.getResultItem().getItem().isEdible()) {
 				return RecipeBookCategories.FURNACE_FOOD;
 			} else {
@@ -102,23 +115,22 @@ public class ClientRecipeBook extends RecipeBook {
 			return RecipeBookCategories.STONECUTTER;
 		} else if (recipeType == RecipeType.CAMPFIRE_COOKING) {
 			return RecipeBookCategories.CAMPFIRE;
+		} else if (recipeType == RecipeType.SMITHING) {
+			return RecipeBookCategories.SMITHING;
 		} else {
-			ItemStack itemStack = recipe.getResultItem();
-			CreativeModeTab creativeModeTab = itemStack.getItem().getItemCategory();
-			if (creativeModeTab == CreativeModeTab.TAB_BUILDING_BLOCKS) {
-				return RecipeBookCategories.BUILDING_BLOCKS;
-			} else if (creativeModeTab == CreativeModeTab.TAB_TOOLS || creativeModeTab == CreativeModeTab.TAB_COMBAT) {
-				return RecipeBookCategories.EQUIPMENT;
-			} else {
-				return creativeModeTab == CreativeModeTab.TAB_REDSTONE ? RecipeBookCategories.REDSTONE : RecipeBookCategories.MISC;
-			}
+			LOGGER.warn("Unknown recipe category: {}/{}", () -> Registry.RECIPE_TYPE.getKey(recipe.getType()), recipe::getId);
+			return RecipeBookCategories.UNKNOWN;
 		}
 	}
 
 	public static List<RecipeBookCategories> getCategories(RecipeBookMenu<?> recipeBookMenu) {
 		if (recipeBookMenu instanceof CraftingMenu || recipeBookMenu instanceof InventoryMenu) {
 			return Lists.<RecipeBookCategories>newArrayList(
-				RecipeBookCategories.SEARCH, RecipeBookCategories.EQUIPMENT, RecipeBookCategories.BUILDING_BLOCKS, RecipeBookCategories.MISC, RecipeBookCategories.REDSTONE
+				RecipeBookCategories.SEARCH,
+				RecipeBookCategories.CRAFTING_EQUIPMENT,
+				RecipeBookCategories.CRAFTING_BUILDING_BLOCKS,
+				RecipeBookCategories.CRAFTING_MISC,
+				RecipeBookCategories.CRAFTING_REDSTONE
 			);
 		} else if (recipeBookMenu instanceof FurnaceMenu) {
 			return Lists.<RecipeBookCategories>newArrayList(

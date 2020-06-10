@@ -100,6 +100,7 @@ import net.minecraft.util.datafix.fixes.LevelFlatGeneratorInfoFix;
 import net.minecraft.util.datafix.fixes.LevelUUIDFix;
 import net.minecraft.util.datafix.fixes.MapIdFix;
 import net.minecraft.util.datafix.fixes.MemoryExpiryDataFix;
+import net.minecraft.util.datafix.fixes.MissingDimensionFix;
 import net.minecraft.util.datafix.fixes.MobSpawnerEntityIdentifiersFix;
 import net.minecraft.util.datafix.fixes.NamedEntityFix;
 import net.minecraft.util.datafix.fixes.NewVillageFix;
@@ -671,5 +672,7 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new RenameBiomesFix(schema121, false, "Nether biome rename", ImmutableMap.of("minecraft:nether", "minecraft:nether_wastes")));
 		Schema schema122 = dataFixerBuilder.addSchema(2553, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new BiomeFix(schema122, false));
+		Schema schema123 = dataFixerBuilder.addSchema(2558, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new MissingDimensionFix(schema123, false));
 	}
 }

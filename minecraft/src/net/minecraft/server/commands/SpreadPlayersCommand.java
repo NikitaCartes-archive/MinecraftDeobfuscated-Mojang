@@ -68,7 +68,7 @@ public class SpreadPlayersCommand {
 										.then(
 											Commands.literal("under")
 												.then(
-													Commands.argument("maxHeight", IntegerArgumentType.integer())
+													Commands.argument("maxHeight", IntegerArgumentType.integer(0))
 														.then(
 															Commands.argument("respectTeams", BoolArgumentType.bool())
 																.then(
