@@ -2,12 +2,11 @@ package net.minecraft.tags;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import java.util.Collections;
+import com.google.common.collect.ImmutableSet;
 import java.util.List;
 import java.util.Set;
 
 public class SetTag<T> implements Tag<T> {
-	private static final SetTag<Object> EMPTY = new SetTag<>(Collections.emptySet(), Object.class);
 	private final ImmutableList<T> valuesList;
 	private final Set<T> values;
 	@VisibleForTesting
@@ -20,11 +19,11 @@ public class SetTag<T> implements Tag<T> {
 	}
 
 	public static <T> SetTag<T> empty() {
-		return (SetTag<T>)EMPTY;
+		return new SetTag<>(ImmutableSet.of(), Void.class);
 	}
 
 	public static <T> SetTag<T> create(Set<T> set) {
-		return set.isEmpty() ? empty() : new SetTag<>(set, findCommonSuperClass(set));
+		return new SetTag<>(set, findCommonSuperClass(set));
 	}
 
 	@Override
@@ -39,7 +38,7 @@ public class SetTag<T> implements Tag<T> {
 
 	private static <T> Class<?> findCommonSuperClass(Set<T> set) {
 		if (set.isEmpty()) {
-			throw new IllegalArgumentException("Expected non-empty set. Got: " + set);
+			return Void.class;
 		} else {
 			Class<?> class_ = null;
 

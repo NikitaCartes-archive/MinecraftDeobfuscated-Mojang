@@ -134,9 +134,9 @@ public abstract class WorldPreset {
 		BiomeSource biomeSource = new FixedBiomeSource(biome);
 		NoiseGeneratorSettings noiseGeneratorSettings;
 		if (worldPreset == SINGLE_BIOME_CAVES) {
-			noiseGeneratorSettings = NoiseGeneratorSettings.Preset.NETHER.settings();
+			noiseGeneratorSettings = NoiseGeneratorSettings.Preset.CAVES.settings();
 		} else if (worldPreset == SINGLE_BIOME_FLOATING_ISLANDS) {
-			noiseGeneratorSettings = NoiseGeneratorSettings.Preset.END.settings();
+			noiseGeneratorSettings = NoiseGeneratorSettings.Preset.FLOATING_ISLANDS.settings();
 		} else {
 			noiseGeneratorSettings = NoiseGeneratorSettings.Preset.OVERWORLD.settings();
 		}

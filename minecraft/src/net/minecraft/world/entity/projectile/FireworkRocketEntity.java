@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.projectile;
 
 import java.util.OptionalInt;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.api.EnvironmentInterface;
@@ -64,7 +65,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 		this.lifetime = 10 * i + this.random.nextInt(6) + this.random.nextInt(7);
 	}
 
-	public FireworkRocketEntity(Level level, Entity entity, double d, double e, double f, ItemStack itemStack) {
+	public FireworkRocketEntity(Level level, @Nullable Entity entity, double d, double e, double f, ItemStack itemStack) {
 		this(level, d, e, f, itemStack);
 		this.setOwner(entity);
 	}

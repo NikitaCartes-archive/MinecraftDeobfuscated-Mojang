@@ -27,7 +27,7 @@ public class StaticTagHelper<T> {
 	@Environment(EnvType.CLIENT)
 	public void resetToEmpty() {
 		this.source = this.empty;
-		Tag<T> tag = this.empty.getEmptyTag();
+		Tag<T> tag = SetTag.empty();
 		this.wrappers.forEach(wrapper -> wrapper.rebind(resourceLocation -> tag));
 	}
 

@@ -11,6 +11,7 @@ import java.util.AbstractList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -371,23 +372,48 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		if (super.keyPressed(i, j, k)) {
 			return true;
 		} else if (i == 264) {
-			this.moveSelection(1);
+			this.moveSelection(AbstractSelectionList.SelectionDirection.DOWN);
 			return true;
 		} else if (i == 265) {
-			this.moveSelection(-1);
+			this.moveSelection(AbstractSelectionList.SelectionDirection.UP);
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	protected void moveSelection(int i) {
-		if (!this.children().isEmpty()) {
-			int j = this.children().indexOf(this.getSelected());
-			int k = Mth.clamp(j + i, 0, this.getItemCount() - 1);
-			E entry = (E)this.children().get(k);
+	protected void moveSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
+		this.moveSelection(selectionDirection, entry -> true);
+	}
+
+	protected void refreshSelection() {
+		E entry = this.getSelected();
+		if (entry != null) {
 			this.setSelected(entry);
 			this.ensureVisible(entry);
+		}
+	}
+
+	protected void moveSelection(AbstractSelectionList.SelectionDirection selectionDirection, Predicate<E> predicate) {
+		int i = selectionDirection == AbstractSelectionList.SelectionDirection.UP ? -1 : 1;
+		if (!this.children().isEmpty()) {
+			int j = this.children().indexOf(this.getSelected());
+
+			while (true) {
+				int k = Mth.clamp(j + i, 0, this.getItemCount() - 1);
+				if (j == k) {
+					break;
+				}
+
+				E entry = (E)this.children().get(k);
+				if (predicate.test(entry)) {
+					this.setSelected(entry);
+					this.ensureVisible(entry);
+					break;
+				}
+
+				j = k;
+			}
 		}
 	}
 
@@ -484,6 +510,12 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		public boolean isMouseOver(double d, double e) {
 			return Objects.equals(this.list.getEntryAtPosition(d, e), this);
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static enum SelectionDirection {
+		UP,
+		DOWN;
 	}
 
 	@Environment(EnvType.CLIENT)

@@ -61,6 +61,11 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 	}
 
 	@Override
+	public double getMyRidingOffset() {
+		return this.isBaby() ? -0.16 : -0.45;
+	}
+
+	@Override
 	protected void addBehaviourGoals() {
 		this.goalSelector.addGoal(2, new ZombieAttackGoal(this, 1.0, false));
 		this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0));

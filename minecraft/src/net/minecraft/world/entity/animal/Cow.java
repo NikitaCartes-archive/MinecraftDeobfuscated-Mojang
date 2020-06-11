@@ -23,6 +23,7 @@ import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
@@ -79,16 +80,7 @@ public class Cow extends Animal {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (itemStack.getItem() == Items.BUCKET && !this.isBaby()) {
 			player.playSound(SoundEvents.COW_MILK, 1.0F, 1.0F);
-			if (!player.abilities.instabuild) {
-				itemStack.shrink(1);
-			}
-
-			if (itemStack.isEmpty()) {
-				player.setItemInHand(interactionHand, new ItemStack(Items.MILK_BUCKET));
-			} else if (!player.inventory.add(new ItemStack(Items.MILK_BUCKET))) {
-				player.drop(new ItemStack(Items.MILK_BUCKET), false);
-			}
-
+			ItemUtils.createBucketResult(itemStack, player, Items.MILK_BUCKET.getDefaultInstance());
 			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		} else {
 			return super.mobInteract(player, interactionHand);

@@ -19,9 +19,9 @@ public abstract class ObjectSelectionList<E extends AbstractSelectionList.Entry<
 		} else {
 			this.inFocus = !this.inFocus;
 			if (this.inFocus && this.getSelected() == null && this.getItemCount() > 0) {
-				this.moveSelection(1);
+				this.moveSelection(AbstractSelectionList.SelectionDirection.DOWN);
 			} else if (this.inFocus && this.getSelected() != null) {
-				this.moveSelection(0);
+				this.refreshSelection();
 			}
 
 			return this.inFocus;

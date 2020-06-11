@@ -14,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.StringSplitter;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -48,7 +49,9 @@ public class AdvancementWidget extends GuiComponent {
 		int j = String.valueOf(i).length();
 		int k = i > 1 ? minecraft.font.width("  ") + minecraft.font.width("0") * j * 2 + minecraft.font.width("/") : 0;
 		int l = 29 + minecraft.font.width(this.title) + k;
-		this.description = this.findOptimalLines(displayInfo.getDescription().copy().withStyle(displayInfo.getFrame().getChatColor()), l);
+		this.description = this.findOptimalLines(
+			ComponentUtils.mergeStyles(displayInfo.getDescription().copy(), Style.EMPTY.withColor(displayInfo.getFrame().getChatColor())), l
+		);
 
 		for (FormattedText formattedText : this.description) {
 			l = Math.max(l, minecraft.font.width(formattedText));

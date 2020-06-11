@@ -8,14 +8,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.world.entity.Entity;
 
 public class ComponentUtils {
-	@Environment(EnvType.CLIENT)
 	public static MutableComponent mergeStyles(MutableComponent mutableComponent, Style style) {
 		if (style.isEmpty()) {
 			return mutableComponent;
@@ -24,7 +21,7 @@ public class ComponentUtils {
 			if (style2.isEmpty()) {
 				return mutableComponent.setStyle(style);
 			} else {
-				return style2.equals(style) ? mutableComponent : new TextComponent("").append(mutableComponent).setStyle(style);
+				return style2.equals(style) ? mutableComponent : mutableComponent.setStyle(style2.applyTo(style));
 			}
 		}
 	}

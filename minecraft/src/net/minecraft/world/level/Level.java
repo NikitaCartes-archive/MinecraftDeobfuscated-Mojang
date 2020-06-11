@@ -270,7 +270,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 					}
 
 					if ((i & 16) == 0) {
-						int j = i & -2;
+						int j = i & -34;
 						blockState2.updateIndirectNeighbourShapes(this, blockPos, j);
 						blockState.updateNeighbourShapes(this, blockPos, j);
 						blockState.updateIndirectNeighbourShapes(this, blockPos, j);

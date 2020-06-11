@@ -111,7 +111,7 @@ public class DataPackCommand {
 		PackRepository<?> packRepository = commandSourceStack.getServer().getPackRepository();
 		List<Pack> list = Lists.<Pack>newArrayList((Iterable<? extends Pack>)packRepository.getSelectedPacks());
 		inserter.apply(list, pack);
-		commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.enable.success", pack.getChatLink(true)), true);
+		commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.modify.enable", pack.getChatLink(true)), true);
 		ReloadCommand.reloadPacks((Collection<String>)list.stream().map(Pack::getId).collect(Collectors.toList()), commandSourceStack);
 		return list.size();
 	}
@@ -120,8 +120,8 @@ public class DataPackCommand {
 		PackRepository<?> packRepository = commandSourceStack.getServer().getPackRepository();
 		List<Pack> list = Lists.<Pack>newArrayList((Iterable<? extends Pack>)packRepository.getSelectedPacks());
 		list.remove(pack);
+		commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.modify.disable", pack.getChatLink(true)), true);
 		ReloadCommand.reloadPacks((Collection<String>)list.stream().map(Pack::getId).collect(Collectors.toList()), commandSourceStack);
-		commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.disable.success", pack.getChatLink(true)), true);
 		return list.size();
 	}
 

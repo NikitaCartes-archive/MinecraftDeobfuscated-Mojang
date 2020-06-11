@@ -58,7 +58,7 @@ public class BucketItem extends Item {
 					if (fluid != Fluids.EMPTY) {
 						player.awardStat(Stats.ITEM_USED.get(this));
 						player.playSound(fluid.is(FluidTags.LAVA) ? SoundEvents.BUCKET_FILL_LAVA : SoundEvents.BUCKET_FILL, 1.0F, 1.0F);
-						ItemStack itemStack2 = this.createResultItem(itemStack, player, fluid.getBucket());
+						ItemStack itemStack2 = ItemUtils.createBucketResult(itemStack, player, new ItemStack(fluid.getBucket()));
 						if (!level.isClientSide) {
 							CriteriaTriggers.FILLED_BUCKET.trigger((ServerPlayer)player, new ItemStack(fluid.getBucket()));
 						}
@@ -91,28 +91,6 @@ public class BucketItem extends Item {
 	}
 
 	public void checkExtraContent(Level level, ItemStack itemStack, BlockPos blockPos) {
-	}
-
-	private ItemStack createResultItem(ItemStack itemStack, Player player, Item item) {
-		if (player.abilities.instabuild) {
-			ItemStack itemStack2 = new ItemStack(item);
-			if (!player.inventory.contains(itemStack2)) {
-				player.inventory.add(itemStack2);
-			}
-
-			return itemStack;
-		} else {
-			itemStack.shrink(1);
-			if (itemStack.isEmpty()) {
-				return new ItemStack(item);
-			} else {
-				if (!player.inventory.add(new ItemStack(item))) {
-					player.drop(new ItemStack(item), false);
-				}
-
-				return itemStack;
-			}
-		}
 	}
 
 	public boolean emptyBucket(@Nullable Player player, Level level, BlockPos blockPos, @Nullable BlockHitResult blockHitResult) {

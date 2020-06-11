@@ -29,6 +29,7 @@ public abstract class BaseCommandBlock implements CommandSource {
 	private boolean updateLastExecution = true;
 	private int successCount;
 	private boolean trackOutput = true;
+	@Nullable
 	private Component lastOutput;
 	private String command = "";
 	private Component name = DEFAULT_NAME;
@@ -113,7 +114,7 @@ public abstract class BaseCommandBlock implements CommandSource {
 		} else {
 			this.successCount = 0;
 			MinecraftServer minecraftServer = this.getLevel().getServer();
-			if (minecraftServer != null && minecraftServer.isCommandBlockEnabled() && !StringUtil.isNullOrEmpty(this.command)) {
+			if (minecraftServer.isCommandBlockEnabled() && !StringUtil.isNullOrEmpty(this.command)) {
 				try {
 					this.lastOutput = null;
 					CommandSourceStack commandSourceStack = this.createCommandSourceStack().withCallback((commandContext, bl, i) -> {

@@ -113,7 +113,9 @@ public class RenderTarget {
 			GlStateManager._texParameter(3553, 10240, 9728);
 			GlStateManager._texParameter(3553, 10242, 10496);
 			GlStateManager._texParameter(3553, 10243, 10496);
-			GlStateManager._texParameter(3553, 34892, 0);
+			GlStateManager._texParameter(3553, 34892, 34894);
+			GlStateManager._texParameter(3553, 34893, 515);
+			GlStateManager._texParameter(3553, 34891, 6409);
 			GlStateManager._texImage2D(3553, 0, 6402, this.width, this.height, 0, 6402, 5126, null);
 		}
 

@@ -7,7 +7,12 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.CrashReportDetail;
+import net.minecraft.ReportedException;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
@@ -148,6 +153,22 @@ public abstract class AbstractContainerMenu {
 	}
 
 	public ItemStack clicked(int i, int j, ClickType clickType, Player player) {
+		try {
+			return this.doClick(i, j, clickType, player);
+		} catch (Exception var8) {
+			CrashReport crashReport = CrashReport.forThrowable(var8, "Container click");
+			CrashReportCategory crashReportCategory = crashReport.addCategory("Click info");
+			crashReportCategory.setDetail(
+				"Menu", (CrashReportDetail<String>)(() -> this.menuType != null ? Registry.MENU.getKey(this.menuType).toString() : "<no type>")
+			);
+			crashReportCategory.setDetail("Slot", i);
+			crashReportCategory.setDetail("Button", j);
+			crashReportCategory.setDetail("Type", clickType);
+			throw new ReportedException(crashReport);
+		}
+	}
+
+	private ItemStack doClick(int i, int j, ClickType clickType, Player player) {
 		ItemStack itemStack = ItemStack.EMPTY;
 		Inventory inventory = player.inventory;
 		if (clickType == ClickType.QUICK_CRAFT) {

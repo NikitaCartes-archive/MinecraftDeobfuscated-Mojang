@@ -73,7 +73,7 @@ public class BlockItem extends Item {
 
 					SoundType soundType = blockState2.getSoundType();
 					level.playSound(player, blockPos, this.getPlaceSound(blockState2), SoundSource.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
-					if (!player.abilities.instabuild) {
+					if (player == null || !player.abilities.instabuild) {
 						itemStack.shrink(1);
 					}
 

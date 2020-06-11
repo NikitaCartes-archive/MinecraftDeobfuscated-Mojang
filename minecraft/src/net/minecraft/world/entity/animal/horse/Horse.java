@@ -190,12 +190,7 @@ public class Horse extends AbstractHorse {
 
 		if (!itemStack.isEmpty()) {
 			if (this.isFood(itemStack)) {
-				boolean bl = this.handleEating(player, itemStack);
-				if (!player.abilities.instabuild) {
-					itemStack.shrink(1);
-				}
-
-				return bl ? InteractionResult.sidedSuccess(this.level.isClientSide) : InteractionResult.CONSUME;
+				return this.fedFood(player, itemStack);
 			}
 
 			InteractionResult interactionResult = itemStack.interactLivingEntity(player, this, interactionHand);
@@ -208,8 +203,8 @@ public class Horse extends AbstractHorse {
 				return InteractionResult.sidedSuccess(this.level.isClientSide);
 			}
 
-			boolean bl2 = !this.isBaby() && !this.isSaddled() && itemStack.getItem() == Items.SADDLE;
-			if (this.isArmor(itemStack) || bl2) {
+			boolean bl = !this.isBaby() && !this.isSaddled() && itemStack.getItem() == Items.SADDLE;
+			if (this.isArmor(itemStack) || bl) {
 				this.openInventory(player);
 				return InteractionResult.sidedSuccess(this.level.isClientSide);
 			}

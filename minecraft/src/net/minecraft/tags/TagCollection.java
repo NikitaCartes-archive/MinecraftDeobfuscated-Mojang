@@ -60,11 +60,6 @@ public class TagCollection<T> {
 		return (Tag<T>)this.tags.getOrDefault(resourceLocation, this.empty);
 	}
 
-	@Environment(EnvType.CLIENT)
-	public Tag<T> getEmptyTag() {
-		return this.empty;
-	}
-
 	@Nullable
 	public ResourceLocation getId(Tag<T> tag) {
 		return tag instanceof Tag.Named ? ((Tag.Named)tag).getName() : (ResourceLocation)this.tags.inverse().get(tag);

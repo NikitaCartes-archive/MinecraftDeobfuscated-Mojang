@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.resources.language.I18n;
@@ -97,8 +98,8 @@ public class CreateBuffetWorldScreen extends Screen {
 		}
 
 		@Override
-		protected void moveSelection(int i) {
-			super.moveSelection(i);
+		protected void moveSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
+			super.moveSelection(selectionDirection);
 			CreateBuffetWorldScreen.this.updateButtonValidity();
 		}
 
