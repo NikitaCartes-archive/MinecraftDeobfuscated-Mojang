@@ -24,6 +24,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
@@ -38,7 +39,6 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -69,11 +69,12 @@ extends ObjectSelectionList<Entry> {
     }
 
     @Override
-    public void setSelected(Entry entry) {
+    public void setSelected(@Nullable Entry entry) {
         super.setSelected(entry);
         if (this.getSelected() instanceof OnlineServerEntry) {
             NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", ((OnlineServerEntry)((OnlineServerEntry)this.getSelected())).serverData.name).getString());
         }
+        this.screen.onSelectedChange();
     }
 
     @Override
@@ -83,17 +84,8 @@ extends ObjectSelectionList<Entry> {
     }
 
     @Override
-    protected void moveSelection(int i) {
-        int j = this.children().indexOf(this.getSelected());
-        int k = Mth.clamp(j + i, 0, this.getItemCount() - 1);
-        Entry entry = (Entry)this.children().get(k);
-        if (entry instanceof LANHeader) {
-            k = Mth.clamp(k + (i > 0 ? 1 : -1), 0, this.getItemCount() - 1);
-            entry = (Entry)this.children().get(k);
-        }
-        super.setSelected(entry);
-        this.ensureVisible(entry);
-        this.screen.onSelectedChange();
+    protected void moveSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
+        this.moveSelection(selectionDirection, entry -> !(entry instanceof LANHeader));
     }
 
     public void updateOnlineServers(ServerList serverList) {

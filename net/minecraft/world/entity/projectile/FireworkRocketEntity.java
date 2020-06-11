@@ -36,6 +36,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 @EnvironmentInterfaces(value={@EnvironmentInterface(value=EnvType.CLIENT, itf=ItemSupplier.class)})
 public class FireworkRocketEntity
@@ -65,7 +66,7 @@ implements ItemSupplier {
         this.lifetime = 10 * i + this.random.nextInt(6) + this.random.nextInt(7);
     }
 
-    public FireworkRocketEntity(Level level, Entity entity, double d, double e, double f, ItemStack itemStack) {
+    public FireworkRocketEntity(Level level, @Nullable Entity entity, double d, double e, double f, ItemStack itemStack) {
         this(level, d, e, f, itemStack);
         this.setOwner(entity);
     }

@@ -49,16 +49,16 @@ extends Biome {
         this.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.SPRING.configured(BiomeDefaultFeatures.CLOSED_NETHER_SPRING_CONFIG).decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(16, 10, 20, 128))));
         this.addFeature(GenerationStep.Decoration.UNDERGROUND_DECORATION, Feature.ORE.configured(new OreConfiguration(OreConfiguration.Predicates.NETHERRACK, Blocks.SOUL_SAND.defaultBlockState(), 12)).decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(12, 0, 0, 32))));
         BiomeDefaultFeatures.addNetherDefaultOres(this);
-        this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.SKELETON, 2, 5, 5));
+        this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.SKELETON, 10, 5, 5));
         this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.GHAST, 50, 4, 4));
         this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.ENDERMAN, 1, 4, 4));
         this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.STRIDER, 60, 1, 2));
         double d = 1.0;
-        double e = 0.08;
-        this.addMobCharge(EntityType.SKELETON, 1.0, 0.08);
-        this.addMobCharge(EntityType.GHAST, 1.0, 0.08);
-        this.addMobCharge(EntityType.ENDERMAN, 1.0, 0.08);
-        this.addMobCharge(EntityType.STRIDER, 1.0, 0.08);
+        double e = 0.15;
+        this.addMobCharge(EntityType.SKELETON, 1.0, 0.15);
+        this.addMobCharge(EntityType.GHAST, 1.0, 0.15);
+        this.addMobCharge(EntityType.ENDERMAN, 1.0, 0.15);
+        this.addMobCharge(EntityType.STRIDER, 1.0, 0.15);
     }
 }
 

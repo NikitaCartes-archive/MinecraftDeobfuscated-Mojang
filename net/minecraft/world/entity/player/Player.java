@@ -66,7 +66,6 @@ import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.TamableAnimal;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Parrot;
@@ -453,15 +452,11 @@ extends LivingEntity {
         this.inventory.tick();
         this.oBob = this.bob;
         super.aiStep();
-        AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
-        if (!this.level.isClientSide) {
-            attributeInstance.setBaseValue(this.abilities.getWalkingSpeed());
-        }
         this.flyingSpeed = 0.02f;
         if (this.isSprinting()) {
             this.flyingSpeed = (float)((double)this.flyingSpeed + 0.005999999865889549);
         }
-        this.setSpeed((float)attributeInstance.getValue());
+        this.setSpeed((float)this.getAttributeValue(Attributes.MOVEMENT_SPEED));
         float f = !this.onGround || this.isDeadOrDying() || this.isSwimming() ? 0.0f : Math.min(0.1f, Mth.sqrt(Player.getHorizontalDistanceSqr(this.getDeltaMovement())));
         this.bob += (f - this.bob) * 0.4f;
         if (this.getHealth() > 0.0f && !this.isSpectator()) {
@@ -667,6 +662,7 @@ extends LivingEntity {
         this.setScore(compoundTag.getInt("Score"));
         this.foodData.readAdditionalSaveData(compoundTag);
         this.abilities.loadSaveData(compoundTag);
+        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(this.abilities.getWalkingSpeed());
         if (compoundTag.contains("EnderItems", 9)) {
             this.enderChestInventory.fromTag(compoundTag.getList("EnderItems", 10));
         }

@@ -14,5 +14,22 @@ public class ItemUtils {
         player.startUsingItem(interactionHand);
         return InteractionResultHolder.consume(player.getItemInHand(interactionHand));
     }
+
+    public static ItemStack createBucketResult(ItemStack itemStack, Player player, ItemStack itemStack2) {
+        if (player.abilities.instabuild) {
+            if (!player.inventory.contains(itemStack2)) {
+                player.inventory.add(itemStack2);
+            }
+            return itemStack;
+        }
+        itemStack.shrink(1);
+        if (itemStack.isEmpty()) {
+            return itemStack2;
+        }
+        if (!player.inventory.add(itemStack2)) {
+            player.drop(itemStack2, false);
+        }
+        return itemStack;
+    }
 }
 

@@ -14,6 +14,7 @@ import java.util.AbstractList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -347,23 +348,43 @@ implements Widget {
             return true;
         }
         if (i == 264) {
-            this.moveSelection(1);
+            this.moveSelection(SelectionDirection.DOWN);
             return true;
         }
         if (i == 265) {
-            this.moveSelection(-1);
+            this.moveSelection(SelectionDirection.UP);
             return true;
         }
         return false;
     }
 
-    protected void moveSelection(int i) {
-        if (!this.children().isEmpty()) {
-            int j = this.children().indexOf(this.getSelected());
-            int k = Mth.clamp(j + i, 0, this.getItemCount() - 1);
-            Entry entry = (Entry)this.children().get(k);
+    protected void moveSelection(SelectionDirection selectionDirection) {
+        this.moveSelection(selectionDirection, entry -> true);
+    }
+
+    protected void refreshSelection() {
+        E entry = this.getSelected();
+        if (entry != null) {
             this.setSelected(entry);
             this.ensureVisible(entry);
+        }
+    }
+
+    protected void moveSelection(SelectionDirection selectionDirection, Predicate<E> predicate) {
+        int i;
+        int n = i = selectionDirection == SelectionDirection.UP ? -1 : 1;
+        if (!this.children().isEmpty()) {
+            int k;
+            int j = this.children().indexOf(this.getSelected());
+            while (j != (k = Mth.clamp(j + i, 0, this.getItemCount() - 1))) {
+                Entry entry = (Entry)this.children().get(k);
+                if (predicate.test(entry)) {
+                    this.setSelected(entry);
+                    this.ensureVisible(entry);
+                    break;
+                }
+                j = k;
+            }
         }
     }
 
@@ -522,6 +543,13 @@ implements Widget {
         public boolean isMouseOver(double d, double e) {
             return Objects.equals(this.list.getEntryAtPosition(d, e), this);
         }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static enum SelectionDirection {
+        UP,
+        DOWN;
+
     }
 }
 

@@ -28,6 +28,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.AlertScreen;
@@ -132,9 +133,10 @@ extends ObjectSelectionList<WorldListEntry> {
     }
 
     @Override
-    protected void moveSelection(int i) {
-        super.moveSelection(i);
-        this.screen.updateButtonStatus(true);
+    protected void moveSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
+        this.moveSelection(selectionDirection, worldListEntry -> !((WorldListEntry)worldListEntry).summary.isLocked());
+        WorldListEntry worldListEntry2 = (WorldListEntry)this.getSelected();
+        this.screen.updateButtonStatus(worldListEntry2 != null && worldListEntry2.summary.isLocked());
     }
 
     public Optional<WorldListEntry> getSelectedOpt() {

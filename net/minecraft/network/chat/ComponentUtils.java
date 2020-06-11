@@ -10,8 +10,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Function;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
@@ -24,7 +22,6 @@ import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
 public class ComponentUtils {
-    @Environment(value=EnvType.CLIENT)
     public static MutableComponent mergeStyles(MutableComponent mutableComponent, Style style) {
         if (style.isEmpty()) {
             return mutableComponent;
@@ -36,7 +33,7 @@ public class ComponentUtils {
         if (style2.equals(style)) {
             return mutableComponent;
         }
-        return new TextComponent("").append(mutableComponent).setStyle(style);
+        return mutableComponent.setStyle(style2.applyTo(style));
     }
 
     public static MutableComponent updateForEntity(@Nullable CommandSourceStack commandSourceStack, Component component, @Nullable Entity entity, int i) throws CommandSyntaxException {

@@ -33,10 +33,14 @@ extends Item {
                 level.setBlockAndUpdate(blockPos, (BlockState)blockState.setValue(CampfireBlock.LIT, true));
                 bl = true;
             }
-        } else if (level.getBlockState(blockPos = blockPos.relative(useOnContext.getClickedFace())).isAir()) {
-            this.playSound(level, blockPos);
-            level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(level, blockPos));
-            bl = true;
+        } else {
+            blockPos = blockPos.relative(useOnContext.getClickedFace());
+            BlockState blockState2 = BaseFireBlock.getState(level, blockPos);
+            if (level.getBlockState(blockPos).isAir() && blockState2.canSurvive(level, blockPos)) {
+                this.playSound(level, blockPos);
+                level.setBlockAndUpdate(blockPos, blockState2);
+                bl = true;
+            }
         }
         if (bl) {
             useOnContext.getItemInHand().shrink(1);

@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
@@ -91,8 +92,8 @@ extends Screen {
         }
 
         @Override
-        protected void moveSelection(int i) {
-            super.moveSelection(i);
+        protected void moveSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
+            super.moveSelection(selectionDirection);
             CreateBuffetWorldScreen.this.updateButtonValidity();
         }
 

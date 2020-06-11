@@ -31,6 +31,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SuspiciousStewItem;
 import net.minecraft.world.level.Level;
@@ -86,9 +87,6 @@ implements Shearable {
         ItemStack itemStack = player2.getItemInHand(interactionHand);
         if (itemStack.getItem() == Items.BOWL && !this.isBaby()) {
             ItemStack itemStack2;
-            if (!player2.abilities.instabuild) {
-                itemStack.shrink(1);
-            }
             boolean bl = false;
             if (this.effect != null) {
                 bl = true;
@@ -99,11 +97,7 @@ implements Shearable {
             } else {
                 itemStack2 = new ItemStack(Items.MUSHROOM_STEW);
             }
-            if (itemStack.isEmpty()) {
-                player2.setItemInHand(interactionHand, itemStack2);
-            } else if (!player2.inventory.add(itemStack2)) {
-                player2.drop(itemStack2, false);
-            }
+            ItemUtils.createBucketResult(itemStack, player2, itemStack2);
             SoundEvent soundEvent = bl ? SoundEvents.MOOSHROOM_MILK_SUSPICIOUSLY : SoundEvents.MOOSHROOM_MILK;
             this.playSound(soundEvent, 1.0f, 1.0f);
             return InteractionResult.sidedSuccess(this.level.isClientSide);

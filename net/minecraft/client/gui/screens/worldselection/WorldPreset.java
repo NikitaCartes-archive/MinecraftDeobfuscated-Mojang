@@ -106,7 +106,7 @@ public abstract class WorldPreset {
 
     private static WorldGenSettings fromBuffetSettings(WorldGenSettings worldGenSettings, WorldPreset worldPreset, Biome biome) {
         FixedBiomeSource biomeSource = new FixedBiomeSource(biome);
-        NoiseGeneratorSettings noiseGeneratorSettings = worldPreset == SINGLE_BIOME_CAVES ? NoiseGeneratorSettings.Preset.NETHER.settings() : (worldPreset == SINGLE_BIOME_FLOATING_ISLANDS ? NoiseGeneratorSettings.Preset.END.settings() : NoiseGeneratorSettings.Preset.OVERWORLD.settings());
+        NoiseGeneratorSettings noiseGeneratorSettings = worldPreset == SINGLE_BIOME_CAVES ? NoiseGeneratorSettings.Preset.CAVES.settings() : (worldPreset == SINGLE_BIOME_FLOATING_ISLANDS ? NoiseGeneratorSettings.Preset.FLOATING_ISLANDS.settings() : NoiseGeneratorSettings.Preset.OVERWORLD.settings());
         return new WorldGenSettings(worldGenSettings.seed(), worldGenSettings.generateFeatures(), worldGenSettings.generateBonusChest(), WorldGenSettings.withOverworld(worldGenSettings.dimensions(), new NoiseBasedChunkGenerator(biomeSource, worldGenSettings.seed(), noiseGeneratorSettings)));
     }
 

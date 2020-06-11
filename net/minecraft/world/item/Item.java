@@ -302,7 +302,6 @@ implements ItemLike {
         return itemStack.getItem() == Items.CROSSBOW;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getDefaultInstance() {
         return new ItemStack(this);
     }

@@ -190,13 +190,9 @@ extends AbstractHorse {
             }
         }
         if (!itemStack.isEmpty()) {
-            boolean bl2;
+            boolean bl;
             if (this.isFood(itemStack)) {
-                boolean bl = this.handleEating(player, itemStack);
-                if (!player.abilities.instabuild) {
-                    itemStack.shrink(1);
-                }
-                return bl ? InteractionResult.sidedSuccess(this.level.isClientSide) : InteractionResult.CONSUME;
+                return this.fedFood(player, itemStack);
             }
             InteractionResult interactionResult = itemStack.interactLivingEntity(player, this, interactionHand);
             if (interactionResult.consumesAction()) {
@@ -206,8 +202,8 @@ extends AbstractHorse {
                 this.makeMad();
                 return InteractionResult.sidedSuccess(this.level.isClientSide);
             }
-            boolean bl = bl2 = !this.isBaby() && !this.isSaddled() && itemStack.getItem() == Items.SADDLE;
-            if (this.isArmor(itemStack) || bl2) {
+            boolean bl2 = bl = !this.isBaby() && !this.isSaddled() && itemStack.getItem() == Items.SADDLE;
+            if (this.isArmor(itemStack) || bl) {
                 this.openInventory(player);
                 return InteractionResult.sidedSuccess(this.level.isClientSide);
             }

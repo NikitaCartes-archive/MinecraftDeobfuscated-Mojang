@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.SetTag;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagCollection;
 import org.jetbrains.annotations.Nullable;
@@ -32,7 +33,7 @@ public class StaticTagHelper<T> {
     @Environment(value=EnvType.CLIENT)
     public void resetToEmpty() {
         this.source = this.empty;
-        Tag tag = this.empty.getEmptyTag();
+        SetTag tag = SetTag.empty();
         this.wrappers.forEach(wrapper -> wrapper.rebind(resourceLocation -> tag));
     }
 

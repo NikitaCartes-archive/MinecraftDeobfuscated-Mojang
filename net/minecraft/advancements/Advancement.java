@@ -26,8 +26,10 @@ import net.minecraft.advancements.RequirementsStrategy;
 import net.minecraft.advancements.critereon.DeserializationContext;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -61,7 +63,7 @@ public class Advancement {
         } else {
             Component component = displayInfo.getTitle();
             ChatFormatting chatFormatting = displayInfo.getFrame().getChatColor();
-            MutableComponent component2 = component.copy().withStyle(chatFormatting).append("\n").append(displayInfo.getDescription());
+            MutableComponent component2 = ComponentUtils.mergeStyles(component.copy(), Style.EMPTY.withColor(chatFormatting)).append("\n").append(displayInfo.getDescription());
             MutableComponent component3 = component.copy().withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component2)));
             this.chatComponent = new TextComponent("[").append(component3).append("]").withStyle(chatFormatting);
         }

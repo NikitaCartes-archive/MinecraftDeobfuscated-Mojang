@@ -18,6 +18,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -65,7 +66,7 @@ extends Item {
                 if (blockState.getBlock() instanceof BucketPickup && (fluid = ((BucketPickup)((Object)blockState.getBlock())).takeLiquid(level, blockPos, blockState)) != Fluids.EMPTY) {
                     player.awardStat(Stats.ITEM_USED.get(this));
                     player.playSound(fluid.is(FluidTags.LAVA) ? SoundEvents.BUCKET_FILL_LAVA : SoundEvents.BUCKET_FILL, 1.0f, 1.0f);
-                    ItemStack itemStack2 = this.createResultItem(itemStack, player, fluid.getBucket());
+                    ItemStack itemStack2 = ItemUtils.createBucketResult(itemStack, player, new ItemStack(fluid.getBucket()));
                     if (!level.isClientSide) {
                         CriteriaTriggers.FILLED_BUCKET.trigger((ServerPlayer)player, new ItemStack(fluid.getBucket()));
                     }
@@ -96,24 +97,6 @@ extends Item {
     }
 
     public void checkExtraContent(Level level, ItemStack itemStack, BlockPos blockPos) {
-    }
-
-    private ItemStack createResultItem(ItemStack itemStack, Player player, Item item) {
-        if (player.abilities.instabuild) {
-            ItemStack itemStack2 = new ItemStack(item);
-            if (!player.inventory.contains(itemStack2)) {
-                player.inventory.add(itemStack2);
-            }
-            return itemStack;
-        }
-        itemStack.shrink(1);
-        if (itemStack.isEmpty()) {
-            return new ItemStack(item);
-        }
-        if (!player.inventory.add(new ItemStack(item))) {
-            player.drop(new ItemStack(item), false);
-        }
-        return itemStack;
     }
 
     public boolean emptyBucket(@Nullable Player player, Level level, BlockPos blockPos, @Nullable BlockHitResult blockHitResult) {

@@ -30,7 +30,6 @@ import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.network.Connection;
 import net.minecraft.network.PacketDecoder;
@@ -148,10 +147,7 @@ public class ServerConnectionListener {
                         connection.tick();
                     } catch (Exception exception) {
                         if (connection.isMemoryConnection()) {
-                            CrashReport crashReport = CrashReport.forThrowable(exception, "Ticking memory connection");
-                            CrashReportCategory crashReportCategory = crashReport.addCategory("Ticking connection");
-                            crashReportCategory.setDetail("Connection", connection::toString);
-                            throw new ReportedException(crashReport);
+                            throw new ReportedException(CrashReport.forThrowable(exception, "Ticking memory connection"));
                         }
                         LOGGER.warn("Failed to handle packet for {}", (Object)connection.getRemoteAddress(), (Object)exception);
                         TextComponent component = new TextComponent("Internal server error");

@@ -37,7 +37,6 @@ extends Item {
     }
 
     @Override
-    @Environment(value=EnvType.CLIENT)
     public ItemStack getDefaultInstance() {
         return PotionUtils.setPotion(super.getDefaultInstance(), Potions.WATER);
     }

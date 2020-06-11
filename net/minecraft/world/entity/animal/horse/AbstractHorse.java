@@ -26,6 +26,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerListener;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
@@ -390,6 +391,17 @@ Saddleable {
         }
     }
 
+    public InteractionResult fedFood(Player player, ItemStack itemStack) {
+        boolean bl = this.handleEating(player, itemStack);
+        if (!player.abilities.instabuild) {
+            itemStack.shrink(1);
+        }
+        if (this.level.isClientSide) {
+            return InteractionResult.CONSUME;
+        }
+        return bl ? InteractionResult.SUCCESS : InteractionResult.PASS;
+    }
+
     protected boolean handleEating(Player player, ItemStack itemStack) {
         boolean bl = false;
         float f = 0.0f;
@@ -415,7 +427,7 @@ Saddleable {
             f = 4.0f;
             i = 60;
             j = 5;
-            if (this.isTamed() && this.getAge() == 0 && !this.isInLove()) {
+            if (!this.level.isClientSide && this.isTamed() && this.getAge() == 0 && !this.isInLove()) {
                 bl = true;
                 this.setInLove(player);
             }
@@ -423,7 +435,7 @@ Saddleable {
             f = 10.0f;
             i = 240;
             j = 10;
-            if (this.isTamed() && this.getAge() == 0 && !this.isInLove()) {
+            if (!this.level.isClientSide && this.isTamed() && this.getAge() == 0 && !this.isInLove()) {
                 bl = true;
                 this.setInLove(player);
             }

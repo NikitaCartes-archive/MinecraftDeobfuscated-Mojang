@@ -251,7 +251,7 @@ AutoCloseable {
                     }
                 }
                 if ((i & 0x10) == 0) {
-                    int j = i & 0xFFFFFFFE;
+                    int j = i & 0xFFFFFFDE;
                     blockState2.updateIndirectNeighbourShapes(this, blockPos, j);
                     blockState.updateNeighbourShapes(this, blockPos, j);
                     blockState.updateIndirectNeighbourShapes(this, blockPos, j);
