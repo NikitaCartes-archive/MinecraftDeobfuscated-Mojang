@@ -1,0 +1,84 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.client.gui.screens;
+
+import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.List;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+
+@Environment(value=EnvType.CLIENT)
+public class PopupScreen
+extends Screen {
+    private final FormattedText message;
+    private final ImmutableList<ButtonOption> buttonOptions;
+    private List<FormattedText> messageLines;
+    private int contentTop;
+    private int buttonWidth;
+
+    protected PopupScreen(Component component, List<FormattedText> list, ImmutableList<ButtonOption> immutableList) {
+        super(component);
+        this.message = FormattedText.composite(list);
+        this.buttonOptions = immutableList;
+    }
+
+    @Override
+    public String getNarrationMessage() {
+        return super.getNarrationMessage() + ". " + this.message.getString();
+    }
+
+    @Override
+    public void init(Minecraft minecraft, int i, int j) {
+        super.init(minecraft, i, j);
+        for (ButtonOption buttonOption : this.buttonOptions) {
+            this.buttonWidth = Math.max(this.buttonWidth, 20 + this.font.width(buttonOption.message) + 20);
+        }
+        int k = 5 + this.buttonWidth + 5;
+        int l = k * this.buttonOptions.size();
+        this.messageLines = this.font.split(this.message, l);
+        int m = this.messageLines.size() * this.font.lineHeight;
+        this.contentTop = (int)((double)j / 2.0 - (double)m / 2.0);
+        int n = this.contentTop + m + this.font.lineHeight * 2;
+        int o = (int)((double)i / 2.0 - (double)l / 2.0);
+        for (ButtonOption buttonOption2 : this.buttonOptions) {
+            this.addButton(new Button(o, n, this.buttonWidth, 20, buttonOption2.message, buttonOption2.onPress));
+            o += k;
+        }
+    }
+
+    @Override
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        this.renderDirtBackground(0);
+        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, this.contentTop - this.font.lineHeight * 2, -1);
+        int k = this.contentTop;
+        for (FormattedText formattedText : this.messageLines) {
+            this.drawCenteredString(poseStack, this.font, formattedText, this.width / 2, k, -1);
+            k += this.font.lineHeight;
+        }
+        super.render(poseStack, i, j, f);
+    }
+
+    @Override
+    public boolean shouldCloseOnEsc() {
+        return false;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public static final class ButtonOption {
+        private final Component message;
+        private final Button.OnPress onPress;
+
+        public ButtonOption(Component component, Button.OnPress onPress) {
+            this.message = component;
+            this.onPress = onPress;
+        }
+    }
+}
+

@@ -97,7 +97,8 @@ implements Shearable {
             } else {
                 itemStack2 = new ItemStack(Items.MUSHROOM_STEW);
             }
-            ItemUtils.createBucketResult(itemStack, player2, itemStack2);
+            ItemStack itemStack3 = ItemUtils.createBucketResult(itemStack, player2, itemStack2);
+            player2.setItemInHand(interactionHand, itemStack3);
             SoundEvent soundEvent = bl ? SoundEvents.MOOSHROOM_MILK_SUSPICIOUSLY : SoundEvents.MOOSHROOM_MILK;
             this.playSound(soundEvent, 1.0f, 1.0f);
             return InteractionResult.sidedSuccess(this.level.isClientSide);

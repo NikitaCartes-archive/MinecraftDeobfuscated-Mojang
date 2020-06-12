@@ -6,7 +6,6 @@ package net.minecraft.world.item;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.UseOnContext;
@@ -27,20 +26,14 @@ extends Item {
         BlockPos blockPos = useOnContext.getClickedPos();
         BlockState blockState = level.getBlockState(blockPos);
         boolean bl = false;
-        if (blockState.is(BlockTags.CAMPFIRES, blockStateBase -> blockStateBase.hasProperty(CampfireBlock.LIT) && blockStateBase.hasProperty(CampfireBlock.WATERLOGGED))) {
-            if (!blockState.getValue(CampfireBlock.LIT).booleanValue() && !blockState.getValue(CampfireBlock.WATERLOGGED).booleanValue()) {
-                this.playSound(level, blockPos);
-                level.setBlockAndUpdate(blockPos, (BlockState)blockState.setValue(CampfireBlock.LIT, true));
-                bl = true;
-            }
-        } else {
-            blockPos = blockPos.relative(useOnContext.getClickedFace());
-            BlockState blockState2 = BaseFireBlock.getState(level, blockPos);
-            if (level.getBlockState(blockPos).isAir() && blockState2.canSurvive(level, blockPos)) {
-                this.playSound(level, blockPos);
-                level.setBlockAndUpdate(blockPos, blockState2);
-                bl = true;
-            }
+        if (CampfireBlock.canLight(blockState)) {
+            this.playSound(level, blockPos);
+            level.setBlockAndUpdate(blockPos, (BlockState)blockState.setValue(CampfireBlock.LIT, true));
+            bl = true;
+        } else if (BaseFireBlock.canBePlacedAt(level, blockPos = blockPos.relative(useOnContext.getClickedFace()))) {
+            this.playSound(level, blockPos);
+            level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(level, blockPos));
+            bl = true;
         }
         if (bl) {
             useOnContext.getItemInHand().shrink(1);

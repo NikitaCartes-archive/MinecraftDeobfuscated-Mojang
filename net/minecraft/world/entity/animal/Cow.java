@@ -86,7 +86,8 @@ extends Animal {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if (itemStack.getItem() == Items.BUCKET && !this.isBaby()) {
             player.playSound(SoundEvents.COW_MILK, 1.0f, 1.0f);
-            ItemUtils.createBucketResult(itemStack, player, Items.MILK_BUCKET.getDefaultInstance());
+            ItemStack itemStack2 = ItemUtils.createBucketResult(itemStack, player, Items.MILK_BUCKET.getDefaultInstance());
+            player.setItemInHand(interactionHand, itemStack2);
             return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
         return super.mobInteract(player, interactionHand);

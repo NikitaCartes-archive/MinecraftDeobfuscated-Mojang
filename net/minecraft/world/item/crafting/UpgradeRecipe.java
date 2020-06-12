@@ -60,6 +60,10 @@ implements Recipe<Container> {
         return this.result;
     }
 
+    public boolean isAdditionIngredient(ItemStack itemStack) {
+        return this.addition.test(itemStack);
+    }
+
     @Override
     @Environment(value=EnvType.CLIENT)
     public ItemStack getToastSymbol() {

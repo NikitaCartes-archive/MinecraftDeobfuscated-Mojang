@@ -44,6 +44,9 @@ extends EntityRenderer<T> {
 
     @Override
     public void render(T entity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+        if (((Entity)entity).tickCount < 2 && this.entityRenderDispatcher.camera.getEntity().distanceToSqr((Entity)entity) < 12.25) {
+            return;
+        }
         poseStack.pushPose();
         poseStack.scale(this.scale, this.scale, this.scale);
         poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());

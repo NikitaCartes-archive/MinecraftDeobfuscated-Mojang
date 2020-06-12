@@ -90,6 +90,7 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
@@ -782,23 +783,32 @@ VillagerDataHolder {
     private IronGolem trySpawnGolem() {
         BlockPos blockPos = this.blockPosition();
         for (int i = 0; i < 10; ++i) {
-            BlockPos blockPos3;
             IronGolem ironGolem;
+            double e;
             double d = this.level.random.nextInt(16) - 8;
-            double e = this.level.random.nextInt(16) - 8;
-            double f = 6.0;
-            for (int j = 0; j >= -12; --j) {
-                BlockPos blockPos2 = blockPos.offset(d, f + (double)j, e);
-                if (!this.level.getBlockState(blockPos2).isAir() && !this.level.getBlockState(blockPos2).getMaterial().isLiquid() || !this.level.getBlockState(blockPos2.below()).getMaterial().isSolidBlocking()) continue;
-                f += (double)j;
-                break;
-            }
-            if ((ironGolem = EntityType.IRON_GOLEM.create(this.level, null, null, null, blockPos3 = blockPos.offset(d, f, e), MobSpawnType.MOB_SUMMONED, false, false)) == null) continue;
+            BlockPos blockPos2 = this.findSpawnPositionForGolemInColumn(blockPos, d, e = (double)(this.level.random.nextInt(16) - 8));
+            if (blockPos2 == null || (ironGolem = EntityType.IRON_GOLEM.create(this.level, null, null, null, blockPos2, MobSpawnType.MOB_SUMMONED, false, false)) == null) continue;
             if (ironGolem.checkSpawnRules(this.level, MobSpawnType.MOB_SUMMONED) && ironGolem.checkSpawnObstruction(this.level)) {
                 this.level.addFreshEntity(ironGolem);
                 return ironGolem;
             }
             ironGolem.remove();
+        }
+        return null;
+    }
+
+    @Nullable
+    private BlockPos findSpawnPositionForGolemInColumn(BlockPos blockPos, double d, double e) {
+        int i = 6;
+        BlockPos blockPos2 = blockPos.offset(d, 6.0, e);
+        BlockState blockState = this.level.getBlockState(blockPos2);
+        for (int j = 6; j >= -6; --j) {
+            BlockPos blockPos3 = blockPos2;
+            BlockState blockState2 = blockState;
+            blockPos2 = blockPos3.below();
+            blockState = this.level.getBlockState(blockPos2);
+            if (!blockState2.isAir() && !blockState2.getMaterial().isLiquid() || !blockState.getMaterial().isSolidBlocking()) continue;
+            return blockPos3;
         }
         return null;
     }

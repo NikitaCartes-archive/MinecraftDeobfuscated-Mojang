@@ -450,61 +450,13 @@ implements ClientGamePacketListener {
             if (entity2 != null) {
                 ((AbstractArrow)entity).setOwner(entity2);
             }
-        } else if (entityType == EntityType.SNOWBALL) {
-            entity = new Snowball(this.level, d, e, f);
-        } else if (entityType == EntityType.LLAMA_SPIT) {
-            entity = new LlamaSpit(this.level, d, e, f, clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa());
-        } else if (entityType == EntityType.ITEM_FRAME) {
-            entity = new ItemFrame(this.level, new BlockPos(d, e, f), Direction.from3DDataValue(clientboundAddEntityPacket.getData()));
-        } else if (entityType == EntityType.LEASH_KNOT) {
-            entity = new LeashFenceKnotEntity(this.level, new BlockPos(d, e, f));
-        } else if (entityType == EntityType.ENDER_PEARL) {
-            entity = new ThrownEnderpearl(this.level, d, e, f);
-        } else if (entityType == EntityType.EYE_OF_ENDER) {
-            entity = new EyeOfEnder(this.level, d, e, f);
-        } else if (entityType == EntityType.FIREWORK_ROCKET) {
-            entity = new FireworkRocketEntity(this.level, d, e, f, ItemStack.EMPTY);
-        } else if (entityType == EntityType.FIREBALL) {
-            entity = new LargeFireball(this.level, d, e, f, clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa());
-        } else if (entityType == EntityType.DRAGON_FIREBALL) {
-            entity = new DragonFireball(this.level, d, e, f, clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa());
-        } else if (entityType == EntityType.SMALL_FIREBALL) {
-            entity = new SmallFireball(this.level, d, e, f, clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa());
-        } else if (entityType == EntityType.WITHER_SKULL) {
-            entity = new WitherSkull(this.level, d, e, f, clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa());
-        } else if (entityType == EntityType.SHULKER_BULLET) {
-            entity = new ShulkerBullet(this.level, d, e, f, clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa());
-        } else if (entityType == EntityType.EGG) {
-            entity = new ThrownEgg(this.level, d, e, f);
-        } else if (entityType == EntityType.EVOKER_FANGS) {
-            entity = new EvokerFangs(this.level, d, e, f, 0.0f, 0, null);
-        } else if (entityType == EntityType.POTION) {
-            entity = new ThrownPotion(this.level, d, e, f);
-        } else if (entityType == EntityType.EXPERIENCE_BOTTLE) {
-            entity = new ThrownExperienceBottle(this.level, d, e, f);
-        } else if (entityType == EntityType.BOAT) {
-            entity = new Boat(this.level, d, e, f);
-        } else if (entityType == EntityType.TNT) {
-            entity = new PrimedTnt(this.level, d, e, f, null);
-        } else if (entityType == EntityType.ARMOR_STAND) {
-            entity = new ArmorStand(this.level, d, e, f);
-        } else if (entityType == EntityType.END_CRYSTAL) {
-            entity = new EndCrystal(this.level, d, e, f);
-        } else if (entityType == EntityType.ITEM) {
-            entity = new ItemEntity(this.level, d, e, f);
-        } else if (entityType == EntityType.FALLING_BLOCK) {
-            entity = new FallingBlockEntity(this.level, d, e, f, Block.stateById(clientboundAddEntityPacket.getData()));
-        } else if (entityType == EntityType.AREA_EFFECT_CLOUD) {
-            entity = new AreaEffectCloud(this.level, d, e, f);
-        } else if (entityType == EntityType.LIGHTNING_BOLT) {
-            entity = new LightningBolt((EntityType<? extends LightningBolt>)EntityType.LIGHTNING_BOLT, (Level)this.level);
-            entity.moveTo(d, e, f);
         } else {
-            entity = null;
+            entity = entityType == EntityType.SNOWBALL ? new Snowball(this.level, d, e, f) : (entityType == EntityType.LLAMA_SPIT ? new LlamaSpit(this.level, d, e, f, clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa()) : (entityType == EntityType.ITEM_FRAME ? new ItemFrame(this.level, new BlockPos(d, e, f), Direction.from3DDataValue(clientboundAddEntityPacket.getData())) : (entityType == EntityType.LEASH_KNOT ? new LeashFenceKnotEntity(this.level, new BlockPos(d, e, f)) : (entityType == EntityType.ENDER_PEARL ? new ThrownEnderpearl(this.level, d, e, f) : (entityType == EntityType.EYE_OF_ENDER ? new EyeOfEnder(this.level, d, e, f) : (entityType == EntityType.FIREWORK_ROCKET ? new FireworkRocketEntity(this.level, d, e, f, ItemStack.EMPTY) : (entityType == EntityType.FIREBALL ? new LargeFireball(this.level, d, e, f, clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa()) : (entityType == EntityType.DRAGON_FIREBALL ? new DragonFireball(this.level, d, e, f, clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa()) : (entityType == EntityType.SMALL_FIREBALL ? new SmallFireball(this.level, d, e, f, clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa()) : (entityType == EntityType.WITHER_SKULL ? new WitherSkull(this.level, d, e, f, clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa()) : (entityType == EntityType.SHULKER_BULLET ? new ShulkerBullet(this.level, d, e, f, clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa()) : (entityType == EntityType.EGG ? new ThrownEgg(this.level, d, e, f) : (entityType == EntityType.EVOKER_FANGS ? new EvokerFangs(this.level, d, e, f, 0.0f, 0, null) : (entityType == EntityType.POTION ? new ThrownPotion(this.level, d, e, f) : (entityType == EntityType.EXPERIENCE_BOTTLE ? new ThrownExperienceBottle(this.level, d, e, f) : (entityType == EntityType.BOAT ? new Boat(this.level, d, e, f) : (entityType == EntityType.TNT ? new PrimedTnt(this.level, d, e, f, null) : (entityType == EntityType.ARMOR_STAND ? new ArmorStand(this.level, d, e, f) : (entityType == EntityType.END_CRYSTAL ? new EndCrystal(this.level, d, e, f) : (entityType == EntityType.ITEM ? new ItemEntity(this.level, d, e, f) : (entityType == EntityType.FALLING_BLOCK ? new FallingBlockEntity(this.level, d, e, f, Block.stateById(clientboundAddEntityPacket.getData())) : (entityType == EntityType.AREA_EFFECT_CLOUD ? new AreaEffectCloud(this.level, d, e, f) : (entityType == EntityType.LIGHTNING_BOLT ? new LightningBolt((EntityType<? extends LightningBolt>)EntityType.LIGHTNING_BOLT, (Level)this.level) : null)))))))))))))))))))))));
         }
         if (entity != null) {
             int i = clientboundAddEntityPacket.getId();
             entity.setPacketCoordinates(d, e, f);
+            entity.moveTo(d, e, f);
             entity.xRot = (float)(clientboundAddEntityPacket.getxRot() * 360) / 256.0f;
             entity.yRot = (float)(clientboundAddEntityPacket.getyRot() * 360) / 256.0f;
             entity.setId(i);

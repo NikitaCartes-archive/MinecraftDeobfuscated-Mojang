@@ -94,6 +94,25 @@ public class Codecs {
         });
     }
 
+    public static <A> MapCodec<A> setPartial(MapCodec<A> mapCodec, final Supplier<A> supplier) {
+        return Codecs.mapResult(mapCodec, new ResultFunction<A>(){
+
+            @Override
+            public <T> DataResult<A> apply(DynamicOps<T> dynamicOps, MapLike<T> mapLike, DataResult<A> dataResult) {
+                return dataResult.setPartial((Object)supplier);
+            }
+
+            @Override
+            public <T> RecordBuilder<T> coApply(DynamicOps<T> dynamicOps, A object, RecordBuilder<T> recordBuilder) {
+                return recordBuilder;
+            }
+
+            public String toString() {
+                return "SetPartial[" + supplier + "]";
+            }
+        });
+    }
+
     static interface ResultFunction<A> {
         public <T> DataResult<A> apply(DynamicOps<T> var1, MapLike<T> var2, DataResult<A> var3);
 

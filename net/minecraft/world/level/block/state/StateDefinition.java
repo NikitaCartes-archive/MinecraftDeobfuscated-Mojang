@@ -10,11 +10,10 @@ import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.Decoder;
+import com.mojang.serialization.Encoder;
 import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.MapLike;
-import com.mojang.serialization.RecordBuilder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,9 +25,9 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.minecraft.util.Codecs;
 import net.minecraft.world.level.block.state.StateHolder;
 import net.minecraft.world.level.block.state.properties.Property;
-import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
 public class StateDefinition<O, S extends StateHolder<O, S>> {
@@ -40,7 +39,12 @@ public class StateDefinition<O, S extends StateHolder<O, S>> {
     protected StateDefinition(Function<O, S> function, O object, Factory<O, S> factory, Map<String, Property<?>> map) {
         this.owner = object;
         this.propertiesByName = ImmutableSortedMap.copyOf(map);
-        PropertiesCodec<StateHolder> mapCodec = new PropertiesCodec<StateHolder>(this.propertiesByName, () -> (StateHolder)function.apply(object));
+        Supplier<StateHolder> supplier = () -> (StateHolder)function.apply(object);
+        MapCodec<StateHolder> mapCodec = MapCodec.of(Encoder.empty(), Decoder.unit(supplier));
+        for (Map.Entry entry : this.propertiesByName.entrySet()) {
+            mapCodec = StateDefinition.appendPropertyCodec(mapCodec, supplier, (String)entry.getKey(), (Property)entry.getValue());
+        }
+        MapCodec<StateHolder> mapCodec2 = mapCodec;
         LinkedHashMap map2 = Maps.newLinkedHashMap();
         ArrayList<StateHolder> list3 = Lists.newArrayList();
         Stream<List<List<Object>>> stream = Stream.of(Collections.emptyList());
@@ -53,7 +57,7 @@ public class StateDefinition<O, S extends StateHolder<O, S>> {
         }
         stream.forEach(list2 -> {
             ImmutableMap<Property<?>, Comparable<?>> immutableMap = list2.stream().collect(ImmutableMap.toImmutableMap(Pair::getFirst, Pair::getSecond));
-            StateHolder stateHolder = (StateHolder)factory.create(object, immutableMap, mapCodec);
+            StateHolder stateHolder = (StateHolder)factory.create(object, immutableMap, mapCodec2);
             map2.put(immutableMap, stateHolder);
             list3.add(stateHolder);
         });
@@ -61,6 +65,10 @@ public class StateDefinition<O, S extends StateHolder<O, S>> {
             stateHolder.populateNeighbours(map2);
         }
         this.states = ImmutableList.copyOf(list3);
+    }
+
+    private static <S extends StateHolder<?, S>, T extends Comparable<T>> MapCodec<S> appendPropertyCodec(MapCodec<S> mapCodec, Supplier<S> supplier, String string, Property<T> property) {
+        return Codec.mapPair(mapCodec, Codecs.setPartial(property.valueCodec().fieldOf(string), () -> property.value((StateHolder)supplier.get()))).xmap(pair -> (StateHolder)((StateHolder)pair.getFirst()).setValue(property, ((Property.Value)pair.getSecond()).value()), stateHolder -> Pair.of(stateHolder, property.value((StateHolder<?, ?>)stateHolder)));
     }
 
     public ImmutableList<S> getPossibleStates() {
@@ -86,52 +94,6 @@ public class StateDefinition<O, S extends StateHolder<O, S>> {
     @Nullable
     public Property<?> getProperty(String string) {
         return this.propertiesByName.get(string);
-    }
-
-    static class PropertiesCodec<S extends StateHolder<?, S>>
-    extends MapCodec<S> {
-        private final Map<String, Property<?>> propertiesByName;
-        private final Supplier<S> defaultState;
-
-        public PropertiesCodec(Map<String, Property<?>> map, Supplier<S> supplier) {
-            this.propertiesByName = map;
-            this.defaultState = supplier;
-        }
-
-        @Override
-        public <T> RecordBuilder<T> encode(S stateHolder, DynamicOps<T> dynamicOps, RecordBuilder<T> recordBuilder) {
-            ((StateHolder)stateHolder).getValues().forEach((property, comparable) -> recordBuilder.add(property.getName(), dynamicOps.createString(PropertiesCodec.getName(property, comparable))));
-            return recordBuilder;
-        }
-
-        @Override
-        public <T> Stream<T> keys(DynamicOps<T> dynamicOps) {
-            return this.propertiesByName.keySet().stream().map(dynamicOps::createString);
-        }
-
-        @Override
-        public <T> DataResult<S> decode(DynamicOps<T> dynamicOps, MapLike<T> mapLike) {
-            MutableObject<DataResult<S>> mutableObject = new MutableObject<DataResult<S>>(DataResult.success(this.defaultState.get()));
-            mapLike.entries().forEach(pair -> {
-                DataResult<Property> dataResult = dynamicOps.getStringValue(pair.getFirst()).map(this.propertiesByName::get);
-                Object object = pair.getSecond();
-                mutableObject.setValue(((DataResult)mutableObject.getValue()).flatMap((? super R stateHolder) -> dataResult.flatMap((? super R property) -> property.parseValue(dynamicOps, stateHolder, object))));
-            });
-            return mutableObject.getValue();
-        }
-
-        private static <T extends Comparable<T>> String getName(Property<T> property, Comparable<?> comparable) {
-            return property.getName(comparable);
-        }
-
-        public String toString() {
-            return "PropertiesCodec";
-        }
-
-        @Override
-        public /* synthetic */ RecordBuilder encode(Object object, DynamicOps dynamicOps, RecordBuilder recordBuilder) {
-            return this.encode((S)((StateHolder)object), (DynamicOps<T>)dynamicOps, (RecordBuilder<T>)recordBuilder);
-        }
     }
 
     public static class Builder<O, S extends StateHolder<O, S>> {

@@ -407,8 +407,11 @@ extends NodeEvaluator {
                     if (WalkNodeEvaluator.isBurningBlock(blockState)) {
                         return BlockPathTypes.DANGER_FIRE;
                     }
-                    if (!blockGetter.getFluidState(mutableBlockPos).is(FluidTags.WATER)) continue;
-                    return BlockPathTypes.WATER_BORDER;
+                    if (blockGetter.getFluidState(mutableBlockPos).is(FluidTags.WATER)) {
+                        return BlockPathTypes.WATER_BORDER;
+                    }
+                    if (!blockGetter.getFluidState(mutableBlockPos).is(FluidTags.LAVA)) continue;
+                    return BlockPathTypes.LAVA;
                 }
             }
         }
@@ -472,7 +475,7 @@ extends NodeEvaluator {
     }
 
     private static boolean isBurningBlock(BlockState blockState) {
-        return blockState.is(BlockTags.FIRE) || blockState.is(Blocks.LAVA) || blockState.is(Blocks.MAGMA_BLOCK) || CampfireBlock.isLitCampfire(blockState);
+        return blockState.is(BlockTags.FIRE) || blockState.is(Blocks.MAGMA_BLOCK) || CampfireBlock.isLitCampfire(blockState);
     }
 }
 

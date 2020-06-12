@@ -20,10 +20,10 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -95,23 +95,9 @@ extends Block {
     }
 
     @Override
-    public void playerDestroy(Level level, Player player, BlockPos blockPos, BlockState blockState, @Nullable BlockEntity blockEntity, ItemStack itemStack) {
-        super.playerDestroy(level, player, blockPos, Blocks.AIR.defaultBlockState(), blockEntity, itemStack);
-    }
-
-    @Override
     public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
-        DoubleBlockHalf doubleBlockHalf = blockState.getValue(HALF);
-        BlockPos blockPos2 = doubleBlockHalf == DoubleBlockHalf.LOWER ? blockPos.above() : blockPos.below();
-        BlockState blockState2 = level.getBlockState(blockPos2);
-        if (blockState2.is(this) && blockState2.getValue(HALF) != doubleBlockHalf) {
-            level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 35);
-            level.levelEvent(player, 2001, blockPos2, Block.getId(blockState2));
-            ItemStack itemStack = player.getMainHandItem();
-            if (!level.isClientSide && !player.isCreative() && player.hasCorrectToolForDrops(blockState2)) {
-                Block.dropResources(blockState, level, blockPos, null, player, itemStack);
-                Block.dropResources(blockState2, level, blockPos2, null, player, itemStack);
-            }
+        if (!level.isClientSide && player.isCreative()) {
+            DoublePlantBlock.preventCreativeDropFromBottomPart(level, blockPos, blockState, player);
         }
         super.playerWillDestroy(level, blockPos, blockState, player);
     }

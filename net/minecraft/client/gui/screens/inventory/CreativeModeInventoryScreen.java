@@ -290,20 +290,20 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
 
     @Override
     public boolean keyPressed(int i, int j, int k) {
-        boolean bl;
         this.ignoreTextInput = false;
         if (selectedTab != CreativeModeTab.TAB_SEARCH.getId()) {
+            boolean bl;
+            boolean bl2 = bl = !this.isCreativeSlot(this.hoveredSlot) || this.hoveredSlot != null && this.hoveredSlot.hasItem();
+            if (bl && this.checkHotbarKeyPressed(i, j)) {
+                this.ignoreTextInput = true;
+                return true;
+            }
             if (this.minecraft.options.keyChat.matches(i, j)) {
                 this.ignoreTextInput = true;
                 this.selectTab(CreativeModeTab.TAB_SEARCH);
                 return true;
             }
             return super.keyPressed(i, j, k);
-        }
-        boolean bl2 = bl = !this.isCreativeSlot(this.hoveredSlot) || this.hoveredSlot != null && this.hoveredSlot.hasItem();
-        if (bl && this.checkHotbarKeyPressed(i, j)) {
-            this.ignoreTextInput = true;
-            return true;
         }
         String string = this.searchBox.getValue();
         if (this.searchBox.keyPressed(i, j, k)) {

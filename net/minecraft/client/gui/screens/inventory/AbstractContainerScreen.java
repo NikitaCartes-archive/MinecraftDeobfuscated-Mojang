@@ -486,6 +486,7 @@ implements MenuAccess<T> {
         }
         if (i == 256 || this.minecraft.options.keyInventory.matches(i, j)) {
             this.minecraft.player.closeContainer();
+            return true;
         }
         this.checkHotbarKeyPressed(i, j);
         if (this.hoveredSlot != null && this.hoveredSlot.hasItem()) {

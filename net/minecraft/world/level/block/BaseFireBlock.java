@@ -17,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FireBlock;
@@ -158,6 +159,20 @@ extends Block {
         if (!level.isClientSide()) {
             level.levelEvent(null, 1009, blockPos, 0);
         }
+    }
+
+    public static boolean canBePlacedAt(LevelAccessor levelAccessor, BlockPos blockPos) {
+        BlockState blockState = levelAccessor.getBlockState(blockPos);
+        BlockState blockState2 = BaseFireBlock.getState(levelAccessor, blockPos);
+        return blockState.isAir() && (blockState2.canSurvive(levelAccessor, blockPos) || BaseFireBlock.isPortal(levelAccessor, blockPos));
+    }
+
+    private static boolean isPortal(LevelAccessor levelAccessor, BlockPos blockPos) {
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            if (!levelAccessor.getBlockState(blockPos.relative(direction)).is(Blocks.OBSIDIAN) || NetherPortalBlock.isPortal(levelAccessor, blockPos) == null) continue;
+            return true;
+        }
+        return false;
     }
 }
 

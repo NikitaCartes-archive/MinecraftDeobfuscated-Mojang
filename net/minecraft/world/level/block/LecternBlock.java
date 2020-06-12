@@ -6,6 +6,7 @@ package net.minecraft.world.level.block;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -78,7 +79,16 @@ extends BaseEntityBlock {
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-        return (BlockState)this.defaultBlockState().setValue(FACING, blockPlaceContext.getHorizontalDirection().getOpposite());
+        CompoundTag compoundTag2;
+        Level level = blockPlaceContext.getLevel();
+        ItemStack itemStack = blockPlaceContext.getItemInHand();
+        CompoundTag compoundTag = itemStack.getOrCreateTag();
+        Player player = blockPlaceContext.getPlayer();
+        boolean bl = false;
+        if (!level.isClientSide && player != null && player.canUseGameMasterBlocks() && compoundTag.contains("BlockEntityTag") && (compoundTag2 = compoundTag.getCompound("BlockEntityTag")).contains("Book")) {
+            bl = true;
+        }
+        return (BlockState)((BlockState)this.defaultBlockState().setValue(FACING, blockPlaceContext.getHorizontalDirection().getOpposite())).setValue(HAS_BOOK, bl);
     }
 
     @Override

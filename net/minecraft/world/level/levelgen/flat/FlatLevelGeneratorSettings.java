@@ -43,7 +43,7 @@ import org.apache.logging.log4j.Logger;
 
 public class FlatLevelGeneratorSettings {
     private static final Logger LOGGER = LogManager.getLogger();
-    public static final Codec<FlatLevelGeneratorSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)StructureSettings.CODEC.fieldOf("structures")).forGetter(FlatLevelGeneratorSettings::structureSettings), ((MapCodec)FlatLayerInfo.CODEC.listOf().fieldOf("layers")).forGetter(FlatLevelGeneratorSettings::getLayersInfo), Codecs.withDefault(Registry.BIOME.fieldOf("biome"), Util.prefix("Unknown biome, defaulting to plains", LOGGER::error), () -> Biomes.PLAINS).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.biome)).apply((Applicative<FlatLevelGeneratorSettings, ?>)instance, FlatLevelGeneratorSettings::new)).stable();
+    public static final Codec<FlatLevelGeneratorSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)StructureSettings.CODEC.fieldOf("structures")).forGetter(FlatLevelGeneratorSettings::structureSettings), ((MapCodec)FlatLayerInfo.CODEC.listOf().fieldOf("layers")).forGetter(FlatLevelGeneratorSettings::getLayersInfo), ((MapCodec)Codec.BOOL.fieldOf("lakes")).withDefault(false).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.addLakes), ((MapCodec)Codec.BOOL.fieldOf("features")).withDefault(false).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.decoration), Codecs.withDefault(Registry.BIOME.fieldOf("biome"), Util.prefix("Unknown biome, defaulting to plains", LOGGER::error), () -> Biomes.PLAINS).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.biome)).apply((Applicative<FlatLevelGeneratorSettings, ?>)instance, FlatLevelGeneratorSettings::new)).stable();
     private static final ConfiguredFeature<?, ?> WATER_LAKE_COMPOSITE_FEATURE = Feature.LAKE.configured(new BlockStateConfiguration(Blocks.WATER.defaultBlockState())).decorated(FeatureDecorator.WATER_LAKE.configured(new ChanceDecoratorConfiguration(4)));
     private static final ConfiguredFeature<?, ?> LAVA_LAKE_COMPOSITE_FEATURE = Feature.LAKE.configured(new BlockStateConfiguration(Blocks.LAVA.defaultBlockState())).decorated(FeatureDecorator.LAVA_LAKE.configured(new ChanceDecoratorConfiguration(80)));
     private static final Map<StructureFeature<?>, ConfiguredStructureFeature<?, ?>> STRUCTURE_FEATURES = Util.make(Maps.newHashMap(), hashMap -> {
@@ -72,8 +72,14 @@ public class FlatLevelGeneratorSettings {
     private boolean decoration = false;
     private boolean addLakes = false;
 
-    public FlatLevelGeneratorSettings(StructureSettings structureSettings, List<FlatLayerInfo> list, Biome biome) {
+    public FlatLevelGeneratorSettings(StructureSettings structureSettings, List<FlatLayerInfo> list, boolean bl, boolean bl2, Biome biome) {
         this(structureSettings);
+        if (bl) {
+            this.setAddLakes();
+        }
+        if (bl2) {
+            this.setDecoration();
+        }
         this.layersInfo.addAll(list);
         this.updateLayers();
         this.biome = biome;
@@ -105,12 +111,10 @@ public class FlatLevelGeneratorSettings {
         return flatLevelGeneratorSettings;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void setDecoration() {
         this.decoration = true;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public void setAddLakes() {
         this.addLakes = true;
     }

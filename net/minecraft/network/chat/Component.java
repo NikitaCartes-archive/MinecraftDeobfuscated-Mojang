@@ -49,12 +49,7 @@ FormattedText {
 
     @Override
     default public String getString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        this.visit(string -> {
-            stringBuilder.append(string);
-            return Optional.empty();
-        });
-        return stringBuilder.toString();
+        return FormattedText.super.getString();
     }
 
     default public String getString(int i) {

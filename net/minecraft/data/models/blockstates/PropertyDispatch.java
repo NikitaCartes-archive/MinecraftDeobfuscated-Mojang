@@ -13,7 +13,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.minecraft.data.models.blockstates.PropertyValue;
 import net.minecraft.data.models.blockstates.Selector;
 import net.minecraft.data.models.blockstates.Variant;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -37,7 +36,7 @@ public abstract class PropertyDispatch {
         List<Property<?>> list = this.getDefinedProperties();
         Stream<Selector> stream = Stream.of(Selector.empty());
         for (Property<?> property : list) {
-            stream = stream.flatMap(selector -> PropertyValue.getAll(property).map(selector::extend));
+            stream = stream.flatMap(selector -> property.getAllValues().map(selector::extend));
         }
         List list2 = stream.filter(selector -> !this.values.containsKey(selector)).collect(Collectors.toList());
         if (!list2.isEmpty()) {
@@ -94,7 +93,7 @@ public abstract class PropertyDispatch {
         }
 
         public C5<T1, T2, T3, T4, T5> select(T1 comparable, T2 comparable2, T3 comparable3, T4 comparable4, T5 comparable5, List<Variant> list) {
-            Selector selector = Selector.of(new PropertyValue<T1>(this.property1, comparable), new PropertyValue<T2>(this.property2, comparable2), new PropertyValue<T3>(this.property3, comparable3), new PropertyValue<T4>(this.property4, comparable4), new PropertyValue<T5>(this.property5, comparable5));
+            Selector selector = Selector.of(this.property1.value(comparable), this.property2.value(comparable2), this.property3.value(comparable3), this.property4.value(comparable4), this.property5.value(comparable5));
             this.putValue(selector, list);
             return this;
         }
@@ -124,7 +123,7 @@ public abstract class PropertyDispatch {
         }
 
         public C4<T1, T2, T3, T4> select(T1 comparable, T2 comparable2, T3 comparable3, T4 comparable4, List<Variant> list) {
-            Selector selector = Selector.of(new PropertyValue<T1>(this.property1, comparable), new PropertyValue<T2>(this.property2, comparable2), new PropertyValue<T3>(this.property3, comparable3), new PropertyValue<T4>(this.property4, comparable4));
+            Selector selector = Selector.of(this.property1.value(comparable), this.property2.value(comparable2), this.property3.value(comparable3), this.property4.value(comparable4));
             this.putValue(selector, list);
             return this;
         }
@@ -152,7 +151,7 @@ public abstract class PropertyDispatch {
         }
 
         public C3<T1, T2, T3> select(T1 comparable, T2 comparable2, T3 comparable3, List<Variant> list) {
-            Selector selector = Selector.of(new PropertyValue<T1>(this.property1, comparable), new PropertyValue<T2>(this.property2, comparable2), new PropertyValue<T3>(this.property3, comparable3));
+            Selector selector = Selector.of(this.property1.value(comparable), this.property2.value(comparable2), this.property3.value(comparable3));
             this.putValue(selector, list);
             return this;
         }
@@ -183,7 +182,7 @@ public abstract class PropertyDispatch {
         }
 
         public C2<T1, T2> select(T1 comparable, T2 comparable2, List<Variant> list) {
-            Selector selector = Selector.of(new PropertyValue<T1>(this.property1, comparable), new PropertyValue<T2>(this.property2, comparable2));
+            Selector selector = Selector.of(this.property1.value(comparable), this.property2.value(comparable2));
             this.putValue(selector, list);
             return this;
         }
@@ -217,7 +216,7 @@ public abstract class PropertyDispatch {
         }
 
         public C1<T1> select(T1 comparable, List<Variant> list) {
-            Selector selector = Selector.of(new PropertyValue<T1>(this.property1, comparable));
+            Selector selector = Selector.of(this.property1.value(comparable));
             this.putValue(selector, list);
             return this;
         }

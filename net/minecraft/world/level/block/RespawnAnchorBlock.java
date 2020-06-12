@@ -73,7 +73,7 @@ extends Block {
                 level.playSound(null, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, SoundEvents.RESPAWN_ANCHOR_SET_SPAWN, SoundSource.BLOCKS, 1.0f, 1.0f);
                 return InteractionResult.SUCCESS;
             }
-            return RespawnAnchorBlock.canBeCharged(blockState) ? InteractionResult.PASS : InteractionResult.CONSUME;
+            return InteractionResult.CONSUME;
         }
         if (!level.isClientSide) {
             this.explode(blockState, level, blockPos);

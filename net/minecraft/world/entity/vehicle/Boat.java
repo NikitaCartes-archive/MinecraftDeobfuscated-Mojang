@@ -774,6 +774,11 @@ extends Entity {
         return new ClientboundAddEntityPacket(this);
     }
 
+    @Override
+    public boolean isUnderWater() {
+        return this.status == Status.UNDER_WATER || this.status == Status.UNDER_FLOWING_WATER;
+    }
+
     public static enum Type {
         OAK(Blocks.OAK_PLANKS, "oak"),
         SPRUCE(Blocks.SPRUCE_PLANKS, "spruce"),

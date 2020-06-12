@@ -354,8 +354,8 @@ extends Screen {
             this.drawString(poseStack, this.font, I18n.get("selectWorld.enterName", new Object[0]), this.width / 2 - 100, 47, -6250336);
             this.drawString(poseStack, this.font, I18n.get("selectWorld.resultFolder", new Object[0]) + " " + this.resultFolder, this.width / 2 - 100, 85, -6250336);
             this.nameEdit.render(poseStack, i, j, f);
-            this.drawCenteredString(poseStack, this.font, this.gameModeHelp1, this.width / 2 - 155 + 75, 122, -6250336);
-            this.drawCenteredString(poseStack, this.font, this.gameModeHelp2, this.width / 2 - 155 + 75, 134, -6250336);
+            this.drawString(poseStack, this.font, this.gameModeHelp1, this.width / 2 - 150, 122, -6250336);
+            this.drawString(poseStack, this.font, this.gameModeHelp2, this.width / 2 - 150, 134, -6250336);
             if (this.commandsButton.visible) {
                 this.drawString(poseStack, this.font, I18n.get("selectWorld.allowCommands.info", new Object[0]), this.width / 2 - 150, 172, -6250336);
             }

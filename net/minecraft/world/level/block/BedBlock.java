@@ -10,7 +10,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -164,24 +163,13 @@ implements EntityBlock {
     }
 
     @Override
-    public void playerDestroy(Level level, Player player, BlockPos blockPos, BlockState blockState, @Nullable BlockEntity blockEntity, ItemStack itemStack) {
-        super.playerDestroy(level, player, blockPos, Blocks.AIR.defaultBlockState(), blockEntity, itemStack);
-    }
-
-    @Override
     public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
-        BedPart bedPart = blockState.getValue(PART);
-        BlockPos blockPos2 = blockPos.relative(BedBlock.getNeighbourDirection(bedPart, blockState.getValue(FACING)));
-        BlockState blockState2 = level.getBlockState(blockPos2);
-        if (blockState2.is(this) && blockState2.getValue(PART) != bedPart) {
+        BlockPos blockPos2;
+        BlockState blockState2;
+        BedPart bedPart;
+        if (!level.isClientSide && player.isCreative() && (bedPart = blockState.getValue(PART)) == BedPart.FOOT && (blockState2 = level.getBlockState(blockPos2 = blockPos.relative(BedBlock.getNeighbourDirection(bedPart, blockState.getValue(FACING))))).getBlock() == this && blockState2.getValue(PART) == BedPart.HEAD) {
             level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 35);
             level.levelEvent(player, 2001, blockPos2, Block.getId(blockState2));
-            if (!level.isClientSide && !player.isCreative()) {
-                ItemStack itemStack = player.getMainHandItem();
-                BedBlock.dropResources(blockState, level, blockPos, null, player, itemStack);
-                BedBlock.dropResources(blockState2, level, blockPos2, null, player, itemStack);
-            }
-            player.awardStat(Stats.BLOCK_MINED.get(this));
         }
         super.playerWillDestroy(level, blockPos, blockState, player);
     }
