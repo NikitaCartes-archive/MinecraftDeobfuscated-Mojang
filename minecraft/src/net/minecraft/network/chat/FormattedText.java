@@ -91,6 +91,15 @@ public interface FormattedText {
 		};
 	}
 
+	default String getString() {
+		StringBuilder stringBuilder = new StringBuilder();
+		this.visit(string -> {
+			stringBuilder.append(string);
+			return Optional.empty();
+		});
+		return stringBuilder.toString();
+	}
+
 	public interface ContentConsumer<T> {
 		Optional<T> accept(String string);
 	}

@@ -3,7 +3,6 @@ package net.minecraft.world.entity;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.gson.JsonSyntaxException;
 import it.unimi.dsi.fastutil.objects.Object2DoubleArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import java.util.Arrays;
@@ -976,7 +975,16 @@ public abstract class Entity implements Nameable, CommandSource {
 		this.wasEyeInWater = this.isEyeInFluid(FluidTags.WATER);
 		this.fluidOnEyes = null;
 		double d = this.getEyeY() - 0.11111111F;
-		BlockPos blockPos = new BlockPos(this.getX(), d, this.getZ());
+		Vec3 vec3 = new Vec3(this.getX(), d, this.getZ());
+		Entity entity = this.getVehicle();
+		if (entity instanceof Boat) {
+			Boat boat = (Boat)entity;
+			if (!boat.isUnderWater() && boat.getBoundingBox().contains(vec3)) {
+				return;
+			}
+		}
+
+		BlockPos blockPos = new BlockPos(vec3);
 		FluidState fluidState = this.level.getFluidState(blockPos);
 
 		for (Tag<Fluid> tag : FluidTags.getWrappers()) {
@@ -1422,7 +1430,7 @@ public abstract class Entity implements Nameable, CommandSource {
 
 					try {
 						this.setCustomName(Component.Serializer.fromJson(string));
-					} catch (JsonSyntaxException var14) {
+					} catch (Exception var14) {
 						LOGGER.warn("Failed to parse entity custom name {}", string, var14);
 					}
 				}
@@ -1528,21 +1536,10 @@ public abstract class Entity implements Nameable, CommandSource {
 		if (this.noPhysics) {
 			return false;
 		} else {
-			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-
-			for (int i = 0; i < 8; i++) {
-				int j = Mth.floor(this.getY() + (double)(((float)((i >> 0) % 2) - 0.5F) * 0.1F) + (double)this.eyeHeight);
-				int k = Mth.floor(this.getX() + (double)(((float)((i >> 1) % 2) - 0.5F) * this.dimensions.width * 0.8F));
-				int l = Mth.floor(this.getZ() + (double)(((float)((i >> 2) % 2) - 0.5F) * this.dimensions.width * 0.8F));
-				if (mutableBlockPos.getX() != k || mutableBlockPos.getY() != j || mutableBlockPos.getZ() != l) {
-					mutableBlockPos.set(k, j, l);
-					if (this.level.getBlockState(mutableBlockPos).isSuffocating(this.level, mutableBlockPos)) {
-						return true;
-					}
-				}
-			}
-
-			return false;
+			float f = 0.1F;
+			float g = this.dimensions.width * 0.8F;
+			AABB aABB = AABB.ofSize((double)g, 0.1F, (double)g).move(this.getX(), this.getEyeY(), this.getZ());
+			return this.level.getBlockCollisions(this, aABB, (blockState, blockPos) -> blockState.isSuffocating(this.level, blockPos)).findAny().isPresent();
 		}
 	}
 

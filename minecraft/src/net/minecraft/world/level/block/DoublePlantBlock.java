@@ -13,7 +13,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -75,25 +74,24 @@ public class DoublePlantBlock extends BushBlock {
 	}
 
 	@Override
-	public void playerDestroy(Level level, Player player, BlockPos blockPos, BlockState blockState, @Nullable BlockEntity blockEntity, ItemStack itemStack) {
-		super.playerDestroy(level, player, blockPos, Blocks.AIR.defaultBlockState(), blockEntity, itemStack);
-	}
-
-	@Override
 	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
-		DoubleBlockHalf doubleBlockHalf = blockState.getValue(HALF);
-		BlockPos blockPos2 = doubleBlockHalf == DoubleBlockHalf.LOWER ? blockPos.above() : blockPos.below();
-		BlockState blockState2 = level.getBlockState(blockPos2);
-		if (blockState2.is(this) && blockState2.getValue(HALF) != doubleBlockHalf) {
-			level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 35);
-			level.levelEvent(player, 2001, blockPos2, Block.getId(blockState2));
-			if (!level.isClientSide && !player.isCreative()) {
-				dropResources(blockState, level, blockPos, null, player, player.getMainHandItem());
-				dropResources(blockState2, level, blockPos2, null, player, player.getMainHandItem());
-			}
+		if (!level.isClientSide && player.isCreative()) {
+			preventCreativeDropFromBottomPart(level, blockPos, blockState, player);
 		}
 
 		super.playerWillDestroy(level, blockPos, blockState, player);
+	}
+
+	protected static void preventCreativeDropFromBottomPart(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+		DoubleBlockHalf doubleBlockHalf = blockState.getValue(HALF);
+		if (doubleBlockHalf == DoubleBlockHalf.UPPER) {
+			BlockPos blockPos2 = blockPos.below();
+			BlockState blockState2 = level.getBlockState(blockPos2);
+			if (blockState2.getBlock() == blockState.getBlock() && blockState2.getValue(HALF) == DoubleBlockHalf.LOWER) {
+				level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 35);
+				level.levelEvent(player, 2001, blockPos2, Block.getId(blockState2));
+			}
+		}
 	}
 
 	@Override

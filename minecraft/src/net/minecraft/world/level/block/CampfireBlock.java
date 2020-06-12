@@ -309,4 +309,12 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
 	}
+
+	public static boolean canLight(BlockState blockState) {
+		return blockState.is(
+				BlockTags.CAMPFIRES, blockStateBase -> blockStateBase.hasProperty(BlockStateProperties.WATERLOGGED) && blockStateBase.hasProperty(BlockStateProperties.LIT)
+			)
+			&& !(Boolean)blockState.getValue(BlockStateProperties.WATERLOGGED)
+			&& !(Boolean)blockState.getValue(BlockStateProperties.LIT);
+	}
 }

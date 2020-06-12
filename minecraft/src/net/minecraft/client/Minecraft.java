@@ -97,6 +97,7 @@ import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.GpuWarnlistManager;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
@@ -284,6 +285,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private final MusicManager musicManager;
 	private final FontManager fontManager;
 	private final SplashManager splashManager;
+	private final GpuWarnlistManager gpuWarnlistManager;
 	private final MinecraftSessionService minecraftSessionService;
 	private final SkinManager skinManager;
 	private final ModelManager modelManager;
@@ -467,6 +469,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.resourceManager.registerReloadListener(this.paintingTextures);
 		this.mobEffectTextures = new MobEffectTextureManager(this.textureManager);
 		this.resourceManager.registerReloadListener(this.mobEffectTextures);
+		this.gpuWarnlistManager = new GpuWarnlistManager();
+		this.resourceManager.registerReloadListener(this.gpuWarnlistManager);
 		this.gui = new Gui(this);
 		this.debugRenderer = new DebugRenderer(this);
 		RenderSystem.setErrorCallback(this::onFullscreenError);
@@ -2224,6 +2228,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public boolean isPaused() {
 		return this.pause;
+	}
+
+	public GpuWarnlistManager getGpuWarnlistManager() {
+		return this.gpuWarnlistManager;
 	}
 
 	public SoundManager getSoundManager() {

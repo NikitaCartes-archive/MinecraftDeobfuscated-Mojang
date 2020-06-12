@@ -471,7 +471,15 @@ public class Blocks {
 		"wheat", new CropBlock(BlockBehaviour.Properties.of(Material.PLANT).noCollission().randomTicks().instabreak().sound(SoundType.CROP))
 	);
 	public static final Block FARMLAND = register(
-		"farmland", new FarmBlock(BlockBehaviour.Properties.of(Material.DIRT).randomTicks().strength(0.6F).sound(SoundType.GRAVEL).isViewBlocking(Blocks::always))
+		"farmland",
+		new FarmBlock(
+			BlockBehaviour.Properties.of(Material.DIRT)
+				.randomTicks()
+				.strength(0.6F)
+				.sound(SoundType.GRAVEL)
+				.isViewBlocking(Blocks::always)
+				.isSuffocating(Blocks::always)
+		)
 	);
 	public static final Block FURNACE = register(
 		"furnace", new FurnaceBlock(BlockBehaviour.Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(3.5F).lightLevel(litBlockEmission(13)))
@@ -690,6 +698,7 @@ public class Blocks {
 				.isValidSpawn(Blocks::always)
 				.isRedstoneConductor(Blocks::always)
 				.isViewBlocking(Blocks::always)
+				.isSuffocating(Blocks::always)
 		)
 	);
 	public static final Block SOUL_SOIL = register(
@@ -1775,7 +1784,10 @@ public class Blocks {
 		"beetroots", new BeetrootBlock(BlockBehaviour.Properties.of(Material.PLANT).noCollission().randomTicks().instabreak().sound(SoundType.CROP))
 	);
 	public static final Block GRASS_PATH = register(
-		"grass_path", new GrassPathBlock(BlockBehaviour.Properties.of(Material.DIRT).strength(0.65F).sound(SoundType.GRASS).isViewBlocking(Blocks::always))
+		"grass_path",
+		new GrassPathBlock(
+			BlockBehaviour.Properties.of(Material.DIRT).strength(0.65F).sound(SoundType.GRASS).isViewBlocking(Blocks::always).isSuffocating(Blocks::always)
+		)
 	);
 	public static final Block END_GATEWAY = register(
 		"end_gateway",

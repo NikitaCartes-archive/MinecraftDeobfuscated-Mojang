@@ -70,6 +70,10 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 		return this.byType(recipeType).values().stream().flatMap(recipe -> Util.toStream(recipeType.tryMatch(recipe, level, container))).findFirst();
 	}
 
+	public <C extends Container, T extends Recipe<C>> List<T> getAllRecipesFor(RecipeType<T> recipeType) {
+		return (List<T>)this.byType(recipeType).values().stream().map(recipe -> recipe).collect(Collectors.toList());
+	}
+
 	public <C extends Container, T extends Recipe<C>> List<T> getRecipesFor(RecipeType<T> recipeType, C container, Level level) {
 		return (List<T>)this.byType(recipeType)
 			.values()

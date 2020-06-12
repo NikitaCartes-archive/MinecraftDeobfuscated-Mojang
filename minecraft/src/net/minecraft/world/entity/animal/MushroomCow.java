@@ -91,7 +91,8 @@ public class MushroomCow extends Cow implements Shearable {
 				itemStack2 = new ItemStack(Items.MUSHROOM_STEW);
 			}
 
-			ItemUtils.createBucketResult(itemStack, player, itemStack2);
+			ItemStack itemStack3 = ItemUtils.createBucketResult(itemStack, player, itemStack2);
+			player.setItemInHand(interactionHand, itemStack3);
 			SoundEvent soundEvent;
 			if (bl) {
 				soundEvent = SoundEvents.MOOSHROOM_MILK_SUSPICIOUSLY;

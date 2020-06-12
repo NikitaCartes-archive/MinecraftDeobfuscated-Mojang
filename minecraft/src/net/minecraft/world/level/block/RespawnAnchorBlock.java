@@ -84,7 +84,7 @@ public class RespawnAnchorBlock extends Block {
 				}
 			}
 
-			return canBeCharged(blockState) ? InteractionResult.PASS : InteractionResult.CONSUME;
+			return InteractionResult.CONSUME;
 		}
 	}
 

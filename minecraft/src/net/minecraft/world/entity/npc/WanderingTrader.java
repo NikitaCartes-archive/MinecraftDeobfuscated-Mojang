@@ -31,6 +31,7 @@ import net.minecraft.world.entity.monster.Illusioner;
 import net.minecraft.world.entity.monster.Pillager;
 import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.monster.Vindicator;
+import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -80,6 +81,7 @@ public class WanderingTrader extends AbstractVillager {
 		this.goalSelector.addGoal(1, new AvoidEntityGoal(this, Vex.class, 8.0F, 0.5, 0.5));
 		this.goalSelector.addGoal(1, new AvoidEntityGoal(this, Pillager.class, 15.0F, 0.5, 0.5));
 		this.goalSelector.addGoal(1, new AvoidEntityGoal(this, Illusioner.class, 12.0F, 0.5, 0.5));
+		this.goalSelector.addGoal(1, new AvoidEntityGoal(this, Zoglin.class, 10.0F, 0.5, 0.5));
 		this.goalSelector.addGoal(1, new PanicGoal(this, 0.5));
 		this.goalSelector.addGoal(1, new LookAtTradingPlayerGoal(this));
 		this.goalSelector.addGoal(2, new WanderingTrader.WanderToPositionGoal(this, 2.0, 0.35));

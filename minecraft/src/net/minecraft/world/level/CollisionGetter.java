@@ -1,5 +1,6 @@
 package net.minecraft.world.level;
 
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -56,5 +57,9 @@ public interface CollisionGetter extends BlockGetter {
 
 	default Stream<VoxelShape> getBlockCollisions(@Nullable Entity entity, AABB aABB) {
 		return StreamSupport.stream(new CollisionSpliterator(this, entity, aABB), false);
+	}
+
+	default Stream<VoxelShape> getBlockCollisions(@Nullable Entity entity, AABB aABB, BiPredicate<BlockState, BlockPos> biPredicate) {
+		return StreamSupport.stream(new CollisionSpliterator(this, entity, aABB, biPredicate), false);
 	}
 }

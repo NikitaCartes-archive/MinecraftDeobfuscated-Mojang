@@ -159,8 +159,10 @@ public abstract class AbstractContainerMenu {
 			CrashReport crashReport = CrashReport.forThrowable(var8, "Container click");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Click info");
 			crashReportCategory.setDetail(
-				"Menu", (CrashReportDetail<String>)(() -> this.menuType != null ? Registry.MENU.getKey(this.menuType).toString() : "<no type>")
+				"Menu Type", (CrashReportDetail<String>)(() -> this.menuType != null ? Registry.MENU.getKey(this.menuType).toString() : "<no type>")
 			);
+			crashReportCategory.setDetail("Menu Class", (CrashReportDetail<String>)(() -> this.getClass().getCanonicalName()));
+			crashReportCategory.setDetail("Slot Count", this.slots.size());
 			crashReportCategory.setDetail("Slot", i);
 			crashReportCategory.setDetail("Button", j);
 			crashReportCategory.setDetail("Type", clickType);

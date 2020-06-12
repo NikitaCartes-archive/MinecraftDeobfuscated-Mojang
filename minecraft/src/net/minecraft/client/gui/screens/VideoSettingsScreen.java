@@ -1,29 +1,38 @@
 package net.minecraft.client.gui.screens;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.FullscreenResolutionProgressOption;
+import net.minecraft.client.GraphicsStatus;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.OptionButton;
 import net.minecraft.client.gui.components.OptionsList;
+import net.minecraft.client.renderer.GpuWarnlistManager;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class VideoSettingsScreen extends OptionsSubScreen {
-	@Nullable
-	private List<FormattedText> tooltip;
-	private OptionsList list;
+	private static final Component FABULOUS = new TranslatableComponent("options.graphics.fabulous").withStyle(ChatFormatting.ITALIC);
+	private static final Component WARNING_MESSAGE = new TranslatableComponent("options.graphics.warning.message", FABULOUS, FABULOUS);
+	private static final Component WARNING_TITLE = new TranslatableComponent("options.graphics.warning.title").withStyle(ChatFormatting.RED);
+	private static final Component BUTTON_ACCEPT = new TranslatableComponent("options.graphics.warning.accept");
+	private static final Component BUTTON_CANCEL = new TranslatableComponent("options.graphics.warning.cancel");
+	private static final Component NEW_LINE = new TextComponent("\n");
 	private static final Option[] OPTIONS = new Option[]{
 		Option.GRAPHICS,
 		Option.RENDER_DISTANCE,
@@ -41,10 +50,15 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 		Option.ENTITY_SHADOWS,
 		Option.ENTITY_DISTANCE_SCALING
 	};
-	private int oldMipmaps;
+	@Nullable
+	private List<FormattedText> tooltip;
+	private OptionsList list;
+	private final GpuWarnlistManager gpuWarnlistManager;
+	private final int oldMipmaps;
 
 	public VideoSettingsScreen(Screen screen, Options options) {
 		super(screen, options, new TranslatableComponent("options.videoTitle"));
+		this.gpuWarnlistManager = screen.minecraft.getGpuWarnlistManager();
 		this.oldMipmaps = options.mipmapLevels;
 	}
 
@@ -75,9 +89,42 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 	@Override
 	public boolean mouseClicked(double d, double e, int i) {
 		int j = this.options.guiScale;
+		GraphicsStatus graphicsStatus = this.options.graphicsMode;
 		if (super.mouseClicked(d, e, i)) {
 			if (this.options.guiScale != j) {
 				this.minecraft.resizeDisplay();
+			}
+
+			if (this.options.graphicsMode != graphicsStatus && this.options.graphicsMode == GraphicsStatus.FABULOUS && this.gpuWarnlistManager.hasWarnings()) {
+				this.options.graphicsMode = GraphicsStatus.FANCY;
+				List<FormattedText> list = Lists.<FormattedText>newArrayList(WARNING_MESSAGE, NEW_LINE);
+				String string = this.gpuWarnlistManager.getRendererWarnings();
+				if (string != null) {
+					list.add(NEW_LINE);
+					list.add(new TranslatableComponent("options.graphics.warning.renderer", string).withStyle(ChatFormatting.GRAY));
+				}
+
+				String string2 = this.gpuWarnlistManager.getVendorWarnings();
+				if (string2 != null) {
+					list.add(NEW_LINE);
+					list.add(new TranslatableComponent("options.graphics.warning.vendor", string2).withStyle(ChatFormatting.GRAY));
+				}
+
+				String string3 = this.gpuWarnlistManager.getVersionWarnings();
+				if (string3 != null) {
+					list.add(NEW_LINE);
+					list.add(new TranslatableComponent("options.graphics.warning.version", string3).withStyle(ChatFormatting.GRAY));
+				}
+
+				this.minecraft.setScreen(new PopupScreen(WARNING_TITLE, list, ImmutableList.of(new PopupScreen.ButtonOption(BUTTON_ACCEPT, button -> {
+					this.options.graphicsMode = GraphicsStatus.FABULOUS;
+					Minecraft.getInstance().levelRenderer.allChanged();
+					this.minecraft.setScreen(this);
+				}), new PopupScreen.ButtonOption(BUTTON_CANCEL, button -> {
+					this.options.graphicsMode = GraphicsStatus.FAST;
+					Minecraft.getInstance().levelRenderer.allChanged();
+					this.minecraft.setScreen(this);
+				}))));
 			}
 
 			return true;
@@ -107,12 +154,8 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 		this.tooltip = null;
 		Optional<AbstractWidget> optional = this.list.getMouseOver((double)i, (double)j);
 		if (optional.isPresent() && optional.get() instanceof OptionButton) {
-			Optional<TranslatableComponent> optional2 = ((OptionButton)optional.get()).getOption().getTooltip();
-			if (optional2.isPresent()) {
-				Builder<FormattedText> builder = ImmutableList.builder();
-				this.font.split((FormattedText)optional2.get(), 200).forEach(builder::add);
-				this.tooltip = builder.build();
-			}
+			Optional<List<FormattedText>> optional2 = ((OptionButton)optional.get()).getOption().getTooltip();
+			optional2.ifPresent(list -> this.tooltip = list);
 		}
 
 		this.renderBackground(poseStack);

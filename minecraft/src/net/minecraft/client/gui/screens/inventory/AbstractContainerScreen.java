@@ -535,11 +535,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 	public boolean keyPressed(int i, int j, int k) {
 		if (super.keyPressed(i, j, k)) {
 			return true;
-		} else {
-			if (i == 256 || this.minecraft.options.keyInventory.matches(i, j)) {
-				this.minecraft.player.closeContainer();
-			}
-
+		} else if (i != 256 && !this.minecraft.options.keyInventory.matches(i, j)) {
 			this.checkHotbarKeyPressed(i, j);
 			if (this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
 				if (this.minecraft.options.keyPickItem.matches(i, j)) {
@@ -549,6 +545,9 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 				}
 			}
 
+			return true;
+		} else {
+			this.minecraft.player.closeContainer();
 			return true;
 		}
 	}

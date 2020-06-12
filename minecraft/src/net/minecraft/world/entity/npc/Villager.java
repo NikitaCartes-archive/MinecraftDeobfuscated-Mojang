@@ -82,6 +82,7 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
 public class Villager extends AbstractVillager implements ReputationEventHandler, VillagerDataHolder {
@@ -883,26 +884,36 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		for (int i = 0; i < 10; i++) {
 			double d = (double)(this.level.random.nextInt(16) - 8);
 			double e = (double)(this.level.random.nextInt(16) - 8);
-			double f = 6.0;
+			BlockPos blockPos2 = this.findSpawnPositionForGolemInColumn(blockPos, d, e);
+			if (blockPos2 != null) {
+				IronGolem ironGolem = EntityType.IRON_GOLEM.create(this.level, null, null, null, blockPos2, MobSpawnType.MOB_SUMMONED, false, false);
+				if (ironGolem != null) {
+					if (ironGolem.checkSpawnRules(this.level, MobSpawnType.MOB_SUMMONED) && ironGolem.checkSpawnObstruction(this.level)) {
+						this.level.addFreshEntity(ironGolem);
+						return ironGolem;
+					}
 
-			for (int j = 0; j >= -12; j--) {
-				BlockPos blockPos2 = blockPos.offset(d, f + (double)j, e);
-				if ((this.level.getBlockState(blockPos2).isAir() || this.level.getBlockState(blockPos2).getMaterial().isLiquid())
-					&& this.level.getBlockState(blockPos2.below()).getMaterial().isSolidBlocking()) {
-					f += (double)j;
-					break;
+					ironGolem.remove();
 				}
 			}
+		}
 
-			BlockPos blockPos3 = blockPos.offset(d, f, e);
-			IronGolem ironGolem = EntityType.IRON_GOLEM.create(this.level, null, null, null, blockPos3, MobSpawnType.MOB_SUMMONED, false, false);
-			if (ironGolem != null) {
-				if (ironGolem.checkSpawnRules(this.level, MobSpawnType.MOB_SUMMONED) && ironGolem.checkSpawnObstruction(this.level)) {
-					this.level.addFreshEntity(ironGolem);
-					return ironGolem;
-				}
+		return null;
+	}
 
-				ironGolem.remove();
+	@Nullable
+	private BlockPos findSpawnPositionForGolemInColumn(BlockPos blockPos, double d, double e) {
+		int i = 6;
+		BlockPos blockPos2 = blockPos.offset(d, 6.0, e);
+		BlockState blockState = this.level.getBlockState(blockPos2);
+
+		for (int j = 6; j >= -6; j--) {
+			BlockPos blockPos3 = blockPos2;
+			BlockState blockState2 = blockState;
+			blockPos2 = blockPos2.below();
+			blockState = this.level.getBlockState(blockPos2);
+			if ((blockState2.isAir() || blockState2.getMaterial().isLiquid()) && blockState.getMaterial().isSolidBlocking()) {
+				return blockPos3;
 			}
 		}
 

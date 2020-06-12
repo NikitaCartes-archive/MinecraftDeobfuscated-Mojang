@@ -509,7 +509,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			entity = new AreaEffectCloud(this.level, d, e, f);
 		} else if (entityType == EntityType.LIGHTNING_BOLT) {
 			entity = new LightningBolt(EntityType.LIGHTNING_BOLT, this.level);
-			entity.moveTo(d, e, f);
 		} else {
 			entity = null;
 		}
@@ -517,6 +516,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		if (entity != null) {
 			int i = clientboundAddEntityPacket.getId();
 			entity.setPacketCoordinates(d, e, f);
+			entity.moveTo(d, e, f);
 			entity.xRot = (float)(clientboundAddEntityPacket.getxRot() * 360) / 256.0F;
 			entity.yRot = (float)(clientboundAddEntityPacket.getyRot() * 360) / 256.0F;
 			entity.setId(i);

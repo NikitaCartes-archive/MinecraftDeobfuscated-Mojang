@@ -80,7 +80,8 @@ public class Cow extends Animal {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (itemStack.getItem() == Items.BUCKET && !this.isBaby()) {
 			player.playSound(SoundEvents.COW_MILK, 1.0F, 1.0F);
-			ItemUtils.createBucketResult(itemStack, player, Items.MILK_BUCKET.getDefaultInstance());
+			ItemStack itemStack2 = ItemUtils.createBucketResult(itemStack, player, Items.MILK_BUCKET.getDefaultInstance());
+			player.setItemInHand(interactionHand, itemStack2);
 			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		} else {
 			return super.mobInteract(player, interactionHand);

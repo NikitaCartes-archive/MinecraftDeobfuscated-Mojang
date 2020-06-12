@@ -52,6 +52,10 @@ public class UpgradeRecipe implements Recipe<Container> {
 		return this.result;
 	}
 
+	public boolean isAdditionIngredient(ItemStack itemStack) {
+		return this.addition.test(itemStack);
+	}
+
 	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getToastSymbol() {

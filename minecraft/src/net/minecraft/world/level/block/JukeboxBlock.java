@@ -1,8 +1,11 @@
 package net.minecraft.world.level.block;
 
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -26,6 +29,18 @@ public class JukeboxBlock extends BaseEntityBlock {
 	protected JukeboxBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(HAS_RECORD, Boolean.valueOf(false)));
+	}
+
+	@Override
+	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, @Nullable LivingEntity livingEntity, ItemStack itemStack) {
+		super.setPlacedBy(level, blockPos, blockState, livingEntity, itemStack);
+		CompoundTag compoundTag = itemStack.getOrCreateTag();
+		if (compoundTag.contains("BlockEntityTag")) {
+			CompoundTag compoundTag2 = compoundTag.getCompound("BlockEntityTag");
+			if (compoundTag2.contains("RecordItem")) {
+				level.setBlock(blockPos, blockState.setValue(HAS_RECORD, Boolean.valueOf(true)), 2);
+			}
+		}
 	}
 
 	@Override

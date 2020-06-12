@@ -843,6 +843,11 @@ public class Boat extends Entity {
 		return new ClientboundAddEntityPacket(this);
 	}
 
+	@Override
+	public boolean isUnderWater() {
+		return this.status == Boat.Status.UNDER_WATER || this.status == Boat.Status.UNDER_FLOWING_WATER;
+	}
+
 	public static enum Status {
 		IN_WATER,
 		UNDER_WATER,

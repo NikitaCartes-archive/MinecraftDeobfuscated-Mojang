@@ -2,6 +2,7 @@ package net.minecraft.world.level;
 
 import java.util.Objects;
 import java.util.Spliterators.AbstractSpliterator;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -27,8 +28,13 @@ public class CollisionSpliterator extends AbstractSpliterator<VoxelShape> {
 	private final VoxelShape entityShape;
 	private final CollisionGetter collisionGetter;
 	private boolean needsBorderCheck;
+	private final BiPredicate<BlockState, BlockPos> predicate;
 
 	public CollisionSpliterator(CollisionGetter collisionGetter, @Nullable Entity entity, AABB aABB) {
+		this(collisionGetter, entity, aABB, (blockState, blockPos) -> true);
+	}
+
+	public CollisionSpliterator(CollisionGetter collisionGetter, @Nullable Entity entity, AABB aABB, BiPredicate<BlockState, BlockPos> biPredicate) {
 		super(Long.MAX_VALUE, 1280);
 		this.context = entity == null ? CollisionContext.empty() : CollisionContext.of(entity);
 		this.pos = new BlockPos.MutableBlockPos();
@@ -37,6 +43,7 @@ public class CollisionSpliterator extends AbstractSpliterator<VoxelShape> {
 		this.needsBorderCheck = entity != null;
 		this.source = entity;
 		this.box = aABB;
+		this.predicate = biPredicate;
 		int i = Mth.floor(aABB.minX - 1.0E-7) - 1;
 		int j = Mth.floor(aABB.maxX + 1.0E-7) + 1;
 		int k = Mth.floor(aABB.minY - 1.0E-7) - 1;
@@ -61,7 +68,7 @@ public class CollisionSpliterator extends AbstractSpliterator<VoxelShape> {
 				if (blockGetter != null) {
 					this.pos.set(i, j, k);
 					BlockState blockState = blockGetter.getBlockState(this.pos);
-					if ((l != 1 || blockState.hasLargeCollisionShape()) && (l != 2 || blockState.is(Blocks.MOVING_PISTON))) {
+					if (this.predicate.test(blockState, this.pos) && (l != 1 || blockState.hasLargeCollisionShape()) && (l != 2 || blockState.is(Blocks.MOVING_PISTON))) {
 						VoxelShape voxelShape = blockState.getCollisionShape(this.collisionGetter, this.pos, this.context);
 						if (voxelShape == Shapes.block()) {
 							if (this.box.intersects((double)i, (double)j, (double)k, (double)i + 1.0, (double)j + 1.0, (double)k + 1.0)) {
