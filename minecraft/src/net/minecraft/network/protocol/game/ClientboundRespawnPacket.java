@@ -16,6 +16,7 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 	private ResourceKey<Level> dimension;
 	private long seed;
 	private GameType playerGameType;
+	private GameType previousPlayerGameType;
 	private boolean isDebug;
 	private boolean isFlat;
 	private boolean keepAllPlayerData;
@@ -24,12 +25,13 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 	}
 
 	public ClientboundRespawnPacket(
-		ResourceKey<DimensionType> resourceKey, ResourceKey<Level> resourceKey2, long l, GameType gameType, boolean bl, boolean bl2, boolean bl3
+		ResourceKey<DimensionType> resourceKey, ResourceKey<Level> resourceKey2, long l, GameType gameType, GameType gameType2, boolean bl, boolean bl2, boolean bl3
 	) {
 		this.dimensionType = resourceKey;
 		this.dimension = resourceKey2;
 		this.seed = l;
 		this.playerGameType = gameType;
+		this.previousPlayerGameType = gameType2;
 		this.isDebug = bl;
 		this.isFlat = bl2;
 		this.keepAllPlayerData = bl3;
@@ -45,6 +47,7 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 		this.dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation());
 		this.seed = friendlyByteBuf.readLong();
 		this.playerGameType = GameType.byId(friendlyByteBuf.readUnsignedByte());
+		this.previousPlayerGameType = GameType.byId(friendlyByteBuf.readUnsignedByte());
 		this.isDebug = friendlyByteBuf.readBoolean();
 		this.isFlat = friendlyByteBuf.readBoolean();
 		this.keepAllPlayerData = friendlyByteBuf.readBoolean();
@@ -56,6 +59,7 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 		friendlyByteBuf.writeResourceLocation(this.dimension.location());
 		friendlyByteBuf.writeLong(this.seed);
 		friendlyByteBuf.writeByte(this.playerGameType.getId());
+		friendlyByteBuf.writeByte(this.previousPlayerGameType.getId());
 		friendlyByteBuf.writeBoolean(this.isDebug);
 		friendlyByteBuf.writeBoolean(this.isFlat);
 		friendlyByteBuf.writeBoolean(this.keepAllPlayerData);
@@ -79,6 +83,11 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 	@Environment(EnvType.CLIENT)
 	public GameType getPlayerGameType() {
 		return this.playerGameType;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public GameType getPreviousPlayerGameType() {
+		return this.previousPlayerGameType;
 	}
 
 	@Environment(EnvType.CLIENT)

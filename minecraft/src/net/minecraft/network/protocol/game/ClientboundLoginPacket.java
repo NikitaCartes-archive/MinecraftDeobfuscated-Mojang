@@ -19,6 +19,7 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 	private long seed;
 	private boolean hardcore;
 	private GameType gameType;
+	private GameType previousGameType;
 	private Set<ResourceKey<Level>> levels;
 	private RegistryAccess.RegistryHolder registryHolder;
 	private ResourceKey<DimensionType> dimensionType;
@@ -36,6 +37,7 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 	public ClientboundLoginPacket(
 		int i,
 		GameType gameType,
+		GameType gameType2,
 		long l,
 		boolean bl,
 		Set<ResourceKey<Level>> set,
@@ -56,6 +58,7 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 		this.dimension = resourceKey2;
 		this.seed = l;
 		this.gameType = gameType;
+		this.previousGameType = gameType2;
 		this.maxPlayers = j;
 		this.hardcore = bl;
 		this.chunkRadius = k;
@@ -72,6 +75,7 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 		this.hardcore = (i & 8) == 8;
 		i &= -9;
 		this.gameType = GameType.byId(i);
+		this.previousGameType = GameType.byId(friendlyByteBuf.readUnsignedByte());
 		int j = friendlyByteBuf.readVarInt();
 		this.levels = Sets.<ResourceKey<Level>>newHashSet();
 
@@ -100,6 +104,7 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 		}
 
 		friendlyByteBuf.writeByte(i);
+		friendlyByteBuf.writeByte(this.previousGameType.getId());
 		friendlyByteBuf.writeVarInt(this.levels.size());
 
 		for (ResourceKey<Level> resourceKey : this.levels) {
@@ -140,6 +145,11 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 	@Environment(EnvType.CLIENT)
 	public GameType getGameType() {
 		return this.gameType;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public GameType getPreviousGameType() {
+		return this.previousGameType;
 	}
 
 	@Environment(EnvType.CLIENT)

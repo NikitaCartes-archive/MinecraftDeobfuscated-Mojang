@@ -3,6 +3,7 @@ package net.minecraft.client.gui.screens.inventory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
@@ -296,28 +297,31 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 	@Override
 	public boolean keyPressed(int i, int j, int k) {
 		this.ignoreTextInput = false;
-		if (selectedTab == CreativeModeTab.TAB_SEARCH.getId()) {
-			String string = this.searchBox.getValue();
-			if (this.searchBox.keyPressed(i, j, k)) {
-				if (!Objects.equals(string, this.searchBox.getValue())) {
-					this.refreshSearchResults();
-				}
-
-				return true;
-			} else {
-				return this.searchBox.isFocused() && this.searchBox.isVisible() && i != 256 ? true : super.keyPressed(i, j, k);
-			}
-		} else {
-			boolean bl = !this.isCreativeSlot(this.hoveredSlot) || this.hoveredSlot != null && this.hoveredSlot.hasItem();
-			if (bl && this.checkHotbarKeyPressed(i, j)) {
-				this.ignoreTextInput = true;
-				return true;
-			} else if (this.minecraft.options.keyChat.matches(i, j)) {
+		if (selectedTab != CreativeModeTab.TAB_SEARCH.getId()) {
+			if (this.minecraft.options.keyChat.matches(i, j)) {
 				this.ignoreTextInput = true;
 				this.selectTab(CreativeModeTab.TAB_SEARCH);
 				return true;
 			} else {
 				return super.keyPressed(i, j, k);
+			}
+		} else {
+			boolean bl = !this.isCreativeSlot(this.hoveredSlot) || this.hoveredSlot.hasItem();
+			boolean bl2 = InputConstants.getKey(i, j).getNumericKeyValue().isPresent();
+			if (bl && bl2 && this.checkHotbarKeyPressed(i, j)) {
+				this.ignoreTextInput = true;
+				return true;
+			} else {
+				String string = this.searchBox.getValue();
+				if (this.searchBox.keyPressed(i, j, k)) {
+					if (!Objects.equals(string, this.searchBox.getValue())) {
+						this.refreshSearchResults();
+					}
+
+					return true;
+				} else {
+					return this.searchBox.isFocused() && this.searchBox.isVisible() && i != 256 ? true : super.keyPressed(i, j, k);
+				}
 			}
 		}
 	}

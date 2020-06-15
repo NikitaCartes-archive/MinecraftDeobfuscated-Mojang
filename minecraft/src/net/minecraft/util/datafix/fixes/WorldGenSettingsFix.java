@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -91,10 +92,10 @@ public class WorldGenSettingsFix extends DataFix {
 		} else if (!optional.isPresent()) {
 			dynamic2 = defaultOverworld(dynamic, l);
 		} else {
-			OptionalDynamic<T> optionalDynamic = dynamic.get("generatorOptions");
-			String bl7 = (String)optional.get();
-			switch (bl7) {
+			String bl6 = (String)optional.get();
+			switch (bl6) {
 				case "flat":
+					OptionalDynamic<T> optionalDynamic = dynamic.get("generatorOptions");
 					Map<Dynamic<T>, Dynamic<T>> map = fixFlatStructures(dynamicOps, optionalDynamic);
 					dynamic2 = dynamic.createMap(
 						ImmutableMap.of(
@@ -106,9 +107,27 @@ public class WorldGenSettingsFix extends DataFix {
 									dynamic.createString("structures"),
 									dynamic.createMap(map),
 									dynamic.createString("layers"),
-									optionalDynamic.get("layers").orElseEmptyList(),
+									(Dynamic<?>)optionalDynamic.get("layers")
+										.result()
+										.orElseGet(
+											() -> dynamic.createList(
+													Stream.of(
+														dynamic.createMap(
+															ImmutableMap.of(dynamic.createString("height"), dynamic.createInt(1), dynamic.createString("block"), dynamic.createString("minecraft:bedrock"))
+														),
+														dynamic.createMap(
+															ImmutableMap.of(dynamic.createString("height"), dynamic.createInt(2), dynamic.createString("block"), dynamic.createString("minecraft:dirt"))
+														),
+														dynamic.createMap(
+															ImmutableMap.of(
+																dynamic.createString("height"), dynamic.createInt(1), dynamic.createString("block"), dynamic.createString("minecraft:grass_block")
+															)
+														)
+													)
+												)
+										),
 									dynamic.createString("biome"),
-									dynamic.createString(optionalDynamic.get("biome").asString("plains"))
+									dynamic.createString(optionalDynamic.get("biome").asString("minecraft:plains"))
 								)
 							)
 						)
@@ -118,8 +137,9 @@ public class WorldGenSettingsFix extends DataFix {
 					dynamic2 = dynamic.createMap(ImmutableMap.of(dynamic.createString("type"), dynamic.createString("minecraft:debug")));
 					break;
 				case "buffet":
-					OptionalDynamic<?> optionalDynamic2 = optionalDynamic.get("chunk_generator");
-					Optional<String> optional3 = optionalDynamic2.get("type").asString().result();
+					OptionalDynamic<T> optionalDynamic2 = dynamic.get("generatorOptions");
+					OptionalDynamic<?> optionalDynamic3 = optionalDynamic2.get("chunk_generator");
+					Optional<String> optional3 = optionalDynamic3.get("type").asString().result();
 					Dynamic<T> dynamic3;
 					if (Objects.equals(optional3, Optional.of("minecraft:caves"))) {
 						dynamic3 = dynamic.createString("minecraft:caves");
@@ -130,7 +150,7 @@ public class WorldGenSettingsFix extends DataFix {
 						dynamic3 = dynamic.createString("minecraft:overworld");
 					}
 
-					Dynamic<T> dynamic4 = (Dynamic<T>)optionalDynamic.get("biome_source")
+					Dynamic<T> dynamic4 = (Dynamic<T>)optionalDynamic2.get("biome_source")
 						.result()
 						.orElseGet(() -> dynamic.createMap(ImmutableMap.of(dynamic.createString("type"), dynamic.createString("minecraft:fixed"))));
 					Dynamic<T> dynamic5;
@@ -236,6 +256,11 @@ public class WorldGenSettingsFix extends DataFix {
 		MutableInt mutableInt3 = new MutableInt(128);
 		MutableBoolean mutableBoolean = new MutableBoolean(false);
 		Map<String, WorldGenSettingsFix.StructureFeatureConfiguration> map = Maps.<String, WorldGenSettingsFix.StructureFeatureConfiguration>newHashMap();
+		if (!optionalDynamic.result().isPresent()) {
+			mutableBoolean.setTrue();
+			map.put("minecraft:village", DEFAULTS.get("minecraft:village"));
+		}
+
 		optionalDynamic.get("structures")
 			.flatMap(Dynamic::getMapValues)
 			.result()

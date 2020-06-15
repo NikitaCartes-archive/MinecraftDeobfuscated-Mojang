@@ -1395,4 +1395,10 @@ public abstract class Mob extends LivingEntity {
 			this.setDeltaMovement(this.getDeltaMovement().add(0.0, 0.3, 0.0));
 		}
 	}
+
+	@Override
+	protected void removeAfterChangingDimensions() {
+		super.removeAfterChangingDimensions();
+		this.dropLeash(true, false);
+	}
 }

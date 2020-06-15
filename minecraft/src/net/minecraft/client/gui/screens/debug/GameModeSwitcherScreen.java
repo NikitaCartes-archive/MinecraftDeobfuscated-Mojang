@@ -39,7 +39,21 @@ public class GameModeSwitcherScreen extends Screen {
 
 	public GameModeSwitcherScreen() {
 		super(NarratorChatListener.NO_TITLE);
-		this.previousHovered = GameModeSwitcherScreen.GameModeIcon.getFromGameType(Minecraft.getInstance().gameMode.getPrevPlayerMode());
+		this.previousHovered = GameModeSwitcherScreen.GameModeIcon.getFromGameType(this.getDefaultSelected());
+	}
+
+	private GameType getDefaultSelected() {
+		GameType gameType = Minecraft.getInstance().gameMode.getPlayerMode();
+		GameType gameType2 = Minecraft.getInstance().gameMode.getPreviousPlayerMode();
+		if (gameType2 == GameType.NOT_SET) {
+			if (gameType == GameType.CREATIVE) {
+				gameType2 = GameType.SURVIVAL;
+			} else {
+				gameType2 = GameType.CREATIVE;
+			}
+		}
+
+		return gameType2;
 	}
 
 	@Override

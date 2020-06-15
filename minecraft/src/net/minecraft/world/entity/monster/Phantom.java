@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.monster;
 
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -17,6 +18,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
@@ -249,7 +251,7 @@ public class Phantom extends FlyingMob implements Enemy {
 				this.nextScanTick = 60;
 				List<Player> list = Phantom.this.level.getNearbyPlayers(this.attackTargeting, Phantom.this, Phantom.this.getBoundingBox().inflate(16.0, 64.0, 16.0));
 				if (!list.isEmpty()) {
-					list.sort((playerx, player2) -> playerx.getY() > player2.getY() ? -1 : 1);
+					list.sort(Comparator.comparing(Entity::getY).reversed());
 
 					for (Player player : list) {
 						if (Phantom.this.canAttack(player, TargetingConditions.DEFAULT)) {

@@ -27,6 +27,7 @@ import net.minecraft.advancements.critereon.LootTableTrigger;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.MobEffectsPredicate;
 import net.minecraft.advancements.critereon.NetherTravelTrigger;
+import net.minecraft.advancements.critereon.PlayerInteractTrigger;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -34,6 +35,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -48,6 +50,36 @@ public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
 	private static final Biome[] EXPLORABLE_BIOMES = new Biome[]{
 		Biomes.NETHER_WASTES, Biomes.SOUL_SAND_VALLEY, Biomes.WARPED_FOREST, Biomes.CRIMSON_FOREST, Biomes.BASALT_DELTAS
 	};
+	private static final EntityPredicate.Composite DISTRACT_PIGLIN_PLAYER_ARMOR_PREDICATE = EntityPredicate.Composite.create(
+		LootItemEntityPropertyCondition.hasProperties(
+				LootContext.EntityTarget.THIS,
+				EntityPredicate.Builder.entity()
+					.equipment(EntityEquipmentPredicate.Builder.equipment().head(ItemPredicate.Builder.item().of(Items.GOLDEN_HELMET).build()).build())
+			)
+			.invert()
+			.build(),
+		LootItemEntityPropertyCondition.hasProperties(
+				LootContext.EntityTarget.THIS,
+				EntityPredicate.Builder.entity()
+					.equipment(EntityEquipmentPredicate.Builder.equipment().chest(ItemPredicate.Builder.item().of(Items.GOLDEN_CHESTPLATE).build()).build())
+			)
+			.invert()
+			.build(),
+		LootItemEntityPropertyCondition.hasProperties(
+				LootContext.EntityTarget.THIS,
+				EntityPredicate.Builder.entity()
+					.equipment(EntityEquipmentPredicate.Builder.equipment().legs(ItemPredicate.Builder.item().of(Items.GOLDEN_LEGGINGS).build()).build())
+			)
+			.invert()
+			.build(),
+		LootItemEntityPropertyCondition.hasProperties(
+				LootContext.EntityTarget.THIS,
+				EntityPredicate.Builder.entity()
+					.equipment(EntityEquipmentPredicate.Builder.equipment().feet(ItemPredicate.Builder.item().of(Items.GOLDEN_BOOTS).build()).build())
+			)
+			.invert()
+			.build()
+	);
 
 	public void accept(Consumer<Advancement> consumer) {
 		Advancement advancement = Advancement.Builder.advancement()
@@ -456,6 +488,7 @@ public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
 			.save(consumer, "nether/loot_bastion");
 		Advancement.Builder.advancement()
 			.parent(advancement)
+			.requirements(RequirementsStrategy.OR)
 			.display(
 				Items.GOLD_INGOT,
 				new TranslatableComponent("advancements.nether.distract_piglin.title"),
@@ -469,37 +502,18 @@ public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
 			.addCriterion(
 				"distract_piglin",
 				ItemPickedUpByEntityTrigger.TriggerInstance.itemPickedUpByEntity(
-					EntityPredicate.Composite.create(
-						LootItemEntityPropertyCondition.hasProperties(
-								LootContext.EntityTarget.THIS,
-								EntityPredicate.Builder.entity()
-									.equipment(EntityEquipmentPredicate.Builder.equipment().head(ItemPredicate.Builder.item().of(Items.GOLDEN_HELMET).build()).build())
-							)
-							.invert()
-							.build(),
-						LootItemEntityPropertyCondition.hasProperties(
-								LootContext.EntityTarget.THIS,
-								EntityPredicate.Builder.entity()
-									.equipment(EntityEquipmentPredicate.Builder.equipment().chest(ItemPredicate.Builder.item().of(Items.GOLDEN_CHESTPLATE).build()).build())
-							)
-							.invert()
-							.build(),
-						LootItemEntityPropertyCondition.hasProperties(
-								LootContext.EntityTarget.THIS,
-								EntityPredicate.Builder.entity()
-									.equipment(EntityEquipmentPredicate.Builder.equipment().legs(ItemPredicate.Builder.item().of(Items.GOLDEN_LEGGINGS).build()).build())
-							)
-							.invert()
-							.build(),
-						LootItemEntityPropertyCondition.hasProperties(
-								LootContext.EntityTarget.THIS,
-								EntityPredicate.Builder.entity()
-									.equipment(EntityEquipmentPredicate.Builder.equipment().feet(ItemPredicate.Builder.item().of(Items.GOLDEN_BOOTS).build()).build())
-							)
-							.invert()
-							.build()
-					),
+					DISTRACT_PIGLIN_PLAYER_ARMOR_PREDICATE,
 					ItemPredicate.Builder.item().of(ItemTags.PIGLIN_LOVED),
+					EntityPredicate.Composite.wrap(
+						EntityPredicate.Builder.entity().of(EntityType.PIGLIN).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(false).build()).build()
+					)
+				)
+			)
+			.addCriterion(
+				"distract_piglin_directly",
+				PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(
+					DISTRACT_PIGLIN_PLAYER_ARMOR_PREDICATE,
+					ItemPredicate.Builder.item().of(PiglinAi.BARTERING_ITEM),
 					EntityPredicate.Composite.wrap(
 						EntityPredicate.Builder.entity().of(EntityType.PIGLIN).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(false).build()).build()
 					)

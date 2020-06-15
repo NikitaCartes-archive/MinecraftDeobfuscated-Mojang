@@ -227,6 +227,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	@Override
 	public boolean setBlock(BlockPos blockPos, BlockState blockState, int i) {
+		return this.setBlock(blockPos, blockState, i, 512);
+	}
+
+	@Override
+	public boolean setBlock(BlockPos blockPos, BlockState blockState, int i, int j) {
 		if (isOutsideBuildHeight(blockPos)) {
 			return false;
 		} else if (!this.isClientSide && this.isDebug()) {
@@ -269,11 +274,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 						}
 					}
 
-					if ((i & 16) == 0) {
-						int j = i & -34;
-						blockState2.updateIndirectNeighbourShapes(this, blockPos, j);
-						blockState.updateNeighbourShapes(this, blockPos, j);
-						blockState.updateIndirectNeighbourShapes(this, blockPos, j);
+					if ((i & 16) == 0 && j > 0) {
+						int k = i & -34;
+						blockState2.updateIndirectNeighbourShapes(this, blockPos, k, j - 1);
+						blockState.updateNeighbourShapes(this, blockPos, k, j - 1);
+						blockState.updateIndirectNeighbourShapes(this, blockPos, k, j - 1);
 					}
 
 					this.onBlockStateChange(blockPos, blockState2, blockState3);
@@ -294,7 +299,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	@Override
-	public boolean destroyBlock(BlockPos blockPos, boolean bl, @Nullable Entity entity) {
+	public boolean destroyBlock(BlockPos blockPos, boolean bl, @Nullable Entity entity, int i) {
 		BlockState blockState = this.getBlockState(blockPos);
 		if (blockState.isAir()) {
 			return false;
@@ -309,7 +314,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 				Block.dropResources(blockState, this, blockPos, blockEntity, entity, ItemStack.EMPTY);
 			}
 
-			return this.setBlock(blockPos, fluidState.createLegacyBlock(), 3);
+			return this.setBlock(blockPos, fluidState.createLegacyBlock(), 3, i);
 		}
 	}
 

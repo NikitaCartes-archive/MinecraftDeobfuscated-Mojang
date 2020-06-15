@@ -292,13 +292,7 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		for (BrainDebugRenderer.BrainDump brainDump : this.brainDumpsPerEntity.values()) {
 			for (BlockPos blockPos : Iterables.concat(brainDump.pois, brainDump.potentialPois)) {
 				if (!this.pois.containsKey(blockPos)) {
-					List<String> list = (List<String>)map.get(blockPos);
-					if (list == null) {
-						list = Lists.<String>newArrayList();
-						map.put(blockPos, list);
-					}
-
-					list.add(brainDump.name);
+					((List)map.computeIfAbsent(blockPos, blockPosx -> Lists.newArrayList())).add(brainDump.name);
 				}
 			}
 		}

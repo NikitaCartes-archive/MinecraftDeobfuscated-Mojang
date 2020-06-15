@@ -2148,7 +2148,7 @@ public abstract class Entity implements Nameable, CommandSource {
 				}
 			}
 
-			this.removed = true;
+			this.removeAfterChangingDimensions();
 			this.level.getProfiler().pop();
 			((ServerLevel)this.level).resetEmptyTime();
 			serverLevel.resetEmptyTime();
@@ -2157,6 +2157,10 @@ public abstract class Entity implements Nameable, CommandSource {
 		} else {
 			return null;
 		}
+	}
+
+	protected void removeAfterChangingDimensions() {
+		this.removed = true;
 	}
 
 	public boolean canChangeDimensions() {
@@ -2696,7 +2700,14 @@ public abstract class Entity implements Nameable, CommandSource {
 					vec3 = vec3.normalize();
 				}
 
-				this.setDeltaMovement(this.getDeltaMovement().add(vec3.scale(d)));
+				Vec3 vec33 = this.getDeltaMovement();
+				vec3 = vec3.scale(d * 1.0);
+				double g = 0.003;
+				if (Math.abs(vec33.x) < 0.003 && Math.abs(vec33.z) < 0.003 && vec3.length() < 0.0045000000000000005) {
+					vec3 = vec3.normalize().scale(0.0045000000000000005);
+				}
+
+				this.setDeltaMovement(this.getDeltaMovement().add(vec3));
 			}
 
 			this.fluidHeight.put(tag, e);

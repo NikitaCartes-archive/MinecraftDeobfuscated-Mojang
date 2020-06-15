@@ -42,8 +42,8 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 	private static final AttributeModifier SPEED_MODIFIER_ATTACKING = new AttributeModifier(
 		SPEED_MODIFIER_ATTACKING_UUID, "Attacking speed boost", 0.05, AttributeModifier.Operation.ADDITION
 	);
-	private static final IntRange ANGER_SOUND_INTERVAL = TimeUtil.rangeOfSeconds(0, 2);
-	private int playAngrySoundIn;
+	private static final IntRange FIRST_ANGER_SOUND_DELAY = TimeUtil.rangeOfSeconds(0, 1);
+	private int playFirstAngerSoundIn;
 	private static final IntRange PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
 	private int remainingPersistentAngerTime;
 	private UUID persistentAngerTarget;
@@ -91,12 +91,7 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 				attributeInstance.addTransientModifier(SPEED_MODIFIER_ATTACKING);
 			}
 
-			if (this.playAngrySoundIn == 0) {
-				this.playAngerSound();
-				this.playAngrySoundIn = ANGER_SOUND_INTERVAL.randomValue(this.random);
-			} else {
-				this.playAngrySoundIn--;
-			}
+			this.maybePlayFirstAngerSound();
 		} else if (attributeInstance.hasModifier(SPEED_MODIFIER_ATTACKING)) {
 			attributeInstance.removeModifier(SPEED_MODIFIER_ATTACKING);
 		}
@@ -107,6 +102,15 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 		}
 
 		super.customServerAiStep();
+	}
+
+	private void maybePlayFirstAngerSound() {
+		if (this.playFirstAngerSoundIn > 0) {
+			this.playFirstAngerSoundIn--;
+			if (this.playFirstAngerSoundIn == 0) {
+				this.playAngerSound();
+			}
+		}
 	}
 
 	private void maybeAlertOthers() {
@@ -140,8 +144,7 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 	@Override
 	public void setTarget(@Nullable LivingEntity livingEntity) {
 		if (this.getTarget() == null && livingEntity != null) {
-			this.playAngerSound();
-			this.playAngrySoundIn = ANGER_SOUND_INTERVAL.randomValue(this.random);
+			this.playFirstAngerSoundIn = FIRST_ANGER_SOUND_DELAY.randomValue(this.random);
 			this.ticksUntilNextAlert = ALERT_INTERVAL.randomValue(this.random);
 		}
 
@@ -198,7 +201,7 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 
 	@Override
 	protected SoundEvent getAmbientSound() {
-		return SoundEvents.ZOMBIFIED_PIGLIN_AMBIENT;
+		return this.isAngry() ? SoundEvents.ZOMBIFIED_PIGLIN_ANGRY : SoundEvents.ZOMBIFIED_PIGLIN_AMBIENT;
 	}
 
 	@Override

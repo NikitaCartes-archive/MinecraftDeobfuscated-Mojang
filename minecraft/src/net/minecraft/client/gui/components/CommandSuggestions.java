@@ -18,6 +18,7 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
@@ -114,9 +115,28 @@ public class CommandSuggestions {
 
 				int j = Mth.clamp(this.input.getScreenX(suggestions.getRange().getStart()), 0, this.input.getScreenX(0) + this.input.getInnerWidth() - i);
 				int k = this.anchorToBottom ? this.screen.height - 12 : 72;
-				this.suggestions = new CommandSuggestions.SuggestionsList(j, k, i, suggestions, bl);
+				this.suggestions = new CommandSuggestions.SuggestionsList(j, k, i, this.sortSuggestions(suggestions), bl);
 			}
 		}
+	}
+
+	private List<Suggestion> sortSuggestions(Suggestions suggestions) {
+		String string = this.input.getValue().substring(0, this.input.getCursorPosition());
+		int i = getLastWordIndex(string);
+		String string2 = string.substring(i).toLowerCase(Locale.ROOT);
+		List<Suggestion> list = Lists.<Suggestion>newArrayList();
+		List<Suggestion> list2 = Lists.<Suggestion>newArrayList();
+
+		for (Suggestion suggestion : suggestions.getList()) {
+			if (!suggestion.getText().startsWith(string2) && !suggestion.getText().startsWith("minecraft:" + string2)) {
+				list2.add(suggestion);
+			} else {
+				list.add(suggestion);
+			}
+		}
+
+		list.addAll(list2);
+		return list;
 	}
 
 	public void updateCommandInfo() {
@@ -312,29 +332,29 @@ public class CommandSuggestions {
 	@Environment(EnvType.CLIENT)
 	public class SuggestionsList {
 		private final Rect2i rect;
-		private final Suggestions suggestions;
 		private final String originalContents;
+		private final List<Suggestion> suggestionList;
 		private int offset;
 		private int current;
 		private Vec2 lastMouse = Vec2.ZERO;
 		private boolean tabCycles;
 		private int lastNarratedEntry;
 
-		private SuggestionsList(int i, int j, int k, Suggestions suggestions, boolean bl) {
+		private SuggestionsList(int i, int j, int k, List<Suggestion> list, boolean bl) {
 			int l = i - 1;
-			int m = CommandSuggestions.this.anchorToBottom ? j - 3 - Math.min(suggestions.getList().size(), CommandSuggestions.this.suggestionLineLimit) * 12 : j;
-			this.rect = new Rect2i(l, m, k + 1, Math.min(suggestions.getList().size(), CommandSuggestions.this.suggestionLineLimit) * 12);
-			this.suggestions = suggestions;
+			int m = CommandSuggestions.this.anchorToBottom ? j - 3 - Math.min(list.size(), CommandSuggestions.this.suggestionLineLimit) * 12 : j;
+			this.rect = new Rect2i(l, m, k + 1, Math.min(list.size(), CommandSuggestions.this.suggestionLineLimit) * 12);
 			this.originalContents = CommandSuggestions.this.input.getValue();
 			this.lastNarratedEntry = bl ? -1 : 0;
+			this.suggestionList = list;
 			this.select(0);
 		}
 
 		public void render(PoseStack poseStack, int i, int j) {
-			int k = Math.min(this.suggestions.getList().size(), CommandSuggestions.this.suggestionLineLimit);
+			int k = Math.min(this.suggestionList.size(), CommandSuggestions.this.suggestionLineLimit);
 			int l = -5592406;
 			boolean bl = this.offset > 0;
-			boolean bl2 = this.suggestions.getList().size() > this.offset + k;
+			boolean bl2 = this.suggestionList.size() > this.offset + k;
 			boolean bl3 = bl || bl2;
 			boolean bl4 = this.lastMouse.x != (float)i || this.lastMouse.y != (float)j;
 			if (bl4) {
@@ -375,7 +395,7 @@ public class CommandSuggestions {
 			boolean bl5 = false;
 
 			for (int n = 0; n < k; n++) {
-				Suggestion suggestion = (Suggestion)this.suggestions.getList().get(n + this.offset);
+				Suggestion suggestion = (Suggestion)this.suggestionList.get(n + this.offset);
 				GuiComponent.fill(
 					poseStack,
 					this.rect.getX(),
@@ -399,7 +419,7 @@ public class CommandSuggestions {
 			}
 
 			if (bl5) {
-				Message message = ((Suggestion)this.suggestions.getList().get(this.current)).getTooltip();
+				Message message = ((Suggestion)this.suggestionList.get(this.current)).getTooltip();
 				if (message != null) {
 					CommandSuggestions.this.screen.renderTooltip(poseStack, ComponentUtils.fromMessage(message), i, j);
 				}
@@ -411,7 +431,7 @@ public class CommandSuggestions {
 				return false;
 			} else {
 				int l = (j - this.rect.getY()) / 12 + this.offset;
-				if (l >= 0 && l < this.suggestions.getList().size()) {
+				if (l >= 0 && l < this.suggestionList.size()) {
 					this.select(l);
 					this.useSuggestion();
 				}
@@ -432,7 +452,7 @@ public class CommandSuggestions {
 					/ (double)CommandSuggestions.this.minecraft.getWindow().getScreenHeight()
 			);
 			if (this.rect.contains(i, j)) {
-				this.offset = Mth.clamp((int)((double)this.offset - d), 0, Math.max(this.suggestions.getList().size() - CommandSuggestions.this.suggestionLineLimit, 0));
+				this.offset = Mth.clamp((int)((double)this.offset - d), 0, Math.max(this.suggestionList.size() - CommandSuggestions.this.suggestionLineLimit, 0));
 				return true;
 			} else {
 				return false;
@@ -468,12 +488,12 @@ public class CommandSuggestions {
 			int j = this.offset;
 			int k = this.offset + CommandSuggestions.this.suggestionLineLimit - 1;
 			if (this.current < j) {
-				this.offset = Mth.clamp(this.current, 0, Math.max(this.suggestions.getList().size() - CommandSuggestions.this.suggestionLineLimit, 0));
+				this.offset = Mth.clamp(this.current, 0, Math.max(this.suggestionList.size() - CommandSuggestions.this.suggestionLineLimit, 0));
 			} else if (this.current > k) {
 				this.offset = Mth.clamp(
 					this.current + CommandSuggestions.this.lineStartOffset - CommandSuggestions.this.suggestionLineLimit,
 					0,
-					Math.max(this.suggestions.getList().size() - CommandSuggestions.this.suggestionLineLimit, 0)
+					Math.max(this.suggestionList.size() - CommandSuggestions.this.suggestionLineLimit, 0)
 				);
 			}
 		}
@@ -481,14 +501,14 @@ public class CommandSuggestions {
 		public void select(int i) {
 			this.current = i;
 			if (this.current < 0) {
-				this.current = this.current + this.suggestions.getList().size();
+				this.current = this.current + this.suggestionList.size();
 			}
 
-			if (this.current >= this.suggestions.getList().size()) {
-				this.current = this.current - this.suggestions.getList().size();
+			if (this.current >= this.suggestionList.size()) {
+				this.current = this.current - this.suggestionList.size();
 			}
 
-			Suggestion suggestion = (Suggestion)this.suggestions.getList().get(this.current);
+			Suggestion suggestion = (Suggestion)this.suggestionList.get(this.current);
 			CommandSuggestions.this.input
 				.setSuggestion(CommandSuggestions.calculateSuggestionSuffix(CommandSuggestions.this.input.getValue(), suggestion.apply(this.originalContents)));
 			if (NarratorChatListener.INSTANCE.isActive() && this.lastNarratedEntry != this.current) {
@@ -497,7 +517,7 @@ public class CommandSuggestions {
 		}
 
 		public void useSuggestion() {
-			Suggestion suggestion = (Suggestion)this.suggestions.getList().get(this.current);
+			Suggestion suggestion = (Suggestion)this.suggestionList.get(this.current);
 			CommandSuggestions.this.keepSuggestions = true;
 			CommandSuggestions.this.input.setValue(suggestion.apply(this.originalContents));
 			int i = suggestion.getRange().getStart() + suggestion.getText().length();
@@ -510,12 +530,11 @@ public class CommandSuggestions {
 
 		private String getNarrationMessage() {
 			this.lastNarratedEntry = this.current;
-			List<Suggestion> list = this.suggestions.getList();
-			Suggestion suggestion = (Suggestion)list.get(this.current);
+			Suggestion suggestion = (Suggestion)this.suggestionList.get(this.current);
 			Message message = suggestion.getTooltip();
 			return message != null
-				? I18n.get("narration.suggestion.tooltip", this.current + 1, list.size(), suggestion.getText(), message.getString())
-				: I18n.get("narration.suggestion", this.current + 1, list.size(), suggestion.getText());
+				? I18n.get("narration.suggestion.tooltip", this.current + 1, this.suggestionList.size(), suggestion.getText(), message.getString())
+				: I18n.get("narration.suggestion", this.current + 1, this.suggestionList.size(), suggestion.getText());
 		}
 
 		public void hide() {

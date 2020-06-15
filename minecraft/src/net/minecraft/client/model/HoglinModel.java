@@ -46,7 +46,7 @@ public class HoglinModel<T extends Mob & HoglinBase> extends AgeableListModel<T>
 		this.head.addChild(this.leftEar);
 		ModelPart modelPart = new ModelPart(this);
 		modelPart.setPos(-7.0F, 2.0F, -12.0F);
-		modelPart.texOffs(1, 13).addBox(-1.0F, -11.0F, -1.0F, 2.0F, 11.0F, 2.0F);
+		modelPart.texOffs(10, 13).addBox(-1.0F, -11.0F, -1.0F, 2.0F, 11.0F, 2.0F);
 		this.head.addChild(modelPart);
 		ModelPart modelPart2 = new ModelPart(this);
 		modelPart2.setPos(7.0F, 2.0F, -12.0F);

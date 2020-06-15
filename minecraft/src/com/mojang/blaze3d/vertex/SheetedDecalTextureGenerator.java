@@ -9,10 +9,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.Direction;
 
 @Environment(EnvType.CLIENT)
-public class BreakingTextureGenerator extends DefaultedVertexConsumer {
+public class SheetedDecalTextureGenerator extends DefaultedVertexConsumer {
 	private final VertexConsumer delegate;
 	private final Matrix4f cameraInversePose;
-	private final Matrix3f normalPose;
+	private final Matrix3f normalInversePose;
 	private float x;
 	private float y;
 	private float z;
@@ -23,12 +23,12 @@ public class BreakingTextureGenerator extends DefaultedVertexConsumer {
 	private float ny;
 	private float nz;
 
-	public BreakingTextureGenerator(VertexConsumer vertexConsumer, PoseStack.Pose pose) {
+	public SheetedDecalTextureGenerator(VertexConsumer vertexConsumer, Matrix4f matrix4f, Matrix3f matrix3f) {
 		this.delegate = vertexConsumer;
-		this.cameraInversePose = pose.pose().copy();
+		this.cameraInversePose = matrix4f.copy();
 		this.cameraInversePose.invert();
-		this.normalPose = pose.normal().copy();
-		this.normalPose.invert();
+		this.normalInversePose = matrix3f.copy();
+		this.normalInversePose.invert();
 		this.resetState();
 	}
 
@@ -47,7 +47,7 @@ public class BreakingTextureGenerator extends DefaultedVertexConsumer {
 	@Override
 	public void endVertex() {
 		Vector3f vector3f = new Vector3f(this.nx, this.ny, this.nz);
-		vector3f.transform(this.normalPose);
+		vector3f.transform(this.normalInversePose);
 		Direction direction = Direction.getNearest(vector3f.x(), vector3f.y(), vector3f.z());
 		Vector4f vector4f = new Vector4f(this.x, this.y, this.z, 1.0F);
 		vector4f.transform(this.cameraInversePose);

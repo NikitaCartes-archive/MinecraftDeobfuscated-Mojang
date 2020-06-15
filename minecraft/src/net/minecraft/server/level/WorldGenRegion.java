@@ -172,7 +172,7 @@ public class WorldGenRegion implements WorldGenLevel {
 	}
 
 	@Override
-	public boolean destroyBlock(BlockPos blockPos, boolean bl, @Nullable Entity entity) {
+	public boolean destroyBlock(BlockPos blockPos, boolean bl, @Nullable Entity entity, int i) {
 		BlockState blockState = this.getBlockState(blockPos);
 		if (blockState.isAir()) {
 			return false;
@@ -182,7 +182,7 @@ public class WorldGenRegion implements WorldGenLevel {
 				Block.dropResources(blockState, this.level, blockPos, blockEntity, entity, ItemStack.EMPTY);
 			}
 
-			return this.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
+			return this.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3, i);
 		}
 	}
 
@@ -223,7 +223,7 @@ public class WorldGenRegion implements WorldGenLevel {
 	}
 
 	@Override
-	public boolean setBlock(BlockPos blockPos, BlockState blockState, int i) {
+	public boolean setBlock(BlockPos blockPos, BlockState blockState, int i, int j) {
 		ChunkAccess chunkAccess = this.getChunk(blockPos);
 		BlockState blockState2 = chunkAccess.setBlockState(blockPos, blockState, false);
 		if (blockState2 != null) {

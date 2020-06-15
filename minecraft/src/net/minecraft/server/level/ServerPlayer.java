@@ -227,9 +227,13 @@ public class ServerPlayer extends Player implements ContainerListener {
 		super.readAdditionalSaveData(compoundTag);
 		if (compoundTag.contains("playerGameType", 99)) {
 			if (this.getServer().getForceGameType()) {
-				this.gameMode.setGameModeForPlayer(this.getServer().getDefaultGameType());
+				this.gameMode.setGameModeForPlayer(this.getServer().getDefaultGameType(), GameType.NOT_SET);
 			} else {
-				this.gameMode.setGameModeForPlayer(GameType.byId(compoundTag.getInt("playerGameType")));
+				this.gameMode
+					.setGameModeForPlayer(
+						GameType.byId(compoundTag.getInt("playerGameType")),
+						compoundTag.contains("previousPlayerGameType", 3) ? GameType.byId(compoundTag.getInt("previousPlayerGameType")) : GameType.NOT_SET
+					);
 			}
 		}
 
@@ -263,6 +267,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putInt("playerGameType", this.gameMode.getGameModeForPlayer().getId());
+		compoundTag.putInt("previousPlayerGameType", this.gameMode.getPreviousGameModeForPlayer().getId());
 		compoundTag.putBoolean("seenCredits", this.seenCredits);
 		if (this.enteredNetherPosition != null) {
 			CompoundTag compoundTag2 = new CompoundTag();
@@ -627,6 +632,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 						serverLevel.dimension(),
 						BiomeManager.obfuscateSeed(serverLevel.getSeed()),
 						this.gameMode.getGameModeForPlayer(),
+						this.gameMode.getPreviousGameModeForPlayer(),
 						serverLevel.isDebug(),
 						serverLevel.isFlat(),
 						true
@@ -1359,6 +1365,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 						serverLevel.dimension(),
 						BiomeManager.obfuscateSeed(serverLevel.getSeed()),
 						this.gameMode.getGameModeForPlayer(),
+						this.gameMode.getPreviousGameModeForPlayer(),
 						serverLevel.isDebug(),
 						serverLevel.isFlat(),
 						true

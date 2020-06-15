@@ -5,14 +5,17 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -82,7 +85,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 		} else if (!this.level.isClientSide) {
 			List<Entity> list = this.level.getEntitiesOfClass(Entity.class, new AABB(this.getBlockPos()));
 			if (!list.isEmpty()) {
-				this.teleportEntity(((Entity)list.get(0)).getRootVehicle());
+				this.teleportEntity((Entity)list.get(this.level.random.nextInt(list.size())));
 			}
 
 			if (this.age % 2400L == 0L) {
@@ -151,7 +154,24 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 
 			if (this.exitPortal != null) {
 				BlockPos blockPos = this.exactTeleport ? this.exitPortal : this.findExitPosition();
-				entity.teleportToWithTicket((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5);
+				Entity entity3;
+				if (entity instanceof ThrownEnderpearl) {
+					Entity entity2 = ((ThrownEnderpearl)entity).getOwner();
+					if (entity2 instanceof ServerPlayer) {
+						CriteriaTriggers.ENTER_BLOCK.trigger((ServerPlayer)entity2, this.level.getBlockState(this.getBlockPos()));
+					}
+
+					if (entity2 != null) {
+						entity3 = entity2;
+						entity.remove();
+					} else {
+						entity3 = entity;
+					}
+				} else {
+					entity3 = entity.getRootVehicle();
+				}
+
+				entity3.teleportToWithTicket((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5);
 			}
 
 			this.triggerCooldown();

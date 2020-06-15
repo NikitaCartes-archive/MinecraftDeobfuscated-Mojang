@@ -152,7 +152,7 @@ public class KeyboardHandler {
 					} else if (!this.minecraft.player.isSpectator()) {
 						this.minecraft.player.chat("/gamemode spectator");
 					} else {
-						this.minecraft.player.chat("/gamemode " + this.minecraft.gameMode.getPrevPlayerMode().getName());
+						this.minecraft.player.chat("/gamemode " + this.minecraft.gameMode.getPreviousPlayerMode().getName());
 					}
 
 					return true;

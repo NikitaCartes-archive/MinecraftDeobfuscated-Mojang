@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
@@ -125,7 +126,23 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 
 				RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack, bl3);
 				VertexConsumer vertexConsumer;
-				if (bl3) {
+				if (itemStack.getItem() == Items.COMPASS && itemStack.hasFoil()) {
+					poseStack.pushPose();
+					PoseStack.Pose pose = poseStack.last();
+					if (transformType == ItemTransforms.TransformType.GUI) {
+						pose.pose().multiply(0.5F);
+					} else if (transformType.firstPerson()) {
+						pose.pose().multiply(0.75F);
+					}
+
+					if (bl3) {
+						vertexConsumer = getCompassFoilBufferDirect(multiBufferSource, renderType, pose);
+					} else {
+						vertexConsumer = getCompassFoilBuffer(multiBufferSource, renderType, pose);
+					}
+
+					poseStack.popPose();
+				} else if (bl3) {
 					vertexConsumer = getFoilBufferDirect(multiBufferSource, renderType, true, itemStack.hasFoil());
 				} else {
 					vertexConsumer = getFoilBuffer(multiBufferSource, renderType, true, itemStack.hasFoil());
@@ -146,6 +163,18 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 				multiBufferSource.getBuffer(bl ? RenderType.armorGlint() : RenderType.armorEntityGlint()), multiBufferSource.getBuffer(renderType)
 			)
 			: multiBufferSource.getBuffer(renderType);
+	}
+
+	public static VertexConsumer getCompassFoilBuffer(MultiBufferSource multiBufferSource, RenderType renderType, PoseStack.Pose pose) {
+		return VertexMultiConsumer.create(
+			new SheetedDecalTextureGenerator(multiBufferSource.getBuffer(RenderType.glint()), pose.pose(), pose.normal()), multiBufferSource.getBuffer(renderType)
+		);
+	}
+
+	public static VertexConsumer getCompassFoilBufferDirect(MultiBufferSource multiBufferSource, RenderType renderType, PoseStack.Pose pose) {
+		return VertexMultiConsumer.create(
+			new SheetedDecalTextureGenerator(multiBufferSource.getBuffer(RenderType.glintDirect()), pose.pose(), pose.normal()), multiBufferSource.getBuffer(renderType)
+		);
 	}
 
 	public static VertexConsumer getFoilBuffer(MultiBufferSource multiBufferSource, RenderType renderType, boolean bl, boolean bl2) {

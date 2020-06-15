@@ -94,7 +94,7 @@ public abstract class BlockBehaviour {
 	}
 
 	@Deprecated
-	public void updateIndirectNeighbourShapes(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, int i) {
+	public void updateIndirectNeighbourShapes(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, int i, int j) {
 	}
 
 	@Deprecated
@@ -579,6 +579,10 @@ public abstract class BlockBehaviour {
 		}
 
 		public final void updateNeighbourShapes(LevelAccessor levelAccessor, BlockPos blockPos, int i) {
+			this.updateNeighbourShapes(levelAccessor, blockPos, i, 512);
+		}
+
+		public final void updateNeighbourShapes(LevelAccessor levelAccessor, BlockPos blockPos, int i, int j) {
 			this.getBlock();
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
@@ -586,12 +590,16 @@ public abstract class BlockBehaviour {
 				mutableBlockPos.setWithOffset(blockPos, direction);
 				BlockState blockState = levelAccessor.getBlockState(mutableBlockPos);
 				BlockState blockState2 = blockState.updateShape(direction.getOpposite(), this.asState(), levelAccessor, mutableBlockPos, blockPos);
-				Block.updateOrDestroy(blockState, blockState2, levelAccessor, mutableBlockPos, i);
+				Block.updateOrDestroy(blockState, blockState2, levelAccessor, mutableBlockPos, i, j);
 			}
 		}
 
-		public void updateIndirectNeighbourShapes(LevelAccessor levelAccessor, BlockPos blockPos, int i) {
-			this.getBlock().updateIndirectNeighbourShapes(this.asState(), levelAccessor, blockPos, i);
+		public final void updateIndirectNeighbourShapes(LevelAccessor levelAccessor, BlockPos blockPos, int i) {
+			this.updateIndirectNeighbourShapes(levelAccessor, blockPos, i, 512);
+		}
+
+		public void updateIndirectNeighbourShapes(LevelAccessor levelAccessor, BlockPos blockPos, int i, int j) {
+			this.getBlock().updateIndirectNeighbourShapes(this.asState(), levelAccessor, blockPos, i, j);
 		}
 
 		public void onPlace(Level level, BlockPos blockPos, BlockState blockState, boolean bl) {

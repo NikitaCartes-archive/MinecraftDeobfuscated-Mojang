@@ -278,7 +278,9 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 			long l = Util.getMillis();
 			this.doubleclick = this.lastClickSlot == slot && l - this.lastClickTime < 250L && this.lastClickButton == i;
 			this.skipNextRelease = false;
-			if (i == 0 || i == 1 || bl) {
+			if (i != 0 && i != 1 && !bl) {
+				this.checkHotbarMouseClicked(i);
+			} else {
 				int j = this.leftPos;
 				int k = this.topPos;
 				boolean bl2 = this.hasClickedOutside(d, e, j, k, i);
@@ -347,6 +349,21 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 			this.lastClickTime = l;
 			this.lastClickButton = i;
 			return true;
+		}
+	}
+
+	private void checkHotbarMouseClicked(int i) {
+		if (this.minecraft.player.inventory.getCarried().isEmpty()) {
+			if (this.minecraft.options.keySwapOffhand.matchesMouse(i)) {
+				this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 40, ClickType.SWAP);
+				return;
+			}
+
+			for (int j = 0; j < 9; j++) {
+				if (this.minecraft.options.keyHotbarSlots[j].matchesMouse(i)) {
+					this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, j, ClickType.SWAP);
+				}
+			}
 		}
 	}
 

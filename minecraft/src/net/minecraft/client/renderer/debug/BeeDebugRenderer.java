@@ -108,21 +108,21 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 	private Map<BlockPos, Set<UUID>> createHiveBlacklistMap() {
 		Map<BlockPos, Set<UUID>> map = Maps.<BlockPos, Set<UUID>>newHashMap();
-		this.beeInfosPerEntity.values().forEach(beeInfo -> beeInfo.blacklistedHives.forEach(blockPos -> addBeeToSetInMap(map, beeInfo, blockPos)));
+		this.beeInfosPerEntity
+			.values()
+			.forEach(
+				beeInfo -> beeInfo.blacklistedHives.forEach(blockPos -> ((Set)map.computeIfAbsent(blockPos, blockPosx -> Sets.newHashSet())).add(beeInfo.getUuid()))
+			);
 		return map;
 	}
 
 	private void renderFlowerInfos() {
 		Map<BlockPos, Set<UUID>> map = Maps.<BlockPos, Set<UUID>>newHashMap();
-		this.beeInfosPerEntity.values().stream().filter(BeeDebugRenderer.BeeInfo::hasFlower).forEach(beeInfo -> {
-			Set<UUID> set = (Set<UUID>)map.get(beeInfo.flowerPos);
-			if (set == null) {
-				set = Sets.<UUID>newHashSet();
-				map.put(beeInfo.flowerPos, set);
-			}
-
-			set.add(beeInfo.getUuid());
-		});
+		this.beeInfosPerEntity
+			.values()
+			.stream()
+			.filter(BeeDebugRenderer.BeeInfo::hasFlower)
+			.forEach(beeInfo -> ((Set)map.computeIfAbsent(beeInfo.flowerPos, blockPos -> Sets.newHashSet())).add(beeInfo.getUuid()));
 		map.entrySet().forEach(entry -> {
 			BlockPos blockPos = (BlockPos)entry.getKey();
 			Set<UUID> set = (Set<UUID>)entry.getValue();
@@ -143,16 +143,6 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 				? "" + collection.size() + " bees"
 				: ((Set)collection.stream().map(DebugEntityNameGenerator::getEntityName).collect(Collectors.toSet())).toString();
 		}
-	}
-
-	private static void addBeeToSetInMap(Map<BlockPos, Set<UUID>> map, BeeDebugRenderer.BeeInfo beeInfo, BlockPos blockPos) {
-		Set<UUID> set = (Set<UUID>)map.get(blockPos);
-		if (set == null) {
-			set = Sets.<UUID>newHashSet();
-			map.put(blockPos, set);
-		}
-
-		set.add(beeInfo.getUuid());
 	}
 
 	private static void highlightHive(BlockPos blockPos) {
@@ -290,13 +280,7 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 		for (BeeDebugRenderer.BeeInfo beeInfo : this.beeInfosPerEntity.values()) {
 			if (beeInfo.hivePos != null && !this.hives.containsKey(beeInfo.hivePos)) {
-				List<String> list = (List<String>)map.get(beeInfo.hivePos);
-				if (list == null) {
-					list = Lists.<String>newArrayList();
-					map.put(beeInfo.hivePos, list);
-				}
-
-				list.add(beeInfo.getName());
+				((List)map.computeIfAbsent(beeInfo.hivePos, blockPos -> Lists.newArrayList())).add(beeInfo.getName());
 			}
 		}
 

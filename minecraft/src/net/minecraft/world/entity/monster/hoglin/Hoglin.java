@@ -91,7 +91,7 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 		return Monster.createMonsterAttributes()
 			.add(Attributes.MAX_HEALTH, 40.0)
 			.add(Attributes.MOVEMENT_SPEED, 0.3F)
-			.add(Attributes.KNOCKBACK_RESISTANCE, 0.5)
+			.add(Attributes.KNOCKBACK_RESISTANCE, 0.6F)
 			.add(Attributes.ATTACK_KNOCKBACK, 1.0)
 			.add(Attributes.ATTACK_DAMAGE, 6.0);
 	}
@@ -151,11 +151,10 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 		this.getBrain().tick((ServerLevel)this.level, this);
 		this.level.getProfiler().pop();
 		HoglinAi.updateActivity(this);
-		HoglinAi.maybePlayActivitySound(this);
 		if (this.isConverting()) {
 			this.timeInOverworld++;
 			if (this.timeInOverworld > 300) {
-				this.playConvertedSound();
+				this.playSound(SoundEvents.HOGLIN_CONVERTED_TO_ZOMBIFIED);
 				this.finishConversion((ServerLevel)this.level);
 			}
 		} else {
@@ -345,7 +344,7 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 
 	@Override
 	protected SoundEvent getAmbientSound() {
-		return SoundEvents.HOGLIN_AMBIENT;
+		return this.level.isClientSide ? null : (SoundEvent)HoglinAi.getSoundForCurrentActivity(this).orElse(null);
 	}
 
 	@Override
@@ -369,27 +368,12 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	}
 
 	@Override
-	public void playAmbientSound() {
-		if (HoglinAi.isIdle(this)) {
-			super.playAmbientSound();
-		}
-	}
-
-	@Override
 	protected void playStepSound(BlockPos blockPos, BlockState blockState) {
 		this.playSound(SoundEvents.HOGLIN_STEP, 0.15F, 1.0F);
 	}
 
-	protected void playAngrySound() {
-		this.playSound(SoundEvents.HOGLIN_ANGRY, 1.0F, this.getVoicePitch());
-	}
-
-	protected void playRetreatSound() {
-		this.playSound(SoundEvents.HOGLIN_RETREAT, 1.0F, this.getVoicePitch());
-	}
-
-	private void playConvertedSound() {
-		this.playSound(SoundEvents.HOGLIN_CONVERTED_TO_ZOMBIFIED, 1.0F, this.getVoicePitch());
+	protected void playSound(SoundEvent soundEvent) {
+		this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
 	}
 
 	@Override

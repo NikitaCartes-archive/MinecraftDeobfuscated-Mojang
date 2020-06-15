@@ -9,11 +9,11 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BreakingTextureGenerator;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -1065,8 +1065,9 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					if (sortedSet != null && !sortedSet.isEmpty()) {
 						int v = ((BlockDestructionProgress)sortedSet.last()).getProgress();
 						if (v >= 0) {
-							VertexConsumer vertexConsumer = new BreakingTextureGenerator(
-								this.renderBuffers.crumblingBufferSource().getBuffer((RenderType)ModelBakery.DESTROY_TYPES.get(v)), poseStack.last()
+							PoseStack.Pose pose = poseStack.last();
+							VertexConsumer vertexConsumer = new SheetedDecalTextureGenerator(
+								this.renderBuffers.crumblingBufferSource().getBuffer((RenderType)ModelBakery.DESTROY_TYPES.get(v)), pose.pose(), pose.normal()
 							);
 							multiBufferSource2 = renderType -> {
 								VertexConsumer vertexConsumer2x = bufferSource.getBuffer(renderType);
@@ -1118,8 +1119,9 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 					int z = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
 					poseStack.pushPose();
 					poseStack.translate((double)blockPos3.getX() - d, (double)blockPos3.getY() - e, (double)blockPos3.getZ() - g);
-					VertexConsumer vertexConsumer2 = new BreakingTextureGenerator(
-						this.renderBuffers.crumblingBufferSource().getBuffer((RenderType)ModelBakery.DESTROY_TYPES.get(z)), poseStack.last()
+					PoseStack.Pose pose2 = poseStack.last();
+					VertexConsumer vertexConsumer2 = new SheetedDecalTextureGenerator(
+						this.renderBuffers.crumblingBufferSource().getBuffer((RenderType)ModelBakery.DESTROY_TYPES.get(z)), pose2.pose(), pose2.normal()
 					);
 					this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockPos3), blockPos3, this.level, poseStack, vertexConsumer2);
 					poseStack.popPose();
@@ -2593,7 +2595,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				double e = (double)blockPos.getY() + (double)l * 0.6 + 0.5;
 				double f = (double)blockPos.getZ() + (double)m * 0.6 + 0.5;
 
-				for (int nx = 0; nx < 10; nx++) {
+				for (int n = 0; n < 10; n++) {
 					double g = random.nextDouble() * 0.2 + 0.01;
 					double h = d + (double)kx * 0.01 + (random.nextDouble() - 0.5) * (double)m * 0.5;
 					double o = e + (double)l * 0.01 + (random.nextDouble() - 0.5) * (double)l * 0.5;
@@ -2616,16 +2618,14 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				break;
 			case 2002:
 			case 2007:
-				double t = (double)blockPos.getX();
-				double u = (double)blockPos.getY();
-				double d = (double)blockPos.getZ();
+				Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
 
-				for (int v = 0; v < 8; v++) {
+				for (int kx = 0; kx < 8; kx++) {
 					this.addParticle(
 						new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(Items.SPLASH_POTION)),
-						t,
-						u,
-						d,
+						vec3.x,
+						vec3.y,
+						vec3.z,
 						random.nextGaussian() * 0.15,
 						random.nextDouble() * 0.2,
 						random.nextGaussian() * 0.15
@@ -2637,17 +2637,19 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				float y = (float)(j >> 0 & 0xFF) / 255.0F;
 				ParticleOptions particleOptions = i == 2007 ? ParticleTypes.INSTANT_EFFECT : ParticleTypes.EFFECT;
 
-				for (int n = 0; n < 100; n++) {
-					double g = random.nextDouble() * 4.0;
-					double h = random.nextDouble() * Math.PI * 2.0;
-					double o = Math.cos(h) * g;
-					double p = 0.01 + random.nextDouble() * 0.5;
-					double q = Math.sin(h) * g;
-					Particle particle = this.addParticleInternal(particleOptions, particleOptions.getType().getOverrideLimiter(), t + o * 0.1, u + 0.3, d + q * 0.1, o, p, q);
+				for (int z = 0; z < 100; z++) {
+					double e = random.nextDouble() * 4.0;
+					double f = random.nextDouble() * Math.PI * 2.0;
+					double aa = Math.cos(f) * e;
+					double ab = 0.01 + random.nextDouble() * 0.5;
+					double ac = Math.sin(f) * e;
+					Particle particle = this.addParticleInternal(
+						particleOptions, particleOptions.getType().getOverrideLimiter(), vec3.x + aa * 0.1, vec3.y + 0.3, vec3.z + ac * 0.1, aa, ab, ac
+					);
 					if (particle != null) {
-						float z = 0.75F + random.nextFloat() * 0.25F;
-						particle.setColor(w * z, x * z, y * z);
-						particle.setPower((float)g);
+						float ad = 0.75F + random.nextFloat() * 0.25F;
+						particle.setColor(w * ad, x * ad, y * ad);
+						particle.setPower((float)e);
 					}
 				}
 
@@ -2689,16 +2691,16 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				break;
 			case 2006:
 				for (int k = 0; k < 200; k++) {
-					float aa = random.nextFloat() * 4.0F;
-					float ab = random.nextFloat() * (float) (Math.PI * 2);
-					double d = (double)(Mth.cos(ab) * aa);
+					float x = random.nextFloat() * 4.0F;
+					float y = random.nextFloat() * (float) (Math.PI * 2);
+					double d = (double)(Mth.cos(y) * x);
 					double e = 0.01 + random.nextDouble() * 0.5;
-					double f = (double)(Mth.sin(ab) * aa);
+					double f = (double)(Mth.sin(y) * x);
 					Particle particle2 = this.addParticleInternal(
 						ParticleTypes.DRAGON_BREATH, false, (double)blockPos.getX() + d * 0.1, (double)blockPos.getY() + 0.3, (double)blockPos.getZ() + f * 0.1, d, e, f
 					);
 					if (particle2 != null) {
-						particle2.setPower(aa);
+						particle2.setPower(x);
 					}
 				}
 

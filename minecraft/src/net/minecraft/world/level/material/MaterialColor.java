@@ -57,6 +57,13 @@ public class MaterialColor {
 	public static final MaterialColor TERRACOTTA_GREEN = new MaterialColor(49, 5001770);
 	public static final MaterialColor TERRACOTTA_RED = new MaterialColor(50, 9321518);
 	public static final MaterialColor TERRACOTTA_BLACK = new MaterialColor(51, 2430480);
+	public static final MaterialColor CRIMSON_NYLIUM = new MaterialColor(52, 12398641);
+	public static final MaterialColor CRIMSON_STEM = new MaterialColor(53, 9715553);
+	public static final MaterialColor CRIMSON_HYPHAE = new MaterialColor(54, 6035741);
+	public static final MaterialColor WARPED_NYLIUM = new MaterialColor(55, 1474182);
+	public static final MaterialColor WARPED_STEM = new MaterialColor(56, 3837580);
+	public static final MaterialColor WARPED_HYPHAE = new MaterialColor(57, 5647422);
+	public static final MaterialColor WARPED_WART_BLOCK = new MaterialColor(58, 1356933);
 	public final int col;
 	public final int id;
 

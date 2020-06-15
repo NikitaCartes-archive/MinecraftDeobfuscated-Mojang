@@ -1,5 +1,6 @@
 package net.minecraft.util.datafix.fixes;
 
+import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.OpticFinder;
@@ -45,9 +46,10 @@ public class ItemBannerColorFix extends DataFix {
 								Optional<? extends Dynamic<?>> optional4 = dynamic2.get("display").result();
 								if (optional4.isPresent()) {
 									Dynamic<?> dynamic4 = (Dynamic<?>)optional4.get();
-									if (Objects.equals(dynamic4, dynamic4.emptyMap().merge(dynamic4.createString("Lore"), dynamic4.createList(Stream.of(dynamic4.createString("(+NBT")))))
-										)
-									 {
+									Dynamic<?> dynamic5 = dynamic4.createMap(
+										ImmutableMap.of(dynamic4.createString("Lore"), dynamic4.createList(Stream.of(dynamic4.createString("(+NBT"))))
+									);
+									if (Objects.equals(dynamic4, dynamic5)) {
 										return typed.set(DSL.remainderFinder(), dynamic);
 									}
 								}

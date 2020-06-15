@@ -140,13 +140,17 @@ public class Block extends BlockBehaviour implements ItemLike {
 	}
 
 	public static void updateOrDestroy(BlockState blockState, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, int i) {
+		updateOrDestroy(blockState, blockState2, levelAccessor, blockPos, i, 512);
+	}
+
+	public static void updateOrDestroy(BlockState blockState, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, int i, int j) {
 		if (blockState2 != blockState) {
 			if (blockState2.isAir()) {
 				if (!levelAccessor.isClientSide()) {
-					levelAccessor.destroyBlock(blockPos, (i & 32) == 0);
+					levelAccessor.destroyBlock(blockPos, (i & 32) == 0, null, j);
 				}
 			} else {
-				levelAccessor.setBlock(blockPos, blockState2, i & -33);
+				levelAccessor.setBlock(blockPos, blockState2, i & -33, j);
 			}
 		}
 	}

@@ -298,11 +298,9 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 
 	@Override
 	public void tick() {
-		if (this.temptGoal != null && this.temptGoal.isRunning() && this.random.nextInt(100) == 0) {
+		if (this.isBeingTempted() && this.random.nextInt(140) == 0) {
 			this.playSound(SoundEvents.STRIDER_HAPPY, 1.0F, this.getVoicePitch());
-		}
-
-		if (this.panicGoal != null && this.panicGoal.isRunning() && this.random.nextInt(60) == 0) {
+		} else if (this.isPanicking() && this.random.nextInt(60) == 0) {
 			this.playSound(SoundEvents.STRIDER_RETREAT, 1.0F, this.getVoicePitch());
 		}
 
@@ -313,6 +311,14 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 		super.tick();
 		this.floatStrider();
 		this.checkInsideBlocks();
+	}
+
+	private boolean isPanicking() {
+		return this.panicGoal != null && this.panicGoal.isRunning();
+	}
+
+	private boolean isBeingTempted() {
+		return this.temptGoal != null && this.temptGoal.isRunning();
 	}
 
 	@Override
@@ -338,7 +344,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 
 	@Override
 	protected SoundEvent getAmbientSound() {
-		return SoundEvents.STRIDER_AMBIENT;
+		return !this.isPanicking() && !this.isBeingTempted() ? SoundEvents.STRIDER_AMBIENT : null;
 	}
 
 	@Override
