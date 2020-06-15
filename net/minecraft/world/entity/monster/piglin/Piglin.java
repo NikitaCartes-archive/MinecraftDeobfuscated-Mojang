@@ -53,6 +53,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.TieredItem;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -162,6 +163,7 @@ implements CrossbowAttackMob {
         }
         PiglinAi.initMemories(this);
         this.populateDefaultEquipmentSlots(difficultyInstance);
+        this.populateDefaultEquipmentEnchantments(difficultyInstance);
         return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
@@ -279,10 +281,9 @@ implements CrossbowAttackMob {
         this.getBrain().tick((ServerLevel)this.level, this);
         this.level.getProfiler().pop();
         PiglinAi.updateActivity(this);
-        PiglinAi.maybePlayActivitySound(this);
         this.timeInOverworld = this.isConverting() ? ++this.timeInOverworld : 0;
         if (this.timeInOverworld > 300) {
-            this.playConvertedSound();
+            this.playSound(SoundEvents.PIGLIN_CONVERTED_TO_ZOMBIFIED);
             this.finishConversion((ServerLevel)this.level);
         }
     }
@@ -330,20 +331,17 @@ implements CrossbowAttackMob {
         if (this.isDancing()) {
             return PiglinArmPose.DANCING;
         }
-        if (this.swinging) {
-            return PiglinArmPose.DEFAULT;
-        }
         if (PiglinAi.isLovedItem(this.getOffhandItem().getItem())) {
             return PiglinArmPose.ADMIRING_ITEM;
+        }
+        if (this.isAggressive() && this.isHoldingMeleeWeapon()) {
+            return PiglinArmPose.ATTACKING_WITH_MELEE_WEAPON;
         }
         if (this.isChargingCrossbow()) {
             return PiglinArmPose.CROSSBOW_CHARGE;
         }
         if (this.isAggressive() && this.isHolding(Items.CROSSBOW)) {
             return PiglinArmPose.CROSSBOW_HOLD;
-        }
-        if (this.isAggressive() && this.isHoldingMeleeWeapon()) {
-            return PiglinArmPose.ATTACKING_WITH_MELEE_WEAPON;
         }
         return PiglinArmPose.DEFAULT;
     }
@@ -414,6 +412,9 @@ implements CrossbowAttackMob {
     @Override
     protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2) {
         boolean bl2;
+        if (EnchantmentHelper.hasBindingCurse(itemStack2)) {
+            return false;
+        }
         boolean bl = PiglinAi.isLovedItem(itemStack.getItem()) || itemStack.getItem() == Items.CROSSBOW;
         boolean bl3 = bl2 = PiglinAi.isLovedItem(itemStack2.getItem()) || itemStack2.getItem() == Items.CROSSBOW;
         if (bl && !bl2) {
@@ -452,7 +453,10 @@ implements CrossbowAttackMob {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.PIGLIN_AMBIENT;
+        if (this.level.isClientSide) {
+            return null;
+        }
+        return PiglinAi.getSoundForCurrentActivity(this).orElse(null);
     }
 
     @Override
@@ -470,35 +474,8 @@ implements CrossbowAttackMob {
         this.playSound(SoundEvents.PIGLIN_STEP, 0.15f, 1.0f);
     }
 
-    protected void playAdmiringSound() {
-        this.playSound(SoundEvents.PIGLIN_ADMIRING_ITEM, 1.0f, this.getVoicePitch());
-    }
-
-    @Override
-    public void playAmbientSound() {
-        if (PiglinAi.isIdle(this)) {
-            super.playAmbientSound();
-        }
-    }
-
-    protected void playAngrySound() {
-        this.playSound(SoundEvents.PIGLIN_ANGRY, 1.0f, this.getVoicePitch());
-    }
-
-    protected void playCelebrateSound() {
-        this.playSound(SoundEvents.PIGLIN_CELEBRATE, 1.0f, this.getVoicePitch());
-    }
-
-    protected void playRetreatSound() {
-        this.playSound(SoundEvents.PIGLIN_RETREAT, 1.0f, this.getVoicePitch());
-    }
-
-    protected void playJealousSound() {
-        this.playSound(SoundEvents.PIGLIN_JEALOUS, 1.0f, this.getVoicePitch());
-    }
-
-    private void playConvertedSound() {
-        this.playSound(SoundEvents.PIGLIN_CONVERTED_TO_ZOMBIFIED, 1.0f, this.getVoicePitch());
+    protected void playSound(SoundEvent soundEvent) {
+        this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
     }
 
     @Override

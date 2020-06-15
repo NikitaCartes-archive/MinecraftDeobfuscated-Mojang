@@ -74,7 +74,7 @@ HoglinBase {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 40.0).add(Attributes.MOVEMENT_SPEED, 0.3f).add(Attributes.KNOCKBACK_RESISTANCE, 0.5).add(Attributes.ATTACK_KNOCKBACK, 1.0).add(Attributes.ATTACK_DAMAGE, 6.0);
+        return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 40.0).add(Attributes.MOVEMENT_SPEED, 0.3f).add(Attributes.KNOCKBACK_RESISTANCE, 0.6f).add(Attributes.ATTACK_KNOCKBACK, 1.0).add(Attributes.ATTACK_DAMAGE, 6.0);
     }
 
     @Override
@@ -127,11 +127,10 @@ HoglinBase {
         this.getBrain().tick((ServerLevel)this.level, this);
         this.level.getProfiler().pop();
         HoglinAi.updateActivity(this);
-        HoglinAi.maybePlayActivitySound(this);
         if (this.isConverting()) {
             ++this.timeInOverworld;
             if (this.timeInOverworld > 300) {
-                this.playConvertedSound();
+                this.playSound(SoundEvents.HOGLIN_CONVERTED_TO_ZOMBIFIED);
                 this.finishConversion((ServerLevel)this.level);
             }
         } else {
@@ -310,7 +309,10 @@ HoglinBase {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.HOGLIN_AMBIENT;
+        if (this.level.isClientSide) {
+            return null;
+        }
+        return HoglinAi.getSoundForCurrentActivity(this).orElse(null);
     }
 
     @Override
@@ -334,27 +336,12 @@ HoglinBase {
     }
 
     @Override
-    public void playAmbientSound() {
-        if (HoglinAi.isIdle(this)) {
-            super.playAmbientSound();
-        }
-    }
-
-    @Override
     protected void playStepSound(BlockPos blockPos, BlockState blockState) {
         this.playSound(SoundEvents.HOGLIN_STEP, 0.15f, 1.0f);
     }
 
-    protected void playAngrySound() {
-        this.playSound(SoundEvents.HOGLIN_ANGRY, 1.0f, this.getVoicePitch());
-    }
-
-    protected void playRetreatSound() {
-        this.playSound(SoundEvents.HOGLIN_RETREAT, 1.0f, this.getVoicePitch());
-    }
-
-    private void playConvertedSound() {
-        this.playSound(SoundEvents.HOGLIN_CONVERTED_TO_ZOMBIFIED, 1.0f, this.getVoicePitch());
+    protected void playSound(SoundEvent soundEvent) {
+        this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
     }
 
     @Override

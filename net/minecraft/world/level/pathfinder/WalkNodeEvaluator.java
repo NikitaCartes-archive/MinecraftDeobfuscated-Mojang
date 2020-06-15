@@ -407,10 +407,11 @@ extends NodeEvaluator {
                     if (WalkNodeEvaluator.isBurningBlock(blockState)) {
                         return BlockPathTypes.DANGER_FIRE;
                     }
-                    if (blockGetter.getFluidState(mutableBlockPos).is(FluidTags.WATER)) {
+                    FluidState fluidState = blockGetter.getFluidState(mutableBlockPos);
+                    if (fluidState.is(FluidTags.WATER)) {
                         return BlockPathTypes.WATER_BORDER;
                     }
-                    if (!blockGetter.getFluidState(mutableBlockPos).is(FluidTags.LAVA)) continue;
+                    if (!fluidState.is(FluidTags.LAVA)) continue;
                     return BlockPathTypes.LAVA;
                 }
             }

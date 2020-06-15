@@ -26,11 +26,6 @@ extends Block {
     }
 
     @Override
-    public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-        super.onPlace(blockState, level, blockPos, blockState2, bl);
-    }
-
-    @Override
     @Nullable
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
         return (BlockState)this.defaultBlockState().setValue(LIT, blockPlaceContext.getLevel().hasNeighborSignal(blockPlaceContext.getClickedPos()));

@@ -6,6 +6,7 @@ package net.minecraft.client.gui.screens.inventory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
@@ -292,18 +293,18 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
     public boolean keyPressed(int i, int j, int k) {
         this.ignoreTextInput = false;
         if (selectedTab != CreativeModeTab.TAB_SEARCH.getId()) {
-            boolean bl;
-            boolean bl2 = bl = !this.isCreativeSlot(this.hoveredSlot) || this.hoveredSlot != null && this.hoveredSlot.hasItem();
-            if (bl && this.checkHotbarKeyPressed(i, j)) {
-                this.ignoreTextInput = true;
-                return true;
-            }
             if (this.minecraft.options.keyChat.matches(i, j)) {
                 this.ignoreTextInput = true;
                 this.selectTab(CreativeModeTab.TAB_SEARCH);
                 return true;
             }
             return super.keyPressed(i, j, k);
+        }
+        boolean bl = !this.isCreativeSlot(this.hoveredSlot) || this.hoveredSlot.hasItem();
+        boolean bl2 = InputConstants.getKey(i, j).getNumericKeyValue().isPresent();
+        if (bl && bl2 && this.checkHotbarKeyPressed(i, j)) {
+            this.ignoreTextInput = true;
+            return true;
         }
         String string = this.searchBox.getValue();
         if (this.searchBox.keyPressed(i, j, k)) {

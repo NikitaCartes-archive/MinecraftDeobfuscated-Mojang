@@ -321,11 +321,26 @@ implements MenuAccess<T> {
                     }
                 }
             }
+        } else {
+            this.checkHotbarMouseClicked(i);
         }
         this.lastClickSlot = slot;
         this.lastClickTime = l;
         this.lastClickButton = i;
         return true;
+    }
+
+    private void checkHotbarMouseClicked(int i) {
+        if (this.minecraft.player.inventory.getCarried().isEmpty()) {
+            if (this.minecraft.options.keySwapOffhand.matchesMouse(i)) {
+                this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 40, ClickType.SWAP);
+                return;
+            }
+            for (int j = 0; j < 9; ++j) {
+                if (!this.minecraft.options.keyHotbarSlots[j].matchesMouse(i)) continue;
+                this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, j, ClickType.SWAP);
+            }
+        }
     }
 
     protected boolean hasClickedOutside(double d, double e, int i, int j, int k) {

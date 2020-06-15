@@ -12,11 +12,11 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BreakingTextureGenerator;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -947,7 +947,8 @@ AutoCloseable {
                 poseStack.translate((double)blockPos.getX() - d, (double)blockPos.getY() - e, (double)blockPos.getZ() - g);
                 SortedSet sortedSet = (SortedSet)this.destructionProgress.get(blockPos.asLong());
                 if (sortedSet != null && !sortedSet.isEmpty() && (v = ((BlockDestructionProgress)sortedSet.last()).getProgress()) >= 0) {
-                    BreakingTextureGenerator vertexConsumer = new BreakingTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(v)), poseStack.last());
+                    PoseStack.Pose pose = poseStack.last();
+                    SheetedDecalTextureGenerator vertexConsumer = new SheetedDecalTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(v)), pose.pose(), pose.normal());
                     multiBufferSource2 = renderType -> {
                         VertexConsumer vertexConsumer2 = bufferSource.getBuffer(renderType);
                         if (renderType.affectsCrumbling()) {
@@ -994,7 +995,8 @@ AutoCloseable {
             int z = ((BlockDestructionProgress)sortedSet2.last()).getProgress();
             poseStack.pushPose();
             poseStack.translate((double)blockPos3.getX() - d, (double)blockPos3.getY() - e, (double)blockPos3.getZ() - g);
-            BreakingTextureGenerator vertexConsumer2 = new BreakingTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(z)), poseStack.last());
+            PoseStack.Pose pose2 = poseStack.last();
+            SheetedDecalTextureGenerator vertexConsumer2 = new SheetedDecalTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(z)), pose2.pose(), pose2.normal());
             this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockPos3), blockPos3, this.level, poseStack, vertexConsumer2);
             poseStack.popPose();
         }
@@ -2125,27 +2127,25 @@ AutoCloseable {
             }
             case 2002: 
             case 2007: {
-                double t = blockPos.getX();
-                double u = blockPos.getY();
-                double d = blockPos.getZ();
-                for (int v = 0; v < 8; ++v) {
-                    this.addParticle(new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(Items.SPLASH_POTION)), t, u, d, random.nextGaussian() * 0.15, random.nextDouble() * 0.2, random.nextGaussian() * 0.15);
+                Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
+                for (int k = 0; k < 8; ++k) {
+                    this.addParticle(new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(Items.SPLASH_POTION)), vec3.x, vec3.y, vec3.z, random.nextGaussian() * 0.15, random.nextDouble() * 0.2, random.nextGaussian() * 0.15);
                 }
                 float w = (float)(j >> 16 & 0xFF) / 255.0f;
                 float x = (float)(j >> 8 & 0xFF) / 255.0f;
                 float y = (float)(j >> 0 & 0xFF) / 255.0f;
                 SimpleParticleType particleOptions = i == 2007 ? ParticleTypes.INSTANT_EFFECT : ParticleTypes.EFFECT;
-                for (int n = 0; n < 100; ++n) {
-                    double g = random.nextDouble() * 4.0;
-                    double h = random.nextDouble() * Math.PI * 2.0;
-                    double o = Math.cos(h) * g;
-                    double p = 0.01 + random.nextDouble() * 0.5;
-                    double q = Math.sin(h) * g;
-                    Particle particle = this.addParticleInternal(particleOptions, particleOptions.getType().getOverrideLimiter(), t + o * 0.1, u + 0.3, d + q * 0.1, o, p, q);
+                for (int z = 0; z < 100; ++z) {
+                    double e = random.nextDouble() * 4.0;
+                    double f = random.nextDouble() * Math.PI * 2.0;
+                    double aa = Math.cos(f) * e;
+                    double ab = 0.01 + random.nextDouble() * 0.5;
+                    double ac = Math.sin(f) * e;
+                    Particle particle = this.addParticleInternal(particleOptions, particleOptions.getType().getOverrideLimiter(), vec3.x + aa * 0.1, vec3.y + 0.3, vec3.z + ac * 0.1, aa, ab, ac);
                     if (particle == null) continue;
-                    float z = 0.75f + random.nextFloat() * 0.25f;
-                    particle.setColor(w * z, x * z, y * z);
-                    particle.setPower((float)g);
+                    float ad = 0.75f + random.nextFloat() * 0.25f;
+                    particle.setColor(w * ad, x * ad, y * ad);
+                    particle.setPower((float)e);
                 }
                 this.level.playLocalSound(blockPos, SoundEvents.SPLASH_POTION_BREAK, SoundSource.NEUTRAL, 1.0f, random.nextFloat() * 0.1f + 0.9f, false);
                 break;
@@ -2210,14 +2210,14 @@ AutoCloseable {
             }
             case 2006: {
                 for (int k = 0; k < 200; ++k) {
-                    float aa = random.nextFloat() * 4.0f;
-                    float ab = random.nextFloat() * ((float)Math.PI * 2);
-                    double d = Mth.cos(ab) * aa;
+                    float x = random.nextFloat() * 4.0f;
+                    float y = random.nextFloat() * ((float)Math.PI * 2);
+                    double d = Mth.cos(y) * x;
                     double e = 0.01 + random.nextDouble() * 0.5;
-                    double f = Mth.sin(ab) * aa;
+                    double f = Mth.sin(y) * x;
                     Particle particle2 = this.addParticleInternal(ParticleTypes.DRAGON_BREATH, false, (double)blockPos.getX() + d * 0.1, (double)blockPos.getY() + 0.3, (double)blockPos.getZ() + f * 0.1, d, e, f);
                     if (particle2 == null) continue;
-                    particle2.setPower(aa);
+                    particle2.setPower(x);
                 }
                 if (j != 1) break;
                 this.level.playLocalSound(blockPos, SoundEvents.DRAGON_FIREBALL_EXPLODE, SoundSource.HOSTILE, 1.0f, random.nextFloat() * 0.1f + 0.9f, false);

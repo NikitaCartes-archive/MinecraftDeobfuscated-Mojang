@@ -1110,8 +1110,11 @@ implements ServerGamePacketListener {
                     }
                     this.player.attack(entity);
                 }
-                if (optional.isPresent() && ((InteractionResult)((Object)optional.get())).shouldSwing()) {
-                    this.player.swing(interactionHand, true);
+                if (optional.isPresent() && ((InteractionResult)((Object)optional.get())).consumesAction()) {
+                    CriteriaTriggers.PLAYER_INTERACTED_WITH_ENTITY.trigger(this.player, this.player.getItemInHand(interactionHand), entity);
+                    if (((InteractionResult)((Object)optional.get())).shouldSwing()) {
+                        this.player.swing(interactionHand, true);
+                    }
                 }
             }
         }

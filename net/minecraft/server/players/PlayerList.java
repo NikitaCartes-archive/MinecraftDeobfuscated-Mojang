@@ -161,7 +161,7 @@ public abstract class PlayerList {
         GameRules gameRules = serverLevel2.getGameRules();
         boolean bl = gameRules.getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN);
         boolean bl2 = gameRules.getBoolean(GameRules.RULE_REDUCEDDEBUGINFO);
-        serverGamePacketListenerImpl.send(new ClientboundLoginPacket(serverPlayer.getId(), serverPlayer.gameMode.getGameModeForPlayer(), BiomeManager.obfuscateSeed(serverLevel2.getSeed()), levelData.isHardcore(), this.server.levelKeys(), this.registryHolder, serverLevel2.dimensionTypeKey(), serverLevel2.dimension(), this.getMaxPlayers(), this.viewDistance, bl2, !bl, serverLevel2.isDebug(), serverLevel2.isFlat()));
+        serverGamePacketListenerImpl.send(new ClientboundLoginPacket(serverPlayer.getId(), serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.gameMode.getPreviousGameModeForPlayer(), BiomeManager.obfuscateSeed(serverLevel2.getSeed()), levelData.isHardcore(), this.server.levelKeys(), this.registryHolder, serverLevel2.dimensionTypeKey(), serverLevel2.dimension(), this.getMaxPlayers(), this.viewDistance, bl2, !bl, serverLevel2.isDebug(), serverLevel2.isFlat()));
         serverGamePacketListenerImpl.send(new ClientboundCustomPayloadPacket(ClientboundCustomPayloadPacket.BRAND, new FriendlyByteBuf(Unpooled.buffer()).writeUtf(this.getServer().getServerModName())));
         serverGamePacketListenerImpl.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
         serverGamePacketListenerImpl.send(new ClientboundPlayerAbilitiesPacket(serverPlayer.abilities));
@@ -407,7 +407,7 @@ public abstract class PlayerList {
             serverPlayer2.setPos(serverPlayer2.getX(), serverPlayer2.getY() + 1.0, serverPlayer2.getZ());
         }
         LevelData levelData = serverPlayer2.level.getLevelData();
-        serverPlayer2.connection.send(new ClientboundRespawnPacket(serverPlayer2.level.dimensionTypeKey(), serverPlayer2.level.dimension(), BiomeManager.obfuscateSeed(serverPlayer2.getLevel().getSeed()), serverPlayer2.gameMode.getGameModeForPlayer(), serverPlayer2.getLevel().isDebug(), serverPlayer2.getLevel().isFlat(), bl));
+        serverPlayer2.connection.send(new ClientboundRespawnPacket(serverPlayer2.level.dimensionTypeKey(), serverPlayer2.level.dimension(), BiomeManager.obfuscateSeed(serverPlayer2.getLevel().getSeed()), serverPlayer2.gameMode.getGameModeForPlayer(), serverPlayer2.gameMode.getPreviousGameModeForPlayer(), serverPlayer2.getLevel().isDebug(), serverPlayer2.getLevel().isFlat(), bl));
         serverPlayer2.connection.teleport(serverPlayer2.getX(), serverPlayer2.getY(), serverPlayer2.getZ(), serverPlayer2.yRot, serverPlayer2.xRot);
         serverPlayer2.connection.send(new ClientboundSetDefaultSpawnPositionPacket(serverLevel2.getSharedSpawnPos()));
         serverPlayer2.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
@@ -633,9 +633,9 @@ public abstract class PlayerList {
 
     private void updatePlayerGameMode(ServerPlayer serverPlayer, @Nullable ServerPlayer serverPlayer2, ServerLevel serverLevel) {
         if (serverPlayer2 != null) {
-            serverPlayer.gameMode.setGameModeForPlayer(serverPlayer2.gameMode.getGameModeForPlayer());
+            serverPlayer.gameMode.setGameModeForPlayer(serverPlayer2.gameMode.getGameModeForPlayer(), serverPlayer2.gameMode.getPreviousGameModeForPlayer());
         } else if (this.overrideGameMode != null) {
-            serverPlayer.gameMode.setGameModeForPlayer(this.overrideGameMode);
+            serverPlayer.gameMode.setGameModeForPlayer(this.overrideGameMode, GameType.NOT_SET);
         }
         serverPlayer.gameMode.updateGameMode(serverLevel.getServer().getWorldData().getGameType());
     }

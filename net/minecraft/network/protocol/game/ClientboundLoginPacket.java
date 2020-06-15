@@ -24,6 +24,7 @@ implements Packet<ClientGamePacketListener> {
     private long seed;
     private boolean hardcore;
     private GameType gameType;
+    private GameType previousGameType;
     private Set<ResourceKey<Level>> levels;
     private RegistryAccess.RegistryHolder registryHolder;
     private ResourceKey<DimensionType> dimensionType;
@@ -38,7 +39,7 @@ implements Packet<ClientGamePacketListener> {
     public ClientboundLoginPacket() {
     }
 
-    public ClientboundLoginPacket(int i, GameType gameType, long l, boolean bl, Set<ResourceKey<Level>> set, RegistryAccess.RegistryHolder registryHolder, ResourceKey<DimensionType> resourceKey, ResourceKey<Level> resourceKey2, int j, int k, boolean bl2, boolean bl3, boolean bl4, boolean bl5) {
+    public ClientboundLoginPacket(int i, GameType gameType, GameType gameType2, long l, boolean bl, Set<ResourceKey<Level>> set, RegistryAccess.RegistryHolder registryHolder, ResourceKey<DimensionType> resourceKey, ResourceKey<Level> resourceKey2, int j, int k, boolean bl2, boolean bl3, boolean bl4, boolean bl5) {
         this.playerId = i;
         this.levels = set;
         this.registryHolder = registryHolder;
@@ -46,6 +47,7 @@ implements Packet<ClientGamePacketListener> {
         this.dimension = resourceKey2;
         this.seed = l;
         this.gameType = gameType;
+        this.previousGameType = gameType2;
         this.maxPlayers = j;
         this.hardcore = bl;
         this.chunkRadius = k;
@@ -61,6 +63,7 @@ implements Packet<ClientGamePacketListener> {
         int i = friendlyByteBuf.readUnsignedByte();
         this.hardcore = (i & 8) == 8;
         this.gameType = GameType.byId(i &= 0xFFFFFFF7);
+        this.previousGameType = GameType.byId(friendlyByteBuf.readUnsignedByte());
         int j = friendlyByteBuf.readVarInt();
         this.levels = Sets.newHashSet();
         for (int k = 0; k < j; ++k) {
@@ -86,6 +89,7 @@ implements Packet<ClientGamePacketListener> {
             i |= 8;
         }
         friendlyByteBuf.writeByte(i);
+        friendlyByteBuf.writeByte(this.previousGameType.getId());
         friendlyByteBuf.writeVarInt(this.levels.size());
         for (ResourceKey<Level> resourceKey : this.levels) {
             friendlyByteBuf.writeResourceLocation(resourceKey.location());
@@ -125,6 +129,11 @@ implements Packet<ClientGamePacketListener> {
     @Environment(value=EnvType.CLIENT)
     public GameType getGameType() {
         return this.gameType;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public GameType getPreviousGameType() {
+        return this.previousGameType;
     }
 
     @Environment(value=EnvType.CLIENT)

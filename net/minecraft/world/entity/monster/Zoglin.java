@@ -121,7 +121,7 @@ HoglinBase {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 40.0).add(Attributes.MOVEMENT_SPEED, 0.3f).add(Attributes.KNOCKBACK_RESISTANCE, 0.5).add(Attributes.ATTACK_KNOCKBACK, 1.0).add(Attributes.ATTACK_DAMAGE, 6.0);
+        return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 40.0).add(Attributes.MOVEMENT_SPEED, 0.3f).add(Attributes.KNOCKBACK_RESISTANCE, 0.6f).add(Attributes.ATTACK_KNOCKBACK, 1.0).add(Attributes.ATTACK_DAMAGE, 6.0);
     }
 
     public boolean isAdult() {
@@ -175,8 +175,8 @@ HoglinBase {
         Activity activity = this.brain.getActiveNonCoreActivity().orElse(null);
         this.brain.setActiveActivityToFirstValid(ImmutableList.of(Activity.FIGHT, Activity.IDLE));
         Activity activity2 = this.brain.getActiveNonCoreActivity().orElse(null);
-        if (activity != activity2) {
-            this.playActivitySound();
+        if (activity2 == Activity.FIGHT && activity != Activity.FIGHT) {
+            this.playAngrySound();
         }
         this.setAggressive(this.brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET));
     }
@@ -187,19 +187,6 @@ HoglinBase {
         this.getBrain().tick((ServerLevel)this.level, this);
         this.level.getProfiler().pop();
         this.updateActivity();
-        this.maybePlayActivitySound();
-    }
-
-    private void playActivitySound() {
-        if (this.brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET)) {
-            this.playAngrySound();
-        }
-    }
-
-    protected void maybePlayActivitySound() {
-        if ((double)this.random.nextFloat() < 0.0125) {
-            this.playActivitySound();
-        }
     }
 
     @Override
@@ -242,6 +229,12 @@ HoglinBase {
 
     @Override
     protected SoundEvent getAmbientSound() {
+        if (this.level.isClientSide) {
+            return null;
+        }
+        if (this.brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET)) {
+            return SoundEvents.ZOGLIN_ANGRY;
+        }
         return SoundEvents.ZOGLIN_AMBIENT;
     }
 

@@ -33,16 +33,9 @@ implements DebugRenderer.SimpleDebugRenderer {
     }
 
     public void addUpdate(long l, BlockPos blockPos) {
-        Integer integer;
-        Map<BlockPos, Integer> map = this.lastUpdate.get(l);
-        if (map == null) {
-            map = Maps.newHashMap();
-            this.lastUpdate.put(l, map);
-        }
-        if ((integer = map.get(blockPos)) == null) {
-            integer = 0;
-        }
-        map.put(blockPos, integer + 1);
+        Map map = this.lastUpdate.computeIfAbsent(l, long_ -> Maps.newHashMap());
+        int i = map.getOrDefault(blockPos, 0);
+        map.put(blockPos, i + 1);
     }
 
     @Override

@@ -8,6 +8,7 @@ import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.world.item.BlockItem;
@@ -304,6 +305,9 @@ public class ItemBlockRenderTypes {
     public static RenderType getRenderType(BlockState blockState, boolean bl) {
         RenderType renderType = ItemBlockRenderTypes.getChunkRenderType(blockState);
         if (renderType == RenderType.translucent()) {
+            if (!Minecraft.useShaderTransparency()) {
+                return Sheets.translucentCullBlockSheet();
+            }
             return bl ? Sheets.translucentCullBlockSheet() : Sheets.translucentItemSheet();
         }
         return Sheets.cutoutBlockSheet();

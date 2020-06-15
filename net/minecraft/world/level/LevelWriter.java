@@ -9,7 +9,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 public interface LevelWriter {
-    public boolean setBlock(BlockPos var1, BlockState var2, int var3);
+    public boolean setBlock(BlockPos var1, BlockState var2, int var3, int var4);
+
+    default public boolean setBlock(BlockPos blockPos, BlockState blockState, int i) {
+        return this.setBlock(blockPos, blockState, i, 512);
+    }
 
     public boolean removeBlock(BlockPos var1, boolean var2);
 
@@ -17,7 +21,11 @@ public interface LevelWriter {
         return this.destroyBlock(blockPos, bl, null);
     }
 
-    public boolean destroyBlock(BlockPos var1, boolean var2, @Nullable Entity var3);
+    default public boolean destroyBlock(BlockPos blockPos, boolean bl, @Nullable Entity entity) {
+        return this.destroyBlock(blockPos, bl, entity, 512);
+    }
+
+    public boolean destroyBlock(BlockPos var1, boolean var2, @Nullable Entity var3, int var4);
 
     default public boolean addFreshEntity(Entity entity) {
         return false;

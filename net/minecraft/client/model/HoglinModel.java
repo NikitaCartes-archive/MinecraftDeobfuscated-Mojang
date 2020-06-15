@@ -52,7 +52,7 @@ extends AgeableListModel<T> {
         this.head.addChild(this.leftEar);
         ModelPart modelPart = new ModelPart(this);
         modelPart.setPos(-7.0f, 2.0f, -12.0f);
-        modelPart.texOffs(1, 13).addBox(-1.0f, -11.0f, -1.0f, 2.0f, 11.0f, 2.0f);
+        modelPart.texOffs(10, 13).addBox(-1.0f, -11.0f, -1.0f, 2.0f, 11.0f, 2.0f);
         this.head.addChild(modelPart);
         ModelPart modelPart2 = new ModelPart(this);
         modelPart2.setPos(7.0f, 2.0f, -12.0f);

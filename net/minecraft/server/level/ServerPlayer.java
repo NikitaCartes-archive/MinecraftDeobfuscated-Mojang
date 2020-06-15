@@ -234,9 +234,9 @@ implements ContainerListener {
         super.readAdditionalSaveData(compoundTag);
         if (compoundTag.contains("playerGameType", 99)) {
             if (this.getServer().getForceGameType()) {
-                this.gameMode.setGameModeForPlayer(this.getServer().getDefaultGameType());
+                this.gameMode.setGameModeForPlayer(this.getServer().getDefaultGameType(), GameType.NOT_SET);
             } else {
-                this.gameMode.setGameModeForPlayer(GameType.byId(compoundTag.getInt("playerGameType")));
+                this.gameMode.setGameModeForPlayer(GameType.byId(compoundTag.getInt("playerGameType")), compoundTag.contains("previousPlayerGameType", 3) ? GameType.byId(compoundTag.getInt("previousPlayerGameType")) : GameType.NOT_SET);
             }
         }
         if (compoundTag.contains("enteredNetherPosition", 10)) {
@@ -263,6 +263,7 @@ implements ContainerListener {
     public void addAdditionalSaveData(CompoundTag compoundTag) {
         super.addAdditionalSaveData(compoundTag);
         compoundTag.putInt("playerGameType", this.gameMode.getGameModeForPlayer().getId());
+        compoundTag.putInt("previousPlayerGameType", this.gameMode.getPreviousGameModeForPlayer().getId());
         compoundTag.putBoolean("seenCredits", this.seenCredits);
         if (this.enteredNetherPosition != null) {
             CompoundTag compoundTag2 = new CompoundTag();
@@ -581,7 +582,7 @@ implements ContainerListener {
             return this;
         }
         LevelData levelData = serverLevel.getLevelData();
-        this.connection.send(new ClientboundRespawnPacket(serverLevel.dimensionTypeKey(), serverLevel.dimension(), BiomeManager.obfuscateSeed(serverLevel.getSeed()), this.gameMode.getGameModeForPlayer(), serverLevel.isDebug(), serverLevel.isFlat(), true));
+        this.connection.send(new ClientboundRespawnPacket(serverLevel.dimensionTypeKey(), serverLevel.dimension(), BiomeManager.obfuscateSeed(serverLevel.getSeed()), this.gameMode.getGameModeForPlayer(), this.gameMode.getPreviousGameModeForPlayer(), serverLevel.isDebug(), serverLevel.isFlat(), true));
         this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
         PlayerList playerList = this.server.getPlayerList();
         playerList.sendPlayerPermissionLevel(this);
@@ -1268,7 +1269,7 @@ implements ContainerListener {
         } else {
             ServerLevel serverLevel2 = this.getLevel();
             LevelData levelData = serverLevel.getLevelData();
-            this.connection.send(new ClientboundRespawnPacket(serverLevel.dimensionTypeKey(), serverLevel.dimension(), BiomeManager.obfuscateSeed(serverLevel.getSeed()), this.gameMode.getGameModeForPlayer(), serverLevel.isDebug(), serverLevel.isFlat(), true));
+            this.connection.send(new ClientboundRespawnPacket(serverLevel.dimensionTypeKey(), serverLevel.dimension(), BiomeManager.obfuscateSeed(serverLevel.getSeed()), this.gameMode.getGameModeForPlayer(), this.gameMode.getPreviousGameModeForPlayer(), serverLevel.isDebug(), serverLevel.isFlat(), true));
             this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
             this.server.getPlayerList().sendPlayerPermissionLevel(this);
             serverLevel2.removePlayerImmediately(this);

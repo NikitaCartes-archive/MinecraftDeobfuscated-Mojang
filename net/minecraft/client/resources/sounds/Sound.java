@@ -81,6 +81,10 @@ implements Weighted<Sound> {
         return this.attenuationDistance;
     }
 
+    public String toString() {
+        return "Sound[" + this.location + "]";
+    }
+
     @Override
     public /* synthetic */ Object getSound() {
         return this.getSound();

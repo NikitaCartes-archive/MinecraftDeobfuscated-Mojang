@@ -8,10 +8,8 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -115,20 +113,13 @@ implements DebugRenderer.SimpleDebugRenderer {
 
     private Map<BlockPos, Set<UUID>> createHiveBlacklistMap() {
         HashMap<BlockPos, Set<UUID>> map = Maps.newHashMap();
-        this.beeInfosPerEntity.values().forEach(beeInfo -> beeInfo.blacklistedHives.forEach(blockPos -> BeeDebugRenderer.addBeeToSetInMap(map, beeInfo, blockPos)));
+        this.beeInfosPerEntity.values().forEach(beeInfo -> beeInfo.blacklistedHives.forEach(blockPos2 -> map.computeIfAbsent((BlockPos)blockPos2, blockPos -> Sets.newHashSet()).add(beeInfo.getUuid())));
         return map;
     }
 
     private void renderFlowerInfos() {
         HashMap map = Maps.newHashMap();
-        this.beeInfosPerEntity.values().stream().filter(BeeInfo::hasFlower).forEach(beeInfo -> {
-            HashSet<UUID> set = (HashSet<UUID>)map.get(beeInfo.flowerPos);
-            if (set == null) {
-                set = Sets.newHashSet();
-                map.put(beeInfo.flowerPos, set);
-            }
-            set.add(beeInfo.getUuid());
-        });
+        this.beeInfosPerEntity.values().stream().filter(BeeInfo::hasFlower).forEach(beeInfo -> map.computeIfAbsent(beeInfo.flowerPos, blockPos -> Sets.newHashSet()).add(beeInfo.getUuid()));
         map.entrySet().forEach(entry -> {
             BlockPos blockPos = (BlockPos)entry.getKey();
             Set set = (Set)entry.getValue();
@@ -149,15 +140,6 @@ implements DebugRenderer.SimpleDebugRenderer {
             return "" + collection.size() + " bees";
         }
         return collection.stream().map(DebugEntityNameGenerator::getEntityName).collect(Collectors.toSet()).toString();
-    }
-
-    private static void addBeeToSetInMap(Map<BlockPos, Set<UUID>> map, BeeInfo beeInfo, BlockPos blockPos) {
-        Set<UUID> set = map.get(blockPos);
-        if (set == null) {
-            set = Sets.newHashSet();
-            map.put(blockPos, set);
-        }
-        set.add(beeInfo.getUuid());
     }
 
     private static void highlightHive(BlockPos blockPos) {
@@ -281,12 +263,7 @@ implements DebugRenderer.SimpleDebugRenderer {
         HashMap<BlockPos, List<String>> map = Maps.newHashMap();
         for (BeeInfo beeInfo : this.beeInfosPerEntity.values()) {
             if (beeInfo.hivePos == null || this.hives.containsKey(beeInfo.hivePos)) continue;
-            ArrayList<String> list = (ArrayList<String>)map.get(beeInfo.hivePos);
-            if (list == null) {
-                list = Lists.newArrayList();
-                map.put(beeInfo.hivePos, list);
-            }
-            list.add(beeInfo.getName());
+            map.computeIfAbsent(beeInfo.hivePos, blockPos -> Lists.newArrayList()).add(beeInfo.getName());
         }
         return map;
     }

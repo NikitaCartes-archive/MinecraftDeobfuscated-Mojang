@@ -34,6 +34,7 @@ import net.minecraft.advancements.critereon.LootTableTrigger;
 import net.minecraft.advancements.critereon.NetherTravelTrigger;
 import net.minecraft.advancements.critereon.PlacedBlockTrigger;
 import net.minecraft.advancements.critereon.PlayerHurtEntityTrigger;
+import net.minecraft.advancements.critereon.PlayerInteractTrigger;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.advancements.critereon.ShotCrossbowTrigger;
 import net.minecraft.advancements.critereon.SlideDownBlockTrigger;
@@ -90,6 +91,7 @@ public class CriteriaTriggers {
     public static final ItemUsedOnBlockTrigger ITEM_USED_ON_BLOCK = CriteriaTriggers.register(new ItemUsedOnBlockTrigger());
     public static final LootTableTrigger GENERATE_LOOT = CriteriaTriggers.register(new LootTableTrigger());
     public static final ItemPickedUpByEntityTrigger ITEM_PICKED_UP_BY_ENTITY = CriteriaTriggers.register(new ItemPickedUpByEntityTrigger());
+    public static final PlayerInteractTrigger PLAYER_INTERACTED_WITH_ENTITY = CriteriaTriggers.register(new PlayerInteractTrigger());
 
     private static <T extends CriterionTrigger<?>> T register(T criterionTrigger) {
         if (CRITERIA.containsKey(criterionTrigger.getId())) {

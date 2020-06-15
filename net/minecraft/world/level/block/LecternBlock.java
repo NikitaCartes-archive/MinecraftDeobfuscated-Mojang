@@ -82,10 +82,10 @@ extends BaseEntityBlock {
         CompoundTag compoundTag2;
         Level level = blockPlaceContext.getLevel();
         ItemStack itemStack = blockPlaceContext.getItemInHand();
-        CompoundTag compoundTag = itemStack.getOrCreateTag();
+        CompoundTag compoundTag = itemStack.getTag();
         Player player = blockPlaceContext.getPlayer();
         boolean bl = false;
-        if (!level.isClientSide && player != null && player.canUseGameMasterBlocks() && compoundTag.contains("BlockEntityTag") && (compoundTag2 = compoundTag.getCompound("BlockEntityTag")).contains("Book")) {
+        if (!level.isClientSide && player != null && compoundTag != null && player.canUseGameMasterBlocks() && compoundTag.contains("BlockEntityTag") && (compoundTag2 = compoundTag.getCompound("BlockEntityTag")).contains("Book")) {
             bl = true;
         }
         return (BlockState)((BlockState)this.defaultBlockState().setValue(FACING, blockPlaceContext.getHorizontalDirection().getOpposite())).setValue(HAS_BOOK, bl);

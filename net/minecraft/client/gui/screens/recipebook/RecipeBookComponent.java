@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.RecipeBookCategories;
@@ -51,6 +52,7 @@ GuiEventListener,
 RecipeShownListener,
 PlaceRecipe<Ingredient> {
     protected static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
+    private static final Component SEARCH_HINT = new TranslatableComponent("gui.recipebook.search_hint").withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY);
     private int xOffset;
     private int width;
     private int height;
@@ -224,7 +226,11 @@ PlaceRecipe<Ingredient> {
         int k = (this.width - 147) / 2 - this.xOffset;
         int l = (this.height - 166) / 2;
         this.blit(poseStack, k, l, 1, 1, 147, 166);
-        this.searchBox.render(poseStack, i, j, f);
+        if (!this.searchBox.isFocused() && this.searchBox.getValue().isEmpty()) {
+            this.drawString(poseStack, this.minecraft.font, SEARCH_HINT, k + 25, l + 14, -1);
+        } else {
+            this.searchBox.render(poseStack, i, j, f);
+        }
         for (RecipeBookTabButton recipeBookTabButton : this.tabButtons) {
             recipeBookTabButton.render(poseStack, i, j, f);
         }

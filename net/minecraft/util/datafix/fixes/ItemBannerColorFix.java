@@ -3,6 +3,7 @@
  */
 package net.minecraft.util.datafix.fixes;
 
+import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.OpticFinder;
@@ -42,10 +43,11 @@ extends DataFix {
                     Dynamic<?> dynamic2 = typed2.get(DSL.remainderFinder());
                     Dynamic<?> dynamic3 = typed3.getOrCreate(DSL.remainderFinder());
                     if (dynamic3.get("Base").asNumber().result().isPresent()) {
+                        Dynamic dynamic5;
                         Dynamic dynamic4;
                         dynamic = dynamic.set("Damage", dynamic.createShort((short)(dynamic3.get("Base").asInt(0) & 0xF)));
                         Optional<Dynamic<?>> optional4 = dynamic2.get("display").result();
-                        if (optional4.isPresent() && Objects.equals(dynamic4 = optional4.get(), dynamic4.emptyMap().merge(dynamic4.createString("Lore"), dynamic4.createList(Stream.of(dynamic4.createString("(+NBT")))))) {
+                        if (optional4.isPresent() && Objects.equals(dynamic4 = optional4.get(), dynamic5 = dynamic4.createMap(ImmutableMap.of(dynamic4.createString("Lore"), dynamic4.createList(Stream.of(dynamic4.createString("(+NBT"))))))) {
                             return typed.set(DSL.remainderFinder(), dynamic);
                         }
                         dynamic3.remove("Base");

@@ -221,6 +221,11 @@ AutoCloseable {
 
     @Override
     public boolean setBlock(BlockPos blockPos, BlockState blockState, int i) {
+        return this.setBlock(blockPos, blockState, i, 512);
+    }
+
+    @Override
+    public boolean setBlock(BlockPos blockPos, BlockState blockState, int i, int j) {
         if (Level.isOutsideBuildHeight(blockPos)) {
             return false;
         }
@@ -250,11 +255,11 @@ AutoCloseable {
                         this.updateNeighbourForOutputSignal(blockPos, block);
                     }
                 }
-                if ((i & 0x10) == 0) {
-                    int j = i & 0xFFFFFFDE;
-                    blockState2.updateIndirectNeighbourShapes(this, blockPos, j);
-                    blockState.updateNeighbourShapes(this, blockPos, j);
-                    blockState.updateIndirectNeighbourShapes(this, blockPos, j);
+                if ((i & 0x10) == 0 && j > 0) {
+                    int k = i & 0xFFFFFFDE;
+                    blockState2.updateIndirectNeighbourShapes(this, blockPos, k, j - 1);
+                    blockState.updateNeighbourShapes(this, blockPos, k, j - 1);
+                    blockState.updateIndirectNeighbourShapes(this, blockPos, k, j - 1);
                 }
                 this.onBlockStateChange(blockPos, blockState2, blockState3);
             }
@@ -273,7 +278,7 @@ AutoCloseable {
     }
 
     @Override
-    public boolean destroyBlock(BlockPos blockPos, boolean bl, @Nullable Entity entity) {
+    public boolean destroyBlock(BlockPos blockPos, boolean bl, @Nullable Entity entity, int i) {
         BlockState blockState = this.getBlockState(blockPos);
         if (blockState.isAir()) {
             return false;
@@ -286,7 +291,7 @@ AutoCloseable {
             BlockEntity blockEntity = blockState.getBlock().isEntityBlock() ? this.getBlockEntity(blockPos) : null;
             Block.dropResources(blockState, this, blockPos, blockEntity, entity, ItemStack.EMPTY);
         }
-        return this.setBlock(blockPos, fluidState.createLegacyBlock(), 3);
+        return this.setBlock(blockPos, fluidState.createLegacyBlock(), 3, i);
     }
 
     public boolean setBlockAndUpdate(BlockPos blockPos, BlockState blockState) {

@@ -11,9 +11,11 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.Map;
 import java.util.Objects;
+import java.util.OptionalInt;
 import java.util.function.BiFunction;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -138,6 +140,16 @@ public class InputConstants {
             return this.displayName.get();
         }
 
+        public OptionalInt getNumericKeyValue() {
+            if (this.value >= 48 && this.value <= 57) {
+                return OptionalInt.of(this.value - 48);
+            }
+            if (this.value >= 320 && this.value <= 329) {
+                return OptionalInt.of(this.value - 320);
+            }
+            return OptionalInt.empty();
+        }
+
         public boolean equals(Object object) {
             if (this == object) {
                 return true;
@@ -168,7 +180,7 @@ public class InputConstants {
             String string2 = GLFW.glfwGetKeyName(-1, integer);
             return string2 != null ? new TextComponent(string2) : new TranslatableComponent((String)string);
         }),
-        MOUSE("key.mouse", (integer, string) -> new TranslatableComponent((String)string));
+        MOUSE("key.mouse", (integer, string) -> Language.getInstance().has((String)string) ? new TranslatableComponent((String)string) : new TranslatableComponent("key.mouse", integer + 1));
 
         private final Int2ObjectMap<Key> map = new Int2ObjectOpenHashMap<Key>();
         private final String defaultPrefix;

@@ -147,10 +147,10 @@ extends ItemCombinerMenu {
                 boolean bl22 = false;
                 boolean bl3 = false;
                 for (Enchantment enchantment : map2.keySet()) {
+                    int r;
                     if (enchantment == null) continue;
-                    int q = map.containsKey(enchantment) ? map.get(enchantment) : 0;
-                    int r = map2.get(enchantment);
-                    r = q == r ? r + 1 : Math.max(r, q);
+                    int q = map.getOrDefault(enchantment, 0);
+                    r = q == (r = map2.get(enchantment).intValue()) ? r + 1 : Math.max(r, q);
                     boolean bl4 = enchantment.canEnchant(itemStack);
                     if (this.player.abilities.instabuild || itemStack.getItem() == Items.ENCHANTED_BOOK) {
                         bl4 = true;

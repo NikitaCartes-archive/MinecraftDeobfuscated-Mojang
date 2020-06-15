@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -14,8 +15,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -88,7 +91,7 @@ implements TickableBlockEntity {
         } else if (!this.level.isClientSide) {
             List<Entity> list = this.level.getEntitiesOfClass(Entity.class, new AABB(this.getBlockPos()));
             if (!list.isEmpty()) {
-                this.teleportEntity(list.get(0).getRootVehicle());
+                this.teleportEntity(list.get(this.level.random.nextInt(list.size())));
             }
             if (this.age % 2400L == 0L) {
                 this.triggerCooldown();
@@ -154,8 +157,24 @@ implements TickableBlockEntity {
             this.findExitPortal((ServerLevel)this.level);
         }
         if (this.exitPortal != null) {
-            BlockPos blockPos = this.exactTeleport ? this.exitPortal : this.findExitPosition();
-            entity.teleportToWithTicket((double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5);
+            Entity entity3;
+            BlockPos blockPos;
+            BlockPos blockPos2 = blockPos = this.exactTeleport ? this.exitPortal : this.findExitPosition();
+            if (entity instanceof ThrownEnderpearl) {
+                Entity entity2 = ((ThrownEnderpearl)entity).getOwner();
+                if (entity2 instanceof ServerPlayer) {
+                    CriteriaTriggers.ENTER_BLOCK.trigger((ServerPlayer)entity2, this.level.getBlockState(this.getBlockPos()));
+                }
+                if (entity2 != null) {
+                    entity3 = entity2;
+                    entity.remove();
+                } else {
+                    entity3 = entity;
+                }
+            } else {
+                entity3 = entity.getRootVehicle();
+            }
+            entity3.teleportToWithTicket((double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5);
         }
         this.triggerCooldown();
     }

@@ -39,7 +39,7 @@ import net.minecraft.world.scores.Team;
 import org.jetbrains.annotations.Nullable;
 
 public class EntityPredicate {
-    public static final EntityPredicate ANY = new EntityPredicate(EntityTypePredicate.ANY, DistancePredicate.ANY, LocationPredicate.ANY, MobEffectsPredicate.ANY, NbtPredicate.ANY, EntityFlagsPredicate.ANY, EntityEquipmentPredicate.ANY, PlayerPredicate.ANY, FishingHookPredicate.ANY, ANY, ANY, null, null);
+    public static final EntityPredicate ANY = new EntityPredicate(EntityTypePredicate.ANY, DistancePredicate.ANY, LocationPredicate.ANY, MobEffectsPredicate.ANY, NbtPredicate.ANY, EntityFlagsPredicate.ANY, EntityEquipmentPredicate.ANY, PlayerPredicate.ANY, FishingHookPredicate.ANY, null, null);
     private final EntityTypePredicate entityType;
     private final DistancePredicate distanceToPlayer;
     private final LocationPredicate location;
@@ -55,6 +55,22 @@ public class EntityPredicate {
     private final String team;
     @Nullable
     private final ResourceLocation catType;
+
+    private EntityPredicate(EntityTypePredicate entityTypePredicate, DistancePredicate distancePredicate, LocationPredicate locationPredicate, MobEffectsPredicate mobEffectsPredicate, NbtPredicate nbtPredicate, EntityFlagsPredicate entityFlagsPredicate, EntityEquipmentPredicate entityEquipmentPredicate, PlayerPredicate playerPredicate, FishingHookPredicate fishingHookPredicate, @Nullable String string, @Nullable ResourceLocation resourceLocation) {
+        this.entityType = entityTypePredicate;
+        this.distanceToPlayer = distancePredicate;
+        this.location = locationPredicate;
+        this.effects = mobEffectsPredicate;
+        this.nbt = nbtPredicate;
+        this.flags = entityFlagsPredicate;
+        this.equipment = entityEquipmentPredicate;
+        this.player = playerPredicate;
+        this.fishingHook = fishingHookPredicate;
+        this.vehicle = this;
+        this.targetedEntity = this;
+        this.team = string;
+        this.catType = resourceLocation;
+    }
 
     private EntityPredicate(EntityTypePredicate entityTypePredicate, DistancePredicate distancePredicate, LocationPredicate locationPredicate, MobEffectsPredicate mobEffectsPredicate, NbtPredicate nbtPredicate, EntityFlagsPredicate entityFlagsPredicate, EntityEquipmentPredicate entityEquipmentPredicate, PlayerPredicate playerPredicate, FishingHookPredicate fishingHookPredicate, EntityPredicate entityPredicate, EntityPredicate entityPredicate2, @Nullable String string, @Nullable ResourceLocation resourceLocation) {
         this.entityType = entityTypePredicate;

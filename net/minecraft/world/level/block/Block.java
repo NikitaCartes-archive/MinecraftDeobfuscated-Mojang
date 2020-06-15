@@ -149,13 +149,17 @@ implements ItemLike {
     }
 
     public static void updateOrDestroy(BlockState blockState, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, int i) {
+        Block.updateOrDestroy(blockState, blockState2, levelAccessor, blockPos, i, 512);
+    }
+
+    public static void updateOrDestroy(BlockState blockState, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, int i, int j) {
         if (blockState2 != blockState) {
             if (blockState2.isAir()) {
                 if (!levelAccessor.isClientSide()) {
-                    levelAccessor.destroyBlock(blockPos, (i & 0x20) == 0);
+                    levelAccessor.destroyBlock(blockPos, (i & 0x20) == 0, null, j);
                 }
             } else {
-                levelAccessor.setBlock(blockPos, blockState2, i & 0xFFFFFFDF);
+                levelAccessor.setBlock(blockPos, blockState2, i & 0xFFFFFFDF, j);
             }
         }
     }

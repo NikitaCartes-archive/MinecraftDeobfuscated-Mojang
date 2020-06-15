@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.entity.monster;
 
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import net.fabricmc.api.EnvType;
@@ -232,10 +233,10 @@ implements Enemy {
             this.nextScanTick = 60;
             List<Player> list = Phantom.this.level.getNearbyPlayers(this.attackTargeting, Phantom.this, Phantom.this.getBoundingBox().inflate(16.0, 64.0, 16.0));
             if (!list.isEmpty()) {
-                list.sort((player, player2) -> player.getY() > player2.getY() ? -1 : 1);
-                for (Player player3 : list) {
-                    if (!Phantom.this.canAttack(player3, TargetingConditions.DEFAULT)) continue;
-                    Phantom.this.setTarget(player3);
+                list.sort(Comparator.comparing(Entity::getY).reversed());
+                for (Player player : list) {
+                    if (!Phantom.this.canAttack(player, TargetingConditions.DEFAULT)) continue;
+                    Phantom.this.setTarget(player);
                     return true;
                 }
             }

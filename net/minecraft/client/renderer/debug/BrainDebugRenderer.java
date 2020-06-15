@@ -9,7 +9,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -274,14 +273,9 @@ implements DebugRenderer.SimpleDebugRenderer {
     private Map<BlockPos, List<String>> getGhostPois() {
         HashMap<BlockPos, List<String>> map = Maps.newHashMap();
         for (BrainDump brainDump : this.brainDumpsPerEntity.values()) {
-            for (BlockPos blockPos : Iterables.concat(brainDump.pois, brainDump.potentialPois)) {
-                if (this.pois.containsKey(blockPos)) continue;
-                ArrayList<String> list = (ArrayList<String>)map.get(blockPos);
-                if (list == null) {
-                    list = Lists.newArrayList();
-                    map.put(blockPos, list);
-                }
-                list.add(brainDump.name);
+            for (BlockPos blockPos2 : Iterables.concat(brainDump.pois, brainDump.potentialPois)) {
+                if (this.pois.containsKey(blockPos2)) continue;
+                map.computeIfAbsent(blockPos2, blockPos -> Lists.newArrayList()).add(brainDump.name);
             }
         }
         return map;
