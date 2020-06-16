@@ -113,15 +113,15 @@ public class SoulSandValleyBiome extends Biome {
 				.decorated(FeatureDecorator.COUNT_RANGE.configured(new CountRangeDecoratorConfiguration(12, 0, 0, 32)))
 		);
 		BiomeDefaultFeatures.addNetherDefaultOres(this);
-		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.SKELETON, 10, 5, 5));
+		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.SKELETON, 20, 5, 5));
 		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.GHAST, 50, 4, 4));
 		this.addSpawn(MobCategory.MONSTER, new Biome.SpawnerData(EntityType.ENDERMAN, 1, 4, 4));
 		this.addSpawn(MobCategory.CREATURE, new Biome.SpawnerData(EntityType.STRIDER, 60, 1, 2));
-		double d = 1.0;
+		double d = 0.7;
 		double e = 0.15;
-		this.addMobCharge(EntityType.SKELETON, 1.0, 0.15);
-		this.addMobCharge(EntityType.GHAST, 1.0, 0.15);
-		this.addMobCharge(EntityType.ENDERMAN, 1.0, 0.15);
-		this.addMobCharge(EntityType.STRIDER, 1.0, 0.15);
+		this.addMobCharge(EntityType.SKELETON, 0.7, 0.15);
+		this.addMobCharge(EntityType.GHAST, 0.7, 0.15);
+		this.addMobCharge(EntityType.ENDERMAN, 0.7, 0.15);
+		this.addMobCharge(EntityType.STRIDER, 0.7, 0.15);
 	}
 }

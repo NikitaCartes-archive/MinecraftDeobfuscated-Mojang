@@ -80,7 +80,7 @@ import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEquippedItemPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.protocol.game.ClientboundSetExperiencePacket;
 import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
@@ -241,7 +241,7 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundSetEntityDataPacket.class, ClientboundSetEntityDataPacket::new)
 					.addPacket(ClientboundSetEntityLinkPacket.class, ClientboundSetEntityLinkPacket::new)
 					.addPacket(ClientboundSetEntityMotionPacket.class, ClientboundSetEntityMotionPacket::new)
-					.addPacket(ClientboundSetEquippedItemPacket.class, ClientboundSetEquippedItemPacket::new)
+					.addPacket(ClientboundSetEquipmentPacket.class, ClientboundSetEquipmentPacket::new)
 					.addPacket(ClientboundSetExperiencePacket.class, ClientboundSetExperiencePacket::new)
 					.addPacket(ClientboundSetHealthPacket.class, ClientboundSetHealthPacket::new)
 					.addPacket(ClientboundSetObjectivePacket.class, ClientboundSetObjectivePacket::new)

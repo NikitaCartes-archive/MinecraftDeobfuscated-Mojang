@@ -1031,7 +1031,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 
 	private void playerLoadedChunk(ServerPlayer serverPlayer, Packet<?>[] packets, LevelChunk levelChunk) {
 		if (packets[0] == null) {
-			packets[0] = new ClientboundLevelChunkPacket(levelChunk, 65535);
+			packets[0] = new ClientboundLevelChunkPacket(levelChunk, 65535, true);
 			packets[1] = new ClientboundLightUpdatePacket(levelChunk.getPos(), this.lightEngine, true);
 		}
 

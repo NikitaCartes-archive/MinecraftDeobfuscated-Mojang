@@ -101,7 +101,7 @@ public class TurtleEggBlock extends Block {
 	}
 
 	public static boolean isSand(BlockGetter blockGetter, BlockPos blockPos) {
-		return blockGetter.getBlockState(blockPos.below()).is(BlockTags.SAND);
+		return blockGetter.getBlockState(blockPos).is(BlockTags.SAND);
 	}
 
 	@Override

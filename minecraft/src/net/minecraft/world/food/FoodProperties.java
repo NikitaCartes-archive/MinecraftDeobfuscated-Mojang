@@ -1,9 +1,9 @@
 package net.minecraft.world.food;
 
 import com.google.common.collect.Lists;
+import com.mojang.datafixers.util.Pair;
 import java.util.List;
 import net.minecraft.world.effect.MobEffectInstance;
-import org.apache.commons.lang3.tuple.Pair;
 
 public class FoodProperties {
 	private final int nutrition;

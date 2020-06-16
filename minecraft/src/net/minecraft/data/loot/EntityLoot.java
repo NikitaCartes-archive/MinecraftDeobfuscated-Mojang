@@ -1010,14 +1010,7 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 					LootPool.lootPool()
 						.setRolls(ConstantIntValue.exactly(1))
 						.add(LootItem.lootTableItem(Items.GOLD_INGOT))
-						.when(
-							LootItemKilledByPlayerCondition.killedByPlayer()
-								.or(
-									LootItemEntityPropertyCondition.hasProperties(
-										LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().targetedEntity(EntityPredicate.Builder.entity().build())
-									)
-								)
-						)
+						.when(LootItemKilledByPlayerCondition.killedByPlayer())
 						.when(LootItemRandomChanceWithLootingCondition.randomChanceAndLootingBoost(0.025F, 0.01F))
 				)
 		);

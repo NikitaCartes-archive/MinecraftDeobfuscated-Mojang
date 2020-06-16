@@ -25,7 +25,7 @@ public class StriderModel<T extends Strider> extends ListModel<T> {
 		this.rightLeg = new ModelPart(this, 0, 32);
 		this.rightLeg.setPos(-4.0F, 8.0F, 0.0F);
 		this.rightLeg.addBox(-2.0F, 0.0F, -2.0F, 4.0F, 16.0F, 4.0F, 0.0F);
-		this.leftLeg = new ModelPart(this, 0, 32);
+		this.leftLeg = new ModelPart(this, 0, 55);
 		this.leftLeg.setPos(4.0F, 8.0F, 0.0F);
 		this.leftLeg.addBox(-2.0F, 0.0F, -2.0F, 4.0F, 16.0F, 4.0F, 0.0F);
 		this.body = new ModelPart(this, 0, 0);

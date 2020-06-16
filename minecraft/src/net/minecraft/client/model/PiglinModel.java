@@ -88,6 +88,12 @@ public class PiglinModel<T extends Mob> extends PlayerModel<T> {
 		} else if (mob.getType() == EntityType.ZOMBIFIED_PIGLIN) {
 			AnimationUtils.animateZombieArms(this.leftArm, this.rightArm, mob.isAggressive(), this.attackTime, h);
 		}
+
+		this.leftPants.copyFrom(this.leftLeg);
+		this.rightPants.copyFrom(this.rightLeg);
+		this.leftSleeve.copyFrom(this.leftArm);
+		this.rightSleeve.copyFrom(this.rightArm);
+		this.jacket.copyFrom(this.body);
 	}
 
 	protected void setupAttackAnimation(T mob, float f) {

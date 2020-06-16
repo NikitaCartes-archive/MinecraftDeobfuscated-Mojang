@@ -374,20 +374,23 @@ public class ServerChunkCache extends ChunkSource {
 			List<ChunkHolder> list = Lists.<ChunkHolder>newArrayList(this.chunkMap.getChunks());
 			Collections.shuffle(list);
 			list.forEach(chunkHolder -> {
-				Optional<LevelChunk> optional = ((Either)chunkHolder.getEntityTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK)).left();
+				Optional<LevelChunk> optional = ((Either)chunkHolder.getTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK)).left();
 				if (optional.isPresent()) {
-					LevelChunk levelChunk = (LevelChunk)optional.get();
 					this.level.getProfiler().push("broadcast");
-					chunkHolder.broadcastChanges(levelChunk);
+					chunkHolder.broadcastChanges((LevelChunk)optional.get());
 					this.level.getProfiler().pop();
-					ChunkPos chunkPos = chunkHolder.getPos();
-					if (!this.chunkMap.noPlayersCloseForSpawning(chunkPos)) {
-						levelChunk.setInhabitedTime(levelChunk.getInhabitedTime() + m);
-						if (bl2 && (this.spawnEnemies || this.spawnFriendlies) && this.level.getWorldBorder().isWithinBounds(levelChunk.getPos())) {
-							NaturalSpawner.spawnForChunk(this.level, levelChunk, spawnState, this.spawnFriendlies, this.spawnEnemies, bl3);
-						}
+					Optional<LevelChunk> optional2 = ((Either)chunkHolder.getEntityTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK)).left();
+					if (optional2.isPresent()) {
+						LevelChunk levelChunk = (LevelChunk)optional2.get();
+						ChunkPos chunkPos = chunkHolder.getPos();
+						if (!this.chunkMap.noPlayersCloseForSpawning(chunkPos)) {
+							levelChunk.setInhabitedTime(levelChunk.getInhabitedTime() + m);
+							if (bl2 && (this.spawnEnemies || this.spawnFriendlies) && this.level.getWorldBorder().isWithinBounds(levelChunk.getPos())) {
+								NaturalSpawner.spawnForChunk(this.level, levelChunk, spawnState, this.spawnFriendlies, this.spawnEnemies, bl3);
+							}
 
-						this.level.tickChunk(levelChunk, i);
+							this.level.tickChunk(levelChunk, i);
+						}
 					}
 				}
 			});

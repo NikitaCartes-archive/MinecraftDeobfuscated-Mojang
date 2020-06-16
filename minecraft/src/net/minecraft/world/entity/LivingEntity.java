@@ -3,7 +3,9 @@ package net.minecraft.world.entity;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import java.util.Collection;
@@ -33,7 +35,8 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
-import net.minecraft.network.protocol.game.ClientboundSetEquippedItemPacket;
+import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -105,7 +108,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
-import org.apache.commons.lang3.tuple.Pair;
 
 public abstract class LivingEntity extends Entity {
 	private static final UUID SPEED_MODIFIER_SPRINTING_UUID = UUID.fromString("662A6B8D-DA3E-4C1C-8813-96EA6097278D");
@@ -1688,7 +1690,17 @@ public abstract class LivingEntity extends Entity {
 				break;
 			case 54:
 				HoneyBlock.showJumpParticles(this);
+				break;
+			case 55:
+				this.swapHandItems();
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	private void swapHandItems() {
+		ItemStack itemStack = this.getItemBySlot(EquipmentSlot.OFFHAND);
+		this.setItemSlot(EquipmentSlot.OFFHAND, this.getItemBySlot(EquipmentSlot.MAINHAND));
+		this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
 	}
 
 	@Override
@@ -1933,7 +1945,14 @@ public abstract class LivingEntity extends Entity {
 				double ex = this.getY();
 				this.moveRelative(0.02F, vec3);
 				this.move(MoverType.SELF, this.getDeltaMovement());
-				this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
+				if (this.getFluidHeight(FluidTags.LAVA) <= this.getFluidJumpThreshold()) {
+					this.setDeltaMovement(this.getDeltaMovement().multiply(0.5, 0.8F, 0.5));
+					Vec3 vec34 = this.getFluidFallingAdjustedMovement(d, bl, this.getDeltaMovement());
+					this.setDeltaMovement(vec34);
+				} else {
+					this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
+				}
+
 				if (!this.isNoGravity()) {
 					this.setDeltaMovement(this.getDeltaMovement().add(0.0, -d / 4.0, 0.0));
 				}
@@ -2116,40 +2135,7 @@ public abstract class LivingEntity extends Entity {
 				}
 			}
 
-			for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-				ItemStack itemStack;
-				switch (equipmentSlot.getType()) {
-					case HAND:
-						itemStack = this.lastHandItemStacks.get(equipmentSlot.getIndex());
-						break;
-					case ARMOR:
-						itemStack = this.lastArmorItemStacks.get(equipmentSlot.getIndex());
-						break;
-					default:
-						continue;
-				}
-
-				ItemStack itemStack2 = this.getItemBySlot(equipmentSlot);
-				if (!ItemStack.matches(itemStack2, itemStack)) {
-					((ServerLevel)this.level).getChunkSource().broadcast(this, new ClientboundSetEquippedItemPacket(this.getId(), equipmentSlot, itemStack2));
-					if (!itemStack.isEmpty()) {
-						this.getAttributes().removeAttributeModifiers(itemStack.getAttributeModifiers(equipmentSlot));
-					}
-
-					if (!itemStack2.isEmpty()) {
-						this.getAttributes().addTransientAttributeModifiers(itemStack2.getAttributeModifiers(equipmentSlot));
-					}
-
-					switch (equipmentSlot.getType()) {
-						case HAND:
-							this.lastHandItemStacks.set(equipmentSlot.getIndex(), itemStack2.copy());
-							break;
-						case ARMOR:
-							this.lastArmorItemStacks.set(equipmentSlot.getIndex(), itemStack2.copy());
-					}
-				}
-			}
-
+			this.detectEquipmentUpdates();
 			if (this.tickCount % 20 == 0) {
 				this.getCombatTracker().recheckStatus();
 			}
@@ -2245,6 +2231,100 @@ public abstract class LivingEntity extends Entity {
 		}
 	}
 
+	private void detectEquipmentUpdates() {
+		Map<EquipmentSlot, ItemStack> map = this.collectEquipmentChanges();
+		if (map != null) {
+			this.handleHandSwap(map);
+			if (!map.isEmpty()) {
+				this.handleEquipmentChanges(map);
+			}
+		}
+	}
+
+	@Nullable
+	private Map<EquipmentSlot, ItemStack> collectEquipmentChanges() {
+		Map<EquipmentSlot, ItemStack> map = null;
+
+		for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+			ItemStack itemStack;
+			switch (equipmentSlot.getType()) {
+				case HAND:
+					itemStack = this.getLastHandItem(equipmentSlot);
+					break;
+				case ARMOR:
+					itemStack = this.getLastArmorItem(equipmentSlot);
+					break;
+				default:
+					continue;
+			}
+
+			ItemStack itemStack2 = this.getItemBySlot(equipmentSlot);
+			if (!ItemStack.matches(itemStack2, itemStack)) {
+				if (map == null) {
+					map = Maps.newEnumMap(EquipmentSlot.class);
+				}
+
+				map.put(equipmentSlot, itemStack2);
+				if (!itemStack.isEmpty()) {
+					this.getAttributes().removeAttributeModifiers(itemStack.getAttributeModifiers(equipmentSlot));
+				}
+
+				if (!itemStack2.isEmpty()) {
+					this.getAttributes().addTransientAttributeModifiers(itemStack2.getAttributeModifiers(equipmentSlot));
+				}
+			}
+		}
+
+		return map;
+	}
+
+	private void handleHandSwap(Map<EquipmentSlot, ItemStack> map) {
+		ItemStack itemStack = (ItemStack)map.get(EquipmentSlot.MAINHAND);
+		ItemStack itemStack2 = (ItemStack)map.get(EquipmentSlot.OFFHAND);
+		if (itemStack != null
+			&& itemStack2 != null
+			&& ItemStack.matches(itemStack, this.getLastHandItem(EquipmentSlot.OFFHAND))
+			&& ItemStack.matches(itemStack2, this.getLastHandItem(EquipmentSlot.MAINHAND))) {
+			((ServerLevel)this.level).getChunkSource().broadcast(this, new ClientboundEntityEventPacket(this, (byte)55));
+			map.remove(EquipmentSlot.MAINHAND);
+			map.remove(EquipmentSlot.OFFHAND);
+			this.setLastHandItem(EquipmentSlot.MAINHAND, itemStack.copy());
+			this.setLastHandItem(EquipmentSlot.OFFHAND, itemStack2.copy());
+		}
+	}
+
+	private void handleEquipmentChanges(Map<EquipmentSlot, ItemStack> map) {
+		List<Pair<EquipmentSlot, ItemStack>> list = Lists.<Pair<EquipmentSlot, ItemStack>>newArrayListWithCapacity(map.size());
+		map.forEach((equipmentSlot, itemStack) -> {
+			ItemStack itemStack2 = itemStack.copy();
+			list.add(Pair.of(equipmentSlot, itemStack2));
+			switch (equipmentSlot.getType()) {
+				case HAND:
+					this.setLastHandItem(equipmentSlot, itemStack2);
+					break;
+				case ARMOR:
+					this.setLastArmorItem(equipmentSlot, itemStack2);
+			}
+		});
+		((ServerLevel)this.level).getChunkSource().broadcast(this, new ClientboundSetEquipmentPacket(this.getId(), list));
+	}
+
+	private ItemStack getLastArmorItem(EquipmentSlot equipmentSlot) {
+		return this.lastArmorItemStacks.get(equipmentSlot.getIndex());
+	}
+
+	private void setLastArmorItem(EquipmentSlot equipmentSlot, ItemStack itemStack) {
+		this.lastArmorItemStacks.set(equipmentSlot.getIndex(), itemStack);
+	}
+
+	private ItemStack getLastHandItem(EquipmentSlot equipmentSlot) {
+		return this.lastHandItemStacks.get(equipmentSlot.getIndex());
+	}
+
+	private void setLastHandItem(EquipmentSlot equipmentSlot, ItemStack itemStack) {
+		this.lastHandItemStacks.set(equipmentSlot.getIndex(), itemStack);
+	}
+
 	protected float tickHeadTurn(float f, float g) {
 		float h = Mth.wrapDegrees(f - this.yBodyRot);
 		this.yBodyRot += h * 0.3F;
@@ -2330,15 +2410,23 @@ public abstract class LivingEntity extends Entity {
 		this.level.getProfiler().pop();
 		this.level.getProfiler().push("jump");
 		if (this.jumping && this.isAffectedByFluids()) {
-			double k = this.getFluidHeight(FluidTags.WATER);
+			double k;
+			if (this.isInLava()) {
+				k = this.getFluidHeight(FluidTags.LAVA);
+			} else {
+				k = this.getFluidHeight(FluidTags.WATER);
+			}
+
 			boolean bl = this.isInWater() && k > 0.0;
 			double l = this.getFluidJumpThreshold();
 			if (!bl || this.onGround && !(k > l)) {
-				if (this.isInLava()) {
+				if (!this.isInLava() || this.onGround && !(k > l)) {
+					if ((this.onGround || bl && k <= l) && this.noJumpDelay == 0) {
+						this.jumpFromGround();
+						this.noJumpDelay = 10;
+					}
+				} else {
 					this.jumpInLiquid(FluidTags.LAVA);
-				} else if ((this.onGround || bl && k <= l) && this.noJumpDelay == 0) {
-					this.jumpFromGround();
-					this.noJumpDelay = 10;
 				}
 			} else {
 				this.jumpInLiquid(FluidTags.WATER);
@@ -2983,8 +3071,8 @@ public abstract class LivingEntity extends Entity {
 		Item item = itemStack.getItem();
 		if (item.isEdible()) {
 			for (Pair<MobEffectInstance, Float> pair : item.getFoodProperties().getEffects()) {
-				if (!level.isClientSide && pair.getLeft() != null && level.random.nextFloat() < pair.getRight()) {
-					livingEntity.addEffect(new MobEffectInstance(pair.getLeft()));
+				if (!level.isClientSide && pair.getFirst() != null && level.random.nextFloat() < pair.getSecond()) {
+					livingEntity.addEffect(new MobEffectInstance(pair.getFirst()));
 				}
 			}
 		}

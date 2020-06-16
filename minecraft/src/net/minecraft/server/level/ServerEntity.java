@@ -1,5 +1,7 @@
 package net.minecraft.server.level;
 
+import com.google.common.collect.Lists;
+import com.mojang.datafixers.util.Pair;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -12,7 +14,7 @@ import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEquippedItemPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
@@ -220,11 +222,17 @@ public class ServerEntity {
 		}
 
 		if (this.entity instanceof LivingEntity) {
+			List<Pair<EquipmentSlot, ItemStack>> list = Lists.<Pair<EquipmentSlot, ItemStack>>newArrayList();
+
 			for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
 				ItemStack itemStack = ((LivingEntity)this.entity).getItemBySlot(equipmentSlot);
 				if (!itemStack.isEmpty()) {
-					consumer.accept(new ClientboundSetEquippedItemPacket(this.entity.getId(), equipmentSlot, itemStack));
+					list.add(Pair.of(equipmentSlot, itemStack.copy()));
 				}
+			}
+
+			if (!list.isEmpty()) {
+				consumer.accept(new ClientboundSetEquipmentPacket(this.entity.getId(), list));
 			}
 		}
 

@@ -31,15 +31,17 @@ public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListe
 	private byte[] buffer;
 	private List<CompoundTag> blockEntitiesTags;
 	private boolean fullChunk;
+	private boolean forgetOldData;
 
 	public ClientboundLevelChunkPacket() {
 	}
 
-	public ClientboundLevelChunkPacket(LevelChunk levelChunk, int i) {
+	public ClientboundLevelChunkPacket(LevelChunk levelChunk, int i, boolean bl) {
 		ChunkPos chunkPos = levelChunk.getPos();
 		this.x = chunkPos.x;
 		this.z = chunkPos.z;
 		this.fullChunk = i == 65535;
+		this.forgetOldData = bl;
 		this.heightmaps = new CompoundTag();
 
 		for (Entry<Heightmap.Types, Heightmap> entry : levelChunk.getHeightmaps()) {
@@ -72,6 +74,7 @@ public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListe
 		this.x = friendlyByteBuf.readInt();
 		this.z = friendlyByteBuf.readInt();
 		this.fullChunk = friendlyByteBuf.readBoolean();
+		this.forgetOldData = friendlyByteBuf.readBoolean();
 		this.availableSections = friendlyByteBuf.readVarInt();
 		this.heightmaps = friendlyByteBuf.readNbt();
 		if (this.fullChunk) {
@@ -98,6 +101,7 @@ public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListe
 		friendlyByteBuf.writeInt(this.x);
 		friendlyByteBuf.writeInt(this.z);
 		friendlyByteBuf.writeBoolean(this.fullChunk);
+		friendlyByteBuf.writeBoolean(this.forgetOldData);
 		friendlyByteBuf.writeVarInt(this.availableSections);
 		friendlyByteBuf.writeNbt(this.heightmaps);
 		if (this.biomes != null) {
@@ -176,6 +180,11 @@ public class ClientboundLevelChunkPacket implements Packet<ClientGamePacketListe
 
 	public boolean isFullChunk() {
 		return this.fullChunk;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public boolean forgetOldData() {
+		return this.forgetOldData;
 	}
 
 	@Environment(EnvType.CLIENT)
