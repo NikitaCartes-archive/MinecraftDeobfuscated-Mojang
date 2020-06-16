@@ -159,7 +159,7 @@ AutoCloseable {
             this.effectIndex = EFFECT_NONE;
             this.effectActive = false;
         } catch (JsonSyntaxException jsonSyntaxException) {
-            LOGGER.warn("Failed to load shader: {}", (Object)resourceLocation, (Object)jsonSyntaxException);
+            LOGGER.warn("Failed to parse shader: {}", (Object)resourceLocation, (Object)jsonSyntaxException);
             this.effectIndex = EFFECT_NONE;
             this.effectActive = false;
         }

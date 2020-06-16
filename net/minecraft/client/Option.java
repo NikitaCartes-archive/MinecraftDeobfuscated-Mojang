@@ -26,6 +26,7 @@ import net.minecraft.client.ProgressOption;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.ChatComponent;
+import net.minecraft.client.renderer.GpuWarnlistManager;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -201,11 +202,17 @@ public abstract class Option {
     private static final Component GRAPHICS_TOOLTIP_FABULOUS = new TranslatableComponent("options.graphics.fabulous.tooltip", new TranslatableComponent("options.graphics.fabulous").withStyle(ChatFormatting.ITALIC));
     private static final Component GRAPHICS_TOOLTIP_FANCY = new TranslatableComponent("options.graphics.fancy.tooltip");
     public static final CycleOption GRAPHICS = new CycleOption("options.graphics", (options, integer) -> {
+        Minecraft minecraft = Minecraft.getInstance();
+        GpuWarnlistManager gpuWarnlistManager = minecraft.getGpuWarnlistManager();
+        if (options.graphicsMode == GraphicsStatus.FANCY && gpuWarnlistManager.willShowWarning()) {
+            gpuWarnlistManager.showWarning();
+            return;
+        }
         options.graphicsMode = options.graphicsMode.cycleNext();
-        if (options.graphicsMode == GraphicsStatus.FABULOUS && !GlStateManager.supportsFramebufferBlit()) {
+        if (options.graphicsMode == GraphicsStatus.FABULOUS && (!GlStateManager.supportsFramebufferBlit() || gpuWarnlistManager.isSkippingFabulous())) {
             options.graphicsMode = GraphicsStatus.FAST;
         }
-        Minecraft.getInstance().levelRenderer.allChanged();
+        minecraft.levelRenderer.allChanged();
     }, (options, cycleOption) -> {
         switch (options.graphicsMode) {
             case FAST: {

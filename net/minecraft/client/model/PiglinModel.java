@@ -96,6 +96,11 @@ extends PlayerModel<T> {
         } else if (((Entity)mob).getType() == EntityType.ZOMBIFIED_PIGLIN) {
             AnimationUtils.animateZombieArms(this.leftArm, this.rightArm, ((Mob)mob).isAggressive(), this.attackTime, h);
         }
+        this.leftPants.copyFrom(this.leftLeg);
+        this.rightPants.copyFrom(this.rightLeg);
+        this.leftSleeve.copyFrom(this.leftArm);
+        this.rightSleeve.copyFrom(this.rightArm);
+        this.jacket.copyFrom(this.body);
     }
 
     @Override

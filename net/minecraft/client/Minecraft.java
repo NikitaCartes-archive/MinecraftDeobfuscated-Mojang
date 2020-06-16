@@ -947,6 +947,11 @@ WindowEventHandler {
         this.mouseHandler.setIgnoreFirstMove();
     }
 
+    @Override
+    public void cursorEntered() {
+        this.mouseHandler.cursorEntered();
+    }
+
     private int getFramerateLimit() {
         if (this.level == null && (this.screen != null || this.overlay != null)) {
             return 60;
@@ -2010,7 +2015,7 @@ WindowEventHandler {
             if (this.musicManager.isPlayingMusic(Musics.UNDER_WATER) || this.player.isUnderWater() && (biomeCategory == Biome.BiomeCategory.OCEAN || biomeCategory == Biome.BiomeCategory.RIVER)) {
                 return Musics.UNDER_WATER;
             }
-            if (this.player.abilities.instabuild && this.player.abilities.mayfly) {
+            if (this.player.level.dimension() != Level.NETHER && this.player.abilities.instabuild && this.player.abilities.mayfly) {
                 return Musics.CREATIVE;
             }
             return this.level.getBiomeManager().getNoiseBiomeAtPosition(this.player.blockPosition()).getBackgroundMusic().orElse(Musics.GAME);

@@ -163,7 +163,7 @@ import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEquippedItemPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.protocol.game.ClientboundSetExperiencePacket;
 import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
@@ -215,6 +215,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
@@ -688,10 +689,22 @@ implements ClientGamePacketListener {
             this.level.setSectionDirtyWithNeighbors(i, k, j);
         }
         for (CompoundTag compoundTag : clientboundLevelChunkPacket.getBlockEntitiesTags()) {
-            BlockPos blockPos = new BlockPos(compoundTag.getInt("x"), compoundTag.getInt("y"), compoundTag.getInt("z"));
-            BlockEntity blockEntity = this.level.getBlockEntity(blockPos);
+            BlockPos blockPos2 = new BlockPos(compoundTag.getInt("x"), compoundTag.getInt("y"), compoundTag.getInt("z"));
+            BlockEntity blockEntity = this.level.getBlockEntity(blockPos2);
             if (blockEntity == null) continue;
-            blockEntity.load(this.level.getBlockState(blockPos), compoundTag);
+            blockEntity.load(this.level.getBlockState(blockPos2), compoundTag);
+        }
+        if (!clientboundLevelChunkPacket.forgetOldData()) {
+            this.level.getLightEngine().enableLightSources(levelChunk.getPos(), false);
+            int k = clientboundLevelChunkPacket.getAvailableSections();
+            for (int l = 0; l < 16; ++l) {
+                if ((k & 1 << l) == 0) continue;
+                this.level.getLightEngine().queueSectionData(LightLayer.BLOCK, SectionPos.of(levelChunk.getPos(), l), new DataLayer(), false);
+                this.level.getLightEngine().queueSectionData(LightLayer.SKY, SectionPos.of(levelChunk.getPos(), l), new DataLayer(), false);
+            }
+            this.level.getLightEngine().runUpdates(Integer.MAX_VALUE, true, true);
+            this.level.getLightEngine().enableLightSources(levelChunk.getPos(), true);
+            levelChunk.getLights().forEach(blockPos -> this.level.getLightEngine().onBlockEmissionIncrease((BlockPos)blockPos, levelChunk.getLightEmission((BlockPos)blockPos)));
         }
     }
 
@@ -1087,11 +1100,11 @@ implements ClientGamePacketListener {
     }
 
     @Override
-    public void handleSetEquippedItem(ClientboundSetEquippedItemPacket clientboundSetEquippedItemPacket) {
-        PacketUtils.ensureRunningOnSameThread(clientboundSetEquippedItemPacket, this, this.minecraft);
-        Entity entity = this.level.getEntity(clientboundSetEquippedItemPacket.getEntity());
+    public void handleSetEquipment(ClientboundSetEquipmentPacket clientboundSetEquipmentPacket) {
+        PacketUtils.ensureRunningOnSameThread(clientboundSetEquipmentPacket, this, this.minecraft);
+        Entity entity = this.level.getEntity(clientboundSetEquipmentPacket.getEntity());
         if (entity != null) {
-            entity.setItemSlot(clientboundSetEquippedItemPacket.getSlot(), clientboundSetEquippedItemPacket.getItem());
+            clientboundSetEquipmentPacket.getSlots().forEach(pair -> entity.setItemSlot((EquipmentSlot)((Object)((Object)pair.getFirst())), (ItemStack)pair.getSecond()));
         }
     }
 

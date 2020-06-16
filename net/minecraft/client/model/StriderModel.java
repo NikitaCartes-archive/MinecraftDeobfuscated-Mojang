@@ -30,7 +30,7 @@ extends ListModel<T> {
         this.rightLeg = new ModelPart(this, 0, 32);
         this.rightLeg.setPos(-4.0f, 8.0f, 0.0f);
         this.rightLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 16.0f, 4.0f, 0.0f);
-        this.leftLeg = new ModelPart(this, 0, 32);
+        this.leftLeg = new ModelPart(this, 0, 55);
         this.leftLeg.setPos(4.0f, 8.0f, 0.0f);
         this.leftLeg.addBox(-2.0f, 0.0f, -2.0f, 4.0f, 16.0f, 4.0f, 0.0f);
         this.body = new ModelPart(this, 0, 0);

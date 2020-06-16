@@ -339,14 +339,18 @@ extends ChunkSource {
             ArrayList<ChunkHolder> list = Lists.newArrayList(this.chunkMap.getChunks());
             Collections.shuffle(list);
             list.forEach(chunkHolder -> {
-                Optional<LevelChunk> optional = chunkHolder.getEntityTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK).left();
+                Optional<LevelChunk> optional = chunkHolder.getTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK).left();
                 if (!optional.isPresent()) {
                     return;
                 }
-                LevelChunk levelChunk = optional.get();
                 this.level.getProfiler().push("broadcast");
-                chunkHolder.broadcastChanges(levelChunk);
+                chunkHolder.broadcastChanges(optional.get());
                 this.level.getProfiler().pop();
+                Optional<LevelChunk> optional2 = chunkHolder.getEntityTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK).left();
+                if (!optional2.isPresent()) {
+                    return;
+                }
+                LevelChunk levelChunk = optional2.get();
                 ChunkPos chunkPos = chunkHolder.getPos();
                 if (this.chunkMap.noPlayersCloseForSpawning(chunkPos)) {
                     return;

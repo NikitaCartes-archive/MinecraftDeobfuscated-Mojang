@@ -25,6 +25,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public abstract class AbstractContainerScreen<T extends AbstractContainerMenu>
@@ -39,18 +40,24 @@ implements MenuAccess<T> {
     protected int inventoryLabelY;
     protected final T menu;
     protected final Inventory inventory;
+    @Nullable
+    protected Slot hoveredSlot;
+    @Nullable
+    private Slot clickedSlot;
+    @Nullable
+    private Slot snapbackEnd;
+    @Nullable
+    private Slot quickdropSlot;
+    @Nullable
+    private Slot lastClickSlot;
     protected int leftPos;
     protected int topPos;
-    protected Slot hoveredSlot;
-    private Slot clickedSlot;
     private boolean isSplittingStack;
     private ItemStack draggingItem = ItemStack.EMPTY;
     private int snapbackStartX;
     private int snapbackStartY;
-    private Slot snapbackEnd;
     private long snapbackTime;
     private ItemStack snapbackItem = ItemStack.EMPTY;
-    private Slot quickdropSlot;
     private long quickdropTime;
     protected final Set<Slot> quickCraftSlots = Sets.newHashSet();
     protected boolean isQuickCrafting;
@@ -59,7 +66,6 @@ implements MenuAccess<T> {
     private boolean skipNextRelease;
     private int quickCraftingRemainder;
     private long lastClickTime;
-    private Slot lastClickSlot;
     private int lastClickButton;
     private boolean doubleclick;
     private ItemStack lastQuickMoved = ItemStack.EMPTY;
@@ -248,6 +254,7 @@ implements MenuAccess<T> {
         }
     }
 
+    @Nullable
     private Slot findSlot(double d, double e) {
         for (int i = 0; i < ((AbstractContainerMenu)this.menu).slots.size(); ++i) {
             Slot slot = ((AbstractContainerMenu)this.menu).slots.get(i);
@@ -331,7 +338,7 @@ implements MenuAccess<T> {
     }
 
     private void checkHotbarMouseClicked(int i) {
-        if (this.minecraft.player.inventory.getCarried().isEmpty()) {
+        if (this.hoveredSlot != null && this.minecraft.player.inventory.getCarried().isEmpty()) {
             if (this.minecraft.options.keySwapOffhand.matchesMouse(i)) {
                 this.slotClicked(this.hoveredSlot, this.hoveredSlot.index, 40, ClickType.SWAP);
                 return;

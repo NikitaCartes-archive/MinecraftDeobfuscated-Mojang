@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.platform.GlUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,16 +25,53 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class GpuWarnlistManager
 extends SimplePreparableReloadListener<Preparations> {
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final ResourceLocation GPU_WARNLIST_LOCATION = new ResourceLocation("gpu_warnlist.json");
     private ImmutableMap<String, String> warnings = ImmutableMap.of();
+    private boolean showWarning;
+    private boolean warningDismissed;
+    private boolean skipFabulous;
 
     public boolean hasWarnings() {
         return !this.warnings.isEmpty();
+    }
+
+    public boolean willShowWarning() {
+        return this.hasWarnings() && !this.warningDismissed;
+    }
+
+    public void showWarning() {
+        this.showWarning = true;
+    }
+
+    public void dismissWarning() {
+        this.warningDismissed = true;
+    }
+
+    public void dismissWarningAndSkipFabulous() {
+        this.warningDismissed = true;
+        this.skipFabulous = true;
+    }
+
+    public boolean isShowingWarning() {
+        return this.showWarning && !this.warningDismissed;
+    }
+
+    public boolean isSkippingFabulous() {
+        return this.skipFabulous;
+    }
+
+    public void resetWarnings() {
+        this.showWarning = false;
+        this.warningDismissed = false;
+        this.skipFabulous = false;
     }
 
     @Nullable
@@ -85,8 +123,8 @@ extends SimplePreparableReloadListener<Preparations> {
         try (Resource resource = resourceManager.getResource(GPU_WARNLIST_LOCATION);
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));){
             jsonObject = new JsonParser().parse(bufferedReader).getAsJsonObject();
-        } catch (IOException iOException) {
-            // empty catch block
+        } catch (JsonSyntaxException | IOException exception) {
+            LOGGER.warn("Failed to load GPU warnlist");
         }
         profilerFiller.pop();
         return jsonObject;

@@ -97,17 +97,24 @@ extends Spliterators.AbstractSpliterator<VoxelShape> {
     }
 
     boolean worldBorderCheck(Consumer<? super VoxelShape> consumer) {
-        boolean bl2;
+        VoxelShape voxelShape;
         Objects.requireNonNull(this.source);
         this.needsBorderCheck = false;
         WorldBorder worldBorder = this.collisionGetter.getWorldBorder();
-        boolean bl = CollisionSpliterator.isBoxFullyWithinWorldBorder(worldBorder, this.source.getBoundingBox().deflate(1.0E-7));
-        boolean bl3 = bl2 = bl && !CollisionSpliterator.isBoxFullyWithinWorldBorder(worldBorder, this.source.getBoundingBox().inflate(1.0E-7));
-        if (bl2) {
-            consumer.accept(worldBorder.getCollisionShape());
+        AABB aABB = this.source.getBoundingBox();
+        if (!CollisionSpliterator.isBoxFullyWithinWorldBorder(worldBorder, aABB) && !CollisionSpliterator.isOutsideBorder(voxelShape = worldBorder.getCollisionShape(), aABB) && CollisionSpliterator.isCloseToBorder(voxelShape, aABB)) {
+            consumer.accept(voxelShape);
             return true;
         }
         return false;
+    }
+
+    private static boolean isCloseToBorder(VoxelShape voxelShape, AABB aABB) {
+        return Shapes.joinIsNotEmpty(voxelShape, Shapes.create(aABB.inflate(1.0E-7)), BooleanOp.AND);
+    }
+
+    private static boolean isOutsideBorder(VoxelShape voxelShape, AABB aABB) {
+        return Shapes.joinIsNotEmpty(voxelShape, Shapes.create(aABB.deflate(1.0E-7)), BooleanOp.AND);
     }
 
     public static boolean isBoxFullyWithinWorldBorder(WorldBorder worldBorder, AABB aABB) {

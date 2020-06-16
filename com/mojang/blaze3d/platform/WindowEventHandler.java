@@ -11,5 +11,7 @@ public interface WindowEventHandler {
     public void setWindowActive(boolean var1);
 
     public void resizeDisplay();
+
+    public void cursorEntered();
 }
 

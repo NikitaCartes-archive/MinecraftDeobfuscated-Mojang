@@ -88,7 +88,7 @@ extends BlockEntityRenderer<SkullBlockEntity> {
     private static RenderType getRenderType(SkullBlock.Type type, @Nullable GameProfile gameProfile) {
         ResourceLocation resourceLocation = SKIN_BY_TYPE.get(type);
         if (type != SkullBlock.Types.PLAYER || gameProfile == null) {
-            return RenderType.entityCutoutNoCull(resourceLocation);
+            return RenderType.entityCutoutNoCullZOffset(resourceLocation);
         }
         Minecraft minecraft = Minecraft.getInstance();
         Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = minecraft.getSkinManager().getInsecureSkinInformation(gameProfile);

@@ -102,6 +102,9 @@ implements NeutralMob {
         if (this.getTarget() != null) {
             this.maybeAlertOthers();
         }
+        if (this.isAngry()) {
+            this.lastHurtByPlayerTime = this.tickCount;
+        }
         super.customServerAiStep();
     }
 
@@ -141,12 +144,10 @@ implements NeutralMob {
             this.playFirstAngerSoundIn = FIRST_ANGER_SOUND_DELAY.randomValue(this.random);
             this.ticksUntilNextAlert = ALERT_INTERVAL.randomValue(this.random);
         }
+        if (livingEntity instanceof Player) {
+            this.setLastHurtByPlayer((Player)livingEntity);
+        }
         super.setTarget(livingEntity);
-    }
-
-    @Override
-    protected boolean isAlwaysExperienceDropper() {
-        return this.getTarget() != null;
     }
 
     @Override

@@ -280,5 +280,9 @@ public class MouseHandler {
         this.ypos = this.minecraft.getWindow().getScreenHeight() / 2;
         InputConstants.grabOrReleaseMouse(this.minecraft.getWindow().getWindow(), 212993, this.xpos, this.ypos);
     }
+
+    public void cursorEntered() {
+        this.ignoreFirstMove = true;
+    }
 }
 

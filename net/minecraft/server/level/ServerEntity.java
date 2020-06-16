@@ -3,6 +3,9 @@
  */
 package net.minecraft.server.level;
 
+import com.google.common.collect.Lists;
+import com.mojang.datafixers.util.Pair;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -16,7 +19,7 @@ import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEquippedItemPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
@@ -193,9 +196,9 @@ public class ServerEntity {
         }
         boolean bl = this.trackDelta;
         if (this.entity instanceof LivingEntity) {
-            EquipmentSlot[] collection = ((LivingEntity)this.entity).getAttributes().getSyncableAttributes();
+            Collection<AttributeInstance> collection = ((LivingEntity)this.entity).getAttributes().getSyncableAttributes();
             if (!collection.isEmpty()) {
-                consumer.accept(new ClientboundUpdateAttributesPacket(this.entity.getId(), (Collection<AttributeInstance>)collection));
+                consumer.accept(new ClientboundUpdateAttributesPacket(this.entity.getId(), collection));
             }
             if (((LivingEntity)this.entity).isFallFlying()) {
                 bl = true;
@@ -206,10 +209,14 @@ public class ServerEntity {
             consumer.accept(new ClientboundSetEntityMotionPacket(this.entity.getId(), this.ap));
         }
         if (this.entity instanceof LivingEntity) {
+            ArrayList<Pair<EquipmentSlot, ItemStack>> list = Lists.newArrayList();
             for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
                 ItemStack itemStack = ((LivingEntity)this.entity).getItemBySlot(equipmentSlot);
                 if (itemStack.isEmpty()) continue;
-                consumer.accept(new ClientboundSetEquippedItemPacket(this.entity.getId(), equipmentSlot, itemStack));
+                list.add(Pair.of(equipmentSlot, itemStack.copy()));
+            }
+            if (!list.isEmpty()) {
+                consumer.accept(new ClientboundSetEquipmentPacket(this.entity.getId(), list));
             }
         }
         if (this.entity instanceof LivingEntity) {

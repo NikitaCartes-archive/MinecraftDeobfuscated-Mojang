@@ -394,7 +394,7 @@ CommandSource {
             this.clearFire();
         } else if (this.remainingFireTicks > 0) {
             if (this.fireImmune()) {
-                this.remainingFireTicks -= 4;
+                this.setRemainingFireTicks(this.remainingFireTicks - 4);
                 if (this.remainingFireTicks < 0) {
                     this.clearFire();
                 }
@@ -402,7 +402,7 @@ CommandSource {
                 if (this.remainingFireTicks % 20 == 0) {
                     this.hurt(DamageSource.ON_FIRE, 1.0f);
                 }
-                --this.remainingFireTicks;
+                this.setRemainingFireTicks(this.remainingFireTicks - 1);
             }
         }
         if (this.isInLava()) {
@@ -443,7 +443,7 @@ CommandSource {
             j = ProtectionEnchantment.getFireAfterDampener((LivingEntity)this, j);
         }
         if (this.remainingFireTicks < j) {
-            this.remainingFireTicks = j;
+            this.setRemainingFireTicks(j);
         }
     }
 
@@ -456,7 +456,7 @@ CommandSource {
     }
 
     public void clearFire() {
-        this.remainingFireTicks = 0;
+        this.setRemainingFireTicks(0);
     }
 
     protected void outOfWorld() {
@@ -560,11 +560,11 @@ CommandSource {
         float i = this.getBlockSpeedFactor();
         this.setDeltaMovement(this.getDeltaMovement().multiply(i, 1.0, i));
         if (this.level.getBlockStatesIfLoaded(this.getBoundingBox().deflate(0.001)).noneMatch(blockState -> blockState.is(BlockTags.FIRE) || blockState.is(Blocks.LAVA)) && this.remainingFireTicks <= 0) {
-            this.remainingFireTicks = -this.getFireImmuneTicks();
+            this.setRemainingFireTicks(-this.getFireImmuneTicks());
         }
         if (this.isInWaterRainOrBubble() && this.isOnFire()) {
             this.playSound(SoundEvents.GENERIC_EXTINGUISH_FIRE, 0.7f, 1.6f + (this.random.nextFloat() - this.random.nextFloat()) * 0.4f);
-            this.remainingFireTicks = -this.getFireImmuneTicks();
+            this.setRemainingFireTicks(-this.getFireImmuneTicks());
         }
         this.level.getProfiler().pop();
     }
@@ -1832,7 +1832,7 @@ CommandSource {
     }
 
     public void thunderHit(LightningBolt lightningBolt) {
-        ++this.remainingFireTicks;
+        this.setRemainingFireTicks(this.remainingFireTicks + 1);
         if (this.remainingFireTicks == 0) {
             this.setSecondsOnFire(8);
         }

@@ -72,7 +72,7 @@ import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEquippedItemPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.protocol.game.ClientboundSetExperiencePacket;
 import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
@@ -192,7 +192,7 @@ extends PacketListener {
 
     public void handleSetEntityMotion(ClientboundSetEntityMotionPacket var1);
 
-    public void handleSetEquippedItem(ClientboundSetEquippedItemPacket var1);
+    public void handleSetEquipment(ClientboundSetEquipmentPacket var1);
 
     public void handleSetExperience(ClientboundSetExperiencePacket var1);
 

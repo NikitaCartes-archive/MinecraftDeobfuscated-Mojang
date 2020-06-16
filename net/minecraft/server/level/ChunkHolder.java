@@ -55,7 +55,6 @@ public class ChunkHolder {
     private final short[] changedBlocks = new short[64];
     private int changes;
     private int changedSectionFilter;
-    private boolean forceSendLight;
     private int blockChangedLightSectionFilter;
     private int skyChangedLightSectionFilter;
     private final LevelLightEngine lightEngine;
@@ -169,13 +168,8 @@ public class ChunkHolder {
             return;
         }
         Level level = levelChunk.getLevel();
-        if (this.changes == 64) {
-            this.forceSendLight = true;
-        }
-        boolean bl = !this.forceSendLight;
-        boolean bl2 = this.forceSendLight = this.forceSendLight && this.lightEngine.hasLightWork();
-        if (this.skyChangedLightSectionFilter != 0 || this.blockChangedLightSectionFilter != 0) {
-            this.broadcast(new ClientboundLightUpdatePacket(levelChunk.getPos(), this.lightEngine, this.skyChangedLightSectionFilter, this.blockChangedLightSectionFilter, bl), bl);
+        if (this.changes < 64 && (this.skyChangedLightSectionFilter != 0 || this.blockChangedLightSectionFilter != 0)) {
+            this.broadcast(new ClientboundLightUpdatePacket(levelChunk.getPos(), this.lightEngine, this.skyChangedLightSectionFilter, this.blockChangedLightSectionFilter, false), true);
             this.skyChangedLightSectionFilter = 0;
             this.blockChangedLightSectionFilter = 0;
         }
@@ -189,7 +183,7 @@ public class ChunkHolder {
                 this.broadcastBlockEntity(level, blockPos);
             }
         } else if (this.changes == 64) {
-            this.broadcast(new ClientboundLevelChunkPacket(levelChunk, this.changedSectionFilter), false);
+            this.broadcast(new ClientboundLevelChunkPacket(levelChunk, this.changedSectionFilter, false), false);
         } else if (this.changes != 0) {
             this.broadcast(new ClientboundChunkBlocksUpdatePacket(this.changes, this.changedBlocks, levelChunk), false);
             for (int i = 0; i < this.changes; ++i) {
