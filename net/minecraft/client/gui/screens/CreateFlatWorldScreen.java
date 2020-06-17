@@ -11,7 +11,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.PresetFlatWorldScreen;
@@ -71,6 +70,7 @@ extends Screen {
             list.remove(j);
             this.list.setSelected(list.isEmpty() ? null : (DetailsList.Entry)this.list.children().get(Math.min(i, list.size() - 1)));
             this.generator.updateLayers();
+            this.list.resetRows();
             this.updateButtonValidity();
         }));
         this.addButton(new Button(this.width / 2 + 5, this.height - 52, 150, 20, new TranslatableComponent("createWorld.customize.presets"), button -> {
@@ -82,20 +82,17 @@ extends Screen {
             this.applySettings.accept(this.generator);
             this.minecraft.setScreen(this.parent);
             this.generator.updateLayers();
-            this.updateButtonValidity();
         }));
         this.addButton(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
             this.minecraft.setScreen(this.parent);
             this.generator.updateLayers();
-            this.updateButtonValidity();
         }));
         this.generator.updateLayers();
         this.updateButtonValidity();
     }
 
-    public void updateButtonValidity() {
+    private void updateButtonValidity() {
         this.deleteLayerButton.active = this.hasValidSelection();
-        this.list.resetRows();
     }
 
     private boolean hasValidSelection() {
@@ -136,11 +133,6 @@ extends Screen {
             if (entry != null && (item = (flatLayerInfo = CreateFlatWorldScreen.this.generator.getLayersInfo().get(CreateFlatWorldScreen.this.generator.getLayersInfo().size() - this.children().indexOf(entry) - 1)).getBlockState().getBlock().asItem()) != Items.AIR) {
                 NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", item.getName(new ItemStack(item))).getString());
             }
-        }
-
-        @Override
-        protected void moveSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
-            super.moveSelection(selectionDirection);
             CreateFlatWorldScreen.this.updateButtonValidity();
         }
 
@@ -195,7 +187,6 @@ extends Screen {
             public boolean mouseClicked(double d, double e, int i) {
                 if (i == 0) {
                     DetailsList.this.setSelected(this);
-                    CreateFlatWorldScreen.this.updateButtonValidity();
                     return true;
                 }
                 return false;

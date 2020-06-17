@@ -61,10 +61,10 @@ extends ZombieModel<T> {
             this.rightArm.yRot = 0.0f;
         }
         if (this.swimAmount > 0.0f) {
-            this.rightArm.xRot = this.rotlerpRad(this.rightArm.xRot, -2.5132742f, this.swimAmount) + this.swimAmount * 0.35f * Mth.sin(0.1f * h);
-            this.leftArm.xRot = this.rotlerpRad(this.leftArm.xRot, -2.5132742f, this.swimAmount) - this.swimAmount * 0.35f * Mth.sin(0.1f * h);
-            this.rightArm.zRot = this.rotlerpRad(this.rightArm.zRot, -0.15f, this.swimAmount);
-            this.leftArm.zRot = this.rotlerpRad(this.leftArm.zRot, 0.15f, this.swimAmount);
+            this.rightArm.xRot = this.rotlerpRad(this.swimAmount, this.rightArm.xRot, -2.5132742f) + this.swimAmount * 0.35f * Mth.sin(0.1f * h);
+            this.leftArm.xRot = this.rotlerpRad(this.swimAmount, this.leftArm.xRot, -2.5132742f) - this.swimAmount * 0.35f * Mth.sin(0.1f * h);
+            this.rightArm.zRot = this.rotlerpRad(this.swimAmount, this.rightArm.zRot, -0.15f);
+            this.leftArm.zRot = this.rotlerpRad(this.swimAmount, this.leftArm.zRot, 0.15f);
             this.leftLeg.xRot -= this.swimAmount * 0.55f * Mth.sin(0.1f * h);
             this.rightLeg.xRot += this.swimAmount * 0.55f * Mth.sin(0.1f * h);
             this.head.xRot = 0.0f;

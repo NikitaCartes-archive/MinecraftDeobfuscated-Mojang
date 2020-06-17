@@ -130,13 +130,12 @@ extends ObjectSelectionList<WorldListEntry> {
             LevelSummary levelSummary = worldListEntry.summary;
             NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", new TranslatableComponent("narrator.select.world", levelSummary.getLevelName(), new Date(levelSummary.getLastPlayed()), levelSummary.isHardcore() ? new TranslatableComponent("gameMode.hardcore") : new TranslatableComponent("gameMode." + levelSummary.getGameMode().getName()), levelSummary.hasCheats() ? new TranslatableComponent("selectWorld.cheats") : TextComponent.EMPTY, levelSummary.getWorldVersionName())).getString());
         }
+        this.screen.updateButtonStatus(worldListEntry != null && !worldListEntry.summary.isLocked());
     }
 
     @Override
     protected void moveSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
         this.moveSelection(selectionDirection, worldListEntry -> !((WorldListEntry)worldListEntry).summary.isLocked());
-        WorldListEntry worldListEntry2 = (WorldListEntry)this.getSelected();
-        this.screen.updateButtonStatus(worldListEntry2 != null && worldListEntry2.summary.isLocked());
     }
 
     public Optional<WorldListEntry> getSelectedOpt() {

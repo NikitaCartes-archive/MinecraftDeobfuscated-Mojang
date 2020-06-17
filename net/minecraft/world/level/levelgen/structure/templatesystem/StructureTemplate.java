@@ -92,7 +92,7 @@ public class StructureTemplate {
                 compoundTag.remove("x");
                 compoundTag.remove("y");
                 compoundTag.remove("z");
-                structureBlockInfo = new StructureBlockInfo(blockPos7, blockState, compoundTag);
+                structureBlockInfo = new StructureBlockInfo(blockPos7, blockState, compoundTag.copy());
             } else {
                 structureBlockInfo = new StructureBlockInfo(blockPos7, blockState, null);
             }
@@ -138,7 +138,7 @@ public class StructureTemplate {
             CompoundTag compoundTag = new CompoundTag();
             entity2.save(compoundTag);
             BlockPos blockPos3 = entity2 instanceof Painting ? ((Painting)entity2).getPos().subtract(blockPos) : new BlockPos(vec3);
-            this.entityInfoList.add(new StructureEntityInfo(vec3, blockPos3, compoundTag));
+            this.entityInfoList.add(new StructureEntityInfo(vec3, blockPos3, compoundTag.copy()));
         }
     }
 
@@ -311,7 +311,7 @@ public class StructureTemplate {
         ArrayList<StructureBlockInfo> list2 = Lists.newArrayList();
         for (StructureBlockInfo structureBlockInfo : list) {
             BlockPos blockPos3 = StructureTemplate.calculateRelativePosition(structurePlaceSettings, structureBlockInfo.pos).offset(blockPos);
-            StructureBlockInfo structureBlockInfo2 = new StructureBlockInfo(blockPos3, structureBlockInfo.state, structureBlockInfo.nbt);
+            StructureBlockInfo structureBlockInfo2 = new StructureBlockInfo(blockPos3, structureBlockInfo.state, structureBlockInfo.nbt != null ? structureBlockInfo.nbt.copy() : null);
             Iterator<StructureProcessor> iterator = structurePlaceSettings.getProcessors().iterator();
             while (structureBlockInfo2 != null && iterator.hasNext()) {
                 structureBlockInfo2 = iterator.next().processBlock(levelAccessor, blockPos, blockPos2, structureBlockInfo, structureBlockInfo2, structurePlaceSettings);
@@ -326,7 +326,7 @@ public class StructureTemplate {
         for (StructureEntityInfo structureEntityInfo : this.entityInfoList) {
             BlockPos blockPos3 = StructureTemplate.transform(structureEntityInfo.blockPos, mirror, rotation, blockPos2).offset(blockPos);
             if (boundingBox != null && !boundingBox.isInside(blockPos3)) continue;
-            CompoundTag compoundTag = structureEntityInfo.nbt;
+            CompoundTag compoundTag = structureEntityInfo.nbt.copy();
             Vec3 vec3 = StructureTemplate.transform(structureEntityInfo.pos, mirror, rotation, blockPos2);
             Vec3 vec32 = vec3.add(blockPos.getX(), blockPos.getY(), blockPos.getZ());
             ListTag listTag = new ListTag();

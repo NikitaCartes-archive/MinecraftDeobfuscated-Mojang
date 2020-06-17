@@ -100,9 +100,9 @@ public final class NoiseGeneratorSettings {
         public static final Preset OVERWORLD = new Preset("overworld", preset -> Preset.overworld(new StructureSettings(true), false, preset));
         public static final Preset AMPLIFIED = new Preset("amplified", preset -> Preset.overworld(new StructureSettings(true), true, preset));
         public static final Preset NETHER = new Preset("nether", preset -> Preset.nether(new StructureSettings(false), Blocks.NETHERRACK.defaultBlockState(), Blocks.LAVA.defaultBlockState(), preset));
-        public static final Preset END = new Preset("end", preset -> Preset.end(new StructureSettings(false), Blocks.END_STONE.defaultBlockState(), Blocks.AIR.defaultBlockState(), preset, true));
+        public static final Preset END = new Preset("end", preset -> Preset.end(new StructureSettings(false), Blocks.END_STONE.defaultBlockState(), Blocks.AIR.defaultBlockState(), preset, true, true));
         public static final Preset CAVES = new Preset("caves", preset -> Preset.nether(new StructureSettings(false), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), preset));
-        public static final Preset FLOATING_ISLANDS = new Preset("floating_islands", preset -> Preset.end(new StructureSettings(false), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), preset, false));
+        public static final Preset FLOATING_ISLANDS = new Preset("floating_islands", preset -> Preset.end(new StructureSettings(false), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), preset, false, false));
         private final Component description;
         private final ResourceLocation name;
         private final NoiseGeneratorSettings settings;
@@ -118,8 +118,8 @@ public final class NoiseGeneratorSettings {
             return this.settings;
         }
 
-        private static NoiseGeneratorSettings end(StructureSettings structureSettings, BlockState blockState, BlockState blockState2, Preset preset, boolean bl) {
-            return new NoiseGeneratorSettings(structureSettings, new NoiseSettings(128, new NoiseSamplingSettings(2.0, 1.0, 80.0, 160.0), new NoiseSlideSettings(-3000, 64, -46), new NoiseSlideSettings(-30, 7, 1), 2, 1, 0.0, 0.0, true, false, bl, false), blockState, blockState2, -10, -10, 0, true, Optional.of(preset));
+        private static NoiseGeneratorSettings end(StructureSettings structureSettings, BlockState blockState, BlockState blockState2, Preset preset, boolean bl, boolean bl2) {
+            return new NoiseGeneratorSettings(structureSettings, new NoiseSettings(128, new NoiseSamplingSettings(2.0, 1.0, 80.0, 160.0), new NoiseSlideSettings(-3000, 64, -46), new NoiseSlideSettings(-30, 7, 1), 2, 1, 0.0, 0.0, true, false, bl2, false), blockState, blockState2, -10, -10, 0, bl, Optional.of(preset));
         }
 
         private static NoiseGeneratorSettings nether(StructureSettings structureSettings, BlockState blockState, BlockState blockState2, Preset preset) {

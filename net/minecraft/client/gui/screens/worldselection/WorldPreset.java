@@ -64,7 +64,7 @@ public abstract class WorldPreset {
 
         @Override
         protected ChunkGenerator generator(long l) {
-            return new NoiseBasedChunkGenerator(new FixedBiomeSource(Biomes.OCEAN), l, NoiseGeneratorSettings.Preset.OVERWORLD.settings());
+            return new NoiseBasedChunkGenerator(new FixedBiomeSource(Biomes.PLAINS), l, NoiseGeneratorSettings.Preset.OVERWORLD.settings());
         }
     };
     private static final WorldPreset SINGLE_BIOME_CAVES = new WorldPreset("single_biome_caves"){
@@ -76,14 +76,14 @@ public abstract class WorldPreset {
 
         @Override
         protected ChunkGenerator generator(long l) {
-            return new NoiseBasedChunkGenerator(new FixedBiomeSource(Biomes.OCEAN), l, NoiseGeneratorSettings.Preset.CAVES.settings());
+            return new NoiseBasedChunkGenerator(new FixedBiomeSource(Biomes.PLAINS), l, NoiseGeneratorSettings.Preset.CAVES.settings());
         }
     };
     private static final WorldPreset SINGLE_BIOME_FLOATING_ISLANDS = new WorldPreset("single_biome_floating_islands"){
 
         @Override
         protected ChunkGenerator generator(long l) {
-            return new NoiseBasedChunkGenerator(new FixedBiomeSource(Biomes.OCEAN), l, NoiseGeneratorSettings.Preset.FLOATING_ISLANDS.settings());
+            return new NoiseBasedChunkGenerator(new FixedBiomeSource(Biomes.PLAINS), l, NoiseGeneratorSettings.Preset.FLOATING_ISLANDS.settings());
         }
     };
     private static final WorldPreset DEBUG = new WorldPreset("debug_all_block_states"){
@@ -111,7 +111,7 @@ public abstract class WorldPreset {
     }
 
     private static Biome parseBuffetSettings(WorldGenSettings worldGenSettings) {
-        return worldGenSettings.overworld().getBiomeSource().possibleBiomes().stream().findFirst().orElse(Biomes.OCEAN);
+        return worldGenSettings.overworld().getBiomeSource().possibleBiomes().stream().findFirst().orElse(Biomes.PLAINS);
     }
 
     public static Optional<WorldPreset> of(WorldGenSettings worldGenSettings) {

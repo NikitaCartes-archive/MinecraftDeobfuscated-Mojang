@@ -10,7 +10,6 @@ import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
@@ -47,13 +46,12 @@ extends Screen {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         this.list = new BiomeList();
         this.children.add(this.list);
-        this.list.setSelected((BiomeList.Entry)this.list.children().stream().filter(entry -> Objects.equals(((BiomeList.Entry)entry).biome, this.biome)).findFirst().orElse(null));
         this.doneButton = this.addButton(new Button(this.width / 2 - 155, this.height - 28, 150, 20, CommonComponents.GUI_DONE, button -> {
             this.applySettings.accept(this.biome);
             this.minecraft.setScreen(this.parent);
         }));
         this.addButton(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.parent)));
-        this.updateButtonValidity();
+        this.list.setSelected((BiomeList.Entry)this.list.children().stream().filter(entry -> Objects.equals(((BiomeList.Entry)entry).biome, this.biome)).findFirst().orElse(null));
     }
 
     private void updateButtonValidity() {
@@ -89,11 +87,6 @@ extends Screen {
                 CreateBuffetWorldScreen.this.biome = entry.biome;
                 NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", entry.biome.getName().getString()).getString());
             }
-        }
-
-        @Override
-        protected void moveSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
-            super.moveSelection(selectionDirection);
             CreateBuffetWorldScreen.this.updateButtonValidity();
         }
 
@@ -115,7 +108,6 @@ extends Screen {
             public boolean mouseClicked(double d, double e, int i) {
                 if (i == 0) {
                     BiomeList.this.setSelected(this);
-                    CreateBuffetWorldScreen.this.updateButtonValidity();
                     return true;
                 }
                 return false;

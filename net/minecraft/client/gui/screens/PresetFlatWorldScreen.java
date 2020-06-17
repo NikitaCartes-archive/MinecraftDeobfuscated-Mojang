@@ -20,7 +20,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -283,12 +282,7 @@ extends Screen {
             if (entry != null) {
                 NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", ((PresetInfo)PRESETS.get(this.children().indexOf(entry))).getName()).getString());
             }
-        }
-
-        @Override
-        protected void moveSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
-            super.moveSelection(selectionDirection);
-            PresetFlatWorldScreen.this.updateButtonValidity(true);
+            PresetFlatWorldScreen.this.updateButtonValidity(entry != null);
         }
 
         @Override
@@ -327,7 +321,6 @@ extends Screen {
 
             private void select() {
                 PresetsList.this.setSelected(this);
-                PresetFlatWorldScreen.this.updateButtonValidity(true);
                 PresetInfo presetInfo = (PresetInfo)PRESETS.get(PresetsList.this.children().indexOf(this));
                 PresetFlatWorldScreen.this.export.setValue(PresetFlatWorldScreen.save(presetInfo.settings));
                 PresetFlatWorldScreen.this.export.moveCursorToStart();

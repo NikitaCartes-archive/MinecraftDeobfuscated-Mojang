@@ -40,6 +40,10 @@ implements LootItemCondition {
         return () -> new LocationCheck(builder.build(), BlockPos.ZERO);
     }
 
+    public static LootItemCondition.Builder checkLocation(LocationPredicate.Builder builder, BlockPos blockPos) {
+        return () -> new LocationCheck(builder.build(), blockPos);
+    }
+
     @Override
     public /* synthetic */ boolean test(Object object) {
         return this.test((LootContext)object);

@@ -14,6 +14,7 @@ import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -240,9 +241,18 @@ public abstract class ChunkGenerator {
             for (int o = k - 8; o <= k + 8; ++o) {
                 long p = ChunkPos.asLong(n, o);
                 for (StructureStart<?> structureStart : levelAccessor.getChunk(n, o).getAllStarts().values()) {
-                    if (structureStart == StructureStart.INVALID_START || !structureStart.getBoundingBox().intersects(l, m, l + 15, m + 15)) continue;
-                    structureFeatureManager.addReferenceForFeature(sectionPos, structureStart.getFeature(), p, chunkAccess);
-                    DebugPackets.sendStructurePacket(levelAccessor, structureStart);
+                    try {
+                        if (structureStart == StructureStart.INVALID_START || !structureStart.getBoundingBox().intersects(l, m, l + 15, m + 15)) continue;
+                        structureFeatureManager.addReferenceForFeature(sectionPos, structureStart.getFeature(), p, chunkAccess);
+                        DebugPackets.sendStructurePacket(levelAccessor, structureStart);
+                    } catch (Exception exception) {
+                        CrashReport crashReport = CrashReport.forThrowable(exception, "Generating structure reference");
+                        CrashReportCategory crashReportCategory = crashReport.addCategory("Structure");
+                        crashReportCategory.setDetail("Id", () -> Registry.STRUCTURE_FEATURE.getKey(structureStart.getFeature()).toString());
+                        crashReportCategory.setDetail("Name", () -> structureStart.getFeature().getFeatureName());
+                        crashReportCategory.setDetail("Class", () -> structureStart.getFeature().getClass().getCanonicalName());
+                        throw new ReportedException(crashReport);
+                    }
                 }
             }
         }

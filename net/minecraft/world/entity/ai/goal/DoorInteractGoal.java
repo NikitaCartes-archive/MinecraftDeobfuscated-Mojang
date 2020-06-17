@@ -23,7 +23,7 @@ extends Goal {
 
     public DoorInteractGoal(Mob mob) {
         this.mob = mob;
-        if (!(mob.getNavigation() instanceof GroundPathNavigation)) {
+        if (!this.hasGroundPathNavigation()) {
             throw new IllegalArgumentException("Unsupported mob type for DoorInteractGoal");
         }
     }
@@ -49,6 +49,9 @@ extends Goal {
 
     @Override
     public boolean canUse() {
+        if (!this.hasGroundPathNavigation()) {
+            return false;
+        }
         if (!this.mob.horizontalCollision) {
             return false;
         }
@@ -90,6 +93,10 @@ extends Goal {
         if (h < 0.0f) {
             this.passed = true;
         }
+    }
+
+    private boolean hasGroundPathNavigation() {
+        return this.mob.getNavigation() instanceof GroundPathNavigation;
     }
 }
 

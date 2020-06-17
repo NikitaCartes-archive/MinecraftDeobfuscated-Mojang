@@ -40,13 +40,16 @@ extends Goal {
         this.distanceToPoi = i;
         this.canDealWithDoors = booleanSupplier;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE));
-        if (!(pathfinderMob.getNavigation() instanceof GroundPathNavigation)) {
+        if (!this.hasGroundPathNavigation()) {
             throw new IllegalArgumentException("Unsupported mob for MoveThroughVillageGoal");
         }
     }
 
     @Override
     public boolean canUse() {
+        if (!this.hasGroundPathNavigation()) {
+            return false;
+        }
         this.updateVisited();
         if (this.onlyAtNight && this.mob.level.isDay()) {
             return false;
@@ -133,6 +136,10 @@ extends Goal {
         if (this.visited.size() > 15) {
             this.visited.remove(0);
         }
+    }
+
+    private boolean hasGroundPathNavigation() {
+        return this.mob.getNavigation() instanceof GroundPathNavigation;
     }
 }
 

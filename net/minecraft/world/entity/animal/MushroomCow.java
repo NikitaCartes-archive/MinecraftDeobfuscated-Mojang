@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.entity.animal;
 
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
@@ -30,6 +31,7 @@ import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
@@ -37,6 +39,7 @@ import net.minecraft.world.item.SuspiciousStewItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -116,7 +119,11 @@ implements Shearable {
                     this.level.addParticle(ParticleTypes.SMOKE, this.getX() + this.random.nextDouble() / 2.0, this.getY(0.5), this.getZ() + this.random.nextDouble() / 2.0, 0.0, this.random.nextDouble() / 5.0, 0.0);
                 }
             } else {
-                Pair<MobEffect, Integer> pair = this.getEffectFromItemStack(itemStack);
+                Optional<Pair<MobEffect, Integer>> optional = this.getEffectFromItemStack(itemStack);
+                if (!optional.isPresent()) {
+                    return InteractionResult.PASS;
+                }
+                Pair<MobEffect, Integer> pair = optional.get();
                 if (!player2.abilities.instabuild) {
                     itemStack.shrink(1);
                 }
@@ -184,9 +191,14 @@ implements Shearable {
         }
     }
 
-    private Pair<MobEffect, Integer> getEffectFromItemStack(ItemStack itemStack) {
-        FlowerBlock flowerBlock = (FlowerBlock)((BlockItem)itemStack.getItem()).getBlock();
-        return Pair.of(flowerBlock.getSuspiciousStewEffect(), flowerBlock.getEffectDuration());
+    private Optional<Pair<MobEffect, Integer>> getEffectFromItemStack(ItemStack itemStack) {
+        Block block;
+        Item item = itemStack.getItem();
+        if (item instanceof BlockItem && (block = ((BlockItem)item).getBlock()) instanceof FlowerBlock) {
+            FlowerBlock flowerBlock = (FlowerBlock)block;
+            return Optional.of(Pair.of(flowerBlock.getSuspiciousStewEffect(), flowerBlock.getEffectDuration()));
+        }
+        return Optional.empty();
     }
 
     private void setMushroomType(MushroomType mushroomType) {
