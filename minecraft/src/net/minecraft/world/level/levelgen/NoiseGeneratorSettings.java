@@ -132,13 +132,13 @@ public final class NoiseGeneratorSettings {
 			"nether", preset -> nether(new StructureSettings(false), Blocks.NETHERRACK.defaultBlockState(), Blocks.LAVA.defaultBlockState(), preset)
 		);
 		public static final NoiseGeneratorSettings.Preset END = new NoiseGeneratorSettings.Preset(
-			"end", preset -> end(new StructureSettings(false), Blocks.END_STONE.defaultBlockState(), Blocks.AIR.defaultBlockState(), preset, true)
+			"end", preset -> end(new StructureSettings(false), Blocks.END_STONE.defaultBlockState(), Blocks.AIR.defaultBlockState(), preset, true, true)
 		);
 		public static final NoiseGeneratorSettings.Preset CAVES = new NoiseGeneratorSettings.Preset(
 			"caves", preset -> nether(new StructureSettings(false), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), preset)
 		);
 		public static final NoiseGeneratorSettings.Preset FLOATING_ISLANDS = new NoiseGeneratorSettings.Preset(
-			"floating_islands", preset -> end(new StructureSettings(false), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), preset, false)
+			"floating_islands", preset -> end(new StructureSettings(false), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), preset, false, false)
 		);
 		private final Component description;
 		private final ResourceLocation name;
@@ -156,7 +156,7 @@ public final class NoiseGeneratorSettings {
 		}
 
 		private static NoiseGeneratorSettings end(
-			StructureSettings structureSettings, BlockState blockState, BlockState blockState2, NoiseGeneratorSettings.Preset preset, boolean bl
+			StructureSettings structureSettings, BlockState blockState, BlockState blockState2, NoiseGeneratorSettings.Preset preset, boolean bl, boolean bl2
 		) {
 			return new NoiseGeneratorSettings(
 				structureSettings,
@@ -171,7 +171,7 @@ public final class NoiseGeneratorSettings {
 					0.0,
 					true,
 					false,
-					bl,
+					bl2,
 					false
 				),
 				blockState,
@@ -179,7 +179,7 @@ public final class NoiseGeneratorSettings {
 				-10,
 				-10,
 				0,
-				true,
+				bl,
 				Optional.of(preset)
 			);
 		}

@@ -154,13 +154,13 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 						.getString()
 				);
 		}
+
+		this.screen.updateButtonStatus(worldListEntry != null && !worldListEntry.summary.isLocked());
 	}
 
 	@Override
 	protected void moveSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
-		this.moveSelection(selectionDirection, worldListEntryx -> !worldListEntryx.summary.isLocked());
-		WorldSelectionList.WorldListEntry worldListEntry = this.getSelected();
-		this.screen.updateButtonStatus(worldListEntry != null && worldListEntry.summary.isLocked());
+		this.moveSelection(selectionDirection, worldListEntry -> !worldListEntry.summary.isLocked());
 	}
 
 	public Optional<WorldSelectionList.WorldListEntry> getSelectedOpt() {

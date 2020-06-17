@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.animal;
 
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
@@ -26,6 +27,7 @@ import net.minecraft.world.entity.Shearable;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
@@ -33,6 +35,7 @@ import net.minecraft.world.item.SuspiciousStewItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -124,7 +127,12 @@ public class MushroomCow extends Cow implements Shearable {
 						);
 				}
 			} else {
-				Pair<MobEffect, Integer> pair = this.getEffectFromItemStack(itemStack);
+				Optional<Pair<MobEffect, Integer>> optional = this.getEffectFromItemStack(itemStack);
+				if (!optional.isPresent()) {
+					return InteractionResult.PASS;
+				}
+
+				Pair<MobEffect, Integer> pair = (Pair<MobEffect, Integer>)optional.get();
 				if (!player.abilities.instabuild) {
 					itemStack.shrink(1);
 				}
@@ -210,9 +218,17 @@ public class MushroomCow extends Cow implements Shearable {
 		}
 	}
 
-	private Pair<MobEffect, Integer> getEffectFromItemStack(ItemStack itemStack) {
-		FlowerBlock flowerBlock = (FlowerBlock)((BlockItem)itemStack.getItem()).getBlock();
-		return Pair.of(flowerBlock.getSuspiciousStewEffect(), flowerBlock.getEffectDuration());
+	private Optional<Pair<MobEffect, Integer>> getEffectFromItemStack(ItemStack itemStack) {
+		Item item = itemStack.getItem();
+		if (item instanceof BlockItem) {
+			Block block = ((BlockItem)item).getBlock();
+			if (block instanceof FlowerBlock) {
+				FlowerBlock flowerBlock = (FlowerBlock)block;
+				return Optional.of(Pair.of(flowerBlock.getSuspiciousStewEffect(), flowerBlock.getEffectDuration()));
+			}
+		}
+
+		return Optional.empty();
 	}
 
 	private void setMushroomType(MushroomCow.MushroomType mushroomType) {

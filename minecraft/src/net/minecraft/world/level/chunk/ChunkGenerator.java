@@ -11,6 +11,8 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -265,9 +267,18 @@ public abstract class ChunkGenerator {
 				long p = ChunkPos.asLong(n, o);
 
 				for (StructureStart<?> structureStart : levelAccessor.getChunk(n, o).getAllStarts().values()) {
-					if (structureStart != StructureStart.INVALID_START && structureStart.getBoundingBox().intersects(l, m, l + 15, m + 15)) {
-						structureFeatureManager.addReferenceForFeature(sectionPos, structureStart.getFeature(), p, chunkAccess);
-						DebugPackets.sendStructurePacket(levelAccessor, structureStart);
+					try {
+						if (structureStart != StructureStart.INVALID_START && structureStart.getBoundingBox().intersects(l, m, l + 15, m + 15)) {
+							structureFeatureManager.addReferenceForFeature(sectionPos, structureStart.getFeature(), p, chunkAccess);
+							DebugPackets.sendStructurePacket(levelAccessor, structureStart);
+						}
+					} catch (Exception var19) {
+						CrashReport crashReport = CrashReport.forThrowable(var19, "Generating structure reference");
+						CrashReportCategory crashReportCategory = crashReport.addCategory("Structure");
+						crashReportCategory.setDetail("Id", (CrashReportDetail<String>)(() -> Registry.STRUCTURE_FEATURE.getKey(structureStart.getFeature()).toString()));
+						crashReportCategory.setDetail("Name", (CrashReportDetail<String>)(() -> structureStart.getFeature().getFeatureName()));
+						crashReportCategory.setDetail("Class", (CrashReportDetail<String>)(() -> structureStart.getFeature().getClass().getCanonicalName()));
+						throw new ReportedException(crashReport);
 					}
 				}
 			}

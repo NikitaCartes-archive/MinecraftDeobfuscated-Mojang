@@ -9,7 +9,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.resources.language.I18n;
@@ -64,6 +63,7 @@ public class CreateFlatWorldScreen extends Screen {
 					list.remove(j);
 					this.list.setSelected(list.isEmpty() ? null : (CreateFlatWorldScreen.DetailsList.Entry)this.list.children().get(Math.min(i, list.size() - 1)));
 					this.generator.updateLayers();
+					this.list.resetRows();
 					this.updateButtonValidity();
 				}
 			})
@@ -77,20 +77,17 @@ public class CreateFlatWorldScreen extends Screen {
 			this.applySettings.accept(this.generator);
 			this.minecraft.setScreen(this.parent);
 			this.generator.updateLayers();
-			this.updateButtonValidity();
 		}));
 		this.addButton(new Button(this.width / 2 + 5, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
 			this.minecraft.setScreen(this.parent);
 			this.generator.updateLayers();
-			this.updateButtonValidity();
 		}));
 		this.generator.updateLayers();
 		this.updateButtonValidity();
 	}
 
-	public void updateButtonValidity() {
+	private void updateButtonValidity() {
 		this.deleteLayerButton.active = this.hasValidSelection();
-		this.list.resetRows();
 	}
 
 	private boolean hasValidSelection() {
@@ -136,11 +133,7 @@ public class CreateFlatWorldScreen extends Screen {
 					NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.select", item.getName(new ItemStack(item))).getString());
 				}
 			}
-		}
 
-		@Override
-		protected void moveSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
-			super.moveSelection(selectionDirection);
 			CreateFlatWorldScreen.this.updateButtonValidity();
 		}
 
@@ -207,7 +200,6 @@ public class CreateFlatWorldScreen extends Screen {
 			public boolean mouseClicked(double d, double e, int i) {
 				if (i == 0) {
 					DetailsList.this.setSelected(this);
-					CreateFlatWorldScreen.this.updateButtonValidity();
 					return true;
 				} else {
 					return false;

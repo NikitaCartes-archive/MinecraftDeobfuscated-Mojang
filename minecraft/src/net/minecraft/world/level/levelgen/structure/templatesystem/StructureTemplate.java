@@ -89,7 +89,7 @@ public class StructureTemplate {
 						compoundTag.remove("x");
 						compoundTag.remove("y");
 						compoundTag.remove("z");
-						structureBlockInfo = new StructureTemplate.StructureBlockInfo(blockPos7, blockState, compoundTag);
+						structureBlockInfo = new StructureTemplate.StructureBlockInfo(blockPos7, blockState, compoundTag.copy());
 					} else {
 						structureBlockInfo = new StructureTemplate.StructureBlockInfo(blockPos7, blockState, null);
 					}
@@ -156,7 +156,7 @@ public class StructureTemplate {
 				blockPos3 = new BlockPos(vec3);
 			}
 
-			this.entityInfoList.add(new StructureTemplate.StructureEntityInfo(vec3, blockPos3, compoundTag));
+			this.entityInfoList.add(new StructureTemplate.StructureEntityInfo(vec3, blockPos3, compoundTag.copy()));
 		}
 	}
 
@@ -389,7 +389,7 @@ public class StructureTemplate {
 		for (StructureTemplate.StructureBlockInfo structureBlockInfo : list) {
 			BlockPos blockPos3 = calculateRelativePosition(structurePlaceSettings, structureBlockInfo.pos).offset(blockPos);
 			StructureTemplate.StructureBlockInfo structureBlockInfo2 = new StructureTemplate.StructureBlockInfo(
-				blockPos3, structureBlockInfo.state, structureBlockInfo.nbt
+				blockPos3, structureBlockInfo.state, structureBlockInfo.nbt != null ? structureBlockInfo.nbt.copy() : null
 			);
 			Iterator<StructureProcessor> iterator = structurePlaceSettings.getProcessors().iterator();
 
@@ -412,7 +412,7 @@ public class StructureTemplate {
 		for (StructureTemplate.StructureEntityInfo structureEntityInfo : this.entityInfoList) {
 			BlockPos blockPos3 = transform(structureEntityInfo.blockPos, mirror, rotation, blockPos2).offset(blockPos);
 			if (boundingBox == null || boundingBox.isInside(blockPos3)) {
-				CompoundTag compoundTag = structureEntityInfo.nbt;
+				CompoundTag compoundTag = structureEntityInfo.nbt.copy();
 				Vec3 vec3 = transform(structureEntityInfo.pos, mirror, rotation, blockPos2);
 				Vec3 vec32 = vec3.add((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
 				ListTag listTag = new ListTag();

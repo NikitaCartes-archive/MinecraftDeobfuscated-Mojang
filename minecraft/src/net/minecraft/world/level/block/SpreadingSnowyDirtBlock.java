@@ -9,7 +9,6 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.lighting.LayerLightEngine;
-import net.minecraft.world.level.material.Fluids;
 
 public abstract class SpreadingSnowyDirtBlock extends SnowyDirtBlock {
 	protected SpreadingSnowyDirtBlock(BlockBehaviour.Properties properties) {
@@ -21,7 +20,7 @@ public abstract class SpreadingSnowyDirtBlock extends SnowyDirtBlock {
 		BlockState blockState2 = levelReader.getBlockState(blockPos2);
 		if (blockState2.is(Blocks.SNOW) && (Integer)blockState2.getValue(SnowLayerBlock.LAYERS) == 1) {
 			return true;
-		} else if (blockState2.getFluidState().getType() != Fluids.EMPTY) {
+		} else if (blockState2.getFluidState().getAmount() == 8) {
 			return false;
 		} else {
 			int i = LayerLightEngine.getLightBlockInto(

@@ -40,6 +40,7 @@ public interface ItemSteerable {
 					mob.lerpSteps = 0;
 				} else {
 					mob.calculateEntityAnimation(mob, false);
+					mob.setDeltaMovement(Vec3.ZERO);
 				}
 
 				return true;

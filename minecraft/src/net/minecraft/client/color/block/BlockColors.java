@@ -17,8 +17,8 @@ import net.minecraft.world.level.GrassColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.RedStoneWireBlock;
-import net.minecraft.world.level.block.ShearableDoublePlantBlock;
 import net.minecraft.world.level.block.StemBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
@@ -34,14 +34,12 @@ public class BlockColors {
 		BlockColors blockColors = new BlockColors();
 		blockColors.register(
 			(blockState, blockAndTintGetter, blockPos, i) -> blockAndTintGetter != null && blockPos != null
-					? BiomeColors.getAverageGrassColor(
-						blockAndTintGetter, blockState.getValue(ShearableDoublePlantBlock.HALF) == DoubleBlockHalf.UPPER ? blockPos.below() : blockPos
-					)
+					? BiomeColors.getAverageGrassColor(blockAndTintGetter, blockState.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.UPPER ? blockPos.below() : blockPos)
 					: -1,
 			Blocks.LARGE_FERN,
 			Blocks.TALL_GRASS
 		);
-		blockColors.addColoringState(ShearableDoublePlantBlock.HALF, Blocks.LARGE_FERN, Blocks.TALL_GRASS);
+		blockColors.addColoringState(DoublePlantBlock.HALF, Blocks.LARGE_FERN, Blocks.TALL_GRASS);
 		blockColors.register(
 			(blockState, blockAndTintGetter, blockPos, i) -> blockAndTintGetter != null && blockPos != null
 					? BiomeColors.getAverageGrassColor(blockAndTintGetter, blockPos)

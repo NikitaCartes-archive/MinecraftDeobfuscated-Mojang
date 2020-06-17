@@ -1229,15 +1229,16 @@ public abstract class Mob extends LivingEntity {
 				Entity entity = ((ServerLevel)this.level).getEntity(uUID);
 				if (entity != null) {
 					this.setLeashedTo(entity, true);
+					return;
 				}
 			} else if (this.leashInfoTag.contains("X", 99) && this.leashInfoTag.contains("Y", 99) && this.leashInfoTag.contains("Z", 99)) {
 				BlockPos blockPos = new BlockPos(this.leashInfoTag.getInt("X"), this.leashInfoTag.getInt("Y"), this.leashInfoTag.getInt("Z"));
 				this.setLeashedTo(LeashFenceKnotEntity.getOrCreateKnot(this.level, blockPos), true);
-			} else {
-				this.dropLeash(false, true);
+				return;
 			}
 
 			if (this.tickCount > 100) {
+				this.spawnAtLocation(Items.LEAD);
 				this.leashInfoTag = null;
 			}
 		}

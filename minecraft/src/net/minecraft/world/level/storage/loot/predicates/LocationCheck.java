@@ -39,6 +39,10 @@ public class LocationCheck implements LootItemCondition {
 		return () -> new LocationCheck(builder.build(), BlockPos.ZERO);
 	}
 
+	public static LootItemCondition.Builder checkLocation(LocationPredicate.Builder builder, BlockPos blockPos) {
+		return () -> new LocationCheck(builder.build(), blockPos);
+	}
+
 	public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<LocationCheck> {
 		public void serialize(JsonObject jsonObject, LocationCheck locationCheck, JsonSerializationContext jsonSerializationContext) {
 			jsonObject.add("predicate", locationCheck.predicate.serializeToJson());

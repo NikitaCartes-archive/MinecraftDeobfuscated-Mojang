@@ -17,7 +17,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -409,12 +408,8 @@ public class PresetFlatWorldScreen extends Screen {
 							.getString()
 					);
 			}
-		}
 
-		@Override
-		protected void moveSelection(AbstractSelectionList.SelectionDirection selectionDirection) {
-			super.moveSelection(selectionDirection);
-			PresetFlatWorldScreen.this.updateButtonValidity(true);
+			PresetFlatWorldScreen.this.updateButtonValidity(entry != null);
 		}
 
 		@Override
@@ -455,7 +450,6 @@ public class PresetFlatWorldScreen extends Screen {
 
 			private void select() {
 				PresetsList.this.setSelected(this);
-				PresetFlatWorldScreen.this.updateButtonValidity(true);
 				PresetFlatWorldScreen.PresetInfo presetInfo = (PresetFlatWorldScreen.PresetInfo)PresetFlatWorldScreen.PRESETS
 					.get(PresetsList.this.children().indexOf(this));
 				PresetFlatWorldScreen.this.export.setValue(PresetFlatWorldScreen.save(presetInfo.settings));

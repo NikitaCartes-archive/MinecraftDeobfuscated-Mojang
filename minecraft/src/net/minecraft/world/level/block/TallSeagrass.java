@@ -21,8 +21,8 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class TallSeagrass extends ShearableDoublePlantBlock implements LiquidBlockContainer {
-	public static final EnumProperty<DoubleBlockHalf> HALF = ShearableDoublePlantBlock.HALF;
+public class TallSeagrass extends DoublePlantBlock implements LiquidBlockContainer {
+	public static final EnumProperty<DoubleBlockHalf> HALF = DoublePlantBlock.HALF;
 	protected static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 16.0, 14.0);
 
 	public TallSeagrass(BlockBehaviour.Properties properties) {
