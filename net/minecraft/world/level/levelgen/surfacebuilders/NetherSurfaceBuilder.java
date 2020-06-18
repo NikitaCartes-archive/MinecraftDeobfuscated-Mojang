@@ -30,7 +30,7 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
 
     @Override
     public void apply(Random random, ChunkAccess chunkAccess, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, long m, SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration) {
-        int n = l + 1;
+        int n = l;
         int o = i & 0xF;
         int p = j & 0xF;
         double e = 0.03125;
@@ -50,8 +50,9 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
             }
             if (!blockState5.is(blockState.getBlock())) continue;
             if (r == -1) {
+                boolean bl3 = false;
                 if (q <= 0) {
-                    blockState3 = AIR;
+                    bl3 = true;
                     blockState4 = surfaceBuilderBaseConfiguration.getUnderMaterial();
                 } else if (s >= n - 4 && s <= n + 1) {
                     blockState3 = surfaceBuilderBaseConfiguration.getTopMaterial();
@@ -65,7 +66,7 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
                         blockState4 = SOUL_SAND;
                     }
                 }
-                if (s < n && blockState3.isAir()) {
+                if (s < n && bl3) {
                     blockState3 = blockState2;
                 }
                 r = q;

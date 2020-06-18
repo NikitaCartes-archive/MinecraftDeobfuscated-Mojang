@@ -28,7 +28,7 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
 
     @Override
     public void apply(Random random, ChunkAccess chunkAccess, Biome biome, int i, int j, int k, double d, BlockState blockState, BlockState blockState2, int l, long m, SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration) {
-        int n = l + 1;
+        int n = l;
         int o = i & 0xF;
         int p = j & 0xF;
         double e = this.decorationNoise.getValue((double)i * 0.1, l, (double)j * 0.1);
@@ -49,8 +49,9 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
             }
             if (!blockState5.is(blockState.getBlock())) continue;
             if (r == -1) {
+                boolean bl3 = false;
                 if (q <= 0) {
-                    blockState4 = AIR;
+                    bl3 = true;
                     blockState3 = surfaceBuilderBaseConfiguration.getUnderMaterial();
                 }
                 if (bl) {
@@ -58,7 +59,7 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
                 } else if (bl2) {
                     blockState4 = surfaceBuilderBaseConfiguration.getUnderwaterMaterial();
                 }
-                if (s < n && blockState4.isAir()) {
+                if (s < n && bl3) {
                     blockState4 = blockState2;
                 }
                 r = q;

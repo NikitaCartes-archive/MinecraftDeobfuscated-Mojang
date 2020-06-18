@@ -22,6 +22,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -59,11 +60,12 @@ extends Block {
     }
 
     private void destroyEgg(Level level, BlockPos blockPos, Entity entity, int i) {
+        BlockState blockState;
         if (!this.canDestroyEgg(level, entity)) {
             return;
         }
-        if (!level.isClientSide && level.random.nextInt(i) == 0) {
-            this.decreaseEggs(level, blockPos, level.getBlockState(blockPos));
+        if (!level.isClientSide && level.random.nextInt(i) == 0 && (blockState = level.getBlockState(blockPos)).is(Blocks.TURTLE_EGG)) {
+            this.decreaseEggs(level, blockPos, blockState);
         }
     }
 
