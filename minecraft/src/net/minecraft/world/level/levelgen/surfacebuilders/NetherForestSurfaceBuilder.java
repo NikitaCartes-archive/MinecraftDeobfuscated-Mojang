@@ -34,7 +34,7 @@ public class NetherForestSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBas
 		long m,
 		SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration
 	) {
-		int n = l + 1;
+		int n = l;
 		int o = i & 15;
 		int p = j & 15;
 		double e = this.decorationNoise.getValue((double)i * 0.1, (double)l, (double)j * 0.1);
@@ -54,8 +54,9 @@ public class NetherForestSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBas
 				r = -1;
 			} else if (blockState5.is(blockState.getBlock())) {
 				if (r == -1) {
+					boolean bl3 = false;
 					if (q <= 0) {
-						blockState4 = AIR;
+						bl3 = true;
 						blockState3 = surfaceBuilderBaseConfiguration.getUnderMaterial();
 					}
 
@@ -65,7 +66,7 @@ public class NetherForestSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBas
 						blockState4 = surfaceBuilderBaseConfiguration.getUnderwaterMaterial();
 					}
 
-					if (s < n && blockState4.isAir()) {
+					if (s < n && bl3) {
 						blockState4 = blockState2;
 					}
 

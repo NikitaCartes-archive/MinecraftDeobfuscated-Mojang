@@ -112,12 +112,16 @@ public class StonecutterMenu extends AbstractContainerMenu {
 
 	@Override
 	public boolean clickMenuButton(Player player, int i) {
-		if (i >= 0 && i < this.recipes.size()) {
+		if (this.isValidRecipeIndex(i)) {
 			this.selectedRecipeIndex.set(i);
 			this.setupResultSlot();
 		}
 
 		return true;
+	}
+
+	private boolean isValidRecipeIndex(int i) {
+		return i >= 0 && i < this.recipes.size();
 	}
 
 	@Override
@@ -139,7 +143,7 @@ public class StonecutterMenu extends AbstractContainerMenu {
 	}
 
 	private void setupResultSlot() {
-		if (!this.recipes.isEmpty()) {
+		if (!this.recipes.isEmpty() && this.isValidRecipeIndex(this.selectedRecipeIndex.get())) {
 			StonecutterRecipe stonecutterRecipe = (StonecutterRecipe)this.recipes.get(this.selectedRecipeIndex.get());
 			this.resultSlot.set(stonecutterRecipe.assemble(this.container));
 		} else {

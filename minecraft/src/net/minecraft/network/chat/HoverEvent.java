@@ -140,14 +140,16 @@ public class HoverEvent {
 			return (T)object;
 		}
 
+		@Nullable
 		public HoverEvent deserialize(JsonElement jsonElement) {
 			T object = (T)this.argDeserializer.apply(jsonElement);
-			return new HoverEvent(this, object);
+			return object == null ? null : new HoverEvent(this, object);
 		}
 
+		@Nullable
 		public HoverEvent deserializeFromLegacy(Component component) {
 			T object = (T)this.legacyArgDeserializer.apply(component);
-			return new HoverEvent(this, object);
+			return object == null ? null : new HoverEvent(this, object);
 		}
 
 		public JsonElement serializeArg(Object object) {

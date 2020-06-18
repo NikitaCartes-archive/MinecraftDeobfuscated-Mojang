@@ -36,7 +36,7 @@ public class NetherSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfi
 		long m,
 		SurfaceBuilderBaseConfiguration surfaceBuilderBaseConfiguration
 	) {
-		int n = l + 1;
+		int n = l;
 		int o = i & 15;
 		int p = j & 15;
 		double e = 0.03125;
@@ -55,8 +55,9 @@ public class NetherSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfi
 				r = -1;
 			} else if (blockState5.is(blockState.getBlock())) {
 				if (r == -1) {
+					boolean bl3 = false;
 					if (q <= 0) {
-						blockState3 = AIR;
+						bl3 = true;
 						blockState4 = surfaceBuilderBaseConfiguration.getUnderMaterial();
 					} else if (s >= n - 4 && s <= n + 1) {
 						blockState3 = surfaceBuilderBaseConfiguration.getTopMaterial();
@@ -72,7 +73,7 @@ public class NetherSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfi
 						}
 					}
 
-					if (s < n && blockState3.isAir()) {
+					if (s < n && bl3) {
 						blockState3 = blockState2;
 					}
 

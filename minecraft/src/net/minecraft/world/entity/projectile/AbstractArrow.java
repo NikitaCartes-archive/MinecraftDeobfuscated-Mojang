@@ -292,7 +292,7 @@ public abstract class AbstractArrow extends Projectile {
 		super.onHitEntity(entityHitResult);
 		Entity entity = entityHitResult.getEntity();
 		float f = (float)this.getDeltaMovement().length();
-		int i = Mth.ceil(Math.max((double)f * this.baseDamage, 0.0));
+		int i = Mth.ceil(Mth.clamp((double)f * this.baseDamage, 0.0, 2.147483647E9));
 		if (this.getPierceLevel() > 0) {
 			if (this.piercingIgnoreEntityIds == null) {
 				this.piercingIgnoreEntityIds = new IntOpenHashSet(5);
@@ -311,7 +311,8 @@ public abstract class AbstractArrow extends Projectile {
 		}
 
 		if (this.isCritArrow()) {
-			i += this.random.nextInt(i / 2 + 2);
+			long l = (long)this.random.nextInt(i / 2 + 2);
+			i = (int)Math.min(l + (long)i, 2147483647L);
 		}
 
 		Entity entity2 = this.getOwner();
