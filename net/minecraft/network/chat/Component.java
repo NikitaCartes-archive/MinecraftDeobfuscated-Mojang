@@ -110,6 +110,11 @@ FormattedText {
         return contentConsumer.accept(this.getContents());
     }
 
+    @Environment(value=EnvType.CLIENT)
+    public static Component nullToEmpty(@Nullable String string) {
+        return string != null ? new TextComponent(string) : TextComponent.EMPTY;
+    }
+
     public static class Serializer
     implements JsonDeserializer<MutableComponent>,
     JsonSerializer<Component> {

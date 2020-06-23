@@ -42,6 +42,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.TickableWidget;
@@ -133,7 +134,7 @@ extends RealmsScreen {
         this.inviteNarrationLimiter = RateLimiter.create(0.01666666753590107);
     }
 
-    public boolean shouldShowMessageInList() {
+    private boolean shouldShowMessageInList() {
         if (!RealmsMainScreen.hasParentalConsent() || !this.hasFetchedServers) {
             return false;
         }
@@ -310,7 +311,7 @@ extends RealmsScreen {
                 }
                 this.realmsServers = list;
                 if (this.shouldShowMessageInList()) {
-                    this.realmSelectionList.addEntry(new TrialEntry());
+                    this.realmSelectionList.addMessageEntry(new TrialEntry());
                 }
                 for (RealmsServer realmsServer : this.realmsServers) {
                     this.realmSelectionList.addEntry(new ServerEntry(realmsServer));
@@ -975,7 +976,9 @@ extends RealmsScreen {
     }
 
     public RealmsMainScreen newScreen() {
-        return new RealmsMainScreen(this.lastScreen);
+        RealmsMainScreen realmsMainScreen = new RealmsMainScreen(this.lastScreen);
+        realmsMainScreen.init(this.minecraft, this.width, this.height);
+        return realmsMainScreen;
     }
 
     public static void updateTeaserImages(ResourceManager resourceManager) {
@@ -1234,8 +1237,21 @@ extends RealmsScreen {
     @Environment(value=EnvType.CLIENT)
     class RealmSelectionList
     extends RealmsObjectSelectionList<Entry> {
+        private boolean showingMessage;
+
         public RealmSelectionList() {
             super(RealmsMainScreen.this.width, RealmsMainScreen.this.height, 32, RealmsMainScreen.this.height - 40, 36);
+        }
+
+        @Override
+        public void clear() {
+            super.clear();
+            this.showingMessage = false;
+        }
+
+        public int addMessageEntry(Entry entry) {
+            this.showingMessage = true;
+            return this.addEntry(entry);
         }
 
         @Override
@@ -1279,7 +1295,7 @@ extends RealmsScreen {
             if (i == -1) {
                 return;
             }
-            if (RealmsMainScreen.this.shouldShowMessageInList()) {
+            if (this.showingMessage) {
                 if (i == 0) {
                     NarrationHelper.now(I18n.get("mco.trial.message.line1", new Object[0]), I18n.get("mco.trial.message.line2", new Object[0]));
                     realmsServer = null;
@@ -1317,14 +1333,14 @@ extends RealmsScreen {
         @Override
         public void setSelected(@Nullable Entry entry) {
             super.setSelected(entry);
-            RealmsServer realmsServer = (RealmsServer)RealmsMainScreen.this.realmsServers.get(this.children().indexOf(entry) - (RealmsMainScreen.this.shouldShowMessageInList() ? 1 : 0));
+            RealmsServer realmsServer = (RealmsServer)RealmsMainScreen.this.realmsServers.get(this.children().indexOf(entry) - (this.showingMessage ? 1 : 0));
             RealmsMainScreen.this.selectedServerId = realmsServer.id;
             RealmsMainScreen.this.updateButtonStates(realmsServer);
         }
 
         @Override
         public void itemClicked(int i, int j, double d, double e, int k) {
-            if (RealmsMainScreen.this.shouldShowMessageInList()) {
+            if (this.showingMessage) {
                 if (j == 0) {
                     RealmsMainScreen.this.popupOpenedByUser = true;
                     return;
@@ -1363,6 +1379,11 @@ extends RealmsScreen {
         @Override
         public int getRowWidth() {
             return 300;
+        }
+
+        @Override
+        public /* synthetic */ void setSelected(@Nullable AbstractSelectionList.Entry entry) {
+            this.setSelected((Entry)entry);
         }
     }
 

@@ -35,7 +35,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
@@ -234,7 +233,7 @@ extends RealmsScreenWithCallback {
                 }
             } catch (RealmsServiceException realmsServiceException) {
                 LOGGER.error("Couldn't get own world");
-                this.minecraft.execute(() -> this.minecraft.setScreen(new RealmsGenericErrorScreen(new TextComponent(realmsServiceException.getMessage()), (Screen)this.lastScreen)));
+                this.minecraft.execute(() -> this.minecraft.setScreen(new RealmsGenericErrorScreen(Component.nullToEmpty(realmsServiceException.getMessage()), (Screen)this.lastScreen)));
             }
         }).start();
     }
