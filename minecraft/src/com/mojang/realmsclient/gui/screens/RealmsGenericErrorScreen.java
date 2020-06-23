@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
 
@@ -40,8 +41,7 @@ public class RealmsGenericErrorScreen extends RealmsScreen {
 		} else {
 			this.line1 = new TextComponent("Realms (" + realmsServiceException.errorCode + "):");
 			String string = "mco.errorMessage." + realmsServiceException.errorCode;
-			String string2 = I18n.get(string);
-			this.line2 = new TextComponent(string2.equals(string) ? realmsServiceException.errorMsg : string2);
+			this.line2 = (Component)(I18n.exists(string) ? new TranslatableComponent(string) : Component.nullToEmpty(realmsServiceException.errorMsg));
 		}
 	}
 

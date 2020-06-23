@@ -25,7 +25,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
@@ -222,7 +221,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 				this.addButtons();
 			} catch (RealmsServiceException var5) {
 				LOGGER.error("Couldn't get own world");
-				this.minecraft.setScreen(new RealmsGenericErrorScreen(new TextComponent(var5.getMessage()), this.lastScreen));
+				this.minecraft.setScreen(new RealmsGenericErrorScreen(Component.nullToEmpty(var5.getMessage()), this.lastScreen));
 			}
 		}).start();
 	}
