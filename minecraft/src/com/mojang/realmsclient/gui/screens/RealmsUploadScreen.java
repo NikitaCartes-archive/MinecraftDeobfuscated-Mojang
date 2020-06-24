@@ -54,7 +54,7 @@ public class RealmsUploadScreen extends RealmsScreen {
 	private final UploadStatus uploadStatus;
 	private final RateLimiter narrationRateLimiter;
 	private volatile Component[] errorMessage;
-	private volatile Component status;
+	private volatile Component status = new TranslatableComponent("mco.upload.preparing");
 	private volatile String progress;
 	private volatile boolean cancelled;
 	private volatile boolean uploadFinished;
@@ -241,8 +241,9 @@ public class RealmsUploadScreen extends RealmsScreen {
 					long l = this.worldId;
 
 					try {
-						if (UPLOAD_LOCK.tryLock(1L, TimeUnit.SECONDS)) {
-							this.status = new TranslatableComponent("mco.upload.preparing");
+						if (!UPLOAD_LOCK.tryLock(1L, TimeUnit.SECONDS)) {
+							this.status = new TranslatableComponent("mco.upload.close.failure");
+						} else {
 							UploadInfo uploadInfo = null;
 
 							for (int i = 0; i < 20; i++) {

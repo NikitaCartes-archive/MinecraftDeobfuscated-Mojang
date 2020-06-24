@@ -1278,9 +1278,12 @@ public class RealmsMainScreen extends RealmsScreen {
 
 		public void setSelected(@Nullable RealmsMainScreen.Entry entry) {
 			super.setSelected(entry);
-			RealmsServer realmsServer = (RealmsServer)RealmsMainScreen.this.realmsServers.get(this.children().indexOf(entry) - (this.showingMessage ? 1 : 0));
-			RealmsMainScreen.this.selectedServerId = realmsServer.id;
-			RealmsMainScreen.this.updateButtonStates(realmsServer);
+			int i = this.children().indexOf(entry);
+			if (!this.showingMessage || i > 0) {
+				RealmsServer realmsServer = (RealmsServer)RealmsMainScreen.this.realmsServers.get(i - (this.showingMessage ? 1 : 0));
+				RealmsMainScreen.this.selectedServerId = realmsServer.id;
+				RealmsMainScreen.this.updateButtonStates(realmsServer);
+			}
 		}
 
 		@Override
