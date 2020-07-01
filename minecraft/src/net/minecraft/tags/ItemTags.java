@@ -1,13 +1,10 @@
 package net.minecraft.tags;
 
-import java.util.Set;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 
-public class ItemTags {
-	private static final StaticTagHelper<Item> HELPER = new StaticTagHelper<>();
+public final class ItemTags {
+	protected static final StaticTagHelper<Item> HELPER = StaticTags.create(new ResourceLocation("item"), TagContainer::getItems);
 	public static final Tag.Named<Item> WOOL = bind("wool");
 	public static final Tag.Named<Item> PLANKS = bind("planks");
 	public static final Tag.Named<Item> STONE_BRICKS = bind("stone_bricks");
@@ -67,20 +64,7 @@ public class ItemTags {
 		return HELPER.bind(string);
 	}
 
-	public static void reset(TagCollection<Item> tagCollection) {
-		HELPER.reset(tagCollection);
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static void resetToEmpty() {
-		HELPER.resetToEmpty();
-	}
-
 	public static TagCollection<Item> getAllTags() {
 		return HELPER.getAllTags();
-	}
-
-	public static Set<ResourceLocation> getMissingTags(TagCollection<Item> tagCollection) {
-		return HELPER.getMissingTags(tagCollection);
 	}
 }

@@ -33,7 +33,6 @@ import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
 import net.minecraft.server.level.progress.LoggerChunkProgressListener;
 import net.minecraft.server.packs.repository.FolderRepositorySource;
-import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.ServerPacksSource;
@@ -114,8 +113,8 @@ public class Main {
 				LOGGER.warn("Safe mode active, only vanilla datapack will be loaded");
 			}
 
-			PackRepository<Pack> packRepository = new PackRepository<>(
-				Pack::new, new ServerPacksSource(), new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD)
+			PackRepository packRepository = new PackRepository(
+				new ServerPacksSource(), new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD)
 			);
 			DataPackConfig dataPackConfig2 = MinecraftServer.configurePackRepository(
 				packRepository, dataPackConfig == null ? DataPackConfig.DEFAULT : dataPackConfig, bl

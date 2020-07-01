@@ -3,7 +3,6 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -18,12 +17,7 @@ public class IcePatchFeature extends Feature<FeatureRadiusConfiguration> {
 	}
 
 	public boolean place(
-		WorldGenLevel worldGenLevel,
-		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator chunkGenerator,
-		Random random,
-		BlockPos blockPos,
-		FeatureRadiusConfiguration featureRadiusConfiguration
+		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, FeatureRadiusConfiguration featureRadiusConfiguration
 	) {
 		while (worldGenLevel.isEmptyBlock(blockPos) && blockPos.getY() > 2) {
 			blockPos = blockPos.below();

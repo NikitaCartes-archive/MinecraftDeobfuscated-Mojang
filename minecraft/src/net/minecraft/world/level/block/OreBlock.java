@@ -2,11 +2,11 @@ package net.minecraft.world.level.block;
 
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -32,12 +32,12 @@ public class OreBlock extends Block {
 	}
 
 	@Override
-	public void spawnAfterBreak(BlockState blockState, Level level, BlockPos blockPos, ItemStack itemStack) {
-		super.spawnAfterBreak(blockState, level, blockPos, itemStack);
+	public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack) {
+		super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack);
 		if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, itemStack) == 0) {
-			int i = this.xpOnDrop(level.random);
+			int i = this.xpOnDrop(serverLevel.random);
 			if (i > 0) {
-				this.popExperience(level, blockPos, i);
+				this.popExperience(serverLevel, blockPos, i);
 			}
 		}
 	}

@@ -13,7 +13,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.ElderGuardian;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
@@ -412,318 +411,318 @@ public class OceanMonumentPieces {
 			return true;
 		}
 
-		private void generateWing(boolean bl, int i, LevelAccessor levelAccessor, Random random, BoundingBox boundingBox) {
+		private void generateWing(boolean bl, int i, WorldGenLevel worldGenLevel, Random random, BoundingBox boundingBox) {
 			int j = 24;
 			if (this.chunkIntersects(boundingBox, i, 0, i + 23, 20)) {
-				this.generateBox(levelAccessor, boundingBox, i + 0, 0, 0, i + 24, 0, 20, BASE_GRAY, BASE_GRAY, false);
-				this.generateWaterBox(levelAccessor, boundingBox, i + 0, 1, 0, i + 24, 10, 20);
+				this.generateBox(worldGenLevel, boundingBox, i + 0, 0, 0, i + 24, 0, 20, BASE_GRAY, BASE_GRAY, false);
+				this.generateWaterBox(worldGenLevel, boundingBox, i + 0, 1, 0, i + 24, 10, 20);
 
 				for (int k = 0; k < 4; k++) {
-					this.generateBox(levelAccessor, boundingBox, i + k, k + 1, k, i + k, k + 1, 20, BASE_LIGHT, BASE_LIGHT, false);
-					this.generateBox(levelAccessor, boundingBox, i + k + 7, k + 5, k + 7, i + k + 7, k + 5, 20, BASE_LIGHT, BASE_LIGHT, false);
-					this.generateBox(levelAccessor, boundingBox, i + 17 - k, k + 5, k + 7, i + 17 - k, k + 5, 20, BASE_LIGHT, BASE_LIGHT, false);
-					this.generateBox(levelAccessor, boundingBox, i + 24 - k, k + 1, k, i + 24 - k, k + 1, 20, BASE_LIGHT, BASE_LIGHT, false);
-					this.generateBox(levelAccessor, boundingBox, i + k + 1, k + 1, k, i + 23 - k, k + 1, k, BASE_LIGHT, BASE_LIGHT, false);
-					this.generateBox(levelAccessor, boundingBox, i + k + 8, k + 5, k + 7, i + 16 - k, k + 5, k + 7, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, i + k, k + 1, k, i + k, k + 1, 20, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, i + k + 7, k + 5, k + 7, i + k + 7, k + 5, 20, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, i + 17 - k, k + 5, k + 7, i + 17 - k, k + 5, 20, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, i + 24 - k, k + 1, k, i + 24 - k, k + 1, 20, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, i + k + 1, k + 1, k, i + 23 - k, k + 1, k, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, i + k + 8, k + 5, k + 7, i + 16 - k, k + 5, k + 7, BASE_LIGHT, BASE_LIGHT, false);
 				}
 
-				this.generateBox(levelAccessor, boundingBox, i + 4, 4, 4, i + 6, 4, 20, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, i + 7, 4, 4, i + 17, 4, 6, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, i + 18, 4, 4, i + 20, 4, 20, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, i + 11, 8, 11, i + 13, 8, 20, BASE_GRAY, BASE_GRAY, false);
-				this.placeBlock(levelAccessor, DOT_DECO_DATA, i + 12, 9, 12, boundingBox);
-				this.placeBlock(levelAccessor, DOT_DECO_DATA, i + 12, 9, 15, boundingBox);
-				this.placeBlock(levelAccessor, DOT_DECO_DATA, i + 12, 9, 18, boundingBox);
+				this.generateBox(worldGenLevel, boundingBox, i + 4, 4, 4, i + 6, 4, 20, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, i + 7, 4, 4, i + 17, 4, 6, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, i + 18, 4, 4, i + 20, 4, 20, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, i + 11, 8, 11, i + 13, 8, 20, BASE_GRAY, BASE_GRAY, false);
+				this.placeBlock(worldGenLevel, DOT_DECO_DATA, i + 12, 9, 12, boundingBox);
+				this.placeBlock(worldGenLevel, DOT_DECO_DATA, i + 12, 9, 15, boundingBox);
+				this.placeBlock(worldGenLevel, DOT_DECO_DATA, i + 12, 9, 18, boundingBox);
 				int k = i + (bl ? 19 : 5);
 				int l = i + (bl ? 5 : 19);
 
 				for (int m = 20; m >= 5; m -= 3) {
-					this.placeBlock(levelAccessor, DOT_DECO_DATA, k, 5, m, boundingBox);
+					this.placeBlock(worldGenLevel, DOT_DECO_DATA, k, 5, m, boundingBox);
 				}
 
 				for (int m = 19; m >= 7; m -= 3) {
-					this.placeBlock(levelAccessor, DOT_DECO_DATA, l, 5, m, boundingBox);
+					this.placeBlock(worldGenLevel, DOT_DECO_DATA, l, 5, m, boundingBox);
 				}
 
 				for (int m = 0; m < 4; m++) {
 					int n = bl ? i + 24 - (17 - m * 3) : i + 17 - m * 3;
-					this.placeBlock(levelAccessor, DOT_DECO_DATA, n, 5, 5, boundingBox);
+					this.placeBlock(worldGenLevel, DOT_DECO_DATA, n, 5, 5, boundingBox);
 				}
 
-				this.placeBlock(levelAccessor, DOT_DECO_DATA, l, 5, 5, boundingBox);
-				this.generateBox(levelAccessor, boundingBox, i + 11, 1, 12, i + 13, 7, 12, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, i + 12, 1, 11, i + 12, 7, 13, BASE_GRAY, BASE_GRAY, false);
+				this.placeBlock(worldGenLevel, DOT_DECO_DATA, l, 5, 5, boundingBox);
+				this.generateBox(worldGenLevel, boundingBox, i + 11, 1, 12, i + 13, 7, 12, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, i + 12, 1, 11, i + 12, 7, 13, BASE_GRAY, BASE_GRAY, false);
 			}
 		}
 
-		private void generateEntranceArchs(LevelAccessor levelAccessor, Random random, BoundingBox boundingBox) {
+		private void generateEntranceArchs(WorldGenLevel worldGenLevel, Random random, BoundingBox boundingBox) {
 			if (this.chunkIntersects(boundingBox, 22, 5, 35, 17)) {
-				this.generateWaterBox(levelAccessor, boundingBox, 25, 0, 0, 32, 8, 20);
+				this.generateWaterBox(worldGenLevel, boundingBox, 25, 0, 0, 32, 8, 20);
 
 				for (int i = 0; i < 4; i++) {
-					this.generateBox(levelAccessor, boundingBox, 24, 2, 5 + i * 4, 24, 4, 5 + i * 4, BASE_LIGHT, BASE_LIGHT, false);
-					this.generateBox(levelAccessor, boundingBox, 22, 4, 5 + i * 4, 23, 4, 5 + i * 4, BASE_LIGHT, BASE_LIGHT, false);
-					this.placeBlock(levelAccessor, BASE_LIGHT, 25, 5, 5 + i * 4, boundingBox);
-					this.placeBlock(levelAccessor, BASE_LIGHT, 26, 6, 5 + i * 4, boundingBox);
-					this.placeBlock(levelAccessor, LAMP_BLOCK, 26, 5, 5 + i * 4, boundingBox);
-					this.generateBox(levelAccessor, boundingBox, 33, 2, 5 + i * 4, 33, 4, 5 + i * 4, BASE_LIGHT, BASE_LIGHT, false);
-					this.generateBox(levelAccessor, boundingBox, 34, 4, 5 + i * 4, 35, 4, 5 + i * 4, BASE_LIGHT, BASE_LIGHT, false);
-					this.placeBlock(levelAccessor, BASE_LIGHT, 32, 5, 5 + i * 4, boundingBox);
-					this.placeBlock(levelAccessor, BASE_LIGHT, 31, 6, 5 + i * 4, boundingBox);
-					this.placeBlock(levelAccessor, LAMP_BLOCK, 31, 5, 5 + i * 4, boundingBox);
-					this.generateBox(levelAccessor, boundingBox, 27, 6, 5 + i * 4, 30, 6, 5 + i * 4, BASE_GRAY, BASE_GRAY, false);
+					this.generateBox(worldGenLevel, boundingBox, 24, 2, 5 + i * 4, 24, 4, 5 + i * 4, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, 22, 4, 5 + i * 4, 23, 4, 5 + i * 4, BASE_LIGHT, BASE_LIGHT, false);
+					this.placeBlock(worldGenLevel, BASE_LIGHT, 25, 5, 5 + i * 4, boundingBox);
+					this.placeBlock(worldGenLevel, BASE_LIGHT, 26, 6, 5 + i * 4, boundingBox);
+					this.placeBlock(worldGenLevel, LAMP_BLOCK, 26, 5, 5 + i * 4, boundingBox);
+					this.generateBox(worldGenLevel, boundingBox, 33, 2, 5 + i * 4, 33, 4, 5 + i * 4, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, 34, 4, 5 + i * 4, 35, 4, 5 + i * 4, BASE_LIGHT, BASE_LIGHT, false);
+					this.placeBlock(worldGenLevel, BASE_LIGHT, 32, 5, 5 + i * 4, boundingBox);
+					this.placeBlock(worldGenLevel, BASE_LIGHT, 31, 6, 5 + i * 4, boundingBox);
+					this.placeBlock(worldGenLevel, LAMP_BLOCK, 31, 5, 5 + i * 4, boundingBox);
+					this.generateBox(worldGenLevel, boundingBox, 27, 6, 5 + i * 4, 30, 6, 5 + i * 4, BASE_GRAY, BASE_GRAY, false);
 				}
 			}
 		}
 
-		private void generateEntranceWall(LevelAccessor levelAccessor, Random random, BoundingBox boundingBox) {
+		private void generateEntranceWall(WorldGenLevel worldGenLevel, Random random, BoundingBox boundingBox) {
 			if (this.chunkIntersects(boundingBox, 15, 20, 42, 21)) {
-				this.generateBox(levelAccessor, boundingBox, 15, 0, 21, 42, 0, 21, BASE_GRAY, BASE_GRAY, false);
-				this.generateWaterBox(levelAccessor, boundingBox, 26, 1, 21, 31, 3, 21);
-				this.generateBox(levelAccessor, boundingBox, 21, 12, 21, 36, 12, 21, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, 17, 11, 21, 40, 11, 21, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, 16, 10, 21, 41, 10, 21, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, 15, 7, 21, 42, 9, 21, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, 16, 6, 21, 41, 6, 21, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, 17, 5, 21, 40, 5, 21, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, 21, 4, 21, 36, 4, 21, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, 22, 3, 21, 26, 3, 21, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, 31, 3, 21, 35, 3, 21, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, 23, 2, 21, 25, 2, 21, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, 32, 2, 21, 34, 2, 21, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, 28, 4, 20, 29, 4, 21, BASE_LIGHT, BASE_LIGHT, false);
-				this.placeBlock(levelAccessor, BASE_LIGHT, 27, 3, 21, boundingBox);
-				this.placeBlock(levelAccessor, BASE_LIGHT, 30, 3, 21, boundingBox);
-				this.placeBlock(levelAccessor, BASE_LIGHT, 26, 2, 21, boundingBox);
-				this.placeBlock(levelAccessor, BASE_LIGHT, 31, 2, 21, boundingBox);
-				this.placeBlock(levelAccessor, BASE_LIGHT, 25, 1, 21, boundingBox);
-				this.placeBlock(levelAccessor, BASE_LIGHT, 32, 1, 21, boundingBox);
+				this.generateBox(worldGenLevel, boundingBox, 15, 0, 21, 42, 0, 21, BASE_GRAY, BASE_GRAY, false);
+				this.generateWaterBox(worldGenLevel, boundingBox, 26, 1, 21, 31, 3, 21);
+				this.generateBox(worldGenLevel, boundingBox, 21, 12, 21, 36, 12, 21, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 17, 11, 21, 40, 11, 21, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 16, 10, 21, 41, 10, 21, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 15, 7, 21, 42, 9, 21, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 16, 6, 21, 41, 6, 21, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 17, 5, 21, 40, 5, 21, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 21, 4, 21, 36, 4, 21, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 22, 3, 21, 26, 3, 21, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 31, 3, 21, 35, 3, 21, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 23, 2, 21, 25, 2, 21, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 32, 2, 21, 34, 2, 21, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 28, 4, 20, 29, 4, 21, BASE_LIGHT, BASE_LIGHT, false);
+				this.placeBlock(worldGenLevel, BASE_LIGHT, 27, 3, 21, boundingBox);
+				this.placeBlock(worldGenLevel, BASE_LIGHT, 30, 3, 21, boundingBox);
+				this.placeBlock(worldGenLevel, BASE_LIGHT, 26, 2, 21, boundingBox);
+				this.placeBlock(worldGenLevel, BASE_LIGHT, 31, 2, 21, boundingBox);
+				this.placeBlock(worldGenLevel, BASE_LIGHT, 25, 1, 21, boundingBox);
+				this.placeBlock(worldGenLevel, BASE_LIGHT, 32, 1, 21, boundingBox);
 
 				for (int i = 0; i < 7; i++) {
-					this.placeBlock(levelAccessor, BASE_BLACK, 28 - i, 6 + i, 21, boundingBox);
-					this.placeBlock(levelAccessor, BASE_BLACK, 29 + i, 6 + i, 21, boundingBox);
+					this.placeBlock(worldGenLevel, BASE_BLACK, 28 - i, 6 + i, 21, boundingBox);
+					this.placeBlock(worldGenLevel, BASE_BLACK, 29 + i, 6 + i, 21, boundingBox);
 				}
 
 				for (int i = 0; i < 4; i++) {
-					this.placeBlock(levelAccessor, BASE_BLACK, 28 - i, 9 + i, 21, boundingBox);
-					this.placeBlock(levelAccessor, BASE_BLACK, 29 + i, 9 + i, 21, boundingBox);
+					this.placeBlock(worldGenLevel, BASE_BLACK, 28 - i, 9 + i, 21, boundingBox);
+					this.placeBlock(worldGenLevel, BASE_BLACK, 29 + i, 9 + i, 21, boundingBox);
 				}
 
-				this.placeBlock(levelAccessor, BASE_BLACK, 28, 12, 21, boundingBox);
-				this.placeBlock(levelAccessor, BASE_BLACK, 29, 12, 21, boundingBox);
+				this.placeBlock(worldGenLevel, BASE_BLACK, 28, 12, 21, boundingBox);
+				this.placeBlock(worldGenLevel, BASE_BLACK, 29, 12, 21, boundingBox);
 
 				for (int i = 0; i < 3; i++) {
-					this.placeBlock(levelAccessor, BASE_BLACK, 22 - i * 2, 8, 21, boundingBox);
-					this.placeBlock(levelAccessor, BASE_BLACK, 22 - i * 2, 9, 21, boundingBox);
-					this.placeBlock(levelAccessor, BASE_BLACK, 35 + i * 2, 8, 21, boundingBox);
-					this.placeBlock(levelAccessor, BASE_BLACK, 35 + i * 2, 9, 21, boundingBox);
+					this.placeBlock(worldGenLevel, BASE_BLACK, 22 - i * 2, 8, 21, boundingBox);
+					this.placeBlock(worldGenLevel, BASE_BLACK, 22 - i * 2, 9, 21, boundingBox);
+					this.placeBlock(worldGenLevel, BASE_BLACK, 35 + i * 2, 8, 21, boundingBox);
+					this.placeBlock(worldGenLevel, BASE_BLACK, 35 + i * 2, 9, 21, boundingBox);
 				}
 
-				this.generateWaterBox(levelAccessor, boundingBox, 15, 13, 21, 42, 15, 21);
-				this.generateWaterBox(levelAccessor, boundingBox, 15, 1, 21, 15, 6, 21);
-				this.generateWaterBox(levelAccessor, boundingBox, 16, 1, 21, 16, 5, 21);
-				this.generateWaterBox(levelAccessor, boundingBox, 17, 1, 21, 20, 4, 21);
-				this.generateWaterBox(levelAccessor, boundingBox, 21, 1, 21, 21, 3, 21);
-				this.generateWaterBox(levelAccessor, boundingBox, 22, 1, 21, 22, 2, 21);
-				this.generateWaterBox(levelAccessor, boundingBox, 23, 1, 21, 24, 1, 21);
-				this.generateWaterBox(levelAccessor, boundingBox, 42, 1, 21, 42, 6, 21);
-				this.generateWaterBox(levelAccessor, boundingBox, 41, 1, 21, 41, 5, 21);
-				this.generateWaterBox(levelAccessor, boundingBox, 37, 1, 21, 40, 4, 21);
-				this.generateWaterBox(levelAccessor, boundingBox, 36, 1, 21, 36, 3, 21);
-				this.generateWaterBox(levelAccessor, boundingBox, 33, 1, 21, 34, 1, 21);
-				this.generateWaterBox(levelAccessor, boundingBox, 35, 1, 21, 35, 2, 21);
+				this.generateWaterBox(worldGenLevel, boundingBox, 15, 13, 21, 42, 15, 21);
+				this.generateWaterBox(worldGenLevel, boundingBox, 15, 1, 21, 15, 6, 21);
+				this.generateWaterBox(worldGenLevel, boundingBox, 16, 1, 21, 16, 5, 21);
+				this.generateWaterBox(worldGenLevel, boundingBox, 17, 1, 21, 20, 4, 21);
+				this.generateWaterBox(worldGenLevel, boundingBox, 21, 1, 21, 21, 3, 21);
+				this.generateWaterBox(worldGenLevel, boundingBox, 22, 1, 21, 22, 2, 21);
+				this.generateWaterBox(worldGenLevel, boundingBox, 23, 1, 21, 24, 1, 21);
+				this.generateWaterBox(worldGenLevel, boundingBox, 42, 1, 21, 42, 6, 21);
+				this.generateWaterBox(worldGenLevel, boundingBox, 41, 1, 21, 41, 5, 21);
+				this.generateWaterBox(worldGenLevel, boundingBox, 37, 1, 21, 40, 4, 21);
+				this.generateWaterBox(worldGenLevel, boundingBox, 36, 1, 21, 36, 3, 21);
+				this.generateWaterBox(worldGenLevel, boundingBox, 33, 1, 21, 34, 1, 21);
+				this.generateWaterBox(worldGenLevel, boundingBox, 35, 1, 21, 35, 2, 21);
 			}
 		}
 
-		private void generateRoofPiece(LevelAccessor levelAccessor, Random random, BoundingBox boundingBox) {
+		private void generateRoofPiece(WorldGenLevel worldGenLevel, Random random, BoundingBox boundingBox) {
 			if (this.chunkIntersects(boundingBox, 21, 21, 36, 36)) {
-				this.generateBox(levelAccessor, boundingBox, 21, 0, 22, 36, 0, 36, BASE_GRAY, BASE_GRAY, false);
-				this.generateWaterBox(levelAccessor, boundingBox, 21, 1, 22, 36, 23, 36);
+				this.generateBox(worldGenLevel, boundingBox, 21, 0, 22, 36, 0, 36, BASE_GRAY, BASE_GRAY, false);
+				this.generateWaterBox(worldGenLevel, boundingBox, 21, 1, 22, 36, 23, 36);
 
 				for (int i = 0; i < 4; i++) {
-					this.generateBox(levelAccessor, boundingBox, 21 + i, 13 + i, 21 + i, 36 - i, 13 + i, 21 + i, BASE_LIGHT, BASE_LIGHT, false);
-					this.generateBox(levelAccessor, boundingBox, 21 + i, 13 + i, 36 - i, 36 - i, 13 + i, 36 - i, BASE_LIGHT, BASE_LIGHT, false);
-					this.generateBox(levelAccessor, boundingBox, 21 + i, 13 + i, 22 + i, 21 + i, 13 + i, 35 - i, BASE_LIGHT, BASE_LIGHT, false);
-					this.generateBox(levelAccessor, boundingBox, 36 - i, 13 + i, 22 + i, 36 - i, 13 + i, 35 - i, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, 21 + i, 13 + i, 21 + i, 36 - i, 13 + i, 21 + i, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, 21 + i, 13 + i, 36 - i, 36 - i, 13 + i, 36 - i, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, 21 + i, 13 + i, 22 + i, 21 + i, 13 + i, 35 - i, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, 36 - i, 13 + i, 22 + i, 36 - i, 13 + i, 35 - i, BASE_LIGHT, BASE_LIGHT, false);
 				}
 
-				this.generateBox(levelAccessor, boundingBox, 25, 16, 25, 32, 16, 32, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, 25, 17, 25, 25, 19, 25, BASE_LIGHT, BASE_LIGHT, false);
-				this.generateBox(levelAccessor, boundingBox, 32, 17, 25, 32, 19, 25, BASE_LIGHT, BASE_LIGHT, false);
-				this.generateBox(levelAccessor, boundingBox, 25, 17, 32, 25, 19, 32, BASE_LIGHT, BASE_LIGHT, false);
-				this.generateBox(levelAccessor, boundingBox, 32, 17, 32, 32, 19, 32, BASE_LIGHT, BASE_LIGHT, false);
-				this.placeBlock(levelAccessor, BASE_LIGHT, 26, 20, 26, boundingBox);
-				this.placeBlock(levelAccessor, BASE_LIGHT, 27, 21, 27, boundingBox);
-				this.placeBlock(levelAccessor, LAMP_BLOCK, 27, 20, 27, boundingBox);
-				this.placeBlock(levelAccessor, BASE_LIGHT, 26, 20, 31, boundingBox);
-				this.placeBlock(levelAccessor, BASE_LIGHT, 27, 21, 30, boundingBox);
-				this.placeBlock(levelAccessor, LAMP_BLOCK, 27, 20, 30, boundingBox);
-				this.placeBlock(levelAccessor, BASE_LIGHT, 31, 20, 31, boundingBox);
-				this.placeBlock(levelAccessor, BASE_LIGHT, 30, 21, 30, boundingBox);
-				this.placeBlock(levelAccessor, LAMP_BLOCK, 30, 20, 30, boundingBox);
-				this.placeBlock(levelAccessor, BASE_LIGHT, 31, 20, 26, boundingBox);
-				this.placeBlock(levelAccessor, BASE_LIGHT, 30, 21, 27, boundingBox);
-				this.placeBlock(levelAccessor, LAMP_BLOCK, 30, 20, 27, boundingBox);
-				this.generateBox(levelAccessor, boundingBox, 28, 21, 27, 29, 21, 27, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, 27, 21, 28, 27, 21, 29, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, 28, 21, 30, 29, 21, 30, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, 30, 21, 28, 30, 21, 29, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 25, 16, 25, 32, 16, 32, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 25, 17, 25, 25, 19, 25, BASE_LIGHT, BASE_LIGHT, false);
+				this.generateBox(worldGenLevel, boundingBox, 32, 17, 25, 32, 19, 25, BASE_LIGHT, BASE_LIGHT, false);
+				this.generateBox(worldGenLevel, boundingBox, 25, 17, 32, 25, 19, 32, BASE_LIGHT, BASE_LIGHT, false);
+				this.generateBox(worldGenLevel, boundingBox, 32, 17, 32, 32, 19, 32, BASE_LIGHT, BASE_LIGHT, false);
+				this.placeBlock(worldGenLevel, BASE_LIGHT, 26, 20, 26, boundingBox);
+				this.placeBlock(worldGenLevel, BASE_LIGHT, 27, 21, 27, boundingBox);
+				this.placeBlock(worldGenLevel, LAMP_BLOCK, 27, 20, 27, boundingBox);
+				this.placeBlock(worldGenLevel, BASE_LIGHT, 26, 20, 31, boundingBox);
+				this.placeBlock(worldGenLevel, BASE_LIGHT, 27, 21, 30, boundingBox);
+				this.placeBlock(worldGenLevel, LAMP_BLOCK, 27, 20, 30, boundingBox);
+				this.placeBlock(worldGenLevel, BASE_LIGHT, 31, 20, 31, boundingBox);
+				this.placeBlock(worldGenLevel, BASE_LIGHT, 30, 21, 30, boundingBox);
+				this.placeBlock(worldGenLevel, LAMP_BLOCK, 30, 20, 30, boundingBox);
+				this.placeBlock(worldGenLevel, BASE_LIGHT, 31, 20, 26, boundingBox);
+				this.placeBlock(worldGenLevel, BASE_LIGHT, 30, 21, 27, boundingBox);
+				this.placeBlock(worldGenLevel, LAMP_BLOCK, 30, 20, 27, boundingBox);
+				this.generateBox(worldGenLevel, boundingBox, 28, 21, 27, 29, 21, 27, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 27, 21, 28, 27, 21, 29, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 28, 21, 30, 29, 21, 30, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 30, 21, 28, 30, 21, 29, BASE_GRAY, BASE_GRAY, false);
 			}
 		}
 
-		private void generateLowerWall(LevelAccessor levelAccessor, Random random, BoundingBox boundingBox) {
+		private void generateLowerWall(WorldGenLevel worldGenLevel, Random random, BoundingBox boundingBox) {
 			if (this.chunkIntersects(boundingBox, 0, 21, 6, 58)) {
-				this.generateBox(levelAccessor, boundingBox, 0, 0, 21, 6, 0, 57, BASE_GRAY, BASE_GRAY, false);
-				this.generateWaterBox(levelAccessor, boundingBox, 0, 1, 21, 6, 7, 57);
-				this.generateBox(levelAccessor, boundingBox, 4, 4, 21, 6, 4, 53, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 0, 0, 21, 6, 0, 57, BASE_GRAY, BASE_GRAY, false);
+				this.generateWaterBox(worldGenLevel, boundingBox, 0, 1, 21, 6, 7, 57);
+				this.generateBox(worldGenLevel, boundingBox, 4, 4, 21, 6, 4, 53, BASE_GRAY, BASE_GRAY, false);
 
 				for (int i = 0; i < 4; i++) {
-					this.generateBox(levelAccessor, boundingBox, i, i + 1, 21, i, i + 1, 57 - i, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, i, i + 1, 21, i, i + 1, 57 - i, BASE_LIGHT, BASE_LIGHT, false);
 				}
 
 				for (int i = 23; i < 53; i += 3) {
-					this.placeBlock(levelAccessor, DOT_DECO_DATA, 5, 5, i, boundingBox);
+					this.placeBlock(worldGenLevel, DOT_DECO_DATA, 5, 5, i, boundingBox);
 				}
 
-				this.placeBlock(levelAccessor, DOT_DECO_DATA, 5, 5, 52, boundingBox);
+				this.placeBlock(worldGenLevel, DOT_DECO_DATA, 5, 5, 52, boundingBox);
 
 				for (int i = 0; i < 4; i++) {
-					this.generateBox(levelAccessor, boundingBox, i, i + 1, 21, i, i + 1, 57 - i, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, i, i + 1, 21, i, i + 1, 57 - i, BASE_LIGHT, BASE_LIGHT, false);
 				}
 
-				this.generateBox(levelAccessor, boundingBox, 4, 1, 52, 6, 3, 52, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, 5, 1, 51, 5, 3, 53, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 4, 1, 52, 6, 3, 52, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 5, 1, 51, 5, 3, 53, BASE_GRAY, BASE_GRAY, false);
 			}
 
 			if (this.chunkIntersects(boundingBox, 51, 21, 58, 58)) {
-				this.generateBox(levelAccessor, boundingBox, 51, 0, 21, 57, 0, 57, BASE_GRAY, BASE_GRAY, false);
-				this.generateWaterBox(levelAccessor, boundingBox, 51, 1, 21, 57, 7, 57);
-				this.generateBox(levelAccessor, boundingBox, 51, 4, 21, 53, 4, 53, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 51, 0, 21, 57, 0, 57, BASE_GRAY, BASE_GRAY, false);
+				this.generateWaterBox(worldGenLevel, boundingBox, 51, 1, 21, 57, 7, 57);
+				this.generateBox(worldGenLevel, boundingBox, 51, 4, 21, 53, 4, 53, BASE_GRAY, BASE_GRAY, false);
 
 				for (int i = 0; i < 4; i++) {
-					this.generateBox(levelAccessor, boundingBox, 57 - i, i + 1, 21, 57 - i, i + 1, 57 - i, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, 57 - i, i + 1, 21, 57 - i, i + 1, 57 - i, BASE_LIGHT, BASE_LIGHT, false);
 				}
 
 				for (int i = 23; i < 53; i += 3) {
-					this.placeBlock(levelAccessor, DOT_DECO_DATA, 52, 5, i, boundingBox);
+					this.placeBlock(worldGenLevel, DOT_DECO_DATA, 52, 5, i, boundingBox);
 				}
 
-				this.placeBlock(levelAccessor, DOT_DECO_DATA, 52, 5, 52, boundingBox);
-				this.generateBox(levelAccessor, boundingBox, 51, 1, 52, 53, 3, 52, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, 52, 1, 51, 52, 3, 53, BASE_GRAY, BASE_GRAY, false);
+				this.placeBlock(worldGenLevel, DOT_DECO_DATA, 52, 5, 52, boundingBox);
+				this.generateBox(worldGenLevel, boundingBox, 51, 1, 52, 53, 3, 52, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 52, 1, 51, 52, 3, 53, BASE_GRAY, BASE_GRAY, false);
 			}
 
 			if (this.chunkIntersects(boundingBox, 0, 51, 57, 57)) {
-				this.generateBox(levelAccessor, boundingBox, 7, 0, 51, 50, 0, 57, BASE_GRAY, BASE_GRAY, false);
-				this.generateWaterBox(levelAccessor, boundingBox, 7, 1, 51, 50, 10, 57);
+				this.generateBox(worldGenLevel, boundingBox, 7, 0, 51, 50, 0, 57, BASE_GRAY, BASE_GRAY, false);
+				this.generateWaterBox(worldGenLevel, boundingBox, 7, 1, 51, 50, 10, 57);
 
 				for (int i = 0; i < 4; i++) {
-					this.generateBox(levelAccessor, boundingBox, i + 1, i + 1, 57 - i, 56 - i, i + 1, 57 - i, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, i + 1, i + 1, 57 - i, 56 - i, i + 1, 57 - i, BASE_LIGHT, BASE_LIGHT, false);
 				}
 			}
 		}
 
-		private void generateMiddleWall(LevelAccessor levelAccessor, Random random, BoundingBox boundingBox) {
+		private void generateMiddleWall(WorldGenLevel worldGenLevel, Random random, BoundingBox boundingBox) {
 			if (this.chunkIntersects(boundingBox, 7, 21, 13, 50)) {
-				this.generateBox(levelAccessor, boundingBox, 7, 0, 21, 13, 0, 50, BASE_GRAY, BASE_GRAY, false);
-				this.generateWaterBox(levelAccessor, boundingBox, 7, 1, 21, 13, 10, 50);
-				this.generateBox(levelAccessor, boundingBox, 11, 8, 21, 13, 8, 53, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 7, 0, 21, 13, 0, 50, BASE_GRAY, BASE_GRAY, false);
+				this.generateWaterBox(worldGenLevel, boundingBox, 7, 1, 21, 13, 10, 50);
+				this.generateBox(worldGenLevel, boundingBox, 11, 8, 21, 13, 8, 53, BASE_GRAY, BASE_GRAY, false);
 
 				for (int i = 0; i < 4; i++) {
-					this.generateBox(levelAccessor, boundingBox, i + 7, i + 5, 21, i + 7, i + 5, 54, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, i + 7, i + 5, 21, i + 7, i + 5, 54, BASE_LIGHT, BASE_LIGHT, false);
 				}
 
 				for (int i = 21; i <= 45; i += 3) {
-					this.placeBlock(levelAccessor, DOT_DECO_DATA, 12, 9, i, boundingBox);
+					this.placeBlock(worldGenLevel, DOT_DECO_DATA, 12, 9, i, boundingBox);
 				}
 			}
 
 			if (this.chunkIntersects(boundingBox, 44, 21, 50, 54)) {
-				this.generateBox(levelAccessor, boundingBox, 44, 0, 21, 50, 0, 50, BASE_GRAY, BASE_GRAY, false);
-				this.generateWaterBox(levelAccessor, boundingBox, 44, 1, 21, 50, 10, 50);
-				this.generateBox(levelAccessor, boundingBox, 44, 8, 21, 46, 8, 53, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 44, 0, 21, 50, 0, 50, BASE_GRAY, BASE_GRAY, false);
+				this.generateWaterBox(worldGenLevel, boundingBox, 44, 1, 21, 50, 10, 50);
+				this.generateBox(worldGenLevel, boundingBox, 44, 8, 21, 46, 8, 53, BASE_GRAY, BASE_GRAY, false);
 
 				for (int i = 0; i < 4; i++) {
-					this.generateBox(levelAccessor, boundingBox, 50 - i, i + 5, 21, 50 - i, i + 5, 54, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, 50 - i, i + 5, 21, 50 - i, i + 5, 54, BASE_LIGHT, BASE_LIGHT, false);
 				}
 
 				for (int i = 21; i <= 45; i += 3) {
-					this.placeBlock(levelAccessor, DOT_DECO_DATA, 45, 9, i, boundingBox);
+					this.placeBlock(worldGenLevel, DOT_DECO_DATA, 45, 9, i, boundingBox);
 				}
 			}
 
 			if (this.chunkIntersects(boundingBox, 8, 44, 49, 54)) {
-				this.generateBox(levelAccessor, boundingBox, 14, 0, 44, 43, 0, 50, BASE_GRAY, BASE_GRAY, false);
-				this.generateWaterBox(levelAccessor, boundingBox, 14, 1, 44, 43, 10, 50);
+				this.generateBox(worldGenLevel, boundingBox, 14, 0, 44, 43, 0, 50, BASE_GRAY, BASE_GRAY, false);
+				this.generateWaterBox(worldGenLevel, boundingBox, 14, 1, 44, 43, 10, 50);
 
 				for (int i = 12; i <= 45; i += 3) {
-					this.placeBlock(levelAccessor, DOT_DECO_DATA, i, 9, 45, boundingBox);
-					this.placeBlock(levelAccessor, DOT_DECO_DATA, i, 9, 52, boundingBox);
+					this.placeBlock(worldGenLevel, DOT_DECO_DATA, i, 9, 45, boundingBox);
+					this.placeBlock(worldGenLevel, DOT_DECO_DATA, i, 9, 52, boundingBox);
 					if (i == 12 || i == 18 || i == 24 || i == 33 || i == 39 || i == 45) {
-						this.placeBlock(levelAccessor, DOT_DECO_DATA, i, 9, 47, boundingBox);
-						this.placeBlock(levelAccessor, DOT_DECO_DATA, i, 9, 50, boundingBox);
-						this.placeBlock(levelAccessor, DOT_DECO_DATA, i, 10, 45, boundingBox);
-						this.placeBlock(levelAccessor, DOT_DECO_DATA, i, 10, 46, boundingBox);
-						this.placeBlock(levelAccessor, DOT_DECO_DATA, i, 10, 51, boundingBox);
-						this.placeBlock(levelAccessor, DOT_DECO_DATA, i, 10, 52, boundingBox);
-						this.placeBlock(levelAccessor, DOT_DECO_DATA, i, 11, 47, boundingBox);
-						this.placeBlock(levelAccessor, DOT_DECO_DATA, i, 11, 50, boundingBox);
-						this.placeBlock(levelAccessor, DOT_DECO_DATA, i, 12, 48, boundingBox);
-						this.placeBlock(levelAccessor, DOT_DECO_DATA, i, 12, 49, boundingBox);
+						this.placeBlock(worldGenLevel, DOT_DECO_DATA, i, 9, 47, boundingBox);
+						this.placeBlock(worldGenLevel, DOT_DECO_DATA, i, 9, 50, boundingBox);
+						this.placeBlock(worldGenLevel, DOT_DECO_DATA, i, 10, 45, boundingBox);
+						this.placeBlock(worldGenLevel, DOT_DECO_DATA, i, 10, 46, boundingBox);
+						this.placeBlock(worldGenLevel, DOT_DECO_DATA, i, 10, 51, boundingBox);
+						this.placeBlock(worldGenLevel, DOT_DECO_DATA, i, 10, 52, boundingBox);
+						this.placeBlock(worldGenLevel, DOT_DECO_DATA, i, 11, 47, boundingBox);
+						this.placeBlock(worldGenLevel, DOT_DECO_DATA, i, 11, 50, boundingBox);
+						this.placeBlock(worldGenLevel, DOT_DECO_DATA, i, 12, 48, boundingBox);
+						this.placeBlock(worldGenLevel, DOT_DECO_DATA, i, 12, 49, boundingBox);
 					}
 				}
 
 				for (int ix = 0; ix < 3; ix++) {
-					this.generateBox(levelAccessor, boundingBox, 8 + ix, 5 + ix, 54, 49 - ix, 5 + ix, 54, BASE_GRAY, BASE_GRAY, false);
+					this.generateBox(worldGenLevel, boundingBox, 8 + ix, 5 + ix, 54, 49 - ix, 5 + ix, 54, BASE_GRAY, BASE_GRAY, false);
 				}
 
-				this.generateBox(levelAccessor, boundingBox, 11, 8, 54, 46, 8, 54, BASE_LIGHT, BASE_LIGHT, false);
-				this.generateBox(levelAccessor, boundingBox, 14, 8, 44, 43, 8, 53, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 11, 8, 54, 46, 8, 54, BASE_LIGHT, BASE_LIGHT, false);
+				this.generateBox(worldGenLevel, boundingBox, 14, 8, 44, 43, 8, 53, BASE_GRAY, BASE_GRAY, false);
 			}
 		}
 
-		private void generateUpperWall(LevelAccessor levelAccessor, Random random, BoundingBox boundingBox) {
+		private void generateUpperWall(WorldGenLevel worldGenLevel, Random random, BoundingBox boundingBox) {
 			if (this.chunkIntersects(boundingBox, 14, 21, 20, 43)) {
-				this.generateBox(levelAccessor, boundingBox, 14, 0, 21, 20, 0, 43, BASE_GRAY, BASE_GRAY, false);
-				this.generateWaterBox(levelAccessor, boundingBox, 14, 1, 22, 20, 14, 43);
-				this.generateBox(levelAccessor, boundingBox, 18, 12, 22, 20, 12, 39, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, 18, 12, 21, 20, 12, 21, BASE_LIGHT, BASE_LIGHT, false);
+				this.generateBox(worldGenLevel, boundingBox, 14, 0, 21, 20, 0, 43, BASE_GRAY, BASE_GRAY, false);
+				this.generateWaterBox(worldGenLevel, boundingBox, 14, 1, 22, 20, 14, 43);
+				this.generateBox(worldGenLevel, boundingBox, 18, 12, 22, 20, 12, 39, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 18, 12, 21, 20, 12, 21, BASE_LIGHT, BASE_LIGHT, false);
 
 				for (int i = 0; i < 4; i++) {
-					this.generateBox(levelAccessor, boundingBox, i + 14, i + 9, 21, i + 14, i + 9, 43 - i, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, i + 14, i + 9, 21, i + 14, i + 9, 43 - i, BASE_LIGHT, BASE_LIGHT, false);
 				}
 
 				for (int i = 23; i <= 39; i += 3) {
-					this.placeBlock(levelAccessor, DOT_DECO_DATA, 19, 13, i, boundingBox);
+					this.placeBlock(worldGenLevel, DOT_DECO_DATA, 19, 13, i, boundingBox);
 				}
 			}
 
 			if (this.chunkIntersects(boundingBox, 37, 21, 43, 43)) {
-				this.generateBox(levelAccessor, boundingBox, 37, 0, 21, 43, 0, 43, BASE_GRAY, BASE_GRAY, false);
-				this.generateWaterBox(levelAccessor, boundingBox, 37, 1, 22, 43, 14, 43);
-				this.generateBox(levelAccessor, boundingBox, 37, 12, 22, 39, 12, 39, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, 37, 12, 21, 39, 12, 21, BASE_LIGHT, BASE_LIGHT, false);
+				this.generateBox(worldGenLevel, boundingBox, 37, 0, 21, 43, 0, 43, BASE_GRAY, BASE_GRAY, false);
+				this.generateWaterBox(worldGenLevel, boundingBox, 37, 1, 22, 43, 14, 43);
+				this.generateBox(worldGenLevel, boundingBox, 37, 12, 22, 39, 12, 39, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 37, 12, 21, 39, 12, 21, BASE_LIGHT, BASE_LIGHT, false);
 
 				for (int i = 0; i < 4; i++) {
-					this.generateBox(levelAccessor, boundingBox, 43 - i, i + 9, 21, 43 - i, i + 9, 43 - i, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, 43 - i, i + 9, 21, 43 - i, i + 9, 43 - i, BASE_LIGHT, BASE_LIGHT, false);
 				}
 
 				for (int i = 23; i <= 39; i += 3) {
-					this.placeBlock(levelAccessor, DOT_DECO_DATA, 38, 13, i, boundingBox);
+					this.placeBlock(worldGenLevel, DOT_DECO_DATA, 38, 13, i, boundingBox);
 				}
 			}
 
 			if (this.chunkIntersects(boundingBox, 15, 37, 42, 43)) {
-				this.generateBox(levelAccessor, boundingBox, 21, 0, 37, 36, 0, 43, BASE_GRAY, BASE_GRAY, false);
-				this.generateWaterBox(levelAccessor, boundingBox, 21, 1, 37, 36, 14, 43);
-				this.generateBox(levelAccessor, boundingBox, 21, 12, 37, 36, 12, 39, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, 21, 0, 37, 36, 0, 43, BASE_GRAY, BASE_GRAY, false);
+				this.generateWaterBox(worldGenLevel, boundingBox, 21, 1, 37, 36, 14, 43);
+				this.generateBox(worldGenLevel, boundingBox, 21, 12, 37, 36, 12, 39, BASE_GRAY, BASE_GRAY, false);
 
 				for (int i = 0; i < 4; i++) {
-					this.generateBox(levelAccessor, boundingBox, 15 + i, i + 9, 43 - i, 42 - i, i + 9, 43 - i, BASE_LIGHT, BASE_LIGHT, false);
+					this.generateBox(worldGenLevel, boundingBox, 15 + i, i + 9, 43 - i, 42 - i, i + 9, 43 - i, BASE_LIGHT, BASE_LIGHT, false);
 				}
 
 				for (int i = 21; i <= 36; i += 3) {
-					this.placeBlock(levelAccessor, DOT_DECO_DATA, i, 13, 38, boundingBox);
+					this.placeBlock(worldGenLevel, DOT_DECO_DATA, i, 13, 38, boundingBox);
 				}
 			}
 		}
@@ -1513,16 +1512,16 @@ public class OceanMonumentPieces {
 		protected void addAdditionalSaveData(CompoundTag compoundTag) {
 		}
 
-		protected void generateWaterBox(LevelAccessor levelAccessor, BoundingBox boundingBox, int i, int j, int k, int l, int m, int n) {
+		protected void generateWaterBox(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k, int l, int m, int n) {
 			for (int o = j; o <= m; o++) {
 				for (int p = i; p <= l; p++) {
 					for (int q = k; q <= n; q++) {
-						BlockState blockState = this.getBlock(levelAccessor, p, o, q, boundingBox);
+						BlockState blockState = this.getBlock(worldGenLevel, p, o, q, boundingBox);
 						if (!FILL_KEEP.contains(blockState.getBlock())) {
-							if (this.getWorldY(o) >= levelAccessor.getSeaLevel() && blockState != FILL_BLOCK) {
-								this.placeBlock(levelAccessor, Blocks.AIR.defaultBlockState(), p, o, q, boundingBox);
+							if (this.getWorldY(o) >= worldGenLevel.getSeaLevel() && blockState != FILL_BLOCK) {
+								this.placeBlock(worldGenLevel, Blocks.AIR.defaultBlockState(), p, o, q, boundingBox);
 							} else {
-								this.placeBlock(levelAccessor, FILL_BLOCK, p, o, q, boundingBox);
+								this.placeBlock(worldGenLevel, FILL_BLOCK, p, o, q, boundingBox);
 							}
 						}
 					}
@@ -1530,27 +1529,27 @@ public class OceanMonumentPieces {
 			}
 		}
 
-		protected void generateDefaultFloor(LevelAccessor levelAccessor, BoundingBox boundingBox, int i, int j, boolean bl) {
+		protected void generateDefaultFloor(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, boolean bl) {
 			if (bl) {
-				this.generateBox(levelAccessor, boundingBox, i + 0, 0, j + 0, i + 2, 0, j + 8 - 1, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, i + 5, 0, j + 0, i + 8 - 1, 0, j + 8 - 1, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, i + 3, 0, j + 0, i + 4, 0, j + 2, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, i + 3, 0, j + 5, i + 4, 0, j + 8 - 1, BASE_GRAY, BASE_GRAY, false);
-				this.generateBox(levelAccessor, boundingBox, i + 3, 0, j + 2, i + 4, 0, j + 2, BASE_LIGHT, BASE_LIGHT, false);
-				this.generateBox(levelAccessor, boundingBox, i + 3, 0, j + 5, i + 4, 0, j + 5, BASE_LIGHT, BASE_LIGHT, false);
-				this.generateBox(levelAccessor, boundingBox, i + 2, 0, j + 3, i + 2, 0, j + 4, BASE_LIGHT, BASE_LIGHT, false);
-				this.generateBox(levelAccessor, boundingBox, i + 5, 0, j + 3, i + 5, 0, j + 4, BASE_LIGHT, BASE_LIGHT, false);
+				this.generateBox(worldGenLevel, boundingBox, i + 0, 0, j + 0, i + 2, 0, j + 8 - 1, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, i + 5, 0, j + 0, i + 8 - 1, 0, j + 8 - 1, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, i + 3, 0, j + 0, i + 4, 0, j + 2, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, i + 3, 0, j + 5, i + 4, 0, j + 8 - 1, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, i + 3, 0, j + 2, i + 4, 0, j + 2, BASE_LIGHT, BASE_LIGHT, false);
+				this.generateBox(worldGenLevel, boundingBox, i + 3, 0, j + 5, i + 4, 0, j + 5, BASE_LIGHT, BASE_LIGHT, false);
+				this.generateBox(worldGenLevel, boundingBox, i + 2, 0, j + 3, i + 2, 0, j + 4, BASE_LIGHT, BASE_LIGHT, false);
+				this.generateBox(worldGenLevel, boundingBox, i + 5, 0, j + 3, i + 5, 0, j + 4, BASE_LIGHT, BASE_LIGHT, false);
 			} else {
-				this.generateBox(levelAccessor, boundingBox, i + 0, 0, j + 0, i + 8 - 1, 0, j + 8 - 1, BASE_GRAY, BASE_GRAY, false);
+				this.generateBox(worldGenLevel, boundingBox, i + 0, 0, j + 0, i + 8 - 1, 0, j + 8 - 1, BASE_GRAY, BASE_GRAY, false);
 			}
 		}
 
-		protected void generateBoxOnFillOnly(LevelAccessor levelAccessor, BoundingBox boundingBox, int i, int j, int k, int l, int m, int n, BlockState blockState) {
+		protected void generateBoxOnFillOnly(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k, int l, int m, int n, BlockState blockState) {
 			for (int o = j; o <= m; o++) {
 				for (int p = i; p <= l; p++) {
 					for (int q = k; q <= n; q++) {
-						if (this.getBlock(levelAccessor, p, o, q, boundingBox) == FILL_BLOCK) {
-							this.placeBlock(levelAccessor, blockState, p, o, q, boundingBox);
+						if (this.getBlock(worldGenLevel, p, o, q, boundingBox) == FILL_BLOCK) {
+							this.placeBlock(worldGenLevel, blockState, p, o, q, boundingBox);
 						}
 					}
 				}
@@ -1565,16 +1564,16 @@ public class OceanMonumentPieces {
 			return boundingBox.intersects(Math.min(m, o), Math.min(n, p), Math.max(m, o), Math.max(n, p));
 		}
 
-		protected boolean spawnElder(LevelAccessor levelAccessor, BoundingBox boundingBox, int i, int j, int k) {
+		protected boolean spawnElder(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k) {
 			int l = this.getWorldX(i, k);
 			int m = this.getWorldY(j);
 			int n = this.getWorldZ(i, k);
 			if (boundingBox.isInside(new BlockPos(l, m, n))) {
-				ElderGuardian elderGuardian = EntityType.ELDER_GUARDIAN.create(levelAccessor.getLevel());
+				ElderGuardian elderGuardian = EntityType.ELDER_GUARDIAN.create(worldGenLevel.getLevel());
 				elderGuardian.heal(elderGuardian.getMaxHealth());
 				elderGuardian.moveTo((double)l + 0.5, (double)m, (double)n + 0.5, 0.0F, 0.0F);
-				elderGuardian.finalizeSpawn(levelAccessor, levelAccessor.getCurrentDifficultyAt(elderGuardian.blockPosition()), MobSpawnType.STRUCTURE, null, null);
-				levelAccessor.addFreshEntity(elderGuardian);
+				elderGuardian.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(elderGuardian.blockPosition()), MobSpawnType.STRUCTURE, null, null);
+				worldGenLevel.addFreshEntity(elderGuardian);
 				return true;
 			} else {
 				return false;

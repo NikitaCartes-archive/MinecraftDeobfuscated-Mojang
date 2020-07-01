@@ -37,7 +37,7 @@ import net.minecraft.world.entity.ai.navigation.WallClimberNavigation;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -150,25 +150,27 @@ public class Spider extends Monster {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		spawnGroupData = super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
-		if (levelAccessor.getRandom().nextInt(100) == 0) {
+		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		if (serverLevelAccessor.getRandom().nextInt(100) == 0) {
 			Skeleton skeleton = EntityType.SKELETON.create(this.level);
 			skeleton.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0F);
-			skeleton.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, null, null);
+			skeleton.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, null, null);
 			skeleton.startRiding(this);
-			levelAccessor.addFreshEntity(skeleton);
+			serverLevelAccessor.addFreshEntity(skeleton);
 		}
 
 		if (spawnGroupData == null) {
 			spawnGroupData = new Spider.SpiderEffectsGroupData();
-			if (levelAccessor.getDifficulty() == Difficulty.HARD && levelAccessor.getRandom().nextFloat() < 0.1F * difficultyInstance.getSpecialMultiplier()) {
-				((Spider.SpiderEffectsGroupData)spawnGroupData).setRandomEffect(levelAccessor.getRandom());
+			if (serverLevelAccessor.getDifficulty() == Difficulty.HARD && serverLevelAccessor.getRandom().nextFloat() < 0.1F * difficultyInstance.getSpecialMultiplier()
+				)
+			 {
+				((Spider.SpiderEffectsGroupData)spawnGroupData).setRandomEffect(serverLevelAccessor.getRandom());
 			}
 		}
 

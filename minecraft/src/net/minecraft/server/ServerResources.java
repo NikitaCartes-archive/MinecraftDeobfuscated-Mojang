@@ -9,6 +9,7 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleReloadableResourceManager;
+import net.minecraft.tags.TagContainer;
 import net.minecraft.tags.TagManager;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -20,7 +21,7 @@ public class ServerResources implements AutoCloseable {
 	private final ReloadableResourceManager resources = new SimpleReloadableResourceManager(PackType.SERVER_DATA);
 	private final Commands commands;
 	private final RecipeManager recipes = new RecipeManager();
-	private final TagManager tags = new TagManager();
+	private final TagManager tagManager = new TagManager();
 	private final PredicateManager predicateManager = new PredicateManager();
 	private final LootTables lootTables = new LootTables(this.predicateManager);
 	private final ServerAdvancementManager advancements = new ServerAdvancementManager(this.predicateManager);
@@ -29,7 +30,7 @@ public class ServerResources implements AutoCloseable {
 	public ServerResources(Commands.CommandSelection commandSelection, int i) {
 		this.commands = new Commands(commandSelection);
 		this.functionLibrary = new ServerFunctionLibrary(i, this.commands.getDispatcher());
-		this.resources.registerReloadListener(this.tags);
+		this.resources.registerReloadListener(this.tagManager);
 		this.resources.registerReloadListener(this.predicateManager);
 		this.resources.registerReloadListener(this.recipes);
 		this.resources.registerReloadListener(this.lootTables);
@@ -49,8 +50,8 @@ public class ServerResources implements AutoCloseable {
 		return this.lootTables;
 	}
 
-	public TagManager getTags() {
-		return this.tags;
+	public TagContainer getTags() {
+		return this.tagManager.getTags();
 	}
 
 	public RecipeManager getRecipeManager() {
@@ -82,7 +83,7 @@ public class ServerResources implements AutoCloseable {
 	}
 
 	public void updateGlobals() {
-		this.tags.bindToGlobal();
+		this.tagManager.getTags().bindToGlobal();
 	}
 
 	public void close() {

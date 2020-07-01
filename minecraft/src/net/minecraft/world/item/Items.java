@@ -1090,6 +1090,9 @@ public class Items {
 	public static final Item PIGLIN_SPAWN_EGG = registerItem(
 		"piglin_spawn_egg", new SpawnEggItem(EntityType.PIGLIN, 10051392, 16380836, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);
+	public static final Item PIGLIN_BRUTE_SPAWN_EGG = registerItem(
+		"piglin_brute_spawn_egg", new SpawnEggItem(EntityType.PIGLIN_BRUTE, 5843472, 16380836, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
+	);
 	public static final Item PILLAGER_SPAWN_EGG = registerItem(
 		"pillager_spawn_egg", new SpawnEggItem(EntityType.PILLAGER, 5451574, 9804699, new Item.Properties().tab(CreativeModeTab.TAB_MISC))
 	);

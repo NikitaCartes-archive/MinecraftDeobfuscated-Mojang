@@ -2,7 +2,6 @@ package net.minecraft.client.resources;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.platform.NativeImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -52,7 +51,7 @@ public class ClientPackSource implements RepositorySource {
 	@Nullable
 	private CompletableFuture<?> currentDownload;
 	@Nullable
-	private ResourcePack serverPack;
+	private Pack serverPack;
 
 	public ClientPackSource(File file, AssetIndex assetIndex) {
 		this.serverPackDir = file;
@@ -61,8 +60,8 @@ public class ClientPackSource implements RepositorySource {
 	}
 
 	@Override
-	public <T extends Pack> void loadPacks(Consumer<T> consumer, Pack.PackConstructor<T> packConstructor) {
-		T pack = Pack.create("vanilla", true, () -> this.vanillaPack, packConstructor, Pack.Position.BOTTOM, PackSource.BUILT_IN);
+	public void loadPacks(Consumer<Pack> consumer, Pack.PackConstructor packConstructor) {
+		Pack pack = Pack.create("vanilla", true, () -> this.vanillaPack, packConstructor, Pack.Position.BOTTOM, PackSource.BUILT_IN);
 		if (pack != null) {
 			consumer.accept(pack);
 		}
@@ -71,7 +70,7 @@ public class ClientPackSource implements RepositorySource {
 			consumer.accept(this.serverPack);
 		}
 
-		T pack2 = this.createProgrammerArtPack(packConstructor);
+		Pack pack2 = this.createProgrammerArtPack(packConstructor);
 		if (pack2 != null) {
 			consumer.accept(pack2);
 		}
@@ -81,7 +80,7 @@ public class ClientPackSource implements RepositorySource {
 		return this.vanillaPack;
 	}
 
-	public static Map<String, String> getDownloadHeaders() {
+	private static Map<String, String> getDownloadHeaders() {
 		Map<String, String> map = Maps.<String, String>newHashMap();
 		map.put("X-Minecraft-Username", Minecraft.getInstance().getUser().getName());
 		map.put("X-Minecraft-UUID", Minecraft.getInstance().getUser().getUuid());
@@ -220,16 +219,14 @@ public class ClientPackSource implements RepositorySource {
 
 	public CompletableFuture<Void> setServerPack(File file, PackSource packSource) {
 		PackMetadataSection packMetadataSection;
-		NativeImage nativeImage;
 		try (FilePackResources filePackResources = new FilePackResources(file)) {
 			packMetadataSection = filePackResources.getMetadataSection(PackMetadataSection.SERIALIZER);
-			nativeImage = ResourcePack.readIcon(filePackResources);
-		} catch (IOException var18) {
-			return Util.failedFuture(new IOException(String.format("Invalid resourcepack at %s", file), var18));
+		} catch (IOException var17) {
+			return Util.failedFuture(new IOException(String.format("Invalid resourcepack at %s", file), var17));
 		}
 
 		LOGGER.info("Applying server pack {}", file);
-		this.serverPack = new ResourcePack(
+		this.serverPack = new Pack(
 			"server",
 			true,
 			() -> new FilePackResources(file),
@@ -238,15 +235,14 @@ public class ClientPackSource implements RepositorySource {
 			PackCompatibility.forFormat(packMetadataSection.getPackFormat()),
 			Pack.Position.TOP,
 			true,
-			packSource,
-			nativeImage
+			packSource
 		);
 		return Minecraft.getInstance().delayTextureReload();
 	}
 
 	@Nullable
-	private <T extends Pack> T createProgrammerArtPack(Pack.PackConstructor<T> packConstructor) {
-		T pack = null;
+	private Pack createProgrammerArtPack(Pack.PackConstructor packConstructor) {
+		Pack pack = null;
 		File file = this.assetIndex.getFile(new ResourceLocation("resourcepacks/programmer_art.zip"));
 		if (file != null && file.isFile()) {
 			pack = createProgrammerArtPack(packConstructor, () -> createProgrammerArtZipPack(file));
@@ -263,7 +259,7 @@ public class ClientPackSource implements RepositorySource {
 	}
 
 	@Nullable
-	private static <T extends Pack> T createProgrammerArtPack(Pack.PackConstructor<T> packConstructor, Supplier<PackResources> supplier) {
+	private static Pack createProgrammerArtPack(Pack.PackConstructor packConstructor, Supplier<PackResources> supplier) {
 		return Pack.create("programer_art", false, supplier, packConstructor, Pack.Position.TOP, PackSource.BUILT_IN);
 	}
 

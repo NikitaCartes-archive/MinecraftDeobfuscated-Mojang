@@ -32,7 +32,7 @@ public class DataPackCommand {
 			commandContext.getSource().getServer().getPackRepository().getSelectedIds().stream().map(StringArgumentType::escapeIfRequired), suggestionsBuilder
 		);
 	private static final SuggestionProvider<CommandSourceStack> UNSELECTED_PACKS = (commandContext, suggestionsBuilder) -> {
-		PackRepository<?> packRepository = commandContext.getSource().getServer().getPackRepository();
+		PackRepository packRepository = commandContext.getSource().getServer().getPackRepository();
 		Collection<String> collection = packRepository.getSelectedIds();
 		return SharedSuggestionProvider.suggest(
 			packRepository.getAvailableIds().stream().filter(string -> !collection.contains(string)).map(StringArgumentType::escapeIfRequired), suggestionsBuilder
@@ -108,8 +108,8 @@ public class DataPackCommand {
 	}
 
 	private static int enablePack(CommandSourceStack commandSourceStack, Pack pack, DataPackCommand.Inserter inserter) throws CommandSyntaxException {
-		PackRepository<?> packRepository = commandSourceStack.getServer().getPackRepository();
-		List<Pack> list = Lists.<Pack>newArrayList((Iterable<? extends Pack>)packRepository.getSelectedPacks());
+		PackRepository packRepository = commandSourceStack.getServer().getPackRepository();
+		List<Pack> list = Lists.<Pack>newArrayList(packRepository.getSelectedPacks());
 		inserter.apply(list, pack);
 		commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.modify.enable", pack.getChatLink(true)), true);
 		ReloadCommand.reloadPacks((Collection<String>)list.stream().map(Pack::getId).collect(Collectors.toList()), commandSourceStack);
@@ -117,8 +117,8 @@ public class DataPackCommand {
 	}
 
 	private static int disablePack(CommandSourceStack commandSourceStack, Pack pack) {
-		PackRepository<?> packRepository = commandSourceStack.getServer().getPackRepository();
-		List<Pack> list = Lists.<Pack>newArrayList((Iterable<? extends Pack>)packRepository.getSelectedPacks());
+		PackRepository packRepository = commandSourceStack.getServer().getPackRepository();
+		List<Pack> list = Lists.<Pack>newArrayList(packRepository.getSelectedPacks());
 		list.remove(pack);
 		commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.modify.disable", pack.getChatLink(true)), true);
 		ReloadCommand.reloadPacks((Collection<String>)list.stream().map(Pack::getId).collect(Collectors.toList()), commandSourceStack);
@@ -130,10 +130,10 @@ public class DataPackCommand {
 	}
 
 	private static int listAvailablePacks(CommandSourceStack commandSourceStack) {
-		PackRepository<?> packRepository = commandSourceStack.getServer().getPackRepository();
+		PackRepository packRepository = commandSourceStack.getServer().getPackRepository();
 		packRepository.reload();
-		Collection<? extends Pack> collection = (Collection<? extends Pack>)packRepository.getSelectedPacks();
-		Collection<? extends Pack> collection2 = (Collection<? extends Pack>)packRepository.getAvailablePacks();
+		Collection<? extends Pack> collection = packRepository.getSelectedPacks();
+		Collection<? extends Pack> collection2 = packRepository.getAvailablePacks();
 		List<Pack> list = (List<Pack>)collection2.stream().filter(pack -> !collection.contains(pack)).collect(Collectors.toList());
 		if (list.isEmpty()) {
 			commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.list.available.none"), false);
@@ -147,9 +147,9 @@ public class DataPackCommand {
 	}
 
 	private static int listEnabledPacks(CommandSourceStack commandSourceStack) {
-		PackRepository<?> packRepository = commandSourceStack.getServer().getPackRepository();
+		PackRepository packRepository = commandSourceStack.getServer().getPackRepository();
 		packRepository.reload();
-		Collection<? extends Pack> collection = (Collection<? extends Pack>)packRepository.getSelectedPacks();
+		Collection<? extends Pack> collection = packRepository.getSelectedPacks();
 		if (collection.isEmpty()) {
 			commandSourceStack.sendSuccess(new TranslatableComponent("commands.datapack.list.enabled.none"), false);
 		} else {
@@ -166,7 +166,7 @@ public class DataPackCommand {
 
 	private static Pack getPack(CommandContext<CommandSourceStack> commandContext, String string, boolean bl) throws CommandSyntaxException {
 		String string2 = StringArgumentType.getString(commandContext, string);
-		PackRepository<?> packRepository = commandContext.getSource().getServer().getPackRepository();
+		PackRepository packRepository = commandContext.getSource().getServer().getPackRepository();
 		Pack pack = packRepository.getPack(string2);
 		if (pack == null) {
 			throw ERROR_UNKNOWN_PACK.create(string2);

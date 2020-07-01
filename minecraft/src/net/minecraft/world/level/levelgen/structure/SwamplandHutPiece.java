@@ -9,7 +9,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -113,18 +113,18 @@ public class SwamplandHutPiece extends ScatteredFeaturePiece {
 		}
 	}
 
-	private void spawnCat(LevelAccessor levelAccessor, BoundingBox boundingBox) {
+	private void spawnCat(ServerLevelAccessor serverLevelAccessor, BoundingBox boundingBox) {
 		if (!this.spawnedCat) {
 			int i = this.getWorldX(2, 5);
 			int j = this.getWorldY(2);
 			int k = this.getWorldZ(2, 5);
 			if (boundingBox.isInside(new BlockPos(i, j, k))) {
 				this.spawnedCat = true;
-				Cat cat = EntityType.CAT.create(levelAccessor.getLevel());
+				Cat cat = EntityType.CAT.create(serverLevelAccessor.getLevel());
 				cat.setPersistenceRequired();
 				cat.moveTo((double)i + 0.5, (double)j, (double)k + 0.5, 0.0F, 0.0F);
-				cat.finalizeSpawn(levelAccessor, levelAccessor.getCurrentDifficultyAt(new BlockPos(i, j, k)), MobSpawnType.STRUCTURE, null, null);
-				levelAccessor.addFreshEntity(cat);
+				cat.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(new BlockPos(i, j, k)), MobSpawnType.STRUCTURE, null, null);
+				serverLevelAccessor.addFreshEntity(cat);
 			}
 		}
 	}

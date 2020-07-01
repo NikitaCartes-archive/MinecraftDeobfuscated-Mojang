@@ -73,8 +73,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
@@ -281,8 +281,8 @@ public class Fox extends Animal {
 			.add(Attributes.ATTACK_DAMAGE, 2.0);
 	}
 
-	public Fox getBreedOffspring(AgableMob agableMob) {
-		Fox fox = EntityType.FOX.create(this.level);
+	public Fox getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+		Fox fox = EntityType.FOX.create(serverLevel);
 		fox.setFoxType(this.random.nextBoolean() ? this.getFoxType() : ((Fox)agableMob).getFoxType());
 		return fox;
 	}
@@ -290,13 +290,13 @@ public class Fox extends Animal {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		Biome biome = levelAccessor.getBiome(this.blockPosition());
+		Biome biome = serverLevelAccessor.getBiome(this.blockPosition());
 		Fox.Type type = Fox.Type.byBiome(biome);
 		boolean bl = false;
 		if (spawnGroupData instanceof Fox.FoxGroupData) {
@@ -313,12 +313,12 @@ public class Fox extends Animal {
 			this.setAge(-24000);
 		}
 
-		if (levelAccessor instanceof ServerLevel) {
+		if (serverLevelAccessor instanceof ServerLevel) {
 			this.setTargetGoals();
 		}
 
 		this.populateDefaultEquipmentSlots(difficultyInstance);
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	private void setTargetGoals() {
@@ -828,7 +828,7 @@ public class Fox extends Animal {
 
 		@Override
 		protected void breed() {
-			Fox fox = (Fox)this.animal.getBreedOffspring(this.partner);
+			Fox fox = (Fox)this.animal.getBreedOffspring((ServerLevel)this.level, this.partner);
 			if (fox != null) {
 				ServerPlayer serverPlayer = this.animal.getLoveCause();
 				ServerPlayer serverPlayer2 = this.partner.getLoveCause();

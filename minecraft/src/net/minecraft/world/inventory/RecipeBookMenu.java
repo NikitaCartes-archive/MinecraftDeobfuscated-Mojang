@@ -31,4 +31,7 @@ public abstract class RecipeBookMenu<C extends Container> extends AbstractContai
 
 	@Environment(EnvType.CLIENT)
 	public abstract int getSize();
+
+	@Environment(EnvType.CLIENT)
+	public abstract RecipeBookType getRecipeBookType();
 }

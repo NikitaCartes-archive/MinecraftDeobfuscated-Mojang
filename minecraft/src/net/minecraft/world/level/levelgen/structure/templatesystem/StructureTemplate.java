@@ -31,6 +31,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlockContainer;
@@ -195,17 +196,17 @@ public class StructureTemplate {
 		return transform(blockPos, structurePlaceSettings.getMirror(), structurePlaceSettings.getRotation(), structurePlaceSettings.getRotationPivot());
 	}
 
-	public void placeInWorldChunk(LevelAccessor levelAccessor, BlockPos blockPos, StructurePlaceSettings structurePlaceSettings, Random random) {
+	public void placeInWorldChunk(ServerLevelAccessor serverLevelAccessor, BlockPos blockPos, StructurePlaceSettings structurePlaceSettings, Random random) {
 		structurePlaceSettings.updateBoundingBoxFromChunkPos();
-		this.placeInWorld(levelAccessor, blockPos, structurePlaceSettings, random);
+		this.placeInWorld(serverLevelAccessor, blockPos, structurePlaceSettings, random);
 	}
 
-	public void placeInWorld(LevelAccessor levelAccessor, BlockPos blockPos, StructurePlaceSettings structurePlaceSettings, Random random) {
-		this.placeInWorld(levelAccessor, blockPos, blockPos, structurePlaceSettings, random, 2);
+	public void placeInWorld(ServerLevelAccessor serverLevelAccessor, BlockPos blockPos, StructurePlaceSettings structurePlaceSettings, Random random) {
+		this.placeInWorld(serverLevelAccessor, blockPos, blockPos, structurePlaceSettings, random, 2);
 	}
 
 	public boolean placeInWorld(
-		LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2, StructurePlaceSettings structurePlaceSettings, Random random, int i
+		ServerLevelAccessor serverLevelAccessor, BlockPos blockPos, BlockPos blockPos2, StructurePlaceSettings structurePlaceSettings, Random random, int i
 	) {
 		if (this.palettes.isEmpty()) {
 			return false;
@@ -225,18 +226,18 @@ public class StructureTemplate {
 				int n = Integer.MIN_VALUE;
 				int o = Integer.MIN_VALUE;
 
-				for (StructureTemplate.StructureBlockInfo structureBlockInfo : processBlockInfos(levelAccessor, blockPos, blockPos2, structurePlaceSettings, list)) {
+				for (StructureTemplate.StructureBlockInfo structureBlockInfo : processBlockInfos(serverLevelAccessor, blockPos, blockPos2, structurePlaceSettings, list)) {
 					BlockPos blockPos3 = structureBlockInfo.pos;
 					if (boundingBox == null || boundingBox.isInside(blockPos3)) {
-						FluidState fluidState = structurePlaceSettings.shouldKeepLiquids() ? levelAccessor.getFluidState(blockPos3) : null;
+						FluidState fluidState = structurePlaceSettings.shouldKeepLiquids() ? serverLevelAccessor.getFluidState(blockPos3) : null;
 						BlockState blockState = structureBlockInfo.state.mirror(structurePlaceSettings.getMirror()).rotate(structurePlaceSettings.getRotation());
 						if (structureBlockInfo.nbt != null) {
-							BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos3);
+							BlockEntity blockEntity = serverLevelAccessor.getBlockEntity(blockPos3);
 							Clearable.tryClear(blockEntity);
-							levelAccessor.setBlock(blockPos3, Blocks.BARRIER.defaultBlockState(), 20);
+							serverLevelAccessor.setBlock(blockPos3, Blocks.BARRIER.defaultBlockState(), 20);
 						}
 
-						if (levelAccessor.setBlock(blockPos3, blockState, i)) {
+						if (serverLevelAccessor.setBlock(blockPos3, blockState, i)) {
 							j = Math.min(j, blockPos3.getX());
 							k = Math.min(k, blockPos3.getY());
 							l = Math.min(l, blockPos3.getZ());
@@ -245,7 +246,7 @@ public class StructureTemplate {
 							o = Math.max(o, blockPos3.getZ());
 							list3.add(Pair.of(blockPos3, structureBlockInfo.nbt));
 							if (structureBlockInfo.nbt != null) {
-								BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos3);
+								BlockEntity blockEntity = serverLevelAccessor.getBlockEntity(blockPos3);
 								if (blockEntity != null) {
 									structureBlockInfo.nbt.putInt("x", blockPos3.getX());
 									structureBlockInfo.nbt.putInt("y", blockPos3.getY());
@@ -261,7 +262,7 @@ public class StructureTemplate {
 							}
 
 							if (fluidState != null && blockState.getBlock() instanceof LiquidBlockContainer) {
-								((LiquidBlockContainer)blockState.getBlock()).placeLiquid(levelAccessor, blockPos3, blockState, fluidState);
+								((LiquidBlockContainer)blockState.getBlock()).placeLiquid(serverLevelAccessor, blockPos3, blockState, fluidState);
 								if (!fluidState.isSource()) {
 									list2.add(blockPos3);
 								}
@@ -280,12 +281,12 @@ public class StructureTemplate {
 					while (iterator.hasNext()) {
 						BlockPos blockPos4 = (BlockPos)iterator.next();
 						BlockPos blockPos5 = blockPos4;
-						FluidState fluidState2 = levelAccessor.getFluidState(blockPos4);
+						FluidState fluidState2 = serverLevelAccessor.getFluidState(blockPos4);
 
 						for (int p = 0; p < directions.length && !fluidState2.isSource(); p++) {
 							BlockPos blockPos6 = blockPos5.relative(directions[p]);
-							FluidState fluidState3 = levelAccessor.getFluidState(blockPos6);
-							if (fluidState3.getHeight(levelAccessor, blockPos6) > fluidState2.getHeight(levelAccessor, blockPos5)
+							FluidState fluidState3 = serverLevelAccessor.getFluidState(blockPos6);
+							if (fluidState3.getHeight(serverLevelAccessor, blockPos6) > fluidState2.getHeight(serverLevelAccessor, blockPos5)
 								|| fluidState3.isSource() && !fluidState2.isSource()) {
 								fluidState2 = fluidState3;
 								blockPos5 = blockPos6;
@@ -293,10 +294,10 @@ public class StructureTemplate {
 						}
 
 						if (fluidState2.isSource()) {
-							BlockState blockState2 = levelAccessor.getBlockState(blockPos4);
+							BlockState blockState2 = serverLevelAccessor.getBlockState(blockPos4);
 							Block block = blockState2.getBlock();
 							if (block instanceof LiquidBlockContainer) {
-								((LiquidBlockContainer)block).placeLiquid(levelAccessor, blockPos4, blockState2, fluidState2);
+								((LiquidBlockContainer)block).placeLiquid(serverLevelAccessor, blockPos4, blockState2, fluidState2);
 								bl = true;
 								iterator.remove();
 							}
@@ -316,23 +317,23 @@ public class StructureTemplate {
 							discreteVoxelShape.setFull(blockPos7.getX() - q, blockPos7.getY() - r, blockPos7.getZ() - s, true, true);
 						}
 
-						updateShapeAtEdge(levelAccessor, i, discreteVoxelShape, q, r, s);
+						updateShapeAtEdge(serverLevelAccessor, i, discreteVoxelShape, q, r, s);
 					}
 
 					for (Pair<BlockPos, CompoundTag> pair2 : list3) {
 						BlockPos blockPos5 = pair2.getFirst();
 						if (!structurePlaceSettings.getKnownShape()) {
-							BlockState blockState3 = levelAccessor.getBlockState(blockPos5);
-							BlockState blockState2 = Block.updateFromNeighbourShapes(blockState3, levelAccessor, blockPos5);
+							BlockState blockState3 = serverLevelAccessor.getBlockState(blockPos5);
+							BlockState blockState2 = Block.updateFromNeighbourShapes(blockState3, serverLevelAccessor, blockPos5);
 							if (blockState3 != blockState2) {
-								levelAccessor.setBlock(blockPos5, blockState2, i & -2 | 16);
+								serverLevelAccessor.setBlock(blockPos5, blockState2, i & -2 | 16);
 							}
 
-							levelAccessor.blockUpdated(blockPos5, blockState2.getBlock());
+							serverLevelAccessor.blockUpdated(blockPos5, blockState2.getBlock());
 						}
 
 						if (pair2.getSecond() != null) {
-							BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos5);
+							BlockEntity blockEntity = serverLevelAccessor.getBlockEntity(blockPos5);
 							if (blockEntity != null) {
 								blockEntity.setChanged();
 							}
@@ -342,7 +343,7 @@ public class StructureTemplate {
 
 				if (!structurePlaceSettings.isIgnoreEntities()) {
 					this.placeEntities(
-						levelAccessor,
+						serverLevelAccessor,
 						blockPos,
 						structurePlaceSettings.getMirror(),
 						structurePlaceSettings.getRotation(),
@@ -407,7 +408,13 @@ public class StructureTemplate {
 	}
 
 	private void placeEntities(
-		LevelAccessor levelAccessor, BlockPos blockPos, Mirror mirror, Rotation rotation, BlockPos blockPos2, @Nullable BoundingBox boundingBox, boolean bl
+		ServerLevelAccessor serverLevelAccessor,
+		BlockPos blockPos,
+		Mirror mirror,
+		Rotation rotation,
+		BlockPos blockPos2,
+		@Nullable BoundingBox boundingBox,
+		boolean bl
 	) {
 		for (StructureTemplate.StructureEntityInfo structureEntityInfo : this.entityInfoList) {
 			BlockPos blockPos3 = transform(structureEntityInfo.blockPos, mirror, rotation, blockPos2).offset(blockPos);
@@ -421,23 +428,27 @@ public class StructureTemplate {
 				listTag.add(DoubleTag.valueOf(vec32.z));
 				compoundTag.put("Pos", listTag);
 				compoundTag.remove("UUID");
-				createEntityIgnoreException(levelAccessor, compoundTag).ifPresent(entity -> {
-					float f = entity.mirror(mirror);
-					f += entity.yRot - entity.rotate(rotation);
-					entity.moveTo(vec32.x, vec32.y, vec32.z, f, entity.xRot);
-					if (bl && entity instanceof Mob) {
-						((Mob)entity).finalizeSpawn(levelAccessor, levelAccessor.getCurrentDifficultyAt(new BlockPos(vec32)), MobSpawnType.STRUCTURE, null, compoundTag);
-					}
+				createEntityIgnoreException(serverLevelAccessor, compoundTag)
+					.ifPresent(
+						entity -> {
+							float f = entity.mirror(mirror);
+							f += entity.yRot - entity.rotate(rotation);
+							entity.moveTo(vec32.x, vec32.y, vec32.z, f, entity.xRot);
+							if (bl && entity instanceof Mob) {
+								((Mob)entity)
+									.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(new BlockPos(vec32)), MobSpawnType.STRUCTURE, null, compoundTag);
+							}
 
-					levelAccessor.addFreshEntity(entity);
-				});
+							serverLevelAccessor.addFreshEntity(entity);
+						}
+					);
 			}
 		}
 	}
 
-	private static Optional<Entity> createEntityIgnoreException(LevelAccessor levelAccessor, CompoundTag compoundTag) {
+	private static Optional<Entity> createEntityIgnoreException(ServerLevelAccessor serverLevelAccessor, CompoundTag compoundTag) {
 		try {
-			return EntityType.create(compoundTag, levelAccessor.getLevel());
+			return EntityType.create(compoundTag, serverLevelAccessor.getLevel());
 		} catch (Exception var3) {
 			return Optional.empty();
 		}

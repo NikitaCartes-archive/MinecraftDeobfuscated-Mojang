@@ -591,6 +591,7 @@ public class SoundEvents {
 	public static final SoundEvent PARROT_IMITATE_MAGMA_CUBE = register("entity.parrot.imitate.magma_cube");
 	public static final SoundEvent PARROT_IMITATE_PHANTOM = register("entity.parrot.imitate.phantom");
 	public static final SoundEvent PARROT_IMITATE_PIGLIN = register("entity.parrot.imitate.piglin");
+	public static final SoundEvent PARROT_IMITATE_PIGLIN_BRUTE = register("entity.parrot.imitate.piglin_brute");
 	public static final SoundEvent PARROT_IMITATE_PILLAGER = register("entity.parrot.imitate.pillager");
 	public static final SoundEvent PARROT_IMITATE_RAVAGER = register("entity.parrot.imitate.ravager");
 	public static final SoundEvent PARROT_IMITATE_SHULKER = register("entity.parrot.imitate.shulker");
@@ -629,6 +630,12 @@ public class SoundEvents {
 	public static final SoundEvent PIGLIN_RETREAT = register("entity.piglin.retreat");
 	public static final SoundEvent PIGLIN_STEP = register("entity.piglin.step");
 	public static final SoundEvent PIGLIN_CONVERTED_TO_ZOMBIFIED = register("entity.piglin.converted_to_zombified");
+	public static final SoundEvent PIGLIN_BRUTE_AMBIENT = register("entity.piglin_brute.ambient");
+	public static final SoundEvent PIGLIN_BRUTE_ANGRY = register("entity.piglin_brute.angry");
+	public static final SoundEvent PIGLIN_BRUTE_DEATH = register("entity.piglin_brute.death");
+	public static final SoundEvent PIGLIN_BRUTE_HURT = register("entity.piglin_brute.hurt");
+	public static final SoundEvent PIGLIN_BRUTE_STEP = register("entity.piglin_brute.step");
+	public static final SoundEvent PIGLIN_BRUTE_CONVERTED_TO_ZOMBIFIED = register("entity.piglin_brute.converted_to_zombified");
 	public static final SoundEvent PILLAGER_AMBIENT = register("entity.pillager.ambient");
 	public static final SoundEvent PILLAGER_CELEBRATE = register("entity.pillager.celebrate");
 	public static final SoundEvent PILLAGER_DEATH = register("entity.pillager.death");

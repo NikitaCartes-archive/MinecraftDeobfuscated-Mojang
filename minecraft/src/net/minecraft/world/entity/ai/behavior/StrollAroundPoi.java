@@ -15,10 +15,12 @@ public class StrollAroundPoi extends Behavior<PathfinderMob> {
 	private final MemoryModuleType<GlobalPos> memoryType;
 	private long nextOkStartTime;
 	private final int maxDistanceFromPoi;
+	private float speedModifier;
 
-	public StrollAroundPoi(MemoryModuleType<GlobalPos> memoryModuleType, int i) {
+	public StrollAroundPoi(MemoryModuleType<GlobalPos> memoryModuleType, float f, int i) {
 		super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED, memoryModuleType, MemoryStatus.VALUE_PRESENT));
 		this.memoryType = memoryModuleType;
+		this.speedModifier = f;
 		this.maxDistanceFromPoi = i;
 	}
 
@@ -32,7 +34,7 @@ public class StrollAroundPoi extends Behavior<PathfinderMob> {
 	protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {
 		if (l > this.nextOkStartTime) {
 			Optional<Vec3> optional = Optional.ofNullable(RandomPos.getLandPos(pathfinderMob, 8, 6));
-			pathfinderMob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, optional.map(vec3 -> new WalkTarget(vec3, 0.4F, 1)));
+			pathfinderMob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, optional.map(vec3 -> new WalkTarget(vec3, this.speedModifier, 1)));
 			this.nextOkStartTime = l + 180L;
 		}
 	}

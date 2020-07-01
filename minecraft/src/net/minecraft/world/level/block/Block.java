@@ -266,25 +266,22 @@ public class Block extends BlockBehaviour implements ItemLike {
 	public static void dropResources(BlockState blockState, Level level, BlockPos blockPos) {
 		if (level instanceof ServerLevel) {
 			getDrops(blockState, (ServerLevel)level, blockPos, null).forEach(itemStack -> popResource(level, blockPos, itemStack));
+			blockState.spawnAfterBreak((ServerLevel)level, blockPos, ItemStack.EMPTY);
 		}
-
-		blockState.spawnAfterBreak(level, blockPos, ItemStack.EMPTY);
 	}
 
-	public static void dropResources(BlockState blockState, Level level, BlockPos blockPos, @Nullable BlockEntity blockEntity) {
-		if (level instanceof ServerLevel) {
-			getDrops(blockState, (ServerLevel)level, blockPos, blockEntity).forEach(itemStack -> popResource(level, blockPos, itemStack));
+	public static void dropResources(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, @Nullable BlockEntity blockEntity) {
+		if (levelAccessor instanceof ServerLevel) {
+			getDrops(blockState, (ServerLevel)levelAccessor, blockPos, blockEntity).forEach(itemStack -> popResource((ServerLevel)levelAccessor, blockPos, itemStack));
+			blockState.spawnAfterBreak((ServerLevel)levelAccessor, blockPos, ItemStack.EMPTY);
 		}
-
-		blockState.spawnAfterBreak(level, blockPos, ItemStack.EMPTY);
 	}
 
 	public static void dropResources(BlockState blockState, Level level, BlockPos blockPos, @Nullable BlockEntity blockEntity, Entity entity, ItemStack itemStack) {
 		if (level instanceof ServerLevel) {
 			getDrops(blockState, (ServerLevel)level, blockPos, blockEntity, entity, itemStack).forEach(itemStackx -> popResource(level, blockPos, itemStackx));
+			blockState.spawnAfterBreak((ServerLevel)level, blockPos, itemStack);
 		}
-
-		blockState.spawnAfterBreak(level, blockPos, itemStack);
 	}
 
 	public static void popResource(Level level, BlockPos blockPos, ItemStack itemStack) {
@@ -299,12 +296,12 @@ public class Block extends BlockBehaviour implements ItemLike {
 		}
 	}
 
-	protected void popExperience(Level level, BlockPos blockPos, int i) {
-		if (!level.isClientSide && level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)) {
+	protected void popExperience(ServerLevel serverLevel, BlockPos blockPos, int i) {
+		if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)) {
 			while (i > 0) {
 				int j = ExperienceOrb.getExperienceValue(i);
 				i -= j;
-				level.addFreshEntity(new ExperienceOrb(level, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, j));
+				serverLevel.addFreshEntity(new ExperienceOrb(serverLevel, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, j));
 			}
 		}
 	}

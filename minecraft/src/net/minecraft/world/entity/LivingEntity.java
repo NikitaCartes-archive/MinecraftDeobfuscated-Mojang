@@ -1191,17 +1191,17 @@ public abstract class LivingEntity extends Entity {
 				livingEntity.awardKillScore(this, this.deathScore, damageSource);
 			}
 
-			if (entity != null) {
-				entity.killed(this);
-			}
-
 			if (this.isSleeping()) {
 				this.stopSleeping();
 			}
 
 			this.dead = true;
 			this.getCombatTracker().recheckStatus();
-			if (!this.level.isClientSide) {
+			if (this.level instanceof ServerLevel) {
+				if (entity != null) {
+					entity.killed((ServerLevel)this.level, this);
+				}
+
 				this.dropAllDeathLoot(damageSource);
 				this.createWitherRose(livingEntity);
 			}
@@ -2804,12 +2804,17 @@ public abstract class LivingEntity extends Entity {
 	}
 
 	protected void completeUsingItem() {
-		if (!this.useItem.equals(this.getItemInHand(this.getUsedItemHand()))) {
+		InteractionHand interactionHand = this.getUsedItemHand();
+		if (!this.useItem.equals(this.getItemInHand(interactionHand))) {
 			this.releaseUsingItem();
 		} else {
 			if (!this.useItem.isEmpty() && this.isUsingItem()) {
 				this.triggerItemUseEffects(this.useItem, 16);
-				this.setItemInHand(this.getUsedItemHand(), this.useItem.finishUsingItem(this.level, this));
+				ItemStack itemStack = this.useItem.finishUsingItem(this.level, this);
+				if (itemStack != this.useItem) {
+					this.setItemInHand(interactionHand, itemStack);
+				}
+
 				this.stopUsingItem();
 			}
 		}
@@ -3103,5 +3108,16 @@ public abstract class LivingEntity extends Entity {
 
 	public void broadcastBreakEvent(InteractionHand interactionHand) {
 		this.broadcastBreakEvent(interactionHand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public AABB getBoundingBoxForCulling() {
+		if (this.getItemBySlot(EquipmentSlot.HEAD).getItem() == Items.DRAGON_HEAD) {
+			float f = 0.5F;
+			return this.getBoundingBox().inflate(0.5, 0.5, 0.5);
+		} else {
+			return super.getBoundingBoxForCulling();
+		}
 	}
 }

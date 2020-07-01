@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.shaders.AbstractUniform;
 import com.mojang.blaze3d.shaders.BlendMode;
@@ -21,10 +20,10 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.function.IntSupplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ChainedJsonException;
 import net.minecraft.server.packs.resources.Resource;
@@ -40,7 +39,7 @@ public class EffectInstance implements Effect, AutoCloseable {
 	private static final AbstractUniform DUMMY_UNIFORM = new AbstractUniform();
 	private static EffectInstance lastAppliedEffect;
 	private static int lastProgramId = -1;
-	private final Map<String, Object> samplerMap = Maps.<String, Object>newHashMap();
+	private final Map<String, IntSupplier> samplerMap = Maps.<String, IntSupplier>newHashMap();
 	private final List<String> samplerNames = Lists.<String>newArrayList();
 	private final List<Integer> samplerLocations = Lists.<Integer>newArrayList();
 	private final List<Uniform> uniforms = Lists.<Uniform>newArrayList();
@@ -252,19 +251,12 @@ public class EffectInstance implements Effect, AutoCloseable {
 		}
 
 		for (int i = 0; i < this.samplerLocations.size(); i++) {
-			if (this.samplerMap.get(this.samplerNames.get(i)) != null) {
+			String string = (String)this.samplerNames.get(i);
+			IntSupplier intSupplier = (IntSupplier)this.samplerMap.get(string);
+			if (intSupplier != null) {
 				RenderSystem.activeTexture(33984 + i);
 				RenderSystem.enableTexture();
-				Object object = this.samplerMap.get(this.samplerNames.get(i));
-				int j = -1;
-				if (object instanceof RenderTarget) {
-					j = ((RenderTarget)object).colorTextureId;
-				} else if (object instanceof AbstractTexture) {
-					j = ((AbstractTexture)object).getId();
-				} else if (object instanceof Integer) {
-					j = (Integer)object;
-				}
-
+				int j = intSupplier.getAsInt();
 				if (j != -1) {
 					RenderSystem.bindTexture(j);
 					Uniform.uploadInteger((Integer)this.samplerLocations.get(i), i);
@@ -338,12 +330,12 @@ public class EffectInstance implements Effect, AutoCloseable {
 		}
 	}
 
-	public void setSampler(String string, Object object) {
+	public void setSampler(String string, IntSupplier intSupplier) {
 		if (this.samplerMap.containsKey(string)) {
 			this.samplerMap.remove(string);
 		}
 
-		this.samplerMap.put(string, object);
+		this.samplerMap.put(string, intSupplier);
 		this.markDirty();
 	}
 

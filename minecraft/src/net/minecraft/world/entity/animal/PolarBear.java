@@ -44,6 +44,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
@@ -63,8 +64,8 @@ public class PolarBear extends Animal implements NeutralMob {
 	}
 
 	@Override
-	public AgableMob getBreedOffspring(AgableMob agableMob) {
-		return EntityType.POLAR_BEAR.create(this.level);
+	public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+		return EntityType.POLAR_BEAR.create(serverLevel);
 	}
 
 	@Override
@@ -242,7 +243,7 @@ public class PolarBear extends Animal implements NeutralMob {
 
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
@@ -253,7 +254,7 @@ public class PolarBear extends Animal implements NeutralMob {
 			((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(1.0F);
 		}
 
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	class PolarBearAttackPlayersGoal extends NearestAttackableTargetGoal<Player> {

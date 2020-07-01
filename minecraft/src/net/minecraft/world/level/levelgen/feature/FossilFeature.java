@@ -6,7 +6,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -47,12 +46,7 @@ public class FossilFeature extends Feature<NoneFeatureConfiguration> {
 	}
 
 	public boolean place(
-		WorldGenLevel worldGenLevel,
-		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator chunkGenerator,
-		Random random,
-		BlockPos blockPos,
-		NoneFeatureConfiguration noneFeatureConfiguration
+		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration
 	) {
 		Rotation rotation = Rotation.getRandom(random);
 		int i = random.nextInt(fossils.length);

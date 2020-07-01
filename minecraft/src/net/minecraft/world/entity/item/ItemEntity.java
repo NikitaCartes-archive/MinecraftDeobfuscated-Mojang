@@ -89,9 +89,10 @@ public class ItemEntity extends Entity {
 			this.yo = this.getY();
 			this.zo = this.getZ();
 			Vec3 vec3 = this.getDeltaMovement();
-			if (this.isEyeInFluid(FluidTags.WATER)) {
+			float f = this.getEyeHeight() - 0.11111111F;
+			if (this.isInWater() && this.getFluidHeight(FluidTags.WATER) > (double)f) {
 				this.setUnderwaterMovement();
-			} else if (this.isEyeInFluid(FluidTags.LAVA)) {
+			} else if (this.isInLava() && this.getFluidHeight(FluidTags.LAVA) > (double)f) {
 				this.setUnderLavaMovement();
 			} else if (!this.isNoGravity()) {
 				this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
@@ -108,14 +109,17 @@ public class ItemEntity extends Entity {
 
 			if (!this.onGround || getHorizontalDistanceSqr(this.getDeltaMovement()) > 1.0E-5F || (this.tickCount + this.getId()) % 4 == 0) {
 				this.move(MoverType.SELF, this.getDeltaMovement());
-				float f = 0.98F;
+				float g = 0.98F;
 				if (this.onGround) {
-					f = this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.98F;
+					g = this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.98F;
 				}
 
-				this.setDeltaMovement(this.getDeltaMovement().multiply((double)f, 0.98, (double)f));
+				this.setDeltaMovement(this.getDeltaMovement().multiply((double)g, 0.98, (double)g));
 				if (this.onGround) {
-					this.setDeltaMovement(this.getDeltaMovement().multiply(1.0, -0.5, 1.0));
+					Vec3 vec32 = this.getDeltaMovement();
+					if (vec32.y < 0.0) {
+						this.setDeltaMovement(vec32.multiply(1.0, -0.5, 1.0));
+					}
 				}
 			}
 

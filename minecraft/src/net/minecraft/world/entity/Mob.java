@@ -65,6 +65,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
@@ -971,7 +972,7 @@ public abstract class Mob extends LivingEntity {
 
 	@Nullable
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
@@ -1057,10 +1058,10 @@ public abstract class Mob extends LivingEntity {
 			}
 
 			if (itemStack.getItem() instanceof SpawnEggItem) {
-				if (!this.level.isClientSide) {
+				if (this.level instanceof ServerLevel) {
 					SpawnEggItem spawnEggItem = (SpawnEggItem)itemStack.getItem();
 					Optional<Mob> optional = spawnEggItem.spawnOffspringFromSpawnEgg(
-						player, this, (EntityType<? extends Mob>)this.getType(), this.level, this.position(), itemStack
+						player, this, (EntityType<? extends Mob>)this.getType(), (ServerLevel)this.level, this.position(), itemStack
 					);
 					optional.ifPresent(mob -> this.onOffspringSpawnedFromEgg(player, mob));
 					return optional.isPresent() ? InteractionResult.SUCCESS : InteractionResult.PASS;

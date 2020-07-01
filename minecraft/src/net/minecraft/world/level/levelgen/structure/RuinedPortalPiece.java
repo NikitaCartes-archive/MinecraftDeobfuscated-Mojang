@@ -17,6 +17,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
@@ -163,7 +164,7 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 	}
 
 	@Override
-	protected void handleDataMarker(String string, BlockPos blockPos, LevelAccessor levelAccessor, Random random, BoundingBox boundingBox) {
+	protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, Random random, BoundingBox boundingBox) {
 	}
 
 	private void maybeAddVines(Random random, LevelAccessor levelAccessor, BlockPos blockPos) {
@@ -251,6 +252,7 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 		BlockState blockState = levelAccessor.getBlockState(blockPos);
 		return !blockState.is(Blocks.AIR)
 			&& !blockState.is(Blocks.OBSIDIAN)
+			&& !blockState.is(Blocks.CHEST)
 			&& (this.verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_NETHER || !blockState.is(Blocks.LAVA));
 	}
 

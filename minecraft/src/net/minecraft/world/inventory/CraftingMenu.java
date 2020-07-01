@@ -170,4 +170,10 @@ public class CraftingMenu extends RecipeBookMenu<CraftingContainer> {
 	public int getSize() {
 		return 10;
 	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public RecipeBookType getRecipeBookType() {
+		return RecipeBookType.CRAFTING;
+	}
 }

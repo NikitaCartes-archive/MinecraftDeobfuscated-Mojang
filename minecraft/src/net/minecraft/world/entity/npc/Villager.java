@@ -63,6 +63,7 @@ import net.minecraft.world.entity.ai.gossip.GossipType;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.sensing.GolemSensor;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.ReputationEventType;
@@ -81,7 +82,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
@@ -134,7 +135,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		MemoryModuleType.LAST_SLEPT,
 		MemoryModuleType.LAST_WOKEN,
 		MemoryModuleType.LAST_WORKED_AT_POI,
-		MemoryModuleType.GOLEM_LAST_SEEN_TIME
+		MemoryModuleType.GOLEM_DETECTED_RECENTLY
 	);
 	private static final ImmutableList<SensorType<? extends Sensor<? super Villager>>> SENSOR_TYPES = ImmutableList.of(
 		SensorType.NEAREST_LIVING_ENTITIES,
@@ -146,7 +147,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		SensorType.VILLAGER_HOSTILES,
 		SensorType.VILLAGER_BABIES,
 		SensorType.SECONDARY_POIS,
-		SensorType.GOLEM_LAST_SEEN
+		SensorType.GOLEM_DETECTED
 	);
 	public static final Map<MemoryModuleType<GlobalPos>, BiPredicate<Villager, PoiType>> POI_MEMORIES = ImmutableMap.of(
 		MemoryModuleType.HOME,
@@ -706,7 +707,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
@@ -720,39 +721,39 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			|| mobSpawnType == MobSpawnType.SPAWN_EGG
 			|| mobSpawnType == MobSpawnType.SPAWNER
 			|| mobSpawnType == MobSpawnType.DISPENSER) {
-			this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(levelAccessor.getBiome(this.blockPosition()))));
+			this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(serverLevelAccessor.getBiome(this.blockPosition()))));
 		}
 
 		if (mobSpawnType == MobSpawnType.STRUCTURE) {
 			this.assignProfessionWhenSpawned = true;
 		}
 
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
-	public Villager getBreedOffspring(AgableMob agableMob) {
+	public Villager getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
 		double d = this.random.nextDouble();
 		VillagerType villagerType;
 		if (d < 0.5) {
-			villagerType = VillagerType.byBiome(this.level.getBiome(this.blockPosition()));
+			villagerType = VillagerType.byBiome(serverLevel.getBiome(this.blockPosition()));
 		} else if (d < 0.75) {
 			villagerType = this.getVillagerData().getType();
 		} else {
 			villagerType = ((Villager)agableMob).getVillagerData().getType();
 		}
 
-		Villager villager = new Villager(EntityType.VILLAGER, this.level, villagerType);
-		villager.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.BREEDING, null, null);
+		Villager villager = new Villager(EntityType.VILLAGER, serverLevel, villagerType);
+		villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.BREEDING, null, null);
 		return villager;
 	}
 
 	@Override
-	public void thunderHit(LightningBolt lightningBolt) {
-		if (this.level.getDifficulty() != Difficulty.PEACEFUL) {
+	public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
+		if (serverLevel.getDifficulty() != Difficulty.PEACEFUL) {
 			LOGGER.info("Villager {} was struck by lightning {}.", this, lightningBolt);
-			Witch witch = EntityType.WITCH.create(this.level);
+			Witch witch = EntityType.WITCH.create(serverLevel);
 			witch.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
-			witch.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(witch.blockPosition()), MobSpawnType.CONVERSION, null, null);
+			witch.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(witch.blockPosition()), MobSpawnType.CONVERSION, null, null);
 			witch.setNoAi(this.isNoAi());
 			if (this.hasCustomName()) {
 				witch.setCustomName(this.getCustomName());
@@ -760,10 +761,10 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			}
 
 			witch.setPersistenceRequired();
-			this.level.addFreshEntity(witch);
+			serverLevel.addFreshEntity(witch);
 			this.remove();
 		} else {
-			super.thunderHit(lightningBolt);
+			super.thunderHit(serverLevel, lightningBolt);
 		}
 	}
 
@@ -826,12 +827,12 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		}
 	}
 
-	public void gossip(Villager villager, long l) {
+	public void gossip(ServerLevel serverLevel, Villager villager, long l) {
 		if ((l < this.lastGossipTime || l >= this.lastGossipTime + 1200L) && (l < villager.lastGossipTime || l >= villager.lastGossipTime + 1200L)) {
 			this.gossips.transferFrom(villager.gossips, this.random, 10);
 			this.lastGossipTime = l;
 			villager.lastGossipTime = l;
-			this.spawnGolemIfNeeded(l, 5);
+			this.spawnGolemIfNeeded(serverLevel, l, 5);
 		}
 	}
 
@@ -845,51 +846,37 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		}
 	}
 
-	public void spawnGolemIfNeeded(long l, int i) {
+	public void spawnGolemIfNeeded(ServerLevel serverLevel, long l, int i) {
 		if (this.wantsToSpawnGolem(l)) {
 			AABB aABB = this.getBoundingBox().inflate(10.0, 10.0, 10.0);
-			List<Villager> list = this.level.getEntitiesOfClass(Villager.class, aABB);
+			List<Villager> list = serverLevel.getEntitiesOfClass(Villager.class, aABB);
 			List<Villager> list2 = (List<Villager>)list.stream().filter(villager -> villager.wantsToSpawnGolem(l)).limit(5L).collect(Collectors.toList());
 			if (list2.size() >= i) {
-				IronGolem ironGolem = this.trySpawnGolem();
+				IronGolem ironGolem = this.trySpawnGolem(serverLevel);
 				if (ironGolem != null) {
-					list.forEach(villager -> villager.sawGolem(l));
+					list.forEach(GolemSensor::golemDetected);
 				}
 			}
 		}
 	}
 
-	private void sawGolem(long l) {
-		this.brain.setMemory(MemoryModuleType.GOLEM_LAST_SEEN_TIME, l);
-	}
-
-	private boolean hasSeenGolemRecently(long l) {
-		Optional<Long> optional = this.brain.getMemory(MemoryModuleType.GOLEM_LAST_SEEN_TIME);
-		if (!optional.isPresent()) {
-			return false;
-		} else {
-			Long long_ = (Long)optional.get();
-			return l - long_ <= 600L;
-		}
-	}
-
 	public boolean wantsToSpawnGolem(long l) {
-		return !this.golemSpawnConditionsMet(this.level.getGameTime()) ? false : !this.hasSeenGolemRecently(l);
+		return !this.golemSpawnConditionsMet(this.level.getGameTime()) ? false : !this.brain.hasMemoryValue(MemoryModuleType.GOLEM_DETECTED_RECENTLY);
 	}
 
 	@Nullable
-	private IronGolem trySpawnGolem() {
+	private IronGolem trySpawnGolem(ServerLevel serverLevel) {
 		BlockPos blockPos = this.blockPosition();
 
 		for (int i = 0; i < 10; i++) {
-			double d = (double)(this.level.random.nextInt(16) - 8);
-			double e = (double)(this.level.random.nextInt(16) - 8);
+			double d = (double)(serverLevel.random.nextInt(16) - 8);
+			double e = (double)(serverLevel.random.nextInt(16) - 8);
 			BlockPos blockPos2 = this.findSpawnPositionForGolemInColumn(blockPos, d, e);
 			if (blockPos2 != null) {
-				IronGolem ironGolem = EntityType.IRON_GOLEM.create(this.level, null, null, null, blockPos2, MobSpawnType.MOB_SUMMONED, false, false);
+				IronGolem ironGolem = EntityType.IRON_GOLEM.create(serverLevel, null, null, null, blockPos2, MobSpawnType.MOB_SUMMONED, false, false);
 				if (ironGolem != null) {
-					if (ironGolem.checkSpawnRules(this.level, MobSpawnType.MOB_SUMMONED) && ironGolem.checkSpawnObstruction(this.level)) {
-						this.level.addFreshEntity(ironGolem);
+					if (ironGolem.checkSpawnRules(serverLevel, MobSpawnType.MOB_SUMMONED) && ironGolem.checkSpawnObstruction(serverLevel)) {
+						serverLevel.addFreshEntity(ironGolem);
 						return ironGolem;
 					}
 

@@ -65,8 +65,8 @@ public class TextureManager implements PreparableReloadListener, Tickable, AutoC
 		AbstractTexture abstractTexture2 = (AbstractTexture)this.byPath.put(resourceLocation, abstractTexture);
 		if (abstractTexture2 != abstractTexture) {
 			if (abstractTexture2 != null && abstractTexture2 != MissingTextureAtlasSprite.getTexture()) {
-				abstractTexture2.releaseId();
 				this.tickableTextures.remove(abstractTexture2);
+				this.safeClose(resourceLocation, abstractTexture2);
 			}
 
 			if (abstractTexture instanceof Tickable) {
@@ -75,18 +75,30 @@ public class TextureManager implements PreparableReloadListener, Tickable, AutoC
 		}
 	}
 
+	private void safeClose(ResourceLocation resourceLocation, AbstractTexture abstractTexture) {
+		if (abstractTexture != MissingTextureAtlasSprite.getTexture()) {
+			try {
+				abstractTexture.close();
+			} catch (Exception var4) {
+				LOGGER.warn("Failed to close texture {}", resourceLocation, var4);
+			}
+		}
+
+		abstractTexture.releaseId();
+	}
+
 	private AbstractTexture loadTexture(ResourceLocation resourceLocation, AbstractTexture abstractTexture) {
 		try {
 			abstractTexture.load(this.resourceManager);
 			return abstractTexture;
-		} catch (IOException var7) {
+		} catch (IOException var6) {
 			if (resourceLocation != INTENTIONAL_MISSING_TEXTURE) {
-				LOGGER.warn("Failed to load texture: {}", resourceLocation, var7);
+				LOGGER.warn("Failed to load texture: {}", resourceLocation, var6);
 			}
 
 			return MissingTextureAtlasSprite.getTexture();
-		} catch (Throwable var8) {
-			CrashReport crashReport = CrashReport.forThrowable(var8, "Registering texture");
+		} catch (Throwable var7) {
+			CrashReport crashReport = CrashReport.forThrowable(var7, "Registering texture");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Resource location being registered");
 			crashReportCategory.setDetail("Resource location", resourceLocation);
 			crashReportCategory.setDetail("Texture object class", (CrashReportDetail<String>)(() -> abstractTexture.getClass().getName()));
@@ -142,7 +154,7 @@ public class TextureManager implements PreparableReloadListener, Tickable, AutoC
 	}
 
 	public void close() {
-		this.byPath.values().forEach(AbstractTexture::releaseId);
+		this.byPath.forEach(this::safeClose);
 		this.byPath.clear();
 		this.tickableTextures.clear();
 		this.prefixRegister.clear();

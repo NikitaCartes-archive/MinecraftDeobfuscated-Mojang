@@ -2,6 +2,7 @@ package net.minecraft.world.entity.animal.horse;
 
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
@@ -155,8 +156,8 @@ public class SkeletonHorse extends AbstractHorse {
 
 	@Nullable
 	@Override
-	public AgableMob getBreedOffspring(AgableMob agableMob) {
-		return EntityType.SKELETON_HORSE.create(this.level);
+	public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+		return EntityType.SKELETON_HORSE.create(serverLevel);
 	}
 
 	@Override

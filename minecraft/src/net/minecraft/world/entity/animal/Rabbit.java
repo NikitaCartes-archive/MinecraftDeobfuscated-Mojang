@@ -12,6 +12,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -50,6 +51,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -303,9 +305,9 @@ public class Rabbit extends Animal {
 		return item == Items.CARROT || item == Items.GOLDEN_CARROT || item == Blocks.DANDELION.asItem();
 	}
 
-	public Rabbit getBreedOffspring(AgableMob agableMob) {
-		Rabbit rabbit = EntityType.RABBIT.create(this.level);
-		int i = this.getRandomRabbitType(this.level);
+	public Rabbit getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+		Rabbit rabbit = EntityType.RABBIT.create(serverLevel);
+		int i = this.getRandomRabbitType(serverLevel);
 		if (this.random.nextInt(20) != 0) {
 			if (agableMob instanceof Rabbit && this.random.nextBoolean()) {
 				i = ((Rabbit)agableMob).getRabbitType();
@@ -345,13 +347,13 @@ public class Rabbit extends Animal {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		int i = this.getRandomRabbitType(levelAccessor);
+		int i = this.getRandomRabbitType(serverLevelAccessor);
 		if (spawnGroupData instanceof Rabbit.RabbitGroupData) {
 			i = ((Rabbit.RabbitGroupData)spawnGroupData).rabbitType;
 		} else {
@@ -359,7 +361,7 @@ public class Rabbit extends Animal {
 		}
 
 		this.setRabbitType(i);
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	private int getRandomRabbitType(LevelAccessor levelAccessor) {

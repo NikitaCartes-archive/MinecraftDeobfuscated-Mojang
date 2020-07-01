@@ -7,7 +7,6 @@ import java.util.Set;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
 public class GolemSensor extends Sensor<LivingEntity> {
@@ -21,7 +20,7 @@ public class GolemSensor extends Sensor<LivingEntity> {
 
 	@Override
 	protected void doTick(ServerLevel serverLevel, LivingEntity livingEntity) {
-		checkForNearbyGolem(serverLevel.getGameTime(), livingEntity);
+		checkForNearbyGolem(livingEntity);
 	}
 
 	@Override
@@ -29,14 +28,17 @@ public class GolemSensor extends Sensor<LivingEntity> {
 		return ImmutableSet.of(MemoryModuleType.LIVING_ENTITIES);
 	}
 
-	public static void checkForNearbyGolem(long l, LivingEntity livingEntity) {
-		Brain<?> brain = livingEntity.getBrain();
-		Optional<List<LivingEntity>> optional = brain.getMemory(MemoryModuleType.LIVING_ENTITIES);
+	public static void checkForNearbyGolem(LivingEntity livingEntity) {
+		Optional<List<LivingEntity>> optional = livingEntity.getBrain().getMemory(MemoryModuleType.LIVING_ENTITIES);
 		if (optional.isPresent()) {
 			boolean bl = ((List)optional.get()).stream().anyMatch(livingEntityx -> livingEntityx.getType().equals(EntityType.IRON_GOLEM));
 			if (bl) {
-				brain.setMemory(MemoryModuleType.GOLEM_LAST_SEEN_TIME, l);
+				golemDetected(livingEntity);
 			}
 		}
+	}
+
+	public static void golemDetected(LivingEntity livingEntity) {
+		livingEntity.getBrain().setMemoryWithExpiry(MemoryModuleType.GOLEM_DETECTED_RECENTLY, true, 600L);
 	}
 }

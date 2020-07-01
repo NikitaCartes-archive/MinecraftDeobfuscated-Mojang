@@ -7,7 +7,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GrowingPlantHeadBlock;
@@ -21,12 +20,7 @@ public class TwistingVinesFeature extends Feature<NoneFeatureConfiguration> {
 	}
 
 	public boolean place(
-		WorldGenLevel worldGenLevel,
-		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator chunkGenerator,
-		Random random,
-		BlockPos blockPos,
-		NoneFeatureConfiguration noneFeatureConfiguration
+		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration
 	) {
 		return place(worldGenLevel, random, blockPos, 8, 4, 8);
 	}

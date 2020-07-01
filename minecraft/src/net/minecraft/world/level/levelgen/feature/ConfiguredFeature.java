@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
@@ -37,9 +36,7 @@ public class ConfiguredFeature<FC extends FeatureConfiguration, F extends Featur
 		return new WeightedConfiguredFeature<>(this, f);
 	}
 
-	public boolean place(
-		WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos
-	) {
-		return this.feature.place(worldGenLevel, structureFeatureManager, chunkGenerator, random, blockPos, this.config);
+	public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos) {
+		return this.feature.place(worldGenLevel, chunkGenerator, random, blockPos, this.config);
 	}
 }

@@ -26,11 +26,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
-import net.minecraft.client.resources.ResourcePack;
 import net.minecraft.client.tutorial.TutorialSteps;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.GsonHelper;
@@ -770,28 +770,28 @@ public class Options {
 		return this.useNativeTransport;
 	}
 
-	public void loadSelectedResourcePacks(PackRepository<ResourcePack> packRepository) {
+	public void loadSelectedResourcePacks(PackRepository packRepository) {
 		Set<String> set = Sets.<String>newLinkedHashSet();
 		Iterator<String> iterator = this.resourcePacks.iterator();
 
 		while (iterator.hasNext()) {
 			String string = (String)iterator.next();
-			ResourcePack resourcePack = packRepository.getPack(string);
-			if (resourcePack == null && !string.startsWith("file/")) {
-				resourcePack = packRepository.getPack("file/" + string);
+			Pack pack = packRepository.getPack(string);
+			if (pack == null && !string.startsWith("file/")) {
+				pack = packRepository.getPack("file/" + string);
 			}
 
-			if (resourcePack == null) {
+			if (pack == null) {
 				LOGGER.warn("Removed resource pack {} from options because it doesn't seem to exist anymore", string);
 				iterator.remove();
-			} else if (!resourcePack.getCompatibility().isCompatible() && !this.incompatibleResourcePacks.contains(string)) {
+			} else if (!pack.getCompatibility().isCompatible() && !this.incompatibleResourcePacks.contains(string)) {
 				LOGGER.warn("Removed resource pack {} from options because it is no longer compatible", string);
 				iterator.remove();
-			} else if (resourcePack.getCompatibility().isCompatible() && this.incompatibleResourcePacks.contains(string)) {
+			} else if (pack.getCompatibility().isCompatible() && this.incompatibleResourcePacks.contains(string)) {
 				LOGGER.info("Removed resource pack {} from incompatibility list because it's now compatible", string);
 				this.incompatibleResourcePacks.remove(string);
 			} else {
-				set.add(resourcePack.getId());
+				set.add(pack.getId());
 			}
 		}
 

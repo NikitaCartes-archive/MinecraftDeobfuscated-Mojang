@@ -37,7 +37,7 @@ public class RecipeButton extends AbstractWidget {
 		this.collection = recipeCollection;
 		this.menu = (RecipeBookMenu<?>)recipeBookPage.getMinecraft().player.containerMenu;
 		this.book = recipeBookPage.getRecipeBook();
-		List<Recipe<?>> list = recipeCollection.getRecipes(this.book.isFilteringCraftable(this.menu));
+		List<Recipe<?>> list = recipeCollection.getRecipes(this.book.isFiltering(this.menu));
 
 		for (Recipe<?> recipe : list) {
 			if (this.book.willHighlight(recipe)) {
@@ -71,7 +71,7 @@ public class RecipeButton extends AbstractWidget {
 		}
 
 		int l = 206;
-		if (this.collection.getRecipes(this.book.isFilteringCraftable(this.menu)).size() > 1) {
+		if (this.collection.getRecipes(this.book.isFiltering(this.menu)).size() > 1) {
 			l += 25;
 		}
 
@@ -103,7 +103,7 @@ public class RecipeButton extends AbstractWidget {
 
 	private List<Recipe<?>> getOrderedRecipes() {
 		List<Recipe<?>> list = this.collection.getDisplayRecipes(true);
-		if (!this.book.isFilteringCraftable(this.menu)) {
+		if (!this.book.isFiltering(this.menu)) {
 			list.addAll(this.collection.getDisplayRecipes(false));
 		}
 
@@ -122,7 +122,7 @@ public class RecipeButton extends AbstractWidget {
 	public List<FormattedText> getTooltipText(Screen screen) {
 		ItemStack itemStack = ((Recipe)this.getOrderedRecipes().get(this.currentIndex)).getResultItem();
 		List<FormattedText> list = Lists.<FormattedText>newArrayList(screen.getTooltipFromItem(itemStack));
-		if (this.collection.getRecipes(this.book.isFilteringCraftable(this.menu)).size() > 1) {
+		if (this.collection.getRecipes(this.book.isFiltering(this.menu)).size() > 1) {
 			list.add(new TranslatableComponent("gui.recipebook.moreRecipes"));
 		}
 

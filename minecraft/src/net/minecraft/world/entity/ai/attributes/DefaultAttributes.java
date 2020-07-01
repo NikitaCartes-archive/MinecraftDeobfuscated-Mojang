@@ -63,6 +63,7 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
+import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
 import org.apache.logging.log4j.LogManager;
@@ -108,6 +109,7 @@ public class DefaultAttributes {
 		.put(EntityType.PHANTOM, Monster.createMonsterAttributes().build())
 		.put(EntityType.PIG, Pig.createAttributes().build())
 		.put(EntityType.PIGLIN, Piglin.createAttributes().build())
+		.put(EntityType.PIGLIN_BRUTE, PiglinBrute.createAttributes().build())
 		.put(EntityType.PILLAGER, Pillager.createAttributes().build())
 		.put(EntityType.PLAYER, Player.createAttributes().build())
 		.put(EntityType.POLAR_BEAR, PolarBear.createAttributes().build())

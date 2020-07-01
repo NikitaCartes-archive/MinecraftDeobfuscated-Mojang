@@ -25,6 +25,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -254,7 +255,7 @@ public abstract class ChunkGenerator {
 		structureFeatureManager.setStartForFeature(SectionPos.of(chunkAccess.getPos(), 0), configuredStructureFeature.feature, structureStart2, chunkAccess);
 	}
 
-	public void createReferences(LevelAccessor levelAccessor, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
+	public void createReferences(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
 		int i = 8;
 		int j = chunkAccess.getPos().x;
 		int k = chunkAccess.getPos().z;
@@ -266,11 +267,11 @@ public abstract class ChunkGenerator {
 			for (int o = k - 8; o <= k + 8; o++) {
 				long p = ChunkPos.asLong(n, o);
 
-				for (StructureStart<?> structureStart : levelAccessor.getChunk(n, o).getAllStarts().values()) {
+				for (StructureStart<?> structureStart : worldGenLevel.getChunk(n, o).getAllStarts().values()) {
 					try {
 						if (structureStart != StructureStart.INVALID_START && structureStart.getBoundingBox().intersects(l, m, l + 15, m + 15)) {
 							structureFeatureManager.addReferenceForFeature(sectionPos, structureStart.getFeature(), p, chunkAccess);
-							DebugPackets.sendStructurePacket(levelAccessor, structureStart);
+							DebugPackets.sendStructurePacket(worldGenLevel, structureStart);
 						}
 					} catch (Exception var19) {
 						CrashReport crashReport = CrashReport.forThrowable(var19, "Generating structure reference");

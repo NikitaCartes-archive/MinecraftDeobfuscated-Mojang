@@ -3,14 +3,17 @@ package net.minecraft.client.renderer.texture;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.blaze3d.systems.RenderSystem;
-import java.io.IOException;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.server.packs.resources.ResourceManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
-public class DynamicTexture extends AbstractTexture implements AutoCloseable {
+public class DynamicTexture extends AbstractTexture {
+	private static final Logger LOGGER = LogManager.getLogger();
+	@Nullable
 	private NativeImage pixels;
 
 	public DynamicTexture(NativeImage nativeImage) {
@@ -33,12 +36,16 @@ public class DynamicTexture extends AbstractTexture implements AutoCloseable {
 	}
 
 	@Override
-	public void load(ResourceManager resourceManager) throws IOException {
+	public void load(ResourceManager resourceManager) {
 	}
 
 	public void upload() {
-		this.bind();
-		this.pixels.upload(0, 0, 0, false);
+		if (this.pixels != null) {
+			this.bind();
+			this.pixels.upload(0, 0, 0, false);
+		} else {
+			LOGGER.warn("Trying to upload disposed texture {}", this.getId());
+		}
 	}
 
 	@Nullable
@@ -46,14 +53,20 @@ public class DynamicTexture extends AbstractTexture implements AutoCloseable {
 		return this.pixels;
 	}
 
-	public void setPixels(NativeImage nativeImage) throws Exception {
-		this.pixels.close();
+	public void setPixels(NativeImage nativeImage) {
+		if (this.pixels != null) {
+			this.pixels.close();
+		}
+
 		this.pixels = nativeImage;
 	}
 
+	@Override
 	public void close() {
-		this.pixels.close();
-		this.releaseId();
-		this.pixels = null;
+		if (this.pixels != null) {
+			this.pixels.close();
+			this.releaseId();
+			this.pixels = null;
+		}
 	}
 }

@@ -5,10 +5,10 @@ import net.minecraft.core.BlockSourceImpl;
 import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.entity.DropperBlockEntity;
@@ -33,17 +33,17 @@ public class DropperBlock extends DispenserBlock {
 	}
 
 	@Override
-	protected void dispenseFrom(Level level, BlockPos blockPos) {
-		BlockSourceImpl blockSourceImpl = new BlockSourceImpl(level, blockPos);
+	protected void dispenseFrom(ServerLevel serverLevel, BlockPos blockPos) {
+		BlockSourceImpl blockSourceImpl = new BlockSourceImpl(serverLevel, blockPos);
 		DispenserBlockEntity dispenserBlockEntity = blockSourceImpl.getEntity();
 		int i = dispenserBlockEntity.getRandomSlot();
 		if (i < 0) {
-			level.levelEvent(1001, blockPos, 0);
+			serverLevel.levelEvent(1001, blockPos, 0);
 		} else {
 			ItemStack itemStack = dispenserBlockEntity.getItem(i);
 			if (!itemStack.isEmpty()) {
-				Direction direction = level.getBlockState(blockPos).getValue(FACING);
-				Container container = HopperBlockEntity.getContainerAt(level, blockPos.relative(direction));
+				Direction direction = serverLevel.getBlockState(blockPos).getValue(FACING);
+				Container container = HopperBlockEntity.getContainerAt(serverLevel, blockPos.relative(direction));
 				ItemStack itemStack2;
 				if (container == null) {
 					itemStack2 = DISPENSE_BEHAVIOUR.dispense(blockSourceImpl, itemStack);

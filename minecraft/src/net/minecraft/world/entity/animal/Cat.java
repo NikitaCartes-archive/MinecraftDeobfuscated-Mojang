@@ -58,7 +58,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
@@ -320,8 +320,8 @@ public class Cat extends TamableAnimal {
 		return Mth.lerp(f, this.relaxStateOneAmountO, this.relaxStateOneAmount);
 	}
 
-	public Cat getBreedOffspring(AgableMob agableMob) {
-		Cat cat = EntityType.CAT.create(this.level);
+	public Cat getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+		Cat cat = EntityType.CAT.create(serverLevel);
 		if (agableMob instanceof Cat) {
 			if (this.random.nextBoolean()) {
 				cat.setCatType(this.getCatType());
@@ -358,20 +358,20 @@ public class Cat extends TamableAnimal {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		spawnGroupData = super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
-		if (levelAccessor.getMoonBrightness() > 0.9F) {
+		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		if (serverLevelAccessor.getMoonBrightness() > 0.9F) {
 			this.setCatType(this.random.nextInt(11));
 		} else {
 			this.setCatType(this.random.nextInt(10));
 		}
 
-		Level level = levelAccessor.getLevel();
+		Level level = serverLevelAccessor.getLevel();
 		if (level instanceof ServerLevel
 			&& ((ServerLevel)level).structureFeatureManager().getStructureAt(this.blockPosition(), true, StructureFeature.SWAMP_HUT).isValid()) {
 			this.setCatType(10);

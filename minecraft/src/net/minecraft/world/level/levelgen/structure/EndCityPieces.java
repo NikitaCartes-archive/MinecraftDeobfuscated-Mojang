@@ -13,7 +13,7 @@ import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.levelgen.feature.StructurePieceType;
@@ -329,21 +329,21 @@ public class EndCityPieces {
 		}
 
 		@Override
-		protected void handleDataMarker(String string, BlockPos blockPos, LevelAccessor levelAccessor, Random random, BoundingBox boundingBox) {
+		protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, Random random, BoundingBox boundingBox) {
 			if (string.startsWith("Chest")) {
 				BlockPos blockPos2 = blockPos.below();
 				if (boundingBox.isInside(blockPos2)) {
-					RandomizableContainerBlockEntity.setLootTable(levelAccessor, random, blockPos2, BuiltInLootTables.END_CITY_TREASURE);
+					RandomizableContainerBlockEntity.setLootTable(serverLevelAccessor, random, blockPos2, BuiltInLootTables.END_CITY_TREASURE);
 				}
 			} else if (string.startsWith("Sentry")) {
-				Shulker shulker = EntityType.SHULKER.create(levelAccessor.getLevel());
+				Shulker shulker = EntityType.SHULKER.create(serverLevelAccessor.getLevel());
 				shulker.setPos((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5);
 				shulker.setAttachPosition(blockPos);
-				levelAccessor.addFreshEntity(shulker);
+				serverLevelAccessor.addFreshEntity(shulker);
 			} else if (string.startsWith("Elytra")) {
-				ItemFrame itemFrame = new ItemFrame(levelAccessor.getLevel(), blockPos, this.rotation.rotate(Direction.SOUTH));
+				ItemFrame itemFrame = new ItemFrame(serverLevelAccessor.getLevel(), blockPos, this.rotation.rotate(Direction.SOUTH));
 				itemFrame.setItem(new ItemStack(Items.ELYTRA), false);
-				levelAccessor.addFreshEntity(itemFrame);
+				serverLevelAccessor.addFreshEntity(itemFrame);
 			}
 		}
 	}

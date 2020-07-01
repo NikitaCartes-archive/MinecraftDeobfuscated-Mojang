@@ -3,9 +3,9 @@ package net.minecraft.world.level.block;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -22,10 +22,10 @@ public class SpawnerBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void spawnAfterBreak(BlockState blockState, Level level, BlockPos blockPos, ItemStack itemStack) {
-		super.spawnAfterBreak(blockState, level, blockPos, itemStack);
-		int i = 15 + level.random.nextInt(15) + level.random.nextInt(15);
-		this.popExperience(level, blockPos, i);
+	public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack) {
+		super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack);
+		int i = 15 + serverLevel.random.nextInt(15) + serverLevel.random.nextInt(15);
+		this.popExperience(serverLevel, blockPos, i);
 	}
 
 	@Override

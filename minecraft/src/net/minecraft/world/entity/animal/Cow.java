@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.animal;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
@@ -80,7 +81,7 @@ public class Cow extends Animal {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (itemStack.getItem() == Items.BUCKET && !this.isBaby()) {
 			player.playSound(SoundEvents.COW_MILK, 1.0F, 1.0F);
-			ItemStack itemStack2 = ItemUtils.createBucketResult(itemStack, player, Items.MILK_BUCKET.getDefaultInstance());
+			ItemStack itemStack2 = ItemUtils.createFilledResult(itemStack, player, Items.MILK_BUCKET.getDefaultInstance());
 			player.setItemInHand(interactionHand, itemStack2);
 			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		} else {
@@ -88,8 +89,8 @@ public class Cow extends Animal {
 		}
 	}
 
-	public Cow getBreedOffspring(AgableMob agableMob) {
-		return EntityType.COW.create(this.level);
+	public Cow getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+		return EntityType.COW.create(serverLevel);
 	}
 
 	@Override

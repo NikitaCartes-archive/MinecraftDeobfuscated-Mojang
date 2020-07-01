@@ -32,7 +32,7 @@ import net.minecraft.world.entity.monster.Strider;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 public class SpawnPlacements {
@@ -58,10 +58,10 @@ public class SpawnPlacements {
 	}
 
 	public static <T extends Entity> boolean checkSpawnRules(
-		EntityType<T> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+		EntityType<T> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
 		SpawnPlacements.Data data = (SpawnPlacements.Data)DATA_BY_TYPE.get(entityType);
-		return data == null || data.predicate.test(entityType, levelAccessor, mobSpawnType, blockPos, random);
+		return data == null || data.predicate.test(entityType, serverLevelAccessor, mobSpawnType, blockPos, random);
 	}
 
 	static {
@@ -150,7 +150,7 @@ public class SpawnPlacements {
 
 	@FunctionalInterface
 	public interface SpawnPredicate<T extends Entity> {
-		boolean test(EntityType<T> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random);
+		boolean test(EntityType<T> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random);
 	}
 
 	public static enum Type {

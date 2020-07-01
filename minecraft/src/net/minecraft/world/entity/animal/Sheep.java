@@ -15,6 +15,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -55,7 +56,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
@@ -331,9 +332,9 @@ public class Sheep extends Animal implements Shearable {
 		}
 	}
 
-	public Sheep getBreedOffspring(AgableMob agableMob) {
+	public Sheep getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
 		Sheep sheep = (Sheep)agableMob;
-		Sheep sheep2 = EntityType.SHEEP.create(this.level);
+		Sheep sheep2 = EntityType.SHEEP.create(serverLevel);
 		sheep2.setColor(this.getOffspringColor(this, sheep));
 		return sheep2;
 	}
@@ -349,14 +350,14 @@ public class Sheep extends Animal implements Shearable {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		this.setColor(getRandomSheepColor(levelAccessor.getRandom()));
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		this.setColor(getRandomSheepColor(serverLevelAccessor.getRandom()));
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	private DyeColor getOffspringColor(Animal animal, Animal animal2) {

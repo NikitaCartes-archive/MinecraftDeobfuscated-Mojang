@@ -73,7 +73,7 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 				GuiComponent.fill(poseStack, k - 1, j - 1, k + l - 9, j + m + 1, -8978432);
 			}
 
-			this.pack.bindIcon(this.minecraft.getTextureManager());
+			this.minecraft.getTextureManager().bind(this.pack.getIconTexture());
 			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			GuiComponent.blit(poseStack, k, j, 0.0F, 0.0F, 32, 32, 32, 32);
 			Component component = this.pack.getTitle();

@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 @Environment(EnvType.CLIENT)
-public abstract class AbstractTexture {
+public abstract class AbstractTexture implements AutoCloseable {
 	protected int id = -1;
 	protected boolean blur;
 	protected boolean mipmap;
@@ -69,5 +69,8 @@ public abstract class AbstractTexture {
 
 	public void reset(TextureManager textureManager, ResourceManager resourceManager, ResourceLocation resourceLocation, Executor executor) {
 		textureManager.register(resourceLocation, this);
+	}
+
+	public void close() {
 	}
 }

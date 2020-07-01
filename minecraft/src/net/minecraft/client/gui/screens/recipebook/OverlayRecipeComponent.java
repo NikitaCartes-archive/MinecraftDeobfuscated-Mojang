@@ -43,7 +43,7 @@ public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiE
 			this.isFurnaceMenu = true;
 		}
 
-		boolean bl = minecraft.player.getRecipeBook().isFilteringCraftable((RecipeBookMenu<?>)minecraft.player.containerMenu);
+		boolean bl = minecraft.player.getRecipeBook().isFiltering((RecipeBookMenu<?>)minecraft.player.containerMenu);
 		List<Recipe<?>> list = recipeCollection.getDisplayRecipes(true);
 		List<Recipe<?>> list2 = bl ? Collections.emptyList() : recipeCollection.getDisplayRecipes(false);
 		int m = list.size();

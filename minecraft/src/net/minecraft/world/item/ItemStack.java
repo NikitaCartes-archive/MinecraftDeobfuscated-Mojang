@@ -45,7 +45,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagManager;
+import net.minecraft.tags.TagContainer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -525,23 +525,19 @@ public final class ItemStack {
 			list.add(new TextComponent("#" + MapItem.getMapId(this)).withStyle(ChatFormatting.GRAY));
 		}
 
-		int i = 0;
-		if (this.hasTag() && this.tag.contains("HideFlags", 99)) {
-			i = this.tag.getInt("HideFlags");
-		}
-
-		if ((i & 32) == 0) {
+		int i = this.getHideFlags();
+		if (shouldShowInTooltip(i, ItemStack.TooltipPart.ADDITIONAL)) {
 			this.getItem().appendHoverText(this, player == null ? null : player.level, list, tooltipFlag);
 		}
 
 		if (this.hasTag()) {
-			if ((i & 1) == 0) {
+			if (shouldShowInTooltip(i, ItemStack.TooltipPart.ENCHANTMENTS)) {
 				appendEnchantmentNames(list, this.getEnchantmentTags());
 			}
 
 			if (this.tag.contains("display", 10)) {
 				CompoundTag compoundTag = this.tag.getCompound("display");
-				if (compoundTag.contains("color", 3)) {
+				if (shouldShowInTooltip(i, ItemStack.TooltipPart.DYE) && compoundTag.contains("color", 99)) {
 					if (tooltipFlag.isAdvanced()) {
 						list.add(new TranslatableComponent("item.color", String.format("#%06X", compoundTag.getInt("color"))).withStyle(ChatFormatting.GRAY));
 					} else {
@@ -568,97 +564,101 @@ public final class ItemStack {
 			}
 		}
 
-		for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-			Multimap<Attribute, AttributeModifier> multimap = this.getAttributeModifiers(equipmentSlot);
-			if (!multimap.isEmpty() && (i & 2) == 0) {
-				list.add(TextComponent.EMPTY);
-				list.add(new TranslatableComponent("item.modifiers." + equipmentSlot.getName()).withStyle(ChatFormatting.GRAY));
+		if (shouldShowInTooltip(i, ItemStack.TooltipPart.MODIFIERS)) {
+			for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+				Multimap<Attribute, AttributeModifier> multimap = this.getAttributeModifiers(equipmentSlot);
+				if (!multimap.isEmpty()) {
+					list.add(TextComponent.EMPTY);
+					list.add(new TranslatableComponent("item.modifiers." + equipmentSlot.getName()).withStyle(ChatFormatting.GRAY));
 
-				for (Entry<Attribute, AttributeModifier> entry : multimap.entries()) {
-					AttributeModifier attributeModifier = (AttributeModifier)entry.getValue();
-					double d = attributeModifier.getAmount();
-					boolean bl = false;
-					if (player != null) {
-						if (attributeModifier.getId() == Item.BASE_ATTACK_DAMAGE_UUID) {
-							d += player.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
-							d += (double)EnchantmentHelper.getDamageBonus(this, MobType.UNDEFINED);
-							bl = true;
-						} else if (attributeModifier.getId() == Item.BASE_ATTACK_SPEED_UUID) {
-							d += player.getAttributeBaseValue(Attributes.ATTACK_SPEED);
-							bl = true;
+					for (Entry<Attribute, AttributeModifier> entry : multimap.entries()) {
+						AttributeModifier attributeModifier = (AttributeModifier)entry.getValue();
+						double d = attributeModifier.getAmount();
+						boolean bl = false;
+						if (player != null) {
+							if (attributeModifier.getId() == Item.BASE_ATTACK_DAMAGE_UUID) {
+								d += player.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
+								d += (double)EnchantmentHelper.getDamageBonus(this, MobType.UNDEFINED);
+								bl = true;
+							} else if (attributeModifier.getId() == Item.BASE_ATTACK_SPEED_UUID) {
+								d += player.getAttributeBaseValue(Attributes.ATTACK_SPEED);
+								bl = true;
+							}
 						}
-					}
 
-					double e;
-					if (attributeModifier.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE
-						|| attributeModifier.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL) {
-						e = d * 100.0;
-					} else if (((Attribute)entry.getKey()).equals(Attributes.KNOCKBACK_RESISTANCE)) {
-						e = d * 10.0;
-					} else {
-						e = d;
-					}
+						double e;
+						if (attributeModifier.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE
+							|| attributeModifier.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL) {
+							e = d * 100.0;
+						} else if (((Attribute)entry.getKey()).equals(Attributes.KNOCKBACK_RESISTANCE)) {
+							e = d * 10.0;
+						} else {
+							e = d;
+						}
 
-					if (bl) {
-						list.add(
-							new TextComponent(" ")
-								.append(
-									new TranslatableComponent(
-										"attribute.modifier.equals." + attributeModifier.getOperation().toValue(),
+						if (bl) {
+							list.add(
+								new TextComponent(" ")
+									.append(
+										new TranslatableComponent(
+											"attribute.modifier.equals." + attributeModifier.getOperation().toValue(),
+											ATTRIBUTE_MODIFIER_FORMAT.format(e),
+											new TranslatableComponent(((Attribute)entry.getKey()).getDescriptionId())
+										)
+									)
+									.withStyle(ChatFormatting.DARK_GREEN)
+							);
+						} else if (d > 0.0) {
+							list.add(
+								new TranslatableComponent(
+										"attribute.modifier.plus." + attributeModifier.getOperation().toValue(),
 										ATTRIBUTE_MODIFIER_FORMAT.format(e),
 										new TranslatableComponent(((Attribute)entry.getKey()).getDescriptionId())
 									)
-								)
-								.withStyle(ChatFormatting.DARK_GREEN)
-						);
-					} else if (d > 0.0) {
-						list.add(
-							new TranslatableComponent(
-									"attribute.modifier.plus." + attributeModifier.getOperation().toValue(),
-									ATTRIBUTE_MODIFIER_FORMAT.format(e),
-									new TranslatableComponent(((Attribute)entry.getKey()).getDescriptionId())
-								)
-								.withStyle(ChatFormatting.BLUE)
-						);
-					} else if (d < 0.0) {
-						e *= -1.0;
-						list.add(
-							new TranslatableComponent(
-									"attribute.modifier.take." + attributeModifier.getOperation().toValue(),
-									ATTRIBUTE_MODIFIER_FORMAT.format(e),
-									new TranslatableComponent(((Attribute)entry.getKey()).getDescriptionId())
-								)
-								.withStyle(ChatFormatting.RED)
-						);
+									.withStyle(ChatFormatting.BLUE)
+							);
+						} else if (d < 0.0) {
+							e *= -1.0;
+							list.add(
+								new TranslatableComponent(
+										"attribute.modifier.take." + attributeModifier.getOperation().toValue(),
+										ATTRIBUTE_MODIFIER_FORMAT.format(e),
+										new TranslatableComponent(((Attribute)entry.getKey()).getDescriptionId())
+									)
+									.withStyle(ChatFormatting.RED)
+							);
+						}
 					}
 				}
 			}
 		}
 
-		if (this.hasTag() && this.getTag().getBoolean("Unbreakable") && (i & 4) == 0) {
-			list.add(new TranslatableComponent("item.unbreakable").withStyle(ChatFormatting.BLUE));
-		}
+		if (this.hasTag()) {
+			if (shouldShowInTooltip(i, ItemStack.TooltipPart.UNBREAKABLE) && this.tag.getBoolean("Unbreakable")) {
+				list.add(new TranslatableComponent("item.unbreakable").withStyle(ChatFormatting.BLUE));
+			}
 
-		if (this.hasTag() && this.tag.contains("CanDestroy", 9) && (i & 8) == 0) {
-			ListTag listTag2 = this.tag.getList("CanDestroy", 8);
-			if (!listTag2.isEmpty()) {
-				list.add(TextComponent.EMPTY);
-				list.add(new TranslatableComponent("item.canBreak").withStyle(ChatFormatting.GRAY));
+			if (shouldShowInTooltip(i, ItemStack.TooltipPart.CAN_DESTROY) && this.tag.contains("CanDestroy", 9)) {
+				ListTag listTag2 = this.tag.getList("CanDestroy", 8);
+				if (!listTag2.isEmpty()) {
+					list.add(TextComponent.EMPTY);
+					list.add(new TranslatableComponent("item.canBreak").withStyle(ChatFormatting.GRAY));
 
-				for (int k = 0; k < listTag2.size(); k++) {
-					list.addAll(expandBlockState(listTag2.getString(k)));
+					for (int k = 0; k < listTag2.size(); k++) {
+						list.addAll(expandBlockState(listTag2.getString(k)));
+					}
 				}
 			}
-		}
 
-		if (this.hasTag() && this.tag.contains("CanPlaceOn", 9) && (i & 16) == 0) {
-			ListTag listTag2 = this.tag.getList("CanPlaceOn", 8);
-			if (!listTag2.isEmpty()) {
-				list.add(TextComponent.EMPTY);
-				list.add(new TranslatableComponent("item.canPlace").withStyle(ChatFormatting.GRAY));
+			if (shouldShowInTooltip(i, ItemStack.TooltipPart.CAN_PLACE) && this.tag.contains("CanPlaceOn", 9)) {
+				ListTag listTag2 = this.tag.getList("CanPlaceOn", 8);
+				if (!listTag2.isEmpty()) {
+					list.add(TextComponent.EMPTY);
+					list.add(new TranslatableComponent("item.canPlace").withStyle(ChatFormatting.GRAY));
 
-				for (int k = 0; k < listTag2.size(); k++) {
-					list.addAll(expandBlockState(listTag2.getString(k)));
+					for (int k = 0; k < listTag2.size(); k++) {
+						list.addAll(expandBlockState(listTag2.getString(k)));
+					}
 				}
 			}
 		}
@@ -670,11 +670,26 @@ public final class ItemStack {
 
 			list.add(new TextComponent(Registry.ITEM.getKey(this.getItem()).toString()).withStyle(ChatFormatting.DARK_GRAY));
 			if (this.hasTag()) {
-				list.add(new TranslatableComponent("item.nbt_tags", this.getTag().getAllKeys().size()).withStyle(ChatFormatting.DARK_GRAY));
+				list.add(new TranslatableComponent("item.nbt_tags", this.tag.getAllKeys().size()).withStyle(ChatFormatting.DARK_GRAY));
 			}
 		}
 
 		return list;
+	}
+
+	@Environment(EnvType.CLIENT)
+	private static boolean shouldShowInTooltip(int i, ItemStack.TooltipPart tooltipPart) {
+		return (i & tooltipPart.getMask()) == 0;
+	}
+
+	@Environment(EnvType.CLIENT)
+	private int getHideFlags() {
+		return this.hasTag() && this.tag.contains("HideFlags", 99) ? this.tag.getInt("HideFlags") : 0;
+	}
+
+	public void hideTooltipPart(ItemStack.TooltipPart tooltipPart) {
+		CompoundTag compoundTag = this.getOrCreateTag();
+		compoundTag.putInt("HideFlags", compoundTag.getInt("HideFlags") | tooltipPart.getMask());
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -844,7 +859,7 @@ public final class ItemStack {
 		}
 	}
 
-	public boolean hasAdventureModeBreakTagForBlock(TagManager tagManager, BlockInWorld blockInWorld) {
+	public boolean hasAdventureModeBreakTagForBlock(TagContainer tagContainer, BlockInWorld blockInWorld) {
 		if (areSameBlocks(blockInWorld, this.cachedBreakBlock)) {
 			return this.cachedBreakBlockResult;
 		} else {
@@ -856,7 +871,7 @@ public final class ItemStack {
 					String string = listTag.getString(i);
 
 					try {
-						Predicate<BlockInWorld> predicate = BlockPredicateArgument.blockPredicate().parse(new StringReader(string)).create(tagManager);
+						Predicate<BlockInWorld> predicate = BlockPredicateArgument.blockPredicate().parse(new StringReader(string)).create(tagContainer);
 						if (predicate.test(blockInWorld)) {
 							this.cachedBreakBlockResult = true;
 							return true;
@@ -871,7 +886,7 @@ public final class ItemStack {
 		}
 	}
 
-	public boolean hasAdventureModePlaceTagForBlock(TagManager tagManager, BlockInWorld blockInWorld) {
+	public boolean hasAdventureModePlaceTagForBlock(TagContainer tagContainer, BlockInWorld blockInWorld) {
 		if (areSameBlocks(blockInWorld, this.cachedPlaceBlock)) {
 			return this.cachedPlaceBlockResult;
 		} else {
@@ -883,7 +898,7 @@ public final class ItemStack {
 					String string = listTag.getString(i);
 
 					try {
-						Predicate<BlockInWorld> predicate = BlockPredicateArgument.blockPredicate().parse(new StringReader(string)).create(tagManager);
+						Predicate<BlockInWorld> predicate = BlockPredicateArgument.blockPredicate().parse(new StringReader(string)).create(tagContainer);
 						if (predicate.test(blockInWorld)) {
 							this.cachedPlaceBlockResult = true;
 							return true;
@@ -937,5 +952,21 @@ public final class ItemStack {
 
 	public SoundEvent getEatingSound() {
 		return this.getItem().getEatingSound();
+	}
+
+	public static enum TooltipPart {
+		ENCHANTMENTS,
+		MODIFIERS,
+		UNBREAKABLE,
+		CAN_DESTROY,
+		CAN_PLACE,
+		ADDITIONAL,
+		DYE;
+
+		private int mask = 1 << this.ordinal();
+
+		public int getMask() {
+			return this.mask;
+		}
 	}
 }

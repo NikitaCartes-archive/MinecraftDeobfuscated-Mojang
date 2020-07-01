@@ -25,15 +25,9 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
 		this.registerDefaultState(this.stateDefinition.any().setValue(AGE, Integer.valueOf(0)));
 	}
 
+	@Override
 	public BlockState getStateForPlacement(LevelAccessor levelAccessor) {
 		return this.defaultBlockState().setValue(AGE, Integer.valueOf(levelAccessor.getRandom().nextInt(25)));
-	}
-
-	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		if (!blockState.canSurvive(serverLevel, blockPos)) {
-			serverLevel.destroyBlock(blockPos, true);
-		}
 	}
 
 	@Override
@@ -59,14 +53,14 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
 			levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
 		}
 
-		if (direction == this.growthDirection && blockState2.is(this)) {
-			return this.getBodyBlock().defaultBlockState();
-		} else {
+		if (direction != this.growthDirection || !blockState2.is(this) && !blockState2.is(this.getBodyBlock())) {
 			if (this.scheduleFluidTicks) {
 				levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
 			}
 
 			return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+		} else {
+			return this.getBodyBlock().defaultBlockState();
 		}
 	}
 

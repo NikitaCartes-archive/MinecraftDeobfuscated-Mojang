@@ -44,6 +44,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -191,17 +192,17 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		if (levelAccessor.getRandom().nextFloat() < 0.2F) {
+		if (serverLevelAccessor.getRandom().nextFloat() < 0.2F) {
 			this.setBaby(true);
 		}
 
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	@Override
@@ -323,8 +324,8 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 
 	@Nullable
 	@Override
-	public AgableMob getBreedOffspring(AgableMob agableMob) {
-		Hoglin hoglin = EntityType.HOGLIN.create(this.level);
+	public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+		Hoglin hoglin = EntityType.HOGLIN.create(serverLevel);
 		if (hoglin != null) {
 			hoglin.setPersistenceRequired();
 		}

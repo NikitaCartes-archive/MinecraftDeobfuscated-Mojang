@@ -13,7 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 
 public class Husk extends Zombie {
 	public Husk(EntityType<? extends Husk> entityType, Level level) {
@@ -21,10 +21,10 @@ public class Husk extends Zombie {
 	}
 
 	public static boolean checkHuskSpawnRules(
-		EntityType<Husk> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+		EntityType<Husk> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
-		return checkMonsterSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random)
-			&& (mobSpawnType == MobSpawnType.SPAWNER || levelAccessor.canSeeSky(blockPos));
+		return checkMonsterSpawnRules(entityType, serverLevelAccessor, mobSpawnType, blockPos, random)
+			&& (mobSpawnType == MobSpawnType.SPAWNER || serverLevelAccessor.canSeeSky(blockPos));
 	}
 
 	@Override

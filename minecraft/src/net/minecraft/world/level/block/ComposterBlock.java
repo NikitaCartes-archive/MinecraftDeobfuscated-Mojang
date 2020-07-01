@@ -232,7 +232,6 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		if (i < 7 && COMPOSTABLES.containsKey(itemStack.getItem())) {
 			BlockState blockState2 = addItem(blockState, serverLevel, blockPos, itemStack);
 			itemStack.shrink(1);
-			serverLevel.levelEvent(1500, blockPos, blockState != blockState2 ? 1 : 0);
 			return blockState2;
 		} else {
 			return blockState;

@@ -441,8 +441,8 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		this.entityData.set(DATA_COLLAR_COLOR, dyeColor.getId());
 	}
 
-	public Wolf getBreedOffspring(AgableMob agableMob) {
-		Wolf wolf = EntityType.WOLF.create(this.level);
+	public Wolf getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+		Wolf wolf = EntityType.WOLF.create(serverLevel);
 		UUID uUID = this.getOwnerUUID();
 		if (uUID != null) {
 			wolf.setOwnerUUID(uUID);

@@ -96,6 +96,7 @@ public class AdventureAdvancements implements Consumer<Consumer<Advancement>> {
 		EntityType.MAGMA_CUBE,
 		EntityType.PHANTOM,
 		EntityType.PIGLIN,
+		EntityType.PIGLIN_BRUTE,
 		EntityType.PILLAGER,
 		EntityType.RAVAGER,
 		EntityType.SHULKER,

@@ -71,15 +71,13 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 	@Override
 	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
 		this.playerId = friendlyByteBuf.readInt();
-		int i = friendlyByteBuf.readUnsignedByte();
-		this.hardcore = (i & 8) == 8;
-		i &= -9;
-		this.gameType = GameType.byId(i);
-		this.previousGameType = GameType.byId(friendlyByteBuf.readUnsignedByte());
-		int j = friendlyByteBuf.readVarInt();
+		this.hardcore = friendlyByteBuf.readBoolean();
+		this.gameType = GameType.byId(friendlyByteBuf.readByte());
+		this.previousGameType = GameType.byId(friendlyByteBuf.readByte());
+		int i = friendlyByteBuf.readVarInt();
 		this.levels = Sets.<ResourceKey<Level>>newHashSet();
 
-		for (int k = 0; k < j; k++) {
+		for (int j = 0; j < i; j++) {
 			this.levels.add(ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation()));
 		}
 
@@ -87,7 +85,7 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 		this.dimensionType = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, friendlyByteBuf.readResourceLocation());
 		this.dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation());
 		this.seed = friendlyByteBuf.readLong();
-		this.maxPlayers = friendlyByteBuf.readUnsignedByte();
+		this.maxPlayers = friendlyByteBuf.readVarInt();
 		this.chunkRadius = friendlyByteBuf.readVarInt();
 		this.reducedDebugInfo = friendlyByteBuf.readBoolean();
 		this.showDeathScreen = friendlyByteBuf.readBoolean();
@@ -98,12 +96,8 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
 		friendlyByteBuf.writeInt(this.playerId);
-		int i = this.gameType.getId();
-		if (this.hardcore) {
-			i |= 8;
-		}
-
-		friendlyByteBuf.writeByte(i);
+		friendlyByteBuf.writeBoolean(this.hardcore);
+		friendlyByteBuf.writeByte(this.gameType.getId());
 		friendlyByteBuf.writeByte(this.previousGameType.getId());
 		friendlyByteBuf.writeVarInt(this.levels.size());
 
@@ -115,7 +109,7 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 		friendlyByteBuf.writeResourceLocation(this.dimensionType.location());
 		friendlyByteBuf.writeResourceLocation(this.dimension.location());
 		friendlyByteBuf.writeLong(this.seed);
-		friendlyByteBuf.writeByte(this.maxPlayers);
+		friendlyByteBuf.writeVarInt(this.maxPlayers);
 		friendlyByteBuf.writeVarInt(this.chunkRadius);
 		friendlyByteBuf.writeBoolean(this.reducedDebugInfo);
 		friendlyByteBuf.writeBoolean(this.showDeathScreen);

@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -143,7 +144,7 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 	@Override
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		boolean bl = this.isFood(player.getItemInHand(interactionHand));
-		if (!bl && this.isSaddled() && !this.isVehicle()) {
+		if (!bl && this.isSaddled() && !this.isVehicle() && !player.isSecondaryUseActive()) {
 			if (!this.level.isClientSide) {
 				player.startRiding(this);
 			}
@@ -217,9 +218,9 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 	}
 
 	@Override
-	public void thunderHit(LightningBolt lightningBolt) {
-		if (this.level.getDifficulty() != Difficulty.PEACEFUL) {
-			ZombifiedPiglin zombifiedPiglin = EntityType.ZOMBIFIED_PIGLIN.create(this.level);
+	public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
+		if (serverLevel.getDifficulty() != Difficulty.PEACEFUL) {
+			ZombifiedPiglin zombifiedPiglin = EntityType.ZOMBIFIED_PIGLIN.create(serverLevel);
 			zombifiedPiglin.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_SWORD));
 			zombifiedPiglin.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
 			zombifiedPiglin.setNoAi(this.isNoAi());
@@ -230,10 +231,10 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 			}
 
 			zombifiedPiglin.setPersistenceRequired();
-			this.level.addFreshEntity(zombifiedPiglin);
+			serverLevel.addFreshEntity(zombifiedPiglin);
 			this.remove();
 		} else {
-			super.thunderHit(lightningBolt);
+			super.thunderHit(serverLevel, lightningBolt);
 		}
 	}
 
@@ -257,8 +258,8 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 		return this.steering.boost(this.getRandom());
 	}
 
-	public Pig getBreedOffspring(AgableMob agableMob) {
-		return EntityType.PIG.create(this.level);
+	public Pig getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+		return EntityType.PIG.create(serverLevel);
 	}
 
 	@Override

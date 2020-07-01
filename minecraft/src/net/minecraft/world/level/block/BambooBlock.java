@@ -89,7 +89,10 @@ public class BambooBlock extends Block implements BonemealableBlock {
 					int i = blockState.getValue(AGE) > 0 ? 1 : 0;
 					return this.defaultBlockState().setValue(AGE, Integer.valueOf(i));
 				} else {
-					return Blocks.BAMBOO_SAPLING.defaultBlockState();
+					BlockState blockState2 = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos().above());
+					return !blockState2.is(Blocks.BAMBOO) && !blockState2.is(Blocks.BAMBOO_SAPLING)
+						? Blocks.BAMBOO_SAPLING.defaultBlockState()
+						: this.defaultBlockState().setValue(AGE, blockState2.getValue(AGE));
 				}
 			} else {
 				return null;

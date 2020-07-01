@@ -1,13 +1,11 @@
 package net.minecraft.tags;
 
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import net.minecraft.core.Registry;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -15,47 +13,17 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 
 public class TagManager implements PreparableReloadListener {
-	private final SynchronizableTagCollection<Block> blocks = new SynchronizableTagCollection<>(Registry.BLOCK, "tags/blocks", "block");
-	private final SynchronizableTagCollection<Item> items = new SynchronizableTagCollection<>(Registry.ITEM, "tags/items", "item");
-	private final SynchronizableTagCollection<Fluid> fluids = new SynchronizableTagCollection<>(Registry.FLUID, "tags/fluids", "fluid");
-	private final SynchronizableTagCollection<EntityType<?>> entityTypes = new SynchronizableTagCollection<>(
-		Registry.ENTITY_TYPE, "tags/entity_types", "entity_type"
-	);
+	private final TagLoader<Block> blocks = new TagLoader<>(Registry.BLOCK::getOptional, "tags/blocks", "block");
+	private final TagLoader<Item> items = new TagLoader<>(Registry.ITEM::getOptional, "tags/items", "item");
+	private final TagLoader<Fluid> fluids = new TagLoader<>(Registry.FLUID::getOptional, "tags/fluids", "fluid");
+	private final TagLoader<EntityType<?>> entityTypes = new TagLoader<>(Registry.ENTITY_TYPE::getOptional, "tags/entity_types", "entity_type");
+	private TagContainer tags = TagContainer.EMPTY;
 
-	public SynchronizableTagCollection<Block> getBlocks() {
-		return this.blocks;
-	}
-
-	public SynchronizableTagCollection<Item> getItems() {
-		return this.items;
-	}
-
-	public SynchronizableTagCollection<Fluid> getFluids() {
-		return this.fluids;
-	}
-
-	public SynchronizableTagCollection<EntityType<?>> getEntityTypes() {
-		return this.entityTypes;
-	}
-
-	public void serializeToNetwork(FriendlyByteBuf friendlyByteBuf) {
-		this.blocks.serializeToNetwork(friendlyByteBuf);
-		this.items.serializeToNetwork(friendlyByteBuf);
-		this.fluids.serializeToNetwork(friendlyByteBuf);
-		this.entityTypes.serializeToNetwork(friendlyByteBuf);
-	}
-
-	public static TagManager deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
-		TagManager tagManager = new TagManager();
-		tagManager.getBlocks().loadFromNetwork(friendlyByteBuf);
-		tagManager.getItems().loadFromNetwork(friendlyByteBuf);
-		tagManager.getFluids().loadFromNetwork(friendlyByteBuf);
-		tagManager.getEntityTypes().loadFromNetwork(friendlyByteBuf);
-		return tagManager;
+	public TagContainer getTags() {
+		return this.tags;
 	}
 
 	@Override
@@ -75,32 +43,23 @@ public class TagManager implements PreparableReloadListener {
 			.thenCompose(preparationBarrier::wait)
 			.thenAcceptAsync(
 				void_ -> {
-					this.blocks.load((Map<ResourceLocation, Tag.Builder>)completableFuture.join());
-					this.items.load((Map<ResourceLocation, Tag.Builder>)completableFuture2.join());
-					this.fluids.load((Map<ResourceLocation, Tag.Builder>)completableFuture3.join());
-					this.entityTypes.load((Map<ResourceLocation, Tag.Builder>)completableFuture4.join());
-					SerializationTags.bind(this.blocks, this.items, this.fluids, this.entityTypes);
-					Multimap<String, ResourceLocation> multimap = HashMultimap.create();
-					multimap.putAll("blocks", BlockTags.getMissingTags(this.blocks));
-					multimap.putAll("items", ItemTags.getMissingTags(this.items));
-					multimap.putAll("fluids", FluidTags.getMissingTags(this.fluids));
-					multimap.putAll("entity_types", EntityTypeTags.getMissingTags(this.entityTypes));
+					TagCollection<Block> tagCollection = this.blocks.load((Map<ResourceLocation, Tag.Builder>)completableFuture.join());
+					TagCollection<Item> tagCollection2 = this.items.load((Map<ResourceLocation, Tag.Builder>)completableFuture2.join());
+					TagCollection<Fluid> tagCollection3 = this.fluids.load((Map<ResourceLocation, Tag.Builder>)completableFuture3.join());
+					TagCollection<EntityType<?>> tagCollection4 = this.entityTypes.load((Map<ResourceLocation, Tag.Builder>)completableFuture4.join());
+					TagContainer tagContainer = TagContainer.of(tagCollection, tagCollection2, tagCollection3, tagCollection4);
+					Multimap<ResourceLocation, ResourceLocation> multimap = StaticTags.getAllMissingTags(tagContainer);
 					if (!multimap.isEmpty()) {
 						throw new IllegalStateException(
 							"Missing required tags: "
-								+ (String)multimap.entries().stream().map(entry -> (String)entry.getKey() + ":" + entry.getValue()).sorted().collect(Collectors.joining(","))
+								+ (String)multimap.entries().stream().map(entry -> entry.getKey() + ":" + entry.getValue()).sorted().collect(Collectors.joining(","))
 						);
+					} else {
+						SerializationTags.bind(tagContainer);
+						this.tags = tagContainer;
 					}
 				},
 				executor2
 			);
-	}
-
-	public void bindToGlobal() {
-		BlockTags.reset(this.blocks);
-		ItemTags.reset(this.items);
-		FluidTags.reset(this.fluids);
-		EntityTypeTags.reset(this.entityTypes);
-		Blocks.rebuildCache();
 	}
 }

@@ -3,6 +3,7 @@ package net.minecraft.world.entity.ai.goal;
 import java.util.EnumSet;
 import java.util.List;
 import javax.annotation.Nullable;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.Level;
@@ -76,6 +77,6 @@ public class BreedGoal extends Goal {
 	}
 
 	protected void breed() {
-		this.animal.spawnChildFromBreeding(this.level, this.partner);
+		this.animal.spawnChildFromBreeding((ServerLevel)this.level, this.partner);
 	}
 }

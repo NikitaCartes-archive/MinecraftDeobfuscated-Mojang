@@ -1,13 +1,10 @@
 package net.minecraft.tags;
 
-import java.util.Set;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 
-public class BlockTags {
-	private static final StaticTagHelper<Block> HELPER = new StaticTagHelper<>();
+public final class BlockTags {
+	protected static final StaticTagHelper<Block> HELPER = StaticTags.create(new ResourceLocation("block"), TagContainer::getBlocks);
 	public static final Tag.Named<Block> WOOL = bind("wool");
 	public static final Tag.Named<Block> PLANKS = bind("planks");
 	public static final Tag.Named<Block> STONE_BRICKS = bind("stone_bricks");
@@ -88,6 +85,7 @@ public class BlockTags {
 	public static final Tag.Named<Block> PREVENT_MOB_SPAWNING_INSIDE = bind("prevent_mob_spawning_inside");
 	public static final Tag.Named<Block> FENCE_GATES = bind("fence_gates");
 	public static final Tag.Named<Block> UNSTABLE_BOTTOM_CENTER = bind("unstable_bottom_center");
+	public static final Tag.Named<Block> MUSHROOM_GROW_BLOCK = bind("mushroom_grow_block");
 	public static final Tag.Named<Block> INFINIBURN_OVERWORLD = bind("infiniburn_overworld");
 	public static final Tag.Named<Block> INFINIBURN_NETHER = bind("infiniburn_nether");
 	public static final Tag.Named<Block> INFINIBURN_END = bind("infiniburn_end");
@@ -96,20 +94,7 @@ public class BlockTags {
 		return HELPER.bind(string);
 	}
 
-	public static void reset(TagCollection<Block> tagCollection) {
-		HELPER.reset(tagCollection);
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static void resetToEmpty() {
-		HELPER.resetToEmpty();
-	}
-
 	public static TagCollection<Block> getAllTags() {
 		return HELPER.getAllTags();
-	}
-
-	public static Set<ResourceLocation> getMissingTags(TagCollection<Block> tagCollection) {
-		return HELPER.getMissingTags(tagCollection);
 	}
 }

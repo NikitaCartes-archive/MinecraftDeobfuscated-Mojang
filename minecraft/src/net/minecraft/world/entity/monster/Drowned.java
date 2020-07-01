@@ -42,6 +42,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
@@ -80,13 +81,13 @@ public class Drowned extends Zombie implements RangedAttackMob {
 
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		spawnGroupData = super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 		if (this.getItemBySlot(EquipmentSlot.OFFHAND).isEmpty() && this.random.nextFloat() < 0.03F) {
 			this.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.NAUTILUS_SHELL));
 			this.handDropChances[EquipmentSlot.OFFHAND.getIndex()] = 2.0F;
@@ -96,14 +97,14 @@ public class Drowned extends Zombie implements RangedAttackMob {
 	}
 
 	public static boolean checkDrownedSpawnRules(
-		EntityType<Drowned> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+		EntityType<Drowned> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
-		Biome biome = levelAccessor.getBiome(blockPos);
-		boolean bl = levelAccessor.getDifficulty() != Difficulty.PEACEFUL
-			&& isDarkEnoughToSpawn(levelAccessor, blockPos, random)
-			&& (mobSpawnType == MobSpawnType.SPAWNER || levelAccessor.getFluidState(blockPos).is(FluidTags.WATER));
+		Biome biome = serverLevelAccessor.getBiome(blockPos);
+		boolean bl = serverLevelAccessor.getDifficulty() != Difficulty.PEACEFUL
+			&& isDarkEnoughToSpawn(serverLevelAccessor, blockPos, random)
+			&& (mobSpawnType == MobSpawnType.SPAWNER || serverLevelAccessor.getFluidState(blockPos).is(FluidTags.WATER));
 		return biome != Biomes.RIVER && biome != Biomes.FROZEN_RIVER
-			? random.nextInt(40) == 0 && isDeepEnoughToSpawn(levelAccessor, blockPos) && bl
+			? random.nextInt(40) == 0 && isDeepEnoughToSpawn(serverLevelAccessor, blockPos) && bl
 			: random.nextInt(15) == 0 && bl;
 	}
 

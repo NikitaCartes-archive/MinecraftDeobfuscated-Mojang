@@ -6,7 +6,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -53,7 +52,7 @@ public abstract class AbstractHugeMushroomFeature extends Feature<HugeMushroomFe
 		int j = blockPos.getY();
 		if (j >= 1 && j + i + 1 < 256) {
 			Block block = levelAccessor.getBlockState(blockPos.below()).getBlock();
-			if (!isDirt(block)) {
+			if (!isDirt(block) && !block.is(BlockTags.MUSHROOM_GROW_BLOCK)) {
 				return false;
 			} else {
 				for (int k = 0; k <= i; k++) {
@@ -78,7 +77,6 @@ public abstract class AbstractHugeMushroomFeature extends Feature<HugeMushroomFe
 
 	public boolean place(
 		WorldGenLevel worldGenLevel,
-		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,

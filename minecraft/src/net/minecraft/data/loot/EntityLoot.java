@@ -1038,6 +1038,7 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 				)
 		);
 		this.add(EntityType.PIGLIN, LootTable.lootTable());
+		this.add(EntityType.PIGLIN_BRUTE, LootTable.lootTable());
 		this.add(
 			EntityType.ZOMBIE_VILLAGER,
 			LootTable.lootTable()

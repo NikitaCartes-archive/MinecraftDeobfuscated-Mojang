@@ -42,7 +42,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagManager;
+import net.minecraft.tags.TagContainer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.Difficulty;
@@ -552,7 +552,7 @@ public class ClientLevel extends Level {
 	}
 
 	@Override
-	public TagManager getTagManager() {
+	public TagContainer getTagManager() {
 		return this.connection.getTags();
 	}
 

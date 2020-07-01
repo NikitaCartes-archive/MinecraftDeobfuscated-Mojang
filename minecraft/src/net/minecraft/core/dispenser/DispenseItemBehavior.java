@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
@@ -530,16 +531,16 @@ public interface DispenseItemBehavior {
 				@Override
 				public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
 					this.setSuccess(false);
-					LevelAccessor levelAccessor = blockSource.getLevel();
+					ServerLevel serverLevel = blockSource.getLevel();
 					BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
-					BlockState blockState = levelAccessor.getBlockState(blockPos);
+					BlockState blockState = serverLevel.getBlockState(blockPos);
 					if (blockState.is(BlockTags.BEEHIVES, blockStateBase -> blockStateBase.hasProperty(BeehiveBlock.HONEY_LEVEL))
 						&& (Integer)blockState.getValue(BeehiveBlock.HONEY_LEVEL) >= 5) {
 						((BeehiveBlock)blockState.getBlock())
-							.releaseBeesAndResetHoneyLevel(levelAccessor.getLevel(), blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
+							.releaseBeesAndResetHoneyLevel(serverLevel, blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
 						this.setSuccess(true);
 						return this.takeLiquid(blockSource, itemStack, new ItemStack(Items.HONEY_BOTTLE));
-					} else if (levelAccessor.getFluidState(blockPos).is(FluidTags.WATER)) {
+					} else if (serverLevel.getFluidState(blockPos).is(FluidTags.WATER)) {
 						this.setSuccess(true);
 						return this.takeLiquid(blockSource, itemStack, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER));
 					} else {

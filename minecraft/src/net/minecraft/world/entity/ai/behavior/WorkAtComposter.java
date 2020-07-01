@@ -3,6 +3,7 @@ package net.minecraft.world.entity.ai.behavior;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.SimpleContainer;
@@ -32,8 +33,9 @@ public class WorkAtComposter extends WorkAtPoi {
 	}
 
 	private void compostItems(ServerLevel serverLevel, Villager villager, GlobalPos globalPos, BlockState blockState) {
+		BlockPos blockPos = globalPos.pos();
 		if ((Integer)blockState.getValue(ComposterBlock.LEVEL) == 8) {
-			blockState = ComposterBlock.extractProduce(blockState, serverLevel, globalPos.pos());
+			blockState = ComposterBlock.extractProduce(blockState, serverLevel, blockPos);
 		}
 
 		int i = 20;
@@ -41,6 +43,7 @@ public class WorkAtComposter extends WorkAtPoi {
 		int[] is = new int[COMPOSTABLE_ITEMS.size()];
 		SimpleContainer simpleContainer = villager.getInventory();
 		int k = simpleContainer.getContainerSize();
+		BlockState blockState2 = blockState;
 
 		for (int l = k - 1; l >= 0 && i > 0; l--) {
 			ItemStack itemStack = simpleContainer.getItem(l);
@@ -54,14 +57,21 @@ public class WorkAtComposter extends WorkAtPoi {
 					i -= p;
 
 					for (int q = 0; q < p; q++) {
-						blockState = ComposterBlock.insertItem(blockState, serverLevel, itemStack, globalPos.pos());
-						if ((Integer)blockState.getValue(ComposterBlock.LEVEL) == 7) {
+						blockState2 = ComposterBlock.insertItem(blockState2, serverLevel, itemStack, blockPos);
+						if ((Integer)blockState2.getValue(ComposterBlock.LEVEL) == 7) {
+							this.spawnComposterFillEffects(serverLevel, blockState, blockPos, blockState2);
 							return;
 						}
 					}
 				}
 			}
 		}
+
+		this.spawnComposterFillEffects(serverLevel, blockState, blockPos, blockState2);
+	}
+
+	private void spawnComposterFillEffects(ServerLevel serverLevel, BlockState blockState, BlockPos blockPos, BlockState blockState2) {
+		serverLevel.levelEvent(1500, blockPos, blockState2 != blockState ? 1 : 0);
 	}
 
 	private void makeBread(Villager villager) {

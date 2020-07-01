@@ -16,8 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.IronBarsBlock;
@@ -41,14 +40,7 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 		return SPIKE_CACHE.getUnchecked(l);
 	}
 
-	public boolean place(
-		WorldGenLevel worldGenLevel,
-		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator chunkGenerator,
-		Random random,
-		BlockPos blockPos,
-		SpikeConfiguration spikeConfiguration
-	) {
+	public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, SpikeConfiguration spikeConfiguration) {
 		List<SpikeFeature.EndSpike> list = spikeConfiguration.getSpikes();
 		if (list.isEmpty()) {
 			list = getSpikesForLevel(worldGenLevel);
@@ -63,7 +55,7 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 		return true;
 	}
 
-	private void placeSpike(LevelAccessor levelAccessor, Random random, SpikeConfiguration spikeConfiguration, SpikeFeature.EndSpike endSpike) {
+	private void placeSpike(ServerLevelAccessor serverLevelAccessor, Random random, SpikeConfiguration spikeConfiguration, SpikeFeature.EndSpike endSpike) {
 		int i = endSpike.getRadius();
 
 		for (BlockPos blockPos : BlockPos.betweenClosed(
@@ -72,9 +64,9 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 		)) {
 			if (blockPos.distSqr((double)endSpike.getCenterX(), (double)blockPos.getY(), (double)endSpike.getCenterZ(), false) <= (double)(i * i + 1)
 				&& blockPos.getY() < endSpike.getHeight()) {
-				this.setBlock(levelAccessor, blockPos, Blocks.OBSIDIAN.defaultBlockState());
+				this.setBlock(serverLevelAccessor, blockPos, Blocks.OBSIDIAN.defaultBlockState());
 			} else if (blockPos.getY() > 65) {
-				this.setBlock(levelAccessor, blockPos, Blocks.AIR.defaultBlockState());
+				this.setBlock(serverLevelAccessor, blockPos, Blocks.AIR.defaultBlockState());
 			}
 		}
 
@@ -99,21 +91,21 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 								.setValue(IronBarsBlock.SOUTH, Boolean.valueOf(bl4 && n != 2))
 								.setValue(IronBarsBlock.WEST, Boolean.valueOf(bl5 && m != -2))
 								.setValue(IronBarsBlock.EAST, Boolean.valueOf(bl5 && m != 2));
-							this.setBlock(levelAccessor, mutableBlockPos.set(endSpike.getCenterX() + m, endSpike.getHeight() + o, endSpike.getCenterZ() + n), blockState);
+							this.setBlock(serverLevelAccessor, mutableBlockPos.set(endSpike.getCenterX() + m, endSpike.getHeight() + o, endSpike.getCenterZ() + n), blockState);
 						}
 					}
 				}
 			}
 		}
 
-		EndCrystal endCrystal = EntityType.END_CRYSTAL.create(levelAccessor.getLevel());
+		EndCrystal endCrystal = EntityType.END_CRYSTAL.create(serverLevelAccessor.getLevel());
 		endCrystal.setBeamTarget(spikeConfiguration.getCrystalBeamTarget());
 		endCrystal.setInvulnerable(spikeConfiguration.isCrystalInvulnerable());
 		endCrystal.moveTo(
 			(double)endSpike.getCenterX() + 0.5, (double)(endSpike.getHeight() + 1), (double)endSpike.getCenterZ() + 0.5, random.nextFloat() * 360.0F, 0.0F
 		);
-		levelAccessor.addFreshEntity(endCrystal);
-		this.setBlock(levelAccessor, new BlockPos(endSpike.getCenterX(), endSpike.getHeight(), endSpike.getCenterZ()), Blocks.BEDROCK.defaultBlockState());
+		serverLevelAccessor.addFreshEntity(endCrystal);
+		this.setBlock(serverLevelAccessor, new BlockPos(endSpike.getCenterX(), endSpike.getHeight(), endSpike.getCenterZ()), Blocks.BEDROCK.defaultBlockState());
 	}
 
 	public static class EndSpike {

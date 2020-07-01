@@ -90,6 +90,7 @@ public class ServerboundInteractPacket implements Packet<ServerGamePacketListene
 		return this.action;
 	}
 
+	@Nullable
 	public InteractionHand getHand() {
 		return this.hand;
 	}

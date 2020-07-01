@@ -90,7 +90,7 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.ServerOpListEntry;
 import net.minecraft.server.players.UserWhiteList;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagManager;
+import net.minecraft.tags.TagContainer;
 import net.minecraft.util.FrameTimer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.ProgressListener;
@@ -208,7 +208,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	private boolean mayHaveDelayedTasks;
 	@Environment(EnvType.CLIENT)
 	private boolean hasWorldScreenshot;
-	private final PackRepository<Pack> packRepository;
+	private final PackRepository packRepository;
 	private final ServerScoreboard scoreboard = new ServerScoreboard(this);
 	@Nullable
 	private CommandStorage commandStorage;
@@ -239,7 +239,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		RegistryAccess.RegistryHolder registryHolder,
 		LevelStorageSource.LevelStorageAccess levelStorageAccess,
 		WorldData worldData,
-		PackRepository<Pack> packRepository,
+		PackRepository packRepository,
 		Proxy proxy,
 		DataFixer dataFixer,
 		ServerResources serverResources,
@@ -481,11 +481,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			if (bl) {
 				ConfiguredFeature<?, ?> configuredFeature = Feature.BONUS_CHEST.configured(FeatureConfiguration.NONE);
 				configuredFeature.place(
-					serverLevel,
-					serverLevel.structureFeatureManager(),
-					chunkGenerator,
-					serverLevel.random,
-					new BlockPos(serverLevelData.getXSpawn(), serverLevelData.getYSpawn(), serverLevelData.getZSpawn())
+					serverLevel, chunkGenerator, serverLevel.random, new BlockPos(serverLevelData.getXSpawn(), serverLevelData.getYSpawn(), serverLevelData.getZSpawn())
 				);
 			}
 		}
@@ -1345,7 +1341,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return completableFuture;
 	}
 
-	public static DataPackConfig configurePackRepository(PackRepository<Pack> packRepository, DataPackConfig dataPackConfig, boolean bl) {
+	public static DataPackConfig configurePackRepository(PackRepository packRepository, DataPackConfig dataPackConfig, boolean bl) {
 		packRepository.reload();
 		if (bl) {
 			packRepository.setSelected(Collections.singleton("vanilla"));
@@ -1379,7 +1375,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		}
 	}
 
-	private static DataPackConfig getSelectedPacks(PackRepository<?> packRepository) {
+	private static DataPackConfig getSelectedPacks(PackRepository packRepository) {
 		Collection<String> collection = packRepository.getSelectedIds();
 		List<String> list = ImmutableList.copyOf(collection);
 		List<String> list2 = (List<String>)packRepository.getAvailableIds()
@@ -1402,7 +1398,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		}
 	}
 
-	public PackRepository<Pack> getPackRepository() {
+	public PackRepository getPackRepository() {
 		return this.packRepository;
 	}
 
@@ -1439,7 +1435,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return this.resources.getRecipeManager();
 	}
 
-	public TagManager getTags() {
+	public TagContainer getTags() {
 		return this.resources.getTags();
 	}
 

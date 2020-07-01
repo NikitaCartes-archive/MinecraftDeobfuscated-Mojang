@@ -15,7 +15,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.Drowned;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -246,26 +246,28 @@ public class OceanRuinPieces {
 		}
 
 		@Override
-		protected void handleDataMarker(String string, BlockPos blockPos, LevelAccessor levelAccessor, Random random, BoundingBox boundingBox) {
+		protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, Random random, BoundingBox boundingBox) {
 			if ("chest".equals(string)) {
-				levelAccessor.setBlock(
-					blockPos, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.WATERLOGGED, Boolean.valueOf(levelAccessor.getFluidState(blockPos).is(FluidTags.WATER))), 2
+				serverLevelAccessor.setBlock(
+					blockPos,
+					Blocks.CHEST.defaultBlockState().setValue(ChestBlock.WATERLOGGED, Boolean.valueOf(serverLevelAccessor.getFluidState(blockPos).is(FluidTags.WATER))),
+					2
 				);
-				BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos);
+				BlockEntity blockEntity = serverLevelAccessor.getBlockEntity(blockPos);
 				if (blockEntity instanceof ChestBlockEntity) {
 					((ChestBlockEntity)blockEntity)
 						.setLootTable(this.isLarge ? BuiltInLootTables.UNDERWATER_RUIN_BIG : BuiltInLootTables.UNDERWATER_RUIN_SMALL, random.nextLong());
 				}
 			} else if ("drowned".equals(string)) {
-				Drowned drowned = EntityType.DROWNED.create(levelAccessor.getLevel());
+				Drowned drowned = EntityType.DROWNED.create(serverLevelAccessor.getLevel());
 				drowned.setPersistenceRequired();
 				drowned.moveTo(blockPos, 0.0F, 0.0F);
-				drowned.finalizeSpawn(levelAccessor, levelAccessor.getCurrentDifficultyAt(blockPos), MobSpawnType.STRUCTURE, null, null);
-				levelAccessor.addFreshEntity(drowned);
-				if (blockPos.getY() > levelAccessor.getSeaLevel()) {
-					levelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2);
+				drowned.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(blockPos), MobSpawnType.STRUCTURE, null, null);
+				serverLevelAccessor.addFreshEntity(drowned);
+				if (blockPos.getY() > serverLevelAccessor.getSeaLevel()) {
+					serverLevelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2);
 				} else {
-					levelAccessor.setBlock(blockPos, Blocks.WATER.defaultBlockState(), 2);
+					serverLevelAccessor.setBlock(blockPos, Blocks.WATER.defaultBlockState(), 2);
 				}
 			}
 		}

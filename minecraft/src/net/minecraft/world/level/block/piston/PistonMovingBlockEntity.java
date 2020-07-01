@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block.piston;
 
+import java.util.Iterator;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -7,7 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -113,50 +113,61 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 			if (!list.isEmpty()) {
 				List<AABB> list2 = voxelShape.toAabbs();
 				boolean bl = this.movedState.is(Blocks.SLIME_BLOCK);
+				Iterator var10 = list.iterator();
 
-				for (Entity entity : list) {
-					if (entity.getPistonPushReaction() != PushReaction.IGNORE) {
-						if (bl) {
-							Vec3 vec3 = entity.getDeltaMovement();
-							double e = vec3.x;
-							double g = vec3.y;
-							double h = vec3.z;
-							switch (direction.getAxis()) {
-								case X:
-									e = (double)direction.getStepX();
-									break;
-								case Y:
-									g = (double)direction.getStepY();
-									break;
-								case Z:
-									h = (double)direction.getStepZ();
-							}
-
-							entity.setDeltaMovement(e, g, h);
-							if (entity instanceof ServerPlayer) {
-								((ServerPlayer)entity).connection.send(new ClientboundSetEntityMotionPacket(entity));
-							}
+				while (true) {
+					Entity entity;
+					while (true) {
+						if (!var10.hasNext()) {
+							return;
 						}
 
-						double i = 0.0;
+						entity = (Entity)var10.next();
+						if (entity.getPistonPushReaction() != PushReaction.IGNORE) {
+							if (!bl) {
+								break;
+							}
 
-						for (AABB aABB2 : list2) {
-							AABB aABB3 = PistonMath.getMovementArea(this.moveByPositionAndProgress(aABB2), direction, d);
-							AABB aABB4 = entity.getBoundingBox();
-							if (aABB3.intersects(aABB4)) {
-								i = Math.max(i, getMovement(aABB3, direction, aABB4));
-								if (i >= d) {
-									break;
+							if (!(entity instanceof ServerPlayer)) {
+								Vec3 vec3 = entity.getDeltaMovement();
+								double e = vec3.x;
+								double g = vec3.y;
+								double h = vec3.z;
+								switch (direction.getAxis()) {
+									case X:
+										e = (double)direction.getStepX();
+										break;
+									case Y:
+										g = (double)direction.getStepY();
+										break;
+									case Z:
+										h = (double)direction.getStepZ();
 								}
+
+								entity.setDeltaMovement(e, g, h);
+								break;
 							}
 						}
+					}
 
-						if (!(i <= 0.0)) {
-							i = Math.min(i, d) + 0.01;
-							moveEntityByPiston(direction, entity, i, direction);
-							if (!this.extending && this.isSourcePiston) {
-								this.fixEntityWithinPistonBase(entity, direction, d);
+					double i = 0.0;
+
+					for (AABB aABB2 : list2) {
+						AABB aABB3 = PistonMath.getMovementArea(this.moveByPositionAndProgress(aABB2), direction, d);
+						AABB aABB4 = entity.getBoundingBox();
+						if (aABB3.intersects(aABB4)) {
+							i = Math.max(i, getMovement(aABB3, direction, aABB4));
+							if (i >= d) {
+								break;
 							}
+						}
+					}
+
+					if (!(i <= 0.0)) {
+						i = Math.min(i, d) + 0.01;
+						moveEntityByPiston(direction, entity, i, direction);
+						if (!this.extending && this.isSourcePiston) {
+							this.fixEntityWithinPistonBase(entity, direction, d);
 						}
 					}
 				}

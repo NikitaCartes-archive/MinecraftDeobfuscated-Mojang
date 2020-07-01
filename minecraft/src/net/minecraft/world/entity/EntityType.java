@@ -18,6 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.Mth;
@@ -97,6 +98,7 @@ import net.minecraft.world.entity.monster.ZombieVillager;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
+import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
@@ -322,6 +324,9 @@ public class EntityType<T extends Entity> {
 	public static final EntityType<Piglin> PIGLIN = register(
 		"piglin", EntityType.Builder.of(Piglin::new, MobCategory.MONSTER).sized(0.6F, 1.95F).clientTrackingRange(8)
 	);
+	public static final EntityType<PiglinBrute> PIGLIN_BRUTE = register(
+		"piglin_brute", EntityType.Builder.of(PiglinBrute::new, MobCategory.MONSTER).sized(0.6F, 1.95F).clientTrackingRange(8)
+	);
 	public static final EntityType<Pillager> PILLAGER = register(
 		"pillager", EntityType.Builder.of(Pillager::new, MobCategory.MONSTER).canSpawnFarFromPlayer().sized(0.6F, 1.95F).clientTrackingRange(8)
 	);
@@ -516,9 +521,11 @@ public class EntityType<T extends Entity> {
 	}
 
 	@Nullable
-	public Entity spawn(Level level, @Nullable ItemStack itemStack, @Nullable Player player, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2) {
+	public Entity spawn(
+		ServerLevel serverLevel, @Nullable ItemStack itemStack, @Nullable Player player, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2
+	) {
 		return this.spawn(
-			level,
+			serverLevel,
 			itemStack == null ? null : itemStack.getTag(),
 			itemStack != null && itemStack.hasCustomHoverName() ? itemStack.getHoverName() : null,
 			player,
@@ -531,7 +538,7 @@ public class EntityType<T extends Entity> {
 
 	@Nullable
 	public T spawn(
-		Level level,
+		ServerLevel serverLevel,
 		@Nullable CompoundTag compoundTag,
 		@Nullable Component component,
 		@Nullable Player player,
@@ -540,14 +547,14 @@ public class EntityType<T extends Entity> {
 		boolean bl,
 		boolean bl2
 	) {
-		T entity = this.create(level, compoundTag, component, player, blockPos, mobSpawnType, bl, bl2);
-		level.addFreshEntity(entity);
+		T entity = this.create(serverLevel, compoundTag, component, player, blockPos, mobSpawnType, bl, bl2);
+		serverLevel.addFreshEntity(entity);
 		return entity;
 	}
 
 	@Nullable
 	public T create(
-		Level level,
+		ServerLevel serverLevel,
 		@Nullable CompoundTag compoundTag,
 		@Nullable Component component,
 		@Nullable Player player,
@@ -556,26 +563,26 @@ public class EntityType<T extends Entity> {
 		boolean bl,
 		boolean bl2
 	) {
-		T entity = this.create(level);
+		T entity = this.create(serverLevel);
 		if (entity == null) {
 			return null;
 		} else {
 			double d;
 			if (bl) {
 				entity.setPos((double)blockPos.getX() + 0.5, (double)(blockPos.getY() + 1), (double)blockPos.getZ() + 0.5);
-				d = getYOffset(level, blockPos, bl2, entity.getBoundingBox());
+				d = getYOffset(serverLevel, blockPos, bl2, entity.getBoundingBox());
 			} else {
 				d = 0.0;
 			}
 
 			entity.moveTo(
-				(double)blockPos.getX() + 0.5, (double)blockPos.getY() + d, (double)blockPos.getZ() + 0.5, Mth.wrapDegrees(level.random.nextFloat() * 360.0F), 0.0F
+				(double)blockPos.getX() + 0.5, (double)blockPos.getY() + d, (double)blockPos.getZ() + 0.5, Mth.wrapDegrees(serverLevel.random.nextFloat() * 360.0F), 0.0F
 			);
 			if (entity instanceof Mob) {
 				Mob mob = (Mob)entity;
 				mob.yHeadRot = mob.yRot;
 				mob.yBodyRot = mob.yRot;
-				mob.finalizeSpawn(level, level.getCurrentDifficultyAt(mob.blockPosition()), mobSpawnType, null, compoundTag);
+				mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), mobSpawnType, null, compoundTag);
 				mob.playAmbientSound();
 			}
 
@@ -583,7 +590,7 @@ public class EntityType<T extends Entity> {
 				entity.setCustomName(component);
 			}
 
-			updateCustomEntityTag(level, player, entity, compoundTag);
+			updateCustomEntityTag(serverLevel, player, entity, compoundTag);
 			return entity;
 		}
 	}

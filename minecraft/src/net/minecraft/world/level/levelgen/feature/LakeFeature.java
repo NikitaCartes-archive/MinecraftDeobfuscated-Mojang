@@ -5,7 +5,6 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
@@ -22,12 +21,7 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 	}
 
 	public boolean place(
-		WorldGenLevel worldGenLevel,
-		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator chunkGenerator,
-		Random random,
-		BlockPos blockPos,
-		BlockStateConfiguration blockStateConfiguration
+		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, BlockStateConfiguration blockStateConfiguration
 	) {
 		while (blockPos.getY() > 5 && worldGenLevel.isEmptyBlock(blockPos)) {
 			blockPos = blockPos.below();
@@ -37,7 +31,7 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 			return false;
 		} else {
 			blockPos = blockPos.below(4);
-			if (structureFeatureManager.startsForFeature(SectionPos.of(blockPos), StructureFeature.VILLAGE).findAny().isPresent()) {
+			if (worldGenLevel.startsForFeature(SectionPos.of(blockPos), StructureFeature.VILLAGE).findAny().isPresent()) {
 				return false;
 			} else {
 				boolean[] bls = new boolean[2048];

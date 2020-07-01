@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -204,8 +205,8 @@ public class Creeper extends Monster implements PowerableMob {
 	}
 
 	@Override
-	public void thunderHit(LightningBolt lightningBolt) {
-		super.thunderHit(lightningBolt);
+	public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
+		super.thunderHit(serverLevel, lightningBolt);
 		this.entityData.set(DATA_IS_POWERED, true);
 	}
 

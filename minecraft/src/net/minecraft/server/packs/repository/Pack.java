@@ -37,8 +37,8 @@ public class Pack implements AutoCloseable {
 	private final PackSource packSource;
 
 	@Nullable
-	public static <T extends Pack> T create(
-		String string, boolean bl, Supplier<PackResources> supplier, Pack.PackConstructor<T> packConstructor, Pack.Position position, PackSource packSource
+	public static Pack create(
+		String string, boolean bl, Supplier<PackResources> supplier, Pack.PackConstructor packConstructor, Pack.Position position, PackSource packSource
 	) {
 		try (PackResources packResources = (PackResources)supplier.get()) {
 			PackMetadataSection packMetadataSection = packResources.getMetadataSection(PackMetadataSection.SERIALIZER);
@@ -172,9 +172,9 @@ public class Pack implements AutoCloseable {
 	}
 
 	@FunctionalInterface
-	public interface PackConstructor<T extends Pack> {
+	public interface PackConstructor {
 		@Nullable
-		T create(
+		Pack create(
 			String string,
 			boolean bl,
 			Supplier<PackResources> supplier,
@@ -189,12 +189,12 @@ public class Pack implements AutoCloseable {
 		TOP,
 		BOTTOM;
 
-		public <T, P extends Pack> int insert(List<T> list, T object, Function<T, P> function, boolean bl) {
+		public <T> int insert(List<T> list, T object, Function<T, Pack> function, boolean bl) {
 			Pack.Position position = bl ? this.opposite() : this;
 			if (position == BOTTOM) {
 				int i;
 				for (i = 0; i < list.size(); i++) {
-					P pack = (P)function.apply(list.get(i));
+					Pack pack = (Pack)function.apply(list.get(i));
 					if (!pack.isFixedPosition() || pack.getDefaultPosition() != this) {
 						break;
 					}
@@ -205,7 +205,7 @@ public class Pack implements AutoCloseable {
 			} else {
 				int i;
 				for (i = list.size() - 1; i >= 0; i--) {
-					P pack = (P)function.apply(list.get(i));
+					Pack pack = (Pack)function.apply(list.get(i));
 					if (!pack.isFixedPosition() || pack.getDefaultPosition() != this) {
 						break;
 					}

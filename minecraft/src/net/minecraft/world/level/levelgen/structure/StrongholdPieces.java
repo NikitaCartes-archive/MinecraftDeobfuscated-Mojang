@@ -9,7 +9,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -1454,30 +1453,30 @@ public class StrongholdPieces {
 		}
 
 		protected void generateSmallDoor(
-			LevelAccessor levelAccessor, Random random, BoundingBox boundingBox, StrongholdPieces.StrongholdPiece.SmallDoorType smallDoorType, int i, int j, int k
+			WorldGenLevel worldGenLevel, Random random, BoundingBox boundingBox, StrongholdPieces.StrongholdPiece.SmallDoorType smallDoorType, int i, int j, int k
 		) {
 			switch (smallDoorType) {
 				case OPENING:
-					this.generateBox(levelAccessor, boundingBox, i, j, k, i + 3 - 1, j + 3 - 1, k, CAVE_AIR, CAVE_AIR, false);
+					this.generateBox(worldGenLevel, boundingBox, i, j, k, i + 3 - 1, j + 3 - 1, k, CAVE_AIR, CAVE_AIR, false);
 					break;
 				case WOOD_DOOR:
-					this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i, j, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i, j + 1, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i, j + 2, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i + 1, j + 2, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j + 2, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j + 1, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.OAK_DOOR.defaultBlockState(), i + 1, j, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.OAK_DOOR.defaultBlockState().setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER), i + 1, j + 1, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i, j, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i, j + 1, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i, j + 2, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i + 1, j + 2, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j + 2, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j + 1, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.OAK_DOOR.defaultBlockState(), i + 1, j, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.OAK_DOOR.defaultBlockState().setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER), i + 1, j + 1, k, boundingBox);
 					break;
 				case GRATES:
-					this.placeBlock(levelAccessor, Blocks.CAVE_AIR.defaultBlockState(), i + 1, j, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.CAVE_AIR.defaultBlockState(), i + 1, j + 1, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.WEST, Boolean.valueOf(true)), i, j, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.WEST, Boolean.valueOf(true)), i, j + 1, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.CAVE_AIR.defaultBlockState(), i + 1, j, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.CAVE_AIR.defaultBlockState(), i + 1, j + 1, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.WEST, Boolean.valueOf(true)), i, j, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.WEST, Boolean.valueOf(true)), i, j + 1, k, boundingBox);
 					this.placeBlock(
-						levelAccessor,
+						worldGenLevel,
 						Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, Boolean.valueOf(true)).setValue(IronBarsBlock.WEST, Boolean.valueOf(true)),
 						i,
 						j + 2,
@@ -1485,7 +1484,7 @@ public class StrongholdPieces {
 						boundingBox
 					);
 					this.placeBlock(
-						levelAccessor,
+						worldGenLevel,
 						Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, Boolean.valueOf(true)).setValue(IronBarsBlock.WEST, Boolean.valueOf(true)),
 						i + 1,
 						j + 2,
@@ -1493,28 +1492,28 @@ public class StrongholdPieces {
 						boundingBox
 					);
 					this.placeBlock(
-						levelAccessor,
+						worldGenLevel,
 						Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, Boolean.valueOf(true)).setValue(IronBarsBlock.WEST, Boolean.valueOf(true)),
 						i + 2,
 						j + 2,
 						k,
 						boundingBox
 					);
-					this.placeBlock(levelAccessor, Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, Boolean.valueOf(true)), i + 2, j + 1, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, Boolean.valueOf(true)), i + 2, j, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, Boolean.valueOf(true)), i + 2, j + 1, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, Boolean.valueOf(true)), i + 2, j, k, boundingBox);
 					break;
 				case IRON_DOOR:
-					this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i, j, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i, j + 1, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i, j + 2, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i + 1, j + 2, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j + 2, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j + 1, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.IRON_DOOR.defaultBlockState(), i + 1, j, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.IRON_DOOR.defaultBlockState().setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER), i + 1, j + 1, k, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.STONE_BUTTON.defaultBlockState().setValue(ButtonBlock.FACING, Direction.NORTH), i + 2, j + 1, k + 1, boundingBox);
-					this.placeBlock(levelAccessor, Blocks.STONE_BUTTON.defaultBlockState().setValue(ButtonBlock.FACING, Direction.SOUTH), i + 2, j + 1, k - 1, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i, j, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i, j + 1, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i, j + 2, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i + 1, j + 2, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j + 2, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j + 1, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.IRON_DOOR.defaultBlockState(), i + 1, j, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.IRON_DOOR.defaultBlockState().setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER), i + 1, j + 1, k, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.STONE_BUTTON.defaultBlockState().setValue(ButtonBlock.FACING, Direction.NORTH), i + 2, j + 1, k + 1, boundingBox);
+					this.placeBlock(worldGenLevel, Blocks.STONE_BUTTON.defaultBlockState().setValue(ButtonBlock.FACING, Direction.SOUTH), i + 2, j + 1, k - 1, boundingBox);
 			}
 		}
 

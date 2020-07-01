@@ -15,6 +15,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
@@ -83,7 +84,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 		if (bl2) {
 			this.teleportCooldown--;
 		} else if (!this.level.isClientSide) {
-			List<Entity> list = this.level.getEntitiesOfClass(Entity.class, new AABB(this.getBlockPos()));
+			List<Entity> list = this.level.getEntitiesOfClass(Entity.class, new AABB(this.getBlockPos()), TheEndGatewayBlockEntity::canEntityTeleport);
 			if (!list.isEmpty()) {
 				this.teleportEntity((Entity)list.get(this.level.random.nextInt(list.size())));
 			}
@@ -96,6 +97,10 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 		if (bl != this.isSpawning() || bl2 != this.isCoolingDown()) {
 			this.setChanged();
 		}
+	}
+
+	public static boolean canEntityTeleport(Entity entity) {
+		return EntitySelector.NO_SPECTATORS.test(entity) && !entity.getRootVehicle().isOnPortalCooldown();
 	}
 
 	public boolean isSpawning() {
@@ -171,6 +176,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 					entity3 = entity.getRootVehicle();
 				}
 
+				entity3.setPortalCooldown();
 				entity3.teleportToWithTicket((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5);
 			}
 
@@ -179,7 +185,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 	}
 
 	private BlockPos findExitPosition() {
-		BlockPos blockPos = findTallestBlock(this.level, this.exitPortal, 5, false);
+		BlockPos blockPos = findTallestBlock(this.level, this.exitPortal.offset(0, 2, 0), 5, false);
 		LOGGER.debug("Best exit position for portal at {} is {}", this.exitPortal, blockPos);
 		return blockPos.above();
 	}
@@ -204,9 +210,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 			LOGGER.debug("Failed to find suitable block, settling on {}", this.exitPortal);
 			Feature.END_ISLAND
 				.configured(FeatureConfiguration.NONE)
-				.place(
-					serverLevel, serverLevel.structureFeatureManager(), serverLevel.getChunkSource().getGenerator(), new Random(this.exitPortal.asLong()), this.exitPortal
-				);
+				.place(serverLevel, serverLevel.getChunkSource().getGenerator(), new Random(this.exitPortal.asLong()), this.exitPortal);
 		} else {
 			LOGGER.debug("Found block at {}", this.exitPortal);
 		}
@@ -273,7 +277,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 	private void createExitPortal(ServerLevel serverLevel, BlockPos blockPos) {
 		Feature.END_GATEWAY
 			.configured(EndGatewayConfiguration.knownExit(this.getBlockPos(), false))
-			.place(serverLevel, serverLevel.structureFeatureManager(), serverLevel.getChunkSource().getGenerator(), new Random(), blockPos);
+			.place(serverLevel, serverLevel.getChunkSource().getGenerator(), new Random(), blockPos);
 	}
 
 	@Environment(EnvType.CLIENT)

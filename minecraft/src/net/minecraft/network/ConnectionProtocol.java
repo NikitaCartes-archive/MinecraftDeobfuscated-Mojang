@@ -128,7 +128,8 @@ import net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
-import net.minecraft.network.protocol.game.ServerboundRecipeBookUpdatePacket;
+import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPacket;
+import net.minecraft.network.protocol.game.ServerboundRecipeBookSeenRecipePacket;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
 import net.minecraft.network.protocol.game.ServerboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ServerboundSeenAdvancementsPacket;
@@ -296,7 +297,8 @@ public enum ConnectionProtocol {
 					.addPacket(ServerboundPlayerActionPacket.class, ServerboundPlayerActionPacket::new)
 					.addPacket(ServerboundPlayerCommandPacket.class, ServerboundPlayerCommandPacket::new)
 					.addPacket(ServerboundPlayerInputPacket.class, ServerboundPlayerInputPacket::new)
-					.addPacket(ServerboundRecipeBookUpdatePacket.class, ServerboundRecipeBookUpdatePacket::new)
+					.addPacket(ServerboundRecipeBookChangeSettingsPacket.class, ServerboundRecipeBookChangeSettingsPacket::new)
+					.addPacket(ServerboundRecipeBookSeenRecipePacket.class, ServerboundRecipeBookSeenRecipePacket::new)
 					.addPacket(ServerboundRenameItemPacket.class, ServerboundRenameItemPacket::new)
 					.addPacket(ServerboundResourcePackPacket.class, ServerboundResourcePackPacket::new)
 					.addPacket(ServerboundSeenAdvancementsPacket.class, ServerboundSeenAdvancementsPacket::new)

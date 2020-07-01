@@ -63,7 +63,7 @@ public class MushroomCow extends Cow implements Shearable {
 	}
 
 	@Override
-	public void thunderHit(LightningBolt lightningBolt) {
+	public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
 		UUID uUID = lightningBolt.getUUID();
 		if (!uUID.equals(this.lastLightningBoltUUID)) {
 			this.setMushroomType(this.getMushroomType() == MushroomCow.MushroomType.RED ? MushroomCow.MushroomType.BROWN : MushroomCow.MushroomType.RED);
@@ -94,7 +94,7 @@ public class MushroomCow extends Cow implements Shearable {
 				itemStack2 = new ItemStack(Items.MUSHROOM_STEW);
 			}
 
-			ItemStack itemStack3 = ItemUtils.createBucketResult(itemStack, player, itemStack2);
+			ItemStack itemStack3 = ItemUtils.createFilledResult(itemStack, player, itemStack2, false);
 			player.setItemInHand(interactionHand, itemStack3);
 			SoundEvent soundEvent;
 			if (bl) {
@@ -239,8 +239,8 @@ public class MushroomCow extends Cow implements Shearable {
 		return MushroomCow.MushroomType.byType(this.entityData.get(DATA_TYPE));
 	}
 
-	public MushroomCow getBreedOffspring(AgableMob agableMob) {
-		MushroomCow mushroomCow = EntityType.MOOSHROOM.create(this.level);
+	public MushroomCow getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+		MushroomCow mushroomCow = EntityType.MOOSHROOM.create(serverLevel);
 		mushroomCow.setMushroomType(this.getOffspringType((MushroomCow)agableMob));
 		return mushroomCow;
 	}

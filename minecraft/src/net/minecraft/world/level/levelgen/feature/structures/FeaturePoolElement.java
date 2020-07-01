@@ -96,7 +96,7 @@ public class FeaturePoolElement extends StructurePoolElement {
 		Random random,
 		boolean bl
 	) {
-		return this.feature.place(worldGenLevel, structureFeatureManager, chunkGenerator, random, blockPos);
+		return this.feature.place(worldGenLevel, chunkGenerator, random, blockPos);
 	}
 
 	@Override

@@ -214,4 +214,10 @@ public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
 	public CraftingContainer getCraftSlots() {
 		return this.craftSlots;
 	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public RecipeBookType getRecipeBookType() {
+		return RecipeBookType.CRAFTING;
+	}
 }

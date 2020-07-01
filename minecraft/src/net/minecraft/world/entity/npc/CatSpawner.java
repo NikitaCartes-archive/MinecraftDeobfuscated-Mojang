@@ -13,7 +13,6 @@ import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.phys.AABB;
@@ -73,20 +72,20 @@ public class CatSpawner implements CustomSpawner {
 		return 0;
 	}
 
-	private int spawnInHut(Level level, BlockPos blockPos) {
+	private int spawnInHut(ServerLevel serverLevel, BlockPos blockPos) {
 		int i = 16;
-		List<Cat> list = level.getEntitiesOfClass(Cat.class, new AABB(blockPos).inflate(16.0, 8.0, 16.0));
-		return list.size() < 1 ? this.spawnCat(blockPos, level) : 0;
+		List<Cat> list = serverLevel.getEntitiesOfClass(Cat.class, new AABB(blockPos).inflate(16.0, 8.0, 16.0));
+		return list.size() < 1 ? this.spawnCat(blockPos, serverLevel) : 0;
 	}
 
-	private int spawnCat(BlockPos blockPos, Level level) {
-		Cat cat = EntityType.CAT.create(level);
+	private int spawnCat(BlockPos blockPos, ServerLevel serverLevel) {
+		Cat cat = EntityType.CAT.create(serverLevel);
 		if (cat == null) {
 			return 0;
 		} else {
-			cat.finalizeSpawn(level, level.getCurrentDifficultyAt(blockPos), MobSpawnType.NATURAL, null, null);
+			cat.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(blockPos), MobSpawnType.NATURAL, null, null);
 			cat.moveTo(blockPos, 0.0F, 0.0F);
-			level.addFreshEntity(cat);
+			serverLevel.addFreshEntity(cat);
 			return 1;
 		}
 	}

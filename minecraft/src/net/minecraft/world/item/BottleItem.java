@@ -61,16 +61,7 @@ public class BottleItem extends Item {
 	}
 
 	protected ItemStack turnBottleIntoItem(ItemStack itemStack, Player player, ItemStack itemStack2) {
-		itemStack.shrink(1);
 		player.awardStat(Stats.ITEM_USED.get(this));
-		if (itemStack.isEmpty()) {
-			return itemStack2;
-		} else {
-			if (!player.inventory.add(itemStack2)) {
-				player.drop(itemStack2, false);
-			}
-
-			return itemStack;
-		}
+		return ItemUtils.createFilledResult(itemStack, player, itemStack2);
 	}
 }

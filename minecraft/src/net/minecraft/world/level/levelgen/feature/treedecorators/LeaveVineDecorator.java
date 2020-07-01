@@ -6,8 +6,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelSimulatedRW;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -23,33 +23,33 @@ public class LeaveVineDecorator extends TreeDecorator {
 	}
 
 	@Override
-	public void place(LevelAccessor levelAccessor, Random random, List<BlockPos> list, List<BlockPos> list2, Set<BlockPos> set, BoundingBox boundingBox) {
+	public void place(WorldGenLevel worldGenLevel, Random random, List<BlockPos> list, List<BlockPos> list2, Set<BlockPos> set, BoundingBox boundingBox) {
 		list2.forEach(blockPos -> {
 			if (random.nextInt(4) == 0) {
 				BlockPos blockPos2 = blockPos.west();
-				if (Feature.isAir(levelAccessor, blockPos2)) {
-					this.addHangingVine(levelAccessor, blockPos2, VineBlock.EAST, set, boundingBox);
+				if (Feature.isAir(worldGenLevel, blockPos2)) {
+					this.addHangingVine(worldGenLevel, blockPos2, VineBlock.EAST, set, boundingBox);
 				}
 			}
 
 			if (random.nextInt(4) == 0) {
 				BlockPos blockPos2 = blockPos.east();
-				if (Feature.isAir(levelAccessor, blockPos2)) {
-					this.addHangingVine(levelAccessor, blockPos2, VineBlock.WEST, set, boundingBox);
+				if (Feature.isAir(worldGenLevel, blockPos2)) {
+					this.addHangingVine(worldGenLevel, blockPos2, VineBlock.WEST, set, boundingBox);
 				}
 			}
 
 			if (random.nextInt(4) == 0) {
 				BlockPos blockPos2 = blockPos.north();
-				if (Feature.isAir(levelAccessor, blockPos2)) {
-					this.addHangingVine(levelAccessor, blockPos2, VineBlock.SOUTH, set, boundingBox);
+				if (Feature.isAir(worldGenLevel, blockPos2)) {
+					this.addHangingVine(worldGenLevel, blockPos2, VineBlock.SOUTH, set, boundingBox);
 				}
 			}
 
 			if (random.nextInt(4) == 0) {
 				BlockPos blockPos2 = blockPos.south();
-				if (Feature.isAir(levelAccessor, blockPos2)) {
-					this.addHangingVine(levelAccessor, blockPos2, VineBlock.NORTH, set, boundingBox);
+				if (Feature.isAir(worldGenLevel, blockPos2)) {
+					this.addHangingVine(worldGenLevel, blockPos2, VineBlock.NORTH, set, boundingBox);
 				}
 			}
 		});

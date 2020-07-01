@@ -13,7 +13,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.vehicle.MinecartChest;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -237,16 +236,16 @@ public class MineShaftPieces {
 		}
 
 		@Override
-		protected boolean createChest(LevelAccessor levelAccessor, BoundingBox boundingBox, Random random, int i, int j, int k, ResourceLocation resourceLocation) {
+		protected boolean createChest(WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, int i, int j, int k, ResourceLocation resourceLocation) {
 			BlockPos blockPos = new BlockPos(this.getWorldX(i, k), this.getWorldY(j), this.getWorldZ(i, k));
-			if (boundingBox.isInside(blockPos) && levelAccessor.getBlockState(blockPos).isAir() && !levelAccessor.getBlockState(blockPos.below()).isAir()) {
+			if (boundingBox.isInside(blockPos) && worldGenLevel.getBlockState(blockPos).isAir() && !worldGenLevel.getBlockState(blockPos.below()).isAir()) {
 				BlockState blockState = Blocks.RAIL.defaultBlockState().setValue(RailBlock.SHAPE, random.nextBoolean() ? RailShape.NORTH_SOUTH : RailShape.EAST_WEST);
-				this.placeBlock(levelAccessor, blockState, i, j, k, boundingBox);
+				this.placeBlock(worldGenLevel, blockState, i, j, k, boundingBox);
 				MinecartChest minecartChest = new MinecartChest(
-					levelAccessor.getLevel(), (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5
+					worldGenLevel.getLevel(), (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5
 				);
 				minecartChest.setLootTable(resourceLocation, random.nextLong());
-				levelAccessor.addFreshEntity(minecartChest);
+				worldGenLevel.addFreshEntity(minecartChest);
 				return true;
 			} else {
 				return false;
@@ -341,30 +340,30 @@ public class MineShaftPieces {
 			}
 		}
 
-		private void placeSupport(LevelAccessor levelAccessor, BoundingBox boundingBox, int i, int j, int k, int l, int m, Random random) {
-			if (this.isSupportingBox(levelAccessor, boundingBox, i, m, l, k)) {
+		private void placeSupport(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k, int l, int m, Random random) {
+			if (this.isSupportingBox(worldGenLevel, boundingBox, i, m, l, k)) {
 				BlockState blockState = this.getPlanksBlock();
 				BlockState blockState2 = this.getFenceBlock();
-				this.generateBox(levelAccessor, boundingBox, i, j, k, i, l - 1, k, blockState2.setValue(FenceBlock.WEST, Boolean.valueOf(true)), CAVE_AIR, false);
-				this.generateBox(levelAccessor, boundingBox, m, j, k, m, l - 1, k, blockState2.setValue(FenceBlock.EAST, Boolean.valueOf(true)), CAVE_AIR, false);
+				this.generateBox(worldGenLevel, boundingBox, i, j, k, i, l - 1, k, blockState2.setValue(FenceBlock.WEST, Boolean.valueOf(true)), CAVE_AIR, false);
+				this.generateBox(worldGenLevel, boundingBox, m, j, k, m, l - 1, k, blockState2.setValue(FenceBlock.EAST, Boolean.valueOf(true)), CAVE_AIR, false);
 				if (random.nextInt(4) == 0) {
-					this.generateBox(levelAccessor, boundingBox, i, l, k, i, l, k, blockState, CAVE_AIR, false);
-					this.generateBox(levelAccessor, boundingBox, m, l, k, m, l, k, blockState, CAVE_AIR, false);
+					this.generateBox(worldGenLevel, boundingBox, i, l, k, i, l, k, blockState, CAVE_AIR, false);
+					this.generateBox(worldGenLevel, boundingBox, m, l, k, m, l, k, blockState, CAVE_AIR, false);
 				} else {
-					this.generateBox(levelAccessor, boundingBox, i, l, k, m, l, k, blockState, CAVE_AIR, false);
+					this.generateBox(worldGenLevel, boundingBox, i, l, k, m, l, k, blockState, CAVE_AIR, false);
 					this.maybeGenerateBlock(
-						levelAccessor, boundingBox, random, 0.05F, i + 1, l, k - 1, Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.NORTH)
+						worldGenLevel, boundingBox, random, 0.05F, i + 1, l, k - 1, Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.NORTH)
 					);
 					this.maybeGenerateBlock(
-						levelAccessor, boundingBox, random, 0.05F, i + 1, l, k + 1, Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH)
+						worldGenLevel, boundingBox, random, 0.05F, i + 1, l, k + 1, Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH)
 					);
 				}
 			}
 		}
 
-		private void placeCobWeb(LevelAccessor levelAccessor, BoundingBox boundingBox, Random random, float f, int i, int j, int k) {
-			if (this.isInterior(levelAccessor, i, j, k, boundingBox)) {
-				this.maybeGenerateBlock(levelAccessor, boundingBox, random, f, i, j, k, Blocks.COBWEB.defaultBlockState());
+		private void placeCobWeb(WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, float f, int i, int j, int k) {
+			if (this.isInterior(worldGenLevel, i, j, k, boundingBox)) {
+				this.maybeGenerateBlock(worldGenLevel, boundingBox, random, f, i, j, k, Blocks.COBWEB.defaultBlockState());
 			}
 		}
 	}
@@ -617,9 +616,9 @@ public class MineShaftPieces {
 			}
 		}
 
-		private void placeSupportPillar(LevelAccessor levelAccessor, BoundingBox boundingBox, int i, int j, int k, int l) {
-			if (!this.getBlock(levelAccessor, i, l + 1, k, boundingBox).isAir()) {
-				this.generateBox(levelAccessor, boundingBox, i, j, k, i, l, k, this.getPlanksBlock(), CAVE_AIR, false);
+		private void placeSupportPillar(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k, int l) {
+			if (!this.getBlock(worldGenLevel, i, l + 1, k, boundingBox).isAir()) {
+				this.generateBox(worldGenLevel, boundingBox, i, j, k, i, l, k, this.getPlanksBlock(), CAVE_AIR, false);
 			}
 		}
 	}

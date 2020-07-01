@@ -18,8 +18,8 @@ public class RenderTarget {
 	public int viewHeight;
 	public final boolean useDepth;
 	public int frameBufferId;
-	public int colorTextureId;
-	public int depthBufferId;
+	private int colorTextureId;
+	private int depthBufferId;
 	public final float[] clearChannels;
 	public int filterMode;
 
@@ -265,5 +265,13 @@ public class RenderTarget {
 
 		GlStateManager._clear(i, bl);
 		this.unbindWrite();
+	}
+
+	public int getColorTextureId() {
+		return this.colorTextureId;
+	}
+
+	public int getDepthTextureId() {
+		return this.depthBufferId;
 	}
 }

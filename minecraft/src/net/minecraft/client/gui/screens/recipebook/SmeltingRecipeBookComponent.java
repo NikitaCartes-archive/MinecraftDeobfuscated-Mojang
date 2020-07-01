@@ -11,26 +11,6 @@ import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 @Environment(EnvType.CLIENT)
 public class SmeltingRecipeBookComponent extends AbstractFurnaceRecipeBookComponent {
 	@Override
-	protected boolean getFilteringCraftable() {
-		return this.book.isFurnaceFilteringCraftable();
-	}
-
-	@Override
-	protected void setFilteringCraftable(boolean bl) {
-		this.book.setFurnaceFilteringCraftable(bl);
-	}
-
-	@Override
-	protected boolean isGuiOpen() {
-		return this.book.isFurnaceGuiOpen();
-	}
-
-	@Override
-	protected void setGuiOpen(boolean bl) {
-		this.book.setFurnaceGuiOpen(bl);
-	}
-
-	@Override
 	protected Component getRecipeFilterName() {
 		return new TranslatableComponent("gui.recipebook.toggleRecipes.smeltable");
 	}

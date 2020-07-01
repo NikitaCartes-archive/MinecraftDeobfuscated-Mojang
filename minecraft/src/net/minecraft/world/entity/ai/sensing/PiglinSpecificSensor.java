@@ -17,8 +17,10 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.WitherSkeleton;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
+import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
+import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
@@ -36,7 +38,7 @@ public class PiglinSpecificSensor extends Sensor<LivingEntity> {
 			MemoryModuleType.NEAREST_VISIBLE_HUNTABLE_HOGLIN,
 			MemoryModuleType.NEAREST_VISIBLE_BABY_HOGLIN,
 			MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLINS,
-			MemoryModuleType.NEAREST_ADULT_PIGLINS,
+			MemoryModuleType.NEARBY_ADULT_PIGLINS,
 			MemoryModuleType.VISIBLE_ADULT_PIGLIN_COUNT,
 			MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT,
 			MemoryModuleType.NEAREST_REPELLENT
@@ -55,8 +57,8 @@ public class PiglinSpecificSensor extends Sensor<LivingEntity> {
 		Optional<Player> optional6 = Optional.empty();
 		Optional<Player> optional7 = Optional.empty();
 		int i = 0;
-		List<Piglin> list = Lists.<Piglin>newArrayList();
-		List<Piglin> list2 = Lists.<Piglin>newArrayList();
+		List<AbstractPiglin> list = Lists.<AbstractPiglin>newArrayList();
+		List<AbstractPiglin> list2 = Lists.<AbstractPiglin>newArrayList();
 
 		for (LivingEntity livingEntity2 : (List)brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).orElse(ImmutableList.of())) {
 			if (livingEntity2 instanceof Hoglin) {
@@ -69,6 +71,8 @@ public class PiglinSpecificSensor extends Sensor<LivingEntity> {
 						optional2 = Optional.of(hoglin);
 					}
 				}
+			} else if (livingEntity2 instanceof PiglinBrute) {
+				list.add((PiglinBrute)livingEntity2);
 			} else if (livingEntity2 instanceof Piglin) {
 				Piglin piglin = (Piglin)livingEntity2;
 				if (piglin.isBaby() && !optional4.isPresent()) {
@@ -95,19 +99,18 @@ public class PiglinSpecificSensor extends Sensor<LivingEntity> {
 		}
 
 		for (LivingEntity livingEntity3 : (List)brain.getMemory(MemoryModuleType.LIVING_ENTITIES).orElse(ImmutableList.of())) {
-			if (livingEntity3 instanceof Piglin && ((Piglin)livingEntity3).isAdult()) {
-				list2.add((Piglin)livingEntity3);
+			if (livingEntity3 instanceof AbstractPiglin && ((AbstractPiglin)livingEntity3).isAdult()) {
+				list2.add((AbstractPiglin)livingEntity3);
 			}
 		}
 
 		brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_NEMESIS, optional);
 		brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_HUNTABLE_HOGLIN, optional2);
 		brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_BABY_HOGLIN, optional3);
-		brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_BABY_PIGLIN, optional4);
 		brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_ZOMBIFIED, optional5);
 		brain.setMemory(MemoryModuleType.NEAREST_TARGETABLE_PLAYER_NOT_WEARING_GOLD, optional6);
 		brain.setMemory(MemoryModuleType.NEAREST_PLAYER_HOLDING_WANTED_ITEM, optional7);
-		brain.setMemory(MemoryModuleType.NEAREST_ADULT_PIGLINS, list2);
+		brain.setMemory(MemoryModuleType.NEARBY_ADULT_PIGLINS, list2);
 		brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_ADULT_PIGLINS, list);
 		brain.setMemory(MemoryModuleType.VISIBLE_ADULT_PIGLIN_COUNT, list.size());
 		brain.setMemory(MemoryModuleType.VISIBLE_ADULT_HOGLIN_COUNT, i);

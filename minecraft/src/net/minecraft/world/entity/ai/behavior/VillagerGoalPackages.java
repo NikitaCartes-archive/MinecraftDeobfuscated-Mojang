@@ -55,8 +55,8 @@ public class VillagerGoalPackages {
 				new RunOne<>(
 					ImmutableList.of(
 						Pair.of(workAtPoi, 7),
-						Pair.of(new StrollAroundPoi(MemoryModuleType.JOB_SITE, 4), 2),
-						Pair.of(new StrollToPoi(MemoryModuleType.JOB_SITE, 1, 10), 5),
+						Pair.of(new StrollAroundPoi(MemoryModuleType.JOB_SITE, 0.4F, 4), 2),
+						Pair.of(new StrollToPoi(MemoryModuleType.JOB_SITE, 0.4F, 1, 10), 5),
 						Pair.of(new StrollToPoiList(MemoryModuleType.SECONDARY_JOB_SITE, f, 1, 6, MemoryModuleType.JOB_SITE), 5),
 						Pair.of(new HarvestFarmland(), villagerProfession == VillagerProfession.FARMER ? 2 : 5),
 						Pair.of(new UseBonemeal(), villagerProfession == VillagerProfession.FARMER ? 4 : 7)
@@ -118,7 +118,7 @@ public class VillagerGoalPackages {
 
 	public static ImmutableList<Pair<Integer, ? extends Behavior<? super Villager>>> getMeetPackage(VillagerProfession villagerProfession, float f) {
 		return ImmutableList.of(
-			Pair.of(2, new RunOne<>(ImmutableList.of(Pair.of(new StrollAroundPoi(MemoryModuleType.MEETING_POINT, 40), 2), Pair.of(new SocializeAtBell(), 2)))),
+			Pair.of(2, new RunOne<>(ImmutableList.of(Pair.of(new StrollAroundPoi(MemoryModuleType.MEETING_POINT, 0.4F, 40), 2), Pair.of(new SocializeAtBell(), 2)))),
 			Pair.of(10, new ShowTradesToPlayer(400, 1600)),
 			Pair.of(10, new SetLookAndInteract(EntityType.PLAYER, 4)),
 			Pair.of(2, new SetWalkTargetFromBlockMemory(MemoryModuleType.MEETING_POINT, f, 6, 100, 200)),

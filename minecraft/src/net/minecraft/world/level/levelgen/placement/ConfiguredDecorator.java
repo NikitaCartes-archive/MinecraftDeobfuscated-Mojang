@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -24,13 +23,8 @@ public class ConfiguredDecorator<DC extends DecoratorConfiguration> {
 	}
 
 	public <FC extends FeatureConfiguration, F extends Feature<FC>> boolean place(
-		WorldGenLevel worldGenLevel,
-		StructureFeatureManager structureFeatureManager,
-		ChunkGenerator chunkGenerator,
-		Random random,
-		BlockPos blockPos,
-		ConfiguredFeature<FC, F> configuredFeature
+		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, ConfiguredFeature<FC, F> configuredFeature
 	) {
-		return this.decorator.placeFeature(worldGenLevel, structureFeatureManager, chunkGenerator, random, blockPos, this.config, configuredFeature);
+		return this.decorator.placeFeature(worldGenLevel, chunkGenerator, random, blockPos, this.config, configuredFeature);
 	}
 }

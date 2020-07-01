@@ -22,7 +22,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagManager;
+import net.minecraft.tags.TagContainer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -45,11 +45,11 @@ public class BlockPredicateArgument implements ArgumentType<BlockPredicateArgume
 			BlockPredicateArgument.BlockPredicate blockPredicate = new BlockPredicateArgument.BlockPredicate(
 				blockStateParser.getState(), blockStateParser.getProperties().keySet(), blockStateParser.getNbt()
 			);
-			return tagManager -> blockPredicate;
+			return tagContainer -> blockPredicate;
 		} else {
 			ResourceLocation resourceLocation = blockStateParser.getTag();
-			return tagManager -> {
-				Tag<Block> tag = tagManager.getBlocks().getTag(resourceLocation);
+			return tagContainer -> {
+				Tag<Block> tag = tagContainer.getBlocks().getTag(resourceLocation);
 				if (tag == null) {
 					throw ERROR_UNKNOWN_TAG.create(resourceLocation.toString());
 				} else {
@@ -117,7 +117,7 @@ public class BlockPredicateArgument implements ArgumentType<BlockPredicateArgume
 	}
 
 	public interface Result {
-		Predicate<BlockInWorld> create(TagManager tagManager) throws CommandSyntaxException;
+		Predicate<BlockInWorld> create(TagContainer tagContainer) throws CommandSyntaxException;
 	}
 
 	static class TagPredicate implements Predicate<BlockInWorld> {

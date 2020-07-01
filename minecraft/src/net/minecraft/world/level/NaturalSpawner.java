@@ -310,7 +310,9 @@ public final class NaturalSpawner {
 		return new BlockPos(i, l, j);
 	}
 
-	public static boolean isValidEmptySpawnBlock(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, FluidState fluidState, EntityType entityType) {
+	public static boolean isValidEmptySpawnBlock(
+		BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, FluidState fluidState, EntityType<?> entityType
+	) {
 		if (blockState.isCollisionShapeFullBlock(blockGetter, blockPos)) {
 			return false;
 		} else if (blockState.isSignalSource()) {
@@ -350,7 +352,7 @@ public final class NaturalSpawner {
 		}
 	}
 
-	public static void spawnMobsForChunkGeneration(LevelAccessor levelAccessor, Biome biome, int i, int j, Random random) {
+	public static void spawnMobsForChunkGeneration(ServerLevelAccessor serverLevelAccessor, Biome biome, int i, int j, Random random) {
 		List<Biome.SpawnerData> list = biome.getMobs(MobCategory.CREATURE);
 		if (!list.isEmpty()) {
 			int k = i << 4;
@@ -369,21 +371,22 @@ public final class NaturalSpawner {
 					boolean bl = false;
 
 					for (int s = 0; !bl && s < 4; s++) {
-						BlockPos blockPos = getTopNonCollidingPos(levelAccessor, spawnerData.type, n, o);
-						if (spawnerData.type.canSummon() && isSpawnPositionOk(SpawnPlacements.getPlacementType(spawnerData.type), levelAccessor, blockPos, spawnerData.type)) {
+						BlockPos blockPos = getTopNonCollidingPos(serverLevelAccessor, spawnerData.type, n, o);
+						if (spawnerData.type.canSummon()
+							&& isSpawnPositionOk(SpawnPlacements.getPlacementType(spawnerData.type), serverLevelAccessor, blockPos, spawnerData.type)) {
 							float f = spawnerData.type.getWidth();
 							double d = Mth.clamp((double)n, (double)k + (double)f, (double)k + 16.0 - (double)f);
 							double e = Mth.clamp((double)o, (double)l + (double)f, (double)l + 16.0 - (double)f);
-							if (!levelAccessor.noCollision(spawnerData.type.getAABB(d, (double)blockPos.getY(), e))
+							if (!serverLevelAccessor.noCollision(spawnerData.type.getAABB(d, (double)blockPos.getY(), e))
 								|| !SpawnPlacements.checkSpawnRules(
-									spawnerData.type, levelAccessor, MobSpawnType.CHUNK_GENERATION, new BlockPos(d, (double)blockPos.getY(), e), levelAccessor.getRandom()
+									spawnerData.type, serverLevelAccessor, MobSpawnType.CHUNK_GENERATION, new BlockPos(d, (double)blockPos.getY(), e), serverLevelAccessor.getRandom()
 								)) {
 								continue;
 							}
 
 							Entity entity;
 							try {
-								entity = spawnerData.type.create(levelAccessor.getLevel());
+								entity = spawnerData.type.create(serverLevelAccessor.getLevel());
 							} catch (Exception var26) {
 								LOGGER.warn("Failed to create mob", (Throwable)var26);
 								continue;
@@ -392,11 +395,11 @@ public final class NaturalSpawner {
 							entity.moveTo(d, (double)blockPos.getY(), e, random.nextFloat() * 360.0F, 0.0F);
 							if (entity instanceof Mob) {
 								Mob mob = (Mob)entity;
-								if (mob.checkSpawnRules(levelAccessor, MobSpawnType.CHUNK_GENERATION) && mob.checkSpawnObstruction(levelAccessor)) {
+								if (mob.checkSpawnRules(serverLevelAccessor, MobSpawnType.CHUNK_GENERATION) && mob.checkSpawnObstruction(serverLevelAccessor)) {
 									spawnGroupData = mob.finalizeSpawn(
-										levelAccessor, levelAccessor.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.CHUNK_GENERATION, spawnGroupData, null
+										serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.CHUNK_GENERATION, spawnGroupData, null
 									);
-									levelAccessor.addFreshEntity(mob);
+									serverLevelAccessor.addFreshEntity(mob);
 									bl = true;
 								}
 							}

@@ -439,7 +439,7 @@ public class Biome {
 			worldgenRandom.setFeatureSeed(l, i, decoration.ordinal());
 
 			try {
-				configuredFeature.place(worldGenLevel, structureFeatureManager, chunkGenerator, worldgenRandom, blockPos);
+				configuredFeature.place(worldGenLevel, chunkGenerator, worldgenRandom, blockPos);
 			} catch (Exception var18) {
 				CrashReport crashReport2 = CrashReport.forThrowable(var18, "Feature placement");
 				crashReport2.addCategory("Feature")

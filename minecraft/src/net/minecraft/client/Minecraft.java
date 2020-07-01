@@ -117,7 +117,6 @@ import net.minecraft.client.resources.LegacyPackResourcesAdapter;
 import net.minecraft.client.resources.MobEffectTextureManager;
 import net.minecraft.client.resources.PackResourcesAdapterV4;
 import net.minecraft.client.resources.PaintingTextureManager;
-import net.minecraft.client.resources.ResourcePack;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.client.resources.SplashManager;
 import net.minecraft.client.resources.language.I18n;
@@ -276,7 +275,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private final boolean allowsChat;
 	private final ReloadableResourceManager resourceManager;
 	private final ClientPackSource clientPackSource;
-	private final PackRepository<ResourcePack> resourcePackRepository;
+	private final PackRepository resourcePackRepository;
 	private final LanguageManager languageManager;
 	private final BlockColors blockColors;
 	private final ItemColors itemColors;
@@ -358,7 +357,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.versionType = gameConfig.game.versionType;
 		this.profileProperties = gameConfig.user.profileProperties;
 		this.clientPackSource = new ClientPackSource(new File(this.gameDirectory, "server-resource-packs"), gameConfig.location.getAssetIndex());
-		this.resourcePackRepository = new PackRepository<>(
+		this.resourcePackRepository = new PackRepository(
 			Minecraft::createClientPackAdapter, this.clientPackSource, new FolderRepositorySource(this.resourcePackDirectory, PackSource.DEFAULT)
 		);
 		this.proxy = gameConfig.user.proxy;
@@ -1791,8 +1790,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		LevelStorageSource.LevelStorageAccess levelStorageAccess
 	) throws InterruptedException, ExecutionException {
 		DataPackConfig dataPackConfig = (DataPackConfig)function.apply(levelStorageAccess);
-		PackRepository<Pack> packRepository = new PackRepository<>(
-			Pack::new, new ServerPacksSource(), new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD)
+		PackRepository packRepository = new PackRepository(
+			new ServerPacksSource(), new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD)
 		);
 
 		try {
@@ -2134,9 +2133,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		snooper.setDynamicData("touch", this.options.touchscreen ? "touch" : "mouse");
 		int i = 0;
 
-		for (ResourcePack resourcePack : this.resourcePackRepository.getSelectedPacks()) {
-			if (!resourcePack.isRequired() && !resourcePack.isFixedPosition()) {
-				snooper.setDynamicData("resource_pack[" + i++ + "]", resourcePack.getId());
+		for (Pack pack : this.resourcePackRepository.getSelectedPacks()) {
+			if (!pack.isRequired() && !pack.isFixedPosition()) {
+				snooper.setDynamicData("resource_pack[" + i++ + "]", pack.getId());
 			}
 		}
 
@@ -2207,7 +2206,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		return this.resourceManager;
 	}
 
-	public PackRepository<ResourcePack> getResourcePackRepository() {
+	public PackRepository getResourcePackRepository() {
 		return this.resourcePackRepository;
 	}
 
@@ -2417,7 +2416,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		return this.renderBuffers;
 	}
 
-	private static ResourcePack createClientPackAdapter(
+	private static Pack createClientPackAdapter(
 		String string,
 		boolean bl,
 		Supplier<PackResources> supplier,
@@ -2436,7 +2435,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			supplier2 = adaptV4(supplier2);
 		}
 
-		return new ResourcePack(string, bl, supplier2, packResources, packMetadataSection, position, packSource);
+		return new Pack(string, bl, supplier2, packResources, packMetadataSection, position, packSource);
 	}
 
 	private static Supplier<PackResources> adaptV3(Supplier<PackResources> supplier) {
@@ -2460,17 +2459,17 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	@Environment(EnvType.CLIENT)
 	public static final class ServerStem implements AutoCloseable {
-		private final PackRepository<Pack> packRepository;
+		private final PackRepository packRepository;
 		private final ServerResources serverResources;
 		private final WorldData worldData;
 
-		private ServerStem(PackRepository<Pack> packRepository, ServerResources serverResources, WorldData worldData) {
+		private ServerStem(PackRepository packRepository, ServerResources serverResources, WorldData worldData) {
 			this.packRepository = packRepository;
 			this.serverResources = serverResources;
 			this.worldData = worldData;
 		}
 
-		public PackRepository<Pack> packRepository() {
+		public PackRepository packRepository() {
 			return this.packRepository;
 		}
 

@@ -9,6 +9,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
@@ -204,8 +205,8 @@ public abstract class Animal extends AgableMob {
 		}
 	}
 
-	public void spawnChildFromBreeding(Level level, Animal animal) {
-		AgableMob agableMob = this.getBreedOffspring(animal);
+	public void spawnChildFromBreeding(ServerLevel serverLevel, Animal animal) {
+		AgableMob agableMob = this.getBreedOffspring(serverLevel, animal);
 		if (agableMob != null) {
 			ServerPlayer serverPlayer = this.getLoveCause();
 			if (serverPlayer == null && animal.getLoveCause() != null) {
@@ -223,10 +224,10 @@ public abstract class Animal extends AgableMob {
 			animal.resetLove();
 			agableMob.setBaby(true);
 			agableMob.moveTo(this.getX(), this.getY(), this.getZ(), 0.0F, 0.0F);
-			level.addFreshEntity(agableMob);
-			level.broadcastEntityEvent(this, (byte)18);
-			if (level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-				level.addFreshEntity(new ExperienceOrb(level, this.getX(), this.getY(), this.getZ(), this.getRandom().nextInt(7) + 1));
+			serverLevel.addFreshEntity(agableMob);
+			serverLevel.broadcastEntityEvent(this, (byte)18);
+			if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+				serverLevel.addFreshEntity(new ExperienceOrb(serverLevel, this.getX(), this.getY(), this.getZ(), this.getRandom().nextInt(7) + 1));
 			}
 		}
 	}

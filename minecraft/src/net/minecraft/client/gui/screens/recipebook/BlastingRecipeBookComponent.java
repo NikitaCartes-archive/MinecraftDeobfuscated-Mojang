@@ -11,26 +11,6 @@ import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 @Environment(EnvType.CLIENT)
 public class BlastingRecipeBookComponent extends AbstractFurnaceRecipeBookComponent {
 	@Override
-	protected boolean getFilteringCraftable() {
-		return this.book.isBlastingFurnaceFilteringCraftable();
-	}
-
-	@Override
-	protected void setFilteringCraftable(boolean bl) {
-		this.book.setBlastingFurnaceFilteringCraftable(bl);
-	}
-
-	@Override
-	protected boolean isGuiOpen() {
-		return this.book.isBlastingFurnaceGuiOpen();
-	}
-
-	@Override
-	protected void setGuiOpen(boolean bl) {
-		this.book.setBlastingFurnaceGuiOpen(bl);
-	}
-
-	@Override
 	protected Component getRecipeFilterName() {
 		return new TranslatableComponent("gui.recipebook.toggleRecipes.blastable");
 	}

@@ -40,7 +40,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -157,7 +156,6 @@ public abstract class Entity implements Nameable, CommandSource {
 	protected boolean wasEyeInWater;
 	@Nullable
 	protected Tag<Fluid> fluidOnEyes;
-	protected boolean isTouchingLava;
 	public int invulnerableTime;
 	protected boolean firstTick = true;
 	protected final SynchedEntityData entityData;
@@ -175,12 +173,10 @@ public abstract class Entity implements Nameable, CommandSource {
 	public int yChunk;
 	public int zChunk;
 	private boolean movedSinceLastChunkCheck;
-	public long xp;
-	public long yp;
-	public long zp;
+	private Vec3 packetCoordinates;
 	public boolean noCulling;
 	public boolean hasImpulse;
-	public int changingDimensionDelay;
+	private int portalCooldown;
 	protected boolean isInsidePortal;
 	protected int portalTime;
 	protected BlockPos portalEntranceBlock;
@@ -203,6 +199,7 @@ public abstract class Entity implements Nameable, CommandSource {
 		this.dimensions = entityType.getDimensions();
 		this.position = Vec3.ZERO;
 		this.blockPosition = BlockPos.ZERO;
+		this.packetCoordinates = Vec3.ZERO;
 		this.setPos(0.0, 0.0, 0.0);
 		this.entityData = new SynchedEntityData(this);
 		this.entityData.define(DATA_SHARED_FLAGS_ID, (byte)0);
@@ -237,9 +234,16 @@ public abstract class Entity implements Nameable, CommandSource {
 	}
 
 	public void setPacketCoordinates(double d, double e, double f) {
-		this.xp = ClientboundMoveEntityPacket.entityToPacket(d);
-		this.yp = ClientboundMoveEntityPacket.entityToPacket(e);
-		this.zp = ClientboundMoveEntityPacket.entityToPacket(f);
+		this.setPacketCoordinates(new Vec3(d, e, f));
+	}
+
+	public void setPacketCoordinates(Vec3 vec3) {
+		this.packetCoordinates = vec3;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Vec3 getPacketCoordinates() {
+		return this.packetCoordinates;
 	}
 
 	public EntityType<?> getType() {
@@ -325,9 +329,7 @@ public abstract class Entity implements Nameable, CommandSource {
 
 	public void setPos(double d, double e, double f) {
 		this.setPosRaw(d, e, f);
-		float g = this.dimensions.width / 2.0F;
-		float h = this.dimensions.height;
-		this.setBoundingBox(new AABB(d - (double)g, e, f - (double)g, d + (double)g, e + (double)h, f + (double)g));
+		this.setBoundingBox(this.dimensions.makeBoundingBox(d, e, f));
 	}
 
 	protected void reapplyPosition() {
@@ -412,9 +414,17 @@ public abstract class Entity implements Nameable, CommandSource {
 		this.level.getProfiler().pop();
 	}
 
-	protected void processDimensionDelay() {
-		if (this.changingDimensionDelay > 0) {
-			this.changingDimensionDelay--;
+	public void setPortalCooldown() {
+		this.portalCooldown = this.getDimensionChangingDelay();
+	}
+
+	public boolean isOnPortalCooldown() {
+		return this.portalCooldown > 0;
+	}
+
+	protected void processPortalCooldown() {
+		if (this.isOnPortalCooldown()) {
+			this.portalCooldown--;
 		}
 	}
 
@@ -555,7 +565,6 @@ public abstract class Entity implements Nameable, CommandSource {
 			}
 
 			try {
-				this.isTouchingLava = false;
 				this.checkInsideBlocks();
 			} catch (Throwable var18) {
 				CrashReport crashReport = CrashReport.forThrowable(var18, "Checking entity block collision");
@@ -1062,12 +1071,8 @@ public abstract class Entity implements Nameable, CommandSource {
 		return this.fluidOnEyes == tag;
 	}
 
-	public void setInLava() {
-		this.isTouchingLava = true;
-	}
-
 	public boolean isInLava() {
-		return this.isTouchingLava;
+		return !this.firstTick && this.fluidHeight.getDouble(FluidTags.LAVA) > 0.0;
 	}
 
 	public void moveRelative(float f, Vec3 vec3) {
@@ -1322,7 +1327,7 @@ public abstract class Entity implements Nameable, CommandSource {
 	public CompoundTag saveWithoutId(CompoundTag compoundTag) {
 		try {
 			if (this.vehicle != null) {
-				compoundTag.put("Pos", this.newDoubleList(this.vehicle.getX(), this.vehicle.getY(), this.vehicle.getZ()));
+				compoundTag.put("Pos", this.newDoubleList(this.vehicle.getX(), this.getY(), this.vehicle.getZ()));
 			} else {
 				compoundTag.put("Pos", this.newDoubleList(this.getX(), this.getY(), this.getZ()));
 			}
@@ -1335,7 +1340,7 @@ public abstract class Entity implements Nameable, CommandSource {
 			compoundTag.putShort("Air", (short)this.getAirSupply());
 			compoundTag.putBoolean("OnGround", this.onGround);
 			compoundTag.putBoolean("Invulnerable", this.invulnerable);
-			compoundTag.putInt("PortalCooldown", this.changingDimensionDelay);
+			compoundTag.putInt("PortalCooldown", this.portalCooldown);
 			compoundTag.putUUID("UUID", this.getUUID());
 			Component component = this.getCustomName();
 			if (component != null) {
@@ -1414,7 +1419,7 @@ public abstract class Entity implements Nameable, CommandSource {
 			this.setAirSupply(compoundTag.getShort("Air"));
 			this.onGround = compoundTag.getBoolean("OnGround");
 			this.invulnerable = compoundTag.getBoolean("Invulnerable");
-			this.changingDimensionDelay = compoundTag.getInt("PortalCooldown");
+			this.portalCooldown = compoundTag.getInt("PortalCooldown");
 			if (compoundTag.hasUUID("UUID")) {
 				this.uuid = compoundTag.getUUID("UUID");
 				this.stringUUID = this.uuid.toString();
@@ -1693,8 +1698,8 @@ public abstract class Entity implements Nameable, CommandSource {
 	}
 
 	public void handleInsidePortal(BlockPos blockPos) {
-		if (this.changingDimensionDelay > 0) {
-			this.changingDimensionDelay = this.getDimensionChangingDelay();
+		if (this.isOnPortalCooldown()) {
+			this.setPortalCooldown();
 		} else {
 			if (!this.level.isClientSide && !blockPos.equals(this.portalEntranceBlock)) {
 				this.portalEntranceBlock = new BlockPos(blockPos);
@@ -1742,7 +1747,7 @@ public abstract class Entity implements Nameable, CommandSource {
 				if (serverLevel2 != null && minecraftServer.isNetherEnabled() && !this.isPassenger() && this.portalTime++ >= i) {
 					this.level.getProfiler().push("portal");
 					this.portalTime = i;
-					this.changingDimensionDelay = this.getDimensionChangingDelay();
+					this.setPortalCooldown();
 					this.changeDimension(serverLevel2);
 					this.level.getProfiler().pop();
 				}
@@ -1758,7 +1763,7 @@ public abstract class Entity implements Nameable, CommandSource {
 				}
 			}
 
-			this.processDimensionDelay();
+			this.processPortalCooldown();
 		}
 	}
 
@@ -1935,7 +1940,7 @@ public abstract class Entity implements Nameable, CommandSource {
 		this.entityData.set(DATA_AIR_SUPPLY_ID, i);
 	}
 
-	public void thunderHit(LightningBolt lightningBolt) {
+	public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
 		this.setRemainingFireTicks(this.remainingFireTicks + 1);
 		if (this.remainingFireTicks == 0) {
 			this.setSecondsOnFire(8);
@@ -1969,7 +1974,7 @@ public abstract class Entity implements Nameable, CommandSource {
 		this.fallDistance = 0.0F;
 	}
 
-	public void killed(LivingEntity livingEntity) {
+	public void killed(ServerLevel serverLevel, LivingEntity livingEntity) {
 	}
 
 	protected void checkInBlock(double d, double e, double f) {
@@ -2084,7 +2089,7 @@ public abstract class Entity implements Nameable, CommandSource {
 		CompoundTag compoundTag = entity.saveWithoutId(new CompoundTag());
 		compoundTag.remove("Dimension");
 		this.load(compoundTag);
-		this.changingDimensionDelay = entity.changingDimensionDelay;
+		this.portalCooldown = entity.portalCooldown;
 		this.portalEntranceBlock = entity.portalEntranceBlock;
 		this.portalEntranceOffset = entity.portalEntranceOffset;
 		this.portalEntranceForwards = entity.portalEntranceForwards;

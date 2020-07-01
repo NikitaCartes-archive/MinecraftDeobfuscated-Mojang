@@ -21,16 +21,26 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu<Container> {
 	private final ContainerData data;
 	protected final Level level;
 	private final RecipeType<? extends AbstractCookingRecipe> recipeType;
+	private final RecipeBookType recipeBookType;
 
-	protected AbstractFurnaceMenu(MenuType<?> menuType, RecipeType<? extends AbstractCookingRecipe> recipeType, int i, Inventory inventory) {
-		this(menuType, recipeType, i, inventory, new SimpleContainer(3), new SimpleContainerData(4));
+	protected AbstractFurnaceMenu(
+		MenuType<?> menuType, RecipeType<? extends AbstractCookingRecipe> recipeType, RecipeBookType recipeBookType, int i, Inventory inventory
+	) {
+		this(menuType, recipeType, recipeBookType, i, inventory, new SimpleContainer(3), new SimpleContainerData(4));
 	}
 
 	protected AbstractFurnaceMenu(
-		MenuType<?> menuType, RecipeType<? extends AbstractCookingRecipe> recipeType, int i, Inventory inventory, Container container, ContainerData containerData
+		MenuType<?> menuType,
+		RecipeType<? extends AbstractCookingRecipe> recipeType,
+		RecipeBookType recipeBookType,
+		int i,
+		Inventory inventory,
+		Container container,
+		ContainerData containerData
 	) {
 		super(menuType, i);
 		this.recipeType = recipeType;
+		this.recipeBookType = recipeBookType;
 		checkContainerSize(container, 3);
 		checkContainerDataCount(containerData, 4);
 		this.container = container;
@@ -178,5 +188,11 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu<Container> {
 	@Environment(EnvType.CLIENT)
 	public boolean isLit() {
 		return this.data.get(0) > 0;
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public RecipeBookType getRecipeBookType() {
+		return this.recipeBookType;
 	}
 }

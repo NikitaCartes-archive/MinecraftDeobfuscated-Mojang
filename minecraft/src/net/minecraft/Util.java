@@ -430,6 +430,14 @@ public class Util {
 		Files.copy(path3, path5);
 	}
 
+	@Environment(EnvType.CLIENT)
+	public static String sanitizeResourceName(String string) {
+		return (String)string.toLowerCase(Locale.ROOT)
+			.chars()
+			.mapToObj(i -> ResourceLocation.isAllowedInResourceLocation((char)i) ? Character.toString((char)i) : "_")
+			.collect(Collectors.joining());
+	}
+
 	static enum IdentityStrategy implements Strategy<Object> {
 		INSTANCE;
 
