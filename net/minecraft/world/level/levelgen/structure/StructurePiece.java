@@ -14,8 +14,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
@@ -187,7 +187,7 @@ public abstract class StructurePiece {
         return j;
     }
 
-    protected void placeBlock(LevelAccessor levelAccessor, BlockState blockState, int i, int j, int k, BoundingBox boundingBox) {
+    protected void placeBlock(WorldGenLevel worldGenLevel, BlockState blockState, int i, int j, int k, BoundingBox boundingBox) {
         BlockPos blockPos = new BlockPos(this.getWorldX(i, k), this.getWorldY(j), this.getWorldZ(i, k));
         if (!boundingBox.isInside(blockPos)) {
             return;
@@ -198,13 +198,13 @@ public abstract class StructurePiece {
         if (this.rotation != Rotation.NONE) {
             blockState = blockState.rotate(this.rotation);
         }
-        levelAccessor.setBlock(blockPos, blockState, 2);
-        FluidState fluidState = levelAccessor.getFluidState(blockPos);
+        worldGenLevel.setBlock(blockPos, blockState, 2);
+        FluidState fluidState = worldGenLevel.getFluidState(blockPos);
         if (!fluidState.isEmpty()) {
-            levelAccessor.getLiquidTicks().scheduleTick(blockPos, fluidState.getType(), 0);
+            worldGenLevel.getLiquidTicks().scheduleTick(blockPos, fluidState.getType(), 0);
         }
         if (SHAPE_CHECK_BLOCKS.contains(blockState.getBlock())) {
-            levelAccessor.getChunk(blockPos).markPosForPostprocessing(blockPos);
+            worldGenLevel.getChunk(blockPos).markPosForPostprocessing(blockPos);
         }
     }
 
@@ -230,65 +230,65 @@ public abstract class StructurePiece {
         return m < levelReader.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, l, n);
     }
 
-    protected void generateAirBox(LevelAccessor levelAccessor, BoundingBox boundingBox, int i, int j, int k, int l, int m, int n) {
+    protected void generateAirBox(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k, int l, int m, int n) {
         for (int o = j; o <= m; ++o) {
             for (int p = i; p <= l; ++p) {
                 for (int q = k; q <= n; ++q) {
-                    this.placeBlock(levelAccessor, Blocks.AIR.defaultBlockState(), p, o, q, boundingBox);
+                    this.placeBlock(worldGenLevel, Blocks.AIR.defaultBlockState(), p, o, q, boundingBox);
                 }
             }
         }
     }
 
-    protected void generateBox(LevelAccessor levelAccessor, BoundingBox boundingBox, int i, int j, int k, int l, int m, int n, BlockState blockState, BlockState blockState2, boolean bl) {
+    protected void generateBox(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k, int l, int m, int n, BlockState blockState, BlockState blockState2, boolean bl) {
         for (int o = j; o <= m; ++o) {
             for (int p = i; p <= l; ++p) {
                 for (int q = k; q <= n; ++q) {
-                    if (bl && this.getBlock(levelAccessor, p, o, q, boundingBox).isAir()) continue;
+                    if (bl && this.getBlock(worldGenLevel, p, o, q, boundingBox).isAir()) continue;
                     if (o == j || o == m || p == i || p == l || q == k || q == n) {
-                        this.placeBlock(levelAccessor, blockState, p, o, q, boundingBox);
+                        this.placeBlock(worldGenLevel, blockState, p, o, q, boundingBox);
                         continue;
                     }
-                    this.placeBlock(levelAccessor, blockState2, p, o, q, boundingBox);
+                    this.placeBlock(worldGenLevel, blockState2, p, o, q, boundingBox);
                 }
             }
         }
     }
 
-    protected void generateBox(LevelAccessor levelAccessor, BoundingBox boundingBox, int i, int j, int k, int l, int m, int n, boolean bl, Random random, BlockSelector blockSelector) {
+    protected void generateBox(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k, int l, int m, int n, boolean bl, Random random, BlockSelector blockSelector) {
         for (int o = j; o <= m; ++o) {
             for (int p = i; p <= l; ++p) {
                 for (int q = k; q <= n; ++q) {
-                    if (bl && this.getBlock(levelAccessor, p, o, q, boundingBox).isAir()) continue;
+                    if (bl && this.getBlock(worldGenLevel, p, o, q, boundingBox).isAir()) continue;
                     blockSelector.next(random, p, o, q, o == j || o == m || p == i || p == l || q == k || q == n);
-                    this.placeBlock(levelAccessor, blockSelector.getNext(), p, o, q, boundingBox);
+                    this.placeBlock(worldGenLevel, blockSelector.getNext(), p, o, q, boundingBox);
                 }
             }
         }
     }
 
-    protected void generateMaybeBox(LevelAccessor levelAccessor, BoundingBox boundingBox, Random random, float f, int i, int j, int k, int l, int m, int n, BlockState blockState, BlockState blockState2, boolean bl, boolean bl2) {
+    protected void generateMaybeBox(WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, float f, int i, int j, int k, int l, int m, int n, BlockState blockState, BlockState blockState2, boolean bl, boolean bl2) {
         for (int o = j; o <= m; ++o) {
             for (int p = i; p <= l; ++p) {
                 for (int q = k; q <= n; ++q) {
-                    if (random.nextFloat() > f || bl && this.getBlock(levelAccessor, p, o, q, boundingBox).isAir() || bl2 && !this.isInterior(levelAccessor, p, o, q, boundingBox)) continue;
+                    if (random.nextFloat() > f || bl && this.getBlock(worldGenLevel, p, o, q, boundingBox).isAir() || bl2 && !this.isInterior(worldGenLevel, p, o, q, boundingBox)) continue;
                     if (o == j || o == m || p == i || p == l || q == k || q == n) {
-                        this.placeBlock(levelAccessor, blockState, p, o, q, boundingBox);
+                        this.placeBlock(worldGenLevel, blockState, p, o, q, boundingBox);
                         continue;
                     }
-                    this.placeBlock(levelAccessor, blockState2, p, o, q, boundingBox);
+                    this.placeBlock(worldGenLevel, blockState2, p, o, q, boundingBox);
                 }
             }
         }
     }
 
-    protected void maybeGenerateBlock(LevelAccessor levelAccessor, BoundingBox boundingBox, Random random, float f, int i, int j, int k, BlockState blockState) {
+    protected void maybeGenerateBlock(WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, float f, int i, int j, int k, BlockState blockState) {
         if (random.nextFloat() < f) {
-            this.placeBlock(levelAccessor, blockState, i, j, k, boundingBox);
+            this.placeBlock(worldGenLevel, blockState, i, j, k, boundingBox);
         }
     }
 
-    protected void generateUpperHalfSphere(LevelAccessor levelAccessor, BoundingBox boundingBox, int i, int j, int k, int l, int m, int n, BlockState blockState, boolean bl) {
+    protected void generateUpperHalfSphere(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k, int l, int m, int n, BlockState blockState, boolean bl) {
         float f = l - i + 1;
         float g = m - j + 1;
         float h = n - k + 1;
@@ -301,29 +301,29 @@ public abstract class StructurePiece {
                 for (int u = k; u <= n; ++u) {
                     float w;
                     float v = ((float)u - p) / (h * 0.5f);
-                    if (bl && this.getBlock(levelAccessor, s, q, u, boundingBox).isAir() || !((w = t * t + r * r + v * v) <= 1.05f)) continue;
-                    this.placeBlock(levelAccessor, blockState, s, q, u, boundingBox);
+                    if (bl && this.getBlock(worldGenLevel, s, q, u, boundingBox).isAir() || !((w = t * t + r * r + v * v) <= 1.05f)) continue;
+                    this.placeBlock(worldGenLevel, blockState, s, q, u, boundingBox);
                 }
             }
         }
     }
 
-    protected void fillColumnDown(LevelAccessor levelAccessor, BlockState blockState, int i, int j, int k, BoundingBox boundingBox) {
+    protected void fillColumnDown(WorldGenLevel worldGenLevel, BlockState blockState, int i, int j, int k, BoundingBox boundingBox) {
         int n;
         int m;
         int l = this.getWorldX(i, k);
         if (!boundingBox.isInside(new BlockPos(l, m = this.getWorldY(j), n = this.getWorldZ(i, k)))) {
             return;
         }
-        while ((levelAccessor.isEmptyBlock(new BlockPos(l, m, n)) || levelAccessor.getBlockState(new BlockPos(l, m, n)).getMaterial().isLiquid()) && m > 1) {
-            levelAccessor.setBlock(new BlockPos(l, m, n), blockState, 2);
+        while ((worldGenLevel.isEmptyBlock(new BlockPos(l, m, n)) || worldGenLevel.getBlockState(new BlockPos(l, m, n)).getMaterial().isLiquid()) && m > 1) {
+            worldGenLevel.setBlock(new BlockPos(l, m, n), blockState, 2);
             --m;
         }
     }
 
-    protected boolean createChest(LevelAccessor levelAccessor, BoundingBox boundingBox, Random random, int i, int j, int k, ResourceLocation resourceLocation) {
+    protected boolean createChest(WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, int i, int j, int k, ResourceLocation resourceLocation) {
         BlockPos blockPos = new BlockPos(this.getWorldX(i, k), this.getWorldY(j), this.getWorldZ(i, k));
-        return this.createChest(levelAccessor, boundingBox, random, blockPos, resourceLocation, null);
+        return this.createChest(worldGenLevel, boundingBox, random, blockPos, resourceLocation, null);
     }
 
     public static BlockState reorient(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
@@ -362,26 +362,26 @@ public abstract class StructurePiece {
         return (BlockState)blockState.setValue(HorizontalDirectionalBlock.FACING, direction3);
     }
 
-    protected boolean createChest(LevelAccessor levelAccessor, BoundingBox boundingBox, Random random, BlockPos blockPos, ResourceLocation resourceLocation, @Nullable BlockState blockState) {
-        if (!boundingBox.isInside(blockPos) || levelAccessor.getBlockState(blockPos).is(Blocks.CHEST)) {
+    protected boolean createChest(ServerLevelAccessor serverLevelAccessor, BoundingBox boundingBox, Random random, BlockPos blockPos, ResourceLocation resourceLocation, @Nullable BlockState blockState) {
+        if (!boundingBox.isInside(blockPos) || serverLevelAccessor.getBlockState(blockPos).is(Blocks.CHEST)) {
             return false;
         }
         if (blockState == null) {
-            blockState = StructurePiece.reorient(levelAccessor, blockPos, Blocks.CHEST.defaultBlockState());
+            blockState = StructurePiece.reorient(serverLevelAccessor, blockPos, Blocks.CHEST.defaultBlockState());
         }
-        levelAccessor.setBlock(blockPos, blockState, 2);
-        BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos);
+        serverLevelAccessor.setBlock(blockPos, blockState, 2);
+        BlockEntity blockEntity = serverLevelAccessor.getBlockEntity(blockPos);
         if (blockEntity instanceof ChestBlockEntity) {
             ((ChestBlockEntity)blockEntity).setLootTable(resourceLocation, random.nextLong());
         }
         return true;
     }
 
-    protected boolean createDispenser(LevelAccessor levelAccessor, BoundingBox boundingBox, Random random, int i, int j, int k, Direction direction, ResourceLocation resourceLocation) {
+    protected boolean createDispenser(WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, int i, int j, int k, Direction direction, ResourceLocation resourceLocation) {
         BlockPos blockPos = new BlockPos(this.getWorldX(i, k), this.getWorldY(j), this.getWorldZ(i, k));
-        if (boundingBox.isInside(blockPos) && !levelAccessor.getBlockState(blockPos).is(Blocks.DISPENSER)) {
-            this.placeBlock(levelAccessor, (BlockState)Blocks.DISPENSER.defaultBlockState().setValue(DispenserBlock.FACING, direction), i, j, k, boundingBox);
-            BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos);
+        if (boundingBox.isInside(blockPos) && !worldGenLevel.getBlockState(blockPos).is(Blocks.DISPENSER)) {
+            this.placeBlock(worldGenLevel, (BlockState)Blocks.DISPENSER.defaultBlockState().setValue(DispenserBlock.FACING, direction), i, j, k, boundingBox);
+            BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos);
             if (blockEntity instanceof DispenserBlockEntity) {
                 ((DispenserBlockEntity)blockEntity).setLootTable(resourceLocation, random.nextLong());
             }

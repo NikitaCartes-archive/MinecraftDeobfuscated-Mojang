@@ -365,6 +365,10 @@ extends Entity {
             }
         }
         this.updateInWaterStateAndDoFluidPushing();
+        if (this.isInLava()) {
+            this.lavaHurt();
+            this.fallDistance *= 0.5f;
+        }
     }
 
     protected double getMaxSpeed() {

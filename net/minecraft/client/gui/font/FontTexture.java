@@ -6,7 +6,6 @@ package net.minecraft.client.gui.font;
 import com.mojang.blaze3d.font.RawGlyph;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
-import java.io.Closeable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
@@ -18,8 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class FontTexture
-extends AbstractTexture
-implements Closeable {
+extends AbstractTexture {
     private final ResourceLocation name;
     private final RenderType normalType;
     private final RenderType seeThroughType;

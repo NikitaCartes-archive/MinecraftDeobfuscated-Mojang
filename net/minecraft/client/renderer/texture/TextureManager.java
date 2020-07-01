@@ -73,13 +73,24 @@ AutoCloseable {
         AbstractTexture abstractTexture2 = this.byPath.put(resourceLocation, abstractTexture = this.loadTexture(resourceLocation, abstractTexture));
         if (abstractTexture2 != abstractTexture) {
             if (abstractTexture2 != null && abstractTexture2 != MissingTextureAtlasSprite.getTexture()) {
-                abstractTexture2.releaseId();
                 this.tickableTextures.remove(abstractTexture2);
+                this.safeClose(resourceLocation, abstractTexture2);
             }
             if (abstractTexture instanceof Tickable) {
                 this.tickableTextures.add((Tickable)((Object)abstractTexture));
             }
         }
+    }
+
+    private void safeClose(ResourceLocation resourceLocation, AbstractTexture abstractTexture) {
+        if (abstractTexture != MissingTextureAtlasSprite.getTexture()) {
+            try {
+                abstractTexture.close();
+            } catch (Exception exception) {
+                LOGGER.warn("Failed to close texture {}", (Object)resourceLocation, (Object)exception);
+            }
+        }
+        abstractTexture.releaseId();
     }
 
     private AbstractTexture loadTexture(ResourceLocation resourceLocation, AbstractTexture abstractTexture) {
@@ -94,9 +105,8 @@ AutoCloseable {
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Registering texture");
             CrashReportCategory crashReportCategory = crashReport.addCategory("Resource location being registered");
-            AbstractTexture abstractTexture2 = abstractTexture;
             crashReportCategory.setDetail("Resource location", resourceLocation);
-            crashReportCategory.setDetail("Texture object class", () -> abstractTexture2.getClass().getName());
+            crashReportCategory.setDetail("Texture object class", () -> abstractTexture.getClass().getName());
             throw new ReportedException(crashReport);
         }
     }
@@ -149,7 +159,7 @@ AutoCloseable {
 
     @Override
     public void close() {
-        this.byPath.values().forEach(AbstractTexture::releaseId);
+        this.byPath.forEach(this::safeClose);
         this.byPath.clear();
         this.tickableTextures.clear();
         this.prefixRegister.clear();

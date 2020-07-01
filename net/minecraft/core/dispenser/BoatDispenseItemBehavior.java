@@ -7,10 +7,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 
 public class BoatDispenseItemBehavior
@@ -26,7 +26,7 @@ extends DefaultDispenseItemBehavior {
     public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
         double g;
         Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
-        Level level = blockSource.getLevel();
+        ServerLevel level = blockSource.getLevel();
         double d = blockSource.x() + (double)((float)direction.getStepX() * 1.125f);
         double e = blockSource.y() + (double)((float)direction.getStepY() * 1.125f);
         double f = blockSource.z() + (double)((float)direction.getStepZ() * 1.125f);

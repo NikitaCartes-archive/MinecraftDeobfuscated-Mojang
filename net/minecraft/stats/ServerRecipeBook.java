@@ -19,6 +19,7 @@ import net.minecraft.network.protocol.game.ClientboundRecipePacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.RecipeBook;
+import net.minecraft.stats.RecipeBookSettings;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import org.apache.logging.log4j.LogManager;
@@ -59,19 +60,12 @@ extends RecipeBook {
     }
 
     private void sendRecipes(ClientboundRecipePacket.State state, ServerPlayer serverPlayer, List<ResourceLocation> list) {
-        serverPlayer.connection.send(new ClientboundRecipePacket(state, list, Collections.emptyList(), this.guiOpen, this.filteringCraftable, this.furnaceGuiOpen, this.furnaceFilteringCraftable));
+        serverPlayer.connection.send(new ClientboundRecipePacket(state, list, Collections.emptyList(), this.getBookSettings()));
     }
 
     public CompoundTag toNbt() {
         CompoundTag compoundTag = new CompoundTag();
-        compoundTag.putBoolean("isGuiOpen", this.guiOpen);
-        compoundTag.putBoolean("isFilteringCraftable", this.filteringCraftable);
-        compoundTag.putBoolean("isFurnaceGuiOpen", this.furnaceGuiOpen);
-        compoundTag.putBoolean("isFurnaceFilteringCraftable", this.furnaceFilteringCraftable);
-        compoundTag.putBoolean("isBlastingFurnaceGuiOpen", this.blastingFurnaceGuiOpen);
-        compoundTag.putBoolean("isBlastingFurnaceFilteringCraftable", this.blastingFurnaceFilteringCraftable);
-        compoundTag.putBoolean("isSmokerGuiOpen", this.smokerGuiOpen);
-        compoundTag.putBoolean("isSmokerFilteringCraftable", this.smokerFilteringCraftable);
+        this.getBookSettings().write(compoundTag);
         ListTag listTag = new ListTag();
         for (ResourceLocation resourceLocation : this.known) {
             listTag.add(StringTag.valueOf(resourceLocation.toString()));
@@ -86,14 +80,7 @@ extends RecipeBook {
     }
 
     public void fromNbt(CompoundTag compoundTag, RecipeManager recipeManager) {
-        this.guiOpen = compoundTag.getBoolean("isGuiOpen");
-        this.filteringCraftable = compoundTag.getBoolean("isFilteringCraftable");
-        this.furnaceGuiOpen = compoundTag.getBoolean("isFurnaceGuiOpen");
-        this.furnaceFilteringCraftable = compoundTag.getBoolean("isFurnaceFilteringCraftable");
-        this.blastingFurnaceGuiOpen = compoundTag.getBoolean("isBlastingFurnaceGuiOpen");
-        this.blastingFurnaceFilteringCraftable = compoundTag.getBoolean("isBlastingFurnaceFilteringCraftable");
-        this.smokerGuiOpen = compoundTag.getBoolean("isSmokerGuiOpen");
-        this.smokerFilteringCraftable = compoundTag.getBoolean("isSmokerFilteringCraftable");
+        this.setBookSettings(RecipeBookSettings.read(compoundTag));
         ListTag listTag = compoundTag.getList("recipes", 8);
         this.loadRecipes(listTag, this::add, recipeManager);
         ListTag listTag2 = compoundTag.getList("toBeDisplayed", 8);
@@ -119,7 +106,7 @@ extends RecipeBook {
     }
 
     public void sendInitialRecipeBook(ServerPlayer serverPlayer) {
-        serverPlayer.connection.send(new ClientboundRecipePacket(ClientboundRecipePacket.State.INIT, this.known, this.highlight, this.guiOpen, this.filteringCraftable, this.furnaceGuiOpen, this.furnaceFilteringCraftable));
+        serverPlayer.connection.send(new ClientboundRecipePacket(ClientboundRecipePacket.State.INIT, this.known, this.highlight, this.getBookSettings()));
     }
 }
 

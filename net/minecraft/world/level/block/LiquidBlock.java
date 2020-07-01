@@ -13,7 +13,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -33,7 +32,6 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -172,17 +170,6 @@ implements BucketPickup {
             return this.fluid;
         }
         return Fluids.EMPTY;
-    }
-
-    @Override
-    public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-        if (this.fluid.is(FluidTags.LAVA)) {
-            float f = (float)blockPos.getY() + blockState.getFluidState().getHeight(level, blockPos);
-            AABB aABB = entity.getBoundingBox();
-            if (aABB.minY < (double)f || (double)f > aABB.maxY) {
-                entity.setInLava();
-            }
-        }
     }
 }
 

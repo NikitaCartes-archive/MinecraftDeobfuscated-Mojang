@@ -9,22 +9,22 @@ import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.tags.TagManager;
+import net.minecraft.tags.TagContainer;
 
 public class ClientboundUpdateTagsPacket
 implements Packet<ClientGamePacketListener> {
-    private TagManager tags;
+    private TagContainer tags;
 
     public ClientboundUpdateTagsPacket() {
     }
 
-    public ClientboundUpdateTagsPacket(TagManager tagManager) {
-        this.tags = tagManager;
+    public ClientboundUpdateTagsPacket(TagContainer tagContainer) {
+        this.tags = tagContainer;
     }
 
     @Override
     public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-        this.tags = TagManager.deserializeFromNetwork(friendlyByteBuf);
+        this.tags = TagContainer.deserializeFromNetwork(friendlyByteBuf);
     }
 
     @Override
@@ -38,7 +38,7 @@ implements Packet<ClientGamePacketListener> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public TagManager getTags() {
+    public TagContainer getTags() {
         return this.tags;
     }
 }

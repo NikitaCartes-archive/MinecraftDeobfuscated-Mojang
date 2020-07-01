@@ -7,7 +7,6 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -21,7 +20,7 @@ extends Feature<U> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, U featureConfiguration) {
+    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, U featureConfiguration) {
         BlockState blockState = this.getRandomFlower(random, blockPos, featureConfiguration);
         int i = 0;
         for (int j = 0; j < this.getCount(featureConfiguration); ++j) {

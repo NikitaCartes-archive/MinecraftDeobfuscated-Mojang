@@ -528,8 +528,8 @@ FlyingAnimal {
     }
 
     @Override
-    public Bee getBreedOffspring(AgableMob agableMob) {
-        return EntityType.BEE.create(this.level);
+    public Bee getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+        return EntityType.BEE.create(serverLevel);
     }
 
     @Override
@@ -592,8 +592,8 @@ FlyingAnimal {
     }
 
     @Override
-    public /* synthetic */ AgableMob getBreedOffspring(AgableMob agableMob) {
-        return this.getBreedOffspring(agableMob);
+    public /* synthetic */ AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+        return this.getBreedOffspring(serverLevel, agableMob);
     }
 
     class BeeEnterHiveGoal

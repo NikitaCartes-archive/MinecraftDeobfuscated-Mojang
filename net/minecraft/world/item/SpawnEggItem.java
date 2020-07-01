@@ -13,6 +13,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -57,7 +58,7 @@ extends Item {
     public InteractionResult useOn(UseOnContext useOnContext) {
         BlockEntity blockEntity;
         Level level = useOnContext.getLevel();
-        if (level.isClientSide) {
+        if (!(level instanceof ServerLevel)) {
             return InteractionResult.SUCCESS;
         }
         ItemStack itemStack = useOnContext.getItemInHand();
@@ -75,7 +76,7 @@ extends Item {
         }
         BlockPos blockPos2 = blockState.getCollisionShape(level, blockPos).isEmpty() ? blockPos : blockPos.relative(direction);
         EntityType<?> entityType2 = this.getType(itemStack.getTag());
-        if (entityType2.spawn(level, itemStack, useOnContext.getPlayer(), blockPos2, MobSpawnType.SPAWN_EGG, true, !Objects.equals(blockPos, blockPos2) && direction == Direction.UP) != null) {
+        if (entityType2.spawn((ServerLevel)level, itemStack, useOnContext.getPlayer(), blockPos2, MobSpawnType.SPAWN_EGG, true, !Objects.equals(blockPos, blockPos2) && direction == Direction.UP) != null) {
             itemStack.shrink(1);
         }
         return InteractionResult.CONSUME;
@@ -88,7 +89,7 @@ extends Item {
         if (((HitResult)hitResult).getType() != HitResult.Type.BLOCK) {
             return InteractionResultHolder.pass(itemStack);
         }
-        if (level.isClientSide) {
+        if (!(level instanceof ServerLevel)) {
             return InteractionResultHolder.success(itemStack);
         }
         BlockHitResult blockHitResult = hitResult;
@@ -100,7 +101,7 @@ extends Item {
             return InteractionResultHolder.fail(itemStack);
         }
         EntityType<?> entityType = this.getType(itemStack.getTag());
-        if (entityType.spawn(level, itemStack, player, blockPos, MobSpawnType.SPAWN_EGG, false, false) == null) {
+        if (entityType.spawn((ServerLevel)level, itemStack, player, blockPos, MobSpawnType.SPAWN_EGG, false, false) == null) {
             return InteractionResultHolder.pass(itemStack);
         }
         if (!player.abilities.instabuild) {
@@ -137,11 +138,11 @@ extends Item {
         return this.defaultType;
     }
 
-    public Optional<Mob> spawnOffspringFromSpawnEgg(Player player, Mob mob, EntityType<? extends Mob> entityType, Level level, Vec3 vec3, ItemStack itemStack) {
+    public Optional<Mob> spawnOffspringFromSpawnEgg(Player player, Mob mob, EntityType<? extends Mob> entityType, ServerLevel serverLevel, Vec3 vec3, ItemStack itemStack) {
         if (!this.spawnsEntity(itemStack.getTag(), entityType)) {
             return Optional.empty();
         }
-        Mob mob2 = mob instanceof AgableMob ? ((AgableMob)mob).getBreedOffspring((AgableMob)mob) : entityType.create(level);
+        Mob mob2 = mob instanceof AgableMob ? ((AgableMob)mob).getBreedOffspring(serverLevel, (AgableMob)mob) : entityType.create(serverLevel);
         if (mob2 == null) {
             return Optional.empty();
         }
@@ -150,7 +151,7 @@ extends Item {
             return Optional.empty();
         }
         mob2.moveTo(vec3.x(), vec3.y(), vec3.z(), 0.0f, 0.0f);
-        level.addFreshEntity(mob2);
+        serverLevel.addFreshEntity(mob2);
         if (itemStack.hasCustomHoverName()) {
             mob2.setCustomName(itemStack.getHoverName());
         }

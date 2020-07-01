@@ -48,6 +48,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
@@ -163,11 +164,11 @@ HoglinBase {
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        if (levelAccessor.getRandom().nextFloat() < 0.2f) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
+        if (serverLevelAccessor.getRandom().nextFloat() < 0.2f) {
             this.setBaby(true);
         }
-        return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+        return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     @Override
@@ -289,8 +290,8 @@ HoglinBase {
 
     @Override
     @Nullable
-    public AgableMob getBreedOffspring(AgableMob agableMob) {
-        Hoglin hoglin = EntityType.HOGLIN.create(this.level);
+    public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+        Hoglin hoglin = EntityType.HOGLIN.create(serverLevel);
         if (hoglin != null) {
             hoglin.setPersistenceRequired();
         }

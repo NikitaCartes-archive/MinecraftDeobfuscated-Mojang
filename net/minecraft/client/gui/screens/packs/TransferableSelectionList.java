@@ -79,7 +79,7 @@ extends ObjectSelectionList<PackEntry> {
                 RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
                 GuiComponent.fill(poseStack, k - 1, j - 1, k + l - 9, j + m + 1, -8978432);
             }
-            this.pack.bindIcon(this.minecraft.getTextureManager());
+            this.minecraft.getTextureManager().bind(this.pack.getIconTexture());
             RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
             GuiComponent.blit(poseStack, k, j, 0.0f, 0.0f, 32, 32, 32, 32);
             Component component = this.pack.getTitle();

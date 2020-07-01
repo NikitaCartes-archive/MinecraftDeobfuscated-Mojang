@@ -9,8 +9,8 @@ import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelWriter;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -22,7 +22,7 @@ public abstract class TreeDecorator {
 
     protected abstract TreeDecoratorType<?> type();
 
-    public abstract void place(LevelAccessor var1, Random var2, List<BlockPos> var3, List<BlockPos> var4, Set<BlockPos> var5, BoundingBox var6);
+    public abstract void place(WorldGenLevel var1, Random var2, List<BlockPos> var3, List<BlockPos> var4, Set<BlockPos> var5, BoundingBox var6);
 
     protected void placeVine(LevelWriter levelWriter, BlockPos blockPos, BooleanProperty booleanProperty, Set<BlockPos> set, BoundingBox boundingBox) {
         this.setBlock(levelWriter, blockPos, (BlockState)Blocks.VINE.defaultBlockState().setValue(booleanProperty, true), set, boundingBox);

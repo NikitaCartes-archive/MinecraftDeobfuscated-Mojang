@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -25,7 +24,7 @@ extends Feature<ReplaceSpheroidConfiguration> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, ReplaceSpheroidConfiguration replaceSpheroidConfiguration) {
+    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, ReplaceSpheroidConfiguration replaceSpheroidConfiguration) {
         Block block = replaceSpheroidConfiguration.targetState.getBlock();
         BlockPos blockPos2 = ReplaceBlobsFeature.findTarget(worldGenLevel, blockPos.mutable().clamp(Direction.Axis.Y, 1, worldGenLevel.getMaxBuildHeight() - 1), block);
         if (blockPos2 == null) {

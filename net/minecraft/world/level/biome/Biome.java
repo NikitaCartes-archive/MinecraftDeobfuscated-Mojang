@@ -334,7 +334,7 @@ public class Biome {
         for (ConfiguredFeature configuredFeature : this.features.get(decoration)) {
             worldgenRandom.setFeatureSeed(l, i, decoration.ordinal());
             try {
-                configuredFeature.place(worldGenLevel, structureFeatureManager, chunkGenerator, worldgenRandom, blockPos);
+                configuredFeature.place(worldGenLevel, chunkGenerator, worldgenRandom, blockPos);
             } catch (Exception exception2) {
                 CrashReport crashReport2 = CrashReport.forThrowable(exception2, "Feature placement");
                 crashReport2.addCategory("Feature").setDetail("Id", Registry.FEATURE.getKey((Feature<?>)configuredFeature.feature)).setDetail("Config", configuredFeature.config).setDetail("Description", () -> configuredFeature.feature.toString());

@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -258,7 +259,7 @@ extends Entity {
     }
 
     @Override
-    public void thunderHit(LightningBolt lightningBolt) {
+    public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
     }
 
     @Override

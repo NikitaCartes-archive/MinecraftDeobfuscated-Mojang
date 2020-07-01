@@ -101,7 +101,7 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.ServerOpListEntry;
 import net.minecraft.server.players.UserWhiteList;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagManager;
+import net.minecraft.tags.TagContainer;
 import net.minecraft.util.FrameTimer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.ProgressListener;
@@ -223,7 +223,7 @@ AutoCloseable {
     private boolean mayHaveDelayedTasks;
     @Environment(value=EnvType.CLIENT)
     private boolean hasWorldScreenshot;
-    private final PackRepository<Pack> packRepository;
+    private final PackRepository packRepository;
     private final ServerScoreboard scoreboard = new ServerScoreboard(this);
     @Nullable
     private CommandStorage commandStorage;
@@ -249,7 +249,7 @@ AutoCloseable {
         return (S)minecraftServer;
     }
 
-    public MinecraftServer(Thread thread, RegistryAccess.RegistryHolder registryHolder, LevelStorageSource.LevelStorageAccess levelStorageAccess, WorldData worldData, PackRepository<Pack> packRepository, Proxy proxy, DataFixer dataFixer, ServerResources serverResources, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory) {
+    public MinecraftServer(Thread thread, RegistryAccess.RegistryHolder registryHolder, LevelStorageSource.LevelStorageAccess levelStorageAccess, WorldData worldData, PackRepository packRepository, Proxy proxy, DataFixer dataFixer, ServerResources serverResources, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory) {
         super("Server");
         this.registryHolder = registryHolder;
         this.worldData = worldData;
@@ -434,7 +434,7 @@ AutoCloseable {
         }
         if (bl) {
             ConfiguredFeature<NoneFeatureConfiguration, ?> configuredFeature = Feature.BONUS_CHEST.configured(FeatureConfiguration.NONE);
-            configuredFeature.place(serverLevel, serverLevel.structureFeatureManager(), chunkGenerator, serverLevel.random, new BlockPos(serverLevelData.getXSpawn(), serverLevelData.getYSpawn(), serverLevelData.getZSpawn()));
+            configuredFeature.place(serverLevel, chunkGenerator, serverLevel.random, new BlockPos(serverLevelData.getXSpawn(), serverLevelData.getYSpawn(), serverLevelData.getZSpawn()));
         }
     }
 
@@ -1221,7 +1221,7 @@ AutoCloseable {
         return completableFuture;
     }
 
-    public static DataPackConfig configurePackRepository(PackRepository<Pack> packRepository, DataPackConfig dataPackConfig, boolean bl) {
+    public static DataPackConfig configurePackRepository(PackRepository packRepository, DataPackConfig dataPackConfig, boolean bl) {
         packRepository.reload();
         if (bl) {
             packRepository.setSelected(Collections.singleton("vanilla"));
@@ -1249,7 +1249,7 @@ AutoCloseable {
         return MinecraftServer.getSelectedPacks(packRepository);
     }
 
-    private static DataPackConfig getSelectedPacks(PackRepository<?> packRepository) {
+    private static DataPackConfig getSelectedPacks(PackRepository packRepository) {
         Collection<String> collection = packRepository.getSelectedIds();
         ImmutableList<String> list = ImmutableList.copyOf(collection);
         List list2 = packRepository.getAvailableIds().stream().filter(string -> !collection.contains(string)).collect(ImmutableList.toImmutableList());
@@ -1269,7 +1269,7 @@ AutoCloseable {
         }
     }
 
-    public PackRepository<Pack> getPackRepository() {
+    public PackRepository getPackRepository() {
         return this.packRepository;
     }
 
@@ -1296,7 +1296,7 @@ AutoCloseable {
         return this.resources.getRecipeManager();
     }
 
-    public TagManager getTags() {
+    public TagContainer getTags() {
         return this.resources.getTags();
     }
 

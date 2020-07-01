@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.treedecorators.TreeDecorator;
@@ -26,20 +26,20 @@ extends TreeDecorator {
     }
 
     @Override
-    public void place(LevelAccessor levelAccessor, Random random, List<BlockPos> list, List<BlockPos> list2, Set<BlockPos> set, BoundingBox boundingBox) {
+    public void place(WorldGenLevel worldGenLevel, Random random, List<BlockPos> list, List<BlockPos> list2, Set<BlockPos> set, BoundingBox boundingBox) {
         list.forEach(blockPos -> {
             BlockPos blockPos2;
-            if (random.nextInt(3) > 0 && Feature.isAir(levelAccessor, blockPos2 = blockPos.west())) {
-                this.placeVine(levelAccessor, blockPos2, VineBlock.EAST, set, boundingBox);
+            if (random.nextInt(3) > 0 && Feature.isAir(worldGenLevel, blockPos2 = blockPos.west())) {
+                this.placeVine(worldGenLevel, blockPos2, VineBlock.EAST, set, boundingBox);
             }
-            if (random.nextInt(3) > 0 && Feature.isAir(levelAccessor, blockPos2 = blockPos.east())) {
-                this.placeVine(levelAccessor, blockPos2, VineBlock.WEST, set, boundingBox);
+            if (random.nextInt(3) > 0 && Feature.isAir(worldGenLevel, blockPos2 = blockPos.east())) {
+                this.placeVine(worldGenLevel, blockPos2, VineBlock.WEST, set, boundingBox);
             }
-            if (random.nextInt(3) > 0 && Feature.isAir(levelAccessor, blockPos2 = blockPos.north())) {
-                this.placeVine(levelAccessor, blockPos2, VineBlock.SOUTH, set, boundingBox);
+            if (random.nextInt(3) > 0 && Feature.isAir(worldGenLevel, blockPos2 = blockPos.north())) {
+                this.placeVine(worldGenLevel, blockPos2, VineBlock.SOUTH, set, boundingBox);
             }
-            if (random.nextInt(3) > 0 && Feature.isAir(levelAccessor, blockPos2 = blockPos.south())) {
-                this.placeVine(levelAccessor, blockPos2, VineBlock.NORTH, set, boundingBox);
+            if (random.nextInt(3) > 0 && Feature.isAir(worldGenLevel, blockPos2 = blockPos.south())) {
+                this.placeVine(worldGenLevel, blockPos2, VineBlock.NORTH, set, boundingBox);
             }
         });
     }

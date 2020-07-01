@@ -79,12 +79,12 @@ extends BaseEntityBlock {
         return InteractionResult.CONSUME;
     }
 
-    protected void dispenseFrom(Level level, BlockPos blockPos) {
-        BlockSourceImpl blockSourceImpl = new BlockSourceImpl(level, blockPos);
+    protected void dispenseFrom(ServerLevel serverLevel, BlockPos blockPos) {
+        BlockSourceImpl blockSourceImpl = new BlockSourceImpl(serverLevel, blockPos);
         DispenserBlockEntity dispenserBlockEntity = (DispenserBlockEntity)blockSourceImpl.getEntity();
         int i = dispenserBlockEntity.getRandomSlot();
         if (i < 0) {
-            level.levelEvent(1001, blockPos, 0);
+            serverLevel.levelEvent(1001, blockPos, 0);
             return;
         }
         ItemStack itemStack = dispenserBlockEntity.getItem(i);

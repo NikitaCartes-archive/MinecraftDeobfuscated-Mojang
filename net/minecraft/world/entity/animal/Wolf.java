@@ -434,8 +434,8 @@ implements NeutralMob {
     }
 
     @Override
-    public Wolf getBreedOffspring(AgableMob agableMob) {
-        Wolf wolf = EntityType.WOLF.create(this.level);
+    public Wolf getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+        Wolf wolf = EntityType.WOLF.create(serverLevel);
         UUID uUID = this.getOwnerUUID();
         if (uUID != null) {
             wolf.setOwnerUUID(uUID);
@@ -503,8 +503,8 @@ implements NeutralMob {
     }
 
     @Override
-    public /* synthetic */ AgableMob getBreedOffspring(AgableMob agableMob) {
-        return this.getBreedOffspring(agableMob);
+    public /* synthetic */ AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+        return this.getBreedOffspring(serverLevel, agableMob);
     }
 
     class WolfAvoidEntityGoal<T extends LivingEntity>

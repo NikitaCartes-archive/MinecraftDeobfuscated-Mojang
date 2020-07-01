@@ -4,55 +4,33 @@
 package net.minecraft.world.level;
 
 import java.util.Random;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.EntityGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.LevelSimulatedRW;
+import net.minecraft.world.level.CommonLevelAccessor;
+import net.minecraft.world.level.LevelTimeAccess;
 import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkSource;
-import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelData;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public interface LevelAccessor
-extends EntityGetter,
-LevelReader,
-LevelSimulatedRW {
-    default public float getMoonBrightness() {
-        return DimensionType.MOON_BRIGHTNESS_PER_PHASE[this.dimensionType().moonPhase(this.getLevelData().getDayTime())];
-    }
-
-    default public float getTimeOfDay(float f) {
-        return this.dimensionType().timeOfDay(this.getLevelData().getDayTime());
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    default public int getMoonPhase() {
-        return this.dimensionType().moonPhase(this.getLevelData().getDayTime());
+extends CommonLevelAccessor,
+LevelTimeAccess {
+    @Override
+    default public long dayTime() {
+        return this.getLevelData().getDayTime();
     }
 
     public TickList<Block> getBlockTicks();
 
     public TickList<Fluid> getLiquidTicks();
-
-    public Level getLevel();
 
     public LevelData getLevelData();
 
@@ -86,21 +64,6 @@ LevelSimulatedRW {
 
     default public void levelEvent(int i, BlockPos blockPos, int j) {
         this.levelEvent(null, i, blockPos, j);
-    }
-
-    @Override
-    default public Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
-        return EntityGetter.super.getEntityCollisions(entity, aABB, predicate);
-    }
-
-    @Override
-    default public boolean isUnobstructed(@Nullable Entity entity, VoxelShape voxelShape) {
-        return EntityGetter.super.isUnobstructed(entity, voxelShape);
-    }
-
-    @Override
-    default public BlockPos getHeightmapPos(Heightmap.Types types, BlockPos blockPos) {
-        return LevelReader.super.getHeightmapPos(types, blockPos);
     }
 }
 

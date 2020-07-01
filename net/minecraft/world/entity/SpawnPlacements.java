@@ -38,7 +38,7 @@ import net.minecraft.world.entity.monster.Strider;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.jetbrains.annotations.Nullable;
 
@@ -62,9 +62,9 @@ public class SpawnPlacements {
         return data == null ? Heightmap.Types.MOTION_BLOCKING_NO_LEAVES : data.heightMap;
     }
 
-    public static <T extends Entity> boolean checkSpawnRules(EntityType<T> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
+    public static <T extends Entity> boolean checkSpawnRules(EntityType<T> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random) {
         Data data = DATA_BY_TYPE.get(entityType);
-        return data == null || data.predicate.test(entityType, levelAccessor, mobSpawnType, blockPos, random);
+        return data == null || data.predicate.test(entityType, serverLevelAccessor, mobSpawnType, blockPos, random);
     }
 
     static {
@@ -159,7 +159,7 @@ public class SpawnPlacements {
 
     @FunctionalInterface
     public static interface SpawnPredicate<T extends Entity> {
-        public boolean test(EntityType<T> var1, LevelAccessor var2, MobSpawnType var3, BlockPos var4, Random var5);
+        public boolean test(EntityType<T> var1, ServerLevelAccessor var2, MobSpawnType var3, BlockPos var4, Random var5);
     }
 }
 

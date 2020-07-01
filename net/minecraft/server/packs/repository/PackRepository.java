@@ -21,16 +21,20 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.RepositorySource;
 import org.jetbrains.annotations.Nullable;
 
-public class PackRepository<T extends Pack>
+public class PackRepository
 implements AutoCloseable {
     private final Set<RepositorySource> sources;
-    private Map<String, T> available = ImmutableMap.of();
-    private List<T> selected = ImmutableList.of();
-    private final Pack.PackConstructor<T> constructor;
+    private Map<String, Pack> available = ImmutableMap.of();
+    private List<Pack> selected = ImmutableList.of();
+    private final Pack.PackConstructor constructor;
 
-    public PackRepository(Pack.PackConstructor<T> packConstructor, RepositorySource ... repositorySources) {
+    public PackRepository(Pack.PackConstructor packConstructor, RepositorySource ... repositorySources) {
         this.constructor = packConstructor;
         this.sources = ImmutableSet.copyOf(repositorySources);
+    }
+
+    public PackRepository(RepositorySource ... repositorySources) {
+        this(Pack::new, repositorySources);
     }
 
     public void reload() {
@@ -40,7 +44,7 @@ implements AutoCloseable {
         this.selected = this.rebuildSelected(list);
     }
 
-    private Map<String, T> discoverAvailable() {
+    private Map<String, Pack> discoverAvailable() {
         TreeMap map = Maps.newTreeMap();
         for (RepositorySource repositorySource : this.sources) {
             repositorySource.loadPacks(pack -> map.put(pack.getId(), pack), this.constructor);
@@ -52,7 +56,7 @@ implements AutoCloseable {
         this.selected = this.rebuildSelected(collection);
     }
 
-    private List<T> rebuildSelected(Collection<String> collection) {
+    private List<Pack> rebuildSelected(Collection<String> collection) {
         List list = this.getAvailablePacks(collection).collect(Collectors.toList());
         for (Pack pack : this.available.values()) {
             if (!pack.isRequired() || list.contains(pack)) continue;
@@ -61,7 +65,7 @@ implements AutoCloseable {
         return ImmutableList.copyOf(list);
     }
 
-    private Stream<T> getAvailablePacks(Collection<String> collection) {
+    private Stream<Pack> getAvailablePacks(Collection<String> collection) {
         return collection.stream().map(this.available::get).filter(Objects::nonNull);
     }
 
@@ -69,7 +73,7 @@ implements AutoCloseable {
         return this.available.keySet();
     }
 
-    public Collection<T> getAvailablePacks() {
+    public Collection<Pack> getAvailablePacks() {
         return this.available.values();
     }
 
@@ -77,13 +81,13 @@ implements AutoCloseable {
         return this.selected.stream().map(Pack::getId).collect(ImmutableSet.toImmutableSet());
     }
 
-    public Collection<T> getSelectedPacks() {
+    public Collection<Pack> getSelectedPacks() {
         return this.selected;
     }
 
     @Nullable
-    public T getPack(String string) {
-        return (T)((Pack)this.available.get(string));
+    public Pack getPack(String string) {
+        return this.available.get(string);
     }
 
     @Override

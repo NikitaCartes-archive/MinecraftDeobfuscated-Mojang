@@ -13,7 +13,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.world.level.storage.WorldData;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +29,7 @@ public class ReloadCommand {
         });
     }
 
-    private static Collection<String> discoverNewPacks(PackRepository<?> packRepository, WorldData worldData, Collection<String> collection) {
+    private static Collection<String> discoverNewPacks(PackRepository packRepository, WorldData worldData, Collection<String> collection) {
         packRepository.reload();
         ArrayList<String> collection2 = Lists.newArrayList(collection);
         List<String> collection3 = worldData.getDataPackConfig().getDisabled();
@@ -45,7 +44,7 @@ public class ReloadCommand {
         commandDispatcher.register((LiteralArgumentBuilder)((LiteralArgumentBuilder)Commands.literal("reload").requires(commandSourceStack -> commandSourceStack.hasPermission(2))).executes(commandContext -> {
             CommandSourceStack commandSourceStack = (CommandSourceStack)commandContext.getSource();
             MinecraftServer minecraftServer = commandSourceStack.getServer();
-            PackRepository<Pack> packRepository = minecraftServer.getPackRepository();
+            PackRepository packRepository = minecraftServer.getPackRepository();
             WorldData worldData = minecraftServer.getWorldData();
             Collection<String> collection = packRepository.getSelectedIds();
             Collection<String> collection2 = ReloadCommand.discoverNewPacks(packRepository, worldData, collection);

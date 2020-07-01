@@ -7,6 +7,6 @@ import java.util.function.Consumer;
 import net.minecraft.server.packs.repository.Pack;
 
 public interface RepositorySource {
-    public <T extends Pack> void loadPacks(Consumer<T> var1, Pack.PackConstructor<T> var2);
+    public void loadPacks(Consumer<Pack> var1, Pack.PackConstructor var2);
 }
 

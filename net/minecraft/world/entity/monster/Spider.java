@@ -42,7 +42,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -154,20 +154,20 @@ extends Monster {
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         MobEffect mobEffect;
-        spawnGroupData = super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
-        if (levelAccessor.getRandom().nextInt(100) == 0) {
+        spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+        if (serverLevelAccessor.getRandom().nextInt(100) == 0) {
             Skeleton skeleton = EntityType.SKELETON.create(this.level);
             skeleton.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0f);
-            skeleton.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, null, null);
+            skeleton.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, null, null);
             skeleton.startRiding(this);
-            levelAccessor.addFreshEntity(skeleton);
+            serverLevelAccessor.addFreshEntity(skeleton);
         }
         if (spawnGroupData == null) {
             spawnGroupData = new SpiderEffectsGroupData();
-            if (levelAccessor.getDifficulty() == Difficulty.HARD && levelAccessor.getRandom().nextFloat() < 0.1f * difficultyInstance.getSpecialMultiplier()) {
-                ((SpiderEffectsGroupData)spawnGroupData).setRandomEffect(levelAccessor.getRandom());
+            if (serverLevelAccessor.getDifficulty() == Difficulty.HARD && serverLevelAccessor.getRandom().nextFloat() < 0.1f * difficultyInstance.getSpecialMultiplier()) {
+                ((SpiderEffectsGroupData)spawnGroupData).setRandomEffect(serverLevelAccessor.getRandom());
             }
         }
         if (spawnGroupData instanceof SpiderEffectsGroupData && (mobEffect = ((SpiderEffectsGroupData)spawnGroupData).effect) != null) {

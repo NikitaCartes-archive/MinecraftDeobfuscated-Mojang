@@ -3,17 +3,16 @@
  */
 package net.minecraft.tags;
 
-import java.util.Set;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.StaticTagHelper;
+import net.minecraft.tags.StaticTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagCollection;
+import net.minecraft.tags.TagContainer;
 import net.minecraft.world.level.block.Block;
 
-public class BlockTags {
-    private static final StaticTagHelper<Block> HELPER = new StaticTagHelper();
+public final class BlockTags {
+    protected static final StaticTagHelper<Block> HELPER = StaticTags.create(new ResourceLocation("block"), TagContainer::getBlocks);
     public static final Tag.Named<Block> WOOL = BlockTags.bind("wool");
     public static final Tag.Named<Block> PLANKS = BlockTags.bind("planks");
     public static final Tag.Named<Block> STONE_BRICKS = BlockTags.bind("stone_bricks");
@@ -94,6 +93,7 @@ public class BlockTags {
     public static final Tag.Named<Block> PREVENT_MOB_SPAWNING_INSIDE = BlockTags.bind("prevent_mob_spawning_inside");
     public static final Tag.Named<Block> FENCE_GATES = BlockTags.bind("fence_gates");
     public static final Tag.Named<Block> UNSTABLE_BOTTOM_CENTER = BlockTags.bind("unstable_bottom_center");
+    public static final Tag.Named<Block> MUSHROOM_GROW_BLOCK = BlockTags.bind("mushroom_grow_block");
     public static final Tag.Named<Block> INFINIBURN_OVERWORLD = BlockTags.bind("infiniburn_overworld");
     public static final Tag.Named<Block> INFINIBURN_NETHER = BlockTags.bind("infiniburn_nether");
     public static final Tag.Named<Block> INFINIBURN_END = BlockTags.bind("infiniburn_end");
@@ -102,21 +102,8 @@ public class BlockTags {
         return HELPER.bind(string);
     }
 
-    public static void reset(TagCollection<Block> tagCollection) {
-        HELPER.reset(tagCollection);
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static void resetToEmpty() {
-        HELPER.resetToEmpty();
-    }
-
     public static TagCollection<Block> getAllTags() {
         return HELPER.getAllTags();
-    }
-
-    public static Set<ResourceLocation> getMissingTags(TagCollection<Block> tagCollection) {
-        return HELPER.getMissingTags(tagCollection);
     }
 }
 

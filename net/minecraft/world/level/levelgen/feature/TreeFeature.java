@@ -21,7 +21,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.LevelWriter;
-import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -137,7 +136,7 @@ extends Feature<TreeConfiguration> {
     }
 
     @Override
-    public final boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, TreeConfiguration treeConfiguration) {
+    public final boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, TreeConfiguration treeConfiguration) {
         HashSet<BlockPos> set = Sets.newHashSet();
         HashSet<BlockPos> set2 = Sets.newHashSet();
         HashSet<BlockPos> set3 = Sets.newHashSet();

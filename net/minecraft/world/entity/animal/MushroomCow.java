@@ -70,7 +70,7 @@ implements Shearable {
     }
 
     @Override
-    public void thunderHit(LightningBolt lightningBolt) {
+    public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
         UUID uUID = lightningBolt.getUUID();
         if (!uUID.equals(this.lastLightningBoltUUID)) {
             this.setMushroomType(this.getMushroomType() == MushroomType.RED ? MushroomType.BROWN : MushroomType.RED);
@@ -100,7 +100,7 @@ implements Shearable {
             } else {
                 itemStack2 = new ItemStack(Items.MUSHROOM_STEW);
             }
-            ItemStack itemStack3 = ItemUtils.createBucketResult(itemStack, player2, itemStack2);
+            ItemStack itemStack3 = ItemUtils.createFilledResult(itemStack, player2, itemStack2, false);
             player2.setItemInHand(interactionHand, itemStack3);
             SoundEvent soundEvent = bl ? SoundEvents.MOOSHROOM_MILK_SUSPICIOUSLY : SoundEvents.MOOSHROOM_MILK;
             this.playSound(soundEvent, 1.0f, 1.0f);
@@ -210,8 +210,8 @@ implements Shearable {
     }
 
     @Override
-    public MushroomCow getBreedOffspring(AgableMob agableMob) {
-        MushroomCow mushroomCow = EntityType.MOOSHROOM.create(this.level);
+    public MushroomCow getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+        MushroomCow mushroomCow = EntityType.MOOSHROOM.create(serverLevel);
         mushroomCow.setMushroomType(this.getOffspringType((MushroomCow)agableMob));
         return mushroomCow;
     }
@@ -224,13 +224,13 @@ implements Shearable {
     }
 
     @Override
-    public /* synthetic */ Cow getBreedOffspring(AgableMob agableMob) {
-        return this.getBreedOffspring(agableMob);
+    public /* synthetic */ Cow getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+        return this.getBreedOffspring(serverLevel, agableMob);
     }
 
     @Override
-    public /* synthetic */ AgableMob getBreedOffspring(AgableMob agableMob) {
-        return this.getBreedOffspring(agableMob);
+    public /* synthetic */ AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+        return this.getBreedOffspring(serverLevel, agableMob);
     }
 
     public static enum MushroomType {

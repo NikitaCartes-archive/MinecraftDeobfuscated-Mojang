@@ -33,15 +33,9 @@ implements BonemealableBlock {
         this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(AGE, 0));
     }
 
+    @Override
     public BlockState getStateForPlacement(LevelAccessor levelAccessor) {
         return (BlockState)this.defaultBlockState().setValue(AGE, levelAccessor.getRandom().nextInt(25));
-    }
-
-    @Override
-    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-        if (!blockState.canSurvive(serverLevel, blockPos)) {
-            serverLevel.destroyBlock(blockPos, true);
-        }
     }
 
     @Override
@@ -62,7 +56,7 @@ implements BonemealableBlock {
         if (direction == this.growthDirection.getOpposite() && !blockState.canSurvive(levelAccessor, blockPos)) {
             levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
         }
-        if (direction == this.growthDirection && blockState2.is(this)) {
+        if (direction == this.growthDirection && (blockState2.is(this) || blockState2.is(this.getBodyBlock()))) {
             return this.getBodyBlock().defaultBlockState();
         }
         if (this.scheduleFluidTicks) {

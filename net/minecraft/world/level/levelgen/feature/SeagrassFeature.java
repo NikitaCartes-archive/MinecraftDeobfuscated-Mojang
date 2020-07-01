@@ -6,7 +6,6 @@ package net.minecraft.world.level.levelgen.feature;
 import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.TallSeagrass;
@@ -24,7 +23,7 @@ extends Feature<SeagrassFeatureConfiguration> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, SeagrassFeatureConfiguration seagrassFeatureConfiguration) {
+    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, SeagrassFeatureConfiguration seagrassFeatureConfiguration) {
         int i = 0;
         for (int j = 0; j < seagrassFeatureConfiguration.count; ++j) {
             BlockState blockState;

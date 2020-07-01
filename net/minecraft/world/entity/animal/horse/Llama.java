@@ -11,6 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.ItemTags;
@@ -50,7 +51,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WoolCarpetBlock;
@@ -234,7 +235,7 @@ implements RangedAttackMob {
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         int i;
         this.setRandomStrength();
         if (spawnGroupData instanceof LlamaGroupData) {
@@ -244,7 +245,7 @@ implements RangedAttackMob {
             spawnGroupData = new LlamaGroupData(i);
         }
         this.setVariant(i);
-        return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+        return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     @Override
@@ -366,7 +367,7 @@ implements RangedAttackMob {
     }
 
     @Override
-    public Llama getBreedOffspring(AgableMob agableMob) {
+    public Llama getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
         Llama llama = this.makeBabyLlama();
         this.setOffspringAttributes(agableMob, llama);
         Llama llama2 = (Llama)agableMob;
@@ -467,8 +468,8 @@ implements RangedAttackMob {
     }
 
     @Override
-    public /* synthetic */ AgableMob getBreedOffspring(AgableMob agableMob) {
-        return this.getBreedOffspring(agableMob);
+    public /* synthetic */ AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+        return this.getBreedOffspring(serverLevel, agableMob);
     }
 
     static class LlamaAttackWolfGoal

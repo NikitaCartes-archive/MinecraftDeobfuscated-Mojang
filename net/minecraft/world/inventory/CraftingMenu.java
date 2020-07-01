@@ -16,6 +16,7 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.RecipeBookMenu;
+import net.minecraft.world.inventory.RecipeBookType;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
@@ -162,6 +163,12 @@ extends RecipeBookMenu<CraftingContainer> {
     @Environment(value=EnvType.CLIENT)
     public int getSize() {
         return 10;
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public RecipeBookType getRecipeBookType() {
+        return RecipeBookType.CRAFTING;
     }
 }
 

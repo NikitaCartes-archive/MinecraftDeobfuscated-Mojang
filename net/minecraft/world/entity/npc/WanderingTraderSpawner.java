@@ -99,7 +99,7 @@ implements CustomSpawner {
             WanderingTrader wanderingTrader = EntityType.WANDERING_TRADER.spawn(serverLevel, null, null, null, blockPos3, MobSpawnType.EVENT, false, false);
             if (wanderingTrader != null) {
                 for (int j = 0; j < 2; ++j) {
-                    this.tryToSpawnLlamaFor(wanderingTrader, 4);
+                    this.tryToSpawnLlamaFor(serverLevel, wanderingTrader, 4);
                 }
                 this.serverLevelData.setWanderingTraderId(wanderingTrader.getUUID());
                 wanderingTrader.setDespawnDelay(48000);
@@ -111,12 +111,12 @@ implements CustomSpawner {
         return false;
     }
 
-    private void tryToSpawnLlamaFor(WanderingTrader wanderingTrader, int i) {
-        BlockPos blockPos = this.findSpawnPositionNear(wanderingTrader.level, wanderingTrader.blockPosition(), i);
+    private void tryToSpawnLlamaFor(ServerLevel serverLevel, WanderingTrader wanderingTrader, int i) {
+        BlockPos blockPos = this.findSpawnPositionNear(serverLevel, wanderingTrader.blockPosition(), i);
         if (blockPos == null) {
             return;
         }
-        TraderLlama traderLlama = EntityType.TRADER_LLAMA.spawn(wanderingTrader.level, null, null, null, blockPos, MobSpawnType.EVENT, false, false);
+        TraderLlama traderLlama = EntityType.TRADER_LLAMA.spawn(serverLevel, null, null, null, blockPos, MobSpawnType.EVENT, false, false);
         if (traderLlama == null) {
             return;
         }

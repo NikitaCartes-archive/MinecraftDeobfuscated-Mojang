@@ -41,7 +41,7 @@ extends Behavior<Villager> {
     @Override
     protected void tick(ServerLevel serverLevel, Villager villager, long l) {
         if (l % 100L == 0L) {
-            villager.spawnGolemIfNeeded(l, 3);
+            villager.spawnGolemIfNeeded(serverLevel, l, 3);
         }
     }
 

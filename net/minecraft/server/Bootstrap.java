@@ -15,6 +15,7 @@ import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.locale.Language;
 import net.minecraft.server.DebugLoggedPrintStream;
 import net.minecraft.server.LoggedPrintStream;
+import net.minecraft.tags.StaticTags;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -52,6 +53,7 @@ public class Bootstrap {
         EntitySelectorOptions.bootStrap();
         DispenseItemBehavior.bootStrap();
         ArgumentTypes.bootStrap();
+        StaticTags.bootStrap();
         Bootstrap.wrapStreams();
     }
 

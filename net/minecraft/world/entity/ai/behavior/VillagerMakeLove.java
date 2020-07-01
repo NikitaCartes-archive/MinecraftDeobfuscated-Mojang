@@ -72,7 +72,7 @@ extends Behavior<Villager> {
             serverLevel.broadcastEntityEvent(villager2, (byte)13);
             serverLevel.broadcastEntityEvent(villager, (byte)13);
         } else {
-            Optional<Villager> optional2 = this.breed(villager, villager2);
+            Optional<Villager> optional2 = this.breed(serverLevel, villager, villager2);
             if (optional2.isPresent()) {
                 this.giveBedToChild(serverLevel, optional2.get(), optional.get());
             } else {
@@ -105,8 +105,8 @@ extends Behavior<Villager> {
         return path != null && path.canReach();
     }
 
-    private Optional<Villager> breed(Villager villager, Villager villager2) {
-        Villager villager3 = villager.getBreedOffspring(villager2);
+    private Optional<Villager> breed(ServerLevel serverLevel, Villager villager, Villager villager2) {
+        Villager villager3 = villager.getBreedOffspring(serverLevel, villager2);
         if (villager3 == null) {
             return Optional.empty();
         }

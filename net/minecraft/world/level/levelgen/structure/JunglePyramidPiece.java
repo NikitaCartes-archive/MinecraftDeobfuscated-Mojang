@@ -8,7 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -67,19 +66,19 @@ extends ScatteredFeaturePiece {
         if (!this.updateAverageGroundHeight(worldGenLevel, boundingBox, 0)) {
             return false;
         }
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, -4, 0, this.width - 1, 0, this.depth - 1, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 1, 2, 9, 2, 2, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 1, 12, 9, 2, 12, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 1, 3, 2, 2, 11, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 9, 1, 3, 9, 2, 11, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 3, 1, 10, 6, 1, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 3, 13, 10, 6, 13, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 3, 2, 1, 6, 12, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 10, 3, 2, 10, 6, 12, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 3, 2, 9, 3, 12, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 6, 2, 9, 6, 12, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 3, 7, 3, 8, 7, 11, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 8, 4, 7, 8, 10, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 0, -4, 0, this.width - 1, 0, this.depth - 1, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 2, 1, 2, 9, 2, 2, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 2, 1, 12, 9, 2, 12, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 2, 1, 3, 2, 2, 11, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 9, 1, 3, 9, 2, 11, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 1, 3, 1, 10, 6, 1, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 1, 3, 13, 10, 6, 13, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 1, 3, 2, 1, 6, 12, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 10, 3, 2, 10, 6, 12, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 2, 3, 2, 9, 3, 12, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 2, 6, 2, 9, 6, 12, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 3, 7, 3, 8, 7, 11, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 4, 8, 4, 7, 8, 10, false, random, STONE_SELECTOR);
         this.generateAirBox(worldGenLevel, boundingBox, 3, 1, 3, 8, 2, 11);
         this.generateAirBox(worldGenLevel, boundingBox, 4, 3, 6, 7, 3, 9);
         this.generateAirBox(worldGenLevel, boundingBox, 2, 4, 2, 9, 5, 12);
@@ -94,28 +93,28 @@ extends ScatteredFeaturePiece {
         this.placeBlock(worldGenLevel, Blocks.AIR.defaultBlockState(), 1, 5, 9, boundingBox);
         this.placeBlock(worldGenLevel, Blocks.AIR.defaultBlockState(), 10, 5, 9, boundingBox);
         for (i = 0; i <= 14; i += 14) {
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 4, i, 2, 5, i, false, random, STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 4, i, 4, 5, i, false, random, STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 7, 4, i, 7, 5, i, false, random, STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 9, 4, i, 9, 5, i, false, random, STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 2, 4, i, 2, 5, i, false, random, STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 4, 4, i, 4, 5, i, false, random, STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 7, 4, i, 7, 5, i, false, random, STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 9, 4, i, 9, 5, i, false, random, STONE_SELECTOR);
         }
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 6, 0, 6, 6, 0, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 5, 6, 0, 6, 6, 0, false, random, STONE_SELECTOR);
         for (i = 0; i <= 11; i += 11) {
             for (int j = 2; j <= 12; j += 2) {
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, i, 4, j, i, 5, j, false, random, STONE_SELECTOR);
+                this.generateBox(worldGenLevel, boundingBox, i, 4, j, i, 5, j, false, random, STONE_SELECTOR);
             }
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, i, 6, 5, i, 6, 5, false, random, STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, i, 6, 9, i, 6, 9, false, random, STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, i, 6, 5, i, 6, 5, false, random, STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, i, 6, 9, i, 6, 9, false, random, STONE_SELECTOR);
         }
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 7, 2, 2, 9, 2, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 9, 7, 2, 9, 9, 2, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, 7, 12, 2, 9, 12, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 9, 7, 12, 9, 9, 12, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 9, 4, 4, 9, 4, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 7, 9, 4, 7, 9, 4, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 9, 10, 4, 9, 10, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 7, 9, 10, 7, 9, 10, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 9, 7, 6, 9, 7, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 2, 7, 2, 2, 9, 2, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 9, 7, 2, 9, 9, 2, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 2, 7, 12, 2, 9, 12, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 9, 7, 12, 9, 9, 12, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 4, 9, 4, 4, 9, 4, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 7, 9, 4, 7, 9, 4, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 4, 9, 10, 4, 9, 10, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 7, 9, 10, 7, 9, 10, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 5, 9, 7, 6, 9, 7, false, random, STONE_SELECTOR);
         BlockState blockState = (BlockState)Blocks.COBBLESTONE_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.EAST);
         BlockState blockState2 = (BlockState)Blocks.COBBLESTONE_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.WEST);
         BlockState blockState3 = (BlockState)Blocks.COBBLESTONE_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.SOUTH);
@@ -134,10 +133,10 @@ extends ScatteredFeaturePiece {
         this.placeBlock(worldGenLevel, blockState4, 7, 1, 8, boundingBox);
         this.placeBlock(worldGenLevel, blockState4, 7, 2, 9, boundingBox);
         this.placeBlock(worldGenLevel, blockState4, 7, 3, 10, boundingBox);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 1, 9, 4, 1, 9, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 7, 1, 9, 7, 1, 9, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 1, 10, 7, 2, 10, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 4, 5, 6, 4, 5, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 4, 1, 9, 4, 1, 9, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 7, 1, 9, 7, 1, 9, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 4, 1, 10, 7, 2, 10, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 5, 4, 5, 6, 4, 5, false, random, STONE_SELECTOR);
         this.placeBlock(worldGenLevel, blockState, 4, 4, 5, boundingBox);
         this.placeBlock(worldGenLevel, blockState2, 7, 4, 5, boundingBox);
         for (k = 0; k < 4; ++k) {
@@ -149,15 +148,15 @@ extends ScatteredFeaturePiece {
         this.generateAirBox(worldGenLevel, boundingBox, 1, -3, 1, 3, -1, 13);
         this.generateAirBox(worldGenLevel, boundingBox, 1, -3, 1, 9, -1, 5);
         for (k = 1; k <= 13; k += 2) {
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, -3, k, 1, -2, k, false, random, STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 1, -3, k, 1, -2, k, false, random, STONE_SELECTOR);
         }
         for (k = 2; k <= 12; k += 2) {
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, -1, k, 3, -1, k, false, random, STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 1, -1, k, 3, -1, k, false, random, STONE_SELECTOR);
         }
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, -2, 1, 5, -2, 1, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 7, -2, 1, 9, -2, 1, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 6, -3, 1, 6, -3, 1, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 6, -1, 1, 6, -1, 1, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 2, -2, 1, 5, -2, 1, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 7, -2, 1, 9, -2, 1, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 6, -3, 1, 6, -3, 1, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 6, -1, 1, 6, -1, 1, false, random, STONE_SELECTOR);
         this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.TRIPWIRE_HOOK.defaultBlockState().setValue(TripWireHookBlock.FACING, Direction.EAST)).setValue(TripWireHookBlock.ATTACHED, true), 1, -3, 8, boundingBox);
         this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.TRIPWIRE_HOOK.defaultBlockState().setValue(TripWireHookBlock.FACING, Direction.WEST)).setValue(TripWireHookBlock.ATTACHED, true), 4, -3, 8, boundingBox);
         this.placeBlock(worldGenLevel, (BlockState)((BlockState)((BlockState)Blocks.TRIPWIRE.defaultBlockState().setValue(TripWireBlock.EAST, true)).setValue(TripWireBlock.WEST, true)).setValue(TripWireBlock.ATTACHED, true), 2, -3, 8, boundingBox);
@@ -203,7 +202,7 @@ extends ScatteredFeaturePiece {
         this.placeBlock(worldGenLevel, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), 7, -2, 5, boundingBox);
         this.placeBlock(worldGenLevel, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), 7, -1, 5, boundingBox);
         this.placeBlock(worldGenLevel, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), 8, -3, 5, boundingBox);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 9, -1, 1, 9, -1, 5, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 9, -1, 1, 9, -1, 5, false, random, STONE_SELECTOR);
         this.generateAirBox(worldGenLevel, boundingBox, 8, -3, 8, 10, -1, 10);
         this.placeBlock(worldGenLevel, Blocks.CHISELED_STONE_BRICKS.defaultBlockState(), 8, -2, 11, boundingBox);
         this.placeBlock(worldGenLevel, Blocks.CHISELED_STONE_BRICKS.defaultBlockState(), 9, -2, 11, boundingBox);
@@ -212,8 +211,8 @@ extends ScatteredFeaturePiece {
         this.placeBlock(worldGenLevel, blockState6, 8, -2, 12, boundingBox);
         this.placeBlock(worldGenLevel, blockState6, 9, -2, 12, boundingBox);
         this.placeBlock(worldGenLevel, blockState6, 10, -2, 12, boundingBox);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 8, -3, 8, 8, -3, 10, false, random, STONE_SELECTOR);
-        this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 10, -3, 8, 10, -3, 10, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 8, -3, 8, 8, -3, 10, false, random, STONE_SELECTOR);
+        this.generateBox(worldGenLevel, boundingBox, 10, -3, 8, 10, -3, 10, false, random, STONE_SELECTOR);
         this.placeBlock(worldGenLevel, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), 10, -2, 9, boundingBox);
         this.placeBlock(worldGenLevel, blockState5, 8, -2, 9, boundingBox);
         this.placeBlock(worldGenLevel, blockState5, 8, -2, 10, boundingBox);

@@ -53,7 +53,7 @@ extends Behavior<Villager> {
             return;
         }
         BehaviorUtils.lockGazeAndWalkToEachOther(villager, villager2, 0.5f);
-        villager.gossip(villager2, l);
+        villager.gossip(serverLevel, villager2, l);
         if (villager.hasExcessFood() && (villager.getVillagerData().getProfession() == VillagerProfession.FARMER || villager2.wantsMoreFood())) {
             TradeWithVillager.throwHalfStack(villager, Villager.FOOD_POINTS.keySet(), villager2);
         }

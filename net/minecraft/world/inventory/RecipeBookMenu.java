@@ -11,6 +11,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.RecipeBookType;
 import net.minecraft.world.item.crafting.Recipe;
 
 public abstract class RecipeBookMenu<C extends Container>
@@ -37,5 +38,8 @@ extends AbstractContainerMenu {
 
     @Environment(value=EnvType.CLIENT)
     public abstract int getSize();
+
+    @Environment(value=EnvType.CLIENT)
+    public abstract RecipeBookType getRecipeBookType();
 }
 

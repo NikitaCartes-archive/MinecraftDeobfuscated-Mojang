@@ -79,7 +79,7 @@ extends StructurePoolElement {
 
     @Override
     public boolean place(StructureManager structureManager, WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, BlockPos blockPos, BlockPos blockPos2, Rotation rotation, BoundingBox boundingBox, Random random, boolean bl) {
-        return this.feature.place(worldGenLevel, structureFeatureManager, chunkGenerator, random, blockPos);
+        return this.feature.place(worldGenLevel, chunkGenerator, random, blockPos);
     }
 
     @Override

@@ -63,7 +63,7 @@ extends Projectile {
                 bl = true;
             } else if (blockState.is(Blocks.END_GATEWAY)) {
                 BlockEntity blockEntity = this.level.getBlockEntity(blockPos);
-                if (blockEntity instanceof TheEndGatewayBlockEntity) {
+                if (blockEntity instanceof TheEndGatewayBlockEntity && TheEndGatewayBlockEntity.canEntityTeleport(this)) {
                     ((TheEndGatewayBlockEntity)blockEntity).teleportEntity(this);
                 }
                 bl = true;

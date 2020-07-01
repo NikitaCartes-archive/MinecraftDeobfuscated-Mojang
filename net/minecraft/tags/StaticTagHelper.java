@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -17,12 +16,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.SetTag;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagCollection;
+import net.minecraft.tags.TagContainer;
 import org.jetbrains.annotations.Nullable;
 
 public class StaticTagHelper<T> {
-    private final TagCollection<T> empty = new TagCollection(resourceLocation -> Optional.empty(), "", "");
-    private TagCollection<T> source = this.empty;
+    private TagCollection<T> source = TagCollection.empty();
     private final List<Wrapper<T>> wrappers = Lists.newArrayList();
+    private final Function<TagContainer, TagCollection<T>> collectionGetter;
+
+    public StaticTagHelper(Function<TagContainer, TagCollection<T>> function) {
+        this.collectionGetter = function;
+    }
 
     public Tag.Named<T> bind(String string) {
         Wrapper wrapper = new Wrapper(new ResourceLocation(string));
@@ -32,12 +36,13 @@ public class StaticTagHelper<T> {
 
     @Environment(value=EnvType.CLIENT)
     public void resetToEmpty() {
-        this.source = this.empty;
+        this.source = TagCollection.empty();
         SetTag tag = SetTag.empty();
         this.wrappers.forEach(wrapper -> wrapper.rebind(resourceLocation -> tag));
     }
 
-    public void reset(TagCollection<T> tagCollection) {
+    public void reset(TagContainer tagContainer) {
+        TagCollection tagCollection = this.collectionGetter.apply(tagContainer);
         this.source = tagCollection;
         this.wrappers.forEach(wrapper -> wrapper.rebind(tagCollection::getTag));
     }
@@ -46,17 +51,18 @@ public class StaticTagHelper<T> {
         return this.source;
     }
 
-    public List<Wrapper<T>> getWrappers() {
+    public List<? extends Tag<T>> getWrappers() {
         return this.wrappers;
     }
 
-    public Set<ResourceLocation> getMissingTags(TagCollection<T> tagCollection) {
+    public Set<ResourceLocation> getMissingTags(TagContainer tagContainer) {
+        TagCollection<T> tagCollection = this.collectionGetter.apply(tagContainer);
         Set set = this.wrappers.stream().map(Wrapper::getName).collect(Collectors.toSet());
         ImmutableSet<ResourceLocation> immutableSet = ImmutableSet.copyOf(tagCollection.getAvailableTags());
         return Sets.difference(set, immutableSet);
     }
 
-    public static class Wrapper<T>
+    static class Wrapper<T>
     implements Tag.Named<T> {
         @Nullable
         private Tag<T> tag;

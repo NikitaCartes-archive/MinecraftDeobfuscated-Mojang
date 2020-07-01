@@ -11,7 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -85,12 +85,12 @@ public class IglooPieces {
         }
 
         @Override
-        protected void handleDataMarker(String string, BlockPos blockPos, LevelAccessor levelAccessor, Random random, BoundingBox boundingBox) {
+        protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, Random random, BoundingBox boundingBox) {
             if (!"chest".equals(string)) {
                 return;
             }
-            levelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
-            BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos.below());
+            serverLevelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
+            BlockEntity blockEntity = serverLevelAccessor.getBlockEntity(blockPos.below());
             if (blockEntity instanceof ChestBlockEntity) {
                 ((ChestBlockEntity)blockEntity).setLootTable(BuiltInLootTables.IGLOO_CHEST, random.nextLong());
             }

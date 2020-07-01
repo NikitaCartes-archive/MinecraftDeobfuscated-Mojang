@@ -35,6 +35,7 @@ import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
@@ -68,7 +69,7 @@ import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.TagManager;
+import net.minecraft.tags.TagContainer;
 import net.minecraft.util.ClassInstanceMultiMap;
 import net.minecraft.util.CsvOutput;
 import net.minecraft.util.Mth;
@@ -129,6 +130,7 @@ import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -976,7 +978,7 @@ implements WorldGenLevel {
     }
 
     @Override
-    public TagManager getTagManager() {
+    public TagContainer getTagManager() {
         return this.server.getTags();
     }
 
@@ -1238,6 +1240,16 @@ implements WorldGenLevel {
     @Nullable
     public EndDragonFight dragonFight() {
         return this.dragonFight;
+    }
+
+    @Override
+    public Stream<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature) {
+        return this.structureFeatureManager().startsForFeature(sectionPos, structureFeature);
+    }
+
+    @Override
+    public Level getLevel() {
+        return this;
     }
 
     public static void makeObsidianPlatform(ServerLevel serverLevel) {

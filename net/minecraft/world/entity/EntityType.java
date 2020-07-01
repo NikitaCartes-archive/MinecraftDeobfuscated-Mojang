@@ -20,6 +20,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.Mth;
@@ -108,6 +109,7 @@ import net.minecraft.world.entity.monster.ZombieVillager;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
+import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
@@ -214,6 +216,7 @@ public class EntityType<T extends Entity> {
     public static final EntityType<Phantom> PHANTOM = EntityType.register("phantom", Builder.of(Phantom::new, MobCategory.MONSTER).sized(0.9f, 0.5f).clientTrackingRange(8));
     public static final EntityType<Pig> PIG = EntityType.register("pig", Builder.of(Pig::new, MobCategory.CREATURE).sized(0.9f, 0.9f).clientTrackingRange(10));
     public static final EntityType<Piglin> PIGLIN = EntityType.register("piglin", Builder.of(Piglin::new, MobCategory.MONSTER).sized(0.6f, 1.95f).clientTrackingRange(8));
+    public static final EntityType<PiglinBrute> PIGLIN_BRUTE = EntityType.register("piglin_brute", Builder.of(PiglinBrute::new, MobCategory.MONSTER).sized(0.6f, 1.95f).clientTrackingRange(8));
     public static final EntityType<Pillager> PILLAGER = EntityType.register("pillager", Builder.of(Pillager::new, MobCategory.MONSTER).canSpawnFarFromPlayer().sized(0.6f, 1.95f).clientTrackingRange(8));
     public static final EntityType<PolarBear> POLAR_BEAR = EntityType.register("polar_bear", Builder.of(PolarBear::new, MobCategory.CREATURE).sized(1.4f, 1.4f).clientTrackingRange(10));
     public static final EntityType<PrimedTnt> TNT = EntityType.register("tnt", Builder.of(PrimedTnt::new, MobCategory.MISC).fireImmune().sized(0.98f, 0.98f).clientTrackingRange(10).updateInterval(10));
@@ -303,42 +306,42 @@ public class EntityType<T extends Entity> {
     }
 
     @Nullable
-    public Entity spawn(Level level, @Nullable ItemStack itemStack, @Nullable Player player, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2) {
-        return this.spawn(level, itemStack == null ? null : itemStack.getTag(), itemStack != null && itemStack.hasCustomHoverName() ? itemStack.getHoverName() : null, player, blockPos, mobSpawnType, bl, bl2);
+    public Entity spawn(ServerLevel serverLevel, @Nullable ItemStack itemStack, @Nullable Player player, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2) {
+        return this.spawn(serverLevel, itemStack == null ? null : itemStack.getTag(), itemStack != null && itemStack.hasCustomHoverName() ? itemStack.getHoverName() : null, player, blockPos, mobSpawnType, bl, bl2);
     }
 
     @Nullable
-    public T spawn(Level level, @Nullable CompoundTag compoundTag, @Nullable Component component, @Nullable Player player, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2) {
-        T entity = this.create(level, compoundTag, component, player, blockPos, mobSpawnType, bl, bl2);
-        level.addFreshEntity((Entity)entity);
+    public T spawn(ServerLevel serverLevel, @Nullable CompoundTag compoundTag, @Nullable Component component, @Nullable Player player, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2) {
+        T entity = this.create(serverLevel, compoundTag, component, player, blockPos, mobSpawnType, bl, bl2);
+        serverLevel.addFreshEntity((Entity)entity);
         return entity;
     }
 
     @Nullable
-    public T create(Level level, @Nullable CompoundTag compoundTag, @Nullable Component component, @Nullable Player player, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2) {
+    public T create(ServerLevel serverLevel, @Nullable CompoundTag compoundTag, @Nullable Component component, @Nullable Player player, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2) {
         double d;
-        T entity = this.create(level);
+        T entity = this.create(serverLevel);
         if (entity == null) {
             return null;
         }
         if (bl) {
             ((Entity)entity).setPos((double)blockPos.getX() + 0.5, blockPos.getY() + 1, (double)blockPos.getZ() + 0.5);
-            d = EntityType.getYOffset(level, blockPos, bl2, ((Entity)entity).getBoundingBox());
+            d = EntityType.getYOffset(serverLevel, blockPos, bl2, ((Entity)entity).getBoundingBox());
         } else {
             d = 0.0;
         }
-        ((Entity)entity).moveTo((double)blockPos.getX() + 0.5, (double)blockPos.getY() + d, (double)blockPos.getZ() + 0.5, Mth.wrapDegrees(level.random.nextFloat() * 360.0f), 0.0f);
+        ((Entity)entity).moveTo((double)blockPos.getX() + 0.5, (double)blockPos.getY() + d, (double)blockPos.getZ() + 0.5, Mth.wrapDegrees(serverLevel.random.nextFloat() * 360.0f), 0.0f);
         if (entity instanceof Mob) {
             Mob mob = (Mob)entity;
             mob.yHeadRot = mob.yRot;
             mob.yBodyRot = mob.yRot;
-            mob.finalizeSpawn(level, level.getCurrentDifficultyAt(mob.blockPosition()), mobSpawnType, null, compoundTag);
+            mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), mobSpawnType, null, compoundTag);
             mob.playAmbientSound();
         }
         if (component != null && entity instanceof LivingEntity) {
             ((Entity)entity).setCustomName(component);
         }
-        EntityType.updateCustomEntityTag(level, player, entity, compoundTag);
+        EntityType.updateCustomEntityTag(serverLevel, player, entity, compoundTag);
         return entity;
     }
 

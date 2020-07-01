@@ -7,6 +7,7 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Rotations;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -19,6 +20,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 public class ArmorStandItem
 extends Item {
@@ -36,11 +39,17 @@ extends Item {
         BlockPlaceContext blockPlaceContext = new BlockPlaceContext(useOnContext);
         BlockPos blockPos = blockPlaceContext.getClickedPos();
         ItemStack itemStack = useOnContext.getItemInHand();
-        ArmorStand armorStand = EntityType.ARMOR_STAND.create(level, itemStack.getTag(), null, useOnContext.getPlayer(), blockPos, MobSpawnType.SPAWN_EGG, true, true);
-        if (!level.noCollision(armorStand) || !level.getEntities(armorStand, armorStand.getBoundingBox()).isEmpty()) {
+        Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
+        AABB aABB = EntityType.ARMOR_STAND.getDimensions().makeBoundingBox(vec3.x(), vec3.y(), vec3.z());
+        if (!level.noCollision(null, aABB, entity -> true) || !level.getEntities(null, aABB).isEmpty()) {
             return InteractionResult.FAIL;
         }
-        if (!level.isClientSide) {
+        if (level instanceof ServerLevel) {
+            ArmorStand armorStand = EntityType.ARMOR_STAND.create((ServerLevel)level, itemStack.getTag(), null, useOnContext.getPlayer(), blockPos, MobSpawnType.SPAWN_EGG, true, true);
+            if (armorStand == null) {
+                return InteractionResult.FAIL;
+            }
+            level.addFreshEntity(armorStand);
             float f = (float)Mth.floor((Mth.wrapDegrees(useOnContext.getRotation() - 180.0f) + 22.5f) / 45.0f) * 45.0f;
             armorStand.moveTo(armorStand.getX(), armorStand.getY(), armorStand.getZ(), f, 0.0f);
             this.randomizePose(armorStand, level.random);

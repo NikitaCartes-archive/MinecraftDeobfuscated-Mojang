@@ -902,7 +902,7 @@ extends LivingEntity {
 
     @Override
     protected Vec3 maybeBackOffFromEdge(Vec3 vec3, MoverType moverType) {
-        if ((moverType == MoverType.SELF || moverType == MoverType.PLAYER) && this.onGround && this.isStayingOnGroundSurface()) {
+        if ((moverType == MoverType.SELF || moverType == MoverType.PLAYER) && this.isStayingOnGroundSurface() && this.isAboveGround()) {
             double d = vec3.x;
             double e = vec3.z;
             double f = 0.05;
@@ -943,6 +943,10 @@ extends LivingEntity {
             vec3 = new Vec3(d, vec3.y, e);
         }
         return vec3;
+    }
+
+    private boolean isAboveGround() {
+        return this.onGround || this.fallDistance < this.maxUpStep && !this.level.noCollision(this, this.getBoundingBox().move(0.0, this.fallDistance - this.maxUpStep, 0.0));
     }
 
     public void attack(Entity entity) {
@@ -1377,7 +1381,7 @@ extends LivingEntity {
     }
 
     @Override
-    public void killed(LivingEntity livingEntity) {
+    public void killed(ServerLevel serverLevel, LivingEntity livingEntity) {
         this.awardStat(Stats.ENTITY_KILLED.get(livingEntity.getType()));
     }
 

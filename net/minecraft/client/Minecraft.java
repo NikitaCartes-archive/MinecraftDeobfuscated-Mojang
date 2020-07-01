@@ -130,7 +130,6 @@ import net.minecraft.client.resources.LegacyPackResourcesAdapter;
 import net.minecraft.client.resources.MobEffectTextureManager;
 import net.minecraft.client.resources.PackResourcesAdapterV4;
 import net.minecraft.client.resources.PaintingTextureManager;
-import net.minecraft.client.resources.ResourcePack;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.client.resources.SplashManager;
 import net.minecraft.client.resources.language.I18n;
@@ -292,7 +291,7 @@ WindowEventHandler {
     private final boolean allowsChat;
     private final ReloadableResourceManager resourceManager;
     private final ClientPackSource clientPackSource;
-    private final PackRepository<ResourcePack> resourcePackRepository;
+    private final PackRepository resourcePackRepository;
     private final LanguageManager languageManager;
     private final BlockColors blockColors;
     private final ItemColors itemColors;
@@ -376,7 +375,7 @@ WindowEventHandler {
         this.versionType = gameConfig.game.versionType;
         this.profileProperties = gameConfig.user.profileProperties;
         this.clientPackSource = new ClientPackSource(new File(this.gameDirectory, "server-resource-packs"), gameConfig.location.getAssetIndex());
-        this.resourcePackRepository = new PackRepository<ResourcePack>(Minecraft::createClientPackAdapter, this.clientPackSource, new FolderRepositorySource(this.resourcePackDirectory, PackSource.DEFAULT));
+        this.resourcePackRepository = new PackRepository(Minecraft::createClientPackAdapter, this.clientPackSource, new FolderRepositorySource(this.resourcePackDirectory, PackSource.DEFAULT));
         this.proxy = gameConfig.user.proxy;
         this.minecraftSessionService = new YggdrasilAuthenticationService(this.proxy, UUID.randomUUID().toString()).createMinecraftSessionService();
         this.user = gameConfig.user.user;
@@ -1570,7 +1569,7 @@ WindowEventHandler {
 
     public ServerStem makeServerStem(RegistryAccess.RegistryHolder registryHolder, Function<LevelStorageSource.LevelStorageAccess, DataPackConfig> function, Function4<LevelStorageSource.LevelStorageAccess, RegistryAccess.RegistryHolder, ResourceManager, DataPackConfig, WorldData> function4, boolean bl, LevelStorageSource.LevelStorageAccess levelStorageAccess) throws InterruptedException, ExecutionException {
         DataPackConfig dataPackConfig = function.apply(levelStorageAccess);
-        PackRepository<Pack> packRepository = new PackRepository<Pack>(Pack::new, new ServerPacksSource(), new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD));
+        PackRepository packRepository = new PackRepository(new ServerPacksSource(), new FolderRepositorySource(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD));
         try {
             DataPackConfig dataPackConfig2 = MinecraftServer.configurePackRepository(packRepository, dataPackConfig, bl);
             CompletableFuture<ServerResources> completableFuture = ServerResources.loadResources(packRepository.openAllSelected(), Commands.CommandSelection.INTEGRATED, 2, Util.backgroundExecutor(), this);
@@ -1888,9 +1887,9 @@ WindowEventHandler {
         snooper.setDynamicData("subtitles", this.options.showSubtitles);
         snooper.setDynamicData("touch", this.options.touchscreen ? "touch" : "mouse");
         int i = 0;
-        for (ResourcePack resourcePack : this.resourcePackRepository.getSelectedPacks()) {
-            if (resourcePack.isRequired() || resourcePack.isFixedPosition()) continue;
-            snooper.setDynamicData("resource_pack[" + i++ + "]", resourcePack.getId());
+        for (Pack pack : this.resourcePackRepository.getSelectedPacks()) {
+            if (pack.isRequired() || pack.isFixedPosition()) continue;
+            snooper.setDynamicData("resource_pack[" + i++ + "]", pack.getId());
         }
         snooper.setDynamicData("resource_packs", i);
         if (this.singleplayerServer != null) {
@@ -1964,7 +1963,7 @@ WindowEventHandler {
         return this.resourceManager;
     }
 
-    public PackRepository<ResourcePack> getResourcePackRepository() {
+    public PackRepository getResourcePackRepository() {
         return this.resourcePackRepository;
     }
 
@@ -2174,7 +2173,7 @@ WindowEventHandler {
         return this.renderBuffers;
     }
 
-    private static ResourcePack createClientPackAdapter(String string, boolean bl, Supplier<PackResources> supplier, PackResources packResources, PackMetadataSection packMetadataSection, Pack.Position position, PackSource packSource) {
+    private static Pack createClientPackAdapter(String string, boolean bl, Supplier<PackResources> supplier, PackResources packResources, PackMetadataSection packMetadataSection, Pack.Position position, PackSource packSource) {
         int i = packMetadataSection.getPackFormat();
         Supplier<PackResources> supplier2 = supplier;
         if (i <= 3) {
@@ -2183,7 +2182,7 @@ WindowEventHandler {
         if (i <= 4) {
             supplier2 = Minecraft.adaptV4(supplier2);
         }
-        return new ResourcePack(string, bl, supplier2, packResources, packMetadataSection, position, packSource);
+        return new Pack(string, bl, supplier2, packResources, packMetadataSection, position, packSource);
     }
 
     private static Supplier<PackResources> adaptV3(Supplier<PackResources> supplier) {
@@ -2211,17 +2210,17 @@ WindowEventHandler {
     @Environment(value=EnvType.CLIENT)
     public static final class ServerStem
     implements AutoCloseable {
-        private final PackRepository<Pack> packRepository;
+        private final PackRepository packRepository;
         private final ServerResources serverResources;
         private final WorldData worldData;
 
-        private ServerStem(PackRepository<Pack> packRepository, ServerResources serverResources, WorldData worldData) {
+        private ServerStem(PackRepository packRepository, ServerResources serverResources, WorldData worldData) {
             this.packRepository = packRepository;
             this.serverResources = serverResources;
             this.worldData = worldData;
         }
 
-        public PackRepository<Pack> packRepository() {
+        public PackRepository packRepository() {
             return this.packRepository;
         }
 

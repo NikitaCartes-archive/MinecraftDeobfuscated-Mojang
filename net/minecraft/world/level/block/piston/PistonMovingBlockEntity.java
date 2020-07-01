@@ -11,7 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -128,6 +127,7 @@ implements TickableBlockEntity {
             AABB aABB3;
             if (entity.getPistonPushReaction() == PushReaction.IGNORE) continue;
             if (bl) {
+                if (entity instanceof ServerPlayer) continue;
                 Vec3 vec3 = entity.getDeltaMovement();
                 double e = vec3.x;
                 double g = vec3.y;
@@ -146,9 +146,6 @@ implements TickableBlockEntity {
                     }
                 }
                 entity.setDeltaMovement(e, g, h);
-                if (entity instanceof ServerPlayer) {
-                    ((ServerPlayer)entity).connection.send(new ClientboundSetEntityMotionPacket(entity));
-                }
             }
             double i = 0.0;
             Iterator<AABB> iterator = list2.iterator();

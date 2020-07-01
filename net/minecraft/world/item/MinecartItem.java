@@ -8,6 +8,7 @@ import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
@@ -30,7 +31,7 @@ extends Item {
             double g;
             RailShape railShape;
             Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
-            Level level = blockSource.getLevel();
+            ServerLevel level = blockSource.getLevel();
             double d = blockSource.x() + (double)direction.getStepX() * 1.125;
             double e = Math.floor(blockSource.y()) + (double)direction.getStepY();
             double f = blockSource.z() + (double)direction.getStepZ() * 1.125;

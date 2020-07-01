@@ -78,7 +78,8 @@ import net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
-import net.minecraft.network.protocol.game.ServerboundRecipeBookUpdatePacket;
+import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPacket;
+import net.minecraft.network.protocol.game.ServerboundRecipeBookSeenRecipePacket;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
 import net.minecraft.network.protocol.game.ServerboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ServerboundSeenAdvancementsPacket;
@@ -383,20 +384,15 @@ implements ServerGamePacketListener {
     }
 
     @Override
-    public void handleRecipeBookUpdatePacket(ServerboundRecipeBookUpdatePacket serverboundRecipeBookUpdatePacket) {
-        PacketUtils.ensureRunningOnSameThread(serverboundRecipeBookUpdatePacket, this, this.player.getLevel());
-        if (serverboundRecipeBookUpdatePacket.getPurpose() == ServerboundRecipeBookUpdatePacket.Purpose.SHOWN) {
-            this.server.getRecipeManager().byKey(serverboundRecipeBookUpdatePacket.getRecipe()).ifPresent(this.player.getRecipeBook()::removeHighlight);
-        } else if (serverboundRecipeBookUpdatePacket.getPurpose() == ServerboundRecipeBookUpdatePacket.Purpose.SETTINGS) {
-            this.player.getRecipeBook().setGuiOpen(serverboundRecipeBookUpdatePacket.isGuiOpen());
-            this.player.getRecipeBook().setFilteringCraftable(serverboundRecipeBookUpdatePacket.isFilteringCraftable());
-            this.player.getRecipeBook().setFurnaceGuiOpen(serverboundRecipeBookUpdatePacket.isFurnaceGuiOpen());
-            this.player.getRecipeBook().setFurnaceFilteringCraftable(serverboundRecipeBookUpdatePacket.isFurnaceFilteringCraftable());
-            this.player.getRecipeBook().setBlastingFurnaceGuiOpen(serverboundRecipeBookUpdatePacket.isBlastFurnaceGuiOpen());
-            this.player.getRecipeBook().setBlastingFurnaceFilteringCraftable(serverboundRecipeBookUpdatePacket.isBlastFurnaceFilteringCraftable());
-            this.player.getRecipeBook().setSmokerGuiOpen(serverboundRecipeBookUpdatePacket.isSmokerGuiOpen());
-            this.player.getRecipeBook().setSmokerFilteringCraftable(serverboundRecipeBookUpdatePacket.isSmokerFilteringCraftable());
-        }
+    public void handleRecipeBookSeenRecipePacket(ServerboundRecipeBookSeenRecipePacket serverboundRecipeBookSeenRecipePacket) {
+        PacketUtils.ensureRunningOnSameThread(serverboundRecipeBookSeenRecipePacket, this, this.player.getLevel());
+        this.server.getRecipeManager().byKey(serverboundRecipeBookSeenRecipePacket.getRecipe()).ifPresent(this.player.getRecipeBook()::removeHighlight);
+    }
+
+    @Override
+    public void handleRecipeBookChangeSettingsPacket(ServerboundRecipeBookChangeSettingsPacket serverboundRecipeBookChangeSettingsPacket) {
+        PacketUtils.ensureRunningOnSameThread(serverboundRecipeBookChangeSettingsPacket, this, this.player.getLevel());
+        this.player.getRecipeBook().setBookSetting(serverboundRecipeBookChangeSettingsPacket.getBookType(), serverboundRecipeBookChangeSettingsPacket.isOpen(), serverboundRecipeBookChangeSettingsPacket.isFiltering());
     }
 
     @Override
@@ -566,7 +562,7 @@ implements ServerGamePacketListener {
                 } else if (serverboundSetStructureBlockPacket.getUpdateType() == StructureBlockEntity.UpdateType.LOAD_AREA) {
                     if (!structureBlockEntity.isStructureLoadable()) {
                         this.player.displayClientMessage(new TranslatableComponent("structure_block.load_not_found", string), false);
-                    } else if (structureBlockEntity.loadStructure()) {
+                    } else if (structureBlockEntity.loadStructure(this.player.getLevel())) {
                         this.player.displayClientMessage(new TranslatableComponent("structure_block.load_success", string), false);
                     } else {
                         this.player.displayClientMessage(new TranslatableComponent("structure_block.load_prepare", string), false);
@@ -1097,6 +1093,7 @@ implements ServerGamePacketListener {
             double d = 36.0;
             if (this.player.distanceToSqr(entity) < 36.0) {
                 InteractionHand interactionHand = serverboundInteractPacket.getHand();
+                ItemStack itemStack = interactionHand != null ? this.player.getItemInHand(interactionHand).copy() : ItemStack.EMPTY;
                 Optional<Object> optional = Optional.empty();
                 if (serverboundInteractPacket.getAction() == ServerboundInteractPacket.Action.INTERACT) {
                     optional = Optional.of(this.player.interactOn(entity, interactionHand));
@@ -1111,7 +1108,7 @@ implements ServerGamePacketListener {
                     this.player.attack(entity);
                 }
                 if (optional.isPresent() && ((InteractionResult)((Object)optional.get())).consumesAction()) {
-                    CriteriaTriggers.PLAYER_INTERACTED_WITH_ENTITY.trigger(this.player, this.player.getItemInHand(interactionHand), entity);
+                    CriteriaTriggers.PLAYER_INTERACTED_WITH_ENTITY.trigger(this.player, itemStack, entity);
                     if (((InteractionResult)((Object)optional.get())).shouldSwing()) {
                         this.player.swing(interactionHand, true);
                     }

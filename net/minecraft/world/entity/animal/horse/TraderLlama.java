@@ -22,7 +22,7 @@ import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import org.jetbrains.annotations.Nullable;
 
 public class TraderLlama
@@ -107,7 +107,7 @@ extends Llama {
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         if (mobSpawnType == MobSpawnType.EVENT) {
             this.setAge(0);
         }
@@ -115,7 +115,7 @@ extends Llama {
             spawnGroupData = new AgableMob.AgableMobGroupData();
             ((AgableMob.AgableMobGroupData)spawnGroupData).setShouldSpawnBaby(false);
         }
-        return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+        return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     public class TraderLlamaDefendWanderingTraderGoal

@@ -33,11 +33,12 @@ import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.network.protocol.game.ServerboundRecipeBookUpdatePacket;
+import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPacket;
 import net.minecraft.recipebook.PlaceRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.RecipeBookMenu;
+import net.minecraft.world.inventory.RecipeBookType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -64,9 +65,9 @@ PlaceRecipe<Ingredient> {
     protected Minecraft minecraft;
     private EditBox searchBox;
     private String lastSearch = "";
-    protected ClientRecipeBook book;
-    protected final RecipeBookPage recipeBookPage = new RecipeBookPage();
-    protected final StackedContents stackedContents = new StackedContents();
+    private ClientRecipeBook book;
+    private final RecipeBookPage recipeBookPage = new RecipeBookPage();
+    private final StackedContents stackedContents = new StackedContents();
     private int timesInventoryChanged;
     private boolean ignoreTextInput;
 
@@ -100,10 +101,10 @@ PlaceRecipe<Ingredient> {
         this.searchBox.setValue(string);
         this.recipeBookPage.init(this.minecraft, i, j);
         this.recipeBookPage.addListener(this);
-        this.filterButton = new StateSwitchingButton(i + 110, j + 12, 26, 16, this.book.isFilteringCraftable(this.menu));
+        this.filterButton = new StateSwitchingButton(i + 110, j + 12, 26, 16, this.book.isFiltering(this.menu));
         this.initFilterButtonTextures();
         this.tabButtons.clear();
-        for (RecipeBookCategories recipeBookCategories : ClientRecipeBook.getCategories(this.menu)) {
+        for (RecipeBookCategories recipeBookCategories : RecipeBookCategories.getCategories(this.menu.getRecipeBookType())) {
             this.tabButtons.add(new RecipeBookTabButton(recipeBookCategories));
         }
         if (this.selectedTab != null) {
@@ -142,11 +143,11 @@ PlaceRecipe<Ingredient> {
     }
 
     public boolean isVisible() {
-        return this.book.isGuiOpen();
+        return this.book.isOpen(this.menu.getRecipeBookType());
     }
 
     protected void setVisible(boolean bl) {
-        this.book.setGuiOpen(bl);
+        this.book.setOpen(this.menu.getRecipeBookType(), bl);
         if (!bl) {
             this.recipeBookPage.setInvisible();
         }
@@ -173,7 +174,7 @@ PlaceRecipe<Ingredient> {
             ObjectLinkedOpenHashSet objectSet = new ObjectLinkedOpenHashSet(this.minecraft.getSearchTree(SearchRegistry.RECIPE_COLLECTIONS).search(string.toLowerCase(Locale.ROOT)));
             list2.removeIf(recipeCollection -> !objectSet.contains(recipeCollection));
         }
-        if (this.book.isFilteringCraftable(this.menu)) {
+        if (this.book.isFiltering(this.menu)) {
             list2.removeIf(recipeCollection -> !recipeCollection.hasCraftable());
         }
         this.recipeBookPage.updateCollections(list2, bl);
@@ -186,7 +187,7 @@ PlaceRecipe<Ingredient> {
         int l = 0;
         for (RecipeBookTabButton recipeBookTabButton : this.tabButtons) {
             RecipeBookCategories recipeBookCategories = recipeBookTabButton.getCategory();
-            if (recipeBookCategories == RecipeBookCategories.SEARCH || recipeBookCategories == RecipeBookCategories.FURNACE_SEARCH) {
+            if (recipeBookCategories == RecipeBookCategories.CRAFTING_SEARCH || recipeBookCategories == RecipeBookCategories.FURNACE_SEARCH) {
                 recipeBookTabButton.visible = true;
                 recipeBookTabButton.setPosition(i, j + 27 * l++);
                 continue;
@@ -299,7 +300,7 @@ PlaceRecipe<Ingredient> {
             return true;
         }
         if (this.filterButton.mouseClicked(d, e, i)) {
-            boolean bl = this.updateFiltering();
+            boolean bl = this.toggleFiltering();
             this.filterButton.setStateTriggered(bl);
             this.sendUpdateSettings();
             this.updateCollections(false);
@@ -318,9 +319,10 @@ PlaceRecipe<Ingredient> {
         return false;
     }
 
-    protected boolean updateFiltering() {
-        boolean bl = !this.book.isFilteringCraftable();
-        this.book.setFilteringCraftable(bl);
+    private boolean toggleFiltering() {
+        RecipeBookType recipeBookType = this.menu.getRecipeBookType();
+        boolean bl = !this.book.isFiltering(recipeBookType);
+        this.book.setFiltering(recipeBookType, bl);
         return bl;
     }
 
@@ -443,7 +445,10 @@ PlaceRecipe<Ingredient> {
 
     protected void sendUpdateSettings() {
         if (this.minecraft.getConnection() != null) {
-            this.minecraft.getConnection().send(new ServerboundRecipeBookUpdatePacket(this.book.isGuiOpen(), this.book.isFilteringCraftable(), this.book.isFurnaceGuiOpen(), this.book.isFurnaceFilteringCraftable(), this.book.isBlastingFurnaceGuiOpen(), this.book.isBlastingFurnaceFilteringCraftable()));
+            RecipeBookType recipeBookType = this.menu.getRecipeBookType();
+            boolean bl = this.book.getBookSettings().isOpen(recipeBookType);
+            boolean bl2 = this.book.getBookSettings().isFiltering(recipeBookType);
+            this.minecraft.getConnection().send(new ServerboundRecipeBookChangeSettingsPacket(recipeBookType, bl, bl2));
         }
     }
 }

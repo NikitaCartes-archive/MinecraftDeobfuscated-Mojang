@@ -3,9 +3,13 @@
  */
 package net.minecraft.world.level.block;
 
+import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.GrowingPlantHeadBlock;
@@ -13,6 +17,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class GrowingPlantBlock
 extends Block {
@@ -28,6 +33,20 @@ extends Block {
     }
 
     @Override
+    @Nullable
+    public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
+        BlockState blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos().relative(this.growthDirection));
+        if (blockState.is(this.getHeadBlock()) || blockState.is(this.getBodyBlock())) {
+            return this.getBodyBlock().defaultBlockState();
+        }
+        return this.getStateForPlacement(blockPlaceContext.getLevel());
+    }
+
+    public BlockState getStateForPlacement(LevelAccessor levelAccessor) {
+        return this.defaultBlockState();
+    }
+
+    @Override
     public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
         BlockPos blockPos2 = blockPos.relative(this.growthDirection.getOpposite());
         BlockState blockState2 = levelReader.getBlockState(blockPos2);
@@ -36,6 +55,13 @@ extends Block {
             return false;
         }
         return block == this.getHeadBlock() || block == this.getBodyBlock() || blockState2.isFaceSturdy(levelReader, blockPos2, this.growthDirection);
+    }
+
+    @Override
+    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+        if (!blockState.canSurvive(serverLevel, blockPos)) {
+            serverLevel.destroyBlock(blockPos, true);
+        }
     }
 
     protected boolean canAttachToBlock(Block block) {

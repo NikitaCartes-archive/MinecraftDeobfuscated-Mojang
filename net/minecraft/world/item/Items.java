@@ -893,6 +893,7 @@ public class Items {
     public static final Item PHANTOM_SPAWN_EGG = Items.registerItem("phantom_spawn_egg", (Item)new SpawnEggItem(EntityType.PHANTOM, 4411786, 0x88FF00, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item PIG_SPAWN_EGG = Items.registerItem("pig_spawn_egg", (Item)new SpawnEggItem(EntityType.PIG, 15771042, 14377823, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item PIGLIN_SPAWN_EGG = Items.registerItem("piglin_spawn_egg", (Item)new SpawnEggItem(EntityType.PIGLIN, 10051392, 16380836, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+    public static final Item PIGLIN_BRUTE_SPAWN_EGG = Items.registerItem("piglin_brute_spawn_egg", (Item)new SpawnEggItem(EntityType.PIGLIN_BRUTE, 5843472, 16380836, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item PILLAGER_SPAWN_EGG = Items.registerItem("pillager_spawn_egg", (Item)new SpawnEggItem(EntityType.PILLAGER, 5451574, 0x959B9B, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item POLAR_BEAR_SPAWN_EGG = Items.registerItem("polar_bear_spawn_egg", (Item)new SpawnEggItem(EntityType.POLAR_BEAR, 0xF2F2F2, 0x959590, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final Item PUFFERFISH_SPAWN_EGG = Items.registerItem("pufferfish_spawn_egg", (Item)new SpawnEggItem(EntityType.PUFFERFISH, 16167425, 3654642, new Item.Properties().tab(CreativeModeTab.TAB_MISC)));

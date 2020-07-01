@@ -429,6 +429,11 @@ public class Util {
         Files.copy(path3, path5, new CopyOption[0]);
     }
 
+    @Environment(value=EnvType.CLIENT)
+    public static String sanitizeResourceName(String string) {
+        return string.toLowerCase(Locale.ROOT).chars().mapToObj(i -> ResourceLocation.isAllowedInResourceLocation((char)i) ? Character.toString((char)i) : "_").collect(Collectors.joining());
+    }
+
     static enum IdentityStrategy implements Hash.Strategy<Object>
     {
         INSTANCE;

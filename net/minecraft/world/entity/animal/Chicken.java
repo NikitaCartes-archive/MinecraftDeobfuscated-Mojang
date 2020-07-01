@@ -5,6 +5,7 @@ package net.minecraft.world.entity.animal;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -123,8 +124,8 @@ extends Animal {
     }
 
     @Override
-    public Chicken getBreedOffspring(AgableMob agableMob) {
-        return EntityType.CHICKEN.create(this.level);
+    public Chicken getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+        return EntityType.CHICKEN.create(serverLevel);
     }
 
     @Override
@@ -183,8 +184,8 @@ extends Animal {
     }
 
     @Override
-    public /* synthetic */ AgableMob getBreedOffspring(AgableMob agableMob) {
-        return this.getBreedOffspring(agableMob);
+    public /* synthetic */ AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+        return this.getBreedOffspring(serverLevel, agableMob);
     }
 }
 

@@ -96,9 +96,10 @@ extends Entity {
         this.yo = this.getY();
         this.zo = this.getZ();
         Vec3 vec3 = this.getDeltaMovement();
-        if (this.isEyeInFluid(FluidTags.WATER)) {
+        float f = this.getEyeHeight() - 0.11111111f;
+        if (this.isInWater() && this.getFluidHeight(FluidTags.WATER) > (double)f) {
             this.setUnderwaterMovement();
-        } else if (this.isEyeInFluid(FluidTags.LAVA)) {
+        } else if (this.isInLava() && this.getFluidHeight(FluidTags.LAVA) > (double)f) {
             this.setUnderLavaMovement();
         } else if (!this.isNoGravity()) {
             this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
@@ -113,13 +114,16 @@ extends Entity {
         }
         if (!this.onGround || ItemEntity.getHorizontalDistanceSqr(this.getDeltaMovement()) > (double)1.0E-5f || (this.tickCount + this.getId()) % 4 == 0) {
             this.move(MoverType.SELF, this.getDeltaMovement());
-            float f = 0.98f;
+            float g = 0.98f;
             if (this.onGround) {
-                f = this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.98f;
+                g = this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.98f;
             }
-            this.setDeltaMovement(this.getDeltaMovement().multiply(f, 0.98, f));
+            this.setDeltaMovement(this.getDeltaMovement().multiply(g, 0.98, g));
             if (this.onGround) {
-                this.setDeltaMovement(this.getDeltaMovement().multiply(1.0, -0.5, 1.0));
+                Vec3 vec32 = this.getDeltaMovement();
+                if (vec32.y < 0.0) {
+                    this.setDeltaMovement(vec32.multiply(1.0, -0.5, 1.0));
+                }
             }
         }
         boolean bl = Mth.floor(this.xo) != Mth.floor(this.getX()) || Mth.floor(this.yo) != Mth.floor(this.getY()) || Mth.floor(this.zo) != Mth.floor(this.getZ());

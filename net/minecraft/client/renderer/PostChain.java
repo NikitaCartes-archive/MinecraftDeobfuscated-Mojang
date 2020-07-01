@@ -193,13 +193,13 @@ implements AutoCloseable {
                                 RenderSystem.texParameter(3553, 10241, 9728);
                                 RenderSystem.texParameter(3553, 10240, 9728);
                             }
-                            postPass.addAuxAsset(string4, abstractTexture.getId(), j, k);
+                            postPass.addAuxAsset(string4, abstractTexture::getId, j, k);
                             break block20;
                         }
                         if (bl) {
-                            postPass.addAuxAsset(string4, renderTarget3.depthBufferId, renderTarget3.width, renderTarget3.height);
+                            postPass.addAuxAsset(string4, renderTarget3::getDepthTextureId, renderTarget3.width, renderTarget3.height);
                         } else {
-                            postPass.addAuxAsset(string4, renderTarget3, renderTarget3.width, renderTarget3.height);
+                            postPass.addAuxAsset(string4, renderTarget3::getColorTextureId, renderTarget3.width, renderTarget3.height);
                         }
                     } catch (Exception exception) {
                         ChainedJsonException chainedJsonException = ChainedJsonException.forException(exception);

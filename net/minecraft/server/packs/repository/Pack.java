@@ -45,7 +45,7 @@ implements AutoCloseable {
      * Enabled aggressive exception aggregation
      */
     @Nullable
-    public static <T extends Pack> T create(String string, boolean bl, Supplier<PackResources> supplier, PackConstructor<T> packConstructor, Position position, PackSource packSource) {
+    public static Pack create(String string, boolean bl, Supplier<PackResources> supplier, PackConstructor packConstructor, Position position, PackSource packSource) {
         try (PackResources packResources = supplier.get();){
             PackMetadataSection packMetadataSection = packResources.getMetadataSection(PackMetadataSection.SERIALIZER);
             if (bl && packMetadataSection == null) {
@@ -53,8 +53,8 @@ implements AutoCloseable {
                 packMetadataSection = BROKEN_ASSETS_FALLBACK;
             }
             if (packMetadataSection != null) {
-                T t = packConstructor.create(string, bl, supplier, packResources, packMetadataSection, position, packSource);
-                return t;
+                Pack pack = packConstructor.create(string, bl, supplier, packResources, packMetadataSection, position, packSource);
+                return pack;
             }
             LOGGER.warn("Couldn't find pack meta for pack {}", (Object)string);
             return null;
@@ -147,7 +147,7 @@ implements AutoCloseable {
         BOTTOM;
 
 
-        public <T, P extends Pack> int insert(List<T> list, T object, Function<T, P> function, boolean bl) {
+        public <T> int insert(List<T> list, T object, Function<T, Pack> function, boolean bl) {
             Pack pack;
             int i;
             Position position;
@@ -155,12 +155,12 @@ implements AutoCloseable {
             if (position == BOTTOM) {
                 Pack pack2;
                 int i2;
-                for (i2 = 0; i2 < list.size() && (pack2 = (Pack)function.apply(list.get(i2))).isFixedPosition() && pack2.getDefaultPosition() == this; ++i2) {
+                for (i2 = 0; i2 < list.size() && (pack2 = function.apply(list.get(i2))).isFixedPosition() && pack2.getDefaultPosition() == this; ++i2) {
                 }
                 list.add(i2, object);
                 return i2;
             }
-            for (i = list.size() - 1; i >= 0 && (pack = (Pack)function.apply(list.get(i))).isFixedPosition() && pack.getDefaultPosition() == this; --i) {
+            for (i = list.size() - 1; i >= 0 && (pack = function.apply(list.get(i))).isFixedPosition() && pack.getDefaultPosition() == this; --i) {
             }
             list.add(i + 1, object);
             return i + 1;
@@ -172,9 +172,9 @@ implements AutoCloseable {
     }
 
     @FunctionalInterface
-    public static interface PackConstructor<T extends Pack> {
+    public static interface PackConstructor {
         @Nullable
-        public T create(String var1, boolean var2, Supplier<PackResources> var3, PackResources var4, PackMetadataSection var5, Position var6, PackSource var7);
+        public Pack create(String var1, boolean var2, Supplier<PackResources> var3, PackResources var4, PackMetadataSection var5, Position var6, PackSource var7);
     }
 }
 

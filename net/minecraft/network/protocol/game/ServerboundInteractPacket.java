@@ -92,6 +92,7 @@ implements Packet<ServerGamePacketListener> {
         return this.action;
     }
 
+    @Nullable
     public InteractionHand getHand() {
         return this.hand;
     }

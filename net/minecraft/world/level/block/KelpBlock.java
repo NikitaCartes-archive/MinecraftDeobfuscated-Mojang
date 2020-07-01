@@ -66,7 +66,7 @@ implements LiquidBlockContainer {
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
         FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
         if (fluidState.is(FluidTags.WATER) && fluidState.getAmount() == 8) {
-            return this.getStateForPlacement(blockPlaceContext.getLevel());
+            return super.getStateForPlacement(blockPlaceContext);
         }
         return null;
     }

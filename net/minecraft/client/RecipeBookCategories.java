@@ -4,16 +4,19 @@
 package net.minecraft.client;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.util.List;
+import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.world.inventory.RecipeBookType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 
 @Environment(value=EnvType.CLIENT)
 public enum RecipeBookCategories {
-    SEARCH(new ItemStack(Items.COMPASS)),
+    CRAFTING_SEARCH(new ItemStack(Items.COMPASS)),
     CRAFTING_BUILDING_BLOCKS(new ItemStack(Blocks.BRICKS)),
     CRAFTING_REDSTONE(new ItemStack(Items.REDSTONE)),
     CRAFTING_EQUIPMENT(new ItemStack(Items.IRON_AXE), new ItemStack(Items.GOLDEN_SWORD)),
@@ -32,14 +35,45 @@ public enum RecipeBookCategories {
     CAMPFIRE(new ItemStack(Items.PORKCHOP)),
     UNKNOWN(new ItemStack(Items.BARRIER));
 
+    public static final List<RecipeBookCategories> SMOKER_CATEGORIES;
+    public static final List<RecipeBookCategories> BLAST_FURNACE_CATEGORIES;
+    public static final List<RecipeBookCategories> FURNACE_CATEGORIES;
+    public static final List<RecipeBookCategories> CRAFTING_CATEGORIES;
+    public static final Map<RecipeBookCategories, List<RecipeBookCategories>> AGGREGATE_CATEGORIES;
     private final List<ItemStack> itemIcons;
 
     private RecipeBookCategories(ItemStack ... itemStacks) {
         this.itemIcons = ImmutableList.copyOf(itemStacks);
     }
 
+    public static List<RecipeBookCategories> getCategories(RecipeBookType recipeBookType) {
+        switch (recipeBookType) {
+            case CRAFTING: {
+                return CRAFTING_CATEGORIES;
+            }
+            case FURNACE: {
+                return FURNACE_CATEGORIES;
+            }
+            case BLAST_FURNACE: {
+                return BLAST_FURNACE_CATEGORIES;
+            }
+            case SMOKER: {
+                return SMOKER_CATEGORIES;
+            }
+        }
+        return ImmutableList.of();
+    }
+
     public List<ItemStack> getIconItems() {
         return this.itemIcons;
+    }
+
+    static {
+        SMOKER_CATEGORIES = ImmutableList.of(SMOKER_SEARCH, SMOKER_FOOD);
+        BLAST_FURNACE_CATEGORIES = ImmutableList.of(BLAST_FURNACE_SEARCH, BLAST_FURNACE_BLOCKS, BLAST_FURNACE_MISC);
+        FURNACE_CATEGORIES = ImmutableList.of(FURNACE_SEARCH, FURNACE_FOOD, FURNACE_BLOCKS, FURNACE_MISC);
+        CRAFTING_CATEGORIES = ImmutableList.of(CRAFTING_SEARCH, CRAFTING_EQUIPMENT, CRAFTING_BUILDING_BLOCKS, CRAFTING_MISC, CRAFTING_REDSTONE);
+        AGGREGATE_CATEGORIES = ImmutableMap.of(CRAFTING_SEARCH, ImmutableList.of(CRAFTING_EQUIPMENT, CRAFTING_BUILDING_BLOCKS, CRAFTING_MISC, CRAFTING_REDSTONE), FURNACE_SEARCH, ImmutableList.of(FURNACE_FOOD, FURNACE_BLOCKS, FURNACE_MISC), BLAST_FURNACE_SEARCH, ImmutableList.of(BLAST_FURNACE_BLOCKS, BLAST_FURNACE_MISC), SMOKER_SEARCH, ImmutableList.of(SMOKER_FOOD));
     }
 }
 

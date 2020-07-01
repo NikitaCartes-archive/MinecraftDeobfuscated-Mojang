@@ -18,6 +18,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -61,7 +62,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -238,8 +239,8 @@ extends Animal {
 
     @Override
     @Nullable
-    public AgableMob getBreedOffspring(AgableMob agableMob) {
-        Panda panda = EntityType.PANDA.create(this.level);
+    public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+        Panda panda = EntityType.PANDA.create(serverLevel);
         if (agableMob instanceof Panda) {
             panda.setGeneFromParents(this, (Panda)agableMob);
         }
@@ -485,7 +486,7 @@ extends Animal {
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         this.setMainGene(Gene.getRandom(this.random));
         this.setHiddenGene(Gene.getRandom(this.random));
         this.setAttributes();
@@ -493,7 +494,7 @@ extends Animal {
             spawnGroupData = new AgableMob.AgableMobGroupData();
             ((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(0.2f);
         }
-        return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+        return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     public void setGeneFromParents(Panda panda, @Nullable Panda panda2) {

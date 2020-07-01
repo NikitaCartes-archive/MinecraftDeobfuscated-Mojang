@@ -65,6 +65,7 @@ import net.minecraft.world.entity.ai.gossip.GossipType;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.sensing.GolemSensor;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.ReputationEventType;
@@ -89,7 +90,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
@@ -114,8 +115,8 @@ VillagerDataHolder {
     private int numberOfRestocksToday;
     private long lastRestockCheckDayTime;
     private boolean assignProfessionWhenSpawned;
-    private static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.HOME, MemoryModuleType.JOB_SITE, MemoryModuleType.POTENTIAL_JOB_SITE, MemoryModuleType.MEETING_POINT, MemoryModuleType.LIVING_ENTITIES, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryModuleType.VISIBLE_VILLAGER_BABIES, MemoryModuleType.NEAREST_PLAYERS, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryModuleType.WALK_TARGET, new MemoryModuleType[]{MemoryModuleType.LOOK_TARGET, MemoryModuleType.INTERACTION_TARGET, MemoryModuleType.BREED_TARGET, MemoryModuleType.PATH, MemoryModuleType.INTERACTABLE_DOORS, MemoryModuleType.OPENED_DOORS, MemoryModuleType.NEAREST_BED, MemoryModuleType.HURT_BY, MemoryModuleType.HURT_BY_ENTITY, MemoryModuleType.NEAREST_HOSTILE, MemoryModuleType.SECONDARY_JOB_SITE, MemoryModuleType.HIDING_PLACE, MemoryModuleType.HEARD_BELL_TIME, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.LAST_SLEPT, MemoryModuleType.LAST_WOKEN, MemoryModuleType.LAST_WORKED_AT_POI, MemoryModuleType.GOLEM_LAST_SEEN_TIME});
-    private static final ImmutableList<SensorType<? extends Sensor<? super Villager>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS, SensorType.INTERACTABLE_DOORS, SensorType.NEAREST_BED, SensorType.HURT_BY, SensorType.VILLAGER_HOSTILES, SensorType.VILLAGER_BABIES, SensorType.SECONDARY_POIS, SensorType.GOLEM_LAST_SEEN);
+    private static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.HOME, MemoryModuleType.JOB_SITE, MemoryModuleType.POTENTIAL_JOB_SITE, MemoryModuleType.MEETING_POINT, MemoryModuleType.LIVING_ENTITIES, MemoryModuleType.VISIBLE_LIVING_ENTITIES, MemoryModuleType.VISIBLE_VILLAGER_BABIES, MemoryModuleType.NEAREST_PLAYERS, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryModuleType.WALK_TARGET, new MemoryModuleType[]{MemoryModuleType.LOOK_TARGET, MemoryModuleType.INTERACTION_TARGET, MemoryModuleType.BREED_TARGET, MemoryModuleType.PATH, MemoryModuleType.INTERACTABLE_DOORS, MemoryModuleType.OPENED_DOORS, MemoryModuleType.NEAREST_BED, MemoryModuleType.HURT_BY, MemoryModuleType.HURT_BY_ENTITY, MemoryModuleType.NEAREST_HOSTILE, MemoryModuleType.SECONDARY_JOB_SITE, MemoryModuleType.HIDING_PLACE, MemoryModuleType.HEARD_BELL_TIME, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.LAST_SLEPT, MemoryModuleType.LAST_WOKEN, MemoryModuleType.LAST_WORKED_AT_POI, MemoryModuleType.GOLEM_DETECTED_RECENTLY});
+    private static final ImmutableList<SensorType<? extends Sensor<? super Villager>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS, SensorType.INTERACTABLE_DOORS, SensorType.NEAREST_BED, SensorType.HURT_BY, SensorType.VILLAGER_HOSTILES, SensorType.VILLAGER_BABIES, SensorType.SECONDARY_POIS, SensorType.GOLEM_DETECTED);
     public static final Map<MemoryModuleType<GlobalPos>, BiPredicate<Villager, PoiType>> POI_MEMORIES = ImmutableMap.of(MemoryModuleType.HOME, (villager, poiType) -> poiType == PoiType.HOME, MemoryModuleType.JOB_SITE, (villager, poiType) -> villager.getVillagerData().getProfession().getJobPoiType() == poiType, MemoryModuleType.POTENTIAL_JOB_SITE, (villager, poiType) -> PoiType.ALL_JOBS.test((PoiType)poiType), MemoryModuleType.MEETING_POINT, (villager, poiType) -> poiType == PoiType.MEETING);
 
     public Villager(EntityType<? extends Villager> entityType, Level level) {
@@ -619,45 +620,45 @@ VillagerDataHolder {
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         if (mobSpawnType == MobSpawnType.BREEDING) {
             this.setVillagerData(this.getVillagerData().setProfession(VillagerProfession.NONE));
         }
         if (mobSpawnType == MobSpawnType.COMMAND || mobSpawnType == MobSpawnType.SPAWN_EGG || mobSpawnType == MobSpawnType.SPAWNER || mobSpawnType == MobSpawnType.DISPENSER) {
-            this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(levelAccessor.getBiome(this.blockPosition()))));
+            this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(serverLevelAccessor.getBiome(this.blockPosition()))));
         }
         if (mobSpawnType == MobSpawnType.STRUCTURE) {
             this.assignProfessionWhenSpawned = true;
         }
-        return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+        return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     @Override
-    public Villager getBreedOffspring(AgableMob agableMob) {
+    public Villager getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
         double d = this.random.nextDouble();
-        VillagerType villagerType = d < 0.5 ? VillagerType.byBiome(this.level.getBiome(this.blockPosition())) : (d < 0.75 ? this.getVillagerData().getType() : ((Villager)agableMob).getVillagerData().getType());
-        Villager villager = new Villager(EntityType.VILLAGER, this.level, villagerType);
-        villager.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.BREEDING, null, null);
+        VillagerType villagerType = d < 0.5 ? VillagerType.byBiome(serverLevel.getBiome(this.blockPosition())) : (d < 0.75 ? this.getVillagerData().getType() : ((Villager)agableMob).getVillagerData().getType());
+        Villager villager = new Villager(EntityType.VILLAGER, serverLevel, villagerType);
+        villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.BREEDING, null, null);
         return villager;
     }
 
     @Override
-    public void thunderHit(LightningBolt lightningBolt) {
-        if (this.level.getDifficulty() != Difficulty.PEACEFUL) {
+    public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
+        if (serverLevel.getDifficulty() != Difficulty.PEACEFUL) {
             LOGGER.info("Villager {} was struck by lightning {}.", (Object)this, (Object)lightningBolt);
-            Witch witch = EntityType.WITCH.create(this.level);
+            Witch witch = EntityType.WITCH.create(serverLevel);
             witch.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
-            witch.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(witch.blockPosition()), MobSpawnType.CONVERSION, null, null);
+            witch.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(witch.blockPosition()), MobSpawnType.CONVERSION, null, null);
             witch.setNoAi(this.isNoAi());
             if (this.hasCustomName()) {
                 witch.setCustomName(this.getCustomName());
                 witch.setCustomNameVisible(this.isCustomNameVisible());
             }
             witch.setPersistenceRequired();
-            this.level.addFreshEntity(witch);
+            serverLevel.addFreshEntity(witch);
             this.remove();
         } else {
-            super.thunderHit(lightningBolt);
+            super.thunderHit(serverLevel, lightningBolt);
         }
     }
 
@@ -719,14 +720,14 @@ VillagerDataHolder {
         this.addOffersFromItemListings(merchantOffers, itemListings, 2);
     }
 
-    public void gossip(Villager villager, long l) {
+    public void gossip(ServerLevel serverLevel, Villager villager, long l) {
         if (l >= this.lastGossipTime && l < this.lastGossipTime + 1200L || l >= villager.lastGossipTime && l < villager.lastGossipTime + 1200L) {
             return;
         }
         this.gossips.transferFrom(villager.gossips, this.random, 10);
         this.lastGossipTime = l;
         villager.lastGossipTime = l;
-        this.spawnGolemIfNeeded(l, 5);
+        this.spawnGolemIfNeeded(serverLevel, l, 5);
     }
 
     private void maybeDecayGossip() {
@@ -742,54 +743,41 @@ VillagerDataHolder {
         this.lastGossipDecayTime = l;
     }
 
-    public void spawnGolemIfNeeded(long l, int i) {
+    public void spawnGolemIfNeeded(ServerLevel serverLevel, long l, int i) {
         if (!this.wantsToSpawnGolem(l)) {
             return;
         }
         AABB aABB = this.getBoundingBox().inflate(10.0, 10.0, 10.0);
-        List<Villager> list = this.level.getEntitiesOfClass(Villager.class, aABB);
+        List<Villager> list = serverLevel.getEntitiesOfClass(Villager.class, aABB);
         List list2 = list.stream().filter(villager -> villager.wantsToSpawnGolem(l)).limit(5L).collect(Collectors.toList());
         if (list2.size() < i) {
             return;
         }
-        IronGolem ironGolem = this.trySpawnGolem();
+        IronGolem ironGolem = this.trySpawnGolem(serverLevel);
         if (ironGolem == null) {
             return;
         }
-        list.forEach(villager -> villager.sawGolem(l));
-    }
-
-    private void sawGolem(long l) {
-        this.brain.setMemory(MemoryModuleType.GOLEM_LAST_SEEN_TIME, l);
-    }
-
-    private boolean hasSeenGolemRecently(long l) {
-        Optional<Long> optional = this.brain.getMemory(MemoryModuleType.GOLEM_LAST_SEEN_TIME);
-        if (!optional.isPresent()) {
-            return false;
-        }
-        Long long_ = optional.get();
-        return l - long_ <= 600L;
+        list.forEach(GolemSensor::golemDetected);
     }
 
     public boolean wantsToSpawnGolem(long l) {
         if (!this.golemSpawnConditionsMet(this.level.getGameTime())) {
             return false;
         }
-        return !this.hasSeenGolemRecently(l);
+        return !this.brain.hasMemoryValue(MemoryModuleType.GOLEM_DETECTED_RECENTLY);
     }
 
     @Nullable
-    private IronGolem trySpawnGolem() {
+    private IronGolem trySpawnGolem(ServerLevel serverLevel) {
         BlockPos blockPos = this.blockPosition();
         for (int i = 0; i < 10; ++i) {
             IronGolem ironGolem;
             double e;
-            double d = this.level.random.nextInt(16) - 8;
-            BlockPos blockPos2 = this.findSpawnPositionForGolemInColumn(blockPos, d, e = (double)(this.level.random.nextInt(16) - 8));
-            if (blockPos2 == null || (ironGolem = EntityType.IRON_GOLEM.create(this.level, null, null, null, blockPos2, MobSpawnType.MOB_SUMMONED, false, false)) == null) continue;
-            if (ironGolem.checkSpawnRules(this.level, MobSpawnType.MOB_SUMMONED) && ironGolem.checkSpawnObstruction(this.level)) {
-                this.level.addFreshEntity(ironGolem);
+            double d = serverLevel.random.nextInt(16) - 8;
+            BlockPos blockPos2 = this.findSpawnPositionForGolemInColumn(blockPos, d, e = (double)(serverLevel.random.nextInt(16) - 8));
+            if (blockPos2 == null || (ironGolem = EntityType.IRON_GOLEM.create(serverLevel, null, null, null, blockPos2, MobSpawnType.MOB_SUMMONED, false, false)) == null) continue;
+            if (ironGolem.checkSpawnRules(serverLevel, MobSpawnType.MOB_SUMMONED) && ironGolem.checkSpawnObstruction(serverLevel)) {
+                serverLevel.addFreshEntity(ironGolem);
                 return ironGolem;
             }
             ironGolem.remove();
@@ -878,8 +866,8 @@ VillagerDataHolder {
     }
 
     @Override
-    public /* synthetic */ AgableMob getBreedOffspring(AgableMob agableMob) {
-        return this.getBreedOffspring(agableMob);
+    public /* synthetic */ AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+        return this.getBreedOffspring(serverLevel, agableMob);
     }
 }
 

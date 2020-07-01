@@ -15,6 +15,7 @@ import net.minecraft.world.entity.ai.sensing.InteractableDoorsSensor;
 import net.minecraft.world.entity.ai.sensing.NearestBedSensor;
 import net.minecraft.world.entity.ai.sensing.NearestItemSensor;
 import net.minecraft.world.entity.ai.sensing.NearestLivingEntitySensor;
+import net.minecraft.world.entity.ai.sensing.PiglinBruteSpecificSensor;
 import net.minecraft.world.entity.ai.sensing.PiglinSpecificSensor;
 import net.minecraft.world.entity.ai.sensing.PlayerSensor;
 import net.minecraft.world.entity.ai.sensing.SecondaryPoiSensor;
@@ -33,8 +34,9 @@ public class SensorType<U extends Sensor<?>> {
     public static final SensorType<VillagerHostilesSensor> VILLAGER_HOSTILES = SensorType.register("villager_hostiles", VillagerHostilesSensor::new);
     public static final SensorType<VillagerBabiesSensor> VILLAGER_BABIES = SensorType.register("villager_babies", VillagerBabiesSensor::new);
     public static final SensorType<SecondaryPoiSensor> SECONDARY_POIS = SensorType.register("secondary_pois", SecondaryPoiSensor::new);
-    public static final SensorType<GolemSensor> GOLEM_LAST_SEEN = SensorType.register("golem_last_seen", GolemSensor::new);
+    public static final SensorType<GolemSensor> GOLEM_DETECTED = SensorType.register("golem_detected", GolemSensor::new);
     public static final SensorType<PiglinSpecificSensor> PIGLIN_SPECIFIC_SENSOR = SensorType.register("piglin_specific_sensor", PiglinSpecificSensor::new);
+    public static final SensorType<PiglinBruteSpecificSensor> PIGLIN_BRUTE_SPECIFIC_SENSOR = SensorType.register("piglin_brute_specific_sensor", PiglinBruteSpecificSensor::new);
     public static final SensorType<HoglinSpecificSensor> HOGLIN_SPECIFIC_SENSOR = SensorType.register("hoglin_specific_sensor", HoglinSpecificSensor::new);
     public static final SensorType<AdultSensor> NEAREST_ADULT = SensorType.register("nearest_adult", AdultSensor::new);
     private final Supplier<U> factory;

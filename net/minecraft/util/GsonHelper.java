@@ -315,6 +315,7 @@ public class GsonHelper {
     }
 
     @Nullable
+    @Environment(value=EnvType.CLIENT)
     public static <T> T fromJson(Gson gson, Reader reader, TypeToken<T> typeToken, boolean bl) {
         try {
             JsonReader jsonReader = new JsonReader(reader);
@@ -337,6 +338,7 @@ public class GsonHelper {
     }
 
     @Nullable
+    @Environment(value=EnvType.CLIENT)
     public static <T> T fromJson(Gson gson, Reader reader, TypeToken<T> typeToken) {
         return GsonHelper.fromJson(gson, reader, typeToken, false);
     }

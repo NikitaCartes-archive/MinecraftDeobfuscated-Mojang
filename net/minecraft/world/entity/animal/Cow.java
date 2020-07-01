@@ -4,6 +4,7 @@
 package net.minecraft.world.entity.animal;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
@@ -86,7 +87,7 @@ extends Animal {
         ItemStack itemStack = player.getItemInHand(interactionHand);
         if (itemStack.getItem() == Items.BUCKET && !this.isBaby()) {
             player.playSound(SoundEvents.COW_MILK, 1.0f, 1.0f);
-            ItemStack itemStack2 = ItemUtils.createBucketResult(itemStack, player, Items.MILK_BUCKET.getDefaultInstance());
+            ItemStack itemStack2 = ItemUtils.createFilledResult(itemStack, player, Items.MILK_BUCKET.getDefaultInstance());
             player.setItemInHand(interactionHand, itemStack2);
             return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
@@ -94,8 +95,8 @@ extends Animal {
     }
 
     @Override
-    public Cow getBreedOffspring(AgableMob agableMob) {
-        return EntityType.COW.create(this.level);
+    public Cow getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+        return EntityType.COW.create(serverLevel);
     }
 
     @Override
@@ -107,8 +108,8 @@ extends Animal {
     }
 
     @Override
-    public /* synthetic */ AgableMob getBreedOffspring(AgableMob agableMob) {
-        return this.getBreedOffspring(agableMob);
+    public /* synthetic */ AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+        return this.getBreedOffspring(serverLevel, agableMob);
     }
 }
 

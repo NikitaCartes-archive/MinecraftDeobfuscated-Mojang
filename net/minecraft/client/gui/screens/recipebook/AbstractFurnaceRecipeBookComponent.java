@@ -33,35 +33,6 @@ extends RecipeBookComponent {
     private float time;
 
     @Override
-    protected boolean updateFiltering() {
-        boolean bl = !this.getFilteringCraftable();
-        this.setFilteringCraftable(bl);
-        return bl;
-    }
-
-    protected abstract boolean getFilteringCraftable();
-
-    protected abstract void setFilteringCraftable(boolean var1);
-
-    @Override
-    public boolean isVisible() {
-        return this.isGuiOpen();
-    }
-
-    protected abstract boolean isGuiOpen();
-
-    @Override
-    protected void setVisible(boolean bl) {
-        this.setGuiOpen(bl);
-        if (!bl) {
-            this.recipeBookPage.setInvisible();
-        }
-        this.sendUpdateSettings();
-    }
-
-    protected abstract void setGuiOpen(boolean var1);
-
-    @Override
     protected void initFilterButtonTextures() {
         this.filterButton.initTextureValues(152, 182, 28, 18, RECIPE_BOOK_LOCATION);
     }

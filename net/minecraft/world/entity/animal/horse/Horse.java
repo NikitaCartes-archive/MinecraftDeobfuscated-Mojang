@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Container;
@@ -33,7 +34,7 @@ import net.minecraft.world.item.HorseArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.SoundType;
 import org.jetbrains.annotations.Nullable;
 
@@ -227,13 +228,13 @@ extends AbstractHorse {
     }
 
     @Override
-    public AgableMob getBreedOffspring(AgableMob agableMob) {
+    public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
         AbstractHorse abstractHorse;
         if (agableMob instanceof Donkey) {
-            abstractHorse = EntityType.MULE.create(this.level);
+            abstractHorse = EntityType.MULE.create(serverLevel);
         } else {
             Horse horse = (Horse)agableMob;
-            abstractHorse = EntityType.HORSE.create(this.level);
+            abstractHorse = EntityType.HORSE.create(serverLevel);
             int i = this.random.nextInt(9);
             Variant variant = i < 4 ? this.getVariant() : (i < 8 ? horse.getVariant() : Util.getRandom(Variant.values(), this.random));
             int j = this.random.nextInt(5);
@@ -256,7 +257,7 @@ extends AbstractHorse {
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         Variant variant;
         if (spawnGroupData instanceof HorseGroupData) {
             variant = ((HorseGroupData)spawnGroupData).variant;
@@ -265,7 +266,7 @@ extends AbstractHorse {
             spawnGroupData = new HorseGroupData(variant);
         }
         this.setVariantAndMarkings(variant, Util.getRandom(Markings.values(), this.random));
-        return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+        return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     public static class HorseGroupData

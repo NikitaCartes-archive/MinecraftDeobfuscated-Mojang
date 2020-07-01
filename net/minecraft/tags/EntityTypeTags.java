@@ -3,17 +3,16 @@
  */
 package net.minecraft.tags;
 
-import java.util.Set;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.StaticTagHelper;
+import net.minecraft.tags.StaticTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagCollection;
+import net.minecraft.tags.TagContainer;
 import net.minecraft.world.entity.EntityType;
 
-public class EntityTypeTags {
-    private static final StaticTagHelper<EntityType<?>> HELPER = new StaticTagHelper();
+public final class EntityTypeTags {
+    protected static final StaticTagHelper<EntityType<?>> HELPER = StaticTags.create(new ResourceLocation("entity_type"), TagContainer::getEntityTypes);
     public static final Tag.Named<EntityType<?>> SKELETONS = EntityTypeTags.bind("skeletons");
     public static final Tag.Named<EntityType<?>> RAIDERS = EntityTypeTags.bind("raiders");
     public static final Tag.Named<EntityType<?>> BEEHIVE_INHABITORS = EntityTypeTags.bind("beehive_inhabitors");
@@ -24,21 +23,8 @@ public class EntityTypeTags {
         return HELPER.bind(string);
     }
 
-    public static void reset(TagCollection<EntityType<?>> tagCollection) {
-        HELPER.reset(tagCollection);
-    }
-
-    @Environment(value=EnvType.CLIENT)
-    public static void resetToEmpty() {
-        HELPER.resetToEmpty();
-    }
-
     public static TagCollection<EntityType<?>> getAllTags() {
         return HELPER.getAllTags();
-    }
-
-    public static Set<ResourceLocation> getMissingTags(TagCollection<EntityType<?>> tagCollection) {
-        return HELPER.getMissingTags(tagCollection);
     }
 }
 

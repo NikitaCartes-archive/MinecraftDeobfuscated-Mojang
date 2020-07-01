@@ -27,6 +27,7 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagCollection;
+import net.minecraft.tags.TagLoader;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -40,7 +41,8 @@ implements PreparableReloadListener {
     private static final int PATH_PREFIX_LENGTH = "functions/".length();
     private static final int PATH_SUFFIX_LENGTH = ".mcfunction".length();
     private volatile Map<ResourceLocation, CommandFunction> functions = ImmutableMap.of();
-    private final TagCollection<CommandFunction> tags = new TagCollection(this::getFunction, "tags/functions", "function");
+    private final TagLoader<CommandFunction> tagsLoader = new TagLoader(this::getFunction, "tags/functions", "function");
+    private volatile TagCollection<CommandFunction> tags = TagCollection.empty();
     private final int functionCompilationLevel;
     private final CommandDispatcher<CommandSourceStack> dispatcher;
 
@@ -67,7 +69,7 @@ implements PreparableReloadListener {
 
     @Override
     public CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier preparationBarrier, ResourceManager resourceManager, ProfilerFiller profilerFiller, ProfilerFiller profilerFiller2, Executor executor, Executor executor2) {
-        CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture = this.tags.prepare(resourceManager, executor);
+        CompletableFuture<Map<ResourceLocation, Tag.Builder>> completableFuture = this.tagsLoader.prepare(resourceManager, executor);
         CompletionStage completableFuture2 = CompletableFuture.supplyAsync(() -> resourceManager.listResources("functions", string -> string.endsWith(".mcfunction")), executor).thenCompose(collection -> {
             HashMap<ResourceLocation, CompletableFuture<CommandFunction>> map = Maps.newHashMap();
             CommandSourceStack commandSourceStack = new CommandSourceStack(CommandSource.NULL, Vec3.ZERO, Vec2.ZERO, null, this.functionCompilationLevel, "", TextComponent.EMPTY, null, null);
@@ -94,7 +96,7 @@ implements PreparableReloadListener {
                 return null;
             })).join());
             this.functions = builder.build();
-            this.tags.load((Map)pair.getFirst());
+            this.tags = this.tagsLoader.load((Map)pair.getFirst());
         }, executor2);
     }
 

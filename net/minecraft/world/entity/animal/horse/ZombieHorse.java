@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.entity.animal.horse;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
@@ -60,8 +61,8 @@ extends AbstractHorse {
 
     @Override
     @Nullable
-    public AgableMob getBreedOffspring(AgableMob agableMob) {
-        return EntityType.ZOMBIE_HORSE.create(this.level);
+    public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+        return EntityType.ZOMBIE_HORSE.create(serverLevel);
     }
 
     @Override

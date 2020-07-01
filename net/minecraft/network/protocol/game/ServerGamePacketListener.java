@@ -31,7 +31,8 @@ import net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
-import net.minecraft.network.protocol.game.ServerboundRecipeBookUpdatePacket;
+import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPacket;
+import net.minecraft.network.protocol.game.ServerboundRecipeBookSeenRecipePacket;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
 import net.minecraft.network.protocol.game.ServerboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ServerboundSeenAdvancementsPacket;
@@ -105,7 +106,9 @@ extends PacketListener {
 
     public void handleAcceptTeleportPacket(ServerboundAcceptTeleportationPacket var1);
 
-    public void handleRecipeBookUpdatePacket(ServerboundRecipeBookUpdatePacket var1);
+    public void handleRecipeBookSeenRecipePacket(ServerboundRecipeBookSeenRecipePacket var1);
+
+    public void handleRecipeBookChangeSettingsPacket(ServerboundRecipeBookChangeSettingsPacket var1);
 
     public void handleSeenAdvancements(ServerboundSeenAdvancementsPacket var1);
 

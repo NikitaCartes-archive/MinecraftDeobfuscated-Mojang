@@ -595,6 +595,7 @@ public class SoundEvents {
     public static final SoundEvent PARROT_IMITATE_MAGMA_CUBE = SoundEvents.register("entity.parrot.imitate.magma_cube");
     public static final SoundEvent PARROT_IMITATE_PHANTOM = SoundEvents.register("entity.parrot.imitate.phantom");
     public static final SoundEvent PARROT_IMITATE_PIGLIN = SoundEvents.register("entity.parrot.imitate.piglin");
+    public static final SoundEvent PARROT_IMITATE_PIGLIN_BRUTE = SoundEvents.register("entity.parrot.imitate.piglin_brute");
     public static final SoundEvent PARROT_IMITATE_PILLAGER = SoundEvents.register("entity.parrot.imitate.pillager");
     public static final SoundEvent PARROT_IMITATE_RAVAGER = SoundEvents.register("entity.parrot.imitate.ravager");
     public static final SoundEvent PARROT_IMITATE_SHULKER = SoundEvents.register("entity.parrot.imitate.shulker");
@@ -633,6 +634,12 @@ public class SoundEvents {
     public static final SoundEvent PIGLIN_RETREAT = SoundEvents.register("entity.piglin.retreat");
     public static final SoundEvent PIGLIN_STEP = SoundEvents.register("entity.piglin.step");
     public static final SoundEvent PIGLIN_CONVERTED_TO_ZOMBIFIED = SoundEvents.register("entity.piglin.converted_to_zombified");
+    public static final SoundEvent PIGLIN_BRUTE_AMBIENT = SoundEvents.register("entity.piglin_brute.ambient");
+    public static final SoundEvent PIGLIN_BRUTE_ANGRY = SoundEvents.register("entity.piglin_brute.angry");
+    public static final SoundEvent PIGLIN_BRUTE_DEATH = SoundEvents.register("entity.piglin_brute.death");
+    public static final SoundEvent PIGLIN_BRUTE_HURT = SoundEvents.register("entity.piglin_brute.hurt");
+    public static final SoundEvent PIGLIN_BRUTE_STEP = SoundEvents.register("entity.piglin_brute.step");
+    public static final SoundEvent PIGLIN_BRUTE_CONVERTED_TO_ZOMBIFIED = SoundEvents.register("entity.piglin_brute.converted_to_zombified");
     public static final SoundEvent PILLAGER_AMBIENT = SoundEvents.register("entity.pillager.ambient");
     public static final SoundEvent PILLAGER_CELEBRATE = SoundEvents.register("entity.pillager.celebrate");
     public static final SoundEvent PILLAGER_DEATH = SoundEvents.register("entity.pillager.death");

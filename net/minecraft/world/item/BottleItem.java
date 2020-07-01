@@ -16,6 +16,7 @@ import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
@@ -58,15 +59,8 @@ extends Item {
     }
 
     protected ItemStack turnBottleIntoItem(ItemStack itemStack, Player player, ItemStack itemStack2) {
-        itemStack.shrink(1);
         player.awardStat(Stats.ITEM_USED.get(this));
-        if (itemStack.isEmpty()) {
-            return itemStack2;
-        }
-        if (!player.inventory.add(itemStack2)) {
-            player.drop(itemStack2, false);
-        }
-        return itemStack;
+        return ItemUtils.createFilledResult(itemStack, player, itemStack2);
     }
 }
 

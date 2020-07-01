@@ -14,6 +14,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -58,6 +59,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -387,8 +389,8 @@ Saddleable {
     }
 
     @Override
-    public Strider getBreedOffspring(AgableMob agableMob) {
-        return EntityType.STRIDER.create(this.level);
+    public Strider getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+        return EntityType.STRIDER.create(serverLevel);
     }
 
     @Override
@@ -407,7 +409,7 @@ Saddleable {
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
         boolean bl = this.isFood(player.getItemInHand(interactionHand));
-        if (!bl && this.isSaddled() && !this.isVehicle()) {
+        if (!bl && this.isSaddled() && !this.isVehicle() && !player.isSecondaryUseActive()) {
             if (!this.level.isClientSide) {
                 player.startRiding(this);
             }
@@ -435,7 +437,7 @@ Saddleable {
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         ZombifiedPiglin zombifiedPiglin;
         StriderGroupData.Rider rider;
         Zombie.ZombieGroupData spawnGroupData2 = null;
@@ -455,27 +457,27 @@ Saddleable {
         }
         PathfinderMob mob = null;
         if (rider == StriderGroupData.Rider.BABY_RIDER) {
-            Strider strider = EntityType.STRIDER.create(levelAccessor.getLevel());
+            Strider strider = EntityType.STRIDER.create(serverLevelAccessor.getLevel());
             if (strider != null) {
                 mob = strider;
                 strider.setAge(-24000);
             }
-        } else if (rider == StriderGroupData.Rider.PIGLIN_RIDER && (zombifiedPiglin = EntityType.ZOMBIFIED_PIGLIN.create(levelAccessor.getLevel())) != null) {
+        } else if (rider == StriderGroupData.Rider.PIGLIN_RIDER && (zombifiedPiglin = EntityType.ZOMBIFIED_PIGLIN.create(serverLevelAccessor.getLevel())) != null) {
             mob = zombifiedPiglin;
             this.equipSaddle(null);
         }
         if (mob != null) {
             mob.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0f);
-            mob.finalizeSpawn(levelAccessor, difficultyInstance, MobSpawnType.JOCKEY, spawnGroupData2, null);
+            mob.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, spawnGroupData2, null);
             mob.startRiding(this, true);
-            levelAccessor.addFreshEntity(mob);
+            serverLevelAccessor.addFreshEntity(mob);
         }
-        return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+        return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }
 
     @Override
-    public /* synthetic */ AgableMob getBreedOffspring(AgableMob agableMob) {
-        return this.getBreedOffspring(agableMob);
+    public /* synthetic */ AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+        return this.getBreedOffspring(serverLevel, agableMob);
     }
 
     static class StriderPathNavigation

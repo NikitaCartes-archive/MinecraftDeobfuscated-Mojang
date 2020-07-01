@@ -165,7 +165,7 @@ implements SimpleWaterloggedBlock {
         BlockEntity blockEntity;
         if (levelAccessor.isClientSide()) {
             for (int i = 0; i < 20; ++i) {
-                CampfireBlock.makeParticles(levelAccessor.getLevel(), blockPos, blockState.getValue(SIGNAL_FIRE), true);
+                CampfireBlock.makeParticles((Level)levelAccessor, blockPos, blockState.getValue(SIGNAL_FIRE), true);
             }
         }
         if ((blockEntity = levelAccessor.getBlockEntity(blockPos)) instanceof CampfireBlockEntity) {

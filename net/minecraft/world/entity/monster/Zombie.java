@@ -15,6 +15,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -66,6 +67,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.NaturalSpawner;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
@@ -261,37 +263,41 @@ extends Monster {
 
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
-        if (super.hurt(damageSource, f)) {
-            LivingEntity livingEntity = this.getTarget();
-            if (livingEntity == null && damageSource.getEntity() instanceof LivingEntity) {
-                livingEntity = (LivingEntity)damageSource.getEntity();
-            }
-            if (livingEntity != null && this.level.getDifficulty() == Difficulty.HARD && (double)this.random.nextFloat() < this.getAttributeValue(Attributes.SPAWN_REINFORCEMENTS_CHANCE) && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
-                int i = Mth.floor(this.getX());
-                int j = Mth.floor(this.getY());
-                int k = Mth.floor(this.getZ());
-                Zombie zombie = new Zombie(this.level);
-                for (int l = 0; l < 50; ++l) {
-                    int m = i + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
-                    int n = j + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
-                    int o = k + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
-                    BlockPos blockPos = new BlockPos(m, n, o);
-                    EntityType<?> entityType = zombie.getType();
-                    SpawnPlacements.Type type = SpawnPlacements.getPlacementType(entityType);
-                    if (!NaturalSpawner.isSpawnPositionOk(type, this.level, blockPos, entityType) || !SpawnPlacements.checkSpawnRules(entityType, this.level, MobSpawnType.REINFORCEMENT, blockPos, this.level.random)) continue;
-                    zombie.setPos(m, n, o);
-                    if (this.level.hasNearbyAlivePlayer(m, n, o, 7.0) || !this.level.isUnobstructed(zombie) || !this.level.noCollision(zombie) || this.level.containsAnyLiquid(zombie.getBoundingBox())) continue;
-                    this.level.addFreshEntity(zombie);
-                    zombie.setTarget(livingEntity);
-                    zombie.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(zombie.blockPosition()), MobSpawnType.REINFORCEMENT, null, null);
-                    this.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE).addPermanentModifier(new AttributeModifier("Zombie reinforcement caller charge", -0.05f, AttributeModifier.Operation.ADDITION));
-                    zombie.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE).addPermanentModifier(new AttributeModifier("Zombie reinforcement callee charge", -0.05f, AttributeModifier.Operation.ADDITION));
-                    break;
-                }
-            }
-            return true;
+        if (!super.hurt(damageSource, f)) {
+            return false;
         }
-        return false;
+        if (!(this.level instanceof ServerLevel)) {
+            return false;
+        }
+        ServerLevel serverLevel = (ServerLevel)this.level;
+        LivingEntity livingEntity = this.getTarget();
+        if (livingEntity == null && damageSource.getEntity() instanceof LivingEntity) {
+            livingEntity = (LivingEntity)damageSource.getEntity();
+        }
+        if (livingEntity != null && this.level.getDifficulty() == Difficulty.HARD && (double)this.random.nextFloat() < this.getAttributeValue(Attributes.SPAWN_REINFORCEMENTS_CHANCE) && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
+            int i = Mth.floor(this.getX());
+            int j = Mth.floor(this.getY());
+            int k = Mth.floor(this.getZ());
+            Zombie zombie = new Zombie(this.level);
+            for (int l = 0; l < 50; ++l) {
+                int m = i + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
+                int n = j + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
+                int o = k + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
+                BlockPos blockPos = new BlockPos(m, n, o);
+                EntityType<?> entityType = zombie.getType();
+                SpawnPlacements.Type type = SpawnPlacements.getPlacementType(entityType);
+                if (!NaturalSpawner.isSpawnPositionOk(type, this.level, blockPos, entityType) || !SpawnPlacements.checkSpawnRules(entityType, serverLevel, MobSpawnType.REINFORCEMENT, blockPos, this.level.random)) continue;
+                zombie.setPos(m, n, o);
+                if (this.level.hasNearbyAlivePlayer(m, n, o, 7.0) || !this.level.isUnobstructed(zombie) || !this.level.noCollision(zombie) || this.level.containsAnyLiquid(zombie.getBoundingBox())) continue;
+                this.level.addFreshEntity(zombie);
+                zombie.setTarget(livingEntity);
+                zombie.finalizeSpawn(serverLevel, this.level.getCurrentDifficultyAt(zombie.blockPosition()), MobSpawnType.REINFORCEMENT, null, null);
+                this.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE).addPermanentModifier(new AttributeModifier("Zombie reinforcement caller charge", -0.05f, AttributeModifier.Operation.ADDITION));
+                zombie.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE).addPermanentModifier(new AttributeModifier("Zombie reinforcement callee charge", -0.05f, AttributeModifier.Operation.ADDITION));
+                break;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -375,17 +381,17 @@ extends Monster {
     }
 
     @Override
-    public void killed(LivingEntity livingEntity) {
-        super.killed(livingEntity);
-        if ((this.level.getDifficulty() == Difficulty.NORMAL || this.level.getDifficulty() == Difficulty.HARD) && livingEntity instanceof Villager) {
-            if (this.level.getDifficulty() != Difficulty.HARD && this.random.nextBoolean()) {
+    public void killed(ServerLevel serverLevel, LivingEntity livingEntity) {
+        super.killed(serverLevel, livingEntity);
+        if ((serverLevel.getDifficulty() == Difficulty.NORMAL || serverLevel.getDifficulty() == Difficulty.HARD) && livingEntity instanceof Villager) {
+            if (serverLevel.getDifficulty() != Difficulty.HARD && this.random.nextBoolean()) {
                 return;
             }
             Villager villager = (Villager)livingEntity;
-            ZombieVillager zombieVillager = EntityType.ZOMBIE_VILLAGER.create(this.level);
+            ZombieVillager zombieVillager = EntityType.ZOMBIE_VILLAGER.create(serverLevel);
             zombieVillager.copyPosition(villager);
             villager.remove();
-            zombieVillager.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(zombieVillager.blockPosition()), MobSpawnType.CONVERSION, new ZombieGroupData(false, true), null);
+            zombieVillager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(zombieVillager.blockPosition()), MobSpawnType.CONVERSION, new ZombieGroupData(false, true), null);
             zombieVillager.setVillagerData(villager.getVillagerData());
             zombieVillager.setGossips(villager.getGossips().store(NbtOps.INSTANCE).getValue());
             zombieVillager.setTradeOffers(villager.getOffers().createTag());
@@ -400,9 +406,9 @@ extends Monster {
                 zombieVillager.setPersistenceRequired();
             }
             zombieVillager.setInvulnerable(this.isInvulnerable());
-            this.level.addFreshEntity(zombieVillager);
+            serverLevel.addFreshEntity(zombieVillager);
             if (!this.isSilent()) {
-                this.level.levelEvent(null, 1026, this.blockPosition(), 0);
+                serverLevel.levelEvent(null, 1026, this.blockPosition(), 0);
             }
         }
     }
@@ -422,32 +428,32 @@ extends Monster {
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        spawnGroupData = super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
+        spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
         float f = difficultyInstance.getSpecialMultiplier();
         this.setCanPickUpLoot(this.random.nextFloat() < 0.55f * f);
         if (spawnGroupData == null) {
-            spawnGroupData = new ZombieGroupData(Zombie.getSpawnAsBabyOdds(levelAccessor.getRandom()), true);
+            spawnGroupData = new ZombieGroupData(Zombie.getSpawnAsBabyOdds(serverLevelAccessor.getRandom()), true);
         }
         if (spawnGroupData instanceof ZombieGroupData) {
             ZombieGroupData zombieGroupData = (ZombieGroupData)spawnGroupData;
             if (zombieGroupData.isBaby) {
                 this.setBaby(true);
                 if (zombieGroupData.canSpawnJockey) {
-                    if ((double)levelAccessor.getRandom().nextFloat() < 0.05) {
-                        List<Entity> list = levelAccessor.getEntitiesOfClass(Chicken.class, this.getBoundingBox().inflate(5.0, 3.0, 5.0), EntitySelector.ENTITY_NOT_BEING_RIDDEN);
+                    if ((double)serverLevelAccessor.getRandom().nextFloat() < 0.05) {
+                        List<Entity> list = serverLevelAccessor.getEntitiesOfClass(Chicken.class, this.getBoundingBox().inflate(5.0, 3.0, 5.0), EntitySelector.ENTITY_NOT_BEING_RIDDEN);
                         if (!list.isEmpty()) {
                             Chicken chicken = (Chicken)list.get(0);
                             chicken.setChickenJockey(true);
                             this.startRiding(chicken);
                         }
-                    } else if ((double)levelAccessor.getRandom().nextFloat() < 0.05) {
+                    } else if ((double)serverLevelAccessor.getRandom().nextFloat() < 0.05) {
                         Chicken chicken2 = EntityType.CHICKEN.create(this.level);
                         chicken2.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0f);
-                        chicken2.finalizeSpawn(levelAccessor, difficultyInstance, MobSpawnType.JOCKEY, null, null);
+                        chicken2.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, null, null);
                         chicken2.setChickenJockey(true);
                         this.startRiding(chicken2);
-                        levelAccessor.addFreshEntity(chicken2);
+                        serverLevelAccessor.addFreshEntity(chicken2);
                     }
                 }
             }

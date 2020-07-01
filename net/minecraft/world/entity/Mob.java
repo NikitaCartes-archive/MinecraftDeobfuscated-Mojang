@@ -75,6 +75,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
@@ -944,7 +945,7 @@ extends LivingEntity {
     }
 
     @Nullable
-    public SpawnGroupData finalizeSpawn(LevelAccessor levelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         this.getAttribute(Attributes.FOLLOW_RANGE).addPermanentModifier(new AttributeModifier("Random spawn bonus", this.random.nextGaussian() * 0.05, AttributeModifier.Operation.MULTIPLY_BASE));
         if (this.random.nextFloat() < 0.05f) {
             this.setLeftHanded(true);
@@ -1024,9 +1025,9 @@ extends LivingEntity {
             return interactionResult;
         }
         if (itemStack.getItem() instanceof SpawnEggItem) {
-            if (!this.level.isClientSide) {
+            if (this.level instanceof ServerLevel) {
                 SpawnEggItem spawnEggItem = (SpawnEggItem)itemStack.getItem();
-                Optional<Mob> optional = spawnEggItem.spawnOffspringFromSpawnEgg(player, this, this.getType(), this.level, this.position(), itemStack);
+                Optional<Mob> optional = spawnEggItem.spawnOffspringFromSpawnEgg(player, this, this.getType(), (ServerLevel)this.level, this.position(), itemStack);
                 optional.ifPresent(mob -> this.onOffspringSpawnedFromEgg(player, (Mob)mob));
                 return optional.isPresent() ? InteractionResult.SUCCESS : InteractionResult.PASS;
             }

@@ -42,7 +42,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -169,7 +168,6 @@ CommandSource {
     protected boolean wasEyeInWater;
     @Nullable
     protected Tag<Fluid> fluidOnEyes;
-    protected boolean isTouchingLava;
     public int invulnerableTime;
     protected boolean firstTick = true;
     protected final SynchedEntityData entityData;
@@ -185,12 +183,10 @@ CommandSource {
     public int yChunk;
     public int zChunk;
     private boolean movedSinceLastChunkCheck;
-    public long xp;
-    public long yp;
-    public long zp;
+    private Vec3 packetCoordinates;
     public boolean noCulling;
     public boolean hasImpulse;
-    public int changingDimensionDelay;
+    private int portalCooldown;
     protected boolean isInsidePortal;
     protected int portalTime;
     protected BlockPos portalEntranceBlock;
@@ -213,6 +209,7 @@ CommandSource {
         this.dimensions = entityType.getDimensions();
         this.position = Vec3.ZERO;
         this.blockPosition = BlockPos.ZERO;
+        this.packetCoordinates = Vec3.ZERO;
         this.setPos(0.0, 0.0, 0.0);
         this.entityData = new SynchedEntityData(this);
         this.entityData.define(DATA_SHARED_FLAGS_ID, (byte)0);
@@ -249,9 +246,16 @@ CommandSource {
     }
 
     public void setPacketCoordinates(double d, double e, double f) {
-        this.xp = ClientboundMoveEntityPacket.entityToPacket(d);
-        this.yp = ClientboundMoveEntityPacket.entityToPacket(e);
-        this.zp = ClientboundMoveEntityPacket.entityToPacket(f);
+        this.setPacketCoordinates(new Vec3(d, e, f));
+    }
+
+    public void setPacketCoordinates(Vec3 vec3) {
+        this.packetCoordinates = vec3;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public Vec3 getPacketCoordinates() {
+        return this.packetCoordinates;
     }
 
     public EntityType<?> getType() {
@@ -341,9 +345,7 @@ CommandSource {
 
     public void setPos(double d, double e, double f) {
         this.setPosRaw(d, e, f);
-        float g = this.dimensions.width / 2.0f;
-        float h = this.dimensions.height;
-        this.setBoundingBox(new AABB(d - (double)g, e, f - (double)g, d + (double)g, e + (double)h, f + (double)g));
+        this.setBoundingBox(this.dimensions.makeBoundingBox(d, e, f));
     }
 
     protected void reapplyPosition() {
@@ -419,9 +421,17 @@ CommandSource {
         this.level.getProfiler().pop();
     }
 
-    protected void processDimensionDelay() {
-        if (this.changingDimensionDelay > 0) {
-            --this.changingDimensionDelay;
+    public void setPortalCooldown() {
+        this.portalCooldown = this.getDimensionChangingDelay();
+    }
+
+    public boolean isOnPortalCooldown() {
+        return this.portalCooldown > 0;
+    }
+
+    protected void processPortalCooldown() {
+        if (this.isOnPortalCooldown()) {
+            --this.portalCooldown;
         }
     }
 
@@ -549,7 +559,6 @@ CommandSource {
             }
         }
         try {
-            this.isTouchingLava = false;
             this.checkInsideBlocks();
         } catch (Throwable throwable) {
             CrashReport crashReport = CrashReport.forThrowable(throwable, "Checking entity block collision");
@@ -930,7 +939,7 @@ CommandSource {
         }
         BlockPos blockPos = new BlockPos(vec3);
         FluidState fluidState = this.level.getFluidState(blockPos);
-        for (Tag tag : FluidTags.getWrappers()) {
+        for (Tag<Fluid> tag : FluidTags.getWrappers()) {
             if (!fluidState.is(tag)) continue;
             double e = (float)blockPos.getY() + fluidState.getHeight(this.level, blockPos);
             if (e > d) {
@@ -996,12 +1005,8 @@ CommandSource {
         return this.fluidOnEyes == tag;
     }
 
-    public void setInLava() {
-        this.isTouchingLava = true;
-    }
-
     public boolean isInLava() {
-        return this.isTouchingLava;
+        return !this.firstTick && this.fluidHeight.getDouble(FluidTags.LAVA) > 0.0;
     }
 
     public void moveRelative(float f, Vec3 vec3) {
@@ -1259,7 +1264,7 @@ CommandSource {
         try {
             ListTag listTag;
             if (this.vehicle != null) {
-                compoundTag.put("Pos", this.newDoubleList(this.vehicle.getX(), this.vehicle.getY(), this.vehicle.getZ()));
+                compoundTag.put("Pos", this.newDoubleList(this.vehicle.getX(), this.getY(), this.vehicle.getZ()));
             } else {
                 compoundTag.put("Pos", this.newDoubleList(this.getX(), this.getY(), this.getZ()));
             }
@@ -1271,7 +1276,7 @@ CommandSource {
             compoundTag.putShort("Air", (short)this.getAirSupply());
             compoundTag.putBoolean("OnGround", this.onGround);
             compoundTag.putBoolean("Invulnerable", this.invulnerable);
-            compoundTag.putInt("PortalCooldown", this.changingDimensionDelay);
+            compoundTag.putInt("PortalCooldown", this.portalCooldown);
             compoundTag.putUUID("UUID", this.getUUID());
             Component component = this.getCustomName();
             if (component != null) {
@@ -1338,7 +1343,7 @@ CommandSource {
             this.setAirSupply(compoundTag.getShort("Air"));
             this.onGround = compoundTag.getBoolean("OnGround");
             this.invulnerable = compoundTag.getBoolean("Invulnerable");
-            this.changingDimensionDelay = compoundTag.getInt("PortalCooldown");
+            this.portalCooldown = compoundTag.getInt("PortalCooldown");
             if (compoundTag.hasUUID("UUID")) {
                 this.uuid = compoundTag.getUUID("UUID");
                 this.stringUUID = this.uuid.toString();
@@ -1606,8 +1611,8 @@ CommandSource {
     }
 
     public void handleInsidePortal(BlockPos blockPos) {
-        if (this.changingDimensionDelay > 0) {
-            this.changingDimensionDelay = this.getDimensionChangingDelay();
+        if (this.isOnPortalCooldown()) {
+            this.setPortalCooldown();
             return;
         }
         if (!this.level.isClientSide && !blockPos.equals(this.portalEntranceBlock)) {
@@ -1636,7 +1641,7 @@ CommandSource {
             if (serverLevel2 != null && minecraftServer.isNetherEnabled() && !this.isPassenger() && this.portalTime++ >= i) {
                 this.level.getProfiler().push("portal");
                 this.portalTime = i;
-                this.changingDimensionDelay = this.getDimensionChangingDelay();
+                this.setPortalCooldown();
                 this.changeDimension(serverLevel2);
                 this.level.getProfiler().pop();
             }
@@ -1649,7 +1654,7 @@ CommandSource {
                 this.portalTime = 0;
             }
         }
-        this.processDimensionDelay();
+        this.processPortalCooldown();
     }
 
     public int getDimensionChangingDelay() {
@@ -1831,7 +1836,7 @@ CommandSource {
         this.entityData.set(DATA_AIR_SUPPLY_ID, i);
     }
 
-    public void thunderHit(LightningBolt lightningBolt) {
+    public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
         this.setRemainingFireTicks(this.remainingFireTicks + 1);
         if (this.remainingFireTicks == 0) {
             this.setSecondsOnFire(8);
@@ -1852,7 +1857,7 @@ CommandSource {
         this.fallDistance = 0.0f;
     }
 
-    public void killed(LivingEntity livingEntity) {
+    public void killed(ServerLevel serverLevel, LivingEntity livingEntity) {
     }
 
     protected void checkInBlock(double d, double e, double f) {
@@ -1955,7 +1960,7 @@ CommandSource {
         CompoundTag compoundTag = entity.saveWithoutId(new CompoundTag());
         compoundTag.remove("Dimension");
         this.load(compoundTag);
-        this.changingDimensionDelay = entity.changingDimensionDelay;
+        this.portalCooldown = entity.portalCooldown;
         this.portalEntranceBlock = entity.portalEntranceBlock;
         this.portalEntranceOffset = entity.portalEntranceOffset;
         this.portalEntranceForwards = entity.portalEntranceForwards;

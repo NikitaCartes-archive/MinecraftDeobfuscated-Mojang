@@ -16,6 +16,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.StringUtil;
 import net.minecraft.util.WeighedRandom;
 import net.minecraft.world.entity.Entity;
@@ -74,7 +75,7 @@ public abstract class BaseSpawner {
         }
         Level level = this.getLevel();
         BlockPos blockPos = this.getPos();
-        if (level.isClientSide) {
+        if (!(level instanceof ServerLevel)) {
             double d = (double)blockPos.getX() + level.random.nextDouble();
             double e = (double)blockPos.getY() + level.random.nextDouble();
             double f = (double)blockPos.getZ() + level.random.nextDouble();
@@ -107,7 +108,9 @@ public abstract class BaseSpawner {
                 double g = j >= 1 ? listTag.getDouble(0) : (double)blockPos.getX() + (level.random.nextDouble() - level.random.nextDouble()) * (double)this.spawnRange + 0.5;
                 double h = j >= 2 ? listTag.getDouble(1) : (double)(blockPos.getY() + level.random.nextInt(3) - 1);
                 double d = k = j >= 3 ? listTag.getDouble(2) : (double)blockPos.getZ() + (level.random.nextDouble() - level.random.nextDouble()) * (double)this.spawnRange + 0.5;
-                if (!level.noCollision(optional.get().getAABB(g, h, k)) || !SpawnPlacements.checkSpawnRules(optional.get(), level.getLevel(), MobSpawnType.SPAWNER, new BlockPos(g, h, k), level.getRandom())) continue;
+                if (!level.noCollision(optional.get().getAABB(g, h, k))) continue;
+                ServerLevel serverLevel = (ServerLevel)level;
+                if (!SpawnPlacements.checkSpawnRules(optional.get(), serverLevel, MobSpawnType.SPAWNER, new BlockPos(g, h, k), level.getRandom())) continue;
                 Entity entity2 = EntityType.loadEntityRecursive(compoundTag, level, entity -> {
                     entity.moveTo(g, h, k, entity.yRot, entity.xRot);
                     return entity;
@@ -126,7 +129,7 @@ public abstract class BaseSpawner {
                     Mob mob = (Mob)entity2;
                     if (!mob.checkSpawnRules(level, MobSpawnType.SPAWNER) || !mob.checkSpawnObstruction(level)) continue;
                     if (this.nextSpawnData.getTag().size() == 1 && this.nextSpawnData.getTag().contains("id", 8)) {
-                        ((Mob)entity2).finalizeSpawn(level, level.getCurrentDifficultyAt(entity2.blockPosition()), MobSpawnType.SPAWNER, null, null);
+                        ((Mob)entity2).finalizeSpawn(serverLevel, level.getCurrentDifficultyAt(entity2.blockPosition()), MobSpawnType.SPAWNER, null, null);
                     }
                 }
                 this.addWithPassengers(entity2);
@@ -220,8 +223,8 @@ public abstract class BaseSpawner {
     public Entity getOrCreateDisplayEntity() {
         if (this.displayEntity == null) {
             this.displayEntity = EntityType.loadEntityRecursive(this.nextSpawnData.getTag(), this.getLevel(), Function.identity());
-            if (this.nextSpawnData.getTag().size() == 1 && this.nextSpawnData.getTag().contains("id", 8) && this.displayEntity instanceof Mob) {
-                ((Mob)this.displayEntity).finalizeSpawn(this.getLevel(), this.getLevel().getCurrentDifficultyAt(this.displayEntity.blockPosition()), MobSpawnType.SPAWNER, null, null);
+            if (this.nextSpawnData.getTag().size() != 1 || !this.nextSpawnData.getTag().contains("id", 8) || this.displayEntity instanceof Mob) {
+                // empty if block
             }
         }
         return this.displayEntity;

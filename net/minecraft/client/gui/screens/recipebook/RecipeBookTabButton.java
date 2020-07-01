@@ -38,7 +38,7 @@ extends StateSwitchingButton {
             return;
         }
         for (RecipeCollection recipeCollection : list) {
-            for (Recipe<?> recipe : recipeCollection.getRecipes(clientRecipeBook.isFilteringCraftable((RecipeBookMenu)minecraft.player.containerMenu))) {
+            for (Recipe<?> recipe : recipeCollection.getRecipes(clientRecipeBook.isFiltering((RecipeBookMenu)minecraft.player.containerMenu))) {
                 if (!clientRecipeBook.willHighlight(recipe)) continue;
                 this.animationTime = 15.0f;
                 return;

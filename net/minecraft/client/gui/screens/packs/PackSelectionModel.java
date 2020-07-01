@@ -7,32 +7,31 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
 
 @Environment(value=EnvType.CLIENT)
-public class PackSelectionModel<T extends Pack> {
-    private final PackRepository<T> repository;
-    private final List<T> selected;
-    private final List<T> unselected;
-    private final BiConsumer<T, TextureManager> iconBinder;
+public class PackSelectionModel {
+    private final PackRepository repository;
+    private final List<Pack> selected;
+    private final List<Pack> unselected;
+    private final Function<Pack, ResourceLocation> iconGetter;
     private final Runnable onListChanged;
-    private final Consumer<PackRepository<T>> output;
+    private final Consumer<PackRepository> output;
 
-    public PackSelectionModel(Runnable runnable, BiConsumer<T, TextureManager> biConsumer, PackRepository<T> packRepository, Consumer<PackRepository<T>> consumer) {
+    public PackSelectionModel(Runnable runnable, Function<Pack, ResourceLocation> function, PackRepository packRepository, Consumer<PackRepository> consumer) {
         this.onListChanged = runnable;
-        this.iconBinder = biConsumer;
+        this.iconGetter = function;
         this.repository = packRepository;
         this.selected = Lists.newArrayList(packRepository.getSelectedPacks());
         Collections.reverse(this.selected);
@@ -42,11 +41,11 @@ public class PackSelectionModel<T extends Pack> {
     }
 
     public Stream<Entry> getUnselected() {
-        return this.unselected.stream().map(pack -> new UnselectedPackEntry(this, pack));
+        return this.unselected.stream().map(pack -> new UnselectedPackEntry((Pack)pack));
     }
 
     public Stream<Entry> getSelected() {
-        return this.selected.stream().map(pack -> new SelectedPackEntry(this, pack));
+        return this.selected.stream().map(pack -> new SelectedPackEntry((Pack)pack));
     }
 
     public void commit() {
@@ -56,29 +55,29 @@ public class PackSelectionModel<T extends Pack> {
 
     public void findNewPacks() {
         this.repository.reload();
+        this.selected.clear();
+        this.selected.addAll(this.repository.getSelectedPacks());
+        Collections.reverse(this.selected);
         this.unselected.clear();
         this.unselected.addAll(this.repository.getAvailablePacks());
         this.unselected.removeAll(this.selected);
     }
 
     @Environment(value=EnvType.CLIENT)
-    static class UnselectedPackEntry
+    class UnselectedPackEntry
     extends EntryBase {
-        final /* synthetic */ PackSelectionModel field_25463;
-
-        public UnselectedPackEntry(T pack) {
-            this.field_25463 = packSelectionModel;
-            super((PackSelectionModel)packSelectionModel, pack);
+        public UnselectedPackEntry(Pack pack) {
+            super(pack);
         }
 
         @Override
-        protected List<T> getSelfList() {
-            return this.field_25463.unselected;
+        protected List<Pack> getSelfList() {
+            return PackSelectionModel.this.unselected;
         }
 
         @Override
-        protected List<T> getOtherList() {
-            return this.field_25463.selected;
+        protected List<Pack> getOtherList() {
+            return PackSelectionModel.this.selected;
         }
 
         @Override
@@ -97,23 +96,20 @@ public class PackSelectionModel<T extends Pack> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    static class SelectedPackEntry
+    class SelectedPackEntry
     extends EntryBase {
-        final /* synthetic */ PackSelectionModel field_25462;
-
-        public SelectedPackEntry(T pack) {
-            this.field_25462 = packSelectionModel;
-            super((PackSelectionModel)packSelectionModel, pack);
+        public SelectedPackEntry(Pack pack) {
+            super(pack);
         }
 
         @Override
-        protected List<T> getSelfList() {
-            return this.field_25462.selected;
+        protected List<Pack> getSelfList() {
+            return PackSelectionModel.this.selected;
         }
 
         @Override
-        protected List<T> getOtherList() {
-            return this.field_25462.unselected;
+        protected List<Pack> getOtherList() {
+            return PackSelectionModel.this.unselected;
         }
 
         @Override
@@ -132,74 +128,72 @@ public class PackSelectionModel<T extends Pack> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    static abstract class EntryBase
+    abstract class EntryBase
     implements Entry {
-        private final T pack;
-        final /* synthetic */ PackSelectionModel field_25460;
+        private final Pack pack;
 
-        public EntryBase(T pack) {
-            this.field_25460 = packSelectionModel;
+        public EntryBase(Pack pack) {
             this.pack = pack;
         }
 
-        protected abstract List<T> getSelfList();
+        protected abstract List<Pack> getSelfList();
 
-        protected abstract List<T> getOtherList();
+        protected abstract List<Pack> getOtherList();
 
         @Override
-        public void bindIcon(TextureManager textureManager) {
-            this.field_25460.iconBinder.accept(this.pack, textureManager);
+        public ResourceLocation getIconTexture() {
+            return (ResourceLocation)PackSelectionModel.this.iconGetter.apply(this.pack);
         }
 
         @Override
         public PackCompatibility getCompatibility() {
-            return ((Pack)this.pack).getCompatibility();
+            return this.pack.getCompatibility();
         }
 
         @Override
         public Component getTitle() {
-            return ((Pack)this.pack).getTitle();
+            return this.pack.getTitle();
         }
 
         @Override
         public Component getDescription() {
-            return ((Pack)this.pack).getDescription();
+            return this.pack.getDescription();
         }
 
         @Override
         public PackSource getPackSource() {
-            return ((Pack)this.pack).getPackSource();
+            return this.pack.getPackSource();
         }
 
         @Override
         public boolean isFixedPosition() {
-            return ((Pack)this.pack).isFixedPosition();
+            return this.pack.isFixedPosition();
         }
 
         @Override
         public boolean isRequired() {
-            return ((Pack)this.pack).isRequired();
+            return this.pack.isRequired();
         }
 
         protected void toggleSelection() {
             this.getSelfList().remove(this.pack);
-            ((Pack)this.pack).getDefaultPosition().insert(this.getOtherList(), this.pack, Function.identity(), true);
-            this.field_25460.onListChanged.run();
+            this.pack.getDefaultPosition().insert(this.getOtherList(), this.pack, Function.identity(), true);
+            PackSelectionModel.this.onListChanged.run();
         }
 
         protected void move(int i) {
-            List list = this.getSelfList();
+            List<Pack> list = this.getSelfList();
             int j = list.indexOf(this.pack);
             list.remove(j);
             list.add(j + i, this.pack);
-            this.field_25460.onListChanged.run();
+            PackSelectionModel.this.onListChanged.run();
         }
 
         @Override
         public boolean canMoveUp() {
-            List list = this.getSelfList();
+            List<Pack> list = this.getSelfList();
             int i = list.indexOf(this.pack);
-            return i > 0 && !((Pack)list.get(i - 1)).isFixedPosition();
+            return i > 0 && !list.get(i - 1).isFixedPosition();
         }
 
         @Override
@@ -209,9 +203,9 @@ public class PackSelectionModel<T extends Pack> {
 
         @Override
         public boolean canMoveDown() {
-            List list = this.getSelfList();
+            List<Pack> list = this.getSelfList();
             int i = list.indexOf(this.pack);
-            return i >= 0 && i < list.size() - 1 && !((Pack)list.get(i + 1)).isFixedPosition();
+            return i >= 0 && i < list.size() - 1 && !list.get(i + 1).isFixedPosition();
         }
 
         @Override
@@ -222,7 +216,7 @@ public class PackSelectionModel<T extends Pack> {
 
     @Environment(value=EnvType.CLIENT)
     public static interface Entry {
-        public void bindIcon(TextureManager var1);
+        public ResourceLocation getIconTexture();
 
         public PackCompatibility getCompatibility();
 

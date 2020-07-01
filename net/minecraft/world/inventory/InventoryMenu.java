@@ -16,6 +16,7 @@ import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
+import net.minecraft.world.inventory.RecipeBookType;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
@@ -194,6 +195,12 @@ extends RecipeBookMenu<CraftingContainer> {
 
     public CraftingContainer getCraftSlots() {
         return this.craftSlots;
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public RecipeBookType getRecipeBookType() {
+        return RecipeBookType.CRAFTING;
     }
 }
 

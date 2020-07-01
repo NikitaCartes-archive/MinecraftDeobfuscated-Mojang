@@ -24,7 +24,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagManager;
+import net.minecraft.tags.TagContainer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -46,11 +46,11 @@ implements ArgumentType<Result> {
         BlockStateParser blockStateParser = new BlockStateParser(stringReader, true).parse(true);
         if (blockStateParser.getState() != null) {
             BlockPredicate blockPredicate = new BlockPredicate(blockStateParser.getState(), blockStateParser.getProperties().keySet(), blockStateParser.getNbt());
-            return tagManager -> blockPredicate;
+            return tagContainer -> blockPredicate;
         }
         ResourceLocation resourceLocation = blockStateParser.getTag();
-        return tagManager -> {
-            Tag tag = tagManager.getBlocks().getTag(resourceLocation);
+        return tagContainer -> {
+            Tag<Block> tag = tagContainer.getBlocks().getTag(resourceLocation);
             if (tag == null) {
                 throw ERROR_UNKNOWN_TAG.create(resourceLocation.toString());
             }
@@ -166,7 +166,7 @@ implements ArgumentType<Result> {
     }
 
     public static interface Result {
-        public Predicate<BlockInWorld> create(TagManager var1) throws CommandSyntaxException;
+        public Predicate<BlockInWorld> create(TagContainer var1) throws CommandSyntaxException;
     }
 }
 

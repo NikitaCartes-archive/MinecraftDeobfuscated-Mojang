@@ -5,11 +5,11 @@ package net.minecraft.world.level.block;
 
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -44,11 +44,11 @@ extends Block {
     }
 
     @Override
-    public void spawnAfterBreak(BlockState blockState, Level level, BlockPos blockPos, ItemStack itemStack) {
+    public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack) {
         int i;
-        super.spawnAfterBreak(blockState, level, blockPos, itemStack);
-        if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, itemStack) == 0 && (i = this.xpOnDrop(level.random)) > 0) {
-            this.popExperience(level, blockPos, i);
+        super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack);
+        if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, itemStack) == 0 && (i = this.xpOnDrop(serverLevel.random)) > 0) {
+            this.popExperience(serverLevel, blockPos, i);
         }
     }
 }

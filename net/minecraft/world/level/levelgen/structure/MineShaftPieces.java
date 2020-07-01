@@ -15,7 +15,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.vehicle.MinecartChest;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -144,10 +143,10 @@ public class MineShaftPieces {
             if (this.edgesLiquid(worldGenLevel, boundingBox)) {
                 return false;
             }
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 5, 0, 2, 7, 1, CAVE_AIR, CAVE_AIR, false);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 7, 2, 2, 8, CAVE_AIR, CAVE_AIR, false);
+            this.generateBox(worldGenLevel, boundingBox, 0, 5, 0, 2, 7, 1, CAVE_AIR, CAVE_AIR, false);
+            this.generateBox(worldGenLevel, boundingBox, 0, 0, 7, 2, 2, 8, CAVE_AIR, CAVE_AIR, false);
             for (int i = 0; i < 5; ++i) {
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 5 - i - (i < 4 ? 1 : 0), 2 + i, 2, 7 - i, 2 + i, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, 0, 5 - i - (i < 4 ? 1 : 0), 2 + i, 2, 7 - i, 2 + i, CAVE_AIR, CAVE_AIR, false);
             }
             return true;
         }
@@ -265,14 +264,14 @@ public class MineShaftPieces {
             }
             BlockState blockState = this.getPlanksBlock();
             if (this.isTwoFloored) {
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, this.boundingBox.x0 + 1, this.boundingBox.y0, this.boundingBox.z0, this.boundingBox.x1 - 1, this.boundingBox.y0 + 3 - 1, this.boundingBox.z1, CAVE_AIR, CAVE_AIR, false);
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, this.boundingBox.x0, this.boundingBox.y0, this.boundingBox.z0 + 1, this.boundingBox.x1, this.boundingBox.y0 + 3 - 1, this.boundingBox.z1 - 1, CAVE_AIR, CAVE_AIR, false);
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, this.boundingBox.x0 + 1, this.boundingBox.y1 - 2, this.boundingBox.z0, this.boundingBox.x1 - 1, this.boundingBox.y1, this.boundingBox.z1, CAVE_AIR, CAVE_AIR, false);
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, this.boundingBox.x0, this.boundingBox.y1 - 2, this.boundingBox.z0 + 1, this.boundingBox.x1, this.boundingBox.y1, this.boundingBox.z1 - 1, CAVE_AIR, CAVE_AIR, false);
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, this.boundingBox.x0 + 1, this.boundingBox.y0 + 3, this.boundingBox.z0 + 1, this.boundingBox.x1 - 1, this.boundingBox.y0 + 3, this.boundingBox.z1 - 1, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, this.boundingBox.x0 + 1, this.boundingBox.y0, this.boundingBox.z0, this.boundingBox.x1 - 1, this.boundingBox.y0 + 3 - 1, this.boundingBox.z1, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, this.boundingBox.x0, this.boundingBox.y0, this.boundingBox.z0 + 1, this.boundingBox.x1, this.boundingBox.y0 + 3 - 1, this.boundingBox.z1 - 1, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, this.boundingBox.x0 + 1, this.boundingBox.y1 - 2, this.boundingBox.z0, this.boundingBox.x1 - 1, this.boundingBox.y1, this.boundingBox.z1, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, this.boundingBox.x0, this.boundingBox.y1 - 2, this.boundingBox.z0 + 1, this.boundingBox.x1, this.boundingBox.y1, this.boundingBox.z1 - 1, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, this.boundingBox.x0 + 1, this.boundingBox.y0 + 3, this.boundingBox.z0 + 1, this.boundingBox.x1 - 1, this.boundingBox.y0 + 3, this.boundingBox.z1 - 1, CAVE_AIR, CAVE_AIR, false);
             } else {
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, this.boundingBox.x0 + 1, this.boundingBox.y0, this.boundingBox.z0, this.boundingBox.x1 - 1, this.boundingBox.y1, this.boundingBox.z1, CAVE_AIR, CAVE_AIR, false);
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, this.boundingBox.x0, this.boundingBox.y0, this.boundingBox.z0 + 1, this.boundingBox.x1, this.boundingBox.y1, this.boundingBox.z1 - 1, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, this.boundingBox.x0 + 1, this.boundingBox.y0, this.boundingBox.z0, this.boundingBox.x1 - 1, this.boundingBox.y1, this.boundingBox.z1, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, this.boundingBox.x0, this.boundingBox.y0, this.boundingBox.z0 + 1, this.boundingBox.x1, this.boundingBox.y1, this.boundingBox.z1 - 1, CAVE_AIR, CAVE_AIR, false);
             }
             this.placeSupportPillar(worldGenLevel, boundingBox, this.boundingBox.x0 + 1, this.boundingBox.y0, this.boundingBox.z0 + 1, this.boundingBox.y1);
             this.placeSupportPillar(worldGenLevel, boundingBox, this.boundingBox.x0 + 1, this.boundingBox.y0, this.boundingBox.z1 - 1, this.boundingBox.y1);
@@ -287,9 +286,9 @@ public class MineShaftPieces {
             return true;
         }
 
-        private void placeSupportPillar(LevelAccessor levelAccessor, BoundingBox boundingBox, int i, int j, int k, int l) {
-            if (!this.getBlock(levelAccessor, i, l + 1, k, boundingBox).isAir()) {
-                this.generateBox(levelAccessor, boundingBox, i, j, k, i, l, k, this.getPlanksBlock(), CAVE_AIR, false);
+        private void placeSupportPillar(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k, int l) {
+            if (!this.getBlock(worldGenLevel, i, l + 1, k, boundingBox).isAir()) {
+                this.generateBox(worldGenLevel, boundingBox, i, j, k, i, l, k, this.getPlanksBlock(), CAVE_AIR, false);
             }
         }
     }
@@ -446,14 +445,14 @@ public class MineShaftPieces {
         }
 
         @Override
-        protected boolean createChest(LevelAccessor levelAccessor, BoundingBox boundingBox, Random random, int i, int j, int k, ResourceLocation resourceLocation) {
+        protected boolean createChest(WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, int i, int j, int k, ResourceLocation resourceLocation) {
             BlockPos blockPos = new BlockPos(this.getWorldX(i, k), this.getWorldY(j), this.getWorldZ(i, k));
-            if (boundingBox.isInside(blockPos) && levelAccessor.getBlockState(blockPos).isAir() && !levelAccessor.getBlockState(blockPos.below()).isAir()) {
+            if (boundingBox.isInside(blockPos) && worldGenLevel.getBlockState(blockPos).isAir() && !worldGenLevel.getBlockState(blockPos.below()).isAir()) {
                 BlockState blockState = (BlockState)Blocks.RAIL.defaultBlockState().setValue(RailBlock.SHAPE, random.nextBoolean() ? RailShape.NORTH_SOUTH : RailShape.EAST_WEST);
-                this.placeBlock(levelAccessor, blockState, i, j, k, boundingBox);
-                MinecartChest minecartChest = new MinecartChest(levelAccessor.getLevel(), (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5);
+                this.placeBlock(worldGenLevel, blockState, i, j, k, boundingBox);
+                MinecartChest minecartChest = new MinecartChest(worldGenLevel.getLevel(), (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5);
                 minecartChest.setLootTable(resourceLocation, random.nextLong());
-                levelAccessor.addFreshEntity(minecartChest);
+                worldGenLevel.addFreshEntity(minecartChest);
                 return true;
             }
             return false;
@@ -474,7 +473,7 @@ public class MineShaftPieces {
             int l = 2;
             int m = this.numSections * 5 - 1;
             BlockState blockState = this.getPlanksBlock();
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 2, 1, m, CAVE_AIR, CAVE_AIR, false);
+            this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 2, 1, m, CAVE_AIR, CAVE_AIR, false);
             this.generateMaybeBox(worldGenLevel, boundingBox, random, 0.8f, 0, 2, 0, 2, 2, m, CAVE_AIR, CAVE_AIR, false, false);
             if (this.spiderCorridor) {
                 this.generateMaybeBox(worldGenLevel, boundingBox, random, 0.6f, 0, 0, 0, 2, 1, m, Blocks.COBWEB.defaultBlockState(), CAVE_AIR, false, true);
@@ -530,27 +529,27 @@ public class MineShaftPieces {
             return true;
         }
 
-        private void placeSupport(LevelAccessor levelAccessor, BoundingBox boundingBox, int i, int j, int k, int l, int m, Random random) {
-            if (!this.isSupportingBox(levelAccessor, boundingBox, i, m, l, k)) {
+        private void placeSupport(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k, int l, int m, Random random) {
+            if (!this.isSupportingBox(worldGenLevel, boundingBox, i, m, l, k)) {
                 return;
             }
             BlockState blockState = this.getPlanksBlock();
             BlockState blockState2 = this.getFenceBlock();
-            this.generateBox(levelAccessor, boundingBox, i, j, k, i, l - 1, k, (BlockState)blockState2.setValue(FenceBlock.WEST, true), CAVE_AIR, false);
-            this.generateBox(levelAccessor, boundingBox, m, j, k, m, l - 1, k, (BlockState)blockState2.setValue(FenceBlock.EAST, true), CAVE_AIR, false);
+            this.generateBox(worldGenLevel, boundingBox, i, j, k, i, l - 1, k, (BlockState)blockState2.setValue(FenceBlock.WEST, true), CAVE_AIR, false);
+            this.generateBox(worldGenLevel, boundingBox, m, j, k, m, l - 1, k, (BlockState)blockState2.setValue(FenceBlock.EAST, true), CAVE_AIR, false);
             if (random.nextInt(4) == 0) {
-                this.generateBox(levelAccessor, boundingBox, i, l, k, i, l, k, blockState, CAVE_AIR, false);
-                this.generateBox(levelAccessor, boundingBox, m, l, k, m, l, k, blockState, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, i, l, k, i, l, k, blockState, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, m, l, k, m, l, k, blockState, CAVE_AIR, false);
             } else {
-                this.generateBox(levelAccessor, boundingBox, i, l, k, m, l, k, blockState, CAVE_AIR, false);
-                this.maybeGenerateBlock(levelAccessor, boundingBox, random, 0.05f, i + 1, l, k - 1, (BlockState)Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.NORTH));
-                this.maybeGenerateBlock(levelAccessor, boundingBox, random, 0.05f, i + 1, l, k + 1, (BlockState)Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH));
+                this.generateBox(worldGenLevel, boundingBox, i, l, k, m, l, k, blockState, CAVE_AIR, false);
+                this.maybeGenerateBlock(worldGenLevel, boundingBox, random, 0.05f, i + 1, l, k - 1, (BlockState)Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.NORTH));
+                this.maybeGenerateBlock(worldGenLevel, boundingBox, random, 0.05f, i + 1, l, k + 1, (BlockState)Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH));
             }
         }
 
-        private void placeCobWeb(LevelAccessor levelAccessor, BoundingBox boundingBox, Random random, float f, int i, int j, int k) {
-            if (this.isInterior(levelAccessor, i, j, k, boundingBox)) {
-                this.maybeGenerateBlock(levelAccessor, boundingBox, random, f, i, j, k, Blocks.COBWEB.defaultBlockState());
+        private void placeCobWeb(WorldGenLevel worldGenLevel, BoundingBox boundingBox, Random random, float f, int i, int j, int k) {
+            if (this.isInterior(worldGenLevel, i, j, k, boundingBox)) {
+                this.maybeGenerateBlock(worldGenLevel, boundingBox, random, f, i, j, k, Blocks.COBWEB.defaultBlockState());
             }
         }
     }
@@ -614,10 +613,10 @@ public class MineShaftPieces {
             if (this.edgesLiquid(worldGenLevel, boundingBox)) {
                 return false;
             }
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, this.boundingBox.x0, this.boundingBox.y0, this.boundingBox.z0, this.boundingBox.x1, this.boundingBox.y0, this.boundingBox.z1, Blocks.DIRT.defaultBlockState(), CAVE_AIR, true);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, this.boundingBox.x0, this.boundingBox.y0 + 1, this.boundingBox.z0, this.boundingBox.x1, Math.min(this.boundingBox.y0 + 3, this.boundingBox.y1), this.boundingBox.z1, CAVE_AIR, CAVE_AIR, false);
+            this.generateBox(worldGenLevel, boundingBox, this.boundingBox.x0, this.boundingBox.y0, this.boundingBox.z0, this.boundingBox.x1, this.boundingBox.y0, this.boundingBox.z1, Blocks.DIRT.defaultBlockState(), CAVE_AIR, true);
+            this.generateBox(worldGenLevel, boundingBox, this.boundingBox.x0, this.boundingBox.y0 + 1, this.boundingBox.z0, this.boundingBox.x1, Math.min(this.boundingBox.y0 + 3, this.boundingBox.y1), this.boundingBox.z1, CAVE_AIR, CAVE_AIR, false);
             for (BoundingBox boundingBox2 : this.childEntranceBoxes) {
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, boundingBox2.x0, boundingBox2.y1 - 2, boundingBox2.z0, boundingBox2.x1, boundingBox2.y1, boundingBox2.z1, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, boundingBox2.x0, boundingBox2.y1 - 2, boundingBox2.z0, boundingBox2.x1, boundingBox2.y1, boundingBox2.z1, CAVE_AIR, CAVE_AIR, false);
             }
             this.generateUpperHalfSphere(worldGenLevel, boundingBox, this.boundingBox.x0, this.boundingBox.y0 + 4, this.boundingBox.z0, this.boundingBox.x1, this.boundingBox.y1, this.boundingBox.z1, CAVE_AIR, false);
             return true;

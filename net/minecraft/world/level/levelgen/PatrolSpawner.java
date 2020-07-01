@@ -12,7 +12,6 @@ import net.minecraft.world.entity.monster.PatrollingMonster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
@@ -83,23 +82,23 @@ implements CustomSpawner {
         return m;
     }
 
-    private boolean spawnPatrolMember(Level level, BlockPos blockPos, Random random, boolean bl) {
-        BlockState blockState = level.getBlockState(blockPos);
-        if (!NaturalSpawner.isValidEmptySpawnBlock(level, blockPos, blockState, blockState.getFluidState(), EntityType.PILLAGER)) {
+    private boolean spawnPatrolMember(ServerLevel serverLevel, BlockPos blockPos, Random random, boolean bl) {
+        BlockState blockState = serverLevel.getBlockState(blockPos);
+        if (!NaturalSpawner.isValidEmptySpawnBlock(serverLevel, blockPos, blockState, blockState.getFluidState(), EntityType.PILLAGER)) {
             return false;
         }
-        if (!PatrollingMonster.checkPatrollingMonsterSpawnRules(EntityType.PILLAGER, level, MobSpawnType.PATROL, blockPos, random)) {
+        if (!PatrollingMonster.checkPatrollingMonsterSpawnRules(EntityType.PILLAGER, serverLevel, MobSpawnType.PATROL, blockPos, random)) {
             return false;
         }
-        PatrollingMonster patrollingMonster = EntityType.PILLAGER.create(level);
+        PatrollingMonster patrollingMonster = EntityType.PILLAGER.create(serverLevel);
         if (patrollingMonster != null) {
             if (bl) {
                 patrollingMonster.setPatrolLeader(true);
                 patrollingMonster.findPatrolTarget();
             }
             patrollingMonster.setPos(blockPos.getX(), blockPos.getY(), blockPos.getZ());
-            patrollingMonster.finalizeSpawn(level, level.getCurrentDifficultyAt(blockPos), MobSpawnType.PATROL, null, null);
-            level.addFreshEntity(patrollingMonster);
+            patrollingMonster.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(blockPos), MobSpawnType.PATROL, null, null);
+            serverLevel.addFreshEntity(patrollingMonster);
             return true;
         }
         return false;

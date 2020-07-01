@@ -10,7 +10,7 @@ import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CocoaBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -34,7 +34,7 @@ extends TreeDecorator {
     }
 
     @Override
-    public void place(LevelAccessor levelAccessor, Random random, List<BlockPos> list, List<BlockPos> list2, Set<BlockPos> set, BoundingBox boundingBox) {
+    public void place(WorldGenLevel worldGenLevel, Random random, List<BlockPos> list, List<BlockPos> list2, Set<BlockPos> set, BoundingBox boundingBox) {
         if (random.nextFloat() >= this.probability) {
             return;
         }
@@ -43,9 +43,9 @@ extends TreeDecorator {
             for (Direction direction : Direction.Plane.HORIZONTAL) {
                 Direction direction2;
                 BlockPos blockPos2;
-                if (!(random.nextFloat() <= 0.25f) || !Feature.isAir(levelAccessor, blockPos2 = blockPos.offset((direction2 = direction.getOpposite()).getStepX(), 0, direction2.getStepZ()))) continue;
+                if (!(random.nextFloat() <= 0.25f) || !Feature.isAir(worldGenLevel, blockPos2 = blockPos.offset((direction2 = direction.getOpposite()).getStepX(), 0, direction2.getStepZ()))) continue;
                 BlockState blockState = (BlockState)((BlockState)Blocks.COCOA.defaultBlockState().setValue(CocoaBlock.AGE, random.nextInt(3))).setValue(CocoaBlock.FACING, direction);
-                this.setBlock(levelAccessor, blockPos2, blockState, set, boundingBox);
+                this.setBlock(worldGenLevel, blockPos2, blockState, set, boundingBox);
             }
         });
     }

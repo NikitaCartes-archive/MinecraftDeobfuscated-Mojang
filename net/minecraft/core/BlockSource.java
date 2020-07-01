@@ -4,12 +4,13 @@
 package net.minecraft.core;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.LocatableSource;
+import net.minecraft.core.Position;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 public interface BlockSource
-extends LocatableSource {
+extends Position {
     @Override
     public double x();
 
@@ -24,5 +25,7 @@ extends LocatableSource {
     public BlockState getBlockState();
 
     public <T extends BlockEntity> T getEntity();
+
+    public ServerLevel getLevel();
 }
 

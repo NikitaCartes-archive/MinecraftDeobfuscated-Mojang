@@ -11,7 +11,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -210,32 +209,32 @@ public class StrongholdPieces {
         @Override
         public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
             int j;
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 10, 7, 15, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 10, 7, 15, false, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, StrongholdPiece.SmallDoorType.GRATES, 4, 1, 0);
             int i = 6;
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, i, 1, 1, i, 14, false, random, SMOOTH_STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 9, i, 1, 9, i, 14, false, random, SMOOTH_STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, i, 1, 8, i, 2, false, random, SMOOTH_STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 2, i, 14, 8, i, 14, false, random, SMOOTH_STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 1, 1, 2, 1, 4, false, random, SMOOTH_STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 8, 1, 1, 9, 1, 4, false, random, SMOOTH_STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 1, 1, 1, 1, 3, Blocks.LAVA.defaultBlockState(), Blocks.LAVA.defaultBlockState(), false);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 9, 1, 1, 9, 1, 3, Blocks.LAVA.defaultBlockState(), Blocks.LAVA.defaultBlockState(), false);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 3, 1, 8, 7, 1, 12, false, random, SMOOTH_STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 1, 9, 6, 1, 11, Blocks.LAVA.defaultBlockState(), Blocks.LAVA.defaultBlockState(), false);
+            this.generateBox(worldGenLevel, boundingBox, 1, i, 1, 1, i, 14, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 9, i, 1, 9, i, 14, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 2, i, 1, 8, i, 2, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 2, i, 14, 8, i, 14, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 1, 1, 1, 2, 1, 4, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 8, 1, 1, 9, 1, 4, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 1, 1, 1, 1, 1, 3, Blocks.LAVA.defaultBlockState(), Blocks.LAVA.defaultBlockState(), false);
+            this.generateBox(worldGenLevel, boundingBox, 9, 1, 1, 9, 1, 3, Blocks.LAVA.defaultBlockState(), Blocks.LAVA.defaultBlockState(), false);
+            this.generateBox(worldGenLevel, boundingBox, 3, 1, 8, 7, 1, 12, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 4, 1, 9, 6, 1, 11, Blocks.LAVA.defaultBlockState(), Blocks.LAVA.defaultBlockState(), false);
             BlockState blockState = (BlockState)((BlockState)Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.NORTH, true)).setValue(IronBarsBlock.SOUTH, true);
             BlockState blockState2 = (BlockState)((BlockState)Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.WEST, true)).setValue(IronBarsBlock.EAST, true);
             for (j = 3; j < 14; j += 2) {
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 3, j, 0, 4, j, blockState, blockState, false);
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 10, 3, j, 10, 4, j, blockState, blockState, false);
+                this.generateBox(worldGenLevel, boundingBox, 0, 3, j, 0, 4, j, blockState, blockState, false);
+                this.generateBox(worldGenLevel, boundingBox, 10, 3, j, 10, 4, j, blockState, blockState, false);
             }
             for (j = 2; j < 9; j += 2) {
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, j, 3, 15, j, 4, 15, blockState2, blockState2, false);
+                this.generateBox(worldGenLevel, boundingBox, j, 3, 15, j, 4, 15, blockState2, blockState2, false);
             }
             BlockState blockState3 = (BlockState)Blocks.STONE_BRICK_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.NORTH);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 1, 5, 6, 1, 7, false, random, SMOOTH_STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 2, 6, 6, 2, 7, false, random, SMOOTH_STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 3, 7, 6, 3, 7, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 4, 1, 5, 6, 1, 7, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 4, 2, 6, 6, 2, 7, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 4, 3, 7, 6, 3, 7, false, random, SMOOTH_STONE_SELECTOR);
             for (int k = 4; k <= 6; ++k) {
                 this.placeBlock(worldGenLevel, blockState3, k, 1, 4, boundingBox);
                 this.placeBlock(worldGenLevel, blockState3, k, 2, 5, boundingBox);
@@ -360,34 +359,34 @@ public class StrongholdPieces {
 
         @Override
         public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 9, 8, 10, true, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 9, 8, 10, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, this.entryDoor, 4, 3, 0);
             if (this.leftLow) {
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 3, 1, 0, 5, 3, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, 0, 3, 1, 0, 5, 3, CAVE_AIR, CAVE_AIR, false);
             }
             if (this.rightLow) {
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 9, 3, 1, 9, 5, 3, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, 9, 3, 1, 9, 5, 3, CAVE_AIR, CAVE_AIR, false);
             }
             if (this.leftHigh) {
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 5, 7, 0, 7, 9, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, 0, 5, 7, 0, 7, 9, CAVE_AIR, CAVE_AIR, false);
             }
             if (this.rightHigh) {
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 9, 5, 7, 9, 7, 9, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, 9, 5, 7, 9, 7, 9, CAVE_AIR, CAVE_AIR, false);
             }
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 1, 10, 7, 3, 10, CAVE_AIR, CAVE_AIR, false);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 2, 1, 8, 2, 6, false, random, SMOOTH_STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 1, 5, 4, 4, 9, false, random, SMOOTH_STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 8, 1, 5, 8, 4, 9, false, random, SMOOTH_STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 4, 7, 3, 4, 9, false, random, SMOOTH_STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 3, 5, 3, 3, 6, false, random, SMOOTH_STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 3, 4, 3, 3, 4, Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), false);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 4, 6, 3, 4, 6, Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), false);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 1, 7, 7, 1, 8, false, random, SMOOTH_STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 1, 9, 7, 1, 9, Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), false);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 2, 7, 7, 2, 7, Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), false);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 5, 7, 4, 5, 9, Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), false);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 8, 5, 7, 8, 5, 9, Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), false);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 5, 5, 7, 7, 5, 9, (BlockState)Blocks.SMOOTH_STONE_SLAB.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.DOUBLE), (BlockState)Blocks.SMOOTH_STONE_SLAB.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.DOUBLE), false);
+            this.generateBox(worldGenLevel, boundingBox, 5, 1, 10, 7, 3, 10, CAVE_AIR, CAVE_AIR, false);
+            this.generateBox(worldGenLevel, boundingBox, 1, 2, 1, 8, 2, 6, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 4, 1, 5, 4, 4, 9, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 8, 1, 5, 8, 4, 9, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 1, 4, 7, 3, 4, 9, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 1, 3, 5, 3, 3, 6, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 1, 3, 4, 3, 3, 4, Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), false);
+            this.generateBox(worldGenLevel, boundingBox, 1, 4, 6, 3, 4, 6, Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), false);
+            this.generateBox(worldGenLevel, boundingBox, 5, 1, 7, 7, 1, 8, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 5, 1, 9, 7, 1, 9, Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), false);
+            this.generateBox(worldGenLevel, boundingBox, 5, 2, 7, 7, 2, 7, Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), false);
+            this.generateBox(worldGenLevel, boundingBox, 4, 5, 7, 4, 5, 9, Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), false);
+            this.generateBox(worldGenLevel, boundingBox, 8, 5, 7, 8, 5, 9, Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), false);
+            this.generateBox(worldGenLevel, boundingBox, 5, 5, 7, 7, 5, 9, (BlockState)Blocks.SMOOTH_STONE_SLAB.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.DOUBLE), (BlockState)Blocks.SMOOTH_STONE_SLAB.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.DOUBLE), false);
             this.placeBlock(worldGenLevel, (BlockState)Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.SOUTH), 6, 5, 6, boundingBox);
             return true;
         }
@@ -431,47 +430,47 @@ public class StrongholdPieces {
             if (!this.isTall) {
                 i = 6;
             }
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 13, i - 1, 14, true, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 13, i - 1, 14, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, this.entryDoor, 4, 1, 0);
             this.generateMaybeBox(worldGenLevel, boundingBox, random, 0.07f, 2, 1, 1, 11, 4, 13, Blocks.COBWEB.defaultBlockState(), Blocks.COBWEB.defaultBlockState(), false, false);
             boolean j = true;
             int k = 12;
             for (l = 1; l <= 13; ++l) {
                 if ((l - 1) % 4 == 0) {
-                    this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 1, l, 1, 4, l, Blocks.OAK_PLANKS.defaultBlockState(), Blocks.OAK_PLANKS.defaultBlockState(), false);
-                    this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 12, 1, l, 12, 4, l, Blocks.OAK_PLANKS.defaultBlockState(), Blocks.OAK_PLANKS.defaultBlockState(), false);
+                    this.generateBox(worldGenLevel, boundingBox, 1, 1, l, 1, 4, l, Blocks.OAK_PLANKS.defaultBlockState(), Blocks.OAK_PLANKS.defaultBlockState(), false);
+                    this.generateBox(worldGenLevel, boundingBox, 12, 1, l, 12, 4, l, Blocks.OAK_PLANKS.defaultBlockState(), Blocks.OAK_PLANKS.defaultBlockState(), false);
                     this.placeBlock(worldGenLevel, (BlockState)Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.EAST), 2, 3, l, boundingBox);
                     this.placeBlock(worldGenLevel, (BlockState)Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.WEST), 11, 3, l, boundingBox);
                     if (!this.isTall) continue;
-                    this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 6, l, 1, 9, l, Blocks.OAK_PLANKS.defaultBlockState(), Blocks.OAK_PLANKS.defaultBlockState(), false);
-                    this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 12, 6, l, 12, 9, l, Blocks.OAK_PLANKS.defaultBlockState(), Blocks.OAK_PLANKS.defaultBlockState(), false);
+                    this.generateBox(worldGenLevel, boundingBox, 1, 6, l, 1, 9, l, Blocks.OAK_PLANKS.defaultBlockState(), Blocks.OAK_PLANKS.defaultBlockState(), false);
+                    this.generateBox(worldGenLevel, boundingBox, 12, 6, l, 12, 9, l, Blocks.OAK_PLANKS.defaultBlockState(), Blocks.OAK_PLANKS.defaultBlockState(), false);
                     continue;
                 }
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 1, l, 1, 4, l, Blocks.BOOKSHELF.defaultBlockState(), Blocks.BOOKSHELF.defaultBlockState(), false);
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 12, 1, l, 12, 4, l, Blocks.BOOKSHELF.defaultBlockState(), Blocks.BOOKSHELF.defaultBlockState(), false);
+                this.generateBox(worldGenLevel, boundingBox, 1, 1, l, 1, 4, l, Blocks.BOOKSHELF.defaultBlockState(), Blocks.BOOKSHELF.defaultBlockState(), false);
+                this.generateBox(worldGenLevel, boundingBox, 12, 1, l, 12, 4, l, Blocks.BOOKSHELF.defaultBlockState(), Blocks.BOOKSHELF.defaultBlockState(), false);
                 if (!this.isTall) continue;
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 6, l, 1, 9, l, Blocks.BOOKSHELF.defaultBlockState(), Blocks.BOOKSHELF.defaultBlockState(), false);
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 12, 6, l, 12, 9, l, Blocks.BOOKSHELF.defaultBlockState(), Blocks.BOOKSHELF.defaultBlockState(), false);
+                this.generateBox(worldGenLevel, boundingBox, 1, 6, l, 1, 9, l, Blocks.BOOKSHELF.defaultBlockState(), Blocks.BOOKSHELF.defaultBlockState(), false);
+                this.generateBox(worldGenLevel, boundingBox, 12, 6, l, 12, 9, l, Blocks.BOOKSHELF.defaultBlockState(), Blocks.BOOKSHELF.defaultBlockState(), false);
             }
             for (l = 3; l < 12; l += 2) {
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 3, 1, l, 4, 3, l, Blocks.BOOKSHELF.defaultBlockState(), Blocks.BOOKSHELF.defaultBlockState(), false);
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 6, 1, l, 7, 3, l, Blocks.BOOKSHELF.defaultBlockState(), Blocks.BOOKSHELF.defaultBlockState(), false);
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 9, 1, l, 10, 3, l, Blocks.BOOKSHELF.defaultBlockState(), Blocks.BOOKSHELF.defaultBlockState(), false);
+                this.generateBox(worldGenLevel, boundingBox, 3, 1, l, 4, 3, l, Blocks.BOOKSHELF.defaultBlockState(), Blocks.BOOKSHELF.defaultBlockState(), false);
+                this.generateBox(worldGenLevel, boundingBox, 6, 1, l, 7, 3, l, Blocks.BOOKSHELF.defaultBlockState(), Blocks.BOOKSHELF.defaultBlockState(), false);
+                this.generateBox(worldGenLevel, boundingBox, 9, 1, l, 10, 3, l, Blocks.BOOKSHELF.defaultBlockState(), Blocks.BOOKSHELF.defaultBlockState(), false);
             }
             if (this.isTall) {
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 5, 1, 3, 5, 13, Blocks.OAK_PLANKS.defaultBlockState(), Blocks.OAK_PLANKS.defaultBlockState(), false);
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 10, 5, 1, 12, 5, 13, Blocks.OAK_PLANKS.defaultBlockState(), Blocks.OAK_PLANKS.defaultBlockState(), false);
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 5, 1, 9, 5, 2, Blocks.OAK_PLANKS.defaultBlockState(), Blocks.OAK_PLANKS.defaultBlockState(), false);
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 5, 12, 9, 5, 13, Blocks.OAK_PLANKS.defaultBlockState(), Blocks.OAK_PLANKS.defaultBlockState(), false);
+                this.generateBox(worldGenLevel, boundingBox, 1, 5, 1, 3, 5, 13, Blocks.OAK_PLANKS.defaultBlockState(), Blocks.OAK_PLANKS.defaultBlockState(), false);
+                this.generateBox(worldGenLevel, boundingBox, 10, 5, 1, 12, 5, 13, Blocks.OAK_PLANKS.defaultBlockState(), Blocks.OAK_PLANKS.defaultBlockState(), false);
+                this.generateBox(worldGenLevel, boundingBox, 4, 5, 1, 9, 5, 2, Blocks.OAK_PLANKS.defaultBlockState(), Blocks.OAK_PLANKS.defaultBlockState(), false);
+                this.generateBox(worldGenLevel, boundingBox, 4, 5, 12, 9, 5, 13, Blocks.OAK_PLANKS.defaultBlockState(), Blocks.OAK_PLANKS.defaultBlockState(), false);
                 this.placeBlock(worldGenLevel, Blocks.OAK_PLANKS.defaultBlockState(), 9, 5, 11, boundingBox);
                 this.placeBlock(worldGenLevel, Blocks.OAK_PLANKS.defaultBlockState(), 8, 5, 11, boundingBox);
                 this.placeBlock(worldGenLevel, Blocks.OAK_PLANKS.defaultBlockState(), 9, 5, 10, boundingBox);
                 BlockState blockState = (BlockState)((BlockState)Blocks.OAK_FENCE.defaultBlockState().setValue(FenceBlock.WEST, true)).setValue(FenceBlock.EAST, true);
                 BlockState blockState2 = (BlockState)((BlockState)Blocks.OAK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.SOUTH, true);
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 3, 6, 3, 3, 6, 11, blockState2, blockState2, false);
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 10, 6, 3, 10, 6, 9, blockState2, blockState2, false);
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 6, 2, 9, 6, 2, blockState, blockState, false);
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 6, 12, 7, 6, 12, blockState, blockState, false);
+                this.generateBox(worldGenLevel, boundingBox, 3, 6, 3, 3, 6, 11, blockState2, blockState2, false);
+                this.generateBox(worldGenLevel, boundingBox, 10, 6, 3, 10, 6, 9, blockState2, blockState2, false);
+                this.generateBox(worldGenLevel, boundingBox, 4, 6, 2, 9, 6, 2, blockState, blockState, false);
+                this.generateBox(worldGenLevel, boundingBox, 4, 6, 12, 7, 6, 12, blockState, blockState, false);
                 this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.OAK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.EAST, true), 3, 6, 2, boundingBox);
                 this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.OAK_FENCE.defaultBlockState().setValue(FenceBlock.SOUTH, true)).setValue(FenceBlock.EAST, true), 3, 6, 12, boundingBox);
                 this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.OAK_FENCE.defaultBlockState().setValue(FenceBlock.NORTH, true)).setValue(FenceBlock.WEST, true), 10, 6, 2, boundingBox);
@@ -550,13 +549,13 @@ public class StrongholdPieces {
 
         @Override
         public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 8, 4, 10, true, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 8, 4, 10, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, this.entryDoor, 1, 1, 0);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 1, 1, 10, 3, 3, 10, CAVE_AIR, CAVE_AIR, false);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 1, 1, 4, 3, 1, false, random, SMOOTH_STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 1, 3, 4, 3, 3, false, random, SMOOTH_STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 1, 7, 4, 3, 7, false, random, SMOOTH_STONE_SELECTOR);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 1, 9, 4, 3, 9, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 1, 1, 10, 3, 3, 10, CAVE_AIR, CAVE_AIR, false);
+            this.generateBox(worldGenLevel, boundingBox, 4, 1, 1, 4, 3, 1, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 4, 1, 3, 4, 3, 3, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 4, 1, 7, 4, 3, 7, false, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 4, 1, 9, 4, 3, 9, false, random, SMOOTH_STONE_SELECTOR);
             for (int i = 1; i <= 3; ++i) {
                 this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.NORTH, true)).setValue(IronBarsBlock.SOUTH, true), 4, i, 4, boundingBox);
                 this.placeBlock(worldGenLevel, (BlockState)((BlockState)((BlockState)Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.NORTH, true)).setValue(IronBarsBlock.SOUTH, true)).setValue(IronBarsBlock.EAST, true), 4, i, 5, boundingBox);
@@ -617,11 +616,11 @@ public class StrongholdPieces {
 
         @Override
         public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 10, 6, 10, true, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 10, 6, 10, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, this.entryDoor, 4, 1, 0);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 1, 10, 6, 3, 10, CAVE_AIR, CAVE_AIR, false);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 1, 4, 0, 3, 6, CAVE_AIR, CAVE_AIR, false);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 10, 1, 4, 10, 3, 6, CAVE_AIR, CAVE_AIR, false);
+            this.generateBox(worldGenLevel, boundingBox, 4, 1, 10, 6, 3, 10, CAVE_AIR, CAVE_AIR, false);
+            this.generateBox(worldGenLevel, boundingBox, 0, 1, 4, 0, 3, 6, CAVE_AIR, CAVE_AIR, false);
+            this.generateBox(worldGenLevel, boundingBox, 10, 1, 4, 10, 3, 6, CAVE_AIR, CAVE_AIR, false);
             switch (this.type) {
                 default: {
                     break;
@@ -737,13 +736,13 @@ public class StrongholdPieces {
 
         @Override
         public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 4, 4, 4, true, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 4, 4, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, this.entryDoor, 1, 1, 0);
             Direction direction = this.getOrientation();
             if (direction == Direction.NORTH || direction == Direction.EAST) {
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 1, 1, 4, 3, 3, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, 4, 1, 1, 4, 3, 3, CAVE_AIR, CAVE_AIR, false);
             } else {
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 1, 1, 0, 3, 3, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, 0, 1, 1, 0, 3, 3, CAVE_AIR, CAVE_AIR, false);
             }
             return true;
         }
@@ -782,13 +781,13 @@ public class StrongholdPieces {
 
         @Override
         public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 4, 4, 4, true, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 4, 4, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, this.entryDoor, 1, 1, 0);
             Direction direction = this.getOrientation();
             if (direction == Direction.NORTH || direction == Direction.EAST) {
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 1, 1, 0, 3, 3, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, 0, 1, 1, 0, 3, 3, CAVE_AIR, CAVE_AIR, false);
             } else {
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 1, 1, 4, 3, 3, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, 4, 1, 1, 4, 3, 3, CAVE_AIR, CAVE_AIR, false);
             }
             return true;
         }
@@ -833,7 +832,7 @@ public class StrongholdPieces {
 
         @Override
         public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 4, 10, 7, true, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 10, 7, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, this.entryDoor, 1, 7, 0);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, StrongholdPiece.SmallDoorType.OPENING, 1, 1, 7);
             BlockState blockState = (BlockState)Blocks.COBBLESTONE_STAIRS.defaultBlockState().setValue(StairBlock.FACING, Direction.SOUTH);
@@ -887,10 +886,10 @@ public class StrongholdPieces {
 
         @Override
         public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 4, 4, 6, true, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 4, 6, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, this.entryDoor, 1, 1, 0);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, StrongholdPiece.SmallDoorType.OPENING, 1, 1, 6);
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 3, 1, 2, 3, 1, 4, Blocks.STONE_BRICKS.defaultBlockState(), Blocks.STONE_BRICKS.defaultBlockState(), false);
+            this.generateBox(worldGenLevel, boundingBox, 3, 1, 2, 3, 1, 4, Blocks.STONE_BRICKS.defaultBlockState(), Blocks.STONE_BRICKS.defaultBlockState(), false);
             this.placeBlock(worldGenLevel, Blocks.STONE_BRICK_SLAB.defaultBlockState(), 3, 1, 1, boundingBox);
             this.placeBlock(worldGenLevel, Blocks.STONE_BRICK_SLAB.defaultBlockState(), 3, 1, 5, boundingBox);
             this.placeBlock(worldGenLevel, Blocks.STONE_BRICK_SLAB.defaultBlockState(), 3, 2, 2, boundingBox);
@@ -954,7 +953,7 @@ public class StrongholdPieces {
 
         @Override
         public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 4, 4, 6, true, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 4, 6, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, this.entryDoor, 1, 1, 0);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, StrongholdPiece.SmallDoorType.OPENING, 1, 1, 6);
             BlockState blockState = (BlockState)Blocks.WALL_TORCH.defaultBlockState().setValue(WallTorchBlock.FACING, Direction.EAST);
@@ -964,10 +963,10 @@ public class StrongholdPieces {
             this.maybeGenerateBlock(worldGenLevel, boundingBox, random, 0.1f, 1, 2, 5, blockState);
             this.maybeGenerateBlock(worldGenLevel, boundingBox, random, 0.1f, 3, 2, 5, blockState2);
             if (this.leftChild) {
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 1, 2, 0, 3, 4, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, 0, 1, 2, 0, 3, 4, CAVE_AIR, CAVE_AIR, false);
             }
             if (this.rightChild) {
-                this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 4, 1, 2, 4, 3, 4, CAVE_AIR, CAVE_AIR, false);
+                this.generateBox(worldGenLevel, boundingBox, 4, 1, 2, 4, 3, 4, CAVE_AIR, CAVE_AIR, false);
             }
             return true;
         }
@@ -1042,7 +1041,7 @@ public class StrongholdPieces {
 
         @Override
         public boolean postProcess(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, BlockPos blockPos) {
-            this.generateBox((LevelAccessor)worldGenLevel, boundingBox, 0, 0, 0, 4, 10, 4, true, random, SMOOTH_STONE_SELECTOR);
+            this.generateBox(worldGenLevel, boundingBox, 0, 0, 0, 4, 10, 4, true, random, SMOOTH_STONE_SELECTOR);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, this.entryDoor, 1, 7, 0);
             this.generateSmallDoor(worldGenLevel, random, boundingBox, StrongholdPiece.SmallDoorType.OPENING, 1, 1, 4);
             this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), 2, 6, 1, boundingBox);
@@ -1148,48 +1147,48 @@ public class StrongholdPieces {
             compoundTag.putString("EntryDoor", this.entryDoor.name());
         }
 
-        protected void generateSmallDoor(LevelAccessor levelAccessor, Random random, BoundingBox boundingBox, SmallDoorType smallDoorType, int i, int j, int k) {
+        protected void generateSmallDoor(WorldGenLevel worldGenLevel, Random random, BoundingBox boundingBox, SmallDoorType smallDoorType, int i, int j, int k) {
             switch (smallDoorType) {
                 case OPENING: {
-                    this.generateBox(levelAccessor, boundingBox, i, j, k, i + 3 - 1, j + 3 - 1, k, CAVE_AIR, CAVE_AIR, false);
+                    this.generateBox(worldGenLevel, boundingBox, i, j, k, i + 3 - 1, j + 3 - 1, k, CAVE_AIR, CAVE_AIR, false);
                     break;
                 }
                 case WOOD_DOOR: {
-                    this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i, j, k, boundingBox);
-                    this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i, j + 1, k, boundingBox);
-                    this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i, j + 2, k, boundingBox);
-                    this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i + 1, j + 2, k, boundingBox);
-                    this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j + 2, k, boundingBox);
-                    this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j + 1, k, boundingBox);
-                    this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j, k, boundingBox);
-                    this.placeBlock(levelAccessor, Blocks.OAK_DOOR.defaultBlockState(), i + 1, j, k, boundingBox);
-                    this.placeBlock(levelAccessor, (BlockState)Blocks.OAK_DOOR.defaultBlockState().setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER), i + 1, j + 1, k, boundingBox);
+                    this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i, j, k, boundingBox);
+                    this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i, j + 1, k, boundingBox);
+                    this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i, j + 2, k, boundingBox);
+                    this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i + 1, j + 2, k, boundingBox);
+                    this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j + 2, k, boundingBox);
+                    this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j + 1, k, boundingBox);
+                    this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j, k, boundingBox);
+                    this.placeBlock(worldGenLevel, Blocks.OAK_DOOR.defaultBlockState(), i + 1, j, k, boundingBox);
+                    this.placeBlock(worldGenLevel, (BlockState)Blocks.OAK_DOOR.defaultBlockState().setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER), i + 1, j + 1, k, boundingBox);
                     break;
                 }
                 case GRATES: {
-                    this.placeBlock(levelAccessor, Blocks.CAVE_AIR.defaultBlockState(), i + 1, j, k, boundingBox);
-                    this.placeBlock(levelAccessor, Blocks.CAVE_AIR.defaultBlockState(), i + 1, j + 1, k, boundingBox);
-                    this.placeBlock(levelAccessor, (BlockState)Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.WEST, true), i, j, k, boundingBox);
-                    this.placeBlock(levelAccessor, (BlockState)Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.WEST, true), i, j + 1, k, boundingBox);
-                    this.placeBlock(levelAccessor, (BlockState)((BlockState)Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, true)).setValue(IronBarsBlock.WEST, true), i, j + 2, k, boundingBox);
-                    this.placeBlock(levelAccessor, (BlockState)((BlockState)Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, true)).setValue(IronBarsBlock.WEST, true), i + 1, j + 2, k, boundingBox);
-                    this.placeBlock(levelAccessor, (BlockState)((BlockState)Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, true)).setValue(IronBarsBlock.WEST, true), i + 2, j + 2, k, boundingBox);
-                    this.placeBlock(levelAccessor, (BlockState)Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, true), i + 2, j + 1, k, boundingBox);
-                    this.placeBlock(levelAccessor, (BlockState)Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, true), i + 2, j, k, boundingBox);
+                    this.placeBlock(worldGenLevel, Blocks.CAVE_AIR.defaultBlockState(), i + 1, j, k, boundingBox);
+                    this.placeBlock(worldGenLevel, Blocks.CAVE_AIR.defaultBlockState(), i + 1, j + 1, k, boundingBox);
+                    this.placeBlock(worldGenLevel, (BlockState)Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.WEST, true), i, j, k, boundingBox);
+                    this.placeBlock(worldGenLevel, (BlockState)Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.WEST, true), i, j + 1, k, boundingBox);
+                    this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, true)).setValue(IronBarsBlock.WEST, true), i, j + 2, k, boundingBox);
+                    this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, true)).setValue(IronBarsBlock.WEST, true), i + 1, j + 2, k, boundingBox);
+                    this.placeBlock(worldGenLevel, (BlockState)((BlockState)Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, true)).setValue(IronBarsBlock.WEST, true), i + 2, j + 2, k, boundingBox);
+                    this.placeBlock(worldGenLevel, (BlockState)Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, true), i + 2, j + 1, k, boundingBox);
+                    this.placeBlock(worldGenLevel, (BlockState)Blocks.IRON_BARS.defaultBlockState().setValue(IronBarsBlock.EAST, true), i + 2, j, k, boundingBox);
                     break;
                 }
                 case IRON_DOOR: {
-                    this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i, j, k, boundingBox);
-                    this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i, j + 1, k, boundingBox);
-                    this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i, j + 2, k, boundingBox);
-                    this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i + 1, j + 2, k, boundingBox);
-                    this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j + 2, k, boundingBox);
-                    this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j + 1, k, boundingBox);
-                    this.placeBlock(levelAccessor, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j, k, boundingBox);
-                    this.placeBlock(levelAccessor, Blocks.IRON_DOOR.defaultBlockState(), i + 1, j, k, boundingBox);
-                    this.placeBlock(levelAccessor, (BlockState)Blocks.IRON_DOOR.defaultBlockState().setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER), i + 1, j + 1, k, boundingBox);
-                    this.placeBlock(levelAccessor, (BlockState)Blocks.STONE_BUTTON.defaultBlockState().setValue(ButtonBlock.FACING, Direction.NORTH), i + 2, j + 1, k + 1, boundingBox);
-                    this.placeBlock(levelAccessor, (BlockState)Blocks.STONE_BUTTON.defaultBlockState().setValue(ButtonBlock.FACING, Direction.SOUTH), i + 2, j + 1, k - 1, boundingBox);
+                    this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i, j, k, boundingBox);
+                    this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i, j + 1, k, boundingBox);
+                    this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i, j + 2, k, boundingBox);
+                    this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i + 1, j + 2, k, boundingBox);
+                    this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j + 2, k, boundingBox);
+                    this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j + 1, k, boundingBox);
+                    this.placeBlock(worldGenLevel, Blocks.STONE_BRICKS.defaultBlockState(), i + 2, j, k, boundingBox);
+                    this.placeBlock(worldGenLevel, Blocks.IRON_DOOR.defaultBlockState(), i + 1, j, k, boundingBox);
+                    this.placeBlock(worldGenLevel, (BlockState)Blocks.IRON_DOOR.defaultBlockState().setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER), i + 1, j + 1, k, boundingBox);
+                    this.placeBlock(worldGenLevel, (BlockState)Blocks.STONE_BUTTON.defaultBlockState().setValue(ButtonBlock.FACING, Direction.NORTH), i + 2, j + 1, k + 1, boundingBox);
+                    this.placeBlock(worldGenLevel, (BlockState)Blocks.STONE_BUTTON.defaultBlockState().setValue(ButtonBlock.FACING, Direction.SOUTH), i + 2, j + 1, k - 1, boundingBox);
                 }
             }
         }

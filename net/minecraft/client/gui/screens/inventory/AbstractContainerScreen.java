@@ -503,11 +503,11 @@ implements MenuAccess<T> {
 
     @Override
     public boolean keyPressed(int i, int j, int k) {
-        if (super.keyPressed(i, j, k)) {
-            return true;
-        }
         if (i == 256 || this.minecraft.options.keyInventory.matches(i, j)) {
             this.minecraft.player.closeContainer();
+            return true;
+        }
+        if (super.keyPressed(i, j, k)) {
             return true;
         }
         this.checkHotbarKeyPressed(i, j);

@@ -3,6 +3,7 @@
  */
 package net.minecraft.client.gui.screens.recipebook;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
@@ -17,11 +18,27 @@ import net.minecraft.world.item.crafting.Recipe;
 
 @Environment(value=EnvType.CLIENT)
 public class RecipeCollection {
-    private final List<Recipe<?>> recipes = Lists.newArrayList();
+    private final List<Recipe<?>> recipes;
+    private final boolean singleResultItem;
     private final Set<Recipe<?>> craftable = Sets.newHashSet();
     private final Set<Recipe<?>> fitsDimensions = Sets.newHashSet();
     private final Set<Recipe<?>> known = Sets.newHashSet();
-    private boolean singleResultItem = true;
+
+    public RecipeCollection(List<Recipe<?>> list) {
+        this.recipes = ImmutableList.copyOf(list);
+        this.singleResultItem = list.size() <= 1 ? true : RecipeCollection.allRecipesHaveSameResult(list);
+    }
+
+    private static boolean allRecipesHaveSameResult(List<Recipe<?>> list) {
+        int i = list.size();
+        ItemStack itemStack = list.get(0).getResultItem();
+        for (int j = 1; j < i; ++j) {
+            ItemStack itemStack2 = list.get(j).getResultItem();
+            if (ItemStack.isSame(itemStack, itemStack2) && ItemStack.tagMatches(itemStack, itemStack2)) continue;
+            return false;
+        }
+        return true;
+    }
 
     public boolean hasKnownRecipes() {
         return !this.known.isEmpty();
@@ -35,9 +52,8 @@ public class RecipeCollection {
     }
 
     public void canCraft(StackedContents stackedContents, int i, int j, RecipeBook recipeBook) {
-        for (int k = 0; k < this.recipes.size(); ++k) {
+        for (Recipe<?> recipe : this.recipes) {
             boolean bl;
-            Recipe<?> recipe = this.recipes.get(k);
             boolean bl2 = bl = recipe.canCraftInDimensions(i, j) && recipeBook.contains(recipe);
             if (bl) {
                 this.fitsDimensions.add(recipe);
@@ -85,15 +101,6 @@ public class RecipeCollection {
             list.add(recipe);
         }
         return list;
-    }
-
-    public void add(Recipe<?> recipe) {
-        this.recipes.add(recipe);
-        if (this.singleResultItem) {
-            ItemStack itemStack2;
-            ItemStack itemStack = this.recipes.get(0).getResultItem();
-            this.singleResultItem = ItemStack.isSame(itemStack, itemStack2 = recipe.getResultItem()) && ItemStack.tagMatches(itemStack, itemStack2);
-        }
     }
 
     public boolean hasSingleResultItem() {

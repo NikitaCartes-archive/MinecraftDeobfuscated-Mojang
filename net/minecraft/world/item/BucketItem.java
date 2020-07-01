@@ -66,7 +66,7 @@ extends Item {
                 if (blockState.getBlock() instanceof BucketPickup && (fluid = ((BucketPickup)((Object)blockState.getBlock())).takeLiquid(level, blockPos, blockState)) != Fluids.EMPTY) {
                     player.awardStat(Stats.ITEM_USED.get(this));
                     player.playSound(fluid.is(FluidTags.LAVA) ? SoundEvents.BUCKET_FILL_LAVA : SoundEvents.BUCKET_FILL, 1.0f, 1.0f);
-                    ItemStack itemStack2 = ItemUtils.createBucketResult(itemStack, player, new ItemStack(fluid.getBucket()));
+                    ItemStack itemStack2 = ItemUtils.createFilledResult(itemStack, player, new ItemStack(fluid.getBucket()));
                     if (!level.isClientSide) {
                         CriteriaTriggers.FILLED_BUCKET.trigger((ServerPlayer)player, new ItemStack(fluid.getBucket()));
                     }

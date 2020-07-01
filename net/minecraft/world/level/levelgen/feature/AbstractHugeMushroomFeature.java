@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -45,7 +44,7 @@ extends Feature<HugeMushroomFeatureConfiguration> {
             return false;
         }
         Block block = levelAccessor.getBlockState(blockPos.below()).getBlock();
-        if (!AbstractHugeMushroomFeature.isDirt(block)) {
+        if (!AbstractHugeMushroomFeature.isDirt(block) && !block.is(BlockTags.MUSHROOM_GROW_BLOCK)) {
             return false;
         }
         for (int k = 0; k <= i; ++k) {
@@ -62,7 +61,7 @@ extends Feature<HugeMushroomFeatureConfiguration> {
     }
 
     @Override
-    public boolean place(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, HugeMushroomFeatureConfiguration hugeMushroomFeatureConfiguration) {
+    public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, HugeMushroomFeatureConfiguration hugeMushroomFeatureConfiguration) {
         BlockPos.MutableBlockPos mutableBlockPos;
         int i = this.getTreeHeight(random);
         if (!this.isValidPosition(worldGenLevel, blockPos, i, mutableBlockPos = new BlockPos.MutableBlockPos(), hugeMushroomFeatureConfiguration)) {

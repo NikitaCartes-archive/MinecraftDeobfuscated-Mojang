@@ -11,6 +11,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DirectionalPlaceContext;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 
 public class ShulkerBoxDispenseBehavior
@@ -23,7 +24,7 @@ extends OptionalDispenseItemBehavior {
             Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
             BlockPos blockPos = blockSource.getPos().relative(direction);
             Direction direction2 = blockSource.getLevel().isEmptyBlock(blockPos.below()) ? direction : Direction.UP;
-            this.setSuccess(((BlockItem)item).place(new DirectionalPlaceContext(blockSource.getLevel(), blockPos, direction, itemStack, direction2)).consumesAction());
+            this.setSuccess(((BlockItem)item).place(new DirectionalPlaceContext((Level)blockSource.getLevel(), blockPos, direction, itemStack, direction2)).consumesAction());
         }
         return itemStack;
     }

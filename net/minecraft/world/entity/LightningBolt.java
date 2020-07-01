@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -77,13 +78,13 @@ extends Entity {
             }
         }
         if (this.life >= 0) {
-            if (this.level.isClientSide) {
+            if (!(this.level instanceof ServerLevel)) {
                 this.level.setSkyFlashTime(2);
             } else if (!this.visualOnly) {
                 double d = 3.0;
                 List<Entity> list = this.level.getEntities(this, new AABB(this.getX() - 3.0, this.getY() - 3.0, this.getZ() - 3.0, this.getX() + 3.0, this.getY() + 6.0 + 3.0, this.getZ() + 3.0), Entity::isAlive);
                 for (Entity entity : list) {
-                    entity.thunderHit(this);
+                    entity.thunderHit((ServerLevel)this.level, this);
                 }
                 if (this.cause != null) {
                     CriteriaTriggers.CHANNELED_LIGHTNING.trigger(this.cause, list);

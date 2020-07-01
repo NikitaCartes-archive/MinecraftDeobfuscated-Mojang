@@ -5,6 +5,7 @@ package net.minecraft.client.gui.screens.worldselection;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.datafixers.util.Pair;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
@@ -25,9 +26,9 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ConfirmScreen;
-import net.minecraft.client.gui.screens.DataPackSelectScreen;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
 import net.minecraft.client.gui.screens.worldselection.EditGameRulesScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldGenSettingsComponent;
 import net.minecraft.client.resources.language.I18n;
@@ -40,7 +41,6 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.ServerResources;
 import net.minecraft.server.packs.repository.FolderRepositorySource;
-import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.ServerPacksSource;
@@ -75,6 +75,8 @@ extends Screen {
     protected DataPackConfig dataPacks = DataPackConfig.DEFAULT;
     @Nullable
     private Path tempDataPackDir;
+    @Nullable
+    private PackRepository tempDataPackRepository;
     private boolean displayOptions;
     private Button createButton;
     private Button modeButton;
@@ -207,10 +209,7 @@ extends Screen {
         this.moreOptionsButton = this.addButton(new Button(j, 185, 150, 20, new TranslatableComponent("selectWorld.moreWorldOptions"), button -> this.toggleDisplayOptions()));
         this.createButton = this.addButton(new Button(i, this.height - 28, 150, 20, new TranslatableComponent("selectWorld.create"), button -> this.onCreate()));
         this.createButton.active = !this.initName.isEmpty();
-        this.addButton(new Button(j, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
-            this.removeTempDataPackDir();
-            this.minecraft.setScreen(this.lastScreen);
-        }));
+        this.addButton(new Button(j, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> this.popScreen()));
         this.updateDisplayOptions();
         this.setInitialFocus(this.nameEdit);
         this.setGameMode(this.gameMode);
@@ -250,6 +249,7 @@ extends Screen {
         if (!this.copyTempDataPackDirToNewWorld()) {
             return;
         }
+        this.cleanupTempResources();
         WorldGenSettings worldGenSettings = this.worldGenSettingsComponent.makeSettings(this.hardCore);
         if (worldGenSettings.isDebug()) {
             GameRules gameRules = new GameRules();
@@ -337,7 +337,18 @@ extends Screen {
         if (this.displayOptions) {
             this.setDisplayOptions(false);
         } else {
-            this.minecraft.setScreen(this.lastScreen);
+            this.popScreen();
+        }
+    }
+
+    public void popScreen() {
+        this.minecraft.setScreen(this.lastScreen);
+        this.cleanupTempResources();
+    }
+
+    private void cleanupTempResources() {
+        if (this.tempDataPackRepository != null) {
+            this.tempDataPackRepository.close();
         }
         this.removeTempDataPackDir();
     }
@@ -381,24 +392,20 @@ extends Screen {
             } catch (IOException iOException) {
                 LOGGER.warn("Failed to create temporary dir", (Throwable)iOException);
                 SystemToast.onPackCopyFailure(this.minecraft, this.resultFolder);
-                this.minecraft.setScreen(this.lastScreen);
+                this.popScreen();
             }
         }
         return this.tempDataPackDir;
     }
 
     private void openDataPackSelectionScreen() {
-        Path path = this.getTempDataPackDir();
-        if (path != null) {
-            File file = path.toFile();
-            PackRepository<Pack> packRepository = new PackRepository<Pack>(Pack::new, new ServerPacksSource(), new FolderRepositorySource(file, PackSource.DEFAULT));
-            packRepository.reload();
-            packRepository.setSelected(this.dataPacks.getEnabled());
-            this.minecraft.setScreen(new DataPackSelectScreen((Screen)this, packRepository, this::tryApplyNewDataPacks, file));
+        Pair<File, PackRepository> pair = this.getDataPackSelectionSettings();
+        if (pair != null) {
+            this.minecraft.setScreen(new PackSelectionScreen(this, pair.getSecond(), this::tryApplyNewDataPacks, pair.getFirst(), new TranslatableComponent("dataPack.title")));
         }
     }
 
-    private void tryApplyNewDataPacks(PackRepository<Pack> packRepository) {
+    private void tryApplyNewDataPacks(PackRepository packRepository) {
         ImmutableList<String> list = ImmutableList.copyOf(packRepository.getSelectedIds());
         List list2 = packRepository.getAvailableIds().stream().filter(string -> !list.contains(string)).collect(ImmutableList.toImmutableList());
         DataPackConfig dataPackConfig = new DataPackConfig(list, list2);
@@ -464,11 +471,9 @@ extends Screen {
             } catch (IOException | OperationFailedException exception) {
                 LOGGER.warn("Failed to copy datapacks to world {}", (Object)this.resultFolder, (Object)exception);
                 SystemToast.onPackCopyFailure(this.minecraft, this.resultFolder);
-                this.minecraft.setScreen(this.lastScreen);
-                this.removeTempDataPackDir();
+                this.popScreen();
                 return false;
             }
-            this.removeTempDataPackDir();
         }
         return true;
     }
@@ -496,6 +501,21 @@ extends Screen {
             return null;
         }
         return (Path)mutableObject.getValue();
+    }
+
+    @Nullable
+    private Pair<File, PackRepository> getDataPackSelectionSettings() {
+        Path path = this.getTempDataPackDir();
+        if (path != null) {
+            File file = path.toFile();
+            if (this.tempDataPackRepository == null) {
+                this.tempDataPackRepository = new PackRepository(new ServerPacksSource(), new FolderRepositorySource(file, PackSource.DEFAULT));
+                this.tempDataPackRepository.reload();
+            }
+            this.tempDataPackRepository.setSelected(this.dataPacks.getEnabled());
+            return Pair.of(file, this.tempDataPackRepository);
+        }
+        return null;
     }
 
     @Environment(value=EnvType.CLIENT)

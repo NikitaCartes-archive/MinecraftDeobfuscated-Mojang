@@ -32,13 +32,6 @@ implements BonemealableBlock {
     }
 
     @Override
-    public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-        if (!blockState.canSurvive(serverLevel, blockPos)) {
-            serverLevel.destroyBlock(blockPos, true);
-        }
-    }
-
-    @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
         Block block;
         if (direction == this.growthDirection.getOpposite() && !blockState.canSurvive(levelAccessor, blockPos)) {
