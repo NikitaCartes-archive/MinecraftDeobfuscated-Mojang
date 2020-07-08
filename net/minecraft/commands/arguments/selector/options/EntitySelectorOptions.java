@@ -263,7 +263,7 @@ public class EntitySelectorOptions {
                 entitySelectorParser.addPredicate(entity -> entity.getServer().getTags().getEntityTypes().getTagOrEmpty(resourceLocation).contains(entity.getType()) != bl);
             } else {
                 ResourceLocation resourceLocation = ResourceLocation.read(entitySelectorParser.getReader());
-                EntityType entityType = (EntityType)Registry.ENTITY_TYPE.getOptional(resourceLocation).orElseThrow(() -> {
+                EntityType<?> entityType = Registry.ENTITY_TYPE.getOptional(resourceLocation).orElseThrow(() -> {
                     entitySelectorParser.getReader().setCursor(i);
                     return ERROR_ENTITY_TYPE_INVALID.createWithContext(entitySelectorParser.getReader(), resourceLocation.toString());
                 });

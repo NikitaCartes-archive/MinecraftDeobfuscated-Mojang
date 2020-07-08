@@ -51,7 +51,6 @@ import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.PoweredRailBlock;
-import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
@@ -178,7 +177,7 @@ extends Entity {
             return super.getDismountLocationForPassenger(livingEntity);
         }
         int[][] is = DismountHelper.offsetsForDirection(direction);
-        BlockPos blockPos = this.blockPosition();
+        BlockPos blockPos2 = this.blockPosition();
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         ImmutableList<Pose> immutableList = livingEntity.getDismountPoses();
         for (Pose pose : immutableList) {
@@ -190,24 +189,20 @@ extends Entity {
                 for (int[] js : is) {
                     Vec3 vec3;
                     AABB aABB;
-                    mutableBlockPos.set(blockPos.getX() + js[0], blockPos.getY() + i, blockPos.getZ() + js[1]);
-                    double d = this.level.getRelativeFloorHeight(mutableBlockPos, blockState -> {
-                        if (blockState.is(BlockTags.CLIMBABLE)) {
-                            return true;
-                        }
-                        return blockState.getBlock() instanceof TrapDoorBlock && blockState.getValue(TrapDoorBlock.OPEN) != false;
-                    });
-                    if (!DismountHelper.isFloorValid(d) || !DismountHelper.canDismountTo(this.level, livingEntity, (aABB = new AABB(-f, d, -f, f, d + (double)entityDimensions.height, f)).move(vec3 = Vec3.upFromBottomCenterOf(mutableBlockPos, d)))) continue;
+                    mutableBlockPos.set(blockPos2.getX() + js[0], blockPos2.getY() + i, blockPos2.getZ() + js[1]);
+                    double d = this.level.getBlockFloorHeight(DismountHelper.nonClimbableShape(this.level, mutableBlockPos), () -> DismountHelper.nonClimbableShape(this.level, (BlockPos)mutableBlockPos.below()));
+                    if (!DismountHelper.isBlockFloorValid(d) || !DismountHelper.canDismountTo(this.level, livingEntity, (aABB = new AABB(-f, 0.0, -f, f, entityDimensions.height, f)).move(vec3 = Vec3.upFromBottomCenterOf(mutableBlockPos, d)))) continue;
                     livingEntity.setPose(pose);
                     return vec3;
                 }
             }
         }
         double e = this.getBoundingBox().maxY;
-        mutableBlockPos.set((double)blockPos.getX(), e, (double)blockPos.getZ());
+        mutableBlockPos.set((double)blockPos2.getX(), e, (double)blockPos2.getZ());
         for (Pose pose2 : immutableList) {
             double g = livingEntity.getDimensions((Pose)pose2).height;
-            double h = (double)mutableBlockPos.getY() + this.level.getRelativeCeilingHeight(mutableBlockPos, e - (double)mutableBlockPos.getY() + g);
+            int j = Mth.ceil(e - (double)mutableBlockPos.getY() + g);
+            double h = DismountHelper.findCeilingFrom(mutableBlockPos, j, blockPos -> this.level.getBlockState((BlockPos)blockPos).getCollisionShape(this.level, (BlockPos)blockPos));
             if (!(e + g <= h)) continue;
             livingEntity.setPose(pose2);
             break;
@@ -369,6 +364,7 @@ extends Entity {
             this.lavaHurt();
             this.fallDistance *= 0.5f;
         }
+        this.firstTick = false;
     }
 
     protected double getMaxSpeed() {

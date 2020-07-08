@@ -6,6 +6,7 @@ package net.minecraft.world.level.levelgen.structure;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
@@ -37,7 +38,7 @@ extends StructureFeature<NoneFeatureConfiguration> {
         }
 
         @Override
-        public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration) {
+        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration) {
             int n;
             ChunkPos chunkPos = new ChunkPos(i, j);
             int k = chunkPos.getMinBlockX() + this.random.nextInt(16);

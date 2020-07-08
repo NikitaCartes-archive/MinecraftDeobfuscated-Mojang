@@ -6,6 +6,7 @@ package net.minecraft.world.entity.ai.behavior;
 import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -27,18 +28,20 @@ extends Behavior<PathfinderMob> {
     private final PoiType poiType;
     private final MemoryModuleType<GlobalPos> memoryToAcquire;
     private final boolean onlyIfAdult;
+    private final Optional<Byte> onPoiAcquisitionEvent;
     private long nextScheduledStart;
     private final Long2ObjectMap<JitteredLinearRetry> batchCache = new Long2ObjectOpenHashMap<JitteredLinearRetry>();
 
-    public AcquirePoi(PoiType poiType, MemoryModuleType<GlobalPos> memoryModuleType, MemoryModuleType<GlobalPos> memoryModuleType2, boolean bl) {
+    public AcquirePoi(PoiType poiType, MemoryModuleType<GlobalPos> memoryModuleType, MemoryModuleType<GlobalPos> memoryModuleType2, boolean bl, Optional<Byte> optional) {
         super(AcquirePoi.constructEntryConditionMap(memoryModuleType, memoryModuleType2));
         this.poiType = poiType;
         this.memoryToAcquire = memoryModuleType2;
         this.onlyIfAdult = bl;
+        this.onPoiAcquisitionEvent = optional;
     }
 
-    public AcquirePoi(PoiType poiType, MemoryModuleType<GlobalPos> memoryModuleType, boolean bl) {
-        this(poiType, memoryModuleType, memoryModuleType, bl);
+    public AcquirePoi(PoiType poiType, MemoryModuleType<GlobalPos> memoryModuleType, boolean bl, Optional<Byte> optional) {
+        this(poiType, memoryModuleType, memoryModuleType, bl, optional);
     }
 
     private static ImmutableMap<MemoryModuleType<?>, MemoryStatus> constructEntryConditionMap(MemoryModuleType<GlobalPos> memoryModuleType, MemoryModuleType<GlobalPos> memoryModuleType2) {
@@ -85,6 +88,7 @@ extends Behavior<PathfinderMob> {
             poiManager.getType(blockPos2).ifPresent(poiType -> {
                 poiManager.take(this.poiType.getPredicate(), blockPos2 -> blockPos2.equals(blockPos2), blockPos2, 1);
                 pathfinderMob.getBrain().setMemory(this.memoryToAcquire, GlobalPos.of(serverLevel.dimension(), blockPos2));
+                this.onPoiAcquisitionEvent.ifPresent(byte_ -> serverLevel.broadcastEntityEvent(pathfinderMob, (byte)byte_));
                 this.batchCache.clear();
                 DebugPackets.sendPoiTicketCountPacket(serverLevel, blockPos2);
             });

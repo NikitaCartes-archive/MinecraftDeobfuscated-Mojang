@@ -491,8 +491,7 @@ extends Animal {
         this.setHiddenGene(Gene.getRandom(this.random));
         this.setAttributes();
         if (spawnGroupData == null) {
-            spawnGroupData = new AgableMob.AgableMobGroupData();
-            ((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(0.2f);
+            spawnGroupData = new AgableMob.AgableMobGroupData(0.2f);
         }
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }

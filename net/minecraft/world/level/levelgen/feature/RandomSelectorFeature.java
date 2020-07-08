@@ -20,11 +20,11 @@ extends Feature<RandomFeatureConfiguration> {
 
     @Override
     public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, RandomFeatureConfiguration randomFeatureConfiguration) {
-        for (WeightedConfiguredFeature<?> weightedConfiguredFeature : randomFeatureConfiguration.features) {
+        for (WeightedConfiguredFeature weightedConfiguredFeature : randomFeatureConfiguration.features) {
             if (!(random.nextFloat() < weightedConfiguredFeature.chance)) continue;
             return weightedConfiguredFeature.place(worldGenLevel, chunkGenerator, random, blockPos);
         }
-        return randomFeatureConfiguration.defaultFeature.place(worldGenLevel, chunkGenerator, random, blockPos);
+        return randomFeatureConfiguration.defaultFeature.get().place(worldGenLevel, chunkGenerator, random, blockPos);
     }
 }
 

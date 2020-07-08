@@ -15,7 +15,7 @@ import net.minecraft.world.entity.npc.VillagerType;
 
 public class VillagerData {
     private static final int[] NEXT_LEVEL_XP_THRESHOLDS = new int[]{0, 10, 70, 150, 250};
-    public static final Codec<VillagerData> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Registry.VILLAGER_TYPE.fieldOf("type")).withDefault(() -> VillagerType.PLAINS).forGetter(villagerData -> villagerData.type), ((MapCodec)Registry.VILLAGER_PROFESSION.fieldOf("profession")).withDefault(() -> VillagerProfession.NONE).forGetter(villagerData -> villagerData.profession), ((MapCodec)Codec.INT.fieldOf("level")).withDefault(1).forGetter(villagerData -> villagerData.level)).apply((Applicative<VillagerData, ?>)instance, VillagerData::new));
+    public static final Codec<VillagerData> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Registry.VILLAGER_TYPE.fieldOf("type")).orElseGet(() -> VillagerType.PLAINS).forGetter(villagerData -> villagerData.type), ((MapCodec)Registry.VILLAGER_PROFESSION.fieldOf("profession")).orElseGet(() -> VillagerProfession.NONE).forGetter(villagerData -> villagerData.profession), ((MapCodec)Codec.INT.fieldOf("level")).orElse(1).forGetter(villagerData -> villagerData.level)).apply((Applicative<VillagerData, ?>)instance, VillagerData::new));
     private final VillagerType type;
     private final VillagerProfession profession;
     private final int level;

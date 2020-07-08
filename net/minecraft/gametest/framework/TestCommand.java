@@ -280,8 +280,9 @@ public class TestCommand {
             BufferedReader bufferedReader = Files.newBufferedReader(path);
             String string2 = IOUtils.toString(bufferedReader);
             Files.createDirectories(path2.getParent(), new FileAttribute[0]);
-            OutputStream outputStream = Files.newOutputStream(path2, new OpenOption[0]);
-            NbtIo.writeCompressed(TagParser.parseTag(string2), outputStream);
+            try (OutputStream outputStream = Files.newOutputStream(path2, new OpenOption[0]);){
+                NbtIo.writeCompressed(TagParser.parseTag(string2), outputStream);
+            }
             TestCommand.say(commandSourceStack, "Imported to " + path2.toAbsolutePath());
             return 0;
         } catch (CommandSyntaxException | IOException exception) {

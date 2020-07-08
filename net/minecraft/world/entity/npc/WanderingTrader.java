@@ -64,7 +64,7 @@ extends AbstractVillager {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(0, new UseItemGoal<WanderingTrader>(this, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.INVISIBILITY), SoundEvents.WANDERING_TRADER_DISAPPEARED, wanderingTrader -> !this.level.isDay() && !wanderingTrader.isInvisible()));
+        this.goalSelector.addGoal(0, new UseItemGoal<WanderingTrader>(this, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.INVISIBILITY), SoundEvents.WANDERING_TRADER_DISAPPEARED, wanderingTrader -> this.level.isNight() && !wanderingTrader.isInvisible()));
         this.goalSelector.addGoal(0, new UseItemGoal<WanderingTrader>(this, new ItemStack(Items.MILK_BUCKET), SoundEvents.WANDERING_TRADER_REAPPEARED, wanderingTrader -> this.level.isDay() && wanderingTrader.isInvisible()));
         this.goalSelector.addGoal(1, new TradeWithPlayerGoal(this));
         this.goalSelector.addGoal(1, new AvoidEntityGoal<Zombie>(this, Zombie.class, 8.0f, 0.5, 0.5));

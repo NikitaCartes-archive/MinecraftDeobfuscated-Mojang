@@ -8,6 +8,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.UniformInt;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.BlobFoliagePlacer;
@@ -19,8 +20,8 @@ public class BushFoliagePlacer
 extends BlobFoliagePlacer {
     public static final Codec<BushFoliagePlacer> CODEC = RecordCodecBuilder.create(instance -> BushFoliagePlacer.blobParts(instance).apply(instance, BushFoliagePlacer::new));
 
-    public BushFoliagePlacer(int i, int j, int k, int l, int m) {
-        super(i, j, k, l, m, FoliagePlacerType.BUSH_FOLIAGE_PLACER);
+    public BushFoliagePlacer(UniformInt uniformInt, UniformInt uniformInt2, int i) {
+        super(uniformInt, uniformInt2, i);
     }
 
     @Override

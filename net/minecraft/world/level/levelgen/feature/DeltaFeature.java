@@ -16,20 +16,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureConfiguration;
-import org.jetbrains.annotations.Nullable;
 
 public class DeltaFeature
 extends Feature<DeltaFeatureConfiguration> {
     private static final ImmutableList<Block> CANNOT_REPLACE = ImmutableList.of(Blocks.BEDROCK, Blocks.NETHER_BRICKS, Blocks.NETHER_BRICK_FENCE, Blocks.NETHER_BRICK_STAIRS, Blocks.NETHER_WART, Blocks.CHEST, Blocks.SPAWNER);
     private static final Direction[] DIRECTIONS = Direction.values();
-
-    private static int calculateRadius(Random random, DeltaFeatureConfiguration deltaFeatureConfiguration) {
-        return deltaFeatureConfiguration.minimumRadius + random.nextInt(deltaFeatureConfiguration.maximumRadius - deltaFeatureConfiguration.minimumRadius + 1);
-    }
-
-    private static int calculateRimSize(Random random, DeltaFeatureConfiguration deltaFeatureConfiguration) {
-        return random.nextInt(deltaFeatureConfiguration.maximumRimSize + 1);
-    }
 
     public DeltaFeature(Codec<DeltaFeatureConfiguration> codec) {
         super(codec);
@@ -37,36 +28,32 @@ extends Feature<DeltaFeatureConfiguration> {
 
     @Override
     public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, DeltaFeatureConfiguration deltaFeatureConfiguration) {
-        BlockPos blockPos2 = DeltaFeature.findDeltaLevel(worldGenLevel, blockPos.mutable().clamp(Direction.Axis.Y, 1, worldGenLevel.getMaxBuildHeight() - 1));
-        if (blockPos2 == null) {
-            return false;
-        }
         boolean bl = false;
         boolean bl2 = random.nextDouble() < 0.9;
-        int i = bl2 ? DeltaFeature.calculateRimSize(random, deltaFeatureConfiguration) : 0;
-        int j = bl2 ? DeltaFeature.calculateRimSize(random, deltaFeatureConfiguration) : 0;
+        int i = bl2 ? deltaFeatureConfiguration.rimSize().sample(random) : 0;
+        int j = bl2 ? deltaFeatureConfiguration.rimSize().sample(random) : 0;
         boolean bl3 = bl2 && i != 0 && j != 0;
-        int k = DeltaFeature.calculateRadius(random, deltaFeatureConfiguration);
-        int l = DeltaFeature.calculateRadius(random, deltaFeatureConfiguration);
+        int k = deltaFeatureConfiguration.size().sample(random);
+        int l = deltaFeatureConfiguration.size().sample(random);
         int m = Math.max(k, l);
-        for (BlockPos blockPos3 : BlockPos.withinManhattan(blockPos2, k, 0, l)) {
-            BlockPos blockPos4;
-            if (blockPos3.distManhattan(blockPos2) > m) break;
-            if (!DeltaFeature.isClear(worldGenLevel, blockPos3, deltaFeatureConfiguration)) continue;
+        for (BlockPos blockPos2 : BlockPos.withinManhattan(blockPos, k, 0, l)) {
+            BlockPos blockPos3;
+            if (blockPos2.distManhattan(blockPos) > m) break;
+            if (!DeltaFeature.isClear(worldGenLevel, blockPos2, deltaFeatureConfiguration)) continue;
             if (bl3) {
                 bl = true;
-                this.setBlock(worldGenLevel, blockPos3, deltaFeatureConfiguration.rim);
+                this.setBlock(worldGenLevel, blockPos2, deltaFeatureConfiguration.rim());
             }
-            if (!DeltaFeature.isClear(worldGenLevel, blockPos4 = blockPos3.offset(i, 0, j), deltaFeatureConfiguration)) continue;
+            if (!DeltaFeature.isClear(worldGenLevel, blockPos3 = blockPos2.offset(i, 0, j), deltaFeatureConfiguration)) continue;
             bl = true;
-            this.setBlock(worldGenLevel, blockPos4, deltaFeatureConfiguration.contents);
+            this.setBlock(worldGenLevel, blockPos3, deltaFeatureConfiguration.contents());
         }
         return bl;
     }
 
     private static boolean isClear(LevelAccessor levelAccessor, BlockPos blockPos, DeltaFeatureConfiguration deltaFeatureConfiguration) {
         BlockState blockState = levelAccessor.getBlockState(blockPos);
-        if (blockState.is(deltaFeatureConfiguration.contents.getBlock())) {
+        if (blockState.is(deltaFeatureConfiguration.contents().getBlock())) {
             return false;
         }
         if (CANNOT_REPLACE.contains(blockState.getBlock())) {
@@ -78,21 +65,6 @@ extends Feature<DeltaFeatureConfiguration> {
             return false;
         }
         return true;
-    }
-
-    @Nullable
-    private static BlockPos findDeltaLevel(LevelAccessor levelAccessor, BlockPos.MutableBlockPos mutableBlockPos) {
-        while (mutableBlockPos.getY() > 1) {
-            if (levelAccessor.getBlockState(mutableBlockPos).isAir()) {
-                BlockState blockState = levelAccessor.getBlockState(mutableBlockPos.move(Direction.DOWN));
-                mutableBlockPos.move(Direction.UP);
-                if (!(blockState.is(Blocks.LAVA) || blockState.is(Blocks.BEDROCK) || blockState.isAir())) {
-                    return mutableBlockPos;
-                }
-            }
-            mutableBlockPos.move(Direction.DOWN);
-        }
-        return null;
     }
 }
 

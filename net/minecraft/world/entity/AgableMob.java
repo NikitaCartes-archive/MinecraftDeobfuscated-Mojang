@@ -33,7 +33,7 @@ extends PathfinderMob {
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         AgableMobGroupData agableMobGroupData;
         if (spawnGroupData == null) {
-            spawnGroupData = new AgableMobGroupData();
+            spawnGroupData = new AgableMobGroupData(true);
         }
         if ((agableMobGroupData = (AgableMobGroupData)spawnGroupData).isShouldSpawnBaby() && agableMobGroupData.getGroupSize() > 0 && this.random.nextFloat() <= agableMobGroupData.getBabySpawnChance()) {
             this.setAge(-24000);
@@ -152,8 +152,21 @@ extends PathfinderMob {
     public static class AgableMobGroupData
     implements SpawnGroupData {
         private int groupSize;
-        private boolean shouldSpawnBaby = true;
-        private float babySpawnChance = 0.05f;
+        private final boolean shouldSpawnBaby;
+        private final float babySpawnChance;
+
+        private AgableMobGroupData(boolean bl, float f) {
+            this.shouldSpawnBaby = bl;
+            this.babySpawnChance = f;
+        }
+
+        public AgableMobGroupData(boolean bl) {
+            this(bl, 0.05f);
+        }
+
+        public AgableMobGroupData(float f) {
+            this(true, f);
+        }
 
         public int getGroupSize() {
             return this.groupSize;
@@ -167,16 +180,8 @@ extends PathfinderMob {
             return this.shouldSpawnBaby;
         }
 
-        public void setShouldSpawnBaby(boolean bl) {
-            this.shouldSpawnBaby = bl;
-        }
-
         public float getBabySpawnChance() {
             return this.babySpawnChance;
-        }
-
-        public void setBabySpawnChance(float f) {
-            this.babySpawnChance = f;
         }
     }
 }

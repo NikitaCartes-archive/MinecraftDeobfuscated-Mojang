@@ -28,7 +28,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.UseOnContext;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -312,6 +312,9 @@ extends ComplexItem {
         if (compoundTag != null && compoundTag.contains("map_scale_direction", 99)) {
             MapItem.scaleMap(itemStack, level, compoundTag.getInt("map_scale_direction"));
             compoundTag.remove("map_scale_direction");
+        } else if (compoundTag != null && compoundTag.contains("map_to_lock", 1) && compoundTag.getBoolean("map_to_lock")) {
+            MapItem.lockMap(level, itemStack);
+            compoundTag.remove("map_to_lock");
         }
     }
 
@@ -322,16 +325,12 @@ extends ComplexItem {
         }
     }
 
-    @Nullable
-    public static ItemStack lockMap(Level level, ItemStack itemStack) {
+    public static void lockMap(Level level, ItemStack itemStack) {
         MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(itemStack, level);
         if (mapItemSavedData != null) {
-            ItemStack itemStack2 = itemStack.copy();
-            MapItemSavedData mapItemSavedData2 = MapItem.createAndStoreSavedData(itemStack2, level, 0, 0, mapItemSavedData.scale, mapItemSavedData.trackingPosition, mapItemSavedData.unlimitedTracking, mapItemSavedData.dimension);
+            MapItemSavedData mapItemSavedData2 = MapItem.createAndStoreSavedData(itemStack, level, 0, 0, mapItemSavedData.scale, mapItemSavedData.trackingPosition, mapItemSavedData.unlimitedTracking, mapItemSavedData.dimension);
             mapItemSavedData2.lockData(mapItemSavedData);
-            return itemStack2;
         }
-        return null;
     }
 
     @Override
@@ -367,11 +366,11 @@ extends ComplexItem {
     public InteractionResult useOn(UseOnContext useOnContext) {
         BlockState blockState = useOnContext.getLevel().getBlockState(useOnContext.getClickedPos());
         if (blockState.is(BlockTags.BANNERS)) {
-            if (!useOnContext.level.isClientSide) {
+            if (!useOnContext.getLevel().isClientSide) {
                 MapItemSavedData mapItemSavedData = MapItem.getOrCreateSavedData(useOnContext.getItemInHand(), useOnContext.getLevel());
                 mapItemSavedData.toggleBanner(useOnContext.getLevel(), useOnContext.getClickedPos());
             }
-            return InteractionResult.sidedSuccess(useOnContext.level.isClientSide);
+            return InteractionResult.sidedSuccess(useOnContext.getLevel().isClientSide);
         }
         return super.useOn(useOnContext);
     }

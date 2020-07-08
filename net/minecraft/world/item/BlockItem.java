@@ -18,12 +18,12 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.UseOnContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -48,7 +48,7 @@ extends Item {
     public InteractionResult useOn(UseOnContext useOnContext) {
         InteractionResult interactionResult = this.place(new BlockPlaceContext(useOnContext));
         if (!interactionResult.consumesAction() && this.isEdible()) {
-            return this.use(useOnContext.level, useOnContext.player, useOnContext.hand).getResult();
+            return this.use(useOnContext.getLevel(), useOnContext.getPlayer(), useOnContext.getHand()).getResult();
         }
         return interactionResult;
     }

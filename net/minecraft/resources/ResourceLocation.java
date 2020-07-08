@@ -153,7 +153,7 @@ implements Comparable<ResourceLocation> {
         return true;
     }
 
-    private static boolean validPathChar(char c) {
+    public static boolean validPathChar(char c) {
         return c == '_' || c == '-' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c == '/' || c == '.';
     }
 

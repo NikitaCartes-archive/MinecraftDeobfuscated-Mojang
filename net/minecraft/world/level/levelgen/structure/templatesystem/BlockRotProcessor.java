@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class BlockRotProcessor
 extends StructureProcessor {
-    public static final Codec<BlockRotProcessor> CODEC = ((MapCodec)Codec.FLOAT.fieldOf("integrity")).withDefault(Float.valueOf(1.0f)).xmap(BlockRotProcessor::new, blockRotProcessor -> Float.valueOf(blockRotProcessor.integrity)).codec();
+    public static final Codec<BlockRotProcessor> CODEC = ((MapCodec)Codec.FLOAT.fieldOf("integrity")).orElse(Float.valueOf(1.0f)).xmap(BlockRotProcessor::new, blockRotProcessor -> Float.valueOf(blockRotProcessor.integrity)).codec();
     private final float integrity;
 
     public BlockRotProcessor(float f) {

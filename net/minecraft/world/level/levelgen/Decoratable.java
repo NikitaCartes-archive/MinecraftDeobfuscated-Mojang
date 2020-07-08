@@ -1,0 +1,41 @@
+/*
+ * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
+ */
+package net.minecraft.world.level.levelgen;
+
+import net.minecraft.util.UniformInt;
+import net.minecraft.world.level.levelgen.feature.configurations.CountConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.RangeDecoratorConfiguration;
+import net.minecraft.world.level.levelgen.placement.ChanceDecoratorConfiguration;
+import net.minecraft.world.level.levelgen.placement.ConfiguredDecorator;
+import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
+
+public interface Decoratable<R> {
+    public R decorated(ConfiguredDecorator<?> var1);
+
+    default public R chance(int i) {
+        return this.decorated(FeatureDecorator.CHANCE.configured(new ChanceDecoratorConfiguration(i)));
+    }
+
+    default public R count(UniformInt uniformInt) {
+        return this.decorated(FeatureDecorator.COUNT.configured(new CountConfiguration(uniformInt)));
+    }
+
+    default public R count(int i) {
+        return this.count(UniformInt.fixed(i));
+    }
+
+    default public R countRandom(int i) {
+        return this.count(UniformInt.of(0, i));
+    }
+
+    default public R range(int i) {
+        return this.decorated(FeatureDecorator.RANGE.configured(new RangeDecoratorConfiguration(0, 0, i)));
+    }
+
+    default public R squared() {
+        return this.decorated(FeatureDecorator.SQUARE.configured(NoneDecoratorConfiguration.INSTANCE));
+    }
+}
+

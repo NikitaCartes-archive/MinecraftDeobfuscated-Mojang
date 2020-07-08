@@ -19,7 +19,7 @@ public class PoiRecord {
     private final Runnable setDirty;
 
     public static Codec<PoiRecord> codec(Runnable runnable) {
-        return RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockPos.CODEC.fieldOf("pos")).forGetter(poiRecord -> poiRecord.pos), ((MapCodec)Registry.POINT_OF_INTEREST_TYPE.fieldOf("type")).forGetter(poiRecord -> poiRecord.poiType), ((MapCodec)Codec.INT.fieldOf("free_tickets")).withDefault(0).forGetter(poiRecord -> poiRecord.freeTickets), RecordCodecBuilder.point(runnable)).apply((Applicative<PoiRecord, ?>)instance, PoiRecord::new));
+        return RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockPos.CODEC.fieldOf("pos")).forGetter(poiRecord -> poiRecord.pos), ((MapCodec)Registry.POINT_OF_INTEREST_TYPE.fieldOf("type")).forGetter(poiRecord -> poiRecord.poiType), ((MapCodec)Codec.INT.fieldOf("free_tickets")).orElse(0).forGetter(poiRecord -> poiRecord.freeTickets), RecordCodecBuilder.point(runnable)).apply((Applicative<PoiRecord, ?>)instance, PoiRecord::new));
     }
 
     private PoiRecord(BlockPos blockPos, PoiType poiType, int i, Runnable runnable) {

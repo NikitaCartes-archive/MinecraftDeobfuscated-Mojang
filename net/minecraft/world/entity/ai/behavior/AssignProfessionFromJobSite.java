@@ -33,6 +33,7 @@ extends Behavior<Villager> {
         GlobalPos globalPos = villager.getBrain().getMemory(MemoryModuleType.POTENTIAL_JOB_SITE).get();
         villager.getBrain().eraseMemory(MemoryModuleType.POTENTIAL_JOB_SITE);
         villager.getBrain().setMemory(MemoryModuleType.JOB_SITE, globalPos);
+        serverLevel2.broadcastEntityEvent(villager, (byte)14);
         if (villager.getVillagerData().getProfession() != VillagerProfession.NONE) {
             return;
         }

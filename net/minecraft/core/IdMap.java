@@ -7,6 +7,8 @@ import org.jetbrains.annotations.Nullable;
 
 public interface IdMap<T>
 extends Iterable<T> {
+    public int getId(T var1);
+
     @Nullable
     public T byId(int var1);
 }

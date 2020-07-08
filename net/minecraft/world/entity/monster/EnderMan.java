@@ -30,7 +30,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
@@ -95,11 +94,10 @@ implements NeutralMob {
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         this.goalSelector.addGoal(10, new EndermanLeaveBlockGoal(this));
         this.goalSelector.addGoal(11, new EndermanTakeBlockGoal(this));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<Player>(this, Player.class, 10, true, false, this::isAngryAt));
-        this.targetSelector.addGoal(2, new EndermanLookForPlayerGoal(this));
-        this.targetSelector.addGoal(3, new HurtByTargetGoal(this, new Class[0]));
-        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<Endermite>(this, Endermite.class, 10, true, false, ENDERMITE_SELECTOR));
-        this.targetSelector.addGoal(5, new ResetUniversalAngerTargetGoal<EnderMan>(this, false));
+        this.targetSelector.addGoal(1, new EndermanLookForPlayerGoal(this, this::isAngryAt));
+        this.targetSelector.addGoal(2, new HurtByTargetGoal(this, new Class[0]));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<Endermite>(this, Endermite.class, 10, true, false, ENDERMITE_SELECTOR));
+        this.targetSelector.addGoal(4, new ResetUniversalAngerTargetGoal<EnderMan>(this, false));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -329,7 +327,7 @@ implements NeutralMob {
             return false;
         }
         boolean bl = super.hurt(damageSource, f);
-        if (!this.level.isClientSide() && this.random.nextInt(10) != 0) {
+        if (!this.level.isClientSide() && !(damageSource.getEntity() instanceof LivingEntity) && this.random.nextInt(10) != 0) {
             this.teleport();
         }
         return bl;
@@ -477,8 +475,8 @@ implements NeutralMob {
         private final TargetingConditions startAggroTargetConditions;
         private final TargetingConditions continueAggroTargetConditions = new TargetingConditions().allowUnseeable();
 
-        public EndermanLookForPlayerGoal(EnderMan enderMan) {
-            super((Mob)enderMan, Player.class, false);
+        public EndermanLookForPlayerGoal(EnderMan enderMan, @Nullable Predicate<LivingEntity> predicate) {
+            super(enderMan, Player.class, 10, false, false, predicate);
             this.enderman = enderMan;
             this.startAggroTargetConditions = new TargetingConditions().range(this.getFollowDistance()).selector(livingEntity -> enderMan.isLookingAtMe((Player)livingEntity));
         }

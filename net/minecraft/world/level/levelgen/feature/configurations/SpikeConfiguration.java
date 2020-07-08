@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class SpikeConfiguration
 implements FeatureConfiguration {
-    public static final Codec<SpikeConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.BOOL.fieldOf("crystal_invulnerable")).withDefault(false).forGetter(spikeConfiguration -> spikeConfiguration.crystalInvulnerable), ((MapCodec)SpikeFeature.EndSpike.CODEC.listOf().fieldOf("spikes")).forGetter(spikeConfiguration -> spikeConfiguration.spikes), BlockPos.CODEC.optionalFieldOf("crystal_beam_target").forGetter(spikeConfiguration -> Optional.ofNullable(spikeConfiguration.crystalBeamTarget))).apply((Applicative<SpikeConfiguration, ?>)instance, SpikeConfiguration::new));
+    public static final Codec<SpikeConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.BOOL.fieldOf("crystal_invulnerable")).orElse(false).forGetter(spikeConfiguration -> spikeConfiguration.crystalInvulnerable), ((MapCodec)SpikeFeature.EndSpike.CODEC.listOf().fieldOf("spikes")).forGetter(spikeConfiguration -> spikeConfiguration.spikes), BlockPos.CODEC.optionalFieldOf("crystal_beam_target").forGetter(spikeConfiguration -> Optional.ofNullable(spikeConfiguration.crystalBeamTarget))).apply((Applicative<SpikeConfiguration, ?>)instance, SpikeConfiguration::new));
     private final boolean crystalInvulnerable;
     private final List<SpikeFeature.EndSpike> spikes;
     @Nullable

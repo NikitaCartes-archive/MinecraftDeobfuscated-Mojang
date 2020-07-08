@@ -31,6 +31,7 @@ import net.minecraft.client.gui.screens.recipebook.RecipeShownListener;
 import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.client.searchtree.SearchRegistry;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPacket;
@@ -171,7 +172,7 @@ PlaceRecipe<Ingredient> {
         list2.removeIf(recipeCollection -> !recipeCollection.hasFitting());
         String string = this.searchBox.getValue();
         if (!string.isEmpty()) {
-            ObjectLinkedOpenHashSet objectSet = new ObjectLinkedOpenHashSet(this.minecraft.getSearchTree(SearchRegistry.RECIPE_COLLECTIONS).search(string.toLowerCase(Locale.ROOT)));
+            ObjectLinkedOpenHashSet objectSet = new ObjectLinkedOpenHashSet(this.minecraft.getSearchTree(SearchRegistry.RECIPE_COLLECTIONS).search(Language.getInstance().reorder(string.toLowerCase(Locale.ROOT), false)));
             list2.removeIf(recipeCollection -> !objectSet.contains(recipeCollection));
         }
         if (this.book.isFiltering(this.menu)) {

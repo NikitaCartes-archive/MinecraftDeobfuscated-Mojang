@@ -157,7 +157,7 @@ implements Predicate<ItemStack> {
         }
         if (jsonObject.has("item")) {
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "item"));
-            Item item = (Item)Registry.ITEM.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown item '" + resourceLocation + "'"));
+            Item item = Registry.ITEM.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown item '" + resourceLocation + "'"));
             return new ItemValue(new ItemStack(item));
         }
         if (jsonObject.has("tag")) {

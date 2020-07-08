@@ -16,6 +16,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -30,6 +31,8 @@ import net.minecraft.world.item.alchemy.Potions;
 import org.jetbrains.annotations.Nullable;
 
 public class PotionUtils {
+    private static final MutableComponent NO_EFFECT = new TranslatableComponent("effect.none").withStyle(ChatFormatting.GRAY);
+
     public static List<MobEffectInstance> getMobEffects(ItemStack itemStack) {
         return PotionUtils.getAllEffects(itemStack.getTag());
     }
@@ -148,7 +151,7 @@ public class PotionUtils {
         List<MobEffectInstance> list2 = PotionUtils.getMobEffects(itemStack);
         ArrayList<Pair<Attribute, AttributeModifier>> list3 = Lists.newArrayList();
         if (list2.isEmpty()) {
-            list.add(new TranslatableComponent("effect.none").withStyle(ChatFormatting.GRAY));
+            list.add(NO_EFFECT);
         } else {
             for (MobEffectInstance mobEffectInstance : list2) {
                 TranslatableComponent mutableComponent = new TranslatableComponent(mobEffectInstance.getDescriptionId());
@@ -162,10 +165,10 @@ public class PotionUtils {
                     }
                 }
                 if (mobEffectInstance.getAmplifier() > 0) {
-                    mutableComponent.append(" ").append(new TranslatableComponent("potion.potency." + mobEffectInstance.getAmplifier()));
+                    mutableComponent = new TranslatableComponent("potion.withAmplifier", mutableComponent, new TranslatableComponent("potion.potency." + mobEffectInstance.getAmplifier()));
                 }
                 if (mobEffectInstance.getDuration() > 20) {
-                    mutableComponent.append(" (").append(MobEffectUtil.formatDuration(mobEffectInstance, f)).append(")");
+                    mutableComponent = new TranslatableComponent("potion.withDuration", mutableComponent, MobEffectUtil.formatDuration(mobEffectInstance, f));
                 }
                 list.add(mutableComponent.withStyle(mobEffect.getCategory().getTooltipFormatting()));
             }

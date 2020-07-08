@@ -4,11 +4,9 @@
 package net.minecraft.world.level.block.grower;
 
 import java.util.Random;
-import net.minecraft.world.level.biome.BiomeDefaultFeatures;
+import net.minecraft.data.worldgen.Features;
 import net.minecraft.world.level.block.grower.AbstractMegaTreeGrower;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.TreeFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,13 +15,13 @@ extends AbstractMegaTreeGrower {
     @Override
     @Nullable
     protected ConfiguredFeature<TreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl) {
-        return new TreeFeature(TreeConfiguration.CODEC).configured(BiomeDefaultFeatures.JUNGLE_TREE_NOVINE_CONFIG);
+        return Features.JUNGLE_TREE_NO_VINE;
     }
 
     @Override
     @Nullable
     protected ConfiguredFeature<TreeConfiguration, ?> getConfiguredMegaFeature(Random random) {
-        return Feature.TREE.configured(BiomeDefaultFeatures.MEGA_JUNGLE_TREE_CONFIG);
+        return Features.MEGA_JUNGLE_TREE;
     }
 }
 

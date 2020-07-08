@@ -95,7 +95,9 @@ extends Monster {
 
     protected void finishConversion(ServerLevel serverLevel) {
         ZombifiedPiglin zombifiedPiglin = this.convertTo(EntityType.ZOMBIFIED_PIGLIN);
-        zombifiedPiglin.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
+        if (zombifiedPiglin != null) {
+            zombifiedPiglin.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
+        }
     }
 
     public boolean isAdult() {

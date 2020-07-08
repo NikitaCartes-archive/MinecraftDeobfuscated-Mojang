@@ -50,7 +50,6 @@ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Zombie;
-import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.item.ItemStack;
@@ -226,7 +225,6 @@ Saddleable {
 
     @Override
     public Vec3 getDismountLocationForPassenger(LivingEntity livingEntity) {
-        double f;
         Vec3[] vec3s = new Vec3[]{Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.yRot), Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.yRot - 22.5f), Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.yRot + 22.5f), Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.yRot - 45.0f), Strider.getCollisionHorizontalEscapeVector(this.getBbWidth(), livingEntity.getBbWidth(), livingEntity.yRot + 45.0f)};
         LinkedHashSet<BlockPos> set = Sets.newLinkedHashSet();
         double d = this.getBoundingBox().maxY;
@@ -234,18 +232,18 @@ Saddleable {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (Vec3 vec3 : vec3s) {
             mutableBlockPos.set(this.getX() + vec3.x, d, this.getZ() + vec3.z);
-            for (f = d; f > e; f -= 1.0) {
+            for (double f = d; f > e; f -= 1.0) {
                 set.add(mutableBlockPos.immutable());
                 mutableBlockPos.move(Direction.DOWN);
             }
         }
         for (BlockPos blockPos : set) {
-            if (this.level.getFluidState(blockPos).is(FluidTags.LAVA)) continue;
+            double g;
+            if (this.level.getFluidState(blockPos).is(FluidTags.LAVA) || !DismountHelper.isBlockFloorValid(g = this.level.getBlockFloorHeight(blockPos))) continue;
+            Vec3 vec32 = Vec3.upFromBottomCenterOf(blockPos, g);
             for (Pose pose : livingEntity.getDismountPoses()) {
-                Vec3 vec32;
-                AABB aABB;
-                f = this.level.getRelativeFloorHeight(blockPos);
-                if (!DismountHelper.isFloorValid(f) || !DismountHelper.canDismountTo(this.level, livingEntity, (aABB = livingEntity.getLocalBoundsForPose(pose)).move(vec32 = Vec3.upFromBottomCenterOf(blockPos, f)))) continue;
+                AABB aABB = livingEntity.getLocalBoundsForPose(pose);
+                if (!DismountHelper.canDismountTo(this.level, livingEntity, aABB.move(vec32))) continue;
                 livingEntity.setPose(pose);
                 return vec32;
             }
@@ -438,41 +436,29 @@ Saddleable {
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        ZombifiedPiglin zombifiedPiglin;
-        StriderGroupData.Rider rider;
-        Zombie.ZombieGroupData spawnGroupData2 = null;
-        if (spawnGroupData instanceof StriderGroupData) {
-            rider = ((StriderGroupData)spawnGroupData).rider;
-        } else if (!this.isBaby()) {
-            if (this.random.nextInt(30) == 0) {
-                rider = StriderGroupData.Rider.PIGLIN_RIDER;
-                spawnGroupData2 = new Zombie.ZombieGroupData(Zombie.getSpawnAsBabyOdds(this.random), false);
-            } else {
-                rider = this.random.nextInt(10) == 0 ? StriderGroupData.Rider.BABY_RIDER : StriderGroupData.Rider.NO_RIDER;
-            }
-            spawnGroupData = new StriderGroupData(rider);
-            ((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(rider == StriderGroupData.Rider.NO_RIDER ? 0.5f : 0.0f);
-        } else {
-            rider = StriderGroupData.Rider.NO_RIDER;
+        if (this.isBaby()) {
+            return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
         }
-        PathfinderMob mob = null;
-        if (rider == StriderGroupData.Rider.BABY_RIDER) {
-            Strider strider = EntityType.STRIDER.create(serverLevelAccessor.getLevel());
-            if (strider != null) {
-                mob = strider;
-                strider.setAge(-24000);
-            }
-        } else if (rider == StriderGroupData.Rider.PIGLIN_RIDER && (zombifiedPiglin = EntityType.ZOMBIFIED_PIGLIN.create(serverLevelAccessor.getLevel())) != null) {
-            mob = zombifiedPiglin;
+        if (this.random.nextInt(30) == 0) {
+            Mob mob = EntityType.ZOMBIFIED_PIGLIN.create(serverLevelAccessor.getLevel());
+            spawnGroupData = this.spawnJockey(serverLevelAccessor, difficultyInstance, mob, new Zombie.ZombieGroupData(Zombie.getSpawnAsBabyOdds(this.random), false));
             this.equipSaddle(null);
-        }
-        if (mob != null) {
-            mob.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0f);
-            mob.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, spawnGroupData2, null);
-            mob.startRiding(this, true);
-            serverLevelAccessor.addFreshEntity(mob);
+        } else if (this.random.nextInt(10) == 0) {
+            AgableMob agableMob = EntityType.STRIDER.create(serverLevelAccessor.getLevel());
+            agableMob.setAge(-24000);
+            spawnGroupData = this.spawnJockey(serverLevelAccessor, difficultyInstance, agableMob, null);
+        } else {
+            spawnGroupData = new AgableMob.AgableMobGroupData(0.5f);
         }
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+    }
+
+    private SpawnGroupData spawnJockey(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, Mob mob, @Nullable SpawnGroupData spawnGroupData) {
+        mob.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0f);
+        mob.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, spawnGroupData, null);
+        mob.startRiding(this, true);
+        serverLevelAccessor.addFreshEntity(mob);
+        return new AgableMob.AgableMobGroupData(0.0f);
     }
 
     @Override
@@ -503,22 +489,6 @@ Saddleable {
         @Override
         public boolean isStableDestination(BlockPos blockPos) {
             return this.level.getBlockState(blockPos).is(Blocks.LAVA) || super.isStableDestination(blockPos);
-        }
-    }
-
-    public static class StriderGroupData
-    extends AgableMob.AgableMobGroupData {
-        public final Rider rider;
-
-        public StriderGroupData(Rider rider) {
-            this.rider = rider;
-        }
-
-        public static enum Rider {
-            NO_RIDER,
-            BABY_RIDER,
-            PIGLIN_RIDER;
-
         }
     }
 }

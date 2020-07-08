@@ -5,12 +5,12 @@ package net.minecraft.world.level.block;
 
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.data.worldgen.Features;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
@@ -18,8 +18,6 @@ import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -75,12 +73,12 @@ implements BonemealableBlock {
     }
 
     public boolean growMushroom(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState, Random random) {
-        ConfiguredFeature<HugeMushroomFeatureConfiguration, ?> configuredFeature;
+        ConfiguredFeature<?, ?> configuredFeature;
         serverLevel.removeBlock(blockPos, false);
         if (this == Blocks.BROWN_MUSHROOM) {
-            configuredFeature = Feature.HUGE_BROWN_MUSHROOM.configured(BiomeDefaultFeatures.HUGE_BROWN_MUSHROOM_CONFIG);
+            configuredFeature = Features.HUGE_BROWN_MUSHROOM;
         } else if (this == Blocks.RED_MUSHROOM) {
-            configuredFeature = Feature.HUGE_RED_MUSHROOM.configured(BiomeDefaultFeatures.HUGE_RED_MUSHROOM_CONFIG);
+            configuredFeature = Features.HUGE_RED_MUSHROOM;
         } else {
             serverLevel.setBlock(blockPos, blockState, 3);
             return false;

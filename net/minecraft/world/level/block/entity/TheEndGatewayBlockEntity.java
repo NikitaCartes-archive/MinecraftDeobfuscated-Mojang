@@ -11,6 +11,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.data.worldgen.Features;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -32,7 +33,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.LogManager;
@@ -210,7 +210,7 @@ implements TickableBlockEntity {
         if (this.exitPortal == null) {
             this.exitPortal = new BlockPos(vec32.x + 0.5, 75.0, vec32.z + 0.5);
             LOGGER.debug("Failed to find suitable block, settling on {}", (Object)this.exitPortal);
-            Feature.END_ISLAND.configured(FeatureConfiguration.NONE).place(serverLevel, serverLevel.getChunkSource().getGenerator(), new Random(this.exitPortal.asLong()), this.exitPortal);
+            Features.END_ISLAND.place(serverLevel, serverLevel.getChunkSource().getGenerator(), new Random(this.exitPortal.asLong()), this.exitPortal);
         } else {
             LOGGER.debug("Found block at {}", (Object)this.exitPortal);
         }

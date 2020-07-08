@@ -9,22 +9,21 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
+import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.Registry;
-import net.minecraft.util.Codecs;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 
 public class CheckerboardColumnBiomeSource
 extends BiomeSource {
-    public static final Codec<CheckerboardColumnBiomeSource> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Registry.BIOME.listOf().fieldOf("biomes")).forGetter(checkerboardColumnBiomeSource -> checkerboardColumnBiomeSource.allowedBiomes), ((MapCodec)Codecs.intRange(0, 62).fieldOf("scale")).withDefault(2).forGetter(checkerboardColumnBiomeSource -> checkerboardColumnBiomeSource.size)).apply((Applicative<CheckerboardColumnBiomeSource, ?>)instance, CheckerboardColumnBiomeSource::new));
-    private final List<Biome> allowedBiomes;
+    public static final Codec<CheckerboardColumnBiomeSource> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Biome.CODEC.listOf().fieldOf("biomes")).forGetter(checkerboardColumnBiomeSource -> checkerboardColumnBiomeSource.allowedBiomes), ((MapCodec)Codec.intRange(0, 62).fieldOf("scale")).orElse(2).forGetter(checkerboardColumnBiomeSource -> checkerboardColumnBiomeSource.size)).apply((Applicative<CheckerboardColumnBiomeSource, ?>)instance, CheckerboardColumnBiomeSource::new));
+    private final List<Supplier<Biome>> allowedBiomes;
     private final int bitShift;
     private final int size;
 
-    public CheckerboardColumnBiomeSource(List<Biome> list, int i) {
-        super(ImmutableList.copyOf(list));
+    public CheckerboardColumnBiomeSource(List<Supplier<Biome>> list, int i) {
+        super(list.stream().map(Supplier::get).collect(ImmutableList.toImmutableList()));
         this.allowedBiomes = list;
         this.bitShift = i + 2;
         this.size = i;
@@ -43,7 +42,7 @@ extends BiomeSource {
 
     @Override
     public Biome getNoiseBiome(int i, int j, int k) {
-        return this.allowedBiomes.get(Math.floorMod((i >> this.bitShift) + (k >> this.bitShift), this.allowedBiomes.size()));
+        return this.allowedBiomes.get(Math.floorMod((i >> this.bitShift) + (k >> this.bitShift), this.allowedBiomes.size())).get();
     }
 }
 

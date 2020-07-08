@@ -45,7 +45,7 @@ public abstract class EntityTypePredicate {
             return new TagPredicate(SerializationTags.getInstance().getEntityTypes().getTagOrEmpty(resourceLocation));
         }
         ResourceLocation resourceLocation = new ResourceLocation(string);
-        EntityType entityType = (EntityType)Registry.ENTITY_TYPE.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown entity type '" + resourceLocation + "', valid types are: " + COMMA_JOINER.join(Registry.ENTITY_TYPE.keySet())));
+        EntityType<?> entityType = Registry.ENTITY_TYPE.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown entity type '" + resourceLocation + "', valid types are: " + COMMA_JOINER.join(Registry.ENTITY_TYPE.keySet())));
         return new TypePredicate(entityType);
     }
 

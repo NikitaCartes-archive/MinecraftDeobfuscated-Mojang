@@ -60,9 +60,9 @@ public class McRegionUpgrader {
         WorldData worldData = levelStorageAccess.getDataTag(registryReadOps, DataPackConfig.DEFAULT);
         long l = worldData != null ? worldData.worldGenSettings().seed() : 0L;
         BiomeSource biomeSource = worldData != null && worldData.worldGenSettings().isFlatWorld() ? new FixedBiomeSource(Biomes.PLAINS) : new OverworldBiomeSource(l, false, false);
-        McRegionUpgrader.convertRegions(new File(file, "region"), list, biomeSource, 0, i, progressListener);
-        McRegionUpgrader.convertRegions(new File(file2, "region"), list2, new FixedBiomeSource(Biomes.NETHER_WASTES), list.size(), i, progressListener);
-        McRegionUpgrader.convertRegions(new File(file3, "region"), list3, new FixedBiomeSource(Biomes.THE_END), list.size() + list2.size(), i, progressListener);
+        McRegionUpgrader.convertRegions(registryHolder, new File(file, "region"), list, biomeSource, 0, i, progressListener);
+        McRegionUpgrader.convertRegions(registryHolder, new File(file2, "region"), list2, new FixedBiomeSource(Biomes.NETHER_WASTES), list.size(), i, progressListener);
+        McRegionUpgrader.convertRegions(registryHolder, new File(file3, "region"), list3, new FixedBiomeSource(Biomes.THE_END), list.size() + list2.size(), i, progressListener);
         McRegionUpgrader.makeMcrLevelDatBackup(levelStorageAccess);
         levelStorageAccess.saveDataTag(registryHolder, worldData);
         return true;
@@ -80,15 +80,15 @@ public class McRegionUpgrader {
         }
     }
 
-    private static void convertRegions(File file, Iterable<File> iterable, BiomeSource biomeSource, int i, int j, ProgressListener progressListener) {
+    private static void convertRegions(RegistryAccess.RegistryHolder registryHolder, File file, Iterable<File> iterable, BiomeSource biomeSource, int i, int j, ProgressListener progressListener) {
         for (File file2 : iterable) {
-            McRegionUpgrader.convertRegion(file, file2, biomeSource, i, j, progressListener);
+            McRegionUpgrader.convertRegion(registryHolder, file, file2, biomeSource, i, j, progressListener);
             int k = (int)Math.round(100.0 * (double)(++i) / (double)j);
             progressListener.progressStagePercentage(k);
         }
     }
 
-    private static void convertRegion(File file, File file2, BiomeSource biomeSource, int i, int j, ProgressListener progressListener) {
+    private static void convertRegion(RegistryAccess.RegistryHolder registryHolder, File file, File file2, BiomeSource biomeSource, int i, int j, ProgressListener progressListener) {
         String string = file2.getName();
         try (RegionFile regionFile = new RegionFile(file2, file, true);
              RegionFile regionFile2 = new RegionFile(new File(file, string.substring(0, string.length() - ".mcr".length()) + ".mca"), file, true);){
@@ -113,7 +113,7 @@ public class McRegionUpgrader {
                     CompoundTag compoundTag3 = new CompoundTag();
                     CompoundTag compoundTag4 = new CompoundTag();
                     compoundTag3.put("Level", compoundTag4);
-                    OldChunkStorage.convertToAnvilFormat(oldLevelChunk, compoundTag4, biomeSource);
+                    OldChunkStorage.convertToAnvilFormat(registryHolder, oldLevelChunk, compoundTag4, biomeSource);
                     try (DataOutputStream dataOutputStream = regionFile2.getChunkDataOutputStream(chunkPos);){
                         NbtIo.write(compoundTag3, dataOutputStream);
                         continue;

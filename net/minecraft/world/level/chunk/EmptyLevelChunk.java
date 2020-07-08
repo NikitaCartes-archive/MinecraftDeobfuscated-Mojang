@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
@@ -30,7 +31,7 @@ extends LevelChunk {
     private static final Biome[] BIOMES = Util.make(new Biome[ChunkBiomeContainer.BIOMES_SIZE], biomes -> Arrays.fill(biomes, Biomes.PLAINS));
 
     public EmptyLevelChunk(Level level, ChunkPos chunkPos) {
-        super(level, chunkPos, new ChunkBiomeContainer(BIOMES));
+        super(level, chunkPos, new ChunkBiomeContainer(level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), BIOMES));
     }
 
     @Override

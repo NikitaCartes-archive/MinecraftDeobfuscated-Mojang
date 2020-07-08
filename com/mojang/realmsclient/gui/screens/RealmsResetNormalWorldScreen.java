@@ -88,8 +88,7 @@ extends RealmsScreen {
     }
 
     private Component generateStructuresTitle() {
-        String string = this.generateStructures != false ? "mco.configure.world.on" : "mco.configure.world.off";
-        return new TranslatableComponent("selectWorld.mapFeatures").append(" ").append(new TranslatableComponent(string));
+        return CommonComponents.optionStatus(new TranslatableComponent("selectWorld.mapFeatures"), this.generateStructures);
     }
 }
 

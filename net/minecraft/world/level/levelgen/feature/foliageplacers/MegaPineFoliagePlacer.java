@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.util.UniformInt;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
@@ -19,14 +20,12 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class MegaPineFoliagePlacer
 extends FoliagePlacer {
-    public static final Codec<MegaPineFoliagePlacer> CODEC = RecordCodecBuilder.create(instance -> MegaPineFoliagePlacer.foliagePlacerParts(instance).and(instance.group(((MapCodec)Codec.INT.fieldOf("height_random")).forGetter(megaPineFoliagePlacer -> megaPineFoliagePlacer.heightRand), ((MapCodec)Codec.INT.fieldOf("crown_height")).forGetter(megaPineFoliagePlacer -> megaPineFoliagePlacer.crownHeight))).apply((Applicative<MegaPineFoliagePlacer, ?>)instance, MegaPineFoliagePlacer::new));
-    private final int heightRand;
-    private final int crownHeight;
+    public static final Codec<MegaPineFoliagePlacer> CODEC = RecordCodecBuilder.create(instance -> MegaPineFoliagePlacer.foliagePlacerParts(instance).and(((MapCodec)UniformInt.codec(0, 16, 8).fieldOf("crown_height")).forGetter(megaPineFoliagePlacer -> megaPineFoliagePlacer.crownHeight)).apply((Applicative<MegaPineFoliagePlacer, ?>)instance, MegaPineFoliagePlacer::new));
+    private final UniformInt crownHeight;
 
-    public MegaPineFoliagePlacer(int i, int j, int k, int l, int m, int n) {
-        super(i, j, k, l);
-        this.heightRand = m;
-        this.crownHeight = n;
+    public MegaPineFoliagePlacer(UniformInt uniformInt, UniformInt uniformInt2, UniformInt uniformInt3) {
+        super(uniformInt, uniformInt2);
+        this.crownHeight = uniformInt3;
     }
 
     @Override
@@ -49,7 +48,7 @@ extends FoliagePlacer {
 
     @Override
     public int foliageHeight(Random random, int i, TreeConfiguration treeConfiguration) {
-        return random.nextInt(this.heightRand + 1) + this.crownHeight;
+        return this.crownHeight.sample(random);
     }
 
     @Override

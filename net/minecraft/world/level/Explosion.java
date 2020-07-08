@@ -32,7 +32,6 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.ProtectionEnchantment;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.DefaultExplosionDamageCalculator;
 import net.minecraft.world.level.EntityBasedExplosionDamageCalculator;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
@@ -50,6 +49,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class Explosion {
+    private static final ExplosionDamageCalculator EXPLOSION_DAMAGE_CALCULATOR = new ExplosionDamageCalculator();
     private final boolean fire;
     private final BlockInteraction blockInteraction;
     private final Random random = new Random();
@@ -95,7 +95,7 @@ public class Explosion {
     }
 
     private ExplosionDamageCalculator makeDamageCalculator(@Nullable Entity entity) {
-        return entity == null ? DefaultExplosionDamageCalculator.INSTANCE : new EntityBasedExplosionDamageCalculator(entity);
+        return entity == null ? EXPLOSION_DAMAGE_CALCULATOR : new EntityBasedExplosionDamageCalculator(entity);
     }
 
     public static float getSeenPercent(Vec3 vec3, Entity entity) {

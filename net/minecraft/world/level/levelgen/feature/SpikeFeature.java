@@ -127,7 +127,7 @@ extends Feature<SpikeConfiguration> {
     }
 
     public static class EndSpike {
-        public static final Codec<EndSpike> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("centerX")).withDefault(0).forGetter(endSpike -> endSpike.centerX), ((MapCodec)Codec.INT.fieldOf("centerZ")).withDefault(0).forGetter(endSpike -> endSpike.centerZ), ((MapCodec)Codec.INT.fieldOf("radius")).withDefault(0).forGetter(endSpike -> endSpike.radius), ((MapCodec)Codec.INT.fieldOf("height")).withDefault(0).forGetter(endSpike -> endSpike.height), ((MapCodec)Codec.BOOL.fieldOf("guarded")).withDefault(false).forGetter(endSpike -> endSpike.guarded)).apply((Applicative<EndSpike, ?>)instance, EndSpike::new));
+        public static final Codec<EndSpike> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("centerX")).orElse(0).forGetter(endSpike -> endSpike.centerX), ((MapCodec)Codec.INT.fieldOf("centerZ")).orElse(0).forGetter(endSpike -> endSpike.centerZ), ((MapCodec)Codec.INT.fieldOf("radius")).orElse(0).forGetter(endSpike -> endSpike.radius), ((MapCodec)Codec.INT.fieldOf("height")).orElse(0).forGetter(endSpike -> endSpike.height), ((MapCodec)Codec.BOOL.fieldOf("guarded")).orElse(false).forGetter(endSpike -> endSpike.guarded)).apply((Applicative<EndSpike, ?>)instance, EndSpike::new));
         private final int centerX;
         private final int centerZ;
         private final int radius;

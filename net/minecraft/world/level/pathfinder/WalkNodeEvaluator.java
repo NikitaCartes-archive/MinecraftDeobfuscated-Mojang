@@ -233,29 +233,17 @@ extends NodeEvaluator {
             }
         }
         if (blockPathTypes2 == BlockPathTypes.OPEN) {
-            BlockPathTypes blockPathTypes3;
-            AABB aABB2 = new AABB((double)i - g + 0.5, (double)j + 0.001, (double)k - g + 0.5, (double)i + g + 0.5, (float)j + this.mob.getBbHeight(), (double)k + g + 0.5);
-            if (this.hasCollisions(aABB2)) {
-                return null;
-            }
-            if (this.mob.getBbWidth() >= 1.0f && (blockPathTypes3 = this.getCachedBlockType(this.mob, i, j - 1, k)) == BlockPathTypes.BLOCKED) {
-                node = this.getNode(i, j, k);
-                node.type = BlockPathTypes.WALKABLE;
-                node.costMalus = Math.max(node.costMalus, f);
-                return node;
-            }
             int n = 0;
             int o = j;
             while (blockPathTypes2 == BlockPathTypes.OPEN) {
-                Node node2;
                 if (--j < 0) {
-                    node2 = this.getNode(i, o, k);
+                    Node node2 = this.getNode(i, o, k);
                     node2.type = BlockPathTypes.BLOCKED;
                     node2.costMalus = -1.0f;
                     return node2;
                 }
-                node2 = this.getNode(i, j, k);
                 if (n++ >= this.mob.getMaxFallDistance()) {
+                    Node node2 = this.getNode(i, j, k);
                     node2.type = BlockPathTypes.BLOCKED;
                     node2.costMalus = -1.0f;
                     return node2;
@@ -263,12 +251,13 @@ extends NodeEvaluator {
                 blockPathTypes2 = this.getCachedBlockType(this.mob, i, j, k);
                 f = this.mob.getPathfindingMalus(blockPathTypes2);
                 if (blockPathTypes2 != BlockPathTypes.OPEN && f >= 0.0f) {
-                    node = node2;
+                    node = this.getNode(i, j, k);
                     node.type = blockPathTypes2;
                     node.costMalus = Math.max(node.costMalus, f);
                     break;
                 }
                 if (!(f < 0.0f)) continue;
+                Node node2 = this.getNode(i, j, k);
                 node2.type = BlockPathTypes.BLOCKED;
                 node2.costMalus = -1.0f;
                 return node2;
@@ -307,7 +296,7 @@ extends NodeEvaluator {
             if (!(mob.getPathfindingMalus(blockPathTypes3) >= mob.getPathfindingMalus(blockPathTypes2))) continue;
             blockPathTypes2 = blockPathTypes3;
         }
-        if (blockPathTypes == BlockPathTypes.OPEN && mob.getPathfindingMalus(blockPathTypes2) == 0.0f) {
+        if (blockPathTypes == BlockPathTypes.OPEN && mob.getPathfindingMalus(blockPathTypes2) == 0.0f && l <= 1) {
             return BlockPathTypes.OPEN;
         }
         return blockPathTypes2;

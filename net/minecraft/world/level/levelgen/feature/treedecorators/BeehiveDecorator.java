@@ -26,7 +26,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class BeehiveDecorator
 extends TreeDecorator {
-    public static final Codec<BeehiveDecorator> CODEC = ((MapCodec)Codec.FLOAT.fieldOf("probability")).xmap(BeehiveDecorator::new, beehiveDecorator -> Float.valueOf(beehiveDecorator.probability)).codec();
+    public static final Codec<BeehiveDecorator> CODEC = ((MapCodec)Codec.floatRange(0.0f, 1.0f).fieldOf("probability")).xmap(BeehiveDecorator::new, beehiveDecorator -> Float.valueOf(beehiveDecorator.probability)).codec();
     private final float probability;
 
     public BeehiveDecorator(float f) {

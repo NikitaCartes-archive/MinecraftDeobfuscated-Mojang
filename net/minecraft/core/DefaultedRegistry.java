@@ -4,6 +4,7 @@
 package net.minecraft.core;
 
 import com.mojang.serialization.Lifecycle;
+import java.util.Optional;
 import java.util.Random;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
@@ -17,7 +18,7 @@ extends MappedRegistry<T> {
     private final ResourceLocation defaultKey;
     private T defaultValue;
 
-    public DefaultedRegistry(String string, ResourceKey<Registry<T>> resourceKey, Lifecycle lifecycle) {
+    public DefaultedRegistry(String string, ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle) {
         super(resourceKey, lifecycle);
         this.defaultKey = new ResourceLocation(string);
     }
@@ -48,6 +49,11 @@ extends MappedRegistry<T> {
     public T get(@Nullable ResourceLocation resourceLocation) {
         Object object = super.get(resourceLocation);
         return object == null ? this.defaultValue : object;
+    }
+
+    @Override
+    public Optional<T> getOptional(@Nullable ResourceLocation resourceLocation) {
+        return Optional.ofNullable(super.get(resourceLocation));
     }
 
     @Override

@@ -19,7 +19,6 @@ import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundChatPacket;
-import net.minecraft.network.protocol.game.ClientboundChunkBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerAckPacket;
@@ -61,6 +60,7 @@ import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
+import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSelectAdvancementsTabPacket;
 import net.minecraft.network.protocol.game.ClientboundSetBorderPacket;
 import net.minecraft.network.protocol.game.ClientboundSetCameraPacket;
@@ -126,7 +126,7 @@ extends PacketListener {
 
     public void handleChat(ClientboundChatPacket var1);
 
-    public void handleChunkBlocksUpdate(ClientboundChunkBlocksUpdatePacket var1);
+    public void handleChunkBlocksUpdate(ClientboundSectionBlocksUpdatePacket var1);
 
     public void handleMapItemData(ClientboundMapItemDataPacket var1);
 

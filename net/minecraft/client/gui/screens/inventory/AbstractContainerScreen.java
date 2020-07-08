@@ -497,17 +497,12 @@ implements MenuAccess<T> {
     }
 
     @Override
-    public boolean shouldCloseOnEsc() {
-        return false;
-    }
-
-    @Override
     public boolean keyPressed(int i, int j, int k) {
-        if (i == 256 || this.minecraft.options.keyInventory.matches(i, j)) {
-            this.minecraft.player.closeContainer();
+        if (super.keyPressed(i, j, k)) {
             return true;
         }
-        if (super.keyPressed(i, j, k)) {
+        if (this.minecraft.options.keyInventory.matches(i, j)) {
+            this.onClose();
             return true;
         }
         this.checkHotbarKeyPressed(i, j);
@@ -560,6 +555,12 @@ implements MenuAccess<T> {
     @Override
     public T getMenu() {
         return this.menu;
+    }
+
+    @Override
+    public void onClose() {
+        this.minecraft.player.closeContainer();
+        super.onClose();
     }
 }
 

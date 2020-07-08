@@ -113,6 +113,11 @@ extends MinecraftServer {
     }
 
     @Override
+    public int getRateLimitPacketsPerSecond() {
+        return 0;
+    }
+
+    @Override
     public boolean isEpollEnabled() {
         return false;
     }

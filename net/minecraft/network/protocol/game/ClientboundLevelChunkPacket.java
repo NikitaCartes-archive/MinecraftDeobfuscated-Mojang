@@ -32,7 +32,7 @@ implements Packet<ClientGamePacketListener> {
     private int availableSections;
     private CompoundTag heightmaps;
     @Nullable
-    private ChunkBiomeContainer biomes;
+    private int[] biomes;
     private byte[] buffer;
     private List<CompoundTag> blockEntitiesTags;
     private boolean fullChunk;
@@ -53,7 +53,7 @@ implements Packet<ClientGamePacketListener> {
             this.heightmaps.put(entry.getKey().getSerializationKey(), new LongArrayTag(entry.getValue().getRawData()));
         }
         if (this.fullChunk) {
-            this.biomes = levelChunk.getBiomes().copy();
+            this.biomes = levelChunk.getBiomes().writeBiomes();
         }
         this.buffer = new byte[this.calculateChunkSize(levelChunk, i)];
         this.availableSections = this.extractChunkData(new FriendlyByteBuf(this.getWriteBuffer()), levelChunk, i);
@@ -78,7 +78,7 @@ implements Packet<ClientGamePacketListener> {
         this.availableSections = friendlyByteBuf.readVarInt();
         this.heightmaps = friendlyByteBuf.readNbt();
         if (this.fullChunk) {
-            this.biomes = new ChunkBiomeContainer(friendlyByteBuf);
+            this.biomes = friendlyByteBuf.readVarIntArray(ChunkBiomeContainer.BIOMES_SIZE);
         }
         if ((i = friendlyByteBuf.readVarInt()) > 0x200000) {
             throw new RuntimeException("Chunk Packet trying to allocate too much memory on read.");
@@ -101,7 +101,7 @@ implements Packet<ClientGamePacketListener> {
         friendlyByteBuf.writeVarInt(this.availableSections);
         friendlyByteBuf.writeNbt(this.heightmaps);
         if (this.biomes != null) {
-            this.biomes.write(friendlyByteBuf);
+            friendlyByteBuf.writeVarIntArray(this.biomes);
         }
         friendlyByteBuf.writeVarInt(this.buffer.length);
         friendlyByteBuf.writeBytes(this.buffer);
@@ -188,8 +188,8 @@ implements Packet<ClientGamePacketListener> {
 
     @Nullable
     @Environment(value=EnvType.CLIENT)
-    public ChunkBiomeContainer getBiomes() {
-        return this.biomes == null ? null : this.biomes.copy();
+    public int[] getBiomes() {
+        return this.biomes;
     }
 }
 

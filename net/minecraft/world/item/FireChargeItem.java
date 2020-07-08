@@ -8,7 +8,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.UseOnContext;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.CampfireBlock;
@@ -30,7 +30,7 @@ extends Item {
             this.playSound(level, blockPos);
             level.setBlockAndUpdate(blockPos, (BlockState)blockState.setValue(CampfireBlock.LIT, true));
             bl = true;
-        } else if (BaseFireBlock.canBePlacedAt(level, blockPos = blockPos.relative(useOnContext.getClickedFace()))) {
+        } else if (BaseFireBlock.canBePlacedAt(level, blockPos = blockPos.relative(useOnContext.getClickedFace()), useOnContext.getHorizontalDirection())) {
             this.playSound(level, blockPos);
             level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(level, blockPos));
             bl = true;

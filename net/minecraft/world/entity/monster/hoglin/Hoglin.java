@@ -230,7 +230,9 @@ HoglinBase {
 
     private void finishConversion(ServerLevel serverLevel) {
         Zoglin zoglin = this.convertTo(EntityType.ZOGLIN);
-        zoglin.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
+        if (zoglin != null) {
+            zoglin.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
+        }
     }
 
     @Override

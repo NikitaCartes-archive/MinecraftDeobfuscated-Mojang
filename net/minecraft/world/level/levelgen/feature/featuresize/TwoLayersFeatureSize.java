@@ -13,7 +13,7 @@ import net.minecraft.world.level.levelgen.feature.featuresize.FeatureSizeType;
 
 public class TwoLayersFeatureSize
 extends FeatureSize {
-    public static final Codec<TwoLayersFeatureSize> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("limit")).withDefault(1).forGetter(twoLayersFeatureSize -> twoLayersFeatureSize.limit), ((MapCodec)Codec.INT.fieldOf("lower_size")).withDefault(0).forGetter(twoLayersFeatureSize -> twoLayersFeatureSize.lowerSize), ((MapCodec)Codec.INT.fieldOf("upper_size")).withDefault(1).forGetter(twoLayersFeatureSize -> twoLayersFeatureSize.upperSize), TwoLayersFeatureSize.minClippedHeightCodec()).apply((Applicative<TwoLayersFeatureSize, ?>)instance, TwoLayersFeatureSize::new));
+    public static final Codec<TwoLayersFeatureSize> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.intRange(0, 81).fieldOf("limit")).orElse(1).forGetter(twoLayersFeatureSize -> twoLayersFeatureSize.limit), ((MapCodec)Codec.intRange(0, 16).fieldOf("lower_size")).orElse(0).forGetter(twoLayersFeatureSize -> twoLayersFeatureSize.lowerSize), ((MapCodec)Codec.intRange(0, 16).fieldOf("upper_size")).orElse(1).forGetter(twoLayersFeatureSize -> twoLayersFeatureSize.upperSize), TwoLayersFeatureSize.minClippedHeightCodec()).apply((Applicative<TwoLayersFeatureSize, ?>)instance, TwoLayersFeatureSize::new));
     private final int limit;
     private final int lowerSize;
     private final int upperSize;

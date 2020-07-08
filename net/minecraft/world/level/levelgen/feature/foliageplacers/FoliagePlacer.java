@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.util.UniformInt;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.levelgen.feature.TreeFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
@@ -19,20 +20,16 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public abstract class FoliagePlacer {
     public static final Codec<FoliagePlacer> CODEC = Registry.FOLIAGE_PLACER_TYPES.dispatch(FoliagePlacer::type, FoliagePlacerType::codec);
-    protected final int radius;
-    protected final int radiusRandom;
-    protected final int offset;
-    protected final int offsetRandom;
+    protected final UniformInt radius;
+    protected final UniformInt offset;
 
-    protected static <P extends FoliagePlacer> Products.P4<RecordCodecBuilder.Mu<P>, Integer, Integer, Integer, Integer> foliagePlacerParts(RecordCodecBuilder.Instance<P> instance) {
-        return instance.group(((MapCodec)Codec.INT.fieldOf("radius")).forGetter(foliagePlacer -> foliagePlacer.radius), ((MapCodec)Codec.INT.fieldOf("radius_random")).forGetter(foliagePlacer -> foliagePlacer.radiusRandom), ((MapCodec)Codec.INT.fieldOf("offset")).forGetter(foliagePlacer -> foliagePlacer.offset), ((MapCodec)Codec.INT.fieldOf("offset_random")).forGetter(foliagePlacer -> foliagePlacer.offsetRandom));
+    protected static <P extends FoliagePlacer> Products.P2<RecordCodecBuilder.Mu<P>, UniformInt, UniformInt> foliagePlacerParts(RecordCodecBuilder.Instance<P> instance) {
+        return instance.group(((MapCodec)UniformInt.codec(0, 8, 8).fieldOf("radius")).forGetter(foliagePlacer -> foliagePlacer.radius), ((MapCodec)UniformInt.codec(0, 8, 8).fieldOf("offset")).forGetter(foliagePlacer -> foliagePlacer.offset));
     }
 
-    public FoliagePlacer(int i, int j, int k, int l) {
-        this.radius = i;
-        this.radiusRandom = j;
-        this.offset = k;
-        this.offsetRandom = l;
+    public FoliagePlacer(UniformInt uniformInt, UniformInt uniformInt2) {
+        this.radius = uniformInt;
+        this.offset = uniformInt2;
     }
 
     protected abstract FoliagePlacerType<?> type();
@@ -46,11 +43,11 @@ public abstract class FoliagePlacer {
     public abstract int foliageHeight(Random var1, int var2, TreeConfiguration var3);
 
     public int foliageRadius(Random random, int i) {
-        return this.radius + random.nextInt(this.radiusRandom + 1);
+        return this.radius.sample(random);
     }
 
     private int offset(Random random) {
-        return this.offset + random.nextInt(this.offsetRandom + 1);
+        return this.offset.sample(random);
     }
 
     protected abstract boolean shouldSkipLocation(Random var1, int var2, int var3, int var4, int var5, boolean var6);

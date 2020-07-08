@@ -6,6 +6,7 @@ package net.minecraft.network.chat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
@@ -21,6 +22,10 @@ public class CommonComponents {
 
     public static Component optionStatus(boolean bl) {
         return bl ? OPTION_ON : OPTION_OFF;
+    }
+
+    public static MutableComponent optionStatus(Component component, boolean bl) {
+        return new TranslatableComponent(bl ? "options.on.composed" : "options.off.composed", component);
     }
 }
 

@@ -5,6 +5,7 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -33,7 +34,7 @@ extends StructureFeature<ShipwreckConfiguration> {
         }
 
         @Override
-        public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, ShipwreckConfiguration shipwreckConfiguration) {
+        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, ShipwreckConfiguration shipwreckConfiguration) {
             Rotation rotation = Rotation.getRandom(this.random);
             BlockPos blockPos = new BlockPos(i * 16, 90, j * 16);
             ShipwreckPieces.addPieces(structureManager, blockPos, rotation, this.pieces, this.random, shipwreckConfiguration);

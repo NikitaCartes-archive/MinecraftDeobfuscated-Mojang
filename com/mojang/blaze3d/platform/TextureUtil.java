@@ -14,8 +14,10 @@ import java.nio.IntBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.util.concurrent.ThreadLocalRandom;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.SharedConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL11;
@@ -27,6 +29,13 @@ public class TextureUtil {
 
     public static int generateTextureId() {
         RenderSystem.assertThread(RenderSystem::isOnRenderThreadOrInit);
+        if (SharedConstants.IS_RUNNING_IN_IDE) {
+            int[] is = new int[ThreadLocalRandom.current().nextInt(15) + 1];
+            GlStateManager._genTextures(is);
+            int i = GlStateManager._genTexture();
+            GlStateManager._deleteTextures(is);
+            return i;
+        }
         return GlStateManager._genTexture();
     }
 

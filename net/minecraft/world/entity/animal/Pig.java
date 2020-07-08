@@ -211,8 +211,8 @@ Saddleable {
             for (int[] js : is) {
                 Vec3 vec3;
                 mutableBlockPos.set(blockPos.getX() + js[0], blockPos.getY(), blockPos.getZ() + js[1]);
-                double d = this.level.getRelativeFloorHeight(mutableBlockPos);
-                if (!DismountHelper.isFloorValid(d) || !DismountHelper.canDismountTo(this.level, livingEntity, aABB.move(vec3 = Vec3.upFromBottomCenterOf(mutableBlockPos, d)))) continue;
+                double d = this.level.getBlockFloorHeight(mutableBlockPos);
+                if (!DismountHelper.isBlockFloorValid(d) || !DismountHelper.canDismountTo(this.level, livingEntity, aABB.move(vec3 = Vec3.upFromBottomCenterOf(mutableBlockPos, d)))) continue;
                 livingEntity.setPose(pose);
                 return vec3;
             }

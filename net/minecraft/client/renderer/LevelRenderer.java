@@ -1029,9 +1029,9 @@ AutoCloseable {
         bufferSource.endBatch(RenderType.entityGlintDirect());
         bufferSource.endBatch(RenderType.waterMask());
         this.renderBuffers.crumblingBufferSource().endBatch();
-        bufferSource.endBatch(RenderType.lines());
-        bufferSource.endBatch();
         if (this.transparencyChain != null) {
+            bufferSource.endBatch(RenderType.lines());
+            bufferSource.endBatch();
             this.translucentTarget.clear(Minecraft.ON_OSX);
             this.translucentTarget.copyDepthFrom(this.minecraft.getMainRenderTarget());
             profilerFiller.popPush("translucent");
@@ -1051,6 +1051,8 @@ AutoCloseable {
             this.renderChunkLayer(RenderType.tripwire(), poseStack, d, e, g);
             profilerFiller.popPush("particles");
             this.minecraft.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
+            bufferSource.endBatch(RenderType.lines());
+            bufferSource.endBatch();
         }
         RenderSystem.pushMatrix();
         RenderSystem.multMatrix(poseStack.last().pose());

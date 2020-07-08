@@ -98,7 +98,7 @@ Widget {
             if (!this.changeFocus(bl)) {
                 this.changeFocus(bl);
             }
-            return true;
+            return false;
         }
         return super.keyPressed(i, j, k);
     }

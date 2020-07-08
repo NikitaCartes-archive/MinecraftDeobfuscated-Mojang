@@ -6,9 +6,6 @@ package net.minecraft.world.level.levelgen.feature;
 import java.util.Locale;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.block.entity.JigsawBlockEntity;
-import net.minecraft.world.level.levelgen.feature.BastionPieces;
-import net.minecraft.world.level.levelgen.feature.VillagePieces;
 import net.minecraft.world.level.levelgen.structure.BuriedTreasurePieces;
 import net.minecraft.world.level.levelgen.structure.DesertPyramidPiece;
 import net.minecraft.world.level.levelgen.structure.EndCityPieces;
@@ -19,7 +16,7 @@ import net.minecraft.world.level.levelgen.structure.NetherBridgePieces;
 import net.minecraft.world.level.levelgen.structure.NetherFossilPieces;
 import net.minecraft.world.level.levelgen.structure.OceanMonumentPieces;
 import net.minecraft.world.level.levelgen.structure.OceanRuinPieces;
-import net.minecraft.world.level.levelgen.structure.PillagerOutpostPieces;
+import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.RuinedPortalPiece;
 import net.minecraft.world.level.levelgen.structure.ShipwreckPieces;
 import net.minecraft.world.level.levelgen.structure.StrongholdPieces;
@@ -33,8 +30,6 @@ public interface StructurePieceType {
     public static final StructurePieceType MINE_SHAFT_CROSSING = StructurePieceType.setPieceId(MineShaftPieces.MineShaftCrossing::new, "MSCrossing");
     public static final StructurePieceType MINE_SHAFT_ROOM = StructurePieceType.setPieceId(MineShaftPieces.MineShaftRoom::new, "MSRoom");
     public static final StructurePieceType MINE_SHAFT_STAIRS = StructurePieceType.setPieceId(MineShaftPieces.MineShaftStairs::new, "MSStairs");
-    public static final StructurePieceType PILLAGER_OUTPOST = StructurePieceType.setPieceId(PillagerOutpostPieces.PillagerOutpostPiece::new, "PCP");
-    public static final StructurePieceType VILLAGE = StructurePieceType.setPieceId(VillagePieces.VillagePiece::new, "NVi");
     public static final StructurePieceType NETHER_FORTRESS_BRIDGE_CROSSING = StructurePieceType.setPieceId(NetherBridgePieces.BridgeCrossing::new, "NeBCr");
     public static final StructurePieceType NETHER_FORTRESS_BRIDGE_END_FILLER = StructurePieceType.setPieceId(NetherBridgePieces.BridgeEndFiller::new, "NeBEF");
     public static final StructurePieceType NETHER_FORTRESS_BRIDGE_STRAIGHT = StructurePieceType.setPieceId(NetherBridgePieces.BridgeStraight::new, "NeBS");
@@ -86,8 +81,7 @@ public interface StructurePieceType {
     public static final StructurePieceType BURIED_TREASURE_PIECE = StructurePieceType.setPieceId(BuriedTreasurePieces.BuriedTreasurePiece::new, "BTP");
     public static final StructurePieceType SHIPWRECK_PIECE = StructurePieceType.setPieceId(ShipwreckPieces.ShipwreckPiece::new, "Shipwreck");
     public static final StructurePieceType NETHER_FOSSIL = StructurePieceType.setPieceId(NetherFossilPieces.NetherFossilPiece::new, "NeFos");
-    public static final StructurePieceType BASTION_REMNANT = StructurePieceType.setPieceId(BastionPieces.BastionPiece::new, "BastionRemnant");
-    public static final StructurePieceType RUNTIME = StructurePieceType.setPieceId(JigsawBlockEntity.RuntimePiece::new, "Runtime");
+    public static final StructurePieceType JIGSAW = StructurePieceType.setPieceId(PoolElementStructurePiece::new, "jigsaw");
 
     public StructurePiece load(StructureManager var1, CompoundTag var2);
 

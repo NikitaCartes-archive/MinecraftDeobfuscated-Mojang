@@ -18,7 +18,6 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.HugeFungusConfiguration;
 import net.minecraft.world.level.levelgen.feature.WeepingVinesFeature;
 import net.minecraft.world.level.material.Material;
-import org.jetbrains.annotations.Nullable;
 
 public class HugeFungusFeature
 extends Feature<HugeFungusConfiguration> {
@@ -30,13 +29,9 @@ extends Feature<HugeFungusConfiguration> {
     public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, HugeFungusConfiguration hugeFungusConfiguration) {
         Block block = hugeFungusConfiguration.validBaseState.getBlock();
         BlockPos blockPos2 = null;
-        if (hugeFungusConfiguration.planted) {
-            Block block2 = worldGenLevel.getBlockState(blockPos.below()).getBlock();
-            if (block2 == block) {
-                blockPos2 = blockPos;
-            }
-        } else {
-            blockPos2 = HugeFungusFeature.findOnNyliumPosition(worldGenLevel, blockPos, block);
+        Block block2 = worldGenLevel.getBlockState(blockPos.below()).getBlock();
+        if (block2 == block) {
+            blockPos2 = blockPos;
         }
         if (blockPos2 == null) {
             return false;
@@ -61,7 +56,7 @@ extends Feature<HugeFungusConfiguration> {
     private static boolean isReplaceable(LevelAccessor levelAccessor, BlockPos blockPos, boolean bl) {
         return levelAccessor.isStateAtPosition(blockPos, blockState -> {
             Material material = blockState.getMaterial();
-            return blockState.isAir() || blockState.is(Blocks.WATER) || blockState.is(Blocks.LAVA) || material == Material.REPLACEABLE_PLANT || bl && material == Material.PLANT;
+            return blockState.getMaterial().isReplaceable() || bl && material == Material.PLANT;
         });
     }
 
@@ -158,18 +153,6 @@ extends Feature<HugeFungusConfiguration> {
                 HugeFungusFeature.tryPlaceWeepingVines(blockPos, levelAccessor, random);
             }
         }
-    }
-
-    @Nullable
-    private static BlockPos.MutableBlockPos findOnNyliumPosition(LevelAccessor levelAccessor, BlockPos blockPos, Block block) {
-        BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
-        for (int i = blockPos.getY(); i >= 1; --i) {
-            mutableBlockPos.setY(i);
-            Block block2 = levelAccessor.getBlockState((BlockPos)mutableBlockPos.below()).getBlock();
-            if (block2 != block) continue;
-            return mutableBlockPos;
-        }
-        return null;
     }
 
     private static void tryPlaceWeepingVines(BlockPos blockPos, LevelAccessor levelAccessor, Random random) {

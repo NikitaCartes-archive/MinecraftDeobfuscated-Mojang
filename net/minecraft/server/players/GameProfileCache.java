@@ -20,6 +20,7 @@ import com.mojang.authlib.ProfileLookupCallback;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
@@ -38,9 +39,12 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 import net.minecraft.world.entity.player.Player;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 public class GameProfileCache {
+    private static final Logger LOGGER = LogManager.getLogger();
     private static boolean usesAuthentication;
     private final Map<String, GameProfileInfo> profilesByName = Maps.newConcurrentMap();
     private final Map<UUID, GameProfileInfo> profilesByUUID = Maps.newConcurrentMap();
@@ -156,10 +160,19 @@ public class GameProfileCache {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
     }
 
+    /*
+     * Enabled aggressive block sorting
+     * Enabled unnecessary exception pruning
+     * Enabled aggressive exception aggregation
+     */
     public List<GameProfileInfo> load() {
         ArrayList<GameProfileInfo> list = Lists.newArrayList();
-        try (BufferedReader reader = Files.newReader(this.file, StandardCharsets.UTF_8);){
-            JsonArray jsonArray = this.gson.fromJson((Reader)reader, JsonArray.class);
+        try (BufferedReader reader2 = Files.newReader(this.file, StandardCharsets.UTF_8);){
+            JsonArray jsonArray = this.gson.fromJson((Reader)reader2, JsonArray.class);
+            if (jsonArray == null) {
+                ArrayList<GameProfileInfo> arrayList = list;
+                return arrayList;
+            }
             DateFormat dateFormat = GameProfileCache.createDateFormat();
             jsonArray.forEach(jsonElement -> {
                 GameProfileInfo gameProfileInfo = GameProfileCache.readGameProfile(jsonElement, dateFormat);
@@ -167,8 +180,11 @@ public class GameProfileCache {
                     list.add(gameProfileInfo);
                 }
             });
+            return list;
+        } catch (FileNotFoundException reader2) {
+            return list;
         } catch (JsonParseException | IOException exception) {
-            // empty catch block
+            LOGGER.warn("Failed to load profile cache {}", (Object)this.file, (Object)exception);
         }
         return list;
     }

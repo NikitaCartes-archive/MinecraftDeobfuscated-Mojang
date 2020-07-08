@@ -23,7 +23,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.DefaultExplosionDamageCalculator;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
@@ -116,12 +115,7 @@ extends Block {
                 if (blockPos.equals(blockPos2) && bl2) {
                     return Optional.of(Float.valueOf(Blocks.WATER.getExplosionResistance()));
                 }
-                return DefaultExplosionDamageCalculator.INSTANCE.getBlockExplosionResistance(explosion, blockGetter, blockPos, blockState, fluidState);
-            }
-
-            @Override
-            public boolean shouldBlockExplode(Explosion explosion, BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, float f) {
-                return DefaultExplosionDamageCalculator.INSTANCE.shouldBlockExplode(explosion, blockGetter, blockPos, blockState, f);
+                return super.getBlockExplosionResistance(explosion, blockGetter, blockPos, blockState, fluidState);
             }
         };
         level.explode(null, DamageSource.badRespawnPointExplosion(), explosionDamageCalculator, (double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.5, (double)blockPos2.getZ() + 0.5, 5.0f, true, Explosion.BlockInteraction.DESTROY);

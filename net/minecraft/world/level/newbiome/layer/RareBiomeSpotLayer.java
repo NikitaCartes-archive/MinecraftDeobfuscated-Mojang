@@ -3,7 +3,7 @@
  */
 package net.minecraft.world.level.newbiome.layer;
 
-import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.newbiome.context.Context;
 import net.minecraft.world.level.newbiome.layer.traits.C1Transformer;
@@ -24,8 +24,8 @@ public enum RareBiomeSpotLayer implements C1Transformer
     }
 
     static {
-        PLAINS = Registry.BIOME.getId(Biomes.PLAINS);
-        SUNFLOWER_PLAINS = Registry.BIOME.getId(Biomes.SUNFLOWER_PLAINS);
+        PLAINS = BuiltinRegistries.BIOME.getId(Biomes.PLAINS);
+        SUNFLOWER_PLAINS = BuiltinRegistries.BIOME.getId(Biomes.SUNFLOWER_PLAINS);
     }
 }
 

@@ -15,7 +15,6 @@ import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.PageButton;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.ClickEvent;
@@ -53,6 +52,7 @@ extends Screen {
     private int currentPage;
     private List<FormattedText> cachedPageComponents = Collections.emptyList();
     private int cachedPage = -1;
+    private FormattedText pageMsg = FormattedText.EMPTY;
     private PageButton forwardButton;
     private PageButton backButton;
     private final boolean playTurnSound;
@@ -160,14 +160,14 @@ extends Screen {
         int k = (this.width - 192) / 2;
         int l = 2;
         this.blit(poseStack, k, 2, 0, 0, 192, 192);
-        String string = I18n.get("book.pageIndicator", this.currentPage + 1, Math.max(this.getNumPages(), 1));
         if (this.cachedPage != this.currentPage) {
             FormattedText formattedText = this.bookAccess.getPage(this.currentPage);
             this.cachedPageComponents = this.font.getSplitter().splitLines(formattedText, 114, Style.EMPTY);
+            this.pageMsg = new TranslatableComponent("book.pageIndicator", this.currentPage + 1, Math.max(this.getNumPages(), 1));
         }
         this.cachedPage = this.currentPage;
-        int m = this.strWidth(string);
-        this.font.draw(poseStack, string, (float)(k - m + 192 - 44), 18.0f, 0);
+        int m = this.font.width(this.pageMsg);
+        this.font.draw(poseStack, this.pageMsg, (float)(k - m + 192 - 44), 18.0f, 0);
         int n = Math.min(128 / this.font.lineHeight, this.cachedPageComponents.size());
         for (int o = 0; o < n; ++o) {
             FormattedText formattedText2 = this.cachedPageComponents.get(o);
@@ -178,10 +178,6 @@ extends Screen {
             this.renderComponentHoverEffect(poseStack, style, i, j);
         }
         super.render(poseStack, i, j, f);
-    }
-
-    private int strWidth(String string) {
-        return this.font.width(this.font.isBidirectional() ? this.font.bidirectionalShaping(string) : string);
     }
 
     @Override

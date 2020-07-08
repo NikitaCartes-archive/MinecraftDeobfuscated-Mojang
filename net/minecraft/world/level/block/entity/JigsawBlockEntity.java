@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.level.block.entity;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,11 +23,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.feature.StructurePieceType;
 import net.minecraft.world.level.levelgen.feature.structures.JigsawPlacement;
 import net.minecraft.world.level.levelgen.feature.structures.SinglePoolElement;
-import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
-import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
@@ -137,22 +133,11 @@ extends BlockEntity {
         ArrayList<PoolElementStructurePiece> list = Lists.newArrayList();
         StructureTemplate structureTemplate = new StructureTemplate();
         structureTemplate.fillFromWorld(serverLevel, blockPos, new BlockPos(1, 1, 1), false, null);
-        SinglePoolElement structurePoolElement = new SinglePoolElement(structureTemplate, ImmutableList.of(), StructureTemplatePool.Projection.RIGID);
-        RuntimePiece runtimePiece = new RuntimePiece(structureManager, structurePoolElement, blockPos, 1, Rotation.NONE, new BoundingBox(blockPos, blockPos));
-        JigsawPlacement.addPieces(runtimePiece, i, RuntimePiece::new, chunkGenerator, structureManager, list, random);
-        for (PoolElementStructurePiece poolElementStructurePiece : list) {
-            poolElementStructurePiece.place(serverLevel, structureFeatureManager, chunkGenerator, random, BoundingBox.infinite(), blockPos, bl);
-        }
-    }
-
-    public static final class RuntimePiece
-    extends PoolElementStructurePiece {
-        public RuntimePiece(StructureManager structureManager, StructurePoolElement structurePoolElement, BlockPos blockPos, int i, Rotation rotation, BoundingBox boundingBox) {
-            super(StructurePieceType.RUNTIME, structureManager, structurePoolElement, blockPos, i, rotation, boundingBox);
-        }
-
-        public RuntimePiece(StructureManager structureManager, CompoundTag compoundTag) {
-            super(structureManager, compoundTag, StructurePieceType.RUNTIME);
+        SinglePoolElement structurePoolElement = new SinglePoolElement(structureTemplate);
+        PoolElementStructurePiece poolElementStructurePiece = new PoolElementStructurePiece(structureManager, structurePoolElement, blockPos, 1, Rotation.NONE, new BoundingBox(blockPos, blockPos));
+        JigsawPlacement.addPieces(serverLevel.registryAccess(), poolElementStructurePiece, i, PoolElementStructurePiece::new, chunkGenerator, structureManager, list, random);
+        for (PoolElementStructurePiece poolElementStructurePiece2 : list) {
+            poolElementStructurePiece2.place(serverLevel, structureFeatureManager, chunkGenerator, random, BoundingBox.infinite(), blockPos, bl);
         }
     }
 

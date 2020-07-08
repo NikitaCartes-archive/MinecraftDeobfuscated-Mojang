@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
@@ -44,6 +45,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
@@ -53,6 +55,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.CharPredicate;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
@@ -355,17 +358,108 @@ public class Util {
         return is[random.nextInt(is.length)];
     }
 
+    private static BooleanSupplier createRenamer(final Path path, final Path path2) {
+        return new BooleanSupplier(){
+
+            @Override
+            public boolean getAsBoolean() {
+                try {
+                    Files.move(path, path2, new CopyOption[0]);
+                    return true;
+                } catch (IOException iOException) {
+                    LOGGER.error("Failed to rename", (Throwable)iOException);
+                    return false;
+                }
+            }
+
+            public String toString() {
+                return "rename " + path + " to " + path2;
+            }
+        };
+    }
+
+    private static BooleanSupplier createDeleter(final Path path) {
+        return new BooleanSupplier(){
+
+            @Override
+            public boolean getAsBoolean() {
+                try {
+                    Files.deleteIfExists(path);
+                    return true;
+                } catch (IOException iOException) {
+                    LOGGER.warn("Failed to delete", (Throwable)iOException);
+                    return false;
+                }
+            }
+
+            public String toString() {
+                return "delete old " + path;
+            }
+        };
+    }
+
+    private static BooleanSupplier createFileDeletedCheck(final Path path) {
+        return new BooleanSupplier(){
+
+            @Override
+            public boolean getAsBoolean() {
+                return !Files.exists(path, new LinkOption[0]);
+            }
+
+            public String toString() {
+                return "verify that " + path + " is deleted";
+            }
+        };
+    }
+
+    private static BooleanSupplier createFileCreatedCheck(final Path path) {
+        return new BooleanSupplier(){
+
+            @Override
+            public boolean getAsBoolean() {
+                return Files.isRegularFile(path, new LinkOption[0]);
+            }
+
+            public String toString() {
+                return "verify that " + path + " is present";
+            }
+        };
+    }
+
+    private static boolean executeInSequence(BooleanSupplier ... booleanSuppliers) {
+        for (BooleanSupplier booleanSupplier : booleanSuppliers) {
+            if (booleanSupplier.getAsBoolean()) continue;
+            LOGGER.warn("Failed to execute {}", (Object)booleanSupplier);
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean runWithRetries(int i, String string, BooleanSupplier ... booleanSuppliers) {
+        for (int j = 0; j < i; ++j) {
+            if (Util.executeInSequence(booleanSuppliers)) {
+                return true;
+            }
+            LOGGER.error("Failed to {}, retrying {}/{}", (Object)string, (Object)j, (Object)i);
+        }
+        LOGGER.error("Failed to {}, aborting, progress might be lost", (Object)string);
+        return false;
+    }
+
     public static void safeReplaceFile(File file, File file2, File file3) {
-        if (file3.exists()) {
-            file3.delete();
+        Util.safeReplaceFile(file.toPath(), file2.toPath(), file3.toPath());
+    }
+
+    public static void safeReplaceFile(Path path, Path path2, Path path3) {
+        int i = 10;
+        if (Files.exists(path, new LinkOption[0]) && !Util.runWithRetries(10, "create backup " + path3, Util.createDeleter(path3), Util.createRenamer(path, path3), Util.createFileCreatedCheck(path3))) {
+            return;
         }
-        file.renameTo(file3);
-        if (file.exists()) {
-            file.delete();
+        if (!Util.runWithRetries(10, "remove old " + path, Util.createDeleter(path), Util.createFileDeletedCheck(path))) {
+            return;
         }
-        file2.renameTo(file);
-        if (file2.exists()) {
-            file2.delete();
+        if (!Util.runWithRetries(10, "replace " + path + " with " + path2, Util.createRenamer(path2, path), Util.createFileCreatedCheck(path))) {
+            Util.runWithRetries(10, "restore " + path + " from " + path3, Util.createRenamer(path3, path), Util.createFileCreatedCheck(path));
         }
     }
 
@@ -430,8 +524,8 @@ public class Util {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static String sanitizeResourceName(String string) {
-        return string.toLowerCase(Locale.ROOT).chars().mapToObj(i -> ResourceLocation.isAllowedInResourceLocation((char)i) ? Character.toString((char)i) : "_").collect(Collectors.joining());
+    public static String sanitizeName(String string, CharPredicate charPredicate) {
+        return string.toLowerCase(Locale.ROOT).chars().mapToObj(i -> charPredicate.test((char)i) ? Character.toString((char)i) : "_").collect(Collectors.joining());
     }
 
     static enum IdentityStrategy implements Hash.Strategy<Object>

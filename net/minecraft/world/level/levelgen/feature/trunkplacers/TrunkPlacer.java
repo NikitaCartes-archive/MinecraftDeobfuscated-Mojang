@@ -32,7 +32,7 @@ public abstract class TrunkPlacer {
     protected final int heightRandB;
 
     protected static <P extends TrunkPlacer> Products.P3<RecordCodecBuilder.Mu<P>, Integer, Integer, Integer> trunkPlacerParts(RecordCodecBuilder.Instance<P> instance) {
-        return instance.group(((MapCodec)Codec.INT.fieldOf("base_height")).forGetter(trunkPlacer -> trunkPlacer.baseHeight), ((MapCodec)Codec.INT.fieldOf("height_rand_a")).forGetter(trunkPlacer -> trunkPlacer.heightRandA), ((MapCodec)Codec.INT.fieldOf("height_rand_b")).forGetter(trunkPlacer -> trunkPlacer.heightRandB));
+        return instance.group(((MapCodec)Codec.intRange(0, 32).fieldOf("base_height")).forGetter(trunkPlacer -> trunkPlacer.baseHeight), ((MapCodec)Codec.intRange(0, 24).fieldOf("height_rand_a")).forGetter(trunkPlacer -> trunkPlacer.heightRandA), ((MapCodec)Codec.intRange(0, 24).fieldOf("height_rand_b")).forGetter(trunkPlacer -> trunkPlacer.heightRandB));
     }
 
     public TrunkPlacer(int i, int j, int k) {

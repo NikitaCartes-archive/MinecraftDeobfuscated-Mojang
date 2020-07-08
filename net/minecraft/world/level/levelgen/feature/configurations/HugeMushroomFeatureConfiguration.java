@@ -12,7 +12,7 @@ import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvi
 
 public class HugeMushroomFeatureConfiguration
 implements FeatureConfiguration {
-    public static final Codec<HugeMushroomFeatureConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockStateProvider.CODEC.fieldOf("cap_provider")).forGetter(hugeMushroomFeatureConfiguration -> hugeMushroomFeatureConfiguration.capProvider), ((MapCodec)BlockStateProvider.CODEC.fieldOf("stem_provider")).forGetter(hugeMushroomFeatureConfiguration -> hugeMushroomFeatureConfiguration.stemProvider), ((MapCodec)Codec.INT.fieldOf("foliage_radius")).withDefault(2).forGetter(hugeMushroomFeatureConfiguration -> hugeMushroomFeatureConfiguration.foliageRadius)).apply((Applicative<HugeMushroomFeatureConfiguration, ?>)instance, HugeMushroomFeatureConfiguration::new));
+    public static final Codec<HugeMushroomFeatureConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)BlockStateProvider.CODEC.fieldOf("cap_provider")).forGetter(hugeMushroomFeatureConfiguration -> hugeMushroomFeatureConfiguration.capProvider), ((MapCodec)BlockStateProvider.CODEC.fieldOf("stem_provider")).forGetter(hugeMushroomFeatureConfiguration -> hugeMushroomFeatureConfiguration.stemProvider), ((MapCodec)Codec.INT.fieldOf("foliage_radius")).orElse(2).forGetter(hugeMushroomFeatureConfiguration -> hugeMushroomFeatureConfiguration.foliageRadius)).apply((Applicative<HugeMushroomFeatureConfiguration, ?>)instance, HugeMushroomFeatureConfiguration::new));
     public final BlockStateProvider capProvider;
     public final BlockStateProvider stemProvider;
     public final int foliageRadius;

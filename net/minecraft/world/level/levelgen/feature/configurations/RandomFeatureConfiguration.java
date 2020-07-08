@@ -7,6 +7,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
+import java.util.function.Supplier;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.WeightedConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
@@ -14,12 +15,16 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfigur
 public class RandomFeatureConfiguration
 implements FeatureConfiguration {
     public static final Codec<RandomFeatureConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.apply2(RandomFeatureConfiguration::new, ((MapCodec)WeightedConfiguredFeature.CODEC.listOf().fieldOf("features")).forGetter(randomFeatureConfiguration -> randomFeatureConfiguration.features), ((MapCodec)ConfiguredFeature.CODEC.fieldOf("default")).forGetter(randomFeatureConfiguration -> randomFeatureConfiguration.defaultFeature)));
-    public final List<WeightedConfiguredFeature<?>> features;
-    public final ConfiguredFeature<?, ?> defaultFeature;
+    public final List<WeightedConfiguredFeature> features;
+    public final Supplier<ConfiguredFeature<?, ?>> defaultFeature;
 
-    public RandomFeatureConfiguration(List<WeightedConfiguredFeature<?>> list, ConfiguredFeature<?, ?> configuredFeature) {
+    public RandomFeatureConfiguration(List<WeightedConfiguredFeature> list, ConfiguredFeature<?, ?> configuredFeature) {
+        this(list, () -> configuredFeature);
+    }
+
+    private RandomFeatureConfiguration(List<WeightedConfiguredFeature> list, Supplier<ConfiguredFeature<?, ?>> supplier) {
         this.features = list;
-        this.defaultFeature = configuredFeature;
+        this.defaultFeature = supplier;
     }
 }
 

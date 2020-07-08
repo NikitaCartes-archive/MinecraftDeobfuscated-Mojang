@@ -64,6 +64,7 @@ import net.minecraft.world.entity.monster.piglin.RememberIfHoglinWasKilled;
 import net.minecraft.world.entity.monster.piglin.StartAdmiringItemIfSeen;
 import net.minecraft.world.entity.monster.piglin.StartHuntingHoglin;
 import net.minecraft.world.entity.monster.piglin.StopAdmiringIfItemTooFarAway;
+import net.minecraft.world.entity.monster.piglin.StopAdmiringIfTiredOfTryingToReachItem;
 import net.minecraft.world.entity.monster.piglin.StopHoldingItemIfNoLongerAdmiring;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
@@ -126,7 +127,7 @@ public class PiglinAi {
     }
 
     private static void initAdmireItemActivity(Brain<Piglin> brain) {
-        brain.addActivityAndRemoveMemoryWhenStopped(Activity.ADMIRE_ITEM, 10, ImmutableList.of(new GoToWantedItem<Piglin>(PiglinAi::isNotHoldingLovedItemInOffHand, 1.0f, true, 9), new StopAdmiringIfItemTooFarAway(9)), MemoryModuleType.ADMIRING_ITEM);
+        brain.addActivityAndRemoveMemoryWhenStopped(Activity.ADMIRE_ITEM, 10, ImmutableList.of(new GoToWantedItem<Piglin>(PiglinAi::isNotHoldingLovedItemInOffHand, 1.0f, true, 9), new StopAdmiringIfItemTooFarAway(9), new StopAdmiringIfTiredOfTryingToReachItem(200, 200)), MemoryModuleType.ADMIRING_ITEM);
     }
 
     private static void initRetreatActivity(Brain<Piglin> brain) {
@@ -196,6 +197,7 @@ public class PiglinAi {
         }
         Item item = itemStack.getItem();
         if (PiglinAi.isLovedItem(item)) {
+            piglin.getBrain().eraseMemory(MemoryModuleType.TIME_TRYING_TO_REACH_ADMIRE_ITEM);
             PiglinAi.holdInOffhand(piglin, itemStack);
             PiglinAi.admireGoldItem(piglin);
             return;

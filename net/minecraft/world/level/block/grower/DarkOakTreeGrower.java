@@ -4,10 +4,9 @@
 package net.minecraft.world.level.block.grower;
 
 import java.util.Random;
-import net.minecraft.world.level.biome.BiomeDefaultFeatures;
+import net.minecraft.data.worldgen.Features;
 import net.minecraft.world.level.block.grower.AbstractMegaTreeGrower;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +21,7 @@ extends AbstractMegaTreeGrower {
     @Override
     @Nullable
     protected ConfiguredFeature<TreeConfiguration, ?> getConfiguredMegaFeature(Random random) {
-        return Feature.TREE.configured(BiomeDefaultFeatures.DARK_OAK_TREE_CONFIG);
+        return Features.DARK_OAK;
     }
 }
 

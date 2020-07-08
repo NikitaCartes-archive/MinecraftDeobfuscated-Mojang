@@ -21,7 +21,7 @@ extends Feature<SimpleRandomFeatureConfiguration> {
     @Override
     public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, SimpleRandomFeatureConfiguration simpleRandomFeatureConfiguration) {
         int i = random.nextInt(simpleRandomFeatureConfiguration.features.size());
-        ConfiguredFeature<?, ?> configuredFeature = simpleRandomFeatureConfiguration.features.get(i);
+        ConfiguredFeature<?, ?> configuredFeature = simpleRandomFeatureConfiguration.features.get(i).get();
         return configuredFeature.place(worldGenLevel, chunkGenerator, random, blockPos);
     }
 }

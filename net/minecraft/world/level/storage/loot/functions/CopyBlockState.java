@@ -90,7 +90,7 @@ extends LootItemConditionalFunction {
         @Override
         public CopyBlockState deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "block"));
-            Block block = (Block)Registry.BLOCK.getOptional(resourceLocation).orElseThrow(() -> new IllegalArgumentException("Can't find block " + resourceLocation));
+            Block block = Registry.BLOCK.getOptional(resourceLocation).orElseThrow(() -> new IllegalArgumentException("Can't find block " + resourceLocation));
             StateDefinition<Block, BlockState> stateDefinition = block.getStateDefinition();
             HashSet set = Sets.newHashSet();
             JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "properties", null);

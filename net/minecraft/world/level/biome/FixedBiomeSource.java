@@ -10,22 +10,26 @@ import com.mojang.serialization.MapCodec;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import org.jetbrains.annotations.Nullable;
 
 public class FixedBiomeSource
 extends BiomeSource {
-    public static final Codec<FixedBiomeSource> CODEC = ((MapCodec)Registry.BIOME.fieldOf("biome")).xmap(FixedBiomeSource::new, fixedBiomeSource -> fixedBiomeSource.biome).stable().codec();
-    private final Biome biome;
+    public static final Codec<FixedBiomeSource> CODEC = ((MapCodec)Biome.CODEC.fieldOf("biome")).xmap(FixedBiomeSource::new, fixedBiomeSource -> fixedBiomeSource.biome).stable().codec();
+    private final Supplier<Biome> biome;
 
     public FixedBiomeSource(Biome biome) {
-        super(ImmutableList.of(biome));
-        this.biome = biome;
+        this(() -> biome);
+    }
+
+    public FixedBiomeSource(Supplier<Biome> supplier) {
+        super(ImmutableList.of(supplier.get()));
+        this.biome = supplier;
     }
 
     @Override
@@ -41,13 +45,13 @@ extends BiomeSource {
 
     @Override
     public Biome getNoiseBiome(int i, int j, int k) {
-        return this.biome;
+        return this.biome.get();
     }
 
     @Override
     @Nullable
     public BlockPos findBiomeHorizontal(int i, int j, int k, int l, int m, List<Biome> list, Random random, boolean bl) {
-        if (list.contains(this.biome)) {
+        if (list.contains(this.biome.get())) {
             if (bl) {
                 return new BlockPos(i, j, k);
             }
@@ -58,7 +62,7 @@ extends BiomeSource {
 
     @Override
     public Set<Biome> getBiomesWithin(int i, int j, int k, int l) {
-        return Sets.newHashSet(this.biome);
+        return Sets.newHashSet(this.biome.get());
     }
 }
 

@@ -27,6 +27,7 @@ implements IdMap<K> {
         this.byId = new Object[i];
     }
 
+    @Override
     public int getId(@Nullable K object) {
         return this.getValue(this.indexOf(object, this.hash(object)));
     }

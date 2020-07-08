@@ -32,6 +32,7 @@ import net.minecraft.client.searchtree.MutableSearchTree;
 import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -340,6 +341,7 @@ extends EffectRenderingInventoryScreen<ItemPickerMenu> {
                 searchTree = this.minecraft.getSearchTree(SearchRegistry.CREATIVE_TAGS);
                 this.updateVisibleTags(string);
             } else {
+                string = Language.getInstance().reorder(string, false);
                 searchTree = this.minecraft.getSearchTree(SearchRegistry.CREATIVE_NAMES);
             }
             ((ItemPickerMenu)this.menu).items.addAll(searchTree.search(string.toLowerCase(Locale.ROOT)));

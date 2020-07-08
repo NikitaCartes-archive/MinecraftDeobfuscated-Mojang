@@ -22,7 +22,6 @@ import net.minecraft.resources.DelegatingOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.Codecs;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,15 +42,15 @@ extends DelegatingOps<T> {
         this.registryHolder = registryAccess;
     }
 
-    protected <E> DataResult<Pair<java.util.function.Supplier<E>, T>> decodeElement(T object, ResourceKey<Registry<E>> resourceKey, MapCodec<E> mapCodec) {
-        Optional<WritableRegistry<E>> optional = this.registryHolder.registry(resourceKey);
+    protected <E> DataResult<Pair<java.util.function.Supplier<E>, T>> decodeElement(T object, ResourceKey<? extends Registry<E>> resourceKey, MapCodec<E> mapCodec) {
+        Optional optional = this.registryHolder.registry(resourceKey);
         if (!optional.isPresent()) {
             return DataResult.error("Unknown registry: " + resourceKey);
         }
         WritableRegistry writableRegistry = optional.get();
         DataResult dataResult = ResourceLocation.CODEC.decode(this.delegate, object);
         if (!dataResult.result().isPresent()) {
-            return Codecs.withName(resourceKey, mapCodec).codec().decode(this.delegate, object).map(pair2 -> pair2.mapFirst(pair -> {
+            return MappedRegistry.withName(resourceKey, mapCodec).codec().decode(this.delegate, object).map(pair2 -> pair2.mapFirst(pair -> {
                 writableRegistry.register((ResourceKey)pair.getFirst(), pair.getSecond());
                 writableRegistry.setPersistent((ResourceKey)pair.getFirst());
                 return pair::getSecond;
@@ -62,7 +61,7 @@ extends DelegatingOps<T> {
         return this.readAndRegisterElement(resourceKey, writableRegistry, mapCodec, resourceLocation).map(supplier -> Pair.of(supplier, pair.getSecond()));
     }
 
-    public <E> DataResult<MappedRegistry<E>> decodeElements(MappedRegistry<E> mappedRegistry2, ResourceKey<Registry<E>> resourceKey, MapCodec<E> mapCodec) {
+    public <E> DataResult<MappedRegistry<E>> decodeElements(MappedRegistry<E> mappedRegistry2, ResourceKey<? extends Registry<E>> resourceKey, MapCodec<E> mapCodec) {
         ResourceLocation resourceLocation = resourceKey.location();
         Collection<ResourceLocation> collection = this.resourceManager.listResources(resourceLocation, string -> string.endsWith(".json"));
         DataResult<MappedRegistry<Object>> dataResult = DataResult.success(mappedRegistry2, Lifecycle.stable());
@@ -90,7 +89,7 @@ extends DelegatingOps<T> {
         return dataResult.setPartial(mappedRegistry2);
     }
 
-    private <E> DataResult<java.util.function.Supplier<E>> readAndRegisterElement(ResourceKey<Registry<E>> resourceKey, WritableRegistry<E> writableRegistry, MapCodec<E> mapCodec, ResourceLocation resourceLocation) {
+    private <E> DataResult<java.util.function.Supplier<E>> readAndRegisterElement(ResourceKey<? extends Registry<E>> resourceKey, WritableRegistry<E> writableRegistry, MapCodec<E> mapCodec, ResourceLocation resourceLocation) {
         ResourceKey resourceKey2 = ResourceKey.create(resourceKey, resourceLocation);
         Object object2 = writableRegistry.get(resourceKey2);
         if (object2 != null) {
@@ -109,7 +108,7 @@ extends DelegatingOps<T> {
             return object;
         });
         ((ReadCache)readCache).values.put(resourceKey2, DataResult.success(supplier));
-        DataResult<E> dataResult2 = this.readElementFromFile(resourceKey, resourceKey2, mapCodec);
+        DataResult<java.util.function.Supplier> dataResult2 = this.readElementFromFile(resourceKey, resourceKey2, mapCodec);
         dataResult2.result().ifPresent(object -> writableRegistry.register(resourceKey2, object));
         DataResult<java.util.function.Supplier<E>> dataResult3 = dataResult2.map(object -> () -> object);
         ((ReadCache)readCache).values.put(resourceKey2, dataResult3);
@@ -119,7 +118,7 @@ extends DelegatingOps<T> {
     /*
      * Exception decompiling
      */
-    private <E> DataResult<E> readElementFromFile(ResourceKey<Registry<E>> resourceKey, ResourceKey<E> resourceKey2, MapCodec<E> mapCodec) {
+    private <E> DataResult<E> readElementFromFile(ResourceKey<? extends Registry<E>> resourceKey, ResourceKey<E> resourceKey2, MapCodec<E> mapCodec) {
         /*
          * This method has failed to decompile.  When submitting a bug report, please provide this stack trace, and (if you hold appropriate legal rights) the relevant class file.
          * 
@@ -169,7 +168,7 @@ extends DelegatingOps<T> {
         throw new IllegalStateException("Decompilation failed");
     }
 
-    private <E> ReadCache<E> readCache(ResourceKey<Registry<E>> resourceKey2) {
+    private <E> ReadCache<E> readCache(ResourceKey<? extends Registry<E>> resourceKey2) {
         return this.readCache.computeIfAbsent(resourceKey2, resourceKey -> new ReadCache());
     }
 

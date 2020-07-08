@@ -258,7 +258,7 @@ public class BlockStateParser {
     public void readBlock() throws CommandSyntaxException {
         int i = this.reader.getCursor();
         this.id = ResourceLocation.read(this.reader);
-        Block block = (Block)Registry.BLOCK.getOptional(this.id).orElseThrow(() -> {
+        Block block = Registry.BLOCK.getOptional(this.id).orElseThrow(() -> {
             this.reader.setCursor(i);
             return ERROR_UNKNOWN_BLOCK.createWithContext(this.reader, this.id.toString());
         });

@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.level.block;
 
-import com.google.common.cache.LoadingCache;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -13,7 +12,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
@@ -29,13 +27,11 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.portal.PortalShape;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jetbrains.annotations.Nullable;
 
 public class NetherPortalBlock
 extends Block {
@@ -69,28 +65,6 @@ extends Block {
                 entity.setPortalCooldown();
             }
         }
-    }
-
-    public static boolean trySpawnPortal(LevelAccessor levelAccessor, BlockPos blockPos) {
-        PortalShape portalShape = NetherPortalBlock.isPortal(levelAccessor, blockPos);
-        if (portalShape != null) {
-            portalShape.createPortalBlocks();
-            return true;
-        }
-        return false;
-    }
-
-    @Nullable
-    public static PortalShape isPortal(LevelAccessor levelAccessor, BlockPos blockPos) {
-        PortalShape portalShape = new PortalShape(levelAccessor, blockPos, Direction.Axis.X);
-        if (portalShape.isValid() && portalShape.numPortalBlocks == 0) {
-            return portalShape;
-        }
-        PortalShape portalShape2 = new PortalShape(levelAccessor, blockPos, Direction.Axis.Z);
-        if (portalShape2.isValid() && portalShape2.numPortalBlocks == 0) {
-            return portalShape2;
-        }
-        return null;
     }
 
     @Override
@@ -165,152 +139,6 @@ extends Block {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(AXIS);
-    }
-
-    public static BlockPattern.BlockPatternMatch getPortalShape(LevelAccessor levelAccessor, BlockPos blockPos) {
-        Direction.Axis axis = Direction.Axis.Z;
-        PortalShape portalShape = new PortalShape(levelAccessor, blockPos, Direction.Axis.X);
-        LoadingCache<BlockPos, BlockInWorld> loadingCache = BlockPattern.createLevelCache(levelAccessor, true);
-        if (!portalShape.isValid()) {
-            axis = Direction.Axis.X;
-            portalShape = new PortalShape(levelAccessor, blockPos, Direction.Axis.Z);
-        }
-        if (!portalShape.isValid()) {
-            return new BlockPattern.BlockPatternMatch(blockPos, Direction.NORTH, Direction.UP, loadingCache, 1, 1, 1);
-        }
-        int[] is = new int[Direction.AxisDirection.values().length];
-        Direction direction = portalShape.rightDir.getCounterClockWise();
-        BlockPos blockPos2 = portalShape.bottomLeft.above(portalShape.getHeight() - 1);
-        for (Direction.AxisDirection axisDirection : Direction.AxisDirection.values()) {
-            BlockPattern.BlockPatternMatch blockPatternMatch = new BlockPattern.BlockPatternMatch(direction.getAxisDirection() == axisDirection ? blockPos2 : blockPos2.relative(portalShape.rightDir, portalShape.getWidth() - 1), Direction.get(axisDirection, axis), Direction.UP, loadingCache, portalShape.getWidth(), portalShape.getHeight(), 1);
-            for (int i = 0; i < portalShape.getWidth(); ++i) {
-                for (int j = 0; j < portalShape.getHeight(); ++j) {
-                    BlockInWorld blockInWorld = blockPatternMatch.getBlock(i, j, 1);
-                    if (blockInWorld.getState().isAir()) continue;
-                    int n = axisDirection.ordinal();
-                    is[n] = is[n] + 1;
-                }
-            }
-        }
-        Direction.AxisDirection axisDirection2 = Direction.AxisDirection.POSITIVE;
-        for (Direction.AxisDirection axisDirection3 : Direction.AxisDirection.values()) {
-            if (is[axisDirection3.ordinal()] >= is[axisDirection2.ordinal()]) continue;
-            axisDirection2 = axisDirection3;
-        }
-        return new BlockPattern.BlockPatternMatch(direction.getAxisDirection() == axisDirection2 ? blockPos2 : blockPos2.relative(portalShape.rightDir, portalShape.getWidth() - 1), Direction.get(axisDirection2, axis), Direction.UP, loadingCache, portalShape.getWidth(), portalShape.getHeight(), 1);
-    }
-
-    public static class PortalShape {
-        private final LevelAccessor level;
-        private final Direction.Axis axis;
-        private final Direction rightDir;
-        private final Direction leftDir;
-        private int numPortalBlocks;
-        @Nullable
-        private BlockPos bottomLeft;
-        private int height;
-        private int width;
-
-        public PortalShape(LevelAccessor levelAccessor, BlockPos blockPos, Direction.Axis axis) {
-            this.level = levelAccessor;
-            this.axis = axis;
-            if (axis == Direction.Axis.X) {
-                this.leftDir = Direction.EAST;
-                this.rightDir = Direction.WEST;
-            } else {
-                this.leftDir = Direction.NORTH;
-                this.rightDir = Direction.SOUTH;
-            }
-            BlockPos blockPos2 = blockPos;
-            while (blockPos.getY() > blockPos2.getY() - 21 && blockPos.getY() > 0 && this.isEmpty(levelAccessor.getBlockState(blockPos.below()))) {
-                blockPos = blockPos.below();
-            }
-            int i = this.getDistanceUntilEdge(blockPos, this.leftDir) - 1;
-            if (i >= 0) {
-                this.bottomLeft = blockPos.relative(this.leftDir, i);
-                this.width = this.getDistanceUntilEdge(this.bottomLeft, this.rightDir);
-                if (this.width < 2 || this.width > 21) {
-                    this.bottomLeft = null;
-                    this.width = 0;
-                }
-            }
-            if (this.bottomLeft != null) {
-                this.height = this.calculatePortalHeight();
-            }
-        }
-
-        protected int getDistanceUntilEdge(BlockPos blockPos, Direction direction) {
-            BlockPos blockPos2;
-            int i;
-            for (i = 0; i < 22 && this.isEmpty(this.level.getBlockState(blockPos2 = blockPos.relative(direction, i))) && this.level.getBlockState(blockPos2.below()).is(Blocks.OBSIDIAN); ++i) {
-            }
-            if (this.level.getBlockState(blockPos.relative(direction, i)).is(Blocks.OBSIDIAN)) {
-                return i;
-            }
-            return 0;
-        }
-
-        public int getHeight() {
-            return this.height;
-        }
-
-        public int getWidth() {
-            return this.width;
-        }
-
-        protected int calculatePortalHeight() {
-            int i;
-            this.height = 0;
-            block0: while (this.height < 21) {
-                for (i = 0; i < this.width; ++i) {
-                    BlockPos blockPos = this.bottomLeft.relative(this.rightDir, i).above(this.height);
-                    BlockState blockState = this.level.getBlockState(blockPos);
-                    if (!this.isEmpty(blockState)) break block0;
-                    if (blockState.is(Blocks.NETHER_PORTAL)) {
-                        ++this.numPortalBlocks;
-                    }
-                    if (i == 0 ? !this.level.getBlockState(blockPos.relative(this.leftDir)).is(Blocks.OBSIDIAN) : i == this.width - 1 && !this.level.getBlockState(blockPos.relative(this.rightDir)).is(Blocks.OBSIDIAN)) break block0;
-                }
-                ++this.height;
-            }
-            for (i = 0; i < this.width; ++i) {
-                if (this.level.getBlockState(this.bottomLeft.relative(this.rightDir, i).above(this.height)).is(Blocks.OBSIDIAN)) continue;
-                this.height = 0;
-                break;
-            }
-            if (this.height > 21 || this.height < 3) {
-                this.bottomLeft = null;
-                this.width = 0;
-                this.height = 0;
-                return 0;
-            }
-            return this.height;
-        }
-
-        protected boolean isEmpty(BlockState blockState) {
-            return blockState.isAir() || blockState.is(BlockTags.FIRE) || blockState.is(Blocks.NETHER_PORTAL);
-        }
-
-        public boolean isValid() {
-            return this.bottomLeft != null && this.width >= 2 && this.width <= 21 && this.height >= 3 && this.height <= 21;
-        }
-
-        public void createPortalBlocks() {
-            for (int i = 0; i < this.width; ++i) {
-                BlockPos blockPos = this.bottomLeft.relative(this.rightDir, i);
-                for (int j = 0; j < this.height; ++j) {
-                    this.level.setBlock(blockPos.above(j), (BlockState)Blocks.NETHER_PORTAL.defaultBlockState().setValue(AXIS, this.axis), 18);
-                }
-            }
-        }
-
-        private boolean hasAllPortalBlocks() {
-            return this.numPortalBlocks >= this.width * this.height;
-        }
-
-        public boolean isComplete() {
-            return this.isValid() && this.hasAllPortalBlocks();
-        }
     }
 }
 

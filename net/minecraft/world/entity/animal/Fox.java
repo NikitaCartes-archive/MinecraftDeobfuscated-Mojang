@@ -882,7 +882,7 @@ extends Animal {
         public final Type type;
 
         public FoxGroupData(Type type) {
-            this.setShouldSpawnBaby(false);
+            super(false);
             this.type = type;
         }
     }

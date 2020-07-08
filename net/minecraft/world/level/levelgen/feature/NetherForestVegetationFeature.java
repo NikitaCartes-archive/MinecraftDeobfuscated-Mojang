@@ -28,9 +28,8 @@ extends Feature<BlockPileConfiguration> {
 
     public static boolean place(LevelAccessor levelAccessor, Random random, BlockPos blockPos, BlockPileConfiguration blockPileConfiguration, int i, int j) {
         Block block = levelAccessor.getBlockState(blockPos.below()).getBlock();
-        while (!block.is(BlockTags.NYLIUM) && blockPos.getY() > 0) {
-            blockPos = blockPos.below();
-            block = levelAccessor.getBlockState(blockPos).getBlock();
+        if (!block.is(BlockTags.NYLIUM)) {
+            return false;
         }
         int k = blockPos.getY();
         if (k < 1 || k + 1 >= 256) {

@@ -22,6 +22,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -69,8 +70,6 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.Scoreboard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -165,40 +164,6 @@ AutoCloseable {
 
     public static boolean isOutsideBuildHeight(int i) {
         return i < 0 || i >= 256;
-    }
-
-    public double getRelativeFloorHeight(BlockPos blockPos) {
-        return this.getRelativeFloorHeight(blockPos, blockState -> false);
-    }
-
-    public double getRelativeFloorHeight(BlockPos blockPos, Predicate<BlockState> predicate) {
-        VoxelShape voxelShape;
-        BlockState blockState = this.getBlockState(blockPos);
-        VoxelShape voxelShape2 = voxelShape = predicate.test(blockState) ? Shapes.empty() : blockState.getCollisionShape(this, blockPos);
-        if (voxelShape.isEmpty()) {
-            BlockPos blockPos2 = blockPos.below();
-            BlockState blockState2 = this.getBlockState(blockPos2);
-            VoxelShape voxelShape22 = predicate.test(blockState2) ? Shapes.empty() : blockState2.getCollisionShape(this, blockPos2);
-            double d = voxelShape22.max(Direction.Axis.Y);
-            if (d >= 1.0) {
-                return d - 1.0;
-            }
-            return Double.NEGATIVE_INFINITY;
-        }
-        return voxelShape.max(Direction.Axis.Y);
-    }
-
-    public double getRelativeCeilingHeight(BlockPos blockPos, double d) {
-        BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
-        int i = Mth.ceil(d);
-        for (int j = 0; j < i; ++j) {
-            VoxelShape voxelShape = this.getBlockState(mutableBlockPos).getCollisionShape(this, mutableBlockPos);
-            if (!voxelShape.isEmpty()) {
-                return (double)j + voxelShape.min(Direction.Axis.Y);
-            }
-            mutableBlockPos.move(Direction.UP);
-        }
-        return Double.POSITIVE_INFINITY;
     }
 
     public LevelChunk getChunkAt(BlockPos blockPos) {
@@ -1026,6 +991,8 @@ AutoCloseable {
     public final boolean isDebug() {
         return this.isDebug;
     }
+
+    public abstract RegistryAccess registryAccess();
 
     @Override
     public /* synthetic */ ChunkAccess getChunk(int i, int j) {

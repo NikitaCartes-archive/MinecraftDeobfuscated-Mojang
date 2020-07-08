@@ -931,9 +931,9 @@ Saddleable {
             do {
                 Vec3 vec32;
                 AABB aABB;
-                double h = this.level.getRelativeFloorHeight(mutableBlockPos);
+                double h = this.level.getBlockFloorHeight(mutableBlockPos);
                 if ((double)mutableBlockPos.getY() + h > g) continue block0;
-                if (DismountHelper.isFloorValid(h) && DismountHelper.canDismountTo(this.level, livingEntity, (aABB = livingEntity.getLocalBoundsForPose(pose)).move(vec32 = new Vec3(d, (double)mutableBlockPos.getY() + h, f)))) {
+                if (DismountHelper.isBlockFloorValid(h) && DismountHelper.canDismountTo(this.level, livingEntity, (aABB = livingEntity.getLocalBoundsForPose(pose)).move(vec32 = new Vec3(d, (double)mutableBlockPos.getY() + h, f)))) {
                     livingEntity.setPose(pose);
                     return vec32;
                 }
@@ -965,8 +965,7 @@ Saddleable {
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         if (spawnGroupData == null) {
-            spawnGroupData = new AgableMob.AgableMobGroupData();
-            ((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(0.2f);
+            spawnGroupData = new AgableMob.AgableMobGroupData(0.2f);
         }
         this.randomizeAttributes();
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);

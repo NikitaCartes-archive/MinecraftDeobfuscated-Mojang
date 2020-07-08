@@ -42,7 +42,7 @@ public class ChunkStatus {
     public static final ChunkStatus STRUCTURE_STARTS = ChunkStatus.register("structure_starts", EMPTY, 0, PRE_FEATURES, ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, structureManager, threadedLevelLightEngine, function, list, chunkAccess) -> {
         if (!chunkAccess.getStatus().isOrAfter(chunkStatus)) {
             if (serverLevel.getServer().getWorldData().worldGenSettings().generateFeatures()) {
-                chunkGenerator.createStructures(serverLevel.structureFeatureManager(), chunkAccess, structureManager, serverLevel.getSeed());
+                chunkGenerator.createStructures(serverLevel.registryAccess(), serverLevel.structureFeatureManager(), chunkAccess, structureManager, serverLevel.getSeed());
             }
             if (chunkAccess instanceof ProtoChunk) {
                 ((ProtoChunk)chunkAccess).setStatus(chunkStatus);
@@ -54,7 +54,7 @@ public class ChunkStatus {
         WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list);
         chunkGenerator.createReferences(worldGenRegion, serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess);
     });
-    public static final ChunkStatus BIOMES = ChunkStatus.registerSimple("biomes", STRUCTURE_REFERENCES, 0, PRE_FEATURES, ChunkType.PROTOCHUNK, (serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.createBiomes(chunkAccess));
+    public static final ChunkStatus BIOMES = ChunkStatus.registerSimple("biomes", STRUCTURE_REFERENCES, 0, PRE_FEATURES, ChunkType.PROTOCHUNK, (serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.createBiomes(serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunkAccess));
     public static final ChunkStatus NOISE = ChunkStatus.registerSimple("noise", BIOMES, 8, PRE_FEATURES, ChunkType.PROTOCHUNK, (serverLevel, chunkGenerator, list, chunkAccess) -> {
         WorldGenRegion worldGenRegion = new WorldGenRegion(serverLevel, list);
         chunkGenerator.fillFromNoise(worldGenRegion, serverLevel.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunkAccess);

@@ -609,17 +609,16 @@ extends Entity {
         BlockPos blockPos = new BlockPos(d, this.getBoundingBox().maxY, e = this.getZ() + vec3.z);
         BlockPos blockPos2 = blockPos.below();
         if (!this.level.isWaterAt(blockPos2)) {
+            double f = (double)blockPos.getY() + this.level.getBlockFloorHeight(blockPos);
+            double g = (double)blockPos.getY() + this.level.getBlockFloorHeight(blockPos2);
             for (Pose pose : livingEntity.getDismountPoses()) {
-                Vec3 vec33;
-                Vec3 vec32;
-                AABB aABB = livingEntity.getLocalBoundsForPose(pose);
-                double f = this.level.getRelativeFloorHeight(blockPos);
-                if (DismountHelper.isFloorValid(f) && DismountHelper.canDismountTo(this.level, livingEntity, aABB.move(vec32 = new Vec3(d, (double)blockPos.getY() + f, e)))) {
+                Vec3 vec32 = DismountHelper.findDismountLocation(this.level, d, f, e, livingEntity, pose);
+                if (vec32 != null) {
                     livingEntity.setPose(pose);
                     return vec32;
                 }
-                double g = this.level.getRelativeFloorHeight(blockPos2);
-                if (!DismountHelper.isFloorValid(g) || !DismountHelper.canDismountTo(this.level, livingEntity, aABB.move(vec33 = new Vec3(d, (double)blockPos2.getY() + g, e)))) continue;
+                Vec3 vec33 = DismountHelper.findDismountLocation(this.level, d, g, e, livingEntity, pose);
+                if (vec33 == null) continue;
                 livingEntity.setPose(pose);
                 return vec33;
             }

@@ -571,8 +571,8 @@ extends Animal {
         public final int rabbitType;
 
         public RabbitGroupData(int i) {
+            super(1.0f);
             this.rabbitType = i;
-            this.setBabySpawnChance(1.0f);
         }
     }
 }

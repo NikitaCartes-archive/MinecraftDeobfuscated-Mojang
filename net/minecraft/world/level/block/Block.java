@@ -32,11 +32,11 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
@@ -47,6 +47,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.SupportType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -77,8 +78,6 @@ implements ItemLike {
             return this.load((VoxelShape)object);
         }
     });
-    private static final VoxelShape RIGID_SUPPORT_SHAPE = Shapes.join(Shapes.block(), Block.box(2.0, 0.0, 2.0, 14.0, 16.0, 14.0), BooleanOp.ONLY_FIRST);
-    private static final VoxelShape CENTER_SUPPORT_SHAPE = Block.box(7.0, 0.0, 7.0, 9.0, 10.0, 9.0);
     protected final StateDefinition<Block, BlockState> stateDefinition;
     private BlockState defaultBlockState;
     @Nullable
@@ -207,8 +206,7 @@ implements ItemLike {
     }
 
     public static boolean canSupportRigidBlock(BlockGetter blockGetter, BlockPos blockPos) {
-        BlockState blockState = blockGetter.getBlockState(blockPos);
-        return blockState.isCollisionShapeFullBlock(blockGetter, blockPos) && blockState.isFaceSturdy(blockGetter, blockPos, Direction.UP) || !Shapes.joinIsNotEmpty(blockState.getBlockSupportShape(blockGetter, blockPos).getFaceShape(Direction.UP), RIGID_SUPPORT_SHAPE, BooleanOp.ONLY_SECOND);
+        return blockGetter.getBlockState(blockPos).isFaceSturdy(blockGetter, blockPos, Direction.UP, SupportType.RIGID);
     }
 
     public static boolean canSupportCenter(LevelReader levelReader, BlockPos blockPos, Direction direction) {
@@ -216,11 +214,7 @@ implements ItemLike {
         if (direction == Direction.DOWN && blockState.is(BlockTags.UNSTABLE_BOTTOM_CENTER)) {
             return false;
         }
-        return !Shapes.joinIsNotEmpty(blockState.getBlockSupportShape(levelReader, blockPos).getFaceShape(direction), CENTER_SUPPORT_SHAPE, BooleanOp.ONLY_SECOND);
-    }
-
-    public static boolean isFaceSturdy(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
-        return Block.isFaceFull(blockState.getBlockSupportShape(blockGetter, blockPos), direction);
+        return blockState.isFaceSturdy(levelReader, blockPos, direction, SupportType.CENTER);
     }
 
     public static boolean isFaceFull(VoxelShape voxelShape, Direction direction) {

@@ -12,6 +12,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
@@ -135,7 +136,7 @@ extends StructureFeature<RuinedPortalConfiguration> {
         }
 
         @Override
-        public void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, RuinedPortalConfiguration ruinedPortalConfiguration) {
+        public void generatePieces(RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, RuinedPortalConfiguration ruinedPortalConfiguration) {
             boolean bl;
             RuinedPortalPiece.VerticalPlacement verticalPlacement;
             RuinedPortalPiece.Properties properties = new RuinedPortalPiece.Properties();

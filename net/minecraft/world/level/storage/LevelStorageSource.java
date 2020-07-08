@@ -14,8 +14,6 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
@@ -159,7 +157,7 @@ public class LevelStorageSource {
     @Nullable
     private static DataPackConfig getDataPacks(File file, DataFixer dataFixer) {
         try {
-            CompoundTag compoundTag = NbtIo.readCompressed(new FileInputStream(file));
+            CompoundTag compoundTag = NbtIo.readCompressed(file);
             CompoundTag compoundTag2 = compoundTag.getCompound("Data");
             compoundTag2.remove("Player");
             int i = compoundTag2.contains("DataVersion", 99) ? compoundTag2.getInt("DataVersion") : -1;
@@ -174,7 +172,7 @@ public class LevelStorageSource {
     private static BiFunction<File, DataFixer, PrimaryLevelData> getLevelData(DynamicOps<Tag> dynamicOps, DataPackConfig dataPackConfig) {
         return (file, dataFixer) -> {
             try {
-                CompoundTag compoundTag = NbtIo.readCompressed(new FileInputStream((File)file));
+                CompoundTag compoundTag = NbtIo.readCompressed(file);
                 CompoundTag compoundTag2 = compoundTag.getCompound("Data");
                 CompoundTag compoundTag3 = compoundTag2.contains("Player", 10) ? compoundTag2.getCompound("Player") : null;
                 compoundTag2.remove("Player");
@@ -194,7 +192,7 @@ public class LevelStorageSource {
     private BiFunction<File, DataFixer, LevelSummary> levelSummaryReader(File file, boolean bl) {
         return (file2, dataFixer) -> {
             try {
-                CompoundTag compoundTag = NbtIo.readCompressed(new FileInputStream((File)file2));
+                CompoundTag compoundTag = NbtIo.readCompressed(file2);
                 CompoundTag compoundTag2 = compoundTag.getCompound("Data");
                 compoundTag2.remove("Player");
                 int i = compoundTag2.contains("DataVersion", 99) ? compoundTag2.getInt("DataVersion") : -1;
@@ -322,7 +320,7 @@ public class LevelStorageSource {
             compoundTag3.put("Data", compoundTag2);
             try {
                 File file2 = File.createTempFile("level", ".dat", file);
-                NbtIo.writeCompressed(compoundTag3, new FileOutputStream(file2));
+                NbtIo.writeCompressed(compoundTag3, file2);
                 File file3 = new File(file, "level.dat_old");
                 File file4 = new File(file, "level.dat");
                 Util.safeReplaceFile(file4, file2, file3);
@@ -400,10 +398,10 @@ public class LevelStorageSource {
             }
             File file2 = new File(file, "level.dat");
             if (file2.exists()) {
-                CompoundTag compoundTag = NbtIo.readCompressed(new FileInputStream(file2));
+                CompoundTag compoundTag = NbtIo.readCompressed(file2);
                 CompoundTag compoundTag2 = compoundTag.getCompound("Data");
                 compoundTag2.putString("LevelName", string);
-                NbtIo.writeCompressed(compoundTag, new FileOutputStream(file2));
+                NbtIo.writeCompressed(compoundTag, file2);
             }
         }
 

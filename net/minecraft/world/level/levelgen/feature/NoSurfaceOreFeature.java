@@ -25,7 +25,7 @@ extends Feature<OreConfiguration> {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int j = 0; j < i; ++j) {
             this.offsetTargetPos(mutableBlockPos, random, blockPos, Math.min(j, 7));
-            if (!oreConfiguration.target.getPredicate().test(worldGenLevel.getBlockState(mutableBlockPos)) || this.isFacingAir(worldGenLevel, mutableBlockPos)) continue;
+            if (!oreConfiguration.target.test(worldGenLevel.getBlockState(mutableBlockPos), random) || this.isFacingAir(worldGenLevel, mutableBlockPos)) continue;
             worldGenLevel.setBlock(mutableBlockPos, oreConfiguration.state, 2);
         }
         return true;

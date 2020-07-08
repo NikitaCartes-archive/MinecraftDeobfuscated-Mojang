@@ -26,7 +26,7 @@ extends Feature<NoneFeatureConfiguration> {
     @Override
     public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration) {
         BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
-        block0: for (int i = blockPos.getY(); i < 256; ++i) {
+        block0: for (int i = 64; i < 256; ++i) {
             mutableBlockPos.set(blockPos);
             mutableBlockPos.move(random.nextInt(4) - random.nextInt(4), 0, random.nextInt(4) - random.nextInt(4));
             mutableBlockPos.setY(i);

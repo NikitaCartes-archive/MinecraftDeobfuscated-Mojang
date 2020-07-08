@@ -34,6 +34,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.network.Connection;
 import net.minecraft.network.PacketDecoder;
 import net.minecraft.network.PacketEncoder;
+import net.minecraft.network.RateKickingConnection;
 import net.minecraft.network.Varint21FrameDecoder;
 import net.minecraft.network.Varint21LengthFieldPrepender;
 import net.minecraft.network.chat.TextComponent;
@@ -89,7 +90,8 @@ public class ServerConnectionListener {
                         // empty catch block
                     }
                     channel.pipeline().addLast("timeout", (ChannelHandler)new ReadTimeoutHandler(30)).addLast("legacy_query", (ChannelHandler)new LegacyQueryHandler(ServerConnectionListener.this)).addLast("splitter", (ChannelHandler)new Varint21FrameDecoder()).addLast("decoder", (ChannelHandler)new PacketDecoder(PacketFlow.SERVERBOUND)).addLast("prepender", (ChannelHandler)new Varint21LengthFieldPrepender()).addLast("encoder", (ChannelHandler)new PacketEncoder(PacketFlow.CLIENTBOUND));
-                    Connection connection = new Connection(PacketFlow.SERVERBOUND);
+                    int i = ServerConnectionListener.this.server.getRateLimitPacketsPerSecond();
+                    Connection connection = i > 0 ? new RateKickingConnection(i) : new Connection(PacketFlow.SERVERBOUND);
                     ServerConnectionListener.this.connections.add(connection);
                     channel.pipeline().addLast("packet_handler", (ChannelHandler)connection);
                     connection.setListener(new ServerHandshakePacketListenerImpl(ServerConnectionListener.this.server, connection));

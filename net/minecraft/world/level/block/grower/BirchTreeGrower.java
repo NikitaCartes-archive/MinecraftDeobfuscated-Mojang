@@ -4,10 +4,9 @@
 package net.minecraft.world.level.block.grower;
 
 import java.util.Random;
-import net.minecraft.world.level.biome.BiomeDefaultFeatures;
+import net.minecraft.data.worldgen.Features;
 import net.minecraft.world.level.block.grower.AbstractTreeGrower;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,7 +15,7 @@ extends AbstractTreeGrower {
     @Override
     @Nullable
     protected ConfiguredFeature<TreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl) {
-        return Feature.TREE.configured(bl ? BiomeDefaultFeatures.BIRCH_TREE_WITH_BEES_005_CONFIG : BiomeDefaultFeatures.BIRCH_TREE_CONFIG);
+        return bl ? Features.BIRCH_BEES_005 : Features.BIRCH;
     }
 }
 

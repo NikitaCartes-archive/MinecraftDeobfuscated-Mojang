@@ -8,6 +8,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.UniformInt;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
@@ -18,8 +19,8 @@ public class AcaciaFoliagePlacer
 extends FoliagePlacer {
     public static final Codec<AcaciaFoliagePlacer> CODEC = RecordCodecBuilder.create(instance -> AcaciaFoliagePlacer.foliagePlacerParts(instance).apply(instance, AcaciaFoliagePlacer::new));
 
-    public AcaciaFoliagePlacer(int i, int j, int k, int l) {
-        super(i, j, k, l);
+    public AcaciaFoliagePlacer(UniformInt uniformInt, UniformInt uniformInt2) {
+        super(uniformInt, uniformInt2);
     }
 
     @Override

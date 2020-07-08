@@ -61,7 +61,35 @@ extends Vec3i {
         int i = SectionPos.sectionRelative(blockPos.getX());
         int j = SectionPos.sectionRelative(blockPos.getY());
         int k = SectionPos.sectionRelative(blockPos.getZ());
-        return (short)(i << 8 | k << 4 | j);
+        return (short)(i << 8 | k << 4 | j << 0);
+    }
+
+    public static int sectionRelativeX(short s) {
+        return s >>> 8 & 0xF;
+    }
+
+    public static int sectionRelativeY(short s) {
+        return s >>> 0 & 0xF;
+    }
+
+    public static int sectionRelativeZ(short s) {
+        return s >>> 4 & 0xF;
+    }
+
+    public int relativeToBlockX(short s) {
+        return this.minBlockX() + SectionPos.sectionRelativeX(s);
+    }
+
+    public int relativeToBlockY(short s) {
+        return this.minBlockY() + SectionPos.sectionRelativeY(s);
+    }
+
+    public int relativeToBlockZ(short s) {
+        return this.minBlockZ() + SectionPos.sectionRelativeZ(s);
+    }
+
+    public BlockPos relativeToBlockPos(short s) {
+        return new BlockPos(this.relativeToBlockX(s), this.relativeToBlockY(s), this.relativeToBlockZ(s));
     }
 
     public static int sectionToBlockCoord(int i) {

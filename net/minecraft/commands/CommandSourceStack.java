@@ -21,6 +21,7 @@ import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
@@ -272,6 +273,11 @@ implements SharedSuggestionProvider {
     @Override
     public Set<ResourceKey<Level>> levels() {
         return this.server.levelKeys();
+    }
+
+    @Override
+    public RegistryAccess registryAccess() {
+        return this.server.registryAccess();
     }
 }
 

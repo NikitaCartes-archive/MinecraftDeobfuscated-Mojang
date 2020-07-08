@@ -30,7 +30,6 @@ import net.minecraft.client.renderer.GpuWarnlistManager;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
@@ -43,52 +42,50 @@ public abstract class Option {
         Minecraft.getInstance().levelRenderer.allChanged();
     }, (options, progressOption) -> {
         double d = progressOption.get((Options)options);
-        MutableComponent mutableComponent = progressOption.createCaption();
         int i = (int)d * 2 + 1;
-        return mutableComponent.append(new TranslatableComponent("options.biomeBlendRadius." + i));
+        return progressOption.genericValueLabel(new TranslatableComponent("options.biomeBlendRadius." + i));
     });
     public static final ProgressOption CHAT_HEIGHT_FOCUSED = new ProgressOption("options.chat.height.focused", 0.0, 1.0, 0.0f, options -> options.chatHeightFocused, (options, double_) -> {
         options.chatHeightFocused = double_;
         Minecraft.getInstance().gui.getChat().rescaleChat();
     }, (options, progressOption) -> {
         double d = progressOption.toPct(progressOption.get((Options)options));
-        return progressOption.createCaption().append(ChatComponent.getHeight(d) + "px");
+        return progressOption.pixelValueLabel(ChatComponent.getHeight(d));
     });
     public static final ProgressOption CHAT_HEIGHT_UNFOCUSED = new ProgressOption("options.chat.height.unfocused", 0.0, 1.0, 0.0f, options -> options.chatHeightUnfocused, (options, double_) -> {
         options.chatHeightUnfocused = double_;
         Minecraft.getInstance().gui.getChat().rescaleChat();
     }, (options, progressOption) -> {
         double d = progressOption.toPct(progressOption.get((Options)options));
-        return progressOption.createCaption().append(ChatComponent.getHeight(d) + "px");
+        return progressOption.pixelValueLabel(ChatComponent.getHeight(d));
     });
     public static final ProgressOption CHAT_OPACITY = new ProgressOption("options.chat.opacity", 0.0, 1.0, 0.0f, options -> options.chatOpacity, (options, double_) -> {
         options.chatOpacity = double_;
         Minecraft.getInstance().gui.getChat().rescaleChat();
     }, (options, progressOption) -> {
         double d = progressOption.toPct(progressOption.get((Options)options));
-        return progressOption.createCaption().append((int)(d * 90.0 + 10.0) + "%");
+        return progressOption.percentValueLabel(d * 0.9 + 0.1);
     });
     public static final ProgressOption CHAT_SCALE = new ProgressOption("options.chat.scale", 0.0, 1.0, 0.0f, options -> options.chatScale, (options, double_) -> {
         options.chatScale = double_;
         Minecraft.getInstance().gui.getChat().rescaleChat();
     }, (options, progressOption) -> {
         double d = progressOption.toPct(progressOption.get((Options)options));
-        MutableComponent mutableComponent = progressOption.createCaption();
         if (d == 0.0) {
-            return mutableComponent.append(CommonComponents.OPTION_OFF);
+            return CommonComponents.optionStatus(progressOption.getCaption(), false);
         }
-        return mutableComponent.append((int)(d * 100.0) + "%");
+        return progressOption.percentValueLabel(d);
     });
     public static final ProgressOption CHAT_WIDTH = new ProgressOption("options.chat.width", 0.0, 1.0, 0.0f, options -> options.chatWidth, (options, double_) -> {
         options.chatWidth = double_;
         Minecraft.getInstance().gui.getChat().rescaleChat();
     }, (options, progressOption) -> {
         double d = progressOption.toPct(progressOption.get((Options)options));
-        return progressOption.createCaption().append(ChatComponent.getWidth(d) + "px");
+        return progressOption.pixelValueLabel(ChatComponent.getWidth(d));
     });
     public static final ProgressOption CHAT_LINE_SPACING = new ProgressOption("options.chat.line_spacing", 0.0, 1.0, 0.0f, options -> options.chatLineSpacing, (options, double_) -> {
         options.chatLineSpacing = double_;
-    }, (options, progressOption) -> progressOption.createCaption().append((int)(progressOption.toPct(progressOption.get((Options)options)) * 100.0) + "%"));
+    }, (options, progressOption) -> progressOption.percentValueLabel(progressOption.toPct(progressOption.get((Options)options))));
     public static final ProgressOption CHAT_DELAY = new ProgressOption("options.chat.delay_instant", 0.0, 6.0, 0.1f, options -> options.chatDelay, (options, double_) -> {
         options.chatDelay = double_;
     }, (options, progressOption) -> {
@@ -102,54 +99,50 @@ public abstract class Option {
         options.fov = double_;
     }, (options, progressOption) -> {
         double d = progressOption.get((Options)options);
-        MutableComponent mutableComponent = progressOption.createCaption();
         if (d == 70.0) {
-            return mutableComponent.append(new TranslatableComponent("options.fov.min"));
+            return progressOption.genericValueLabel(new TranslatableComponent("options.fov.min"));
         }
         if (d == progressOption.getMaxValue()) {
-            return mutableComponent.append(new TranslatableComponent("options.fov.max"));
+            return progressOption.genericValueLabel(new TranslatableComponent("options.fov.max"));
         }
-        return mutableComponent.append(Integer.toString((int)d));
+        return progressOption.genericValueLabel((int)d);
     });
     public static final ProgressOption FRAMERATE_LIMIT = new ProgressOption("options.framerateLimit", 10.0, 260.0, 10.0f, options -> options.framerateLimit, (options, double_) -> {
         options.framerateLimit = (int)double_.doubleValue();
         Minecraft.getInstance().getWindow().setFramerateLimit(options.framerateLimit);
     }, (options, progressOption) -> {
         double d = progressOption.get((Options)options);
-        MutableComponent mutableComponent = progressOption.createCaption();
         if (d == progressOption.getMaxValue()) {
-            return mutableComponent.append(new TranslatableComponent("options.framerateLimit.max"));
+            return progressOption.genericValueLabel(new TranslatableComponent("options.framerateLimit.max"));
         }
-        return mutableComponent.append(new TranslatableComponent("options.framerate", (int)d));
+        return progressOption.genericValueLabel(new TranslatableComponent("options.framerate", (int)d));
     });
     public static final ProgressOption GAMMA = new ProgressOption("options.gamma", 0.0, 1.0, 0.0f, options -> options.gamma, (options, double_) -> {
         options.gamma = double_;
     }, (options, progressOption) -> {
         double d = progressOption.toPct(progressOption.get((Options)options));
-        MutableComponent mutableComponent = progressOption.createCaption();
         if (d == 0.0) {
-            return mutableComponent.append(new TranslatableComponent("options.gamma.min"));
+            return progressOption.genericValueLabel(new TranslatableComponent("options.gamma.min"));
         }
         if (d == 1.0) {
-            return mutableComponent.append(new TranslatableComponent("options.gamma.max"));
+            return progressOption.genericValueLabel(new TranslatableComponent("options.gamma.max"));
         }
-        return mutableComponent.append("+" + (int)(d * 100.0) + "%");
+        return progressOption.percentAddValueLabel((int)(d * 100.0));
     });
     public static final ProgressOption MIPMAP_LEVELS = new ProgressOption("options.mipmapLevels", 0.0, 4.0, 1.0f, options -> options.mipmapLevels, (options, double_) -> {
         options.mipmapLevels = (int)double_.doubleValue();
     }, (options, progressOption) -> {
         double d = progressOption.get((Options)options);
-        MutableComponent mutableComponent = progressOption.createCaption();
         if (d == 0.0) {
-            return mutableComponent.append(CommonComponents.OPTION_OFF);
+            return CommonComponents.optionStatus(progressOption.getCaption(), false);
         }
-        return mutableComponent.append(Integer.toString((int)d));
+        return progressOption.genericValueLabel((int)d);
     });
     public static final ProgressOption MOUSE_WHEEL_SENSITIVITY = new LogaritmicProgressOption("options.mouseWheelSensitivity", 0.01, 10.0, 0.01f, options -> options.mouseWheelSensitivity, (options, double_) -> {
         options.mouseWheelSensitivity = double_;
     }, (options, progressOption) -> {
         double d = progressOption.toPct(progressOption.get((Options)options));
-        return progressOption.createCaption().append(String.format("%.2f", progressOption.toValue(d)));
+        return progressOption.genericValueLabel(new TextComponent(String.format("%.2f", progressOption.toValue(d))));
     });
     public static final BooleanOption RAW_MOUSE_INPUT = new BooleanOption("options.rawMouseInput", options -> options.rawMouseInput, (options, boolean_) -> {
         options.rawMouseInput = boolean_;
@@ -163,41 +156,40 @@ public abstract class Option {
         Minecraft.getInstance().levelRenderer.needsUpdate();
     }, (options, progressOption) -> {
         double d = progressOption.get((Options)options);
-        return progressOption.createCaption().append(new TranslatableComponent("options.chunks", (int)d));
+        return progressOption.genericValueLabel(new TranslatableComponent("options.chunks", (int)d));
     });
     public static final ProgressOption ENTITY_DISTANCE_SCALING = new ProgressOption("options.entityDistanceScaling", 0.5, 5.0, 0.25f, options -> options.entityDistanceScaling, (options, double_) -> {
         options.entityDistanceScaling = (float)double_.doubleValue();
     }, (options, progressOption) -> {
         double d = progressOption.get((Options)options);
-        return progressOption.createCaption().append(new TranslatableComponent("options.entityDistancePercent", (int)(d * 100.0)));
+        return progressOption.percentValueLabel(d);
     });
     public static final ProgressOption SENSITIVITY = new ProgressOption("options.sensitivity", 0.0, 1.0, 0.0f, options -> options.sensitivity, (options, double_) -> {
         options.sensitivity = double_;
     }, (options, progressOption) -> {
         double d = progressOption.toPct(progressOption.get((Options)options));
-        MutableComponent mutableComponent = progressOption.createCaption();
         if (d == 0.0) {
-            return mutableComponent.append(new TranslatableComponent("options.sensitivity.min"));
+            return progressOption.genericValueLabel(new TranslatableComponent("options.sensitivity.min"));
         }
         if (d == 1.0) {
-            return mutableComponent.append(new TranslatableComponent("options.sensitivity.max"));
+            return progressOption.genericValueLabel(new TranslatableComponent("options.sensitivity.max"));
         }
-        return mutableComponent.append((int)(d * 200.0) + "%");
+        return progressOption.percentValueLabel(2.0 * d);
     });
     public static final ProgressOption TEXT_BACKGROUND_OPACITY = new ProgressOption("options.accessibility.text_background_opacity", 0.0, 1.0, 0.0f, options -> options.textBackgroundOpacity, (options, double_) -> {
         options.textBackgroundOpacity = double_;
         Minecraft.getInstance().gui.getChat().rescaleChat();
-    }, (options, progressOption) -> progressOption.createCaption().append((int)(progressOption.toPct(progressOption.get((Options)options)) * 100.0) + "%"));
+    }, (options, progressOption) -> progressOption.percentValueLabel(progressOption.toPct(progressOption.get((Options)options))));
     public static final CycleOption AMBIENT_OCCLUSION = new CycleOption("options.ao", (options, integer) -> {
         options.ambientOcclusion = AmbientOcclusionStatus.byId(options.ambientOcclusion.getId() + integer);
         Minecraft.getInstance().levelRenderer.allChanged();
-    }, (options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.ambientOcclusion.getKey())));
+    }, (options, cycleOption) -> cycleOption.genericValueLabel(new TranslatableComponent(options.ambientOcclusion.getKey())));
     public static final CycleOption ATTACK_INDICATOR = new CycleOption("options.attackIndicator", (options, integer) -> {
         options.attackIndicator = AttackIndicatorStatus.byId(options.attackIndicator.getId() + integer);
-    }, (options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.attackIndicator.getKey())));
+    }, (options, cycleOption) -> cycleOption.genericValueLabel(new TranslatableComponent(options.attackIndicator.getKey())));
     public static final CycleOption CHAT_VISIBILITY = new CycleOption("options.chat.visibility", (options, integer) -> {
         options.chatVisibility = ChatVisiblity.byId((options.chatVisibility.getId() + integer) % 3);
-    }, (options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.chatVisibility.getKey())));
+    }, (options, cycleOption) -> cycleOption.genericValueLabel(new TranslatableComponent(options.chatVisibility.getKey())));
     private static final Component GRAPHICS_TOOLTIP_FAST = new TranslatableComponent("options.graphics.fast.tooltip");
     private static final Component GRAPHICS_TOOLTIP_FABULOUS = new TranslatableComponent("options.graphics.fabulous.tooltip", new TranslatableComponent("options.graphics.fabulous").withStyle(ChatFormatting.ITALIC));
     private static final Component GRAPHICS_TOOLTIP_FANCY = new TranslatableComponent("options.graphics.fancy.tooltip");
@@ -227,46 +219,45 @@ public abstract class Option {
                 cycleOption.setTooltip(Minecraft.getInstance().font.split(GRAPHICS_TOOLTIP_FABULOUS, 200));
             }
         }
-        TranslatableComponent translatableComponent = new TranslatableComponent(options.graphicsMode.getKey());
+        TranslatableComponent mutableComponent = new TranslatableComponent(options.graphicsMode.getKey());
         if (options.graphicsMode == GraphicsStatus.FABULOUS) {
-            return cycleOption.createCaption().append(new TextComponent("").append(translatableComponent).withStyle(ChatFormatting.ITALIC));
+            return cycleOption.genericValueLabel(mutableComponent.withStyle(ChatFormatting.ITALIC));
         }
-        return cycleOption.createCaption().append(translatableComponent);
+        return cycleOption.genericValueLabel(mutableComponent);
     });
     public static final CycleOption GUI_SCALE = new CycleOption("options.guiScale", (options, integer) -> {
         options.guiScale = Integer.remainderUnsigned(options.guiScale + integer, Minecraft.getInstance().getWindow().calculateScale(0, Minecraft.getInstance().isEnforceUnicode()) + 1);
     }, (options, cycleOption) -> {
-        MutableComponent mutableComponent = cycleOption.createCaption();
         if (options.guiScale == 0) {
-            return mutableComponent.append(new TranslatableComponent("options.guiScale.auto"));
+            return cycleOption.genericValueLabel(new TranslatableComponent("options.guiScale.auto"));
         }
-        return mutableComponent.append(Integer.toString(options.guiScale));
+        return cycleOption.genericValueLabel(options.guiScale);
     });
     public static final CycleOption MAIN_HAND = new CycleOption("options.mainHand", (options, integer) -> {
         options.mainHand = options.mainHand.getOpposite();
-    }, (options, cycleOption) -> cycleOption.createCaption().append(options.mainHand.getName()));
+    }, (options, cycleOption) -> cycleOption.genericValueLabel(options.mainHand.getName()));
     public static final CycleOption NARRATOR = new CycleOption("options.narrator", (options, integer) -> {
         options.narratorStatus = NarratorChatListener.INSTANCE.isActive() ? NarratorStatus.byId(options.narratorStatus.getId() + integer) : NarratorStatus.OFF;
         NarratorChatListener.INSTANCE.updateNarratorStatus(options.narratorStatus);
     }, (options, cycleOption) -> {
         if (NarratorChatListener.INSTANCE.isActive()) {
-            return cycleOption.createCaption().append(options.narratorStatus.getName());
+            return cycleOption.genericValueLabel(options.narratorStatus.getName());
         }
-        return cycleOption.createCaption().append(new TranslatableComponent("options.narrator.notavailable"));
+        return cycleOption.genericValueLabel(new TranslatableComponent("options.narrator.notavailable"));
     });
     public static final CycleOption PARTICLES = new CycleOption("options.particles", (options, integer) -> {
         options.particles = ParticleStatus.byId(options.particles.getId() + integer);
-    }, (options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.particles.getKey())));
+    }, (options, cycleOption) -> cycleOption.genericValueLabel(new TranslatableComponent(options.particles.getKey())));
     public static final CycleOption RENDER_CLOUDS = new CycleOption("options.renderClouds", (options, integer) -> {
         RenderTarget renderTarget;
         options.renderClouds = CloudStatus.byId(options.renderClouds.getId() + integer);
         if (Minecraft.useShaderTransparency() && (renderTarget = Minecraft.getInstance().levelRenderer.getCloudsTarget()) != null) {
             renderTarget.clear(Minecraft.ON_OSX);
         }
-    }, (options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.renderClouds.getKey())));
+    }, (options, cycleOption) -> cycleOption.genericValueLabel(new TranslatableComponent(options.renderClouds.getKey())));
     public static final CycleOption TEXT_BACKGROUND = new CycleOption("options.accessibility.text_background", (options, integer) -> {
         options.backgroundForChatOnly = !options.backgroundForChatOnly;
-    }, (options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.backgroundForChatOnly ? "options.accessibility.text_background.chat" : "options.accessibility.text_background.everywhere")));
+    }, (options, cycleOption) -> cycleOption.genericValueLabel(new TranslatableComponent(options.backgroundForChatOnly ? "options.accessibility.text_background.chat" : "options.accessibility.text_background.everywhere")));
     public static final BooleanOption AUTO_JUMP = new BooleanOption("options.autoJump", options -> options.autoJump, (options, boolean_) -> {
         options.autoJump = boolean_;
     });
@@ -323,10 +314,10 @@ public abstract class Option {
     });
     public static final CycleOption TOGGLE_CROUCH = new CycleOption("key.sneak", (options, integer) -> {
         options.toggleCrouch = !options.toggleCrouch;
-    }, (options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.toggleCrouch ? "options.key.toggle" : "options.key.hold")));
+    }, (options, cycleOption) -> cycleOption.genericValueLabel(new TranslatableComponent(options.toggleCrouch ? "options.key.toggle" : "options.key.hold")));
     public static final CycleOption TOGGLE_SPRINT = new CycleOption("key.sprint", (options, integer) -> {
         options.toggleSprint = !options.toggleSprint;
-    }, (options, cycleOption) -> cycleOption.createCaption().append(new TranslatableComponent(options.toggleSprint ? "options.key.toggle" : "options.key.hold")));
+    }, (options, cycleOption) -> cycleOption.genericValueLabel(new TranslatableComponent(options.toggleSprint ? "options.key.toggle" : "options.key.hold")));
     public static final BooleanOption TOUCHSCREEN = new BooleanOption("options.touchscreen", options -> options.touchscreen, (options, boolean_) -> {
         options.touchscreen = boolean_;
     });
@@ -341,18 +332,18 @@ public abstract class Option {
     public static final BooleanOption VIEW_BOBBING = new BooleanOption("options.viewBobbing", options -> options.bobView, (options, boolean_) -> {
         options.bobView = boolean_;
     });
-    private final String captionId;
+    private final Component caption;
     private Optional<List<FormattedText>> toolTip;
 
     public Option(String string) {
-        this.captionId = string;
+        this.caption = new TranslatableComponent(string);
         this.toolTip = Optional.empty();
     }
 
     public abstract AbstractWidget createButton(Options var1, int var2, int var3, int var4);
 
-    public MutableComponent createCaption() {
-        return new TranslatableComponent(this.captionId).append(": ");
+    protected Component getCaption() {
+        return this.caption;
     }
 
     public void setTooltip(List<FormattedText> list) {
@@ -361,6 +352,26 @@ public abstract class Option {
 
     public Optional<List<FormattedText>> getTooltip() {
         return this.toolTip;
+    }
+
+    protected Component pixelValueLabel(int i) {
+        return new TranslatableComponent("options.pixel_value", this.getCaption(), i);
+    }
+
+    protected Component percentValueLabel(double d) {
+        return new TranslatableComponent("options.percent_value", this.getCaption(), (int)(d * 100.0));
+    }
+
+    protected Component percentAddValueLabel(int i) {
+        return new TranslatableComponent("options.percent_add_value", this.getCaption(), i);
+    }
+
+    protected Component genericValueLabel(Component component) {
+        return new TranslatableComponent("options.generic_value", this.getCaption(), component);
+    }
+
+    protected Component genericValueLabel(int i) {
+        return this.genericValueLabel(new TextComponent(Integer.toString(i)));
     }
 }
 

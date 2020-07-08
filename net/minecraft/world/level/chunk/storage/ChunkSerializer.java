@@ -76,7 +76,7 @@ public class ChunkSerializer {
         if (!Objects.equals(chunkPos, chunkPos2)) {
             LOGGER.error("Chunk file at {} is in the wrong location; relocating. (Expected {}, got {})", (Object)chunkPos, (Object)chunkPos, (Object)chunkPos2);
         }
-        ChunkBiomeContainer chunkBiomeContainer = new ChunkBiomeContainer(chunkPos, biomeSource, compoundTag2.contains("Biomes", 11) ? compoundTag2.getIntArray("Biomes") : null);
+        ChunkBiomeContainer chunkBiomeContainer = new ChunkBiomeContainer(serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunkPos, biomeSource, compoundTag2.contains("Biomes", 11) ? compoundTag2.getIntArray("Biomes") : null);
         UpgradeData upgradeData = compoundTag2.contains("UpgradeData", 10) ? new UpgradeData(compoundTag2.getCompound("UpgradeData")) : UpgradeData.EMPTY;
         ProtoTickList<Block> protoTickList = new ProtoTickList<Block>(block -> block == null || block.defaultBlockState().isAir(), chunkPos, compoundTag2.getList("ToBeTicked", 9));
         ProtoTickList<Fluid> protoTickList2 = new ProtoTickList<Fluid>(fluid -> fluid == null || fluid == Fluids.EMPTY, chunkPos, compoundTag2.getList("LiquidsToBeTicked", 9));

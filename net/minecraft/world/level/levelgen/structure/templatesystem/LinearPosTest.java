@@ -15,7 +15,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTestTy
 
 public class LinearPosTest
 extends PosRuleTest {
-    public static final Codec<LinearPosTest> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.FLOAT.fieldOf("min_chance")).withDefault(Float.valueOf(0.0f)).forGetter(linearPosTest -> Float.valueOf(linearPosTest.minChance)), ((MapCodec)Codec.FLOAT.fieldOf("max_chance")).withDefault(Float.valueOf(0.0f)).forGetter(linearPosTest -> Float.valueOf(linearPosTest.maxChance)), ((MapCodec)Codec.INT.fieldOf("min_dist")).withDefault(0).forGetter(linearPosTest -> linearPosTest.minDist), ((MapCodec)Codec.INT.fieldOf("max_dist")).withDefault(0).forGetter(linearPosTest -> linearPosTest.maxDist)).apply((Applicative<LinearPosTest, ?>)instance, LinearPosTest::new));
+    public static final Codec<LinearPosTest> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.FLOAT.fieldOf("min_chance")).orElse(Float.valueOf(0.0f)).forGetter(linearPosTest -> Float.valueOf(linearPosTest.minChance)), ((MapCodec)Codec.FLOAT.fieldOf("max_chance")).orElse(Float.valueOf(0.0f)).forGetter(linearPosTest -> Float.valueOf(linearPosTest.maxChance)), ((MapCodec)Codec.INT.fieldOf("min_dist")).orElse(0).forGetter(linearPosTest -> linearPosTest.minDist), ((MapCodec)Codec.INT.fieldOf("max_dist")).orElse(0).forGetter(linearPosTest -> linearPosTest.maxDist)).apply((Applicative<LinearPosTest, ?>)instance, LinearPosTest::new));
     private final float minChance;
     private final float maxChance;
     private final int minDist;

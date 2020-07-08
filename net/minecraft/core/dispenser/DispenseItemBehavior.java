@@ -390,9 +390,10 @@ public interface DispenseItemBehavior {
             protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
                 ServerLevel level = blockSource.getLevel();
                 this.setSuccess(true);
-                BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+                Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
+                BlockPos blockPos = blockSource.getPos().relative(direction);
                 BlockState blockState = level.getBlockState(blockPos);
-                if (BaseFireBlock.canBePlacedAt(level, blockPos)) {
+                if (BaseFireBlock.canBePlacedAt(level, blockPos, direction)) {
                     level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(level, blockPos));
                 } else if (CampfireBlock.canLight(blockState)) {
                     level.setBlockAndUpdate(blockPos, (BlockState)blockState.setValue(BlockStateProperties.LIT, true));

@@ -6,15 +6,16 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import java.util.List;
+import java.util.function.Supplier;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 public class SimpleRandomFeatureConfiguration
 implements FeatureConfiguration {
     public static final Codec<SimpleRandomFeatureConfiguration> CODEC = ((MapCodec)ConfiguredFeature.CODEC.listOf().fieldOf("features")).xmap(SimpleRandomFeatureConfiguration::new, simpleRandomFeatureConfiguration -> simpleRandomFeatureConfiguration.features).codec();
-    public final List<ConfiguredFeature<?, ?>> features;
+    public final List<Supplier<ConfiguredFeature<?, ?>>> features;
 
-    public SimpleRandomFeatureConfiguration(List<ConfiguredFeature<?, ?>> list) {
+    public SimpleRandomFeatureConfiguration(List<Supplier<ConfiguredFeature<?, ?>>> list) {
         this.features = list;
     }
 }

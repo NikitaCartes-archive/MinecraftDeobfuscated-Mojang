@@ -14,6 +14,7 @@ import net.minecraft.advancements.critereon.LightPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -125,7 +126,7 @@ public class LocationPredicate {
             jsonObject.addProperty("feature", this.feature.getFeatureName());
         }
         if (this.biome != null) {
-            jsonObject.addProperty("biome", Registry.BIOME.getKey(this.biome).toString());
+            jsonObject.addProperty("biome", BuiltinRegistries.BIOME.getKey(this.biome).toString());
         }
         if (this.smokey != null) {
             jsonObject.addProperty("smokey", this.smokey);
@@ -150,7 +151,7 @@ public class LocationPredicate {
         Biome biome = null;
         if (jsonObject.has("biome")) {
             ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "biome"));
-            biome = Registry.BIOME.getOptional(resourceLocation2).orElseThrow(() -> new JsonSyntaxException("Unknown biome '" + resourceLocation2 + "'"));
+            biome = BuiltinRegistries.BIOME.getOptional(resourceLocation2).orElseThrow(() -> new JsonSyntaxException("Unknown biome '" + resourceLocation2 + "'"));
         }
         Boolean boolean_ = jsonObject.has("smokey") ? Boolean.valueOf(jsonObject.get("smokey").getAsBoolean()) : null;
         LightPredicate lightPredicate = LightPredicate.fromJson(jsonObject.get("light"));

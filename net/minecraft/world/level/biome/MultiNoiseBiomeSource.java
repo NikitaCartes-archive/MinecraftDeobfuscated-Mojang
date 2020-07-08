@@ -19,11 +19,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.LongFunction;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -33,23 +33,23 @@ import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 public class MultiNoiseBiomeSource
 extends BiomeSource {
-    public static final MapCodec<MultiNoiseBiomeSource> DIRECT_CODEC = RecordCodecBuilder.mapCodec(instance2 -> instance2.group(((MapCodec)Codec.LONG.fieldOf("seed")).forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.seed), ((MapCodec)RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Biome.ClimateParameters.CODEC.fieldOf("parameters")).forGetter(Pair::getFirst), ((MapCodec)Registry.BIOME.fieldOf("biome")).forGetter(Pair::getSecond)).apply((Applicative<Pair, ?>)instance, Pair::of)).listOf().fieldOf("biomes")).forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.parameters)).apply((Applicative<MultiNoiseBiomeSource, ?>)instance2, MultiNoiseBiomeSource::new));
+    public static final MapCodec<MultiNoiseBiomeSource> DIRECT_CODEC = RecordCodecBuilder.mapCodec(instance2 -> instance2.group(((MapCodec)Codec.LONG.fieldOf("seed")).forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.seed), ((MapCodec)RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Biome.ClimateParameters.CODEC.fieldOf("parameters")).forGetter(Pair::getFirst), ((MapCodec)Biome.CODEC.fieldOf("biome")).forGetter(Pair::getSecond)).apply((Applicative<Pair, ?>)instance, Pair::of)).listOf().fieldOf("biomes")).forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.parameters)).apply((Applicative<MultiNoiseBiomeSource, ?>)instance2, MultiNoiseBiomeSource::new));
     public static final Codec<MultiNoiseBiomeSource> CODEC = Codec.mapEither(Preset.CODEC, DIRECT_CODEC).xmap(either -> either.map(pair -> ((Preset)pair.getFirst()).biomeSource((Long)pair.getSecond()), Function.identity()), multiNoiseBiomeSource -> multiNoiseBiomeSource.preset.map(preset -> Either.left(Pair.of(preset, multiNoiseBiomeSource.seed))).orElseGet(() -> Either.right(multiNoiseBiomeSource))).codec();
     private final NormalNoise temperatureNoise;
     private final NormalNoise humidityNoise;
     private final NormalNoise altitudeNoise;
     private final NormalNoise weirdnessNoise;
-    private final List<Pair<Biome.ClimateParameters, Biome>> parameters;
+    private final List<Pair<Biome.ClimateParameters, Supplier<Biome>>> parameters;
     private final boolean useY;
     private final long seed;
     private final Optional<Preset> preset;
 
-    private MultiNoiseBiomeSource(long l, List<Pair<Biome.ClimateParameters, Biome>> list) {
+    private MultiNoiseBiomeSource(long l, List<Pair<Biome.ClimateParameters, Supplier<Biome>>> list) {
         this(l, list, Optional.empty());
     }
 
-    public MultiNoiseBiomeSource(long l, List<Pair<Biome.ClimateParameters, Biome>> list, Optional<Preset> optional) {
-        super(list.stream().map(Pair::getSecond).collect(Collectors.toList()));
+    public MultiNoiseBiomeSource(long l, List<Pair<Biome.ClimateParameters, Supplier<Biome>>> list, Optional<Preset> optional) {
+        super(list.stream().map(Pair::getSecond).map(Supplier::get).collect(Collectors.toList()));
         this.seed = l;
         this.preset = optional;
         IntStream intStream = IntStream.rangeClosed(-7, -6);
@@ -65,8 +65,7 @@ extends BiomeSource {
     }
 
     private static MultiNoiseBiomeSource defaultNether(long l) {
-        ImmutableList<Biome> immutableList = ImmutableList.of(Biomes.NETHER_WASTES, Biomes.SOUL_SAND_VALLEY, Biomes.CRIMSON_FOREST, Biomes.WARPED_FOREST, Biomes.BASALT_DELTAS);
-        return new MultiNoiseBiomeSource(l, immutableList.stream().flatMap(biome -> biome.optimalParameters().map(climateParameters -> Pair.of(climateParameters, biome))).collect(ImmutableList.toImmutableList()), Optional.of(Preset.NETHER));
+        return new MultiNoiseBiomeSource(l, ImmutableList.of(Pair.of(new Biome.ClimateParameters(0.0f, 0.0f, 0.0f, 0.0f, 0.0f), () -> Biomes.NETHER_WASTES), Pair.of(new Biome.ClimateParameters(0.0f, -0.5f, 0.0f, 0.0f, 0.0f), () -> Biomes.SOUL_SAND_VALLEY), Pair.of(new Biome.ClimateParameters(0.4f, 0.0f, 0.0f, 0.0f, 0.0f), () -> Biomes.CRIMSON_FOREST), Pair.of(new Biome.ClimateParameters(0.0f, 0.5f, 0.0f, 0.0f, 0.375f), () -> Biomes.WARPED_FOREST), Pair.of(new Biome.ClimateParameters(-0.5f, 0.0f, 0.0f, 0.0f, 0.175f), () -> Biomes.BASALT_DELTAS)), Optional.of(Preset.NETHER));
     }
 
     @Override
@@ -84,7 +83,7 @@ extends BiomeSource {
     public Biome getNoiseBiome(int i, int j, int k) {
         int l = this.useY ? j : 0;
         Biome.ClimateParameters climateParameters = new Biome.ClimateParameters((float)this.temperatureNoise.getValue(i, l, k), (float)this.humidityNoise.getValue(i, l, k), (float)this.altitudeNoise.getValue(i, l, k), (float)this.weirdnessNoise.getValue(i, l, k), 0.0f);
-        return this.parameters.stream().min(Comparator.comparing(pair -> Float.valueOf(((Biome.ClimateParameters)pair.getFirst()).fitness(climateParameters)))).map(Pair::getSecond).orElse(Biomes.THE_VOID);
+        return this.parameters.stream().min(Comparator.comparing(pair -> Float.valueOf(((Biome.ClimateParameters)pair.getFirst()).fitness(climateParameters)))).map(Pair::getSecond).map(Supplier::get).orElse(Biomes.THE_VOID);
     }
 
     public boolean stable(long l) {

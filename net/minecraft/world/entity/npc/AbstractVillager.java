@@ -59,8 +59,7 @@ Merchant {
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         if (spawnGroupData == null) {
-            spawnGroupData = new AgableMob.AgableMobGroupData();
-            ((AgableMob.AgableMobGroupData)spawnGroupData).setShouldSpawnBaby(false);
+            spawnGroupData = new AgableMob.AgableMobGroupData(false);
         }
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }

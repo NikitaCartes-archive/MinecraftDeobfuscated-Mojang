@@ -7,6 +7,7 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -16,16 +17,16 @@ import net.minecraft.world.level.levelgen.placement.ConfiguredDecorator;
 public class DecoratedFeatureConfiguration
 implements FeatureConfiguration {
     public static final Codec<DecoratedFeatureConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ConfiguredFeature.CODEC.fieldOf("feature")).forGetter(decoratedFeatureConfiguration -> decoratedFeatureConfiguration.feature), ((MapCodec)ConfiguredDecorator.CODEC.fieldOf("decorator")).forGetter(decoratedFeatureConfiguration -> decoratedFeatureConfiguration.decorator)).apply((Applicative<DecoratedFeatureConfiguration, ?>)instance, DecoratedFeatureConfiguration::new));
-    public final ConfiguredFeature<?, ?> feature;
+    public final Supplier<ConfiguredFeature<?, ?>> feature;
     public final ConfiguredDecorator<?> decorator;
 
-    public DecoratedFeatureConfiguration(ConfiguredFeature<?, ?> configuredFeature, ConfiguredDecorator<?> configuredDecorator) {
-        this.feature = configuredFeature;
+    public DecoratedFeatureConfiguration(Supplier<ConfiguredFeature<?, ?>> supplier, ConfiguredDecorator<?> configuredDecorator) {
+        this.feature = supplier;
         this.decorator = configuredDecorator;
     }
 
     public String toString() {
-        return String.format("< %s [%s | %s] >", this.getClass().getSimpleName(), Registry.FEATURE.getKey((Feature<?>)this.feature.feature), Registry.DECORATOR.getKey(this.decorator.decorator));
+        return String.format("< %s [%s | %s] >", this.getClass().getSimpleName(), Registry.FEATURE.getKey((Feature<?>)this.feature.get().feature()), this.decorator);
     }
 }
 

@@ -12,7 +12,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfigur
 
 public class LayerConfiguration
 implements FeatureConfiguration {
-    public static final Codec<LayerConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("height")).forGetter(layerConfiguration -> layerConfiguration.height), ((MapCodec)BlockState.CODEC.fieldOf("state")).forGetter(layerConfiguration -> layerConfiguration.state)).apply((Applicative<LayerConfiguration, ?>)instance, LayerConfiguration::new));
+    public static final Codec<LayerConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.intRange(0, 255).fieldOf("height")).forGetter(layerConfiguration -> layerConfiguration.height), ((MapCodec)BlockState.CODEC.fieldOf("state")).forGetter(layerConfiguration -> layerConfiguration.state)).apply((Applicative<LayerConfiguration, ?>)instance, LayerConfiguration::new));
     public final int height;
     public final BlockState state;
 

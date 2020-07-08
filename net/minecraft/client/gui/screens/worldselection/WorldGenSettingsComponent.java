@@ -74,29 +74,22 @@ Widget {
     private RegistryAccess.RegistryHolder registryHolder;
     private WorldGenSettings settings;
     private Optional<WorldPreset> preset;
-    private String initSeed;
+    private OptionalLong seed;
 
-    public WorldGenSettingsComponent() {
-        this.registryHolder = RegistryAccess.builtin();
-        this.settings = WorldGenSettings.makeDefault();
-        this.preset = Optional.of(WorldPreset.NORMAL);
-        this.initSeed = "";
-    }
-
-    public WorldGenSettingsComponent(RegistryAccess.RegistryHolder registryHolder, WorldGenSettings worldGenSettings) {
+    public WorldGenSettingsComponent(RegistryAccess.RegistryHolder registryHolder, WorldGenSettings worldGenSettings, Optional<WorldPreset> optional, OptionalLong optionalLong) {
         this.registryHolder = registryHolder;
         this.settings = worldGenSettings;
-        this.preset = WorldPreset.of(worldGenSettings);
-        this.initSeed = Long.toString(worldGenSettings.seed());
+        this.preset = optional;
+        this.seed = optionalLong;
     }
 
     public void init(final CreateWorldScreen createWorldScreen, Minecraft minecraft, Font font) {
         this.font = font;
         this.width = createWorldScreen.width;
         this.seedEdit = new EditBox(this.font, this.width / 2 - 100, 60, 200, 20, new TranslatableComponent("selectWorld.enterSeed"));
-        this.seedEdit.setValue(this.initSeed);
+        this.seedEdit.setValue(WorldGenSettingsComponent.toString(this.seed));
         this.seedEdit.setResponder(string -> {
-            this.initSeed = this.seedEdit.getValue();
+            this.seed = this.parseSeed();
         });
         createWorldScreen.addWidget(this.seedEdit);
         int i = this.width / 2 - 155;
@@ -108,7 +101,7 @@ Widget {
 
             @Override
             public Component getMessage() {
-                return super.getMessage().copy().append(" ").append(CommonComponents.optionStatus(WorldGenSettingsComponent.this.settings.generateFeatures()));
+                return CommonComponents.optionStatus(super.getMessage(), WorldGenSettingsComponent.this.settings.generateFeatures());
             }
 
             @Override
@@ -161,7 +154,7 @@ Widget {
 
             @Override
             public Component getMessage() {
-                return super.getMessage().copy().append(" ").append(CommonComponents.optionStatus(WorldGenSettingsComponent.this.settings.generateBonusChest() && !createWorldScreen.hardCore));
+                return CommonComponents.optionStatus(super.getMessage(), WorldGenSettingsComponent.this.settings.generateBonusChest() && !createWorldScreen.hardCore);
             }
         });
         this.bonusItemsButton.visible = false;
@@ -203,6 +196,7 @@ Widget {
                 TextComponent component4 = new TextComponent(string2);
                 minecraft.getToasts().addToast(SystemToast.multiline(minecraft, SystemToast.SystemToastIds.WORLD_GEN_SETTINGS_TRANSFER, component3, component4));
             }
+            serverResources.close();
             Lifecycle lifecycle = dataResult.lifecycle();
             dataResult.resultOrPartial(LOGGER::error).ifPresent(worldGenSettings -> {
                 BooleanConsumer booleanConsumer = bl -> {
@@ -224,11 +218,11 @@ Widget {
     }
 
     private void importSettings(RegistryAccess.RegistryHolder registryHolder, WorldGenSettings worldGenSettings) {
-        this.registryHolder = registryHolder;
+        this.setRegistryHolder(registryHolder);
         this.settings = worldGenSettings;
         this.preset = WorldPreset.of(worldGenSettings);
-        this.initSeed = Long.toString(worldGenSettings.seed());
-        this.seedEdit.setValue(this.initSeed);
+        this.seed = OptionalLong.of(worldGenSettings.seed());
+        this.seedEdit.setValue(WorldGenSettingsComponent.toString(this.seed));
         this.typeButton.active = this.preset.isPresent();
     }
 
@@ -252,6 +246,13 @@ Widget {
         this.settings = worldGenSettings;
     }
 
+    private static String toString(OptionalLong optionalLong) {
+        if (optionalLong.isPresent()) {
+            return Long.toString(optionalLong.getAsLong());
+        }
+        return "";
+    }
+
     private static OptionalLong parseLong(String string) {
         try {
             return OptionalLong.of(Long.parseLong(string));
@@ -261,10 +262,15 @@ Widget {
     }
 
     public WorldGenSettings makeSettings(boolean bl) {
+        OptionalLong optionalLong = this.parseSeed();
+        return this.settings.withSeed(bl, optionalLong);
+    }
+
+    private OptionalLong parseSeed() {
         OptionalLong optionalLong2;
         String string = this.seedEdit.getValue();
         OptionalLong optionalLong = StringUtils.isEmpty(string) ? OptionalLong.empty() : ((optionalLong2 = WorldGenSettingsComponent.parseLong(string)).isPresent() && optionalLong2.getAsLong() != 0L ? optionalLong2 : OptionalLong.of(string.hashCode()));
-        return this.settings.withSeed(bl, optionalLong);
+        return optionalLong;
     }
 
     public boolean isDebug() {
@@ -289,6 +295,10 @@ Widget {
 
     public RegistryAccess.RegistryHolder registryHolder() {
         return this.registryHolder;
+    }
+
+    protected void setRegistryHolder(RegistryAccess.RegistryHolder registryHolder) {
+        this.registryHolder = registryHolder;
     }
 }
 

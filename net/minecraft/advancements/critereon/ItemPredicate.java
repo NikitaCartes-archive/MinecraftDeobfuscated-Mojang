@@ -122,7 +122,7 @@ public class ItemPredicate {
         Item item = null;
         if (jsonObject.has("item")) {
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "item"));
-            item = (Item)Registry.ITEM.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown item id '" + resourceLocation + "'"));
+            item = Registry.ITEM.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown item id '" + resourceLocation + "'"));
         }
         Tag<Item> tag = null;
         if (jsonObject.has("tag")) {
@@ -135,7 +135,7 @@ public class ItemPredicate {
         Potion potion = null;
         if (jsonObject.has("potion")) {
             ResourceLocation resourceLocation3 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "potion"));
-            potion = (Potion)Registry.POTION.getOptional(resourceLocation3).orElseThrow(() -> new JsonSyntaxException("Unknown potion '" + resourceLocation3 + "'"));
+            potion = Registry.POTION.getOptional(resourceLocation3).orElseThrow(() -> new JsonSyntaxException("Unknown potion '" + resourceLocation3 + "'"));
         }
         EnchantmentPredicate[] enchantmentPredicates = EnchantmentPredicate.fromJsonArray(jsonObject.get("enchantments"));
         EnchantmentPredicate[] enchantmentPredicates2 = EnchantmentPredicate.fromJsonArray(jsonObject.get("stored_enchantments"));

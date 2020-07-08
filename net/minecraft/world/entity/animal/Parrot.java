@@ -105,6 +105,7 @@ implements FlyingAnimal {
         hashMap.put(EntityType.MAGMA_CUBE, SoundEvents.PARROT_IMITATE_MAGMA_CUBE);
         hashMap.put(EntityType.PHANTOM, SoundEvents.PARROT_IMITATE_PHANTOM);
         hashMap.put(EntityType.PIGLIN, SoundEvents.PARROT_IMITATE_PIGLIN);
+        hashMap.put(EntityType.PIGLIN_BRUTE, SoundEvents.PARROT_IMITATE_PIGLIN_BRUTE);
         hashMap.put(EntityType.PILLAGER, SoundEvents.PARROT_IMITATE_PILLAGER);
         hashMap.put(EntityType.RAVAGER, SoundEvents.PARROT_IMITATE_RAVAGER);
         hashMap.put(EntityType.SHULKER, SoundEvents.PARROT_IMITATE_SHULKER);
@@ -143,8 +144,7 @@ implements FlyingAnimal {
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
         this.setVariant(this.random.nextInt(5));
         if (spawnGroupData == null) {
-            spawnGroupData = new AgableMob.AgableMobGroupData();
-            ((AgableMob.AgableMobGroupData)spawnGroupData).setShouldSpawnBaby(false);
+            spawnGroupData = new AgableMob.AgableMobGroupData(false);
         }
         return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
     }

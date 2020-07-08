@@ -7,27 +7,20 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.placement.ChanceDecoratorConfiguration;
-import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneDecoratorConfiguration;
+import net.minecraft.world.level.levelgen.placement.SimpleFeatureDecorator;
 
 public class IcebergPlacementDecorator
-extends FeatureDecorator<ChanceDecoratorConfiguration> {
-    public IcebergPlacementDecorator(Codec<ChanceDecoratorConfiguration> codec) {
+extends SimpleFeatureDecorator<NoneDecoratorConfiguration> {
+    public IcebergPlacementDecorator(Codec<NoneDecoratorConfiguration> codec) {
         super(codec);
     }
 
     @Override
-    public Stream<BlockPos> getPositions(LevelAccessor levelAccessor, ChunkGenerator chunkGenerator, Random random, ChanceDecoratorConfiguration chanceDecoratorConfiguration, BlockPos blockPos) {
-        if (random.nextFloat() < 1.0f / (float)chanceDecoratorConfiguration.chance) {
-            int i = random.nextInt(8) + 4 + blockPos.getX();
-            int j = random.nextInt(8) + 4 + blockPos.getZ();
-            int k = levelAccessor.getHeight(Heightmap.Types.MOTION_BLOCKING, i, j);
-            return Stream.of(new BlockPos(i, k, j));
-        }
-        return Stream.empty();
+    public Stream<BlockPos> place(Random random, NoneDecoratorConfiguration noneDecoratorConfiguration, BlockPos blockPos) {
+        int i = random.nextInt(8) + 4 + blockPos.getX();
+        int j = random.nextInt(8) + 4 + blockPos.getZ();
+        return Stream.of(new BlockPos(i, blockPos.getY(), j));
     }
 }
 

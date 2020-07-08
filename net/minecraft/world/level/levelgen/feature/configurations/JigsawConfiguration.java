@@ -7,25 +7,26 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.resources.ResourceLocation;
+import java.util.function.Supplier;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
 
 public class JigsawConfiguration
 implements FeatureConfiguration {
-    public static final Codec<JigsawConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)ResourceLocation.CODEC.fieldOf("start_pool")).forGetter(JigsawConfiguration::getStartPool), ((MapCodec)Codec.INT.fieldOf("size")).forGetter(JigsawConfiguration::getSize)).apply((Applicative<JigsawConfiguration, ?>)instance, JigsawConfiguration::new));
-    public final ResourceLocation startPool;
-    public final int size;
+    public static final Codec<JigsawConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)StructureTemplatePool.CODEC.fieldOf("start_pool")).forGetter(JigsawConfiguration::startPool), ((MapCodec)Codec.intRange(0, 7).fieldOf("size")).forGetter(JigsawConfiguration::maxDepth)).apply((Applicative<JigsawConfiguration, ?>)instance, JigsawConfiguration::new));
+    private final Supplier<StructureTemplatePool> startPool;
+    private final int maxDepth;
 
-    public JigsawConfiguration(ResourceLocation resourceLocation, int i) {
-        this.startPool = resourceLocation;
-        this.size = i;
+    public JigsawConfiguration(Supplier<StructureTemplatePool> supplier, int i) {
+        this.startPool = supplier;
+        this.maxDepth = i;
     }
 
-    public int getSize() {
-        return this.size;
+    public int maxDepth() {
+        return this.maxDepth;
     }
 
-    public ResourceLocation getStartPool() {
+    public Supplier<StructureTemplatePool> startPool() {
         return this.startPool;
     }
 }

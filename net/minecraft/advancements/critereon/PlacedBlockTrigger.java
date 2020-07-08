@@ -51,7 +51,7 @@ extends SimpleCriterionTrigger<TriggerInstance> {
     private static Block deserializeBlock(JsonObject jsonObject) {
         if (jsonObject.has("block")) {
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "block"));
-            return (Block)Registry.BLOCK.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown block type '" + resourceLocation + "'"));
+            return Registry.BLOCK.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown block type '" + resourceLocation + "'"));
         }
         return null;
     }

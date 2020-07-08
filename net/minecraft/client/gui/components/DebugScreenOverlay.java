@@ -238,7 +238,7 @@ extends GuiComponent {
                     }
                     list.add(stringBuilder.toString());
                     if (blockPos.getY() >= 0 && blockPos.getY() < 256) {
-                        list.add("Biome: " + Registry.BIOME.getKey(this.minecraft.level.getBiome(blockPos)));
+                        list.add("Biome: " + this.minecraft.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.minecraft.level.getBiome(blockPos)));
                         long l = 0L;
                         float h = 0.0f;
                         if (levelChunk2 != null) {

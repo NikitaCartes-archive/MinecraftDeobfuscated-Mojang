@@ -3,7 +3,7 @@
  */
 package net.minecraft.world.level.newbiome.layer;
 
-import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.newbiome.context.Context;
 import net.minecraft.world.level.newbiome.layer.Layers;
@@ -24,7 +24,7 @@ public enum AddMushroomIslandLayer implements BishopTransformer
     }
 
     static {
-        MUSHROOM_FIELDS = Registry.BIOME.getId(Biomes.MUSHROOM_FIELDS);
+        MUSHROOM_FIELDS = BuiltinRegistries.BIOME.getId(Biomes.MUSHROOM_FIELDS);
     }
 }
 

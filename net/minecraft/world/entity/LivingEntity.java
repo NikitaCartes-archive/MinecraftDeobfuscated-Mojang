@@ -1003,6 +1003,7 @@ extends Entity {
             this.removeAllEffects();
             this.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 900, 1));
             this.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 100, 1));
+            this.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 800, 1));
             this.level.broadcastEntityEvent(this, (byte)35);
         }
         return itemStack != null;

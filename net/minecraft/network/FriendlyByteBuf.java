@@ -59,7 +59,7 @@ extends ByteBuf {
     }
 
     public <T> T readWithCodec(Codec<T> codec) throws IOException {
-        CompoundTag compoundTag = this.readNbt();
+        CompoundTag compoundTag = this.readAnySizeNbt();
         DataResult dataResult = codec.parse(NbtOps.INSTANCE, compoundTag);
         if (dataResult.error().isPresent()) {
             throw new IOException("Failed to decode: " + dataResult.error().get().message() + " " + compoundTag);
@@ -250,6 +250,16 @@ extends ByteBuf {
 
     @Nullable
     public CompoundTag readNbt() {
+        return this.readNbt(new NbtAccounter(0x200000L));
+    }
+
+    @Nullable
+    public CompoundTag readAnySizeNbt() {
+        return this.readNbt(NbtAccounter.UNLIMITED);
+    }
+
+    @Nullable
+    public CompoundTag readNbt(NbtAccounter nbtAccounter) {
         int i = this.readerIndex();
         byte b = this.readByte();
         if (b == 0) {
@@ -257,7 +267,7 @@ extends ByteBuf {
         }
         this.readerIndex(i);
         try {
-            return NbtIo.read(new ByteBufInputStream(this), new NbtAccounter(0x200000L));
+            return NbtIo.read(new ByteBufInputStream(this), nbtAccounter);
         } catch (IOException iOException) {
             throw new EncoderException(iOException);
         }

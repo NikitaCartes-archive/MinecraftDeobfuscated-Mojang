@@ -3,7 +3,7 @@
  */
 package net.minecraft.world.level.newbiome.layer;
 
-import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.newbiome.context.Context;
@@ -39,7 +39,7 @@ public enum ShoreLayer implements CastleTransformer
 
     @Override
     public int apply(Context context, int i, int j, int k, int l, int m) {
-        Biome biome = (Biome)Registry.BIOME.byId(m);
+        Biome biome = (Biome)BuiltinRegistries.BIOME.byId(m);
         if (m == MUSHROOM_FIELDS) {
             if (Layers.isShallowOcean(i) || Layers.isShallowOcean(j) || Layers.isShallowOcean(k) || Layers.isShallowOcean(l)) {
                 return MUSHROOM_FIELD_SHORE;
@@ -70,7 +70,7 @@ public enum ShoreLayer implements CastleTransformer
     }
 
     private static boolean isJungleCompatible(int i) {
-        if (Registry.BIOME.byId(i) != null && ((Biome)Registry.BIOME.byId(i)).getBiomeCategory() == Biome.BiomeCategory.JUNGLE) {
+        if (BuiltinRegistries.BIOME.byId(i) != null && ((Biome)BuiltinRegistries.BIOME.byId(i)).getBiomeCategory() == Biome.BiomeCategory.JUNGLE) {
             return true;
         }
         return i == JUNGLE_EDGE || i == JUNGLE || i == JUNGLE_HILLS || i == FOREST || i == TAIGA || Layers.isOcean(i);
@@ -81,28 +81,28 @@ public enum ShoreLayer implements CastleTransformer
     }
 
     static {
-        BEACH = Registry.BIOME.getId(Biomes.BEACH);
-        SNOWY_BEACH = Registry.BIOME.getId(Biomes.SNOWY_BEACH);
-        DESERT = Registry.BIOME.getId(Biomes.DESERT);
-        MOUNTAINS = Registry.BIOME.getId(Biomes.MOUNTAINS);
-        WOODED_MOUNTAINS = Registry.BIOME.getId(Biomes.WOODED_MOUNTAINS);
-        FOREST = Registry.BIOME.getId(Biomes.FOREST);
-        JUNGLE = Registry.BIOME.getId(Biomes.JUNGLE);
-        JUNGLE_EDGE = Registry.BIOME.getId(Biomes.JUNGLE_EDGE);
-        JUNGLE_HILLS = Registry.BIOME.getId(Biomes.JUNGLE_HILLS);
-        BADLANDS = Registry.BIOME.getId(Biomes.BADLANDS);
-        WOODED_BADLANDS_PLATEAU = Registry.BIOME.getId(Biomes.WOODED_BADLANDS_PLATEAU);
-        BADLANDS_PLATEAU = Registry.BIOME.getId(Biomes.BADLANDS_PLATEAU);
-        ERODED_BADLANDS = Registry.BIOME.getId(Biomes.ERODED_BADLANDS);
-        MODIFIED_WOODED_BADLANDS_PLATEAU = Registry.BIOME.getId(Biomes.MODIFIED_WOODED_BADLANDS_PLATEAU);
-        MODIFIED_BADLANDS_PLATEAU = Registry.BIOME.getId(Biomes.MODIFIED_BADLANDS_PLATEAU);
-        MUSHROOM_FIELDS = Registry.BIOME.getId(Biomes.MUSHROOM_FIELDS);
-        MUSHROOM_FIELD_SHORE = Registry.BIOME.getId(Biomes.MUSHROOM_FIELD_SHORE);
-        RIVER = Registry.BIOME.getId(Biomes.RIVER);
-        MOUNTAIN_EDGE = Registry.BIOME.getId(Biomes.MOUNTAIN_EDGE);
-        STONE_SHORE = Registry.BIOME.getId(Biomes.STONE_SHORE);
-        SWAMP = Registry.BIOME.getId(Biomes.SWAMP);
-        TAIGA = Registry.BIOME.getId(Biomes.TAIGA);
+        BEACH = BuiltinRegistries.BIOME.getId(Biomes.BEACH);
+        SNOWY_BEACH = BuiltinRegistries.BIOME.getId(Biomes.SNOWY_BEACH);
+        DESERT = BuiltinRegistries.BIOME.getId(Biomes.DESERT);
+        MOUNTAINS = BuiltinRegistries.BIOME.getId(Biomes.MOUNTAINS);
+        WOODED_MOUNTAINS = BuiltinRegistries.BIOME.getId(Biomes.WOODED_MOUNTAINS);
+        FOREST = BuiltinRegistries.BIOME.getId(Biomes.FOREST);
+        JUNGLE = BuiltinRegistries.BIOME.getId(Biomes.JUNGLE);
+        JUNGLE_EDGE = BuiltinRegistries.BIOME.getId(Biomes.JUNGLE_EDGE);
+        JUNGLE_HILLS = BuiltinRegistries.BIOME.getId(Biomes.JUNGLE_HILLS);
+        BADLANDS = BuiltinRegistries.BIOME.getId(Biomes.BADLANDS);
+        WOODED_BADLANDS_PLATEAU = BuiltinRegistries.BIOME.getId(Biomes.WOODED_BADLANDS_PLATEAU);
+        BADLANDS_PLATEAU = BuiltinRegistries.BIOME.getId(Biomes.BADLANDS_PLATEAU);
+        ERODED_BADLANDS = BuiltinRegistries.BIOME.getId(Biomes.ERODED_BADLANDS);
+        MODIFIED_WOODED_BADLANDS_PLATEAU = BuiltinRegistries.BIOME.getId(Biomes.MODIFIED_WOODED_BADLANDS_PLATEAU);
+        MODIFIED_BADLANDS_PLATEAU = BuiltinRegistries.BIOME.getId(Biomes.MODIFIED_BADLANDS_PLATEAU);
+        MUSHROOM_FIELDS = BuiltinRegistries.BIOME.getId(Biomes.MUSHROOM_FIELDS);
+        MUSHROOM_FIELD_SHORE = BuiltinRegistries.BIOME.getId(Biomes.MUSHROOM_FIELD_SHORE);
+        RIVER = BuiltinRegistries.BIOME.getId(Biomes.RIVER);
+        MOUNTAIN_EDGE = BuiltinRegistries.BIOME.getId(Biomes.MOUNTAIN_EDGE);
+        STONE_SHORE = BuiltinRegistries.BIOME.getId(Biomes.STONE_SHORE);
+        SWAMP = BuiltinRegistries.BIOME.getId(Biomes.SWAMP);
+        TAIGA = BuiltinRegistries.BIOME.getId(Biomes.TAIGA);
     }
 }
 

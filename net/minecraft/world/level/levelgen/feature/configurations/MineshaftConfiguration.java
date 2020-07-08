@@ -12,12 +12,12 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfigur
 
 public class MineshaftConfiguration
 implements FeatureConfiguration {
-    public static final Codec<MineshaftConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.DOUBLE.fieldOf("probability")).forGetter(mineshaftConfiguration -> mineshaftConfiguration.probability), ((MapCodec)MineshaftFeature.Type.CODEC.fieldOf("type")).forGetter(mineshaftConfiguration -> mineshaftConfiguration.type)).apply((Applicative<MineshaftConfiguration, ?>)instance, MineshaftConfiguration::new));
-    public final double probability;
+    public static final Codec<MineshaftConfiguration> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.floatRange(0.0f, 1.0f).fieldOf("probability")).forGetter(mineshaftConfiguration -> Float.valueOf(mineshaftConfiguration.probability)), ((MapCodec)MineshaftFeature.Type.CODEC.fieldOf("type")).forGetter(mineshaftConfiguration -> mineshaftConfiguration.type)).apply((Applicative<MineshaftConfiguration, ?>)instance, MineshaftConfiguration::new));
+    public final float probability;
     public final MineshaftFeature.Type type;
 
-    public MineshaftConfiguration(double d, MineshaftFeature.Type type) {
-        this.probability = d;
+    public MineshaftConfiguration(float f, MineshaftFeature.Type type) {
+        this.probability = f;
         this.type = type;
     }
 }

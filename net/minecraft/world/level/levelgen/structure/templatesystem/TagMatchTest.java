@@ -15,7 +15,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
 
 public class TagMatchTest
 extends RuleTest {
-    public static final Codec<TagMatchTest> CODEC = ((MapCodec)Tag.codec(SerializationTags.getInstance()::getBlocks).fieldOf("tag")).xmap(TagMatchTest::new, tagMatchTest -> tagMatchTest.tag).codec();
+    public static final Codec<TagMatchTest> CODEC = ((MapCodec)Tag.codec(() -> SerializationTags.getInstance().getBlocks()).fieldOf("tag")).xmap(TagMatchTest::new, tagMatchTest -> tagMatchTest.tag).codec();
     private final Tag<Block> tag;
 
     public TagMatchTest(Tag<Block> tag) {

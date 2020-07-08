@@ -31,7 +31,7 @@ extends SimpleCriterionTrigger<TriggerInstance> {
         Potion potion = null;
         if (jsonObject.has("potion")) {
             ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "potion"));
-            potion = (Potion)Registry.POTION.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown potion '" + resourceLocation + "'"));
+            potion = Registry.POTION.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown potion '" + resourceLocation + "'"));
         }
         return new TriggerInstance(composite, potion);
     }

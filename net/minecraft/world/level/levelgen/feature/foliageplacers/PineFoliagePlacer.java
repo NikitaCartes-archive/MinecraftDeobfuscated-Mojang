@@ -10,6 +10,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.UniformInt;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
@@ -18,14 +19,12 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class PineFoliagePlacer
 extends FoliagePlacer {
-    public static final Codec<PineFoliagePlacer> CODEC = RecordCodecBuilder.create(instance -> PineFoliagePlacer.foliagePlacerParts(instance).and(instance.group(((MapCodec)Codec.INT.fieldOf("height")).forGetter(pineFoliagePlacer -> pineFoliagePlacer.height), ((MapCodec)Codec.INT.fieldOf("height_random")).forGetter(pineFoliagePlacer -> pineFoliagePlacer.heightRandom))).apply((Applicative<PineFoliagePlacer, ?>)instance, PineFoliagePlacer::new));
-    private final int height;
-    private final int heightRandom;
+    public static final Codec<PineFoliagePlacer> CODEC = RecordCodecBuilder.create(instance -> PineFoliagePlacer.foliagePlacerParts(instance).and(((MapCodec)UniformInt.codec(0, 16, 8).fieldOf("height")).forGetter(pineFoliagePlacer -> pineFoliagePlacer.height)).apply((Applicative<PineFoliagePlacer, ?>)instance, PineFoliagePlacer::new));
+    private final UniformInt height;
 
-    public PineFoliagePlacer(int i, int j, int k, int l, int m, int n) {
-        super(i, j, k, l);
-        this.height = m;
-        this.heightRandom = n;
+    public PineFoliagePlacer(UniformInt uniformInt, UniformInt uniformInt2, UniformInt uniformInt3) {
+        super(uniformInt, uniformInt2);
+        this.height = uniformInt3;
     }
 
     @Override
@@ -54,7 +53,7 @@ extends FoliagePlacer {
 
     @Override
     public int foliageHeight(Random random, int i, TreeConfiguration treeConfiguration) {
-        return this.height + random.nextInt(this.heightRandom + 1);
+        return this.height.sample(random);
     }
 
     @Override

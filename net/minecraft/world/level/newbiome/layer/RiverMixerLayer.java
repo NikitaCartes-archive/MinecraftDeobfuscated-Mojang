@@ -3,7 +3,7 @@
  */
 package net.minecraft.world.level.newbiome.layer;
 
-import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.newbiome.area.Area;
 import net.minecraft.world.level.newbiome.context.Context;
@@ -42,11 +42,11 @@ DimensionOffset0Transformer
     }
 
     static {
-        FROZEN_RIVER = Registry.BIOME.getId(Biomes.FROZEN_RIVER);
-        SNOWY_TUNDRA = Registry.BIOME.getId(Biomes.SNOWY_TUNDRA);
-        MUSHROOM_FIELDS = Registry.BIOME.getId(Biomes.MUSHROOM_FIELDS);
-        MUSHROOM_FIELD_SHORE = Registry.BIOME.getId(Biomes.MUSHROOM_FIELD_SHORE);
-        RIVER = Registry.BIOME.getId(Biomes.RIVER);
+        FROZEN_RIVER = BuiltinRegistries.BIOME.getId(Biomes.FROZEN_RIVER);
+        SNOWY_TUNDRA = BuiltinRegistries.BIOME.getId(Biomes.SNOWY_TUNDRA);
+        MUSHROOM_FIELDS = BuiltinRegistries.BIOME.getId(Biomes.MUSHROOM_FIELDS);
+        MUSHROOM_FIELD_SHORE = BuiltinRegistries.BIOME.getId(Biomes.MUSHROOM_FIELD_SHORE);
+        RIVER = BuiltinRegistries.BIOME.getId(Biomes.RIVER);
     }
 }
 

@@ -401,7 +401,7 @@ extends ChunkSource {
         int i = blockPos.getX() >> 4;
         ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(ChunkPos.asLong(i, j = blockPos.getZ() >> 4));
         if (chunkHolder != null) {
-            chunkHolder.blockChanged(blockPos.getX() & 0xF, blockPos.getY(), blockPos.getZ() & 0xF);
+            chunkHolder.blockChanged(blockPos);
         }
     }
 

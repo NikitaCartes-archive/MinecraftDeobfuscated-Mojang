@@ -53,7 +53,7 @@ implements BonemealableBlock {
             if (random.nextInt(8) == 0) {
                 List<ConfiguredFeature<?, ?>> list = serverLevel.getBiome(blockPos3).getFlowerFeatures();
                 if (list.isEmpty()) continue;
-                ConfiguredFeature<?, ?> configuredFeature = ((DecoratedFeatureConfiguration)list.get((int)0).config).feature;
+                ConfiguredFeature<?, ?> configuredFeature = ((DecoratedFeatureConfiguration)list.get((int)0).config).feature.get();
                 blockState4 = ((AbstractFlowerFeature)configuredFeature.feature).getRandomFlower(random, blockPos3, configuredFeature.config);
             } else {
                 blockState4 = blockState2;

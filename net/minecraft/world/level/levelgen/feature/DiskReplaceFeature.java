@@ -8,13 +8,12 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.BaseDiskFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
 
 public class DiskReplaceFeature
-extends Feature<DiskConfiguration> {
+extends BaseDiskFeature {
     public DiskReplaceFeature(Codec<DiskConfiguration> codec) {
         super(codec);
     }
@@ -24,26 +23,7 @@ extends Feature<DiskConfiguration> {
         if (!worldGenLevel.getFluidState(blockPos).is(FluidTags.WATER)) {
             return false;
         }
-        int i = 0;
-        int j = random.nextInt(diskConfiguration.radius - 2) + 2;
-        for (int k = blockPos.getX() - j; k <= blockPos.getX() + j; ++k) {
-            for (int l = blockPos.getZ() - j; l <= blockPos.getZ() + j; ++l) {
-                int n;
-                int m = k - blockPos.getX();
-                if (m * m + (n = l - blockPos.getZ()) * n > j * j) continue;
-                block2: for (int o = blockPos.getY() - diskConfiguration.ySize; o <= blockPos.getY() + diskConfiguration.ySize; ++o) {
-                    BlockPos blockPos2 = new BlockPos(k, o, l);
-                    BlockState blockState = worldGenLevel.getBlockState(blockPos2);
-                    for (BlockState blockState2 : diskConfiguration.targets) {
-                        if (!blockState2.is(blockState.getBlock())) continue;
-                        worldGenLevel.setBlock(blockPos2, diskConfiguration.state, 2);
-                        ++i;
-                        continue block2;
-                    }
-                }
-            }
-        }
-        return i > 0;
+        return super.place(worldGenLevel, chunkGenerator, random, blockPos, diskConfiguration);
     }
 }
 

@@ -54,10 +54,8 @@ extends Enchantment {
                 entity.hurt(DamageSource.thorns(livingEntity2), ThornsEnchantment.getDamage(i, random));
             }
             if (entry != null) {
-                entry.getValue().hurtAndBreak(3, livingEntity2, livingEntity -> livingEntity.broadcastBreakEvent((EquipmentSlot)((Object)((Object)entry.getKey()))));
+                entry.getValue().hurtAndBreak(2, livingEntity2, livingEntity -> livingEntity.broadcastBreakEvent((EquipmentSlot)((Object)((Object)entry.getKey()))));
             }
-        } else if (entry != null) {
-            entry.getValue().hurtAndBreak(1, livingEntity2, livingEntity -> livingEntity.broadcastBreakEvent((EquipmentSlot)((Object)((Object)entry.getKey()))));
         }
     }
 

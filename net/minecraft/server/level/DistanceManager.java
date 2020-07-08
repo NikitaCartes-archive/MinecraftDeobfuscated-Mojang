@@ -93,7 +93,7 @@ public abstract class DistanceManager {
         boolean bl;
         this.naturalSpawnChunkCounter.runAllUpdates();
         this.playerTicketManager.runAllUpdates();
-        int i = Integer.MAX_VALUE - this.ticketTracker.runDistnaceUpdates(Integer.MAX_VALUE);
+        int i = Integer.MAX_VALUE - this.ticketTracker.runDistanceUpdates(Integer.MAX_VALUE);
         boolean bl2 = bl = i != 0;
         if (bl) {
             // empty if block
@@ -254,7 +254,7 @@ public abstract class DistanceManager {
             }
         }
 
-        public int runDistnaceUpdates(int i) {
+        public int runDistanceUpdates(int i) {
             return this.runUpdates(i);
         }
     }

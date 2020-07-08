@@ -18,6 +18,7 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
@@ -103,7 +104,7 @@ public class ComponentUtils {
     }
 
     public static MutableComponent wrapInSquareBrackets(Component component) {
-        return new TextComponent("[").append(component).append("]");
+        return new TranslatableComponent("chat.square_brackets", component);
     }
 
     public static Component fromMessage(Message message) {

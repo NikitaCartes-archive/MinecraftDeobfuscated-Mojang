@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.BlockUtil;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -89,17 +90,19 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.HoneyBlock;
 import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.pattern.BlockPattern;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.portal.PortalInfo;
+import net.minecraft.world.level.portal.PortalShape;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec2;
@@ -189,9 +192,7 @@ CommandSource {
     private int portalCooldown;
     protected boolean isInsidePortal;
     protected int portalTime;
-    protected BlockPos portalEntranceBlock;
-    protected Vec3 portalEntranceOffset;
-    protected Direction portalEntranceForwards;
+    protected BlockPos portalEntrancePos;
     private boolean invulnerable;
     protected UUID uuid = Mth.createInsecureUUID(this.random);
     protected String stringUUID = this.uuid.toString();
@@ -436,7 +437,7 @@ CommandSource {
     }
 
     public int getPortalWaitTime() {
-        return 1;
+        return 0;
     }
 
     protected void lavaHurt() {
@@ -905,11 +906,9 @@ CommandSource {
     protected boolean updateInWaterStateAndDoFluidPushing() {
         this.fluidHeight.clear();
         this.updateInWaterStateAndDoWaterCurrentPushing();
-        if (this.isInWater()) {
-            return true;
-        }
         double d = this.level.dimensionType().ultraWarm() ? 0.007 : 0.0023333333333333335;
-        return this.updateFluidHeightAndDoFluidPushing(FluidTags.LAVA, d);
+        boolean bl = this.updateFluidHeightAndDoFluidPushing(FluidTags.LAVA, d);
+        return this.isInWater() || bl;
     }
 
     void updateInWaterStateAndDoWaterCurrentPushing() {
@@ -1615,15 +1614,8 @@ CommandSource {
             this.setPortalCooldown();
             return;
         }
-        if (!this.level.isClientSide && !blockPos.equals(this.portalEntranceBlock)) {
-            this.portalEntranceBlock = new BlockPos(blockPos);
-            NetherPortalBlock cfr_ignored_0 = (NetherPortalBlock)Blocks.NETHER_PORTAL;
-            BlockPattern.BlockPatternMatch blockPatternMatch = NetherPortalBlock.getPortalShape(this.level, this.portalEntranceBlock);
-            double d = blockPatternMatch.getForwards().getAxis() == Direction.Axis.X ? (double)blockPatternMatch.getFrontTopLeft().getZ() : (double)blockPatternMatch.getFrontTopLeft().getX();
-            double e = Mth.clamp(Math.abs(Mth.inverseLerp((blockPatternMatch.getForwards().getAxis() == Direction.Axis.X ? this.getZ() : this.getX()) - (double)(blockPatternMatch.getForwards().getClockWise().getAxisDirection() == Direction.AxisDirection.NEGATIVE ? 1 : 0), d, d - (double)blockPatternMatch.getWidth())), 0.0, 1.0);
-            double f = Mth.clamp(Mth.inverseLerp(this.getY() - 1.0, blockPatternMatch.getFrontTopLeft().getY(), blockPatternMatch.getFrontTopLeft().getY() - blockPatternMatch.getHeight()), 0.0, 1.0);
-            this.portalEntranceOffset = new Vec3(e, f, 0.0);
-            this.portalEntranceForwards = blockPatternMatch.getForwards();
+        if (!this.level.isClientSide && !blockPos.equals(this.portalEntrancePos)) {
+            this.portalEntrancePos = blockPos.immutable();
         }
         this.isInsidePortal = true;
     }
@@ -1961,61 +1953,27 @@ CommandSource {
         compoundTag.remove("Dimension");
         this.load(compoundTag);
         this.portalCooldown = entity.portalCooldown;
-        this.portalEntranceBlock = entity.portalEntranceBlock;
-        this.portalEntranceOffset = entity.portalEntranceOffset;
-        this.portalEntranceForwards = entity.portalEntranceForwards;
+        this.portalEntrancePos = entity.portalEntrancePos;
     }
 
     @Nullable
     public Entity changeDimension(ServerLevel serverLevel) {
-        BlockPos blockPos;
         if (!(this.level instanceof ServerLevel) || this.removed) {
             return null;
         }
         this.level.getProfiler().push("changeDimension");
         this.unRide();
         this.level.getProfiler().push("reposition");
-        Vec3 vec3 = this.getDeltaMovement();
-        float f = 0.0f;
-        if (this.level.dimension() == Level.END && serverLevel.dimension() == Level.OVERWORLD) {
-            blockPos = serverLevel.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, serverLevel.getSharedSpawnPos());
-        } else if (serverLevel.dimension() == Level.END) {
-            blockPos = ServerLevel.END_SPAWN_POINT;
-        } else {
-            double d = this.getX();
-            double e = this.getZ();
-            DimensionType dimensionType = this.level.dimensionType();
-            DimensionType dimensionType2 = serverLevel.dimensionType();
-            double g = 8.0;
-            if (!dimensionType.shrunk() && dimensionType2.shrunk()) {
-                d /= 8.0;
-                e /= 8.0;
-            } else if (dimensionType.shrunk() && !dimensionType2.shrunk()) {
-                d *= 8.0;
-                e *= 8.0;
-            }
-            double h = Math.min(-2.9999872E7, serverLevel.getWorldBorder().getMinX() + 16.0);
-            double i = Math.min(-2.9999872E7, serverLevel.getWorldBorder().getMinZ() + 16.0);
-            double j = Math.min(2.9999872E7, serverLevel.getWorldBorder().getMaxX() - 16.0);
-            double k = Math.min(2.9999872E7, serverLevel.getWorldBorder().getMaxZ() - 16.0);
-            d = Mth.clamp(d, h, j);
-            e = Mth.clamp(e, i, k);
-            Vec3 vec32 = this.getPortalEntranceOffset();
-            blockPos = new BlockPos(d, this.getY(), e);
-            BlockPattern.PortalInfo portalInfo = serverLevel.getPortalForcer().findPortal(blockPos, vec3, this.getPortalEntranceForwards(), vec32.x, vec32.y, this instanceof Player);
-            if (portalInfo == null) {
-                return null;
-            }
-            blockPos = new BlockPos(portalInfo.pos);
-            vec3 = portalInfo.speed;
-            f = portalInfo.angle;
+        PortalInfo portalInfo = this.findDimensionEntryPoint(serverLevel);
+        if (portalInfo == null) {
+            return null;
         }
         this.level.getProfiler().popPush("reloading");
         Object entity = this.getType().create(serverLevel);
         if (entity != null) {
             ((Entity)entity).restoreFrom(this);
-            ((Entity)entity).moveTo(blockPos, ((Entity)entity).yRot + f, ((Entity)entity).xRot);
-            ((Entity)entity).setDeltaMovement(vec3);
+            ((Entity)entity).moveTo(portalInfo.pos.x, portalInfo.pos.y, portalInfo.pos.z, portalInfo.yRot, ((Entity)entity).xRot);
+            ((Entity)entity).setDeltaMovement(portalInfo.speed);
             serverLevel.addFromAnotherDimension((Entity)entity);
             if (serverLevel.dimension() == Level.END) {
                 ServerLevel.makeObsidianPlatform(serverLevel);
@@ -2033,6 +1991,59 @@ CommandSource {
         this.removed = true;
     }
 
+    @Nullable
+    protected PortalInfo findDimensionEntryPoint(ServerLevel serverLevel) {
+        boolean bl3;
+        boolean bl2;
+        boolean bl = this.level.dimension() == Level.END && serverLevel.dimension() == Level.OVERWORLD;
+        boolean bl4 = bl2 = serverLevel.dimension() == Level.END;
+        if (bl || bl2) {
+            BlockPos blockPos = bl2 ? ServerLevel.END_SPAWN_POINT : serverLevel.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, serverLevel.getSharedSpawnPos());
+            return new PortalInfo(new Vec3((double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5), this.getDeltaMovement(), this.yRot, this.xRot);
+        }
+        boolean bl5 = bl3 = serverLevel.dimension() == Level.NETHER;
+        if (this.level.dimension() != Level.NETHER && !bl3) {
+            return null;
+        }
+        WorldBorder worldBorder = serverLevel.getWorldBorder();
+        double d = Math.max(-2.9999872E7, worldBorder.getMinX() + 16.0);
+        double e = Math.max(-2.9999872E7, worldBorder.getMinZ() + 16.0);
+        double f = Math.min(2.9999872E7, worldBorder.getMaxX() - 16.0);
+        double g = Math.min(2.9999872E7, worldBorder.getMaxZ() - 16.0);
+        double h = Entity.getTeleportationScale(this.level.dimensionType(), serverLevel.dimensionType());
+        BlockPos blockPos2 = new BlockPos(Mth.clamp(this.getX() * h, d, f), this.getY(), Mth.clamp(this.getZ() * h, e, g));
+        return this.getExitPortal(serverLevel, blockPos2, bl3).map(foundRectangle -> {
+            Vec3 vec3;
+            Direction.Axis axis;
+            BlockState blockState = this.level.getBlockState(this.portalEntrancePos);
+            if (blockState.hasProperty(BlockStateProperties.HORIZONTAL_AXIS)) {
+                axis = blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS);
+                BlockUtil.FoundRectangle foundRectangle2 = BlockUtil.getLargestRectangleAround(this.portalEntrancePos, axis, 21, Direction.Axis.Y, 21, blockPos -> this.level.getBlockState((BlockPos)blockPos) == blockState);
+                vec3 = PortalShape.getRelativePosition(foundRectangle2, axis, this.position(), this.getDimensions(this.getPose()));
+            } else {
+                axis = Direction.Axis.X;
+                vec3 = new Vec3(0.5, 0.0, 0.0);
+            }
+            return PortalShape.createPortalInfo(serverLevel, foundRectangle, axis, vec3, this.getDimensions(this.getPose()), this.getDeltaMovement(), this.yRot, this.xRot);
+        }).orElse(null);
+    }
+
+    protected Optional<BlockUtil.FoundRectangle> getExitPortal(ServerLevel serverLevel, BlockPos blockPos, boolean bl) {
+        return serverLevel.getPortalForcer().findPortalAround(blockPos, bl);
+    }
+
+    private static double getTeleportationScale(DimensionType dimensionType, DimensionType dimensionType2) {
+        boolean bl = dimensionType.shrunk();
+        boolean bl2 = dimensionType2.shrunk();
+        if (!bl && bl2) {
+            return 0.125;
+        }
+        if (bl && !bl2) {
+            return 8.0;
+        }
+        return 1.0;
+    }
+
     public boolean canChangeDimensions() {
         return true;
     }
@@ -2047,14 +2058,6 @@ CommandSource {
 
     public int getMaxFallDistance() {
         return 3;
-    }
-
-    public Vec3 getPortalEntranceOffset() {
-        return this.portalEntranceOffset;
-    }
-
-    public Direction getPortalEntranceForwards() {
-        return this.portalEntranceForwards;
     }
 
     public boolean isIgnoringBlockTriggers() {
