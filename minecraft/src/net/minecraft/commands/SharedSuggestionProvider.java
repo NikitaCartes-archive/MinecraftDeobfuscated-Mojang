@@ -16,6 +16,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -44,6 +45,8 @@ public interface SharedSuggestionProvider {
 	}
 
 	Set<ResourceKey<Level>> levels();
+
+	RegistryAccess registryAccess();
 
 	boolean hasPermission(int i);
 

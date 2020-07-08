@@ -8,7 +8,6 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -55,14 +54,12 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class Piglin extends AbstractPiglin implements CrossbowAttackMob {
 	private static final EntityDataAccessor<Boolean> DATA_BABY_ID = SynchedEntityData.defineId(Piglin.class, EntityDataSerializers.BOOLEAN);
-	private static final EntityDataAccessor<Boolean> DATA_IMMUNE_TO_ZOMBIFICATION = SynchedEntityData.defineId(Piglin.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_IS_CHARGING_CROSSBOW = SynchedEntityData.defineId(Piglin.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_IS_DANCING = SynchedEntityData.defineId(Piglin.class, EntityDataSerializers.BOOLEAN);
 	private static final UUID SPEED_MODIFIER_BABY_UUID = UUID.fromString("766bfa64-11f3-11ea-8d71-362b9e155667");
 	private static final AttributeModifier SPEED_MODIFIER_BABY = new AttributeModifier(
 		SPEED_MODIFIER_BABY_UUID, "Baby speed boost", 0.2F, AttributeModifier.Operation.MULTIPLY_BASE
 	);
-	private int timeInOverworld = 0;
 	private final SimpleContainer inventory = new SimpleContainer(8);
 	private boolean cannotHunt = false;
 	protected static final ImmutableList<SensorType<? extends Sensor<? super Piglin>>> SENSOR_TYPES = ImmutableList.of(
@@ -96,7 +93,9 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob {
 		MemoryModuleType.UNIVERSAL_ANGER,
 		MemoryModuleType.AVOID_TARGET,
 		MemoryModuleType.ADMIRING_ITEM,
+		MemoryModuleType.TIME_TRYING_TO_REACH_ADMIRE_ITEM,
 		MemoryModuleType.ADMIRING_DISABLED,
+		MemoryModuleType.DISABLE_WALK_TO_ADMIRE_ITEM,
 		MemoryModuleType.CELEBRATE_LOCATION,
 		MemoryModuleType.DANCING,
 		MemoryModuleType.HUNTED_RECENTLY,
@@ -159,7 +158,6 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob {
 		super.defineSynchedData();
 		this.entityData.define(DATA_BABY_ID, false);
 		this.entityData.define(DATA_IS_CHARGING_CROSSBOW, false);
-		this.entityData.define(DATA_IMMUNE_TO_ZOMBIFICATION, false);
 		this.entityData.define(DATA_IS_DANCING, false);
 	}
 
@@ -301,21 +299,11 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob {
 
 	@Override
 	protected void customServerAiStep() {
-		super.customServerAiStep();
 		this.level.getProfiler().push("piglinBrain");
 		this.getBrain().tick((ServerLevel)this.level, this);
 		this.level.getProfiler().pop();
 		PiglinAi.updateActivity(this);
-		if (this.isConverting()) {
-			this.timeInOverworld++;
-		} else {
-			this.timeInOverworld = 0;
-		}
-
-		if (this.timeInOverworld > 300) {
-			this.playConvertedSound();
-			this.finishConversion((ServerLevel)this.level);
-		}
+		super.customServerAiStep();
 	}
 
 	@Override
@@ -415,7 +403,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob {
 
 	@Override
 	public boolean wantsToPickUp(ItemStack itemStack) {
-		return this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && PiglinAi.wantsToPickup(this, itemStack);
+		return this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && this.canPickUpLoot() && PiglinAi.wantsToPickup(this, itemStack);
 	}
 
 	protected boolean canReplaceCurrentItem(ItemStack itemStack) {
@@ -485,12 +473,6 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob {
 
 	protected void playSound(SoundEvent soundEvent) {
 		this.playSound(soundEvent, this.getSoundVolume(), this.getVoicePitch());
-	}
-
-	@Override
-	protected void sendDebugPackets() {
-		super.sendDebugPackets();
-		DebugPackets.sendEntityBrain(this);
 	}
 
 	@Override

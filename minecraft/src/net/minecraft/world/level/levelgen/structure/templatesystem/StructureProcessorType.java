@@ -1,7 +1,12 @@
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.RegistryFileCodec;
 
 public interface StructureProcessorType<P extends StructureProcessor> {
 	StructureProcessorType<BlockIgnoreProcessor> BLOCK_IGNORE = register("block_ignore", BlockIgnoreProcessor.CODEC);
@@ -13,7 +18,11 @@ public interface StructureProcessorType<P extends StructureProcessor> {
 	StructureProcessorType<BlockAgeProcessor> BLOCK_AGE = register("block_age", BlockAgeProcessor.CODEC);
 	StructureProcessorType<BlackstoneReplaceProcessor> BLACKSTONE_REPLACE = register("blackstone_replace", BlackstoneReplaceProcessor.CODEC);
 	StructureProcessorType<LavaSubmergedBlockProcessor> LAVA_SUBMERGED_BLOCK = register("lava_submerged_block", LavaSubmergedBlockProcessor.CODEC);
-	Codec<StructureProcessor> CODEC = Registry.STRUCTURE_PROCESSOR.dispatch("processor_type", StructureProcessor::getType, StructureProcessorType::codec);
+	Codec<StructureProcessor> SINGLE_CODEC = Registry.STRUCTURE_PROCESSOR.dispatch("processor_type", StructureProcessor::getType, StructureProcessorType::codec);
+	MapCodec<ImmutableList<StructureProcessor>> DIRECT_CODEC = SINGLE_CODEC.listOf()
+		.<ImmutableList<StructureProcessor>>xmap(ImmutableList::copyOf, Function.identity())
+		.fieldOf("processors");
+	Codec<Supplier<ImmutableList<StructureProcessor>>> LIST_CODEC = RegistryFileCodec.create(Registry.PROCESSOR_LIST_REGISTRY, DIRECT_CODEC);
 
 	Codec<P> codec();
 

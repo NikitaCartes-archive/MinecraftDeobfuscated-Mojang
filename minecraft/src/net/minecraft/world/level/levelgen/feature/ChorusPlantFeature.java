@@ -17,8 +17,8 @@ public class ChorusPlantFeature extends Feature<NoneFeatureConfiguration> {
 	public boolean place(
 		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration
 	) {
-		if (worldGenLevel.isEmptyBlock(blockPos.above()) && worldGenLevel.getBlockState(blockPos).is(Blocks.END_STONE)) {
-			ChorusFlowerBlock.generatePlant(worldGenLevel, blockPos.above(), random, 8);
+		if (worldGenLevel.isEmptyBlock(blockPos) && worldGenLevel.getBlockState(blockPos.below()).is(Blocks.END_STONE)) {
+			ChorusFlowerBlock.generatePlant(worldGenLevel, blockPos, random, 8);
 			return true;
 		} else {
 			return false;

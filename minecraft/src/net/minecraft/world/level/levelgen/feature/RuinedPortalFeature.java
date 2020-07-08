@@ -9,6 +9,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
@@ -127,7 +128,13 @@ public class RuinedPortalFeature extends StructureFeature<RuinedPortalConfigurat
 		}
 
 		public void generatePieces(
-			ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, RuinedPortalConfiguration ruinedPortalConfiguration
+			RegistryAccess registryAccess,
+			ChunkGenerator chunkGenerator,
+			StructureManager structureManager,
+			int i,
+			int j,
+			Biome biome,
+			RuinedPortalConfiguration ruinedPortalConfiguration
 		) {
 			RuinedPortalPiece.Properties properties = new RuinedPortalPiece.Properties();
 			RuinedPortalPiece.VerticalPlacement verticalPlacement;

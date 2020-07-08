@@ -4,8 +4,6 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
 
 public abstract class SimpleFeatureDecorator<DC extends DecoratorConfiguration> extends FeatureDecorator<DC> {
@@ -14,9 +12,7 @@ public abstract class SimpleFeatureDecorator<DC extends DecoratorConfiguration> 
 	}
 
 	@Override
-	public final Stream<BlockPos> getPositions(
-		LevelAccessor levelAccessor, ChunkGenerator chunkGenerator, Random random, DC decoratorConfiguration, BlockPos blockPos
-	) {
+	public final Stream<BlockPos> getPositions(DecorationContext decorationContext, Random random, DC decoratorConfiguration, BlockPos blockPos) {
 		return this.place(random, decoratorConfiguration, blockPos);
 	}
 

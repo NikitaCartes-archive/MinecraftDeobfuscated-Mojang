@@ -40,7 +40,6 @@ import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.PoweredRailBlock;
-import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.AABB;
@@ -170,14 +169,11 @@ public abstract class AbstractMinecart extends Entity {
 					for (int[] js : is) {
 						mutableBlockPos.set(blockPos.getX() + js[0], blockPos.getY() + i, blockPos.getZ() + js[1]);
 						double d = this.level
-							.getRelativeFloorHeight(
-								mutableBlockPos,
-								blockState -> blockState.is(BlockTags.CLIMBABLE)
-										? true
-										: blockState.getBlock() instanceof TrapDoorBlock && (Boolean)blockState.getValue(TrapDoorBlock.OPEN)
+							.getBlockFloorHeight(
+								DismountHelper.nonClimbableShape(this.level, mutableBlockPos), () -> DismountHelper.nonClimbableShape(this.level, mutableBlockPos.below())
 							);
-						if (DismountHelper.isFloorValid(d)) {
-							AABB aABB = new AABB((double)(-f), d, (double)(-f), (double)f, d + (double)entityDimensions.height, (double)f);
+						if (DismountHelper.isBlockFloorValid(d)) {
+							AABB aABB = new AABB((double)(-f), 0.0, (double)(-f), (double)f, (double)entityDimensions.height, (double)f);
 							Vec3 vec3 = Vec3.upFromBottomCenterOf(mutableBlockPos, d);
 							if (DismountHelper.canDismountTo(this.level, livingEntity, aABB.move(vec3))) {
 								livingEntity.setPose(pose);
@@ -193,7 +189,8 @@ public abstract class AbstractMinecart extends Entity {
 
 			for (Pose pose2 : immutableList) {
 				double g = (double)livingEntity.getDimensions(pose2).height;
-				double h = (double)mutableBlockPos.getY() + this.level.getRelativeCeilingHeight(mutableBlockPos, e - (double)mutableBlockPos.getY() + g);
+				int j = Mth.ceil(e - (double)mutableBlockPos.getY() + g);
+				double h = DismountHelper.findCeilingFrom(mutableBlockPos, j, blockPosx -> this.level.getBlockState(blockPosx).getCollisionShape(this.level, blockPosx));
 				if (e + g <= h) {
 					livingEntity.setPose(pose2);
 					break;
@@ -365,6 +362,8 @@ public abstract class AbstractMinecart extends Entity {
 				this.lavaHurt();
 				this.fallDistance *= 0.5F;
 			}
+
+			this.firstTick = false;
 		}
 	}
 

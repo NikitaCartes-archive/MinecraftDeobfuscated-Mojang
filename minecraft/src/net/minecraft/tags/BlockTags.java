@@ -89,6 +89,8 @@ public final class BlockTags {
 	public static final Tag.Named<Block> INFINIBURN_OVERWORLD = bind("infiniburn_overworld");
 	public static final Tag.Named<Block> INFINIBURN_NETHER = bind("infiniburn_nether");
 	public static final Tag.Named<Block> INFINIBURN_END = bind("infiniburn_end");
+	public static final Tag.Named<Block> BASE_STONE_OVERWORLD = bind("base_stone_overworld");
+	public static final Tag.Named<Block> BASE_STONE_NETHER = bind("base_stone_nether");
 
 	private static Tag.Named<Block> bind(String string) {
 		return HELPER.bind(string);

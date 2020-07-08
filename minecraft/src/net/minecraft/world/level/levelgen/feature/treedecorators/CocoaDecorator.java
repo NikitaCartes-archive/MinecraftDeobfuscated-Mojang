@@ -14,7 +14,7 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class CocoaDecorator extends TreeDecorator {
-	public static final Codec<CocoaDecorator> CODEC = Codec.FLOAT
+	public static final Codec<CocoaDecorator> CODEC = Codec.floatRange(0.0F, 1.0F)
 		.fieldOf("probability")
 		.<CocoaDecorator>xmap(CocoaDecorator::new, cocoaDecorator -> cocoaDecorator.probability)
 		.codec();

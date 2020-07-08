@@ -7,7 +7,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
@@ -44,10 +44,9 @@ public class FullscreenResolutionProgressOption extends ProgressOption {
 					return new TranslatableComponent("options.fullscreen.unavailable");
 				} else {
 					double d = progressOption.get(options);
-					MutableComponent mutableComponent = progressOption.createCaption();
 					return d == -1.0
-						? mutableComponent.append(new TranslatableComponent("options.fullscreen.current"))
-						: mutableComponent.append(monitor.getMode((int)d).toString());
+						? progressOption.genericValueLabel(new TranslatableComponent("options.fullscreen.current"))
+						: progressOption.genericValueLabel(new TextComponent(monitor.getMode((int)d).toString()));
 				}
 			}
 		);

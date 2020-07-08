@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Rotation;
@@ -30,7 +31,13 @@ public class OceanRuinFeature extends StructureFeature<OceanRuinConfiguration> {
 		}
 
 		public void generatePieces(
-			ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, OceanRuinConfiguration oceanRuinConfiguration
+			RegistryAccess registryAccess,
+			ChunkGenerator chunkGenerator,
+			StructureManager structureManager,
+			int i,
+			int j,
+			Biome biome,
+			OceanRuinConfiguration oceanRuinConfiguration
 		) {
 			int k = i * 16;
 			int l = j * 16;

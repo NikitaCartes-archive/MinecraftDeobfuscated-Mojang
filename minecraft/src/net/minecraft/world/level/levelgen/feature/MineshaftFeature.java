@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
@@ -34,7 +35,7 @@ public class MineshaftFeature extends StructureFeature<MineshaftConfiguration> {
 		MineshaftConfiguration mineshaftConfiguration
 	) {
 		worldgenRandom.setLargeFeatureSeed(l, i, j);
-		double d = mineshaftConfiguration.probability;
+		double d = (double)mineshaftConfiguration.probability;
 		return worldgenRandom.nextDouble() < d;
 	}
 
@@ -49,7 +50,13 @@ public class MineshaftFeature extends StructureFeature<MineshaftConfiguration> {
 		}
 
 		public void generatePieces(
-			ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, MineshaftConfiguration mineshaftConfiguration
+			RegistryAccess registryAccess,
+			ChunkGenerator chunkGenerator,
+			StructureManager structureManager,
+			int i,
+			int j,
+			Biome biome,
+			MineshaftConfiguration mineshaftConfiguration
 		) {
 			MineShaftPieces.MineShaftRoom mineShaftRoom = new MineShaftPieces.MineShaftRoom(0, this.random, (i << 4) + 2, (j << 4) + 2, mineshaftConfiguration.type);
 			this.pieces.add(mineShaftRoom);

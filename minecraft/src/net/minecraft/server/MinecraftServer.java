@@ -65,6 +65,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.data.worldgen.Features;
 import net.minecraft.gametest.framework.GameTestTicker;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -130,8 +131,6 @@ import net.minecraft.world.level.levelgen.PatrolSpawner;
 import net.minecraft.world.level.levelgen.PhantomSpawner;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.saveddata.SaveDataDirtyRunnable;
 import net.minecraft.world.level.storage.CommandStorage;
@@ -162,7 +161,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	protected final PlayerDataStorage playerDataStorage;
 	private final Snooper snooper = new Snooper("server", this, Util.getMillis());
 	private final List<Runnable> tickables = Lists.<Runnable>newArrayList();
-	private ContinuousProfiler continousProfiler = new ContinuousProfiler(Util.timeSource, this::getTickCount);
+	private final ContinuousProfiler continousProfiler = new ContinuousProfiler(Util.timeSource, this::getTickCount);
 	private ProfilerFiller profiler = InactiveProfiler.INSTANCE;
 	private final ServerConnectionListener connection;
 	private final ChunkProgressListenerFactory progressListenerFactory;
@@ -479,7 +478,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			}
 
 			if (bl) {
-				ConfiguredFeature<?, ?> configuredFeature = Feature.BONUS_CHEST.configured(FeatureConfiguration.NONE);
+				ConfiguredFeature<?, ?> configuredFeature = Features.BONUS_CHEST;
 				configuredFeature.place(
 					serverLevel, chunkGenerator, serverLevel.random, new BlockPos(serverLevelData.getXSpawn(), serverLevelData.getYSpawn(), serverLevelData.getZSpawn())
 				);
@@ -1116,6 +1115,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	public abstract boolean isDedicatedServer();
 
+	public abstract int getRateLimitPacketsPerSecond();
+
 	public boolean usesAuthentication() {
 		return this.onlineMode;
 	}
@@ -1717,5 +1718,9 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	public WorldData getWorldData() {
 		return this.worldData;
+	}
+
+	public RegistryAccess registryAccess() {
+		return this.registryHolder;
 	}
 }

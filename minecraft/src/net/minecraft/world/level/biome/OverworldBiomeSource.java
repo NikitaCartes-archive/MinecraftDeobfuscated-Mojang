@@ -17,7 +17,7 @@ public class OverworldBiomeSource extends BiomeSource {
 					Codec.BOOL
 						.optionalFieldOf("legacy_biome_init_layer", Boolean.valueOf(false), Lifecycle.stable())
 						.forGetter(overworldBiomeSource -> overworldBiomeSource.legacyBiomeInitLayer),
-					Codec.BOOL.fieldOf("large_biomes").withDefault(false).stable().forGetter(overworldBiomeSource -> overworldBiomeSource.largeBiomes)
+					Codec.BOOL.fieldOf("large_biomes").orElse(false).stable().forGetter(overworldBiomeSource -> overworldBiomeSource.largeBiomes)
 				)
 				.apply(instance, instance.stable(OverworldBiomeSource::new))
 	);

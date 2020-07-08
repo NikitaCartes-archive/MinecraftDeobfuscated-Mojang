@@ -48,6 +48,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelResource;
@@ -187,7 +188,9 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 			this.summary = levelSummary;
 			this.minecraft = Minecraft.getInstance();
 			String string = levelSummary.getLevelId();
-			this.iconLocation = new ResourceLocation("worlds/" + Util.sanitizeResourceName(string) + "/" + Hashing.sha1().hashUnencodedChars(string) + "/icon");
+			this.iconLocation = new ResourceLocation(
+				"minecraft", "worlds/" + Util.sanitizeName(string, ResourceLocation::validPathChar) + "/" + Hashing.sha1().hashUnencodedChars(string) + "/icon"
+			);
 			this.iconFile = levelSummary.getIcon();
 			if (!this.iconFile.isFile()) {
 				this.iconFile = null;
@@ -401,13 +404,15 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 					.makeServerStem(registryHolder, Minecraft::loadDataPacks, Minecraft::loadWorldData, false, levelStorageAccess);
 			) {
 				LevelSettings levelSettings = serverStem.worldData().getLevelSettings();
+				DataPackConfig dataPackConfig = levelSettings.getDataPackConfig();
 				WorldGenSettings worldGenSettings = serverStem.worldData().worldGenSettings();
 				Path path = CreateWorldScreen.createTempDataPackDirFromExistingWorld(levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR), this.minecraft);
 				if (worldGenSettings.isOldCustomizedWorld()) {
 					this.minecraft
 						.setScreen(
 							new ConfirmScreen(
-								bl -> this.minecraft.setScreen((Screen)(bl ? new CreateWorldScreen(this.screen, levelSettings, worldGenSettings, path, registryHolder) : this.screen)),
+								bl -> this.minecraft
+										.setScreen((Screen)(bl ? new CreateWorldScreen(this.screen, levelSettings, worldGenSettings, path, dataPackConfig, registryHolder) : this.screen)),
 								new TranslatableComponent("selectWorld.recreate.customized.title"),
 								new TranslatableComponent("selectWorld.recreate.customized.text"),
 								CommonComponents.GUI_PROCEED,
@@ -415,10 +420,10 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 							)
 						);
 				} else {
-					this.minecraft.setScreen(new CreateWorldScreen(this.screen, levelSettings, worldGenSettings, path, registryHolder));
+					this.minecraft.setScreen(new CreateWorldScreen(this.screen, levelSettings, worldGenSettings, path, dataPackConfig, registryHolder));
 				}
-			} catch (Exception var36) {
-				WorldSelectionList.LOGGER.error("Unable to recreate world", (Throwable)var36);
+			} catch (Exception var37) {
+				WorldSelectionList.LOGGER.error("Unable to recreate world", (Throwable)var37);
 				this.minecraft
 					.setScreen(
 						new AlertScreen(

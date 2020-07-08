@@ -9,10 +9,10 @@ import net.minecraft.util.Mth;
 public class LinearPosTest extends PosRuleTest {
 	public static final Codec<LinearPosTest> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					Codec.FLOAT.fieldOf("min_chance").withDefault(0.0F).forGetter(linearPosTest -> linearPosTest.minChance),
-					Codec.FLOAT.fieldOf("max_chance").withDefault(0.0F).forGetter(linearPosTest -> linearPosTest.maxChance),
-					Codec.INT.fieldOf("min_dist").withDefault(0).forGetter(linearPosTest -> linearPosTest.minDist),
-					Codec.INT.fieldOf("max_dist").withDefault(0).forGetter(linearPosTest -> linearPosTest.maxDist)
+					Codec.FLOAT.fieldOf("min_chance").orElse(0.0F).forGetter(linearPosTest -> linearPosTest.minChance),
+					Codec.FLOAT.fieldOf("max_chance").orElse(0.0F).forGetter(linearPosTest -> linearPosTest.maxChance),
+					Codec.INT.fieldOf("min_dist").orElse(0).forGetter(linearPosTest -> linearPosTest.minDist),
+					Codec.INT.fieldOf("max_dist").orElse(0).forGetter(linearPosTest -> linearPosTest.maxDist)
 				)
 				.apply(instance, LinearPosTest::new)
 	);

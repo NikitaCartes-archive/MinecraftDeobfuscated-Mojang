@@ -10,13 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.core.Registry;
-import net.minecraft.util.Codecs;
+import net.minecraft.data.worldgen.Features;
+import net.minecraft.data.worldgen.StructureFeatures;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -27,11 +27,8 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
-import net.minecraft.world.level.levelgen.placement.ChanceDecoratorConfiguration;
-import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -41,49 +38,45 @@ public class FlatLevelGeneratorSettings {
 			instance -> instance.group(
 						StructureSettings.CODEC.fieldOf("structures").forGetter(FlatLevelGeneratorSettings::structureSettings),
 						FlatLayerInfo.CODEC.listOf().fieldOf("layers").forGetter(FlatLevelGeneratorSettings::getLayersInfo),
-						Codec.BOOL.fieldOf("lakes").withDefault(false).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.addLakes),
-						Codec.BOOL.fieldOf("features").withDefault(false).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.decoration),
-						Codecs.withDefault(Registry.BIOME.fieldOf("biome"), Util.prefix("Unknown biome, defaulting to plains", LOGGER::error), () -> Biomes.PLAINS)
+						Codec.BOOL.fieldOf("lakes").orElse(false).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.addLakes),
+						Codec.BOOL.fieldOf("features").orElse(false).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.decoration),
+						Biome.CODEC
+							.fieldOf("biome")
+							.orElseGet(Util.prefix("Unknown biome, defaulting to plains", LOGGER::error), () -> () -> Biomes.PLAINS)
 							.forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.biome)
 					)
 					.apply(instance, FlatLevelGeneratorSettings::new)
 		)
 		.stable();
-	private static final ConfiguredFeature<?, ?> WATER_LAKE_COMPOSITE_FEATURE = Feature.LAKE
-		.configured(new BlockStateConfiguration(Blocks.WATER.defaultBlockState()))
-		.decorated(FeatureDecorator.WATER_LAKE.configured(new ChanceDecoratorConfiguration(4)));
-	private static final ConfiguredFeature<?, ?> LAVA_LAKE_COMPOSITE_FEATURE = Feature.LAKE
-		.configured(new BlockStateConfiguration(Blocks.LAVA.defaultBlockState()))
-		.decorated(FeatureDecorator.LAVA_LAKE.configured(new ChanceDecoratorConfiguration(80)));
 	private static final Map<StructureFeature<?>, ConfiguredStructureFeature<?, ?>> STRUCTURE_FEATURES = Util.make(
 		Maps.<StructureFeature<?>, ConfiguredStructureFeature<?, ?>>newHashMap(), hashMap -> {
-			hashMap.put(StructureFeature.MINESHAFT, BiomeDefaultFeatures.MINESHAFT);
-			hashMap.put(StructureFeature.VILLAGE, BiomeDefaultFeatures.VILLAGE_PLAINS);
-			hashMap.put(StructureFeature.STRONGHOLD, BiomeDefaultFeatures.STRONGHOLD);
-			hashMap.put(StructureFeature.SWAMP_HUT, BiomeDefaultFeatures.SWAMP_HUT);
-			hashMap.put(StructureFeature.DESERT_PYRAMID, BiomeDefaultFeatures.DESERT_PYRAMID);
-			hashMap.put(StructureFeature.JUNGLE_TEMPLE, BiomeDefaultFeatures.JUNGLE_TEMPLE);
-			hashMap.put(StructureFeature.IGLOO, BiomeDefaultFeatures.IGLOO);
-			hashMap.put(StructureFeature.OCEAN_RUIN, BiomeDefaultFeatures.OCEAN_RUIN_COLD);
-			hashMap.put(StructureFeature.SHIPWRECK, BiomeDefaultFeatures.SHIPWRECK);
-			hashMap.put(StructureFeature.OCEAN_MONUMENT, BiomeDefaultFeatures.OCEAN_MONUMENT);
-			hashMap.put(StructureFeature.END_CITY, BiomeDefaultFeatures.END_CITY);
-			hashMap.put(StructureFeature.WOODLAND_MANSION, BiomeDefaultFeatures.WOODLAND_MANSION);
-			hashMap.put(StructureFeature.NETHER_BRIDGE, BiomeDefaultFeatures.NETHER_BRIDGE);
-			hashMap.put(StructureFeature.PILLAGER_OUTPOST, BiomeDefaultFeatures.PILLAGER_OUTPOST);
-			hashMap.put(StructureFeature.RUINED_PORTAL, BiomeDefaultFeatures.RUINED_PORTAL_STANDARD);
-			hashMap.put(StructureFeature.BASTION_REMNANT, BiomeDefaultFeatures.BASTION_REMNANT);
+			hashMap.put(StructureFeature.MINESHAFT, StructureFeatures.MINESHAFT);
+			hashMap.put(StructureFeature.VILLAGE, StructureFeatures.VILLAGE_PLAINS);
+			hashMap.put(StructureFeature.STRONGHOLD, StructureFeatures.STRONGHOLD);
+			hashMap.put(StructureFeature.SWAMP_HUT, StructureFeatures.SWAMP_HUT);
+			hashMap.put(StructureFeature.DESERT_PYRAMID, StructureFeatures.DESERT_PYRAMID);
+			hashMap.put(StructureFeature.JUNGLE_TEMPLE, StructureFeatures.JUNGLE_TEMPLE);
+			hashMap.put(StructureFeature.IGLOO, StructureFeatures.IGLOO);
+			hashMap.put(StructureFeature.OCEAN_RUIN, StructureFeatures.OCEAN_RUIN_COLD);
+			hashMap.put(StructureFeature.SHIPWRECK, StructureFeatures.SHIPWRECK);
+			hashMap.put(StructureFeature.OCEAN_MONUMENT, StructureFeatures.OCEAN_MONUMENT);
+			hashMap.put(StructureFeature.END_CITY, StructureFeatures.END_CITY);
+			hashMap.put(StructureFeature.WOODLAND_MANSION, StructureFeatures.WOODLAND_MANSION);
+			hashMap.put(StructureFeature.NETHER_BRIDGE, StructureFeatures.NETHER_BRIDGE);
+			hashMap.put(StructureFeature.PILLAGER_OUTPOST, StructureFeatures.PILLAGER_OUTPOST);
+			hashMap.put(StructureFeature.RUINED_PORTAL, StructureFeatures.RUINED_PORTAL_STANDARD);
+			hashMap.put(StructureFeature.BASTION_REMNANT, StructureFeatures.BASTION_REMNANT);
 		}
 	);
 	private final StructureSettings structureSettings;
 	private final List<FlatLayerInfo> layersInfo = Lists.<FlatLayerInfo>newArrayList();
-	private Biome biome;
+	private Supplier<Biome> biome = () -> Biomes.PLAINS;
 	private final BlockState[] layers = new BlockState[256];
 	private boolean voidGen;
 	private boolean decoration = false;
 	private boolean addLakes = false;
 
-	public FlatLevelGeneratorSettings(StructureSettings structureSettings, List<FlatLayerInfo> list, boolean bl, boolean bl2, Biome biome) {
+	public FlatLevelGeneratorSettings(StructureSettings structureSettings, List<FlatLayerInfo> list, boolean bl, boolean bl2, Supplier<Biome> supplier) {
 		this(structureSettings);
 		if (bl) {
 			this.setAddLakes();
@@ -95,7 +88,7 @@ public class FlatLevelGeneratorSettings {
 
 		this.layersInfo.addAll(list);
 		this.updateLayers();
-		this.biome = biome;
+		this.biome = supplier;
 	}
 
 	public FlatLevelGeneratorSettings(StructureSettings structureSettings) {
@@ -116,7 +109,7 @@ public class FlatLevelGeneratorSettings {
 			flatLevelGeneratorSettings.updateLayers();
 		}
 
-		flatLevelGeneratorSettings.setBiome(this.biome);
+		flatLevelGeneratorSettings.setBiome((Biome)this.biome.get());
 		if (this.decoration) {
 			flatLevelGeneratorSettings.setDecoration();
 		}
@@ -152,8 +145,8 @@ public class FlatLevelGeneratorSettings {
 		) {
 		};
 		if (this.addLakes) {
-			biome2.addFeature(GenerationStep.Decoration.LAKES, WATER_LAKE_COMPOSITE_FEATURE);
-			biome2.addFeature(GenerationStep.Decoration.LAKES, LAVA_LAKE_COMPOSITE_FEATURE);
+			biome2.addFeature(GenerationStep.Decoration.LAKES, Features.LAKE_WATER);
+			biome2.addFeature(GenerationStep.Decoration.LAKES, Features.LAKE_LAVA);
 		}
 
 		for (Entry<StructureFeature<?>, StructureFeatureConfiguration> entry : this.structureSettings.structureConfig().entrySet()) {
@@ -162,14 +155,12 @@ public class FlatLevelGeneratorSettings {
 
 		boolean bl = (!this.voidGen || biome == Biomes.THE_VOID) && this.decoration;
 		if (bl) {
-			List<GenerationStep.Decoration> list = Lists.<GenerationStep.Decoration>newArrayList();
-			list.add(GenerationStep.Decoration.UNDERGROUND_STRUCTURES);
-			list.add(GenerationStep.Decoration.SURFACE_STRUCTURES);
+			List<List<Supplier<ConfiguredFeature<?, ?>>>> list = biome.features();
 
-			for (GenerationStep.Decoration decoration : GenerationStep.Decoration.values()) {
-				if (!list.contains(decoration)) {
-					for (ConfiguredFeature<?, ?> configuredFeature : biome.getFeaturesForStep(decoration)) {
-						biome2.addFeature(decoration, configuredFeature);
+			for (int i = 0; i < list.size(); i++) {
+				if (i != GenerationStep.Decoration.UNDERGROUND_STRUCTURES.ordinal() && i != GenerationStep.Decoration.SURFACE_STRUCTURES.ordinal()) {
+					for (Supplier<ConfiguredFeature<?, ?>> supplier : (List)list.get(i)) {
+						biome2.addFeature(i, supplier);
 					}
 				}
 			}
@@ -177,11 +168,11 @@ public class FlatLevelGeneratorSettings {
 
 		BlockState[] blockStates = this.getLayers();
 
-		for (int i = 0; i < blockStates.length; i++) {
-			BlockState blockState = blockStates[i];
+		for (int ix = 0; ix < blockStates.length; ix++) {
+			BlockState blockState = blockStates[ix];
 			if (blockState != null && !Heightmap.Types.MOTION_BLOCKING.isOpaque().test(blockState)) {
-				this.layers[i] = null;
-				biome2.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, Feature.FILL_LAYER.configured(new LayerConfiguration(i, blockState)));
+				this.layers[ix] = null;
+				biome2.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, Feature.FILL_LAYER.configured(new LayerConfiguration(ix, blockState)));
 			}
 		}
 
@@ -193,11 +184,11 @@ public class FlatLevelGeneratorSettings {
 	}
 
 	public Biome getBiome() {
-		return this.biome;
+		return (Biome)this.biome.get();
 	}
 
 	public void setBiome(Biome biome) {
-		this.biome = biome;
+		this.biome = () -> biome;
 	}
 
 	public List<FlatLayerInfo> getLayersInfo() {

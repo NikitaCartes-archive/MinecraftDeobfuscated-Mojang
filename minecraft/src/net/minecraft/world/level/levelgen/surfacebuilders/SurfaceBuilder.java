@@ -9,32 +9,29 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
 public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
-	public static final BlockState AIR = Blocks.AIR.defaultBlockState();
-	public static final BlockState DIRT = Blocks.DIRT.defaultBlockState();
-	public static final BlockState GRASS_BLOCK = Blocks.GRASS_BLOCK.defaultBlockState();
-	public static final BlockState PODZOL = Blocks.PODZOL.defaultBlockState();
-	public static final BlockState GRAVEL = Blocks.GRAVEL.defaultBlockState();
-	public static final BlockState STONE = Blocks.STONE.defaultBlockState();
-	public static final BlockState COARSE_DIRT = Blocks.COARSE_DIRT.defaultBlockState();
-	public static final BlockState SAND = Blocks.SAND.defaultBlockState();
-	public static final BlockState RED_SAND = Blocks.RED_SAND.defaultBlockState();
-	public static final BlockState WHITE_TERRACOTTA = Blocks.WHITE_TERRACOTTA.defaultBlockState();
-	public static final BlockState MYCELIUM = Blocks.MYCELIUM.defaultBlockState();
-	public static final BlockState SOUL_SAND = Blocks.SOUL_SAND.defaultBlockState();
-	public static final BlockState NETHERRACK = Blocks.NETHERRACK.defaultBlockState();
-	public static final BlockState ENDSTONE = Blocks.END_STONE.defaultBlockState();
-	public static final BlockState CRIMSON_NYLIUM = Blocks.CRIMSON_NYLIUM.defaultBlockState();
-	public static final BlockState WARPED_NYLIUM = Blocks.WARPED_NYLIUM.defaultBlockState();
-	public static final BlockState NETHER_WART_BLOCK = Blocks.NETHER_WART_BLOCK.defaultBlockState();
-	public static final BlockState WARPED_WART_BLOCK = Blocks.WARPED_WART_BLOCK.defaultBlockState();
-	public static final BlockState BLACKSTONE = Blocks.BLACKSTONE.defaultBlockState();
-	public static final BlockState BASALT = Blocks.BASALT.defaultBlockState();
-	public static final BlockState MAGMA = Blocks.MAGMA_BLOCK.defaultBlockState();
-	public static final SurfaceBuilderBaseConfiguration CONFIG_EMPTY = new SurfaceBuilderBaseConfiguration(AIR, AIR, AIR);
+	private static final BlockState DIRT = Blocks.DIRT.defaultBlockState();
+	private static final BlockState GRASS_BLOCK = Blocks.GRASS_BLOCK.defaultBlockState();
+	private static final BlockState PODZOL = Blocks.PODZOL.defaultBlockState();
+	private static final BlockState GRAVEL = Blocks.GRAVEL.defaultBlockState();
+	private static final BlockState STONE = Blocks.STONE.defaultBlockState();
+	private static final BlockState COARSE_DIRT = Blocks.COARSE_DIRT.defaultBlockState();
+	private static final BlockState SAND = Blocks.SAND.defaultBlockState();
+	private static final BlockState RED_SAND = Blocks.RED_SAND.defaultBlockState();
+	private static final BlockState WHITE_TERRACOTTA = Blocks.WHITE_TERRACOTTA.defaultBlockState();
+	private static final BlockState MYCELIUM = Blocks.MYCELIUM.defaultBlockState();
+	private static final BlockState SOUL_SAND = Blocks.SOUL_SAND.defaultBlockState();
+	private static final BlockState NETHERRACK = Blocks.NETHERRACK.defaultBlockState();
+	private static final BlockState ENDSTONE = Blocks.END_STONE.defaultBlockState();
+	private static final BlockState CRIMSON_NYLIUM = Blocks.CRIMSON_NYLIUM.defaultBlockState();
+	private static final BlockState WARPED_NYLIUM = Blocks.WARPED_NYLIUM.defaultBlockState();
+	private static final BlockState NETHER_WART_BLOCK = Blocks.NETHER_WART_BLOCK.defaultBlockState();
+	private static final BlockState WARPED_WART_BLOCK = Blocks.WARPED_WART_BLOCK.defaultBlockState();
+	private static final BlockState BLACKSTONE = Blocks.BLACKSTONE.defaultBlockState();
+	private static final BlockState BASALT = Blocks.BASALT.defaultBlockState();
+	private static final BlockState MAGMA = Blocks.MAGMA_BLOCK.defaultBlockState();
 	public static final SurfaceBuilderBaseConfiguration CONFIG_PODZOL = new SurfaceBuilderBaseConfiguration(PODZOL, DIRT, GRAVEL);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_GRAVEL = new SurfaceBuilderBaseConfiguration(GRAVEL, GRAVEL, GRAVEL);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_GRASS = new SurfaceBuilderBaseConfiguration(GRASS_BLOCK, DIRT, GRAVEL);
-	public static final SurfaceBuilderBaseConfiguration CONFIG_DIRT = new SurfaceBuilderBaseConfiguration(DIRT, DIRT, GRAVEL);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_STONE = new SurfaceBuilderBaseConfiguration(STONE, STONE, GRAVEL);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_COARSE_DIRT = new SurfaceBuilderBaseConfiguration(COARSE_DIRT, DIRT, GRAVEL);
 	public static final SurfaceBuilderBaseConfiguration CONFIG_DESERT = new SurfaceBuilderBaseConfiguration(SAND, SAND, GRAVEL);
@@ -96,16 +93,15 @@ public abstract class SurfaceBuilder<C extends SurfaceBuilderConfiguration> {
 	}
 
 	public SurfaceBuilder(Codec<C> codec) {
-		this.configuredCodec = codec.fieldOf("config")
-			.<ConfiguredSurfaceBuilder<C>>xmap(
-				surfaceBuilderConfiguration -> new ConfiguredSurfaceBuilder<>(this, (C)surfaceBuilderConfiguration),
-				configuredSurfaceBuilder -> configuredSurfaceBuilder.config
-			)
-			.codec();
+		this.configuredCodec = codec.fieldOf("config").<ConfiguredSurfaceBuilder<C>>xmap(this::configured, ConfiguredSurfaceBuilder::config).codec();
 	}
 
 	public Codec<ConfiguredSurfaceBuilder<C>> configuredCodec() {
 		return this.configuredCodec;
+	}
+
+	public ConfiguredSurfaceBuilder<C> configured(C surfaceBuilderConfiguration) {
+		return new ConfiguredSurfaceBuilder<>(this, surfaceBuilderConfiguration);
 	}
 
 	public abstract void apply(

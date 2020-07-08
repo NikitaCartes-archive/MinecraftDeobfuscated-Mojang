@@ -2,6 +2,7 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 
 import com.mojang.serialization.Codec;
 import java.util.List;
+import java.util.function.Supplier;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 
 public class SimpleRandomFeatureConfiguration implements FeatureConfiguration {
@@ -10,9 +11,9 @@ public class SimpleRandomFeatureConfiguration implements FeatureConfiguration {
 		.fieldOf("features")
 		.<SimpleRandomFeatureConfiguration>xmap(SimpleRandomFeatureConfiguration::new, simpleRandomFeatureConfiguration -> simpleRandomFeatureConfiguration.features)
 		.codec();
-	public final List<ConfiguredFeature<?, ?>> features;
+	public final List<Supplier<ConfiguredFeature<?, ?>>> features;
 
-	public SimpleRandomFeatureConfiguration(List<ConfiguredFeature<?, ?>> list) {
+	public SimpleRandomFeatureConfiguration(List<Supplier<ConfiguredFeature<?, ?>>> list) {
 		this.features = list;
 	}
 }

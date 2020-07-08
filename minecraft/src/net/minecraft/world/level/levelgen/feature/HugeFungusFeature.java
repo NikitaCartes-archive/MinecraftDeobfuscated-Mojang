@@ -2,7 +2,6 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import java.util.Random;
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -24,13 +23,9 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 	) {
 		Block block = hugeFungusConfiguration.validBaseState.getBlock();
 		BlockPos blockPos2 = null;
-		if (hugeFungusConfiguration.planted) {
-			Block block2 = worldGenLevel.getBlockState(blockPos.below()).getBlock();
-			if (block2 == block) {
-				blockPos2 = blockPos;
-			}
-		} else {
-			blockPos2 = findOnNyliumPosition(worldGenLevel, blockPos, block);
+		Block block2 = worldGenLevel.getBlockState(blockPos.below()).getBlock();
+		if (block2 == block) {
+			blockPos2 = blockPos;
 		}
 
 		if (blockPos2 == null) {
@@ -57,17 +52,10 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 	}
 
 	private static boolean isReplaceable(LevelAccessor levelAccessor, BlockPos blockPos, boolean bl) {
-		return levelAccessor.isStateAtPosition(
-			blockPos,
-			blockState -> {
-				Material material = blockState.getMaterial();
-				return blockState.isAir()
-					|| blockState.is(Blocks.WATER)
-					|| blockState.is(Blocks.LAVA)
-					|| material == Material.REPLACEABLE_PLANT
-					|| bl && material == Material.PLANT;
-			}
-		);
+		return levelAccessor.isStateAtPosition(blockPos, blockState -> {
+			Material material = blockState.getMaterial();
+			return blockState.getMaterial().isReplaceable() || bl && material == Material.PLANT;
+		});
 	}
 
 	private void placeStem(LevelAccessor levelAccessor, Random random, HugeFungusConfiguration hugeFungusConfiguration, BlockPos blockPos, int i, boolean bl) {
@@ -175,21 +163,6 @@ public class HugeFungusFeature extends Feature<HugeFungusConfiguration> {
 				tryPlaceWeepingVines(blockPos, levelAccessor, random);
 			}
 		}
-	}
-
-	@Nullable
-	private static BlockPos.MutableBlockPos findOnNyliumPosition(LevelAccessor levelAccessor, BlockPos blockPos, Block block) {
-		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
-
-		for (int i = blockPos.getY(); i >= 1; i--) {
-			mutableBlockPos.setY(i);
-			Block block2 = levelAccessor.getBlockState(mutableBlockPos.below()).getBlock();
-			if (block2 == block) {
-				return mutableBlockPos;
-			}
-		}
-
-		return null;
 	}
 
 	private static void tryPlaceWeepingVines(BlockPos blockPos, LevelAccessor levelAccessor, Random random) {

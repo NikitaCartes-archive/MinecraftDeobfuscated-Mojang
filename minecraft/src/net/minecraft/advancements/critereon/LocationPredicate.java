@@ -8,6 +8,7 @@ import com.mojang.serialization.JsonOps;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -169,7 +170,7 @@ public class LocationPredicate {
 			}
 
 			if (this.biome != null) {
-				jsonObject.addProperty("biome", Registry.BIOME.getKey(this.biome).toString());
+				jsonObject.addProperty("biome", BuiltinRegistries.BIOME.getKey(this.biome).toString());
 			}
 
 			if (this.smokey != null) {
@@ -203,7 +204,7 @@ public class LocationPredicate {
 			Biome biome = null;
 			if (jsonObject.has("biome")) {
 				ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "biome"));
-				biome = (Biome)Registry.BIOME.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown biome '" + resourceLocation + "'"));
+				biome = (Biome)BuiltinRegistries.BIOME.getOptional(resourceLocation).orElseThrow(() -> new JsonSyntaxException("Unknown biome '" + resourceLocation + "'"));
 			}
 
 			Boolean boolean_ = jsonObject.has("smokey") ? jsonObject.get("smokey").getAsBoolean() : null;

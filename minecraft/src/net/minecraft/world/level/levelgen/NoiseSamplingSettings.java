@@ -2,10 +2,9 @@ package net.minecraft.world.level.levelgen;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.Codecs;
 
 public class NoiseSamplingSettings {
-	private static final Codec<Double> SCALE_RANGE = Codecs.doubleRange(0.001, 1000.0);
+	private static final Codec<Double> SCALE_RANGE = Codec.doubleRange(0.001, 1000.0);
 	public static final Codec<NoiseSamplingSettings> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					SCALE_RANGE.fieldOf("xz_scale").forGetter(NoiseSamplingSettings::xzScale),

@@ -40,7 +40,6 @@ public class SoulParticle extends RisingParticle {
 		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
 			SoulParticle soulParticle = new SoulParticle(clientLevel, d, e, f, g, h, i, this.sprite);
 			soulParticle.setAlpha(1.0F);
-			soulParticle.pickSprite(this.sprite);
 			return soulParticle;
 		}
 	}

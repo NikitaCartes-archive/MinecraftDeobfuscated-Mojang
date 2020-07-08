@@ -7,6 +7,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
+import net.minecraft.world.level.levelgen.placement.DecorationContext;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public class DecoratedFeature extends Feature<DecoratedFeatureConfiguration> {
 	public DecoratedFeature(Codec<DecoratedFeatureConfiguration> codec) {
@@ -16,7 +18,13 @@ public class DecoratedFeature extends Feature<DecoratedFeatureConfiguration> {
 	public boolean place(
 		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, DecoratedFeatureConfiguration decoratedFeatureConfiguration
 	) {
-		return decoratedFeatureConfiguration.decorator.place(worldGenLevel, chunkGenerator, random, blockPos, decoratedFeatureConfiguration.feature);
+		MutableBoolean mutableBoolean = new MutableBoolean();
+		decoratedFeatureConfiguration.decorator.getPositions(new DecorationContext(worldGenLevel, chunkGenerator), random, blockPos).forEach(blockPosx -> {
+			if (((ConfiguredFeature)decoratedFeatureConfiguration.feature.get()).place(worldGenLevel, chunkGenerator, random, blockPosx)) {
+				mutableBoolean.setTrue();
+			}
+		});
+		return mutableBoolean.isTrue();
 	}
 
 	public String toString() {

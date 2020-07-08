@@ -10,11 +10,11 @@ import net.minecraft.util.Mth;
 public class AxisAlignedLinearPosTest extends PosRuleTest {
 	public static final Codec<AxisAlignedLinearPosTest> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					Codec.FLOAT.fieldOf("min_chance").withDefault(0.0F).forGetter(axisAlignedLinearPosTest -> axisAlignedLinearPosTest.minChance),
-					Codec.FLOAT.fieldOf("max_chance").withDefault(0.0F).forGetter(axisAlignedLinearPosTest -> axisAlignedLinearPosTest.maxChance),
-					Codec.INT.fieldOf("min_dist").withDefault(0).forGetter(axisAlignedLinearPosTest -> axisAlignedLinearPosTest.minDist),
-					Codec.INT.fieldOf("max_dist").withDefault(0).forGetter(axisAlignedLinearPosTest -> axisAlignedLinearPosTest.maxDist),
-					Direction.Axis.CODEC.fieldOf("axis").withDefault(Direction.Axis.Y).forGetter(axisAlignedLinearPosTest -> axisAlignedLinearPosTest.axis)
+					Codec.FLOAT.fieldOf("min_chance").orElse(0.0F).forGetter(axisAlignedLinearPosTest -> axisAlignedLinearPosTest.minChance),
+					Codec.FLOAT.fieldOf("max_chance").orElse(0.0F).forGetter(axisAlignedLinearPosTest -> axisAlignedLinearPosTest.maxChance),
+					Codec.INT.fieldOf("min_dist").orElse(0).forGetter(axisAlignedLinearPosTest -> axisAlignedLinearPosTest.minDist),
+					Codec.INT.fieldOf("max_dist").orElse(0).forGetter(axisAlignedLinearPosTest -> axisAlignedLinearPosTest.maxDist),
+					Direction.Axis.CODEC.fieldOf("axis").orElse(Direction.Axis.Y).forGetter(axisAlignedLinearPosTest -> axisAlignedLinearPosTest.axis)
 				)
 				.apply(instance, AxisAlignedLinearPosTest::new)
 	);

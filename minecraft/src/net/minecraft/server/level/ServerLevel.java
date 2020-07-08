@@ -40,6 +40,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
@@ -101,7 +102,6 @@ import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.NaturalSpawner;
-import net.minecraft.world.level.PortalForcer;
 import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.TickNextTickData;
@@ -126,6 +126,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.portal.PortalForcer;
 import net.minecraft.world.level.saveddata.maps.MapIndex;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
@@ -1146,6 +1147,11 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	@Override
 	public boolean noSave() {
 		return this.noSave;
+	}
+
+	@Override
+	public RegistryAccess registryAccess() {
+		return this.server.registryAccess();
 	}
 
 	public DimensionDataStorage getDataStorage() {

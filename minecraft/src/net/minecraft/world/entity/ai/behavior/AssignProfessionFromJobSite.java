@@ -26,6 +26,7 @@ public class AssignProfessionFromJobSite extends Behavior<Villager> {
 		GlobalPos globalPos = (GlobalPos)villager.getBrain().getMemory(MemoryModuleType.POTENTIAL_JOB_SITE).get();
 		villager.getBrain().eraseMemory(MemoryModuleType.POTENTIAL_JOB_SITE);
 		villager.getBrain().setMemory(MemoryModuleType.JOB_SITE, globalPos);
+		serverLevel.broadcastEntityEvent(villager, (byte)14);
 		if (villager.getVillagerData().getProfession() == VillagerProfession.NONE) {
 			MinecraftServer minecraftServer = serverLevel.getServer();
 			Optional.ofNullable(minecraftServer.getLevel(globalPos.dimension()))

@@ -15,6 +15,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.ProfileLookupCallback;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -34,8 +35,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.world.entity.player.Player;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class GameProfileCache {
+	private static final Logger LOGGER = LogManager.getLogger();
 	private static boolean usesAuthentication;
 	private final Map<String, GameProfileCache.GameProfileInfo> profilesByName = Maps.<String, GameProfileCache.GameProfileInfo>newConcurrentMap();
 	private final Map<UUID, GameProfileCache.GameProfileInfo> profilesByUUID = Maps.<UUID, GameProfileCache.GameProfileInfo>newConcurrentMap();
@@ -163,32 +167,42 @@ public class GameProfileCache {
 			Reader reader = Files.newReader(this.file, StandardCharsets.UTF_8);
 			Throwable var3 = null;
 
+			Object dateFormat;
 			try {
 				JsonArray jsonArray = this.gson.fromJson(reader, JsonArray.class);
-				DateFormat dateFormat = createDateFormat();
-				jsonArray.forEach(jsonElement -> {
-					GameProfileCache.GameProfileInfo gameProfileInfo = readGameProfile(jsonElement, dateFormat);
-					if (gameProfileInfo != null) {
-						list.add(gameProfileInfo);
-					}
-				});
-			} catch (Throwable var14) {
-				var3 = var14;
-				throw var14;
+				if (jsonArray != null) {
+					DateFormat dateFormatx = createDateFormat();
+					jsonArray.forEach(jsonElement -> {
+						GameProfileCache.GameProfileInfo gameProfileInfo = readGameProfile(jsonElement, dateFormat);
+						if (gameProfileInfo != null) {
+							list.add(gameProfileInfo);
+						}
+					});
+					return list;
+				}
+
+				dateFormat = list;
+			} catch (Throwable var17) {
+				var3 = var17;
+				throw var17;
 			} finally {
 				if (reader != null) {
 					if (var3 != null) {
 						try {
 							reader.close();
-						} catch (Throwable var13) {
-							var3.addSuppressed(var13);
+						} catch (Throwable var16) {
+							var3.addSuppressed(var16);
 						}
 					} else {
 						reader.close();
 					}
 				}
 			}
-		} catch (JsonParseException | IOException var16) {
+
+			return (List<GameProfileCache.GameProfileInfo>)dateFormat;
+		} catch (FileNotFoundException var19) {
+		} catch (JsonParseException | IOException var20) {
+			LOGGER.warn("Failed to load profile cache {}", this.file, var20);
 		}
 
 		return list;

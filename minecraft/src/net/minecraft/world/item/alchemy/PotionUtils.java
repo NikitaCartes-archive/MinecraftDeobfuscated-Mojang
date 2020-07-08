@@ -26,6 +26,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
 
 public class PotionUtils {
+	private static final MutableComponent NO_EFFECT = new TranslatableComponent("effect.none").withStyle(ChatFormatting.GRAY);
+
 	public static List<MobEffectInstance> getMobEffects(ItemStack itemStack) {
 		return getAllEffects(itemStack.getTag());
 	}
@@ -153,7 +155,7 @@ public class PotionUtils {
 		List<MobEffectInstance> list2 = getMobEffects(itemStack);
 		List<Pair<Attribute, AttributeModifier>> list3 = Lists.<Pair<Attribute, AttributeModifier>>newArrayList();
 		if (list2.isEmpty()) {
-			list.add(new TranslatableComponent("effect.none").withStyle(ChatFormatting.GRAY));
+			list.add(NO_EFFECT);
 		} else {
 			for (MobEffectInstance mobEffectInstance : list2) {
 				MutableComponent mutableComponent = new TranslatableComponent(mobEffectInstance.getDescriptionId());
@@ -170,11 +172,13 @@ public class PotionUtils {
 				}
 
 				if (mobEffectInstance.getAmplifier() > 0) {
-					mutableComponent.append(" ").append(new TranslatableComponent("potion.potency." + mobEffectInstance.getAmplifier()));
+					mutableComponent = new TranslatableComponent(
+						"potion.withAmplifier", mutableComponent, new TranslatableComponent("potion.potency." + mobEffectInstance.getAmplifier())
+					);
 				}
 
 				if (mobEffectInstance.getDuration() > 20) {
-					mutableComponent.append(" (").append(MobEffectUtil.formatDuration(mobEffectInstance, f)).append(")");
+					mutableComponent = new TranslatableComponent("potion.withDuration", mutableComponent, MobEffectUtil.formatDuration(mobEffectInstance, f));
 				}
 
 				list.add(mutableComponent.withStyle(mobEffect.getCategory().getTooltipFormatting()));

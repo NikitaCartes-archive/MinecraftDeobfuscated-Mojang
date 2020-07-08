@@ -1,9 +1,19 @@
 package net.minecraft.world.entity.vehicle;
 
+import java.util.function.Function;
+import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.CollisionGetter;
+import net.minecraft.world.level.block.TrapDoorBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class DismountHelper {
@@ -23,11 +33,47 @@ public class DismountHelper {
 		};
 	}
 
-	public static boolean isFloorValid(double d) {
+	public static boolean isBlockFloorValid(double d) {
 		return !Double.isInfinite(d) && d < 1.0;
 	}
 
-	public static boolean canDismountTo(Level level, LivingEntity livingEntity, AABB aABB) {
-		return level.getBlockCollisions(livingEntity, aABB).allMatch(VoxelShape::isEmpty);
+	public static boolean canDismountTo(CollisionGetter collisionGetter, LivingEntity livingEntity, AABB aABB) {
+		return collisionGetter.getBlockCollisions(livingEntity, aABB).allMatch(VoxelShape::isEmpty);
+	}
+
+	@Nullable
+	public static Vec3 findDismountLocation(CollisionGetter collisionGetter, double d, double e, double f, LivingEntity livingEntity, Pose pose) {
+		if (isBlockFloorValid(e)) {
+			Vec3 vec3 = new Vec3(d, e, f);
+			if (canDismountTo(collisionGetter, livingEntity, livingEntity.getLocalBoundsForPose(pose).move(vec3))) {
+				return vec3;
+			}
+		}
+
+		return null;
+	}
+
+	public static VoxelShape nonClimbableShape(BlockGetter blockGetter, BlockPos blockPos) {
+		BlockState blockState = blockGetter.getBlockState(blockPos);
+		return !blockState.is(BlockTags.CLIMBABLE) && (!(blockState.getBlock() instanceof TrapDoorBlock) || !blockState.getValue(TrapDoorBlock.OPEN))
+			? blockState.getCollisionShape(blockGetter, blockPos)
+			: Shapes.empty();
+	}
+
+	public static double findCeilingFrom(BlockPos blockPos, int i, Function<BlockPos, VoxelShape> function) {
+		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+		int j = 0;
+
+		while (j < i) {
+			VoxelShape voxelShape = (VoxelShape)function.apply(mutableBlockPos);
+			if (!voxelShape.isEmpty()) {
+				return (double)(blockPos.getY() + j) + voxelShape.min(Direction.Axis.Y);
+			}
+
+			j++;
+			mutableBlockPos.move(Direction.UP);
+		}
+
+		return Double.POSITIVE_INFINITY;
 	}
 }

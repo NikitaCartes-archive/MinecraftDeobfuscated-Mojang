@@ -56,7 +56,9 @@ public class GrassBlock extends SpreadingSnowyDirtBlock implements BonemealableB
 						continue;
 					}
 
-					ConfiguredFeature<?, ?> configuredFeature = ((DecoratedFeatureConfiguration)((ConfiguredFeature)list.get(0)).config).feature;
+					ConfiguredFeature<?, ?> configuredFeature = (ConfiguredFeature<?, ?>)((DecoratedFeatureConfiguration)((ConfiguredFeature)list.get(0)).config)
+						.feature
+						.get();
 					blockState4 = ((AbstractFlowerFeature)configuredFeature.feature).getRandomFlower(random, blockPos3, configuredFeature.config);
 				} else {
 					blockState4 = blockState2;

@@ -6,23 +6,27 @@ import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 
 public class FixedBiomeSource extends BiomeSource {
-	public static final Codec<FixedBiomeSource> CODEC = Registry.BIOME
+	public static final Codec<FixedBiomeSource> CODEC = Biome.CODEC
 		.fieldOf("biome")
 		.<FixedBiomeSource>xmap(FixedBiomeSource::new, fixedBiomeSource -> fixedBiomeSource.biome)
 		.stable()
 		.codec();
-	private final Biome biome;
+	private final Supplier<Biome> biome;
 
 	public FixedBiomeSource(Biome biome) {
-		super(ImmutableList.of(biome));
-		this.biome = biome;
+		this(() -> biome);
+	}
+
+	public FixedBiomeSource(Supplier<Biome> supplier) {
+		super(ImmutableList.of((Biome)supplier.get()));
+		this.biome = supplier;
 	}
 
 	@Override
@@ -38,13 +42,13 @@ public class FixedBiomeSource extends BiomeSource {
 
 	@Override
 	public Biome getNoiseBiome(int i, int j, int k) {
-		return this.biome;
+		return (Biome)this.biome.get();
 	}
 
 	@Nullable
 	@Override
 	public BlockPos findBiomeHorizontal(int i, int j, int k, int l, int m, List<Biome> list, Random random, boolean bl) {
-		if (list.contains(this.biome)) {
+		if (list.contains(this.biome.get())) {
 			return bl ? new BlockPos(i, j, k) : new BlockPos(i - l + random.nextInt(l * 2 + 1), j, k - l + random.nextInt(l * 2 + 1));
 		} else {
 			return null;
@@ -53,6 +57,6 @@ public class FixedBiomeSource extends BiomeSource {
 
 	@Override
 	public Set<Biome> getBiomesWithin(int i, int j, int k, int l) {
-		return Sets.<Biome>newHashSet(this.biome);
+		return Sets.<Biome>newHashSet((Biome)this.biome.get());
 	}
 }

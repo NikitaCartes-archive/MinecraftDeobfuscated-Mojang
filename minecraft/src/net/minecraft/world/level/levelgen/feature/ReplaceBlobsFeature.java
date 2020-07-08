@@ -5,39 +5,37 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.feature.configurations.ReplaceSpheroidConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.ReplaceSphereConfiguration;
 
-public class ReplaceBlobsFeature extends Feature<ReplaceSpheroidConfiguration> {
-	public ReplaceBlobsFeature(Codec<ReplaceSpheroidConfiguration> codec) {
+public class ReplaceBlobsFeature extends Feature<ReplaceSphereConfiguration> {
+	public ReplaceBlobsFeature(Codec<ReplaceSphereConfiguration> codec) {
 		super(codec);
 	}
 
 	public boolean place(
-		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, ReplaceSpheroidConfiguration replaceSpheroidConfiguration
+		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, ReplaceSphereConfiguration replaceSphereConfiguration
 	) {
-		Block block = replaceSpheroidConfiguration.targetState.getBlock();
+		Block block = replaceSphereConfiguration.targetState.getBlock();
 		BlockPos blockPos2 = findTarget(worldGenLevel, blockPos.mutable().clamp(Direction.Axis.Y, 1, worldGenLevel.getMaxBuildHeight() - 1), block);
 		if (blockPos2 == null) {
 			return false;
 		} else {
-			Vec3i vec3i = calculateReach(random, replaceSpheroidConfiguration);
-			int i = Math.max(vec3i.getX(), Math.max(vec3i.getY(), vec3i.getZ()));
+			int i = replaceSphereConfiguration.radius().sample(random);
 			boolean bl = false;
 
-			for (BlockPos blockPos3 : BlockPos.withinManhattan(blockPos2, vec3i.getX(), vec3i.getY(), vec3i.getZ())) {
+			for (BlockPos blockPos3 : BlockPos.withinManhattan(blockPos2, i, i, i)) {
 				if (blockPos3.distManhattan(blockPos2) > i) {
 					break;
 				}
 
 				BlockState blockState = worldGenLevel.getBlockState(blockPos3);
 				if (blockState.is(block)) {
-					this.setBlock(worldGenLevel, blockPos3, replaceSpheroidConfiguration.replaceState);
+					this.setBlock(worldGenLevel, blockPos3, replaceSphereConfiguration.replaceState);
 					bl = true;
 				}
 			}
@@ -58,16 +56,5 @@ public class ReplaceBlobsFeature extends Feature<ReplaceSpheroidConfiguration> {
 		}
 
 		return null;
-	}
-
-	private static Vec3i calculateReach(Random random, ReplaceSpheroidConfiguration replaceSpheroidConfiguration) {
-		return new Vec3i(
-			replaceSpheroidConfiguration.minimumReach.getX()
-				+ random.nextInt(replaceSpheroidConfiguration.maximumReach.getX() - replaceSpheroidConfiguration.minimumReach.getX() + 1),
-			replaceSpheroidConfiguration.minimumReach.getY()
-				+ random.nextInt(replaceSpheroidConfiguration.maximumReach.getY() - replaceSpheroidConfiguration.minimumReach.getY() + 1),
-			replaceSpheroidConfiguration.minimumReach.getZ()
-				+ random.nextInt(replaceSpheroidConfiguration.maximumReach.getZ() - replaceSpheroidConfiguration.minimumReach.getZ() + 1)
-		);
 	}
 }

@@ -108,18 +108,21 @@ public abstract class WorldPreset {
 		Optional.of(SINGLE_BIOME_SURFACE),
 		(createWorldScreen, worldGenSettings) -> new CreateBuffetWorldScreen(
 				createWorldScreen,
+				createWorldScreen.worldGenSettingsComponent.registryHolder(),
 				biome -> createWorldScreen.worldGenSettingsComponent.updateSettings(fromBuffetSettings(worldGenSettings, SINGLE_BIOME_SURFACE, biome)),
 				parseBuffetSettings(worldGenSettings)
 			),
 		Optional.of(SINGLE_BIOME_CAVES),
 		(createWorldScreen, worldGenSettings) -> new CreateBuffetWorldScreen(
 				createWorldScreen,
+				createWorldScreen.worldGenSettingsComponent.registryHolder(),
 				biome -> createWorldScreen.worldGenSettingsComponent.updateSettings(fromBuffetSettings(worldGenSettings, SINGLE_BIOME_CAVES, biome)),
 				parseBuffetSettings(worldGenSettings)
 			),
 		Optional.of(SINGLE_BIOME_FLOATING_ISLANDS),
 		(createWorldScreen, worldGenSettings) -> new CreateBuffetWorldScreen(
 				createWorldScreen,
+				createWorldScreen.worldGenSettingsComponent.registryHolder(),
 				biome -> createWorldScreen.worldGenSettingsComponent.updateSettings(fromBuffetSettings(worldGenSettings, SINGLE_BIOME_FLOATING_ISLANDS, biome)),
 				parseBuffetSettings(worldGenSettings)
 			)

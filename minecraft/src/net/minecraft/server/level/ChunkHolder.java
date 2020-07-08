@@ -1,6 +1,8 @@
 package net.minecraft.server.level;
 
 import com.mojang.datafixers.util.Either;
+import it.unimi.dsi.fastutil.shorts.ShortArraySet;
+import it.unimi.dsi.fastutil.shorts.ShortSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -13,21 +15,23 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
-import net.minecraft.network.protocol.game.ClientboundChunkBlocksUpdatePacket;
-import net.minecraft.network.protocol.game.ClientboundLevelChunkPacket;
 import net.minecraft.network.protocol.game.ClientboundLightUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 
@@ -53,9 +57,8 @@ public class ChunkHolder {
 	private int ticketLevel;
 	private int queueLevel;
 	private final ChunkPos pos;
-	private final short[] changedBlocks = new short[64];
-	private int changes;
-	private int changedSectionFilter;
+	private boolean hasChangedSections;
+	private final ShortSet[] changedBlocksPerSection = new ShortSet[16];
 	private int blockChangedLightSectionFilter;
 	private int skyChangedLightSectionFilter;
 	private final LevelLightEngine lightEngine;
@@ -139,21 +142,16 @@ public class ChunkHolder {
 		return this.chunkToSave;
 	}
 
-	public void blockChanged(int i, int j, int k) {
+	public void blockChanged(BlockPos blockPos) {
 		LevelChunk levelChunk = this.getTickingChunk();
 		if (levelChunk != null) {
-			this.changedSectionFilter |= 1 << (j >> 4);
-			if (this.changes < 64) {
-				short s = (short)(i << 12 | k << 8 | j);
-
-				for (int l = 0; l < this.changes; l++) {
-					if (this.changedBlocks[l] == s) {
-						return;
-					}
-				}
-
-				this.changedBlocks[this.changes++] = s;
+			byte b = (byte)SectionPos.blockToSectionCoord(blockPos.getY());
+			if (this.changedBlocksPerSection[b] == null) {
+				this.hasChangedSections = true;
+				this.changedBlocksPerSection[b] = new ShortArraySet();
 			}
+
+			this.changedBlocksPerSection[b].add(SectionPos.sectionRelativePos(blockPos));
 		}
 	}
 
@@ -170,9 +168,9 @@ public class ChunkHolder {
 	}
 
 	public void broadcastChanges(LevelChunk levelChunk) {
-		if (this.changes != 0 || this.skyChangedLightSectionFilter != 0 || this.blockChangedLightSectionFilter != 0) {
+		if (this.hasChangedSections || this.skyChangedLightSectionFilter != 0 || this.blockChangedLightSectionFilter != 0) {
 			Level level = levelChunk.getLevel();
-			if (this.changes < 64 && (this.skyChangedLightSectionFilter != 0 || this.blockChangedLightSectionFilter != 0)) {
+			if (this.skyChangedLightSectionFilter != 0 || this.blockChangedLightSectionFilter != 0) {
 				this.broadcast(
 					new ClientboundLightUpdatePacket(levelChunk.getPos(), this.lightEngine, this.skyChangedLightSectionFilter, this.blockChangedLightSectionFilter, false),
 					true
@@ -181,33 +179,35 @@ public class ChunkHolder {
 				this.blockChangedLightSectionFilter = 0;
 			}
 
-			if (this.changes == 1) {
-				int i = (this.changedBlocks[0] >> 12 & 15) + this.pos.x * 16;
-				int j = this.changedBlocks[0] & 255;
-				int k = (this.changedBlocks[0] >> 8 & 15) + this.pos.z * 16;
-				BlockPos blockPos = new BlockPos(i, j, k);
-				this.broadcast(new ClientboundBlockUpdatePacket(level, blockPos), false);
-				if (level.getBlockState(blockPos).getBlock().isEntityBlock()) {
-					this.broadcastBlockEntity(level, blockPos);
-				}
-			} else if (this.changes == 64) {
-				this.broadcast(new ClientboundLevelChunkPacket(levelChunk, this.changedSectionFilter, false), false);
-			} else if (this.changes != 0) {
-				this.broadcast(new ClientboundChunkBlocksUpdatePacket(this.changes, this.changedBlocks, levelChunk), false);
-
-				for (int i = 0; i < this.changes; i++) {
-					int j = (this.changedBlocks[i] >> 12 & 15) + this.pos.x * 16;
-					int k = this.changedBlocks[i] & 255;
-					int l = (this.changedBlocks[i] >> 8 & 15) + this.pos.z * 16;
-					BlockPos blockPos2 = new BlockPos(j, k, l);
-					if (level.getBlockState(blockPos2).getBlock().isEntityBlock()) {
-						this.broadcastBlockEntity(level, blockPos2);
+			for (int i = 0; i < this.changedBlocksPerSection.length; i++) {
+				ShortSet shortSet = this.changedBlocksPerSection[i];
+				if (shortSet != null) {
+					SectionPos sectionPos = SectionPos.of(levelChunk.getPos(), i);
+					if (shortSet.size() == 1) {
+						BlockPos blockPos = sectionPos.relativeToBlockPos(shortSet.iterator().nextShort());
+						BlockState blockState = level.getBlockState(blockPos);
+						this.broadcast(new ClientboundBlockUpdatePacket(blockPos, blockState), false);
+						this.broadcastBlockEntityIfNeeded(level, blockPos, blockState);
+					} else {
+						LevelChunkSection levelChunkSection = levelChunk.getSections()[sectionPos.getY()];
+						ClientboundSectionBlocksUpdatePacket clientboundSectionBlocksUpdatePacket = new ClientboundSectionBlocksUpdatePacket(
+							sectionPos, shortSet, levelChunkSection
+						);
+						this.broadcast(clientboundSectionBlocksUpdatePacket, false);
+						clientboundSectionBlocksUpdatePacket.runUpdates((blockPos, blockState) -> this.broadcastBlockEntityIfNeeded(level, blockPos, blockState));
 					}
+
+					this.changedBlocksPerSection[i] = null;
 				}
 			}
 
-			this.changes = 0;
-			this.changedSectionFilter = 0;
+			this.hasChangedSections = false;
+		}
+	}
+
+	private void broadcastBlockEntityIfNeeded(Level level, BlockPos blockPos, BlockState blockState) {
+		if (blockState.getBlock().isEntityBlock()) {
+			this.broadcastBlockEntity(level, blockPos);
 		}
 	}
 

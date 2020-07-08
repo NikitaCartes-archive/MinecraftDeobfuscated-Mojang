@@ -27,7 +27,6 @@ import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundChatPacket;
-import net.minecraft.network.protocol.game.ClientboundChunkBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerAckPacket;
@@ -69,6 +68,7 @@ import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
+import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSelectAdvancementsTabPacket;
 import net.minecraft.network.protocol.game.ClientboundSetBorderPacket;
 import net.minecraft.network.protocol.game.ClientboundSetCameraPacket;
@@ -186,7 +186,6 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundBossEventPacket.class, ClientboundBossEventPacket::new)
 					.addPacket(ClientboundChangeDifficultyPacket.class, ClientboundChangeDifficultyPacket::new)
 					.addPacket(ClientboundChatPacket.class, ClientboundChatPacket::new)
-					.addPacket(ClientboundChunkBlocksUpdatePacket.class, ClientboundChunkBlocksUpdatePacket::new)
 					.addPacket(ClientboundCommandSuggestionsPacket.class, ClientboundCommandSuggestionsPacket::new)
 					.addPacket(ClientboundCommandsPacket.class, ClientboundCommandsPacket::new)
 					.addPacket(ClientboundContainerAckPacket.class, ClientboundContainerAckPacket::new)
@@ -231,6 +230,7 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundResourcePackPacket.class, ClientboundResourcePackPacket::new)
 					.addPacket(ClientboundRespawnPacket.class, ClientboundRespawnPacket::new)
 					.addPacket(ClientboundRotateHeadPacket.class, ClientboundRotateHeadPacket::new)
+					.addPacket(ClientboundSectionBlocksUpdatePacket.class, ClientboundSectionBlocksUpdatePacket::new)
 					.addPacket(ClientboundSelectAdvancementsTabPacket.class, ClientboundSelectAdvancementsTabPacket::new)
 					.addPacket(ClientboundSetBorderPacket.class, ClientboundSetBorderPacket::new)
 					.addPacket(ClientboundSetCameraPacket.class, ClientboundSetCameraPacket::new)

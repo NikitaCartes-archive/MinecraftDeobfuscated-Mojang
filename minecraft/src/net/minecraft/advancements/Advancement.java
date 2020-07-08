@@ -64,7 +64,7 @@ public class Advancement {
 			ChatFormatting chatFormatting = displayInfo.getFrame().getChatColor();
 			Component component2 = ComponentUtils.mergeStyles(component.copy(), Style.EMPTY.withColor(chatFormatting)).append("\n").append(displayInfo.getDescription());
 			Component component3 = component.copy().withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component2)));
-			this.chatComponent = new TextComponent("[").append(component3).append("]").withStyle(chatFormatting);
+			this.chatComponent = ComponentUtils.wrapInSquareBrackets(component3).withStyle(chatFormatting);
 		}
 	}
 

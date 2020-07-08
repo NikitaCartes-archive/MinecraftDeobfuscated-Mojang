@@ -92,10 +92,6 @@ public class ChunkPos {
 		return this.z & 31;
 	}
 
-	public BlockPos getBlockAt(int i, int j, int k) {
-		return new BlockPos((this.x << 4) + i, j, (this.z << 4) + k);
-	}
-
 	public String toString() {
 		return "[" + this.x + ", " + this.z + "]";
 	}

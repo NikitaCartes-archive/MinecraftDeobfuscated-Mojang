@@ -20,7 +20,7 @@ public class NoSurfaceOreFeature extends Feature<OreConfiguration> {
 
 		for (int j = 0; j < i; j++) {
 			this.offsetTargetPos(mutableBlockPos, random, blockPos, Math.min(j, 7));
-			if (oreConfiguration.target.getPredicate().test(worldGenLevel.getBlockState(mutableBlockPos)) && !this.isFacingAir(worldGenLevel, mutableBlockPos)) {
+			if (oreConfiguration.target.test(worldGenLevel.getBlockState(mutableBlockPos), random) && !this.isFacingAir(worldGenLevel, mutableBlockPos)) {
 				worldGenLevel.setBlock(mutableBlockPos, oreConfiguration.state, 2);
 			}
 		}

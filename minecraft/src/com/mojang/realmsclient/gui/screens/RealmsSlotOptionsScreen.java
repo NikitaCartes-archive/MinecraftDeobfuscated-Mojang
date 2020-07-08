@@ -30,8 +30,9 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 		new TranslatableComponent("selectWorld.gameMode.creative"),
 		new TranslatableComponent("selectWorld.gameMode.adventure")
 	};
-	private static final TranslatableComponent TEXT_ON = new TranslatableComponent("mco.configure.world.on");
-	private static final TranslatableComponent TEXT_OFF = new TranslatableComponent("mco.configure.world.off");
+	private static final Component TEXT_ON = new TranslatableComponent("mco.configure.world.on");
+	private static final Component TEXT_OFF = new TranslatableComponent("mco.configure.world.off");
+	private static final Component GAME_MODE_LABEL = new TranslatableComponent("selectWorld.gameMode");
 	private EditBox nameEdit;
 	protected final RealmsConfigureWorldScreen parent;
 	private int column1X;
@@ -200,7 +201,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 	}
 
 	private Component gameModeTitle() {
-		return new TranslatableComponent("selectWorld.gameMode").append(": ").append(GAME_MODES[this.gameMode]);
+		return new TranslatableComponent("options.generic_value", GAME_MODE_LABEL, GAME_MODES[this.gameMode]);
 	}
 
 	private Component pvpTitle() {

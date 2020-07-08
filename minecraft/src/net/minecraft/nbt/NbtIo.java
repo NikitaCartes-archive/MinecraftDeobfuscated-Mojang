@@ -22,6 +22,33 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 
 public class NbtIo {
+	public static CompoundTag readCompressed(File file) throws IOException {
+		InputStream inputStream = new FileInputStream(file);
+		Throwable var2 = null;
+
+		CompoundTag var3;
+		try {
+			var3 = readCompressed(inputStream);
+		} catch (Throwable var12) {
+			var2 = var12;
+			throw var12;
+		} finally {
+			if (inputStream != null) {
+				if (var2 != null) {
+					try {
+						inputStream.close();
+					} catch (Throwable var11) {
+						var2.addSuppressed(var11);
+					}
+				} else {
+					inputStream.close();
+				}
+			}
+		}
+
+		return var3;
+	}
+
 	public static CompoundTag readCompressed(InputStream inputStream) throws IOException {
 		DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(new GZIPInputStream(inputStream)));
 		Throwable var2 = null;
@@ -47,6 +74,30 @@ public class NbtIo {
 		}
 
 		return var3;
+	}
+
+	public static void writeCompressed(CompoundTag compoundTag, File file) throws IOException {
+		OutputStream outputStream = new FileOutputStream(file);
+		Throwable var3 = null;
+
+		try {
+			writeCompressed(compoundTag, outputStream);
+		} catch (Throwable var12) {
+			var3 = var12;
+			throw var12;
+		} finally {
+			if (outputStream != null) {
+				if (var3 != null) {
+					try {
+						outputStream.close();
+					} catch (Throwable var11) {
+						var3.addSuppressed(var11);
+					}
+				} else {
+					outputStream.close();
+				}
+			}
+		}
 	}
 
 	public static void writeCompressed(CompoundTag compoundTag, OutputStream outputStream) throws IOException {
@@ -75,12 +126,46 @@ public class NbtIo {
 
 	@Environment(EnvType.CLIENT)
 	public static void write(CompoundTag compoundTag, File file) throws IOException {
-		DataOutputStream dataOutputStream = new DataOutputStream(new FileOutputStream(file));
+		FileOutputStream fileOutputStream = new FileOutputStream(file);
+		Throwable var3 = null;
 
 		try {
-			write(compoundTag, dataOutputStream);
+			DataOutputStream dataOutputStream = new DataOutputStream(fileOutputStream);
+			Throwable var5 = null;
+
+			try {
+				write(compoundTag, dataOutputStream);
+			} catch (Throwable var28) {
+				var5 = var28;
+				throw var28;
+			} finally {
+				if (dataOutputStream != null) {
+					if (var5 != null) {
+						try {
+							dataOutputStream.close();
+						} catch (Throwable var27) {
+							var5.addSuppressed(var27);
+						}
+					} else {
+						dataOutputStream.close();
+					}
+				}
+			}
+		} catch (Throwable var30) {
+			var3 = var30;
+			throw var30;
 		} finally {
-			dataOutputStream.close();
+			if (fileOutputStream != null) {
+				if (var3 != null) {
+					try {
+						fileOutputStream.close();
+					} catch (Throwable var26) {
+						var3.addSuppressed(var26);
+					}
+				} else {
+					fileOutputStream.close();
+				}
+			}
 		}
 	}
 
@@ -90,21 +175,55 @@ public class NbtIo {
 		if (!file.exists()) {
 			return null;
 		} else {
-			DataInputStream dataInputStream = new DataInputStream(new FileInputStream(file));
+			FileInputStream fileInputStream = new FileInputStream(file);
+			Throwable var2 = null;
 
-			CompoundTag var2;
+			CompoundTag var5;
 			try {
-				var2 = read(dataInputStream, NbtAccounter.UNLIMITED);
+				DataInputStream dataInputStream = new DataInputStream(fileInputStream);
+				Throwable var4 = null;
+
+				try {
+					var5 = read(dataInputStream, NbtAccounter.UNLIMITED);
+				} catch (Throwable var28) {
+					var4 = var28;
+					throw var28;
+				} finally {
+					if (dataInputStream != null) {
+						if (var4 != null) {
+							try {
+								dataInputStream.close();
+							} catch (Throwable var27) {
+								var4.addSuppressed(var27);
+							}
+						} else {
+							dataInputStream.close();
+						}
+					}
+				}
+			} catch (Throwable var30) {
+				var2 = var30;
+				throw var30;
 			} finally {
-				dataInputStream.close();
+				if (fileInputStream != null) {
+					if (var2 != null) {
+						try {
+							fileInputStream.close();
+						} catch (Throwable var26) {
+							var2.addSuppressed(var26);
+						}
+					} else {
+						fileInputStream.close();
+					}
+				}
 			}
 
-			return var2;
+			return var5;
 		}
 	}
 
-	public static CompoundTag read(DataInputStream dataInputStream) throws IOException {
-		return read(dataInputStream, NbtAccounter.UNLIMITED);
+	public static CompoundTag read(DataInput dataInput) throws IOException {
+		return read(dataInput, NbtAccounter.UNLIMITED);
 	}
 
 	public static CompoundTag read(DataInput dataInput, NbtAccounter nbtAccounter) throws IOException {

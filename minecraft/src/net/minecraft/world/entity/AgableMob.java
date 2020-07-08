@@ -30,7 +30,7 @@ public abstract class AgableMob extends PathfinderMob {
 		@Nullable CompoundTag compoundTag
 	) {
 		if (spawnGroupData == null) {
-			spawnGroupData = new AgableMob.AgableMobGroupData();
+			spawnGroupData = new AgableMob.AgableMobGroupData(true);
 		}
 
 		AgableMob.AgableMobGroupData agableMobGroupData = (AgableMob.AgableMobGroupData)spawnGroupData;
@@ -156,8 +156,21 @@ public abstract class AgableMob extends PathfinderMob {
 
 	public static class AgableMobGroupData implements SpawnGroupData {
 		private int groupSize;
-		private boolean shouldSpawnBaby = true;
-		private float babySpawnChance = 0.05F;
+		private final boolean shouldSpawnBaby;
+		private final float babySpawnChance;
+
+		private AgableMobGroupData(boolean bl, float f) {
+			this.shouldSpawnBaby = bl;
+			this.babySpawnChance = f;
+		}
+
+		public AgableMobGroupData(boolean bl) {
+			this(bl, 0.05F);
+		}
+
+		public AgableMobGroupData(float f) {
+			this(true, f);
+		}
 
 		public int getGroupSize() {
 			return this.groupSize;
@@ -171,16 +184,8 @@ public abstract class AgableMob extends PathfinderMob {
 			return this.shouldSpawnBaby;
 		}
 
-		public void setShouldSpawnBaby(boolean bl) {
-			this.shouldSpawnBaby = bl;
-		}
-
 		public float getBabySpawnChance() {
 			return this.babySpawnChance;
-		}
-
-		public void setBabySpawnChance(float f) {
-			this.babySpawnChance = f;
 		}
 	}
 }

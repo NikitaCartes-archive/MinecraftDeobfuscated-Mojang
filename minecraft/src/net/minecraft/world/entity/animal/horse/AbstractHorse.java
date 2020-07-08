@@ -1003,12 +1003,12 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 			double g = this.getBoundingBox().maxY + 0.75;
 
 			do {
-				double h = this.level.getRelativeFloorHeight(mutableBlockPos);
+				double h = this.level.getBlockFloorHeight(mutableBlockPos);
 				if ((double)mutableBlockPos.getY() + h > g) {
 					break;
 				}
 
-				if (DismountHelper.isFloorValid(h)) {
+				if (DismountHelper.isBlockFloorValid(h)) {
 					AABB aABB = livingEntity.getLocalBoundsForPose(pose);
 					Vec3 vec32 = new Vec3(d, (double)mutableBlockPos.getY() + h, f);
 					if (DismountHelper.canDismountTo(this.level, livingEntity, aABB.move(vec32))) {
@@ -1054,8 +1054,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		@Nullable CompoundTag compoundTag
 	) {
 		if (spawnGroupData == null) {
-			spawnGroupData = new AgableMob.AgableMobGroupData();
-			((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(0.2F);
+			spawnGroupData = new AgableMob.AgableMobGroupData(0.2F);
 		}
 
 		this.randomizeAttributes();

@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -63,7 +64,13 @@ public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfigur
 		}
 
 		public void generatePieces(
-			ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration
+			RegistryAccess registryAccess,
+			ChunkGenerator chunkGenerator,
+			StructureManager structureManager,
+			int i,
+			int j,
+			Biome biome,
+			NoneFeatureConfiguration noneFeatureConfiguration
 		) {
 			Rotation rotation = Rotation.getRandom(this.random);
 			int k = 5;

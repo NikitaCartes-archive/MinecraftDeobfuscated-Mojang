@@ -7,7 +7,7 @@ import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 public class ProbabilityFeatureConfiguration implements CarverConfiguration, FeatureConfiguration {
 	public static final Codec<ProbabilityFeatureConfiguration> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					Codec.FLOAT.fieldOf("probability").withDefault(0.0F).forGetter(probabilityFeatureConfiguration -> probabilityFeatureConfiguration.probability)
+					Codec.floatRange(0.0F, 1.0F).fieldOf("probability").forGetter(probabilityFeatureConfiguration -> probabilityFeatureConfiguration.probability)
 				)
 				.apply(instance, ProbabilityFeatureConfiguration::new)
 	);

@@ -68,7 +68,10 @@ public class ChunkSerializer {
 		}
 
 		ChunkBiomeContainer chunkBiomeContainer = new ChunkBiomeContainer(
-			chunkPos, biomeSource, compoundTag2.contains("Biomes", 11) ? compoundTag2.getIntArray("Biomes") : null
+			serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY),
+			chunkPos,
+			biomeSource,
+			compoundTag2.contains("Biomes", 11) ? compoundTag2.getIntArray("Biomes") : null
 		);
 		UpgradeData upgradeData = compoundTag2.contains("UpgradeData", 10) ? new UpgradeData(compoundTag2.getCompound("UpgradeData")) : UpgradeData.EMPTY;
 		ProtoTickList<Block> protoTickList = new ProtoTickList<>(

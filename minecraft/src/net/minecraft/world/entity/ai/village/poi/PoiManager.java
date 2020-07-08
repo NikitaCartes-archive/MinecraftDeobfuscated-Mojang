@@ -58,7 +58,10 @@ public class PoiManager extends SectionStorage<PoiSection> {
 
 	public Stream<PoiRecord> getInSquare(Predicate<PoiType> predicate, BlockPos blockPos, int i, PoiManager.Occupancy occupancy) {
 		int j = Math.floorDiv(i, 16) + 1;
-		return ChunkPos.rangeClosed(new ChunkPos(blockPos), j).flatMap(chunkPos -> this.getInChunk(predicate, chunkPos, occupancy));
+		return ChunkPos.rangeClosed(new ChunkPos(blockPos), j).flatMap(chunkPos -> this.getInChunk(predicate, chunkPos, occupancy)).filter(poiRecord -> {
+			BlockPos blockPos2 = poiRecord.getPos();
+			return Math.abs(blockPos2.getX() - blockPos.getX()) <= i && Math.abs(blockPos2.getZ() - blockPos.getZ()) <= i;
+		});
 	}
 
 	public Stream<PoiRecord> getInRange(Predicate<PoiType> predicate, BlockPos blockPos, int i, PoiManager.Occupancy occupancy) {

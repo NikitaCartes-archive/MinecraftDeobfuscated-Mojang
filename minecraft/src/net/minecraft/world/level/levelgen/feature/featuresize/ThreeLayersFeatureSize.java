@@ -7,11 +7,11 @@ import java.util.OptionalInt;
 public class ThreeLayersFeatureSize extends FeatureSize {
 	public static final Codec<ThreeLayersFeatureSize> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					Codec.INT.fieldOf("limit").withDefault(1).forGetter(threeLayersFeatureSize -> threeLayersFeatureSize.limit),
-					Codec.INT.fieldOf("upper_limit").withDefault(1).forGetter(threeLayersFeatureSize -> threeLayersFeatureSize.upperLimit),
-					Codec.INT.fieldOf("lower_size").withDefault(0).forGetter(threeLayersFeatureSize -> threeLayersFeatureSize.lowerSize),
-					Codec.INT.fieldOf("middle_size").withDefault(1).forGetter(threeLayersFeatureSize -> threeLayersFeatureSize.middleSize),
-					Codec.INT.fieldOf("upper_size").withDefault(1).forGetter(threeLayersFeatureSize -> threeLayersFeatureSize.upperSize),
+					Codec.intRange(0, 80).fieldOf("limit").orElse(1).forGetter(threeLayersFeatureSize -> threeLayersFeatureSize.limit),
+					Codec.intRange(0, 80).fieldOf("upper_limit").orElse(1).forGetter(threeLayersFeatureSize -> threeLayersFeatureSize.upperLimit),
+					Codec.intRange(0, 16).fieldOf("lower_size").orElse(0).forGetter(threeLayersFeatureSize -> threeLayersFeatureSize.lowerSize),
+					Codec.intRange(0, 16).fieldOf("middle_size").orElse(1).forGetter(threeLayersFeatureSize -> threeLayersFeatureSize.middleSize),
+					Codec.intRange(0, 16).fieldOf("upper_size").orElse(1).forGetter(threeLayersFeatureSize -> threeLayersFeatureSize.upperSize),
 					minClippedHeightCodec()
 				)
 				.apply(instance, ThreeLayersFeatureSize::new)

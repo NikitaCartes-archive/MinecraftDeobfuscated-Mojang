@@ -6,15 +6,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.feature.configurations.BlockBlobConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 
-public class BlockBlobFeature extends Feature<BlockBlobConfiguration> {
-	public BlockBlobFeature(Codec<BlockBlobConfiguration> codec) {
+public class BlockBlobFeature extends Feature<BlockStateConfiguration> {
+	public BlockBlobFeature(Codec<BlockStateConfiguration> codec) {
 		super(codec);
 	}
 
 	public boolean place(
-		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, BlockBlobConfiguration blockBlobConfiguration
+		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, BlockStateConfiguration blockStateConfiguration
 	) {
 		while (blockPos.getY() > 3) {
 			if (!worldGenLevel.isEmptyBlock(blockPos.below())) {
@@ -30,21 +30,19 @@ public class BlockBlobFeature extends Feature<BlockBlobConfiguration> {
 		if (blockPos.getY() <= 3) {
 			return false;
 		} else {
-			int i = blockBlobConfiguration.startRadius;
+			for (int i = 0; i < 3; i++) {
+				int j = random.nextInt(2);
+				int k = random.nextInt(2);
+				int l = random.nextInt(2);
+				float f = (float)(j + k + l) * 0.333F + 0.5F;
 
-			for (int j = 0; i >= 0 && j < 3; j++) {
-				int k = i + random.nextInt(2);
-				int l = i + random.nextInt(2);
-				int m = i + random.nextInt(2);
-				float f = (float)(k + l + m) * 0.333F + 0.5F;
-
-				for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-k, -l, -m), blockPos.offset(k, l, m))) {
+				for (BlockPos blockPos2 : BlockPos.betweenClosed(blockPos.offset(-j, -k, -l), blockPos.offset(j, k, l))) {
 					if (blockPos2.distSqr(blockPos) <= (double)(f * f)) {
-						worldGenLevel.setBlock(blockPos2, blockBlobConfiguration.state, 4);
+						worldGenLevel.setBlock(blockPos2, blockStateConfiguration.state, 4);
 					}
 				}
 
-				blockPos = blockPos.offset(-(i + 1) + random.nextInt(2 + i * 2), 0 - random.nextInt(2), -(i + 1) + random.nextInt(2 + i * 2));
+				blockPos = blockPos.offset(-1 + random.nextInt(2), -random.nextInt(2), -1 + random.nextInt(2));
 			}
 
 			return true;

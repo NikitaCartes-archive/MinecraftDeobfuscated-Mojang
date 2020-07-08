@@ -2,6 +2,7 @@ package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
 import java.util.List;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -47,7 +48,13 @@ public class StrongholdFeature extends StructureFeature<NoneFeatureConfiguration
 		}
 
 		public void generatePieces(
-			ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, NoneFeatureConfiguration noneFeatureConfiguration
+			RegistryAccess registryAccess,
+			ChunkGenerator chunkGenerator,
+			StructureManager structureManager,
+			int i,
+			int j,
+			Biome biome,
+			NoneFeatureConfiguration noneFeatureConfiguration
 		) {
 			int k = 0;
 

@@ -5,7 +5,7 @@ import com.mojang.serialization.Codec;
 public class ShipwreckConfiguration implements FeatureConfiguration {
 	public static final Codec<ShipwreckConfiguration> CODEC = Codec.BOOL
 		.fieldOf("is_beached")
-		.withDefault(false)
+		.orElse(false)
 		.<ShipwreckConfiguration>xmap(ShipwreckConfiguration::new, shipwreckConfiguration -> shipwreckConfiguration.isBeached)
 		.codec();
 	public final boolean isBeached;

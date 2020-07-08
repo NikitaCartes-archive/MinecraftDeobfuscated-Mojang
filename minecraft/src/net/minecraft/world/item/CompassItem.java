@@ -12,6 +12,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import org.apache.logging.log4j.LogManager;
@@ -60,29 +62,32 @@ public class CompassItem extends Item implements Vanishable {
 
 	@Override
 	public InteractionResult useOn(UseOnContext useOnContext) {
-		BlockPos blockPos = useOnContext.hitResult.getBlockPos();
-		if (!useOnContext.level.getBlockState(blockPos).is(Blocks.LODESTONE)) {
+		BlockPos blockPos = useOnContext.getClickedPos();
+		Level level = useOnContext.getLevel();
+		if (!level.getBlockState(blockPos).is(Blocks.LODESTONE)) {
 			return super.useOn(useOnContext);
 		} else {
-			useOnContext.level.playSound(null, blockPos, SoundEvents.LODESTONE_COMPASS_LOCK, SoundSource.PLAYERS, 1.0F, 1.0F);
-			boolean bl = !useOnContext.player.abilities.instabuild && useOnContext.itemStack.getCount() == 1;
+			level.playSound(null, blockPos, SoundEvents.LODESTONE_COMPASS_LOCK, SoundSource.PLAYERS, 1.0F, 1.0F);
+			Player player = useOnContext.getPlayer();
+			ItemStack itemStack = useOnContext.getItemInHand();
+			boolean bl = !player.abilities.instabuild && itemStack.getCount() == 1;
 			if (bl) {
-				this.addLodestoneTags(useOnContext.level.dimension(), blockPos, useOnContext.itemStack.getOrCreateTag());
+				this.addLodestoneTags(level.dimension(), blockPos, itemStack.getOrCreateTag());
 			} else {
-				ItemStack itemStack = new ItemStack(Items.COMPASS, 1);
-				CompoundTag compoundTag = useOnContext.itemStack.hasTag() ? useOnContext.itemStack.getTag().copy() : new CompoundTag();
-				itemStack.setTag(compoundTag);
-				if (!useOnContext.player.abilities.instabuild) {
-					useOnContext.itemStack.shrink(1);
+				ItemStack itemStack2 = new ItemStack(Items.COMPASS, 1);
+				CompoundTag compoundTag = itemStack.hasTag() ? itemStack.getTag().copy() : new CompoundTag();
+				itemStack2.setTag(compoundTag);
+				if (!player.abilities.instabuild) {
+					itemStack.shrink(1);
 				}
 
-				this.addLodestoneTags(useOnContext.level.dimension(), blockPos, compoundTag);
-				if (!useOnContext.player.inventory.add(itemStack)) {
-					useOnContext.player.drop(itemStack, false);
+				this.addLodestoneTags(level.dimension(), blockPos, compoundTag);
+				if (!player.inventory.add(itemStack2)) {
+					player.drop(itemStack2, false);
 				}
 			}
 
-			return InteractionResult.sidedSuccess(useOnContext.level.isClientSide);
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
 	}
 

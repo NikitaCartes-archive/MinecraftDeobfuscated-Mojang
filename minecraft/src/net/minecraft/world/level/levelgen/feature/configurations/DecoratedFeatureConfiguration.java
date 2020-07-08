@@ -2,6 +2,7 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.placement.ConfiguredDecorator;
@@ -14,17 +15,17 @@ public class DecoratedFeatureConfiguration implements FeatureConfiguration {
 				)
 				.apply(instance, DecoratedFeatureConfiguration::new)
 	);
-	public final ConfiguredFeature<?, ?> feature;
+	public final Supplier<ConfiguredFeature<?, ?>> feature;
 	public final ConfiguredDecorator<?> decorator;
 
-	public DecoratedFeatureConfiguration(ConfiguredFeature<?, ?> configuredFeature, ConfiguredDecorator<?> configuredDecorator) {
-		this.feature = configuredFeature;
+	public DecoratedFeatureConfiguration(Supplier<ConfiguredFeature<?, ?>> supplier, ConfiguredDecorator<?> configuredDecorator) {
+		this.feature = supplier;
 		this.decorator = configuredDecorator;
 	}
 
 	public String toString() {
 		return String.format(
-			"< %s [%s | %s] >", this.getClass().getSimpleName(), Registry.FEATURE.getKey(this.feature.feature), Registry.DECORATOR.getKey(this.decorator.decorator)
+			"< %s [%s | %s] >", this.getClass().getSimpleName(), Registry.FEATURE.getKey(((ConfiguredFeature)this.feature.get()).feature()), this.decorator
 		);
 	}
 }

@@ -18,6 +18,8 @@ public class StartAdmiringItemIfSeen<E extends Piglin> extends Behavior<E> {
 				MemoryModuleType.ADMIRING_ITEM,
 				MemoryStatus.VALUE_ABSENT,
 				MemoryModuleType.ADMIRING_DISABLED,
+				MemoryStatus.VALUE_ABSENT,
+				MemoryModuleType.DISABLE_WALK_TO_ADMIRE_ITEM,
 				MemoryStatus.VALUE_ABSENT
 			)
 		);

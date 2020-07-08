@@ -102,7 +102,7 @@ public class ComponentUtils {
 	}
 
 	public static MutableComponent wrapInSquareBrackets(Component component) {
-		return new TextComponent("[").append(component).append("]");
+		return new TranslatableComponent("chat.square_brackets", component);
 	}
 
 	public static Component fromMessage(Message message) {

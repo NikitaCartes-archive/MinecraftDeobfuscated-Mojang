@@ -461,12 +461,32 @@ public class TestCommand {
 			String string2 = IOUtils.toString(bufferedReader);
 			Files.createDirectories(path2.getParent());
 			OutputStream outputStream = Files.newOutputStream(path2);
-			NbtIo.writeCompressed(TagParser.parseTag(string2), outputStream);
+			Throwable var8 = null;
+
+			try {
+				NbtIo.writeCompressed(TagParser.parseTag(string2), outputStream);
+			} catch (Throwable var18) {
+				var8 = var18;
+				throw var18;
+			} finally {
+				if (outputStream != null) {
+					if (var8 != null) {
+						try {
+							outputStream.close();
+						} catch (Throwable var17) {
+							var8.addSuppressed(var17);
+						}
+					} else {
+						outputStream.close();
+					}
+				}
+			}
+
 			say(commandSourceStack, "Imported to " + path2.toAbsolutePath());
 			return 0;
-		} catch (CommandSyntaxException | IOException var8) {
+		} catch (CommandSyntaxException | IOException var20) {
 			System.err.println("Failed to load structure " + string);
-			var8.printStackTrace();
+			var20.printStackTrace();
 			return 1;
 		}
 	}

@@ -39,6 +39,7 @@ public class IdMapper<T> implements IdMap<T> {
 		this.addMapping(object, this.nextId);
 	}
 
+	@Override
 	public int getId(T object) {
 		Integer integer = (Integer)this.tToId.get(object);
 		return integer == null ? -1 : integer;

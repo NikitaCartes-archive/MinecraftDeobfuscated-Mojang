@@ -22,6 +22,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -337,6 +338,9 @@ public class MapItem extends ComplexItem {
 		if (compoundTag != null && compoundTag.contains("map_scale_direction", 99)) {
 			scaleMap(itemStack, level, compoundTag.getInt("map_scale_direction"));
 			compoundTag.remove("map_scale_direction");
+		} else if (compoundTag != null && compoundTag.contains("map_to_lock", 1) && compoundTag.getBoolean("map_to_lock")) {
+			lockMap(level, itemStack);
+			compoundTag.remove("map_to_lock");
 		}
 	}
 
@@ -356,18 +360,13 @@ public class MapItem extends ComplexItem {
 		}
 	}
 
-	@Nullable
-	public static ItemStack lockMap(Level level, ItemStack itemStack) {
+	public static void lockMap(Level level, ItemStack itemStack) {
 		MapItemSavedData mapItemSavedData = getOrCreateSavedData(itemStack, level);
 		if (mapItemSavedData != null) {
-			ItemStack itemStack2 = itemStack.copy();
 			MapItemSavedData mapItemSavedData2 = createAndStoreSavedData(
-				itemStack2, level, 0, 0, mapItemSavedData.scale, mapItemSavedData.trackingPosition, mapItemSavedData.unlimitedTracking, mapItemSavedData.dimension
+				itemStack, level, 0, 0, mapItemSavedData.scale, mapItemSavedData.trackingPosition, mapItemSavedData.unlimitedTracking, mapItemSavedData.dimension
 			);
 			mapItemSavedData2.lockData(mapItemSavedData);
-			return itemStack2;
-		} else {
-			return null;
 		}
 	}
 
@@ -405,12 +404,12 @@ public class MapItem extends ComplexItem {
 	public InteractionResult useOn(UseOnContext useOnContext) {
 		BlockState blockState = useOnContext.getLevel().getBlockState(useOnContext.getClickedPos());
 		if (blockState.is(BlockTags.BANNERS)) {
-			if (!useOnContext.level.isClientSide) {
+			if (!useOnContext.getLevel().isClientSide) {
 				MapItemSavedData mapItemSavedData = getOrCreateSavedData(useOnContext.getItemInHand(), useOnContext.getLevel());
 				mapItemSavedData.toggleBanner(useOnContext.getLevel(), useOnContext.getClickedPos());
 			}
 
-			return InteractionResult.sidedSuccess(useOnContext.level.isClientSide);
+			return InteractionResult.sidedSuccess(useOnContext.getLevel().isClientSide);
 		} else {
 			return super.useOn(useOnContext);
 		}

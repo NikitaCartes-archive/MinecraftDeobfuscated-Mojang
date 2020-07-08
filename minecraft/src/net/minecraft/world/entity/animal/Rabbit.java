@@ -434,8 +434,8 @@ public class Rabbit extends Animal {
 		public final int rabbitType;
 
 		public RabbitGroupData(int i) {
+			super(1.0F);
 			this.rabbitType = i;
-			this.setBabySpawnChance(1.0F);
 		}
 	}
 

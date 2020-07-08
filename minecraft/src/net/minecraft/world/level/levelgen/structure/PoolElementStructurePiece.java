@@ -21,7 +21,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class PoolElementStructurePiece extends StructurePiece {
+public class PoolElementStructurePiece extends StructurePiece {
 	private static final Logger LOGGER = LogManager.getLogger();
 	protected final StructurePoolElement element;
 	protected BlockPos position;
@@ -31,15 +31,9 @@ public abstract class PoolElementStructurePiece extends StructurePiece {
 	private final StructureManager structureManager;
 
 	public PoolElementStructurePiece(
-		StructurePieceType structurePieceType,
-		StructureManager structureManager,
-		StructurePoolElement structurePoolElement,
-		BlockPos blockPos,
-		int i,
-		Rotation rotation,
-		BoundingBox boundingBox
+		StructureManager structureManager, StructurePoolElement structurePoolElement, BlockPos blockPos, int i, Rotation rotation, BoundingBox boundingBox
 	) {
-		super(structurePieceType, 0);
+		super(StructurePieceType.JIGSAW, 0);
 		this.structureManager = structureManager;
 		this.element = structurePoolElement;
 		this.position = blockPos;
@@ -48,8 +42,8 @@ public abstract class PoolElementStructurePiece extends StructurePiece {
 		this.boundingBox = boundingBox;
 	}
 
-	public PoolElementStructurePiece(StructureManager structureManager, CompoundTag compoundTag, StructurePieceType structurePieceType) {
-		super(structurePieceType, compoundTag);
+	public PoolElementStructurePiece(StructureManager structureManager, CompoundTag compoundTag) {
+		super(StructurePieceType.JIGSAW, compoundTag);
 		this.structureManager = structureManager;
 		this.position = new BlockPos(compoundTag.getInt("PosX"), compoundTag.getInt("PosY"), compoundTag.getInt("PosZ"));
 		this.groundLevelDelta = compoundTag.getInt("ground_level_delta");

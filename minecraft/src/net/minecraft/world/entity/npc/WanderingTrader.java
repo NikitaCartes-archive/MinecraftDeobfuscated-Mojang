@@ -65,7 +65,7 @@ public class WanderingTrader extends AbstractVillager {
 					this,
 					PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.INVISIBILITY),
 					SoundEvents.WANDERING_TRADER_DISAPPEARED,
-					wanderingTrader -> !this.level.isDay() && !wanderingTrader.isInvisible()
+					wanderingTrader -> this.level.isNight() && !wanderingTrader.isInvisible()
 				)
 			);
 		this.goalSelector

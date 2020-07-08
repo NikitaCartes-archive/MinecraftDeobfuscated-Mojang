@@ -9,7 +9,7 @@ public class HugeMushroomFeatureConfiguration implements FeatureConfiguration {
 		instance -> instance.group(
 					BlockStateProvider.CODEC.fieldOf("cap_provider").forGetter(hugeMushroomFeatureConfiguration -> hugeMushroomFeatureConfiguration.capProvider),
 					BlockStateProvider.CODEC.fieldOf("stem_provider").forGetter(hugeMushroomFeatureConfiguration -> hugeMushroomFeatureConfiguration.stemProvider),
-					Codec.INT.fieldOf("foliage_radius").withDefault(2).forGetter(hugeMushroomFeatureConfiguration -> hugeMushroomFeatureConfiguration.foliageRadius)
+					Codec.INT.fieldOf("foliage_radius").orElse(2).forGetter(hugeMushroomFeatureConfiguration -> hugeMushroomFeatureConfiguration.foliageRadius)
 				)
 				.apply(instance, HugeMushroomFeatureConfiguration::new)
 	);

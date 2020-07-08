@@ -160,7 +160,7 @@ public class ItemTagsProvider extends TagsProvider<Item> {
 				Items.WARPED_SIGN
 			);
 		this.tag(ItemTags.STONE_TOOL_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE);
-		this.tag(ItemTags.FURNACE_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE);
+		this.tag(ItemTags.STONE_CRAFTING_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE);
 	}
 
 	protected void copy(Tag.Named<Block> named, Tag.Named<Item> named2) {

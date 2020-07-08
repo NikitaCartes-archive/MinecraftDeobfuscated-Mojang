@@ -4,7 +4,7 @@ import com.mojang.serialization.Lifecycle;
 import net.minecraft.resources.ResourceKey;
 
 public abstract class WritableRegistry<T> extends Registry<T> {
-	public WritableRegistry(ResourceKey<Registry<T>> resourceKey, Lifecycle lifecycle) {
+	public WritableRegistry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle) {
 		super(resourceKey, lifecycle);
 	}
 

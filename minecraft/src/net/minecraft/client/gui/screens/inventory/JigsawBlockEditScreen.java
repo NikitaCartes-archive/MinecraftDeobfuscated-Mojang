@@ -134,10 +134,13 @@ public class JigsawBlockEditScreen extends Screen {
 		}) {
 			@Override
 			public Component getMessage() {
-				return super.getMessage().copy().append(" ").append(CommonComponents.optionStatus(JigsawBlockEditScreen.this.keepJigsaws));
+				return CommonComponents.optionStatus(super.getMessage(), JigsawBlockEditScreen.this.keepJigsaws);
 			}
 		});
-		this.addButton(new Button(this.width / 2 + 54, 180, 100, 20, new TranslatableComponent("jigsaw_block.generate"), button -> this.sendGenerate()));
+		this.addButton(new Button(this.width / 2 + 54, 180, 100, 20, new TranslatableComponent("jigsaw_block.generate"), button -> {
+			this.onDone();
+			this.sendGenerate();
+		}));
 		this.doneButton = this.addButton(new Button(this.width / 2 - 4 - 150, 210, 150, 20, CommonComponents.GUI_DONE, button -> this.onDone()));
 		this.addButton(new Button(this.width / 2 + 4, 210, 150, 20, CommonComponents.GUI_CANCEL, button -> this.onCancel()));
 		this.setInitialFocus(this.poolEdit);

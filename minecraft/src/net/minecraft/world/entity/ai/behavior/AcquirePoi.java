@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -23,18 +24,22 @@ public class AcquirePoi extends Behavior<PathfinderMob> {
 	private final PoiType poiType;
 	private final MemoryModuleType<GlobalPos> memoryToAcquire;
 	private final boolean onlyIfAdult;
+	private final Optional<Byte> onPoiAcquisitionEvent;
 	private long nextScheduledStart;
 	private final Long2ObjectMap<AcquirePoi.JitteredLinearRetry> batchCache = new Long2ObjectOpenHashMap<>();
 
-	public AcquirePoi(PoiType poiType, MemoryModuleType<GlobalPos> memoryModuleType, MemoryModuleType<GlobalPos> memoryModuleType2, boolean bl) {
+	public AcquirePoi(
+		PoiType poiType, MemoryModuleType<GlobalPos> memoryModuleType, MemoryModuleType<GlobalPos> memoryModuleType2, boolean bl, Optional<Byte> optional
+	) {
 		super(constructEntryConditionMap(memoryModuleType, memoryModuleType2));
 		this.poiType = poiType;
 		this.memoryToAcquire = memoryModuleType2;
 		this.onlyIfAdult = bl;
+		this.onPoiAcquisitionEvent = optional;
 	}
 
-	public AcquirePoi(PoiType poiType, MemoryModuleType<GlobalPos> memoryModuleType, boolean bl) {
-		this(poiType, memoryModuleType, memoryModuleType, bl);
+	public AcquirePoi(PoiType poiType, MemoryModuleType<GlobalPos> memoryModuleType, boolean bl, Optional<Byte> optional) {
+		this(poiType, memoryModuleType, memoryModuleType, bl, optional);
 	}
 
 	private static ImmutableMap<MemoryModuleType<?>, MemoryStatus> constructEntryConditionMap(
@@ -86,6 +91,7 @@ public class AcquirePoi extends Behavior<PathfinderMob> {
 			poiManager.getType(blockPos).ifPresent(poiType -> {
 				poiManager.take(this.poiType.getPredicate(), blockPos2x -> blockPos2x.equals(blockPos), blockPos, 1);
 				pathfinderMob.getBrain().setMemory(this.memoryToAcquire, GlobalPos.of(serverLevel.dimension(), blockPos));
+				this.onPoiAcquisitionEvent.ifPresent(byte_ -> serverLevel.broadcastEntityEvent(pathfinderMob, byte_));
 				this.batchCache.clear();
 				DebugPackets.sendPoiTicketCountPacket(serverLevel, blockPos);
 			});

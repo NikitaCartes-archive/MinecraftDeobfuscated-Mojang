@@ -20,6 +20,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -62,8 +63,6 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.Scoreboard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -169,42 +168,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	public static boolean isOutsideBuildHeight(int i) {
 		return i < 0 || i >= 256;
-	}
-
-	public double getRelativeFloorHeight(BlockPos blockPos) {
-		return this.getRelativeFloorHeight(blockPos, blockState -> false);
-	}
-
-	public double getRelativeFloorHeight(BlockPos blockPos, Predicate<BlockState> predicate) {
-		BlockState blockState = this.getBlockState(blockPos);
-		VoxelShape voxelShape = predicate.test(blockState) ? Shapes.empty() : blockState.getCollisionShape(this, blockPos);
-		if (voxelShape.isEmpty()) {
-			BlockPos blockPos2 = blockPos.below();
-			BlockState blockState2 = this.getBlockState(blockPos2);
-			VoxelShape voxelShape2 = predicate.test(blockState2) ? Shapes.empty() : blockState2.getCollisionShape(this, blockPos2);
-			double d = voxelShape2.max(Direction.Axis.Y);
-			return d >= 1.0 ? d - 1.0 : Double.NEGATIVE_INFINITY;
-		} else {
-			return voxelShape.max(Direction.Axis.Y);
-		}
-	}
-
-	public double getRelativeCeilingHeight(BlockPos blockPos, double d) {
-		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
-		int i = Mth.ceil(d);
-		int j = 0;
-
-		while (j < i) {
-			VoxelShape voxelShape = this.getBlockState(mutableBlockPos).getCollisionShape(this, mutableBlockPos);
-			if (!voxelShape.isEmpty()) {
-				return (double)j + voxelShape.min(Direction.Axis.Y);
-			}
-
-			j++;
-			mutableBlockPos.move(Direction.UP);
-		}
-
-		return Double.POSITIVE_INFINITY;
 	}
 
 	public LevelChunk getChunkAt(BlockPos blockPos) {
@@ -1110,4 +1073,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	public final boolean isDebug() {
 		return this.isDebug;
 	}
+
+	public abstract RegistryAccess registryAccess();
 }

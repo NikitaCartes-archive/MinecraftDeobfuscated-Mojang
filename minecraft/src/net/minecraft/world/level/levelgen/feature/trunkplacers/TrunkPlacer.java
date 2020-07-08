@@ -29,9 +29,9 @@ public abstract class TrunkPlacer {
 
 	protected static <P extends TrunkPlacer> P3<Mu<P>, Integer, Integer, Integer> trunkPlacerParts(Instance<P> instance) {
 		return instance.group(
-			Codec.INT.fieldOf("base_height").forGetter(trunkPlacer -> trunkPlacer.baseHeight),
-			Codec.INT.fieldOf("height_rand_a").forGetter(trunkPlacer -> trunkPlacer.heightRandA),
-			Codec.INT.fieldOf("height_rand_b").forGetter(trunkPlacer -> trunkPlacer.heightRandB)
+			Codec.intRange(0, 32).fieldOf("base_height").forGetter(trunkPlacer -> trunkPlacer.baseHeight),
+			Codec.intRange(0, 24).fieldOf("height_rand_a").forGetter(trunkPlacer -> trunkPlacer.heightRandA),
+			Codec.intRange(0, 24).fieldOf("height_rand_b").forGetter(trunkPlacer -> trunkPlacer.heightRandB)
 		);
 	}
 

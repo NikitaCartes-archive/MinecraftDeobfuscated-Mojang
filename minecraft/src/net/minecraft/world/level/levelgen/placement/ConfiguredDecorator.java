@@ -2,29 +2,36 @@ package net.minecraft.world.level.levelgen.placement;
 
 import com.mojang.serialization.Codec;
 import java.util.Random;
+import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.Decoratable;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratorConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
-public class ConfiguredDecorator<DC extends DecoratorConfiguration> {
+public class ConfiguredDecorator<DC extends DecoratorConfiguration> implements Decoratable<ConfiguredDecorator<?>> {
 	public static final Codec<ConfiguredDecorator<?>> CODEC = Registry.DECORATOR
 		.dispatch("name", configuredDecorator -> configuredDecorator.decorator, FeatureDecorator::configuredCodec);
-	public final FeatureDecorator<DC> decorator;
-	public final DC config;
+	private final FeatureDecorator<DC> decorator;
+	private final DC config;
 
 	public ConfiguredDecorator(FeatureDecorator<DC> featureDecorator, DC decoratorConfiguration) {
 		this.decorator = featureDecorator;
 		this.config = decoratorConfiguration;
 	}
 
-	public <FC extends FeatureConfiguration, F extends Feature<FC>> boolean place(
-		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, ConfiguredFeature<FC, F> configuredFeature
-	) {
-		return this.decorator.placeFeature(worldGenLevel, chunkGenerator, random, blockPos, this.config, configuredFeature);
+	public Stream<BlockPos> getPositions(DecorationContext decorationContext, Random random, BlockPos blockPos) {
+		return this.decorator.getPositions(decorationContext, random, this.config, blockPos);
+	}
+
+	public String toString() {
+		return String.format("[%s %s]", Registry.DECORATOR.getKey(this.decorator), this.config);
+	}
+
+	public ConfiguredDecorator<?> decorated(ConfiguredDecorator<?> configuredDecorator) {
+		return new ConfiguredDecorator<>(FeatureDecorator.DECORATED, new DecoratedDecoratorConfiguration(configuredDecorator, this));
+	}
+
+	public DC config() {
+		return this.config;
 	}
 }

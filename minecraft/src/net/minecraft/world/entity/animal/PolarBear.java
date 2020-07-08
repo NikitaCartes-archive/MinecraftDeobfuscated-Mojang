@@ -250,8 +250,7 @@ public class PolarBear extends Animal implements NeutralMob {
 		@Nullable CompoundTag compoundTag
 	) {
 		if (spawnGroupData == null) {
-			spawnGroupData = new AgableMob.AgableMobGroupData();
-			((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(1.0F);
+			spawnGroupData = new AgableMob.AgableMobGroupData(1.0F);
 		}
 
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);

@@ -375,10 +375,7 @@ public class Zombie extends Monster {
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		if (this.isBaby()) {
-			compoundTag.putBoolean("IsBaby", true);
-		}
-
+		compoundTag.putBoolean("IsBaby", this.isBaby());
 		compoundTag.putBoolean("CanBreakDoors", this.canBreakDoors());
 		compoundTag.putInt("InWaterTime", this.isInWater() ? this.inWaterTime : -1);
 		compoundTag.putInt("DrownedConversionTime", this.isUnderWaterConverting() ? this.conversionTime : -1);
@@ -387,10 +384,7 @@ public class Zombie extends Monster {
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		if (compoundTag.getBoolean("IsBaby")) {
-			this.setBaby(true);
-		}
-
+		this.setBaby(compoundTag.getBoolean("IsBaby"));
 		this.setCanBreakDoors(compoundTag.getBoolean("CanBreakDoors"));
 		this.inWaterTime = compoundTag.getInt("InWaterTime");
 		if (compoundTag.contains("DrownedConversionTime", 99) && compoundTag.getInt("DrownedConversionTime") > -1) {

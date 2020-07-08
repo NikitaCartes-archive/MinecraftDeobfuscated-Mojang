@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.UniformInt;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -12,21 +13,14 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 public class SpruceFoliagePlacer extends FoliagePlacer {
 	public static final Codec<SpruceFoliagePlacer> CODEC = RecordCodecBuilder.create(
 		instance -> foliagePlacerParts(instance)
-				.<Integer, Integer>and(
-					instance.group(
-						Codec.INT.fieldOf("trunk_height").forGetter(spruceFoliagePlacer -> spruceFoliagePlacer.trunkHeight),
-						Codec.INT.fieldOf("trunk_height_random").forGetter(spruceFoliagePlacer -> spruceFoliagePlacer.trunkHeightRandom)
-					)
-				)
+				.and(UniformInt.codec(0, 16, 8).fieldOf("trunk_height").forGetter(spruceFoliagePlacer -> spruceFoliagePlacer.trunkHeight))
 				.apply(instance, SpruceFoliagePlacer::new)
 	);
-	private final int trunkHeight;
-	private final int trunkHeightRandom;
+	private final UniformInt trunkHeight;
 
-	public SpruceFoliagePlacer(int i, int j, int k, int l, int m, int n) {
-		super(i, j, k, l);
-		this.trunkHeight = m;
-		this.trunkHeightRandom = n;
+	public SpruceFoliagePlacer(UniformInt uniformInt, UniformInt uniformInt2, UniformInt uniformInt3) {
+		super(uniformInt, uniformInt2);
+		this.trunkHeight = uniformInt3;
 	}
 
 	@Override
@@ -66,7 +60,7 @@ public class SpruceFoliagePlacer extends FoliagePlacer {
 
 	@Override
 	public int foliageHeight(Random random, int i, TreeConfiguration treeConfiguration) {
-		return Math.max(4, i - this.trunkHeight - random.nextInt(this.trunkHeightRandom + 1));
+		return Math.max(4, i - this.trunkHeight.sample(random));
 	}
 
 	@Override

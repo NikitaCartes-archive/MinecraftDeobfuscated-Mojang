@@ -23,29 +23,27 @@ public class NetherForestVegetationFeature extends Feature<BlockPileConfiguratio
 	}
 
 	public static boolean place(LevelAccessor levelAccessor, Random random, BlockPos blockPos, BlockPileConfiguration blockPileConfiguration, int i, int j) {
-		for (Block block = levelAccessor.getBlockState(blockPos.below()).getBlock();
-			!block.is(BlockTags.NYLIUM) && blockPos.getY() > 0;
-			block = levelAccessor.getBlockState(blockPos).getBlock()
-		) {
-			blockPos = blockPos.below();
-		}
-
-		int k = blockPos.getY();
-		if (k >= 1 && k + 1 < 256) {
-			int l = 0;
-
-			for (int m = 0; m < i * i; m++) {
-				BlockPos blockPos2 = blockPos.offset(random.nextInt(i) - random.nextInt(i), random.nextInt(j) - random.nextInt(j), random.nextInt(i) - random.nextInt(i));
-				BlockState blockState = blockPileConfiguration.stateProvider.getState(random, blockPos2);
-				if (levelAccessor.isEmptyBlock(blockPos2) && blockPos2.getY() > 0 && blockState.canSurvive(levelAccessor, blockPos2)) {
-					levelAccessor.setBlock(blockPos2, blockState, 2);
-					l++;
-				}
-			}
-
-			return l > 0;
-		} else {
+		Block block = levelAccessor.getBlockState(blockPos.below()).getBlock();
+		if (!block.is(BlockTags.NYLIUM)) {
 			return false;
+		} else {
+			int k = blockPos.getY();
+			if (k >= 1 && k + 1 < 256) {
+				int l = 0;
+
+				for (int m = 0; m < i * i; m++) {
+					BlockPos blockPos2 = blockPos.offset(random.nextInt(i) - random.nextInt(i), random.nextInt(j) - random.nextInt(j), random.nextInt(i) - random.nextInt(i));
+					BlockState blockState = blockPileConfiguration.stateProvider.getState(random, blockPos2);
+					if (levelAccessor.isEmptyBlock(blockPos2) && blockPos2.getY() > 0 && blockState.canSurvive(levelAccessor, blockPos2)) {
+						levelAccessor.setBlock(blockPos2, blockState, 2);
+						l++;
+					}
+				}
+
+				return l > 0;
+			} else {
+				return false;
+			}
 		}
 	}
 }

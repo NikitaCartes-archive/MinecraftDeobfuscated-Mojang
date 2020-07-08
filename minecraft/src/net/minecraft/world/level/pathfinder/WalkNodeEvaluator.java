@@ -274,23 +274,6 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 				}
 
 				if (blockPathTypes2 == BlockPathTypes.OPEN) {
-					AABB aABB2 = new AABB(
-						(double)i - g + 0.5, (double)j + 0.001, (double)k - g + 0.5, (double)i + g + 0.5, (double)((float)j + this.mob.getBbHeight()), (double)k + g + 0.5
-					);
-					if (this.hasCollisions(aABB2)) {
-						return null;
-					}
-
-					if (this.mob.getBbWidth() >= 1.0F) {
-						BlockPathTypes blockPathTypes3 = this.getCachedBlockType(this.mob, i, j - 1, k);
-						if (blockPathTypes3 == BlockPathTypes.BLOCKED) {
-							node = this.getNode(i, j, k);
-							node.type = BlockPathTypes.WALKABLE;
-							node.costMalus = Math.max(node.costMalus, f);
-							return node;
-						}
-					}
-
 					int n = 0;
 					int o = j;
 
@@ -302,8 +285,8 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 							return node2;
 						}
 
-						Node node2 = this.getNode(i, j, k);
 						if (n++ >= this.mob.getMaxFallDistance()) {
+							Node node2 = this.getNode(i, j, k);
 							node2.type = BlockPathTypes.BLOCKED;
 							node2.costMalus = -1.0F;
 							return node2;
@@ -312,13 +295,14 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 						blockPathTypes2 = this.getCachedBlockType(this.mob, i, j, k);
 						f = this.mob.getPathfindingMalus(blockPathTypes2);
 						if (blockPathTypes2 != BlockPathTypes.OPEN && f >= 0.0F) {
-							node = node2;
-							node2.type = blockPathTypes2;
-							node2.costMalus = Math.max(node2.costMalus, f);
+							node = this.getNode(i, j, k);
+							node.type = blockPathTypes2;
+							node.costMalus = Math.max(node.costMalus, f);
 							break;
 						}
 
 						if (f < 0.0F) {
+							Node node2 = this.getNode(i, j, k);
 							node2.type = BlockPathTypes.BLOCKED;
 							node2.costMalus = -1.0F;
 							return node2;
@@ -365,7 +349,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 				}
 			}
 
-			return blockPathTypes == BlockPathTypes.OPEN && mob.getPathfindingMalus(blockPathTypes2) == 0.0F ? BlockPathTypes.OPEN : blockPathTypes2;
+			return blockPathTypes == BlockPathTypes.OPEN && mob.getPathfindingMalus(blockPathTypes2) == 0.0F && l <= 1 ? BlockPathTypes.OPEN : blockPathTypes2;
 		}
 	}
 

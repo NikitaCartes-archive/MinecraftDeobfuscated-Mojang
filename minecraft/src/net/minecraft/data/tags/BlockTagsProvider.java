@@ -585,6 +585,8 @@ public class BlockTagsProvider extends TagsProvider<Block> {
 		this.tag(BlockTags.INFINIBURN_OVERWORLD).add(Blocks.NETHERRACK, Blocks.MAGMA_BLOCK);
 		this.tag(BlockTags.INFINIBURN_NETHER).addTag(BlockTags.INFINIBURN_OVERWORLD);
 		this.tag(BlockTags.INFINIBURN_END).addTag(BlockTags.INFINIBURN_OVERWORLD).add(Blocks.BEDROCK);
+		this.tag(BlockTags.BASE_STONE_OVERWORLD).add(Blocks.STONE).add(Blocks.GRANITE).add(Blocks.DIORITE).add(Blocks.ANDESITE);
+		this.tag(BlockTags.BASE_STONE_NETHER).add(Blocks.NETHERRACK).add(Blocks.BASALT).add(Blocks.BLACKSTONE);
 	}
 
 	@Override

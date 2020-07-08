@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -16,7 +17,9 @@ import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
+import net.minecraft.data.worldgen.StructureFeatures;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
@@ -27,7 +30,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeDefaultFeatures;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
@@ -113,9 +115,9 @@ public abstract class ChunkGenerator {
 	@Environment(EnvType.CLIENT)
 	public abstract ChunkGenerator withSeed(long l);
 
-	public void createBiomes(ChunkAccess chunkAccess) {
+	public void createBiomes(Registry<Biome> registry, ChunkAccess chunkAccess) {
 		ChunkPos chunkPos = chunkAccess.getPos();
-		((ProtoChunk)chunkAccess).setBiomes(new ChunkBiomeContainer(chunkPos, this.runtimeBiomeSource));
+		((ProtoChunk)chunkAccess).setBiomes(new ChunkBiomeContainer(registry, chunkPos, this.runtimeBiomeSource));
 	}
 
 	public void applyCarvers(long l, BiomeManager biomeManager, ChunkAccess chunkAccess, GenerationStep.Carving carving) {
@@ -130,12 +132,12 @@ public abstract class ChunkGenerator {
 
 		for (int m = j - 8; m <= j + 8; m++) {
 			for (int n = k - 8; n <= k + 8; n++) {
-				List<ConfiguredWorldCarver<?>> list = biome.getCarvers(carving);
-				ListIterator<ConfiguredWorldCarver<?>> listIterator = list.listIterator();
+				List<Supplier<ConfiguredWorldCarver<?>>> list = biome.getCarvers(carving);
+				ListIterator<Supplier<ConfiguredWorldCarver<?>>> listIterator = list.listIterator();
 
 				while (listIterator.hasNext()) {
 					int o = listIterator.nextIndex();
-					ConfiguredWorldCarver<?> configuredWorldCarver = (ConfiguredWorldCarver<?>)listIterator.next();
+					ConfiguredWorldCarver<?> configuredWorldCarver = (ConfiguredWorldCarver<?>)((Supplier)listIterator.next()).get();
 					worldgenRandom.setLargeFeatureSeed(l + (long)o, m, n);
 					if (configuredWorldCarver.isStartChunk(worldgenRandom, m, n)) {
 						configuredWorldCarver.carve(chunkAccess, biomeManager2::getBiome, worldgenRandom, this.getSeaLevel(), m, n, j, k, bitSet);
@@ -185,19 +187,12 @@ public abstract class ChunkGenerator {
 		WorldgenRandom worldgenRandom = new WorldgenRandom();
 		long m = worldgenRandom.setDecorationSeed(worldGenRegion.getSeed(), k, l);
 
-		for (GenerationStep.Decoration decoration : GenerationStep.Decoration.values()) {
-			try {
-				biome.generate(decoration, structureFeatureManager, this, worldGenRegion, m, worldgenRandom, blockPos);
-			} catch (Exception var18) {
-				CrashReport crashReport = CrashReport.forThrowable(var18, "Biome decoration");
-				crashReport.addCategory("Generation")
-					.setDetail("CenterX", i)
-					.setDetail("CenterZ", j)
-					.setDetail("Step", decoration)
-					.setDetail("Seed", m)
-					.setDetail("Biome", Registry.BIOME.getKey(biome));
-				throw new ReportedException(crashReport);
-			}
+		try {
+			biome.generate(structureFeatureManager, this, worldGenRegion, m, worldgenRandom, blockPos);
+		} catch (Exception var14) {
+			CrashReport crashReport = CrashReport.forThrowable(var14, "Biome decoration");
+			crashReport.addCategory("Generation").setDetail("CenterX", i).setDetail("CenterZ", j).setDetail("Seed", m).setDetail("Biome", biome);
+			throw new ReportedException(crashReport);
 		}
 	}
 
@@ -226,18 +221,23 @@ public abstract class ChunkGenerator {
 		return biome.getMobs(mobCategory);
 	}
 
-	public void createStructures(StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess, StructureManager structureManager, long l) {
+	public void createStructures(
+		RegistryAccess registryAccess, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess, StructureManager structureManager, long l
+	) {
 		ChunkPos chunkPos = chunkAccess.getPos();
 		Biome biome = this.biomeSource.getNoiseBiome((chunkPos.x << 2) + 2, 0, (chunkPos.z << 2) + 2);
-		this.createStructure(BiomeDefaultFeatures.STRONGHOLD, structureFeatureManager, chunkAccess, structureManager, l, chunkPos, biome);
+		this.createStructure(StructureFeatures.STRONGHOLD, registryAccess, structureFeatureManager, chunkAccess, structureManager, l, chunkPos, biome);
 
-		for (ConfiguredStructureFeature<?, ?> configuredStructureFeature : biome.structures()) {
-			this.createStructure(configuredStructureFeature, structureFeatureManager, chunkAccess, structureManager, l, chunkPos, biome);
+		for (Supplier<ConfiguredStructureFeature<?, ?>> supplier : biome.structures()) {
+			this.createStructure(
+				(ConfiguredStructureFeature<?, ?>)supplier.get(), registryAccess, structureFeatureManager, chunkAccess, structureManager, l, chunkPos, biome
+			);
 		}
 	}
 
 	private void createStructure(
 		ConfiguredStructureFeature<?, ?> configuredStructureFeature,
+		RegistryAccess registryAccess,
 		StructureFeatureManager structureFeatureManager,
 		ChunkAccess chunkAccess,
 		StructureManager structureManager,
@@ -250,7 +250,7 @@ public abstract class ChunkGenerator {
 		);
 		int i = structureStart != null ? structureStart.getReferences() : 0;
 		StructureStart<?> structureStart2 = configuredStructureFeature.generate(
-			this, this.biomeSource, structureManager, l, chunkPos, biome, i, this.settings.getConfig(configuredStructureFeature.feature)
+			registryAccess, this, this.biomeSource, structureManager, l, chunkPos, biome, i, this.settings.getConfig(configuredStructureFeature.feature)
 		);
 		structureFeatureManager.setStartForFeature(SectionPos.of(chunkAccess.getPos(), 0), configuredStructureFeature.feature, structureStart2, chunkAccess);
 	}

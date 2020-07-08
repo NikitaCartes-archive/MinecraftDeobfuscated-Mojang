@@ -1,8 +1,9 @@
 package net.minecraft.world.level.chunk;
 
 import javax.annotation.Nullable;
-import net.minecraft.core.Registry;
-import net.minecraft.network.FriendlyByteBuf;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.core.IdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
@@ -19,22 +20,25 @@ public class ChunkBiomeContainer implements BiomeManager.NoiseBiomeSource {
 	public static final int BIOMES_SIZE = 1 << WIDTH_BITS + WIDTH_BITS + HEIGHT_BITS;
 	public static final int HORIZONTAL_MASK = (1 << WIDTH_BITS) - 1;
 	public static final int VERTICAL_MASK = (1 << HEIGHT_BITS) - 1;
+	private final IdMap<Biome> biomeRegistry;
 	private final Biome[] biomes;
 
-	public ChunkBiomeContainer(Biome[] biomes) {
+	public ChunkBiomeContainer(IdMap<Biome> idMap, Biome[] biomes) {
+		this.biomeRegistry = idMap;
 		this.biomes = biomes;
 	}
 
-	private ChunkBiomeContainer() {
-		this(new Biome[BIOMES_SIZE]);
+	private ChunkBiomeContainer(IdMap<Biome> idMap) {
+		this(idMap, new Biome[BIOMES_SIZE]);
 	}
 
-	public ChunkBiomeContainer(FriendlyByteBuf friendlyByteBuf) {
-		this();
+	@Environment(EnvType.CLIENT)
+	public ChunkBiomeContainer(IdMap<Biome> idMap, int[] is) {
+		this(idMap);
 
 		for (int i = 0; i < this.biomes.length; i++) {
-			int j = friendlyByteBuf.readInt();
-			Biome biome = Registry.BIOME.byId(j);
+			int j = is[i];
+			Biome biome = idMap.byId(j);
 			if (biome == null) {
 				LOGGER.warn("Received invalid biome id: " + j);
 				this.biomes[i] = Biomes.PLAINS;
@@ -44,8 +48,8 @@ public class ChunkBiomeContainer implements BiomeManager.NoiseBiomeSource {
 		}
 	}
 
-	public ChunkBiomeContainer(ChunkPos chunkPos, BiomeSource biomeSource) {
-		this();
+	public ChunkBiomeContainer(IdMap<Biome> idMap, ChunkPos chunkPos, BiomeSource biomeSource) {
+		this(idMap);
 		int i = chunkPos.getMinBlockX() >> 2;
 		int j = chunkPos.getMinBlockZ() >> 2;
 
@@ -57,13 +61,13 @@ public class ChunkBiomeContainer implements BiomeManager.NoiseBiomeSource {
 		}
 	}
 
-	public ChunkBiomeContainer(ChunkPos chunkPos, BiomeSource biomeSource, @Nullable int[] is) {
-		this();
+	public ChunkBiomeContainer(IdMap<Biome> idMap, ChunkPos chunkPos, BiomeSource biomeSource, @Nullable int[] is) {
+		this(idMap);
 		int i = chunkPos.getMinBlockX() >> 2;
 		int j = chunkPos.getMinBlockZ() >> 2;
 		if (is != null) {
 			for (int k = 0; k < is.length; k++) {
-				this.biomes[k] = Registry.BIOME.byId(is[k]);
+				this.biomes[k] = idMap.byId(is[k]);
 				if (this.biomes[k] == null) {
 					int l = k & HORIZONTAL_MASK;
 					int m = k >> WIDTH_BITS + WIDTH_BITS & VERTICAL_MASK;
@@ -85,20 +89,10 @@ public class ChunkBiomeContainer implements BiomeManager.NoiseBiomeSource {
 		int[] is = new int[this.biomes.length];
 
 		for (int i = 0; i < this.biomes.length; i++) {
-			is[i] = Registry.BIOME.getId(this.biomes[i]);
+			is[i] = this.biomeRegistry.getId(this.biomes[i]);
 		}
 
 		return is;
-	}
-
-	public void write(FriendlyByteBuf friendlyByteBuf) {
-		for (Biome biome : this.biomes) {
-			friendlyByteBuf.writeInt(Registry.BIOME.getId(biome));
-		}
-	}
-
-	public ChunkBiomeContainer copy() {
-		return new ChunkBiomeContainer((Biome[])this.biomes.clone());
 	}
 
 	@Override

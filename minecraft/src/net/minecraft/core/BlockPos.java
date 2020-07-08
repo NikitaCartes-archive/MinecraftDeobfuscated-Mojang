@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -166,6 +167,17 @@ public class BlockPos extends Vec3i {
 
 	public BlockPos relative(Direction direction, int i) {
 		return i == 0 ? this : new BlockPos(this.getX() + direction.getStepX() * i, this.getY() + direction.getStepY() * i, this.getZ() + direction.getStepZ() * i);
+	}
+
+	public BlockPos relative(Direction.Axis axis, int i) {
+		if (i == 0) {
+			return this;
+		} else {
+			int j = axis == Direction.Axis.X ? i : 0;
+			int k = axis == Direction.Axis.Y ? i : 0;
+			int l = axis == Direction.Axis.Z ? i : 0;
+			return new BlockPos(this.getX() + j, this.getY() + k, this.getZ() + l);
+		}
 	}
 
 	public BlockPos rotate(Rotation rotation) {
@@ -337,6 +349,40 @@ public class BlockPos extends Vec3i {
 			};
 	}
 
+	public static Iterable<BlockPos.MutableBlockPos> spiralAround(BlockPos blockPos, int i, Direction direction, Direction direction2) {
+		Validate.validState(direction.getAxis() != direction2.getAxis(), "The two directions cannot be on the same axis");
+		return () -> new AbstractIterator<BlockPos.MutableBlockPos>() {
+				private final Direction[] directions = new Direction[]{direction, direction2, direction.getOpposite(), direction2.getOpposite()};
+				private final BlockPos.MutableBlockPos cursor = blockPos.mutable().move(direction2);
+				private final int legs = 4 * i;
+				private int leg = -1;
+				private int legSize;
+				private int legIndex;
+				private int lastX = this.cursor.getX();
+				private int lastY = this.cursor.getY();
+				private int lastZ = this.cursor.getZ();
+
+				protected BlockPos.MutableBlockPos computeNext() {
+					this.cursor.set(this.lastX, this.lastY, this.lastZ).move(this.directions[(this.leg + 4) % 4]);
+					this.lastX = this.cursor.getX();
+					this.lastY = this.cursor.getY();
+					this.lastZ = this.cursor.getZ();
+					if (this.legIndex >= this.legSize) {
+						if (this.leg >= this.legs) {
+							return this.endOfData();
+						}
+
+						this.leg++;
+						this.legIndex = 0;
+						this.legSize = this.leg / 2 + 1;
+					}
+
+					this.legIndex++;
+					return this.cursor;
+				}
+			};
+	}
+
 	public static class MutableBlockPos extends BlockPos {
 		public MutableBlockPos() {
 			this(0, 0, 0);
@@ -363,6 +409,11 @@ public class BlockPos extends Vec3i {
 		@Override
 		public BlockPos relative(Direction direction, int i) {
 			return super.relative(direction, i).immutable();
+		}
+
+		@Override
+		public BlockPos relative(Direction.Axis axis, int i) {
+			return super.relative(axis, i).immutable();
 		}
 
 		@Override

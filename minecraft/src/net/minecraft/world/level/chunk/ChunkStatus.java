@@ -47,7 +47,7 @@ public class ChunkStatus {
 		(chunkStatus, serverLevel, chunkGenerator, structureManager, threadedLevelLightEngine, function, list, chunkAccess) -> {
 			if (!chunkAccess.getStatus().isOrAfter(chunkStatus)) {
 				if (serverLevel.getServer().getWorldData().worldGenSettings().generateFeatures()) {
-					chunkGenerator.createStructures(serverLevel.structureFeatureManager(), chunkAccess, structureManager, serverLevel.getSeed());
+					chunkGenerator.createStructures(serverLevel.registryAccess(), serverLevel.structureFeatureManager(), chunkAccess, structureManager, serverLevel.getSeed());
 				}
 
 				if (chunkAccess instanceof ProtoChunk) {
@@ -70,7 +70,9 @@ public class ChunkStatus {
 		0,
 		PRE_FEATURES,
 		ChunkStatus.ChunkType.PROTOCHUNK,
-		(serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.createBiomes(chunkAccess)
+		(serverLevel, chunkGenerator, list, chunkAccess) -> chunkGenerator.createBiomes(
+				serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunkAccess
+			)
 	);
 	public static final ChunkStatus NOISE = registerSimple(
 		"noise", BIOMES, 8, PRE_FEATURES, ChunkStatus.ChunkType.PROTOCHUNK, (serverLevel, chunkGenerator, list, chunkAccess) -> {

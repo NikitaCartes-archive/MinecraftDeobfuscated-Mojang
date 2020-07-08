@@ -1,10 +1,92 @@
 package net.minecraft.world.level.biome;
 
 import java.util.Collections;
-import net.minecraft.core.Registry;
+import javax.annotation.Nullable;
+import net.minecraft.core.IdMapper;
+import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.data.worldgen.biome.BadlandsBiome;
+import net.minecraft.data.worldgen.biome.BadlandsPlateauBiome;
+import net.minecraft.data.worldgen.biome.BambooJungleBiome;
+import net.minecraft.data.worldgen.biome.BambooJungleHillsBiome;
+import net.minecraft.data.worldgen.biome.BasaltDeltasBiome;
+import net.minecraft.data.worldgen.biome.BeachBiome;
+import net.minecraft.data.worldgen.biome.BirchForestBiome;
+import net.minecraft.data.worldgen.biome.BirchForestHillsBiome;
+import net.minecraft.data.worldgen.biome.ColdOceanBiome;
+import net.minecraft.data.worldgen.biome.CrimsonForestBiome;
+import net.minecraft.data.worldgen.biome.DarkForestBiome;
+import net.minecraft.data.worldgen.biome.DarkForestHillsBiome;
+import net.minecraft.data.worldgen.biome.DeepColdOceanBiome;
+import net.minecraft.data.worldgen.biome.DeepFrozenOceanBiome;
+import net.minecraft.data.worldgen.biome.DeepLukeWarmOceanBiome;
+import net.minecraft.data.worldgen.biome.DeepOceanBiome;
+import net.minecraft.data.worldgen.biome.DeepWarmOceanBiome;
+import net.minecraft.data.worldgen.biome.DesertBiome;
+import net.minecraft.data.worldgen.biome.DesertHillsBiome;
+import net.minecraft.data.worldgen.biome.DesertLakesBiome;
+import net.minecraft.data.worldgen.biome.EndBarrensBiome;
+import net.minecraft.data.worldgen.biome.EndHighlandsBiome;
+import net.minecraft.data.worldgen.biome.EndMidlandsBiome;
+import net.minecraft.data.worldgen.biome.ErodedBadlandsBiome;
+import net.minecraft.data.worldgen.biome.ForestBiome;
+import net.minecraft.data.worldgen.biome.ForestFlowerBiome;
+import net.minecraft.data.worldgen.biome.FrozenOceanBiome;
+import net.minecraft.data.worldgen.biome.FrozenRiverBiome;
+import net.minecraft.data.worldgen.biome.GiantSpruceTaigaBiome;
+import net.minecraft.data.worldgen.biome.GiantSpruceTaigaHillsMutatedBiome;
+import net.minecraft.data.worldgen.biome.GiantTreeTaigaBiome;
+import net.minecraft.data.worldgen.biome.GiantTreeTaigaHillsBiome;
+import net.minecraft.data.worldgen.biome.GravellyMountainsBiome;
+import net.minecraft.data.worldgen.biome.IceSpikesBiome;
+import net.minecraft.data.worldgen.biome.JungleBiome;
+import net.minecraft.data.worldgen.biome.JungleEdgeBiome;
+import net.minecraft.data.worldgen.biome.JungleHillsBiome;
+import net.minecraft.data.worldgen.biome.LukeWarmOceanBiome;
+import net.minecraft.data.worldgen.biome.ModifiedBadlandsPlateauBiome;
+import net.minecraft.data.worldgen.biome.ModifiedGravellyMountainsBiome;
+import net.minecraft.data.worldgen.biome.ModifiedJungleBiome;
+import net.minecraft.data.worldgen.biome.ModifiedJungleEdgeBiome;
+import net.minecraft.data.worldgen.biome.ModifiedWoodedBadlandsPlateauBiome;
+import net.minecraft.data.worldgen.biome.MountainBiome;
+import net.minecraft.data.worldgen.biome.MountainEdgeBiome;
+import net.minecraft.data.worldgen.biome.MushroomFieldsBiome;
+import net.minecraft.data.worldgen.biome.MushroomFieldsShoreBiome;
+import net.minecraft.data.worldgen.biome.NetherWastesBiome;
+import net.minecraft.data.worldgen.biome.OceanBiome;
+import net.minecraft.data.worldgen.biome.PlainsBiome;
+import net.minecraft.data.worldgen.biome.RiverBiome;
+import net.minecraft.data.worldgen.biome.SavannaBiome;
+import net.minecraft.data.worldgen.biome.SavannaPlateauBiome;
+import net.minecraft.data.worldgen.biome.ShatteredSavannaBiome;
+import net.minecraft.data.worldgen.biome.ShatteredSavannaPlateauBiome;
+import net.minecraft.data.worldgen.biome.SmallEndIslandsBiome;
+import net.minecraft.data.worldgen.biome.SnowyBeachBiome;
+import net.minecraft.data.worldgen.biome.SnowyMountainsBiome;
+import net.minecraft.data.worldgen.biome.SnowyTaigaBiome;
+import net.minecraft.data.worldgen.biome.SnowyTaigaHillsBiome;
+import net.minecraft.data.worldgen.biome.SnowyTaigaMountainsBiome;
+import net.minecraft.data.worldgen.biome.SnowyTundraBiome;
+import net.minecraft.data.worldgen.biome.SoulSandValleyBiome;
+import net.minecraft.data.worldgen.biome.StoneShoreBiome;
+import net.minecraft.data.worldgen.biome.SunflowerPlainsBiome;
+import net.minecraft.data.worldgen.biome.SwampBiome;
+import net.minecraft.data.worldgen.biome.SwampHillsBiome;
+import net.minecraft.data.worldgen.biome.TaigaBiome;
+import net.minecraft.data.worldgen.biome.TaigaHillsBiome;
+import net.minecraft.data.worldgen.biome.TaigaMountainsBiome;
+import net.minecraft.data.worldgen.biome.TallBirchForestBiome;
+import net.minecraft.data.worldgen.biome.TallBirchHillsBiome;
+import net.minecraft.data.worldgen.biome.TheEndBiome;
+import net.minecraft.data.worldgen.biome.TheVoidBiome;
+import net.minecraft.data.worldgen.biome.WarmOceanBiome;
+import net.minecraft.data.worldgen.biome.WarpedForestBiome;
+import net.minecraft.data.worldgen.biome.WoodedBadlandsBiome;
+import net.minecraft.data.worldgen.biome.WoodedHillsBiome;
+import net.minecraft.data.worldgen.biome.WoodedMountainBiome;
 import net.minecraft.resources.ResourceLocation;
 
 public abstract class Biomes {
+	public static final IdMapper<Biome> MUTATED_BIOMES = new IdMapper<>();
 	public static final Biome OCEAN = register(0, "ocean", new OceanBiome());
 	public static final Biome DEFAULT = OCEAN;
 	public static final Biome PLAINS = register(1, "plains", new PlainsBiome());
@@ -87,12 +169,17 @@ public abstract class Biomes {
 	public static final Biome BASALT_DELTAS = register(173, "basalt_deltas", new BasaltDeltasBiome());
 
 	private static Biome register(int i, String string, Biome biome) {
-		Registry.registerMapping(Registry.BIOME, i, string, biome);
+		BuiltinRegistries.registerMapping(BuiltinRegistries.BIOME, i, string, biome);
 		if (biome.isMutated()) {
-			Biome.MUTATED_BIOMES.addMapping(biome, Registry.BIOME.getId(Registry.BIOME.get(new ResourceLocation(biome.parent))));
+			MUTATED_BIOMES.addMapping(biome, BuiltinRegistries.BIOME.getId(BuiltinRegistries.BIOME.get(new ResourceLocation(biome.parent))));
 		}
 
 		return biome;
+	}
+
+	@Nullable
+	public static Biome getMutatedVariant(Biome biome) {
+		return MUTATED_BIOMES.byId(BuiltinRegistries.BIOME.getId(biome));
 	}
 
 	static {

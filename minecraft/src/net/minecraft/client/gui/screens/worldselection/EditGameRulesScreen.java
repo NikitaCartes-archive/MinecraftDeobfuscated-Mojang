@@ -113,14 +113,10 @@ public class EditGameRulesScreen extends Screen {
 			}) {
 				@Override
 				protected MutableComponent createNarrationMessage() {
-					return BooleanRuleEntry.this.createFullMessage(component, booleanValue.get()).copy().append("\n").append(string);
+					return CommonComponents.optionStatus(component, booleanValue.get()).append("\n").append(string);
 				}
 			};
 			this.children.add(this.checkbox);
-		}
-
-		private MutableComponent createFullMessage(Component component, boolean bl) {
-			return new TextComponent("").append(component).append(": ").append(CommonComponents.optionStatus(bl));
 		}
 
 		@Override

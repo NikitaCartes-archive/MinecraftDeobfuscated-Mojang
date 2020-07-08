@@ -36,22 +36,21 @@ public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
 		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, ColumnFeatureConfiguration columnFeatureConfiguration
 	) {
 		int i = chunkGenerator.getSeaLevel();
-		BlockPos blockPos2 = findSurface(worldGenLevel, i, blockPos.mutable().clamp(Direction.Axis.Y, 1, worldGenLevel.getMaxBuildHeight() - 1), Integer.MAX_VALUE);
-		if (blockPos2 == null) {
+		if (!canPlaceAt(worldGenLevel, i, blockPos.mutable())) {
 			return false;
 		} else {
-			int j = calculateHeight(random, columnFeatureConfiguration);
+			int j = columnFeatureConfiguration.height().sample(random);
 			boolean bl = random.nextFloat() < 0.9F;
 			int k = Math.min(j, bl ? 5 : 8);
 			int l = bl ? 50 : 15;
 			boolean bl2 = false;
 
-			for (BlockPos blockPos3 : BlockPos.randomBetweenClosed(
-				random, l, blockPos2.getX() - k, blockPos2.getY(), blockPos2.getZ() - k, blockPos2.getX() + k, blockPos2.getY(), blockPos2.getZ() + k
+			for (BlockPos blockPos2 : BlockPos.randomBetweenClosed(
+				random, l, blockPos.getX() - k, blockPos.getY(), blockPos.getZ() - k, blockPos.getX() + k, blockPos.getY(), blockPos.getZ() + k
 			)) {
-				int m = j - blockPos3.distManhattan(blockPos2);
+				int m = j - blockPos2.distManhattan(blockPos);
 				if (m >= 0) {
-					bl2 |= this.placeColumn(worldGenLevel, i, blockPos3, m, calculateReach(random, columnFeatureConfiguration));
+					bl2 |= this.placeColumn(worldGenLevel, i, blockPos2, m, columnFeatureConfiguration.reach().sample(random));
 				}
 			}
 
@@ -95,18 +94,24 @@ public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
 	private static BlockPos findSurface(LevelAccessor levelAccessor, int i, BlockPos.MutableBlockPos mutableBlockPos, int j) {
 		while (mutableBlockPos.getY() > 1 && j > 0) {
 			j--;
-			if (isAirOrLavaOcean(levelAccessor, i, mutableBlockPos)) {
-				BlockState blockState = levelAccessor.getBlockState(mutableBlockPos.move(Direction.DOWN));
-				mutableBlockPos.move(Direction.UP);
-				if (!blockState.isAir() && !CANNOT_PLACE_ON.contains(blockState.getBlock())) {
-					return mutableBlockPos;
-				}
+			if (canPlaceAt(levelAccessor, i, mutableBlockPos)) {
+				return mutableBlockPos;
 			}
 
 			mutableBlockPos.move(Direction.DOWN);
 		}
 
 		return null;
+	}
+
+	private static boolean canPlaceAt(LevelAccessor levelAccessor, int i, BlockPos.MutableBlockPos mutableBlockPos) {
+		if (!isAirOrLavaOcean(levelAccessor, i, mutableBlockPos)) {
+			return false;
+		} else {
+			BlockState blockState = levelAccessor.getBlockState(mutableBlockPos.move(Direction.DOWN));
+			mutableBlockPos.move(Direction.UP);
+			return !blockState.isAir() && !CANNOT_PLACE_ON.contains(blockState.getBlock());
+		}
 	}
 
 	@Nullable
@@ -126,14 +131,6 @@ public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
 		}
 
 		return null;
-	}
-
-	private static int calculateHeight(Random random, ColumnFeatureConfiguration columnFeatureConfiguration) {
-		return columnFeatureConfiguration.minimumHeight + random.nextInt(columnFeatureConfiguration.maximumHeight - columnFeatureConfiguration.minimumHeight + 1);
-	}
-
-	private static int calculateReach(Random random, ColumnFeatureConfiguration columnFeatureConfiguration) {
-		return columnFeatureConfiguration.minimumReach + random.nextInt(columnFeatureConfiguration.maximumReach - columnFeatureConfiguration.minimumReach + 1);
 	}
 
 	private static boolean isAirOrLavaOcean(LevelAccessor levelAccessor, int i, BlockPos blockPos) {

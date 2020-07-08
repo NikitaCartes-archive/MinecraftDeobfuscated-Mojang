@@ -20,7 +20,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.DefaultExplosionDamageCalculator;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
@@ -124,12 +123,7 @@ public class RespawnAnchorBlock extends Block {
 			) {
 				return blockPos.equals(blockPos) && bl2
 					? Optional.of(Blocks.WATER.getExplosionResistance())
-					: DefaultExplosionDamageCalculator.INSTANCE.getBlockExplosionResistance(explosion, blockGetter, blockPos, blockState, fluidState);
-			}
-
-			@Override
-			public boolean shouldBlockExplode(Explosion explosion, BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, float f) {
-				return DefaultExplosionDamageCalculator.INSTANCE.shouldBlockExplode(explosion, blockGetter, blockPos, blockState, f);
+					: super.getBlockExplosionResistance(explosion, blockGetter, blockPos, blockState, fluidState);
 			}
 		};
 		level.explode(

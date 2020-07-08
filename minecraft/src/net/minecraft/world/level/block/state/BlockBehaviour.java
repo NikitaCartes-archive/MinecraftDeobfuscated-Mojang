@@ -28,10 +28,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.Level;
@@ -43,6 +43,7 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.SupportType;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -710,7 +711,11 @@ public abstract class BlockBehaviour {
 		}
 
 		public boolean isFaceSturdy(BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
-			return this.cache != null ? this.cache.isFaceSturdy[direction.ordinal()] : Block.isFaceSturdy(this.asState(), blockGetter, blockPos, direction);
+			return this.isFaceSturdy(blockGetter, blockPos, direction, SupportType.FULL);
+		}
+
+		public boolean isFaceSturdy(BlockGetter blockGetter, BlockPos blockPos, Direction direction, SupportType supportType) {
+			return this.cache != null ? this.cache.isFaceSturdy(direction, supportType) : supportType.isSupporting(this.asState(), blockGetter, blockPos, direction);
 		}
 
 		public boolean isCollisionShapeFullBlock(BlockGetter blockGetter, BlockPos blockPos) {
@@ -725,6 +730,7 @@ public abstract class BlockBehaviour {
 
 		static final class Cache {
 			private static final Direction[] DIRECTIONS = Direction.values();
+			private static final int SUPPORT_TYPE_COUNT = SupportType.values().length;
 			protected final boolean solidRender;
 			private final boolean propagatesSkylightDown;
 			private final int lightBlock;
@@ -732,7 +738,7 @@ public abstract class BlockBehaviour {
 			private final VoxelShape[] occlusionShapes;
 			protected final VoxelShape collisionShape;
 			protected final boolean largeCollisionShape;
-			protected final boolean[] isFaceSturdy;
+			private final boolean[] faceSturdy;
 			protected final boolean isCollisionShapeFullBlock;
 
 			private Cache(BlockState blockState) {
@@ -754,13 +760,23 @@ public abstract class BlockBehaviour {
 				this.collisionShape = block.getCollisionShape(blockState, EmptyBlockGetter.INSTANCE, BlockPos.ZERO, CollisionContext.empty());
 				this.largeCollisionShape = Arrays.stream(Direction.Axis.values())
 					.anyMatch(axis -> this.collisionShape.min(axis) < 0.0 || this.collisionShape.max(axis) > 1.0);
-				this.isFaceSturdy = new boolean[6];
+				this.faceSturdy = new boolean[DIRECTIONS.length * SUPPORT_TYPE_COUNT];
 
 				for (Direction direction2 : DIRECTIONS) {
-					this.isFaceSturdy[direction2.ordinal()] = Block.isFaceSturdy(blockState, EmptyBlockGetter.INSTANCE, BlockPos.ZERO, direction2);
+					for (SupportType supportType : SupportType.values()) {
+						this.faceSturdy[getFaceSupportIndex(direction2, supportType)] = supportType.isSupporting(blockState, EmptyBlockGetter.INSTANCE, BlockPos.ZERO, direction2);
+					}
 				}
 
 				this.isCollisionShapeFullBlock = Block.isShapeFullBlock(blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
+			}
+
+			public boolean isFaceSturdy(Direction direction, SupportType supportType) {
+				return this.faceSturdy[getFaceSupportIndex(direction, supportType)];
+			}
+
+			private static int getFaceSupportIndex(Direction direction, SupportType supportType) {
+				return direction.ordinal() * SUPPORT_TYPE_COUNT + supportType.ordinal();
 			}
 		}
 	}

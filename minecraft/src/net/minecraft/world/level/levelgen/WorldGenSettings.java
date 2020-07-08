@@ -38,8 +38,8 @@ public class WorldGenSettings {
 	public static final Codec<WorldGenSettings> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						Codec.LONG.fieldOf("seed").stable().forGetter(WorldGenSettings::seed),
-						Codec.BOOL.fieldOf("generate_features").withDefault(true).stable().forGetter(WorldGenSettings::generateFeatures),
-						Codec.BOOL.fieldOf("bonus_chest").withDefault(false).stable().forGetter(WorldGenSettings::generateBonusChest),
+						Codec.BOOL.fieldOf("generate_features").orElse(true).stable().forGetter(WorldGenSettings::generateFeatures),
+						Codec.BOOL.fieldOf("bonus_chest").orElse(false).stable().forGetter(WorldGenSettings::generateBonusChest),
 						MappedRegistry.dataPackCodec(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), LevelStem.CODEC)
 							.xmap(LevelStem::sortMap, Function.identity())
 							.fieldOf("dimensions")

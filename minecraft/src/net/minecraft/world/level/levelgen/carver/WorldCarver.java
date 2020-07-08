@@ -80,11 +80,11 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 
 	public WorldCarver(Codec<C> codec, int i) {
 		this.genHeight = i;
-		this.configuredCodec = codec.fieldOf("config")
-			.<ConfiguredWorldCarver<C>>xmap(
-				carverConfiguration -> new ConfiguredWorldCarver<>(this, (C)carverConfiguration), configuredWorldCarver -> configuredWorldCarver.config
-			)
-			.codec();
+		this.configuredCodec = codec.fieldOf("config").<ConfiguredWorldCarver<C>>xmap(this::configured, ConfiguredWorldCarver::config).codec();
+	}
+
+	public ConfiguredWorldCarver<C> configured(C carverConfiguration) {
+		return new ConfiguredWorldCarver<>(this, carverConfiguration);
 	}
 
 	public Codec<ConfiguredWorldCarver<C>> configuredCodec() {

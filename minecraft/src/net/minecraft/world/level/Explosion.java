@@ -42,6 +42,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public class Explosion {
+	private static final ExplosionDamageCalculator EXPLOSION_DAMAGE_CALCULATOR = new ExplosionDamageCalculator();
 	private final boolean fire;
 	private final Explosion.BlockInteraction blockInteraction;
 	private final Random random = new Random();
@@ -100,7 +101,7 @@ public class Explosion {
 	}
 
 	private ExplosionDamageCalculator makeDamageCalculator(@Nullable Entity entity) {
-		return (ExplosionDamageCalculator)(entity == null ? DefaultExplosionDamageCalculator.INSTANCE : new EntityBasedExplosionDamageCalculator(entity));
+		return (ExplosionDamageCalculator)(entity == null ? EXPLOSION_DAMAGE_CALCULATOR : new EntityBasedExplosionDamageCalculator(entity));
 	}
 
 	public static float getSeenPercent(Vec3 vec3, Entity entity) {

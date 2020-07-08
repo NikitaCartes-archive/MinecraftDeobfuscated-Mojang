@@ -21,11 +21,6 @@ public class ListPoolElement extends StructurePoolElement {
 	);
 	private final List<StructurePoolElement> elements;
 
-	@Deprecated
-	public ListPoolElement(List<StructurePoolElement> list) {
-		this(list, StructureTemplatePool.Projection.RIGID);
-	}
-
 	public ListPoolElement(List<StructurePoolElement> list, StructureTemplatePool.Projection projection) {
 		super(projection);
 		if (list.isEmpty()) {

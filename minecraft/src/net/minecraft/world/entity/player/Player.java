@@ -1790,10 +1790,6 @@ public abstract class Player extends LivingEntity {
 		return this.decorateDisplayNameComponent(mutableComponent);
 	}
 
-	public Component getDisplayNameWithUuid() {
-		return new TextComponent("").append(this.getName()).append(" (").append(this.gameProfile.getId().toString()).append(")");
-	}
-
 	private MutableComponent decorateDisplayNameComponent(MutableComponent mutableComponent) {
 		String string = this.getGameProfile().getName();
 		return mutableComponent.withStyle(

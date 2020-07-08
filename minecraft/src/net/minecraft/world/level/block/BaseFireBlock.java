@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import java.util.Optional;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -11,12 +12,12 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.portal.PortalShape;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -144,12 +145,22 @@ public abstract class BaseFireBlock extends Block {
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState2.is(blockState.getBlock())) {
-			if (level.dimension() != Level.OVERWORLD && level.dimension() != Level.NETHER || !NetherPortalBlock.trySpawnPortal(level, blockPos)) {
-				if (!blockState.canSurvive(level, blockPos)) {
-					level.removeBlock(blockPos, false);
+			if (inPortalDimension(level)) {
+				Optional<PortalShape> optional = PortalShape.findEmptyPortalShape(level, blockPos, Direction.Axis.X);
+				if (optional.isPresent()) {
+					((PortalShape)optional.get()).createPortalBlocks();
+					return;
 				}
 			}
+
+			if (!blockState.canSurvive(level, blockPos)) {
+				level.removeBlock(blockPos, false);
+			}
 		}
+	}
+
+	private static boolean inPortalDimension(Level level) {
+		return level.dimension() == Level.OVERWORLD || level.dimension() == Level.NETHER;
 	}
 
 	@Override
@@ -159,19 +170,26 @@ public abstract class BaseFireBlock extends Block {
 		}
 	}
 
-	public static boolean canBePlacedAt(LevelAccessor levelAccessor, BlockPos blockPos) {
-		BlockState blockState = levelAccessor.getBlockState(blockPos);
-		BlockState blockState2 = getState(levelAccessor, blockPos);
-		return blockState.isAir() && (blockState2.canSurvive(levelAccessor, blockPos) || isPortal(levelAccessor, blockPos));
+	public static boolean canBePlacedAt(Level level, BlockPos blockPos, Direction direction) {
+		BlockState blockState = level.getBlockState(blockPos);
+		return !blockState.isAir() ? false : getState(level, blockPos).canSurvive(level, blockPos) || isPortal(level, blockPos, direction);
 	}
 
-	private static boolean isPortal(LevelAccessor levelAccessor, BlockPos blockPos) {
-		for (Direction direction : Direction.Plane.HORIZONTAL) {
-			if (levelAccessor.getBlockState(blockPos.relative(direction)).is(Blocks.OBSIDIAN) && NetherPortalBlock.isPortal(levelAccessor, blockPos) != null) {
-				return true;
-			}
-		}
+	private static boolean isPortal(Level level, BlockPos blockPos, Direction direction) {
+		if (!inPortalDimension(level)) {
+			return false;
+		} else {
+			BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+			boolean bl = false;
 
-		return false;
+			for (Direction direction2 : Direction.values()) {
+				if (level.getBlockState(mutableBlockPos.set(blockPos).move(direction2)).is(Blocks.OBSIDIAN)) {
+					bl = true;
+					break;
+				}
+			}
+
+			return bl && PortalShape.findEmptyPortalShape(level, blockPos, direction.getCounterClockWise().getAxis()).isPresent();
+		}
 	}
 }

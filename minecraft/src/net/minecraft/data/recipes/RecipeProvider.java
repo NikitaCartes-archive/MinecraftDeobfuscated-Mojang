@@ -562,7 +562,7 @@ public class RecipeProvider implements DataProvider {
 		ShapedRecipeBuilder.shaped(Items.BREAD).define('#', Items.WHEAT).pattern("###").unlockedBy("has_wheat", has(Items.WHEAT)).save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.BREWING_STAND)
 			.define('B', Items.BLAZE_ROD)
-			.define('#', Blocks.COBBLESTONE)
+			.define('#', ItemTags.STONE_CRAFTING_MATERIALS)
 			.pattern(" B ")
 			.pattern("###")
 			.unlockedBy("has_blaze_rod", has(Items.BLAZE_ROD))
@@ -1008,11 +1008,11 @@ public class RecipeProvider implements DataProvider {
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.FLOWER_POT).define('#', Items.BRICK).pattern("# #").pattern(" # ").unlockedBy("has_brick", has(Items.BRICK)).save(consumer);
 		ShapedRecipeBuilder.shaped(Blocks.FURNACE)
-			.define('#', ItemTags.FURNACE_MATERIALS)
+			.define('#', ItemTags.STONE_CRAFTING_MATERIALS)
 			.pattern("###")
 			.pattern("# #")
 			.pattern("###")
-			.unlockedBy("has_cobblestone", has(ItemTags.FURNACE_MATERIALS))
+			.unlockedBy("has_cobblestone", has(ItemTags.STONE_CRAFTING_MATERIALS))
 			.save(consumer);
 		ShapedRecipeBuilder.shaped(Items.FURNACE_MINECART)
 			.define('A', Blocks.FURNACE)

@@ -551,16 +551,11 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 	}
 
 	@Override
-	public boolean shouldCloseOnEsc() {
-		return false;
-	}
-
-	@Override
 	public boolean keyPressed(int i, int j, int k) {
-		if (i == 256 || this.minecraft.options.keyInventory.matches(i, j)) {
-			this.minecraft.player.closeContainer();
+		if (super.keyPressed(i, j, k)) {
 			return true;
-		} else if (super.keyPressed(i, j, k)) {
+		} else if (this.minecraft.options.keyInventory.matches(i, j)) {
+			this.onClose();
 			return true;
 		} else {
 			this.checkHotbarKeyPressed(i, j);
@@ -617,5 +612,11 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 	@Override
 	public T getMenu() {
 		return this.menu;
+	}
+
+	@Override
+	public void onClose() {
+		this.minecraft.player.closeContainer();
+		super.onClose();
 	}
 }

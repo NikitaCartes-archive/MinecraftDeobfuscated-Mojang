@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.data.worldgen.Features;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
@@ -48,9 +49,7 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.EndPodiumFeature;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.SpikeFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.phys.AABB;
 import org.apache.logging.log4j.LogManager;
@@ -377,9 +376,7 @@ public class EndDragonFight {
 
 	private void spawnNewGateway(BlockPos blockPos) {
 		this.level.levelEvent(3000, blockPos, 0);
-		Feature.END_GATEWAY
-			.configured(EndGatewayConfiguration.delayedExitSearch())
-			.place(this.level, this.level.getChunkSource().getGenerator(), new Random(), blockPos);
+		Features.END_GATEWAY_DELAYED.place(this.level, this.level.getChunkSource().getGenerator(), new Random(), blockPos);
 	}
 
 	private void spawnExitPortal(boolean bl) {

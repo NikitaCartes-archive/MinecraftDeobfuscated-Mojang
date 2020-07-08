@@ -11,7 +11,7 @@ import net.minecraft.world.level.levelgen.feature.SpikeFeature;
 public class SpikeConfiguration implements FeatureConfiguration {
 	public static final Codec<SpikeConfiguration> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					Codec.BOOL.fieldOf("crystal_invulnerable").withDefault(false).forGetter(spikeConfiguration -> spikeConfiguration.crystalInvulnerable),
+					Codec.BOOL.fieldOf("crystal_invulnerable").orElse(false).forGetter(spikeConfiguration -> spikeConfiguration.crystalInvulnerable),
 					SpikeFeature.EndSpike.CODEC.listOf().fieldOf("spikes").forGetter(spikeConfiguration -> spikeConfiguration.spikes),
 					BlockPos.CODEC.optionalFieldOf("crystal_beam_target").forGetter(spikeConfiguration -> Optional.ofNullable(spikeConfiguration.crystalBeamTarget))
 				)

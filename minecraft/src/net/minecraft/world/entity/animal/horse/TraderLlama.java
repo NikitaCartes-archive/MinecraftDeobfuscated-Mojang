@@ -112,8 +112,7 @@ public class TraderLlama extends Llama {
 		}
 
 		if (spawnGroupData == null) {
-			spawnGroupData = new AgableMob.AgableMobGroupData();
-			((AgableMob.AgableMobGroupData)spawnGroupData).setShouldSpawnBaby(false);
+			spawnGroupData = new AgableMob.AgableMobGroupData(false);
 		}
 
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);

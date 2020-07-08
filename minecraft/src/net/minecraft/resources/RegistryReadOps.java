@@ -26,7 +26,6 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.Codecs;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -46,7 +45,7 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 		this.registryHolder = registryAccess;
 	}
 
-	protected <E> DataResult<Pair<Supplier<E>, T>> decodeElement(T object, ResourceKey<Registry<E>> resourceKey, MapCodec<E> mapCodec) {
+	protected <E> DataResult<Pair<Supplier<E>, T>> decodeElement(T object, ResourceKey<? extends Registry<E>> resourceKey, MapCodec<E> mapCodec) {
 		Optional<WritableRegistry<E>> optional = this.registryHolder.registry(resourceKey);
 		if (!optional.isPresent()) {
 			return DataResult.error("Unknown registry: " + resourceKey);
@@ -54,7 +53,7 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 			WritableRegistry<E> writableRegistry = (WritableRegistry<E>)optional.get();
 			DataResult<Pair<ResourceLocation, T>> dataResult = ResourceLocation.CODEC.decode(this.delegate, object);
 			if (!dataResult.result().isPresent()) {
-				return Codecs.withName(resourceKey, mapCodec).codec().decode(this.delegate, object).map(pairx -> pairx.mapFirst(pairxx -> {
+				return MappedRegistry.withName(resourceKey, mapCodec).codec().decode(this.delegate, object).map(pairx -> pairx.mapFirst(pairxx -> {
 						writableRegistry.register((ResourceKey<E>)pairxx.getFirst(), pairxx.getSecond());
 						writableRegistry.setPersistent((ResourceKey<E>)pairxx.getFirst());
 						return pairxx::getSecond;
@@ -67,7 +66,7 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 		}
 	}
 
-	public <E> DataResult<MappedRegistry<E>> decodeElements(MappedRegistry<E> mappedRegistry, ResourceKey<Registry<E>> resourceKey, MapCodec<E> mapCodec) {
+	public <E> DataResult<MappedRegistry<E>> decodeElements(MappedRegistry<E> mappedRegistry, ResourceKey<? extends Registry<E>> resourceKey, MapCodec<E> mapCodec) {
 		ResourceLocation resourceLocation = resourceKey.location();
 		Collection<ResourceLocation> collection = this.resourceManager.listResources(resourceLocation, stringx -> stringx.endsWith(".json"));
 		DataResult<MappedRegistry<E>> dataResult = DataResult.success(mappedRegistry, Lifecycle.stable());
@@ -98,7 +97,7 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 	}
 
 	private <E> DataResult<Supplier<E>> readAndRegisterElement(
-		ResourceKey<Registry<E>> resourceKey, WritableRegistry<E> writableRegistry, MapCodec<E> mapCodec, ResourceLocation resourceLocation
+		ResourceKey<? extends Registry<E>> resourceKey, WritableRegistry<E> writableRegistry, MapCodec<E> mapCodec, ResourceLocation resourceLocation
 	) {
 		ResourceKey<E> resourceKey2 = ResourceKey.create(resourceKey, resourceLocation);
 		E object = writableRegistry.get(resourceKey2);
@@ -128,7 +127,7 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 		}
 	}
 
-	private <E> DataResult<E> readElementFromFile(ResourceKey<Registry<E>> resourceKey, ResourceKey<E> resourceKey2, MapCodec<E> mapCodec) {
+	private <E> DataResult<E> readElementFromFile(ResourceKey<? extends Registry<E>> resourceKey, ResourceKey<E> resourceKey2, MapCodec<E> mapCodec) {
 		ResourceLocation resourceLocation = new ResourceLocation(
 			resourceKey.location().getNamespace(),
 			resourceKey.location().getPath() + "/" + resourceKey2.location().getNamespace() + "/" + resourceKey2.location().getPath() + ".json"
@@ -186,7 +185,7 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 		}
 	}
 
-	private <E> RegistryReadOps.ReadCache<E> readCache(ResourceKey<Registry<E>> resourceKey) {
+	private <E> RegistryReadOps.ReadCache<E> readCache(ResourceKey<? extends Registry<E>> resourceKey) {
 		return (RegistryReadOps.ReadCache<E>)this.readCache.computeIfAbsent(resourceKey, resourceKeyx -> new RegistryReadOps.ReadCache());
 	}
 

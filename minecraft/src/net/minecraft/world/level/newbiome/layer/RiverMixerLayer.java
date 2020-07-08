@@ -1,6 +1,6 @@
 package net.minecraft.world.level.newbiome.layer;
 
-import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.newbiome.area.Area;
 import net.minecraft.world.level.newbiome.context.Context;
@@ -10,11 +10,11 @@ import net.minecraft.world.level.newbiome.layer.traits.DimensionOffset0Transform
 public enum RiverMixerLayer implements AreaTransformer2, DimensionOffset0Transformer {
 	INSTANCE;
 
-	private static final int FROZEN_RIVER = Registry.BIOME.getId(Biomes.FROZEN_RIVER);
-	private static final int SNOWY_TUNDRA = Registry.BIOME.getId(Biomes.SNOWY_TUNDRA);
-	private static final int MUSHROOM_FIELDS = Registry.BIOME.getId(Biomes.MUSHROOM_FIELDS);
-	private static final int MUSHROOM_FIELD_SHORE = Registry.BIOME.getId(Biomes.MUSHROOM_FIELD_SHORE);
-	private static final int RIVER = Registry.BIOME.getId(Biomes.RIVER);
+	private static final int FROZEN_RIVER = BuiltinRegistries.BIOME.getId(Biomes.FROZEN_RIVER);
+	private static final int SNOWY_TUNDRA = BuiltinRegistries.BIOME.getId(Biomes.SNOWY_TUNDRA);
+	private static final int MUSHROOM_FIELDS = BuiltinRegistries.BIOME.getId(Biomes.MUSHROOM_FIELDS);
+	private static final int MUSHROOM_FIELD_SHORE = BuiltinRegistries.BIOME.getId(Biomes.MUSHROOM_FIELD_SHORE);
+	private static final int RIVER = BuiltinRegistries.BIOME.getId(Biomes.RIVER);
 
 	@Override
 	public int applyPixel(Context context, Area area, Area area2, int i, int j) {

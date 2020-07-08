@@ -104,7 +104,6 @@ import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundChatPacket;
-import net.minecraft.network.protocol.game.ClientboundChunkBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerAckPacket;
@@ -146,6 +145,7 @@ import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
+import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSelectAdvancementsTabPacket;
 import net.minecraft.network.protocol.game.ClientboundSetBorderPacket;
 import net.minecraft.network.protocol.game.ClientboundSetCameraPacket;
@@ -286,6 +286,7 @@ import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
+import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -731,12 +732,9 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	}
 
 	@Override
-	public void handleChunkBlocksUpdate(ClientboundChunkBlocksUpdatePacket clientboundChunkBlocksUpdatePacket) {
-		PacketUtils.ensureRunningOnSameThread(clientboundChunkBlocksUpdatePacket, this, this.minecraft);
-
-		for (ClientboundChunkBlocksUpdatePacket.BlockUpdate blockUpdate : clientboundChunkBlocksUpdatePacket.getUpdates()) {
-			this.level.setKnownState(blockUpdate.getPos(), blockUpdate.getBlock());
-		}
+	public void handleChunkBlocksUpdate(ClientboundSectionBlocksUpdatePacket clientboundSectionBlocksUpdatePacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundSectionBlocksUpdatePacket, this, this.minecraft);
+		clientboundSectionBlocksUpdatePacket.runUpdates(this.level::setKnownState);
 	}
 
 	@Override
@@ -744,12 +742,15 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		PacketUtils.ensureRunningOnSameThread(clientboundLevelChunkPacket, this, this.minecraft);
 		int i = clientboundLevelChunkPacket.getX();
 		int j = clientboundLevelChunkPacket.getZ();
+		ChunkBiomeContainer chunkBiomeContainer = clientboundLevelChunkPacket.getBiomes() == null
+			? null
+			: new ChunkBiomeContainer(this.registryAccess.registryOrThrow(Registry.BIOME_REGISTRY), clientboundLevelChunkPacket.getBiomes());
 		LevelChunk levelChunk = this.level
 			.getChunkSource()
 			.replaceWithPacketData(
 				i,
 				j,
-				clientboundLevelChunkPacket.getBiomes(),
+				chunkBiomeContainer,
 				clientboundLevelChunkPacket.getReadBuffer(),
 				clientboundLevelChunkPacket.getHeightmaps(),
 				clientboundLevelChunkPacket.getAvailableSections(),

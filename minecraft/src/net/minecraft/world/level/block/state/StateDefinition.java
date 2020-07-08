@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.minecraft.util.Codecs;
 import net.minecraft.world.level.block.state.properties.Property;
 
 public class StateDefinition<O, S extends StateHolder<O, S>> {
@@ -74,7 +73,7 @@ public class StateDefinition<O, S extends StateHolder<O, S>> {
 	private static <S extends StateHolder<?, S>, T extends Comparable<T>> MapCodec<S> appendPropertyCodec(
 		MapCodec<S> mapCodec, Supplier<S> supplier, String string, Property<T> property
 	) {
-		return Codec.mapPair(mapCodec, Codecs.setPartial(property.valueCodec().fieldOf(string), () -> property.value((StateHolder<?, ?>)supplier.get())))
+		return Codec.mapPair(mapCodec, property.valueCodec().fieldOf(string).setPartial(() -> property.value((StateHolder<?, ?>)supplier.get())))
 			.xmap(
 				pair -> (StateHolder)((StateHolder)pair.getFirst()).setValue(property, ((Property.Value)pair.getSecond()).value()),
 				stateHolder -> Pair.of(stateHolder, property.value(stateHolder))

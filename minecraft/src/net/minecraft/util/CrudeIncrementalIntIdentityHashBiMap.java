@@ -22,6 +22,7 @@ public class CrudeIncrementalIntIdentityHashBiMap<K> implements IdMap<K> {
 		this.byId = (K[])(new Object[i]);
 	}
 
+	@Override
 	public int getId(@Nullable K object) {
 		return this.getValue(this.indexOf(object, this.hash(object)));
 	}

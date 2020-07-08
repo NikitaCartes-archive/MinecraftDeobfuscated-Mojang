@@ -9,6 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -53,6 +55,7 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class CreateWorldScreen extends Screen {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final TranslatableComponent GAME_MODEL_LABEL = new TranslatableComponent("selectWorld.gameMode");
 	private final Screen lastScreen;
 	private EditBox nameEdit;
 	private String resultFolder;
@@ -64,7 +67,7 @@ public class CreateWorldScreen extends Screen {
 	private boolean commands;
 	private boolean commandsChanged;
 	public boolean hardCore;
-	protected DataPackConfig dataPacks = DataPackConfig.DEFAULT;
+	protected DataPackConfig dataPacks;
 	@Nullable
 	private Path tempDataPackDir;
 	@Nullable
@@ -84,16 +87,24 @@ public class CreateWorldScreen extends Screen {
 	public final WorldGenSettingsComponent worldGenSettingsComponent;
 
 	public CreateWorldScreen(
-		@Nullable Screen screen, LevelSettings levelSettings, WorldGenSettings worldGenSettings, @Nullable Path path, RegistryAccess.RegistryHolder registryHolder
+		@Nullable Screen screen,
+		LevelSettings levelSettings,
+		WorldGenSettings worldGenSettings,
+		@Nullable Path path,
+		DataPackConfig dataPackConfig,
+		RegistryAccess.RegistryHolder registryHolder
 	) {
-		this(screen, new WorldGenSettingsComponent(registryHolder, worldGenSettings));
+		this(
+			screen,
+			dataPackConfig,
+			new WorldGenSettingsComponent(registryHolder, worldGenSettings, WorldPreset.of(worldGenSettings), OptionalLong.of(worldGenSettings.seed()))
+		);
 		this.initName = levelSettings.levelName();
 		this.commands = levelSettings.allowCommands();
 		this.commandsChanged = true;
 		this.selectedDifficulty = levelSettings.difficulty();
 		this.effectiveDifficulty = this.selectedDifficulty;
 		this.gameRules.assignFrom(levelSettings.gameRules(), null);
-		this.dataPacks = levelSettings.getDataPackConfig();
 		if (levelSettings.hardcore()) {
 			this.gameMode = CreateWorldScreen.SelectedGameMode.HARDCORE;
 		} else if (levelSettings.gameType().isSurvival()) {
@@ -106,13 +117,18 @@ public class CreateWorldScreen extends Screen {
 	}
 
 	public CreateWorldScreen(@Nullable Screen screen) {
-		this(screen, new WorldGenSettingsComponent());
+		this(
+			screen,
+			DataPackConfig.DEFAULT,
+			new WorldGenSettingsComponent(RegistryAccess.builtin(), WorldGenSettings.makeDefault(), Optional.of(WorldPreset.NORMAL), OptionalLong.empty())
+		);
 	}
 
-	private CreateWorldScreen(@Nullable Screen screen, WorldGenSettingsComponent worldGenSettingsComponent) {
+	private CreateWorldScreen(@Nullable Screen screen, DataPackConfig dataPackConfig, WorldGenSettingsComponent worldGenSettingsComponent) {
 		super(new TranslatableComponent("selectWorld.create"));
 		this.lastScreen = screen;
 		this.initName = I18n.get("selectWorld.newWorld");
+		this.dataPacks = dataPackConfig;
 		this.worldGenSettingsComponent = worldGenSettingsComponent;
 	}
 
@@ -144,30 +160,34 @@ public class CreateWorldScreen extends Screen {
 		this.children.add(this.nameEdit);
 		int i = this.width / 2 - 155;
 		int j = this.width / 2 + 5;
-		this.modeButton = this.addButton(new Button(i, 100, 150, 20, new TranslatableComponent("selectWorld.gameMode"), button -> {
-			switch (this.gameMode) {
-				case SURVIVAL:
-					this.setGameMode(CreateWorldScreen.SelectedGameMode.HARDCORE);
-					break;
-				case HARDCORE:
-					this.setGameMode(CreateWorldScreen.SelectedGameMode.CREATIVE);
-					break;
-				case CREATIVE:
-					this.setGameMode(CreateWorldScreen.SelectedGameMode.SURVIVAL);
-			}
+		this.modeButton = this.addButton(
+			new Button(i, 100, 150, 20, TextComponent.EMPTY, button -> {
+				switch (this.gameMode) {
+					case SURVIVAL:
+						this.setGameMode(CreateWorldScreen.SelectedGameMode.HARDCORE);
+						break;
+					case HARDCORE:
+						this.setGameMode(CreateWorldScreen.SelectedGameMode.CREATIVE);
+						break;
+					case CREATIVE:
+						this.setGameMode(CreateWorldScreen.SelectedGameMode.SURVIVAL);
+				}
 
-			button.queueNarration(250);
-		}) {
-			@Override
-			public Component getMessage() {
-				return super.getMessage().copy().append(": ").append(new TranslatableComponent("selectWorld.gameMode." + CreateWorldScreen.this.gameMode.name));
-			}
+				button.queueNarration(250);
+			}) {
+				@Override
+				public Component getMessage() {
+					return new TranslatableComponent(
+						"options.generic_value", CreateWorldScreen.GAME_MODEL_LABEL, new TranslatableComponent("selectWorld.gameMode." + CreateWorldScreen.this.gameMode.name)
+					);
+				}
 
-			@Override
-			protected MutableComponent createNarrationMessage() {
-				return super.createNarrationMessage().append(". ").append(CreateWorldScreen.this.gameModeHelp1).append(" ").append(CreateWorldScreen.this.gameModeHelp2);
+				@Override
+				protected MutableComponent createNarrationMessage() {
+					return super.createNarrationMessage().append(". ").append(CreateWorldScreen.this.gameModeHelp1).append(" ").append(CreateWorldScreen.this.gameModeHelp2);
+				}
 			}
-		});
+		);
 		this.difficultyButton = this.addButton(new Button(j, 100, 150, 20, new TranslatableComponent("options.difficulty"), button -> {
 			this.selectedDifficulty = this.selectedDifficulty.nextById();
 			this.effectiveDifficulty = this.selectedDifficulty;
@@ -185,7 +205,7 @@ public class CreateWorldScreen extends Screen {
 		}) {
 			@Override
 			public Component getMessage() {
-				return super.getMessage().copy().append(" ").append(CommonComponents.optionStatus(CreateWorldScreen.this.commands && !CreateWorldScreen.this.hardCore));
+				return CommonComponents.optionStatus(super.getMessage(), CreateWorldScreen.this.commands && !CreateWorldScreen.this.hardCore);
 			}
 
 			@Override
@@ -470,6 +490,8 @@ public class CreateWorldScreen extends Screen {
 						} else {
 							this.minecraft.tell(() -> {
 								this.dataPacks = dataPackConfig;
+								this.worldGenSettingsComponent.setRegistryHolder(RegistryAccess.load(serverResources.getResourceManager()));
+								serverResources.close();
 								this.minecraft.setScreen(this);
 							});
 						}

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
+import java.util.Optional;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -30,11 +31,11 @@ public class VillagerGoalPackages {
 			Pair.of(2, new PoiCompetitorScan(villagerProfession)),
 			Pair.of(3, new LookAndFollowTradingPlayerSink(f)),
 			Pair.of(5, new GoToWantedItem(f, false, 4)),
-			Pair.of(6, new AcquirePoi(villagerProfession.getJobPoiType(), MemoryModuleType.JOB_SITE, MemoryModuleType.POTENTIAL_JOB_SITE, true)),
+			Pair.of(6, new AcquirePoi(villagerProfession.getJobPoiType(), MemoryModuleType.JOB_SITE, MemoryModuleType.POTENTIAL_JOB_SITE, true, Optional.empty())),
 			Pair.of(7, new GoToPotentialJobSite(f)),
 			Pair.of(8, new YieldJobSite(f)),
-			Pair.of(10, new AcquirePoi(PoiType.HOME, MemoryModuleType.HOME, false)),
-			Pair.of(10, new AcquirePoi(PoiType.MEETING, MemoryModuleType.MEETING_POINT, true)),
+			Pair.of(10, new AcquirePoi(PoiType.HOME, MemoryModuleType.HOME, false, Optional.of((byte)14))),
+			Pair.of(10, new AcquirePoi(PoiType.MEETING, MemoryModuleType.MEETING_POINT, true, Optional.of((byte)14))),
 			Pair.of(10, new AssignProfessionFromJobSite()),
 			Pair.of(10, new ResetProfession())
 		);

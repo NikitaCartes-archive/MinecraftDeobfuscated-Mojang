@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.UniformInt;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -12,14 +13,14 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 public class MegaJungleFoliagePlacer extends FoliagePlacer {
 	public static final Codec<MegaJungleFoliagePlacer> CODEC = RecordCodecBuilder.create(
 		instance -> foliagePlacerParts(instance)
-				.and(Codec.INT.fieldOf("height").forGetter(megaJungleFoliagePlacer -> megaJungleFoliagePlacer.height))
+				.and(Codec.intRange(0, 16).fieldOf("height").forGetter(megaJungleFoliagePlacer -> megaJungleFoliagePlacer.height))
 				.apply(instance, MegaJungleFoliagePlacer::new)
 	);
 	protected final int height;
 
-	public MegaJungleFoliagePlacer(int i, int j, int k, int l, int m) {
-		super(i, j, k, l);
-		this.height = m;
+	public MegaJungleFoliagePlacer(UniformInt uniformInt, UniformInt uniformInt2, int i) {
+		super(uniformInt, uniformInt2);
+		this.height = i;
 	}
 
 	@Override

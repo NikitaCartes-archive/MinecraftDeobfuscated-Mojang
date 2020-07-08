@@ -62,9 +62,9 @@ public class McRegionUpgrader {
 			biomeSource = new OverworldBiomeSource(l, false, false);
 		}
 
-		convertRegions(new File(file, "region"), list, biomeSource, 0, i, progressListener);
-		convertRegions(new File(file2, "region"), list2, new FixedBiomeSource(Biomes.NETHER_WASTES), list.size(), i, progressListener);
-		convertRegions(new File(file3, "region"), list3, new FixedBiomeSource(Biomes.THE_END), list.size() + list2.size(), i, progressListener);
+		convertRegions(registryHolder, new File(file, "region"), list, biomeSource, 0, i, progressListener);
+		convertRegions(registryHolder, new File(file2, "region"), list2, new FixedBiomeSource(Biomes.NETHER_WASTES), list.size(), i, progressListener);
+		convertRegions(registryHolder, new File(file3, "region"), list3, new FixedBiomeSource(Biomes.THE_END), list.size() + list2.size(), i, progressListener);
 		makeMcrLevelDatBackup(levelStorageAccess);
 		levelStorageAccess.saveDataTag(registryHolder, worldData);
 		return true;
@@ -82,16 +82,20 @@ public class McRegionUpgrader {
 		}
 	}
 
-	private static void convertRegions(File file, Iterable<File> iterable, BiomeSource biomeSource, int i, int j, ProgressListener progressListener) {
+	private static void convertRegions(
+		RegistryAccess.RegistryHolder registryHolder, File file, Iterable<File> iterable, BiomeSource biomeSource, int i, int j, ProgressListener progressListener
+	) {
 		for (File file2 : iterable) {
-			convertRegion(file, file2, biomeSource, i, j, progressListener);
+			convertRegion(registryHolder, file, file2, biomeSource, i, j, progressListener);
 			i++;
 			int k = (int)Math.round(100.0 * (double)i / (double)j);
 			progressListener.progressStagePercentage(k);
 		}
 	}
 
-	private static void convertRegion(File file, File file2, BiomeSource biomeSource, int i, int j, ProgressListener progressListener) {
+	private static void convertRegion(
+		RegistryAccess.RegistryHolder registryHolder, File file, File file2, BiomeSource biomeSource, int i, int j, ProgressListener progressListener
+	) {
 		String string = file2.getName();
 
 		try (
@@ -114,24 +118,24 @@ public class McRegionUpgrader {
 								}
 
 								compoundTag = NbtIo.read(dataInputStream);
-							} catch (Throwable var104) {
-								oldLevelChunk = var104;
-								throw var104;
+							} catch (Throwable var105) {
+								oldLevelChunk = var105;
+								throw var105;
 							} finally {
 								if (dataInputStream != null) {
 									if (oldLevelChunk != null) {
 										try {
 											dataInputStream.close();
-										} catch (Throwable var101) {
-											oldLevelChunk.addSuppressed(var101);
+										} catch (Throwable var102) {
+											oldLevelChunk.addSuppressed(var102);
 										}
 									} else {
 										dataInputStream.close();
 									}
 								}
 							}
-						} catch (IOException var106) {
-							LOGGER.warn("Failed to read data for chunk {}", chunkPos, var106);
+						} catch (IOException var107) {
+							LOGGER.warn("Failed to read data for chunk {}", chunkPos, var107);
 							continue;
 						}
 
@@ -140,22 +144,22 @@ public class McRegionUpgrader {
 						CompoundTag compoundTag3 = new CompoundTag();
 						CompoundTag compoundTag4 = new CompoundTag();
 						compoundTag3.put("Level", compoundTag4);
-						OldChunkStorage.convertToAnvilFormat(oldLevelChunk, compoundTag4, biomeSource);
+						OldChunkStorage.convertToAnvilFormat(registryHolder, oldLevelChunk, compoundTag4, biomeSource);
 						DataOutputStream dataOutputStream = regionFile2.getChunkDataOutputStream(chunkPos);
-						Throwable var20 = null;
+						Throwable var21 = null;
 
 						try {
 							NbtIo.write(compoundTag3, dataOutputStream);
-						} catch (Throwable var102) {
-							var20 = var102;
-							throw var102;
+						} catch (Throwable var103) {
+							var21 = var103;
+							throw var103;
 						} finally {
 							if (dataOutputStream != null) {
-								if (var20 != null) {
+								if (var21 != null) {
 									try {
 										dataOutputStream.close();
-									} catch (Throwable var100) {
-										var20.addSuppressed(var100);
+									} catch (Throwable var101) {
+										var21.addSuppressed(var101);
 									}
 								} else {
 									dataOutputStream.close();
@@ -171,8 +175,8 @@ public class McRegionUpgrader {
 					progressListener.progressStagePercentage(m);
 				}
 			}
-		} catch (IOException var111) {
-			LOGGER.error("Failed to upgrade region file {}", file2, var111);
+		} catch (IOException var112) {
+			LOGGER.error("Failed to upgrade region file {}", file2, var112);
 		}
 	}
 

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -25,7 +26,13 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
 		StructureFeature.MINESHAFT, 0, 0, BoundingBox.getUnknownBox(), 0, 0L
 	) {
 		public void generatePieces(
-			ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, MineshaftConfiguration mineshaftConfiguration
+			RegistryAccess registryAccess,
+			ChunkGenerator chunkGenerator,
+			StructureManager structureManager,
+			int i,
+			int j,
+			Biome biome,
+			MineshaftConfiguration mineshaftConfiguration
 		) {
 		}
 	};
@@ -47,7 +54,9 @@ public abstract class StructureStart<C extends FeatureConfiguration> {
 		this.boundingBox = boundingBox;
 	}
 
-	public abstract void generatePieces(ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, C featureConfiguration);
+	public abstract void generatePieces(
+		RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, C featureConfiguration
+	);
 
 	public BoundingBox getBoundingBox() {
 		return this.boundingBox;

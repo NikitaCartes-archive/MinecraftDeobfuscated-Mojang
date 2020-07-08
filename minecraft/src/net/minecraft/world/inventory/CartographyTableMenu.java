@@ -15,7 +15,6 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 public class CartographyTableMenu extends AbstractContainerMenu {
 	private final ContainerLevelAccess access;
-	private boolean quickMoved;
 	private long lastSoundTime;
 	public final Container container = new SimpleContainer(2) {
 		@Override
@@ -59,32 +58,9 @@ public class CartographyTableMenu extends AbstractContainerMenu {
 			}
 
 			@Override
-			public ItemStack remove(int i) {
-				ItemStack itemStack = super.remove(i);
-				ItemStack itemStack2 = (ItemStack)containerLevelAccess.evaluate((level, blockPos) -> {
-					if (!CartographyTableMenu.this.quickMoved && CartographyTableMenu.this.container.getItem(1).getItem() == Items.GLASS_PANE) {
-						ItemStack itemStack2x = MapItem.lockMap(level, CartographyTableMenu.this.container.getItem(0));
-						if (itemStack2x != null) {
-							itemStack2x.setCount(1);
-							return itemStack2x;
-						}
-					}
-
-					return itemStack;
-				}).orElse(itemStack);
-				CartographyTableMenu.this.container.removeItem(0, 1);
-				CartographyTableMenu.this.container.removeItem(1, 1);
-				return itemStack2;
-			}
-
-			@Override
-			protected void onQuickCraft(ItemStack itemStack, int i) {
-				this.remove(i);
-				super.onQuickCraft(itemStack, i);
-			}
-
-			@Override
 			public ItemStack onTake(Player player, ItemStack itemStack) {
+				((Slot)CartographyTableMenu.this.slots.get(0)).remove(1);
+				((Slot)CartographyTableMenu.this.slots.get(1)).remove(1);
 				itemStack.getItem().onCraftedBy(itemStack, player.level, player);
 				containerLevelAccess.execute((level, blockPos) -> {
 					long l = level.getGameTime();
@@ -141,6 +117,7 @@ public class CartographyTableMenu extends AbstractContainerMenu {
 				} else if (item == Items.GLASS_PANE && !mapItemSavedData.locked) {
 					itemStack4 = itemStack.copy();
 					itemStack4.setCount(1);
+					itemStack4.getOrCreateTag().putBoolean("map_to_lock", true);
 					this.broadcastChanges();
 				} else {
 					if (item != Items.MAP) {
@@ -173,28 +150,15 @@ public class CartographyTableMenu extends AbstractContainerMenu {
 		Slot slot = (Slot)this.slots.get(i);
 		if (slot != null && slot.hasItem()) {
 			ItemStack itemStack2 = slot.getItem();
-			ItemStack itemStack3 = itemStack2;
 			Item item = itemStack2.getItem();
 			itemStack = itemStack2.copy();
 			if (i == 2) {
-				if (this.container.getItem(1).getItem() == Items.GLASS_PANE) {
-					itemStack3 = (ItemStack)this.access.evaluate((level, blockPos) -> {
-						ItemStack itemStack2x = MapItem.lockMap(level, this.container.getItem(0));
-						if (itemStack2x != null) {
-							itemStack2x.setCount(1);
-							return itemStack2x;
-						} else {
-							return itemStack2;
-						}
-					}).orElse(itemStack2);
-				}
-
-				item.onCraftedBy(itemStack3, player.level, player);
-				if (!this.moveItemStackTo(itemStack3, 3, 39, true)) {
+				item.onCraftedBy(itemStack2, player.level, player);
+				if (!this.moveItemStackTo(itemStack2, 3, 39, true)) {
 					return ItemStack.EMPTY;
 				}
 
-				slot.onQuickCraft(itemStack3, itemStack);
+				slot.onQuickCraft(itemStack2, itemStack);
 			} else if (i != 1 && i != 0) {
 				if (item == Items.FILLED_MAP) {
 					if (!this.moveItemStackTo(itemStack2, 0, 1, false)) {
@@ -215,18 +179,16 @@ public class CartographyTableMenu extends AbstractContainerMenu {
 				return ItemStack.EMPTY;
 			}
 
-			if (itemStack3.isEmpty()) {
+			if (itemStack2.isEmpty()) {
 				slot.set(ItemStack.EMPTY);
 			}
 
 			slot.setChanged();
-			if (itemStack3.getCount() == itemStack.getCount()) {
+			if (itemStack2.getCount() == itemStack.getCount()) {
 				return ItemStack.EMPTY;
 			}
 
-			this.quickMoved = true;
-			slot.onTake(player, itemStack3);
-			this.quickMoved = false;
+			slot.onTake(player, itemStack2);
 			this.broadcastChanges();
 		}
 

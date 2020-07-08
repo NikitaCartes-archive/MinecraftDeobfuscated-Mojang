@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -38,9 +37,7 @@ public class PoiSection {
 						)
 						.apply(instance, PoiSection::new)
 			)
-			.withDefault(
-				Util.prefix("Failed to read POI section: ", LOGGER::error), (Supplier<? extends PoiSection>)(() -> new PoiSection(runnable, false, ImmutableList.of()))
-			);
+			.orElseGet(Util.prefix("Failed to read POI section: ", LOGGER::error), () -> new PoiSection(runnable, false, ImmutableList.of()));
 	}
 
 	public PoiSection(Runnable runnable) {

@@ -6,10 +6,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 
-class EntityBasedExplosionDamageCalculator implements ExplosionDamageCalculator {
+public class EntityBasedExplosionDamageCalculator extends ExplosionDamageCalculator {
 	private final Entity source;
 
-	EntityBasedExplosionDamageCalculator(Entity entity) {
+	public EntityBasedExplosionDamageCalculator(Entity entity) {
 		this.source = entity;
 	}
 
@@ -17,8 +17,7 @@ class EntityBasedExplosionDamageCalculator implements ExplosionDamageCalculator 
 	public Optional<Float> getBlockExplosionResistance(
 		Explosion explosion, BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, FluidState fluidState
 	) {
-		return DefaultExplosionDamageCalculator.INSTANCE
-			.getBlockExplosionResistance(explosion, blockGetter, blockPos, blockState, fluidState)
+		return super.getBlockExplosionResistance(explosion, blockGetter, blockPos, blockState, fluidState)
 			.map(float_ -> this.source.getBlockExplosionResistance(explosion, blockGetter, blockPos, blockState, fluidState, float_));
 	}
 

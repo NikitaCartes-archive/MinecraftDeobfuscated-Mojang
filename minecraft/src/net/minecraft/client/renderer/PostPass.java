@@ -69,7 +69,7 @@ public class PostPass implements AutoCloseable {
 		this.effect.apply();
 		this.outTarget.clear(Minecraft.ON_OSX);
 		this.outTarget.bindWrite(false);
-		RenderSystem.depthMask(false);
+		RenderSystem.depthFunc(519);
 		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
 		bufferBuilder.vertex(0.0, 0.0, 500.0).color(255, 255, 255, 255).endVertex();
@@ -78,7 +78,7 @@ public class PostPass implements AutoCloseable {
 		bufferBuilder.vertex(0.0, (double)h, 500.0).color(255, 255, 255, 255).endVertex();
 		bufferBuilder.end();
 		BufferUploader.end(bufferBuilder);
-		RenderSystem.depthMask(true);
+		RenderSystem.depthFunc(515);
 		this.effect.clear();
 		this.outTarget.unbindWrite();
 		this.inTarget.unbindRead();

@@ -1,7 +1,7 @@
 package net.minecraft.world.level.newbiome.layer;
 
 import java.util.function.LongFunction;
-import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.newbiome.area.Area;
@@ -12,16 +12,16 @@ import net.minecraft.world.level.newbiome.context.LazyAreaContext;
 import net.minecraft.world.level.newbiome.layer.traits.AreaTransformer1;
 
 public class Layers {
-	protected static final int WARM_OCEAN = Registry.BIOME.getId(Biomes.WARM_OCEAN);
-	protected static final int LUKEWARM_OCEAN = Registry.BIOME.getId(Biomes.LUKEWARM_OCEAN);
-	protected static final int OCEAN = Registry.BIOME.getId(Biomes.OCEAN);
-	protected static final int COLD_OCEAN = Registry.BIOME.getId(Biomes.COLD_OCEAN);
-	protected static final int FROZEN_OCEAN = Registry.BIOME.getId(Biomes.FROZEN_OCEAN);
-	protected static final int DEEP_WARM_OCEAN = Registry.BIOME.getId(Biomes.DEEP_WARM_OCEAN);
-	protected static final int DEEP_LUKEWARM_OCEAN = Registry.BIOME.getId(Biomes.DEEP_LUKEWARM_OCEAN);
-	protected static final int DEEP_OCEAN = Registry.BIOME.getId(Biomes.DEEP_OCEAN);
-	protected static final int DEEP_COLD_OCEAN = Registry.BIOME.getId(Biomes.DEEP_COLD_OCEAN);
-	protected static final int DEEP_FROZEN_OCEAN = Registry.BIOME.getId(Biomes.DEEP_FROZEN_OCEAN);
+	protected static final int WARM_OCEAN = BuiltinRegistries.BIOME.getId(Biomes.WARM_OCEAN);
+	protected static final int LUKEWARM_OCEAN = BuiltinRegistries.BIOME.getId(Biomes.LUKEWARM_OCEAN);
+	protected static final int OCEAN = BuiltinRegistries.BIOME.getId(Biomes.OCEAN);
+	protected static final int COLD_OCEAN = BuiltinRegistries.BIOME.getId(Biomes.COLD_OCEAN);
+	protected static final int FROZEN_OCEAN = BuiltinRegistries.BIOME.getId(Biomes.FROZEN_OCEAN);
+	protected static final int DEEP_WARM_OCEAN = BuiltinRegistries.BIOME.getId(Biomes.DEEP_WARM_OCEAN);
+	protected static final int DEEP_LUKEWARM_OCEAN = BuiltinRegistries.BIOME.getId(Biomes.DEEP_LUKEWARM_OCEAN);
+	protected static final int DEEP_OCEAN = BuiltinRegistries.BIOME.getId(Biomes.DEEP_OCEAN);
+	protected static final int DEEP_COLD_OCEAN = BuiltinRegistries.BIOME.getId(Biomes.DEEP_COLD_OCEAN);
+	protected static final int DEEP_FROZEN_OCEAN = BuiltinRegistries.BIOME.getId(Biomes.DEEP_FROZEN_OCEAN);
 
 	private static <T extends Area, C extends BigContext<T>> AreaFactory<T> zoom(
 		long l, AreaTransformer1 areaTransformer1, AreaFactory<T> areaFactory, int i, LongFunction<C> longFunction
@@ -97,8 +97,8 @@ public class Layers {
 		if (i == j) {
 			return true;
 		} else {
-			Biome biome = Registry.BIOME.byId(i);
-			Biome biome2 = Registry.BIOME.byId(j);
+			Biome biome = BuiltinRegistries.BIOME.byId(i);
+			Biome biome2 = BuiltinRegistries.BIOME.byId(j);
 			if (biome == null || biome2 == null) {
 				return false;
 			} else if (biome != Biomes.WOODED_BADLANDS_PLATEAU && biome != Biomes.BADLANDS_PLATEAU) {

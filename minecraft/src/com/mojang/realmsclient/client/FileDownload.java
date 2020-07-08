@@ -348,10 +348,10 @@ public class FileDownload {
 	private static void deletePlayerTag(File file) {
 		if (file.exists()) {
 			try {
-				CompoundTag compoundTag = NbtIo.readCompressed(new FileInputStream(file));
+				CompoundTag compoundTag = NbtIo.readCompressed(file);
 				CompoundTag compoundTag2 = compoundTag.getCompound("Data");
 				compoundTag2.remove("Player");
-				NbtIo.writeCompressed(compoundTag, new FileOutputStream(file));
+				NbtIo.writeCompressed(compoundTag, file);
 			} catch (Exception var3) {
 				var3.printStackTrace();
 			}

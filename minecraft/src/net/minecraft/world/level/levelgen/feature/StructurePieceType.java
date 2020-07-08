@@ -3,7 +3,6 @@ package net.minecraft.world.level.levelgen.feature;
 import java.util.Locale;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.block.entity.JigsawBlockEntity;
 import net.minecraft.world.level.levelgen.structure.BuriedTreasurePieces;
 import net.minecraft.world.level.levelgen.structure.DesertPyramidPiece;
 import net.minecraft.world.level.levelgen.structure.EndCityPieces;
@@ -14,7 +13,7 @@ import net.minecraft.world.level.levelgen.structure.NetherBridgePieces;
 import net.minecraft.world.level.levelgen.structure.NetherFossilPieces;
 import net.minecraft.world.level.levelgen.structure.OceanMonumentPieces;
 import net.minecraft.world.level.levelgen.structure.OceanRuinPieces;
-import net.minecraft.world.level.levelgen.structure.PillagerOutpostPieces;
+import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
 import net.minecraft.world.level.levelgen.structure.RuinedPortalPiece;
 import net.minecraft.world.level.levelgen.structure.ShipwreckPieces;
 import net.minecraft.world.level.levelgen.structure.StrongholdPieces;
@@ -28,8 +27,6 @@ public interface StructurePieceType {
 	StructurePieceType MINE_SHAFT_CROSSING = setPieceId(MineShaftPieces.MineShaftCrossing::new, "MSCrossing");
 	StructurePieceType MINE_SHAFT_ROOM = setPieceId(MineShaftPieces.MineShaftRoom::new, "MSRoom");
 	StructurePieceType MINE_SHAFT_STAIRS = setPieceId(MineShaftPieces.MineShaftStairs::new, "MSStairs");
-	StructurePieceType PILLAGER_OUTPOST = setPieceId(PillagerOutpostPieces.PillagerOutpostPiece::new, "PCP");
-	StructurePieceType VILLAGE = setPieceId(VillagePieces.VillagePiece::new, "NVi");
 	StructurePieceType NETHER_FORTRESS_BRIDGE_CROSSING = setPieceId(NetherBridgePieces.BridgeCrossing::new, "NeBCr");
 	StructurePieceType NETHER_FORTRESS_BRIDGE_END_FILLER = setPieceId(NetherBridgePieces.BridgeEndFiller::new, "NeBEF");
 	StructurePieceType NETHER_FORTRESS_BRIDGE_STRAIGHT = setPieceId(NetherBridgePieces.BridgeStraight::new, "NeBS");
@@ -81,8 +78,7 @@ public interface StructurePieceType {
 	StructurePieceType BURIED_TREASURE_PIECE = setPieceId(BuriedTreasurePieces.BuriedTreasurePiece::new, "BTP");
 	StructurePieceType SHIPWRECK_PIECE = setPieceId(ShipwreckPieces.ShipwreckPiece::new, "Shipwreck");
 	StructurePieceType NETHER_FOSSIL = setPieceId(NetherFossilPieces.NetherFossilPiece::new, "NeFos");
-	StructurePieceType BASTION_REMNANT = setPieceId(BastionPieces.BastionPiece::new, "BastionRemnant");
-	StructurePieceType RUNTIME = setPieceId(JigsawBlockEntity.RuntimePiece::new, "Runtime");
+	StructurePieceType JIGSAW = setPieceId(PoolElementStructurePiece::new, "jigsaw");
 
 	StructurePiece load(StructureManager structureManager, CompoundTag compoundTag);
 

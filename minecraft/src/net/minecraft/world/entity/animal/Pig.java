@@ -202,8 +202,8 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 
 				for (int[] js : is) {
 					mutableBlockPos.set(blockPos.getX() + js[0], blockPos.getY(), blockPos.getZ() + js[1]);
-					double d = this.level.getRelativeFloorHeight(mutableBlockPos);
-					if (DismountHelper.isFloorValid(d)) {
+					double d = this.level.getBlockFloorHeight(mutableBlockPos);
+					if (DismountHelper.isBlockFloorValid(d)) {
 						Vec3 vec3 = Vec3.upFromBottomCenterOf(mutableBlockPos, d);
 						if (DismountHelper.canDismountTo(this.level, livingEntity, aABB.move(vec3))) {
 							livingEntity.setPose(pose);

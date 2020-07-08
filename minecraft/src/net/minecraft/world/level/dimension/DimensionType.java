@@ -15,12 +15,12 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.Tag;
-import net.minecraft.util.Codecs;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.BiomeZoomer;
@@ -52,7 +52,7 @@ public class DimensionType {
 					Codec.BOOL.fieldOf("bed_works").forGetter(DimensionType::bedWorks),
 					Codec.BOOL.fieldOf("respawn_anchor_works").forGetter(DimensionType::respawnAnchorWorks),
 					Codec.BOOL.fieldOf("has_raids").forGetter(DimensionType::hasRaids),
-					Codecs.intRange(0, 256).fieldOf("logical_height").forGetter(DimensionType::logicalHeight),
+					Codec.intRange(0, 256).fieldOf("logical_height").forGetter(DimensionType::logicalHeight),
 					ResourceLocation.CODEC.fieldOf("infiniburn").forGetter(dimensionType -> dimensionType.infiniburn),
 					Codec.FLOAT.fieldOf("ambient_light").forGetter(dimensionType -> dimensionType.ambientLight)
 				)
@@ -247,10 +247,11 @@ public class DimensionType {
 	}
 
 	public static RegistryAccess.RegistryHolder registerBuiltin(RegistryAccess.RegistryHolder registryHolder) {
-		registryHolder.registerDimension(OVERWORLD_LOCATION, DEFAULT_OVERWORLD);
-		registryHolder.registerDimension(OVERWORLD_CAVES_LOCATION, DEFAULT_OVERWORLD_CAVES);
-		registryHolder.registerDimension(NETHER_LOCATION, DEFAULT_NETHER);
-		registryHolder.registerDimension(END_LOCATION, DEFAULT_END);
+		WritableRegistry<DimensionType> writableRegistry = registryHolder.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+		writableRegistry.register(OVERWORLD_LOCATION, DEFAULT_OVERWORLD);
+		writableRegistry.register(OVERWORLD_CAVES_LOCATION, DEFAULT_OVERWORLD_CAVES);
+		writableRegistry.register(NETHER_LOCATION, DEFAULT_NETHER);
+		writableRegistry.register(END_LOCATION, DEFAULT_END);
 		return registryHolder;
 	}
 

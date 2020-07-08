@@ -2,7 +2,7 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Optional;
+import net.minecraft.util.UniformInt;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class DeltaFeatureConfiguration implements FeatureConfiguration {
@@ -10,60 +10,36 @@ public class DeltaFeatureConfiguration implements FeatureConfiguration {
 		instance -> instance.group(
 					BlockState.CODEC.fieldOf("contents").forGetter(deltaFeatureConfiguration -> deltaFeatureConfiguration.contents),
 					BlockState.CODEC.fieldOf("rim").forGetter(deltaFeatureConfiguration -> deltaFeatureConfiguration.rim),
-					Codec.INT.fieldOf("minimum_radius").forGetter(deltaFeatureConfiguration -> deltaFeatureConfiguration.minimumRadius),
-					Codec.INT.fieldOf("maximum_radius").forGetter(deltaFeatureConfiguration -> deltaFeatureConfiguration.maximumRadius),
-					Codec.INT.fieldOf("maximum_rim").forGetter(deltaFeatureConfiguration -> deltaFeatureConfiguration.maximumRimSize)
+					UniformInt.codec(0, 8, 8).fieldOf("size").forGetter(deltaFeatureConfiguration -> deltaFeatureConfiguration.size),
+					UniformInt.codec(0, 8, 8).fieldOf("rim_size").forGetter(deltaFeatureConfiguration -> deltaFeatureConfiguration.rimSize)
 				)
 				.apply(instance, DeltaFeatureConfiguration::new)
 	);
-	public final BlockState contents;
-	public final BlockState rim;
-	public final int minimumRadius;
-	public final int maximumRadius;
-	public final int maximumRimSize;
+	private final BlockState contents;
+	private final BlockState rim;
+	private final UniformInt size;
+	private final UniformInt rimSize;
 
-	public DeltaFeatureConfiguration(BlockState blockState, BlockState blockState2, int i, int j, int k) {
+	public DeltaFeatureConfiguration(BlockState blockState, BlockState blockState2, UniformInt uniformInt, UniformInt uniformInt2) {
 		this.contents = blockState;
 		this.rim = blockState2;
-		this.minimumRadius = i;
-		this.maximumRadius = j;
-		this.maximumRimSize = k;
+		this.size = uniformInt;
+		this.rimSize = uniformInt2;
 	}
 
-	public static class Builder {
-		Optional<BlockState> contents = Optional.empty();
-		Optional<BlockState> rim = Optional.empty();
-		int minRadius;
-		int maxRadius;
-		int maxRim;
+	public BlockState contents() {
+		return this.contents;
+	}
 
-		public DeltaFeatureConfiguration.Builder radius(int i, int j) {
-			this.minRadius = i;
-			this.maxRadius = j;
-			return this;
-		}
+	public BlockState rim() {
+		return this.rim;
+	}
 
-		public DeltaFeatureConfiguration.Builder contents(BlockState blockState) {
-			this.contents = Optional.of(blockState);
-			return this;
-		}
+	public UniformInt size() {
+		return this.size;
+	}
 
-		public DeltaFeatureConfiguration.Builder rim(BlockState blockState, int i) {
-			this.rim = Optional.of(blockState);
-			this.maxRim = i;
-			return this;
-		}
-
-		public DeltaFeatureConfiguration build() {
-			if (!this.contents.isPresent()) {
-				throw new IllegalArgumentException("Missing contents");
-			} else if (!this.rim.isPresent()) {
-				throw new IllegalArgumentException("Missing rim");
-			} else if (this.minRadius > this.maxRadius) {
-				throw new IllegalArgumentException("Minimum radius cannot be greater than maximum radius");
-			} else {
-				return new DeltaFeatureConfiguration((BlockState)this.contents.get(), (BlockState)this.rim.get(), this.minRadius, this.maxRadius, this.maxRim);
-			}
-		}
+	public UniformInt rimSize() {
+		return this.rimSize;
 	}
 }

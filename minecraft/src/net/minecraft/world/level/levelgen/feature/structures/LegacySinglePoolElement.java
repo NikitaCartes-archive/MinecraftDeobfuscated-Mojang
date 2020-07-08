@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.List;
+import java.util.function.Supplier;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -18,18 +18,10 @@ public class LegacySinglePoolElement extends SinglePoolElement {
 		instance -> instance.group(templateCodec(), processorsCodec(), projectionCodec()).apply(instance, LegacySinglePoolElement::new)
 	);
 
-	@Deprecated
-	public LegacySinglePoolElement(String string, List<StructureProcessor> list) {
-		super(string, list);
-	}
-
-	private LegacySinglePoolElement(Either<ResourceLocation, StructureTemplate> either, List<StructureProcessor> list, StructureTemplatePool.Projection projection) {
-		super(either, list, projection);
-	}
-
-	@Deprecated
-	public LegacySinglePoolElement(String string) {
-		super(string, ImmutableList.of());
+	protected LegacySinglePoolElement(
+		Either<ResourceLocation, StructureTemplate> either, Supplier<ImmutableList<StructureProcessor>> supplier, StructureTemplatePool.Projection projection
+	) {
+		super(either, supplier, projection);
 	}
 
 	@Override

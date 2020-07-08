@@ -224,7 +224,7 @@ public class PackSelectionScreen extends Screen {
 			try {
 				String string = pack.getId();
 				ResourceLocation resourceLocation = new ResourceLocation(
-					"pack/" + Util.sanitizeResourceName(string) + "/" + Hashing.sha1().hashUnencodedChars(string) + "/icon"
+					"minecraft", "pack/" + Util.sanitizeName(string, ResourceLocation::validPathChar) + "/" + Hashing.sha1().hashUnencodedChars(string) + "/icon"
 				);
 				NativeImage nativeImage = NativeImage.read(inputStream);
 				textureManager.register(resourceLocation, new DynamicTexture(nativeImage));

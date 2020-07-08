@@ -21,7 +21,7 @@ public class RandomBooleanSelectorFeature extends Feature<RandomBooleanFeatureCo
 	) {
 		boolean bl = random.nextBoolean();
 		return bl
-			? randomBooleanFeatureConfiguration.featureTrue.place(worldGenLevel, chunkGenerator, random, blockPos)
-			: randomBooleanFeatureConfiguration.featureFalse.place(worldGenLevel, chunkGenerator, random, blockPos);
+			? ((ConfiguredFeature)randomBooleanFeatureConfiguration.featureTrue.get()).place(worldGenLevel, chunkGenerator, random, blockPos)
+			: ((ConfiguredFeature)randomBooleanFeatureConfiguration.featureFalse.get()).place(worldGenLevel, chunkGenerator, random, blockPos);
 	}
 }

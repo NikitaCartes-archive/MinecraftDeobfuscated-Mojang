@@ -17,6 +17,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -403,5 +404,10 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 	@Override
 	public Set<ResourceKey<Level>> levels() {
 		return this.server.levelKeys();
+	}
+
+	@Override
+	public RegistryAccess registryAccess() {
+		return this.server.registryAccess();
 	}
 }

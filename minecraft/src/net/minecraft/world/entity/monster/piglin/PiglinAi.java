@@ -173,7 +173,11 @@ public class PiglinAi {
 		brain.addActivityAndRemoveMemoryWhenStopped(
 			Activity.ADMIRE_ITEM,
 			10,
-			ImmutableList.of(new GoToWantedItem<>(PiglinAi::isNotHoldingLovedItemInOffHand, 1.0F, true, 9), new StopAdmiringIfItemTooFarAway(9)),
+			ImmutableList.of(
+				new GoToWantedItem<>(PiglinAi::isNotHoldingLovedItemInOffHand, 1.0F, true, 9),
+				new StopAdmiringIfItemTooFarAway(9),
+				new StopAdmiringIfTiredOfTryingToReachItem(200, 200)
+			),
 			MemoryModuleType.ADMIRING_ITEM
 		);
 	}
@@ -286,6 +290,7 @@ public class PiglinAi {
 
 		Item item = itemStack.getItem();
 		if (isLovedItem(item)) {
+			piglin.getBrain().eraseMemory(MemoryModuleType.TIME_TRYING_TO_REACH_ADMIRE_ITEM);
 			holdInOffhand(piglin, itemStack);
 			admireGoldItem(piglin);
 		} else if (isFood(item) && !hasEatenRecently(piglin)) {

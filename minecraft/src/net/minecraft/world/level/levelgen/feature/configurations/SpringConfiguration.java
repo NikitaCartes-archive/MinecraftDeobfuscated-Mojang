@@ -13,9 +13,9 @@ public class SpringConfiguration implements FeatureConfiguration {
 	public static final Codec<SpringConfiguration> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					FluidState.CODEC.fieldOf("state").forGetter(springConfiguration -> springConfiguration.state),
-					Codec.BOOL.fieldOf("requires_block_below").withDefault(true).forGetter(springConfiguration -> springConfiguration.requiresBlockBelow),
-					Codec.INT.fieldOf("rock_count").withDefault(4).forGetter(springConfiguration -> springConfiguration.rockCount),
-					Codec.INT.fieldOf("hole_count").withDefault(1).forGetter(springConfiguration -> springConfiguration.holeCount),
+					Codec.BOOL.fieldOf("requires_block_below").orElse(true).forGetter(springConfiguration -> springConfiguration.requiresBlockBelow),
+					Codec.INT.fieldOf("rock_count").orElse(4).forGetter(springConfiguration -> springConfiguration.rockCount),
+					Codec.INT.fieldOf("hole_count").orElse(1).forGetter(springConfiguration -> springConfiguration.holeCount),
 					Registry.BLOCK
 						.listOf()
 						.fieldOf("valid_blocks")

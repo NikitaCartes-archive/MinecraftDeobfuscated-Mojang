@@ -8,6 +8,7 @@ import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.DispenserBlock;

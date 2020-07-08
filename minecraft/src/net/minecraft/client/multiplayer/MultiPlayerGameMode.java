@@ -31,7 +31,7 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.UseOnContext;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;

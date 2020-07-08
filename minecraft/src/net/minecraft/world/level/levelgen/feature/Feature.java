@@ -12,17 +12,15 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.feature.configurations.BlockBlobConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockPileConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ColumnFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.CountFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.CountConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DeltaFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureRadiusConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
@@ -31,10 +29,8 @@ import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeat
 import net.minecraft.world.level.levelgen.feature.configurations.RandomBooleanFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.RandomRandomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.ReplaceBlockConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.ReplaceSpheroidConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.SeagrassFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.ReplaceSphereConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleRandomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfiguration;
@@ -68,20 +64,20 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	public static final Feature<NoneFeatureConfiguration> MONSTER_ROOM = register("monster_room", new MonsterRoomFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<NoneFeatureConfiguration> BLUE_ICE = register("blue_ice", new BlueIceFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<BlockStateConfiguration> ICEBERG = register("iceberg", new IcebergFeature(BlockStateConfiguration.CODEC));
-	public static final Feature<BlockBlobConfiguration> FOREST_ROCK = register("forest_rock", new BlockBlobFeature(BlockBlobConfiguration.CODEC));
+	public static final Feature<BlockStateConfiguration> FOREST_ROCK = register("forest_rock", new BlockBlobFeature(BlockStateConfiguration.CODEC));
 	public static final Feature<DiskConfiguration> DISK = register("disk", new DiskReplaceFeature(DiskConfiguration.CODEC));
-	public static final Feature<FeatureRadiusConfiguration> ICE_PATCH = register("ice_patch", new IcePatchFeature(FeatureRadiusConfiguration.CODEC));
+	public static final Feature<DiskConfiguration> ICE_PATCH = register("ice_patch", new IcePatchFeature(DiskConfiguration.CODEC));
 	public static final Feature<BlockStateConfiguration> LAKE = register("lake", new LakeFeature(BlockStateConfiguration.CODEC));
 	public static final Feature<OreConfiguration> ORE = register("ore", new OreFeature(OreConfiguration.CODEC));
 	public static final Feature<SpikeConfiguration> END_SPIKE = register("end_spike", new SpikeFeature(SpikeConfiguration.CODEC));
 	public static final Feature<NoneFeatureConfiguration> END_ISLAND = register("end_island", new EndIslandFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<EndGatewayConfiguration> END_GATEWAY = register("end_gateway", new EndGatewayFeature(EndGatewayConfiguration.CODEC));
-	public static final Feature<SeagrassFeatureConfiguration> SEAGRASS = register("seagrass", new SeagrassFeature(SeagrassFeatureConfiguration.CODEC));
+	public static final SeagrassFeature SEAGRASS = register("seagrass", new SeagrassFeature(ProbabilityFeatureConfiguration.CODEC));
 	public static final Feature<NoneFeatureConfiguration> KELP = register("kelp", new KelpFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<NoneFeatureConfiguration> CORAL_TREE = register("coral_tree", new CoralTreeFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<NoneFeatureConfiguration> CORAL_MUSHROOM = register("coral_mushroom", new CoralMushroomFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<NoneFeatureConfiguration> CORAL_CLAW = register("coral_claw", new CoralClawFeature(NoneFeatureConfiguration.CODEC));
-	public static final Feature<CountFeatureConfiguration> SEA_PICKLE = register("sea_pickle", new SeaPickleFeature(CountFeatureConfiguration.CODEC));
+	public static final Feature<CountConfiguration> SEA_PICKLE = register("sea_pickle", new SeaPickleFeature(CountConfiguration.CODEC));
 	public static final Feature<SimpleBlockConfiguration> SIMPLE_BLOCK = register("simple_block", new SimpleBlockFeature(SimpleBlockConfiguration.CODEC));
 	public static final Feature<ProbabilityFeatureConfiguration> BAMBOO = register("bamboo", new BambooFeature(ProbabilityFeatureConfiguration.CODEC));
 	public static final Feature<HugeFungusConfiguration> HUGE_FUNGUS = register("huge_fungus", new HugeFungusFeature(HugeFungusConfiguration.CODEC));
@@ -92,16 +88,13 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	public static final Feature<NoneFeatureConfiguration> TWISTING_VINES = register("twisting_vines", new TwistingVinesFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<ColumnFeatureConfiguration> BASALT_COLUMNS = register("basalt_columns", new BasaltColumnsFeature(ColumnFeatureConfiguration.CODEC));
 	public static final Feature<DeltaFeatureConfiguration> DELTA_FEATURE = register("delta_feature", new DeltaFeature(DeltaFeatureConfiguration.CODEC));
-	public static final Feature<ReplaceSpheroidConfiguration> REPLACE_BLOBS = register(
-		"netherrack_replace_blobs", new ReplaceBlobsFeature(ReplaceSpheroidConfiguration.CODEC)
+	public static final Feature<ReplaceSphereConfiguration> REPLACE_BLOBS = register(
+		"netherrack_replace_blobs", new ReplaceBlobsFeature(ReplaceSphereConfiguration.CODEC)
 	);
 	public static final Feature<LayerConfiguration> FILL_LAYER = register("fill_layer", new FillLayerFeature(LayerConfiguration.CODEC));
 	public static final BonusChestFeature BONUS_CHEST = register("bonus_chest", new BonusChestFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<NoneFeatureConfiguration> BASALT_PILLAR = register("basalt_pillar", new BasaltPillarFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<OreConfiguration> NO_SURFACE_ORE = register("no_surface_ore", new NoSurfaceOreFeature(OreConfiguration.CODEC));
-	public static final Feature<RandomRandomFeatureConfiguration> RANDOM_RANDOM_SELECTOR = register(
-		"random_random_selector", new RandomRandomFeature(RandomRandomFeatureConfiguration.CODEC)
-	);
 	public static final Feature<RandomFeatureConfiguration> RANDOM_SELECTOR = register(
 		"random_selector", new RandomSelectorFeature(RandomFeatureConfiguration.CODEC)
 	);

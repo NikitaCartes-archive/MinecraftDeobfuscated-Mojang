@@ -236,11 +236,12 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 
 		for (BlockPos blockPos : set) {
 			if (!this.level.getFluidState(blockPos).is(FluidTags.LAVA)) {
-				for (Pose pose : livingEntity.getDismountPoses()) {
-					double f = this.level.getRelativeFloorHeight(blockPos);
-					if (DismountHelper.isFloorValid(f)) {
+				double g = this.level.getBlockFloorHeight(blockPos);
+				if (DismountHelper.isBlockFloorValid(g)) {
+					Vec3 vec32 = Vec3.upFromBottomCenterOf(blockPos, g);
+
+					for (Pose pose : livingEntity.getDismountPoses()) {
 						AABB aABB = livingEntity.getLocalBoundsForPose(pose);
-						Vec3 vec32 = Vec3.upFromBottomCenterOf(blockPos, f);
 						if (DismountHelper.canDismountTo(this.level, livingEntity, aABB.move(vec32))) {
 							livingEntity.setPose(pose);
 							return vec32;
@@ -450,63 +451,34 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		SpawnGroupData spawnGroupData2 = null;
-		Strider.StriderGroupData.Rider rider;
-		if (spawnGroupData instanceof Strider.StriderGroupData) {
-			rider = ((Strider.StriderGroupData)spawnGroupData).rider;
-		} else if (!this.isBaby()) {
-			if (this.random.nextInt(30) == 0) {
-				rider = Strider.StriderGroupData.Rider.PIGLIN_RIDER;
-				spawnGroupData2 = new Zombie.ZombieGroupData(Zombie.getSpawnAsBabyOdds(this.random), false);
-			} else if (this.random.nextInt(10) == 0) {
-				rider = Strider.StriderGroupData.Rider.BABY_RIDER;
-			} else {
-				rider = Strider.StriderGroupData.Rider.NO_RIDER;
-			}
-
-			spawnGroupData = new Strider.StriderGroupData(rider);
-			((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(rider == Strider.StriderGroupData.Rider.NO_RIDER ? 0.5F : 0.0F);
+		if (this.isBaby()) {
+			return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 		} else {
-			rider = Strider.StriderGroupData.Rider.NO_RIDER;
-		}
-
-		Mob mob = null;
-		if (rider == Strider.StriderGroupData.Rider.BABY_RIDER) {
-			Strider strider = EntityType.STRIDER.create(serverLevelAccessor.getLevel());
-			if (strider != null) {
-				mob = strider;
-				strider.setAge(-24000);
-			}
-		} else if (rider == Strider.StriderGroupData.Rider.PIGLIN_RIDER) {
-			ZombifiedPiglin zombifiedPiglin = EntityType.ZOMBIFIED_PIGLIN.create(serverLevelAccessor.getLevel());
-			if (zombifiedPiglin != null) {
-				mob = zombifiedPiglin;
+			Object var7;
+			if (this.random.nextInt(30) == 0) {
+				Mob mob = EntityType.ZOMBIFIED_PIGLIN.create(serverLevelAccessor.getLevel());
+				var7 = this.spawnJockey(serverLevelAccessor, difficultyInstance, mob, new Zombie.ZombieGroupData(Zombie.getSpawnAsBabyOdds(this.random), false));
 				this.equipSaddle(null);
+			} else if (this.random.nextInt(10) == 0) {
+				AgableMob agableMob = EntityType.STRIDER.create(serverLevelAccessor.getLevel());
+				agableMob.setAge(-24000);
+				var7 = this.spawnJockey(serverLevelAccessor, difficultyInstance, agableMob, null);
+			} else {
+				var7 = new AgableMob.AgableMobGroupData(0.5F);
 			}
-		}
 
-		if (mob != null) {
-			mob.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0F);
-			mob.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, spawnGroupData2, null);
-			mob.startRiding(this, true);
-			serverLevelAccessor.addFreshEntity(mob);
+			return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, (SpawnGroupData)var7, compoundTag);
 		}
-
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
-	public static class StriderGroupData extends AgableMob.AgableMobGroupData {
-		public final Strider.StriderGroupData.Rider rider;
-
-		public StriderGroupData(Strider.StriderGroupData.Rider rider) {
-			this.rider = rider;
-		}
-
-		public static enum Rider {
-			NO_RIDER,
-			BABY_RIDER,
-			PIGLIN_RIDER;
-		}
+	private SpawnGroupData spawnJockey(
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, Mob mob, @Nullable SpawnGroupData spawnGroupData
+	) {
+		mob.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0F);
+		mob.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, spawnGroupData, null);
+		mob.startRiding(this, true);
+		serverLevelAccessor.addFreshEntity(mob);
+		return new AgableMob.AgableMobGroupData(0.0F);
 	}
 
 	static class StriderPathNavigation extends GroundPathNavigation {
