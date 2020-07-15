@@ -103,7 +103,7 @@ public class ItemEntity extends Entity {
 			} else {
 				this.noPhysics = !this.level.noCollision(this);
 				if (this.noPhysics) {
-					this.checkInBlock(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
+					this.moveTowardsClosestSpace(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
 				}
 			}
 

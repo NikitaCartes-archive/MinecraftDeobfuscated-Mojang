@@ -71,7 +71,7 @@ public class ExperienceOrb extends Entity {
 		}
 
 		if (!this.level.noCollision(this.getBoundingBox())) {
-			this.checkInBlock(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
+			this.moveTowardsClosestSpace(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
 		}
 
 		double d = 8.0;

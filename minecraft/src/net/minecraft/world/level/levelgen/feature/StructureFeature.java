@@ -105,11 +105,12 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 		"Bastion_Remnant", new BastionFeature(JigsawConfiguration.CODEC), GenerationStep.Decoration.SURFACE_STRUCTURES
 	);
 	public static final List<StructureFeature<?>> NOISE_AFFECTING_FEATURES = ImmutableList.of(PILLAGER_OUTPOST, VILLAGE, NETHER_FOSSIL);
-	private static final Map<String, String> RENAMES = ImmutableMap.<String, String>builder()
-		.put("nvi", "jigsaw")
-		.put("pcp", "jigsaw")
-		.put("bastionremnant", "jigsaw")
-		.put("runtime", "jigsaw")
+	private static final ResourceLocation JIGSAW_RENAME = new ResourceLocation("jigsaw");
+	private static final Map<ResourceLocation, ResourceLocation> RENAMES = ImmutableMap.<ResourceLocation, ResourceLocation>builder()
+		.put(new ResourceLocation("nvi"), JIGSAW_RENAME)
+		.put(new ResourceLocation("pcp"), JIGSAW_RENAME)
+		.put(new ResourceLocation("bastionremnant"), JIGSAW_RENAME)
+		.put(new ResourceLocation("runtime"), JIGSAW_RENAME)
 		.build();
 	private final Codec<ConfiguredStructureFeature<C, StructureFeature<C>>> configuredStructureCodec;
 
@@ -157,23 +158,24 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
 					for (int m = 0; m < listTag.size(); m++) {
 						CompoundTag compoundTag2 = listTag.getCompound(m);
 						String string2 = compoundTag2.getString("id").toLowerCase(Locale.ROOT);
-						String string3 = (String)RENAMES.getOrDefault(string2, string2);
-						StructurePieceType structurePieceType = Registry.STRUCTURE_PIECE.get(new ResourceLocation(string3));
+						ResourceLocation resourceLocation = new ResourceLocation(string2);
+						ResourceLocation resourceLocation2 = (ResourceLocation)RENAMES.getOrDefault(resourceLocation, resourceLocation);
+						StructurePieceType structurePieceType = Registry.STRUCTURE_PIECE.get(resourceLocation2);
 						if (structurePieceType == null) {
-							LOGGER.error("Unknown structure piece id: {}", string3);
+							LOGGER.error("Unknown structure piece id: {}", resourceLocation2);
 						} else {
 							try {
 								StructurePiece structurePiece = structurePieceType.load(structureManager, compoundTag2);
 								structureStart.getPieces().add(structurePiece);
-							} catch (Exception var18) {
-								LOGGER.error("Exception loading structure piece with id {}", string3, var18);
+							} catch (Exception var19) {
+								LOGGER.error("Exception loading structure piece with id {}", resourceLocation2, var19);
 							}
 						}
 					}
 
 					return structureStart;
-				} catch (Exception var19) {
-					LOGGER.error("Failed Start with id {}", string, var19);
+				} catch (Exception var20) {
+					LOGGER.error("Failed Start with id {}", string, var20);
 					return null;
 				}
 			}

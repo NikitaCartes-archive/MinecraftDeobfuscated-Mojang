@@ -20,6 +20,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.BlockUtil;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -1121,7 +1122,7 @@ public abstract class LivingEntity extends Entity {
 				this.removeAllEffects();
 				this.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 900, 1));
 				this.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 100, 1));
-				this.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 800, 1));
+				this.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 800, 0));
 				this.level.broadcastEntityEvent(this, (byte)35);
 			}
 
@@ -2634,7 +2635,7 @@ public abstract class LivingEntity extends Entity {
 
 	@Override
 	public boolean isPushable() {
-		return this.isAlive() && !this.onClimbable();
+		return this.isAlive() && !this.isSpectator() && !this.onClimbable();
 	}
 
 	@Override
@@ -2655,6 +2656,12 @@ public abstract class LivingEntity extends Entity {
 	@Override
 	public void setYBodyRot(float f) {
 		this.yBodyRot = f;
+	}
+
+	@Override
+	protected Vec3 getRelativePortalPosition(Direction.Axis axis, BlockUtil.FoundRectangle foundRectangle) {
+		Vec3 vec3 = super.getRelativePortalPosition(axis, foundRectangle);
+		return new Vec3(vec3.x, vec3.y, 0.0);
 	}
 
 	public float getAbsorptionAmount() {

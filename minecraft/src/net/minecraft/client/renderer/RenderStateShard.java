@@ -42,18 +42,15 @@ public abstract class RenderStateShard {
 			RenderSystem.defaultBlendFunc();
 		}
 	);
-	protected static final RenderStateShard.TransparencyStateShard GLINT_TRANSPARENCY = new RenderStateShard.TransparencyStateShard("glint_transparency", () -> {
-		RenderSystem.enableBlend();
-		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_COLOR, GlStateManager.DestFactor.ONE);
-	}, () -> {
-		RenderSystem.disableBlend();
-		RenderSystem.defaultBlendFunc();
-	});
-	protected static final RenderStateShard.TransparencyStateShard GLINT_DIRECT_TRANSPARENCY = new RenderStateShard.TransparencyStateShard(
-		"glint_gui_transparency", () -> {
+	protected static final RenderStateShard.TransparencyStateShard GLINT_TRANSPARENCY = new RenderStateShard.TransparencyStateShard(
+		"glint_transparency",
+		() -> {
 			RenderSystem.enableBlend();
-			RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_COLOR, GlStateManager.DestFactor.ONE);
-		}, () -> {
+			RenderSystem.blendFuncSeparate(
+				GlStateManager.SourceFactor.SRC_COLOR, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE
+			);
+		},
+		() -> {
 			RenderSystem.disableBlend();
 			RenderSystem.defaultBlendFunc();
 		}

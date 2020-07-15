@@ -136,7 +136,7 @@ public class Biome {
 			return long2FloatLinkedOpenHashMap;
 		}));
 
-	protected Biome(Biome.BiomeBuilder biomeBuilder) {
+	public Biome(Biome.BiomeBuilder biomeBuilder) {
 		if (biomeBuilder.surfaceBuilder != null
 			&& biomeBuilder.precipitation != null
 			&& biomeBuilder.biomeCategory != null
@@ -152,19 +152,19 @@ public class Biome {
 			this.scale = biomeBuilder.scale;
 			this.temperature = biomeBuilder.temperature;
 			this.downfall = biomeBuilder.downfall;
-			this.skyColor = this.calculateSkyColor();
+			this.skyColor = biomeBuilder.skyColor != null ? biomeBuilder.skyColor : this.calculateSkyColor();
 			this.parent = biomeBuilder.parent;
 			this.specialEffects = biomeBuilder.specialEffects;
-			this.carvers = Maps.<GenerationStep.Carving, List<Supplier<ConfiguredWorldCarver<?>>>>newHashMap();
+			this.carvers = Maps.<GenerationStep.Carving, List<Supplier<ConfiguredWorldCarver<?>>>>newLinkedHashMap();
 			this.structureStarts = Lists.<Supplier<ConfiguredStructureFeature<?, ?>>>newArrayList();
 			this.features = Lists.<List<Supplier<ConfiguredFeature<?, ?>>>>newArrayList();
-			this.spawners = Maps.<MobCategory, List<Biome.SpawnerData>>newHashMap();
+			this.spawners = Maps.<MobCategory, List<Biome.SpawnerData>>newLinkedHashMap();
 
 			for (MobCategory mobCategory : MobCategory.values()) {
 				this.spawners.put(mobCategory, Lists.newArrayList());
 			}
 
-			this.mobSpawnCosts = Maps.<EntityType<?>, Biome.MobSpawnCost>newHashMap();
+			this.mobSpawnCosts = Maps.<EntityType<?>, Biome.MobSpawnCost>newLinkedHashMap();
 			this.flowerFeatures = Lists.<ConfiguredFeature<?, ?>>newArrayList();
 		} else {
 			throw new IllegalStateException("You are missing parameters to build a proper biome for " + this.getClass().getSimpleName() + "\n" + biomeBuilder);
@@ -206,7 +206,8 @@ public class Biome {
 		this.flowerFeatures = (List<ConfiguredFeature<?, ?>>)list.stream()
 			.flatMap(Collection::stream)
 			.map(Supplier::get)
-			.filter(configuredFeature -> configuredFeature.feature == Feature.DECORATED_FLOWER)
+			.flatMap(ConfiguredFeature::getFeatures)
+			.filter(configuredFeature -> configuredFeature.feature == Feature.FLOWER)
 			.collect(Collectors.toList());
 	}
 
@@ -230,7 +231,7 @@ public class Biome {
 		((List)this.spawners.get(mobCategory)).add(spawnerData);
 	}
 
-	protected void addMobCharge(EntityType<?> entityType, double d, double e) {
+	public void addMobCharge(EntityType<?> entityType, double d, double e) {
 		this.mobSpawnCosts.put(entityType, new Biome.MobSpawnCost(e, d));
 	}
 
@@ -331,9 +332,7 @@ public class Biome {
 	}
 
 	public void addFeature(int i, Supplier<ConfiguredFeature<?, ?>> supplier) {
-		if (((ConfiguredFeature)supplier.get()).feature == Feature.DECORATED_FLOWER) {
-			this.flowerFeatures.add(supplier.get());
-		}
+		((ConfiguredFeature)supplier.get()).getFeatures().filter(configuredFeature -> configuredFeature.feature == Feature.FLOWER).forEach(this.flowerFeatures::add);
 
 		while (this.features.size() <= i) {
 			this.features.add(Lists.newArrayList());
@@ -568,6 +567,8 @@ public class Biome {
 		@Nullable
 		private Float downfall;
 		@Nullable
+		private Integer skyColor;
+		@Nullable
 		private String parent;
 		@Nullable
 		private BiomeSpecialEffects specialEffects;
@@ -611,6 +612,11 @@ public class Biome {
 			return this;
 		}
 
+		public Biome.BiomeBuilder skyColor(int i) {
+			this.skyColor = i;
+			return this;
+		}
+
 		public Biome.BiomeBuilder parent(@Nullable String string) {
 			this.parent = string;
 			return this;
@@ -636,6 +642,8 @@ public class Biome {
 				+ this.temperature
 				+ ",\ndownfall="
 				+ this.downfall
+				+ ",\nskyColor="
+				+ this.skyColor
 				+ ",\nspecialEffects="
 				+ this.specialEffects
 				+ ",\nparent='"

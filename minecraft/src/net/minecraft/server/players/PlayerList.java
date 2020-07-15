@@ -443,6 +443,7 @@ public abstract class PlayerList {
 		this.players.remove(serverPlayer);
 		serverPlayer.getLevel().removePlayerImmediately(serverPlayer);
 		BlockPos blockPos = serverPlayer.getRespawnPosition();
+		float f = serverPlayer.getRespawnAngle();
 		boolean bl2 = serverPlayer.isRespawnForced();
 		ServerLevel serverLevel = this.server.getLevel(serverPlayer.getRespawnDimension());
 		Optional<Vec3> optional;
@@ -474,8 +475,8 @@ public abstract class PlayerList {
 		boolean bl3 = false;
 		if (optional.isPresent()) {
 			Vec3 vec3 = (Vec3)optional.get();
-			serverPlayer2.moveTo(vec3.x, vec3.y, vec3.z, 0.0F, 0.0F);
-			serverPlayer2.setRespawnPosition(serverLevel2.dimension(), blockPos, bl2, false);
+			serverPlayer2.moveTo(vec3.x, vec3.y, vec3.z, f, 0.0F);
+			serverPlayer2.setRespawnPosition(serverLevel2.dimension(), blockPos, f, bl2, false);
 			bl3 = !bl && serverLevel2.getBlockState(blockPos).getBlock() instanceof RespawnAnchorBlock;
 		} else if (blockPos != null) {
 			serverPlayer2.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE, 0.0F));
@@ -500,7 +501,7 @@ public abstract class PlayerList {
 				)
 			);
 		serverPlayer2.connection.teleport(serverPlayer2.getX(), serverPlayer2.getY(), serverPlayer2.getZ(), serverPlayer2.yRot, serverPlayer2.xRot);
-		serverPlayer2.connection.send(new ClientboundSetDefaultSpawnPositionPacket(serverLevel2.getSharedSpawnPos()));
+		serverPlayer2.connection.send(new ClientboundSetDefaultSpawnPositionPacket(serverLevel2.getSharedSpawnPos(), serverLevel2.getSharedSpawnAngle()));
 		serverPlayer2.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
 		serverPlayer2.connection
 			.send(new ClientboundSetExperiencePacket(serverPlayer2.experienceProgress, serverPlayer2.totalExperience, serverPlayer2.experienceLevel));
@@ -693,7 +694,7 @@ public abstract class PlayerList {
 		serverPlayer.connection.send(new ClientboundSetBorderPacket(worldBorder, ClientboundSetBorderPacket.Type.INITIALIZE));
 		serverPlayer.connection
 			.send(new ClientboundSetTimePacket(serverLevel.getGameTime(), serverLevel.getDayTime(), serverLevel.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)));
-		serverPlayer.connection.send(new ClientboundSetDefaultSpawnPositionPacket(serverLevel.getSharedSpawnPos()));
+		serverPlayer.connection.send(new ClientboundSetDefaultSpawnPositionPacket(serverLevel.getSharedSpawnPos(), serverLevel.getSharedSpawnAngle()));
 		if (serverLevel.isRaining()) {
 			serverPlayer.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.START_RAINING, 0.0F));
 			serverPlayer.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.RAIN_LEVEL_CHANGE, serverLevel.getRainLevel(1.0F)));

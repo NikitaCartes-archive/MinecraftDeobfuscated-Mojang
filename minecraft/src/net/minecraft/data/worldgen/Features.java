@@ -1072,7 +1072,7 @@ public class Features {
 			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(5, 0.1F, 1)))
 	);
 	public static final ConfiguredFeature<?, ?> SPRUCE_SNOWY = register(
-		"spruce_snovy",
+		"spruce_snowy",
 		SPRUCE.decorated(Features.Decorators.HEIGHTMAP_SQUARE)
 			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(0, 0.1F, 1)))
 	);
@@ -1142,7 +1142,7 @@ public class Features {
 						.noProjection()
 						.build()
 				),
-		() -> Feature.FLOWER
+		() -> Feature.NO_BONEMEAL_FLOWER
 				.configured(
 					new RandomPatchConfiguration.GrassConfigurationBuilder(new SimpleStateProvider(Features.States.LILY_OF_THE_VALLEY), SimpleBlockPlacer.INSTANCE)
 						.tries(64)
@@ -1242,6 +1242,11 @@ public class Features {
 		Feature.RANDOM_SELECTOR
 			.configured(new RandomFeatureConfiguration(ImmutableList.of(SUPER_BIRCH_BEES_0002.weighted(0.5F)), BIRCH_BEES_0002))
 			.decorated(Features.Decorators.HEIGHTMAP_SQUARE)
+			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1F, 1)))
+	);
+	public static final ConfiguredFeature<?, ?> TREES_BIRCH = register(
+		"trees_birch",
+		BIRCH_BEES_0002.decorated(Features.Decorators.HEIGHTMAP_SQUARE)
 			.decorated(FeatureDecorator.COUNT_EXTRA.configured(new FrequencyWithExtraChanceDecoratorConfiguration(10, 0.1F, 1)))
 	);
 	public static final ConfiguredFeature<?, ?> TREES_MOUNTAIN_EDGE = register(

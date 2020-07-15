@@ -44,7 +44,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.PosAndRot;
 import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -62,7 +61,7 @@ public class MultiPlayerGameMode {
 	private boolean isDestroying;
 	private GameType localPlayerMode = GameType.SURVIVAL;
 	private GameType previousLocalPlayerMode = GameType.NOT_SET;
-	private final Object2ObjectLinkedOpenHashMap<Pair<BlockPos, ServerboundPlayerActionPacket.Action>, PosAndRot> unAckedActions = new Object2ObjectLinkedOpenHashMap<>();
+	private final Object2ObjectLinkedOpenHashMap<Pair<BlockPos, ServerboundPlayerActionPacket.Action>, Vec3> unAckedActions = new Object2ObjectLinkedOpenHashMap<>();
 	private int carriedIndex;
 
 	public MultiPlayerGameMode(Minecraft minecraft, ClientPacketListener clientPacketListener) {
@@ -418,19 +417,18 @@ public class MultiPlayerGameMode {
 
 	private void sendBlockAction(ServerboundPlayerActionPacket.Action action, BlockPos blockPos, Direction direction) {
 		LocalPlayer localPlayer = this.minecraft.player;
-		this.unAckedActions.put(Pair.of(blockPos, action), new PosAndRot(localPlayer.position(), localPlayer.xRot, localPlayer.yRot));
+		this.unAckedActions.put(Pair.of(blockPos, action), localPlayer.position());
 		this.connection.send(new ServerboundPlayerActionPacket(action, blockPos, direction));
 	}
 
 	public void handleBlockBreakAck(ClientLevel clientLevel, BlockPos blockPos, BlockState blockState, ServerboundPlayerActionPacket.Action action, boolean bl) {
-		PosAndRot posAndRot = this.unAckedActions.remove(Pair.of(blockPos, action));
+		Vec3 vec3 = this.unAckedActions.remove(Pair.of(blockPos, action));
 		BlockState blockState2 = clientLevel.getBlockState(blockPos);
-		if ((posAndRot == null || !bl || action != ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK && blockState2 != blockState)
-			&& blockState2 != blockState) {
+		if ((vec3 == null || !bl || action != ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK && blockState2 != blockState) && blockState2 != blockState) {
 			clientLevel.setKnownState(blockPos, blockState);
-			if (posAndRot != null) {
-				Vec3 vec3 = posAndRot.pos();
-				this.minecraft.player.absMoveTo(vec3.x, vec3.y, vec3.z, posAndRot.yRot(), posAndRot.xRot());
+			Player player = this.minecraft.player;
+			if (vec3 != null && clientLevel == player.level && player.isColliding(blockPos, blockState)) {
+				player.absMoveTo(vec3.x, vec3.y, vec3.z);
 			}
 		}
 

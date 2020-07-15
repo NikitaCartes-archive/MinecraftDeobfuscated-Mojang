@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.AngleArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
@@ -22,21 +23,33 @@ public class SetSpawnCommand {
 					commandContext -> setSpawn(
 							commandContext.getSource(),
 							Collections.singleton(commandContext.getSource().getPlayerOrException()),
-							new BlockPos(commandContext.getSource().getPosition())
+							new BlockPos(commandContext.getSource().getPosition()),
+							0.0F
 						)
 				)
 				.then(
 					Commands.argument("targets", EntityArgument.players())
 						.executes(
 							commandContext -> setSpawn(
-									commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), new BlockPos(commandContext.getSource().getPosition())
+									commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), new BlockPos(commandContext.getSource().getPosition()), 0.0F
 								)
 						)
 						.then(
 							Commands.argument("pos", BlockPosArgument.blockPos())
 								.executes(
 									commandContext -> setSpawn(
-											commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), BlockPosArgument.getOrLoadBlockPos(commandContext, "pos")
+											commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), BlockPosArgument.getOrLoadBlockPos(commandContext, "pos"), 0.0F
+										)
+								)
+								.then(
+									Commands.argument("angle", AngleArgument.angle())
+										.executes(
+											commandContext -> setSpawn(
+													commandContext.getSource(),
+													EntityArgument.getPlayers(commandContext, "targets"),
+													BlockPosArgument.getOrLoadBlockPos(commandContext, "pos"),
+													AngleArgument.getAngle(commandContext, "angle")
+												)
 										)
 								)
 						)
@@ -44,11 +57,11 @@ public class SetSpawnCommand {
 		);
 	}
 
-	private static int setSpawn(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, BlockPos blockPos) {
+	private static int setSpawn(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, BlockPos blockPos, float f) {
 		ResourceKey<Level> resourceKey = commandSourceStack.getLevel().dimension();
 
 		for (ServerPlayer serverPlayer : collection) {
-			serverPlayer.setRespawnPosition(resourceKey, blockPos, true, false);
+			serverPlayer.setRespawnPosition(resourceKey, blockPos, f, true, false);
 		}
 
 		String string = resourceKey.location().toString();
@@ -59,6 +72,7 @@ public class SetSpawnCommand {
 					blockPos.getX(),
 					blockPos.getY(),
 					blockPos.getZ(),
+					f,
 					string,
 					((ServerPlayer)collection.iterator().next()).getDisplayName()
 				),
@@ -66,7 +80,7 @@ public class SetSpawnCommand {
 			);
 		} else {
 			commandSourceStack.sendSuccess(
-				new TranslatableComponent("commands.spawnpoint.success.multiple", blockPos.getX(), blockPos.getY(), blockPos.getZ(), string, collection.size()), true
+				new TranslatableComponent("commands.spawnpoint.success.multiple", blockPos.getX(), blockPos.getY(), blockPos.getZ(), f, string, collection.size()), true
 			);
 		}
 

@@ -26,6 +26,7 @@ public class RenderBuffers {
 		put(object2ObjectLinkedOpenHashMap, RenderType.armorEntityGlint());
 		put(object2ObjectLinkedOpenHashMap, RenderType.glint());
 		put(object2ObjectLinkedOpenHashMap, RenderType.glintDirect());
+		put(object2ObjectLinkedOpenHashMap, RenderType.glintTranslucent());
 		put(object2ObjectLinkedOpenHashMap, RenderType.entityGlint());
 		put(object2ObjectLinkedOpenHashMap, RenderType.entityGlintDirect());
 		put(object2ObjectLinkedOpenHashMap, RenderType.waterMask());

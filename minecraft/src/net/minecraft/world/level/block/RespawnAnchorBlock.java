@@ -68,7 +68,7 @@ public class RespawnAnchorBlock extends Block {
 			if (!level.isClientSide) {
 				ServerPlayer serverPlayer = (ServerPlayer)player;
 				if (serverPlayer.getRespawnDimension() != level.dimension() || !serverPlayer.getRespawnPosition().equals(blockPos)) {
-					serverPlayer.setRespawnPosition(level.dimension(), blockPos, false, true);
+					serverPlayer.setRespawnPosition(level.dimension(), blockPos, 0.0F, false, true);
 					level.playSound(
 						null,
 						(double)blockPos.getX() + 0.5,

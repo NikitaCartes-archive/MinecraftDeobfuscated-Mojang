@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 
 public class SimpleRandomFeatureConfiguration implements FeatureConfiguration {
@@ -15,5 +16,10 @@ public class SimpleRandomFeatureConfiguration implements FeatureConfiguration {
 
 	public SimpleRandomFeatureConfiguration(List<Supplier<ConfiguredFeature<?, ?>>> list) {
 		this.features = list;
+	}
+
+	@Override
+	public Stream<ConfiguredFeature<?, ?>> getFeatures() {
+		return this.features.stream().flatMap(supplier -> ((ConfiguredFeature)supplier.get()).getFeatures());
 	}
 }

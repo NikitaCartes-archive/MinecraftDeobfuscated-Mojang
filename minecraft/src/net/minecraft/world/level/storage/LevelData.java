@@ -12,6 +12,8 @@ public interface LevelData {
 
 	int getZSpawn();
 
+	float getSpawnAngle();
+
 	long getGameTime();
 
 	long getDayTime();

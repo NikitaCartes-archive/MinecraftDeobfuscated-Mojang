@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import java.util.Random;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.Features;
@@ -44,8 +45,7 @@ public class ConfiguredFeature<FC extends FeatureConfiguration, F extends Featur
 	}
 
 	public ConfiguredFeature<?, ?> decorated(ConfiguredDecorator<?> configuredDecorator) {
-		Feature<DecoratedFeatureConfiguration> feature = this.feature instanceof AbstractFlowerFeature ? Feature.DECORATED_FLOWER : Feature.DECORATED;
-		return feature.configured(new DecoratedFeatureConfiguration(() -> this, configuredDecorator));
+		return Feature.DECORATED.configured(new DecoratedFeatureConfiguration(() -> this, configuredDecorator));
 	}
 
 	public WeightedConfiguredFeature weighted(float f) {
@@ -54,5 +54,9 @@ public class ConfiguredFeature<FC extends FeatureConfiguration, F extends Featur
 
 	public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos) {
 		return this.feature.place(worldGenLevel, chunkGenerator, random, blockPos, this.config);
+	}
+
+	public Stream<ConfiguredFeature<?, ?>> getFeatures() {
+		return Stream.concat(Stream.of(this), this.config.getFeatures());
 	}
 }

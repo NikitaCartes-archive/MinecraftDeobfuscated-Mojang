@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.CreateBuffetWorldScreen;
@@ -32,7 +33,7 @@ public abstract class WorldPreset {
 	public static final WorldPreset NORMAL = new WorldPreset("default") {
 		@Override
 		protected ChunkGenerator generator(long l) {
-			return new NoiseBasedChunkGenerator(new OverworldBiomeSource(l, false, false), l, NoiseGeneratorSettings.Preset.OVERWORLD.settings());
+			return new NoiseBasedChunkGenerator(new OverworldBiomeSource(l, false, false), l, () -> NoiseGeneratorSettings.OVERWORLD);
 		}
 	};
 	private static final WorldPreset FLAT = new WorldPreset("flat") {
@@ -44,19 +45,19 @@ public abstract class WorldPreset {
 	private static final WorldPreset LARGE_BIOMES = new WorldPreset("large_biomes") {
 		@Override
 		protected ChunkGenerator generator(long l) {
-			return new NoiseBasedChunkGenerator(new OverworldBiomeSource(l, false, true), l, NoiseGeneratorSettings.Preset.OVERWORLD.settings());
+			return new NoiseBasedChunkGenerator(new OverworldBiomeSource(l, false, true), l, () -> NoiseGeneratorSettings.OVERWORLD);
 		}
 	};
 	public static final WorldPreset AMPLIFIED = new WorldPreset("amplified") {
 		@Override
 		protected ChunkGenerator generator(long l) {
-			return new NoiseBasedChunkGenerator(new OverworldBiomeSource(l, false, false), l, NoiseGeneratorSettings.Preset.AMPLIFIED.settings());
+			return new NoiseBasedChunkGenerator(new OverworldBiomeSource(l, false, false), l, () -> NoiseGeneratorSettings.AMPLIFIED);
 		}
 	};
 	private static final WorldPreset SINGLE_BIOME_SURFACE = new WorldPreset("single_biome_surface") {
 		@Override
 		protected ChunkGenerator generator(long l) {
-			return new NoiseBasedChunkGenerator(new FixedBiomeSource(Biomes.PLAINS), l, NoiseGeneratorSettings.Preset.OVERWORLD.settings());
+			return new NoiseBasedChunkGenerator(new FixedBiomeSource(Biomes.PLAINS), l, () -> NoiseGeneratorSettings.OVERWORLD);
 		}
 	};
 	private static final WorldPreset SINGLE_BIOME_CAVES = new WorldPreset("single_biome_caves") {
@@ -69,13 +70,13 @@ public abstract class WorldPreset {
 
 		@Override
 		protected ChunkGenerator generator(long l) {
-			return new NoiseBasedChunkGenerator(new FixedBiomeSource(Biomes.PLAINS), l, NoiseGeneratorSettings.Preset.CAVES.settings());
+			return new NoiseBasedChunkGenerator(new FixedBiomeSource(Biomes.PLAINS), l, () -> NoiseGeneratorSettings.CAVES);
 		}
 	};
 	private static final WorldPreset SINGLE_BIOME_FLOATING_ISLANDS = new WorldPreset("single_biome_floating_islands") {
 		@Override
 		protected ChunkGenerator generator(long l) {
-			return new NoiseBasedChunkGenerator(new FixedBiomeSource(Biomes.PLAINS), l, NoiseGeneratorSettings.Preset.FLOATING_ISLANDS.settings());
+			return new NoiseBasedChunkGenerator(new FixedBiomeSource(Biomes.PLAINS), l, () -> NoiseGeneratorSettings.FLOATING_ISLANDS);
 		}
 	};
 	private static final WorldPreset DEBUG = new WorldPreset("debug_all_block_states") {
@@ -135,20 +136,20 @@ public abstract class WorldPreset {
 
 	private static WorldGenSettings fromBuffetSettings(WorldGenSettings worldGenSettings, WorldPreset worldPreset, Biome biome) {
 		BiomeSource biomeSource = new FixedBiomeSource(biome);
-		NoiseGeneratorSettings noiseGeneratorSettings;
+		Supplier<NoiseGeneratorSettings> supplier;
 		if (worldPreset == SINGLE_BIOME_CAVES) {
-			noiseGeneratorSettings = NoiseGeneratorSettings.Preset.CAVES.settings();
+			supplier = () -> NoiseGeneratorSettings.CAVES;
 		} else if (worldPreset == SINGLE_BIOME_FLOATING_ISLANDS) {
-			noiseGeneratorSettings = NoiseGeneratorSettings.Preset.FLOATING_ISLANDS.settings();
+			supplier = () -> NoiseGeneratorSettings.FLOATING_ISLANDS;
 		} else {
-			noiseGeneratorSettings = NoiseGeneratorSettings.Preset.OVERWORLD.settings();
+			supplier = () -> NoiseGeneratorSettings.OVERWORLD;
 		}
 
 		return new WorldGenSettings(
 			worldGenSettings.seed(),
 			worldGenSettings.generateFeatures(),
 			worldGenSettings.generateBonusChest(),
-			WorldGenSettings.withOverworld(worldGenSettings.dimensions(), new NoiseBasedChunkGenerator(biomeSource, worldGenSettings.seed(), noiseGeneratorSettings))
+			WorldGenSettings.withOverworld(worldGenSettings.dimensions(), new NoiseBasedChunkGenerator(biomeSource, worldGenSettings.seed(), supplier))
 		);
 	}
 

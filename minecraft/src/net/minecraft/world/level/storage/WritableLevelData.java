@@ -9,9 +9,12 @@ public interface WritableLevelData extends LevelData {
 
 	void setZSpawn(int i);
 
-	default void setSpawn(BlockPos blockPos) {
+	void setSpawnAngle(float f);
+
+	default void setSpawn(BlockPos blockPos, float f) {
 		this.setXSpawn(blockPos.getX());
 		this.setYSpawn(blockPos.getY());
 		this.setZSpawn(blockPos.getZ());
+		this.setSpawnAngle(f);
 	}
 }

@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.objects.ObjectListIterator;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -88,17 +89,18 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	protected final BlockState defaultBlock;
 	protected final BlockState defaultFluid;
 	private final long seed;
-	protected final NoiseGeneratorSettings settings;
+	protected final Supplier<NoiseGeneratorSettings> settings;
 	private final int height;
 
-	public NoiseBasedChunkGenerator(BiomeSource biomeSource, long l, NoiseGeneratorSettings noiseGeneratorSettings) {
-		this(biomeSource, biomeSource, l, noiseGeneratorSettings);
+	public NoiseBasedChunkGenerator(BiomeSource biomeSource, long l, Supplier<NoiseGeneratorSettings> supplier) {
+		this(biomeSource, biomeSource, l, supplier);
 	}
 
-	private NoiseBasedChunkGenerator(BiomeSource biomeSource, BiomeSource biomeSource2, long l, NoiseGeneratorSettings noiseGeneratorSettings) {
-		super(biomeSource, biomeSource2, noiseGeneratorSettings.structureSettings(), l);
+	private NoiseBasedChunkGenerator(BiomeSource biomeSource, BiomeSource biomeSource2, long l, Supplier<NoiseGeneratorSettings> supplier) {
+		super(biomeSource, biomeSource2, ((NoiseGeneratorSettings)supplier.get()).structureSettings(), l);
 		this.seed = l;
-		this.settings = noiseGeneratorSettings;
+		NoiseGeneratorSettings noiseGeneratorSettings = (NoiseGeneratorSettings)supplier.get();
+		this.settings = supplier;
 		NoiseSettings noiseSettings = noiseGeneratorSettings.noiseSettings();
 		this.height = noiseSettings.height();
 		this.chunkHeight = noiseSettings.noiseSizeVertical() * 4;
@@ -137,8 +139,8 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		return new NoiseBasedChunkGenerator(this.biomeSource.withSeed(l), l, this.settings);
 	}
 
-	public boolean stable(long l, NoiseGeneratorSettings.Preset preset) {
-		return this.seed == l && this.settings.stable(preset);
+	public boolean stable(long l, NoiseGeneratorSettings noiseGeneratorSettings) {
+		return this.seed == l && ((NoiseGeneratorSettings)this.settings.get()).stable(noiseGeneratorSettings);
 	}
 
 	private double sampleAndClampNoise(int i, int j, int k, double d, double e, double f, double g) {
@@ -186,7 +188,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	}
 
 	private void fillNoiseColumn(double[] ds, int i, int j) {
-		NoiseSettings noiseSettings = this.settings.noiseSettings();
+		NoiseSettings noiseSettings = ((NoiseGeneratorSettings)this.settings.get()).noiseSettings();
 		double d;
 		double e;
 		if (this.islandNoise != null) {
@@ -382,8 +384,9 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 		int i = chunkAccess.getPos().getMinBlockX();
 		int j = chunkAccess.getPos().getMinBlockZ();
-		int k = this.settings.getBedrockFloorPosition();
-		int l = this.height - 1 - this.settings.getBedrockRoofPosition();
+		NoiseGeneratorSettings noiseGeneratorSettings = (NoiseGeneratorSettings)this.settings.get();
+		int k = noiseGeneratorSettings.getBedrockFloorPosition();
+		int l = this.height - 1 - noiseGeneratorSettings.getBedrockRoofPosition();
 		int m = 5;
 		boolean bl = l + 4 >= 0 && l < this.height;
 		boolean bl2 = k + 4 >= 0 && k < this.height;
@@ -584,7 +587,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 
 	@Override
 	public int getSeaLevel() {
-		return this.settings.seaLevel();
+		return ((NoiseGeneratorSettings)this.settings.get()).seaLevel();
 	}
 
 	@Override
@@ -618,7 +621,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 
 	@Override
 	public void spawnOriginalMobs(WorldGenRegion worldGenRegion) {
-		if (!this.settings.disableMobGeneration()) {
+		if (!((NoiseGeneratorSettings)this.settings.get()).disableMobGeneration()) {
 			int i = worldGenRegion.getCenterX();
 			int j = worldGenRegion.getCenterZ();
 			Biome biome = worldGenRegion.getBiome(new ChunkPos(i, j).getWorldPosition());

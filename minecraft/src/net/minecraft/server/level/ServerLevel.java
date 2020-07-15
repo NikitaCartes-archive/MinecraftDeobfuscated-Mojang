@@ -1174,12 +1174,12 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		return this.getServer().overworld().getDataStorage().<MapIndex>computeIfAbsent(MapIndex::new, "idcounts").getFreeAuxValueForMap();
 	}
 
-	public void setDefaultSpawnPos(BlockPos blockPos) {
+	public void setDefaultSpawnPos(BlockPos blockPos, float f) {
 		ChunkPos chunkPos = new ChunkPos(new BlockPos(this.levelData.getXSpawn(), 0, this.levelData.getZSpawn()));
-		this.levelData.setSpawn(blockPos);
+		this.levelData.setSpawn(blockPos, f);
 		this.getChunkSource().removeRegionTicket(TicketType.START, chunkPos, 11, Unit.INSTANCE);
 		this.getChunkSource().addRegionTicket(TicketType.START, new ChunkPos(blockPos), 11, Unit.INSTANCE);
-		this.getServer().getPlayerList().broadcastAll(new ClientboundSetDefaultSpawnPositionPacket(blockPos));
+		this.getServer().getPlayerList().broadcastAll(new ClientboundSetDefaultSpawnPositionPacket(blockPos, f));
 	}
 
 	public BlockPos getSharedSpawnPos() {
@@ -1189,6 +1189,10 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		}
 
 		return blockPos;
+	}
+
+	public float getSharedSpawnAngle() {
+		return this.levelData.getSpawnAngle();
 	}
 
 	public LongSet getForcedChunks() {

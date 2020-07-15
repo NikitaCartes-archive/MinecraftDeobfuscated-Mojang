@@ -41,6 +41,9 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	public static final Feature<NoneFeatureConfiguration> NO_OP = register("no_op", new NoOpFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<TreeConfiguration> TREE = register("tree", new TreeFeature(TreeConfiguration.CODEC));
 	public static final AbstractFlowerFeature<RandomPatchConfiguration> FLOWER = register("flower", new DefaultFlowerFeature(RandomPatchConfiguration.CODEC));
+	public static final AbstractFlowerFeature<RandomPatchConfiguration> NO_BONEMEAL_FLOWER = register(
+		"no_bonemeal_flower", new DefaultFlowerFeature(RandomPatchConfiguration.CODEC)
+	);
 	public static final Feature<RandomPatchConfiguration> RANDOM_PATCH = register("random_patch", new RandomPatchFeature(RandomPatchConfiguration.CODEC));
 	public static final Feature<BlockPileConfiguration> BLOCK_PILE = register("block_pile", new BlockPileFeature(BlockPileConfiguration.CODEC));
 	public static final Feature<SpringConfiguration> SPRING = register("spring_feature", new SpringFeature(SpringConfiguration.CODEC));
@@ -105,9 +108,6 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 		"random_boolean_selector", new RandomBooleanSelectorFeature(RandomBooleanFeatureConfiguration.CODEC)
 	);
 	public static final Feature<DecoratedFeatureConfiguration> DECORATED = register("decorated", new DecoratedFeature(DecoratedFeatureConfiguration.CODEC));
-	public static final Feature<DecoratedFeatureConfiguration> DECORATED_FLOWER = register(
-		"decorated_flower", new DecoratedFlowerFeature(DecoratedFeatureConfiguration.CODEC)
-	);
 	private final Codec<ConfiguredFeature<FC, Feature<FC>>> configuredCodec;
 
 	private static <C extends FeatureConfiguration, F extends Feature<C>> F register(String string, F feature) {

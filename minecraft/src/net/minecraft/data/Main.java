@@ -22,6 +22,7 @@ import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.data.tags.EntityTypeTagsProvider;
 import net.minecraft.data.tags.FluidTagsProvider;
 import net.minecraft.data.tags.ItemTagsProvider;
+import net.minecraft.data.worldgen.biome.BiomeReport;
 
 public class Main {
 	public static void main(String[] strings) throws IOException {
@@ -82,6 +83,7 @@ public class Main {
 			dataGenerator.addProvider(new BlockListReport(dataGenerator));
 			dataGenerator.addProvider(new RegistryDumpReport(dataGenerator));
 			dataGenerator.addProvider(new CommandsReport(dataGenerator));
+			dataGenerator.addProvider(new BiomeReport(dataGenerator));
 		}
 
 		return dataGenerator;

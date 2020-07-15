@@ -101,7 +101,11 @@ public class IllagerModel<T extends AbstractIllager> extends ListModel<T> implem
 
 		AbstractIllager.IllagerArmPose illagerArmPose = abstractIllager.getArmPose();
 		if (illagerArmPose == AbstractIllager.IllagerArmPose.ATTACKING) {
-			AnimationUtils.swingWeaponDown(this.rightArm, this.leftArm, abstractIllager, this.attackTime, h);
+			if (abstractIllager.getMainHandItem().isEmpty()) {
+				AnimationUtils.animateZombieArms(this.leftArm, this.rightArm, true, this.attackTime, h);
+			} else {
+				AnimationUtils.swingWeaponDown(this.rightArm, this.leftArm, abstractIllager, this.attackTime, h);
+			}
 		} else if (illagerArmPose == AbstractIllager.IllagerArmPose.SPELLCASTING) {
 			this.rightArm.z = 0.0F;
 			this.rightArm.x = -5.0F;

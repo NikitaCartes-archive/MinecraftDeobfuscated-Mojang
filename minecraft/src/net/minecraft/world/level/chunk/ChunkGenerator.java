@@ -43,6 +43,7 @@ import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.StrongholdConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
@@ -171,9 +172,12 @@ public abstract class ChunkGenerator {
 
 			return blockPos2;
 		} else {
-			return structureFeature.getNearestGeneratedFeature(
-				serverLevel, serverLevel.structureFeatureManager(), blockPos, i, bl, serverLevel.getSeed(), this.settings.getConfig(structureFeature)
-			);
+			StructureFeatureConfiguration structureFeatureConfiguration = this.settings.getConfig(structureFeature);
+			return structureFeatureConfiguration == null
+				? null
+				: structureFeature.getNearestGeneratedFeature(
+					serverLevel, serverLevel.structureFeatureManager(), blockPos, i, bl, serverLevel.getSeed(), structureFeatureConfiguration
+				);
 		}
 	}
 
@@ -249,10 +253,13 @@ public abstract class ChunkGenerator {
 			SectionPos.of(chunkAccess.getPos(), 0), configuredStructureFeature.feature, chunkAccess
 		);
 		int i = structureStart != null ? structureStart.getReferences() : 0;
-		StructureStart<?> structureStart2 = configuredStructureFeature.generate(
-			registryAccess, this, this.biomeSource, structureManager, l, chunkPos, biome, i, this.settings.getConfig(configuredStructureFeature.feature)
-		);
-		structureFeatureManager.setStartForFeature(SectionPos.of(chunkAccess.getPos(), 0), configuredStructureFeature.feature, structureStart2, chunkAccess);
+		StructureFeatureConfiguration structureFeatureConfiguration = this.settings.getConfig(configuredStructureFeature.feature);
+		if (structureFeatureConfiguration != null) {
+			StructureStart<?> structureStart2 = configuredStructureFeature.generate(
+				registryAccess, this, this.biomeSource, structureManager, l, chunkPos, biome, i, structureFeatureConfiguration
+			);
+			structureFeatureManager.setStartForFeature(SectionPos.of(chunkAccess.getPos(), 0), configuredStructureFeature.feature, structureStart2, chunkAccess);
+		}
 	}
 
 	public void createReferences(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {

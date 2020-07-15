@@ -61,8 +61,9 @@ public class StructureSettings {
 		return this.structureConfig;
 	}
 
+	@Nullable
 	public StructureFeatureConfiguration getConfig(StructureFeature<?> structureFeature) {
-		return (StructureFeatureConfiguration)this.structureConfig.getOrDefault(structureFeature, new StructureFeatureConfiguration(1, 0, 0));
+		return (StructureFeatureConfiguration)this.structureConfig.get(structureFeature);
 	}
 
 	@Nullable

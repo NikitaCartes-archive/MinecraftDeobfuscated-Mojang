@@ -19,6 +19,11 @@ public class FancyFoliagePlacer extends BlobFoliagePlacer {
 	}
 
 	@Override
+	protected FoliagePlacerType<?> type() {
+		return FoliagePlacerType.FANCY_FOLIAGE_PLACER;
+	}
+
+	@Override
 	protected void createFoliage(
 		LevelSimulatedRW levelSimulatedRW,
 		Random random,

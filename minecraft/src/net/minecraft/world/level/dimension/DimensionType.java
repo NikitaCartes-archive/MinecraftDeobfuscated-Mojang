@@ -256,11 +256,11 @@ public class DimensionType {
 	}
 
 	private static ChunkGenerator defaultEndGenerator(long l) {
-		return new NoiseBasedChunkGenerator(new TheEndBiomeSource(l), l, NoiseGeneratorSettings.Preset.END.settings());
+		return new NoiseBasedChunkGenerator(new TheEndBiomeSource(l), l, () -> NoiseGeneratorSettings.END);
 	}
 
 	private static ChunkGenerator defaultNetherGenerator(long l) {
-		return new NoiseBasedChunkGenerator(MultiNoiseBiomeSource.Preset.NETHER.biomeSource(l), l, NoiseGeneratorSettings.Preset.NETHER.settings());
+		return new NoiseBasedChunkGenerator(MultiNoiseBiomeSource.Preset.NETHER.biomeSource(l), l, () -> NoiseGeneratorSettings.NETHER);
 	}
 
 	public static MappedRegistry<LevelStem> defaultDimensions(long l) {

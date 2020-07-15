@@ -8,6 +8,7 @@ import net.minecraft.client.model.ElytraModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -50,8 +51,8 @@ public class ElytraLayer<T extends LivingEntity, M extends EntityModel<T>> exten
 			poseStack.translate(0.0, 0.0, 0.125);
 			this.getParentModel().copyPropertiesTo(this.elytraModel);
 			this.elytraModel.setupAnim(livingEntity, f, g, j, k, l);
-			VertexConsumer vertexConsumer = ItemRenderer.getFoilBufferDirect(
-				multiBufferSource, this.elytraModel.renderType(resourceLocation), false, itemStack.hasFoil()
+			VertexConsumer vertexConsumer = ItemRenderer.getArmorFoilBuffer(
+				multiBufferSource, RenderType.armorCutoutNoCull(resourceLocation), false, itemStack.hasFoil()
 			);
 			this.elytraModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 			poseStack.popPose();

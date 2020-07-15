@@ -47,6 +47,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	private int xSpawn;
 	private int ySpawn;
 	private int zSpawn;
+	private float spawnAngle;
 	private long gameTime;
 	private long dayTime;
 	@Nullable
@@ -83,6 +84,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		int j,
 		int k,
 		int l,
+		float f,
 		long m,
 		long n,
 		int o,
@@ -110,6 +112,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		this.xSpawn = j;
 		this.ySpawn = k;
 		this.zSpawn = l;
+		this.spawnAngle = f;
 		this.gameTime = m;
 		this.dayTime = n;
 		this.version = o;
@@ -144,6 +147,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 			0,
 			0,
 			0,
+			0.0F,
 			0L,
 			0L,
 			19133,
@@ -191,6 +195,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 			dynamic.get("SpawnX").asInt(0),
 			dynamic.get("SpawnY").asInt(0),
 			dynamic.get("SpawnZ").asInt(0),
+			dynamic.get("SpawnAngle").asFloat(0.0F),
 			l,
 			dynamic.get("DayTime").asLong(l),
 			levelVersion.levelDataVersion(),
@@ -250,6 +255,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		compoundTag.putInt("SpawnX", this.xSpawn);
 		compoundTag.putInt("SpawnY", this.ySpawn);
 		compoundTag.putInt("SpawnZ", this.zSpawn);
+		compoundTag.putFloat("SpawnAngle", this.spawnAngle);
 		compoundTag.putLong("Time", this.gameTime);
 		compoundTag.putLong("DayTime", this.dayTime);
 		compoundTag.putLong("LastPlayed", Util.getEpochMillis());
@@ -301,6 +307,11 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	}
 
 	@Override
+	public float getSpawnAngle() {
+		return this.spawnAngle;
+	}
+
+	@Override
 	public long getGameTime() {
 		return this.gameTime;
 	}
@@ -346,6 +357,11 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	}
 
 	@Override
+	public void setSpawnAngle(float f) {
+		this.spawnAngle = f;
+	}
+
+	@Override
 	public void setGameTime(long l) {
 		this.gameTime = l;
 	}
@@ -356,10 +372,11 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	}
 
 	@Override
-	public void setSpawn(BlockPos blockPos) {
+	public void setSpawn(BlockPos blockPos, float f) {
 		this.xSpawn = blockPos.getX();
 		this.ySpawn = blockPos.getY();
 		this.zSpawn = blockPos.getZ();
+		this.spawnAngle = f;
 	}
 
 	@Override

@@ -92,7 +92,7 @@ public abstract class RenderType extends RenderStateShard {
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
-			.setTransparencyState(GLINT_DIRECT_TRANSPARENCY)
+			.setTransparencyState(GLINT_TRANSPARENCY)
 			.setTexturingState(GLINT_TEXTURING)
 			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
 			.createCompositeState(false)
@@ -107,9 +107,24 @@ public abstract class RenderType extends RenderStateShard {
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
-			.setTransparencyState(GLINT_DIRECT_TRANSPARENCY)
+			.setTransparencyState(GLINT_TRANSPARENCY)
 			.setTexturingState(ENTITY_GLINT_TEXTURING)
 			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
+			.createCompositeState(false)
+	);
+	private static final RenderType GLINT_TRANSLUCENT = create(
+		"glint_translucent",
+		DefaultVertexFormat.POSITION_TEX,
+		7,
+		256,
+		RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, true, false))
+			.setWriteMaskState(COLOR_WRITE)
+			.setCullState(NO_CULL)
+			.setDepthTestState(EQUAL_DEPTH_TEST)
+			.setTransparencyState(GLINT_TRANSPARENCY)
+			.setTexturingState(GLINT_TEXTURING)
+			.setOutputState(ITEM_ENTITY_TARGET)
 			.createCompositeState(false)
 	);
 	private static final RenderType GLINT = create(
@@ -123,7 +138,6 @@ public abstract class RenderType extends RenderStateShard {
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
 			.setTransparencyState(GLINT_TRANSPARENCY)
-			.setOutputState(ITEM_ENTITY_TARGET)
 			.setTexturingState(GLINT_TEXTURING)
 			.createCompositeState(false)
 	);
@@ -137,7 +151,7 @@ public abstract class RenderType extends RenderStateShard {
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
-			.setTransparencyState(GLINT_DIRECT_TRANSPARENCY)
+			.setTransparencyState(GLINT_TRANSPARENCY)
 			.setTexturingState(GLINT_TEXTURING)
 			.createCompositeState(false)
 	);
@@ -166,7 +180,7 @@ public abstract class RenderType extends RenderStateShard {
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
-			.setTransparencyState(GLINT_DIRECT_TRANSPARENCY)
+			.setTransparencyState(GLINT_TRANSPARENCY)
 			.setTexturingState(ENTITY_GLINT_TEXTURING)
 			.createCompositeState(false)
 	);
@@ -514,6 +528,10 @@ public abstract class RenderType extends RenderStateShard {
 
 	public static RenderType armorEntityGlint() {
 		return ARMOR_ENTITY_GLINT;
+	}
+
+	public static RenderType glintTranslucent() {
+		return GLINT_TRANSLUCENT;
 	}
 
 	public static RenderType glint() {

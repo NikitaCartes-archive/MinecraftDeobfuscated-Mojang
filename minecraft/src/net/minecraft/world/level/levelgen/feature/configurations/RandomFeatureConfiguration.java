@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.WeightedConfiguredFeature;
 
@@ -25,5 +26,13 @@ public class RandomFeatureConfiguration implements FeatureConfiguration {
 	private RandomFeatureConfiguration(List<WeightedConfiguredFeature> list, Supplier<ConfiguredFeature<?, ?>> supplier) {
 		this.features = list;
 		this.defaultFeature = supplier;
+	}
+
+	@Override
+	public Stream<ConfiguredFeature<?, ?>> getFeatures() {
+		return Stream.concat(
+			this.features.stream().flatMap(weightedConfiguredFeature -> ((ConfiguredFeature)weightedConfiguredFeature.feature.get()).getFeatures()),
+			((ConfiguredFeature)this.defaultFeature.get()).getFeatures()
+		);
 	}
 }

@@ -411,65 +411,40 @@ public class LocalPlayer extends AbstractClientPlayer {
 		}
 	}
 
-	@Override
-	protected void checkInBlock(double d, double e, double f) {
-		BlockPos blockPos = new BlockPos(d, e, f);
-		if (this.blocked(blockPos)) {
-			double g = d - (double)blockPos.getX();
-			double h = f - (double)blockPos.getZ();
+	private void moveTowardsClosestSpace(double d, double e) {
+		BlockPos blockPos = new BlockPos(d, this.getY(), e);
+		if (this.suffocatesAt(blockPos)) {
+			double f = d - (double)blockPos.getX();
+			double g = e - (double)blockPos.getZ();
 			Direction direction = null;
-			double i = 9999.0;
-			if (!this.blocked(blockPos.west()) && g < i) {
-				i = g;
-				direction = Direction.WEST;
-			}
+			double h = Double.MAX_VALUE;
+			Direction[] directions = new Direction[]{Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH};
 
-			if (!this.blocked(blockPos.east()) && 1.0 - g < i) {
-				i = 1.0 - g;
-				direction = Direction.EAST;
-			}
-
-			if (!this.blocked(blockPos.north()) && h < i) {
-				i = h;
-				direction = Direction.NORTH;
-			}
-
-			if (!this.blocked(blockPos.south()) && 1.0 - h < i) {
-				i = 1.0 - h;
-				direction = Direction.SOUTH;
+			for (Direction direction2 : directions) {
+				double i = direction2.getAxis().choose(f, 0.0, g);
+				double j = direction2.getAxisDirection() == Direction.AxisDirection.POSITIVE ? 1.0 - i : i;
+				if (j < h && !this.suffocatesAt(blockPos.relative(direction2))) {
+					h = j;
+					direction = direction2;
+				}
 			}
 
 			if (direction != null) {
 				Vec3 vec3 = this.getDeltaMovement();
-				switch (direction) {
-					case WEST:
-						this.setDeltaMovement(-0.1, vec3.y, vec3.z);
-						break;
-					case EAST:
-						this.setDeltaMovement(0.1, vec3.y, vec3.z);
-						break;
-					case NORTH:
-						this.setDeltaMovement(vec3.x, vec3.y, -0.1);
-						break;
-					case SOUTH:
-						this.setDeltaMovement(vec3.x, vec3.y, 0.1);
+				if (direction.getAxis() == Direction.Axis.X) {
+					this.setDeltaMovement(0.1 * (double)direction.getStepX(), vec3.y, vec3.z);
+				} else {
+					this.setDeltaMovement(vec3.x, vec3.y, 0.1 * (double)direction.getStepZ());
 				}
 			}
 		}
 	}
 
-	private boolean blocked(BlockPos blockPos) {
+	private boolean suffocatesAt(BlockPos blockPos) {
 		AABB aABB = this.getBoundingBox();
-		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
-
-		for (int i = Mth.floor(aABB.minY); i < Mth.ceil(aABB.maxY); i++) {
-			mutableBlockPos.setY(i);
-			if (!this.freeAt(mutableBlockPos)) {
-				return true;
-			}
-		}
-
-		return false;
+		AABB aABB2 = new AABB((double)blockPos.getX(), aABB.minY, (double)blockPos.getZ(), (double)blockPos.getX() + 1.0, aABB.maxY, (double)blockPos.getZ() + 1.0)
+			.deflate(1.0E-7);
+		return !this.level.noBlockCollision(this, aABB2, (blockState, blockPosx) -> blockState.isSuffocating(this.level, blockPosx));
 	}
 
 	@Override
@@ -680,10 +655,10 @@ public class LocalPlayer extends AbstractClientPlayer {
 		}
 
 		if (!this.noPhysics) {
-			this.checkInBlock(this.getX() - (double)this.getBbWidth() * 0.35, this.getY() + 0.5, this.getZ() + (double)this.getBbWidth() * 0.35);
-			this.checkInBlock(this.getX() - (double)this.getBbWidth() * 0.35, this.getY() + 0.5, this.getZ() - (double)this.getBbWidth() * 0.35);
-			this.checkInBlock(this.getX() + (double)this.getBbWidth() * 0.35, this.getY() + 0.5, this.getZ() - (double)this.getBbWidth() * 0.35);
-			this.checkInBlock(this.getX() + (double)this.getBbWidth() * 0.35, this.getY() + 0.5, this.getZ() + (double)this.getBbWidth() * 0.35);
+			this.moveTowardsClosestSpace(this.getX() - (double)this.getBbWidth() * 0.35, this.getZ() + (double)this.getBbWidth() * 0.35);
+			this.moveTowardsClosestSpace(this.getX() - (double)this.getBbWidth() * 0.35, this.getZ() - (double)this.getBbWidth() * 0.35);
+			this.moveTowardsClosestSpace(this.getX() + (double)this.getBbWidth() * 0.35, this.getZ() - (double)this.getBbWidth() * 0.35);
+			this.moveTowardsClosestSpace(this.getX() + (double)this.getBbWidth() * 0.35, this.getZ() + (double)this.getBbWidth() * 0.35);
 		}
 
 		if (bl2) {

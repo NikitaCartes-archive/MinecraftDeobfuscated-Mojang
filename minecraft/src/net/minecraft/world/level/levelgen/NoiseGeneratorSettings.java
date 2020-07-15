@@ -1,16 +1,16 @@
 package net.minecraft.world.level.levelgen;
 
 import com.google.common.collect.Maps;
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import java.util.function.Supplier;
+import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -18,7 +18,7 @@ import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 
 public final class NoiseGeneratorSettings {
-	public static final Codec<NoiseGeneratorSettings> DIRECT_CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<NoiseGeneratorSettings> DIRECT_CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 					StructureSettings.CODEC.fieldOf("structures").forGetter(NoiseGeneratorSettings::structureSettings),
 					NoiseSettings.CODEC.fieldOf("noise").forGetter(NoiseGeneratorSettings::noiseSettings),
@@ -31,11 +31,7 @@ public final class NoiseGeneratorSettings {
 				)
 				.apply(instance, NoiseGeneratorSettings::new)
 	);
-	public static final Codec<NoiseGeneratorSettings> CODEC = Codec.either(NoiseGeneratorSettings.Preset.CODEC, DIRECT_CODEC)
-		.xmap(
-			either -> either.map(NoiseGeneratorSettings.Preset::settings, Function.identity()),
-			noiseGeneratorSettings -> (Either)noiseGeneratorSettings.preset.map(Either::left).orElseGet(() -> Either.right(noiseGeneratorSettings))
-		);
+	public static final Codec<Supplier<NoiseGeneratorSettings>> CODEC = RegistryFileCodec.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, DIRECT_CODEC);
 	private final StructureSettings structureSettings;
 	private final NoiseSettings noiseSettings;
 	private final BlockState defaultBlock;
@@ -44,7 +40,21 @@ public final class NoiseGeneratorSettings {
 	private final int bedrockFloorPosition;
 	private final int seaLevel;
 	private final boolean disableMobGeneration;
-	private final Optional<NoiseGeneratorSettings.Preset> preset;
+	private final Optional<ResourceLocation> preset;
+	public static final NoiseGeneratorSettings OVERWORLD = register(overworld(new StructureSettings(true), false, new ResourceLocation("overworld")));
+	public static final NoiseGeneratorSettings AMPLIFIED = register(overworld(new StructureSettings(true), true, new ResourceLocation("amplified")));
+	public static final NoiseGeneratorSettings NETHER = register(
+		nether(new StructureSettings(false), Blocks.NETHERRACK.defaultBlockState(), Blocks.LAVA.defaultBlockState(), new ResourceLocation("nether"))
+	);
+	public static final NoiseGeneratorSettings END = register(
+		end(new StructureSettings(false), Blocks.END_STONE.defaultBlockState(), Blocks.AIR.defaultBlockState(), new ResourceLocation("end"), true, true)
+	);
+	public static final NoiseGeneratorSettings CAVES = register(
+		nether(new StructureSettings(false), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), new ResourceLocation("caves"))
+	);
+	public static final NoiseGeneratorSettings FLOATING_ISLANDS = register(
+		end(new StructureSettings(false), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), new ResourceLocation("floating_islands"), false, false)
+	);
 
 	private NoiseGeneratorSettings(
 		StructureSettings structureSettings, NoiseSettings noiseSettings, BlockState blockState, BlockState blockState2, int i, int j, int k, boolean bl
@@ -61,7 +71,7 @@ public final class NoiseGeneratorSettings {
 		int j,
 		int k,
 		boolean bl,
-		Optional<NoiseGeneratorSettings.Preset> optional
+		Optional<ResourceLocation> optional
 	) {
 		this.structureSettings = structureSettings;
 		this.noiseSettings = noiseSettings;
@@ -107,139 +117,102 @@ public final class NoiseGeneratorSettings {
 		return this.disableMobGeneration;
 	}
 
-	public boolean stable(NoiseGeneratorSettings.Preset preset) {
-		return Objects.equals(this.preset, Optional.of(preset));
+	public boolean stable(NoiseGeneratorSettings noiseGeneratorSettings) {
+		return Objects.equals(this.preset, noiseGeneratorSettings.preset);
 	}
 
-	public static class Preset {
-		private static final Map<ResourceLocation, NoiseGeneratorSettings.Preset> BY_NAME = Maps.<ResourceLocation, NoiseGeneratorSettings.Preset>newHashMap();
-		public static final Codec<NoiseGeneratorSettings.Preset> CODEC = ResourceLocation.CODEC
-			.<NoiseGeneratorSettings.Preset>flatXmap(
-				resourceLocation -> (DataResult)Optional.ofNullable(BY_NAME.get(resourceLocation))
-						.map(DataResult::success)
-						.orElseGet(() -> DataResult.error("Unknown preset: " + resourceLocation)),
-				preset -> DataResult.success(preset.name)
-			)
-			.stable();
-		public static final NoiseGeneratorSettings.Preset OVERWORLD = new NoiseGeneratorSettings.Preset(
-			"overworld", preset -> overworld(new StructureSettings(true), false, preset)
+	private static NoiseGeneratorSettings register(NoiseGeneratorSettings noiseGeneratorSettings) {
+		BuiltinRegistries.register(
+			BuiltinRegistries.NOISE_GENERATOR_SETTINGS, (ResourceLocation)noiseGeneratorSettings.preset.orElseThrow(IllegalStateException::new), noiseGeneratorSettings
 		);
-		public static final NoiseGeneratorSettings.Preset AMPLIFIED = new NoiseGeneratorSettings.Preset(
-			"amplified", preset -> overworld(new StructureSettings(true), true, preset)
-		);
-		public static final NoiseGeneratorSettings.Preset NETHER = new NoiseGeneratorSettings.Preset(
-			"nether", preset -> nether(new StructureSettings(false), Blocks.NETHERRACK.defaultBlockState(), Blocks.LAVA.defaultBlockState(), preset)
-		);
-		public static final NoiseGeneratorSettings.Preset END = new NoiseGeneratorSettings.Preset(
-			"end", preset -> end(new StructureSettings(false), Blocks.END_STONE.defaultBlockState(), Blocks.AIR.defaultBlockState(), preset, true, true)
-		);
-		public static final NoiseGeneratorSettings.Preset CAVES = new NoiseGeneratorSettings.Preset(
-			"caves", preset -> nether(new StructureSettings(false), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), preset)
-		);
-		public static final NoiseGeneratorSettings.Preset FLOATING_ISLANDS = new NoiseGeneratorSettings.Preset(
-			"floating_islands", preset -> end(new StructureSettings(false), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), preset, false, false)
-		);
-		private final Component description;
-		private final ResourceLocation name;
-		private final NoiseGeneratorSettings settings;
+		return noiseGeneratorSettings;
+	}
 
-		public Preset(String string, Function<NoiseGeneratorSettings.Preset, NoiseGeneratorSettings> function) {
-			this.name = new ResourceLocation(string);
-			this.description = new TranslatableComponent("generator.noise." + string);
-			this.settings = (NoiseGeneratorSettings)function.apply(this);
-			BY_NAME.put(this.name, this);
-		}
-
-		public NoiseGeneratorSettings settings() {
-			return this.settings;
-		}
-
-		private static NoiseGeneratorSettings end(
-			StructureSettings structureSettings, BlockState blockState, BlockState blockState2, NoiseGeneratorSettings.Preset preset, boolean bl, boolean bl2
-		) {
-			return new NoiseGeneratorSettings(
-				structureSettings,
-				new NoiseSettings(
-					128,
-					new NoiseSamplingSettings(2.0, 1.0, 80.0, 160.0),
-					new NoiseSlideSettings(-3000, 64, -46),
-					new NoiseSlideSettings(-30, 7, 1),
-					2,
-					1,
-					0.0,
-					0.0,
-					true,
-					false,
-					bl2,
-					false
-				),
-				blockState,
-				blockState2,
-				-10,
-				-10,
-				0,
-				bl,
-				Optional.of(preset)
-			);
-		}
-
-		private static NoiseGeneratorSettings nether(
-			StructureSettings structureSettings, BlockState blockState, BlockState blockState2, NoiseGeneratorSettings.Preset preset
-		) {
-			Map<StructureFeature<?>, StructureFeatureConfiguration> map = Maps.<StructureFeature<?>, StructureFeatureConfiguration>newHashMap(StructureSettings.DEFAULTS);
-			map.put(StructureFeature.RUINED_PORTAL, new StructureFeatureConfiguration(25, 10, 34222645));
-			return new NoiseGeneratorSettings(
-				new StructureSettings(Optional.ofNullable(structureSettings.stronghold()), map),
-				new NoiseSettings(
-					128,
-					new NoiseSamplingSettings(1.0, 3.0, 80.0, 60.0),
-					new NoiseSlideSettings(120, 3, 0),
-					new NoiseSlideSettings(320, 4, -1),
-					1,
-					2,
-					0.0,
-					0.019921875,
-					false,
-					false,
-					false,
-					false
-				),
-				blockState,
-				blockState2,
-				0,
-				0,
-				32,
+	private static NoiseGeneratorSettings end(
+		StructureSettings structureSettings, BlockState blockState, BlockState blockState2, ResourceLocation resourceLocation, boolean bl, boolean bl2
+	) {
+		return new NoiseGeneratorSettings(
+			structureSettings,
+			new NoiseSettings(
+				128,
+				new NoiseSamplingSettings(2.0, 1.0, 80.0, 160.0),
+				new NoiseSlideSettings(-3000, 64, -46),
+				new NoiseSlideSettings(-30, 7, 1),
+				2,
+				1,
+				0.0,
+				0.0,
+				true,
 				false,
-				Optional.of(preset)
-			);
-		}
+				bl2,
+				false
+			),
+			blockState,
+			blockState2,
+			-10,
+			-10,
+			0,
+			bl,
+			Optional.of(resourceLocation)
+		);
+	}
 
-		private static NoiseGeneratorSettings overworld(StructureSettings structureSettings, boolean bl, NoiseGeneratorSettings.Preset preset) {
-			double d = 0.9999999814507745;
-			return new NoiseGeneratorSettings(
-				structureSettings,
-				new NoiseSettings(
-					256,
-					new NoiseSamplingSettings(0.9999999814507745, 0.9999999814507745, 80.0, 160.0),
-					new NoiseSlideSettings(-10, 3, 0),
-					new NoiseSlideSettings(-30, 0, 0),
-					1,
-					2,
-					1.0,
-					-0.46875,
-					true,
-					true,
-					false,
-					bl
-				),
-				Blocks.STONE.defaultBlockState(),
-				Blocks.WATER.defaultBlockState(),
-				-10,
-				0,
-				63,
+	private static NoiseGeneratorSettings nether(
+		StructureSettings structureSettings, BlockState blockState, BlockState blockState2, ResourceLocation resourceLocation
+	) {
+		Map<StructureFeature<?>, StructureFeatureConfiguration> map = Maps.<StructureFeature<?>, StructureFeatureConfiguration>newHashMap(StructureSettings.DEFAULTS);
+		map.put(StructureFeature.RUINED_PORTAL, new StructureFeatureConfiguration(25, 10, 34222645));
+		return new NoiseGeneratorSettings(
+			new StructureSettings(Optional.ofNullable(structureSettings.stronghold()), map),
+			new NoiseSettings(
+				128,
+				new NoiseSamplingSettings(1.0, 3.0, 80.0, 60.0),
+				new NoiseSlideSettings(120, 3, 0),
+				new NoiseSlideSettings(320, 4, -1),
+				1,
+				2,
+				0.0,
+				0.019921875,
 				false,
-				Optional.of(preset)
-			);
-		}
+				false,
+				false,
+				false
+			),
+			blockState,
+			blockState2,
+			0,
+			0,
+			32,
+			false,
+			Optional.of(resourceLocation)
+		);
+	}
+
+	private static NoiseGeneratorSettings overworld(StructureSettings structureSettings, boolean bl, ResourceLocation resourceLocation) {
+		double d = 0.9999999814507745;
+		return new NoiseGeneratorSettings(
+			structureSettings,
+			new NoiseSettings(
+				256,
+				new NoiseSamplingSettings(0.9999999814507745, 0.9999999814507745, 80.0, 160.0),
+				new NoiseSlideSettings(-10, 3, 0),
+				new NoiseSlideSettings(-30, 0, 0),
+				1,
+				2,
+				1.0,
+				-0.46875,
+				true,
+				true,
+				false,
+				bl
+			),
+			Blocks.STONE.defaultBlockState(),
+			Blocks.WATER.defaultBlockState(),
+			-10,
+			0,
+			63,
+			false,
+			Optional.of(resourceLocation)
+		);
 	}
 }
