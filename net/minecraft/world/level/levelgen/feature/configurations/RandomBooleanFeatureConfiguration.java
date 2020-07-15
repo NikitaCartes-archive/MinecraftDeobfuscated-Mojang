@@ -8,6 +8,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
@@ -20,6 +21,11 @@ implements FeatureConfiguration {
     public RandomBooleanFeatureConfiguration(Supplier<ConfiguredFeature<?, ?>> supplier, Supplier<ConfiguredFeature<?, ?>> supplier2) {
         this.featureTrue = supplier;
         this.featureFalse = supplier2;
+    }
+
+    @Override
+    public Stream<ConfiguredFeature<?, ?>> getFeatures() {
+        return Stream.concat(this.featureTrue.get().getFeatures(), this.featureFalse.get().getFeatures());
     }
 }
 

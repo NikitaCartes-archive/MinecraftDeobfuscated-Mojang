@@ -14,6 +14,7 @@ import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.AbstractIllager;
 
 @Environment(value=EnvType.CLIENT)
@@ -112,7 +113,11 @@ HeadedModel {
         }
         AbstractIllager.IllagerArmPose illagerArmPose = ((AbstractIllager)abstractIllager).getArmPose();
         if (illagerArmPose == AbstractIllager.IllagerArmPose.ATTACKING) {
-            AnimationUtils.swingWeaponDown(this.rightArm, this.leftArm, abstractIllager, this.attackTime, h);
+            if (((LivingEntity)abstractIllager).getMainHandItem().isEmpty()) {
+                AnimationUtils.animateZombieArms(this.leftArm, this.rightArm, true, this.attackTime, h);
+            } else {
+                AnimationUtils.swingWeaponDown(this.rightArm, this.leftArm, abstractIllager, this.attackTime, h);
+            }
         } else if (illagerArmPose == AbstractIllager.IllagerArmPose.SPELLCASTING) {
             this.rightArm.z = 0.0f;
             this.rightArm.x = -5.0f;

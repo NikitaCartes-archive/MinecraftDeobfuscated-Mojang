@@ -159,13 +159,13 @@ extends LivingEntity {
     @Nullable
     public FishingHook fishing;
 
-    public Player(Level level, BlockPos blockPos, GameProfile gameProfile) {
+    public Player(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
         super((EntityType<? extends LivingEntity>)EntityType.PLAYER, level);
         this.setUUID(Player.createPlayerUUID(gameProfile));
         this.gameProfile = gameProfile;
         this.inventoryMenu = new InventoryMenu(this.inventory, !level.isClientSide, this);
         this.containerMenu = this.inventoryMenu;
-        this.moveTo((double)blockPos.getX() + 0.5, blockPos.getY() + 1, (double)blockPos.getZ() + 0.5, 0.0f, 0.0f);
+        this.moveTo((double)blockPos.getX() + 0.5, blockPos.getY() + 1, (double)blockPos.getZ() + 0.5, f, 0.0f);
         this.rotOffs = 180.0f;
     }
 
@@ -902,7 +902,7 @@ extends LivingEntity {
 
     @Override
     protected Vec3 maybeBackOffFromEdge(Vec3 vec3, MoverType moverType) {
-        if ((moverType == MoverType.SELF || moverType == MoverType.PLAYER) && this.isStayingOnGroundSurface() && this.isAboveGround()) {
+        if (!this.abilities.flying && (moverType == MoverType.SELF || moverType == MoverType.PLAYER) && this.isStayingOnGroundSurface() && this.isAboveGround()) {
             double d = vec3.x;
             double e = vec3.z;
             double f = 0.05;

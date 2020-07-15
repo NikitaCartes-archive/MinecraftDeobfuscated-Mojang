@@ -14,12 +14,14 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 public class ClientboundSetDefaultSpawnPositionPacket
 implements Packet<ClientGamePacketListener> {
     private BlockPos pos;
+    private float angle;
 
     public ClientboundSetDefaultSpawnPositionPacket() {
     }
 
-    public ClientboundSetDefaultSpawnPositionPacket(BlockPos blockPos) {
+    public ClientboundSetDefaultSpawnPositionPacket(BlockPos blockPos, float f) {
         this.pos = blockPos;
+        this.angle = f;
     }
 
     @Override
@@ -40,6 +42,11 @@ implements Packet<ClientGamePacketListener> {
     @Environment(value=EnvType.CLIENT)
     public BlockPos getPos() {
         return this.pos;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public float getAngle() {
+        return this.angle;
     }
 }
 

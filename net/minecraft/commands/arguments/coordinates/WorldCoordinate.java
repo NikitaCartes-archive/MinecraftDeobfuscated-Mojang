@@ -59,7 +59,7 @@ public class WorldCoordinate {
         return new WorldCoordinate(bl, d);
     }
 
-    private static boolean isRelative(StringReader stringReader) {
+    public static boolean isRelative(StringReader stringReader) {
         boolean bl;
         if (stringReader.peek() == '~') {
             bl = true;

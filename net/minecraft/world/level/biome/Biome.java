@@ -110,7 +110,7 @@ public class Biome {
         return long2FloatLinkedOpenHashMap;
     }));
 
-    protected Biome(BiomeBuilder biomeBuilder) {
+    public Biome(BiomeBuilder biomeBuilder) {
         if (biomeBuilder.surfaceBuilder == null || biomeBuilder.precipitation == null || biomeBuilder.biomeCategory == null || biomeBuilder.depth == null || biomeBuilder.scale == null || biomeBuilder.temperature == null || biomeBuilder.downfall == null || biomeBuilder.specialEffects == null) {
             throw new IllegalStateException("You are missing parameters to build a proper biome for " + this.getClass().getSimpleName() + "\n" + biomeBuilder);
         }
@@ -121,17 +121,17 @@ public class Biome {
         this.scale = biomeBuilder.scale.floatValue();
         this.temperature = biomeBuilder.temperature.floatValue();
         this.downfall = biomeBuilder.downfall.floatValue();
-        this.skyColor = this.calculateSkyColor();
+        this.skyColor = biomeBuilder.skyColor != null ? biomeBuilder.skyColor.intValue() : this.calculateSkyColor();
         this.parent = biomeBuilder.parent;
         this.specialEffects = biomeBuilder.specialEffects;
-        this.carvers = Maps.newHashMap();
+        this.carvers = Maps.newLinkedHashMap();
         this.structureStarts = Lists.newArrayList();
         this.features = Lists.newArrayList();
-        this.spawners = Maps.newHashMap();
+        this.spawners = Maps.newLinkedHashMap();
         for (MobCategory mobCategory : MobCategory.values()) {
             this.spawners.put(mobCategory, Lists.newArrayList());
         }
-        this.mobSpawnCosts = Maps.newHashMap();
+        this.mobSpawnCosts = Maps.newLinkedHashMap();
         this.flowerFeatures = Lists.newArrayList();
     }
 
@@ -151,7 +151,7 @@ public class Biome {
         this.spawners = map2;
         this.parent = optional.orElse(null);
         this.mobSpawnCosts = map3;
-        this.flowerFeatures = list.stream().flatMap(Collection::stream).map(Supplier::get).filter(configuredFeature -> configuredFeature.feature == Feature.DECORATED_FLOWER).collect(Collectors.toList());
+        this.flowerFeatures = list.stream().flatMap(Collection::stream).map(Supplier::get).flatMap(ConfiguredFeature::getFeatures).filter(configuredFeature -> configuredFeature.feature == Feature.FLOWER).collect(Collectors.toList());
     }
 
     public boolean isMutated() {
@@ -174,7 +174,7 @@ public class Biome {
         this.spawners.get(mobCategory).add(spawnerData);
     }
 
-    protected void addMobCharge(EntityType<?> entityType, double d, double e) {
+    public void addMobCharge(EntityType<?> entityType, double d, double e) {
         this.mobSpawnCosts.put(entityType, new MobSpawnCost(e, d));
     }
 
@@ -260,9 +260,7 @@ public class Biome {
     }
 
     public void addFeature(int i, Supplier<ConfiguredFeature<?, ?>> supplier) {
-        if (supplier.get().feature == Feature.DECORATED_FLOWER) {
-            this.flowerFeatures.add(supplier.get());
-        }
+        supplier.get().getFeatures().filter(configuredFeature -> configuredFeature.feature == Feature.FLOWER).forEach(this.flowerFeatures::add);
         while (this.features.size() <= i) {
             this.features.add(Lists.newArrayList());
         }
@@ -517,6 +515,8 @@ public class Biome {
         @Nullable
         private Float downfall;
         @Nullable
+        private Integer skyColor;
+        @Nullable
         private String parent;
         @Nullable
         private BiomeSpecialEffects specialEffects;
@@ -560,6 +560,11 @@ public class Biome {
             return this;
         }
 
+        public BiomeBuilder skyColor(int i) {
+            this.skyColor = i;
+            return this;
+        }
+
         public BiomeBuilder parent(@Nullable String string) {
             this.parent = string;
             return this;
@@ -571,7 +576,7 @@ public class Biome {
         }
 
         public String toString() {
-            return "BiomeBuilder{\nsurfaceBuilder=" + this.surfaceBuilder + ",\nprecipitation=" + this.precipitation + ",\nbiomeCategory=" + this.biomeCategory + ",\ndepth=" + this.depth + ",\nscale=" + this.scale + ",\ntemperature=" + this.temperature + ",\ndownfall=" + this.downfall + ",\nspecialEffects=" + this.specialEffects + ",\nparent='" + this.parent + '\'' + "\n" + '}';
+            return "BiomeBuilder{\nsurfaceBuilder=" + this.surfaceBuilder + ",\nprecipitation=" + this.precipitation + ",\nbiomeCategory=" + this.biomeCategory + ",\ndepth=" + this.depth + ",\nscale=" + this.scale + ",\ntemperature=" + this.temperature + ",\ndownfall=" + this.downfall + ",\nskyColor=" + this.skyColor + ",\nspecialEffects=" + this.specialEffects + ",\nparent='" + this.parent + '\'' + "\n" + '}';
         }
     }
 

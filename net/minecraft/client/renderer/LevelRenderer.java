@@ -1025,6 +1025,7 @@ AutoCloseable {
         bufferSource.endBatch(RenderType.armorEntityGlint());
         bufferSource.endBatch(RenderType.glint());
         bufferSource.endBatch(RenderType.glintDirect());
+        bufferSource.endBatch(RenderType.glintTranslucent());
         bufferSource.endBatch(RenderType.entityGlint());
         bufferSource.endBatch(RenderType.entityGlintDirect());
         bufferSource.endBatch(RenderType.waterMask());
@@ -1047,12 +1048,12 @@ AutoCloseable {
         } else {
             profilerFiller.popPush("translucent");
             this.renderChunkLayer(RenderType.translucent(), poseStack, d, e, g);
+            bufferSource.endBatch(RenderType.lines());
+            bufferSource.endBatch();
             profilerFiller.popPush("string");
             this.renderChunkLayer(RenderType.tripwire(), poseStack, d, e, g);
             profilerFiller.popPush("particles");
             this.minecraft.particleEngine.render(poseStack, bufferSource, lightTexture, camera, f);
-            bufferSource.endBatch(RenderType.lines());
-            bufferSource.endBatch();
         }
         RenderSystem.pushMatrix();
         RenderSystem.multMatrix(poseStack.last().pose());

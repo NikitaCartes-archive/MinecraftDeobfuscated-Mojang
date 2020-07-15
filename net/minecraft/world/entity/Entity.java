@@ -225,6 +225,13 @@ CommandSource {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public boolean isColliding(BlockPos blockPos, BlockState blockState) {
+        VoxelShape voxelShape = blockState.getCollisionShape(this.level, blockPos, CollisionContext.of(this));
+        VoxelShape voxelShape2 = voxelShape.move(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+        return Shapes.joinIsNotEmpty(voxelShape2, Shapes.create(this.getBoundingBox()), BooleanOp.AND);
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public int getTeamColor() {
         Team team = this.getTeam();
         if (team != null && team.getColor().getColor() != null) {
@@ -872,7 +879,7 @@ CommandSource {
 
     private boolean isInRain() {
         BlockPos blockPos = this.blockPosition();
-        return this.level.isRainingAt(blockPos) || this.level.isRainingAt(blockPos.offset(0.0, this.dimensions.height, 0.0));
+        return this.level.isRainingAt(blockPos) || this.level.isRainingAt(new BlockPos((double)blockPos.getX(), this.getBoundingBox().maxY, (double)blockPos.getZ()));
     }
 
     private boolean isInBubbleColumn() {
@@ -931,12 +938,11 @@ CommandSource {
         this.wasEyeInWater = this.isEyeInFluid(FluidTags.WATER);
         this.fluidOnEyes = null;
         double d = this.getEyeY() - 0.1111111119389534;
-        Vec3 vec3 = new Vec3(this.getX(), d, this.getZ());
         Entity entity = this.getVehicle();
-        if (entity instanceof Boat && !(boat = (Boat)entity).isUnderWater() && boat.getBoundingBox().contains(vec3)) {
+        if (entity instanceof Boat && !(boat = (Boat)entity).isUnderWater() && boat.getBoundingBox().maxY >= d && boat.getBoundingBox().minY <= d) {
             return;
         }
-        BlockPos blockPos = new BlockPos(vec3);
+        BlockPos blockPos = new BlockPos(this.getX(), d, this.getZ());
         FluidState fluidState = this.level.getFluidState(blockPos);
         for (Tag<Fluid> tag : FluidTags.getWrappers()) {
             if (!fluidState.is(tag)) continue;
@@ -1038,16 +1044,20 @@ CommandSource {
     }
 
     public void absMoveTo(double d, double e, double f, float g, float h) {
-        double i = Mth.clamp(d, -3.0E7, 3.0E7);
-        double j = Mth.clamp(f, -3.0E7, 3.0E7);
-        this.xo = i;
-        this.yo = e;
-        this.zo = j;
-        this.setPos(i, e, j);
+        this.absMoveTo(d, e, f);
         this.yRot = g % 360.0f;
         this.xRot = Mth.clamp(h, -90.0f, 90.0f) % 360.0f;
         this.yRotO = this.yRot;
         this.xRotO = this.xRot;
+    }
+
+    public void absMoveTo(double d, double e, double f) {
+        double g = Mth.clamp(d, -3.0E7, 3.0E7);
+        double h = Mth.clamp(f, -3.0E7, 3.0E7);
+        this.xo = g;
+        this.yo = e;
+        this.zo = h;
+        this.setPos(g, e, h);
     }
 
     public void moveTo(Vec3 vec3) {
@@ -1852,7 +1862,7 @@ CommandSource {
     public void killed(ServerLevel serverLevel, LivingEntity livingEntity) {
     }
 
-    protected void checkInBlock(double d, double e, double f) {
+    protected void moveTowardsClosestSpace(double d, double e, double f) {
         BlockPos blockPos = new BlockPos(d, e, f);
         Vec3 vec3 = new Vec3(d - (double)blockPos.getX(), e - (double)blockPos.getY(), f - (double)blockPos.getZ());
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
@@ -2019,13 +2029,17 @@ CommandSource {
             if (blockState.hasProperty(BlockStateProperties.HORIZONTAL_AXIS)) {
                 axis = blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS);
                 BlockUtil.FoundRectangle foundRectangle2 = BlockUtil.getLargestRectangleAround(this.portalEntrancePos, axis, 21, Direction.Axis.Y, 21, blockPos -> this.level.getBlockState((BlockPos)blockPos) == blockState);
-                vec3 = PortalShape.getRelativePosition(foundRectangle2, axis, this.position(), this.getDimensions(this.getPose()));
+                vec3 = this.getRelativePortalPosition(axis, foundRectangle2);
             } else {
                 axis = Direction.Axis.X;
                 vec3 = new Vec3(0.5, 0.0, 0.0);
             }
             return PortalShape.createPortalInfo(serverLevel, foundRectangle, axis, vec3, this.getDimensions(this.getPose()), this.getDeltaMovement(), this.yRot, this.xRot);
         }).orElse(null);
+    }
+
+    protected Vec3 getRelativePortalPosition(Direction.Axis axis, BlockUtil.FoundRectangle foundRectangle) {
+        return PortalShape.getRelativePosition(foundRectangle, axis, this.position(), this.getDimensions(this.getPose()));
     }
 
     protected Optional<BlockUtil.FoundRectangle> getExitPortal(ServerLevel serverLevel, BlockPos blockPos, boolean bl) {

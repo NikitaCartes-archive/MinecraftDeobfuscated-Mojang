@@ -76,7 +76,7 @@ extends Entity {
             this.playSound(SoundEvents.GENERIC_BURN, 0.4f, 2.0f + this.random.nextFloat() * 0.4f);
         }
         if (!this.level.noCollision(this.getBoundingBox())) {
-            this.checkInBlock(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
+            this.moveTowardsClosestSpace(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
         }
         double d = 8.0;
         if (this.followingTime < this.tickCount - 20 + this.getId() % 100) {

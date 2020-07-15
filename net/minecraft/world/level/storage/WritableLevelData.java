@@ -14,10 +14,13 @@ extends LevelData {
 
     public void setZSpawn(int var1);
 
-    default public void setSpawn(BlockPos blockPos) {
+    public void setSpawnAngle(float var1);
+
+    default public void setSpawn(BlockPos blockPos, float f) {
         this.setXSpawn(blockPos.getX());
         this.setYSpawn(blockPos.getY());
         this.setZSpawn(blockPos.getZ());
+        this.setSpawnAngle(f);
     }
 }
 

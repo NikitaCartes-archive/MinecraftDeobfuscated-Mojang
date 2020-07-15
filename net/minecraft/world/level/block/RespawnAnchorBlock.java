@@ -68,7 +68,7 @@ extends Block {
         if (RespawnAnchorBlock.canSetSpawn(level)) {
             ServerPlayer serverPlayer;
             if (!(level.isClientSide || (serverPlayer = (ServerPlayer)player).getRespawnDimension() == level.dimension() && serverPlayer.getRespawnPosition().equals(blockPos))) {
-                serverPlayer.setRespawnPosition(level.dimension(), blockPos, false, true);
+                serverPlayer.setRespawnPosition(level.dimension(), blockPos, 0.0f, false, true);
                 level.playSound(null, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, SoundEvents.RESPAWN_ANCHOR_SET_SPAWN, SoundSource.BLOCKS, 1.0f, 1.0f);
                 return InteractionResult.SUCCESS;
             }

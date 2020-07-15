@@ -14,6 +14,7 @@ import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.BlobFoliagePlacer;
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
+import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacerType;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class FancyFoliagePlacer
@@ -22,6 +23,11 @@ extends BlobFoliagePlacer {
 
     public FancyFoliagePlacer(UniformInt uniformInt, UniformInt uniformInt2, int i) {
         super(uniformInt, uniformInt2, i);
+    }
+
+    @Override
+    protected FoliagePlacerType<?> type() {
+        return FoliagePlacerType.FANCY_FOLIAGE_PLACER;
     }
 
     @Override

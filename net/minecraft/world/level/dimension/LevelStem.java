@@ -95,10 +95,10 @@ public final class LevelStem {
         }
         NoiseBasedChunkGenerator noiseBasedChunkGenerator = (NoiseBasedChunkGenerator)((LevelStem)entry2.getValue()).generator();
         NoiseBasedChunkGenerator noiseBasedChunkGenerator2 = (NoiseBasedChunkGenerator)((LevelStem)entry3.getValue()).generator();
-        if (!noiseBasedChunkGenerator.stable(l, NoiseGeneratorSettings.Preset.NETHER)) {
+        if (!noiseBasedChunkGenerator.stable(l, NoiseGeneratorSettings.NETHER)) {
             return false;
         }
-        if (!noiseBasedChunkGenerator2.stable(l, NoiseGeneratorSettings.Preset.END)) {
+        if (!noiseBasedChunkGenerator2.stable(l, NoiseGeneratorSettings.END)) {
             return false;
         }
         if (!(noiseBasedChunkGenerator.getBiomeSource() instanceof MultiNoiseBiomeSource)) {

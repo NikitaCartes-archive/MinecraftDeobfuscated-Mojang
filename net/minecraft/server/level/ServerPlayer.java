@@ -177,13 +177,14 @@ implements ContainerListener {
     @Nullable
     private BlockPos respawnPosition;
     private boolean respawnForced;
+    private float respawnAngle;
     private int containerCounter;
     public boolean ignoreSlotUpdateHack;
     public int latency;
     public boolean wonGame;
 
     public ServerPlayer(MinecraftServer minecraftServer, ServerLevel serverLevel, GameProfile gameProfile, ServerPlayerGameMode serverPlayerGameMode) {
-        super(serverLevel, serverLevel.getSharedSpawnPos(), gameProfile);
+        super(serverLevel, serverLevel.getSharedSpawnPos(), serverLevel.getSharedSpawnAngle(), gameProfile);
         serverPlayerGameMode.player = this;
         this.gameMode = serverPlayerGameMode;
         this.server = minecraftServer;
@@ -257,6 +258,7 @@ implements ContainerListener {
         if (compoundTag.contains("SpawnX", 99) && compoundTag.contains("SpawnY", 99) && compoundTag.contains("SpawnZ", 99)) {
             this.respawnPosition = new BlockPos(compoundTag.getInt("SpawnX"), compoundTag.getInt("SpawnY"), compoundTag.getInt("SpawnZ"));
             this.respawnForced = compoundTag.getBoolean("SpawnForced");
+            this.respawnAngle = compoundTag.getFloat("SpawnAngle");
             if (compoundTag.contains("SpawnDimension")) {
                 this.respawnDimension = Level.RESOURCE_KEY_CODEC.parse(NbtOps.INSTANCE, compoundTag.get("SpawnDimension")).resultOrPartial(LOGGER::error).orElse(Level.OVERWORLD);
             }
@@ -293,6 +295,7 @@ implements ContainerListener {
             compoundTag.putInt("SpawnY", this.respawnPosition.getY());
             compoundTag.putInt("SpawnZ", this.respawnPosition.getZ());
             compoundTag.putBoolean("SpawnForced", this.respawnForced);
+            compoundTag.putFloat("SpawnAngle", this.respawnAngle);
             ResourceLocation.CODEC.encodeStart(NbtOps.INSTANCE, this.respawnDimension.location()).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("SpawnDimension", (Tag)tag));
         }
     }
@@ -709,7 +712,7 @@ implements ContainerListener {
         if (this.bedBlocked(blockPos, direction)) {
             return Either.left(Player.BedSleepingProblem.OBSTRUCTED);
         }
-        this.setRespawnPosition(this.level.dimension(), blockPos, false, true);
+        this.setRespawnPosition(this.level.dimension(), blockPos, 0.0f, false, true);
         if (this.level.isDay()) {
             return Either.left(Player.BedSleepingProblem.NOT_POSSIBLE_NOW);
         }
@@ -1290,6 +1293,10 @@ implements ContainerListener {
         return this.respawnPosition;
     }
 
+    public float getRespawnAngle() {
+        return this.respawnAngle;
+    }
+
     public ResourceKey<Level> getRespawnDimension() {
         return this.respawnDimension;
     }
@@ -1298,7 +1305,7 @@ implements ContainerListener {
         return this.respawnForced;
     }
 
-    public void setRespawnPosition(ResourceKey<Level> resourceKey, @Nullable BlockPos blockPos, boolean bl, boolean bl2) {
+    public void setRespawnPosition(ResourceKey<Level> resourceKey, @Nullable BlockPos blockPos, float f, boolean bl, boolean bl2) {
         if (blockPos != null) {
             boolean bl3;
             boolean bl4 = bl3 = blockPos.equals(this.respawnPosition) && resourceKey.equals(this.respawnDimension);
@@ -1307,10 +1314,12 @@ implements ContainerListener {
             }
             this.respawnPosition = blockPos;
             this.respawnDimension = resourceKey;
+            this.respawnAngle = f;
             this.respawnForced = bl;
         } else {
             this.respawnPosition = null;
             this.respawnDimension = Level.OVERWORLD;
+            this.respawnAngle = 0.0f;
             this.respawnForced = false;
         }
     }

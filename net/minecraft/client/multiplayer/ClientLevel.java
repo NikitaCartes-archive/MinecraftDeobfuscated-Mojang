@@ -107,7 +107,7 @@ extends Level {
         this.clientLevelData = clientLevelData;
         this.levelRenderer = levelRenderer;
         this.effects = DimensionSpecialEffects.forType(clientPacketListener.registryAccess().dimensionTypes().getResourceKey(dimensionType));
-        this.setDefaultSpawnPos(new BlockPos(8, 64, 8));
+        this.setDefaultSpawnPos(new BlockPos(8, 64, 8), 0.0f);
         this.updateSkyBrightness();
         this.prepareWeather();
     }
@@ -741,8 +741,12 @@ extends Level {
         return blockPos;
     }
 
-    public void setDefaultSpawnPos(BlockPos blockPos) {
-        this.levelData.setSpawn(blockPos);
+    public float getSharedSpawnAngle() {
+        return this.levelData.getSpawnAngle();
+    }
+
+    public void setDefaultSpawnPos(BlockPos blockPos, float f) {
+        this.levelData.setSpawn(blockPos, f);
     }
 
     public String toString() {
@@ -773,6 +777,7 @@ extends Level {
         private int xSpawn;
         private int ySpawn;
         private int zSpawn;
+        private float spawnAngle;
         private long gameTime;
         private long dayTime;
         private boolean raining;
@@ -802,6 +807,11 @@ extends Level {
         }
 
         @Override
+        public float getSpawnAngle() {
+            return this.spawnAngle;
+        }
+
+        @Override
         public long getGameTime() {
             return this.gameTime;
         }
@@ -826,6 +836,11 @@ extends Level {
             this.zSpawn = i;
         }
 
+        @Override
+        public void setSpawnAngle(float f) {
+            this.spawnAngle = f;
+        }
+
         public void setGameTime(long l) {
             this.gameTime = l;
         }
@@ -835,10 +850,11 @@ extends Level {
         }
 
         @Override
-        public void setSpawn(BlockPos blockPos) {
+        public void setSpawn(BlockPos blockPos, float f) {
             this.xSpawn = blockPos.getX();
             this.ySpawn = blockPos.getY();
             this.zSpawn = blockPos.getZ();
+            this.spawnAngle = f;
         }
 
         @Override

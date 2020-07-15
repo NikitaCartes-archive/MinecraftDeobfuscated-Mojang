@@ -15,6 +15,7 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.JigsawFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 
 public class PillagerOutpostFeature
 extends JigsawFeature {
@@ -38,9 +39,13 @@ extends JigsawFeature {
         if (worldgenRandom.nextInt(5) != 0) {
             return false;
         }
+        StructureFeatureConfiguration structureFeatureConfiguration = chunkGenerator.getSettings().getConfig(StructureFeature.VILLAGE);
+        if (structureFeatureConfiguration == null) {
+            return true;
+        }
         for (int n = i - 10; n <= i + 10; ++n) {
             for (int o = j - 10; o <= j + 10; ++o) {
-                ChunkPos chunkPos2 = StructureFeature.VILLAGE.getPotentialFeatureChunk(chunkGenerator.getSettings().getConfig(StructureFeature.VILLAGE), l, worldgenRandom, n, o);
+                ChunkPos chunkPos2 = StructureFeature.VILLAGE.getPotentialFeatureChunk(structureFeatureConfiguration, l, worldgenRandom, n, o);
                 if (n != chunkPos2.x || o != chunkPos2.z) continue;
                 return false;
             }

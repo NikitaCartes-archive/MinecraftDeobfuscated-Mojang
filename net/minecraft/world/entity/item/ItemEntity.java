@@ -109,7 +109,7 @@ extends Entity {
         } else {
             boolean bl = this.noPhysics = !this.level.noCollision(this);
             if (this.noPhysics) {
-                this.checkInBlock(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
+                this.moveTowardsClosestSpace(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
             }
         }
         if (!this.onGround || ItemEntity.getHorizontalDistanceSqr(this.getDeltaMovement()) > (double)1.0E-5f || (this.tickCount + this.getId()) % 4 == 0) {

@@ -30,7 +30,6 @@ import net.minecraft.world.level.levelgen.feature.CoralClawFeature;
 import net.minecraft.world.level.levelgen.feature.CoralMushroomFeature;
 import net.minecraft.world.level.levelgen.feature.CoralTreeFeature;
 import net.minecraft.world.level.levelgen.feature.DecoratedFeature;
-import net.minecraft.world.level.levelgen.feature.DecoratedFlowerFeature;
 import net.minecraft.world.level.levelgen.feature.DefaultFlowerFeature;
 import net.minecraft.world.level.levelgen.feature.DeltaFeature;
 import net.minecraft.world.level.levelgen.feature.DesertWellFeature;
@@ -100,6 +99,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     public static final Feature<NoneFeatureConfiguration> NO_OP = Feature.register("no_op", new NoOpFeature(NoneFeatureConfiguration.CODEC));
     public static final Feature<TreeConfiguration> TREE = Feature.register("tree", new TreeFeature(TreeConfiguration.CODEC));
     public static final AbstractFlowerFeature<RandomPatchConfiguration> FLOWER = Feature.register("flower", new DefaultFlowerFeature(RandomPatchConfiguration.CODEC));
+    public static final AbstractFlowerFeature<RandomPatchConfiguration> NO_BONEMEAL_FLOWER = Feature.register("no_bonemeal_flower", new DefaultFlowerFeature(RandomPatchConfiguration.CODEC));
     public static final Feature<RandomPatchConfiguration> RANDOM_PATCH = Feature.register("random_patch", new RandomPatchFeature(RandomPatchConfiguration.CODEC));
     public static final Feature<BlockPileConfiguration> BLOCK_PILE = Feature.register("block_pile", new BlockPileFeature(BlockPileConfiguration.CODEC));
     public static final Feature<SpringConfiguration> SPRING = Feature.register("spring_feature", new SpringFeature(SpringConfiguration.CODEC));
@@ -148,7 +148,6 @@ public abstract class Feature<FC extends FeatureConfiguration> {
     public static final Feature<SimpleRandomFeatureConfiguration> SIMPLE_RANDOM_SELECTOR = Feature.register("simple_random_selector", new SimpleRandomSelectorFeature(SimpleRandomFeatureConfiguration.CODEC));
     public static final Feature<RandomBooleanFeatureConfiguration> RANDOM_BOOLEAN_SELECTOR = Feature.register("random_boolean_selector", new RandomBooleanSelectorFeature(RandomBooleanFeatureConfiguration.CODEC));
     public static final Feature<DecoratedFeatureConfiguration> DECORATED = Feature.register("decorated", new DecoratedFeature(DecoratedFeatureConfiguration.CODEC));
-    public static final Feature<DecoratedFeatureConfiguration> DECORATED_FLOWER = Feature.register("decorated_flower", new DecoratedFlowerFeature(DecoratedFeatureConfiguration.CODEC));
     private final Codec<ConfiguredFeature<FC, Feature<FC>>> configuredCodec;
 
     private static <C extends FeatureConfiguration, F extends Feature<C>> F register(String string, F feature) {

@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -90,17 +91,18 @@ extends ChunkGenerator {
     protected final BlockState defaultBlock;
     protected final BlockState defaultFluid;
     private final long seed;
-    protected final NoiseGeneratorSettings settings;
+    protected final Supplier<NoiseGeneratorSettings> settings;
     private final int height;
 
-    public NoiseBasedChunkGenerator(BiomeSource biomeSource, long l, NoiseGeneratorSettings noiseGeneratorSettings) {
-        this(biomeSource, biomeSource, l, noiseGeneratorSettings);
+    public NoiseBasedChunkGenerator(BiomeSource biomeSource, long l, Supplier<NoiseGeneratorSettings> supplier) {
+        this(biomeSource, biomeSource, l, supplier);
     }
 
-    private NoiseBasedChunkGenerator(BiomeSource biomeSource, BiomeSource biomeSource2, long l, NoiseGeneratorSettings noiseGeneratorSettings) {
-        super(biomeSource, biomeSource2, noiseGeneratorSettings.structureSettings(), l);
+    private NoiseBasedChunkGenerator(BiomeSource biomeSource, BiomeSource biomeSource2, long l, Supplier<NoiseGeneratorSettings> supplier) {
+        super(biomeSource, biomeSource2, supplier.get().structureSettings(), l);
         this.seed = l;
-        this.settings = noiseGeneratorSettings;
+        NoiseGeneratorSettings noiseGeneratorSettings = supplier.get();
+        this.settings = supplier;
         NoiseSettings noiseSettings = noiseGeneratorSettings.noiseSettings();
         this.height = noiseSettings.height();
         this.chunkHeight = noiseSettings.noiseSizeVertical() * 4;
@@ -137,8 +139,8 @@ extends ChunkGenerator {
         return new NoiseBasedChunkGenerator(this.biomeSource.withSeed(l), l, this.settings);
     }
 
-    public boolean stable(long l, NoiseGeneratorSettings.Preset preset) {
-        return this.seed == l && this.settings.stable(preset);
+    public boolean stable(long l, NoiseGeneratorSettings noiseGeneratorSettings) {
+        return this.seed == l && this.settings.get().stable(noiseGeneratorSettings);
     }
 
     private double sampleAndClampNoise(int i, int j, int k, double d, double e, double f, double g) {
@@ -180,7 +182,7 @@ extends ChunkGenerator {
         double x;
         double e;
         double d;
-        NoiseSettings noiseSettings = this.settings.noiseSettings();
+        NoiseSettings noiseSettings = this.settings.get().noiseSettings();
         if (this.islandNoise != null) {
             d = TheEndBiomeSource.getHeightValue(this.islandNoise, i, j) - 8.0f;
             e = d > 0.0 ? 0.25 : 1.0;
@@ -339,8 +341,9 @@ extends ChunkGenerator {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         int i = chunkAccess.getPos().getMinBlockX();
         int j = chunkAccess.getPos().getMinBlockZ();
-        int k = this.settings.getBedrockFloorPosition();
-        int l = this.height - 1 - this.settings.getBedrockRoofPosition();
+        NoiseGeneratorSettings noiseGeneratorSettings = this.settings.get();
+        int k = noiseGeneratorSettings.getBedrockFloorPosition();
+        int l = this.height - 1 - noiseGeneratorSettings.getBedrockRoofPosition();
         int m = 5;
         boolean bl = l + 4 >= 0 && l < this.height;
         boolean bl3 = bl2 = k + 4 >= 0 && k < this.height;
@@ -522,7 +525,7 @@ extends ChunkGenerator {
 
     @Override
     public int getSeaLevel() {
-        return this.settings.seaLevel();
+        return this.settings.get().seaLevel();
     }
 
     @Override
@@ -551,7 +554,7 @@ extends ChunkGenerator {
 
     @Override
     public void spawnOriginalMobs(WorldGenRegion worldGenRegion) {
-        if (this.settings.disableMobGeneration()) {
+        if (this.settings.get().disableMobGeneration()) {
             return;
         }
         int i = worldGenRegion.getCenterX();

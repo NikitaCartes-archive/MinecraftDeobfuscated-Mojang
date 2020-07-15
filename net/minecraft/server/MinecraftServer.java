@@ -389,11 +389,11 @@ AutoCloseable {
         ChunkPos chunkPos;
         ChunkGenerator chunkGenerator = serverLevel.getChunkSource().getGenerator();
         if (!bl3) {
-            serverLevelData.setSpawn(BlockPos.ZERO.above(chunkGenerator.getSpawnHeight()));
+            serverLevelData.setSpawn(BlockPos.ZERO.above(chunkGenerator.getSpawnHeight()), 0.0f);
             return;
         }
         if (bl2) {
-            serverLevelData.setSpawn(BlockPos.ZERO.above());
+            serverLevelData.setSpawn(BlockPos.ZERO.above(), 0.0f);
             return;
         }
         BiomeSource biomeSource = chunkGenerator.getBiomeSource();
@@ -410,7 +410,7 @@ AutoCloseable {
             bl4 = true;
             break;
         }
-        serverLevelData.setSpawn(chunkPos.getWorldPosition().offset(8, chunkGenerator.getSpawnHeight(), 8));
+        serverLevelData.setSpawn(chunkPos.getWorldPosition().offset(8, chunkGenerator.getSpawnHeight(), 8), 0.0f);
         int i = 0;
         int j = 0;
         int k = 0;
@@ -419,7 +419,7 @@ AutoCloseable {
         for (int n = 0; n < 1024; ++n) {
             BlockPos blockPos2;
             if (i > -16 && i <= 16 && j > -16 && j <= 16 && (blockPos2 = PlayerRespawnLogic.getSpawnPosInChunk(serverLevel, new ChunkPos(chunkPos.x + i, chunkPos.z + j), bl4)) != null) {
-                serverLevelData.setSpawn(blockPos2);
+                serverLevelData.setSpawn(blockPos2, 0.0f);
                 break;
             }
             if (i == j || i < 0 && i == -j || i > 0 && i == 1 - j) {

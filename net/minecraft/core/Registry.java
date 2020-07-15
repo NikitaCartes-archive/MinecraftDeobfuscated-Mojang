@@ -63,6 +63,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -170,6 +171,7 @@ IdMap<T> {
     public static final Registry<LootPoolEntryType> LOOT_POOL_ENTRY_TYPE = Registry.registerSimple(LOOT_ENTRY_REGISTRY, () -> LootPoolEntries.EMPTY);
     public static final Registry<LootItemFunctionType> LOOT_FUNCTION_TYPE = Registry.registerSimple(LOOT_FUNCTION_REGISTRY, () -> LootItemFunctions.SET_COUNT);
     public static final Registry<LootItemConditionType> LOOT_CONDITION_TYPE = Registry.registerSimple(LOOT_ITEM_REGISTRY, () -> LootItemConditions.INVERTED);
+    public static final ResourceKey<Registry<NoiseGeneratorSettings>> NOISE_GENERATOR_SETTINGS_REGISTRY = Registry.createRegistryKey("worldgen/noise_settings");
     public static final ResourceKey<Registry<ConfiguredSurfaceBuilder<?>>> CONFIGURED_SURFACE_BUILDER_REGISTRY = Registry.createRegistryKey("worldgen/configured_surface_builder");
     public static final ResourceKey<Registry<ConfiguredWorldCarver<?>>> CONFIGURED_CARVER_REGISTRY = Registry.createRegistryKey("worldgen/configured_carver");
     public static final ResourceKey<Registry<ConfiguredFeature<?, ?>>> CONFIGURED_FEATURE_REGISTRY = Registry.createRegistryKey("worldgen/configured_feature");

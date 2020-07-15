@@ -7,6 +7,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import java.util.Random;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.Features;
@@ -14,7 +15,6 @@ import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Decoratable;
-import net.minecraft.world.level.levelgen.feature.AbstractFlowerFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.WeightedConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
@@ -50,8 +50,7 @@ implements Decoratable<ConfiguredFeature<?, ?>> {
 
     @Override
     public ConfiguredFeature<?, ?> decorated(ConfiguredDecorator<?> configuredDecorator) {
-        Feature<DecoratedFeatureConfiguration> feature = this.feature instanceof AbstractFlowerFeature ? Feature.DECORATED_FLOWER : Feature.DECORATED;
-        return feature.configured(new DecoratedFeatureConfiguration(() -> this, configuredDecorator));
+        return Feature.DECORATED.configured(new DecoratedFeatureConfiguration(() -> this, configuredDecorator));
     }
 
     public WeightedConfiguredFeature weighted(float f) {
@@ -60,6 +59,10 @@ implements Decoratable<ConfiguredFeature<?, ?>> {
 
     public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos) {
         return ((Feature)this.feature).place(worldGenLevel, chunkGenerator, random, blockPos, this.config);
+    }
+
+    public Stream<ConfiguredFeature<?, ?>> getFeatures() {
+        return Stream.concat(Stream.of(this), this.config.getFeatures());
     }
 
     @Override

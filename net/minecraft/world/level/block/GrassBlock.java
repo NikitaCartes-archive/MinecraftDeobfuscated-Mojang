@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.AbstractFlowerFeature;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
 
 public class GrassBlock
 extends SpreadingSnowyDirtBlock
@@ -53,8 +52,9 @@ implements BonemealableBlock {
             if (random.nextInt(8) == 0) {
                 List<ConfiguredFeature<?, ?>> list = serverLevel.getBiome(blockPos3).getFlowerFeatures();
                 if (list.isEmpty()) continue;
-                ConfiguredFeature<?, ?> configuredFeature = ((DecoratedFeatureConfiguration)list.get((int)0).config).feature.get();
-                blockState4 = ((AbstractFlowerFeature)configuredFeature.feature).getRandomFlower(random, blockPos3, configuredFeature.config);
+                ConfiguredFeature<?, ?> configuredFeature = list.get(0);
+                AbstractFlowerFeature abstractFlowerFeature = (AbstractFlowerFeature)configuredFeature.feature;
+                blockState4 = abstractFlowerFeature.getRandomFlower(random, blockPos3, configuredFeature.config());
             } else {
                 blockState4 = blockState2;
             }

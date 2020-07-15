@@ -91,7 +91,8 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
     public static final StructureFeature<NoneFeatureConfiguration> NETHER_FOSSIL = StructureFeature.register("Nether_Fossil", new NetherFossilFeature(NoneFeatureConfiguration.CODEC), GenerationStep.Decoration.UNDERGROUND_DECORATION);
     public static final StructureFeature<JigsawConfiguration> BASTION_REMNANT = StructureFeature.register("Bastion_Remnant", new BastionFeature(JigsawConfiguration.CODEC), GenerationStep.Decoration.SURFACE_STRUCTURES);
     public static final List<StructureFeature<?>> NOISE_AFFECTING_FEATURES = ImmutableList.of(PILLAGER_OUTPOST, VILLAGE, NETHER_FOSSIL);
-    private static final Map<String, String> RENAMES = ImmutableMap.builder().put("nvi", "jigsaw").put("pcp", "jigsaw").put("bastionremnant", "jigsaw").put("runtime", "jigsaw").build();
+    private static final ResourceLocation JIGSAW_RENAME = new ResourceLocation("jigsaw");
+    private static final Map<ResourceLocation, ResourceLocation> RENAMES = ImmutableMap.builder().put(new ResourceLocation("nvi"), JIGSAW_RENAME).put(new ResourceLocation("pcp"), JIGSAW_RENAME).put(new ResourceLocation("bastionremnant"), JIGSAW_RENAME).put(new ResourceLocation("runtime"), JIGSAW_RENAME).build();
     private final Codec<ConfiguredStructureFeature<C, StructureFeature<C>>> configuredStructureCodec;
 
     private static <F extends StructureFeature<?>> F register(String string, F structureFeature, GenerationStep.Decoration decoration) {
@@ -132,10 +133,11 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
             for (int m = 0; m < listTag.size(); ++m) {
                 CompoundTag compoundTag2 = listTag.getCompound(m);
                 String string2 = compoundTag2.getString("id").toLowerCase(Locale.ROOT);
-                String string3 = RENAMES.getOrDefault(string2, string2);
-                StructurePieceType structurePieceType = Registry.STRUCTURE_PIECE.get(new ResourceLocation(string3));
+                ResourceLocation resourceLocation = new ResourceLocation(string2);
+                ResourceLocation resourceLocation2 = RENAMES.getOrDefault(resourceLocation, resourceLocation);
+                StructurePieceType structurePieceType = Registry.STRUCTURE_PIECE.get(resourceLocation2);
                 if (structurePieceType == null) {
-                    LOGGER.error("Unknown structure piece id: {}", (Object)string3);
+                    LOGGER.error("Unknown structure piece id: {}", (Object)resourceLocation2);
                     continue;
                 }
                 try {
@@ -143,7 +145,7 @@ public abstract class StructureFeature<C extends FeatureConfiguration> {
                     structureStart.getPieces().add(structurePiece);
                     continue;
                 } catch (Exception exception) {
-                    LOGGER.error("Exception loading structure piece with id {}", (Object)string3, (Object)exception);
+                    LOGGER.error("Exception loading structure piece with id {}", (Object)resourceLocation2, (Object)exception);
                 }
             }
             return structureStart;
