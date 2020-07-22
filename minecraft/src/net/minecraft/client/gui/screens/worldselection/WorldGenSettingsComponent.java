@@ -26,12 +26,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.TickableWidget;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
@@ -57,6 +57,8 @@ public class WorldGenSettingsComponent implements TickableWidget, Widget {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final Component CUSTOM_WORLD_DESCRIPTION = new TranslatableComponent("generator.custom");
 	private static final Component AMPLIFIED_HELP_TEXT = new TranslatableComponent("generator.amplified.info");
+	private static final Component MAP_FEATURES_INFO = new TranslatableComponent("selectWorld.mapFeatures.info");
+	private MultiLineLabel amplifiedWorldInfo = MultiLineLabel.EMPTY;
 	private Font font;
 	private int width;
 	private EditBox seedEdit;
@@ -266,6 +268,7 @@ public class WorldGenSettingsComponent implements TickableWidget, Widget {
 			)
 		);
 		this.importSettingsButton.visible = false;
+		this.amplifiedWorldInfo = MultiLineLabel.create(font, AMPLIFIED_HELP_TEXT, this.typeButton.getWidth());
 	}
 
 	private void importSettings(RegistryAccess.RegistryHolder registryHolder, WorldGenSettings worldGenSettings) {
@@ -285,12 +288,12 @@ public class WorldGenSettingsComponent implements TickableWidget, Widget {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		if (this.featuresButton.visible) {
-			this.font.drawShadow(poseStack, I18n.get("selectWorld.mapFeatures.info"), (float)(this.width / 2 - 150), 122.0F, -6250336);
+			this.font.drawShadow(poseStack, MAP_FEATURES_INFO, (float)(this.width / 2 - 150), 122.0F, -6250336);
 		}
 
 		this.seedEdit.render(poseStack, i, j, f);
 		if (this.preset.equals(Optional.of(WorldPreset.AMPLIFIED))) {
-			this.font.drawWordWrap(AMPLIFIED_HELP_TEXT, this.typeButton.x + 2, this.typeButton.y + 22, this.typeButton.getWidth(), 10526880);
+			this.amplifiedWorldInfo.renderLeftAligned(poseStack, this.typeButton.x + 2, this.typeButton.y + 22, 9, 10526880);
 		}
 	}
 

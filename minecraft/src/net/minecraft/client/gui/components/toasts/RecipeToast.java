@@ -6,12 +6,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 
 @Environment(EnvType.CLIENT)
 public class RecipeToast implements Toast {
+	private static final Component TITLE_TEXT = new TranslatableComponent("recipe.toast.title");
+	private static final Component DESCRIPTION_TEXT = new TranslatableComponent("recipe.toast.description");
 	private final List<Recipe<?>> recipes = Lists.<Recipe<?>>newArrayList();
 	private long lastChanged;
 	private boolean changed;
@@ -33,8 +36,8 @@ public class RecipeToast implements Toast {
 			toastComponent.getMinecraft().getTextureManager().bind(TEXTURE);
 			RenderSystem.color3f(1.0F, 1.0F, 1.0F);
 			toastComponent.blit(poseStack, 0, 0, 0, 32, this.width(), this.height());
-			toastComponent.getMinecraft().font.draw(poseStack, I18n.get("recipe.toast.title"), 30.0F, 7.0F, -11534256);
-			toastComponent.getMinecraft().font.draw(poseStack, I18n.get("recipe.toast.description"), 30.0F, 18.0F, -16777216);
+			toastComponent.getMinecraft().font.draw(poseStack, TITLE_TEXT, 30.0F, 7.0F, -11534256);
+			toastComponent.getMinecraft().font.draw(poseStack, DESCRIPTION_TEXT, 30.0F, 18.0F, -16777216);
 			Recipe<?> recipe = (Recipe<?>)this.recipes.get((int)(l / Math.max(1L, 5000L / (long)this.recipes.size()) % (long)this.recipes.size()));
 			ItemStack itemStack = recipe.getToastSymbol();
 			RenderSystem.pushMatrix();
@@ -46,10 +49,9 @@ public class RecipeToast implements Toast {
 		}
 	}
 
-	public void addItem(Recipe<?> recipe) {
-		if (this.recipes.add(recipe)) {
-			this.changed = true;
-		}
+	private void addItem(Recipe<?> recipe) {
+		this.recipes.add(recipe);
+		this.changed = true;
 	}
 
 	public static void addOrUpdate(ToastComponent toastComponent, Recipe<?> recipe) {

@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
@@ -16,7 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class SmithingTableBlock extends CraftingTableBlock {
-	private static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.upgrade");
+	private static final Component CONTAINER_TITLE = new TranslatableComponent("container.upgrade");
 
 	protected SmithingTableBlock(BlockBehaviour.Properties properties) {
 		super(properties);

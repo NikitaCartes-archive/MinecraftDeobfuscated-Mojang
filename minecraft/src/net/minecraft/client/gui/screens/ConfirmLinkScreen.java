@@ -48,7 +48,7 @@ public class ConfirmLinkScreen extends ConfirmScreen {
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		super.render(poseStack, i, j, f);
 		if (this.showWarning) {
-			this.drawCenteredString(poseStack, this.font, this.warning, this.width / 2, 110, 16764108);
+			drawCenteredString(poseStack, this.font, this.warning, this.width / 2, 110, 16764108);
 		}
 	}
 }

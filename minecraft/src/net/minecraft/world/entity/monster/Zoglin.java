@@ -92,7 +92,7 @@ public class Zoglin extends Monster implements Enemy, HoglinBase {
 	}
 
 	private static void initCoreActivity(Brain<Zoglin> brain) {
-		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new LookAtTargetSink(45, 90), new MoveToTargetSink(200)));
+		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new LookAtTargetSink(45, 90), new MoveToTargetSink()));
 	}
 
 	private static void initIdleActivity(Brain<Zoglin> brain) {
@@ -182,6 +182,11 @@ public class Zoglin extends Monster implements Enemy, HoglinBase {
 		if (!this.isBaby()) {
 			HoglinBase.throwTarget(this, livingEntity);
 		}
+	}
+
+	@Override
+	public double getPassengersRidingOffset() {
+		return (double)this.getBbHeight() - (this.isBaby() ? 0.2 : 0.15);
 	}
 
 	@Override

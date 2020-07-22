@@ -25,6 +25,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.LowerCaseEnumTypeAdapterFactory;
 
@@ -57,6 +58,9 @@ public interface Component extends Message, FormattedText {
 	MutableComponent plainCopy();
 
 	MutableComponent copy();
+
+	@Environment(EnvType.CLIENT)
+	FormattedCharSequence getVisualOrderText();
 
 	@Environment(EnvType.CLIENT)
 	@Override

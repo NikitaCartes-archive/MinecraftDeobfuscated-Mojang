@@ -1,6 +1,7 @@
 package net.minecraft.server.rcon.thread;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.annotation.Nullable;
 import net.minecraft.DefaultUncaughtExceptionHandlerWithName;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,18 +11,24 @@ public abstract class GenericThread implements Runnable {
 	private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
 	protected volatile boolean running;
 	protected final String name;
+	@Nullable
 	protected Thread thread;
 
 	protected GenericThread(String string) {
 		this.name = string;
 	}
 
-	public synchronized void start() {
-		this.running = true;
-		this.thread = new Thread(this, this.name + " #" + UNIQUE_THREAD_ID.incrementAndGet());
-		this.thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandlerWithName(LOGGER));
-		this.thread.start();
-		LOGGER.info("Thread {} started", this.name);
+	public synchronized boolean start() {
+		if (this.running) {
+			return true;
+		} else {
+			this.running = true;
+			this.thread = new Thread(this, this.name + " #" + UNIQUE_THREAD_ID.incrementAndGet());
+			this.thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandlerWithName(LOGGER));
+			this.thread.start();
+			LOGGER.info("Thread {} started", this.name);
+			return true;
+		}
 	}
 
 	public synchronized void stop() {

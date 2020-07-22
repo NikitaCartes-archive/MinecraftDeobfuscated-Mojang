@@ -17,14 +17,18 @@ import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 
 public class MoveToTargetSink extends Behavior<Mob> {
+	private int remainingCooldown;
 	@Nullable
 	private Path path;
 	@Nullable
 	private BlockPos lastTargetPos;
 	private float speedModifier;
-	private int remainingDelay;
 
-	public MoveToTargetSink(int i) {
+	public MoveToTargetSink() {
+		this(150, 250);
+	}
+
+	public MoveToTargetSink(int i, int j) {
 		super(
 			ImmutableMap.of(
 				MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE,
@@ -34,24 +38,30 @@ public class MoveToTargetSink extends Behavior<Mob> {
 				MemoryModuleType.WALK_TARGET,
 				MemoryStatus.VALUE_PRESENT
 			),
-			i
+			i,
+			j
 		);
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Mob mob) {
-		Brain<?> brain = mob.getBrain();
-		WalkTarget walkTarget = (WalkTarget)brain.getMemory(MemoryModuleType.WALK_TARGET).get();
-		boolean bl = this.reachedTarget(mob, walkTarget);
-		if (!bl && this.tryComputePath(mob, walkTarget, serverLevel.getGameTime())) {
-			this.lastTargetPos = walkTarget.getTarget().currentBlockPosition();
-			return true;
-		} else {
-			brain.eraseMemory(MemoryModuleType.WALK_TARGET);
-			if (bl) {
-				brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
-			}
-
+		if (this.remainingCooldown > 0) {
+			this.remainingCooldown--;
 			return false;
+		} else {
+			Brain<?> brain = mob.getBrain();
+			WalkTarget walkTarget = (WalkTarget)brain.getMemory(MemoryModuleType.WALK_TARGET).get();
+			boolean bl = this.reachedTarget(mob, walkTarget);
+			if (!bl && this.tryComputePath(mob, walkTarget, serverLevel.getGameTime())) {
+				this.lastTargetPos = walkTarget.getTarget().currentBlockPosition();
+				return true;
+			} else {
+				brain.eraseMemory(MemoryModuleType.WALK_TARGET);
+				if (bl) {
+					brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
+				}
+
+				return false;
+			}
 		}
 	}
 
@@ -66,6 +76,11 @@ public class MoveToTargetSink extends Behavior<Mob> {
 	}
 
 	protected void stop(ServerLevel serverLevel, Mob mob, long l) {
+		if (mob.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET)
+			&& !this.reachedTarget(mob, (WalkTarget)mob.getBrain().getMemory(MemoryModuleType.WALK_TARGET).get())) {
+			this.remainingCooldown = serverLevel.getRandom().nextInt(40);
+		}
+
 		mob.getNavigation().stop();
 		mob.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
 		mob.getBrain().eraseMemory(MemoryModuleType.PATH);
@@ -75,25 +90,21 @@ public class MoveToTargetSink extends Behavior<Mob> {
 	protected void start(ServerLevel serverLevel, Mob mob, long l) {
 		mob.getBrain().setMemory(MemoryModuleType.PATH, this.path);
 		mob.getNavigation().moveTo(this.path, (double)this.speedModifier);
-		this.remainingDelay = serverLevel.getRandom().nextInt(10);
 	}
 
 	protected void tick(ServerLevel serverLevel, Mob mob, long l) {
-		this.remainingDelay--;
-		if (this.remainingDelay <= 0) {
-			Path path = mob.getNavigation().getPath();
-			Brain<?> brain = mob.getBrain();
-			if (this.path != path) {
-				this.path = path;
-				brain.setMemory(MemoryModuleType.PATH, path);
-			}
+		Path path = mob.getNavigation().getPath();
+		Brain<?> brain = mob.getBrain();
+		if (this.path != path) {
+			this.path = path;
+			brain.setMemory(MemoryModuleType.PATH, path);
+		}
 
-			if (path != null && this.lastTargetPos != null) {
-				WalkTarget walkTarget = (WalkTarget)brain.getMemory(MemoryModuleType.WALK_TARGET).get();
-				if (walkTarget.getTarget().currentBlockPosition().distSqr(this.lastTargetPos) > 4.0 && this.tryComputePath(mob, walkTarget, serverLevel.getGameTime())) {
-					this.lastTargetPos = walkTarget.getTarget().currentBlockPosition();
-					this.start(serverLevel, mob, l);
-				}
+		if (path != null && this.lastTargetPos != null) {
+			WalkTarget walkTarget = (WalkTarget)brain.getMemory(MemoryModuleType.WALK_TARGET).get();
+			if (walkTarget.getTarget().currentBlockPosition().distSqr(this.lastTargetPos) > 4.0 && this.tryComputePath(mob, walkTarget, serverLevel.getGameTime())) {
+				this.lastTargetPos = walkTarget.getTarget().currentBlockPosition();
+				this.start(serverLevel, mob, l);
 			}
 		}
 	}

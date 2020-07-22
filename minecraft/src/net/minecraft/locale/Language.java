@@ -1,5 +1,6 @@
 package net.minecraft.locale;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.Gson;
@@ -10,13 +11,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.StringDecomposer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -70,13 +77,17 @@ public abstract class Language {
 
 			@Environment(EnvType.CLIENT)
 			@Override
-			public boolean requiresReordering() {
+			public boolean isDefaultRightToLeft() {
 				return false;
 			}
 
+			@Environment(EnvType.CLIENT)
 			@Override
-			public String reorder(String string, boolean bl) {
-				return string;
+			public FormattedCharSequence getVisualOrder(FormattedText formattedText) {
+				return formattedCharSink -> formattedText.visit(
+							(style, string) -> StringDecomposer.iterateFormatted(string, style, formattedCharSink) ? Optional.empty() : FormattedText.STOP_ITERATION, Style.EMPTY
+						)
+						.isPresent();
 			}
 		};
 	}
@@ -104,7 +115,13 @@ public abstract class Language {
 	public abstract boolean has(String string);
 
 	@Environment(EnvType.CLIENT)
-	public abstract boolean requiresReordering();
+	public abstract boolean isDefaultRightToLeft();
 
-	public abstract String reorder(String string, boolean bl);
+	@Environment(EnvType.CLIENT)
+	public abstract FormattedCharSequence getVisualOrder(FormattedText formattedText);
+
+	@Environment(EnvType.CLIENT)
+	public List<FormattedCharSequence> getVisualOrder(List<FormattedText> list) {
+		return (List<FormattedCharSequence>)list.stream().map(getInstance()::getVisualOrder).collect(ImmutableList.toImmutableList());
+	}
 }

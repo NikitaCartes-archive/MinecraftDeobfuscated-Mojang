@@ -285,6 +285,7 @@ public class WorldGenRegion implements WorldGenLevel {
 	}
 
 	@Deprecated
+	@Override
 	public ServerLevel getLevel() {
 		return this.level;
 	}

@@ -87,7 +87,7 @@ public class ControlsScreen extends OptionsSubScreen {
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
 		this.controlList.render(poseStack, i, j, f);
-		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 16777215);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 16777215);
 		boolean bl = false;
 
 		for (KeyMapping keyMapping : this.options.keyMappings) {

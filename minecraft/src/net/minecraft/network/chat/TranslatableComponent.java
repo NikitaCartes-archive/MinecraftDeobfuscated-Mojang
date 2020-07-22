@@ -43,7 +43,7 @@ public class TranslatableComponent extends BaseComponent implements ContextAware
 			String string = language.getOrDefault(this.key);
 
 			try {
-				this.decomposeTemplate(language.reorder(string, true), language);
+				this.decomposeTemplate(string);
 			} catch (TranslatableFormatException var4) {
 				this.decomposedParts.clear();
 				this.decomposedParts.add(FormattedText.of(string));
@@ -51,7 +51,7 @@ public class TranslatableComponent extends BaseComponent implements ContextAware
 		}
 	}
 
-	private void decomposeTemplate(String string, Language language) {
+	private void decomposeTemplate(String string) {
 		Matcher matcher = FORMAT_PATTERN.matcher(string);
 
 		try {
@@ -82,7 +82,7 @@ public class TranslatableComponent extends BaseComponent implements ContextAware
 					String string4 = matcher.group(1);
 					int m = string4 != null ? Integer.parseInt(string4) - 1 : i++;
 					if (m < this.args.length) {
-						this.decomposedParts.add(this.getArgument(m, language));
+						this.decomposedParts.add(this.getArgument(m));
 					}
 				}
 
@@ -97,12 +97,12 @@ public class TranslatableComponent extends BaseComponent implements ContextAware
 
 				this.decomposedParts.add(FormattedText.of(string5));
 			}
-		} catch (IllegalArgumentException var12) {
-			throw new TranslatableFormatException(this, var12);
+		} catch (IllegalArgumentException var11) {
+			throw new TranslatableFormatException(this, var11);
 		}
 	}
 
-	private FormattedText getArgument(int i, Language language) {
+	private FormattedText getArgument(int i) {
 		if (i >= this.args.length) {
 			throw new TranslatableFormatException(this, i);
 		} else {
@@ -110,7 +110,7 @@ public class TranslatableComponent extends BaseComponent implements ContextAware
 			if (object instanceof Component) {
 				return (Component)object;
 			} else {
-				return object == null ? TEXT_NULL : FormattedText.of(language.reorder(object.toString(), false));
+				return object == null ? TEXT_NULL : FormattedText.of(object.toString());
 			}
 		}
 	}

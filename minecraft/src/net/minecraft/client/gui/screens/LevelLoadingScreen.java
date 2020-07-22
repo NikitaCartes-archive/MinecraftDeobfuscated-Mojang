@@ -62,7 +62,7 @@ public class LevelLoadingScreen extends Screen {
 		int m = this.height / 2;
 		int n = 30;
 		renderChunks(poseStack, this.progressListener, k, m + 30, 2, 0);
-		this.drawCenteredString(poseStack, this.font, string, k, m - 9 / 2 - 30, 16777215);
+		drawCenteredString(poseStack, this.font, string, k, m - 9 / 2 - 30, 16777215);
 	}
 
 	public static void renderChunks(PoseStack poseStack, StoringChunkProgressListener storingChunkProgressListener, int i, int j, int k, int l) {

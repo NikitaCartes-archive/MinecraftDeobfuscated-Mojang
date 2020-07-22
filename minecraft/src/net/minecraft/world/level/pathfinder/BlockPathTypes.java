@@ -4,6 +4,7 @@ public enum BlockPathTypes {
 	BLOCKED(-1.0F),
 	OPEN(0.0F),
 	WALKABLE(0.0F),
+	WALKABLE_DOOR(0.0F),
 	TRAPDOOR(0.0F),
 	FENCE(-1.0F),
 	LAVA(-1.0F),

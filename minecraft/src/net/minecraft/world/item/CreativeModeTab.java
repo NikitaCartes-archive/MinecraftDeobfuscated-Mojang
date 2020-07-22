@@ -5,6 +5,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
@@ -130,6 +132,7 @@ public abstract class CreativeModeTab {
 	}).setBackgroundSuffix("inventory.png").hideScroll().hideTitle();
 	private final int id;
 	private final String langId;
+	private final Component displayName;
 	private String recipeFolderName;
 	private String backgroundSuffix = "items.png";
 	private boolean canScroll = true;
@@ -140,6 +143,7 @@ public abstract class CreativeModeTab {
 	public CreativeModeTab(int i, String string) {
 		this.id = i;
 		this.langId = string;
+		this.displayName = new TranslatableComponent("itemGroup." + string);
 		this.iconItemStack = ItemStack.EMPTY;
 		TABS[i] = this;
 	}
@@ -149,18 +153,13 @@ public abstract class CreativeModeTab {
 		return this.id;
 	}
 
-	@Environment(EnvType.CLIENT)
-	public String getLangId() {
-		return this.langId;
-	}
-
 	public String getRecipeFolderName() {
 		return this.recipeFolderName == null ? this.langId : this.recipeFolderName;
 	}
 
 	@Environment(EnvType.CLIENT)
-	public String getName() {
-		return "itemGroup." + this.getLangId();
+	public Component getDisplayName() {
+		return this.displayName;
 	}
 
 	@Environment(EnvType.CLIENT)

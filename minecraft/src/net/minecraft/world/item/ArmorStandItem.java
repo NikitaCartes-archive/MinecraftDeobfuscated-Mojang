@@ -37,13 +37,14 @@ public class ArmorStandItem extends Item {
 			AABB aABB = EntityType.ARMOR_STAND.getDimensions().makeBoundingBox(vec3.x(), vec3.y(), vec3.z());
 			if (level.noCollision(null, aABB, entity -> true) && level.getEntities(null, aABB).isEmpty()) {
 				if (level instanceof ServerLevel) {
+					ServerLevel serverLevel = (ServerLevel)level;
 					ArmorStand armorStand = EntityType.ARMOR_STAND
-						.create((ServerLevel)level, itemStack.getTag(), null, useOnContext.getPlayer(), blockPos, MobSpawnType.SPAWN_EGG, true, true);
+						.create(serverLevel, itemStack.getTag(), null, useOnContext.getPlayer(), blockPos, MobSpawnType.SPAWN_EGG, true, true);
 					if (armorStand == null) {
 						return InteractionResult.FAIL;
 					}
 
-					level.addFreshEntity(armorStand);
+					serverLevel.addFreshEntityWithPassengers(armorStand);
 					float f = (float)Mth.floor((Mth.wrapDegrees(useOnContext.getRotation() - 180.0F) + 22.5F) / 45.0F) * 45.0F;
 					armorStand.moveTo(armorStand.getX(), armorStand.getY(), armorStand.getZ(), f, 0.0F);
 					this.randomizePose(armorStand, level.random);

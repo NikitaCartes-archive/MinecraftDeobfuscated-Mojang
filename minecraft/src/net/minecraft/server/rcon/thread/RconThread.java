@@ -7,6 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.server.ServerInterface;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
 import org.apache.logging.log4j.LogManager;
@@ -14,23 +15,16 @@ import org.apache.logging.log4j.Logger;
 
 public class RconThread extends GenericThread {
 	private static final Logger LOGGER = LogManager.getLogger();
-	private final int port;
-	private String serverIp;
-	private ServerSocket socket;
+	private final ServerSocket socket;
 	private final String rconPassword;
 	private final List<RconClient> clients = Lists.<RconClient>newArrayList();
 	private final ServerInterface serverInterface;
 
-	public RconThread(ServerInterface serverInterface) {
+	private RconThread(ServerInterface serverInterface, ServerSocket serverSocket, String string) {
 		super("RCON Listener");
 		this.serverInterface = serverInterface;
-		DedicatedServerProperties dedicatedServerProperties = serverInterface.getProperties();
-		this.port = dedicatedServerProperties.rconPort;
-		this.rconPassword = dedicatedServerProperties.rconPassword;
-		this.serverIp = serverInterface.getServerIp();
-		if (this.serverIp.isEmpty()) {
-			this.serverIp = "0.0.0.0";
-		}
+		this.socket = serverSocket;
+		this.rconPassword = string;
 	}
 
 	private void clearClients() {
@@ -38,8 +32,6 @@ public class RconThread extends GenericThread {
 	}
 
 	public void run() {
-		LOGGER.info("RCON running on {}:{}", this.serverIp, this.port);
-
 		try {
 			while (this.running) {
 				try {
@@ -61,20 +53,39 @@ public class RconThread extends GenericThread {
 		}
 	}
 
-	@Override
-	public void start() {
-		if (this.rconPassword.isEmpty()) {
-			LOGGER.warn("No rcon password set in server.properties, rcon disabled!");
-		} else if (0 >= this.port || 65535 < this.port) {
-			LOGGER.warn("Invalid rcon port {} found in server.properties, rcon disabled!", this.port);
-		} else if (!this.running) {
-			try {
-				this.socket = new ServerSocket(this.port, 0, InetAddress.getByName(this.serverIp));
-				this.socket.setSoTimeout(500);
-				super.start();
-			} catch (IOException var2) {
-				LOGGER.warn("Unable to initialise rcon on {}:{}", this.serverIp, this.port, var2);
+	@Nullable
+	public static RconThread create(ServerInterface serverInterface) {
+		DedicatedServerProperties dedicatedServerProperties = serverInterface.getProperties();
+		String string = serverInterface.getServerIp();
+		if (string.isEmpty()) {
+			string = "0.0.0.0";
+		}
+
+		int i = dedicatedServerProperties.rconPort;
+		if (0 < i && 65535 >= i) {
+			String string2 = dedicatedServerProperties.rconPassword;
+			if (string2.isEmpty()) {
+				LOGGER.warn("No rcon password set in server.properties, rcon disabled!");
+				return null;
+			} else {
+				try {
+					ServerSocket serverSocket = new ServerSocket(i, 0, InetAddress.getByName(string));
+					serverSocket.setSoTimeout(500);
+					RconThread rconThread = new RconThread(serverInterface, serverSocket, string2);
+					if (!rconThread.start()) {
+						return null;
+					} else {
+						LOGGER.info("RCON running on {}:{}", string, i);
+						return rconThread;
+					}
+				} catch (IOException var7) {
+					LOGGER.warn("Unable to initialise RCON on {}:{}", string, i, var7);
+					return null;
+				}
 			}
+		} else {
+			LOGGER.warn("Invalid rcon port {} found in server.properties, rcon disabled!", i);
+			return null;
 		}
 	}
 

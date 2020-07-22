@@ -5,7 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsConnect;
 
 @Environment(EnvType.CLIENT)
@@ -19,7 +19,7 @@ public class ConnectTask extends LongRunningTask {
 	}
 
 	public void run() {
-		this.setTitle(I18n.get("mco.connect.connecting"));
+		this.setTitle(new TranslatableComponent("mco.connect.connecting"));
 		net.minecraft.realms.RealmsServerAddress realmsServerAddress = net.minecraft.realms.RealmsServerAddress.parseString(this.address.address);
 		this.realmsConnect.connect(realmsServerAddress.getHost(), realmsServerAddress.getPort());
 	}

@@ -439,7 +439,7 @@ public class StructureTemplate {
 									.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(new BlockPos(vec32)), MobSpawnType.STRUCTURE, null, compoundTag);
 							}
 
-							serverLevelAccessor.addFreshEntity(entity);
+							serverLevelAccessor.addFreshEntityWithPassengers(entity);
 						}
 					);
 			}

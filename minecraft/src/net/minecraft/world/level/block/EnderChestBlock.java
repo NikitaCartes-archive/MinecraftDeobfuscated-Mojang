@@ -6,6 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
@@ -40,7 +41,7 @@ public class EnderChestBlock extends AbstractChestBlock<EnderChestBlockEntity> i
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	protected static final VoxelShape SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 14.0, 15.0);
-	public static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.enderchest");
+	private static final Component CONTAINER_TITLE = new TranslatableComponent("container.enderchest");
 
 	protected EnderChestBlock(BlockBehaviour.Properties properties) {
 		super(properties, () -> BlockEntityType.ENDER_CHEST);

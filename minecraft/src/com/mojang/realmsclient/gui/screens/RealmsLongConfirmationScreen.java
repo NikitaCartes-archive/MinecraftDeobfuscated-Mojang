@@ -53,9 +53,9 @@ public class RealmsLongConfirmationScreen extends RealmsScreen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		this.drawCenteredString(poseStack, this.font, this.type.text, this.width / 2, row(2), this.type.colorCode);
-		this.drawCenteredString(poseStack, this.font, this.line2, this.width / 2, row(4), 16777215);
-		this.drawCenteredString(poseStack, this.font, this.line3, this.width / 2, row(6), 16777215);
+		drawCenteredString(poseStack, this.font, this.type.text, this.width / 2, row(2), this.type.colorCode);
+		drawCenteredString(poseStack, this.font, this.line2, this.width / 2, row(4), 16777215);
+		drawCenteredString(poseStack, this.font, this.line3, this.width / 2, row(6), 16777215);
 		super.render(poseStack, i, j, f);
 	}
 

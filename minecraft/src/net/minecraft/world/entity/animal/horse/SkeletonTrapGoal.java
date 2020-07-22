@@ -26,22 +26,25 @@ public class SkeletonTrapGoal extends Goal {
 
 	@Override
 	public void tick() {
-		DifficultyInstance difficultyInstance = this.horse.level.getCurrentDifficultyAt(this.horse.blockPosition());
+		ServerLevel serverLevel = (ServerLevel)this.horse.level;
+		DifficultyInstance difficultyInstance = serverLevel.getCurrentDifficultyAt(this.horse.blockPosition());
 		this.horse.setTrap(false);
 		this.horse.setTamed(true);
 		this.horse.setAge(0);
-		LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(this.horse.level);
+		LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(serverLevel);
 		lightningBolt.moveTo(this.horse.getX(), this.horse.getY(), this.horse.getZ());
 		lightningBolt.setVisualOnly(true);
-		this.horse.level.addFreshEntity(lightningBolt);
+		serverLevel.addFreshEntity(lightningBolt);
 		Skeleton skeleton = this.createSkeleton(difficultyInstance, this.horse);
 		skeleton.startRiding(this.horse);
+		serverLevel.addFreshEntityWithPassengers(skeleton);
 
 		for (int i = 0; i < 3; i++) {
 			AbstractHorse abstractHorse = this.createHorse(difficultyInstance);
 			Skeleton skeleton2 = this.createSkeleton(difficultyInstance, abstractHorse);
 			skeleton2.startRiding(abstractHorse);
 			abstractHorse.push(this.horse.getRandom().nextGaussian() * 0.5, 0.0, this.horse.getRandom().nextGaussian() * 0.5);
+			serverLevel.addFreshEntityWithPassengers(abstractHorse);
 		}
 	}
 
@@ -53,7 +56,6 @@ public class SkeletonTrapGoal extends Goal {
 		skeletonHorse.setPersistenceRequired();
 		skeletonHorse.setTamed(true);
 		skeletonHorse.setAge(0);
-		skeletonHorse.level.addFreshEntity(skeletonHorse);
 		return skeletonHorse;
 	}
 
@@ -70,19 +72,26 @@ public class SkeletonTrapGoal extends Goal {
 		skeleton.setItemSlot(
 			EquipmentSlot.MAINHAND,
 			EnchantmentHelper.enchantItem(
-				skeleton.getRandom(), skeleton.getMainHandItem(), (int)(5.0F + difficultyInstance.getSpecialMultiplier() * (float)skeleton.getRandom().nextInt(18)), false
+				skeleton.getRandom(),
+				this.disenchant(skeleton.getMainHandItem()),
+				(int)(5.0F + difficultyInstance.getSpecialMultiplier() * (float)skeleton.getRandom().nextInt(18)),
+				false
 			)
 		);
 		skeleton.setItemSlot(
 			EquipmentSlot.HEAD,
 			EnchantmentHelper.enchantItem(
 				skeleton.getRandom(),
-				skeleton.getItemBySlot(EquipmentSlot.HEAD),
+				this.disenchant(skeleton.getItemBySlot(EquipmentSlot.HEAD)),
 				(int)(5.0F + difficultyInstance.getSpecialMultiplier() * (float)skeleton.getRandom().nextInt(18)),
 				false
 			)
 		);
-		skeleton.level.addFreshEntity(skeleton);
 		return skeleton;
+	}
+
+	private ItemStack disenchant(ItemStack itemStack) {
+		itemStack.removeTagKey("Enchantments");
+		return itemStack;
 	}
 }

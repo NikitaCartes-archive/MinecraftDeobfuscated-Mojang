@@ -8,7 +8,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -33,6 +32,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 	private static final Component TEXT_ON = new TranslatableComponent("mco.configure.world.on");
 	private static final Component TEXT_OFF = new TranslatableComponent("mco.configure.world.off");
 	private static final Component GAME_MODE_LABEL = new TranslatableComponent("selectWorld.gameMode");
+	private static final Component NAME_LABEL = new TranslatableComponent("mco.configure.world.edit.slot.name");
 	private EditBox nameEdit;
 	protected final RealmsConfigureWorldScreen parent;
 	private int column1X;
@@ -237,8 +237,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		String string = I18n.get("mco.configure.world.edit.slot.name");
-		this.font.draw(poseStack, string, (float)(this.column1X + this.columnWidth / 2 - this.font.width(string) / 2), (float)(row(0) - 5), 16777215);
+		this.font.draw(poseStack, NAME_LABEL, (float)(this.column1X + this.columnWidth / 2 - this.font.width(NAME_LABEL) / 2), (float)(row(0) - 5), 16777215);
 		this.titleLabel.render(this, poseStack);
 		if (this.warningLabel != null) {
 			this.warningLabel.render(this, poseStack);

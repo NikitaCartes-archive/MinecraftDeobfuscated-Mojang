@@ -7,7 +7,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.data.worldgen.Features;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -20,8 +19,7 @@ import org.apache.logging.log4j.Logger;
 
 public class ConfiguredFeature<FC extends FeatureConfiguration, F extends Feature<FC>> implements Decoratable<ConfiguredFeature<?, ?>> {
 	public static final MapCodec<ConfiguredFeature<?, ?>> DIRECT_CODEC = Registry.FEATURE
-		.<ConfiguredFeature<?, ?>>dispatchMap("name", configuredFeature -> configuredFeature.feature, Feature::configuredCodec)
-		.orElseGet(ConfiguredFeature::nope);
+		.dispatchMap(configuredFeature -> configuredFeature.feature, Feature::configuredCodec);
 	public static final Codec<Supplier<ConfiguredFeature<?, ?>>> CODEC = RegistryFileCodec.create(Registry.CONFIGURED_FEATURE_REGISTRY, DIRECT_CODEC);
 	public static final Logger LOGGER = LogManager.getLogger();
 	public final F feature;
@@ -30,10 +28,6 @@ public class ConfiguredFeature<FC extends FeatureConfiguration, F extends Featur
 	public ConfiguredFeature(F feature, FC featureConfiguration) {
 		this.feature = feature;
 		this.config = featureConfiguration;
-	}
-
-	private static ConfiguredFeature<?, ?> nope() {
-		return Features.NOPE;
 	}
 
 	public F feature() {

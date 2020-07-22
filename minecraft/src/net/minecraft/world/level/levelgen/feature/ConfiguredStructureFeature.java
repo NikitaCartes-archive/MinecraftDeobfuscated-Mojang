@@ -18,7 +18,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 
 public class ConfiguredStructureFeature<FC extends FeatureConfiguration, F extends StructureFeature<FC>> {
 	public static final MapCodec<ConfiguredStructureFeature<?, ?>> DIRECT_CODEC = Registry.STRUCTURE_FEATURE
-		.dispatchMap("name", configuredStructureFeature -> configuredStructureFeature.feature, StructureFeature::configuredStructureCodec);
+		.dispatchMap(configuredStructureFeature -> configuredStructureFeature.feature, StructureFeature::configuredStructureCodec);
 	public static final Codec<Supplier<ConfiguredStructureFeature<?, ?>>> CODEC = RegistryFileCodec.create(
 		Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, DIRECT_CODEC
 	);

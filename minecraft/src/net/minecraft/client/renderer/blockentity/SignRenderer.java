@@ -15,8 +15,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.StandingSignBlock;
@@ -70,13 +69,13 @@ public class SignRenderer extends BlockEntityRenderer<SignBlockEntity> {
 		int q = 20;
 
 		for (int r = 0; r < 4; r++) {
-			FormattedText formattedText = signBlockEntity.getRenderMessage(r, formattedTextx -> {
-				List<FormattedText> list = font.getSplitter().splitLines(formattedTextx, 90, Style.EMPTY);
-				return list.isEmpty() ? FormattedText.EMPTY : (FormattedText)list.get(0);
+			FormattedCharSequence formattedCharSequence = signBlockEntity.getRenderMessage(r, component -> {
+				List<FormattedCharSequence> list = font.split(component, 90);
+				return list.isEmpty() ? FormattedCharSequence.EMPTY : (FormattedCharSequence)list.get(0);
 			});
-			if (formattedText != null) {
-				float s = (float)(-font.width(formattedText) / 2);
-				font.drawInBatch(formattedText, s, (float)(r * 10 - 20), p, false, poseStack.last().pose(), multiBufferSource, false, 0, i);
+			if (formattedCharSequence != null) {
+				float s = (float)(-font.width(formattedCharSequence) / 2);
+				font.drawInBatch(formattedCharSequence, s, (float)(r * 10 - 20), p, false, poseStack.last().pose(), multiBufferSource, false, 0, i);
 			}
 		}
 

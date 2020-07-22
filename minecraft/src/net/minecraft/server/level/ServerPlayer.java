@@ -776,7 +776,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 		} else if (this.bedBlocked(blockPos, direction)) {
 			return Either.left(Player.BedSleepingProblem.OBSTRUCTED);
 		} else {
-			this.setRespawnPosition(this.level.dimension(), blockPos, 0.0F, false, true);
+			this.setRespawnPosition(this.level.dimension(), blockPos, this.yRot, false, true);
 			if (this.level.isDay()) {
 				return Either.left(Player.BedSleepingProblem.NOT_POSSIBLE_NOW);
 			} else {

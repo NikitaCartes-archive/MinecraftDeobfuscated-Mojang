@@ -297,7 +297,7 @@ public class TitleScreen extends Screen {
 				float o = 1.8F - Mth.abs(Mth.sin((float)(Util.getMillis() % 1000L) / 1000.0F * (float) (Math.PI * 2)) * 0.1F);
 				o = o * 100.0F / (float)(this.font.width(this.splash) + 32);
 				RenderSystem.scalef(o, o, o);
-				this.drawCenteredString(poseStack, this.font, this.splash, 0, -8, 16776960 | n);
+				drawCenteredString(poseStack, this.font, this.splash, 0, -8, 16776960 | n);
 				RenderSystem.popMatrix();
 			}
 
@@ -312,8 +312,8 @@ public class TitleScreen extends Screen {
 				string = string + I18n.get("menu.modded");
 			}
 
-			this.drawString(poseStack, this.font, string, 2, this.height - 10, 16777215 | n);
-			this.drawString(poseStack, this.font, "Copyright Mojang AB. Do not distribute!", this.copyrightX, this.height - 10, 16777215 | n);
+			drawString(poseStack, this.font, string, 2, this.height - 10, 16777215 | n);
+			drawString(poseStack, this.font, "Copyright Mojang AB. Do not distribute!", this.copyrightX, this.height - 10, 16777215 | n);
 			if (i > this.copyrightX && i < this.copyrightX + this.copyrightWidth && j > this.height - 10 && j < this.height) {
 				fill(poseStack, this.copyrightX, this.height - 1, this.copyrightX + this.copyrightWidth, this.height, 16777215 | n);
 			}

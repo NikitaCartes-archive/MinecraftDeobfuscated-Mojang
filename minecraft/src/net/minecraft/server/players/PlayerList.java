@@ -63,6 +63,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -71,7 +73,8 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraft.world.level.block.RespawnAnchorBlock;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -448,7 +451,7 @@ public abstract class PlayerList {
 		ServerLevel serverLevel = this.server.getLevel(serverPlayer.getRespawnDimension());
 		Optional<Vec3> optional;
 		if (serverLevel != null && blockPos != null) {
-			optional = Player.findRespawnPositionAndUseSpawnBlock(serverLevel, blockPos, bl2, bl);
+			optional = Player.findRespawnPositionAndUseSpawnBlock(serverLevel, blockPos, f, bl2, bl);
 		} else {
 			optional = Optional.empty();
 		}
@@ -474,10 +477,20 @@ public abstract class PlayerList {
 		this.updatePlayerGameMode(serverPlayer2, serverPlayer, serverLevel2);
 		boolean bl3 = false;
 		if (optional.isPresent()) {
+			BlockState blockState = serverLevel2.getBlockState(blockPos);
+			boolean bl4 = blockState.is(Blocks.RESPAWN_ANCHOR);
 			Vec3 vec3 = (Vec3)optional.get();
-			serverPlayer2.moveTo(vec3.x, vec3.y, vec3.z, f, 0.0F);
+			float g;
+			if (!blockState.is(BlockTags.BEDS) && !bl4) {
+				g = f;
+			} else {
+				Vec3 vec32 = Vec3.atBottomCenterOf(blockPos).subtract(vec3).normalize();
+				g = (float)Mth.wrapDegrees(Mth.atan2(vec32.z, vec32.x) * 180.0F / (float)Math.PI - 90.0);
+			}
+
+			serverPlayer2.moveTo(vec3.x, vec3.y, vec3.z, g, 0.0F);
 			serverPlayer2.setRespawnPosition(serverLevel2.dimension(), blockPos, f, bl2, false);
-			bl3 = !bl && serverLevel2.getBlockState(blockPos).getBlock() instanceof RespawnAnchorBlock;
+			bl3 = !bl && bl4;
 		} else if (blockPos != null) {
 			serverPlayer2.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE, 0.0F));
 		}

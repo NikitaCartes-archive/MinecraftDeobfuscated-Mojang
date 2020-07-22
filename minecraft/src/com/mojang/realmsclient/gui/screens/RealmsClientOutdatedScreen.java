@@ -12,6 +12,16 @@ import net.minecraft.realms.RealmsScreen;
 
 @Environment(EnvType.CLIENT)
 public class RealmsClientOutdatedScreen extends RealmsScreen {
+	private static final Component OUTDATED_TITLE = new TranslatableComponent("mco.client.outdated.title");
+	private static final Component[] OUTDATED_MESSAGES = new Component[]{
+		new TranslatableComponent("mco.client.outdated.msg.line1"), new TranslatableComponent("mco.client.outdated.msg.line2")
+	};
+	private static final Component INCOMPATIBLE_TITLE = new TranslatableComponent("mco.client.incompatible.title");
+	private static final Component[] INCOMPATIBLE_MESSAGES = new Component[]{
+		new TranslatableComponent("mco.client.incompatible.msg.line1"),
+		new TranslatableComponent("mco.client.incompatible.msg.line2"),
+		new TranslatableComponent("mco.client.incompatible.msg.line3")
+	};
 	private final Screen lastScreen;
 	private final boolean outdated;
 
@@ -28,13 +38,20 @@ public class RealmsClientOutdatedScreen extends RealmsScreen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		Component component = new TranslatableComponent(this.outdated ? "mco.client.outdated.title" : "mco.client.incompatible.title");
-		this.drawCenteredString(poseStack, this.font, component, this.width / 2, row(3), 16711680);
-		int k = this.outdated ? 2 : 3;
+		Component component;
+		Component[] components;
+		if (this.outdated) {
+			component = INCOMPATIBLE_TITLE;
+			components = INCOMPATIBLE_MESSAGES;
+		} else {
+			component = OUTDATED_TITLE;
+			components = OUTDATED_MESSAGES;
+		}
 
-		for (int l = 0; l < k; l++) {
-			String string = (this.outdated ? "mco.client.outdated.msg.line" : "mco.client.incompatible.msg.line") + (l + 1);
-			this.drawCenteredString(poseStack, this.font, new TranslatableComponent(string), this.width / 2, row(5) + l * 12, 16777215);
+		drawCenteredString(poseStack, this.font, component, this.width / 2, row(3), 16711680);
+
+		for (int k = 0; k < components.length; k++) {
+			drawCenteredString(poseStack, this.font, components[k], this.width / 2, row(5) + k * 12, 16777215);
 		}
 
 		super.render(poseStack, i, j, f);

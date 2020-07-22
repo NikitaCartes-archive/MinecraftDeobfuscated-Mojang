@@ -6,7 +6,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
@@ -20,6 +19,7 @@ import net.minecraft.world.item.ItemStack;
 @Environment(EnvType.CLIENT)
 public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 	private static final ResourceLocation ANVIL_LOCATION = new ResourceLocation("textures/gui/container/anvil.png");
+	private static final Component TOO_EXPENSIVE_TEXT = new TranslatableComponent("container.repair.expensive");
 	private EditBox name;
 
 	public AnvilScreen(AnvilMenu anvilMenu, Inventory inventory, Component component) {
@@ -85,22 +85,24 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 		int k = this.menu.getCost();
 		if (k > 0) {
 			int l = 8453920;
-			boolean bl = true;
-			String string = I18n.get("container.repair.cost", k);
+			Component component;
 			if (k >= 40 && !this.minecraft.player.abilities.instabuild) {
-				string = I18n.get("container.repair.expensive");
+				component = TOO_EXPENSIVE_TEXT;
 				l = 16736352;
 			} else if (!this.menu.getSlot(2).hasItem()) {
-				bl = false;
-			} else if (!this.menu.getSlot(2).mayPickup(this.inventory.player)) {
-				l = 16736352;
+				component = null;
+			} else {
+				component = new TranslatableComponent("container.repair.cost", k);
+				if (!this.menu.getSlot(2).mayPickup(this.inventory.player)) {
+					l = 16736352;
+				}
 			}
 
-			if (bl) {
-				int m = this.imageWidth - 8 - this.font.width(string) - 2;
+			if (component != null) {
+				int m = this.imageWidth - 8 - this.font.width(component) - 2;
 				int n = 69;
 				fill(poseStack, m - 2, 67, this.imageWidth - 8, 79, 1325400064);
-				this.font.drawShadow(poseStack, string, (float)m, 69.0F, l);
+				this.font.drawShadow(poseStack, component, (float)m, 69.0F, l);
 			}
 		}
 	}

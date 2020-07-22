@@ -180,14 +180,21 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob {
 
 	@Override
 	protected void populateDefaultEquipmentSlots(DifficultyInstance difficultyInstance) {
-		ItemStack itemStack = new ItemStack(Items.CROSSBOW);
-		if (this.random.nextInt(300) == 0) {
-			Map<Enchantment, Integer> map = Maps.<Enchantment, Integer>newHashMap();
-			map.put(Enchantments.PIERCING, 1);
-			EnchantmentHelper.setEnchantments(map, itemStack);
-		}
+		this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.CROSSBOW));
+	}
 
-		this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
+	@Override
+	protected void enchantSpawnedWeapon(float f) {
+		super.enchantSpawnedWeapon(f);
+		if (this.random.nextInt(300) == 0) {
+			ItemStack itemStack = this.getMainHandItem();
+			if (itemStack.getItem() == Items.CROSSBOW) {
+				Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemStack);
+				map.putIfAbsent(Enchantments.PIERCING, 1);
+				EnchantmentHelper.setEnchantments(map, itemStack);
+				this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
+			}
+		}
 	}
 
 	@Override

@@ -300,9 +300,9 @@ public class Zombie extends Monster {
 							&& this.level.isUnobstructed(zombie)
 							&& this.level.noCollision(zombie)
 							&& !this.level.containsAnyLiquid(zombie.getBoundingBox())) {
-							this.level.addFreshEntity(zombie);
 							zombie.setTarget(livingEntity);
 							zombie.finalizeSpawn(serverLevel, this.level.getCurrentDifficultyAt(zombie.blockPosition()), MobSpawnType.REINFORCEMENT, null, null);
+							serverLevel.addFreshEntityWithPassengers(zombie);
 							this.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE)
 								.addPermanentModifier(new AttributeModifier("Zombie reinforcement caller charge", -0.05F, AttributeModifier.Operation.ADDITION));
 							zombie.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE)
@@ -423,7 +423,7 @@ public class Zombie extends Monster {
 			}
 
 			zombieVillager.setInvulnerable(this.isInvulnerable());
-			serverLevel.addFreshEntity(zombieVillager);
+			serverLevel.addFreshEntityWithPassengers(zombieVillager);
 			if (!this.isSilent()) {
 				serverLevel.levelEvent(null, 1026, this.blockPosition(), 0);
 			}

@@ -31,11 +31,11 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -45,10 +45,10 @@ import org.apache.commons.lang3.mutable.MutableInt;
 
 @Environment(EnvType.CLIENT)
 public class BookEditScreen extends Screen {
-	private static final FormattedText EDIT_TITLE_LABEL = new TranslatableComponent("book.editTitle");
-	private static final FormattedText FINALIZE_WARNING_LABEL = new TranslatableComponent("book.finalizeWarning");
-	private static final FormattedText BLACK_CURSOR = FormattedText.of("_", Style.EMPTY.withColor(ChatFormatting.BLACK));
-	private static final FormattedText GRAY_CURSOR = FormattedText.of("_", Style.EMPTY.withColor(ChatFormatting.GRAY));
+	private static final Component EDIT_TITLE_LABEL = new TranslatableComponent("book.editTitle");
+	private static final Component FINALIZE_WARNING_LABEL = new TranslatableComponent("book.finalizeWarning");
+	private static final FormattedCharSequence BLACK_CURSOR = FormattedCharSequence.forward("_", Style.EMPTY.withColor(ChatFormatting.BLACK));
+	private static final FormattedCharSequence GRAY_CURSOR = FormattedCharSequence.forward("_", Style.EMPTY.withColor(ChatFormatting.GRAY));
 	private final Player owner;
 	private final ItemStack book;
 	private boolean isModified;
@@ -78,8 +78,8 @@ public class BookEditScreen extends Screen {
 	private final InteractionHand hand;
 	@Nullable
 	private BookEditScreen.DisplayCache displayCache = BookEditScreen.DisplayCache.EMPTY;
-	private FormattedText pageMsg = FormattedText.EMPTY;
-	private final FormattedText ownerText;
+	private Component pageMsg = TextComponent.EMPTY;
+	private final Component ownerText;
 
 	public BookEditScreen(Player player, ItemStack itemStack, InteractionHand interactionHand) {
 		super(NarratorChatListener.NO_TITLE);
@@ -389,11 +389,13 @@ public class BookEditScreen extends Screen {
 		this.blit(poseStack, k, 2, 0, 0, 192, 192);
 		if (this.isSigning) {
 			boolean bl = this.frameTick / 6 % 2 == 0;
-			FormattedText formattedText = FormattedText.composite(FormattedText.of(this.title), bl ? BLACK_CURSOR : GRAY_CURSOR);
+			FormattedCharSequence formattedCharSequence = FormattedCharSequence.composite(
+				FormattedCharSequence.forward(this.title, Style.EMPTY), bl ? BLACK_CURSOR : GRAY_CURSOR
+			);
 			int m = this.font.width(EDIT_TITLE_LABEL);
 			this.font.draw(poseStack, EDIT_TITLE_LABEL, (float)(k + 36 + (114 - m) / 2), 34.0F, 0);
-			int n = this.font.width(formattedText);
-			this.font.draw(poseStack, formattedText, (float)(k + 36 + (114 - n) / 2), 50.0F, 0);
+			int n = this.font.width(formattedCharSequence);
+			this.font.draw(poseStack, formattedCharSequence, (float)(k + 36 + (114 - n) / 2), 50.0F, 0);
 			int o = this.font.width(this.ownerText);
 			this.font.draw(poseStack, this.ownerText, (float)(k + 36 + (114 - o) / 2), 60.0F, 0);
 			this.font.drawWordWrap(FINALIZE_WARNING_LABEL, k + 36, 82, 114, 0);

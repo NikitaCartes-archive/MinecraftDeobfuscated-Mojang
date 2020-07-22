@@ -5,6 +5,6 @@ import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public class UploadStatus {
-	public volatile Long bytesWritten = 0L;
-	public volatile Long totalBytes = 0L;
+	public volatile long bytesWritten;
+	public volatile long totalBytes;
 }

@@ -18,8 +18,11 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 import net.minecraft.world.level.levelgen.structure.templatesystem.TagMatchTest;
 
 public class ProcessorLists {
-	private static final ProcessorRule GILDED_BLACKSTONE_REPLACEMENT_RULE = new ProcessorRule(
+	private static final ProcessorRule ADD_GILDED_BLACKSTONE = new ProcessorRule(
 		new RandomBlockMatchTest(Blocks.BLACKSTONE, 0.01F), AlwaysTrueTest.INSTANCE, Blocks.GILDED_BLACKSTONE.defaultBlockState()
+	);
+	private static final ProcessorRule REMOVE_GILDED_BLACKSTONE = new ProcessorRule(
+		new RandomBlockMatchTest(Blocks.GILDED_BLACKSTONE, 0.5F), AlwaysTrueTest.INSTANCE, Blocks.BLACKSTONE.defaultBlockState()
 	);
 	public static final ImmutableList<StructureProcessor> ZOMBIE_PLAINS = register(
 		"zombie_plains",
@@ -341,7 +344,8 @@ public class ProcessorLists {
 						AlwaysTrueTest.INSTANCE,
 						Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState()
 					),
-					GILDED_BLACKSTONE_REPLACEMENT_RULE
+					REMOVE_GILDED_BLACKSTONE,
+					ADD_GILDED_BLACKSTONE
 				)
 			)
 		)
@@ -361,7 +365,8 @@ public class ProcessorLists {
 						AlwaysTrueTest.INSTANCE,
 						Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS.defaultBlockState()
 					),
-					GILDED_BLACKSTONE_REPLACEMENT_RULE
+					REMOVE_GILDED_BLACKSTONE,
+					ADD_GILDED_BLACKSTONE
 				)
 			)
 		)
@@ -375,7 +380,8 @@ public class ProcessorLists {
 						new RandomBlockMatchTest(Blocks.POLISHED_BLACKSTONE_BRICKS, 0.3F), AlwaysTrueTest.INSTANCE, Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS.defaultBlockState()
 					),
 					new ProcessorRule(new RandomBlockMatchTest(Blocks.BLACKSTONE, 1.0E-4F), AlwaysTrueTest.INSTANCE, Blocks.AIR.defaultBlockState()),
-					GILDED_BLACKSTONE_REPLACEMENT_RULE
+					REMOVE_GILDED_BLACKSTONE,
+					ADD_GILDED_BLACKSTONE
 				)
 			)
 		)
@@ -389,7 +395,8 @@ public class ProcessorLists {
 					new ProcessorRule(
 						new RandomBlockMatchTest(Blocks.GOLD_BLOCK, 0.1F), AlwaysTrueTest.INSTANCE, Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS.defaultBlockState()
 					),
-					GILDED_BLACKSTONE_REPLACEMENT_RULE
+					REMOVE_GILDED_BLACKSTONE,
+					ADD_GILDED_BLACKSTONE
 				)
 			)
 		)
@@ -403,7 +410,8 @@ public class ProcessorLists {
 						new RandomBlockMatchTest(Blocks.POLISHED_BLACKSTONE_BRICKS, 0.1F), AlwaysTrueTest.INSTANCE, Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS.defaultBlockState()
 					),
 					new ProcessorRule(new RandomBlockMatchTest(Blocks.BLACKSTONE, 1.0E-4F), AlwaysTrueTest.INSTANCE, Blocks.AIR.defaultBlockState()),
-					GILDED_BLACKSTONE_REPLACEMENT_RULE
+					REMOVE_GILDED_BLACKSTONE,
+					ADD_GILDED_BLACKSTONE
 				)
 			)
 		)
@@ -420,7 +428,8 @@ public class ProcessorLists {
 					new ProcessorRule(
 						new RandomBlockMatchTest(Blocks.GOLD_BLOCK, 0.3F), AlwaysTrueTest.INSTANCE, Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS.defaultBlockState()
 					),
-					GILDED_BLACKSTONE_REPLACEMENT_RULE
+					REMOVE_GILDED_BLACKSTONE,
+					ADD_GILDED_BLACKSTONE
 				)
 			)
 		)
@@ -441,7 +450,8 @@ public class ProcessorLists {
 					new ProcessorRule(
 						new RandomBlockMatchTest(Blocks.GOLD_BLOCK, 0.3F), AlwaysTrueTest.INSTANCE, Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS.defaultBlockState()
 					),
-					GILDED_BLACKSTONE_REPLACEMENT_RULE
+					REMOVE_GILDED_BLACKSTONE,
+					ADD_GILDED_BLACKSTONE
 				)
 			)
 		)
@@ -455,7 +465,8 @@ public class ProcessorLists {
 					new ProcessorRule(
 						new RandomBlockMatchTest(Blocks.GOLD_BLOCK, 0.6F), AlwaysTrueTest.INSTANCE, Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS.defaultBlockState()
 					),
-					GILDED_BLACKSTONE_REPLACEMENT_RULE
+					REMOVE_GILDED_BLACKSTONE,
+					ADD_GILDED_BLACKSTONE
 				)
 			)
 		)
@@ -496,7 +507,8 @@ public class ProcessorLists {
 					new ProcessorRule(
 						new RandomBlockMatchTest(Blocks.POLISHED_BLACKSTONE_BRICKS, 0.5F), AlwaysTrueTest.INSTANCE, Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS.defaultBlockState()
 					),
-					new ProcessorRule(new RandomBlockMatchTest(Blocks.POLISHED_BLACKSTONE_BRICKS, 0.3F), AlwaysTrueTest.INSTANCE, Blocks.BLACKSTONE.defaultBlockState())
+					new ProcessorRule(new RandomBlockMatchTest(Blocks.POLISHED_BLACKSTONE_BRICKS, 0.3F), AlwaysTrueTest.INSTANCE, Blocks.BLACKSTONE.defaultBlockState()),
+					REMOVE_GILDED_BLACKSTONE
 				)
 			)
 		)
@@ -511,7 +523,8 @@ public class ProcessorLists {
 					),
 					new ProcessorRule(
 						AlwaysTrueTest.INSTANCE, AlwaysTrueTest.INSTANCE, new AxisAlignedLinearPosTest(0.0F, 0.05F, 0, 100, Direction.Axis.Y), Blocks.AIR.defaultBlockState()
-					)
+					),
+					REMOVE_GILDED_BLACKSTONE
 				)
 			)
 		)

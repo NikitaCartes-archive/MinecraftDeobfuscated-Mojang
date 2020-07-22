@@ -8,7 +8,7 @@ import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class OpenServerTask extends LongRunningTask {
@@ -25,7 +25,7 @@ public class OpenServerTask extends LongRunningTask {
 	}
 
 	public void run() {
-		this.setTitle(I18n.get("mco.configure.world.opening"));
+		this.setTitle(new TranslatableComponent("mco.configure.world.opening"));
 		RealmsClient realmsClient = RealmsClient.create();
 
 		for (int i = 0; i < 25; i++) {

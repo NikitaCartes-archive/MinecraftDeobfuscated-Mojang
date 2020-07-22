@@ -43,18 +43,18 @@ public class Program {
 		return this.name;
 	}
 
-	public static Program compileShader(Program.Type type, String string, InputStream inputStream) throws IOException {
+	public static Program compileShader(Program.Type type, String string, InputStream inputStream, String string2) throws IOException {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
-		String string2 = TextureUtil.readResourceAsString(inputStream);
-		if (string2 == null) {
+		String string3 = TextureUtil.readResourceAsString(inputStream);
+		if (string3 == null) {
 			throw new IOException("Could not load program " + type.getName());
 		} else {
 			int i = GlStateManager.glCreateShader(type.getGlType());
-			GlStateManager.glShaderSource(i, string2);
+			GlStateManager.glShaderSource(i, string3);
 			GlStateManager.glCompileShader(i);
 			if (GlStateManager.glGetShaderi(i, 35713) == 0) {
-				String string3 = StringUtils.trim(GlStateManager.glGetShaderInfoLog(i, 32768));
-				throw new IOException("Couldn't compile " + type.getName() + " program: " + string3);
+				String string4 = StringUtils.trim(GlStateManager.glGetShaderInfoLog(i, 32768));
+				throw new IOException("Couldn't compile " + type.getName() + " program (" + string2 + ", " + string + ") : " + string4);
 			} else {
 				Program program = new Program(type, i, string);
 				type.getPrograms().put(string, program);

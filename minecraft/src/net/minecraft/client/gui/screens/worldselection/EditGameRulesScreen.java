@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
@@ -25,10 +26,10 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.GameRules;
 
 @Environment(EnvType.CLIENT)
@@ -38,7 +39,7 @@ public class EditGameRulesScreen extends Screen {
 	private final Set<EditGameRulesScreen.RuleEntry> invalidEntries = Sets.<EditGameRulesScreen.RuleEntry>newHashSet();
 	private Button doneButton;
 	@Nullable
-	private List<FormattedText> tooltip;
+	private List<FormattedCharSequence> tooltip;
 	private final GameRules gameRules;
 
 	public EditGameRulesScreen(GameRules gameRules, Consumer<Optional<GameRules>> consumer) {
@@ -75,14 +76,14 @@ public class EditGameRulesScreen extends Screen {
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.tooltip = null;
 		this.rules.render(poseStack, i, j, f);
-		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 16777215);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 16777215);
 		super.render(poseStack, i, j, f);
 		if (this.tooltip != null) {
 			this.renderTooltip(poseStack, this.tooltip, i, j);
 		}
 	}
 
-	private void setTooltip(@Nullable List<FormattedText> list) {
+	private void setTooltip(@Nullable List<FormattedCharSequence> list) {
 		this.tooltip = list;
 	}
 
@@ -104,7 +105,7 @@ public class EditGameRulesScreen extends Screen {
 	public class BooleanRuleEntry extends EditGameRulesScreen.GameRuleEntry {
 		private final Button checkbox;
 
-		public BooleanRuleEntry(Component component, List<FormattedText> list, String string, GameRules.BooleanValue booleanValue) {
+		public BooleanRuleEntry(Component component, List<FormattedCharSequence> list, String string, GameRules.BooleanValue booleanValue) {
 			super(list, component);
 			this.checkbox = new Button(10, 5, 44, 20, CommonComponents.optionStatus(booleanValue.get()), button -> {
 				boolean bl = !booleanValue.get();
@@ -139,7 +140,7 @@ public class EditGameRulesScreen extends Screen {
 
 		@Override
 		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			EditGameRulesScreen.this.drawCenteredString(poseStack, EditGameRulesScreen.this.minecraft.font, this.label, k + l / 2, j + 5, 16777215);
+			GuiComponent.drawCenteredString(poseStack, EditGameRulesScreen.this.minecraft.font, this.label, k + l / 2, j + 5, 16777215);
 		}
 
 		@Override
@@ -151,15 +152,15 @@ public class EditGameRulesScreen extends Screen {
 	@FunctionalInterface
 	@Environment(EnvType.CLIENT)
 	interface EntryFactory<T extends GameRules.Value<T>> {
-		EditGameRulesScreen.RuleEntry create(Component component, List<FormattedText> list, String string, T value);
+		EditGameRulesScreen.RuleEntry create(Component component, List<FormattedCharSequence> list, String string, T value);
 	}
 
 	@Environment(EnvType.CLIENT)
 	public abstract class GameRuleEntry extends EditGameRulesScreen.RuleEntry {
-		private final List<FormattedText> label;
+		private final List<FormattedCharSequence> label;
 		protected final List<GuiEventListener> children = Lists.<GuiEventListener>newArrayList();
 
-		public GameRuleEntry(@Nullable List<FormattedText> list, Component component) {
+		public GameRuleEntry(@Nullable List<FormattedCharSequence> list, Component component) {
 			super(list);
 			this.label = EditGameRulesScreen.this.minecraft.font.split(component, 175);
 		}
@@ -171,10 +172,10 @@ public class EditGameRulesScreen extends Screen {
 
 		protected void renderLabel(PoseStack poseStack, int i, int j) {
 			if (this.label.size() == 1) {
-				EditGameRulesScreen.this.minecraft.font.draw(poseStack, (FormattedText)this.label.get(0), (float)j, (float)(i + 5), 16777215);
+				EditGameRulesScreen.this.minecraft.font.draw(poseStack, (FormattedCharSequence)this.label.get(0), (float)j, (float)(i + 5), 16777215);
 			} else if (this.label.size() >= 2) {
-				EditGameRulesScreen.this.minecraft.font.draw(poseStack, (FormattedText)this.label.get(0), (float)j, (float)i, 16777215);
-				EditGameRulesScreen.this.minecraft.font.draw(poseStack, (FormattedText)this.label.get(1), (float)j, (float)(i + 10), 16777215);
+				EditGameRulesScreen.this.minecraft.font.draw(poseStack, (FormattedCharSequence)this.label.get(0), (float)j, (float)i, 16777215);
+				EditGameRulesScreen.this.minecraft.font.draw(poseStack, (FormattedCharSequence)this.label.get(1), (float)j, (float)(i + 10), 16777215);
 			}
 		}
 	}
@@ -183,7 +184,7 @@ public class EditGameRulesScreen extends Screen {
 	public class IntegerRuleEntry extends EditGameRulesScreen.GameRuleEntry {
 		private final EditBox input;
 
-		public IntegerRuleEntry(Component component, List<FormattedText> list, String string, GameRules.IntegerValue integerValue) {
+		public IntegerRuleEntry(Component component, List<FormattedCharSequence> list, String string, GameRules.IntegerValue integerValue) {
 			super(list, component);
 			this.input = new EditBox(EditGameRulesScreen.this.minecraft.font, 10, 5, 42, 20, component.copy().append("\n").append(string).append("\n"));
 			this.input.setValue(Integer.toString(integerValue.get()));
@@ -211,9 +212,9 @@ public class EditGameRulesScreen extends Screen {
 	@Environment(EnvType.CLIENT)
 	public abstract class RuleEntry extends ContainerObjectSelectionList.Entry<EditGameRulesScreen.RuleEntry> {
 		@Nullable
-		private final List<FormattedText> tooltip;
+		private final List<FormattedCharSequence> tooltip;
 
-		public RuleEntry(@Nullable List<FormattedText> list) {
+		public RuleEntry(@Nullable List<FormattedCharSequence> list) {
 			this.tooltip = list;
 		}
 	}
@@ -241,16 +242,16 @@ public class EditGameRulesScreen extends Screen {
 					String string = value.serialize();
 					Component component3 = new TranslatableComponent("editGamerule.default", new TextComponent(string)).withStyle(ChatFormatting.GRAY);
 					String string2 = key.getDescriptionId() + ".description";
-					List<FormattedText> list;
+					List<FormattedCharSequence> list;
 					String string3;
 					if (I18n.exists(string2)) {
-						Builder<FormattedText> builder = ImmutableList.<FormattedText>builder().add(component2);
+						Builder<FormattedCharSequence> builder = ImmutableList.<FormattedCharSequence>builder().add(component2.getVisualOrderText());
 						Component component4 = new TranslatableComponent(string2);
 						EditGameRulesScreen.this.font.split(component4, 150).forEach(builder::add);
-						list = builder.add(component3).build();
+						list = builder.add(component3.getVisualOrderText()).build();
 						string3 = component4.getString() + "\n" + component3.getString();
 					} else {
-						list = ImmutableList.of(component2, component3);
+						list = ImmutableList.of(component2.getVisualOrderText(), component3.getVisualOrderText());
 						string3 = component3.getString();
 					}
 

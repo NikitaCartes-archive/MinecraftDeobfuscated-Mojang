@@ -13,6 +13,7 @@ public class CommonComponents {
 	public static final Component GUI_NO = new TranslatableComponent("gui.no");
 	public static final Component GUI_PROCEED = new TranslatableComponent("gui.proceed");
 	public static final Component GUI_BACK = new TranslatableComponent("gui.back");
+	public static final Component CONNECT_FAILED = new TranslatableComponent("connect.failed");
 
 	public static Component optionStatus(boolean bl) {
 		return bl ? OPTION_ON : OPTION_OFF;

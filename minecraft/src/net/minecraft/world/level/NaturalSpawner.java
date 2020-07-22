@@ -174,7 +174,7 @@ public final class NaturalSpawner {
 									spawnGroupData = mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.NATURAL, spawnGroupData, null);
 									j++;
 									p++;
-									serverLevel.addFreshEntity(mob);
+									serverLevel.addFreshEntityWithPassengers(mob);
 									afterSpawnCallback.run(mob, chunkAccess);
 									if (j >= mob.getMaxSpawnClusterSize()) {
 										return;
@@ -399,7 +399,7 @@ public final class NaturalSpawner {
 									spawnGroupData = mob.finalizeSpawn(
 										serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.CHUNK_GENERATION, spawnGroupData, null
 									);
-									serverLevelAccessor.addFreshEntity(mob);
+									serverLevelAccessor.addFreshEntityWithPassengers(mob);
 									bl = true;
 								}
 							}

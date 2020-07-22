@@ -17,14 +17,15 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.CollisionGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BedBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -42,6 +43,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.apache.commons.lang3.ArrayUtils;
 
 public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock {
 	public static final EnumProperty<BedPart> PART = BlockStateProperties.BED_PART;
@@ -226,67 +228,65 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 		return bedPart == BedPart.HEAD ? DoubleBlockCombiner.BlockType.FIRST : DoubleBlockCombiner.BlockType.SECOND;
 	}
 
-	public static Optional<Vec3> findStandUpPosition(EntityType<?> entityType, LevelReader levelReader, BlockPos blockPos, int i) {
-		Direction direction = levelReader.getBlockState(blockPos).getValue(FACING);
-		int j = blockPos.getX();
-		int k = blockPos.getY();
-		int l = blockPos.getZ();
+	private static boolean isBunkBed(BlockGetter blockGetter, BlockPos blockPos) {
+		return blockGetter.getBlockState(blockPos.below()).getBlock() instanceof BedBlock;
+	}
 
-		for (int m = 0; m <= 1; m++) {
-			int n = j - direction.getStepX() * m - 1;
-			int o = l - direction.getStepZ() * m - 1;
-			int p = n + 2;
-			int q = o + 2;
+	public static Optional<Vec3> findStandUpPosition(EntityType<?> entityType, CollisionGetter collisionGetter, BlockPos blockPos, float f) {
+		Direction direction = collisionGetter.getBlockState(blockPos).getValue(FACING);
+		Direction direction2 = direction.getClockWise();
+		Direction direction3 = direction2.isFacingAngle(f) ? direction2.getOpposite() : direction2;
+		if (isBunkBed(collisionGetter, blockPos)) {
+			return findBunkBedStandUpPosition(entityType, collisionGetter, blockPos, direction, direction3);
+		} else {
+			int[][] is = bedStandUpOffsets(direction, direction3);
+			Optional<Vec3> optional = findStandUpPositionAtOffset(entityType, collisionGetter, blockPos, is, true);
+			return optional.isPresent() ? optional : findStandUpPositionAtOffset(entityType, collisionGetter, blockPos, is, false);
+		}
+	}
 
-			for (int r = n; r <= p; r++) {
-				for (int s = o; s <= q; s++) {
-					BlockPos blockPos2 = new BlockPos(r, k, s);
-					Optional<Vec3> optional = getStandingLocationAtOrBelow(entityType, levelReader, blockPos2);
-					if (optional.isPresent()) {
-						if (i <= 0) {
-							return optional;
-						}
-
-						i--;
+	private static Optional<Vec3> findBunkBedStandUpPosition(
+		EntityType<?> entityType, CollisionGetter collisionGetter, BlockPos blockPos, Direction direction, Direction direction2
+	) {
+		int[][] is = bedSurroundStandUpOffsets(direction, direction2);
+		Optional<Vec3> optional = findStandUpPositionAtOffset(entityType, collisionGetter, blockPos, is, true);
+		if (optional.isPresent()) {
+			return optional;
+		} else {
+			BlockPos blockPos2 = blockPos.below();
+			Optional<Vec3> optional2 = findStandUpPositionAtOffset(entityType, collisionGetter, blockPos2, is, true);
+			if (optional2.isPresent()) {
+				return optional2;
+			} else {
+				int[][] js = bedAboveStandUpOffsets(direction);
+				Optional<Vec3> optional3 = findStandUpPositionAtOffset(entityType, collisionGetter, blockPos, js, true);
+				if (optional3.isPresent()) {
+					return optional3;
+				} else {
+					Optional<Vec3> optional4 = findStandUpPositionAtOffset(entityType, collisionGetter, blockPos, is, false);
+					if (optional4.isPresent()) {
+						return optional4;
+					} else {
+						Optional<Vec3> optional5 = findStandUpPositionAtOffset(entityType, collisionGetter, blockPos2, is, false);
+						return optional5.isPresent() ? optional5 : findStandUpPositionAtOffset(entityType, collisionGetter, blockPos, js, false);
 					}
 				}
 			}
 		}
-
-		return Optional.empty();
 	}
 
-	public static Optional<Vec3> getStandingLocationAtOrBelow(EntityType<?> entityType, LevelReader levelReader, BlockPos blockPos) {
-		VoxelShape voxelShape = levelReader.getBlockState(blockPos).getCollisionShape(levelReader, blockPos);
-		if (voxelShape.max(Direction.Axis.Y) > 0.4375) {
-			return Optional.empty();
-		} else {
-			BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+	private static Optional<Vec3> findStandUpPositionAtOffset(EntityType<?> entityType, CollisionGetter collisionGetter, BlockPos blockPos, int[][] is, boolean bl) {
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-			while (
-				mutableBlockPos.getY() >= 0
-					&& blockPos.getY() - mutableBlockPos.getY() <= 2
-					&& levelReader.getBlockState(mutableBlockPos).getCollisionShape(levelReader, mutableBlockPos).isEmpty()
-			) {
-				mutableBlockPos.move(Direction.DOWN);
-			}
-
-			VoxelShape voxelShape2 = levelReader.getBlockState(mutableBlockPos).getCollisionShape(levelReader, mutableBlockPos);
-			if (voxelShape2.isEmpty()) {
-				return Optional.empty();
-			} else {
-				double d = (double)mutableBlockPos.getY() + voxelShape2.max(Direction.Axis.Y) + 2.0E-7;
-				if ((double)blockPos.getY() - d > 2.0) {
-					return Optional.empty();
-				} else {
-					Vec3 vec3 = new Vec3((double)mutableBlockPos.getX() + 0.5, d, (double)mutableBlockPos.getZ() + 0.5);
-					AABB aABB = entityType.getAABB(vec3.x, vec3.y, vec3.z);
-					return levelReader.noCollision(aABB) && levelReader.getBlockStates(aABB.expandTowards(0.0, -0.2F, 0.0)).noneMatch(entityType::isBlockDangerous)
-						? Optional.of(vec3)
-						: Optional.empty();
-				}
+		for (int[] js : is) {
+			mutableBlockPos.set(blockPos.getX() + js[0], blockPos.getY(), blockPos.getZ() + js[1]);
+			Vec3 vec3 = DismountHelper.findSafeDismountLocation(entityType, collisionGetter, mutableBlockPos, bl);
+			if (vec3 != null) {
+				return Optional.of(vec3);
 			}
 		}
+
+		return Optional.empty();
 	}
 
 	@Override
@@ -335,5 +335,28 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 	@Override
 	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
+	}
+
+	private static int[][] bedStandUpOffsets(Direction direction, Direction direction2) {
+		return ArrayUtils.addAll(bedSurroundStandUpOffsets(direction, direction2), bedAboveStandUpOffsets(direction));
+	}
+
+	private static int[][] bedSurroundStandUpOffsets(Direction direction, Direction direction2) {
+		return new int[][]{
+			{direction2.getStepX(), direction2.getStepZ()},
+			{direction2.getStepX() - direction.getStepX(), direction2.getStepZ() - direction.getStepZ()},
+			{direction2.getStepX() - direction.getStepX() * 2, direction2.getStepZ() - direction.getStepZ() * 2},
+			{-direction.getStepX() * 2, -direction.getStepZ() * 2},
+			{-direction2.getStepX() - direction.getStepX() * 2, -direction2.getStepZ() - direction.getStepZ() * 2},
+			{-direction2.getStepX() - direction.getStepX(), -direction2.getStepZ() - direction.getStepZ()},
+			{-direction2.getStepX(), -direction2.getStepZ()},
+			{-direction2.getStepX() + direction.getStepX(), -direction2.getStepZ() + direction.getStepZ()},
+			{direction.getStepX(), direction.getStepZ()},
+			{direction2.getStepX() + direction.getStepX(), direction2.getStepZ() + direction.getStepZ()}
+		};
+	}
+
+	private static int[][] bedAboveStandUpOffsets(Direction direction) {
+		return new int[][]{{0, 0}, {-direction.getStepX(), -direction.getStepZ()}};
 	}
 }

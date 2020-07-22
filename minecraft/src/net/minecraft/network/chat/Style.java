@@ -19,8 +19,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 
 public class Style {
-	public static final ResourceLocation DEFAULT_FONT = new ResourceLocation("minecraft", "default");
 	public static final Style EMPTY = new Style(null, null, null, null, null, null, null, null, null, null);
+	public static final ResourceLocation DEFAULT_FONT = new ResourceLocation("minecraft", "default");
 	@Nullable
 	private final TextColor color;
 	@Nullable
@@ -133,6 +133,13 @@ public class Style {
 	public Style withItalic(@Nullable Boolean boolean_) {
 		return new Style(
 			this.color, this.bold, boolean_, this.underlined, this.strikethrough, this.obfuscated, this.clickEvent, this.hoverEvent, this.insertion, this.font
+		);
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Style withUnderlined(@Nullable Boolean boolean_) {
+		return new Style(
+			this.color, this.bold, this.italic, boolean_, this.strikethrough, this.obfuscated, this.clickEvent, this.hoverEvent, this.insertion, this.font
 		);
 	}
 

@@ -12,7 +12,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
@@ -21,6 +23,10 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class RealmsTermsScreen extends RealmsScreen {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Component TITLE = new TranslatableComponent("mco.terms.title");
+	private static final Component TERMS_STATIC_TEXT = new TranslatableComponent("mco.terms.sentence.1");
+	private static final Component TERMS_LINK_TEXT = new TextComponent(" ")
+		.append(new TranslatableComponent("mco.terms.sentence.2").withStyle(Style.EMPTY.withUnderlined(true)));
 	private final Screen lastScreen;
 	private final RealmsMainScreen mainScreen;
 	private final RealmsServer realmsServer;
@@ -86,21 +92,15 @@ public class RealmsTermsScreen extends RealmsScreen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		this.drawCenteredString(poseStack, this.font, I18n.get("mco.terms.title"), this.width / 2, 17, 16777215);
-		this.font.draw(poseStack, I18n.get("mco.terms.sentence.1"), (float)(this.width / 2 - 120), (float)row(5), 16777215);
-		int k = this.font.width(I18n.get("mco.terms.sentence.1"));
+		drawCenteredString(poseStack, this.font, TITLE, this.width / 2, 17, 16777215);
+		this.font.draw(poseStack, TERMS_STATIC_TEXT, (float)(this.width / 2 - 120), (float)row(5), 16777215);
+		int k = this.font.width(TERMS_STATIC_TEXT);
 		int l = this.width / 2 - 121 + k;
 		int m = row(5);
-		int n = l + this.font.width("mco.terms.sentence.2") + 1;
+		int n = l + this.font.width(TERMS_LINK_TEXT) + 1;
 		int o = m + 1 + 9;
-		if (l <= i && i <= n && m <= j && j <= o) {
-			this.onLink = true;
-			this.font.draw(poseStack, " " + I18n.get("mco.terms.sentence.2"), (float)(this.width / 2 - 120 + k), (float)row(5), 7107012);
-		} else {
-			this.onLink = false;
-			this.font.draw(poseStack, " " + I18n.get("mco.terms.sentence.2"), (float)(this.width / 2 - 120 + k), (float)row(5), 3368635);
-		}
-
+		this.onLink = l <= i && i <= n && m <= j && j <= o;
+		this.font.draw(poseStack, TERMS_LINK_TEXT, (float)(this.width / 2 - 120 + k), (float)row(5), this.onLink ? 7107012 : 3368635);
 		super.render(poseStack, i, j, f);
 	}
 }

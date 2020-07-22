@@ -224,7 +224,7 @@ public abstract class Animal extends AgableMob {
 			animal.resetLove();
 			agableMob.setBaby(true);
 			agableMob.moveTo(this.getX(), this.getY(), this.getZ(), 0.0F, 0.0F);
-			serverLevel.addFreshEntity(agableMob);
+			serverLevel.addFreshEntityWithPassengers(agableMob);
 			serverLevel.broadcastEntityEvent(this, (byte)18);
 			if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
 				serverLevel.addFreshEntity(new ExperienceOrb(serverLevel, this.getX(), this.getY(), this.getZ(), this.getRandom().nextInt(7) + 1));

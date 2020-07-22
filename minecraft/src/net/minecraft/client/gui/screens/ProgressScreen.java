@@ -64,11 +64,11 @@ public class ProgressScreen extends Screen implements ProgressListener {
 		} else {
 			this.renderBackground(poseStack);
 			if (this.header != null) {
-				this.drawCenteredString(poseStack, this.font, this.header, this.width / 2, 70, 16777215);
+				drawCenteredString(poseStack, this.font, this.header, this.width / 2, 70, 16777215);
 			}
 
 			if (this.stage != null && this.progress != 0) {
-				this.drawCenteredString(poseStack, this.font, new TextComponent("").append(this.stage).append(" " + this.progress + "%"), this.width / 2, 90, 16777215);
+				drawCenteredString(poseStack, this.font, new TextComponent("").append(this.stage).append(" " + this.progress + "%"), this.width / 2, 90, 16777215);
 			}
 
 			super.render(poseStack, i, j, f);

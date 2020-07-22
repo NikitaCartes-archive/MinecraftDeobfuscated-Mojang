@@ -44,6 +44,15 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 		return Codec.mapPair(ResourceLocation.CODEC.<ResourceKey<T>>xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location).fieldOf("name"), mapCodec);
 	}
 
+	public static <T> MapCodec<Pair<Pair<ResourceKey<T>, Integer>, T>> withNameAndId(ResourceKey<? extends Registry<T>> resourceKey, MapCodec<T> mapCodec) {
+		return Codec.mapPair(
+			Codec.mapPair(
+				ResourceLocation.CODEC.<ResourceKey<T>>xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location).fieldOf("name"), Codec.INT.fieldOf("id")
+			),
+			mapCodec
+		);
+	}
+
 	@Override
 	public <V extends T> V registerMapping(int i, ResourceKey<T> resourceKey, V object) {
 		this.map.addMapping((T)object, i);
@@ -52,6 +61,10 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 		this.randomCache = null;
 		if (this.keyStorage.containsKey(resourceKey)) {
 			LOGGER.debug("Adding duplicate key '{}' to registry", resourceKey);
+		}
+
+		if (this.storage.containsValue(object)) {
+			LOGGER.error("Adding duplicate value '{}' to registry", object);
 		}
 
 		this.storage.put(resourceKey.location(), (T)object);
@@ -151,19 +164,19 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 	}
 
 	public static <T> Codec<MappedRegistry<T>> networkCodec(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, MapCodec<T> mapCodec) {
-		return withName(resourceKey, mapCodec).codec().listOf().xmap(list -> {
+		return withNameAndId(resourceKey, mapCodec).codec().listOf().xmap(list -> {
 			MappedRegistry<T> mappedRegistry = new MappedRegistry<>(resourceKey, lifecycle);
 
-			for (Pair<ResourceKey<T>, T> pair : list) {
-				mappedRegistry.register(pair.getFirst(), pair.getSecond());
+			for (Pair<Pair<ResourceKey<T>, Integer>, T> pair : list) {
+				mappedRegistry.registerMapping(pair.getFirst().getSecond(), pair.getFirst().getFirst(), pair.getSecond());
 			}
 
 			return mappedRegistry;
 		}, mappedRegistry -> {
-			com.google.common.collect.ImmutableList.Builder<Pair<ResourceKey<T>, T>> builder = ImmutableList.builder();
+			com.google.common.collect.ImmutableList.Builder<Pair<Pair<ResourceKey<T>, Integer>, T>> builder = ImmutableList.builder();
 
 			for (T object : mappedRegistry.map) {
-				builder.add(Pair.of((ResourceKey<T>)mappedRegistry.getResourceKey(object).get(), object));
+				builder.add(Pair.of(Pair.of((ResourceKey<T>)mappedRegistry.getResourceKey(object).get(), mappedRegistry.getId(object)), object));
 			}
 
 			return builder.build();

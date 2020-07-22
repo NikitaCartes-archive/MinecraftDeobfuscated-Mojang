@@ -1,7 +1,5 @@
 package com.mojang.realmsclient.client;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.mojang.realmsclient.dto.BackupList;
 import com.mojang.realmsclient.dto.GuardedSerializer;
 import com.mojang.realmsclient.dto.Ops;
@@ -257,24 +255,16 @@ public class RealmsClient {
 		this.execute(Request.put(string2, ""));
 	}
 
-	public WorldDownload download(long l, int i) throws RealmsServiceException {
+	public WorldDownload requestDownloadInfo(long l, int i) throws RealmsServiceException {
 		String string = this.url("worlds" + "/$WORLD_ID/slot/$SLOT_ID/download".replace("$WORLD_ID", String.valueOf(l)).replace("$SLOT_ID", String.valueOf(i)));
 		String string2 = this.execute(Request.get(string));
 		return WorldDownload.parse(string2);
 	}
 
-	public UploadInfo upload(long l, String string) throws RealmsServiceException {
+	@Nullable
+	public UploadInfo requestUploadInfo(long l, @Nullable String string) throws RealmsServiceException {
 		String string2 = this.url("worlds" + "/$WORLD_ID/backups/upload".replace("$WORLD_ID", String.valueOf(l)));
-		UploadInfo uploadInfo = new UploadInfo();
-		if (string != null) {
-			uploadInfo.setToken(string);
-		}
-
-		GsonBuilder gsonBuilder = new GsonBuilder();
-		gsonBuilder.excludeFieldsWithoutExposeAnnotation();
-		Gson gson = gsonBuilder.create();
-		String string3 = gson.toJson(uploadInfo);
-		return UploadInfo.parse(this.execute(Request.put(string2, string3)));
+		return UploadInfo.parse(this.execute(Request.put(string2, UploadInfo.createRequest(string))));
 	}
 
 	public void rejectInvitation(String string) throws RealmsServiceException {

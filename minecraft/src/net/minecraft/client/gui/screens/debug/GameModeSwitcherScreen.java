@@ -81,8 +81,8 @@ public class GameModeSwitcherScreen extends Screen {
 			poseStack.popPose();
 			super.render(poseStack, i, j, f);
 			this.currentlyHovered
-				.ifPresent(gameModeIcon -> this.drawCenteredString(poseStack, this.font, gameModeIcon.getName(), this.width / 2, this.height / 2 - 30 - 20, -1));
-			this.drawCenteredString(poseStack, this.font, SELECT_KEY, this.width / 2, this.height / 2 + 5, 16777215);
+				.ifPresent(gameModeIcon -> drawCenteredString(poseStack, this.font, gameModeIcon.getName(), this.width / 2, this.height / 2 - 30 - 20, -1));
+			drawCenteredString(poseStack, this.font, SELECT_KEY, this.width / 2, this.height / 2 + 5, 16777215);
 			if (!this.setFirstMousePos) {
 				this.firstMouseX = i;
 				this.firstMouseY = j;

@@ -55,7 +55,6 @@ import net.minecraft.client.CloudStatus;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Option;
-import net.minecraft.client.Options;
 import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -502,10 +501,14 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			this.cloudsTarget = renderTarget5;
 		} catch (Exception var8) {
 			String string = var8 instanceof JsonSyntaxException ? "parse" : "load";
-			Options options = Minecraft.getInstance().options;
-			options.graphicsMode = GraphicsStatus.FANCY;
-			options.save();
-			throw new LevelRenderer.TranparencyShaderException("Failed to " + string + " shader: " + resourceLocation, var8);
+			String string2 = "Failed to " + string + " shader: " + resourceLocation;
+			LevelRenderer.TransparencyShaderException transparencyShaderException = new LevelRenderer.TransparencyShaderException(string2, var8);
+			CrashReport crashReport = this.minecraft.fillReport(new CrashReport(string2, transparencyShaderException));
+			this.minecraft.options.graphicsMode = GraphicsStatus.FANCY;
+			this.minecraft.options.save();
+			LOGGER.fatal(string2, (Throwable)transparencyShaderException);
+			this.minecraft.emergencySave();
+			Minecraft.crash(crashReport);
 		}
 	}
 
@@ -2867,8 +2870,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class TranparencyShaderException extends RuntimeException {
-		public TranparencyShaderException(String string, Throwable throwable) {
+	public static class TransparencyShaderException extends RuntimeException {
+		public TransparencyShaderException(String string, Throwable throwable) {
 			super(string, throwable);
 		}
 	}

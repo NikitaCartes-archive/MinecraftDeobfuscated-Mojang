@@ -94,7 +94,7 @@ public interface RegistryAccess {
 			.orElseThrow(() -> new IllegalStateException("Missing registry: " + registry.key()));
 
 		for (Entry<ResourceKey<E>, E> entry : registry.entrySet()) {
-			writableRegistry.register((ResourceKey<E>)entry.getKey(), entry.getValue());
+			writableRegistry.registerMapping(registry.getId((E)entry.getValue()), (ResourceKey<E>)entry.getKey(), entry.getValue());
 		}
 	}
 

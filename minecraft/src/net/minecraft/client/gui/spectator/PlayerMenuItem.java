@@ -21,6 +21,7 @@ import net.minecraft.world.entity.player.Player;
 public class PlayerMenuItem implements SpectatorMenuItem {
 	private final GameProfile profile;
 	private final ResourceLocation location;
+	private final TextComponent name;
 
 	public PlayerMenuItem(GameProfile gameProfile) {
 		this.profile = gameProfile;
@@ -31,6 +32,8 @@ public class PlayerMenuItem implements SpectatorMenuItem {
 		} else {
 			this.location = DefaultPlayerSkin.getDefaultSkin(Player.createPlayerUUID(gameProfile));
 		}
+
+		this.name = new TextComponent(gameProfile.getName());
 	}
 
 	@Override
@@ -40,7 +43,7 @@ public class PlayerMenuItem implements SpectatorMenuItem {
 
 	@Override
 	public Component getName() {
-		return new TextComponent(this.profile.getName());
+		return this.name;
 	}
 
 	@Override

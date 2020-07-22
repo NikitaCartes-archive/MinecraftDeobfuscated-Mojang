@@ -3021,11 +3021,15 @@ public abstract class LivingEntity extends Entity {
 			BlockState blockState = this.level.getBlockState(blockPos);
 			if (blockState.getBlock() instanceof BedBlock) {
 				this.level.setBlock(blockPos, blockState.setValue(BedBlock.OCCUPIED, Boolean.valueOf(false)), 3);
-				Vec3 vec3x = (Vec3)BedBlock.findStandUpPosition(this.getType(), this.level, blockPos, 0).orElseGet(() -> {
+				Vec3 vec3x = (Vec3)BedBlock.findStandUpPosition(this.getType(), this.level, blockPos, this.yRot).orElseGet(() -> {
 					BlockPos blockPos2 = blockPos.above();
 					return new Vec3((double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.1, (double)blockPos2.getZ() + 0.5);
 				});
+				Vec3 vec32 = Vec3.atBottomCenterOf(blockPos).subtract(vec3x).normalize();
+				float f = (float)Mth.wrapDegrees(Mth.atan2(vec32.z, vec32.x) * 180.0F / (float)Math.PI - 90.0);
 				this.setPos(vec3x.x, vec3x.y, vec3x.z);
+				this.yRot = f;
+				this.xRot = 0.0F;
 			}
 		});
 		Vec3 vec3 = this.position();

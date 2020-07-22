@@ -17,7 +17,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -37,7 +36,7 @@ public class GetServerDetailsTask extends LongRunningTask {
 	}
 
 	public void run() {
-		this.setTitle(I18n.get("mco.connect.connecting"));
+		this.setTitle(new TranslatableComponent("mco.connect.connecting"));
 		RealmsClient realmsClient = RealmsClient.create();
 		boolean bl = false;
 		boolean bl2 = false;

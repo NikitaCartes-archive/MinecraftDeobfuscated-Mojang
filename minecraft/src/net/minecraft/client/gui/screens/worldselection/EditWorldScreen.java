@@ -27,7 +27,6 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -47,6 +46,7 @@ import org.apache.logging.log4j.Logger;
 public class EditWorldScreen extends Screen {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final Gson WORLD_GEN_SETTINGS_GSON = new GsonBuilder().setPrettyPrinting().serializeNulls().disableHtmlEscaping().create();
+	private static final Component NAME_LABEL = new TranslatableComponent("selectWorld.enterName");
 	private Button renameButton;
 	private final BooleanConsumer callback;
 	private EditBox nameEdit;
@@ -256,8 +256,8 @@ public class EditWorldScreen extends Screen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 16777215);
-		this.drawString(poseStack, this.font, I18n.get("selectWorld.enterName"), this.width / 2 - 100, 24, 10526880);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 16777215);
+		drawString(poseStack, this.font, NAME_LABEL, this.width / 2 - 100, 24, 10526880);
 		this.nameEdit.render(poseStack, i, j, f);
 		super.render(poseStack, i, j, f);
 	}

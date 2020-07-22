@@ -6,7 +6,7 @@ import com.mojang.realmsclient.exception.RetryCallException;
 import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class CloseServerTask extends LongRunningTask {
@@ -19,7 +19,7 @@ public class CloseServerTask extends LongRunningTask {
 	}
 
 	public void run() {
-		this.setTitle(I18n.get("mco.configure.world.closing"));
+		this.setTitle(new TranslatableComponent("mco.configure.world.closing"));
 		RealmsClient realmsClient = RealmsClient.create();
 
 		for (int i = 0; i < 25; i++) {

@@ -10,9 +10,11 @@ import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 
 @Environment(EnvType.CLIENT)
 public class BlastingRecipeBookComponent extends AbstractFurnaceRecipeBookComponent {
+	private static final Component FILTER_NAME = new TranslatableComponent("gui.recipebook.toggleRecipes.blastable");
+
 	@Override
 	protected Component getRecipeFilterName() {
-		return new TranslatableComponent("gui.recipebook.toggleRecipes.blastable");
+		return FILTER_NAME;
 	}
 
 	@Override

@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
 import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.server.ServerInterface;
 import net.minecraft.server.rcon.NetworkDataOutputStream;
@@ -37,10 +38,10 @@ public class QueryThreadGs4 extends GenericThread {
 	private long lastRulesResponse;
 	private final ServerInterface serverInterface;
 
-	public QueryThreadGs4(ServerInterface serverInterface) {
+	private QueryThreadGs4(ServerInterface serverInterface, int i) {
 		super("Query Listener");
 		this.serverInterface = serverInterface;
-		this.port = serverInterface.getProperties().queryPort;
+		this.port = i;
 		this.serverIp = serverInterface.getServerIp();
 		this.serverPort = serverInterface.getServerPort();
 		this.serverName = serverInterface.getServerName();
@@ -56,13 +57,25 @@ public class QueryThreadGs4 extends GenericThread {
 			try {
 				InetAddress inetAddress = InetAddress.getLocalHost();
 				this.hostIp = inetAddress.getHostAddress();
-			} catch (UnknownHostException var3) {
-				LOGGER.warn("Unable to determine local host IP, please set server-ip in server.properties", (Throwable)var3);
+			} catch (UnknownHostException var4) {
+				LOGGER.warn("Unable to determine local host IP, please set server-ip in server.properties", (Throwable)var4);
 			}
 		}
 
 		this.rulesResponse = new NetworkDataOutputStream(1460);
 		this.validChallenges = Maps.<SocketAddress, QueryThreadGs4.RequestChallenge>newHashMap();
+	}
+
+	@Nullable
+	public static QueryThreadGs4 create(ServerInterface serverInterface) {
+		int i = serverInterface.getProperties().queryPort;
+		if (0 < i && 65535 >= i) {
+			QueryThreadGs4 queryThreadGs4 = new QueryThreadGs4(serverInterface, i);
+			return !queryThreadGs4.start() ? null : queryThreadGs4;
+		} else {
+			LOGGER.warn("Invalid query port {} found in server.properties (queries disabled)", i);
+			return null;
+		}
 	}
 
 	private void sendTo(byte[] bs, DatagramPacket datagramPacket) throws IOException {
@@ -220,15 +233,11 @@ public class QueryThreadGs4 extends GenericThread {
 	}
 
 	@Override
-	public void start() {
-		if (!this.running) {
-			if (0 < this.port && 65535 >= this.port) {
-				if (this.initSocket()) {
-					super.start();
-				}
-			} else {
-				LOGGER.warn("Invalid query port {} found in server.properties (queries disabled)", this.port);
-			}
+	public boolean start() {
+		if (this.running) {
+			return true;
+		} else {
+			return !this.initSocket() ? false : super.start();
 		}
 	}
 

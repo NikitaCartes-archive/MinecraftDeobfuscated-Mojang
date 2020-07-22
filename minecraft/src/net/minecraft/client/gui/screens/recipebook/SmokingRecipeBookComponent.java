@@ -10,9 +10,11 @@ import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 
 @Environment(EnvType.CLIENT)
 public class SmokingRecipeBookComponent extends AbstractFurnaceRecipeBookComponent {
+	private static final Component FILTER_NAME = new TranslatableComponent("gui.recipebook.toggleRecipes.smokable");
+
 	@Override
 	protected Component getRecipeFilterName() {
-		return new TranslatableComponent("gui.recipebook.toggleRecipes.smokable");
+		return FILTER_NAME;
 	}
 
 	@Override

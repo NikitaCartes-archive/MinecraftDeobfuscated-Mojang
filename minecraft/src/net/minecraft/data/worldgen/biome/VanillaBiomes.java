@@ -9,6 +9,7 @@ import net.minecraft.data.worldgen.StructureFeatures;
 import net.minecraft.data.worldgen.SurfaceBuilders;
 import net.minecraft.sounds.Musics;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.AmbientAdditionsSettings;
@@ -22,6 +23,12 @@ import net.minecraft.world.level.levelgen.surfacebuilders.ConfiguredSurfaceBuild
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderBaseConfiguration;
 
 public class VanillaBiomes {
+	private static int calculateSkyColor(float f) {
+		float g = f / 3.0F;
+		g = Mth.clamp(g, -1.0F, 1.0F);
+		return Mth.hsvToRgb(0.62222224F - g * 0.05F, 0.5F + g * 0.1F, 1.0F);
+	}
+
 	public static Biome giantTreeTaiga(float f, float g, float h, boolean bl, @Nullable String string) {
 		Biome biome = new Biome(
 			new Biome.BiomeBuilder()
@@ -37,6 +44,7 @@ public class VanillaBiomes {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(12638463)
+						.skyColor(calculateSkyColor(h))
 						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
 						.build()
 				)
@@ -89,6 +97,7 @@ public class VanillaBiomes {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(12638463)
+						.skyColor(calculateSkyColor(0.6F))
 						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
 						.build()
 				)
@@ -182,6 +191,7 @@ public class VanillaBiomes {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(12638463)
+						.skyColor(calculateSkyColor(0.95F))
 						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
 						.build()
 				)
@@ -241,6 +251,7 @@ public class VanillaBiomes {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(12638463)
+						.skyColor(calculateSkyColor(0.2F))
 						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
 						.build()
 				)
@@ -289,6 +300,7 @@ public class VanillaBiomes {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(12638463)
+						.skyColor(calculateSkyColor(2.0F))
 						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
 						.build()
 				)
@@ -342,6 +354,7 @@ public class VanillaBiomes {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(12638463)
+						.skyColor(calculateSkyColor(0.8F))
 						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
 						.build()
 				)
@@ -393,12 +406,12 @@ public class VanillaBiomes {
 				.scale(0.2F)
 				.temperature(0.5F)
 				.downfall(0.5F)
-				.skyColor(0)
 				.specialEffects(
 					new BiomeSpecialEffects.Builder()
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(10518688)
+						.skyColor(0)
 						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
 						.build()
 				)
@@ -448,6 +461,7 @@ public class VanillaBiomes {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(12638463)
+						.skyColor(calculateSkyColor(0.9F))
 						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
 						.build()
 				)
@@ -485,6 +499,7 @@ public class VanillaBiomes {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(12638463)
+						.skyColor(calculateSkyColor(h))
 						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
 						.build()
 				)
@@ -537,7 +552,7 @@ public class VanillaBiomes {
 	private static Biome baseBadlandsBiome(
 		@Nullable String string, ConfiguredSurfaceBuilder<SurfaceBuilderBaseConfiguration> configuredSurfaceBuilder, float f, float g, boolean bl, boolean bl2
 	) {
-		Biome biome = new BadlandsBiome(
+		Biome biome = new Biome(
 			new Biome.BiomeBuilder()
 				.surfaceBuilder(configuredSurfaceBuilder)
 				.precipitation(Biome.Precipitation.NONE)
@@ -551,6 +566,9 @@ public class VanillaBiomes {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(12638463)
+						.skyColor(calculateSkyColor(2.0F))
+						.foliageColorOverride(10387789)
+						.grassColorOverride(9470285)
 						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
 						.build()
 				)
@@ -603,7 +621,13 @@ public class VanillaBiomes {
 				.temperature(0.5F)
 				.downfall(0.5F)
 				.specialEffects(
-					new BiomeSpecialEffects.Builder().waterColor(i).waterFogColor(j).fogColor(12638463).ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS).build()
+					new BiomeSpecialEffects.Builder()
+						.waterColor(i)
+						.waterFogColor(j)
+						.fogColor(12638463)
+						.skyColor(calculateSkyColor(0.5F))
+						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
+						.build()
 				)
 				.parent(null)
 		);
@@ -705,20 +729,23 @@ public class VanillaBiomes {
 	}
 
 	public static Biome frozenOceanBiome(boolean bl) {
-		Biome biome = new FrozenOceanBiome(
+		float f = bl ? 0.5F : 0.0F;
+		Biome biome = new Biome(
 			new Biome.BiomeBuilder()
 				.surfaceBuilder(SurfaceBuilders.FROZEN_OCEAN)
 				.precipitation(bl ? Biome.Precipitation.RAIN : Biome.Precipitation.SNOW)
 				.biomeCategory(Biome.BiomeCategory.OCEAN)
 				.depth(bl ? -1.8F : -1.0F)
 				.scale(0.1F)
-				.temperature(bl ? 0.5F : 0.0F)
+				.temperature(f)
+				.temperatureAdjustment(Biome.TemperatureModifier.FROZEN)
 				.downfall(0.5F)
 				.specialEffects(
 					new BiomeSpecialEffects.Builder()
 						.waterColor(3750089)
 						.waterFogColor(329011)
 						.fogColor(12638463)
+						.skyColor(calculateSkyColor(f))
 						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
 						.build()
 				)
@@ -769,6 +796,7 @@ public class VanillaBiomes {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(12638463)
+						.skyColor(calculateSkyColor(0.7F))
 						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
 						.build()
 				)
@@ -820,6 +848,7 @@ public class VanillaBiomes {
 	}
 
 	public static Biome taigaBiome(@Nullable String string, float f, float g, boolean bl, boolean bl2, boolean bl3, boolean bl4) {
+		float h = bl ? -0.5F : 0.25F;
 		Biome biome = new Biome(
 			new Biome.BiomeBuilder()
 				.surfaceBuilder(SurfaceBuilders.GRASS)
@@ -827,13 +856,14 @@ public class VanillaBiomes {
 				.biomeCategory(Biome.BiomeCategory.TAIGA)
 				.depth(f)
 				.scale(g)
-				.temperature(bl ? -0.5F : 0.25F)
+				.temperature(h)
 				.downfall(bl ? 0.4F : 0.8F)
 				.specialEffects(
 					new BiomeSpecialEffects.Builder()
 						.waterColor(bl ? 4020182 : 4159204)
 						.waterFogColor(329011)
 						.fogColor(12638463)
+						.skyColor(calculateSkyColor(h))
 						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
 						.build()
 				)
@@ -879,7 +909,7 @@ public class VanillaBiomes {
 	}
 
 	public static Biome darkForestBiome(@Nullable String string, float f, float g, boolean bl) {
-		Biome biome = new DarkForestBiome(
+		Biome biome = new Biome(
 			new Biome.BiomeBuilder()
 				.surfaceBuilder(SurfaceBuilders.GRASS)
 				.precipitation(Biome.Precipitation.RAIN)
@@ -893,6 +923,8 @@ public class VanillaBiomes {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(12638463)
+						.skyColor(calculateSkyColor(0.7F))
+						.grassColorModifier(BiomeSpecialEffects.GrassColorModifier.DARK_FOREST)
 						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
 						.build()
 				)
@@ -921,7 +953,7 @@ public class VanillaBiomes {
 	}
 
 	public static Biome swampBiome(@Nullable String string, float f, float g, boolean bl) {
-		Biome biome = new SwampBiome(
+		Biome biome = new Biome(
 			new Biome.BiomeBuilder()
 				.surfaceBuilder(SurfaceBuilders.SWAMP)
 				.precipitation(Biome.Precipitation.RAIN)
@@ -935,6 +967,9 @@ public class VanillaBiomes {
 						.waterColor(6388580)
 						.waterFogColor(2302743)
 						.fogColor(12638463)
+						.skyColor(calculateSkyColor(0.8F))
+						.foliageColorOverride(6975545)
+						.grassColorModifier(BiomeSpecialEffects.GrassColorModifier.SWAMP)
 						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
 						.build()
 				)
@@ -974,7 +1009,7 @@ public class VanillaBiomes {
 	}
 
 	public static Biome tundraBiome(@Nullable String string, float f, float g, boolean bl, boolean bl2) {
-		Biome biome = new TundraBiome(
+		Biome biome = new Biome(
 			new Biome.BiomeBuilder()
 				.surfaceBuilder(bl ? SurfaceBuilders.ICE_SPIKES : SurfaceBuilders.GRASS)
 				.precipitation(Biome.Precipitation.SNOW)
@@ -983,11 +1018,13 @@ public class VanillaBiomes {
 				.scale(g)
 				.temperature(0.0F)
 				.downfall(0.5F)
+				.creatureGenerationProbability(0.07F)
 				.specialEffects(
 					new BiomeSpecialEffects.Builder()
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(12638463)
+						.skyColor(calculateSkyColor(0.0F))
 						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
 						.build()
 				)
@@ -1041,6 +1078,7 @@ public class VanillaBiomes {
 						.waterColor(i)
 						.waterFogColor(329011)
 						.fogColor(12638463)
+						.skyColor(calculateSkyColor(h))
 						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
 						.build()
 				)
@@ -1087,6 +1125,7 @@ public class VanillaBiomes {
 						.waterColor(j)
 						.waterFogColor(329011)
 						.fogColor(12638463)
+						.skyColor(calculateSkyColor(h))
 						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
 						.build()
 				)
@@ -1136,6 +1175,7 @@ public class VanillaBiomes {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(12638463)
+						.skyColor(calculateSkyColor(0.5F))
 						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
 						.build()
 				)
@@ -1160,6 +1200,7 @@ public class VanillaBiomes {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(3344392)
+						.skyColor(calculateSkyColor(2.0F))
 						.ambientLoopSound(SoundEvents.AMBIENT_NETHER_WASTES_LOOP)
 						.ambientMoodSound(new AmbientMoodSettings(SoundEvents.AMBIENT_NETHER_WASTES_MOOD, 6000, 8, 2.0))
 						.ambientAdditionsSound(new AmbientAdditionsSettings(SoundEvents.AMBIENT_NETHER_WASTES_ADDITIONS, 0.0111))
@@ -1208,6 +1249,7 @@ public class VanillaBiomes {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(1787717)
+						.skyColor(calculateSkyColor(2.0F))
 						.ambientParticle(new AmbientParticleSettings(ParticleTypes.ASH, 0.00625F))
 						.ambientLoopSound(SoundEvents.AMBIENT_SOUL_SAND_VALLEY_LOOP)
 						.ambientMoodSound(new AmbientMoodSettings(SoundEvents.AMBIENT_SOUL_SAND_VALLEY_MOOD, 6000, 8, 2.0))
@@ -1262,6 +1304,7 @@ public class VanillaBiomes {
 						.waterColor(4159204)
 						.waterFogColor(4341314)
 						.fogColor(6840176)
+						.skyColor(calculateSkyColor(2.0F))
 						.ambientParticle(new AmbientParticleSettings(ParticleTypes.WHITE_ASH, 0.118093334F))
 						.ambientLoopSound(SoundEvents.AMBIENT_BASALT_DELTAS_LOOP)
 						.ambientMoodSound(new AmbientMoodSettings(SoundEvents.AMBIENT_BASALT_DELTAS_MOOD, 6000, 8, 2.0))
@@ -1313,6 +1356,7 @@ public class VanillaBiomes {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(3343107)
+						.skyColor(calculateSkyColor(2.0F))
 						.ambientParticle(new AmbientParticleSettings(ParticleTypes.CRIMSON_SPORE, 0.025F))
 						.ambientLoopSound(SoundEvents.AMBIENT_CRIMSON_FOREST_LOOP)
 						.ambientMoodSound(new AmbientMoodSettings(SoundEvents.AMBIENT_CRIMSON_FOREST_MOOD, 6000, 8, 2.0))
@@ -1360,6 +1404,7 @@ public class VanillaBiomes {
 						.waterColor(4159204)
 						.waterFogColor(329011)
 						.fogColor(1705242)
+						.skyColor(calculateSkyColor(2.0F))
 						.ambientParticle(new AmbientParticleSettings(ParticleTypes.WARPED_SPORE, 0.01428F))
 						.ambientLoopSound(SoundEvents.AMBIENT_WARPED_FOREST_LOOP)
 						.ambientMoodSound(new AmbientMoodSettings(SoundEvents.AMBIENT_WARPED_FOREST_MOOD, 6000, 8, 2.0))

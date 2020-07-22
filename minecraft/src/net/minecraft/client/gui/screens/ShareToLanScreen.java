@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -16,6 +15,7 @@ import net.minecraft.world.level.GameType;
 public class ShareToLanScreen extends Screen {
 	private static final Component ALLOW_COMMANDS_LABEL = new TranslatableComponent("selectWorld.allowCommands");
 	private static final Component GAME_MODE_LABEL = new TranslatableComponent("selectWorld.gameMode");
+	private static final Component INFO_TEXT = new TranslatableComponent("lanServer.otherPlayers");
 	private final Screen lastScreen;
 	private Button commandsButton;
 	private Button modeButton;
@@ -72,8 +72,8 @@ public class ShareToLanScreen extends Screen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 50, 16777215);
-		this.drawCenteredString(poseStack, this.font, I18n.get("lanServer.otherPlayers"), this.width / 2, 82, 16777215);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 50, 16777215);
+		drawCenteredString(poseStack, this.font, INFO_TEXT, this.width / 2, 82, 16777215);
 		super.render(poseStack, i, j, f);
 	}
 }

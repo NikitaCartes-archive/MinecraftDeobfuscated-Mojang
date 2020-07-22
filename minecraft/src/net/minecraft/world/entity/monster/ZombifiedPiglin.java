@@ -62,7 +62,7 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 
 	@Override
 	public double getMyRidingOffset() {
-		return this.isBaby() ? -0.16 : -0.45;
+		return this.isBaby() ? -0.05 : -0.45;
 	}
 
 	@Override

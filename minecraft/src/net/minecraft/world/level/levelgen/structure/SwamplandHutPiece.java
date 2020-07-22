@@ -104,7 +104,7 @@ public class SwamplandHutPiece extends ScatteredFeaturePiece {
 					witch.setPersistenceRequired();
 					witch.moveTo((double)i + 0.5, (double)j, (double)k + 0.5, 0.0F, 0.0F);
 					witch.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(new BlockPos(i, j, k)), MobSpawnType.STRUCTURE, null, null);
-					worldGenLevel.addFreshEntity(witch);
+					worldGenLevel.addFreshEntityWithPassengers(witch);
 				}
 			}
 
@@ -124,7 +124,7 @@ public class SwamplandHutPiece extends ScatteredFeaturePiece {
 				cat.setPersistenceRequired();
 				cat.moveTo((double)i + 0.5, (double)j, (double)k + 0.5, 0.0F, 0.0F);
 				cat.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(new BlockPos(i, j, k)), MobSpawnType.STRUCTURE, null, null);
-				serverLevelAccessor.addFreshEntity(cat);
+				serverLevelAccessor.addFreshEntityWithPassengers(cat);
 			}
 		}
 	}

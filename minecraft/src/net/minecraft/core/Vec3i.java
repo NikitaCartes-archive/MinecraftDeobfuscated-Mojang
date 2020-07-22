@@ -82,6 +82,14 @@ public class Vec3i implements Comparable<Vec3i> {
 		this.z = i;
 	}
 
+	public Vec3i above() {
+		return this.above(1);
+	}
+
+	public Vec3i above(int i) {
+		return this.relative(Direction.UP, i);
+	}
+
 	public Vec3i below() {
 		return this.below(1);
 	}

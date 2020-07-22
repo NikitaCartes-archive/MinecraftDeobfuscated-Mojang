@@ -32,17 +32,11 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class PiglinBrute extends AbstractPiglin {
 	protected static final ImmutableList<SensorType<? extends Sensor<? super PiglinBrute>>> SENSOR_TYPES = ImmutableList.of(
-		SensorType.NEAREST_LIVING_ENTITIES,
-		SensorType.NEAREST_PLAYERS,
-		SensorType.NEAREST_ITEMS,
-		SensorType.HURT_BY,
-		SensorType.INTERACTABLE_DOORS,
-		SensorType.PIGLIN_BRUTE_SPECIFIC_SENSOR
+		SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS, SensorType.HURT_BY, SensorType.PIGLIN_BRUTE_SPECIFIC_SENSOR
 	);
 	protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
 		MemoryModuleType.LOOK_TARGET,
-		MemoryModuleType.INTERACTABLE_DOORS,
-		MemoryModuleType.OPENED_DOORS,
+		MemoryModuleType.DOORS_TO_CLOSE,
 		MemoryModuleType.LIVING_ENTITIES,
 		MemoryModuleType.VISIBLE_LIVING_ENTITIES,
 		MemoryModuleType.NEAREST_VISIBLE_PLAYER,

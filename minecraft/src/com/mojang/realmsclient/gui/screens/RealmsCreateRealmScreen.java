@@ -8,14 +8,16 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.RealmsLabel;
 import net.minecraft.realms.RealmsScreen;
 
 @Environment(EnvType.CLIENT)
 public class RealmsCreateRealmScreen extends RealmsScreen {
+	private static final Component NAME_LABEL = new TranslatableComponent("mco.configure.world.name");
+	private static final Component DESCRIPTION_LABEL = new TranslatableComponent("mco.configure.world.description");
 	private final RealmsServer server;
 	private final RealmsMainScreen lastScreen;
 	private EditBox nameBox;
@@ -95,7 +97,7 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
 				() -> this.minecraft.setScreen(this.lastScreen.newScreen()),
 				() -> this.minecraft.setScreen(this.lastScreen.newScreen())
 			);
-			realmsResetWorldScreen.setResetTitle(I18n.get("mco.create.world.reset.title"));
+			realmsResetWorldScreen.setResetTitle(new TranslatableComponent("mco.create.world.reset.title"));
 			this.minecraft
 				.setScreen(
 					new RealmsLongRunningMcoTaskScreen(
@@ -113,8 +115,8 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
 		this.createRealmLabel.render(this, poseStack);
-		this.font.draw(poseStack, I18n.get("mco.configure.world.name"), (float)(this.width / 2 - 100), 52.0F, 10526880);
-		this.font.draw(poseStack, I18n.get("mco.configure.world.description"), (float)(this.width / 2 - 100), 102.0F, 10526880);
+		this.font.draw(poseStack, NAME_LABEL, (float)(this.width / 2 - 100), 52.0F, 10526880);
+		this.font.draw(poseStack, DESCRIPTION_LABEL, (float)(this.width / 2 - 100), 102.0F, 10526880);
 		if (this.nameBox != null) {
 			this.nameBox.render(poseStack, i, j, f);
 		}

@@ -216,9 +216,9 @@ public class PresetFlatWorldScreen extends Screen {
 		this.list.render(poseStack, i, j, f);
 		RenderSystem.pushMatrix();
 		RenderSystem.translatef(0.0F, 0.0F, 400.0F);
-		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 16777215);
-		this.drawString(poseStack, this.font, this.shareText, 50, 30, 10526880);
-		this.drawString(poseStack, this.font, this.listText, 50, 70, 10526880);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 16777215);
+		drawString(poseStack, this.font, this.shareText, 50, 30, 10526880);
+		drawString(poseStack, this.font, this.listText, 50, 70, 10526880);
 		RenderSystem.popMatrix();
 		this.export.render(poseStack, i, j, f);
 		super.render(poseStack, i, j, f);

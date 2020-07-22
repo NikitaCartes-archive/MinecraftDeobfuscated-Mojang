@@ -21,9 +21,10 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
@@ -44,7 +45,7 @@ public class EditBox extends AbstractWidget implements Widget, GuiEventListener 
 	private String suggestion;
 	private Consumer<String> responder;
 	private Predicate<String> filter = Objects::nonNull;
-	private BiFunction<String, Integer, FormattedText> formatter = (string, integer) -> FormattedText.of(string);
+	private BiFunction<String, Integer, FormattedCharSequence> formatter = (string, integer) -> FormattedCharSequence.forward(string, Style.EMPTY);
 
 	public EditBox(Font font, int i, int j, int k, int l, Component component) {
 		this(font, i, j, k, l, null, component);
@@ -62,7 +63,7 @@ public class EditBox extends AbstractWidget implements Widget, GuiEventListener 
 		this.responder = consumer;
 	}
 
-	public void setFormatter(BiFunction<String, Integer, FormattedText> biFunction) {
+	public void setFormatter(BiFunction<String, Integer, FormattedCharSequence> biFunction) {
 		this.formatter = biFunction;
 	}
 
@@ -386,7 +387,7 @@ public class EditBox extends AbstractWidget implements Widget, GuiEventListener 
 
 			if (!string.isEmpty()) {
 				String string2 = bl ? string.substring(0, l) : string;
-				p = this.font.drawShadow(poseStack, (FormattedText)this.formatter.apply(string2, this.displayPos), (float)n, (float)o, k);
+				p = this.font.drawShadow(poseStack, (FormattedCharSequence)this.formatter.apply(string2, this.displayPos), (float)n, (float)o, k);
 			}
 
 			boolean bl3 = this.cursorPos < this.value.length() || this.value.length() >= this.getMaxLength();
@@ -399,7 +400,7 @@ public class EditBox extends AbstractWidget implements Widget, GuiEventListener 
 			}
 
 			if (!string.isEmpty() && bl && l < string.length()) {
-				this.font.drawShadow(poseStack, (FormattedText)this.formatter.apply(string.substring(l), this.cursorPos), (float)p, (float)o, k);
+				this.font.drawShadow(poseStack, (FormattedCharSequence)this.formatter.apply(string.substring(l), this.cursorPos), (float)p, (float)o, k);
 			}
 
 			if (!bl3 && this.suggestion != null) {

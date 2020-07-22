@@ -49,7 +49,8 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback {
 	private RealmsResetWorldScreen.ResetType typeToReset = RealmsResetWorldScreen.ResetType.NONE;
 	private RealmsResetWorldScreen.ResetWorldInfo worldInfoToReset;
 	private WorldTemplate worldTemplateToReset;
-	private String resetTitle;
+	@Nullable
+	private Component resetTitle;
 	private final Runnable resetWorldRunnable;
 	private final Runnable callback;
 
@@ -74,8 +75,8 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback {
 		this.slot = i;
 	}
 
-	public void setResetTitle(String string) {
-		this.resetTitle = string;
+	public void setResetTitle(Component component) {
+		this.resetTitle = component;
 	}
 
 	@Override
@@ -220,7 +221,7 @@ public class RealmsResetWorldScreen extends RealmsScreenWithCallback {
 
 		GuiComponent.blit(poseStack, i, j + 12, 0.0F, 0.0F, 60, 60, 60, 60);
 		int k = bl ? 10526880 : 16777215;
-		this.drawCenteredString(poseStack, this.font, component, i + 30, j, k);
+		drawCenteredString(poseStack, this.font, component, i + 30, j, k);
 	}
 
 	@Override

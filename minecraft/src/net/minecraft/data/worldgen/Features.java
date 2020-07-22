@@ -83,7 +83,6 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 
 public class Features {
-	public static final ConfiguredFeature<?, ?> NOPE = register("nope", Feature.NO_OP.configured(FeatureConfiguration.NONE));
 	public static final ConfiguredFeature<?, ?> END_SPIKE = register(
 		"end_spike", Feature.END_SPIKE.configured(new SpikeConfiguration(false, ImmutableList.of(), null))
 	);

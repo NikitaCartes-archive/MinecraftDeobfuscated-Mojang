@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.screens.worldselection;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.hash.Hashing;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -11,7 +12,6 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -43,7 +43,6 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -66,6 +65,11 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat();
 	private static final ResourceLocation ICON_MISSING = new ResourceLocation("textures/misc/unknown_server.png");
 	private static final ResourceLocation ICON_OVERLAY_LOCATION = new ResourceLocation("textures/gui/world_selection.png");
+	private static final Component FROM_NEWER_TOOLTIP_1 = new TranslatableComponent("selectWorld.tooltip.fromNewerVersion1").withStyle(ChatFormatting.RED);
+	private static final Component FROM_NEWER_TOOLTIP_2 = new TranslatableComponent("selectWorld.tooltip.fromNewerVersion2").withStyle(ChatFormatting.RED);
+	private static final Component SNAPSHOT_TOOLTIP_1 = new TranslatableComponent("selectWorld.tooltip.snapshot1").withStyle(ChatFormatting.GOLD);
+	private static final Component SNAPSHOT_TOOLTIP_2 = new TranslatableComponent("selectWorld.tooltip.snapshot2").withStyle(ChatFormatting.GOLD);
+	private static final Component WORLD_LOCKED_TOOLTIP = new TranslatableComponent("selectWorld.locked").withStyle(ChatFormatting.RED);
 	private final SelectWorldScreen screen;
 	@Nullable
 	private List<LevelSummary> cachedList;
@@ -226,8 +230,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 				if (this.summary.isLocked()) {
 					GuiComponent.blit(poseStack, k, j, 96.0F, (float)q, 32, 32, 256, 256);
 					if (bl2) {
-						FormattedText formattedText = new TranslatableComponent("selectWorld.locked").withStyle(ChatFormatting.RED);
-						this.screen.setToolTip(this.minecraft.font.split(formattedText, 175));
+						this.screen.setToolTip(this.minecraft.font.split(WorldSelectionList.WORLD_LOCKED_TOOLTIP, 175));
 					}
 				} else if (this.summary.markVersionInList()) {
 					GuiComponent.blit(poseStack, k, j, 32.0F, (float)q, 32, 32, 256, 256);
@@ -236,22 +239,14 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.W
 						if (bl2) {
 							this.screen
 								.setToolTip(
-									Arrays.asList(
-										new TranslatableComponent("selectWorld.tooltip.fromNewerVersion1").withStyle(ChatFormatting.RED),
-										new TranslatableComponent("selectWorld.tooltip.fromNewerVersion2").withStyle(ChatFormatting.RED)
-									)
+									ImmutableList.of(WorldSelectionList.FROM_NEWER_TOOLTIP_1.getVisualOrderText(), WorldSelectionList.FROM_NEWER_TOOLTIP_2.getVisualOrderText())
 								);
 						}
 					} else if (!SharedConstants.getCurrentVersion().isStable()) {
 						GuiComponent.blit(poseStack, k, j, 64.0F, (float)q, 32, 32, 256, 256);
 						if (bl2) {
 							this.screen
-								.setToolTip(
-									Arrays.asList(
-										new TranslatableComponent("selectWorld.tooltip.snapshot1").withStyle(ChatFormatting.GOLD),
-										new TranslatableComponent("selectWorld.tooltip.snapshot2").withStyle(ChatFormatting.GOLD)
-									)
-								);
+								.setToolTip(ImmutableList.of(WorldSelectionList.SNAPSHOT_TOOLTIP_1.getVisualOrderText(), WorldSelectionList.SNAPSHOT_TOOLTIP_2.getVisualOrderText()));
 						}
 					}
 				} else {

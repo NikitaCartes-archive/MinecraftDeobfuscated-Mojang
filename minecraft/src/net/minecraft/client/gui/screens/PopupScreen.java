@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 
@@ -14,7 +15,7 @@ import net.minecraft.network.chat.FormattedText;
 public class PopupScreen extends Screen {
 	private final FormattedText message;
 	private final ImmutableList<PopupScreen.ButtonOption> buttonOptions;
-	private List<FormattedText> messageLines;
+	private MultiLineLabel messageLines = MultiLineLabel.EMPTY;
 	private int contentTop;
 	private int buttonWidth;
 
@@ -39,8 +40,8 @@ public class PopupScreen extends Screen {
 
 		int k = 5 + this.buttonWidth + 5;
 		int l = k * this.buttonOptions.size();
-		this.messageLines = this.font.split(this.message, l);
-		int m = this.messageLines.size() * 9;
+		this.messageLines = MultiLineLabel.create(this.font, this.message, l);
+		int m = this.messageLines.getLineCount() * 9;
 		this.contentTop = (int)((double)j / 2.0 - (double)m / 2.0);
 		int n = this.contentTop + m + 9 * 2;
 		int o = (int)((double)i / 2.0 - (double)l / 2.0);
@@ -54,14 +55,8 @@ public class PopupScreen extends Screen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderDirtBackground(0);
-		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, this.contentTop - 9 * 2, -1);
-		int k = this.contentTop;
-
-		for (FormattedText formattedText : this.messageLines) {
-			this.drawCenteredString(poseStack, this.font, formattedText, this.width / 2, k, -1);
-			k += 9;
-		}
-
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, this.contentTop - 9 * 2, -1);
+		this.messageLines.renderCentered(poseStack, this.width / 2, this.contentTop);
 		super.render(poseStack, i, j, f);
 	}
 

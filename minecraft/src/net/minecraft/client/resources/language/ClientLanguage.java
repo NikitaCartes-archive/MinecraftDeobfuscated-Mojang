@@ -2,35 +2,31 @@ package net.minecraft.client.resources.language;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.ibm.icu.text.ArabicShaping;
-import com.ibm.icu.text.ArabicShapingException;
-import com.ibm.icu.text.Bidi;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.locale.Language;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.FormattedCharSequence;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ClientLanguage extends Language {
 	private static final Logger LOGGER = LogManager.getLogger();
-	private static final Pattern FORMAT_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z])");
 	private final Map<String, String> storage;
-	private final boolean requiresReordering;
+	private final boolean defaultRightToLeft;
 
 	private ClientLanguage(Map<String, String> map, boolean bl) {
 		this.storage = map;
-		this.requiresReordering = bl;
+		this.defaultRightToLeft = bl;
 	}
 
 	public static ClientLanguage loadFrom(ResourceManager resourceManager, List<LanguageInfo> list) {
@@ -96,47 +92,12 @@ public class ClientLanguage extends Language {
 	}
 
 	@Override
-	public boolean requiresReordering() {
-		return this.requiresReordering;
+	public boolean isDefaultRightToLeft() {
+		return this.defaultRightToLeft;
 	}
 
 	@Override
-	public String reorder(String string, boolean bl) {
-		if (!this.requiresReordering) {
-			return string;
-		} else {
-			if (bl && string.indexOf(37) != -1) {
-				string = wrapFormatCodes(string);
-			}
-
-			return this.reorder(string);
-		}
-	}
-
-	public static String wrapFormatCodes(String string) {
-		Matcher matcher = FORMAT_PATTERN.matcher(string);
-		StringBuffer stringBuffer = new StringBuffer();
-		int i = 1;
-
-		while (matcher.find()) {
-			String string2 = matcher.group(1);
-			String string3 = string2 != null ? string2 : Integer.toString(i++);
-			String string4 = matcher.group(2);
-			String string5 = Matcher.quoteReplacement("\u2066%" + string3 + "$" + string4 + "\u2069");
-			matcher.appendReplacement(stringBuffer, string5);
-		}
-
-		matcher.appendTail(stringBuffer);
-		return stringBuffer.toString();
-	}
-
-	private String reorder(String string) {
-		try {
-			Bidi bidi = new Bidi(new ArabicShaping(8).shape(string), 127);
-			bidi.setReorderingMode(0);
-			return bidi.writeReordered(10);
-		} catch (ArabicShapingException var3) {
-			return string;
-		}
+	public FormattedCharSequence getVisualOrder(FormattedText formattedText) {
+		return FormattedBidiReorder.reorder(formattedText, this.defaultRightToLeft);
 	}
 }

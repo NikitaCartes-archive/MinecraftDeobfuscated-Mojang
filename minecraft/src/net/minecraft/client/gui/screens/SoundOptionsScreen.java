@@ -48,7 +48,7 @@ public class SoundOptionsScreen extends OptionsSubScreen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 16777215);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 16777215);
 		super.render(poseStack, i, j, f);
 	}
 }

@@ -63,17 +63,11 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob {
 	private final SimpleContainer inventory = new SimpleContainer(8);
 	private boolean cannotHunt = false;
 	protected static final ImmutableList<SensorType<? extends Sensor<? super Piglin>>> SENSOR_TYPES = ImmutableList.of(
-		SensorType.NEAREST_LIVING_ENTITIES,
-		SensorType.NEAREST_PLAYERS,
-		SensorType.NEAREST_ITEMS,
-		SensorType.HURT_BY,
-		SensorType.INTERACTABLE_DOORS,
-		SensorType.PIGLIN_SPECIFIC_SENSOR
+		SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS, SensorType.HURT_BY, SensorType.PIGLIN_SPECIFIC_SENSOR
 	);
 	protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
 		MemoryModuleType.LOOK_TARGET,
-		MemoryModuleType.INTERACTABLE_DOORS,
-		MemoryModuleType.OPENED_DOORS,
+		MemoryModuleType.DOORS_TO_CLOSE,
 		MemoryModuleType.LIVING_ENTITIES,
 		MemoryModuleType.VISIBLE_LIVING_ENTITIES,
 		MemoryModuleType.NEAREST_VISIBLE_PLAYER,
@@ -259,11 +253,6 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob {
 	@Override
 	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
 		return this.isBaby() ? 0.93F : 1.74F;
-	}
-
-	@Override
-	public double getMyRidingOffset() {
-		return this.isBaby() ? -0.1 : -0.45;
 	}
 
 	@Override

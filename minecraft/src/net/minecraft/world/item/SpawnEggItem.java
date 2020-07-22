@@ -178,7 +178,7 @@ public class SpawnEggItem extends Item {
 					return Optional.empty();
 				} else {
 					mob2.moveTo(vec3.x(), vec3.y(), vec3.z(), 0.0F, 0.0F);
-					serverLevel.addFreshEntity(mob2);
+					serverLevel.addFreshEntityWithPassengers(mob2);
 					if (itemStack.hasCustomHoverName()) {
 						mob2.setCustomName(itemStack.getHoverName());
 					}

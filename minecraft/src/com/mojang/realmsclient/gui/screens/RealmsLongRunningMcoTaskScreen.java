@@ -6,6 +6,7 @@ import com.mojang.realmsclient.exception.RealmsDefaultUncaughtExceptionHandler;
 import com.mojang.realmsclient.gui.ErrorCallback;
 import com.mojang.realmsclient.util.task.LongRunningTask;
 import java.util.Set;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
@@ -13,6 +14,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
@@ -22,8 +24,8 @@ import org.apache.logging.log4j.Logger;
 public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements ErrorCallback {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final Screen lastScreen;
-	private volatile String title = "";
-	private volatile boolean error;
+	private volatile Component title = TextComponent.EMPTY;
+	@Nullable
 	private volatile Component errorMessage;
 	private volatile boolean aborted;
 	private int animTicks;
@@ -64,7 +66,7 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
 	@Override
 	public void tick() {
 		super.tick();
-		NarrationHelper.repeatedly(this.title);
+		NarrationHelper.repeatedly(this.title.getString());
 		this.animTicks++;
 		this.task.tick();
 	}
@@ -94,13 +96,12 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, row(3), 16777215);
-		if (!this.error) {
-			this.drawCenteredString(poseStack, this.font, SYMBOLS[this.animTicks % SYMBOLS.length], this.width / 2, row(8), 8421504);
-		}
-
-		if (this.error) {
-			this.drawCenteredString(poseStack, this.font, this.errorMessage, this.width / 2, row(8), 16711680);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, row(3), 16777215);
+		Component component = this.errorMessage;
+		if (component == null) {
+			drawCenteredString(poseStack, this.font, SYMBOLS[this.animTicks % SYMBOLS.length], this.width / 2, row(8), 8421504);
+		} else {
+			drawCenteredString(poseStack, this.font, component, this.width / 2, row(8), 16711680);
 		}
 
 		super.render(poseStack, i, j, f);
@@ -108,21 +109,20 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements Erro
 
 	@Override
 	public void error(Component component) {
-		this.error = true;
 		this.errorMessage = component;
 		NarrationHelper.now(component.getString());
 		this.buttonsClear();
 		this.addButton(new Button(this.width / 2 - 106, this.height / 4 + 120 + 12, 200, 20, CommonComponents.GUI_BACK, button -> this.cancelOrBackButtonClicked()));
 	}
 
-	public void buttonsClear() {
+	private void buttonsClear() {
 		Set<GuiEventListener> set = Sets.<GuiEventListener>newHashSet(this.buttons);
 		this.children.removeIf(set::contains);
 		this.buttons.clear();
 	}
 
-	public void setTitle(String string) {
-		this.title = string;
+	public void setTitle(Component component) {
+		this.title = component;
 	}
 
 	public boolean aborted() {

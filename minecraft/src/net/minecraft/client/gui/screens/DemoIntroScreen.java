@@ -7,12 +7,15 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public class DemoIntroScreen extends Screen {
 	private static final ResourceLocation DEMO_BACKGROUND_LOCATION = new ResourceLocation("textures/gui/demo_background.png");
+	private MultiLineLabel movementMessage = MultiLineLabel.EMPTY;
+	private MultiLineLabel durationMessage = MultiLineLabel.EMPTY;
 
 	public DemoIntroScreen() {
 		super(new TranslatableComponent("demo.help.title"));
@@ -29,6 +32,21 @@ public class DemoIntroScreen extends Screen {
 			this.minecraft.setScreen(null);
 			this.minecraft.mouseHandler.grabMouse();
 		}));
+		Options options = this.minecraft.options;
+		this.movementMessage = MultiLineLabel.create(
+			this.font,
+			new TranslatableComponent(
+				"demo.help.movementShort",
+				options.keyUp.getTranslatedKeyMessage(),
+				options.keyLeft.getTranslatedKeyMessage(),
+				options.keyDown.getTranslatedKeyMessage(),
+				options.keyRight.getTranslatedKeyMessage()
+			),
+			new TranslatableComponent("demo.help.movementMouse"),
+			new TranslatableComponent("demo.help.jump", options.keyJump.getTranslatedKeyMessage()),
+			new TranslatableComponent("demo.help.inventory", options.keyInventory.getTranslatedKeyMessage())
+		);
+		this.durationMessage = MultiLineLabel.create(this.font, new TranslatableComponent("demo.help.fullWrapped"), 218);
 	}
 
 	@Override
@@ -47,27 +65,8 @@ public class DemoIntroScreen extends Screen {
 		int k = (this.width - 248) / 2 + 10;
 		int l = (this.height - 166) / 2 + 8;
 		this.font.draw(poseStack, this.title, (float)k, (float)l, 2039583);
-		l += 12;
-		Options options = this.minecraft.options;
-		this.font
-			.draw(
-				poseStack,
-				new TranslatableComponent(
-					"demo.help.movementShort",
-					options.keyUp.getTranslatedKeyMessage(),
-					options.keyLeft.getTranslatedKeyMessage(),
-					options.keyDown.getTranslatedKeyMessage(),
-					options.keyRight.getTranslatedKeyMessage()
-				),
-				(float)k,
-				(float)l,
-				5197647
-			);
-		this.font.draw(poseStack, new TranslatableComponent("demo.help.movementMouse"), (float)k, (float)(l + 12), 5197647);
-		this.font.draw(poseStack, new TranslatableComponent("demo.help.jump", options.keyJump.getTranslatedKeyMessage()), (float)k, (float)(l + 24), 5197647);
-		this.font
-			.draw(poseStack, new TranslatableComponent("demo.help.inventory", options.keyInventory.getTranslatedKeyMessage()), (float)k, (float)(l + 36), 5197647);
-		this.font.drawWordWrap(new TranslatableComponent("demo.help.fullWrapped"), k, l + 68, 218, 2039583);
+		l = this.movementMessage.renderLeftAlignedNoShadow(poseStack, k, l + 12, 12, 5197647);
+		this.durationMessage.renderLeftAlignedNoShadow(poseStack, k, l + 20, 9, 2039583);
 		super.render(poseStack, i, j, f);
 	}
 }

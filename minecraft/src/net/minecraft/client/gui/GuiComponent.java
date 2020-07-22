@@ -12,8 +12,9 @@ import java.util.function.BiConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 
 @Environment(EnvType.CLIENT)
 public abstract class GuiComponent {
@@ -110,20 +111,21 @@ public abstract class GuiComponent {
 		bufferBuilder.vertex(matrix4f, (float)k, (float)l, (float)m).color(r, s, t, q).endVertex();
 	}
 
-	public void drawCenteredString(PoseStack poseStack, Font font, String string, int i, int j, int k) {
+	public static void drawCenteredString(PoseStack poseStack, Font font, String string, int i, int j, int k) {
 		font.drawShadow(poseStack, string, (float)(i - font.width(string) / 2), (float)j, k);
 	}
 
-	public void drawCenteredString(PoseStack poseStack, Font font, FormattedText formattedText, int i, int j, int k) {
-		font.drawShadow(poseStack, formattedText, (float)(i - font.width(formattedText) / 2), (float)j, k);
+	public static void drawCenteredString(PoseStack poseStack, Font font, Component component, int i, int j, int k) {
+		FormattedCharSequence formattedCharSequence = component.getVisualOrderText();
+		font.drawShadow(poseStack, formattedCharSequence, (float)(i - font.width(formattedCharSequence) / 2), (float)j, k);
 	}
 
-	public void drawString(PoseStack poseStack, Font font, String string, int i, int j, int k) {
+	public static void drawString(PoseStack poseStack, Font font, String string, int i, int j, int k) {
 		font.drawShadow(poseStack, string, (float)i, (float)j, k);
 	}
 
-	public void drawString(PoseStack poseStack, Font font, FormattedText formattedText, int i, int j, int k) {
-		font.drawShadow(poseStack, formattedText, (float)i, (float)j, k);
+	public static void drawString(PoseStack poseStack, Font font, Component component, int i, int j, int k) {
+		font.drawShadow(poseStack, component, (float)i, (float)j, k);
 	}
 
 	public void blitOutlineBlack(int i, int j, BiConsumer<Integer, Integer> biConsumer) {

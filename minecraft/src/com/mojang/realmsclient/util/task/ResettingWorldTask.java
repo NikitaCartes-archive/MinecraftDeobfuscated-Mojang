@@ -6,7 +6,8 @@ import com.mojang.realmsclient.exception.RetryCallException;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class ResettingWorldTask extends LongRunningTask {
@@ -15,19 +16,19 @@ public class ResettingWorldTask extends LongRunningTask {
 	private final int levelType;
 	private final boolean generateStructures;
 	private final long serverId;
-	private String title = I18n.get("mco.reset.world.resetting.screen.title");
+	private Component title = new TranslatableComponent("mco.reset.world.resetting.screen.title");
 	private final Runnable callback;
 
 	public ResettingWorldTask(
-		@Nullable String string, @Nullable WorldTemplate worldTemplate, int i, boolean bl, long l, @Nullable String string2, Runnable runnable
+		@Nullable String string, @Nullable WorldTemplate worldTemplate, int i, boolean bl, long l, @Nullable Component component, Runnable runnable
 	) {
 		this.seed = string;
 		this.worldTemplate = worldTemplate;
 		this.levelType = i;
 		this.generateStructures = bl;
 		this.serverId = l;
-		if (string2 != null) {
-			this.title = string2;
+		if (component != null) {
+			this.title = component;
 		}
 
 		this.callback = runnable;

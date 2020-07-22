@@ -151,7 +151,10 @@ public abstract class Mob extends LivingEntity {
 	}
 
 	public boolean canCutCorner(BlockPathTypes blockPathTypes) {
-		return blockPathTypes != BlockPathTypes.DANGER_FIRE && blockPathTypes != BlockPathTypes.DANGER_CACTUS && blockPathTypes != BlockPathTypes.DANGER_OTHER;
+		return blockPathTypes != BlockPathTypes.DANGER_FIRE
+			&& blockPathTypes != BlockPathTypes.DANGER_CACTUS
+			&& blockPathTypes != BlockPathTypes.DANGER_OTHER
+			&& blockPathTypes != BlockPathTypes.WALKABLE_DOOR;
 	}
 
 	protected BodyRotationControl createBodyControl() {
@@ -954,19 +957,27 @@ public abstract class Mob extends LivingEntity {
 
 	protected void populateDefaultEquipmentEnchantments(DifficultyInstance difficultyInstance) {
 		float f = difficultyInstance.getSpecialMultiplier();
+		this.enchantSpawnedWeapon(f);
+
+		for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+			if (equipmentSlot.getType() == EquipmentSlot.Type.ARMOR) {
+				this.enchantSpawnedArmor(f, equipmentSlot);
+			}
+		}
+	}
+
+	protected void enchantSpawnedWeapon(float f) {
 		if (!this.getMainHandItem().isEmpty() && this.random.nextFloat() < 0.25F * f) {
 			this.setItemSlot(
 				EquipmentSlot.MAINHAND, EnchantmentHelper.enchantItem(this.random, this.getMainHandItem(), (int)(5.0F + f * (float)this.random.nextInt(18)), false)
 			);
 		}
+	}
 
-		for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-			if (equipmentSlot.getType() == EquipmentSlot.Type.ARMOR) {
-				ItemStack itemStack = this.getItemBySlot(equipmentSlot);
-				if (!itemStack.isEmpty() && this.random.nextFloat() < 0.5F * f) {
-					this.setItemSlot(equipmentSlot, EnchantmentHelper.enchantItem(this.random, itemStack, (int)(5.0F + f * (float)this.random.nextInt(18)), false));
-				}
-			}
+	protected void enchantSpawnedArmor(float f, EquipmentSlot equipmentSlot) {
+		ItemStack itemStack = this.getItemBySlot(equipmentSlot);
+		if (!itemStack.isEmpty() && this.random.nextFloat() < 0.5F * f) {
+			this.setItemSlot(equipmentSlot, EnchantmentHelper.enchantItem(this.random, itemStack, (int)(5.0F + f * (float)this.random.nextInt(18)), false));
 		}
 	}
 

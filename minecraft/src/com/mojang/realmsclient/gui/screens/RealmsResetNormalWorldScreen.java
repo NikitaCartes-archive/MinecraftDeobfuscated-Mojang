@@ -5,7 +5,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -14,17 +13,18 @@ import net.minecraft.realms.RealmsScreen;
 
 @Environment(EnvType.CLIENT)
 public class RealmsResetNormalWorldScreen extends RealmsScreen {
-	private final RealmsResetWorldScreen lastScreen;
-	private RealmsLabel titleLabel;
-	private EditBox seedEdit;
-	private Boolean generateStructures = true;
-	private Integer levelTypeIndex = 0;
-	private Component[] levelTypes = new Component[]{
+	private static final Component SEED_LABEL = new TranslatableComponent("mco.reset.world.seed");
+	private static final Component[] LEVEL_TYPES = new Component[]{
 		new TranslatableComponent("generator.default"),
 		new TranslatableComponent("generator.flat"),
 		new TranslatableComponent("generator.large_biomes"),
 		new TranslatableComponent("generator.amplified")
 	};
+	private final RealmsResetWorldScreen lastScreen;
+	private RealmsLabel titleLabel;
+	private EditBox seedEdit;
+	private Boolean generateStructures = true;
+	private Integer levelTypeIndex = 0;
 	private Component buttonTitle;
 
 	public RealmsResetNormalWorldScreen(RealmsResetWorldScreen realmsResetWorldScreen, Component component) {
@@ -48,7 +48,7 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
 		this.addWidget(this.seedEdit);
 		this.setInitialFocus(this.seedEdit);
 		this.addButton(new Button(this.width / 2 - 102, row(4), 205, 20, this.levelTypeTitle(), button -> {
-			this.levelTypeIndex = (this.levelTypeIndex + 1) % this.levelTypes.length;
+			this.levelTypeIndex = (this.levelTypeIndex + 1) % LEVEL_TYPES.length;
 			button.setMessage(this.levelTypeTitle());
 		}));
 		this.addButton(new Button(this.width / 2 - 102, row(6) - 2, 205, 20, this.generateStructuresTitle(), button -> {
@@ -88,13 +88,13 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
 		this.titleLabel.render(this, poseStack);
-		this.font.draw(poseStack, I18n.get("mco.reset.world.seed"), (float)(this.width / 2 - 100), (float)row(1), 10526880);
+		this.font.draw(poseStack, SEED_LABEL, (float)(this.width / 2 - 100), (float)row(1), 10526880);
 		this.seedEdit.render(poseStack, i, j, f);
 		super.render(poseStack, i, j, f);
 	}
 
 	private Component levelTypeTitle() {
-		return new TranslatableComponent("selectWorld.mapType").append(" ").append(this.levelTypes[this.levelTypeIndex]);
+		return new TranslatableComponent("selectWorld.mapType").append(" ").append(LEVEL_TYPES[this.levelTypeIndex]);
 	}
 
 	private Component generateStructuresTitle() {

@@ -1,8 +1,7 @@
 package net.minecraft.world.level.levelgen.synth;
 
-import com.google.common.collect.ImmutableList;
-import java.util.List;
-import java.util.stream.IntStream;
+import it.unimi.dsi.fastutil.doubles.DoubleList;
+import it.unimi.dsi.fastutil.doubles.DoubleListIterator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 
 public class NormalNoise {
@@ -10,16 +9,27 @@ public class NormalNoise {
 	private final PerlinNoise first;
 	private final PerlinNoise second;
 
-	public NormalNoise(WorldgenRandom worldgenRandom, IntStream intStream) {
-		this(worldgenRandom, (List<Integer>)intStream.boxed().collect(ImmutableList.toImmutableList()));
+	public static NormalNoise create(WorldgenRandom worldgenRandom, int i, DoubleList doubleList) {
+		return new NormalNoise(worldgenRandom, i, doubleList);
 	}
 
-	public NormalNoise(WorldgenRandom worldgenRandom, List<Integer> list) {
-		this.first = new PerlinNoise(worldgenRandom, list);
-		this.second = new PerlinNoise(worldgenRandom, list);
-		int i = (Integer)list.stream().min(Integer::compareTo).orElse(0);
-		int j = (Integer)list.stream().max(Integer::compareTo).orElse(0);
-		this.valueFactor = 0.16666666666666666 / expectedDeviation(j - i);
+	private NormalNoise(WorldgenRandom worldgenRandom, int i, DoubleList doubleList) {
+		this.first = PerlinNoise.create(worldgenRandom, i, doubleList);
+		this.second = PerlinNoise.create(worldgenRandom, i, doubleList);
+		int j = Integer.MAX_VALUE;
+		int k = Integer.MIN_VALUE;
+		DoubleListIterator doubleListIterator = doubleList.iterator();
+
+		while (doubleListIterator.hasNext()) {
+			int l = doubleListIterator.nextIndex();
+			double d = doubleListIterator.nextDouble();
+			if (d != 0.0) {
+				j = Math.min(j, l);
+				k = Math.max(k, l);
+			}
+		}
+
+		this.valueFactor = 0.16666666666666666 / expectedDeviation(k - j);
 	}
 
 	private static double expectedDeviation(int i) {

@@ -85,6 +85,13 @@ public class GpuWarnlistManager extends SimplePreparableReloadListener<GpuWarnli
 		return this.warnings.get("vendor");
 	}
 
+	@Nullable
+	public String getAllWarnings() {
+		StringBuilder stringBuilder = new StringBuilder();
+		this.warnings.forEach((string, string2) -> stringBuilder.append(string).append(": ").append(string2));
+		return stringBuilder.length() == 0 ? null : stringBuilder.toString();
+	}
+
 	protected GpuWarnlistManager.Preparations prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
 		List<Pattern> list = Lists.<Pattern>newArrayList();
 		List<Pattern> list2 = Lists.<Pattern>newArrayList();

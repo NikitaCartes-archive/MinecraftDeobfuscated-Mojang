@@ -186,7 +186,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	public double getPassengersRidingOffset() {
 		float f = Math.min(0.25F, this.animationSpeed);
 		float g = this.animationPosition;
-		return (double)this.getBbHeight() - 0.2 + (double)(0.12F * Mth.cos(g * 1.5F) * 2.0F * f);
+		return (double)this.getBbHeight() - 0.3 + (double)(0.12F * Mth.cos(g * 1.5F) * 2.0F * f);
 	}
 
 	@Override
@@ -477,7 +477,6 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 		mob.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0F);
 		mob.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, spawnGroupData, null);
 		mob.startRiding(this, true);
-		serverLevelAccessor.addFreshEntity(mob);
 		return new AgableMob.AgableMobGroupData(0.0F);
 	}
 

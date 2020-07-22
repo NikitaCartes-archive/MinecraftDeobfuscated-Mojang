@@ -10,16 +10,15 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.FormattedCharSequence;
 
 @Environment(EnvType.CLIENT)
 public class SystemToast implements Toast {
 	private final SystemToast.SystemToastIds id;
-	private FormattedText title;
-	private List<FormattedText> messageLines;
+	private Component title;
+	private List<FormattedCharSequence> messageLines;
 	private long lastChanged;
 	private boolean changed;
 	private final int width;
@@ -30,20 +29,20 @@ public class SystemToast implements Toast {
 
 	public static SystemToast multiline(Minecraft minecraft, SystemToast.SystemToastIds systemToastIds, Component component, Component component2) {
 		Font font = minecraft.font;
-		List<FormattedText> list = font.getSplitter().splitLines(component2, 200, Style.EMPTY);
+		List<FormattedCharSequence> list = font.split(component2, 200);
 		int i = Math.max(200, list.stream().mapToInt(font::width).max().orElse(200));
 		return new SystemToast(systemToastIds, component, list, i + 30);
 	}
 
-	private SystemToast(SystemToast.SystemToastIds systemToastIds, Component component, List<FormattedText> list, int i) {
+	private SystemToast(SystemToast.SystemToastIds systemToastIds, Component component, List<FormattedCharSequence> list, int i) {
 		this.id = systemToastIds;
 		this.title = component;
 		this.messageLines = list;
 		this.width = i;
 	}
 
-	private static ImmutableList<FormattedText> nullToEmpty(@Nullable Component component) {
-		return component == null ? ImmutableList.of() : ImmutableList.of(component);
+	private static ImmutableList<FormattedCharSequence> nullToEmpty(@Nullable Component component) {
+		return component == null ? ImmutableList.of() : ImmutableList.of(component.getVisualOrderText());
 	}
 
 	@Override
@@ -83,7 +82,7 @@ public class SystemToast implements Toast {
 			toastComponent.getMinecraft().font.draw(poseStack, this.title, 18.0F, 7.0F, -256);
 
 			for (int k = 0; k < this.messageLines.size(); k++) {
-				toastComponent.getMinecraft().font.draw(poseStack, (FormattedText)this.messageLines.get(k), 18.0F, (float)(18 + k * 12), -1);
+				toastComponent.getMinecraft().font.draw(poseStack, (FormattedCharSequence)this.messageLines.get(k), 18.0F, (float)(18 + k * 12), -1);
 			}
 		}
 

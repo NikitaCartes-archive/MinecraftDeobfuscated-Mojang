@@ -20,10 +20,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.util.FormattedCharSequence;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,7 +38,7 @@ public class WinScreen extends Screen {
 	private final boolean poem;
 	private final Runnable onFinished;
 	private float time;
-	private List<FormattedText> lines;
+	private List<FormattedCharSequence> lines;
 	private IntSet centeredLines;
 	private int totalScrollLength;
 	private float scrollSpeed = 0.5F;
@@ -75,7 +75,7 @@ public class WinScreen extends Screen {
 	@Override
 	protected void init() {
 		if (this.lines == null) {
-			this.lines = Lists.<FormattedText>newArrayList();
+			this.lines = Lists.<FormattedCharSequence>newArrayList();
 			this.centeredLines = new IntOpenHashSet();
 			Resource resource = null;
 
@@ -98,14 +98,14 @@ public class WinScreen extends Screen {
 							string = string2 + ChatFormatting.WHITE + ChatFormatting.OBFUSCATED + "XXXXXXXX".substring(0, random.nextInt(4) + 3) + string3;
 						}
 
-						this.lines.addAll(this.minecraft.font.getSplitter().splitLines(string, 274, Style.EMPTY));
-						this.lines.add(FormattedText.EMPTY);
+						this.lines.addAll(this.minecraft.font.split(new TextComponent(string), 274));
+						this.lines.add(FormattedCharSequence.EMPTY);
 					}
 
 					inputStream.close();
 
 					for (int j = 0; j < 8; j++) {
-						this.lines.add(FormattedText.EMPTY);
+						this.lines.add(FormattedCharSequence.EMPTY);
 					}
 				}
 
@@ -124,15 +124,15 @@ public class WinScreen extends Screen {
 						bl = false;
 					}
 
-					for (FormattedText formattedText : this.minecraft.font.getSplitter().splitLines(string4, 274, Style.EMPTY)) {
+					for (FormattedCharSequence formattedCharSequence : this.minecraft.font.split(new TextComponent(string4), 274)) {
 						if (bl) {
 							this.centeredLines.add(this.lines.size());
 						}
 
-						this.lines.add(formattedText);
+						this.lines.add(formattedCharSequence);
 					}
 
-					this.lines.add(FormattedText.EMPTY);
+					this.lines.add(FormattedCharSequence.EMPTY);
 				}
 
 				inputStream.close();
@@ -207,12 +207,12 @@ public class WinScreen extends Screen {
 			}
 
 			if ((float)n + g + 12.0F + 8.0F > 0.0F && (float)n + g < (float)this.height) {
-				FormattedText formattedText = (FormattedText)this.lines.get(o);
+				FormattedCharSequence formattedCharSequence = (FormattedCharSequence)this.lines.get(o);
 				if (this.centeredLines.contains(o)) {
-					this.font.drawShadow(poseStack, formattedText, (float)(l + (274 - this.font.width(formattedText)) / 2), (float)n, 16777215);
+					this.font.drawShadow(poseStack, formattedCharSequence, (float)(l + (274 - this.font.width(formattedCharSequence)) / 2), (float)n, 16777215);
 				} else {
 					this.font.random.setSeed((long)((float)((long)o * 4238972211L) + this.time / 4.0F));
-					this.font.drawShadow(poseStack, formattedText, (float)l, (float)n, 16777215);
+					this.font.drawShadow(poseStack, formattedCharSequence, (float)l, (float)n, 16777215);
 				}
 			}
 

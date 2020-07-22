@@ -28,6 +28,7 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsObjectSelectionList;
@@ -42,6 +43,8 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 	private static final ResourceLocation LINK_ICON = new ResourceLocation("realms", "textures/gui/realms/link_icons.png");
 	private static final ResourceLocation TRAILER_ICON = new ResourceLocation("realms", "textures/gui/realms/trailer_icons.png");
 	private static final ResourceLocation SLOT_FRAME_LOCATION = new ResourceLocation("realms", "textures/gui/realms/slot_frame.png");
+	private static final Component PUBLISHER_LINK_TOOLTIP = new TranslatableComponent("mco.template.info.tooltip");
+	private static final Component TRAILER_LINK_TOOLTIP = new TranslatableComponent("mco.template.trailer.tooltip");
 	private final RealmsScreenWithCallback lastScreen;
 	private RealmsSelectWorldTemplateScreen.WorldTemplateObjectSelectionList worldTemplateObjectSelectionList;
 	private int selectedTemplate = -1;
@@ -49,7 +52,8 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 	private Button selectButton;
 	private Button trailerButton;
 	private Button publisherButton;
-	private String toolTip;
+	@Nullable
+	private Component toolTip;
 	private String currentLink;
 	private final RealmsServer.WorldType worldType;
 	private int clicks;
@@ -58,6 +62,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 	private String warningURL;
 	private boolean displayWarning;
 	private boolean hoverWarning;
+	@Nullable
 	private List<TextRenderingUtils.Line> noTemplatesMessage;
 
 	public RealmsSelectWorldTemplateScreen(RealmsScreenWithCallback realmsScreenWithCallback, RealmsServer.WorldType worldType) {
@@ -273,7 +278,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 			this.renderMultilineMessage(poseStack, i, j, this.noTemplatesMessage);
 		}
 
-		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 13, 16777215);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 13, 16777215);
 		if (this.displayWarning) {
 			Component[] components = this.warning;
 
@@ -298,14 +303,12 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 					}
 				}
 
-				this.drawCenteredString(poseStack, this.font, component, this.width / 2, row(-1 + kx), m);
+				drawCenteredString(poseStack, this.font, component, this.width / 2, row(-1 + kx), m);
 			}
 		}
 
 		super.render(poseStack, i, j, f);
-		if (this.toolTip != null) {
-			this.renderMousehoverTooltip(poseStack, this.toolTip, i, j);
-		}
+		this.renderMousehoverTooltip(poseStack, this.toolTip, i, j);
 	}
 
 	private void renderMultilineMessage(PoseStack poseStack, int i, int j, List<TextRenderingUtils.Line> list) {
@@ -319,7 +322,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 				int o = lineSegment.isLink() ? 3368635 : 16777215;
 				int p = this.font.drawShadow(poseStack, lineSegment.renderedText(), (float)n, (float)l, o);
 				if (lineSegment.isLink() && i > n && i < p && j > l - 3 && j < l + 8) {
-					this.toolTip = lineSegment.getLinkUrl();
+					this.toolTip = new TextComponent(lineSegment.getLinkUrl());
 					this.currentLink = lineSegment.getLinkUrl();
 				}
 
@@ -328,13 +331,13 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 		}
 	}
 
-	protected void renderMousehoverTooltip(PoseStack poseStack, String string, int i, int j) {
-		if (string != null) {
+	protected void renderMousehoverTooltip(PoseStack poseStack, @Nullable Component component, int i, int j) {
+		if (component != null) {
 			int k = i + 12;
 			int l = j - 12;
-			int m = this.font.width(string);
+			int m = this.font.width(component);
 			this.fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
-			this.font.drawShadow(poseStack, string, (float)k, (float)l, 16777215);
+			this.font.drawShadow(poseStack, component, (float)k, (float)l, 16777215);
 		}
 	}
 
@@ -381,19 +384,20 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 			int m = "".equals(string3) ? 0 : RealmsSelectWorldTemplateScreen.this.font.width(string3) + 2;
 			boolean bl = false;
 			boolean bl2 = false;
+			boolean bl3 = "".equals(string);
 			if (k >= i + m && k <= i + m + 32 && l >= j && l <= j + 15 && l < RealmsSelectWorldTemplateScreen.this.height - 15 && l > 32) {
 				if (k <= i + 15 + m && k > m) {
-					if ("".equals(string)) {
+					if (bl3) {
 						bl2 = true;
 					} else {
 						bl = true;
 					}
-				} else if (!"".equals(string)) {
+				} else if (!bl3) {
 					bl2 = true;
 				}
 			}
 
-			if (!"".equals(string)) {
+			if (!bl3) {
 				RealmsSelectWorldTemplateScreen.this.minecraft.getTextureManager().bind(RealmsSelectWorldTemplateScreen.LINK_ICON);
 				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 				RenderSystem.pushMatrix();
@@ -408,17 +412,17 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 				RenderSystem.pushMatrix();
 				RenderSystem.scalef(1.0F, 1.0F, 1.0F);
-				int n = i + m + ("".equals(string) ? 0 : 17);
+				int n = i + m + (bl3 ? 0 : 17);
 				float g = bl2 ? 15.0F : 0.0F;
 				GuiComponent.blit(poseStack, n, j, g, 0.0F, 15, 15, 30, 15);
 				RenderSystem.popMatrix();
 			}
 
-			if (bl && !"".equals(string)) {
-				RealmsSelectWorldTemplateScreen.this.toolTip = I18n.get("mco.template.info.tooltip");
+			if (bl) {
+				RealmsSelectWorldTemplateScreen.this.toolTip = RealmsSelectWorldTemplateScreen.PUBLISHER_LINK_TOOLTIP;
 				RealmsSelectWorldTemplateScreen.this.currentLink = string;
 			} else if (bl2 && !"".equals(string2)) {
-				RealmsSelectWorldTemplateScreen.this.toolTip = I18n.get("mco.template.trailer.tooltip");
+				RealmsSelectWorldTemplateScreen.this.toolTip = RealmsSelectWorldTemplateScreen.TRAILER_LINK_TOOLTIP;
 				RealmsSelectWorldTemplateScreen.this.currentLink = string2;
 			}
 		}

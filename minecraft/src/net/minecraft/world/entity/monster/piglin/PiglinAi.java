@@ -105,7 +105,7 @@ public class PiglinAi {
 			0,
 			ImmutableList.of(
 				new LookAtTargetSink(45, 90),
-				new MoveToTargetSink(200),
+				new MoveToTargetSink(),
 				new InteractWithDoor(),
 				babyAvoidNemesis(),
 				avoidZombified(),

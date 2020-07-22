@@ -138,12 +138,11 @@ public class FlatLevelGeneratorSettings {
 				.biomeCategory(biome.getBiomeCategory())
 				.depth(biome.getDepth())
 				.scale(biome.getScale())
-				.temperature(biome.getTemperature())
+				.temperature(biome.getBaseTemperature())
 				.downfall(biome.getDownfall())
 				.specialEffects(biome.getSpecialEffects())
 				.parent(biome.getParent())
-		) {
-		};
+		);
 		if (this.addLakes) {
 			biome2.addFeature(GenerationStep.Decoration.LAKES, Features.LAKE_WATER);
 			biome2.addFeature(GenerationStep.Decoration.LAKES, Features.LAKE_LAVA);

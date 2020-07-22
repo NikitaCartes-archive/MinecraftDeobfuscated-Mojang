@@ -85,7 +85,7 @@ public class CatSpawner implements CustomSpawner {
 		} else {
 			cat.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(blockPos), MobSpawnType.NATURAL, null, null);
 			cat.moveTo(blockPos, 0.0F, 0.0F);
-			serverLevel.addFreshEntity(cat);
+			serverLevel.addFreshEntityWithPassengers(cat);
 			return 1;
 		}
 	}

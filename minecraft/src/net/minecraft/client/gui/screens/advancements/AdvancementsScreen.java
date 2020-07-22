@@ -13,7 +13,8 @@ import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientAdvancements;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundSeenAdvancementsPacket;
 import net.minecraft.resources.ResourceLocation;
 
@@ -21,6 +22,9 @@ import net.minecraft.resources.ResourceLocation;
 public class AdvancementsScreen extends Screen implements ClientAdvancements.Listener {
 	private static final ResourceLocation WINDOW_LOCATION = new ResourceLocation("textures/gui/advancements/window.png");
 	private static final ResourceLocation TABS_LOCATION = new ResourceLocation("textures/gui/advancements/tabs.png");
+	private static final Component VERY_SAD_LABEL = new TranslatableComponent("advancements.sad_label");
+	private static final Component NO_ADVANCEMENTS_LABEL = new TranslatableComponent("advancements.empty");
+	private static final Component TITLE = new TranslatableComponent("gui.advancements");
 	private final ClientAdvancements advancements;
 	private final Map<Advancement, AdvancementTab> tabs = Maps.<Advancement, AdvancementTab>newLinkedHashMap();
 	private AdvancementTab selectedTab;
@@ -110,10 +114,9 @@ public class AdvancementsScreen extends Screen implements ClientAdvancements.Lis
 		AdvancementTab advancementTab = this.selectedTab;
 		if (advancementTab == null) {
 			fill(poseStack, k + 9, l + 18, k + 9 + 234, l + 18 + 113, -16777216);
-			String string = I18n.get("advancements.empty");
-			int m = this.font.width(string);
-			this.font.draw(poseStack, string, (float)(k + 9 + 117 - m / 2), (float)(l + 18 + 56 - 9 / 2), -1);
-			this.font.draw(poseStack, ":(", (float)(k + 9 + 117 - this.font.width(":(") / 2), (float)(l + 18 + 113 - 9), -1);
+			int m = k + 9 + 117;
+			drawCenteredString(poseStack, this.font, NO_ADVANCEMENTS_LABEL, m, l + 18 + 56 - 9 / 2, -1);
+			drawCenteredString(poseStack, this.font, VERY_SAD_LABEL, m, l + 18 + 113 - 9, -1);
 		} else {
 			RenderSystem.pushMatrix();
 			RenderSystem.translatef((float)(k + 9), (float)(l + 18), 0.0F);
@@ -146,7 +149,7 @@ public class AdvancementsScreen extends Screen implements ClientAdvancements.Lis
 			RenderSystem.disableBlend();
 		}
 
-		this.font.draw(poseStack, I18n.get("gui.advancements"), (float)(i + 8), (float)(j + 6), 4210752);
+		this.font.draw(poseStack, TITLE, (float)(i + 8), (float)(j + 6), 4210752);
 	}
 
 	private void renderTooltips(PoseStack poseStack, int i, int j, int k, int l) {

@@ -28,6 +28,9 @@ public class RealmsWorldSlotButton extends Button implements TickableWidget {
 	public static final ResourceLocation DEFAULT_WORLD_SLOT_1 = new ResourceLocation("minecraft", "textures/gui/title/background/panorama_0.png");
 	public static final ResourceLocation DEFAULT_WORLD_SLOT_2 = new ResourceLocation("minecraft", "textures/gui/title/background/panorama_2.png");
 	public static final ResourceLocation DEFAULT_WORLD_SLOT_3 = new ResourceLocation("minecraft", "textures/gui/title/background/panorama_3.png");
+	private static final Component SLOT_ACTIVE_TOOLTIP = new TranslatableComponent("mco.configure.world.slot.tooltip.active");
+	private static final Component SWITCH_TO_MINIGAME_SLOT_TOOLTIP = new TranslatableComponent("mco.configure.world.slot.tooltip.minigame");
+	private static final Component SWITCH_TO_WORLD_SLOT_TOOLTIP = new TranslatableComponent("mco.configure.world.slot.tooltip");
 	private final Supplier<RealmsServer> serverDataProvider;
 	private final Consumer<Component> toolTipSetter;
 	private final int slotIndex;
@@ -117,9 +120,9 @@ public class RealmsWorldSlotButton extends Button implements TickableWidget {
 
 			Component component2;
 			if (action == RealmsWorldSlotButton.Action.JOIN) {
-				component2 = new TranslatableComponent("mco.configure.world.slot.tooltip.active");
+				component2 = SLOT_ACTIVE_TOOLTIP;
 			} else {
-				component2 = bl2 ? new TranslatableComponent("mco.configure.world.slot.tooltip.minigame") : new TranslatableComponent("mco.configure.world.slot.tooltip");
+				component2 = bl2 ? SWITCH_TO_MINIGAME_SLOT_TOOLTIP : SWITCH_TO_WORLD_SLOT_TOOLTIP;
 			}
 
 			Component component3 = component2.copy().append(component);
@@ -205,7 +208,7 @@ public class RealmsWorldSlotButton extends Button implements TickableWidget {
 		}
 
 		blit(poseStack, i, j, 0.0F, 0.0F, 80, 80, 80, 80);
-		this.drawCenteredString(poseStack, minecraft.font, string, i + 40, j + 66, 16777215);
+		drawCenteredString(poseStack, minecraft.font, string, i + 40, j + 66, 16777215);
 	}
 
 	@Environment(EnvType.CLIENT)

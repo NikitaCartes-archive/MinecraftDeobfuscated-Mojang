@@ -10,9 +10,11 @@ import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 
 @Environment(EnvType.CLIENT)
 public class SmeltingRecipeBookComponent extends AbstractFurnaceRecipeBookComponent {
+	private static final Component FILTER_NAME = new TranslatableComponent("gui.recipebook.toggleRecipes.smeltable");
+
 	@Override
 	protected Component getRecipeFilterName() {
-		return new TranslatableComponent("gui.recipebook.toggleRecipes.smeltable");
+		return FILTER_NAME;
 	}
 
 	@Override

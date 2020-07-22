@@ -266,15 +266,17 @@ public class Evoker extends SpellcasterIllager {
 
 		@Override
 		protected void performSpellCasting() {
+			ServerLevel serverLevel = (ServerLevel)Evoker.this.level;
+
 			for (int i = 0; i < 3; i++) {
 				BlockPos blockPos = Evoker.this.blockPosition().offset(-2 + Evoker.this.random.nextInt(5), 1, -2 + Evoker.this.random.nextInt(5));
 				Vex vex = EntityType.VEX.create(Evoker.this.level);
 				vex.moveTo(blockPos, 0.0F, 0.0F);
-				vex.finalizeSpawn((ServerLevel)Evoker.this.level, Evoker.this.level.getCurrentDifficultyAt(blockPos), MobSpawnType.MOB_SUMMONED, null, null);
+				vex.finalizeSpawn(serverLevel, Evoker.this.level.getCurrentDifficultyAt(blockPos), MobSpawnType.MOB_SUMMONED, null, null);
 				vex.setOwner(Evoker.this);
 				vex.setBoundOrigin(blockPos);
 				vex.setLimitedLife(20 * (30 + Evoker.this.random.nextInt(90)));
-				Evoker.this.level.addFreshEntity(vex);
+				serverLevel.addFreshEntityWithPassengers(vex);
 			}
 		}
 

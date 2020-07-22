@@ -44,7 +44,7 @@ public class MouseSettingsScreen extends OptionsSubScreen {
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
 		this.list.render(poseStack, i, j, f);
-		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 5, 16777215);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 5, 16777215);
 		super.render(poseStack, i, j, f);
 	}
 }

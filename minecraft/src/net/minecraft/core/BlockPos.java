@@ -464,6 +464,10 @@ public class BlockPos extends Vec3i {
 			return this.set(this.getX() + i, this.getY() + j, this.getZ() + k);
 		}
 
+		public BlockPos.MutableBlockPos move(Vec3i vec3i) {
+			return this.set(this.getX() + vec3i.getX(), this.getY() + vec3i.getY(), this.getZ() + vec3i.getZ());
+		}
+
 		public BlockPos.MutableBlockPos clamp(Direction.Axis axis, int i, int j) {
 			switch (axis) {
 				case X:

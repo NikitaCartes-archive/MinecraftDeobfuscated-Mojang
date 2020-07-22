@@ -8,16 +8,16 @@ import com.mojang.realmsclient.exception.RealmsServiceException;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.Locale;
 import java.util.TimeZone;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
@@ -27,14 +27,20 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Component SUBSCRIPTION_TITLE = new TranslatableComponent("mco.configure.world.subscription.title");
+	private static final Component SUBSCRIPTION_START_LABEL = new TranslatableComponent("mco.configure.world.subscription.start");
+	private static final Component TIME_LEFT_LABEL = new TranslatableComponent("mco.configure.world.subscription.timeleft");
+	private static final Component DAYS_LEFT_LABEL = new TranslatableComponent("mco.configure.world.subscription.recurring.daysleft");
+	private static final Component SUBSCRIPTION_EXPIRED_TEXT = new TranslatableComponent("mco.configure.world.subscription.expired");
+	private static final Component SUBSCRIPTION_LESS_THAN_A_DAY_TEXT = new TranslatableComponent("mco.configure.world.subscription.less_than_a_day");
+	private static final Component MONTH_SUFFIX = new TranslatableComponent("mco.configure.world.subscription.month");
+	private static final Component MONTHS_SUFFIX = new TranslatableComponent("mco.configure.world.subscription.months");
+	private static final Component DAY_SUFFIX = new TranslatableComponent("mco.configure.world.subscription.day");
+	private static final Component DAYS_SUFFIX = new TranslatableComponent("mco.configure.world.subscription.days");
 	private final Screen lastScreen;
 	private final RealmsServer serverData;
 	private final Screen mainScreen;
-	private final String subscriptionTitle;
-	private final String subscriptionStartLabelText;
-	private final String timeLeftLabelText;
-	private final String daysLeftLabelText;
-	private int daysLeft;
+	private Component daysLeft;
 	private String startDate;
 	private Subscription.SubscriptionType type;
 
@@ -42,16 +48,14 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 		this.lastScreen = screen;
 		this.serverData = realmsServer;
 		this.mainScreen = screen2;
-		this.subscriptionTitle = I18n.get("mco.configure.world.subscription.title");
-		this.subscriptionStartLabelText = I18n.get("mco.configure.world.subscription.start");
-		this.timeLeftLabelText = I18n.get("mco.configure.world.subscription.timeleft");
-		this.daysLeftLabelText = I18n.get("mco.configure.world.subscription.recurring.daysleft");
 	}
 
 	@Override
 	public void init() {
 		this.getSubscription(this.serverData.id);
-		NarrationHelper.now(this.subscriptionTitle, this.subscriptionStartLabelText, this.startDate, this.timeLeftLabelText, this.daysLeftPresentation(this.daysLeft));
+		NarrationHelper.now(
+			SUBSCRIPTION_TITLE.getString(), SUBSCRIPTION_START_LABEL.getString(), this.startDate, TIME_LEFT_LABEL.getString(), this.daysLeft.getString()
+		);
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
 		this.addButton(
 			new Button(
@@ -107,8 +111,8 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 
 		try {
 			Subscription subscription = realmsClient.subscriptionFor(l);
-			this.daysLeft = subscription.daysLeft;
-			this.startDate = this.localPresentation(subscription.startDate);
+			this.daysLeft = this.daysLeftPresentation(subscription.daysLeft);
+			this.startDate = localPresentation(subscription.startDate);
 			this.type = subscription.type;
 		} catch (RealmsServiceException var5) {
 			LOGGER.error("Couldn't get subscription");
@@ -116,7 +120,7 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 		}
 	}
 
-	private String localPresentation(long l) {
+	private static String localPresentation(long l) {
 		Calendar calendar = new GregorianCalendar(TimeZone.getDefault());
 		calendar.setTimeInMillis(l);
 		return DateFormat.getDateTimeInstance().format(calendar.getTime());
@@ -141,51 +145,51 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
 		int k = this.width / 2 - 100;
-		this.drawCenteredString(poseStack, this.font, this.subscriptionTitle, this.width / 2, 17, 16777215);
-		this.font.draw(poseStack, this.subscriptionStartLabelText, (float)k, (float)row(0), 10526880);
+		drawCenteredString(poseStack, this.font, SUBSCRIPTION_TITLE, this.width / 2, 17, 16777215);
+		this.font.draw(poseStack, SUBSCRIPTION_START_LABEL, (float)k, (float)row(0), 10526880);
 		this.font.draw(poseStack, this.startDate, (float)k, (float)row(1), 16777215);
 		if (this.type == Subscription.SubscriptionType.NORMAL) {
-			this.font.draw(poseStack, this.timeLeftLabelText, (float)k, (float)row(3), 10526880);
+			this.font.draw(poseStack, TIME_LEFT_LABEL, (float)k, (float)row(3), 10526880);
 		} else if (this.type == Subscription.SubscriptionType.RECURRING) {
-			this.font.draw(poseStack, this.daysLeftLabelText, (float)k, (float)row(3), 10526880);
+			this.font.draw(poseStack, DAYS_LEFT_LABEL, (float)k, (float)row(3), 10526880);
 		}
 
-		this.font.draw(poseStack, this.daysLeftPresentation(this.daysLeft), (float)k, (float)row(4), 16777215);
+		this.font.draw(poseStack, this.daysLeft, (float)k, (float)row(4), 16777215);
 		super.render(poseStack, i, j, f);
 	}
 
-	private String daysLeftPresentation(int i) {
+	private Component daysLeftPresentation(int i) {
 		if (i == -1 && this.serverData.expired) {
-			return I18n.get("mco.configure.world.subscription.expired");
+			return SUBSCRIPTION_EXPIRED_TEXT;
 		} else if (i <= 1) {
-			return I18n.get("mco.configure.world.subscription.less_than_a_day");
+			return SUBSCRIPTION_LESS_THAN_A_DAY_TEXT;
 		} else {
 			int j = i / 30;
 			int k = i % 30;
-			StringBuilder stringBuilder = new StringBuilder();
+			MutableComponent mutableComponent = new TextComponent("");
 			if (j > 0) {
-				stringBuilder.append(j).append(" ");
+				mutableComponent.append(Integer.toString(j)).append(" ");
 				if (j == 1) {
-					stringBuilder.append(I18n.get("mco.configure.world.subscription.month").toLowerCase(Locale.ROOT));
+					mutableComponent.append(MONTH_SUFFIX);
 				} else {
-					stringBuilder.append(I18n.get("mco.configure.world.subscription.months").toLowerCase(Locale.ROOT));
+					mutableComponent.append(MONTHS_SUFFIX);
 				}
 			}
 
 			if (k > 0) {
-				if (stringBuilder.length() > 0) {
-					stringBuilder.append(", ");
+				if (j > 0) {
+					mutableComponent.append(", ");
 				}
 
-				stringBuilder.append(k).append(" ");
+				mutableComponent.append(Integer.toString(k)).append(" ");
 				if (k == 1) {
-					stringBuilder.append(I18n.get("mco.configure.world.subscription.day").toLowerCase(Locale.ROOT));
+					mutableComponent.append(DAY_SUFFIX);
 				} else {
-					stringBuilder.append(I18n.get("mco.configure.world.subscription.days").toLowerCase(Locale.ROOT));
+					mutableComponent.append(DAYS_SUFFIX);
 				}
 			}
 
-			return stringBuilder.toString();
+			return mutableComponent;
 		}
 	}
 }

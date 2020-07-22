@@ -32,8 +32,8 @@ public class RealmsConfirmScreen extends RealmsScreen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		this.drawCenteredString(poseStack, this.font, this.title1, this.width / 2, row(3), 16777215);
-		this.drawCenteredString(poseStack, this.font, this.title2, this.width / 2, row(5), 16777215);
+		drawCenteredString(poseStack, this.font, this.title1, this.width / 2, row(3), 16777215);
+		drawCenteredString(poseStack, this.font, this.title2, this.width / 2, row(5), 16777215);
 		super.render(poseStack, i, j, f);
 	}
 

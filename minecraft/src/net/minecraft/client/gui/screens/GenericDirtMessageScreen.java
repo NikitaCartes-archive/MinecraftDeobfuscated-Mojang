@@ -19,7 +19,7 @@ public class GenericDirtMessageScreen extends Screen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderDirtBackground(0);
-		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 70, 16777215);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 70, 16777215);
 		super.render(poseStack, i, j, f);
 	}
 }

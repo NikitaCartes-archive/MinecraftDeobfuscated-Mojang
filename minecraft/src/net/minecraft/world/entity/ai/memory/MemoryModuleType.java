@@ -44,7 +44,7 @@ public class MemoryModuleType<U> {
 	public static final MemoryModuleType<Entity> RIDE_TARGET = register("ride_target");
 	public static final MemoryModuleType<Path> PATH = register("path");
 	public static final MemoryModuleType<List<GlobalPos>> INTERACTABLE_DOORS = register("interactable_doors");
-	public static final MemoryModuleType<Set<GlobalPos>> OPENED_DOORS = register("opened_doors");
+	public static final MemoryModuleType<Set<GlobalPos>> DOORS_TO_CLOSE = register("doors_to_close");
 	public static final MemoryModuleType<BlockPos> NEAREST_BED = register("nearest_bed");
 	public static final MemoryModuleType<DamageSource> HURT_BY = register("hurt_by");
 	public static final MemoryModuleType<LivingEntity> HURT_BY_ENTITY = register("hurt_by_entity");

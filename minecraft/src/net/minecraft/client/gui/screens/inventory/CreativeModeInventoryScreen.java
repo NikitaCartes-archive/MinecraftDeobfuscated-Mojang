@@ -21,12 +21,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.inventory.Hotbar;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.client.searchtree.SearchTree;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
-import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -54,6 +52,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<CreativeModeInventoryScreen.ItemPickerMenu> {
 	private static final ResourceLocation CREATIVE_TABS_LOCATION = new ResourceLocation("textures/gui/container/creative_inventory/tabs.png");
 	private static final SimpleContainer CONTAINER = new SimpleContainer(45);
+	private static final Component TRASH_SLOT_TOOLTIP = new TranslatableComponent("inventory.binSlot");
 	private static int selectedTab = CreativeModeTab.TAB_BUILDING_BLOCKS.getId();
 	private float scrollOffs;
 	private boolean scrolling;
@@ -348,7 +347,6 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 				searchTree = this.minecraft.getSearchTree(SearchRegistry.CREATIVE_TAGS);
 				this.updateVisibleTags(string);
 			} else {
-				string = Language.getInstance().reorder(string, false);
 				searchTree = this.minecraft.getSearchTree(SearchRegistry.CREATIVE_NAMES);
 			}
 
@@ -381,7 +379,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		CreativeModeTab creativeModeTab = CreativeModeTab.TABS[selectedTab];
 		if (creativeModeTab.showTitle()) {
 			RenderSystem.disableBlend();
-			this.font.draw(poseStack, I18n.get(creativeModeTab.getName()), 8.0F, 6.0F, 4210752);
+			this.font.draw(poseStack, creativeModeTab.getDisplayName(), 8.0F, 6.0F, 4210752);
 		}
 	}
 
@@ -586,7 +584,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		if (this.destroyItemSlot != null
 			&& selectedTab == CreativeModeTab.TAB_INVENTORY.getId()
 			&& this.isHovering(this.destroyItemSlot.x, this.destroyItemSlot.y, 16, 16, (double)i, (double)j)) {
-			this.renderTooltip(poseStack, new TranslatableComponent("inventory.binSlot"), i, j);
+			this.renderTooltip(poseStack, TRASH_SLOT_TOOLTIP, i, j);
 		}
 
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -622,10 +620,10 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 				}
 			});
 			if (creativeModeTab != null) {
-				list2.add(1, new TranslatableComponent(creativeModeTab.getName()).withStyle(ChatFormatting.BLUE));
+				list2.add(1, creativeModeTab.getDisplayName().copy().withStyle(ChatFormatting.BLUE));
 			}
 
-			this.renderTooltip(poseStack, list2, i, j);
+			this.renderComponentTooltip(poseStack, list2, i, j);
 		} else {
 			super.renderTooltip(poseStack, itemStack, i, j);
 		}
@@ -699,7 +697,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		}
 
 		if (this.isHovering(l + 3, m + 3, 23, 27, (double)i, (double)j)) {
-			this.renderTooltip(poseStack, new TranslatableComponent(creativeModeTab.getName()), i, j);
+			this.renderTooltip(poseStack, creativeModeTab.getDisplayName(), i, j);
 			return true;
 		} else {
 			return false;

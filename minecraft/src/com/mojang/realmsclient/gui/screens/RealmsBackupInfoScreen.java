@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
@@ -59,7 +60,7 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBackground(poseStack);
-		this.drawCenteredString(poseStack, this.font, "Changes from last backup", this.width / 2, 10, 16777215);
+		drawCenteredString(poseStack, this.font, "Changes from last backup", this.width / 2, 10, 16777215);
 		this.backupInfoList.render(poseStack, i, j, f);
 		super.render(poseStack, i, j, f);
 	}
@@ -115,8 +116,8 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 		@Override
 		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			Font font = RealmsBackupInfoScreen.this.minecraft.font;
-			RealmsBackupInfoScreen.this.drawString(poseStack, font, this.key, k, j, 10526880);
-			RealmsBackupInfoScreen.this.drawString(poseStack, font, RealmsBackupInfoScreen.this.checkForSpecificMetadata(this.key, this.value), k, j + 12, 16777215);
+			GuiComponent.drawString(poseStack, font, this.key, k, j, 10526880);
+			GuiComponent.drawString(poseStack, font, RealmsBackupInfoScreen.this.checkForSpecificMetadata(this.key, this.value), k, j + 12, 16777215);
 		}
 	}
 }

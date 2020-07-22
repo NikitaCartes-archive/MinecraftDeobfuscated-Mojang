@@ -13,11 +13,13 @@ import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.StringSplitter;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
@@ -27,9 +29,9 @@ public class AdvancementWidget extends GuiComponent {
 	private final AdvancementTab tab;
 	private final Advancement advancement;
 	private final DisplayInfo display;
-	private final FormattedText title;
+	private final FormattedCharSequence title;
 	private final int width;
-	private final List<FormattedText> description;
+	private final List<FormattedCharSequence> description;
 	private final Minecraft minecraft;
 	private AdvancementWidget parent;
 	private final List<AdvancementWidget> children = Lists.<AdvancementWidget>newArrayList();
@@ -42,19 +44,20 @@ public class AdvancementWidget extends GuiComponent {
 		this.advancement = advancement;
 		this.display = displayInfo;
 		this.minecraft = minecraft;
-		this.title = minecraft.font.substrByWidth(displayInfo.getTitle(), 163);
+		this.title = Language.getInstance().getVisualOrder(minecraft.font.substrByWidth(displayInfo.getTitle(), 163));
 		this.x = Mth.floor(displayInfo.getX() * 28.0F);
 		this.y = Mth.floor(displayInfo.getY() * 27.0F);
 		int i = advancement.getMaxCriteraRequired();
 		int j = String.valueOf(i).length();
 		int k = i > 1 ? minecraft.font.width("  ") + minecraft.font.width("0") * j * 2 + minecraft.font.width("/") : 0;
 		int l = 29 + minecraft.font.width(this.title) + k;
-		this.description = this.findOptimalLines(
-			ComponentUtils.mergeStyles(displayInfo.getDescription().copy(), Style.EMPTY.withColor(displayInfo.getFrame().getChatColor())), l
-		);
+		this.description = Language.getInstance()
+			.getVisualOrder(
+				this.findOptimalLines(ComponentUtils.mergeStyles(displayInfo.getDescription().copy(), Style.EMPTY.withColor(displayInfo.getFrame().getChatColor())), l)
+			);
 
-		for (FormattedText formattedText : this.description) {
-			l = Math.max(l, minecraft.font.width(formattedText));
+		for (FormattedCharSequence formattedCharSequence : this.description) {
+			l = Math.max(l, minecraft.font.width(formattedCharSequence));
 		}
 
 		this.width = l + 3 + 5;
@@ -220,11 +223,11 @@ public class AdvancementWidget extends GuiComponent {
 
 		if (bl2) {
 			for (int s = 0; s < this.description.size(); s++) {
-				this.minecraft.font.draw(poseStack, (FormattedText)this.description.get(s), (float)(q + 5), (float)(p + 26 - r + 7 + s * 9), -5592406);
+				this.minecraft.font.draw(poseStack, (FormattedCharSequence)this.description.get(s), (float)(q + 5), (float)(p + 26 - r + 7 + s * 9), -5592406);
 			}
 		} else {
 			for (int s = 0; s < this.description.size(); s++) {
-				this.minecraft.font.draw(poseStack, (FormattedText)this.description.get(s), (float)(q + 5), (float)(j + this.y + 9 + 17 + s * 9), -5592406);
+				this.minecraft.font.draw(poseStack, (FormattedCharSequence)this.description.get(s), (float)(q + 5), (float)(j + this.y + 9 + 17 + s * 9), -5592406);
 			}
 		}
 

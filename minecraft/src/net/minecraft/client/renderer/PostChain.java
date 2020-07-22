@@ -94,8 +94,15 @@ public class PostChain implements AutoCloseable {
 				}
 			}
 		} catch (Exception var18) {
+			String string;
+			if (resource != null) {
+				string = " (" + resource.getSourceName() + ")";
+			} else {
+				string = "";
+			}
+
 			ChainedJsonException chainedJsonException2 = ChainedJsonException.forException(var18);
-			chainedJsonException2.setFilenameAndFlush(resourceLocation.getPath());
+			chainedJsonException2.setFilenameAndFlush(resourceLocation.getPath() + string);
 			throw chainedJsonException2;
 		} finally {
 			IOUtils.closeQuietly(resource);

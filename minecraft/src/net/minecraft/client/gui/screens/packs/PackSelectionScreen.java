@@ -62,10 +62,8 @@ public class PackSelectionScreen extends Screen {
 	private Button doneButton;
 	private final Map<String, ResourceLocation> packIcons = Maps.<String, ResourceLocation>newHashMap();
 
-	public PackSelectionScreen(
-		Screen screen, PackRepository packRepository, Consumer<PackRepository> consumer, File file, TranslatableComponent translatableComponent
-	) {
-		super(translatableComponent);
+	public PackSelectionScreen(Screen screen, PackRepository packRepository, Consumer<PackRepository> consumer, File file, Component component) {
+		super(component);
 		this.lastScreen = screen;
 		this.model = new PackSelectionModel(this::populateLists, this::getPackIcon, packRepository, consumer);
 		this.packDir = file;
@@ -155,8 +153,8 @@ public class PackSelectionScreen extends Screen {
 		this.renderDirtBackground(0);
 		this.availablePackList.render(poseStack, i, j, f);
 		this.selectedPackList.render(poseStack, i, j, f);
-		this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 16777215);
-		this.drawCenteredString(poseStack, this.font, DRAG_AND_DROP, this.width / 2, 20, 16777215);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 16777215);
+		drawCenteredString(poseStack, this.font, DRAG_AND_DROP, this.width / 2, 20, 16777215);
 		super.render(poseStack, i, j, f);
 	}
 

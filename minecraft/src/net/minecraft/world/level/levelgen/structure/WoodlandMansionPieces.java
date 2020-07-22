@@ -1187,7 +1187,7 @@ public class WoodlandMansionPieces {
 				abstractIllager.finalizeSpawn(
 					serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(abstractIllager.blockPosition()), MobSpawnType.STRUCTURE, null, null
 				);
-				serverLevelAccessor.addFreshEntity(abstractIllager);
+				serverLevelAccessor.addFreshEntityWithPassengers(abstractIllager);
 				serverLevelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2);
 			}
 		}
