@@ -96,9 +96,9 @@ extends Screen {
     public void render(PoseStack poseStack, int i, int j, float f) {
         if (this.showPauseMenu) {
             this.renderBackground(poseStack);
-            this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 40, 0xFFFFFF);
+            PauseScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 40, 0xFFFFFF);
         } else {
-            this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 10, 0xFFFFFF);
+            PauseScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 10, 0xFFFFFF);
         }
         super.render(poseStack, i, j, f);
     }

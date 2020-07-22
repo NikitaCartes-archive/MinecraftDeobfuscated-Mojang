@@ -68,7 +68,7 @@ extends Feature<NoneFeatureConfiguration> {
     public static void placeWeepingVinesColumn(LevelAccessor levelAccessor, Random random, BlockPos.MutableBlockPos mutableBlockPos, int i, int j, int k) {
         for (int l = 1; l <= i; ++l) {
             if (levelAccessor.isEmptyBlock(mutableBlockPos)) {
-                if (l == i || !levelAccessor.isEmptyBlock(mutableBlockPos.above())) {
+                if (l == i || !levelAccessor.isEmptyBlock((BlockPos)mutableBlockPos.above())) {
                     levelAccessor.setBlock(mutableBlockPos, (BlockState)Blocks.TWISTING_VINES.defaultBlockState().setValue(GrowingPlantHeadBlock.AGE, Mth.nextInt(random, j, k)), 2);
                     break;
                 }

@@ -8,11 +8,14 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class ReceivingLevelScreen
 extends Screen {
+    private static final Component DOWNLOADING_TERRAIN_TEXT = new TranslatableComponent("multiplayer.downloadingTerrain");
+
     public ReceivingLevelScreen() {
         super(NarratorChatListener.NO_TITLE);
     }
@@ -25,7 +28,7 @@ extends Screen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderDirtBackground(0);
-        this.drawCenteredString(poseStack, this.font, I18n.get("multiplayer.downloadingTerrain", new Object[0]), this.width / 2, this.height / 2 - 50, 0xFFFFFF);
+        ReceivingLevelScreen.drawCenteredString(poseStack, this.font, DOWNLOADING_TERRAIN_TEXT, this.width / 2, this.height / 2 - 50, 0xFFFFFF);
         super.render(poseStack, i, j, f);
     }
 

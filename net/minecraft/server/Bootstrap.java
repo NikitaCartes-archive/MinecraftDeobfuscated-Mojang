@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
 import net.minecraft.SharedConstants;
+import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
 import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraft.core.Registry;
@@ -98,6 +99,7 @@ public class Bootstrap {
         }
         if (SharedConstants.IS_RUNNING_IN_IDE) {
             Bootstrap.getMissingTranslations().forEach(string -> LOGGER.error("Missing translations: " + string));
+            Commands.validate();
         }
         DefaultAttributes.validate();
     }

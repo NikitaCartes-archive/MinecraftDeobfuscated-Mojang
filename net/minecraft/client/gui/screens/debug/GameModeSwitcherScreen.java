@@ -76,8 +76,8 @@ extends Screen {
         GameModeSwitcherScreen.blit(poseStack, k, l, 0.0f, 0.0f, 125, 75, 128, 128);
         poseStack.popPose();
         super.render(poseStack, i, j, f);
-        this.currentlyHovered.ifPresent(gameModeIcon -> this.drawCenteredString(poseStack, this.font, ((GameModeIcon)gameModeIcon).getName(), this.width / 2, this.height / 2 - 30 - 20, -1));
-        this.drawCenteredString(poseStack, this.font, SELECT_KEY, this.width / 2, this.height / 2 + 5, 0xFFFFFF);
+        this.currentlyHovered.ifPresent(gameModeIcon -> GameModeSwitcherScreen.drawCenteredString(poseStack, this.font, ((GameModeIcon)gameModeIcon).getName(), this.width / 2, this.height / 2 - 30 - 20, -1));
+        GameModeSwitcherScreen.drawCenteredString(poseStack, this.font, SELECT_KEY, this.width / 2, this.height / 2 + 5, 0xFFFFFF);
         if (!this.setFirstMousePos) {
             this.firstMouseX = i;
             this.firstMouseY = j;

@@ -73,6 +73,11 @@ extends Monster {
     }
 
     @Override
+    public double getMyRidingOffset() {
+        return this.isBaby() ? -0.05 : -0.45;
+    }
+
+    @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
         this.setImmuneToZombification(compoundTag.getBoolean("IsImmuneToZombification"));

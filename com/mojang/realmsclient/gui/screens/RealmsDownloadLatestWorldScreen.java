@@ -144,11 +144,8 @@ extends RealmsScreen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
-        if (this.extracting && !this.finished) {
-            this.status = new TranslatableComponent("mco.download.extracting");
-        }
-        this.drawCenteredString(poseStack, this.font, this.downloadTitle, this.width / 2, 20, 0xFFFFFF);
-        this.drawCenteredString(poseStack, this.font, this.status, this.width / 2, 50, 0xFFFFFF);
+        RealmsDownloadLatestWorldScreen.drawCenteredString(poseStack, this.font, this.downloadTitle, this.width / 2, 20, 0xFFFFFF);
+        RealmsDownloadLatestWorldScreen.drawCenteredString(poseStack, this.font, this.status, this.width / 2, 50, 0xFFFFFF);
         if (this.showDots) {
             this.drawDots(poseStack);
         }
@@ -157,7 +154,7 @@ extends RealmsScreen {
             this.drawDownloadSpeed(poseStack);
         }
         if (this.errorMessage != null) {
-            this.drawCenteredString(poseStack, this.font, this.errorMessage, this.width / 2, 110, 0xFF0000);
+            RealmsDownloadLatestWorldScreen.drawCenteredString(poseStack, this.font, this.errorMessage, this.width / 2, 110, 0xFF0000);
         }
         super.render(poseStack, i, j, f);
     }
@@ -171,8 +168,8 @@ extends RealmsScreen {
     }
 
     private void drawProgressBar(PoseStack poseStack) {
-        double d = this.downloadStatus.bytesWritten.doubleValue() / this.downloadStatus.totalBytes.doubleValue() * 100.0;
-        this.progress = String.format(Locale.ROOT, "%.1f", d);
+        double d = Math.min((double)this.downloadStatus.bytesWritten / (double)this.downloadStatus.totalBytes, 1.0);
+        this.progress = String.format(Locale.ROOT, "%.1f", d * 100.0);
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.disableTexture();
         Tesselator tesselator = Tesselator.getInstance();
@@ -181,16 +178,16 @@ extends RealmsScreen {
         double e = this.width / 2 - 100;
         double f = 0.5;
         bufferBuilder.vertex(e - 0.5, 95.5, 0.0).color(217, 210, 210, 255).endVertex();
-        bufferBuilder.vertex(e + 200.0 * d / 100.0 + 0.5, 95.5, 0.0).color(217, 210, 210, 255).endVertex();
-        bufferBuilder.vertex(e + 200.0 * d / 100.0 + 0.5, 79.5, 0.0).color(217, 210, 210, 255).endVertex();
+        bufferBuilder.vertex(e + 200.0 * d + 0.5, 95.5, 0.0).color(217, 210, 210, 255).endVertex();
+        bufferBuilder.vertex(e + 200.0 * d + 0.5, 79.5, 0.0).color(217, 210, 210, 255).endVertex();
         bufferBuilder.vertex(e - 0.5, 79.5, 0.0).color(217, 210, 210, 255).endVertex();
         bufferBuilder.vertex(e, 95.0, 0.0).color(128, 128, 128, 255).endVertex();
-        bufferBuilder.vertex(e + 200.0 * d / 100.0, 95.0, 0.0).color(128, 128, 128, 255).endVertex();
-        bufferBuilder.vertex(e + 200.0 * d / 100.0, 80.0, 0.0).color(128, 128, 128, 255).endVertex();
+        bufferBuilder.vertex(e + 200.0 * d, 95.0, 0.0).color(128, 128, 128, 255).endVertex();
+        bufferBuilder.vertex(e + 200.0 * d, 80.0, 0.0).color(128, 128, 128, 255).endVertex();
         bufferBuilder.vertex(e, 80.0, 0.0).color(128, 128, 128, 255).endVertex();
         tesselator.end();
         RenderSystem.enableTexture();
-        this.drawCenteredString(poseStack, this.font, this.progress + " %", this.width / 2, 84, 0xFFFFFF);
+        RealmsDownloadLatestWorldScreen.drawCenteredString(poseStack, this.font, this.progress + " %", this.width / 2, 84, 0xFFFFFF);
     }
 
     private void drawDownloadSpeed(PoseStack poseStack) {
@@ -241,6 +238,9 @@ extends RealmsScreen {
                         return;
                     }
                     if (fileDownload.isExtracting()) {
+                        if (!this.extracting) {
+                            this.status = new TranslatableComponent("mco.download.extracting");
+                        }
                         this.extracting = true;
                     }
                     if (this.cancelled) {
@@ -279,8 +279,8 @@ extends RealmsScreen {
 
     @Environment(value=EnvType.CLIENT)
     public class DownloadStatus {
-        public volatile Long bytesWritten = 0L;
-        public volatile Long totalBytes = 0L;
+        public volatile long bytesWritten;
+        public volatile long totalBytes;
     }
 }
 

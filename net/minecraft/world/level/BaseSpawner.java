@@ -132,7 +132,10 @@ public abstract class BaseSpawner {
                         ((Mob)entity2).finalizeSpawn(serverLevel, level.getCurrentDifficultyAt(entity2.blockPosition()), MobSpawnType.SPAWNER, null, null);
                     }
                 }
-                this.addWithPassengers(entity2);
+                if (!serverLevel.tryAddFreshEntityWithPassengers(entity2)) {
+                    this.delay();
+                    return;
+                }
                 level.levelEvent(2004, blockPos, 0);
                 if (entity2 instanceof Mob) {
                     ((Mob)entity2).spawnAnim();
@@ -142,15 +145,6 @@ public abstract class BaseSpawner {
             if (bl) {
                 this.delay();
             }
-        }
-    }
-
-    private void addWithPassengers(Entity entity) {
-        if (!this.getLevel().addFreshEntity(entity)) {
-            return;
-        }
-        for (Entity entity2 : entity.getPassengers()) {
-            this.addWithPassengers(entity2);
         }
     }
 

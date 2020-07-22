@@ -13,14 +13,14 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.FormattedCharSequence;
 
 @Environment(value=EnvType.CLIENT)
 public class SelectWorldScreen
 extends Screen {
     protected final Screen lastScreen;
-    private List<FormattedText> toolTip;
+    private List<FormattedCharSequence> toolTip;
     private Button deleteButton;
     private Button selectButton;
     private Button renameButton;
@@ -84,14 +84,14 @@ extends Screen {
         this.toolTip = null;
         this.list.render(poseStack, i, j, f);
         this.searchBox.render(poseStack, i, j, f);
-        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 0xFFFFFF);
+        SelectWorldScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 0xFFFFFF);
         super.render(poseStack, i, j, f);
         if (this.toolTip != null) {
             this.renderTooltip(poseStack, this.toolTip, i, j);
         }
     }
 
-    public void setToolTip(List<FormattedText> list) {
+    public void setToolTip(List<FormattedCharSequence> list) {
         this.toolTip = list;
     }
 

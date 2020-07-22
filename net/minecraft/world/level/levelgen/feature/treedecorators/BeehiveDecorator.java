@@ -13,6 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Bee;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.Blocks;
@@ -61,7 +62,7 @@ extends TreeDecorator {
             BeehiveBlockEntity beehiveBlockEntity = (BeehiveBlockEntity)blockEntity;
             int j = 2 + random.nextInt(2);
             for (int k = 0; k < j; ++k) {
-                Bee bee = new Bee((EntityType<? extends Bee>)EntityType.BEE, worldGenLevel.getLevel());
+                Bee bee = new Bee((EntityType<? extends Bee>)EntityType.BEE, (Level)worldGenLevel.getLevel());
                 beehiveBlockEntity.addOccupantWithPresetTicks(bee, false, random.nextInt(599));
             }
         }

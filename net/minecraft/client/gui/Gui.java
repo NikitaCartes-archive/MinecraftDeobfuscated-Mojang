@@ -47,7 +47,6 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.MobEffectTextureManager;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
@@ -88,6 +87,7 @@ extends GuiComponent {
     private static final ResourceLocation VIGNETTE_LOCATION = new ResourceLocation("textures/misc/vignette.png");
     private static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
     private static final ResourceLocation PUMPKIN_BLUR_LOCATION = new ResourceLocation("textures/misc/pumpkinblur.png");
+    private static final Component DEMO_EXPIRED_TEXT = new TranslatableComponent("demo.demoExpired");
     private final Random random = new Random();
     private final Minecraft minecraft;
     private final ItemRenderer itemRenderer;
@@ -571,9 +571,9 @@ extends GuiComponent {
 
     public void renderDemoOverlay(PoseStack poseStack) {
         this.minecraft.getProfiler().push("demo");
-        String string = this.minecraft.level.getGameTime() >= 120500L ? I18n.get("demo.demoExpired", new Object[0]) : I18n.get("demo.remainingTime", StringUtil.formatTickDuration((int)(120500L - this.minecraft.level.getGameTime())));
-        int i = this.getFont().width(string);
-        this.getFont().drawShadow(poseStack, string, (float)(this.screenWidth - i - 10), 5.0f, 0xFFFFFF);
+        Component component = this.minecraft.level.getGameTime() >= 120500L ? DEMO_EXPIRED_TEXT : new TranslatableComponent("demo.remainingTime", StringUtil.formatTickDuration((int)(120500L - this.minecraft.level.getGameTime())));
+        int i = this.getFont().width(component);
+        this.getFont().drawShadow(poseStack, component, (float)(this.screenWidth - i - 10), 5.0f, 0xFFFFFF);
         this.minecraft.getProfiler().pop();
     }
 

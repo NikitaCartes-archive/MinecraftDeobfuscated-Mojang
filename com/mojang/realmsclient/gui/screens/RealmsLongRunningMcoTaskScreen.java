@@ -15,10 +15,12 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class RealmsLongRunningMcoTaskScreen
@@ -26,8 +28,8 @@ extends RealmsScreen
 implements ErrorCallback {
     private static final Logger LOGGER = LogManager.getLogger();
     private final Screen lastScreen;
-    private volatile String title = "";
-    private volatile boolean error;
+    private volatile Component title = TextComponent.EMPTY;
+    @Nullable
     private volatile Component errorMessage;
     private volatile boolean aborted;
     private int animTicks;
@@ -47,7 +49,7 @@ implements ErrorCallback {
     @Override
     public void tick() {
         super.tick();
-        NarrationHelper.repeatedly(this.title);
+        NarrationHelper.repeatedly(this.title.getString());
         ++this.animTicks;
         this.task.tick();
     }
@@ -76,33 +78,32 @@ implements ErrorCallback {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
-        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, RealmsLongRunningMcoTaskScreen.row(3), 0xFFFFFF);
-        if (!this.error) {
-            this.drawCenteredString(poseStack, this.font, SYMBOLS[this.animTicks % SYMBOLS.length], this.width / 2, RealmsLongRunningMcoTaskScreen.row(8), 0x808080);
-        }
-        if (this.error) {
-            this.drawCenteredString(poseStack, this.font, this.errorMessage, this.width / 2, RealmsLongRunningMcoTaskScreen.row(8), 0xFF0000);
+        RealmsLongRunningMcoTaskScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, RealmsLongRunningMcoTaskScreen.row(3), 0xFFFFFF);
+        Component component = this.errorMessage;
+        if (component == null) {
+            RealmsLongRunningMcoTaskScreen.drawCenteredString(poseStack, this.font, SYMBOLS[this.animTicks % SYMBOLS.length], this.width / 2, RealmsLongRunningMcoTaskScreen.row(8), 0x808080);
+        } else {
+            RealmsLongRunningMcoTaskScreen.drawCenteredString(poseStack, this.font, component, this.width / 2, RealmsLongRunningMcoTaskScreen.row(8), 0xFF0000);
         }
         super.render(poseStack, i, j, f);
     }
 
     @Override
     public void error(Component component) {
-        this.error = true;
         this.errorMessage = component;
         NarrationHelper.now(component.getString());
         this.buttonsClear();
         this.addButton(new Button(this.width / 2 - 106, this.height / 4 + 120 + 12, 200, 20, CommonComponents.GUI_BACK, button -> this.cancelOrBackButtonClicked()));
     }
 
-    public void buttonsClear() {
+    private void buttonsClear() {
         HashSet set = Sets.newHashSet(this.buttons);
         this.children.removeIf(set::contains);
         this.buttons.clear();
     }
 
-    public void setTitle(String string) {
-        this.title = string;
+    public void setTitle(Component component) {
+        this.title = component;
     }
 
     public boolean aborted() {

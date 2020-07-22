@@ -7,7 +7,6 @@ import com.mojang.serialization.Codec;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Mirror;
@@ -53,7 +52,7 @@ extends Feature<NoneFeatureConfiguration> {
         int m;
         Rotation rotation = Rotation.getRandom(random);
         int i = random.nextInt(fossils.length);
-        StructureManager structureManager = ((ServerLevel)worldGenLevel.getLevel()).getServer().getStructureManager();
+        StructureManager structureManager = worldGenLevel.getLevel().getServer().getStructureManager();
         StructureTemplate structureTemplate = structureManager.getOrCreate(fossils[i]);
         StructureTemplate structureTemplate2 = structureManager.getOrCreate(fossilsCoal[i]);
         ChunkPos chunkPos = new ChunkPos(blockPos);

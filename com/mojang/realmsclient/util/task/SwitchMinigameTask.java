@@ -10,7 +10,7 @@ import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
 import com.mojang.realmsclient.util.task.LongRunningTask;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class SwitchMinigameTask
@@ -28,8 +28,7 @@ extends LongRunningTask {
     @Override
     public void run() {
         RealmsClient realmsClient = RealmsClient.create();
-        String string = I18n.get("mco.minigame.world.starting.screen.title", new Object[0]);
-        this.setTitle(string);
+        this.setTitle(new TranslatableComponent("mco.minigame.world.starting.screen.title"));
         for (int i = 0; i < 25; ++i) {
             try {
                 if (this.aborted()) {

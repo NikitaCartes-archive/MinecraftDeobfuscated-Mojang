@@ -728,11 +728,35 @@ implements WorldGenLevel {
     }
 
     private boolean isUUIDUsed(Entity entity) {
-        Entity entity2 = this.entitiesByUuid.get(entity.getUUID());
+        UUID uUID = entity.getUUID();
+        Entity entity2 = this.findAddedOrPendingEntity(uUID);
         if (entity2 == null) {
             return false;
         }
-        LOGGER.warn("Keeping entity {} that already exists with UUID {}", (Object)EntityType.getKey(entity2.getType()), (Object)entity.getUUID().toString());
+        LOGGER.warn("Trying to add entity with duplicated UUID {}. Existing {}#{}, new: {}#{}", (Object)uUID, (Object)EntityType.getKey(entity2.getType()), (Object)entity2.getId(), (Object)EntityType.getKey(entity.getType()), (Object)entity.getId());
+        return true;
+    }
+
+    @Nullable
+    private Entity findAddedOrPendingEntity(UUID uUID) {
+        Entity entity = this.entitiesByUuid.get(uUID);
+        if (entity != null) {
+            return entity;
+        }
+        if (this.tickingEntities) {
+            for (Entity entity2 : this.toAddAfterTick) {
+                if (!entity2.getUUID().equals(uUID)) continue;
+                return entity2;
+            }
+        }
+        return null;
+    }
+
+    public boolean tryAddFreshEntityWithPassengers(Entity entity) {
+        if (entity.getSelfAndPassengers().anyMatch(this::isUUIDUsed)) {
+            return false;
+        }
+        this.addFreshEntityWithPassengers(entity);
         return true;
     }
 
@@ -1258,7 +1282,7 @@ implements WorldGenLevel {
     }
 
     @Override
-    public Level getLevel() {
+    public ServerLevel getLevel() {
         return this;
     }
 

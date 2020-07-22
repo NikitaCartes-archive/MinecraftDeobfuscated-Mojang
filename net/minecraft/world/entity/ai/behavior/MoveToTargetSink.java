@@ -23,19 +23,27 @@ import org.jetbrains.annotations.Nullable;
 
 public class MoveToTargetSink
 extends Behavior<Mob> {
+    private int remainingCooldown;
     @Nullable
     private Path path;
     @Nullable
     private BlockPos lastTargetPos;
     private float speedModifier;
-    private int remainingDelay;
 
-    public MoveToTargetSink(int i) {
-        super(ImmutableMap.of(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryStatus.REGISTERED, MemoryModuleType.PATH, MemoryStatus.VALUE_ABSENT, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_PRESENT), i);
+    public MoveToTargetSink() {
+        this(150, 250);
+    }
+
+    public MoveToTargetSink(int i, int j) {
+        super(ImmutableMap.of(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryStatus.REGISTERED, MemoryModuleType.PATH, MemoryStatus.VALUE_ABSENT, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_PRESENT), i, j);
     }
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel serverLevel, Mob mob) {
+        if (this.remainingCooldown > 0) {
+            --this.remainingCooldown;
+            return false;
+        }
         Brain<?> brain = mob.getBrain();
         WalkTarget walkTarget = brain.getMemory(MemoryModuleType.WALK_TARGET).get();
         boolean bl = this.reachedTarget(mob, walkTarget);
@@ -62,6 +70,9 @@ extends Behavior<Mob> {
 
     @Override
     protected void stop(ServerLevel serverLevel, Mob mob, long l) {
+        if (mob.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET) && !this.reachedTarget(mob, mob.getBrain().getMemory(MemoryModuleType.WALK_TARGET).get())) {
+            this.remainingCooldown = serverLevel.getRandom().nextInt(40);
+        }
         mob.getNavigation().stop();
         mob.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
         mob.getBrain().eraseMemory(MemoryModuleType.PATH);
@@ -72,15 +83,10 @@ extends Behavior<Mob> {
     protected void start(ServerLevel serverLevel, Mob mob, long l) {
         mob.getBrain().setMemory(MemoryModuleType.PATH, this.path);
         mob.getNavigation().moveTo(this.path, (double)this.speedModifier);
-        this.remainingDelay = serverLevel.getRandom().nextInt(10);
     }
 
     @Override
     protected void tick(ServerLevel serverLevel, Mob mob, long l) {
-        --this.remainingDelay;
-        if (this.remainingDelay > 0) {
-            return;
-        }
         Path path = mob.getNavigation().getPath();
         Brain<?> brain = mob.getBrain();
         if (this.path != path) {

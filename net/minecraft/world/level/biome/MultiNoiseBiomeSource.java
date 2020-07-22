@@ -12,6 +12,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +23,6 @@ import java.util.function.Function;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
@@ -33,8 +34,13 @@ import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 public class MultiNoiseBiomeSource
 extends BiomeSource {
-    public static final MapCodec<MultiNoiseBiomeSource> DIRECT_CODEC = RecordCodecBuilder.mapCodec(instance2 -> instance2.group(((MapCodec)Codec.LONG.fieldOf("seed")).forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.seed), ((MapCodec)RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Biome.ClimateParameters.CODEC.fieldOf("parameters")).forGetter(Pair::getFirst), ((MapCodec)Biome.CODEC.fieldOf("biome")).forGetter(Pair::getSecond)).apply((Applicative<Pair, ?>)instance, Pair::of)).listOf().fieldOf("biomes")).forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.parameters)).apply((Applicative<MultiNoiseBiomeSource, ?>)instance2, MultiNoiseBiomeSource::new));
+    private static final NoiseParameters DEFAULT_NOISE_PARAMETERS = new NoiseParameters(-7, ImmutableList.of(Double.valueOf(1.0), Double.valueOf(1.0)));
+    public static final MapCodec<MultiNoiseBiomeSource> DIRECT_CODEC = RecordCodecBuilder.mapCodec(instance2 -> instance2.group(((MapCodec)Codec.LONG.fieldOf("seed")).forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.seed), ((MapCodec)RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Biome.ClimateParameters.CODEC.fieldOf("parameters")).forGetter(Pair::getFirst), ((MapCodec)Biome.CODEC.fieldOf("biome")).forGetter(Pair::getSecond)).apply((Applicative<Pair, ?>)instance, Pair::of)).listOf().fieldOf("biomes")).forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.parameters), ((MapCodec)NoiseParameters.CODEC.fieldOf("temperature_noise")).forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.temperatureParams), ((MapCodec)NoiseParameters.CODEC.fieldOf("humidity_noise")).forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.humidityParams), ((MapCodec)NoiseParameters.CODEC.fieldOf("altitude_noise")).forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.altitudeParams), ((MapCodec)NoiseParameters.CODEC.fieldOf("weirdness_noise")).forGetter(multiNoiseBiomeSource -> multiNoiseBiomeSource.weirdnessParams)).apply((Applicative<MultiNoiseBiomeSource, ?>)instance2, MultiNoiseBiomeSource::new));
     public static final Codec<MultiNoiseBiomeSource> CODEC = Codec.mapEither(Preset.CODEC, DIRECT_CODEC).xmap(either -> either.map(pair -> ((Preset)pair.getFirst()).biomeSource((Long)pair.getSecond()), Function.identity()), multiNoiseBiomeSource -> multiNoiseBiomeSource.preset.map(preset -> Either.left(Pair.of(preset, multiNoiseBiomeSource.seed))).orElseGet(() -> Either.right(multiNoiseBiomeSource))).codec();
+    private final NoiseParameters temperatureParams;
+    private final NoiseParameters humidityParams;
+    private final NoiseParameters altitudeParams;
+    private final NoiseParameters weirdnessParams;
     private final NormalNoise temperatureNoise;
     private final NormalNoise humidityNoise;
     private final NormalNoise altitudeNoise;
@@ -44,22 +50,26 @@ extends BiomeSource {
     private final long seed;
     private final Optional<Preset> preset;
 
-    private MultiNoiseBiomeSource(long l, List<Pair<Biome.ClimateParameters, Supplier<Biome>>> list) {
-        this(l, list, Optional.empty());
+    public MultiNoiseBiomeSource(long l, List<Pair<Biome.ClimateParameters, Supplier<Biome>>> list, Optional<Preset> optional) {
+        this(l, list, DEFAULT_NOISE_PARAMETERS, DEFAULT_NOISE_PARAMETERS, DEFAULT_NOISE_PARAMETERS, DEFAULT_NOISE_PARAMETERS, optional);
     }
 
-    public MultiNoiseBiomeSource(long l, List<Pair<Biome.ClimateParameters, Supplier<Biome>>> list, Optional<Preset> optional) {
+    public MultiNoiseBiomeSource(long l, List<Pair<Biome.ClimateParameters, Supplier<Biome>>> list, NoiseParameters noiseParameters, NoiseParameters noiseParameters2, NoiseParameters noiseParameters3, NoiseParameters noiseParameters4) {
+        this(l, list, noiseParameters, noiseParameters2, noiseParameters3, noiseParameters4, Optional.empty());
+    }
+
+    public MultiNoiseBiomeSource(long l, List<Pair<Biome.ClimateParameters, Supplier<Biome>>> list, NoiseParameters noiseParameters, NoiseParameters noiseParameters2, NoiseParameters noiseParameters3, NoiseParameters noiseParameters4, Optional<Preset> optional) {
         super(list.stream().map(Pair::getSecond).map(Supplier::get).collect(Collectors.toList()));
         this.seed = l;
         this.preset = optional;
-        IntStream intStream = IntStream.rangeClosed(-7, -6);
-        IntStream intStream2 = IntStream.rangeClosed(-7, -6);
-        IntStream intStream3 = IntStream.rangeClosed(-7, -6);
-        IntStream intStream4 = IntStream.rangeClosed(-7, -6);
-        this.temperatureNoise = new NormalNoise(new WorldgenRandom(l), intStream);
-        this.humidityNoise = new NormalNoise(new WorldgenRandom(l + 1L), intStream2);
-        this.altitudeNoise = new NormalNoise(new WorldgenRandom(l + 2L), intStream3);
-        this.weirdnessNoise = new NormalNoise(new WorldgenRandom(l + 3L), intStream4);
+        this.temperatureParams = noiseParameters;
+        this.humidityParams = noiseParameters2;
+        this.altitudeParams = noiseParameters3;
+        this.weirdnessParams = noiseParameters4;
+        this.temperatureNoise = NormalNoise.create(new WorldgenRandom(l), noiseParameters.firstOctave(), noiseParameters.amplitudes());
+        this.humidityNoise = NormalNoise.create(new WorldgenRandom(l + 1L), noiseParameters2.firstOctave(), noiseParameters2.amplitudes());
+        this.altitudeNoise = NormalNoise.create(new WorldgenRandom(l + 2L), noiseParameters3.firstOctave(), noiseParameters3.amplitudes());
+        this.weirdnessNoise = NormalNoise.create(new WorldgenRandom(l + 3L), noiseParameters4.firstOctave(), noiseParameters4.amplitudes());
         this.parameters = list;
         this.useY = false;
     }
@@ -76,7 +86,7 @@ extends BiomeSource {
     @Override
     @Environment(value=EnvType.CLIENT)
     public BiomeSource withSeed(long l) {
-        return new MultiNoiseBiomeSource(l, this.parameters, this.preset);
+        return new MultiNoiseBiomeSource(l, this.parameters, this.temperatureParams, this.humidityParams, this.altitudeParams, this.weirdnessParams, this.preset);
     }
 
     @Override
@@ -105,6 +115,25 @@ extends BiomeSource {
 
         public MultiNoiseBiomeSource biomeSource(long l) {
             return this.biomeSource.apply(l);
+        }
+    }
+
+    static class NoiseParameters {
+        private final int firstOctave;
+        private final DoubleList amplitudes;
+        public static final Codec<NoiseParameters> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("firstOctave")).forGetter(NoiseParameters::firstOctave), ((MapCodec)Codec.DOUBLE.listOf().fieldOf("amplitudes")).forGetter(NoiseParameters::amplitudes)).apply((Applicative<NoiseParameters, ?>)instance, NoiseParameters::new));
+
+        public NoiseParameters(int i, List<Double> list) {
+            this.firstOctave = i;
+            this.amplitudes = new DoubleArrayList(list);
+        }
+
+        public int firstOctave() {
+            return this.firstOctave;
+        }
+
+        public DoubleList amplitudes() {
+            return this.amplitudes;
         }
     }
 }

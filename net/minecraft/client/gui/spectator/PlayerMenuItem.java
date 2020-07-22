@@ -26,12 +26,14 @@ public class PlayerMenuItem
 implements SpectatorMenuItem {
     private final GameProfile profile;
     private final ResourceLocation location;
+    private final TextComponent name;
 
     public PlayerMenuItem(GameProfile gameProfile) {
         this.profile = gameProfile;
         Minecraft minecraft = Minecraft.getInstance();
         Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = minecraft.getSkinManager().getInsecureSkinInformation(gameProfile);
         this.location = map.containsKey((Object)MinecraftProfileTexture.Type.SKIN) ? minecraft.getSkinManager().registerTexture(map.get((Object)MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN) : DefaultPlayerSkin.getDefaultSkin(Player.createPlayerUUID(gameProfile));
+        this.name = new TextComponent(gameProfile.getName());
     }
 
     @Override
@@ -41,7 +43,7 @@ implements SpectatorMenuItem {
 
     @Override
     public Component getName() {
-        return new TextComponent(this.profile.getName());
+        return this.name;
     }
 
     @Override

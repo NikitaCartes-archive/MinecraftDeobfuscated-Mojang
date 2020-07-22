@@ -9,23 +9,28 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.WritableRegistry;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class CreateBuffetWorldScreen
 extends Screen {
+    private static final Component BIOME_SELECT_INFO = new TranslatableComponent("createWorld.customize.buffet.biome");
     private final Screen parent;
     private final Consumer<Biome> applySettings;
     private final WritableRegistry<Biome> biomes;
@@ -67,8 +72,8 @@ extends Screen {
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderDirtBackground(0);
         this.list.render(poseStack, i, j, f);
-        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 0xFFFFFF);
-        this.drawCenteredString(poseStack, this.font, I18n.get("createWorld.customize.buffet.biome", new Object[0]), this.width / 2, 28, 0xA0A0A0);
+        CreateBuffetWorldScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 0xFFFFFF);
+        CreateBuffetWorldScreen.drawCenteredString(poseStack, this.font, BIOME_SELECT_INFO, this.width / 2, 28, 0xA0A0A0);
         super.render(poseStack, i, j, f);
     }
 
@@ -99,14 +104,18 @@ extends Screen {
         class Entry
         extends ObjectSelectionList.Entry<Entry> {
             private final Biome biome;
+            private final Component name;
 
             public Entry(Biome biome) {
                 this.biome = biome;
+                ResourceLocation resourceLocation = CreateBuffetWorldScreen.this.biomes.getKey(biome);
+                String string = "biome." + resourceLocation.getNamespace() + "." + resourceLocation.getPath();
+                this.name = Language.getInstance().has(string) ? new TranslatableComponent(string) : new TextComponent(resourceLocation.toString());
             }
 
             @Override
             public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-                BiomeList.this.drawString(poseStack, CreateBuffetWorldScreen.this.font, CreateBuffetWorldScreen.this.biomes.getKey(this.biome).toString(), k + 5, j + 2, 0xFFFFFF);
+                GuiComponent.drawString(poseStack, CreateBuffetWorldScreen.this.font, this.name, k + 5, j + 2, 0xFFFFFF);
             }
 
             @Override

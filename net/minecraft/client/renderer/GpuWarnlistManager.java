@@ -89,6 +89,13 @@ extends SimplePreparableReloadListener<Preparations> {
         return this.warnings.get("vendor");
     }
 
+    @Nullable
+    public String getAllWarnings() {
+        StringBuilder stringBuilder = new StringBuilder();
+        this.warnings.forEach((string, string2) -> stringBuilder.append((String)string).append(": ").append((String)string2));
+        return stringBuilder.length() == 0 ? null : stringBuilder.toString();
+    }
+
     @Override
     protected Preparations prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         ArrayList<Pattern> list = Lists.newArrayList();

@@ -317,6 +317,7 @@ import org.jetbrains.annotations.Nullable;
 public class ClientPacketListener
 implements ClientGamePacketListener {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final Component GENERIC_DISCONNECT_MESSAGE = new TranslatableComponent("disconnect.lost");
     private final Connection connection;
     private final GameProfile localGameProfile;
     private final Screen callbackScreen;
@@ -728,12 +729,12 @@ implements ClientGamePacketListener {
         this.minecraft.clearLevel();
         if (this.callbackScreen != null) {
             if (this.callbackScreen instanceof RealmsScreen) {
-                this.minecraft.setScreen(new DisconnectedRealmsScreen(this.callbackScreen, "disconnect.lost", component));
+                this.minecraft.setScreen(new DisconnectedRealmsScreen(this.callbackScreen, GENERIC_DISCONNECT_MESSAGE, component));
             } else {
-                this.minecraft.setScreen(new DisconnectedScreen(this.callbackScreen, "disconnect.lost", component));
+                this.minecraft.setScreen(new DisconnectedScreen(this.callbackScreen, GENERIC_DISCONNECT_MESSAGE, component));
             }
         } else {
-            this.minecraft.setScreen(new DisconnectedScreen(new JoinMultiplayerScreen(new TitleScreen()), "disconnect.lost", component));
+            this.minecraft.setScreen(new DisconnectedScreen(new JoinMultiplayerScreen(new TitleScreen()), GENERIC_DISCONNECT_MESSAGE, component));
         }
     }
 

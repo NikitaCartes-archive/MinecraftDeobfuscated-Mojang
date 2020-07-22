@@ -4,7 +4,7 @@
 package net.minecraft.world.level.block.entity;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import java.util.function.UnaryOperator;
+import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.commands.CommandSource;
@@ -13,13 +13,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -34,7 +34,7 @@ extends BlockEntity {
     private final Component[] messages = new Component[]{TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY};
     private boolean isEditable = true;
     private Player playerWhoMayEdit;
-    private final FormattedText[] renderMessages = new FormattedText[4];
+    private final FormattedCharSequence[] renderMessages = new FormattedCharSequence[4];
     private DyeColor color = DyeColor.BLACK;
 
     public SignBlockEntity() {
@@ -73,6 +73,11 @@ extends BlockEntity {
         }
     }
 
+    @Environment(value=EnvType.CLIENT)
+    public Component getMessage(int i) {
+        return this.messages[i];
+    }
+
     public void setMessage(int i, Component component) {
         this.messages[i] = component;
         this.renderMessages[i] = null;
@@ -80,9 +85,9 @@ extends BlockEntity {
 
     @Nullable
     @Environment(value=EnvType.CLIENT)
-    public FormattedText getRenderMessage(int i, UnaryOperator<FormattedText> unaryOperator) {
+    public FormattedCharSequence getRenderMessage(int i, Function<Component, FormattedCharSequence> function) {
         if (this.renderMessages[i] == null && this.messages[i] != null) {
-            this.renderMessages[i] = (FormattedText)unaryOperator.apply(this.messages[i]);
+            this.renderMessages[i] = function.apply(this.messages[i]);
         }
         return this.renderMessages[i];
     }

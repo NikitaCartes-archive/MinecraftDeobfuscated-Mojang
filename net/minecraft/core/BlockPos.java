@@ -122,10 +122,12 @@ extends Vec3i {
         return this.offset(-vec3i.getX(), -vec3i.getY(), -vec3i.getZ());
     }
 
+    @Override
     public BlockPos above() {
         return this.relative(Direction.UP);
     }
 
+    @Override
     public BlockPos above(int i) {
         return this.relative(Direction.UP, i);
     }
@@ -427,6 +429,16 @@ extends Vec3i {
         return this.below();
     }
 
+    @Override
+    public /* synthetic */ Vec3i above(int i) {
+        return this.above(i);
+    }
+
+    @Override
+    public /* synthetic */ Vec3i above() {
+        return this.above();
+    }
+
     static {
         PACKED_Z_LENGTH = PACKED_X_LENGTH = 1 + Mth.log2(Mth.smallestEncompassingPowerOfTwo(30000000));
         PACKED_Y_LENGTH = 64 - PACKED_X_LENGTH - PACKED_Z_LENGTH;
@@ -519,6 +531,10 @@ extends Vec3i {
             return this.set(this.getX() + i, this.getY() + j, this.getZ() + k);
         }
 
+        public MutableBlockPos move(Vec3i vec3i) {
+            return this.set(this.getX() + vec3i.getX(), this.getY() + vec3i.getY(), this.getZ() + vec3i.getZ());
+        }
+
         public MutableBlockPos clamp(Direction.Axis axis, int i, int j) {
             switch (axis) {
                 case X: {
@@ -572,6 +588,16 @@ extends Vec3i {
         @Override
         public /* synthetic */ Vec3i below() {
             return super.below();
+        }
+
+        @Override
+        public /* synthetic */ Vec3i above(int i) {
+            return super.above(i);
+        }
+
+        @Override
+        public /* synthetic */ Vec3i above() {
+            return super.above();
         }
     }
 }

@@ -14,8 +14,6 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -36,13 +34,6 @@ extends RecipeBookComponent {
     protected void initFilterButtonTextures() {
         this.filterButton.initTextureValues(152, 182, 28, 18, RECIPE_BOOK_LOCATION);
     }
-
-    @Override
-    protected Component getFilterButtonTooltip() {
-        return this.filterButton.isStateTriggered() ? this.getRecipeFilterName() : new TranslatableComponent("gui.recipebook.toggleRecipes.all");
-    }
-
-    protected abstract Component getRecipeFilterName();
 
     @Override
     public void slotClicked(@Nullable Slot slot) {

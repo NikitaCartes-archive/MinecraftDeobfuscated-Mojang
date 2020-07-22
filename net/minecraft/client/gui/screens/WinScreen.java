@@ -25,10 +25,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.util.FormattedCharSequence;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,7 +44,7 @@ extends Screen {
     private final boolean poem;
     private final Runnable onFinished;
     private float time;
-    private List<FormattedText> lines;
+    private List<FormattedCharSequence> lines;
     private IntSet centeredLines;
     private int totalScrollLength;
     private float scrollSpeed = 0.5f;
@@ -108,12 +108,12 @@ extends Screen {
                         String string3 = string.substring(j + OBFUSCATE_TOKEN.length());
                         string = string2 + (Object)((Object)ChatFormatting.WHITE) + (Object)((Object)ChatFormatting.OBFUSCATED) + "XXXXXXXX".substring(0, random.nextInt(4) + 3) + string3;
                     }
-                    this.lines.addAll(this.minecraft.font.getSplitter().splitLines(string, 274, Style.EMPTY));
-                    this.lines.add(FormattedText.EMPTY);
+                    this.lines.addAll(this.minecraft.font.split(new TextComponent(string), 274));
+                    this.lines.add(FormattedCharSequence.EMPTY);
                 }
                 inputStream.close();
                 for (j = 0; j < 8; ++j) {
-                    this.lines.add(FormattedText.EMPTY);
+                    this.lines.add(FormattedCharSequence.EMPTY);
                 }
             }
             inputStream = this.minecraft.getResourceManager().getResource(new ResourceLocation("texts/credits.txt")).getInputStream();
@@ -127,14 +127,14 @@ extends Screen {
                 } else {
                     bl = false;
                 }
-                List<FormattedText> list = this.minecraft.font.getSplitter().splitLines(string4, 274, Style.EMPTY);
-                for (FormattedText formattedText : list) {
+                List<FormattedCharSequence> list = this.minecraft.font.split(new TextComponent(string4), 274);
+                for (FormattedCharSequence formattedCharSequence : list) {
                     if (bl) {
                         this.centeredLines.add(this.lines.size());
                     }
-                    this.lines.add(formattedText);
+                    this.lines.add(formattedCharSequence);
                 }
-                this.lines.add(FormattedText.EMPTY);
+                this.lines.add(FormattedCharSequence.EMPTY);
             }
             inputStream.close();
             this.totalScrollLength = this.lines.size() * 12;
@@ -203,12 +203,12 @@ extends Screen {
                 RenderSystem.translatef(0.0f, -h, 0.0f);
             }
             if ((float)n + g + 12.0f + 8.0f > 0.0f && (float)n + g < (float)this.height) {
-                FormattedText formattedText = this.lines.get(o);
+                FormattedCharSequence formattedCharSequence = this.lines.get(o);
                 if (this.centeredLines.contains(o)) {
-                    this.font.drawShadow(poseStack, formattedText, (float)(l + (274 - this.font.width(formattedText)) / 2), (float)n, 0xFFFFFF);
+                    this.font.drawShadow(poseStack, formattedCharSequence, (float)(l + (274 - this.font.width(formattedCharSequence)) / 2), (float)n, 0xFFFFFF);
                 } else {
                     this.font.random.setSeed((long)((float)((long)o * 4238972211L) + this.time / 4.0f));
-                    this.font.drawShadow(poseStack, formattedText, (float)l, (float)n, 0xFFFFFF);
+                    this.font.drawShadow(poseStack, formattedCharSequence, (float)l, (float)n, 0xFFFFFF);
                 }
             }
             n += 12;

@@ -1143,7 +1143,7 @@ extends LivingEntity {
         this.stopSleepInBed(true, true);
     }
 
-    public static Optional<Vec3> findRespawnPositionAndUseSpawnBlock(ServerLevel serverLevel, BlockPos blockPos, boolean bl, boolean bl2) {
+    public static Optional<Vec3> findRespawnPositionAndUseSpawnBlock(ServerLevel serverLevel, BlockPos blockPos, float f, boolean bl, boolean bl2) {
         BlockState blockState = serverLevel.getBlockState(blockPos);
         Block block = blockState.getBlock();
         if (block instanceof RespawnAnchorBlock && blockState.getValue(RespawnAnchorBlock.CHARGE) > 0 && RespawnAnchorBlock.canSetSpawn(serverLevel)) {
@@ -1154,7 +1154,7 @@ extends LivingEntity {
             return optional;
         }
         if (block instanceof BedBlock && BedBlock.canSetSpawn(serverLevel)) {
-            return BedBlock.findStandUpPosition(EntityType.PLAYER, serverLevel, blockPos, 0);
+            return BedBlock.findStandUpPosition(EntityType.PLAYER, serverLevel, blockPos, f);
         }
         if (!bl) {
             return Optional.empty();

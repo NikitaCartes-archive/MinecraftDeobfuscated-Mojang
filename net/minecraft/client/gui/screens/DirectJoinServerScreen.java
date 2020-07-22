@@ -12,13 +12,14 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class DirectJoinServerScreen
 extends Screen {
+    private static final Component ENTER_IP_LABEL = new TranslatableComponent("addServer.enterIp");
     private Button selectButton;
     private final ServerData serverData;
     private EditBox ipEdit;
@@ -93,8 +94,8 @@ extends Screen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
-        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 0xFFFFFF);
-        this.drawString(poseStack, this.font, I18n.get("addServer.enterIp", new Object[0]), this.width / 2 - 100, 100, 0xA0A0A0);
+        DirectJoinServerScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 0xFFFFFF);
+        DirectJoinServerScreen.drawString(poseStack, this.font, ENTER_IP_LABEL, this.width / 2 - 100, 100, 0xA0A0A0);
         this.ipEdit.render(poseStack, i, j, f);
         super.render(poseStack, i, j, f);
     }

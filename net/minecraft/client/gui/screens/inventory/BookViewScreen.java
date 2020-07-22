@@ -23,8 +23,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -50,9 +52,9 @@ extends Screen {
     public static final ResourceLocation BOOK_LOCATION = new ResourceLocation("textures/gui/book.png");
     private BookAccess bookAccess;
     private int currentPage;
-    private List<FormattedText> cachedPageComponents = Collections.emptyList();
+    private List<FormattedCharSequence> cachedPageComponents = Collections.emptyList();
     private int cachedPage = -1;
-    private FormattedText pageMsg = FormattedText.EMPTY;
+    private Component pageMsg = TextComponent.EMPTY;
     private PageButton forwardButton;
     private PageButton backButton;
     private final boolean playTurnSound;
@@ -162,7 +164,7 @@ extends Screen {
         this.blit(poseStack, k, 2, 0, 0, 192, 192);
         if (this.cachedPage != this.currentPage) {
             FormattedText formattedText = this.bookAccess.getPage(this.currentPage);
-            this.cachedPageComponents = this.font.getSplitter().splitLines(formattedText, 114, Style.EMPTY);
+            this.cachedPageComponents = this.font.split(formattedText, 114);
             this.pageMsg = new TranslatableComponent("book.pageIndicator", this.currentPage + 1, Math.max(this.getNumPages(), 1));
         }
         this.cachedPage = this.currentPage;
@@ -170,8 +172,8 @@ extends Screen {
         this.font.draw(poseStack, this.pageMsg, (float)(k - m + 192 - 44), 18.0f, 0);
         int n = Math.min(128 / this.font.lineHeight, this.cachedPageComponents.size());
         for (int o = 0; o < n; ++o) {
-            FormattedText formattedText2 = this.cachedPageComponents.get(o);
-            this.font.draw(poseStack, formattedText2, (float)(k + 36), (float)(32 + o * this.font.lineHeight), 0);
+            FormattedCharSequence formattedCharSequence = this.cachedPageComponents.get(o);
+            this.font.draw(poseStack, formattedCharSequence, (float)(k + 36), (float)(32 + o * this.font.lineHeight), 0);
         }
         Style style = this.getClickedComponentStyleAt(i, j);
         if (style != null) {
@@ -213,7 +215,7 @@ extends Screen {
 
     @Nullable
     public Style getClickedComponentStyleAt(double d, double e) {
-        if (this.cachedPageComponents == null) {
+        if (this.cachedPageComponents.isEmpty()) {
             return null;
         }
         int i = Mth.floor(d - (double)((this.width - 192) / 2) - 36.0);
@@ -225,8 +227,8 @@ extends Screen {
         if (i <= 114 && j < this.minecraft.font.lineHeight * k + k) {
             int l = j / this.minecraft.font.lineHeight;
             if (l >= 0 && l < this.cachedPageComponents.size()) {
-                FormattedText formattedText = this.cachedPageComponents.get(l);
-                return this.minecraft.font.getSplitter().componentStyleAtWidth(formattedText, i);
+                FormattedCharSequence formattedCharSequence = this.cachedPageComponents.get(l);
+                return this.minecraft.font.getSplitter().componentStyleAtWidth(formattedCharSequence, i);
             }
             return null;
         }

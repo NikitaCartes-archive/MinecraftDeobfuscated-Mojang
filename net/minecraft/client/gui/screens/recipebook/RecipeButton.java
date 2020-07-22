@@ -15,7 +15,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookPage;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
-import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -29,6 +29,7 @@ import net.minecraft.world.item.crafting.Recipe;
 public class RecipeButton
 extends AbstractWidget {
     private static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
+    private static final Component MORE_RECIPES_TOOLTIP = new TranslatableComponent("gui.recipebook.moreRecipes");
     private RecipeBookMenu<?> menu;
     private RecipeBook book;
     private RecipeCollection collection;
@@ -119,11 +120,11 @@ extends AbstractWidget {
         return list.get(this.currentIndex);
     }
 
-    public List<FormattedText> getTooltipText(Screen screen) {
+    public List<Component> getTooltipText(Screen screen) {
         ItemStack itemStack = this.getOrderedRecipes().get(this.currentIndex).getResultItem();
-        ArrayList<FormattedText> list = Lists.newArrayList(screen.getTooltipFromItem(itemStack));
+        ArrayList<Component> list = Lists.newArrayList(screen.getTooltipFromItem(itemStack));
         if (this.collection.getRecipes(this.book.isFiltering(this.menu)).size() > 1) {
-            list.add(new TranslatableComponent("gui.recipebook.moreRecipes"));
+            list.add(MORE_RECIPES_TOOLTIP);
         }
         return list;
     }

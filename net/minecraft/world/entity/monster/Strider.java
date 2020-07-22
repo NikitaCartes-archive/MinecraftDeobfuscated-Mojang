@@ -196,7 +196,7 @@ Saddleable {
     public double getPassengersRidingOffset() {
         float f = Math.min(0.25f, this.animationSpeed);
         float g = this.animationPosition;
-        return (double)this.getBbHeight() - 0.2 + (double)(0.12f * Mth.cos(g * 1.5f) * 2.0f * f);
+        return (double)this.getBbHeight() - 0.3 + (double)(0.12f * Mth.cos(g * 1.5f) * 2.0f * f);
     }
 
     @Override
@@ -457,7 +457,6 @@ Saddleable {
         mob.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0f);
         mob.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, spawnGroupData, null);
         mob.startRiding(this, true);
-        serverLevelAccessor.addFreshEntity(mob);
         return new AgableMob.AgableMobGroupData(0.0f);
     }
 

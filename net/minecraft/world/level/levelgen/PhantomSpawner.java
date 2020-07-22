@@ -62,7 +62,7 @@ implements CustomSpawner {
                 Phantom phantom = EntityType.PHANTOM.create(serverLevel);
                 phantom.moveTo(blockPos2, 0.0f, 0.0f);
                 spawnGroupData = phantom.finalizeSpawn(serverLevel, difficultyInstance, MobSpawnType.NATURAL, spawnGroupData, null);
-                serverLevel.addFreshEntity(phantom);
+                serverLevel.addFreshEntityWithPassengers(phantom);
             }
             i += l;
         }

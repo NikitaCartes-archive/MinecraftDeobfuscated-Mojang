@@ -49,6 +49,10 @@ extends WritableRegistry<T> {
         return Codec.mapPair(ResourceLocation.CODEC.xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location).fieldOf("name"), mapCodec);
     }
 
+    public static <T> MapCodec<Pair<Pair<ResourceKey<T>, Integer>, T>> withNameAndId(ResourceKey<? extends Registry<T>> resourceKey, MapCodec<T> mapCodec) {
+        return Codec.mapPair(Codec.mapPair(ResourceLocation.CODEC.xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location).fieldOf("name"), Codec.INT.fieldOf("id")), mapCodec);
+    }
+
     @Override
     public <V extends T> V registerMapping(int i, ResourceKey<T> resourceKey, V object) {
         this.map.addMapping(object, i);
@@ -57,6 +61,9 @@ extends WritableRegistry<T> {
         this.randomCache = null;
         if (this.keyStorage.containsKey(resourceKey)) {
             LOGGER.debug("Adding duplicate key '{}' to registry", (Object)resourceKey);
+        }
+        if (this.storage.containsValue(object)) {
+            LOGGER.error("Adding duplicate value '{}' to registry", (Object)object);
         }
         this.storage.put(resourceKey.location(), object);
         this.keyStorage.put(resourceKey, object);
@@ -153,16 +160,16 @@ extends WritableRegistry<T> {
     }
 
     public static <T> Codec<MappedRegistry<T>> networkCodec(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, MapCodec<T> mapCodec) {
-        return MappedRegistry.withName(resourceKey, mapCodec).codec().listOf().xmap(list -> {
+        return MappedRegistry.withNameAndId(resourceKey, mapCodec).codec().listOf().xmap(list -> {
             MappedRegistry mappedRegistry = new MappedRegistry(resourceKey, lifecycle);
             for (Pair pair : list) {
-                mappedRegistry.register((ResourceKey)pair.getFirst(), pair.getSecond());
+                mappedRegistry.registerMapping((Integer)((Pair)pair.getFirst()).getSecond(), (ResourceKey)((Pair)pair.getFirst()).getFirst(), pair.getSecond());
             }
             return mappedRegistry;
         }, mappedRegistry -> {
             ImmutableList.Builder builder = ImmutableList.builder();
             for (Object object : mappedRegistry.map) {
-                builder.add(Pair.of(mappedRegistry.getResourceKey(object).get(), object));
+                builder.add(Pair.of(Pair.of(mappedRegistry.getResourceKey(object).get(), mappedRegistry.getId(object)), object));
             }
             return builder.build();
         });

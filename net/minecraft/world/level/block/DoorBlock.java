@@ -187,8 +187,11 @@ extends Block {
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
-    public void setOpen(Level level, BlockPos blockPos, boolean bl) {
-        BlockState blockState = level.getBlockState(blockPos);
+    public boolean isOpen(BlockState blockState) {
+        return blockState.getValue(OPEN);
+    }
+
+    public void setOpen(Level level, BlockState blockState, BlockPos blockPos, boolean bl) {
         if (!blockState.is(this) || blockState.getValue(OPEN) == bl) {
             return;
         }

@@ -79,14 +79,14 @@ extends Screen {
                         return;
                     }
                     LOGGER.error("Couldn't connect to server", (Throwable)unknownHostException);
-                    ConnectScreen.this.minecraft.execute(() -> ConnectScreen.this.minecraft.setScreen(new DisconnectedScreen(ConnectScreen.this.parent, "connect.failed", new TranslatableComponent("disconnect.genericReason", "Unknown host"))));
+                    ConnectScreen.this.minecraft.execute(() -> ConnectScreen.this.minecraft.setScreen(new DisconnectedScreen(ConnectScreen.this.parent, CommonComponents.CONNECT_FAILED, new TranslatableComponent("disconnect.genericReason", "Unknown host"))));
                 } catch (Exception exception) {
                     if (ConnectScreen.this.aborted) {
                         return;
                     }
                     LOGGER.error("Couldn't connect to server", (Throwable)exception);
                     String string2 = inetAddress == null ? exception.toString() : exception.toString().replaceAll(inetAddress + ":" + i, "");
-                    ConnectScreen.this.minecraft.execute(() -> ConnectScreen.this.minecraft.setScreen(new DisconnectedScreen(ConnectScreen.this.parent, "connect.failed", new TranslatableComponent("disconnect.genericReason", string2))));
+                    ConnectScreen.this.minecraft.execute(() -> ConnectScreen.this.minecraft.setScreen(new DisconnectedScreen(ConnectScreen.this.parent, CommonComponents.CONNECT_FAILED, new TranslatableComponent("disconnect.genericReason", string2))));
                 }
             }
         };
@@ -133,7 +133,7 @@ extends Screen {
             this.lastNarration = l;
             NarratorChatListener.INSTANCE.sayNow(new TranslatableComponent("narrator.joining").getString());
         }
-        this.drawCenteredString(poseStack, this.font, this.status, this.width / 2, this.height / 2 - 50, 0xFFFFFF);
+        ConnectScreen.drawCenteredString(poseStack, this.font, this.status, this.width / 2, this.height / 2 - 50, 0xFFFFFF);
         super.render(poseStack, i, j, f);
     }
 }

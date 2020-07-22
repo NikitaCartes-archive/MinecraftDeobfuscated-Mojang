@@ -15,7 +15,6 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -98,17 +97,17 @@ extends Screen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
-        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 0xFFFFFF);
+        OptimizeWorldScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 0xFFFFFF);
         int k = this.width / 2 - 150;
         int l = this.width / 2 + 150;
         int m = this.height / 4 + 100;
         int n = m + 10;
-        this.drawCenteredString(poseStack, this.font, this.upgrader.getStatus(), this.width / 2, m - this.font.lineHeight - 2, 0xA0A0A0);
+        OptimizeWorldScreen.drawCenteredString(poseStack, this.font, this.upgrader.getStatus(), this.width / 2, m - this.font.lineHeight - 2, 0xA0A0A0);
         if (this.upgrader.getTotalChunks() > 0) {
             OptimizeWorldScreen.fill(poseStack, k - 1, m - 1, l + 1, n + 1, -16777216);
-            this.drawString(poseStack, this.font, I18n.get("optimizeWorld.info.converted", this.upgrader.getConverted()), k, 40, 0xA0A0A0);
-            this.drawString(poseStack, this.font, I18n.get("optimizeWorld.info.skipped", this.upgrader.getSkipped()), k, 40 + this.font.lineHeight + 3, 0xA0A0A0);
-            this.drawString(poseStack, this.font, I18n.get("optimizeWorld.info.total", this.upgrader.getTotalChunks()), k, 40 + (this.font.lineHeight + 3) * 2, 0xA0A0A0);
+            OptimizeWorldScreen.drawString(poseStack, this.font, new TranslatableComponent("optimizeWorld.info.converted", this.upgrader.getConverted()), k, 40, 0xA0A0A0);
+            OptimizeWorldScreen.drawString(poseStack, this.font, new TranslatableComponent("optimizeWorld.info.skipped", this.upgrader.getSkipped()), k, 40 + this.font.lineHeight + 3, 0xA0A0A0);
+            OptimizeWorldScreen.drawString(poseStack, this.font, new TranslatableComponent("optimizeWorld.info.total", this.upgrader.getTotalChunks()), k, 40 + (this.font.lineHeight + 3) * 2, 0xA0A0A0);
             int o = 0;
             for (ResourceKey resourceKey : this.upgrader.levels()) {
                 int p = Mth.floor(this.upgrader.dimensionProgress(resourceKey) * (float)(l - k));
@@ -116,8 +115,8 @@ extends Screen {
                 o += p;
             }
             int q = this.upgrader.getConverted() + this.upgrader.getSkipped();
-            this.drawCenteredString(poseStack, this.font, q + " / " + this.upgrader.getTotalChunks(), this.width / 2, m + 2 * this.font.lineHeight + 2, 0xA0A0A0);
-            this.drawCenteredString(poseStack, this.font, Mth.floor(this.upgrader.getProgress() * 100.0f) + "%", this.width / 2, m + (n - m) / 2 - this.font.lineHeight / 2, 0xA0A0A0);
+            OptimizeWorldScreen.drawCenteredString(poseStack, this.font, q + " / " + this.upgrader.getTotalChunks(), this.width / 2, m + 2 * this.font.lineHeight + 2, 0xA0A0A0);
+            OptimizeWorldScreen.drawCenteredString(poseStack, this.font, Mth.floor(this.upgrader.getProgress() * 100.0f) + "%", this.width / 2, m + (n - m) / 2 - this.font.lineHeight / 2, 0xA0A0A0);
         }
         super.render(poseStack, i, j, f);
     }

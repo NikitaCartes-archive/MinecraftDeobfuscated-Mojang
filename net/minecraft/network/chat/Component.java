@@ -36,6 +36,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.LowerCaseEnumTypeAdapterFactory;
 import org.jetbrains.annotations.Nullable;
@@ -70,6 +71,9 @@ FormattedText {
     public MutableComponent plainCopy();
 
     public MutableComponent copy();
+
+    @Environment(value=EnvType.CLIENT)
+    public FormattedCharSequence getVisualOrderText();
 
     @Override
     @Environment(value=EnvType.CLIENT)

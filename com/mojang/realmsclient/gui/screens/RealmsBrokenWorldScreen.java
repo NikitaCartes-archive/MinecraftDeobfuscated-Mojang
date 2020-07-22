@@ -30,7 +30,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -87,7 +86,7 @@ extends RealmsScreen {
                         this.doSwitchOrReset();
                     });
                     realmsResetWorldScreen.setSlot(i);
-                    realmsResetWorldScreen.setResetTitle(I18n.get("mco.create.world.reset.title", new Object[0]));
+                    realmsResetWorldScreen.setResetTitle(new TranslatableComponent("mco.create.world.reset.title"));
                     this.minecraft.setScreen(realmsResetWorldScreen);
                 } else {
                     this.minecraft.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new SwitchSlotTask(this.serverData.id, i, this::doSwitchOrReset)));
@@ -130,9 +129,9 @@ extends RealmsScreen {
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
         super.render(poseStack, i, j, f);
-        this.drawCenteredString(poseStack, this.font, this.header, this.width / 2, 17, 0xFFFFFF);
+        RealmsBrokenWorldScreen.drawCenteredString(poseStack, this.font, this.header, this.width / 2, 17, 0xFFFFFF);
         for (int k = 0; k < this.message.length; ++k) {
-            this.drawCenteredString(poseStack, this.font, this.message[k], this.width / 2, RealmsBrokenWorldScreen.row(-1) + 3 + k * 12, 0xA0A0A0);
+            RealmsBrokenWorldScreen.drawCenteredString(poseStack, this.font, this.message[k], this.width / 2, RealmsBrokenWorldScreen.row(-1) + 3 + k * 12, 0xA0A0A0);
         }
         if (this.serverData == null) {
             return;
@@ -200,7 +199,7 @@ extends RealmsScreen {
     private void downloadWorld(int i) {
         RealmsClient realmsClient = RealmsClient.create();
         try {
-            WorldDownload worldDownload = realmsClient.download(this.serverData.id, i);
+            WorldDownload worldDownload = realmsClient.requestDownloadInfo(this.serverData.id, i);
             RealmsDownloadLatestWorldScreen realmsDownloadLatestWorldScreen = new RealmsDownloadLatestWorldScreen(this, worldDownload, this.serverData.getWorldName(i), bl -> {
                 if (bl) {
                     this.slotsThatHasBeenDownloaded.add(i);
@@ -249,7 +248,7 @@ extends RealmsScreen {
             RenderSystem.color4f(0.56f, 0.56f, 0.56f, 1.0f);
         }
         GuiComponent.blit(poseStack, i, j, 0.0f, 0.0f, 80, 80, 80, 80);
-        this.drawCenteredString(poseStack, this.font, string, i + 40, j + 66, 0xFFFFFF);
+        RealmsBrokenWorldScreen.drawCenteredString(poseStack, this.font, string, i + 40, j + 66, 0xFFFFFF);
     }
 }
 

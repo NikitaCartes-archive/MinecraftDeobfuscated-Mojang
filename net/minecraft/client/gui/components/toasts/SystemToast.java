@@ -14,18 +14,17 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class SystemToast
 implements Toast {
     private final SystemToastIds id;
-    private FormattedText title;
-    private List<FormattedText> messageLines;
+    private Component title;
+    private List<FormattedCharSequence> messageLines;
     private long lastChanged;
     private boolean changed;
     private final int width;
@@ -36,20 +35,20 @@ implements Toast {
 
     public static SystemToast multiline(Minecraft minecraft, SystemToastIds systemToastIds, Component component, Component component2) {
         Font font = minecraft.font;
-        List<FormattedText> list = font.getSplitter().splitLines(component2, 200, Style.EMPTY);
+        List<FormattedCharSequence> list = font.split(component2, 200);
         int i = Math.max(200, list.stream().mapToInt(font::width).max().orElse(200));
         return new SystemToast(systemToastIds, component, list, i + 30);
     }
 
-    private SystemToast(SystemToastIds systemToastIds, Component component, List<FormattedText> list, int i) {
+    private SystemToast(SystemToastIds systemToastIds, Component component, List<FormattedCharSequence> list, int i) {
         this.id = systemToastIds;
         this.title = component;
         this.messageLines = list;
         this.width = i;
     }
 
-    private static ImmutableList<FormattedText> nullToEmpty(@Nullable Component component) {
-        return component == null ? ImmutableList.of() : ImmutableList.of(component);
+    private static ImmutableList<FormattedCharSequence> nullToEmpty(@Nullable Component component) {
+        return component == null ? ImmutableList.of() : ImmutableList.of(component.getVisualOrderText());
     }
 
     @Override

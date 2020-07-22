@@ -54,9 +54,9 @@ extends RealmsScreen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
-        this.drawCenteredString(poseStack, this.font, this.type.text, this.width / 2, RealmsLongConfirmationScreen.row(2), this.type.colorCode);
-        this.drawCenteredString(poseStack, this.font, this.line2, this.width / 2, RealmsLongConfirmationScreen.row(4), 0xFFFFFF);
-        this.drawCenteredString(poseStack, this.font, this.line3, this.width / 2, RealmsLongConfirmationScreen.row(6), 0xFFFFFF);
+        RealmsLongConfirmationScreen.drawCenteredString(poseStack, this.font, this.type.text, this.width / 2, RealmsLongConfirmationScreen.row(2), this.type.colorCode);
+        RealmsLongConfirmationScreen.drawCenteredString(poseStack, this.font, this.line2, this.width / 2, RealmsLongConfirmationScreen.row(4), 0xFFFFFF);
+        RealmsLongConfirmationScreen.drawCenteredString(poseStack, this.font, this.line3, this.width / 2, RealmsLongConfirmationScreen.row(6), 0xFFFFFF);
         super.render(poseStack, i, j, f);
     }
 

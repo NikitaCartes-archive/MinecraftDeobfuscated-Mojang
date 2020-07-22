@@ -39,18 +39,22 @@ extends JigsawFeature {
         if (worldgenRandom.nextInt(5) != 0) {
             return false;
         }
+        return !this.isNearVillage(chunkGenerator, l, worldgenRandom, i, j);
+    }
+
+    private boolean isNearVillage(ChunkGenerator chunkGenerator, long l, WorldgenRandom worldgenRandom, int i, int j) {
         StructureFeatureConfiguration structureFeatureConfiguration = chunkGenerator.getSettings().getConfig(StructureFeature.VILLAGE);
         if (structureFeatureConfiguration == null) {
-            return true;
+            return false;
         }
-        for (int n = i - 10; n <= i + 10; ++n) {
-            for (int o = j - 10; o <= j + 10; ++o) {
-                ChunkPos chunkPos2 = StructureFeature.VILLAGE.getPotentialFeatureChunk(structureFeatureConfiguration, l, worldgenRandom, n, o);
-                if (n != chunkPos2.x || o != chunkPos2.z) continue;
-                return false;
+        for (int k = i - 10; k <= i + 10; ++k) {
+            for (int m = j - 10; m <= j + 10; ++m) {
+                ChunkPos chunkPos = StructureFeature.VILLAGE.getPotentialFeatureChunk(structureFeatureConfiguration, l, worldgenRandom, k, m);
+                if (k != chunkPos.x || m != chunkPos.z) continue;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 }
 

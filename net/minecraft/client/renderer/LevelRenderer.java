@@ -54,7 +54,6 @@ import net.minecraft.client.CloudStatus;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Option;
-import net.minecraft.client.Options;
 import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -456,10 +455,14 @@ AutoCloseable {
             this.cloudsTarget = renderTarget5;
         } catch (Exception exception) {
             String string = exception instanceof JsonSyntaxException ? "parse" : "load";
-            Options options = Minecraft.getInstance().options;
-            options.graphicsMode = GraphicsStatus.FANCY;
-            options.save();
-            throw new TranparencyShaderException("Failed to " + string + " shader: " + resourceLocation, exception);
+            String string2 = "Failed to " + string + " shader: " + resourceLocation;
+            TransparencyShaderException transparencyShaderException = new TransparencyShaderException(string2, exception);
+            CrashReport crashReport = this.minecraft.fillReport(new CrashReport(string2, transparencyShaderException));
+            this.minecraft.options.graphicsMode = GraphicsStatus.FANCY;
+            this.minecraft.options.save();
+            LOGGER.fatal(string2, (Throwable)transparencyShaderException);
+            this.minecraft.emergencySave();
+            Minecraft.crash(crashReport);
         }
     }
 
@@ -2473,9 +2476,9 @@ AutoCloseable {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public static class TranparencyShaderException
+    public static class TransparencyShaderException
     extends RuntimeException {
-        public TranparencyShaderException(String string, Throwable throwable) {
+        public TransparencyShaderException(String string, Throwable throwable) {
             super(string, throwable);
         }
     }

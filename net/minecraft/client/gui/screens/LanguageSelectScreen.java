@@ -15,16 +15,18 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.OptionButton;
 import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class LanguageSelectScreen
 extends OptionsSubScreen {
+    private static final Component WARNING_LABEL = new TextComponent("(").append(new TranslatableComponent("options.languageWarning")).append(")");
     private LanguageSelectionList packSelectionList;
     private final LanguageManager languageManager;
     private OptionButton forceUnicodeButton;
@@ -63,8 +65,8 @@ extends OptionsSubScreen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.packSelectionList.render(poseStack, i, j, f);
-        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 16, 0xFFFFFF);
-        this.drawCenteredString(poseStack, this.font, "(" + I18n.get("options.languageWarning", new Object[0]) + ")", this.width / 2, this.height - 56, 0x808080);
+        LanguageSelectScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 16, 0xFFFFFF);
+        LanguageSelectScreen.drawCenteredString(poseStack, this.font, WARNING_LABEL, this.width / 2, this.height - 56, 0x808080);
         super.render(poseStack, i, j, f);
     }
 

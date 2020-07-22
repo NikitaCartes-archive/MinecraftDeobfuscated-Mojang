@@ -179,7 +179,7 @@ public class OceanRuinPieces {
                 drowned.setPersistenceRequired();
                 drowned.moveTo(blockPos, 0.0f, 0.0f);
                 drowned.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(blockPos), MobSpawnType.STRUCTURE, null, null);
-                serverLevelAccessor.addFreshEntity(drowned);
+                serverLevelAccessor.addFreshEntityWithPassengers(drowned);
                 if (blockPos.getY() > serverLevelAccessor.getSeaLevel()) {
                     serverLevelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2);
                 } else {

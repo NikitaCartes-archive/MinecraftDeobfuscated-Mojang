@@ -86,7 +86,7 @@ extends Fluid {
         if (fluidState.getValue(FALLING).booleanValue()) {
             for (Direction direction2 : Direction.Plane.HORIZONTAL) {
                 mutableBlockPos.setWithOffset(blockPos, direction2);
-                if (!this.isSolidFace(blockGetter, mutableBlockPos, direction2) && !this.isSolidFace(blockGetter, mutableBlockPos.above(), direction2)) continue;
+                if (!this.isSolidFace(blockGetter, mutableBlockPos, direction2) && !this.isSolidFace(blockGetter, (BlockPos)mutableBlockPos.above(), direction2)) continue;
                 vec3 = vec3.normalize().add(0.0, -6.0, 0.0);
                 break;
             }

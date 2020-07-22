@@ -25,9 +25,10 @@ import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,7 +53,7 @@ GuiEventListener {
     private String suggestion;
     private Consumer<String> responder;
     private Predicate<String> filter = Objects::nonNull;
-    private BiFunction<String, Integer, FormattedText> formatter = (string, integer) -> FormattedText.of(string);
+    private BiFunction<String, Integer, FormattedCharSequence> formatter = (string, integer) -> FormattedCharSequence.forward(string, Style.EMPTY);
 
     public EditBox(Font font, int i, int j, int k, int l, Component component) {
         this(font, i, j, k, l, null, component);
@@ -70,7 +71,7 @@ GuiEventListener {
         this.responder = consumer;
     }
 
-    public void setFormatter(BiFunction<String, Integer, FormattedText> biFunction) {
+    public void setFormatter(BiFunction<String, Integer, FormattedCharSequence> biFunction) {
         this.formatter = biFunction;
     }
 

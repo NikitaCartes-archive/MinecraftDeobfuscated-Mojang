@@ -12,7 +12,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CommandSuggestions;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -23,6 +22,9 @@ import net.minecraft.world.level.BaseCommandBlock;
 @Environment(value=EnvType.CLIENT)
 public abstract class AbstractCommandBlockEditScreen
 extends Screen {
+    private static final Component SET_COMMAND_LABEL = new TranslatableComponent("advMode.setCommand");
+    private static final Component COMMAND_LABEL = new TranslatableComponent("advMode.command");
+    private static final Component PREVIOUS_OUTPUT_LABEL = new TranslatableComponent("advMode.previousOutput");
     protected EditBox commandEdit;
     protected EditBox previousEdit;
     protected Button doneButton;
@@ -154,12 +156,12 @@ extends Screen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
-        this.drawCenteredString(poseStack, this.font, I18n.get("advMode.setCommand", new Object[0]), this.width / 2, 20, 0xFFFFFF);
-        this.drawString(poseStack, this.font, I18n.get("advMode.command", new Object[0]), this.width / 2 - 150, 40, 0xA0A0A0);
+        AbstractCommandBlockEditScreen.drawCenteredString(poseStack, this.font, SET_COMMAND_LABEL, this.width / 2, 20, 0xFFFFFF);
+        AbstractCommandBlockEditScreen.drawString(poseStack, this.font, COMMAND_LABEL, this.width / 2 - 150, 40, 0xA0A0A0);
         this.commandEdit.render(poseStack, i, j, f);
         int k = 75;
         if (!this.previousEdit.getValue().isEmpty()) {
-            this.drawString(poseStack, this.font, I18n.get("advMode.previousOutput", new Object[0]), this.width / 2 - 150, (k += 5 * this.font.lineHeight + 1 + this.getPreviousY() - 135) + 4, 0xA0A0A0);
+            AbstractCommandBlockEditScreen.drawString(poseStack, this.font, PREVIOUS_OUTPUT_LABEL, this.width / 2 - 150, (k += 5 * this.font.lineHeight + 1 + this.getPreviousY() - 135) + 4, 0xA0A0A0);
             this.previousEdit.render(poseStack, i, j, f);
         }
         super.render(poseStack, i, j, f);

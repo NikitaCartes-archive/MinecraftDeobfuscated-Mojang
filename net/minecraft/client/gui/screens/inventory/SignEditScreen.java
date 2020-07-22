@@ -13,10 +13,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
-import java.util.Arrays;
+import java.util.stream.IntStream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.font.TextFieldHelper;
 import net.minecraft.client.gui.screens.Screen;
@@ -26,6 +25,7 @@ import net.minecraft.client.renderer.blockentity.SignRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
@@ -41,7 +41,7 @@ extends Screen {
     private int frame;
     private int line;
     private TextFieldHelper signField;
-    private final String[] messages = Util.make(new String[4], strings -> Arrays.fill(strings, ""));
+    private final String[] messages = (String[])IntStream.range(0, 4).mapToObj(signBlockEntity::getMessage).map(Component::getString).toArray(String[]::new);
 
     public SignEditScreen(SignBlockEntity signBlockEntity) {
         super(new TranslatableComponent("sign.edit"));
@@ -119,7 +119,7 @@ extends Screen {
         int p;
         Lighting.setupForFlatItems();
         this.renderBackground(poseStack);
-        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 40, 0xFFFFFF);
+        SignEditScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 40, 0xFFFFFF);
         poseStack.pushPose();
         poseStack.translate(this.width / 2, 0.0, 50.0);
         float g = 93.75f;

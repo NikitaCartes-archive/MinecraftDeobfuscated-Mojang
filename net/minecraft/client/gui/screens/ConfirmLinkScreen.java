@@ -53,7 +53,7 @@ extends ConfirmScreen {
     public void render(PoseStack poseStack, int i, int j, float f) {
         super.render(poseStack, i, j, f);
         if (this.showWarning) {
-            this.drawCenteredString(poseStack, this.font, this.warning, this.width / 2, 110, 0xFFCCCC);
+            ConfirmLinkScreen.drawCenteredString(poseStack, this.font, this.warning, this.width / 2, 110, 0xFFCCCC);
         }
     }
 }

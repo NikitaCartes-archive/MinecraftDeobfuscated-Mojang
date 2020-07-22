@@ -28,6 +28,8 @@ public class TeleportToPlayerMenuCategory
 implements SpectatorMenuCategory,
 SpectatorMenuItem {
     private static final Ordering<PlayerInfo> PROFILE_ORDER = Ordering.from((playerInfo, playerInfo2) -> ComparisonChain.start().compare(playerInfo.getProfile().getId(), playerInfo2.getProfile().getId()).result());
+    private static final Component TELEPORT_TEXT = new TranslatableComponent("spectatorMenu.teleport");
+    private static final Component TELEPORT_PROMPT = new TranslatableComponent("spectatorMenu.teleport.prompt");
     private final List<SpectatorMenuItem> items = Lists.newArrayList();
 
     public TeleportToPlayerMenuCategory() {
@@ -48,7 +50,7 @@ SpectatorMenuItem {
 
     @Override
     public Component getPrompt() {
-        return new TranslatableComponent("spectatorMenu.teleport.prompt");
+        return TELEPORT_PROMPT;
     }
 
     @Override
@@ -58,7 +60,7 @@ SpectatorMenuItem {
 
     @Override
     public Component getName() {
-        return new TranslatableComponent("spectatorMenu.teleport");
+        return TELEPORT_TEXT;
     }
 
     @Override

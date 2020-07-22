@@ -16,7 +16,7 @@ import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 
 public class ConfiguredDecorator<DC extends DecoratorConfiguration>
 implements Decoratable<ConfiguredDecorator<?>> {
-    public static final Codec<ConfiguredDecorator<?>> CODEC = Registry.DECORATOR.dispatch("name", configuredDecorator -> configuredDecorator.decorator, FeatureDecorator::configuredCodec);
+    public static final Codec<ConfiguredDecorator<?>> CODEC = Registry.DECORATOR.dispatch("type", configuredDecorator -> configuredDecorator.decorator, FeatureDecorator::configuredCodec);
     private final FeatureDecorator<DC> decorator;
     private final DC config;
 

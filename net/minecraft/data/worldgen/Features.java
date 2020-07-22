@@ -88,7 +88,6 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 
 public class Features {
-    public static final ConfiguredFeature<?, ?> NOPE = Features.register("nope", Feature.NO_OP.configured(FeatureConfiguration.NONE));
     public static final ConfiguredFeature<?, ?> END_SPIKE = Features.register("end_spike", Feature.END_SPIKE.configured(new SpikeConfiguration(false, (List<SpikeFeature.EndSpike>)ImmutableList.of(), null)));
     public static final ConfiguredFeature<?, ?> END_GATEWAY = Features.register("end_gateway", Feature.END_GATEWAY.configured(EndGatewayConfiguration.knownExit(ServerLevel.END_SPAWN_POINT, true)).decorated((ConfiguredDecorator)FeatureDecorator.END_GATEWAY.configured(DecoratorConfiguration.NONE)));
     public static final ConfiguredFeature<?, ?> END_GATEWAY_DELAYED = Features.register("end_gateway_delayed", Feature.END_GATEWAY.configured(EndGatewayConfiguration.delayedExitSearch()));

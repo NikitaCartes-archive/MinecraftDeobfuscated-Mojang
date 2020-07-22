@@ -7,6 +7,7 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.level.BlockGetter;
@@ -64,6 +65,25 @@ public class DismountHelper {
             mutableBlockPos.move(Direction.UP);
         }
         return Double.POSITIVE_INFINITY;
+    }
+
+    @Nullable
+    public static Vec3 findSafeDismountLocation(EntityType<?> entityType, CollisionGetter collisionGetter, BlockPos blockPos, boolean bl) {
+        if (bl && entityType.isBlockDangerous(collisionGetter.getBlockState(blockPos))) {
+            return null;
+        }
+        double d = collisionGetter.getBlockFloorHeight(DismountHelper.nonClimbableShape(collisionGetter, blockPos), () -> DismountHelper.nonClimbableShape(collisionGetter, blockPos.below()));
+        if (!DismountHelper.isBlockFloorValid(d)) {
+            return null;
+        }
+        if (bl && d <= 0.0 && entityType.isBlockDangerous(collisionGetter.getBlockState(blockPos.below()))) {
+            return null;
+        }
+        Vec3 vec3 = Vec3.upFromBottomCenterOf(blockPos, d);
+        if (collisionGetter.getBlockCollisions(null, entityType.getDimensions().makeBoundingBox(vec3)).allMatch(VoxelShape::isEmpty)) {
+            return vec3;
+        }
+        return null;
     }
 }
 

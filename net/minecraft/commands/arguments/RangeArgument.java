@@ -3,7 +3,6 @@
  */
 package net.minecraft.commands.arguments;
 
-import com.google.gson.JsonObject;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -12,8 +11,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.synchronization.ArgumentSerializer;
-import net.minecraft.network.FriendlyByteBuf;
 
 public interface RangeArgument<T extends MinMaxBounds<?>>
 extends ArgumentType<T> {
@@ -21,15 +18,8 @@ extends ArgumentType<T> {
         return new Ints();
     }
 
-    public static abstract class Serializer<T extends RangeArgument<?>>
-    implements ArgumentSerializer<T> {
-        @Override
-        public void serializeToNetwork(T rangeArgument, FriendlyByteBuf friendlyByteBuf) {
-        }
-
-        @Override
-        public void serializeToJson(T rangeArgument, JsonObject jsonObject) {
-        }
+    public static Floats floatRange() {
+        return new Floats();
     }
 
     public static class Floats
@@ -49,19 +39,6 @@ extends ArgumentType<T> {
         @Override
         public /* synthetic */ Object parse(StringReader stringReader) throws CommandSyntaxException {
             return this.parse(stringReader);
-        }
-
-        public static class Serializer
-        extends net.minecraft.commands.arguments.RangeArgument$Serializer<Floats> {
-            @Override
-            public Floats deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
-                return new Floats();
-            }
-
-            @Override
-            public /* synthetic */ ArgumentType deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
-                return this.deserializeFromNetwork(friendlyByteBuf);
-            }
         }
     }
 
@@ -86,19 +63,6 @@ extends ArgumentType<T> {
         @Override
         public /* synthetic */ Object parse(StringReader stringReader) throws CommandSyntaxException {
             return this.parse(stringReader);
-        }
-
-        public static class Serializer
-        extends net.minecraft.commands.arguments.RangeArgument$Serializer<Ints> {
-            @Override
-            public Ints deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
-                return new Ints();
-            }
-
-            @Override
-            public /* synthetic */ ArgumentType deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
-                return this.deserializeFromNetwork(friendlyByteBuf);
-            }
         }
     }
 }

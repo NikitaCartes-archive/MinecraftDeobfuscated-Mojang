@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.entity.ai.behavior;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
@@ -60,7 +59,7 @@ extends Behavior<LivingEntity> {
     @Override
     protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
         if (l > this.nextOkStartTime) {
-            livingEntity.getBrain().getMemory(MemoryModuleType.OPENED_DOORS).ifPresent(set -> InteractWithDoor.closeAllOpenedDoors(serverLevel, ImmutableList.of(), 0, livingEntity, livingEntity.getBrain()));
+            InteractWithDoor.closeDoorsThatIHaveOpenedOrPassedThrough(serverLevel, livingEntity, null, null);
             livingEntity.startSleeping(livingEntity.getBrain().getMemory(MemoryModuleType.HOME).get().pos());
         }
     }

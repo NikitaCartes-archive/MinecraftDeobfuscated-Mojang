@@ -109,10 +109,10 @@ extends Screen {
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
         this.list.render(poseStack, i, j, f);
-        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 0xFFFFFF);
+        CreateFlatWorldScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 0xFFFFFF);
         int k = this.width / 2 - 92 - 16;
-        this.drawString(poseStack, this.font, this.columnType, k, 32, 0xFFFFFF);
-        this.drawString(poseStack, this.font, this.columnHeight, k + 2 + 213 - this.font.width(this.columnHeight), 32, 0xFFFFFF);
+        CreateFlatWorldScreen.drawString(poseStack, this.font, this.columnType, k, 32, 0xFFFFFF);
+        CreateFlatWorldScreen.drawString(poseStack, this.font, this.columnHeight, k + 2 + 213 - this.font.width(this.columnHeight), 32, 0xFFFFFF);
         super.render(poseStack, i, j, f);
     }
 

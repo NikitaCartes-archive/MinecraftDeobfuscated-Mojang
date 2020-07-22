@@ -81,7 +81,7 @@ implements CustomSpawner {
         }
         cat.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(blockPos), MobSpawnType.NATURAL, null, null);
         cat.moveTo(blockPos, 0.0f, 0.0f);
-        serverLevel.addFreshEntity(cat);
+        serverLevel.addFreshEntityWithPassengers(cat);
         return 1;
     }
 }

@@ -9,7 +9,7 @@ import com.mojang.realmsclient.util.task.LongRunningTask;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class WorldCreationTask
@@ -28,8 +28,7 @@ extends LongRunningTask {
 
     @Override
     public void run() {
-        String string = I18n.get("mco.create.world.wait", new Object[0]);
-        this.setTitle(string);
+        this.setTitle(new TranslatableComponent("mco.create.world.wait"));
         RealmsClient realmsClient = RealmsClient.create();
         try {
             realmsClient.initializeWorld(this.worldId, this.name, this.motd);

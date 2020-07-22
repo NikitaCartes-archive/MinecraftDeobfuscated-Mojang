@@ -64,7 +64,7 @@ extends Feature<NoneFeatureConfiguration> {
         for (int i = 0; i < 100; ++i) {
             BlockState blockState;
             mutableBlockPos.setWithOffset(blockPos, random.nextInt(8) - random.nextInt(8), random.nextInt(2) - random.nextInt(7), random.nextInt(8) - random.nextInt(8));
-            if (!levelAccessor.isEmptyBlock(mutableBlockPos) || !(blockState = levelAccessor.getBlockState(mutableBlockPos.above())).is(Blocks.NETHERRACK) && !blockState.is(Blocks.NETHER_WART_BLOCK)) continue;
+            if (!levelAccessor.isEmptyBlock(mutableBlockPos) || !(blockState = levelAccessor.getBlockState((BlockPos)mutableBlockPos.above())).is(Blocks.NETHERRACK) && !blockState.is(Blocks.NETHER_WART_BLOCK)) continue;
             int j = Mth.nextInt(random, 1, 8);
             if (random.nextInt(6) == 0) {
                 j *= 2;

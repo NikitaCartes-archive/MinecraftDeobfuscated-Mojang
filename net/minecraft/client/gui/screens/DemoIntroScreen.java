@@ -10,7 +10,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
@@ -18,6 +20,8 @@ import net.minecraft.resources.ResourceLocation;
 public class DemoIntroScreen
 extends Screen {
     private static final ResourceLocation DEMO_BACKGROUND_LOCATION = new ResourceLocation("textures/gui/demo_background.png");
+    private MultiLineLabel movementMessage = MultiLineLabel.EMPTY;
+    private MultiLineLabel durationMessage = MultiLineLabel.EMPTY;
 
     public DemoIntroScreen() {
         super(new TranslatableComponent("demo.help.title"));
@@ -34,6 +38,9 @@ extends Screen {
             this.minecraft.setScreen(null);
             this.minecraft.mouseHandler.grabMouse();
         }));
+        Options options = this.minecraft.options;
+        this.movementMessage = MultiLineLabel.create(this.font, new TranslatableComponent("demo.help.movementShort", options.keyUp.getTranslatedKeyMessage(), options.keyLeft.getTranslatedKeyMessage(), options.keyDown.getTranslatedKeyMessage(), options.keyRight.getTranslatedKeyMessage()), new TranslatableComponent("demo.help.movementMouse"), new TranslatableComponent("demo.help.jump", options.keyJump.getTranslatedKeyMessage()), new TranslatableComponent("demo.help.inventory", options.keyInventory.getTranslatedKeyMessage()));
+        this.durationMessage = MultiLineLabel.create(this.font, (FormattedText)new TranslatableComponent("demo.help.fullWrapped"), 218);
     }
 
     @Override
@@ -52,12 +59,8 @@ extends Screen {
         int k = (this.width - 248) / 2 + 10;
         int l = (this.height - 166) / 2 + 8;
         this.font.draw(poseStack, this.title, (float)k, (float)l, 0x1F1F1F);
-        Options options = this.minecraft.options;
-        this.font.draw(poseStack, new TranslatableComponent("demo.help.movementShort", options.keyUp.getTranslatedKeyMessage(), options.keyLeft.getTranslatedKeyMessage(), options.keyDown.getTranslatedKeyMessage(), options.keyRight.getTranslatedKeyMessage()), (float)k, (float)(l += 12), 0x4F4F4F);
-        this.font.draw(poseStack, new TranslatableComponent("demo.help.movementMouse"), (float)k, (float)(l + 12), 0x4F4F4F);
-        this.font.draw(poseStack, new TranslatableComponent("demo.help.jump", options.keyJump.getTranslatedKeyMessage()), (float)k, (float)(l + 24), 0x4F4F4F);
-        this.font.draw(poseStack, new TranslatableComponent("demo.help.inventory", options.keyInventory.getTranslatedKeyMessage()), (float)k, (float)(l + 36), 0x4F4F4F);
-        this.font.drawWordWrap(new TranslatableComponent("demo.help.fullWrapped"), k, l + 68, 218, 0x1F1F1F);
+        l = this.movementMessage.renderLeftAlignedNoShadow(poseStack, k, l + 12, 12, 0x4F4F4F);
+        this.durationMessage.renderLeftAlignedNoShadow(poseStack, k, l + 20, this.font.lineHeight, 0x1F1F1F);
         super.render(poseStack, i, j, f);
     }
 }

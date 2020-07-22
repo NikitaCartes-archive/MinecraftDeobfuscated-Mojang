@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.DefaultUncaughtExceptionHandlerWithName;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class GenericThread
 implements Runnable {
@@ -14,18 +15,23 @@ implements Runnable {
     private static final AtomicInteger UNIQUE_THREAD_ID = new AtomicInteger(0);
     protected volatile boolean running;
     protected final String name;
+    @Nullable
     protected Thread thread;
 
     protected GenericThread(String string) {
         this.name = string;
     }
 
-    public synchronized void start() {
+    public synchronized boolean start() {
+        if (this.running) {
+            return true;
+        }
         this.running = true;
         this.thread = new Thread((Runnable)this, this.name + " #" + UNIQUE_THREAD_ID.incrementAndGet());
         this.thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandlerWithName(LOGGER));
         this.thread.start();
         LOGGER.info("Thread {} started", (Object)this.name);
+        return true;
     }
 
     public synchronized void stop() {

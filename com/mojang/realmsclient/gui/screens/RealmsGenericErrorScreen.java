@@ -68,8 +68,8 @@ extends RealmsScreen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
-        this.drawCenteredString(poseStack, this.font, this.line1, this.width / 2, 80, 0xFFFFFF);
-        this.drawCenteredString(poseStack, this.font, this.line2, this.width / 2, 100, 0xFF0000);
+        RealmsGenericErrorScreen.drawCenteredString(poseStack, this.font, this.line1, this.width / 2, 80, 0xFFFFFF);
+        RealmsGenericErrorScreen.drawCenteredString(poseStack, this.font, this.line2, this.width / 2, 100, 0xFF0000);
         super.render(poseStack, i, j, f);
     }
 }

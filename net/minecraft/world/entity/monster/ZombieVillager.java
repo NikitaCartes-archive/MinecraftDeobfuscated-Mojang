@@ -213,7 +213,7 @@ implements VillagerDataHolder {
             villager.setPersistenceRequired();
         }
         villager.setInvulnerable(this.isInvulnerable());
-        serverLevel.addFreshEntity(villager);
+        serverLevel.addFreshEntityWithPassengers(villager);
         if (this.conversionStarter != null && (player = serverLevel.getPlayerByUUID(this.conversionStarter)) instanceof ServerPlayer) {
             CriteriaTriggers.CURED_ZOMBIE_VILLAGER.trigger((ServerPlayer)player, this, villager);
             serverLevel.onReputationEvent(ReputationEventType.ZOMBIE_VILLAGER_CURED, player, villager);

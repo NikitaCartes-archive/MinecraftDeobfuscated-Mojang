@@ -17,11 +17,13 @@ import net.minecraft.client.StringSplitter;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.advancements.AdvancementTab;
 import net.minecraft.client.gui.screens.advancements.AdvancementWidgetType;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,9 +35,9 @@ extends GuiComponent {
     private final AdvancementTab tab;
     private final Advancement advancement;
     private final DisplayInfo display;
-    private final FormattedText title;
+    private final FormattedCharSequence title;
     private final int width;
-    private final List<FormattedText> description;
+    private final List<FormattedCharSequence> description;
     private final Minecraft minecraft;
     private AdvancementWidget parent;
     private final List<AdvancementWidget> children = Lists.newArrayList();
@@ -48,16 +50,16 @@ extends GuiComponent {
         this.advancement = advancement;
         this.display = displayInfo;
         this.minecraft = minecraft;
-        this.title = minecraft.font.substrByWidth(displayInfo.getTitle(), 163);
+        this.title = Language.getInstance().getVisualOrder(minecraft.font.substrByWidth(displayInfo.getTitle(), 163));
         this.x = Mth.floor(displayInfo.getX() * 28.0f);
         this.y = Mth.floor(displayInfo.getY() * 27.0f);
         int i = advancement.getMaxCriteraRequired();
         int j = String.valueOf(i).length();
         int k = i > 1 ? minecraft.font.width("  ") + minecraft.font.width("0") * j * 2 + minecraft.font.width("/") : 0;
         int l = 29 + minecraft.font.width(this.title) + k;
-        this.description = this.findOptimalLines(ComponentUtils.mergeStyles(displayInfo.getDescription().copy(), Style.EMPTY.withColor(displayInfo.getFrame().getChatColor())), l);
-        for (FormattedText formattedText : this.description) {
-            l = Math.max(l, minecraft.font.width(formattedText));
+        this.description = Language.getInstance().getVisualOrder(this.findOptimalLines(ComponentUtils.mergeStyles(displayInfo.getDescription().copy(), Style.EMPTY.withColor(displayInfo.getFrame().getChatColor())), l));
+        for (FormattedCharSequence formattedCharSequence : this.description) {
+            l = Math.max(l, minecraft.font.width(formattedCharSequence));
         }
         this.width = l + 3 + 5;
     }

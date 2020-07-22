@@ -69,7 +69,7 @@ implements RangedAttackMob {
     protected void registerGoals() {
         super.registerGoals();
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new SpellcasterIllager.SpellcasterCastingSpellGoal(this));
+        this.goalSelector.addGoal(1, new SpellcasterIllager.SpellcasterCastingSpellGoal());
         this.goalSelector.addGoal(4, new IllusionerMirrorSpellGoal());
         this.goalSelector.addGoal(5, new IllusionerBlindnessSpellGoal());
         this.goalSelector.addGoal(6, new RangedBowAttackGoal<Illusioner>(this, 0.5, 20, 15.0f));
@@ -218,7 +218,6 @@ implements RangedAttackMob {
         private int lastTargetId;
 
         private IllusionerBlindnessSpellGoal() {
-            super(Illusioner.this);
         }
 
         @Override
@@ -270,7 +269,6 @@ implements RangedAttackMob {
     class IllusionerMirrorSpellGoal
     extends SpellcasterIllager.SpellcasterUseSpellGoal {
         private IllusionerMirrorSpellGoal() {
-            super(Illusioner.this);
         }
 
         @Override

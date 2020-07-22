@@ -47,7 +47,7 @@ extends OptionsSubScreen {
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
         this.list.render(poseStack, i, j, f);
-        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 5, 0xFFFFFF);
+        MouseSettingsScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 5, 0xFFFFFF);
         super.render(poseStack, i, j, f);
     }
 }

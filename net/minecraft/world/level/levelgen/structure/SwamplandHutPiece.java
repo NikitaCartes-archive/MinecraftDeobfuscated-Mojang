@@ -99,7 +99,7 @@ extends ScatteredFeaturePiece {
             witch.setPersistenceRequired();
             witch.moveTo((double)i + 0.5, j, (double)k + 0.5, 0.0f, 0.0f);
             witch.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(new BlockPos(i, j, k)), MobSpawnType.STRUCTURE, null, null);
-            worldGenLevel.addFreshEntity(witch);
+            worldGenLevel.addFreshEntityWithPassengers(witch);
         }
         this.spawnCat(worldGenLevel, boundingBox);
         return true;
@@ -115,7 +115,7 @@ extends ScatteredFeaturePiece {
             cat.setPersistenceRequired();
             cat.moveTo((double)i + 0.5, j, (double)k + 0.5, 0.0f, 0.0f);
             cat.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(new BlockPos(i, j, k)), MobSpawnType.STRUCTURE, null, null);
-            serverLevelAccessor.addFreshEntity(cat);
+            serverLevelAccessor.addFreshEntityWithPassengers(cat);
         }
     }
 }

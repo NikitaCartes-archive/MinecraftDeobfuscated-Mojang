@@ -199,9 +199,9 @@ extends Screen {
         this.list.render(poseStack, i, j, f);
         RenderSystem.pushMatrix();
         RenderSystem.translatef(0.0f, 0.0f, 400.0f);
-        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 0xFFFFFF);
-        this.drawString(poseStack, this.font, this.shareText, 50, 30, 0xA0A0A0);
-        this.drawString(poseStack, this.font, this.listText, 50, 70, 0xA0A0A0);
+        PresetFlatWorldScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 0xFFFFFF);
+        PresetFlatWorldScreen.drawString(poseStack, this.font, this.shareText, 50, 30, 0xA0A0A0);
+        PresetFlatWorldScreen.drawString(poseStack, this.font, this.listText, 50, 70, 0xA0A0A0);
         RenderSystem.popMatrix();
         this.export.render(poseStack, i, j, f);
         super.render(poseStack, i, j, f);

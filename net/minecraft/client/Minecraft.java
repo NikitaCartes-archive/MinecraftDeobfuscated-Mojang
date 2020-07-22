@@ -1846,6 +1846,11 @@ WindowEventHandler {
         });
         crashReportCategory.setDetail("Type", "Client (map_client.txt)");
         if (options != null) {
+            String string2;
+            if (instance != null && (string2 = instance.getGpuWarnlistManager().getAllWarnings()) != null) {
+                crashReportCategory.setDetail("GPU Warnings", string2);
+            }
+            crashReportCategory.setDetail("Graphics mode", (Object)options.graphicsMode);
             crashReportCategory.setDetail("Resource Packs", () -> {
                 StringBuilder stringBuilder = new StringBuilder();
                 for (String string : options.resourcePacks) {

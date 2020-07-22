@@ -45,11 +45,12 @@ extends Item {
             return InteractionResult.FAIL;
         }
         if (level instanceof ServerLevel) {
-            ArmorStand armorStand = EntityType.ARMOR_STAND.create((ServerLevel)level, itemStack.getTag(), null, useOnContext.getPlayer(), blockPos, MobSpawnType.SPAWN_EGG, true, true);
+            ServerLevel serverLevel = (ServerLevel)level;
+            ArmorStand armorStand = EntityType.ARMOR_STAND.create(serverLevel, itemStack.getTag(), null, useOnContext.getPlayer(), blockPos, MobSpawnType.SPAWN_EGG, true, true);
             if (armorStand == null) {
                 return InteractionResult.FAIL;
             }
-            level.addFreshEntity(armorStand);
+            serverLevel.addFreshEntityWithPassengers(armorStand);
             float f = (float)Mth.floor((Mth.wrapDegrees(useOnContext.getRotation() - 180.0f) + 22.5f) / 45.0f) * 45.0f;
             armorStand.moveTo(armorStand.getX(), armorStand.getY(), armorStand.getZ(), f, 0.0f);
             this.randomizePose(armorStand, level.random);

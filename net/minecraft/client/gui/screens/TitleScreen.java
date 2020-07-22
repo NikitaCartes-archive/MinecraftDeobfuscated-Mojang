@@ -221,7 +221,7 @@ extends Screen {
             float o = 1.8f - Mth.abs(Mth.sin((float)(Util.getMillis() % 1000L) / 1000.0f * ((float)Math.PI * 2)) * 0.1f);
             o = o * 100.0f / (float)(this.font.width(this.splash) + 32);
             RenderSystem.scalef(o, o, o);
-            this.drawCenteredString(poseStack, this.font, this.splash, 0, -8, 0xFFFF00 | n);
+            TitleScreen.drawCenteredString(poseStack, this.font, this.splash, 0, -8, 0xFFFF00 | n);
             RenderSystem.popMatrix();
         }
         String string = "Minecraft " + SharedConstants.getCurrentVersion().getName();
@@ -229,8 +229,8 @@ extends Screen {
         if (this.minecraft.isProbablyModded()) {
             string = string + I18n.get("menu.modded", new Object[0]);
         }
-        this.drawString(poseStack, this.font, string, 2, this.height - 10, 0xFFFFFF | n);
-        this.drawString(poseStack, this.font, "Copyright Mojang AB. Do not distribute!", this.copyrightX, this.height - 10, 0xFFFFFF | n);
+        TitleScreen.drawString(poseStack, this.font, string, 2, this.height - 10, 0xFFFFFF | n);
+        TitleScreen.drawString(poseStack, this.font, "Copyright Mojang AB. Do not distribute!", this.copyrightX, this.height - 10, 0xFFFFFF | n);
         if (i > this.copyrightX && i < this.copyrightX + this.copyrightWidth && j > this.height - 10 && j < this.height) {
             TitleScreen.fill(poseStack, this.copyrightX, this.height - 1, this.copyrightX + this.copyrightWidth, this.height, 0xFFFFFF | n);
         }

@@ -8,7 +8,6 @@ import com.google.common.collect.Queues;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -18,9 +17,9 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.ComponentRenderUtils;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import org.apache.logging.log4j.LogManager;
@@ -33,8 +32,8 @@ extends GuiComponent {
     private static final Logger LOGGER = LogManager.getLogger();
     private final Minecraft minecraft;
     private final List<String> recentChat = Lists.newArrayList();
-    private final List<GuiMessage> allMessages = Lists.newArrayList();
-    private final List<GuiMessage> trimmedMessages = Lists.newArrayList();
+    private final List<GuiMessage<Component>> allMessages = Lists.newArrayList();
+    private final List<GuiMessage<FormattedCharSequence>> trimmedMessages = Lists.newArrayList();
     private final Deque<Component> chatQueue = Queues.newArrayDeque();
     private int chatScrollbarPos;
     private boolean newMessageSinceScroll;
@@ -73,7 +72,7 @@ extends GuiComponent {
         double h = -8.0 * (this.minecraft.options.chatLineSpacing + 1.0) + 4.0 * this.minecraft.options.chatLineSpacing;
         int m = 0;
         for (n = 0; n + this.chatScrollbarPos < this.trimmedMessages.size() && n < j; ++n) {
-            GuiMessage guiMessage = this.trimmedMessages.get(n + this.chatScrollbarPos);
+            GuiMessage<FormattedCharSequence> guiMessage = this.trimmedMessages.get(n + this.chatScrollbarPos);
             if (guiMessage == null || (o = i - guiMessage.getAddedTime()) >= 200 && !bl) continue;
             double p = bl ? 1.0 : ChatComponent.getTimeFactor(o);
             q = (int)(255.0 * p * e);
@@ -147,30 +146,30 @@ extends GuiComponent {
         this.addMessage(component, 0);
     }
 
-    public void addMessage(Component component, int i) {
+    private void addMessage(Component component, int i) {
         this.addMessage(component, i, this.minecraft.gui.getGuiTicks(), false);
         LOGGER.info("[CHAT] {}", (Object)component.getString().replaceAll("\r", "\\\\r").replaceAll("\n", "\\\\n"));
     }
 
-    private void addMessage(FormattedText formattedText, int i, int j, boolean bl) {
+    private void addMessage(Component component, int i, int j, boolean bl) {
         if (i != 0) {
             this.removeById(i);
         }
         int k = Mth.floor((double)this.getWidth() / this.getScale());
-        List<FormattedText> list = ComponentRenderUtils.wrapComponents(formattedText, k, this.minecraft.font);
+        List<FormattedCharSequence> list = ComponentRenderUtils.wrapComponents(component, k, this.minecraft.font);
         boolean bl2 = this.isChatFocused();
-        for (FormattedText formattedText2 : list) {
+        for (FormattedCharSequence formattedCharSequence : list) {
             if (bl2 && this.chatScrollbarPos > 0) {
                 this.newMessageSinceScroll = true;
                 this.scrollChat(1.0);
             }
-            this.trimmedMessages.add(0, new GuiMessage(j, formattedText2, i));
+            this.trimmedMessages.add(0, new GuiMessage<FormattedCharSequence>(j, formattedCharSequence, i));
         }
         while (this.trimmedMessages.size() > 100) {
             this.trimmedMessages.remove(this.trimmedMessages.size() - 1);
         }
         if (!bl) {
-            this.allMessages.add(0, new GuiMessage(j, formattedText, i));
+            this.allMessages.add(0, new GuiMessage<Component>(j, component, i));
             while (this.allMessages.size() > 100) {
                 this.allMessages.remove(this.allMessages.size() - 1);
             }
@@ -181,7 +180,7 @@ extends GuiComponent {
         this.trimmedMessages.clear();
         this.resetChatScroll();
         for (int i = this.allMessages.size() - 1; i >= 0; --i) {
-            GuiMessage guiMessage = this.allMessages.get(i);
+            GuiMessage<Component> guiMessage = this.allMessages.get(i);
             this.addMessage(guiMessage.getMessage(), guiMessage.getId(), guiMessage.getAddedTime(), true);
         }
     }
@@ -242,31 +241,19 @@ extends GuiComponent {
         }
         int i = Math.min(this.getLinesPerPage(), this.trimmedMessages.size());
         if (f <= (double)Mth.floor((double)this.getWidth() / this.getScale()) && g < (double)(this.minecraft.font.lineHeight * i + i) && (j = (int)(g / (double)this.minecraft.font.lineHeight + (double)this.chatScrollbarPos)) >= 0 && j < this.trimmedMessages.size()) {
-            GuiMessage guiMessage = this.trimmedMessages.get(j);
+            GuiMessage<FormattedCharSequence> guiMessage = this.trimmedMessages.get(j);
             return this.minecraft.font.getSplitter().componentStyleAtWidth(guiMessage.getMessage(), (int)f);
         }
         return null;
     }
 
-    public boolean isChatFocused() {
+    private boolean isChatFocused() {
         return this.minecraft.screen instanceof ChatScreen;
     }
 
-    public void removeById(int i) {
-        GuiMessage guiMessage;
-        Iterator<GuiMessage> iterator = this.trimmedMessages.iterator();
-        while (iterator.hasNext()) {
-            guiMessage = iterator.next();
-            if (guiMessage.getId() != i) continue;
-            iterator.remove();
-        }
-        iterator = this.allMessages.iterator();
-        while (iterator.hasNext()) {
-            guiMessage = iterator.next();
-            if (guiMessage.getId() != i) continue;
-            iterator.remove();
-            break;
-        }
+    private void removeById(int i) {
+        this.trimmedMessages.removeIf(guiMessage -> guiMessage.getId() == i);
+        this.allMessages.removeIf(guiMessage -> guiMessage.getId() == i);
     }
 
     public int getWidth() {

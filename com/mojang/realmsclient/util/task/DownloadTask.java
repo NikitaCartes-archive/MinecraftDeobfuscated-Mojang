@@ -13,7 +13,7 @@ import com.mojang.realmsclient.util.task.LongRunningTask;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class DownloadTask
@@ -32,14 +32,14 @@ extends LongRunningTask {
 
     @Override
     public void run() {
-        this.setTitle(I18n.get("mco.download.preparing", new Object[0]));
+        this.setTitle(new TranslatableComponent("mco.download.preparing"));
         RealmsClient realmsClient = RealmsClient.create();
         for (int i = 0; i < 25; ++i) {
             try {
                 if (this.aborted()) {
                     return;
                 }
-                WorldDownload worldDownload = realmsClient.download(this.worldId, this.slot);
+                WorldDownload worldDownload = realmsClient.requestDownloadInfo(this.worldId, this.slot);
                 DownloadTask.pause(1);
                 if (this.aborted()) {
                     return;

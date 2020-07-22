@@ -14,7 +14,6 @@ import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -28,6 +27,7 @@ extends Screen {
     private int delayTicker;
     private final Component causeOfDeath;
     private final boolean hardcore;
+    private Component deathScore;
 
     public DeathScreen(@Nullable Component component, boolean bl) {
         super(new TranslatableComponent(bl ? "deathScreen.title.hardcore" : "deathScreen.title"));
@@ -57,6 +57,7 @@ extends Screen {
         for (AbstractWidget abstractWidget : this.buttons) {
             abstractWidget.active = false;
         }
+        this.deathScore = new TranslatableComponent("deathScreen.score").append(": ").append(new TextComponent(Integer.toString(this.minecraft.player.getScore())).withStyle(ChatFormatting.YELLOW));
     }
 
     @Override
@@ -86,12 +87,12 @@ extends Screen {
         this.fillGradient(poseStack, 0, 0, this.width, this.height, 0x60500000, -1602211792);
         RenderSystem.pushMatrix();
         RenderSystem.scalef(2.0f, 2.0f, 2.0f);
-        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2 / 2, 30, 0xFFFFFF);
+        DeathScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2 / 2, 30, 0xFFFFFF);
         RenderSystem.popMatrix();
         if (this.causeOfDeath != null) {
-            this.drawCenteredString(poseStack, this.font, this.causeOfDeath, this.width / 2, 85, 0xFFFFFF);
+            DeathScreen.drawCenteredString(poseStack, this.font, this.causeOfDeath, this.width / 2, 85, 0xFFFFFF);
         }
-        this.drawCenteredString(poseStack, this.font, I18n.get("deathScreen.score", new Object[0]) + ": " + (Object)((Object)ChatFormatting.YELLOW) + this.minecraft.player.getScore(), this.width / 2, 100, 0xFFFFFF);
+        DeathScreen.drawCenteredString(poseStack, this.font, this.deathScore, this.width / 2, 100, 0xFFFFFF);
         if (this.causeOfDeath != null && j > 85 && j < 85 + this.font.lineHeight) {
             Style style = this.getClickedComponentStyleAt(i);
             this.renderComponentHoverEffect(poseStack, style, i, j);

@@ -289,9 +289,9 @@ extends Monster {
                 if (!NaturalSpawner.isSpawnPositionOk(type, this.level, blockPos, entityType) || !SpawnPlacements.checkSpawnRules(entityType, serverLevel, MobSpawnType.REINFORCEMENT, blockPos, this.level.random)) continue;
                 zombie.setPos(m, n, o);
                 if (this.level.hasNearbyAlivePlayer(m, n, o, 7.0) || !this.level.isUnobstructed(zombie) || !this.level.noCollision(zombie) || this.level.containsAnyLiquid(zombie.getBoundingBox())) continue;
-                this.level.addFreshEntity(zombie);
                 zombie.setTarget(livingEntity);
                 zombie.finalizeSpawn(serverLevel, this.level.getCurrentDifficultyAt(zombie.blockPosition()), MobSpawnType.REINFORCEMENT, null, null);
+                serverLevel.addFreshEntityWithPassengers(zombie);
                 this.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE).addPermanentModifier(new AttributeModifier("Zombie reinforcement caller charge", -0.05f, AttributeModifier.Operation.ADDITION));
                 zombie.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE).addPermanentModifier(new AttributeModifier("Zombie reinforcement callee charge", -0.05f, AttributeModifier.Operation.ADDITION));
                 break;
@@ -402,7 +402,7 @@ extends Monster {
                 zombieVillager.setPersistenceRequired();
             }
             zombieVillager.setInvulnerable(this.isInvulnerable());
-            serverLevel.addFreshEntity(zombieVillager);
+            serverLevel.addFreshEntityWithPassengers(zombieVillager);
             if (!this.isSilent()) {
                 serverLevel.levelEvent(null, 1026, this.blockPosition(), 0);
             }

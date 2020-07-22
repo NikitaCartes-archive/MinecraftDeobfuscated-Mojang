@@ -30,8 +30,8 @@ extends Screen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.fillGradient(poseStack, 0, 0, this.width, this.height, -12574688, -11530224);
-        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 90, 0xFFFFFF);
-        this.drawCenteredString(poseStack, this.font, this.message, this.width / 2, 110, 0xFFFFFF);
+        ErrorScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 90, 0xFFFFFF);
+        ErrorScreen.drawCenteredString(poseStack, this.font, this.message, this.width / 2, 110, 0xFFFFFF);
         super.render(poseStack, i, j, f);
     }
 

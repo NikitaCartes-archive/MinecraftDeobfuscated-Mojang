@@ -6,16 +6,17 @@ package net.minecraft.client.gui.screens.packs;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
-import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.packs.PackSelectionModel;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
@@ -23,6 +24,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.PackCompatibility;
+import net.minecraft.util.FormattedCharSequence;
 
 @Environment(value=EnvType.CLIENT)
 public class TransferableSelectionList
@@ -63,17 +65,35 @@ extends ObjectSelectionList<PackEntry> {
         protected final Minecraft minecraft;
         protected final Screen screen;
         private final PackSelectionModel.Entry pack;
+        private final FormattedCharSequence nameDisplayCache;
+        private final MultiLineLabel descriptionDisplayCache;
 
         public PackEntry(Minecraft minecraft, TransferableSelectionList transferableSelectionList, Screen screen, PackSelectionModel.Entry entry) {
+            Component component2;
+            Component component;
             this.minecraft = minecraft;
             this.screen = screen;
             this.pack = entry;
             this.parent = transferableSelectionList;
+            if (entry.getCompatibility().isCompatible()) {
+                component = entry.getTitle();
+                component2 = entry.getExtendedDescription();
+            } else {
+                component = INCOMPATIBLE_TITLE;
+                component2 = entry.getCompatibility().getDescription();
+            }
+            int i = minecraft.font.width(component);
+            if (i > 157) {
+                FormattedText formattedText = FormattedText.composite(minecraft.font.substrByWidth(component, 157 - minecraft.font.width("...")), FormattedText.of("..."));
+                this.nameDisplayCache = Language.getInstance().getVisualOrder(formattedText);
+            } else {
+                this.nameDisplayCache = component.getVisualOrderText();
+            }
+            this.descriptionDisplayCache = MultiLineLabel.create(minecraft.font, (FormattedText)component2, 157, 2);
         }
 
         @Override
         public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-            int p;
             PackCompatibility packCompatibility = this.pack.getCompatibility();
             if (!packCompatibility.isCompatible()) {
                 RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -82,18 +102,12 @@ extends ObjectSelectionList<PackEntry> {
             this.minecraft.getTextureManager().bind(this.pack.getIconTexture());
             RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
             GuiComponent.blit(poseStack, k, j, 0.0f, 0.0f, 32, 32, 32, 32);
-            Component component = this.pack.getTitle();
-            FormattedText formattedText = this.pack.getExtendedDescription();
             if (this.showHoverOverlay() && (this.minecraft.options.touchscreen || bl)) {
                 this.minecraft.getTextureManager().bind(ICON_OVERLAY_LOCATION);
                 GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
                 RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-                p = n - k;
+                int p = n - k;
                 int q = o - j;
-                if (!packCompatibility.isCompatible()) {
-                    component = INCOMPATIBLE_TITLE;
-                    formattedText = packCompatibility.getDescription();
-                }
                 if (this.pack.canSelect()) {
                     if (p < 32) {
                         GuiComponent.blit(poseStack, k, j, 0.0f, 32.0f, 32, 32, 256, 256);
@@ -124,17 +138,8 @@ extends ObjectSelectionList<PackEntry> {
                     }
                 }
             }
-            if ((p = this.minecraft.font.width(component)) > 157) {
-                FormattedText formattedText2 = FormattedText.composite(this.minecraft.font.substrByWidth(component, 157 - this.minecraft.font.width("...")), FormattedText.of("..."));
-                this.minecraft.font.drawShadow(poseStack, formattedText2, (float)(k + 32 + 2), (float)(j + 1), 0xFFFFFF);
-            } else {
-                this.minecraft.font.drawShadow(poseStack, component, (float)(k + 32 + 2), (float)(j + 1), 0xFFFFFF);
-            }
-            this.minecraft.font.drawShadow(poseStack, component, (float)(k + 32 + 2), (float)(j + 1), 0xFFFFFF);
-            List<FormattedText> list = this.minecraft.font.split(formattedText, 157);
-            for (int r = 0; r < 2 && r < list.size(); ++r) {
-                this.minecraft.font.drawShadow(poseStack, list.get(r), (float)(k + 32 + 2), (float)(j + 12 + 10 * r), 0x808080);
-            }
+            this.minecraft.font.drawShadow(poseStack, this.nameDisplayCache, (float)(k + 32 + 2), (float)(j + 1), 0xFFFFFF);
+            this.descriptionDisplayCache.renderLeftAligned(poseStack, k + 32 + 2, j + 12, 10, 0x808080);
         }
 
         private boolean showHoverOverlay() {

@@ -10,7 +10,7 @@ import com.mojang.realmsclient.gui.screens.RealmsConfigureWorldScreen;
 import com.mojang.realmsclient.util.task.LongRunningTask;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class CloseServerTask
@@ -25,7 +25,7 @@ extends LongRunningTask {
 
     @Override
     public void run() {
-        this.setTitle(I18n.get("mco.configure.world.closing", new Object[0]));
+        this.setTitle(new TranslatableComponent("mco.configure.world.closing"));
         RealmsClient realmsClient = RealmsClient.create();
         for (int i = 0; i < 25; ++i) {
             if (this.aborted()) {

@@ -117,7 +117,7 @@ public class FlatLevelGeneratorSettings {
         int i;
         boolean bl;
         Biome biome = this.getBiome();
-        Biome biome2 = new Biome(new Biome.BiomeBuilder().surfaceBuilder(biome.getSurfaceBuilder()).precipitation(biome.getPrecipitation()).biomeCategory(biome.getBiomeCategory()).depth(biome.getDepth()).scale(biome.getScale()).temperature(biome.getTemperature()).downfall(biome.getDownfall()).specialEffects(biome.getSpecialEffects()).parent(biome.getParent())){};
+        Biome biome2 = new Biome(new Biome.BiomeBuilder().surfaceBuilder(biome.getSurfaceBuilder()).precipitation(biome.getPrecipitation()).biomeCategory(biome.getBiomeCategory()).depth(biome.getDepth()).scale(biome.getScale()).temperature(biome.getBaseTemperature()).downfall(biome.getDownfall()).specialEffects(biome.getSpecialEffects()).parent(biome.getParent()));
         if (this.addLakes) {
             biome2.addFeature(GenerationStep.Decoration.LAKES, Features.LAKE_WATER);
             biome2.addFeature(GenerationStep.Decoration.LAKES, Features.LAKE_LAVA);

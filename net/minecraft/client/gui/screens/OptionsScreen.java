@@ -129,7 +129,7 @@ extends Screen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
-        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 0xFFFFFF);
+        OptionsScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 0xFFFFFF);
         super.render(poseStack, i, j, f);
     }
 }

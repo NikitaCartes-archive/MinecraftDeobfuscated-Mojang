@@ -157,7 +157,7 @@ extends LivingEntity {
     }
 
     public boolean canCutCorner(BlockPathTypes blockPathTypes) {
-        return blockPathTypes != BlockPathTypes.DANGER_FIRE && blockPathTypes != BlockPathTypes.DANGER_CACTUS && blockPathTypes != BlockPathTypes.DANGER_OTHER;
+        return blockPathTypes != BlockPathTypes.DANGER_FIRE && blockPathTypes != BlockPathTypes.DANGER_CACTUS && blockPathTypes != BlockPathTypes.DANGER_OTHER && blockPathTypes != BlockPathTypes.WALKABLE_DOOR;
     }
 
     protected BodyRotationControl createBodyControl() {
@@ -934,12 +934,22 @@ extends LivingEntity {
 
     protected void populateDefaultEquipmentEnchantments(DifficultyInstance difficultyInstance) {
         float f = difficultyInstance.getSpecialMultiplier();
+        this.enchantSpawnedWeapon(f);
+        for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+            if (equipmentSlot.getType() != EquipmentSlot.Type.ARMOR) continue;
+            this.enchantSpawnedArmor(f, equipmentSlot);
+        }
+    }
+
+    protected void enchantSpawnedWeapon(float f) {
         if (!this.getMainHandItem().isEmpty() && this.random.nextFloat() < 0.25f * f) {
             this.setItemSlot(EquipmentSlot.MAINHAND, EnchantmentHelper.enchantItem(this.random, this.getMainHandItem(), (int)(5.0f + f * (float)this.random.nextInt(18)), false));
         }
-        for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-            ItemStack itemStack;
-            if (equipmentSlot.getType() != EquipmentSlot.Type.ARMOR || (itemStack = this.getItemBySlot(equipmentSlot)).isEmpty() || !(this.random.nextFloat() < 0.5f * f)) continue;
+    }
+
+    protected void enchantSpawnedArmor(float f, EquipmentSlot equipmentSlot) {
+        ItemStack itemStack = this.getItemBySlot(equipmentSlot);
+        if (!itemStack.isEmpty() && this.random.nextFloat() < 0.5f * f) {
             this.setItemSlot(equipmentSlot, EnchantmentHelper.enchantItem(this.random, itemStack, (int)(5.0f + f * (float)this.random.nextInt(18)), false));
         }
     }

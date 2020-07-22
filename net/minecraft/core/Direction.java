@@ -297,6 +297,13 @@ public enum Direction implements StringRepresentable
         return this.normal;
     }
 
+    public boolean isFacingAngle(float f) {
+        float g = f * ((float)Math.PI / 180);
+        float h = -Mth.sin(g);
+        float i = Mth.cos(g);
+        return (float)this.normal.getX() * h + (float)this.normal.getZ() * i > 0.0f;
+    }
+
     static {
         VALUES = Direction.values();
         BY_NAME = Arrays.stream(VALUES).collect(Collectors.toMap(Direction::getName, direction -> direction));

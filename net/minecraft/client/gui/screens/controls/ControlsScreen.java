@@ -77,7 +77,7 @@ extends OptionsSubScreen {
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
         this.controlList.render(poseStack, i, j, f);
-        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 0xFFFFFF);
+        ControlsScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 8, 0xFFFFFF);
         boolean bl = false;
         for (KeyMapping keyMapping : this.options.keyMappings) {
             if (keyMapping.isDefault()) continue;

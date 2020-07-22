@@ -12,7 +12,6 @@ import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -35,6 +34,8 @@ import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 public class BeaconScreen
 extends AbstractContainerScreen<BeaconMenu> {
     private static final ResourceLocation BEACON_LOCATION = new ResourceLocation("textures/gui/container/beacon.png");
+    private static final Component PRIMARY_EFFECT_LABEL = new TranslatableComponent("block.minecraft.beacon.primary");
+    private static final Component SECONDARY_EFFECT_LABEL = new TranslatableComponent("block.minecraft.beacon.secondary");
     private BeaconConfirmButton confirmButton;
     private boolean initPowerButtons;
     private MobEffect primary;
@@ -128,8 +129,8 @@ extends AbstractContainerScreen<BeaconMenu> {
 
     @Override
     protected void renderLabels(PoseStack poseStack, int i, int j) {
-        this.drawCenteredString(poseStack, this.font, I18n.get("block.minecraft.beacon.primary", new Object[0]), 62, 10, 0xE0E0E0);
-        this.drawCenteredString(poseStack, this.font, I18n.get("block.minecraft.beacon.secondary", new Object[0]), 169, 10, 0xE0E0E0);
+        BeaconScreen.drawCenteredString(poseStack, this.font, PRIMARY_EFFECT_LABEL, 62, 10, 0xE0E0E0);
+        BeaconScreen.drawCenteredString(poseStack, this.font, SECONDARY_EFFECT_LABEL, 169, 10, 0xE0E0E0);
         for (AbstractWidget abstractWidget : this.buttons) {
             if (!abstractWidget.isHovered()) continue;
             abstractWidget.renderToolTip(poseStack, i - this.leftPos, j - this.topPos);
@@ -223,12 +224,22 @@ extends AbstractContainerScreen<BeaconMenu> {
         private final MobEffect effect;
         private final TextureAtlasSprite sprite;
         private final boolean isPrimary;
+        private final Component tooltip;
 
         public BeaconPowerButton(int i, int j, MobEffect mobEffect, boolean bl) {
             super(i, j);
             this.effect = mobEffect;
             this.sprite = Minecraft.getInstance().getMobEffectTextures().get(mobEffect);
             this.isPrimary = bl;
+            this.tooltip = this.createTooltip(mobEffect, bl);
+        }
+
+        private Component createTooltip(MobEffect mobEffect, boolean bl) {
+            TranslatableComponent mutableComponent = new TranslatableComponent(mobEffect.getDescriptionId());
+            if (!bl && mobEffect != MobEffects.REGENERATION) {
+                mutableComponent.append(" II");
+            }
+            return mutableComponent;
         }
 
         @Override
@@ -249,11 +260,7 @@ extends AbstractContainerScreen<BeaconMenu> {
 
         @Override
         public void renderToolTip(PoseStack poseStack, int i, int j) {
-            TranslatableComponent mutableComponent = new TranslatableComponent(this.effect.getDescriptionId());
-            if (!this.isPrimary && this.effect != MobEffects.REGENERATION) {
-                mutableComponent.append(" II");
-            }
-            BeaconScreen.this.renderTooltip(poseStack, mutableComponent, i, j);
+            BeaconScreen.this.renderTooltip(poseStack, this.tooltip, i, j);
         }
 
         @Override

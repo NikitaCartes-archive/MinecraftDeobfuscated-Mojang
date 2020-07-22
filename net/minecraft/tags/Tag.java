@@ -47,6 +47,36 @@ public interface Tag<T> {
         public ResourceLocation getName();
     }
 
+    public static class OptionalTagEntry
+    implements Entry {
+        private final ResourceLocation id;
+
+        public OptionalTagEntry(ResourceLocation resourceLocation) {
+            this.id = resourceLocation;
+        }
+
+        @Override
+        public <T> boolean build(Function<ResourceLocation, Tag<T>> function, Function<ResourceLocation, T> function2, Consumer<T> consumer) {
+            Tag<T> tag = function.apply(this.id);
+            if (tag != null) {
+                tag.getValues().forEach(consumer);
+            }
+            return true;
+        }
+
+        @Override
+        public void serializeTo(JsonArray jsonArray) {
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("id", "#" + this.id);
+            jsonObject.addProperty("required", false);
+            jsonArray.add(jsonObject);
+        }
+
+        public String toString() {
+            return "#" + this.id + "?";
+        }
+    }
+
     public static class TagEntry
     implements Entry {
         private final ResourceLocation id;
@@ -72,6 +102,36 @@ public interface Tag<T> {
 
         public String toString() {
             return "#" + this.id;
+        }
+    }
+
+    public static class OptionalElementEntry
+    implements Entry {
+        private final ResourceLocation id;
+
+        public OptionalElementEntry(ResourceLocation resourceLocation) {
+            this.id = resourceLocation;
+        }
+
+        @Override
+        public <T> boolean build(Function<ResourceLocation, Tag<T>> function, Function<ResourceLocation, T> function2, Consumer<T> consumer) {
+            T object = function2.apply(this.id);
+            if (object != null) {
+                consumer.accept(object);
+            }
+            return true;
+        }
+
+        @Override
+        public void serializeTo(JsonArray jsonArray) {
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("id", this.id.toString());
+            jsonObject.addProperty("required", false);
+            jsonArray.add(jsonObject);
+        }
+
+        public String toString() {
+            return this.id.toString() + "?";
         }
     }
 
@@ -154,18 +214,33 @@ public interface Tag<T> {
             JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "values");
             ArrayList<Entry> list = Lists.newArrayList();
             for (JsonElement jsonElement : jsonArray) {
-                String string2 = GsonHelper.convertToString(jsonElement, "value");
-                if (string2.startsWith("#")) {
-                    list.add(new TagEntry(new ResourceLocation(string2.substring(1))));
-                    continue;
-                }
-                list.add(new ElementEntry(new ResourceLocation(string2)));
+                list.add(Builder.parseEntry(jsonElement));
             }
             if (GsonHelper.getAsBoolean(jsonObject, "replace", false)) {
                 this.entries.clear();
             }
             list.forEach(entry -> this.entries.add(new BuilderEntry((Entry)entry, string)));
             return this;
+        }
+
+        private static Entry parseEntry(JsonElement jsonElement) {
+            ResourceLocation resourceLocation;
+            boolean bl;
+            String string;
+            if (jsonElement.isJsonObject()) {
+                JsonObject jsonObject = jsonElement.getAsJsonObject();
+                string = GsonHelper.getAsString(jsonObject, "id");
+                bl = GsonHelper.getAsBoolean(jsonObject, "required", true);
+            } else {
+                string = GsonHelper.convertToString(jsonElement, "id");
+                bl = true;
+            }
+            if (string.startsWith("#")) {
+                resourceLocation = new ResourceLocation(string.substring(1));
+                return bl ? new TagEntry(resourceLocation) : new OptionalTagEntry(resourceLocation);
+            }
+            resourceLocation = new ResourceLocation(string);
+            return bl ? new ElementEntry(resourceLocation) : new OptionalElementEntry(resourceLocation);
         }
 
         public JsonObject serializeToJson() {

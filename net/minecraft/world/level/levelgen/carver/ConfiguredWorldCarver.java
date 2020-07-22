@@ -18,7 +18,7 @@ import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
 
 public class ConfiguredWorldCarver<WC extends CarverConfiguration> {
-    public static final MapCodec<ConfiguredWorldCarver<?>> DIRECT_CODEC = Registry.CARVER.dispatchMap("name", configuredWorldCarver -> configuredWorldCarver.worldCarver, WorldCarver::configuredCodec);
+    public static final MapCodec<ConfiguredWorldCarver<?>> DIRECT_CODEC = Registry.CARVER.dispatchMap(configuredWorldCarver -> configuredWorldCarver.worldCarver, WorldCarver::configuredCodec);
     public static final Codec<Supplier<ConfiguredWorldCarver<?>>> CODEC = RegistryFileCodec.create(Registry.CONFIGURED_CARVER_REGISTRY, DIRECT_CODEC);
     private final WorldCarver<WC> worldCarver;
     private final WC config;

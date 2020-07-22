@@ -98,8 +98,9 @@ implements AutoCloseable {
                 }
             } catch (Exception exception2) {
                 try {
+                    String string = resource != null ? " (" + resource.getSourceName() + ")" : "";
                     ChainedJsonException chainedJsonException2 = ChainedJsonException.forException(exception2);
-                    chainedJsonException2.setFilenameAndFlush(resourceLocation.getPath());
+                    chainedJsonException2.setFilenameAndFlush(resourceLocation.getPath() + string);
                     throw chainedJsonException2;
                 } catch (Throwable throwable) {
                     IOUtils.closeQuietly(resource);

@@ -114,7 +114,7 @@ GuiEventListener {
         this.blit(poseStack, this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + k * 20, this.width / 2, this.height);
         this.renderBg(poseStack, minecraft, i, j);
         int l = this.active ? 0xFFFFFF : 0xA0A0A0;
-        this.drawCenteredString(poseStack, font, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, l | Mth.ceil(this.alpha * 255.0f) << 24);
+        AbstractWidget.drawCenteredString(poseStack, font, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, l | Mth.ceil(this.alpha * 255.0f) << 24);
     }
 
     protected void renderBg(PoseStack poseStack, Minecraft minecraft, int i, int j) {

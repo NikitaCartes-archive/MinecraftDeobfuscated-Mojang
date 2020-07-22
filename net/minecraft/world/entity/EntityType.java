@@ -313,7 +313,9 @@ public class EntityType<T extends Entity> {
     @Nullable
     public T spawn(ServerLevel serverLevel, @Nullable CompoundTag compoundTag, @Nullable Component component, @Nullable Player player, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2) {
         T entity = this.create(serverLevel, compoundTag, component, player, blockPos, mobSpawnType, bl, bl2);
-        serverLevel.addFreshEntity((Entity)entity);
+        if (entity != null) {
+            serverLevel.addFreshEntityWithPassengers((Entity)entity);
+        }
         return entity;
     }
 

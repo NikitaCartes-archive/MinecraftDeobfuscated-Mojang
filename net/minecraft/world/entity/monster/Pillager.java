@@ -5,6 +5,7 @@ package net.minecraft.world.entity.monster;
 
 import com.google.common.collect.Maps;
 import java.util.HashMap;
+import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -178,13 +179,19 @@ implements CrossbowAttackMob {
 
     @Override
     protected void populateDefaultEquipmentSlots(DifficultyInstance difficultyInstance) {
-        ItemStack itemStack = new ItemStack(Items.CROSSBOW);
-        if (this.random.nextInt(300) == 0) {
-            HashMap<Enchantment, Integer> map = Maps.newHashMap();
-            map.put(Enchantments.PIERCING, 1);
+        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.CROSSBOW));
+    }
+
+    @Override
+    protected void enchantSpawnedWeapon(float f) {
+        ItemStack itemStack;
+        super.enchantSpawnedWeapon(f);
+        if (this.random.nextInt(300) == 0 && (itemStack = this.getMainHandItem()).getItem() == Items.CROSSBOW) {
+            Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemStack);
+            map.putIfAbsent(Enchantments.PIERCING, 1);
             EnchantmentHelper.setEnchantments(map, itemStack);
+            this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
         }
-        this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
     }
 
     @Override

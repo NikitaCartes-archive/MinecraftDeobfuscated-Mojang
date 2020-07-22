@@ -13,7 +13,6 @@ import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackCompatibility;
@@ -226,7 +225,7 @@ public class PackSelectionModel {
 
         public PackSource getPackSource();
 
-        default public FormattedText getExtendedDescription() {
+        default public Component getExtendedDescription() {
             return this.getPackSource().decorate(this.getDescription());
         }
 

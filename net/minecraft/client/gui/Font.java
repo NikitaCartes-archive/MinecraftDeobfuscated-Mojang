@@ -20,18 +20,21 @@ import java.util.Random;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.StringDecomposer;
 import net.minecraft.client.StringSplitter;
 import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
 import net.minecraft.client.gui.font.glyphs.EmptyGlyph;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.locale.Language;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.FormattedCharSink;
 import net.minecraft.util.Mth;
+import net.minecraft.util.StringDecomposer;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -65,14 +68,24 @@ public class Font {
         return this.drawInternal(string, f, g, i, poseStack.last().pose(), false, this.isBidirectional());
     }
 
-    public int drawShadow(PoseStack poseStack, FormattedText formattedText, float f, float g, int i) {
+    public int drawShadow(PoseStack poseStack, FormattedCharSequence formattedCharSequence, float f, float g, int i) {
         RenderSystem.enableAlphaTest();
-        return this.drawInternal(formattedText, f, g, i, poseStack.last().pose(), true);
+        return this.drawInternal(formattedCharSequence, f, g, i, poseStack.last().pose(), true);
     }
 
-    public int draw(PoseStack poseStack, FormattedText formattedText, float f, float g, int i) {
+    public int drawShadow(PoseStack poseStack, Component component, float f, float g, int i) {
         RenderSystem.enableAlphaTest();
-        return this.drawInternal(formattedText, f, g, i, poseStack.last().pose(), false);
+        return this.drawInternal(component.getVisualOrderText(), f, g, i, poseStack.last().pose(), true);
+    }
+
+    public int draw(PoseStack poseStack, FormattedCharSequence formattedCharSequence, float f, float g, int i) {
+        RenderSystem.enableAlphaTest();
+        return this.drawInternal(formattedCharSequence, f, g, i, poseStack.last().pose(), false);
+    }
+
+    public int draw(PoseStack poseStack, Component component, float f, float g, int i) {
+        RenderSystem.enableAlphaTest();
+        return this.drawInternal(component.getVisualOrderText(), f, g, i, poseStack.last().pose(), false);
     }
 
     public String bidirectionalShaping(String string) {
@@ -95,9 +108,9 @@ public class Font {
         return j;
     }
 
-    private int drawInternal(FormattedText formattedText, float f, float g, int i, Matrix4f matrix4f, boolean bl) {
+    private int drawInternal(FormattedCharSequence formattedCharSequence, float f, float g, int i, Matrix4f matrix4f, boolean bl) {
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        int j = this.drawInBatch(formattedText, f, g, i, bl, matrix4f, (MultiBufferSource)bufferSource, false, 0, 0xF000F0);
+        int j = this.drawInBatch(formattedCharSequence, f, g, i, bl, matrix4f, (MultiBufferSource)bufferSource, false, 0, 0xF000F0);
         bufferSource.endBatch();
         return j;
     }
@@ -110,8 +123,12 @@ public class Font {
         return this.drawInternal(string, f, g, i, bl, matrix4f, multiBufferSource, bl2, j, k, bl3);
     }
 
-    public int drawInBatch(FormattedText formattedText, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
-        return this.drawInternal(formattedText, f, g, i, bl, matrix4f, multiBufferSource, bl2, j, k);
+    public int drawInBatch(Component component, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
+        return this.drawInBatch(component.getVisualOrderText(), f, g, i, bl, matrix4f, multiBufferSource, bl2, j, k);
+    }
+
+    public int drawInBatch(FormattedCharSequence formattedCharSequence, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
+        return this.drawInternal(formattedCharSequence, f, g, i, bl, matrix4f, multiBufferSource, bl2, j, k);
     }
 
     private static int adjustColor(int i) {
@@ -135,26 +152,26 @@ public class Font {
         return (int)f + (bl ? 1 : 0);
     }
 
-    private int drawInternal(FormattedText formattedText, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
+    private int drawInternal(FormattedCharSequence formattedCharSequence, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
         i = Font.adjustColor(i);
         Matrix4f matrix4f2 = matrix4f.copy();
         if (bl) {
-            this.renderText(formattedText, f, g, i, true, matrix4f, multiBufferSource, bl2, j, k);
+            this.renderText(formattedCharSequence, f, g, i, true, matrix4f, multiBufferSource, bl2, j, k);
             matrix4f2.translate(SHADOW_OFFSET);
         }
-        f = this.renderText(formattedText, f, g, i, false, matrix4f2, multiBufferSource, bl2, j, k);
+        f = this.renderText(formattedCharSequence, f, g, i, false, matrix4f2, multiBufferSource, bl2, j, k);
         return (int)f + (bl ? 1 : 0);
     }
 
     private float renderText(String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
         StringRenderOutput stringRenderOutput = new StringRenderOutput(multiBufferSource, f, g, i, bl, matrix4f, bl2, k);
-        StringDecomposer.iterateFormatted(string, Style.EMPTY, (StringDecomposer.Output)stringRenderOutput);
+        StringDecomposer.iterateFormatted(string, Style.EMPTY, (FormattedCharSink)stringRenderOutput);
         return stringRenderOutput.finish(j, f);
     }
 
-    private float renderText(FormattedText formattedText, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
+    private float renderText(FormattedCharSequence formattedCharSequence, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, boolean bl2, int j, int k) {
         StringRenderOutput stringRenderOutput = new StringRenderOutput(multiBufferSource, f, g, i, bl, matrix4f, bl2, k);
-        StringDecomposer.iterateFormatted(formattedText, Style.EMPTY, (StringDecomposer.Output)stringRenderOutput);
+        formattedCharSequence.accept(stringRenderOutput);
         return stringRenderOutput.finish(j, f);
     }
 
@@ -173,6 +190,10 @@ public class Font {
         return Mth.ceil(this.splitter.stringWidth(formattedText));
     }
 
+    public int width(FormattedCharSequence formattedCharSequence) {
+        return Mth.ceil(this.splitter.stringWidth(formattedCharSequence));
+    }
+
     public String plainSubstrByWidth(String string, int i, boolean bl) {
         return bl ? this.splitter.plainTailByWidth(string, i, Style.EMPTY) : this.splitter.plainHeadByWidth(string, i, Style.EMPTY);
     }
@@ -187,8 +208,8 @@ public class Font {
 
     public void drawWordWrap(FormattedText formattedText, int i, int j, int k, int l) {
         Matrix4f matrix4f = Transformation.identity().getMatrix();
-        for (FormattedText formattedText2 : this.split(formattedText, k)) {
-            this.drawInternal(formattedText2, i, j, l, matrix4f, false);
+        for (FormattedCharSequence formattedCharSequence : this.split(formattedText, k)) {
+            this.drawInternal(formattedCharSequence, i, j, l, matrix4f, false);
             j += 9;
         }
     }
@@ -197,12 +218,12 @@ public class Font {
         return 9 * this.splitter.splitLines(string, i, Style.EMPTY).size();
     }
 
-    public List<FormattedText> split(FormattedText formattedText, int i) {
-        return this.splitter.splitLines(formattedText, i, Style.EMPTY);
+    public List<FormattedCharSequence> split(FormattedText formattedText, int i) {
+        return Language.getInstance().getVisualOrder(this.splitter.splitLines(formattedText, i, Style.EMPTY));
     }
 
     public boolean isBidirectional() {
-        return Language.getInstance().requiresReordering();
+        return Language.getInstance().isDefaultRightToLeft();
     }
 
     public StringSplitter getSplitter() {
@@ -211,7 +232,7 @@ public class Font {
 
     @Environment(value=EnvType.CLIENT)
     class StringRenderOutput
-    implements StringDecomposer.Output {
+    implements FormattedCharSink {
         final MultiBufferSource bufferSource;
         private final boolean dropShadow;
         private final float dimFactor;
@@ -250,7 +271,7 @@ public class Font {
         }
 
         @Override
-        public boolean onChar(int i, Style style, int j) {
+        public boolean accept(int i, Style style, int j) {
             float n;
             float l;
             float h;

@@ -10,7 +10,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.ItemCombinerScreen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
@@ -25,6 +24,7 @@ import net.minecraft.world.item.ItemStack;
 public class AnvilScreen
 extends ItemCombinerScreen<AnvilMenu> {
     private static final ResourceLocation ANVIL_LOCATION = new ResourceLocation("textures/gui/container/anvil.png");
+    private static final Component TOO_EXPENSIVE_TEXT = new TranslatableComponent("container.repair.expensive");
     private EditBox name;
 
     public AnvilScreen(AnvilMenu anvilMenu, Inventory inventory, Component component) {
@@ -91,22 +91,24 @@ extends ItemCombinerScreen<AnvilMenu> {
         super.renderLabels(poseStack, i, j);
         int k = ((AnvilMenu)this.menu).getCost();
         if (k > 0) {
+            Component component;
             int l = 8453920;
-            boolean bl = true;
-            String string = I18n.get("container.repair.cost", k);
             if (k >= 40 && !this.minecraft.player.abilities.instabuild) {
-                string = I18n.get("container.repair.expensive", new Object[0]);
+                component = TOO_EXPENSIVE_TEXT;
                 l = 0xFF6060;
             } else if (!((AnvilMenu)this.menu).getSlot(2).hasItem()) {
-                bl = false;
-            } else if (!((AnvilMenu)this.menu).getSlot(2).mayPickup(this.inventory.player)) {
-                l = 0xFF6060;
+                component = null;
+            } else {
+                component = new TranslatableComponent("container.repair.cost", k);
+                if (!((AnvilMenu)this.menu).getSlot(2).mayPickup(this.inventory.player)) {
+                    l = 0xFF6060;
+                }
             }
-            if (bl) {
-                int m = this.imageWidth - 8 - this.font.width(string) - 2;
+            if (component != null) {
+                int m = this.imageWidth - 8 - this.font.width(component) - 2;
                 int n = 69;
                 AnvilScreen.fill(poseStack, m - 2, 67, this.imageWidth - 8, 79, 0x4F000000);
-                this.font.drawShadow(poseStack, string, (float)m, 69.0f, l);
+                this.font.drawShadow(poseStack, component, (float)m, 69.0f, l);
             }
         }
     }

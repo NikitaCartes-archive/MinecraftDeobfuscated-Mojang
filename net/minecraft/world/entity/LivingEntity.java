@@ -2699,11 +2699,15 @@ extends Entity {
             BlockState blockState = this.level.getBlockState((BlockPos)blockPos);
             if (blockState.getBlock() instanceof BedBlock) {
                 this.level.setBlock((BlockPos)blockPos, (BlockState)blockState.setValue(BedBlock.OCCUPIED, false), 3);
-                Vec3 vec3 = BedBlock.findStandUpPosition(this.getType(), this.level, blockPos, 0).orElseGet(() -> {
+                Vec3 vec3 = BedBlock.findStandUpPosition(this.getType(), this.level, blockPos, this.yRot).orElseGet(() -> {
                     BlockPos blockPos2 = blockPos.above();
                     return new Vec3((double)blockPos2.getX() + 0.5, (double)blockPos2.getY() + 0.1, (double)blockPos2.getZ() + 0.5);
                 });
+                Vec3 vec32 = Vec3.atBottomCenterOf(blockPos).subtract(vec3).normalize();
+                float f = (float)Mth.wrapDegrees(Mth.atan2(vec32.z, vec32.x) * 57.2957763671875 - 90.0);
                 this.setPos(vec3.x, vec3.y, vec3.z);
+                this.yRot = f;
+                this.xRot = 0.0f;
             }
         });
         Vec3 vec3 = this.position();

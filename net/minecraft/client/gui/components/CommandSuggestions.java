@@ -44,9 +44,9 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.Nullable;
@@ -67,7 +67,7 @@ public class CommandSuggestions {
     private final int suggestionLineLimit;
     private final boolean anchorToBottom;
     private final int fillColor;
-    private final List<FormattedText> commandUsage = Lists.newArrayList();
+    private final List<FormattedCharSequence> commandUsage = Lists.newArrayList();
     private int commandUsagePosition;
     private int commandUsageWidth;
     private ParseResults<SharedSuggestionProvider> currentParse;
@@ -200,16 +200,16 @@ public class CommandSuggestions {
         return i;
     }
 
-    private static FormattedText getExceptionMessage(CommandSyntaxException commandSyntaxException) {
+    private static FormattedCharSequence getExceptionMessage(CommandSyntaxException commandSyntaxException) {
         Component component = ComponentUtils.fromMessage(commandSyntaxException.getRawMessage());
         String string = commandSyntaxException.getContext();
         if (string == null) {
-            return component;
+            return component.getVisualOrderText();
         }
-        return new TranslatableComponent("command.context.parse_error", component, commandSyntaxException.getCursor(), string);
+        return new TranslatableComponent("command.context.parse_error", component, commandSyntaxException.getCursor(), string).getVisualOrderText();
     }
 
-    public void updateUsageInfo() {
+    private void updateUsageInfo() {
         if (this.input.getCursorPosition() == this.input.getValue().length()) {
             if (this.pendingSuggestions.join().isEmpty() && !this.currentParse.getExceptions().isEmpty()) {
                 int i = 0;
@@ -243,12 +243,12 @@ public class CommandSuggestions {
         CommandContextBuilder<SharedSuggestionProvider> commandContextBuilder = this.currentParse.getContext();
         SuggestionContext<SharedSuggestionProvider> suggestionContext = commandContextBuilder.findSuggestionContext(this.input.getCursorPosition());
         Map<CommandNode<SharedSuggestionProvider>, String> map = this.minecraft.player.connection.getCommands().getSmartUsage(suggestionContext.parent, this.minecraft.player.connection.getSuggestionsProvider());
-        ArrayList<FormattedText> list = Lists.newArrayList();
+        ArrayList<FormattedCharSequence> list = Lists.newArrayList();
         int i = 0;
         Style style = Style.EMPTY.withColor(chatFormatting);
         for (Map.Entry<CommandNode<SharedSuggestionProvider>, String> entry : map.entrySet()) {
             if (entry.getKey() instanceof LiteralCommandNode) continue;
-            list.add(FormattedText.of(entry.getValue(), style));
+            list.add(FormattedCharSequence.forward(entry.getValue(), style));
             i = Math.max(i, this.font.width(entry.getValue()));
         }
         if (!list.isEmpty()) {
@@ -258,11 +258,11 @@ public class CommandSuggestions {
         }
     }
 
-    private FormattedText formatChat(String string, int i) {
+    private FormattedCharSequence formatChat(String string, int i) {
         if (this.currentParse != null) {
             return CommandSuggestions.formatText(this.currentParse, string, i);
         }
-        return FormattedText.of(string);
+        return FormattedCharSequence.forward(string, Style.EMPTY);
     }
 
     @Nullable
@@ -273,9 +273,9 @@ public class CommandSuggestions {
         return null;
     }
 
-    private static FormattedText formatText(ParseResults<SharedSuggestionProvider> parseResults, String string, int i) {
+    private static FormattedCharSequence formatText(ParseResults<SharedSuggestionProvider> parseResults, String string, int i) {
         int n;
-        ArrayList<FormattedText> list = Lists.newArrayList();
+        ArrayList<FormattedCharSequence> list = Lists.newArrayList();
         int j = 0;
         int k = -1;
         CommandContextBuilder<SharedSuggestionProvider> commandContextBuilder = parseResults.getContext().getLastChild();
@@ -287,18 +287,18 @@ public class CommandSuggestions {
             if ((l = Math.max(parsedArgument.getRange().getStart() - i, 0)) >= string.length()) break;
             int m = Math.min(parsedArgument.getRange().getEnd() - i, string.length());
             if (m <= 0) continue;
-            list.add(FormattedText.of(string.substring(j, l), LITERAL_STYLE));
-            list.add(FormattedText.of(string.substring(l, m), ARGUMENT_STYLES.get(k)));
+            list.add(FormattedCharSequence.forward(string.substring(j, l), LITERAL_STYLE));
+            list.add(FormattedCharSequence.forward(string.substring(l, m), ARGUMENT_STYLES.get(k)));
             j = m;
         }
         if (parseResults.getReader().canRead() && (n = Math.max(parseResults.getReader().getCursor() - i, 0)) < string.length()) {
             int o = Math.min(n + parseResults.getReader().getRemainingLength(), string.length());
-            list.add(FormattedText.of(string.substring(j, n), LITERAL_STYLE));
-            list.add(FormattedText.of(string.substring(n, o), UNPARSED_STYLE));
+            list.add(FormattedCharSequence.forward(string.substring(j, n), LITERAL_STYLE));
+            list.add(FormattedCharSequence.forward(string.substring(n, o), UNPARSED_STYLE));
             j = o;
         }
-        list.add(FormattedText.of(string.substring(j), LITERAL_STYLE));
-        return FormattedText.composite(list);
+        list.add(FormattedCharSequence.forward(string.substring(j), LITERAL_STYLE));
+        return FormattedCharSequence.composite(list);
     }
 
     public void render(PoseStack poseStack, int i, int j) {
@@ -306,10 +306,10 @@ public class CommandSuggestions {
             this.suggestions.render(poseStack, i, j);
         } else {
             int k = 0;
-            for (FormattedText formattedText : this.commandUsage) {
+            for (FormattedCharSequence formattedCharSequence : this.commandUsage) {
                 int l = this.anchorToBottom ? this.screen.height - 14 - 13 - 12 * k : 72 + 12 * k;
                 GuiComponent.fill(poseStack, this.commandUsagePosition - 1, l, this.commandUsagePosition + this.commandUsageWidth + 1, l + 12, this.fillColor);
-                this.font.drawShadow(poseStack, formattedText, (float)this.commandUsagePosition, (float)(l + 2), -1);
+                this.font.drawShadow(poseStack, formattedCharSequence, (float)this.commandUsagePosition, (float)(l + 2), -1);
                 ++k;
             }
         }

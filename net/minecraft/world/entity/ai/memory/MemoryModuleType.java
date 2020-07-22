@@ -49,7 +49,7 @@ public class MemoryModuleType<U> {
     public static final MemoryModuleType<Entity> RIDE_TARGET = MemoryModuleType.register("ride_target");
     public static final MemoryModuleType<Path> PATH = MemoryModuleType.register("path");
     public static final MemoryModuleType<List<GlobalPos>> INTERACTABLE_DOORS = MemoryModuleType.register("interactable_doors");
-    public static final MemoryModuleType<Set<GlobalPos>> OPENED_DOORS = MemoryModuleType.register("opened_doors");
+    public static final MemoryModuleType<Set<GlobalPos>> DOORS_TO_CLOSE = MemoryModuleType.register("doors_to_close");
     public static final MemoryModuleType<BlockPos> NEAREST_BED = MemoryModuleType.register("nearest_bed");
     public static final MemoryModuleType<DamageSource> HURT_BY = MemoryModuleType.register("hurt_by");
     public static final MemoryModuleType<LivingEntity> HURT_BY_ENTITY = MemoryModuleType.register("hurt_by_entity");

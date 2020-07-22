@@ -28,6 +28,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class SummonCommand {
     private static final SimpleCommandExceptionType ERROR_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.summon.failed"));
+    private static final SimpleCommandExceptionType ERROR_DUPLICATE_UUID = new SimpleCommandExceptionType(new TranslatableComponent("commands.summon.failed.uuid"));
     private static final SimpleCommandExceptionType INVALID_POSITION = new SimpleCommandExceptionType(new TranslatableComponent("commands.summon.invalidPosition"));
 
     public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
@@ -44,9 +45,6 @@ public class SummonCommand {
         ServerLevel serverLevel = commandSourceStack.getLevel();
         Entity entity2 = EntityType.loadEntityRecursive(compoundTag2, serverLevel, entity -> {
             entity.moveTo(vec3.x, vec3.y, vec3.z, entity.yRot, entity.xRot);
-            if (!serverLevel.addWithUUID((Entity)entity)) {
-                return null;
-            }
             return entity;
         });
         if (entity2 == null) {
@@ -54,6 +52,9 @@ public class SummonCommand {
         }
         if (bl && entity2 instanceof Mob) {
             ((Mob)entity2).finalizeSpawn(commandSourceStack.getLevel(), commandSourceStack.getLevel().getCurrentDifficultyAt(entity2.blockPosition()), MobSpawnType.COMMAND, null, null);
+        }
+        if (!serverLevel.tryAddFreshEntityWithPassengers(entity2)) {
+            throw ERROR_DUPLICATE_UUID.create();
         }
         commandSourceStack.sendSuccess(new TranslatableComponent("commands.summon.success", entity2.getDisplayName()), true);
         return 1;

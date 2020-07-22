@@ -30,6 +30,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
@@ -43,7 +44,7 @@ extends OptionsSubScreen {
     private static final Component NEW_LINE = new TextComponent("\n");
     private static final Option[] OPTIONS = new Option[]{Option.GRAPHICS, Option.RENDER_DISTANCE, Option.AMBIENT_OCCLUSION, Option.FRAMERATE_LIMIT, Option.ENABLE_VSYNC, Option.VIEW_BOBBING, Option.GUI_SCALE, Option.ATTACK_INDICATOR, Option.GAMMA, Option.RENDER_CLOUDS, Option.USE_FULLSCREEN, Option.PARTICLES, Option.MIPMAP_LEVELS, Option.ENTITY_SHADOWS, Option.ENTITY_DISTANCE_SCALING};
     @Nullable
-    private List<FormattedText> tooltip;
+    private List<FormattedCharSequence> tooltip;
     private OptionsList list;
     private final GpuWarnlistManager gpuWarnlistManager;
     private final int oldMipmaps;
@@ -141,14 +142,14 @@ extends OptionsSubScreen {
         this.tooltip = null;
         Optional<AbstractWidget> optional = this.list.getMouseOver(i, j);
         if (optional.isPresent() && optional.get() instanceof OptionButton) {
-            Optional<List<FormattedText>> optional2 = ((OptionButton)optional.get()).getOption().getTooltip();
+            Optional<List<FormattedCharSequence>> optional2 = ((OptionButton)optional.get()).getOption().getTooltip();
             optional2.ifPresent(list -> {
                 this.tooltip = list;
             });
         }
         this.renderBackground(poseStack);
         this.list.render(poseStack, i, j, f);
-        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 5, 0xFFFFFF);
+        VideoSettingsScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 5, 0xFFFFFF);
         super.render(poseStack, i, j, f);
         if (this.tooltip != null) {
             this.renderTooltip(poseStack, this.tooltip, i, j);

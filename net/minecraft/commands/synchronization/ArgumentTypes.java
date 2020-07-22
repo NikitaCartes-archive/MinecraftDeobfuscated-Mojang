@@ -4,6 +4,7 @@
 package net.minecraft.commands.synchronization;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
@@ -13,8 +14,11 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import net.minecraft.SharedConstants;
+import net.minecraft.commands.arguments.AngleArgument;
 import net.minecraft.commands.arguments.ColorArgument;
 import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.CompoundTagArgument;
@@ -102,6 +106,7 @@ public class ArgumentTypes {
         ArgumentTypes.register("objective_criteria", ObjectiveCriteriaArgument.class, new EmptyArgumentSerializer<ObjectiveCriteriaArgument>(ObjectiveCriteriaArgument::criteria));
         ArgumentTypes.register("operation", OperationArgument.class, new EmptyArgumentSerializer<OperationArgument>(OperationArgument::operation));
         ArgumentTypes.register("particle", ParticleArgument.class, new EmptyArgumentSerializer<ParticleArgument>(ParticleArgument::particle));
+        ArgumentTypes.register("angle", AngleArgument.class, new EmptyArgumentSerializer<AngleArgument>(AngleArgument::angle));
         ArgumentTypes.register("rotation", RotationArgument.class, new EmptyArgumentSerializer<RotationArgument>(RotationArgument::rotation));
         ArgumentTypes.register("scoreboard_slot", ScoreboardSlotArgument.class, new EmptyArgumentSerializer<ScoreboardSlotArgument>(ScoreboardSlotArgument::displaySlot));
         ArgumentTypes.register("score_holder", ScoreHolderArgument.class, new ScoreHolderArgument.Serializer());
@@ -112,8 +117,8 @@ public class ArgumentTypes {
         ArgumentTypes.register("mob_effect", MobEffectArgument.class, new EmptyArgumentSerializer<MobEffectArgument>(MobEffectArgument::effect));
         ArgumentTypes.register("function", FunctionArgument.class, new EmptyArgumentSerializer<FunctionArgument>(FunctionArgument::functions));
         ArgumentTypes.register("entity_anchor", EntityAnchorArgument.class, new EmptyArgumentSerializer<EntityAnchorArgument>(EntityAnchorArgument::anchor));
-        ArgumentTypes.register("int_range", RangeArgument.Ints.class, new RangeArgument.Ints.Serializer());
-        ArgumentTypes.register("float_range", RangeArgument.Floats.class, new RangeArgument.Floats.Serializer());
+        ArgumentTypes.register("int_range", RangeArgument.Ints.class, new EmptyArgumentSerializer<RangeArgument.Ints>(RangeArgument::intRange));
+        ArgumentTypes.register("float_range", RangeArgument.Floats.class, new EmptyArgumentSerializer<RangeArgument.Floats>(RangeArgument::floatRange));
         ArgumentTypes.register("item_enchantment", ItemEnchantmentArgument.class, new EmptyArgumentSerializer<ItemEnchantmentArgument>(ItemEnchantmentArgument::enchantment));
         ArgumentTypes.register("entity_summon", EntitySummonArgument.class, new EmptyArgumentSerializer<EntitySummonArgument>(EntitySummonArgument::id));
         ArgumentTypes.register("dimension", DimensionArgument.class, new EmptyArgumentSerializer<DimensionArgument>(DimensionArgument::dimension));
@@ -204,6 +209,31 @@ public class ArgumentTypes {
             jsonObject.add("redirect", jsonArray);
         }
         return jsonObject;
+    }
+
+    public static boolean isTypeRegistered(ArgumentType<?> argumentType) {
+        return ArgumentTypes.get(argumentType) != null;
+    }
+
+    public static <T> Set<ArgumentType<?>> findUsedArgumentTypes(CommandNode<T> commandNode) {
+        Set<CommandNode<T>> set = Sets.newIdentityHashSet();
+        HashSet<ArgumentType<?>> set2 = Sets.newHashSet();
+        ArgumentTypes.findUsedArgumentTypes(commandNode, set2, set);
+        return set2;
+    }
+
+    private static <T> void findUsedArgumentTypes(CommandNode<T> commandNode2, Set<ArgumentType<?>> set, Set<CommandNode<T>> set2) {
+        if (!set2.add(commandNode2)) {
+            return;
+        }
+        if (commandNode2 instanceof ArgumentCommandNode) {
+            set.add(((ArgumentCommandNode)commandNode2).getType());
+        }
+        commandNode2.getChildren().forEach(commandNode -> ArgumentTypes.findUsedArgumentTypes(commandNode, set, set2));
+        CommandNode<T> commandNode22 = commandNode2.getRedirect();
+        if (commandNode22 != null) {
+            ArgumentTypes.findUsedArgumentTypes(commandNode22, set, set2);
+        }
     }
 
     static class Entry<T extends ArgumentType<?>> {

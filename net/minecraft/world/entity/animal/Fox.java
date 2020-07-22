@@ -1197,7 +1197,8 @@ extends Animal {
 
         @Override
         protected void breed() {
-            Fox fox = (Fox)this.animal.getBreedOffspring((ServerLevel)this.level, this.partner);
+            ServerLevel serverLevel = (ServerLevel)this.level;
+            Fox fox = (Fox)this.animal.getBreedOffspring(serverLevel, this.partner);
             if (fox == null) {
                 return;
             }
@@ -1222,7 +1223,7 @@ extends Animal {
             this.partner.resetLove();
             fox.setAge(-24000);
             fox.moveTo(this.animal.getX(), this.animal.getY(), this.animal.getZ(), 0.0f, 0.0f);
-            this.level.addFreshEntity(fox);
+            serverLevel.addFreshEntityWithPassengers(fox);
             this.level.broadcastEntityEvent(this.animal, (byte)18);
             if (this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
                 this.level.addFreshEntity(new ExperienceOrb(this.level, this.animal.getX(), this.animal.getY(), this.animal.getZ(), this.animal.getRandom().nextInt(7) + 1));

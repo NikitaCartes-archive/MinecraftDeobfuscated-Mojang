@@ -13,7 +13,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -29,6 +28,15 @@ import net.minecraft.world.level.block.state.properties.StructureMode;
 @Environment(value=EnvType.CLIENT)
 public class StructureBlockEditScreen
 extends Screen {
+    private static final Component NAME_LABEL = new TranslatableComponent("structure_block.structure_name");
+    private static final Component POSITION_LABEL = new TranslatableComponent("structure_block.position");
+    private static final Component SIZE_LABEL = new TranslatableComponent("structure_block.size");
+    private static final Component INTEGRITY_LABEL = new TranslatableComponent("structure_block.integrity");
+    private static final Component CUSTOM_DATA_LABEL = new TranslatableComponent("structure_block.custom_data");
+    private static final Component INCLUDE_ENTITIES_LABEL = new TranslatableComponent("structure_block.include_entities");
+    private static final Component DETECT_SIZE_LABEL = new TranslatableComponent("structure_block.detect_size");
+    private static final Component SHOW_AIR_LABEL = new TranslatableComponent("structure_block.show_air");
+    private static final Component SHOW_BOUNDING_BOX_LABEL = new TranslatableComponent("structure_block.show_boundingbox");
     private final StructureBlockEntity structure;
     private Mirror initialMirror = Mirror.NONE;
     private Rotation initialRotation = Rotation.NONE;
@@ -436,50 +444,39 @@ extends Screen {
 
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
-        int k;
-        String string;
         this.renderBackground(poseStack);
         StructureMode structureMode = this.structure.getMode();
-        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 10, 0xFFFFFF);
+        StructureBlockEditScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 10, 0xFFFFFF);
         if (structureMode != StructureMode.DATA) {
-            this.drawString(poseStack, this.font, I18n.get("structure_block.structure_name", new Object[0]), this.width / 2 - 153, 30, 0xA0A0A0);
+            StructureBlockEditScreen.drawString(poseStack, this.font, NAME_LABEL, this.width / 2 - 153, 30, 0xA0A0A0);
             this.nameEdit.render(poseStack, i, j, f);
         }
         if (structureMode == StructureMode.LOAD || structureMode == StructureMode.SAVE) {
-            this.drawString(poseStack, this.font, I18n.get("structure_block.position", new Object[0]), this.width / 2 - 153, 70, 0xA0A0A0);
+            StructureBlockEditScreen.drawString(poseStack, this.font, POSITION_LABEL, this.width / 2 - 153, 70, 0xA0A0A0);
             this.posXEdit.render(poseStack, i, j, f);
             this.posYEdit.render(poseStack, i, j, f);
             this.posZEdit.render(poseStack, i, j, f);
-            string = I18n.get("structure_block.include_entities", new Object[0]);
-            k = this.font.width(string);
-            this.drawString(poseStack, this.font, string, this.width / 2 + 154 - k, 150, 0xA0A0A0);
+            StructureBlockEditScreen.drawString(poseStack, this.font, INCLUDE_ENTITIES_LABEL, this.width / 2 + 154 - this.font.width(INCLUDE_ENTITIES_LABEL), 150, 0xA0A0A0);
         }
         if (structureMode == StructureMode.SAVE) {
-            this.drawString(poseStack, this.font, I18n.get("structure_block.size", new Object[0]), this.width / 2 - 153, 110, 0xA0A0A0);
+            StructureBlockEditScreen.drawString(poseStack, this.font, SIZE_LABEL, this.width / 2 - 153, 110, 0xA0A0A0);
             this.sizeXEdit.render(poseStack, i, j, f);
             this.sizeYEdit.render(poseStack, i, j, f);
             this.sizeZEdit.render(poseStack, i, j, f);
-            string = I18n.get("structure_block.detect_size", new Object[0]);
-            k = this.font.width(string);
-            this.drawString(poseStack, this.font, string, this.width / 2 + 154 - k, 110, 0xA0A0A0);
-            String string2 = I18n.get("structure_block.show_air", new Object[0]);
-            int l = this.font.width(string2);
-            this.drawString(poseStack, this.font, string2, this.width / 2 + 154 - l, 70, 0xA0A0A0);
+            StructureBlockEditScreen.drawString(poseStack, this.font, DETECT_SIZE_LABEL, this.width / 2 + 154 - this.font.width(DETECT_SIZE_LABEL), 110, 0xA0A0A0);
+            StructureBlockEditScreen.drawString(poseStack, this.font, SHOW_AIR_LABEL, this.width / 2 + 154 - this.font.width(SHOW_AIR_LABEL), 70, 0xA0A0A0);
         }
         if (structureMode == StructureMode.LOAD) {
-            this.drawString(poseStack, this.font, I18n.get("structure_block.integrity", new Object[0]), this.width / 2 - 153, 110, 0xA0A0A0);
+            StructureBlockEditScreen.drawString(poseStack, this.font, INTEGRITY_LABEL, this.width / 2 - 153, 110, 0xA0A0A0);
             this.integrityEdit.render(poseStack, i, j, f);
             this.seedEdit.render(poseStack, i, j, f);
-            string = I18n.get("structure_block.show_boundingbox", new Object[0]);
-            k = this.font.width(string);
-            this.drawString(poseStack, this.font, string, this.width / 2 + 154 - k, 70, 0xA0A0A0);
+            StructureBlockEditScreen.drawString(poseStack, this.font, SHOW_BOUNDING_BOX_LABEL, this.width / 2 + 154 - this.font.width(SHOW_BOUNDING_BOX_LABEL), 70, 0xA0A0A0);
         }
         if (structureMode == StructureMode.DATA) {
-            this.drawString(poseStack, this.font, I18n.get("structure_block.custom_data", new Object[0]), this.width / 2 - 153, 110, 0xA0A0A0);
+            StructureBlockEditScreen.drawString(poseStack, this.font, CUSTOM_DATA_LABEL, this.width / 2 - 153, 110, 0xA0A0A0);
             this.dataEdit.render(poseStack, i, j, f);
         }
-        string = "structure_block.mode_info." + structureMode.getSerializedName();
-        this.drawString(poseStack, this.font, I18n.get(string, new Object[0]), this.width / 2 - 153, 174, 0xA0A0A0);
+        StructureBlockEditScreen.drawString(poseStack, this.font, structureMode.getDisplayName(), this.width / 2 - 153, 174, 0xA0A0A0);
         super.render(poseStack, i, j, f);
     }
 

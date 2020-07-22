@@ -365,8 +365,8 @@ extends TamableAnimal {
         } else {
             this.setCatType(this.random.nextInt(10));
         }
-        Level level = serverLevelAccessor.getLevel();
-        if (level instanceof ServerLevel && ((ServerLevel)level).structureFeatureManager().getStructureAt(this.blockPosition(), true, StructureFeature.SWAMP_HUT).isValid()) {
+        ServerLevel level = serverLevelAccessor.getLevel();
+        if (level instanceof ServerLevel && level.structureFeatureManager().getStructureAt(this.blockPosition(), true, StructureFeature.SWAMP_HUT).isValid()) {
             this.setCatType(10);
             this.setPersistenceRequired();
         }

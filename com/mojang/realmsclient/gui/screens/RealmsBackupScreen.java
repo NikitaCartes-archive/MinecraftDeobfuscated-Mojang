@@ -27,6 +27,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsLabel;
@@ -43,10 +44,15 @@ extends RealmsScreen {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final ResourceLocation PLUS_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/plus_icon.png");
     private static final ResourceLocation RESTORE_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/restore_icon.png");
+    private static final Component RESTORE_TOOLTIP = new TranslatableComponent("mco.backup.button.restore");
+    private static final Component HAS_CHANGES_TOOLTIP = new TranslatableComponent("mco.backup.changes.tooltip");
+    private static final Component TITLE = new TranslatableComponent("mco.configure.world.backup");
+    private static final Component NO_BACKUPS_LABEL = new TranslatableComponent("mco.backup.nobackups");
     private static int lastScrollPosition = -1;
     private final RealmsConfigureWorldScreen lastScreen;
     private List<Backup> backups = Collections.emptyList();
-    private String toolTip;
+    @Nullable
+    private Component toolTip;
     private BackupObjectSelectionList backupObjectSelectionList;
     private int selectedBackup = -1;
     private final int slotId;
@@ -209,9 +215,9 @@ extends RealmsScreen {
         this.renderBackground(poseStack);
         this.backupObjectSelectionList.render(poseStack, i, j, f);
         this.titleLabel.render(this, poseStack);
-        this.font.draw(poseStack, I18n.get("mco.configure.world.backup", new Object[0]), (float)((this.width - 150) / 2 - 90), 20.0f, 0xA0A0A0);
+        this.font.draw(poseStack, TITLE, (float)((this.width - 150) / 2 - 90), 20.0f, 0xA0A0A0);
         if (this.noBackups.booleanValue()) {
-            this.font.draw(poseStack, I18n.get("mco.backup.nobackups", new Object[0]), 20.0f, (float)(this.height / 2 - 10), 0xFFFFFF);
+            this.font.draw(poseStack, NO_BACKUPS_LABEL, 20.0f, (float)(this.height / 2 - 10), 0xFFFFFF);
         }
         this.downloadButton.active = this.noBackups == false;
         super.render(poseStack, i, j, f);
@@ -220,15 +226,15 @@ extends RealmsScreen {
         }
     }
 
-    protected void renderMousehoverTooltip(PoseStack poseStack, String string, int i, int j) {
-        if (string == null) {
+    protected void renderMousehoverTooltip(PoseStack poseStack, @Nullable Component component, int i, int j) {
+        if (component == null) {
             return;
         }
         int k = i + 12;
         int l = j - 12;
-        int m = this.font.width(string);
+        int m = this.font.width(component);
         this.fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
-        this.font.drawShadow(poseStack, string, (float)k, (float)l, 0xFFFFFF);
+        this.font.drawShadow(poseStack, component, (float)k, (float)l, 0xFFFFFF);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -275,7 +281,7 @@ extends RealmsScreen {
             GuiComponent.blit(poseStack, i * 2, j * 2, 0.0f, f, 23, 28, 23, 56);
             RenderSystem.popMatrix();
             if (bl) {
-                RealmsBackupScreen.this.toolTip = I18n.get("mco.backup.button.restore", new Object[0]);
+                RealmsBackupScreen.this.toolTip = RESTORE_TOOLTIP;
             }
         }
 
@@ -289,7 +295,7 @@ extends RealmsScreen {
             GuiComponent.blit(poseStack, i * 2, j * 2, 0.0f, f, 15, 15, 15, 30);
             RenderSystem.popMatrix();
             if (bl) {
-                RealmsBackupScreen.this.toolTip = I18n.get("mco.backup.changes.tooltip", new Object[0]);
+                RealmsBackupScreen.this.toolTip = HAS_CHANGES_TOOLTIP;
             }
         }
     }

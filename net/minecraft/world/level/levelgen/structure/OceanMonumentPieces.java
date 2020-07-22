@@ -1708,7 +1708,7 @@ public class OceanMonumentPieces {
                 elderGuardian.heal(elderGuardian.getMaxHealth());
                 elderGuardian.moveTo((double)l + 0.5, m, (double)n + 0.5, 0.0f, 0.0f);
                 elderGuardian.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(elderGuardian.blockPosition()), MobSpawnType.STRUCTURE, null, null);
-                worldGenLevel.addFreshEntity(elderGuardian);
+                worldGenLevel.addFreshEntityWithPassengers(elderGuardian);
                 return true;
             }
             return false;

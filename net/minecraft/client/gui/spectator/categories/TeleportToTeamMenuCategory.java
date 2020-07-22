@@ -30,6 +30,8 @@ import net.minecraft.world.scores.PlayerTeam;
 public class TeleportToTeamMenuCategory
 implements SpectatorMenuCategory,
 SpectatorMenuItem {
+    private static final Component TELEPORT_TEXT = new TranslatableComponent("spectatorMenu.team_teleport");
+    private static final Component TELEPORT_PROMPT = new TranslatableComponent("spectatorMenu.team_teleport.prompt");
     private final List<SpectatorMenuItem> items = Lists.newArrayList();
 
     public TeleportToTeamMenuCategory() {
@@ -46,7 +48,7 @@ SpectatorMenuItem {
 
     @Override
     public Component getPrompt() {
-        return new TranslatableComponent("spectatorMenu.team_teleport.prompt");
+        return TELEPORT_PROMPT;
     }
 
     @Override
@@ -56,7 +58,7 @@ SpectatorMenuItem {
 
     @Override
     public Component getName() {
-        return new TranslatableComponent("spectatorMenu.team_teleport");
+        return TELEPORT_TEXT;
     }
 
     @Override

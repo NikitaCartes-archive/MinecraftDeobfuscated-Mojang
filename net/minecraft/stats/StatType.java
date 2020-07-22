@@ -9,13 +9,19 @@ import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatFormatter;
+import org.jetbrains.annotations.Nullable;
 
 public class StatType<T>
 implements Iterable<Stat<T>> {
     private final Registry<T> registry;
     private final Map<T, Stat<T>> map = new IdentityHashMap<T, Stat<T>>();
+    @Nullable
+    @Environment(value=EnvType.CLIENT)
+    private Component displayName;
 
     public StatType(Registry<T> registry) {
         this.registry = registry;
@@ -46,6 +52,14 @@ implements Iterable<Stat<T>> {
     @Environment(value=EnvType.CLIENT)
     public String getTranslationKey() {
         return "stat_type." + Registry.STAT_TYPE.getKey(this).toString().replace(':', '.');
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public Component getDisplayName() {
+        if (this.displayName == null) {
+            this.displayName = new TranslatableComponent(this.getTranslationKey());
+        }
+        return this.displayName;
     }
 }
 

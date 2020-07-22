@@ -42,8 +42,8 @@ Runnable {
         this.longRunningMcoTaskScreen.error(component);
     }
 
-    public void setTitle(String string) {
-        this.longRunningMcoTaskScreen.setTitle(string);
+    public void setTitle(Component component) {
+        this.longRunningMcoTaskScreen.setTitle(component);
     }
 
     public boolean aborted() {

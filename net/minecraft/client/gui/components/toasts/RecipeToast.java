@@ -11,13 +11,16 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 
 @Environment(value=EnvType.CLIENT)
 public class RecipeToast
 implements Toast {
+    private static final Component TITLE_TEXT = new TranslatableComponent("recipe.toast.title");
+    private static final Component DESCRIPTION_TEXT = new TranslatableComponent("recipe.toast.description");
     private final List<Recipe<?>> recipes = Lists.newArrayList();
     private long lastChanged;
     private boolean changed;
@@ -38,8 +41,8 @@ implements Toast {
         toastComponent.getMinecraft().getTextureManager().bind(TEXTURE);
         RenderSystem.color3f(1.0f, 1.0f, 1.0f);
         toastComponent.blit(poseStack, 0, 0, 0, 32, this.width(), this.height());
-        toastComponent.getMinecraft().font.draw(poseStack, I18n.get("recipe.toast.title", new Object[0]), 30.0f, 7.0f, -11534256);
-        toastComponent.getMinecraft().font.draw(poseStack, I18n.get("recipe.toast.description", new Object[0]), 30.0f, 18.0f, -16777216);
+        toastComponent.getMinecraft().font.draw(poseStack, TITLE_TEXT, 30.0f, 7.0f, -11534256);
+        toastComponent.getMinecraft().font.draw(poseStack, DESCRIPTION_TEXT, 30.0f, 18.0f, -16777216);
         Recipe<?> recipe = this.recipes.get((int)(l / Math.max(1L, 5000L / (long)this.recipes.size()) % (long)this.recipes.size()));
         ItemStack itemStack = recipe.getToastSymbol();
         RenderSystem.pushMatrix();
@@ -50,10 +53,9 @@ implements Toast {
         return l - this.lastChanged >= 5000L ? Toast.Visibility.HIDE : Toast.Visibility.SHOW;
     }
 
-    public void addItem(Recipe<?> recipe) {
-        if (this.recipes.add(recipe)) {
-            this.changed = true;
-        }
+    private void addItem(Recipe<?> recipe) {
+        this.recipes.add(recipe);
+        this.changed = true;
     }
 
     public static void addOrUpdate(ToastComponent toastComponent, Recipe<?> recipe) {

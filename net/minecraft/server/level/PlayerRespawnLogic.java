@@ -38,7 +38,7 @@ public class PlayerRespawnLogic {
             BlockState blockState2 = serverLevel.getBlockState(mutableBlockPos);
             if (!blockState2.getFluidState().isEmpty()) break;
             if (!blockState2.equals(blockState)) continue;
-            return mutableBlockPos.above().immutable();
+            return ((BlockPos)mutableBlockPos.above()).immutable();
         }
         return null;
     }

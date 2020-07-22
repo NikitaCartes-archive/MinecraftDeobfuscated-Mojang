@@ -28,6 +28,9 @@ public class SpectatorMenu {
     private static final SpectatorMenuItem SCROLL_LEFT = new ScrollMenuItem(-1, true);
     private static final SpectatorMenuItem SCROLL_RIGHT_ENABLED = new ScrollMenuItem(1, true);
     private static final SpectatorMenuItem SCROLL_RIGHT_DISABLED = new ScrollMenuItem(1, false);
+    private static final Component CLOSE_MENU_TEXT = new TranslatableComponent("spectatorMenu.close");
+    private static final Component PREVIOUS_PAGE_TEXT = new TranslatableComponent("spectatorMenu.previous_page");
+    private static final Component NEXT_PAGE_TEXT = new TranslatableComponent("spectatorMenu.next_page");
     public static final SpectatorMenuItem EMPTY_SLOT = new SpectatorMenuItem(){
 
         @Override
@@ -140,10 +143,7 @@ public class SpectatorMenu {
 
         @Override
         public Component getName() {
-            if (this.direction < 0) {
-                return new TranslatableComponent("spectatorMenu.previous_page");
-            }
-            return new TranslatableComponent("spectatorMenu.next_page");
+            return this.direction < 0 ? PREVIOUS_PAGE_TEXT : NEXT_PAGE_TEXT;
         }
 
         @Override
@@ -175,7 +175,7 @@ public class SpectatorMenu {
 
         @Override
         public Component getName() {
-            return new TranslatableComponent("spectatorMenu.close");
+            return CLOSE_MENU_TEXT;
         }
 
         @Override

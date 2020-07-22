@@ -12,7 +12,7 @@ import com.mojang.realmsclient.util.task.LongRunningTask;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(value=EnvType.CLIENT)
 public class OpenServerTask
@@ -31,7 +31,7 @@ extends LongRunningTask {
 
     @Override
     public void run() {
-        this.setTitle(I18n.get("mco.configure.world.opening", new Object[0]));
+        this.setTitle(new TranslatableComponent("mco.configure.world.opening"));
         RealmsClient realmsClient = RealmsClient.create();
         for (int i = 0; i < 25; ++i) {
             if (this.aborted()) {

@@ -197,7 +197,7 @@ extends AbstractContainerScreen<EnchantmentMenu> {
                     list.add(mutableComponent2.withStyle(ChatFormatting.GRAY));
                 }
             }
-            this.renderTooltip(poseStack, list, i, j);
+            this.renderComponentTooltip(poseStack, list, i, j);
             break;
         }
     }

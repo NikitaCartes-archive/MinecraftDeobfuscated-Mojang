@@ -34,6 +34,9 @@ implements TickableWidget {
     public static final ResourceLocation DEFAULT_WORLD_SLOT_1 = new ResourceLocation("minecraft", "textures/gui/title/background/panorama_0.png");
     public static final ResourceLocation DEFAULT_WORLD_SLOT_2 = new ResourceLocation("minecraft", "textures/gui/title/background/panorama_2.png");
     public static final ResourceLocation DEFAULT_WORLD_SLOT_3 = new ResourceLocation("minecraft", "textures/gui/title/background/panorama_3.png");
+    private static final Component SLOT_ACTIVE_TOOLTIP = new TranslatableComponent("mco.configure.world.slot.tooltip.active");
+    private static final Component SWITCH_TO_MINIGAME_SLOT_TOOLTIP = new TranslatableComponent("mco.configure.world.slot.tooltip.minigame");
+    private static final Component SWITCH_TO_WORLD_SLOT_TOOLTIP = new TranslatableComponent("mco.configure.world.slot.tooltip");
     private final Supplier<RealmsServer> serverDataProvider;
     private final Consumer<Component> toolTipSetter;
     private final int slotIndex;
@@ -107,7 +110,7 @@ implements TickableWidget {
             return Pair.of(null, new TextComponent(string));
         }
         Component component = bl2 ? (bl ? TextComponent.EMPTY : new TextComponent(" ").append(string).append(" ").append(realmsServer.minigameName)) : new TextComponent(" ").append(string);
-        TranslatableComponent component2 = action == Action.JOIN ? new TranslatableComponent("mco.configure.world.slot.tooltip.active") : (bl2 ? new TranslatableComponent("mco.configure.world.slot.tooltip.minigame") : new TranslatableComponent("mco.configure.world.slot.tooltip"));
+        Component component2 = action == Action.JOIN ? SLOT_ACTIVE_TOOLTIP : (bl2 ? SWITCH_TO_MINIGAME_SLOT_TOOLTIP : SWITCH_TO_WORLD_SLOT_TOOLTIP);
         MutableComponent component3 = component2.copy().append(component);
         return Pair.of(component2, component3);
     }
@@ -158,7 +161,7 @@ implements TickableWidget {
             RenderSystem.color4f(0.56f, 0.56f, 0.56f, 1.0f);
         }
         RealmsWorldSlotButton.blit(poseStack, i, j, 0.0f, 0.0f, 80, 80, 80, 80);
-        this.drawCenteredString(poseStack, minecraft.font, string, i + 40, j + 66, 0xFFFFFF);
+        RealmsWorldSlotButton.drawCenteredString(poseStack, minecraft.font, string, i + 40, j + 66, 0xFFFFFF);
     }
 
     @Environment(value=EnvType.CLIENT)

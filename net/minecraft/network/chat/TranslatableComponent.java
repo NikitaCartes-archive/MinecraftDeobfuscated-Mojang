@@ -57,14 +57,14 @@ implements ContextAwareComponent {
         this.decomposedParts.clear();
         String string = language.getOrDefault(this.key);
         try {
-            this.decomposeTemplate(language.reorder(string, true), language);
+            this.decomposeTemplate(string);
         } catch (TranslatableFormatException translatableFormatException) {
             this.decomposedParts.clear();
             this.decomposedParts.add(FormattedText.of(string));
         }
     }
 
-    private void decomposeTemplate(String string, Language language) {
+    private void decomposeTemplate(String string) {
         Matcher matcher = FORMAT_PATTERN.matcher(string);
         try {
             int i = 0;
@@ -89,7 +89,7 @@ implements ContextAwareComponent {
                     String string4 = matcher.group(1);
                     int n = m = string4 != null ? Integer.parseInt(string4) - 1 : i++;
                     if (m < this.args.length) {
-                        this.decomposedParts.add(this.getArgument(m, language));
+                        this.decomposedParts.add(this.getArgument(m));
                     }
                 } else {
                     throw new TranslatableFormatException(this, "Unsupported format: '" + string3 + "'");
@@ -108,7 +108,7 @@ implements ContextAwareComponent {
         }
     }
 
-    private FormattedText getArgument(int i, Language language) {
+    private FormattedText getArgument(int i) {
         if (i >= this.args.length) {
             throw new TranslatableFormatException(this, i);
         }
@@ -116,7 +116,7 @@ implements ContextAwareComponent {
         if (object instanceof Component) {
             return (Component)object;
         }
-        return object == null ? TEXT_NULL : FormattedText.of(language.reorder(object.toString(), false));
+        return object == null ? TEXT_NULL : FormattedText.of(object.toString());
     }
 
     @Override

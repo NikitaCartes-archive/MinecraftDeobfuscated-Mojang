@@ -52,7 +52,7 @@ public class PiglinBruteAi {
     }
 
     private static void initCoreActivity(PiglinBrute piglinBrute, Brain<PiglinBrute> brain) {
-        brain.addActivity(Activity.CORE, 0, ImmutableList.of(new LookAtTargetSink(45, 90), new MoveToTargetSink(200), new InteractWithDoor(), new StopBeingAngryIfTargetDead()));
+        brain.addActivity(Activity.CORE, 0, ImmutableList.of(new LookAtTargetSink(45, 90), new MoveToTargetSink(), new InteractWithDoor(), new StopBeingAngryIfTargetDead()));
     }
 
     private static void initIdleActivity(PiglinBrute piglinBrute, Brain<PiglinBrute> brain) {

@@ -4,6 +4,10 @@
 package net.minecraft.world.level.levelgen.synth;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.util.Pair;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleList;
+import it.unimi.dsi.fastutil.ints.IntBidirectionalIterator;
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSortedSet;
 import java.util.List;
@@ -17,8 +21,9 @@ import org.jetbrains.annotations.Nullable;
 public class PerlinNoise
 implements SurfaceNoise {
     private final ImprovedNoise[] noiseLevels;
-    private final double highestFreqValueFactor;
-    private final double highestFreqInputFactor;
+    private final DoubleList amplitudes;
+    private final double lowestFreqValueFactor;
+    private final double lowestFreqInputFactor;
 
     public PerlinNoise(WorldgenRandom worldgenRandom, IntStream intStream) {
         this(worldgenRandom, intStream.boxed().collect(ImmutableList.toImmutableList()));
@@ -28,7 +33,11 @@ implements SurfaceNoise {
         this(worldgenRandom, new IntRBTreeSet(list));
     }
 
-    private PerlinNoise(WorldgenRandom worldgenRandom, IntSortedSet intSortedSet) {
+    public static PerlinNoise create(WorldgenRandom worldgenRandom, int i, DoubleList doubleList) {
+        return new PerlinNoise(worldgenRandom, Pair.of(i, doubleList));
+    }
+
+    private static Pair<Integer, DoubleList> makeAmplitudes(IntSortedSet intSortedSet) {
         int j;
         if (intSortedSet.isEmpty()) {
             throw new IllegalArgumentException("Need some octaves!");
@@ -38,32 +47,60 @@ implements SurfaceNoise {
         if (k < 1) {
             throw new IllegalArgumentException("Total number of octaves needs to be >= 1");
         }
-        ImprovedNoise improvedNoise = new ImprovedNoise(worldgenRandom);
-        int l = j;
-        this.noiseLevels = new ImprovedNoise[k];
-        if (l >= 0 && l < k && intSortedSet.contains(0)) {
-            this.noiseLevels[l] = improvedNoise;
+        DoubleArrayList doubleList = new DoubleArrayList(new double[k]);
+        IntBidirectionalIterator intBidirectionalIterator = intSortedSet.iterator();
+        while (intBidirectionalIterator.hasNext()) {
+            int l = intBidirectionalIterator.nextInt();
+            doubleList.set(l + i, 1.0);
         }
-        for (int m = l + 1; m < k; ++m) {
-            if (m >= 0 && intSortedSet.contains(l - m)) {
-                this.noiseLevels[m] = new ImprovedNoise(worldgenRandom);
+        return Pair.of(-i, doubleList);
+    }
+
+    private PerlinNoise(WorldgenRandom worldgenRandom, IntSortedSet intSortedSet) {
+        this(worldgenRandom, PerlinNoise.makeAmplitudes(intSortedSet));
+    }
+
+    private PerlinNoise(WorldgenRandom worldgenRandom, Pair<Integer, DoubleList> pair) {
+        double d;
+        int i = pair.getFirst();
+        this.amplitudes = pair.getSecond();
+        ImprovedNoise improvedNoise = new ImprovedNoise(worldgenRandom);
+        int j = this.amplitudes.size();
+        int k = -i;
+        this.noiseLevels = new ImprovedNoise[j];
+        if (k >= 0 && k < j && (d = this.amplitudes.getDouble(k)) != 0.0) {
+            this.noiseLevels[k] = improvedNoise;
+        }
+        for (int l = k - 1; l >= 0; --l) {
+            if (l < j) {
+                double e = this.amplitudes.getDouble(l);
+                if (e != 0.0) {
+                    this.noiseLevels[l] = new ImprovedNoise(worldgenRandom);
+                    continue;
+                }
+                worldgenRandom.consumeCount(262);
                 continue;
             }
             worldgenRandom.consumeCount(262);
         }
-        if (j > 0) {
-            long n = (long)(improvedNoise.noise(0.0, 0.0, 0.0, 0.0, 0.0) * 9.223372036854776E18);
-            WorldgenRandom worldgenRandom2 = new WorldgenRandom(n);
-            for (int o = l - 1; o >= 0; --o) {
-                if (o < k && intSortedSet.contains(l - o)) {
-                    this.noiseLevels[o] = new ImprovedNoise(worldgenRandom2);
+        if (k < j - 1) {
+            long m = (long)(improvedNoise.noise(0.0, 0.0, 0.0, 0.0, 0.0) * 9.223372036854776E18);
+            WorldgenRandom worldgenRandom2 = new WorldgenRandom(m);
+            for (int n = k + 1; n < j; ++n) {
+                if (n >= 0) {
+                    double f = this.amplitudes.getDouble(n);
+                    if (f != 0.0) {
+                        this.noiseLevels[n] = new ImprovedNoise(worldgenRandom2);
+                        continue;
+                    }
+                    worldgenRandom2.consumeCount(262);
                     continue;
                 }
                 worldgenRandom2.consumeCount(262);
             }
         }
-        this.highestFreqInputFactor = Math.pow(2.0, j);
-        this.highestFreqValueFactor = 1.0 / (Math.pow(2.0, k) - 1.0);
+        this.lowestFreqInputFactor = Math.pow(2.0, -k);
+        this.lowestFreqValueFactor = Math.pow(2.0, j - 1) / (Math.pow(2.0, j) - 1.0);
     }
 
     public double getValue(double d, double e, double f) {
@@ -72,21 +109,22 @@ implements SurfaceNoise {
 
     public double getValue(double d, double e, double f, double g, double h, boolean bl) {
         double i = 0.0;
-        double j = this.highestFreqInputFactor;
-        double k = this.highestFreqValueFactor;
-        for (ImprovedNoise improvedNoise : this.noiseLevels) {
+        double j = this.lowestFreqInputFactor;
+        double k = this.lowestFreqValueFactor;
+        for (int l = 0; l < this.noiseLevels.length; ++l) {
+            ImprovedNoise improvedNoise = this.noiseLevels[l];
             if (improvedNoise != null) {
-                i += improvedNoise.noise(PerlinNoise.wrap(d * j), bl ? -improvedNoise.yo : PerlinNoise.wrap(e * j), PerlinNoise.wrap(f * j), g * j, h * j) * k;
+                i += this.amplitudes.getDouble(l) * improvedNoise.noise(PerlinNoise.wrap(d * j), bl ? -improvedNoise.yo : PerlinNoise.wrap(e * j), PerlinNoise.wrap(f * j), g * j, h * j) * k;
             }
-            j /= 2.0;
-            k *= 2.0;
+            j *= 2.0;
+            k /= 2.0;
         }
         return i;
     }
 
     @Nullable
     public ImprovedNoise getOctaveNoise(int i) {
-        return this.noiseLevels[i];
+        return this.noiseLevels[this.noiseLevels.length - 1 - i];
     }
 
     public static double wrap(double d) {

@@ -14,7 +14,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -23,6 +22,8 @@ import net.minecraft.util.StringUtil;
 @Environment(value=EnvType.CLIENT)
 public class EditServerScreen
 extends Screen {
+    private static final Component NAME_LABEL = new TranslatableComponent("addServer.enterName");
+    private static final Component IP_LABEL = new TranslatableComponent("addServer.enterIp");
     private Button addButton;
     private final BooleanConsumer callback;
     private final ServerData serverData;
@@ -125,9 +126,9 @@ extends Screen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderBackground(poseStack);
-        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 17, 0xFFFFFF);
-        this.drawString(poseStack, this.font, I18n.get("addServer.enterName", new Object[0]), this.width / 2 - 100, 53, 0xA0A0A0);
-        this.drawString(poseStack, this.font, I18n.get("addServer.enterIp", new Object[0]), this.width / 2 - 100, 94, 0xA0A0A0);
+        EditServerScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 17, 0xFFFFFF);
+        EditServerScreen.drawString(poseStack, this.font, NAME_LABEL, this.width / 2 - 100, 53, 0xA0A0A0);
+        EditServerScreen.drawString(poseStack, this.font, IP_LABEL, this.width / 2 - 100, 94, 0xA0A0A0);
         this.nameEdit.render(poseStack, i, j, f);
         this.ipEdit.render(poseStack, i, j, f);
         super.render(poseStack, i, j, f);

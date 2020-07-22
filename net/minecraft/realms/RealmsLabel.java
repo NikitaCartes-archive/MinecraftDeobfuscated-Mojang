@@ -27,7 +27,7 @@ implements GuiEventListener {
     }
 
     public void render(Screen screen, PoseStack poseStack) {
-        screen.drawCenteredString(poseStack, Minecraft.getInstance().font, this.text, this.x, this.y, this.color);
+        Screen.drawCenteredString(poseStack, Minecraft.getInstance().font, this.text, this.x, this.y, this.color);
     }
 
     public String getText() {

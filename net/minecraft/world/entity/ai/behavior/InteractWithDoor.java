@@ -7,8 +7,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
@@ -18,75 +18,131 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
+import org.jetbrains.annotations.Nullable;
 
 public class InteractWithDoor
 extends Behavior<LivingEntity> {
+    @Nullable
+    private Node lastCheckedNode;
+    private int remainingCooldown;
+
     public InteractWithDoor() {
-        super(ImmutableMap.of(MemoryModuleType.PATH, MemoryStatus.VALUE_PRESENT, MemoryModuleType.INTERACTABLE_DOORS, MemoryStatus.VALUE_PRESENT, MemoryModuleType.OPENED_DOORS, MemoryStatus.REGISTERED));
+        super(ImmutableMap.of(MemoryModuleType.PATH, MemoryStatus.VALUE_PRESENT, MemoryModuleType.DOORS_TO_CLOSE, MemoryStatus.REGISTERED));
+    }
+
+    @Override
+    protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity) {
+        Path path = livingEntity.getBrain().getMemory(MemoryModuleType.PATH).get();
+        if (path.notStarted() || path.isDone()) {
+            return false;
+        }
+        if (!Objects.equals(this.lastCheckedNode, path.currentNode())) {
+            this.remainingCooldown = 20;
+            return true;
+        }
+        if (this.remainingCooldown > 0) {
+            --this.remainingCooldown;
+        }
+        return this.remainingCooldown == 0;
     }
 
     @Override
     protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
-        Brain<?> brain = livingEntity.getBrain();
-        Path path = brain.getMemory(MemoryModuleType.PATH).get();
-        List<GlobalPos> list = brain.getMemory(MemoryModuleType.INTERACTABLE_DOORS).get();
-        List<BlockPos> list2 = path.getNodes().stream().map(node -> new BlockPos(node.x, node.y, node.z)).collect(Collectors.toList());
-        Set<BlockPos> set = this.getDoorsThatAreOnMyPath(serverLevel, list, list2);
-        int i = path.getIndex() - 1;
-        this.openOrCloseDoors(serverLevel, list2, set, i, livingEntity, brain);
-    }
-
-    private Set<BlockPos> getDoorsThatAreOnMyPath(ServerLevel serverLevel, List<GlobalPos> list, List<BlockPos> list2) {
-        return list.stream().filter(globalPos -> globalPos.dimension() == serverLevel.dimension()).map(GlobalPos::pos).filter(list2::contains).collect(Collectors.toSet());
-    }
-
-    private void openOrCloseDoors(ServerLevel serverLevel, List<BlockPos> list, Set<BlockPos> set, int i, LivingEntity livingEntity, Brain<?> brain) {
-        set.forEach(blockPos -> {
-            int j = list.indexOf(blockPos);
-            BlockState blockState = serverLevel.getBlockState((BlockPos)blockPos);
-            Block block = blockState.getBlock();
-            if (BlockTags.WOODEN_DOORS.contains(block) && block instanceof DoorBlock) {
-                boolean bl = j >= i;
-                ((DoorBlock)block).setOpen(serverLevel, (BlockPos)blockPos, bl);
-                GlobalPos globalPos = GlobalPos.of(serverLevel.dimension(), blockPos);
-                if (!brain.getMemory(MemoryModuleType.OPENED_DOORS).isPresent() && bl) {
-                    brain.setMemory(MemoryModuleType.OPENED_DOORS, Sets.newHashSet(globalPos));
-                } else {
-                    brain.getMemory(MemoryModuleType.OPENED_DOORS).ifPresent(set -> {
-                        if (bl) {
-                            set.add(globalPos);
-                        } else {
-                            set.remove(globalPos);
-                        }
-                    });
-                }
+        DoorBlock doorBlock2;
+        BlockPos blockPos2;
+        BlockState blockState2;
+        Path path = livingEntity.getBrain().getMemory(MemoryModuleType.PATH).get();
+        this.lastCheckedNode = path.currentNode();
+        Node node = path.previousNode();
+        Node node2 = path.currentNode();
+        BlockPos blockPos = node.asBlockPos();
+        BlockState blockState = serverLevel.getBlockState(blockPos);
+        if (blockState.is(BlockTags.WOODEN_DOORS)) {
+            DoorBlock doorBlock = (DoorBlock)blockState.getBlock();
+            if (!doorBlock.isOpen(blockState)) {
+                doorBlock.setOpen(serverLevel, blockState, blockPos, true);
             }
-        });
-        InteractWithDoor.closeAllOpenedDoors(serverLevel, list, i, livingEntity, brain);
+            this.rememberDoorToClose(serverLevel, livingEntity, blockPos);
+        }
+        if ((blockState2 = serverLevel.getBlockState(blockPos2 = node2.asBlockPos())).is(BlockTags.WOODEN_DOORS) && !(doorBlock2 = (DoorBlock)blockState2.getBlock()).isOpen(blockState2)) {
+            doorBlock2.setOpen(serverLevel, blockState2, blockPos2, true);
+            this.rememberDoorToClose(serverLevel, livingEntity, blockPos2);
+        }
+        InteractWithDoor.closeDoorsThatIHaveOpenedOrPassedThrough(serverLevel, livingEntity, node, node2);
     }
 
-    public static void closeAllOpenedDoors(ServerLevel serverLevel, List<BlockPos> list, int i, LivingEntity livingEntity, Brain<?> brain) {
-        brain.getMemory(MemoryModuleType.OPENED_DOORS).ifPresent(set -> {
-            Iterator iterator = set.iterator();
+    public static void closeDoorsThatIHaveOpenedOrPassedThrough(ServerLevel serverLevel, LivingEntity livingEntity, @Nullable Node node, @Nullable Node node2) {
+        Brain<Set<GlobalPos>> brain = livingEntity.getBrain();
+        if (brain.hasMemoryValue(MemoryModuleType.DOORS_TO_CLOSE)) {
+            Iterator<GlobalPos> iterator = brain.getMemory(MemoryModuleType.DOORS_TO_CLOSE).get().iterator();
             while (iterator.hasNext()) {
-                GlobalPos globalPos = (GlobalPos)iterator.next();
+                GlobalPos globalPos = iterator.next();
                 BlockPos blockPos = globalPos.pos();
-                int j = list.indexOf(blockPos);
-                if (serverLevel.dimension() != globalPos.dimension()) {
+                if (node != null && node.asBlockPos().equals(blockPos) || node2 != null && node2.asBlockPos().equals(blockPos)) continue;
+                if (InteractWithDoor.isDoorTooFarAway(serverLevel, livingEntity, globalPos)) {
                     iterator.remove();
                     continue;
                 }
                 BlockState blockState = serverLevel.getBlockState(blockPos);
-                Block block = blockState.getBlock();
-                if (!BlockTags.WOODEN_DOORS.contains(block) || !(block instanceof DoorBlock) || j >= i || !blockPos.closerThan(livingEntity.position(), 4.0)) continue;
-                ((DoorBlock)block).setOpen(serverLevel, blockPos, false);
+                if (!blockState.is(BlockTags.WOODEN_DOORS)) {
+                    iterator.remove();
+                    continue;
+                }
+                DoorBlock doorBlock = (DoorBlock)blockState.getBlock();
+                if (!doorBlock.isOpen(blockState)) {
+                    iterator.remove();
+                    continue;
+                }
+                if (InteractWithDoor.areOtherMobsComingThroughDoor(serverLevel, livingEntity, blockPos)) {
+                    iterator.remove();
+                    continue;
+                }
+                doorBlock.setOpen(serverLevel, blockState, blockPos, false);
                 iterator.remove();
             }
-        });
+        }
+    }
+
+    private static boolean areOtherMobsComingThroughDoor(ServerLevel serverLevel, LivingEntity livingEntity3, BlockPos blockPos) {
+        Brain<List<LivingEntity>> brain = livingEntity3.getBrain();
+        if (!brain.hasMemoryValue(MemoryModuleType.LIVING_ENTITIES)) {
+            return false;
+        }
+        return brain.getMemory(MemoryModuleType.LIVING_ENTITIES).get().stream().filter(livingEntity2 -> livingEntity2.getType() == livingEntity3.getType()).filter(livingEntity -> blockPos.closerThan(livingEntity.position(), 2.0)).anyMatch(livingEntity -> InteractWithDoor.isMobComingThroughDoor(serverLevel, livingEntity, blockPos));
+    }
+
+    private static boolean isMobComingThroughDoor(ServerLevel serverLevel, LivingEntity livingEntity, BlockPos blockPos) {
+        if (!livingEntity.getBrain().hasMemoryValue(MemoryModuleType.PATH)) {
+            return false;
+        }
+        Path path = livingEntity.getBrain().getMemory(MemoryModuleType.PATH).get();
+        if (path.isDone()) {
+            return false;
+        }
+        Node node = path.previousNode();
+        if (node == null) {
+            return false;
+        }
+        Node node2 = path.currentNode();
+        return blockPos.equals(node.asBlockPos()) || blockPos.equals(node2.asBlockPos());
+    }
+
+    private static boolean isDoorTooFarAway(ServerLevel serverLevel, LivingEntity livingEntity, GlobalPos globalPos) {
+        return globalPos.dimension() != serverLevel.dimension() || !globalPos.pos().closerThan(livingEntity.position(), 2.0);
+    }
+
+    private void rememberDoorToClose(ServerLevel serverLevel, LivingEntity livingEntity, BlockPos blockPos) {
+        Brain<?> brain = livingEntity.getBrain();
+        GlobalPos globalPos = GlobalPos.of(serverLevel.dimension(), blockPos);
+        if (brain.getMemory(MemoryModuleType.DOORS_TO_CLOSE).isPresent()) {
+            brain.getMemory(MemoryModuleType.DOORS_TO_CLOSE).get().add(globalPos);
+        } else {
+            brain.setMemory(MemoryModuleType.DOORS_TO_CLOSE, Sets.newHashSet(globalPos));
+        }
     }
 }
 

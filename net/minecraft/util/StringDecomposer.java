@@ -1,7 +1,7 @@
 /*
  * Decompiled with CFR 0.2.0 (FabricMC d28b102d).
  */
-package net.minecraft.client;
+package net.minecraft.util;
 
 import java.util.Optional;
 import net.fabricmc.api.EnvType;
@@ -9,73 +9,74 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSink;
 import net.minecraft.util.Unit;
 
 @Environment(value=EnvType.CLIENT)
 public class StringDecomposer {
     private static final Optional<Object> STOP_ITERATION = Optional.of(Unit.INSTANCE);
 
-    private static boolean feedChar(Style style, Output output, int i, char c) {
+    private static boolean feedChar(Style style, FormattedCharSink formattedCharSink, int i, char c) {
         if (Character.isSurrogate(c)) {
-            return output.onChar(i, style, 65533);
+            return formattedCharSink.accept(i, style, 65533);
         }
-        return output.onChar(i, style, c);
+        return formattedCharSink.accept(i, style, c);
     }
 
-    public static boolean iterate(String string, Style style, Output output) {
+    public static boolean iterate(String string, Style style, FormattedCharSink formattedCharSink) {
         int i = string.length();
         for (int j = 0; j < i; ++j) {
             char c = string.charAt(j);
             if (Character.isHighSurrogate(c)) {
                 if (j + 1 >= i) {
-                    if (output.onChar(j, style, 65533)) break;
+                    if (formattedCharSink.accept(j, style, 65533)) break;
                     return false;
                 }
                 char d = string.charAt(j + 1);
                 if (Character.isLowSurrogate(d)) {
-                    if (!output.onChar(j, style, Character.toCodePoint(c, d))) {
+                    if (!formattedCharSink.accept(j, style, Character.toCodePoint(c, d))) {
                         return false;
                     }
                     ++j;
                     continue;
                 }
-                if (output.onChar(j, style, 65533)) continue;
+                if (formattedCharSink.accept(j, style, 65533)) continue;
                 return false;
             }
-            if (StringDecomposer.feedChar(style, output, j, c)) continue;
+            if (StringDecomposer.feedChar(style, formattedCharSink, j, c)) continue;
             return false;
         }
         return true;
     }
 
-    public static boolean iterateBackwards(String string, Style style, Output output) {
+    public static boolean iterateBackwards(String string, Style style, FormattedCharSink formattedCharSink) {
         int i = string.length();
         for (int j = i - 1; j >= 0; --j) {
             char c = string.charAt(j);
             if (Character.isLowSurrogate(c)) {
                 if (j - 1 < 0) {
-                    if (output.onChar(0, style, 65533)) break;
+                    if (formattedCharSink.accept(0, style, 65533)) break;
                     return false;
                 }
                 char d = string.charAt(j - 1);
-                if (!(Character.isHighSurrogate(d) ? !output.onChar(--j, style, Character.toCodePoint(d, c)) : !output.onChar(j, style, 65533))) continue;
+                if (!(Character.isHighSurrogate(d) ? !formattedCharSink.accept(--j, style, Character.toCodePoint(d, c)) : !formattedCharSink.accept(j, style, 65533))) continue;
                 return false;
             }
-            if (StringDecomposer.feedChar(style, output, j, c)) continue;
+            if (StringDecomposer.feedChar(style, formattedCharSink, j, c)) continue;
             return false;
         }
         return true;
     }
 
-    public static boolean iterateFormatted(String string, Style style, Output output) {
-        return StringDecomposer.iterateFormatted(string, 0, style, output);
+    public static boolean iterateFormatted(String string, Style style, FormattedCharSink formattedCharSink) {
+        return StringDecomposer.iterateFormatted(string, 0, style, formattedCharSink);
     }
 
-    public static boolean iterateFormatted(String string, int i, Style style, Output output) {
-        return StringDecomposer.iterateFormatted(string, i, style, style, output);
+    public static boolean iterateFormatted(String string, int i, Style style, FormattedCharSink formattedCharSink) {
+        return StringDecomposer.iterateFormatted(string, i, style, style, formattedCharSink);
     }
 
-    public static boolean iterateFormatted(String string, int i, Style style, Style style2, Output output) {
+    public static boolean iterateFormatted(String string, int i, Style style, Style style2, FormattedCharSink formattedCharSink) {
         int j = string.length();
         Style style3 = style;
         for (int k = i; k < j; ++k) {
@@ -93,28 +94,28 @@ public class StringDecomposer {
             }
             if (Character.isHighSurrogate(c)) {
                 if (k + 1 >= j) {
-                    if (output.onChar(k, style3, 65533)) break;
+                    if (formattedCharSink.accept(k, style3, 65533)) break;
                     return false;
                 }
                 d = string.charAt(k + 1);
                 if (Character.isLowSurrogate(d)) {
-                    if (!output.onChar(k, style3, Character.toCodePoint(c, d))) {
+                    if (!formattedCharSink.accept(k, style3, Character.toCodePoint(c, d))) {
                         return false;
                     }
                     ++k;
                     continue;
                 }
-                if (output.onChar(k, style3, 65533)) continue;
+                if (formattedCharSink.accept(k, style3, 65533)) continue;
                 return false;
             }
-            if (StringDecomposer.feedChar(style3, output, k, c)) continue;
+            if (StringDecomposer.feedChar(style3, formattedCharSink, k, c)) continue;
             return false;
         }
         return true;
     }
 
-    public static boolean iterateFormatted(FormattedText formattedText, Style style2, Output output) {
-        return !formattedText.visit((style, string) -> StringDecomposer.iterateFormatted(string, 0, style, output) ? Optional.empty() : STOP_ITERATION, style2).isPresent();
+    public static boolean iterateFormatted(FormattedText formattedText, Style style2, FormattedCharSink formattedCharSink) {
+        return !formattedText.visit((style, string) -> StringDecomposer.iterateFormatted(string, 0, style, formattedCharSink) ? Optional.empty() : STOP_ITERATION, style2).isPresent();
     }
 
     public static String filterBrokenSurrogates(String string) {
@@ -124,12 +125,6 @@ public class StringDecomposer {
             return true;
         });
         return stringBuilder.toString();
-    }
-
-    @FunctionalInterface
-    @Environment(value=EnvType.CLIENT)
-    public static interface Output {
-        public boolean onChar(int var1, Style var2, int var3);
     }
 }
 

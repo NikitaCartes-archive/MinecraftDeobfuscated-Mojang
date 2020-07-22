@@ -342,14 +342,14 @@ public class StructureTemplate {
                 if (bl && entity instanceof Mob) {
                     ((Mob)entity).finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(new BlockPos(vec32)), MobSpawnType.STRUCTURE, null, compoundTag);
                 }
-                serverLevelAccessor.addFreshEntity((Entity)entity);
+                serverLevelAccessor.addFreshEntityWithPassengers((Entity)entity);
             });
         }
     }
 
     private static Optional<Entity> createEntityIgnoreException(ServerLevelAccessor serverLevelAccessor, CompoundTag compoundTag) {
         try {
-            return EntityType.create(compoundTag, serverLevelAccessor.getLevel());
+            return EntityType.create(compoundTag, (Level)serverLevelAccessor.getLevel());
         } catch (Exception exception) {
             return Optional.empty();
         }

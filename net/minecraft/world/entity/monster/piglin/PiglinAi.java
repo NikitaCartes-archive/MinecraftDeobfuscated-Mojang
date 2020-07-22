@@ -111,7 +111,7 @@ public class PiglinAi {
     }
 
     private static void initCoreActivity(Brain<Piglin> brain) {
-        brain.addActivity(Activity.CORE, 0, ImmutableList.of(new LookAtTargetSink(45, 90), new MoveToTargetSink(200), new InteractWithDoor(), PiglinAi.babyAvoidNemesis(), PiglinAi.avoidZombified(), new StopHoldingItemIfNoLongerAdmiring(), new StartAdmiringItemIfSeen(120), new StartCelebratingIfTargetDead(300, PiglinAi::wantsToDance), new StopBeingAngryIfTargetDead()));
+        brain.addActivity(Activity.CORE, 0, ImmutableList.of(new LookAtTargetSink(45, 90), new MoveToTargetSink(), new InteractWithDoor(), PiglinAi.babyAvoidNemesis(), PiglinAi.avoidZombified(), new StopHoldingItemIfNoLongerAdmiring(), new StartAdmiringItemIfSeen(120), new StartCelebratingIfTargetDead(300, PiglinAi::wantsToDance), new StopBeingAngryIfTargetDead()));
     }
 
     private static void initIdleActivity(Brain<Piglin> brain) {

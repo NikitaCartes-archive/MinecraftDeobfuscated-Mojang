@@ -23,6 +23,7 @@ import net.minecraft.server.rcon.PktUtils;
 import net.minecraft.server.rcon.thread.GenericThread;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 public class QueryThreadGs4
 extends GenericThread {
@@ -42,10 +43,10 @@ extends GenericThread {
     private long lastRulesResponse;
     private final ServerInterface serverInterface;
 
-    public QueryThreadGs4(ServerInterface serverInterface) {
+    private QueryThreadGs4(ServerInterface serverInterface, int i) {
         super("Query Listener");
         this.serverInterface = serverInterface;
-        this.port = serverInterface.getProperties().queryPort;
+        this.port = i;
         this.serverIp = serverInterface.getServerIp();
         this.serverPort = serverInterface.getServerPort();
         this.serverName = serverInterface.getServerName();
@@ -66,6 +67,20 @@ extends GenericThread {
         }
         this.rulesResponse = new NetworkDataOutputStream(1460);
         this.validChallenges = Maps.newHashMap();
+    }
+
+    @Nullable
+    public static QueryThreadGs4 create(ServerInterface serverInterface) {
+        int i = serverInterface.getProperties().queryPort;
+        if (0 >= i || 65535 < i) {
+            LOGGER.warn("Invalid query port {} found in server.properties (queries disabled)", (Object)i);
+            return null;
+        }
+        QueryThreadGs4 queryThreadGs4 = new QueryThreadGs4(serverInterface, i);
+        if (!queryThreadGs4.start()) {
+            return null;
+        }
+        return queryThreadGs4;
     }
 
     private void sendTo(byte[] bs, DatagramPacket datagramPacket) throws IOException {
@@ -221,17 +236,14 @@ extends GenericThread {
     }
 
     @Override
-    public void start() {
+    public boolean start() {
         if (this.running) {
-            return;
+            return true;
         }
-        if (0 >= this.port || 65535 < this.port) {
-            LOGGER.warn("Invalid query port {} found in server.properties (queries disabled)", (Object)this.port);
-            return;
+        if (!this.initSocket()) {
+            return false;
         }
-        if (this.initSocket()) {
-            super.start();
-        }
+        return super.start();
     }
 
     private void recoverSocketError(Exception exception) {

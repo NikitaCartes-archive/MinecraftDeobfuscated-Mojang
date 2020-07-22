@@ -168,6 +168,9 @@ extends NodeEvaluator {
         if (node3.y > node.y || node2.y > node.y) {
             return false;
         }
+        if (node2.type == BlockPathTypes.WALKABLE_DOOR || node3.type == BlockPathTypes.WALKABLE_DOOR || node4.type == BlockPathTypes.WALKABLE_DOOR) {
+            return false;
+        }
         boolean bl = node3.type == BlockPathTypes.FENCE && node2.type == BlockPathTypes.FENCE && (double)this.mob.getBbWidth() < 0.5;
         return node4.costMalus >= 0.0f && (node3.y < node.y || node3.costMalus >= 0.0f || bl) && (node2.y < node.y || node2.costMalus >= 0.0f || bl);
     }
@@ -323,7 +326,7 @@ extends NodeEvaluator {
 
     protected BlockPathTypes evaluateBlockPathType(BlockGetter blockGetter, boolean bl, boolean bl2, BlockPos blockPos, BlockPathTypes blockPathTypes) {
         if (blockPathTypes == BlockPathTypes.DOOR_WOOD_CLOSED && bl && bl2) {
-            blockPathTypes = BlockPathTypes.WALKABLE;
+            blockPathTypes = BlockPathTypes.WALKABLE_DOOR;
         }
         if (blockPathTypes == BlockPathTypes.DOOR_OPEN && !bl2) {
             blockPathTypes = BlockPathTypes.BLOCKED;
@@ -396,12 +399,8 @@ extends NodeEvaluator {
                     if (WalkNodeEvaluator.isBurningBlock(blockState)) {
                         return BlockPathTypes.DANGER_FIRE;
                     }
-                    FluidState fluidState = blockGetter.getFluidState(mutableBlockPos);
-                    if (fluidState.is(FluidTags.WATER)) {
-                        return BlockPathTypes.WATER_BORDER;
-                    }
-                    if (!fluidState.is(FluidTags.LAVA)) continue;
-                    return BlockPathTypes.LAVA;
+                    if (!blockGetter.getFluidState(mutableBlockPos).is(FluidTags.WATER)) continue;
+                    return BlockPathTypes.WATER_BORDER;
                 }
             }
         }
@@ -430,6 +429,13 @@ extends NodeEvaluator {
         if (blockState.is(Blocks.COCOA)) {
             return BlockPathTypes.COCOA;
         }
+        FluidState fluidState = blockGetter.getFluidState(blockPos);
+        if (fluidState.is(FluidTags.WATER)) {
+            return BlockPathTypes.WATER;
+        }
+        if (fluidState.is(FluidTags.LAVA)) {
+            return BlockPathTypes.LAVA;
+        }
         if (WalkNodeEvaluator.isBurningBlock(blockState)) {
             return BlockPathTypes.DAMAGE_FIRE;
         }
@@ -454,18 +460,11 @@ extends NodeEvaluator {
         if (!blockState.isPathfindable(blockGetter, blockPos, PathComputationType.LAND)) {
             return BlockPathTypes.BLOCKED;
         }
-        FluidState fluidState = blockGetter.getFluidState(blockPos);
-        if (fluidState.is(FluidTags.WATER)) {
-            return BlockPathTypes.WATER;
-        }
-        if (fluidState.is(FluidTags.LAVA)) {
-            return BlockPathTypes.LAVA;
-        }
         return BlockPathTypes.OPEN;
     }
 
     private static boolean isBurningBlock(BlockState blockState) {
-        return blockState.is(BlockTags.FIRE) || blockState.is(Blocks.MAGMA_BLOCK) || CampfireBlock.isLitCampfire(blockState);
+        return blockState.is(BlockTags.FIRE) || blockState.is(Blocks.LAVA) || blockState.is(Blocks.MAGMA_BLOCK) || CampfireBlock.isLitCampfire(blockState);
     }
 }
 

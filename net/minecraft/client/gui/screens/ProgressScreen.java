@@ -71,10 +71,10 @@ implements ProgressListener {
         }
         this.renderBackground(poseStack);
         if (this.header != null) {
-            this.drawCenteredString(poseStack, this.font, this.header, this.width / 2, 70, 0xFFFFFF);
+            ProgressScreen.drawCenteredString(poseStack, this.font, this.header, this.width / 2, 70, 0xFFFFFF);
         }
         if (this.stage != null && this.progress != 0) {
-            this.drawCenteredString(poseStack, this.font, new TextComponent("").append(this.stage).append(" " + this.progress + "%"), this.width / 2, 90, 0xFFFFFF);
+            ProgressScreen.drawCenteredString(poseStack, this.font, new TextComponent("").append(this.stage).append(" " + this.progress + "%"), this.width / 2, 90, 0xFFFFFF);
         }
         super.render(poseStack, i, j, f);
     }

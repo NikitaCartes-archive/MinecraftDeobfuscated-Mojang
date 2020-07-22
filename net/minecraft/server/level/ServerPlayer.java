@@ -712,7 +712,7 @@ implements ContainerListener {
         if (this.bedBlocked(blockPos, direction)) {
             return Either.left(Player.BedSleepingProblem.OBSTRUCTED);
         }
-        this.setRespawnPosition(this.level.dimension(), blockPos, 0.0f, false, true);
+        this.setRespawnPosition(this.level.dimension(), blockPos, this.yRot, false, true);
         if (this.level.isDay()) {
             return Either.left(Player.BedSleepingProblem.NOT_POSSIBLE_NOW);
         }

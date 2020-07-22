@@ -31,6 +31,7 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsObjectSelectionList;
@@ -47,6 +48,8 @@ extends RealmsScreen {
     private static final ResourceLocation LINK_ICON = new ResourceLocation("realms", "textures/gui/realms/link_icons.png");
     private static final ResourceLocation TRAILER_ICON = new ResourceLocation("realms", "textures/gui/realms/trailer_icons.png");
     private static final ResourceLocation SLOT_FRAME_LOCATION = new ResourceLocation("realms", "textures/gui/realms/slot_frame.png");
+    private static final Component PUBLISHER_LINK_TOOLTIP = new TranslatableComponent("mco.template.info.tooltip");
+    private static final Component TRAILER_LINK_TOOLTIP = new TranslatableComponent("mco.template.trailer.tooltip");
     private final RealmsScreenWithCallback lastScreen;
     private WorldTemplateObjectSelectionList worldTemplateObjectSelectionList;
     private int selectedTemplate = -1;
@@ -54,7 +57,8 @@ extends RealmsScreen {
     private Button selectButton;
     private Button trailerButton;
     private Button publisherButton;
-    private String toolTip;
+    @Nullable
+    private Component toolTip;
     private String currentLink;
     private final RealmsServer.WorldType worldType;
     private int clicks;
@@ -63,6 +67,7 @@ extends RealmsScreen {
     private String warningURL;
     private boolean displayWarning;
     private boolean hoverWarning;
+    @Nullable
     private List<TextRenderingUtils.Line> noTemplatesMessage;
 
     public RealmsSelectWorldTemplateScreen(RealmsScreenWithCallback realmsScreenWithCallback, RealmsServer.WorldType worldType) {
@@ -249,7 +254,7 @@ extends RealmsScreen {
         if (this.noTemplatesMessage != null) {
             this.renderMultilineMessage(poseStack, i, j, this.noTemplatesMessage);
         }
-        this.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 13, 0xFFFFFF);
+        RealmsSelectWorldTemplateScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 13, 0xFFFFFF);
         if (this.displayWarning) {
             int m;
             int k;
@@ -272,13 +277,11 @@ extends RealmsScreen {
                         m = 0x3366BB;
                     }
                 }
-                this.drawCenteredString(poseStack, this.font, component, this.width / 2, RealmsSelectWorldTemplateScreen.row(-1 + k), m);
+                RealmsSelectWorldTemplateScreen.drawCenteredString(poseStack, this.font, component, this.width / 2, RealmsSelectWorldTemplateScreen.row(-1 + k), m);
             }
         }
         super.render(poseStack, i, j, f);
-        if (this.toolTip != null) {
-            this.renderMousehoverTooltip(poseStack, this.toolTip, i, j);
-        }
+        this.renderMousehoverTooltip(poseStack, this.toolTip, i, j);
     }
 
     private void renderMultilineMessage(PoseStack poseStack, int i, int j, List<TextRenderingUtils.Line> list) {
@@ -291,7 +294,7 @@ extends RealmsScreen {
                 int o = lineSegment2.isLink() ? 0x3366BB : 0xFFFFFF;
                 int p = this.font.drawShadow(poseStack, lineSegment2.renderedText(), (float)n, (float)l, o);
                 if (lineSegment2.isLink() && i > n && i < p && j > l - 3 && j < l + 8) {
-                    this.toolTip = lineSegment2.getLinkUrl();
+                    this.toolTip = new TextComponent(lineSegment2.getLinkUrl());
                     this.currentLink = lineSegment2.getLinkUrl();
                 }
                 n = p;
@@ -299,15 +302,15 @@ extends RealmsScreen {
         }
     }
 
-    protected void renderMousehoverTooltip(PoseStack poseStack, String string, int i, int j) {
-        if (string == null) {
+    protected void renderMousehoverTooltip(PoseStack poseStack, @Nullable Component component, int i, int j) {
+        if (component == null) {
             return;
         }
         int k = i + 12;
         int l = j - 12;
-        int m = this.font.width(string);
+        int m = this.font.width(component);
         this.fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
-        this.font.drawShadow(poseStack, string, (float)k, (float)l, 0xFFFFFF);
+        this.font.drawShadow(poseStack, component, (float)k, (float)l, 0xFFFFFF);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -351,18 +354,19 @@ extends RealmsScreen {
             int m = "".equals(string3) ? 0 : RealmsSelectWorldTemplateScreen.this.font.width(string3) + 2;
             boolean bl = false;
             boolean bl2 = false;
+            boolean bl3 = "".equals(string);
             if (k >= i + m && k <= i + m + 32 && l >= j && l <= j + 15 && l < RealmsSelectWorldTemplateScreen.this.height - 15 && l > 32) {
                 if (k <= i + 15 + m && k > m) {
-                    if ("".equals(string)) {
+                    if (bl3) {
                         bl2 = true;
                     } else {
                         bl = true;
                     }
-                } else if (!"".equals(string)) {
+                } else if (!bl3) {
                     bl2 = true;
                 }
             }
-            if (!"".equals(string)) {
+            if (!bl3) {
                 RealmsSelectWorldTemplateScreen.this.minecraft.getTextureManager().bind(LINK_ICON);
                 RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
                 RenderSystem.pushMatrix();
@@ -376,16 +380,16 @@ extends RealmsScreen {
                 RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
                 RenderSystem.pushMatrix();
                 RenderSystem.scalef(1.0f, 1.0f, 1.0f);
-                int n = i + m + ("".equals(string) ? 0 : 17);
+                int n = i + m + (bl3 ? 0 : 17);
                 float g = bl2 ? 15.0f : 0.0f;
                 GuiComponent.blit(poseStack, n, j, g, 0.0f, 15, 15, 30, 15);
                 RenderSystem.popMatrix();
             }
-            if (bl && !"".equals(string)) {
-                RealmsSelectWorldTemplateScreen.this.toolTip = I18n.get("mco.template.info.tooltip", new Object[0]);
+            if (bl) {
+                RealmsSelectWorldTemplateScreen.this.toolTip = PUBLISHER_LINK_TOOLTIP;
                 RealmsSelectWorldTemplateScreen.this.currentLink = string;
             } else if (bl2 && !"".equals(string2)) {
-                RealmsSelectWorldTemplateScreen.this.toolTip = I18n.get("mco.template.trailer.tooltip", new Object[0]);
+                RealmsSelectWorldTemplateScreen.this.toolTip = TRAILER_LINK_TOOLTIP;
                 RealmsSelectWorldTemplateScreen.this.currentLink = string2;
             }
         }

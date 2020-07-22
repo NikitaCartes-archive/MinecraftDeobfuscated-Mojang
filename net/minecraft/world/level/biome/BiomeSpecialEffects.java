@@ -7,36 +7,49 @@ import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.biome.AmbientAdditionsSettings;
 import net.minecraft.world.level.biome.AmbientMoodSettings;
 import net.minecraft.world.level.biome.AmbientParticleSettings;
+import net.minecraft.world.level.biome.Biome;
 
 public class BiomeSpecialEffects {
-    public static final Codec<BiomeSpecialEffects> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("fog_color")).forGetter(biomeSpecialEffects -> biomeSpecialEffects.fogColor), ((MapCodec)Codec.INT.fieldOf("water_color")).forGetter(biomeSpecialEffects -> biomeSpecialEffects.waterColor), ((MapCodec)Codec.INT.fieldOf("water_fog_color")).forGetter(biomeSpecialEffects -> biomeSpecialEffects.waterFogColor), AmbientParticleSettings.CODEC.optionalFieldOf("particle").forGetter(biomeSpecialEffects -> biomeSpecialEffects.ambientParticleSettings), SoundEvent.CODEC.optionalFieldOf("ambient_sound").forGetter(biomeSpecialEffects -> biomeSpecialEffects.ambientLoopSoundEvent), AmbientMoodSettings.CODEC.optionalFieldOf("mood_sound").forGetter(biomeSpecialEffects -> biomeSpecialEffects.ambientMoodSettings), AmbientAdditionsSettings.CODEC.optionalFieldOf("additions_sound").forGetter(biomeSpecialEffects -> biomeSpecialEffects.ambientAdditionsSettings), Music.CODEC.optionalFieldOf("music").forGetter(biomeSpecialEffects -> biomeSpecialEffects.backgroundMusic)).apply((Applicative<BiomeSpecialEffects, ?>)instance, BiomeSpecialEffects::new));
+    public static final Codec<BiomeSpecialEffects> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.INT.fieldOf("fog_color")).forGetter(biomeSpecialEffects -> biomeSpecialEffects.fogColor), ((MapCodec)Codec.INT.fieldOf("water_color")).forGetter(biomeSpecialEffects -> biomeSpecialEffects.waterColor), ((MapCodec)Codec.INT.fieldOf("water_fog_color")).forGetter(biomeSpecialEffects -> biomeSpecialEffects.waterFogColor), ((MapCodec)Codec.INT.fieldOf("sky_color")).forGetter(biomeSpecialEffects -> biomeSpecialEffects.skyColor), Codec.INT.optionalFieldOf("foliage_color").forGetter(biomeSpecialEffects -> biomeSpecialEffects.foliageColorOverride), Codec.INT.optionalFieldOf("grass_color").forGetter(biomeSpecialEffects -> biomeSpecialEffects.grassColorOverride), GrassColorModifier.CODEC.optionalFieldOf("grass_color_modifier", GrassColorModifier.NONE).forGetter(biomeSpecialEffects -> biomeSpecialEffects.grassColorModifier), AmbientParticleSettings.CODEC.optionalFieldOf("particle").forGetter(biomeSpecialEffects -> biomeSpecialEffects.ambientParticleSettings), SoundEvent.CODEC.optionalFieldOf("ambient_sound").forGetter(biomeSpecialEffects -> biomeSpecialEffects.ambientLoopSoundEvent), AmbientMoodSettings.CODEC.optionalFieldOf("mood_sound").forGetter(biomeSpecialEffects -> biomeSpecialEffects.ambientMoodSettings), AmbientAdditionsSettings.CODEC.optionalFieldOf("additions_sound").forGetter(biomeSpecialEffects -> biomeSpecialEffects.ambientAdditionsSettings), Music.CODEC.optionalFieldOf("music").forGetter(biomeSpecialEffects -> biomeSpecialEffects.backgroundMusic)).apply((Applicative<BiomeSpecialEffects, ?>)instance, BiomeSpecialEffects::new));
     private final int fogColor;
     private final int waterColor;
     private final int waterFogColor;
+    private final int skyColor;
+    private final Optional<Integer> foliageColorOverride;
+    private final Optional<Integer> grassColorOverride;
+    private final GrassColorModifier grassColorModifier;
     private final Optional<AmbientParticleSettings> ambientParticleSettings;
     private final Optional<SoundEvent> ambientLoopSoundEvent;
     private final Optional<AmbientMoodSettings> ambientMoodSettings;
     private final Optional<AmbientAdditionsSettings> ambientAdditionsSettings;
     private final Optional<Music> backgroundMusic;
 
-    private BiomeSpecialEffects(int i, int j, int k, Optional<AmbientParticleSettings> optional, Optional<SoundEvent> optional2, Optional<AmbientMoodSettings> optional3, Optional<AmbientAdditionsSettings> optional4, Optional<Music> optional5) {
+    private BiomeSpecialEffects(int i, int j, int k, int l, Optional<Integer> optional, Optional<Integer> optional2, GrassColorModifier grassColorModifier, Optional<AmbientParticleSettings> optional3, Optional<SoundEvent> optional4, Optional<AmbientMoodSettings> optional5, Optional<AmbientAdditionsSettings> optional6, Optional<Music> optional7) {
         this.fogColor = i;
         this.waterColor = j;
         this.waterFogColor = k;
-        this.ambientParticleSettings = optional;
-        this.ambientLoopSoundEvent = optional2;
-        this.ambientMoodSettings = optional3;
-        this.ambientAdditionsSettings = optional4;
-        this.backgroundMusic = optional5;
+        this.skyColor = l;
+        this.foliageColorOverride = optional;
+        this.grassColorOverride = optional2;
+        this.grassColorModifier = grassColorModifier;
+        this.ambientParticleSettings = optional3;
+        this.ambientLoopSoundEvent = optional4;
+        this.ambientMoodSettings = optional5;
+        this.ambientAdditionsSettings = optional6;
+        this.backgroundMusic = optional7;
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -52,6 +65,26 @@ public class BiomeSpecialEffects {
     @Environment(value=EnvType.CLIENT)
     public int getWaterFogColor() {
         return this.waterFogColor;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public int getSkyColor() {
+        return this.skyColor;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public Optional<Integer> getFoliageColorOverride() {
+        return this.foliageColorOverride;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public Optional<Integer> getGrassColorOverride() {
+        return this.grassColorOverride;
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public GrassColorModifier getGrassColorModifier() {
+        return this.grassColorModifier;
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -79,10 +112,77 @@ public class BiomeSpecialEffects {
         return this.backgroundMusic;
     }
 
+    public static enum GrassColorModifier implements StringRepresentable
+    {
+        NONE("none"){
+
+            @Override
+            @Environment(value=EnvType.CLIENT)
+            public int modifyColor(double d, double e, int i) {
+                return i;
+            }
+        }
+        ,
+        DARK_FOREST("dark_forest"){
+
+            @Override
+            @Environment(value=EnvType.CLIENT)
+            public int modifyColor(double d, double e, int i) {
+                return (i & 0xFEFEFE) + 2634762 >> 1;
+            }
+        }
+        ,
+        SWAMP("swamp"){
+
+            @Override
+            @Environment(value=EnvType.CLIENT)
+            public int modifyColor(double d, double e, int i) {
+                double f = Biome.BIOME_INFO_NOISE.getValue(d * 0.0225, e * 0.0225, false);
+                if (f < -0.1) {
+                    return 5011004;
+                }
+                return 6975545;
+            }
+        };
+
+        private final String name;
+        public static final Codec<GrassColorModifier> CODEC;
+        private static final Map<String, GrassColorModifier> BY_NAME;
+
+        @Environment(value=EnvType.CLIENT)
+        public abstract int modifyColor(double var1, double var3, int var5);
+
+        private GrassColorModifier(String string2) {
+            this.name = string2;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        @Override
+        public String getSerializedName() {
+            return this.name;
+        }
+
+        public static GrassColorModifier byName(String string) {
+            return BY_NAME.get(string);
+        }
+
+        static {
+            CODEC = StringRepresentable.fromEnum(GrassColorModifier::values, GrassColorModifier::byName);
+            BY_NAME = Arrays.stream(GrassColorModifier.values()).collect(Collectors.toMap(GrassColorModifier::getName, grassColorModifier -> grassColorModifier));
+        }
+    }
+
     public static class Builder {
         private OptionalInt fogColor = OptionalInt.empty();
         private OptionalInt waterColor = OptionalInt.empty();
         private OptionalInt waterFogColor = OptionalInt.empty();
+        private OptionalInt skyColor = OptionalInt.empty();
+        private Optional<Integer> foliageColorOverride = Optional.empty();
+        private Optional<Integer> grassColorOverride = Optional.empty();
+        private GrassColorModifier grassColorModifier = GrassColorModifier.NONE;
         private Optional<AmbientParticleSettings> ambientParticle = Optional.empty();
         private Optional<SoundEvent> ambientLoopSoundEvent = Optional.empty();
         private Optional<AmbientMoodSettings> ambientMoodSettings = Optional.empty();
@@ -101,6 +201,26 @@ public class BiomeSpecialEffects {
 
         public Builder waterFogColor(int i) {
             this.waterFogColor = OptionalInt.of(i);
+            return this;
+        }
+
+        public Builder skyColor(int i) {
+            this.skyColor = OptionalInt.of(i);
+            return this;
+        }
+
+        public Builder foliageColorOverride(int i) {
+            this.foliageColorOverride = Optional.of(i);
+            return this;
+        }
+
+        public Builder grassColorOverride(int i) {
+            this.grassColorOverride = Optional.of(i);
+            return this;
+        }
+
+        public Builder grassColorModifier(GrassColorModifier grassColorModifier) {
+            this.grassColorModifier = grassColorModifier;
             return this;
         }
 
@@ -130,7 +250,7 @@ public class BiomeSpecialEffects {
         }
 
         public BiomeSpecialEffects build() {
-            return new BiomeSpecialEffects(this.fogColor.orElseThrow(() -> new IllegalStateException("Missing 'fog' color.")), this.waterColor.orElseThrow(() -> new IllegalStateException("Missing 'water' color.")), this.waterFogColor.orElseThrow(() -> new IllegalStateException("Missing 'water fog' color.")), this.ambientParticle, this.ambientLoopSoundEvent, this.ambientMoodSettings, this.ambientAdditionsSettings, this.backgroundMusic);
+            return new BiomeSpecialEffects(this.fogColor.orElseThrow(() -> new IllegalStateException("Missing 'fog' color.")), this.waterColor.orElseThrow(() -> new IllegalStateException("Missing 'water' color.")), this.waterFogColor.orElseThrow(() -> new IllegalStateException("Missing 'water fog' color.")), this.skyColor.orElseThrow(() -> new IllegalStateException("Missing 'sky' color.")), this.foliageColorOverride, this.grassColorOverride, this.grassColorModifier, this.ambientParticle, this.ambientLoopSoundEvent, this.ambientMoodSettings, this.ambientAdditionsSettings, this.backgroundMusic);
         }
     }
 }

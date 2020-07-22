@@ -87,7 +87,7 @@ public interface RegistryAccess {
     public static <E> void copy(RegistryHolder registryHolder, Registry<E> registry) {
         WritableRegistry<E> writableRegistry = registryHolder.registry(registry.key()).orElseThrow(() -> new IllegalStateException("Missing registry: " + registry.key()));
         for (Map.Entry<ResourceKey<E>, E> entry : registry.entrySet()) {
-            writableRegistry.register(entry.getKey(), entry.getValue());
+            writableRegistry.registerMapping(registry.getId(entry.getValue()), entry.getKey(), entry.getValue());
         }
     }
 

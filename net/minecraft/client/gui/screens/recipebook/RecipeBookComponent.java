@@ -31,7 +31,6 @@ import net.minecraft.client.gui.screens.recipebook.RecipeShownListener;
 import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.client.searchtree.SearchRegistry;
-import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPacket;
@@ -55,6 +54,8 @@ RecipeShownListener,
 PlaceRecipe<Ingredient> {
     protected static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
     private static final Component SEARCH_HINT = new TranslatableComponent("gui.recipebook.search_hint").withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY);
+    private static final Component ONLY_CRAFTABLES_TOOLTIP = new TranslatableComponent("gui.recipebook.toggleRecipes.craftable");
+    private static final Component ALL_RECIPES_TOOLTIP = new TranslatableComponent("gui.recipebook.toggleRecipes.all");
     private int xOffset;
     private int width;
     private int height;
@@ -172,7 +173,7 @@ PlaceRecipe<Ingredient> {
         list2.removeIf(recipeCollection -> !recipeCollection.hasFitting());
         String string = this.searchBox.getValue();
         if (!string.isEmpty()) {
-            ObjectLinkedOpenHashSet objectSet = new ObjectLinkedOpenHashSet(this.minecraft.getSearchTree(SearchRegistry.RECIPE_COLLECTIONS).search(Language.getInstance().reorder(string.toLowerCase(Locale.ROOT), false)));
+            ObjectLinkedOpenHashSet objectSet = new ObjectLinkedOpenHashSet(this.minecraft.getSearchTree(SearchRegistry.RECIPE_COLLECTIONS).search(string.toLowerCase(Locale.ROOT)));
             list2.removeIf(recipeCollection -> !objectSet.contains(recipeCollection));
         }
         if (this.book.isFiltering(this.menu)) {
@@ -229,7 +230,7 @@ PlaceRecipe<Ingredient> {
         int l = (this.height - 166) / 2;
         this.blit(poseStack, k, l, 1, 1, 147, 166);
         if (!this.searchBox.isFocused() && this.searchBox.getValue().isEmpty()) {
-            this.drawString(poseStack, this.minecraft.font, SEARCH_HINT, k + 25, l + 14, -1);
+            RecipeBookComponent.drawString(poseStack, this.minecraft.font, SEARCH_HINT, k + 25, l + 14, -1);
         } else {
             this.searchBox.render(poseStack, i, j, f);
         }
@@ -255,8 +256,12 @@ PlaceRecipe<Ingredient> {
         this.renderGhostRecipeTooltip(poseStack, i, j, k, l);
     }
 
-    protected Component getFilterButtonTooltip() {
-        return new TranslatableComponent(this.filterButton.isStateTriggered() ? "gui.recipebook.toggleRecipes.craftable" : "gui.recipebook.toggleRecipes.all");
+    private Component getFilterButtonTooltip() {
+        return this.filterButton.isStateTriggered() ? this.getRecipeFilterName() : ALL_RECIPES_TOOLTIP;
+    }
+
+    protected Component getRecipeFilterName() {
+        return ONLY_CRAFTABLES_TOOLTIP;
     }
 
     private void renderGhostRecipeTooltip(PoseStack poseStack, int i, int j, int k, int l) {
@@ -269,7 +274,7 @@ PlaceRecipe<Ingredient> {
             itemStack = ghostIngredient.getItem();
         }
         if (itemStack != null && this.minecraft.screen != null) {
-            this.minecraft.screen.renderTooltip(poseStack, this.minecraft.screen.getTooltipFromItem(itemStack), k, l);
+            this.minecraft.screen.renderComponentTooltip(poseStack, this.minecraft.screen.getTooltipFromItem(itemStack), k, l);
         }
     }
 

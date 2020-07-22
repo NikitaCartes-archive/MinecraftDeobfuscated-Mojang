@@ -11,11 +11,14 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -24,23 +27,26 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class Lantern
-extends Block {
+extends Block
+implements SimpleWaterloggedBlock {
     public static final BooleanProperty HANGING = BlockStateProperties.HANGING;
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     protected static final VoxelShape AABB = Shapes.or(Block.box(5.0, 0.0, 5.0, 11.0, 7.0, 11.0), Block.box(6.0, 7.0, 6.0, 10.0, 9.0, 10.0));
     protected static final VoxelShape HANGING_AABB = Shapes.or(Block.box(5.0, 1.0, 5.0, 11.0, 8.0, 11.0), Block.box(6.0, 8.0, 6.0, 10.0, 10.0, 10.0));
 
     public Lantern(BlockBehaviour.Properties properties) {
         super(properties);
-        this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(HANGING, false));
+        this.registerDefaultState((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(HANGING, false)).setValue(WATERLOGGED, false));
     }
 
     @Override
     @Nullable
     public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
+        FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPlaceContext.getClickedPos());
         for (Direction direction : blockPlaceContext.getNearestLookingDirections()) {
             BlockState blockState;
             if (direction.getAxis() != Direction.Axis.Y || !(blockState = (BlockState)this.defaultBlockState().setValue(HANGING, direction == Direction.UP)).canSurvive(blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos())) continue;
-            return blockState;
+            return (BlockState)blockState.setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
         }
         return null;
     }
@@ -52,7 +58,7 @@ extends Block {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(HANGING);
+        builder.add(HANGING, WATERLOGGED);
     }
 
     @Override
@@ -72,10 +78,21 @@ extends Block {
 
     @Override
     public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
+        if (blockState.getValue(WATERLOGGED).booleanValue()) {
+            levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+        }
         if (Lantern.getConnectedDirection(blockState).getOpposite() == direction && !blockState.canSurvive(levelAccessor, blockPos)) {
             return Blocks.AIR.defaultBlockState();
         }
         return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+    }
+
+    @Override
+    public FluidState getFluidState(BlockState blockState) {
+        if (blockState.getValue(WATERLOGGED).booleanValue()) {
+            return Fluids.WATER.getSource(false);
+        }
+        return super.getFluidState(blockState);
     }
 
     @Override

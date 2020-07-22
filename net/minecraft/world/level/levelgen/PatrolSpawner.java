@@ -98,7 +98,7 @@ implements CustomSpawner {
             }
             patrollingMonster.setPos(blockPos.getX(), blockPos.getY(), blockPos.getZ());
             patrollingMonster.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(blockPos), MobSpawnType.PATROL, null, null);
-            serverLevel.addFreshEntity(patrollingMonster);
+            serverLevel.addFreshEntityWithPassengers(patrollingMonster);
             return true;
         }
         return false;

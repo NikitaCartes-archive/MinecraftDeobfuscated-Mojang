@@ -8,7 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
 import net.minecraft.server.ServerInterface;
 import net.minecraft.server.rcon.PktUtils;
 import net.minecraft.server.rcon.thread.GenericThread;
@@ -19,7 +19,7 @@ public class RconClient
 extends GenericThread {
     private static final Logger LOGGER = LogManager.getLogger();
     private boolean authed;
-    private Socket client;
+    private final Socket client;
     private final byte[] buf = new byte[1460];
     private final String rconPassword;
     private final ServerInterface serverInterface;
@@ -87,7 +87,6 @@ extends GenericThread {
                     }
                 }
             }
-        } catch (SocketTimeoutException bufferedInputStream) {
         } catch (IOException bufferedInputStream) {
         } catch (Exception exception2) {
             LOGGER.error("Exception whilst parsing RCON input", (Throwable)exception2);
@@ -101,7 +100,7 @@ extends GenericThread {
     private void send(int i, int j, String string) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1248);
         DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-        byte[] bs = string.getBytes("UTF-8");
+        byte[] bs = string.getBytes(StandardCharsets.UTF_8);
         dataOutputStream.writeInt(Integer.reverseBytes(bs.length + 10));
         dataOutputStream.writeInt(Integer.reverseBytes(i));
         dataOutputStream.writeInt(Integer.reverseBytes(j));
@@ -132,15 +131,11 @@ extends GenericThread {
     }
 
     private void closeSocket() {
-        if (null == this.client) {
-            return;
-        }
         try {
             this.client.close();
         } catch (IOException iOException) {
             LOGGER.warn("Failed to close socket", (Throwable)iOException);
         }
-        this.client = null;
     }
 }
 

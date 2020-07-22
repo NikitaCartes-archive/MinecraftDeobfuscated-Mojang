@@ -16,13 +16,16 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.gametest.framework.TestCommand;
 import net.minecraft.network.chat.ClickEvent;
@@ -313,6 +316,16 @@ public class Commands {
             return CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().createWithContext(parseResults.getReader());
         }
         return CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parseResults.getReader());
+    }
+
+    public static void validate() {
+        RootCommandNode<CommandSourceStack> rootCommandNode = new Commands(CommandSelection.ALL).getDispatcher().getRoot();
+        Set<ArgumentType<?>> set = ArgumentTypes.findUsedArgumentTypes(rootCommandNode);
+        Set set2 = set.stream().filter(argumentType -> !ArgumentTypes.isTypeRegistered(argumentType)).collect(Collectors.toSet());
+        if (!set2.isEmpty()) {
+            LOGGER.warn("Missing type registration for following arguments:\n {}", (Object)set2.stream().map(argumentType -> "\t" + argumentType).collect(Collectors.joining(",\n")));
+            throw new IllegalStateException("Unregistered argument types");
+        }
     }
 
     public static enum CommandSelection {

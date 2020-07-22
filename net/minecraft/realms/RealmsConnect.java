@@ -13,6 +13,7 @@ import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
@@ -65,7 +66,7 @@ public class RealmsConnect {
                         return;
                     }
                     LOGGER.error("Couldn't connect to world", (Throwable)unknownHostException);
-                    DisconnectedRealmsScreen disconnectedRealmsScreen = new DisconnectedRealmsScreen(RealmsConnect.this.onlineScreen, "connect.failed", new TranslatableComponent("disconnect.genericReason", "Unknown host '" + string + "'"));
+                    DisconnectedRealmsScreen disconnectedRealmsScreen = new DisconnectedRealmsScreen(RealmsConnect.this.onlineScreen, CommonComponents.CONNECT_FAILED, new TranslatableComponent("disconnect.genericReason", "Unknown host '" + string + "'"));
                     minecraft.execute(() -> minecraft.setScreen(disconnectedRealmsScreen));
                 } catch (Exception exception) {
                     minecraft.getClientPackSource().clearServerPack();
@@ -78,7 +79,7 @@ public class RealmsConnect {
                         String string2 = inetAddress + ":" + i;
                         string3 = string3.replaceAll(string2, "");
                     }
-                    DisconnectedRealmsScreen disconnectedRealmsScreen2 = new DisconnectedRealmsScreen(RealmsConnect.this.onlineScreen, "connect.failed", new TranslatableComponent("disconnect.genericReason", string3));
+                    DisconnectedRealmsScreen disconnectedRealmsScreen2 = new DisconnectedRealmsScreen(RealmsConnect.this.onlineScreen, CommonComponents.CONNECT_FAILED, new TranslatableComponent("disconnect.genericReason", string3));
                     minecraft.execute(() -> minecraft.setScreen(disconnectedRealmsScreen2));
                 }
             }

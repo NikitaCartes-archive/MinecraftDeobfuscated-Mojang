@@ -128,8 +128,9 @@ AutoCloseable {
                 }
             }
         } catch (Exception exception4) {
+            String string3 = resource != null ? " (" + resource.getSourceName() + ")" : "";
             ChainedJsonException chainedJsonException4 = ChainedJsonException.forException(exception4);
-            chainedJsonException4.setFilenameAndFlush(resourceLocation.getPath());
+            chainedJsonException4.setFilenameAndFlush(resourceLocation.getPath() + string3);
             throw chainedJsonException4;
         } finally {
             IOUtils.closeQuietly((Closeable)resource);
@@ -146,7 +147,7 @@ AutoCloseable {
             ResourceLocation resourceLocation = new ResourceLocation("shaders/program/" + string + type.getExtension());
             Resource resource = resourceManager.getResource(resourceLocation);
             try {
-                program = Program.compileShader(type, string, resource.getInputStream());
+                program = Program.compileShader(type, string, resource.getInputStream(), resource.getSourceName());
             } finally {
                 IOUtils.closeQuietly((Closeable)resource);
             }
