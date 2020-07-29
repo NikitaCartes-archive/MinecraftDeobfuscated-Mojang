@@ -43,7 +43,7 @@ extends StructureFeature<NoneFeatureConfiguration> {
     protected boolean isFeatureChunk(ChunkGenerator chunkGenerator, BiomeSource biomeSource, long l, WorldgenRandom worldgenRandom, int i, int j, Biome biome, ChunkPos chunkPos, NoneFeatureConfiguration noneFeatureConfiguration) {
         Set<Biome> set = biomeSource.getBiomesWithin(i * 16 + 9, chunkGenerator.getSeaLevel(), j * 16 + 9, 32);
         for (Biome biome2 : set) {
-            if (biome2.isValidStart(this)) continue;
+            if (biome2.getGenerationSettings().isValidStart(this)) continue;
             return false;
         }
         return true;

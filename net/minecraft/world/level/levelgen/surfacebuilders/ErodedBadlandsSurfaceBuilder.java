@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.surfacebuilders.BadlandsSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderBaseConfiguration;
+import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderConfiguration;
 
 public class ErodedBadlandsSurfaceBuilder
 extends BadlandsSurfaceBuilder {
@@ -41,31 +42,34 @@ extends BadlandsSurfaceBuilder {
         int o = i & 0xF;
         int p = j & 0xF;
         BlockState blockState3 = WHITE_TERRACOTTA;
-        BlockState blockState4 = biome.getSurfaceBuilderConfig().getUnderMaterial();
+        SurfaceBuilderConfiguration surfaceBuilderConfiguration = biome.getGenerationSettings().getSurfaceBuilderConfig();
+        BlockState blockState4 = surfaceBuilderConfiguration.getUnderMaterial();
+        BlockState blockState5 = surfaceBuilderConfiguration.getTopMaterial();
+        BlockState blockState6 = blockState4;
         int q = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
         boolean bl = Math.cos(d / 3.0 * Math.PI) > 0.0;
         int r = -1;
         boolean bl2 = false;
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         for (int s = Math.max(k, (int)e + 1); s >= 0; --s) {
-            BlockState blockState5;
+            BlockState blockState7;
             mutableBlockPos.set(o, s, p);
             if (chunkAccess.getBlockState(mutableBlockPos).isAir() && s < (int)e) {
                 chunkAccess.setBlockState(mutableBlockPos, blockState, false);
             }
-            if ((blockState5 = chunkAccess.getBlockState(mutableBlockPos)).isAir()) {
+            if ((blockState7 = chunkAccess.getBlockState(mutableBlockPos)).isAir()) {
                 r = -1;
                 continue;
             }
-            if (!blockState5.is(blockState.getBlock())) continue;
+            if (!blockState7.is(blockState.getBlock())) continue;
             if (r == -1) {
                 bl2 = false;
                 if (q <= 0) {
                     blockState3 = Blocks.AIR.defaultBlockState();
-                    blockState4 = blockState;
+                    blockState6 = blockState;
                 } else if (s >= l - 4 && s <= l + 1) {
                     blockState3 = WHITE_TERRACOTTA;
-                    blockState4 = biome.getSurfaceBuilderConfig().getUnderMaterial();
+                    blockState6 = blockState4;
                 }
                 if (s < l && (blockState3 == null || blockState3.isAir())) {
                     blockState3 = blockState2;
@@ -73,16 +77,16 @@ extends BadlandsSurfaceBuilder {
                 r = q + Math.max(0, s - l);
                 if (s >= l - 1) {
                     if (s > l + 3 + q) {
-                        BlockState blockState6 = s < 64 || s > 127 ? ORANGE_TERRACOTTA : (bl ? TERRACOTTA : this.getBand(i, s, j));
-                        chunkAccess.setBlockState(mutableBlockPos, blockState6, false);
+                        BlockState blockState8 = s < 64 || s > 127 ? ORANGE_TERRACOTTA : (bl ? TERRACOTTA : this.getBand(i, s, j));
+                        chunkAccess.setBlockState(mutableBlockPos, blockState8, false);
                         continue;
                     }
-                    chunkAccess.setBlockState(mutableBlockPos, biome.getSurfaceBuilderConfig().getTopMaterial(), false);
+                    chunkAccess.setBlockState(mutableBlockPos, blockState5, false);
                     bl2 = true;
                     continue;
                 }
-                chunkAccess.setBlockState(mutableBlockPos, blockState4, false);
-                Block block = blockState4.getBlock();
+                chunkAccess.setBlockState(mutableBlockPos, blockState6, false);
+                Block block = blockState6.getBlock();
                 if (block != Blocks.WHITE_TERRACOTTA && block != Blocks.ORANGE_TERRACOTTA && block != Blocks.MAGENTA_TERRACOTTA && block != Blocks.LIGHT_BLUE_TERRACOTTA && block != Blocks.YELLOW_TERRACOTTA && block != Blocks.LIME_TERRACOTTA && block != Blocks.PINK_TERRACOTTA && block != Blocks.GRAY_TERRACOTTA && block != Blocks.LIGHT_GRAY_TERRACOTTA && block != Blocks.CYAN_TERRACOTTA && block != Blocks.PURPLE_TERRACOTTA && block != Blocks.BLUE_TERRACOTTA && block != Blocks.BROWN_TERRACOTTA && block != Blocks.GREEN_TERRACOTTA && block != Blocks.RED_TERRACOTTA && block != Blocks.BLACK_TERRACOTTA) continue;
                 chunkAccess.setBlockState(mutableBlockPos, ORANGE_TERRACOTTA, false);
                 continue;

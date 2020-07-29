@@ -50,7 +50,7 @@ implements BonemealableBlock {
             }
             if (!blockState3.isAir()) continue;
             if (random.nextInt(8) == 0) {
-                List<ConfiguredFeature<?, ?>> list = serverLevel.getBiome(blockPos3).getFlowerFeatures();
+                List<ConfiguredFeature<?, ?>> list = serverLevel.getBiome(blockPos3).getGenerationSettings().getFlowerFeatures();
                 if (list.isEmpty()) continue;
                 ConfiguredFeature<?, ?> configuredFeature = list.get(0);
                 AbstractFlowerFeature abstractFlowerFeature = (AbstractFlowerFeature)configuredFeature.feature;

@@ -7,10 +7,10 @@ import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
-import com.mojang.serialization.MapCodec;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -29,20 +29,22 @@ public class RegistryReadOps<T>
 extends DelegatingOps<T> {
     private static final Logger LOGGER = LogManager.getLogger();
     private final ResourceManager resourceManager;
-    private final RegistryAccess registryHolder;
+    private final RegistryAccess.RegistryHolder registryHolder;
     private final Map<ResourceKey<? extends Registry<?>>, ReadCache<?>> readCache = Maps.newIdentityHashMap();
 
-    public static <T> RegistryReadOps<T> create(DynamicOps<T> dynamicOps, ResourceManager resourceManager, RegistryAccess registryAccess) {
-        return new RegistryReadOps<T>(dynamicOps, resourceManager, registryAccess);
+    public static <T> RegistryReadOps<T> create(DynamicOps<T> dynamicOps, ResourceManager resourceManager, RegistryAccess.RegistryHolder registryHolder) {
+        RegistryReadOps<T> registryReadOps = new RegistryReadOps<T>(dynamicOps, resourceManager, registryHolder);
+        RegistryAccess.load(registryHolder, registryReadOps);
+        return registryReadOps;
     }
 
-    private RegistryReadOps(DynamicOps<T> dynamicOps, ResourceManager resourceManager, RegistryAccess registryAccess) {
+    private RegistryReadOps(DynamicOps<T> dynamicOps, ResourceManager resourceManager, RegistryAccess.RegistryHolder registryHolder) {
         super(dynamicOps);
         this.resourceManager = resourceManager;
-        this.registryHolder = registryAccess;
+        this.registryHolder = registryHolder;
     }
 
-    protected <E> DataResult<Pair<java.util.function.Supplier<E>, T>> decodeElement(T object, ResourceKey<? extends Registry<E>> resourceKey, MapCodec<E> mapCodec) {
+    protected <E> DataResult<Pair<java.util.function.Supplier<E>, T>> decodeElement(T object, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec) {
         Optional optional = this.registryHolder.registry(resourceKey);
         if (!optional.isPresent()) {
             return DataResult.error("Unknown registry: " + resourceKey);
@@ -50,51 +52,38 @@ extends DelegatingOps<T> {
         WritableRegistry writableRegistry = optional.get();
         DataResult dataResult = ResourceLocation.CODEC.decode(this.delegate, object);
         if (!dataResult.result().isPresent()) {
-            return MappedRegistry.withName(resourceKey, mapCodec).codec().decode(this.delegate, object).map(pair2 -> pair2.mapFirst(pair -> {
-                writableRegistry.register((ResourceKey)pair.getFirst(), pair.getSecond());
-                writableRegistry.setPersistent((ResourceKey)pair.getFirst());
-                return pair::getSecond;
-            }));
+            return codec.decode(this.delegate, object).map(pair -> pair.mapFirst(object -> () -> object));
         }
-        Pair pair = dataResult.result().get();
-        ResourceLocation resourceLocation = (ResourceLocation)pair.getFirst();
-        return this.readAndRegisterElement(resourceKey, writableRegistry, mapCodec, resourceLocation).map(supplier -> Pair.of(supplier, pair.getSecond()));
+        Pair pair2 = dataResult.result().get();
+        ResourceLocation resourceLocation = (ResourceLocation)pair2.getFirst();
+        return this.readAndRegisterElement(resourceKey, writableRegistry, codec, resourceLocation).map(supplier -> Pair.of(supplier, pair2.getSecond()));
     }
 
-    public <E> DataResult<MappedRegistry<E>> decodeElements(MappedRegistry<E> mappedRegistry2, ResourceKey<? extends Registry<E>> resourceKey, MapCodec<E> mapCodec) {
+    public <E> DataResult<MappedRegistry<E>> decodeElements(MappedRegistry<E> mappedRegistry2, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec) {
         ResourceLocation resourceLocation = resourceKey.location();
-        Collection<ResourceLocation> collection = this.resourceManager.listResources(resourceLocation, string -> string.endsWith(".json"));
+        Collection<ResourceLocation> collection = this.resourceManager.listResources(resourceLocation.getPath(), string -> string.endsWith(".json"));
         DataResult<MappedRegistry<Object>> dataResult = DataResult.success(mappedRegistry2, Lifecycle.stable());
+        String string2 = resourceLocation.getPath() + "/";
         for (ResourceLocation resourceLocation2 : collection) {
-            String string2 = resourceLocation2.getPath();
-            if (!string2.endsWith(".json")) {
+            String string22 = resourceLocation2.getPath();
+            if (!string22.endsWith(".json")) {
                 LOGGER.warn("Skipping resource {} since it is not a json file", (Object)resourceLocation2);
                 continue;
             }
-            if (!string2.startsWith(resourceLocation.getPath() + "/")) {
+            if (!string22.startsWith(string2)) {
                 LOGGER.warn("Skipping resource {} since it does not have a registry name prefix", (Object)resourceLocation2);
                 continue;
             }
-            String string22 = string2.substring(0, string2.length() - ".json".length()).substring(resourceLocation.getPath().length() + 1);
-            int i = string22.indexOf(47);
-            if (i < 0) {
-                LOGGER.warn("Skipping resource {} since it does not have a namespace", (Object)resourceLocation2);
-                continue;
-            }
-            String string3 = string22.substring(0, i);
-            String string4 = string22.substring(i + 1);
-            ResourceLocation resourceLocation3 = new ResourceLocation(string3, string4);
-            dataResult = dataResult.flatMap(mappedRegistry -> this.readAndRegisterElement(resourceKey, (WritableRegistry)mappedRegistry, mapCodec, resourceLocation3).map(supplier -> mappedRegistry));
+            String string3 = string22.substring(string2.length(), string22.length() - ".json".length());
+            ResourceLocation resourceLocation3 = new ResourceLocation(resourceLocation2.getNamespace(), string3);
+            dataResult = dataResult.flatMap(mappedRegistry -> this.readAndRegisterElement(resourceKey, (WritableRegistry)mappedRegistry, codec, resourceLocation3).map(supplier -> mappedRegistry));
         }
         return dataResult.setPartial(mappedRegistry2);
     }
 
-    private <E> DataResult<java.util.function.Supplier<E>> readAndRegisterElement(ResourceKey<? extends Registry<E>> resourceKey, WritableRegistry<E> writableRegistry, MapCodec<E> mapCodec, ResourceLocation resourceLocation) {
+    private <E> DataResult<java.util.function.Supplier<E>> readAndRegisterElement(ResourceKey<? extends Registry<E>> resourceKey, WritableRegistry<E> writableRegistry, Codec<E> codec, ResourceLocation resourceLocation) {
+        DataResult dataResult3;
         ResourceKey resourceKey2 = ResourceKey.create(resourceKey, resourceLocation);
-        Object object2 = writableRegistry.get(resourceKey2);
-        if (object2 != null) {
-            return DataResult.success(() -> object2, Lifecycle.stable());
-        }
         ReadCache<E> readCache = this.readCache(resourceKey);
         DataResult dataResult = (DataResult)((ReadCache)readCache).values.get(resourceKey2);
         if (dataResult != null) {
@@ -108,17 +97,23 @@ extends DelegatingOps<T> {
             return object;
         });
         ((ReadCache)readCache).values.put(resourceKey2, DataResult.success(supplier));
-        DataResult<java.util.function.Supplier> dataResult2 = this.readElementFromFile(resourceKey, resourceKey2, mapCodec);
-        dataResult2.result().ifPresent(object -> writableRegistry.register(resourceKey2, object));
-        DataResult<java.util.function.Supplier<E>> dataResult3 = dataResult2.map(object -> () -> object);
-        ((ReadCache)readCache).values.put(resourceKey2, dataResult3);
-        return dataResult3;
+        DataResult<java.util.function.Supplier> dataResult2 = this.readElementFromFile(resourceKey, resourceKey2, codec);
+        if (dataResult2.result().isPresent()) {
+            writableRegistry.registerOrOverride(resourceKey2, dataResult2.result().get());
+            dataResult3 = dataResult2;
+        } else {
+            Object object2 = writableRegistry.get(resourceKey2);
+            dataResult3 = object2 != null ? DataResult.success(object2, Lifecycle.stable()) : dataResult2;
+        }
+        DataResult<java.util.function.Supplier<E>> dataResult4 = dataResult3.map(object -> () -> object);
+        ((ReadCache)readCache).values.put(resourceKey2, dataResult4);
+        return dataResult4;
     }
 
     /*
      * Exception decompiling
      */
-    private <E> DataResult<E> readElementFromFile(ResourceKey<? extends Registry<E>> resourceKey, ResourceKey<E> resourceKey2, MapCodec<E> mapCodec) {
+    private <E> DataResult<E> readElementFromFile(ResourceKey<? extends Registry<E>> resourceKey, ResourceKey<E> resourceKey2, Codec<E> codec) {
         /*
          * This method has failed to decompile.  When submitting a bug report, please provide this stack trace, and (if you hold appropriate legal rights) the relevant class file.
          * 

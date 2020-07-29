@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.ItemCombinerMenu;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.UpgradeRecipe;
@@ -49,6 +50,8 @@ extends ItemCombinerMenu {
     protected ItemStack onTake(Player player, ItemStack itemStack) {
         this.shrinkStackInSlot(0);
         this.shrinkStackInSlot(1);
+        itemStack.onCraftedBy(player.level, player, itemStack.getCount());
+        this.resultSlots.awardUsedRecipes(player);
         this.access.execute((level, blockPos) -> level.levelEvent(1044, (BlockPos)blockPos, 0));
         return itemStack;
     }
@@ -67,6 +70,7 @@ extends ItemCombinerMenu {
         } else {
             this.selectedRecipe = list.get(0);
             ItemStack itemStack = this.selectedRecipe.assemble(this.inputSlots);
+            this.resultSlots.setRecipeUsed(this.selectedRecipe);
             this.resultSlots.setItem(0, itemStack);
         }
     }
@@ -74,6 +78,11 @@ extends ItemCombinerMenu {
     @Override
     protected boolean shouldQuickMoveToAdditionalSlot(ItemStack itemStack) {
         return this.recipes.stream().anyMatch(upgradeRecipe -> upgradeRecipe.isAdditionIngredient(itemStack));
+    }
+
+    @Override
+    public boolean canTakeItemForPickAll(ItemStack itemStack, Slot slot) {
+        return slot.container != this.resultSlots && super.canTakeItemForPickAll(itemStack, slot);
     }
 }
 

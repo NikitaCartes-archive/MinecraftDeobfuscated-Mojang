@@ -56,6 +56,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WoolCarpetBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public class Llama
@@ -465,6 +466,12 @@ implements RangedAttackMob {
     @Override
     public void performRangedAttack(LivingEntity livingEntity, float f) {
         this.spit(livingEntity);
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public Vec3 getLeashOffset() {
+        return new Vec3(0.0, 0.75 * (double)this.getEyeHeight(), (double)this.getBbWidth() * 0.5);
     }
 
     @Override

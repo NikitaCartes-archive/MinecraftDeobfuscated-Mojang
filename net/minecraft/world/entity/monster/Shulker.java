@@ -351,9 +351,8 @@ implements Enemy {
     }
 
     @Override
-    @Nullable
-    public AABB getCollideBox() {
-        return this.isAlive() ? this.getBoundingBox() : null;
+    public boolean canBeCollidedWith() {
+        return this.isAlive();
     }
 
     public Direction getAttachFace() {

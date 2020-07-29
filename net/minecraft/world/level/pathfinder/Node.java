@@ -32,7 +32,7 @@ public class Node {
         this.hash = Node.createHash(i, j, k);
     }
 
-    public Node cloneMove(int i, int j, int k) {
+    public Node cloneAndMove(int i, int j, int k) {
         Node node = new Node(i, j, k);
         node.heapIdx = this.heapIdx;
         node.g = this.g;

@@ -14,6 +14,7 @@ import net.minecraft.client.Option;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+import net.minecraft.client.gui.components.OptionButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,6 +48,17 @@ extends ContainerObjectSelectionList<Entry> {
     @Override
     protected int getScrollbarPosition() {
         return super.getScrollbarPosition() + 32;
+    }
+
+    @Nullable
+    public AbstractWidget findOption(Option option) {
+        for (Entry entry : this.children()) {
+            for (AbstractWidget abstractWidget : entry.children) {
+                if (!(abstractWidget instanceof OptionButton) || ((OptionButton)abstractWidget).getOption() != option) continue;
+                return abstractWidget;
+            }
+        }
+        return null;
     }
 
     public Optional<AbstractWidget> getMouseOver(double d, double e) {

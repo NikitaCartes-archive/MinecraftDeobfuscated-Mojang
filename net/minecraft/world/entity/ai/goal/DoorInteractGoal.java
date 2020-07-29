@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Node;
@@ -23,7 +24,7 @@ extends Goal {
 
     public DoorInteractGoal(Mob mob) {
         this.mob = mob;
-        if (!this.hasGroundPathNavigation()) {
+        if (!GoalUtils.hasGroundPathNavigation(mob)) {
             throw new IllegalArgumentException("Unsupported mob type for DoorInteractGoal");
         }
     }
@@ -49,7 +50,7 @@ extends Goal {
 
     @Override
     public boolean canUse() {
-        if (!this.hasGroundPathNavigation()) {
+        if (!GoalUtils.hasGroundPathNavigation(this.mob)) {
             return false;
         }
         if (!this.mob.horizontalCollision) {
@@ -60,8 +61,8 @@ extends Goal {
         if (path == null || path.isDone() || !groundPathNavigation.canOpenDoors()) {
             return false;
         }
-        for (int i = 0; i < Math.min(path.getIndex() + 2, path.getSize()); ++i) {
-            Node node = path.get(i);
+        for (int i = 0; i < Math.min(path.getNextNodeIndex() + 2, path.getNodeCount()); ++i) {
+            Node node = path.getNode(i);
             this.doorPos = new BlockPos(node.x, node.y + 1, node.z);
             if (this.mob.distanceToSqr(this.doorPos.getX(), this.mob.getY(), this.doorPos.getZ()) > 2.25) continue;
             this.hasDoor = DoorBlock.isWoodenDoor(this.mob.level, this.doorPos);
@@ -93,10 +94,6 @@ extends Goal {
         if (h < 0.0f) {
             this.passed = true;
         }
-    }
-
-    private boolean hasGroundPathNavigation() {
-        return this.mob.getNavigation() instanceof GroundPathNavigation;
     }
 }
 

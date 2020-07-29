@@ -21,6 +21,7 @@ import net.minecraft.Util;
 import net.minecraft.data.worldgen.Features;
 import net.minecraft.data.worldgen.StructureFeatures;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -117,22 +118,23 @@ public class FlatLevelGeneratorSettings {
         int i;
         boolean bl;
         Biome biome = this.getBiome();
-        Biome biome2 = new Biome(new Biome.BiomeBuilder().surfaceBuilder(biome.getSurfaceBuilder()).precipitation(biome.getPrecipitation()).biomeCategory(biome.getBiomeCategory()).depth(biome.getDepth()).scale(biome.getScale()).temperature(biome.getBaseTemperature()).downfall(biome.getDownfall()).specialEffects(biome.getSpecialEffects()).parent(biome.getParent()));
+        BiomeGenerationSettings biomeGenerationSettings = biome.getGenerationSettings();
+        BiomeGenerationSettings.Builder builder = new BiomeGenerationSettings.Builder().surfaceBuilder(biomeGenerationSettings.getSurfaceBuilder());
         if (this.addLakes) {
-            biome2.addFeature(GenerationStep.Decoration.LAKES, Features.LAKE_WATER);
-            biome2.addFeature(GenerationStep.Decoration.LAKES, Features.LAKE_LAVA);
+            builder.addFeature(GenerationStep.Decoration.LAKES, Features.LAKE_WATER);
+            builder.addFeature(GenerationStep.Decoration.LAKES, Features.LAKE_LAVA);
         }
         for (Map.Entry<StructureFeature<?>, StructureFeatureConfiguration> entry : this.structureSettings.structureConfig().entrySet()) {
-            biome2.addStructureStart(biome.withBiomeConfig(STRUCTURE_FEATURES.get(entry.getKey())));
+            builder.addStructureStart(biomeGenerationSettings.withBiomeConfig(STRUCTURE_FEATURES.get(entry.getKey())));
         }
         boolean bl2 = bl = (!this.voidGen || biome == Biomes.THE_VOID) && this.decoration;
         if (bl) {
-            List<List<Supplier<ConfiguredFeature<?, ?>>>> list = biome.features();
+            List<List<Supplier<ConfiguredFeature<?, ?>>>> list = biomeGenerationSettings.features();
             for (i = 0; i < list.size(); ++i) {
                 if (i == GenerationStep.Decoration.UNDERGROUND_STRUCTURES.ordinal() || i == GenerationStep.Decoration.SURFACE_STRUCTURES.ordinal()) continue;
                 List<Supplier<ConfiguredFeature<?, ?>>> list2 = list.get(i);
                 for (Supplier<ConfiguredFeature<?, ?>> supplier : list2) {
-                    biome2.addFeature(i, supplier);
+                    builder.addFeature(i, supplier);
                 }
             }
         }
@@ -141,9 +143,9 @@ public class FlatLevelGeneratorSettings {
             BlockState blockState = blockStates[i];
             if (blockState == null || Heightmap.Types.MOTION_BLOCKING.isOpaque().test(blockState)) continue;
             this.layers[i] = null;
-            biome2.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, Feature.FILL_LAYER.configured(new LayerConfiguration(i, blockState)));
+            builder.addFeature(GenerationStep.Decoration.TOP_LAYER_MODIFICATION, Feature.FILL_LAYER.configured(new LayerConfiguration(i, blockState)));
         }
-        return biome2;
+        return new Biome.BiomeBuilder().precipitation(biome.getPrecipitation()).biomeCategory(biome.getBiomeCategory()).depth(biome.getDepth()).scale(biome.getScale()).temperature(biome.getBaseTemperature()).downfall(biome.getDownfall()).specialEffects(biome.getSpecialEffects()).generationSettings(builder.build()).mobSpawnSettings(biome.getMobSettings()).parent(biome.getParent()).build();
     }
 
     public StructureSettings structureSettings() {

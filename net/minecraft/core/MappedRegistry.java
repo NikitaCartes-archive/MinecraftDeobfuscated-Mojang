@@ -7,15 +7,21 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
-import com.mojang.datafixers.util.Pair;
+import com.google.common.collect.Iterators;
+import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -25,7 +31,6 @@ import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.RegistryDataPackCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,32 +39,37 @@ import org.jetbrains.annotations.Nullable;
 public class MappedRegistry<T>
 extends WritableRegistry<T> {
     protected static final Logger LOGGER = LogManager.getLogger();
-    protected final CrudeIncrementalIntIdentityHashBiMap<T> map = new CrudeIncrementalIntIdentityHashBiMap(256);
-    protected final BiMap<ResourceLocation, T> storage = HashBiMap.create();
-    private final BiMap<ResourceKey<T>, T> keyStorage = HashBiMap.create();
-    private final Set<ResourceKey<T>> persistent = Sets.newIdentityHashSet();
+    private final ObjectList<T> byId = new ObjectArrayList<T>(256);
+    private final Object2IntMap<T> toId = new Object2IntOpenCustomHashMap<T>(Util.identityStrategy());
+    private final BiMap<ResourceLocation, T> storage;
+    private final BiMap<ResourceKey<T>, T> keyStorage;
     protected Object[] randomCache;
     private int nextId;
 
     public MappedRegistry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle) {
         super(resourceKey, lifecycle);
+        this.toId.defaultReturnValue(-1);
+        this.storage = HashBiMap.create();
+        this.keyStorage = HashBiMap.create();
     }
 
-    public static <T> MapCodec<Pair<ResourceKey<T>, T>> withName(ResourceKey<? extends Registry<T>> resourceKey, MapCodec<T> mapCodec) {
-        return Codec.mapPair(ResourceLocation.CODEC.xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location).fieldOf("name"), mapCodec);
-    }
-
-    public static <T> MapCodec<Pair<Pair<ResourceKey<T>, Integer>, T>> withNameAndId(ResourceKey<? extends Registry<T>> resourceKey, MapCodec<T> mapCodec) {
-        return Codec.mapPair(Codec.mapPair(ResourceLocation.CODEC.xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location).fieldOf("name"), Codec.INT.fieldOf("id")), mapCodec);
+    public static <T> MapCodec<RegistryEntry<T>> withNameAndId(ResourceKey<? extends Registry<T>> resourceKey, MapCodec<T> mapCodec) {
+        return RecordCodecBuilder.mapCodec(instance -> instance.group(((MapCodec)ResourceLocation.CODEC.xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location).fieldOf("name")).forGetter(registryEntry -> registryEntry.key), ((MapCodec)Codec.INT.fieldOf("id")).forGetter(registryEntry -> registryEntry.id), mapCodec.forGetter(registryEntry -> registryEntry.value)).apply((Applicative<RegistryEntry, ?>)instance, RegistryEntry::new));
     }
 
     @Override
     public <V extends T> V registerMapping(int i, ResourceKey<T> resourceKey, V object) {
-        this.map.addMapping(object, i);
+        return this.registerMapping(i, resourceKey, object, true);
+    }
+
+    private <V extends T> V registerMapping(int i, ResourceKey<T> resourceKey, V object, boolean bl) {
         Validate.notNull(resourceKey);
         Validate.notNull(object);
+        this.byId.size(Math.max(this.byId.size(), i + 1));
+        this.byId.set(i, object);
+        this.toId.put((T)object, i);
         this.randomCache = null;
-        if (this.keyStorage.containsKey(resourceKey)) {
+        if (bl && this.keyStorage.containsKey(resourceKey)) {
             LOGGER.debug("Adding duplicate key '{}' to registry", (Object)resourceKey);
         }
         if (this.storage.containsValue(object)) {
@@ -79,6 +89,21 @@ extends WritableRegistry<T> {
     }
 
     @Override
+    public <V extends T> V registerOrOverride(ResourceKey<T> resourceKey, V object) {
+        int i;
+        Validate.notNull(resourceKey);
+        Validate.notNull(object);
+        Object object2 = this.keyStorage.get(resourceKey);
+        if (object2 == null) {
+            i = this.nextId;
+        } else {
+            i = this.toId.getInt(object2);
+            this.toId.removeInt(object2);
+        }
+        return this.registerMapping(i, resourceKey, object, false);
+    }
+
+    @Override
     @Nullable
     public ResourceLocation getKey(T object) {
         return (ResourceLocation)this.storage.inverse().get(object);
@@ -91,7 +116,7 @@ extends WritableRegistry<T> {
 
     @Override
     public int getId(@Nullable T object) {
-        return this.map.getId(object);
+        return this.toId.getInt(object);
     }
 
     @Override
@@ -103,12 +128,15 @@ extends WritableRegistry<T> {
     @Override
     @Nullable
     public T byId(int i) {
-        return this.map.byId(i);
+        if (i < 0 || i >= this.byId.size()) {
+            return null;
+        }
+        return (T)this.byId.get(i);
     }
 
     @Override
     public Iterator<T> iterator() {
-        return this.map.iterator();
+        return Iterators.filter(this.byId.iterator(), Objects::nonNull);
     }
 
     @Override
@@ -144,54 +172,44 @@ extends WritableRegistry<T> {
         return this.storage.containsKey(resourceLocation);
     }
 
-    @Override
-    public boolean containsId(int i) {
-        return this.map.contains(i);
-    }
-
-    @Override
-    public boolean persistent(ResourceKey<T> resourceKey) {
-        return this.persistent.contains(resourceKey);
-    }
-
-    @Override
-    public void setPersistent(ResourceKey<T> resourceKey) {
-        this.persistent.add(resourceKey);
-    }
-
-    public static <T> Codec<MappedRegistry<T>> networkCodec(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, MapCodec<T> mapCodec) {
-        return MappedRegistry.withNameAndId(resourceKey, mapCodec).codec().listOf().xmap(list -> {
+    public static <T> Codec<MappedRegistry<T>> networkCodec(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, Codec<T> codec) {
+        return MappedRegistry.withNameAndId(resourceKey, codec.fieldOf("element")).codec().listOf().xmap(list -> {
             MappedRegistry mappedRegistry = new MappedRegistry(resourceKey, lifecycle);
-            for (Pair pair : list) {
-                mappedRegistry.registerMapping((Integer)((Pair)pair.getFirst()).getSecond(), (ResourceKey)((Pair)pair.getFirst()).getFirst(), pair.getSecond());
+            for (RegistryEntry registryEntry : list) {
+                mappedRegistry.registerMapping(registryEntry.id, registryEntry.key, registryEntry.value);
             }
             return mappedRegistry;
         }, mappedRegistry -> {
             ImmutableList.Builder builder = ImmutableList.builder();
-            for (Object object : mappedRegistry.map) {
-                builder.add(Pair.of(Pair.of(mappedRegistry.getResourceKey(object).get(), mappedRegistry.getId(object)), object));
+            for (Object object : mappedRegistry) {
+                builder.add(new RegistryEntry(mappedRegistry.getResourceKey(object).get(), mappedRegistry.getId(object), object));
             }
             return builder.build();
         });
     }
 
-    public static <T> Codec<MappedRegistry<T>> dataPackCodec(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, MapCodec<T> mapCodec) {
-        return RegistryDataPackCodec.create(resourceKey, lifecycle, mapCodec);
+    public static <T> Codec<MappedRegistry<T>> dataPackCodec(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, Codec<T> codec) {
+        return RegistryDataPackCodec.create(resourceKey, lifecycle, codec);
     }
 
-    public static <T> Codec<MappedRegistry<T>> directCodec(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, MapCodec<T> mapCodec) {
-        return Codec.unboundedMap(ResourceLocation.CODEC.xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location), mapCodec.codec()).xmap(map -> {
+    public static <T> Codec<MappedRegistry<T>> directCodec(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, Codec<T> codec) {
+        return Codec.unboundedMap(ResourceLocation.CODEC.xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location), codec).xmap(map -> {
             MappedRegistry mappedRegistry = new MappedRegistry(resourceKey, lifecycle);
-            map.forEach((? super K resourceKey, ? super V object) -> {
-                mappedRegistry.registerMapping(mappedRegistry.nextId, (ResourceKey)resourceKey, (Object)object);
-                mappedRegistry.setPersistent((ResourceKey)resourceKey);
-            });
+            map.forEach(mappedRegistry::register);
             return mappedRegistry;
-        }, mappedRegistry -> {
-            ImmutableMap.Builder builder = ImmutableMap.builder();
-            mappedRegistry.keyStorage.entrySet().stream().filter(entry -> mappedRegistry.persistent((ResourceKey)entry.getKey())).forEach(builder::put);
-            return builder.build();
-        });
+        }, mappedRegistry -> ImmutableMap.copyOf(mappedRegistry.keyStorage));
+    }
+
+    public static class RegistryEntry<T> {
+        public final ResourceKey<T> key;
+        public final int id;
+        public final T value;
+
+        public RegistryEntry(ResourceKey<T> resourceKey, int i, T object) {
+            this.key = resourceKey;
+            this.id = i;
+            this.value = object;
+        }
     }
 }
 

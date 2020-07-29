@@ -69,13 +69,18 @@ extends Goal {
         return 1.0;
     }
 
+    protected BlockPos getMoveToTarget() {
+        return this.blockPos.above();
+    }
+
     @Override
     public void tick() {
-        if (!this.blockPos.above().closerThan(this.mob.position(), this.acceptedDistance())) {
+        BlockPos blockPos = this.getMoveToTarget();
+        if (!blockPos.closerThan(this.mob.position(), this.acceptedDistance())) {
             this.reachedTarget = false;
             ++this.tryTicks;
             if (this.shouldRecalculatePath()) {
-                this.mob.getNavigation().moveTo((double)this.blockPos.getX() + 0.5, this.blockPos.getY() + 1, (double)this.blockPos.getZ() + 0.5, this.speedModifier);
+                this.mob.getNavigation().moveTo((double)blockPos.getX() + 0.5, blockPos.getY(), (double)blockPos.getZ() + 0.5, this.speedModifier);
             }
         } else {
             this.reachedTarget = true;

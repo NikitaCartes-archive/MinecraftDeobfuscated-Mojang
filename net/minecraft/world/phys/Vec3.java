@@ -190,6 +190,16 @@ implements Position {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public Vec3 zRot(float f) {
+        float g = Mth.cos(f);
+        float h = Mth.sin(f);
+        double d = this.x * (double)g + this.y * (double)h;
+        double e = this.y * (double)g - this.x * (double)h;
+        double i = this.z;
+        return new Vec3(d, e, i);
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public static Vec3 directionFromRotation(Vec2 vec2) {
         return Vec3.directionFromRotation(vec2.x, vec2.y);
     }

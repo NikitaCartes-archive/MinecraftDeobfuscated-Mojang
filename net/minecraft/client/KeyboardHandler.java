@@ -19,9 +19,8 @@ import net.minecraft.client.Option;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.screens.AccessibilityOptionsScreen;
-import net.minecraft.client.gui.screens.ChatOptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.SimpleOptionsSubScreen;
 import net.minecraft.client.gui.screens.controls.ControlsScreen;
 import net.minecraft.client.gui.screens.debug.GameModeSwitcherScreen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -286,11 +285,8 @@ public class KeyboardHandler {
         boolean bl2 = bl = containerEventHandler == null || !(containerEventHandler.getFocused() instanceof EditBox) || !((EditBox)containerEventHandler.getFocused()).canConsumeInput();
         if (k != 0 && i == 66 && Screen.hasControlDown() && bl) {
             Option.NARRATOR.toggle(this.minecraft.options, 1);
-            if (containerEventHandler instanceof ChatOptionsScreen) {
-                ((ChatOptionsScreen)containerEventHandler).updateNarratorButton();
-            }
-            if (containerEventHandler instanceof AccessibilityOptionsScreen) {
-                ((AccessibilityOptionsScreen)containerEventHandler).updateNarratorButton();
+            if (containerEventHandler instanceof SimpleOptionsSubScreen) {
+                ((SimpleOptionsSubScreen)containerEventHandler).updateNarratorButton();
             }
         }
         if (containerEventHandler != null) {

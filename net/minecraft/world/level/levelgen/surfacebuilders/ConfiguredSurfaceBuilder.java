@@ -4,7 +4,6 @@
 package net.minecraft.world.level.levelgen.surfacebuilders;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import java.util.Random;
 import java.util.function.Supplier;
 import net.minecraft.core.Registry;
@@ -16,7 +15,7 @@ import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderConfiguration;
 
 public class ConfiguredSurfaceBuilder<SC extends SurfaceBuilderConfiguration> {
-    public static final MapCodec<ConfiguredSurfaceBuilder<?>> DIRECT_CODEC = Registry.SURFACE_BUILDER.dispatchMap(configuredSurfaceBuilder -> configuredSurfaceBuilder.surfaceBuilder, SurfaceBuilder::configuredCodec);
+    public static final Codec<ConfiguredSurfaceBuilder<?>> DIRECT_CODEC = Registry.SURFACE_BUILDER.dispatch(configuredSurfaceBuilder -> configuredSurfaceBuilder.surfaceBuilder, SurfaceBuilder::configuredCodec);
     public static final Codec<Supplier<ConfiguredSurfaceBuilder<?>>> CODEC = RegistryFileCodec.create(Registry.CONFIGURED_SURFACE_BUILDER_REGISTRY, DIRECT_CODEC);
     public final SurfaceBuilder<SC> surfaceBuilder;
     public final SC config;

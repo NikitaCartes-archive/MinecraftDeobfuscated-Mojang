@@ -3,7 +3,6 @@
  */
 package net.minecraft.core;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -82,7 +81,7 @@ import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTestType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
 import net.minecraft.world.level.levelgen.surfacebuilders.ConfiguredSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
@@ -176,7 +175,7 @@ IdMap<T> {
     public static final ResourceKey<Registry<ConfiguredWorldCarver<?>>> CONFIGURED_CARVER_REGISTRY = Registry.createRegistryKey("worldgen/configured_carver");
     public static final ResourceKey<Registry<ConfiguredFeature<?, ?>>> CONFIGURED_FEATURE_REGISTRY = Registry.createRegistryKey("worldgen/configured_feature");
     public static final ResourceKey<Registry<ConfiguredStructureFeature<?, ?>>> CONFIGURED_STRUCTURE_FEATURE_REGISTRY = Registry.createRegistryKey("worldgen/configured_structure_feature");
-    public static final ResourceKey<Registry<ImmutableList<StructureProcessor>>> PROCESSOR_LIST_REGISTRY = Registry.createRegistryKey("worldgen/processor_list");
+    public static final ResourceKey<Registry<StructureProcessorList>> PROCESSOR_LIST_REGISTRY = Registry.createRegistryKey("worldgen/processor_list");
     public static final ResourceKey<Registry<StructureTemplatePool>> TEMPLATE_POOL_REGISTRY = Registry.createRegistryKey("worldgen/template_pool");
     public static final ResourceKey<Registry<Biome>> BIOME_REGISTRY = Registry.createRegistryKey("worldgen/biome");
     public static final ResourceKey<Registry<SurfaceBuilder<?>>> SURFACE_BUILDER_REGISTRY = Registry.createRegistryKey("worldgen/surface_builder");
@@ -333,9 +332,9 @@ IdMap<T> {
 
     public abstract boolean containsKey(ResourceLocation var1);
 
-    public abstract boolean persistent(ResourceKey<T> var1);
-
-    public abstract boolean containsId(int var1);
+    public boolean containsId(int i) {
+        return this.byId(i) != null;
+    }
 
     public static <T> T register(Registry<? super T> registry, String string, T object) {
         return Registry.register(registry, new ResourceLocation(string), object);

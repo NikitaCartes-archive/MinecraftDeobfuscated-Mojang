@@ -351,13 +351,13 @@ AutoCloseable {
             this.bobView(poseStack, f);
         }
         boolean bl2 = bl = this.minecraft.getCameraEntity() instanceof LivingEntity && ((LivingEntity)this.minecraft.getCameraEntity()).isSleeping();
-        if (this.minecraft.options.thirdPersonView == 0 && !bl && !this.minecraft.options.hideGui && this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR) {
+        if (this.minecraft.options.getCameraType().isFirstPerson() && !bl && !this.minecraft.options.hideGui && this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR) {
             this.lightTexture.turnOnLightLayer();
             this.itemInHandRenderer.renderHandsWithItems(f, poseStack, this.renderBuffers.bufferSource(), this.minecraft.player, this.minecraft.getEntityRenderDispatcher().getPackedLightCoords(this.minecraft.player, f));
             this.lightTexture.turnOffLightLayer();
         }
         poseStack.popPose();
-        if (this.minecraft.options.thirdPersonView == 0 && !bl) {
+        if (this.minecraft.options.getCameraType().isFirstPerson() && !bl) {
             ScreenEffectRenderer.renderScreenEffect(this.minecraft, poseStack);
             this.bobHurt(poseStack, f);
         }
@@ -540,7 +540,7 @@ AutoCloseable {
         if (this.minecraft.options.bobView) {
             this.bobView(poseStack2, f);
         }
-        if ((g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime)) > 0.0f) {
+        if ((g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime) * (this.minecraft.options.screenEffectScale * this.minecraft.options.screenEffectScale)) > 0.0f) {
             int i = 20;
             if (this.minecraft.player.hasEffect(MobEffects.CONFUSION)) {
                 i = 7;
@@ -555,7 +555,7 @@ AutoCloseable {
         }
         Matrix4f matrix4f = poseStack2.last().pose();
         this.resetProjectionMatrix(matrix4f);
-        camera.setup(this.minecraft.level, this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity(), this.minecraft.options.thirdPersonView > 0, this.minecraft.options.thirdPersonView == 2, f);
+        camera.setup(this.minecraft.level, this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity(), !this.minecraft.options.getCameraType().isFirstPerson(), this.minecraft.options.getCameraType().isMirrored(), f);
         poseStack.mulPose(Vector3f.XP.rotationDegrees(camera.getXRot()));
         poseStack.mulPose(Vector3f.YP.rotationDegrees(camera.getYRot() + 180.0f));
         this.minecraft.levelRenderer.renderLevel(poseStack, f, l, bl, camera, this, this.lightTexture, matrix4f);

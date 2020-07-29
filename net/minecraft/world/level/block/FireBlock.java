@@ -3,10 +3,13 @@
  */
 package net.minecraft.world.level.block;
 
+import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -41,12 +44,39 @@ extends BaseFireBlock {
     public static final BooleanProperty WEST = PipeBlock.WEST;
     public static final BooleanProperty UP = PipeBlock.UP;
     private static final Map<Direction, BooleanProperty> PROPERTY_BY_DIRECTION = PipeBlock.PROPERTY_BY_DIRECTION.entrySet().stream().filter(entry -> entry.getKey() != Direction.DOWN).collect(Util.toMap());
+    private static final VoxelShape UP_AABB = Block.box(0.0, 15.0, 0.0, 16.0, 16.0, 16.0);
+    private static final VoxelShape WEST_AABB = Block.box(0.0, 0.0, 0.0, 1.0, 16.0, 16.0);
+    private static final VoxelShape EAST_AABB = Block.box(15.0, 0.0, 0.0, 16.0, 16.0, 16.0);
+    private static final VoxelShape NORTH_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 1.0);
+    private static final VoxelShape SOUTH_AABB = Block.box(0.0, 0.0, 15.0, 16.0, 16.0, 16.0);
+    private final Map<BlockState, VoxelShape> shapesCache;
     private final Object2IntMap<Block> flameOdds = new Object2IntOpenHashMap<Block>();
     private final Object2IntMap<Block> burnOdds = new Object2IntOpenHashMap<Block>();
 
     public FireBlock(BlockBehaviour.Properties properties) {
         super(properties, 1.0f);
         this.registerDefaultState((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(AGE, 0)).setValue(NORTH, false)).setValue(EAST, false)).setValue(SOUTH, false)).setValue(WEST, false)).setValue(UP, false));
+        this.shapesCache = ImmutableMap.copyOf(this.stateDefinition.getPossibleStates().stream().filter(blockState -> blockState.getValue(AGE) == 0).collect(Collectors.toMap(Function.identity(), FireBlock::calculateShape)));
+    }
+
+    private static VoxelShape calculateShape(BlockState blockState) {
+        VoxelShape voxelShape = Shapes.empty();
+        if (blockState.getValue(UP).booleanValue()) {
+            voxelShape = UP_AABB;
+        }
+        if (blockState.getValue(NORTH).booleanValue()) {
+            voxelShape = Shapes.or(voxelShape, NORTH_AABB);
+        }
+        if (blockState.getValue(SOUTH).booleanValue()) {
+            voxelShape = Shapes.or(voxelShape, SOUTH_AABB);
+        }
+        if (blockState.getValue(EAST).booleanValue()) {
+            voxelShape = Shapes.or(voxelShape, EAST_AABB);
+        }
+        if (blockState.getValue(WEST).booleanValue()) {
+            voxelShape = Shapes.or(voxelShape, WEST_AABB);
+        }
+        return voxelShape.isEmpty() ? DOWN_AABB : voxelShape;
     }
 
     @Override
@@ -59,26 +89,7 @@ extends BaseFireBlock {
 
     @Override
     public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-        VoxelShape voxelShape = Shapes.empty();
-        if (blockState.getValue(UP).booleanValue()) {
-            voxelShape = UP_AABB;
-        }
-        if (blockState.getValue(WEST).booleanValue()) {
-            voxelShape = Shapes.or(voxelShape, WEST_AABB);
-        }
-        if (blockState.getValue(EAST).booleanValue()) {
-            voxelShape = Shapes.or(voxelShape, EAST_AABB);
-        }
-        if (blockState.getValue(NORTH).booleanValue()) {
-            voxelShape = Shapes.or(voxelShape, NORTH_AABB);
-        }
-        if (blockState.getValue(SOUTH).booleanValue()) {
-            voxelShape = Shapes.or(voxelShape, SOUTH_AABB);
-        }
-        if (voxelShape == Shapes.empty()) {
-            return DOWN_AABB;
-        }
-        return voxelShape;
+        return this.shapesCache.get(blockState.setValue(AGE, 0));
     }
 
     @Override

@@ -90,7 +90,7 @@ extends Feature<BlockStateConfiguration> {
                     BlockPos blockPos2;
                     if (!bls[(j * 16 + s) * 8 + t] || !LakeFeature.isDirt(worldGenLevel.getBlockState(blockPos2 = blockPos.offset(j, t - 1, s)).getBlock()) || worldGenLevel.getBrightness(LightLayer.SKY, blockPos.offset(j, t, s)) <= 0) continue;
                     Biome biome = worldGenLevel.getBiome(blockPos2);
-                    if (biome.getSurfaceBuilderConfig().getTopMaterial().is(Blocks.MYCELIUM)) {
+                    if (biome.getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial().is(Blocks.MYCELIUM)) {
                         worldGenLevel.setBlock(blockPos2, Blocks.MYCELIUM.defaultBlockState(), 2);
                         continue;
                     }

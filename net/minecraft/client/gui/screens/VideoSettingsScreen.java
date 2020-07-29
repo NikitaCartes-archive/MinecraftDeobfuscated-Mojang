@@ -8,7 +8,6 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -17,9 +16,7 @@ import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Option;
 import net.minecraft.client.Options;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.OptionButton;
 import net.minecraft.client.gui.components.OptionsList;
 import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.PopupScreen;
@@ -31,7 +28,6 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
-import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public class VideoSettingsScreen
@@ -42,9 +38,7 @@ extends OptionsSubScreen {
     private static final Component BUTTON_ACCEPT = new TranslatableComponent("options.graphics.warning.accept");
     private static final Component BUTTON_CANCEL = new TranslatableComponent("options.graphics.warning.cancel");
     private static final Component NEW_LINE = new TextComponent("\n");
-    private static final Option[] OPTIONS = new Option[]{Option.GRAPHICS, Option.RENDER_DISTANCE, Option.AMBIENT_OCCLUSION, Option.FRAMERATE_LIMIT, Option.ENABLE_VSYNC, Option.VIEW_BOBBING, Option.GUI_SCALE, Option.ATTACK_INDICATOR, Option.GAMMA, Option.RENDER_CLOUDS, Option.USE_FULLSCREEN, Option.PARTICLES, Option.MIPMAP_LEVELS, Option.ENTITY_SHADOWS, Option.ENTITY_DISTANCE_SCALING};
-    @Nullable
-    private List<FormattedCharSequence> tooltip;
+    private static final Option[] OPTIONS = new Option[]{Option.GRAPHICS, Option.RENDER_DISTANCE, Option.AMBIENT_OCCLUSION, Option.FRAMERATE_LIMIT, Option.ENABLE_VSYNC, Option.VIEW_BOBBING, Option.GUI_SCALE, Option.ATTACK_INDICATOR, Option.GAMMA, Option.RENDER_CLOUDS, Option.USE_FULLSCREEN, Option.PARTICLES, Option.MIPMAP_LEVELS, Option.ENTITY_SHADOWS, Option.SCREEN_EFFECTS_SCALE, Option.ENTITY_DISTANCE_SCALING, Option.FOV_EFFECTS_SCALE};
     private OptionsList list;
     private final GpuWarnlistManager gpuWarnlistManager;
     private final int oldMipmaps;
@@ -85,7 +79,6 @@ extends OptionsSubScreen {
     @Override
     public boolean mouseClicked(double d, double e, int i) {
         int j = this.options.guiScale;
-        GraphicsStatus graphicsStatus = this.options.graphicsMode;
         if (super.mouseClicked(d, e, i)) {
             if (this.options.guiScale != j) {
                 this.minecraft.resizeDisplay();
@@ -139,20 +132,13 @@ extends OptionsSubScreen {
 
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
-        this.tooltip = null;
-        Optional<AbstractWidget> optional = this.list.getMouseOver(i, j);
-        if (optional.isPresent() && optional.get() instanceof OptionButton) {
-            Optional<List<FormattedCharSequence>> optional2 = ((OptionButton)optional.get()).getOption().getTooltip();
-            optional2.ifPresent(list -> {
-                this.tooltip = list;
-            });
-        }
         this.renderBackground(poseStack);
         this.list.render(poseStack, i, j, f);
         VideoSettingsScreen.drawCenteredString(poseStack, this.font, this.title, this.width / 2, 5, 0xFFFFFF);
         super.render(poseStack, i, j, f);
-        if (this.tooltip != null) {
-            this.renderTooltip(poseStack, this.tooltip, i, j);
+        List<FormattedCharSequence> list = VideoSettingsScreen.tooltipAt(this.list, i, j);
+        if (list != null) {
+            this.renderTooltip(poseStack, list, i, j);
         }
     }
 }

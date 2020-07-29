@@ -35,6 +35,7 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.entity.vehicle.MinecartChest;
@@ -152,12 +153,8 @@ extends Entity {
     }
 
     @Override
-    @Nullable
-    public AABB getCollideAgainstBox(Entity entity) {
-        if (entity.isPushable()) {
-            return entity.getBoundingBox();
-        }
-        return null;
+    public boolean canCollideWith(Entity entity) {
+        return Boat.canVehicleCollide(this, entity);
     }
 
     @Override

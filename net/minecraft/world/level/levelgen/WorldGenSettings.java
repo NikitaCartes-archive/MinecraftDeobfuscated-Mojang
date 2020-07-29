@@ -106,13 +106,10 @@ public class WorldGenSettings {
     public static MappedRegistry<LevelStem> withOverworld(MappedRegistry<LevelStem> mappedRegistry, Supplier<DimensionType> supplier, ChunkGenerator chunkGenerator) {
         MappedRegistry<LevelStem> mappedRegistry2 = new MappedRegistry<LevelStem>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental());
         mappedRegistry2.register(LevelStem.OVERWORLD, new LevelStem(supplier, chunkGenerator));
-        mappedRegistry2.setPersistent(LevelStem.OVERWORLD);
         for (Map.Entry<ResourceKey<LevelStem>, LevelStem> entry : mappedRegistry.entrySet()) {
             ResourceKey<LevelStem> resourceKey = entry.getKey();
             if (resourceKey == LevelStem.OVERWORLD) continue;
             mappedRegistry2.register(resourceKey, entry.getValue());
-            if (!mappedRegistry.persistent(resourceKey)) continue;
-            mappedRegistry2.setPersistent(resourceKey);
         }
         return mappedRegistry2;
     }
@@ -217,8 +214,6 @@ public class WorldGenSettings {
             for (Map.Entry<ResourceKey<LevelStem>, LevelStem> entry : this.dimensions.entrySet()) {
                 ResourceKey<LevelStem> resourceKey = entry.getKey();
                 mappedRegistry.register(resourceKey, new LevelStem(entry.getValue().typeSupplier(), entry.getValue().generator().withSeed(m)));
-                if (!this.dimensions.persistent(resourceKey)) continue;
-                mappedRegistry.setPersistent(resourceKey);
             }
         } else {
             mappedRegistry = this.dimensions;

@@ -13,7 +13,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -53,7 +52,7 @@ extends Projectile {
     public void tick() {
         float h;
         super.tick();
-        HitResult hitResult = ProjectileUtil.getHitResult(this, this::canHitEntity, ClipContext.Block.OUTLINE);
+        HitResult hitResult = ProjectileUtil.getHitResult(this, this::canHitEntity);
         boolean bl = false;
         if (hitResult.getType() == HitResult.Type.BLOCK) {
             BlockPos blockPos = ((BlockHitResult)hitResult).getBlockPos();
@@ -72,6 +71,7 @@ extends Projectile {
         if (hitResult.getType() != HitResult.Type.MISS && !bl) {
             this.onHit(hitResult);
         }
+        this.checkInsideBlocks();
         Vec3 vec3 = this.getDeltaMovement();
         double d = this.getX() + vec3.x;
         double e = this.getY() + vec3.y;

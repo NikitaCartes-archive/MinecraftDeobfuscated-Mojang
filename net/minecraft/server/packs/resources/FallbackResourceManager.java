@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -115,14 +114,6 @@ implements ResourceManager {
             throw new FileNotFoundException(resourceLocation.toString());
         }
         return list;
-    }
-
-    @Override
-    public Collection<ResourceLocation> listResources(ResourceLocation resourceLocation, Predicate<String> predicate) {
-        if (Objects.equals(resourceLocation.getNamespace(), this.namespace)) {
-            return this.listResources(resourceLocation.getPath(), predicate);
-        }
-        return ImmutableSet.of();
     }
 
     @Override

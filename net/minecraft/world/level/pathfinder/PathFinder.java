@@ -86,7 +86,7 @@ public class PathFinder {
                 this.openSet.insert(node3);
             }
         }
-        Optional<Path> optional2 = optional = !set3.isEmpty() ? set3.stream().map(target -> this.reconstructPath(target.getBestNode(), (BlockPos)map.get(target), true)).min(Comparator.comparingInt(Path::getSize)) : set.stream().map(target -> this.reconstructPath(target.getBestNode(), (BlockPos)map.get(target), false)).min(Comparator.comparingDouble(Path::getDistToTarget).thenComparingInt(Path::getSize));
+        Optional<Path> optional2 = optional = !set3.isEmpty() ? set3.stream().map(target -> this.reconstructPath(target.getBestNode(), (BlockPos)map.get(target), true)).min(Comparator.comparingInt(Path::getNodeCount)) : set.stream().map(target -> this.reconstructPath(target.getBestNode(), (BlockPos)map.get(target), false)).min(Comparator.comparingDouble(Path::getDistToTarget).thenComparingInt(Path::getNodeCount));
         if (!optional.isPresent()) {
             return null;
         }

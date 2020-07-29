@@ -97,10 +97,10 @@ extends PathNavigation {
             if (this.level.canSeeSky(new BlockPos(this.mob.getX(), this.mob.getY() + 0.5, this.mob.getZ()))) {
                 return;
             }
-            for (int i = 0; i < this.path.getSize(); ++i) {
-                Node node = this.path.get(i);
+            for (int i = 0; i < this.path.getNodeCount(); ++i) {
+                Node node = this.path.getNode(i);
                 if (!this.level.canSeeSky(new BlockPos(node.x, node.y, node.z))) continue;
-                this.path.truncate(i);
+                this.path.truncateNodes(i);
                 return;
             }
         }

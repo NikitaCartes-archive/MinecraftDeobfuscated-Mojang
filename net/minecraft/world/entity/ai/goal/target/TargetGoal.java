@@ -119,7 +119,7 @@ extends Goal {
         if (path == null) {
             return false;
         }
-        Node node = path.last();
+        Node node = path.getEndNode();
         if (node == null) {
             return false;
         }

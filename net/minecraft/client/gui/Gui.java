@@ -85,6 +85,7 @@ import org.jetbrains.annotations.Nullable;
 public class Gui
 extends GuiComponent {
     private static final ResourceLocation VIGNETTE_LOCATION = new ResourceLocation("textures/misc/vignette.png");
+    private static final ResourceLocation NAUSEA_LOCATION = new ResourceLocation("textures/misc/nausea.png");
     private static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
     private static final ResourceLocation PUMPKIN_BLUR_LOCATION = new ResourceLocation("textures/misc/pumpkinblur.png");
     private static final Component DEMO_EXPIRED_TEXT = new TranslatableComponent("demo.demoExpired");
@@ -149,7 +150,7 @@ extends GuiComponent {
     }
 
     public void render(PoseStack poseStack, float f) {
-        int j;
+        int k;
         float g;
         this.screenWidth = this.minecraft.getWindow().getGuiScaledWidth();
         this.screenHeight = this.minecraft.getWindow().getGuiScaledHeight();
@@ -162,11 +163,17 @@ extends GuiComponent {
             RenderSystem.defaultBlendFunc();
         }
         ItemStack itemStack = this.minecraft.player.inventory.getArmor(3);
-        if (this.minecraft.options.thirdPersonView == 0 && itemStack.getItem() == Blocks.CARVED_PUMPKIN.asItem()) {
+        if (this.minecraft.options.getCameraType().isFirstPerson() && itemStack.getItem() == Blocks.CARVED_PUMPKIN.asItem()) {
             this.renderPumpkin();
         }
-        if (!this.minecraft.player.hasEffect(MobEffects.CONFUSION) && (g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime)) > 0.0f) {
-            this.renderPortalOverlay(g);
+        if ((g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime)) > 0.0f) {
+            if (this.minecraft.player.hasEffect(MobEffects.CONFUSION)) {
+                if (this.minecraft.options.screenEffectScale < 1.0f) {
+                    this.renderConfusionOverlay(g * (1.0f - this.minecraft.options.screenEffectScale));
+                }
+            } else {
+                this.renderPortalOverlay(g);
+            }
         }
         if (this.minecraft.gameMode.getPlayerMode() == GameType.SPECTATOR) {
             this.spectatorGui.renderHotbar(poseStack, f);
@@ -206,13 +213,13 @@ extends GuiComponent {
             this.minecraft.getProfiler().push("sleep");
             RenderSystem.disableDepthTest();
             RenderSystem.disableAlphaTest();
-            g = this.minecraft.player.getSleepTimer();
-            float h = g / 100.0f;
-            if (h > 1.0f) {
-                h = 1.0f - (g - 100.0f) / 10.0f;
+            float h = this.minecraft.player.getSleepTimer();
+            float j = h / 100.0f;
+            if (j > 1.0f) {
+                j = 1.0f - (h - 100.0f) / 10.0f;
             }
-            j = (int)(220.0f * h) << 24 | 0x101020;
-            Gui.fill(poseStack, 0, 0, this.screenWidth, this.screenHeight, j);
+            k = (int)(220.0f * j) << 24 | 0x101020;
+            Gui.fill(poseStack, 0, 0, this.screenWidth, this.screenHeight, k);
             RenderSystem.enableAlphaTest();
             RenderSystem.enableDepthTest();
             this.minecraft.getProfiler().pop();
@@ -227,28 +234,28 @@ extends GuiComponent {
         }
         if (!this.minecraft.options.hideGui) {
             Objective objective2;
+            int n;
             int m;
-            int l;
             if (this.overlayMessageString != null && this.overlayMessageTime > 0) {
                 this.minecraft.getProfiler().push("overlayMessage");
-                g = (float)this.overlayMessageTime - f;
-                int k = (int)(g * 255.0f / 20.0f);
-                if (k > 255) {
-                    k = 255;
+                float h = (float)this.overlayMessageTime - f;
+                int l = (int)(h * 255.0f / 20.0f);
+                if (l > 255) {
+                    l = 255;
                 }
-                if (k > 8) {
+                if (l > 8) {
                     RenderSystem.pushMatrix();
                     RenderSystem.translatef(this.screenWidth / 2, this.screenHeight - 68, 0.0f);
                     RenderSystem.enableBlend();
                     RenderSystem.defaultBlendFunc();
-                    j = 0xFFFFFF;
+                    k = 0xFFFFFF;
                     if (this.animateOverlayMessageColor) {
-                        j = Mth.hsvToRgb(g / 50.0f, 0.7f, 0.6f) & 0xFFFFFF;
+                        k = Mth.hsvToRgb(h / 50.0f, 0.7f, 0.6f) & 0xFFFFFF;
                     }
-                    l = k << 24 & 0xFF000000;
-                    m = font.width(this.overlayMessageString);
-                    this.drawBackdrop(poseStack, font, -4, m, 0xFFFFFF | l);
-                    font.draw(poseStack, this.overlayMessageString, (float)(-m / 2), -4.0f, j | l);
+                    m = l << 24 & 0xFF000000;
+                    n = font.width(this.overlayMessageString);
+                    this.drawBackdrop(poseStack, font, -4, n, 0xFFFFFF | m);
+                    font.draw(poseStack, this.overlayMessageString, (float)(-n / 2), -4.0f, k | m);
                     RenderSystem.disableBlend();
                     RenderSystem.popMatrix();
                 }
@@ -256,33 +263,33 @@ extends GuiComponent {
             }
             if (this.title != null && this.titleTime > 0) {
                 this.minecraft.getProfiler().push("titleAndSubtitle");
-                g = (float)this.titleTime - f;
-                int k = 255;
+                float h = (float)this.titleTime - f;
+                int l = 255;
                 if (this.titleTime > this.titleFadeOutTime + this.titleStayTime) {
-                    float n = (float)(this.titleFadeInTime + this.titleStayTime + this.titleFadeOutTime) - g;
-                    k = (int)(n * 255.0f / (float)this.titleFadeInTime);
+                    float o = (float)(this.titleFadeInTime + this.titleStayTime + this.titleFadeOutTime) - h;
+                    l = (int)(o * 255.0f / (float)this.titleFadeInTime);
                 }
                 if (this.titleTime <= this.titleFadeOutTime) {
-                    k = (int)(g * 255.0f / (float)this.titleFadeOutTime);
+                    l = (int)(h * 255.0f / (float)this.titleFadeOutTime);
                 }
-                if ((k = Mth.clamp(k, 0, 255)) > 8) {
+                if ((l = Mth.clamp(l, 0, 255)) > 8) {
                     RenderSystem.pushMatrix();
                     RenderSystem.translatef(this.screenWidth / 2, this.screenHeight / 2, 0.0f);
                     RenderSystem.enableBlend();
                     RenderSystem.defaultBlendFunc();
                     RenderSystem.pushMatrix();
                     RenderSystem.scalef(4.0f, 4.0f, 4.0f);
-                    int j2 = k << 24 & 0xFF000000;
-                    l = font.width(this.title);
-                    this.drawBackdrop(poseStack, font, -10, l, 0xFFFFFF | j2);
-                    font.drawShadow(poseStack, this.title, (float)(-l / 2), -10.0f, 0xFFFFFF | j2);
+                    int k2 = l << 24 & 0xFF000000;
+                    m = font.width(this.title);
+                    this.drawBackdrop(poseStack, font, -10, m, 0xFFFFFF | k2);
+                    font.drawShadow(poseStack, this.title, (float)(-m / 2), -10.0f, 0xFFFFFF | k2);
                     RenderSystem.popMatrix();
                     if (this.subtitle != null) {
                         RenderSystem.pushMatrix();
                         RenderSystem.scalef(2.0f, 2.0f, 2.0f);
-                        m = font.width(this.subtitle);
-                        this.drawBackdrop(poseStack, font, 5, m, 0xFFFFFF | j2);
-                        font.drawShadow(poseStack, this.subtitle, (float)(-m / 2), 5.0f, 0xFFFFFF | j2);
+                        n = font.width(this.subtitle);
+                        this.drawBackdrop(poseStack, font, 5, n, 0xFFFFFF | k2);
+                        font.drawShadow(poseStack, this.subtitle, (float)(-n / 2), 5.0f, 0xFFFFFF | k2);
                         RenderSystem.popMatrix();
                     }
                     RenderSystem.disableBlend();
@@ -294,8 +301,8 @@ extends GuiComponent {
             Scoreboard scoreboard = this.minecraft.level.getScoreboard();
             Objective objective = null;
             PlayerTeam playerTeam = scoreboard.getPlayersTeam(this.minecraft.player.getScoreboardName());
-            if (playerTeam != null && (l = playerTeam.getColor().getId()) >= 0) {
-                objective = scoreboard.getDisplayObjective(3 + l);
+            if (playerTeam != null && (m = playerTeam.getColor().getId()) >= 0) {
+                objective = scoreboard.getDisplayObjective(3 + m);
             }
             Objective objective3 = objective2 = objective != null ? objective : scoreboard.getDisplayObjective(1);
             if (objective2 != null) {
@@ -332,7 +339,7 @@ extends GuiComponent {
 
     private void renderCrosshair(PoseStack poseStack) {
         Options options = this.minecraft.options;
-        if (options.thirdPersonView != 0) {
+        if (!options.getCameraType().isFirstPerson()) {
             return;
         }
         if (this.minecraft.gameMode.getPlayerMode() == GameType.SPECTATOR && !this.canRenderCrosshairForSpectator(this.minecraft.hitResult)) {
@@ -899,6 +906,34 @@ extends GuiComponent {
         RenderSystem.enableDepthTest();
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.defaultBlendFunc();
+    }
+
+    private void renderConfusionOverlay(float f) {
+        double d = Mth.lerp((double)f, 2.0, 1.0);
+        float g = 0.2f * f;
+        float h = 0.4f * f;
+        float i = 0.2f * f;
+        double e = (double)this.screenWidth * d;
+        double j = (double)this.screenHeight * d;
+        double k = ((double)this.screenWidth - e) / 2.0;
+        double l = ((double)this.screenHeight - j) / 2.0;
+        RenderSystem.disableDepthTest();
+        RenderSystem.depthMask(false);
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
+        RenderSystem.color4f(g, h, i, 1.0f);
+        this.minecraft.getTextureManager().bind(NAUSEA_LOCATION);
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
+        bufferBuilder.vertex(k, l + j, -90.0).uv(0.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(k + e, l + j, -90.0).uv(1.0f, 1.0f).endVertex();
+        bufferBuilder.vertex(k + e, l, -90.0).uv(1.0f, 0.0f).endVertex();
+        bufferBuilder.vertex(k, l, -90.0).uv(0.0f, 0.0f).endVertex();
+        tesselator.end();
+        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.depthMask(true);
+        RenderSystem.enableDepthTest();
     }
 
     private void renderPortalOverlay(float f) {

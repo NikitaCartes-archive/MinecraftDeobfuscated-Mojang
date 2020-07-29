@@ -8,7 +8,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryReadOps;
@@ -18,16 +17,16 @@ public final class RegistryDataPackCodec<E>
 implements Codec<MappedRegistry<E>> {
     private final Codec<MappedRegistry<E>> directCodec;
     private final ResourceKey<? extends Registry<E>> registryKey;
-    private final MapCodec<E> elementCodec;
+    private final Codec<E> elementCodec;
 
-    public static <E> RegistryDataPackCodec<E> create(ResourceKey<? extends Registry<E>> resourceKey, Lifecycle lifecycle, MapCodec<E> mapCodec) {
-        return new RegistryDataPackCodec<E>(resourceKey, lifecycle, mapCodec);
+    public static <E> RegistryDataPackCodec<E> create(ResourceKey<? extends Registry<E>> resourceKey, Lifecycle lifecycle, Codec<E> codec) {
+        return new RegistryDataPackCodec<E>(resourceKey, lifecycle, codec);
     }
 
-    private RegistryDataPackCodec(ResourceKey<? extends Registry<E>> resourceKey, Lifecycle lifecycle, MapCodec<E> mapCodec) {
-        this.directCodec = MappedRegistry.directCodec(resourceKey, lifecycle, mapCodec);
+    private RegistryDataPackCodec(ResourceKey<? extends Registry<E>> resourceKey, Lifecycle lifecycle, Codec<E> codec) {
+        this.directCodec = MappedRegistry.directCodec(resourceKey, lifecycle, codec);
         this.registryKey = resourceKey;
-        this.elementCodec = mapCodec;
+        this.elementCodec = codec;
     }
 
     @Override

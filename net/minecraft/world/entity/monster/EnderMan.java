@@ -428,7 +428,7 @@ implements NeutralMob {
         }
 
         private boolean canPlaceBlock(LevelReader levelReader, BlockPos blockPos, BlockState blockState, BlockState blockState2, BlockState blockState3, BlockPos blockPos2) {
-            return blockState2.isAir() && !blockState3.isAir() && blockState3.isCollisionShapeFullBlock(levelReader, blockPos2) && blockState.canSurvive(levelReader, blockPos);
+            return blockState2.isAir() && !blockState3.isAir() && !blockState3.is(Blocks.BEDROCK) && blockState3.isCollisionShapeFullBlock(levelReader, blockPos2) && blockState.canSurvive(levelReader, blockPos);
         }
     }
 

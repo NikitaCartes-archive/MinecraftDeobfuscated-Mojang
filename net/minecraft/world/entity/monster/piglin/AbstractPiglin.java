@@ -17,7 +17,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
-import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
@@ -41,9 +41,8 @@ extends Monster {
     }
 
     private void applyOpenDoorsAbility() {
-        PathNavigation pathNavigation = this.getNavigation();
-        if (pathNavigation instanceof GroundPathNavigation) {
-            ((GroundPathNavigation)pathNavigation).setCanOpenDoors(true);
+        if (GoalUtils.hasGroundPathNavigation(this)) {
+            ((GroundPathNavigation)this.getNavigation()).setCanOpenDoors(true);
         }
     }
 
@@ -99,7 +98,7 @@ extends Monster {
     }
 
     protected void finishConversion(ServerLevel serverLevel) {
-        ZombifiedPiglin zombifiedPiglin = this.convertTo(EntityType.ZOMBIFIED_PIGLIN);
+        ZombifiedPiglin zombifiedPiglin = this.convertTo(EntityType.ZOMBIFIED_PIGLIN, true);
         if (zombifiedPiglin != null) {
             zombifiedPiglin.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
         }

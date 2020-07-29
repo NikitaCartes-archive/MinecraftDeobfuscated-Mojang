@@ -186,6 +186,10 @@ public class BlockModelGenerators {
         return MultiVariantGenerator.multiVariant(block, Variant.variant().with(VariantProperties.MODEL, resourceLocation)).with(BlockModelGenerators.createRotatedPillar());
     }
 
+    private void createAxisAlignedPillarBlockCustomModel(Block block, ResourceLocation resourceLocation) {
+        this.blockStateOutput.accept(BlockModelGenerators.createAxisAlignedPillarBlock(block, resourceLocation));
+    }
+
     private void createAxisAlignedPillarBlock(Block block, TexturedModel.Provider provider) {
         ResourceLocation resourceLocation = provider.create(block, this.modelOutput);
         this.blockStateOutput.accept(BlockModelGenerators.createAxisAlignedPillarBlock(block, resourceLocation));
@@ -679,8 +683,8 @@ public class BlockModelGenerators {
         this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(Blocks.DAYLIGHT_DETECTOR).with(PropertyDispatch.property(BlockStateProperties.INVERTED).select((Boolean)false, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.DAYLIGHT_DETECTOR.create(Blocks.DAYLIGHT_DETECTOR, textureMapping, this.modelOutput))).select((Boolean)true, Variant.variant().with(VariantProperties.MODEL, ModelTemplates.DAYLIGHT_DETECTOR.create(ModelLocationUtils.getModelLocation(Blocks.DAYLIGHT_DETECTOR, "_inverted"), textureMapping2, this.modelOutput)))));
     }
 
-    private void createEndRod() {
-        this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(Blocks.END_ROD, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(Blocks.END_ROD))).with(this.createColumnWithFacing()));
+    private void createRotatableColumn(Block block) {
+        this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(block, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(block))).with(this.createColumnWithFacing()));
     }
 
     private void createFarmland() {
@@ -1099,7 +1103,6 @@ public class BlockModelGenerators {
         this.createNonTemplateModelBlock(Blocks.WATER);
         this.createNonTemplateModelBlock(Blocks.LAVA);
         this.createNonTemplateModelBlock(Blocks.SLIME_BLOCK);
-        this.createNonTemplateModelBlock(Blocks.CHAIN);
         this.createSimpleFlatItemModel(Items.CHAIN);
         this.createNonTemplateModelBlock(Blocks.POTTED_BAMBOO);
         this.createNonTemplateModelBlock(Blocks.POTTED_CACTUS);
@@ -1178,7 +1181,7 @@ public class BlockModelGenerators {
         this.createComposter();
         this.createDaylightDetector();
         this.createEndPortalFrame();
-        this.createEndRod();
+        this.createRotatableColumn(Blocks.END_ROD);
         this.createFarmland();
         this.createFire();
         this.createSoulFire();
@@ -1225,6 +1228,7 @@ public class BlockModelGenerators {
         this.createDispenserBlock(Blocks.DROPPER);
         this.createLantern(Blocks.LANTERN);
         this.createLantern(Blocks.SOUL_LANTERN);
+        this.createAxisAlignedPillarBlockCustomModel(Blocks.CHAIN, ModelLocationUtils.getModelLocation(Blocks.CHAIN));
         this.createAxisAlignedPillarBlock(Blocks.BASALT, TexturedModel.COLUMN);
         this.createAxisAlignedPillarBlock(Blocks.POLISHED_BASALT, TexturedModel.COLUMN);
         this.createAxisAlignedPillarBlock(Blocks.BONE_BLOCK, TexturedModel.COLUMN);

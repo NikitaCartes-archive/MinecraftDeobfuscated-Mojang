@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.surfacebuilders.BadlandsSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderBaseConfiguration;
+import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderConfiguration;
 
 public class WoodedBadlandsSurfaceBuilder
 extends BadlandsSurfaceBuilder {
@@ -28,7 +29,10 @@ extends BadlandsSurfaceBuilder {
         int n = i & 0xF;
         int o = j & 0xF;
         BlockState blockState3 = WHITE_TERRACOTTA;
-        BlockState blockState4 = biome.getSurfaceBuilderConfig().getUnderMaterial();
+        SurfaceBuilderConfiguration surfaceBuilderConfiguration = biome.getGenerationSettings().getSurfaceBuilderConfig();
+        BlockState blockState4 = surfaceBuilderConfiguration.getUnderMaterial();
+        BlockState blockState5 = surfaceBuilderConfiguration.getTopMaterial();
+        BlockState blockState6 = blockState4;
         int p = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
         boolean bl = Math.cos(d / 3.0 * Math.PI) > 0.0;
         int q = -1;
@@ -38,20 +42,20 @@ extends BadlandsSurfaceBuilder {
         for (int s = k; s >= 0; --s) {
             if (r >= 15) continue;
             mutableBlockPos.set(n, s, o);
-            BlockState blockState5 = chunkAccess.getBlockState(mutableBlockPos);
-            if (blockState5.isAir()) {
+            BlockState blockState7 = chunkAccess.getBlockState(mutableBlockPos);
+            if (blockState7.isAir()) {
                 q = -1;
                 continue;
             }
-            if (!blockState5.is(blockState.getBlock())) continue;
+            if (!blockState7.is(blockState.getBlock())) continue;
             if (q == -1) {
                 bl2 = false;
                 if (p <= 0) {
                     blockState3 = Blocks.AIR.defaultBlockState();
-                    blockState4 = blockState;
+                    blockState6 = blockState;
                 } else if (s >= l - 4 && s <= l + 1) {
                     blockState3 = WHITE_TERRACOTTA;
-                    blockState4 = biome.getSurfaceBuilderConfig().getUnderMaterial();
+                    blockState6 = blockState4;
                 }
                 if (s < l && (blockState3 == null || blockState3.isAir())) {
                     blockState3 = blockState2;
@@ -65,15 +69,15 @@ extends BadlandsSurfaceBuilder {
                             chunkAccess.setBlockState(mutableBlockPos, Blocks.GRASS_BLOCK.defaultBlockState(), false);
                         }
                     } else if (s > l + 3 + p) {
-                        BlockState blockState6 = s < 64 || s > 127 ? ORANGE_TERRACOTTA : (bl ? TERRACOTTA : this.getBand(i, s, j));
-                        chunkAccess.setBlockState(mutableBlockPos, blockState6, false);
+                        BlockState blockState8 = s < 64 || s > 127 ? ORANGE_TERRACOTTA : (bl ? TERRACOTTA : this.getBand(i, s, j));
+                        chunkAccess.setBlockState(mutableBlockPos, blockState8, false);
                     } else {
-                        chunkAccess.setBlockState(mutableBlockPos, biome.getSurfaceBuilderConfig().getTopMaterial(), false);
+                        chunkAccess.setBlockState(mutableBlockPos, blockState5, false);
                         bl2 = true;
                     }
                 } else {
-                    chunkAccess.setBlockState(mutableBlockPos, blockState4, false);
-                    if (blockState4 == WHITE_TERRACOTTA) {
+                    chunkAccess.setBlockState(mutableBlockPos, blockState6, false);
+                    if (blockState6 == WHITE_TERRACOTTA) {
                         chunkAccess.setBlockState(mutableBlockPos, ORANGE_TERRACOTTA, false);
                     }
                 }

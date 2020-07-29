@@ -118,13 +118,13 @@ implements BiomeManager.NoiseBiomeSource {
     }
 
     public boolean canGenerateStructure(StructureFeature<?> structureFeature2) {
-        return this.supportedStructures.computeIfAbsent(structureFeature2, structureFeature -> this.possibleBiomes.stream().anyMatch(biome -> biome.isValidStart((StructureFeature<?>)structureFeature)));
+        return this.supportedStructures.computeIfAbsent(structureFeature2, structureFeature -> this.possibleBiomes.stream().anyMatch(biome -> biome.getGenerationSettings().isValidStart((StructureFeature<?>)structureFeature)));
     }
 
     public Set<BlockState> getSurfaceBlocks() {
         if (this.surfaceBlocks.isEmpty()) {
             for (Biome biome : this.possibleBiomes) {
-                this.surfaceBlocks.add(biome.getSurfaceBuilderConfig().getTopMaterial());
+                this.surfaceBlocks.add(biome.getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial());
             }
         }
         return this.surfaceBlocks;

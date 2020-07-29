@@ -178,7 +178,7 @@ implements VillagerDataHolder {
 
     private void finishConversion(ServerLevel serverLevel) {
         Player player;
-        Villager villager = EntityType.VILLAGER.create(serverLevel);
+        Villager villager = this.convertTo(EntityType.VILLAGER, false);
         for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
             ItemStack itemStack = this.getItemBySlot(equipmentSlot);
             if (itemStack.isEmpty()) continue;
@@ -190,7 +190,6 @@ implements VillagerDataHolder {
             if (!(d > 1.0)) continue;
             this.spawnAtLocation(itemStack);
         }
-        villager.copyPosition(this);
         villager.setVillagerData(this.getVillagerData());
         if (this.gossips != null) {
             villager.setGossips(this.gossips);
@@ -200,20 +199,6 @@ implements VillagerDataHolder {
         }
         villager.setVillagerXp(this.villagerXp);
         villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.CONVERSION, null, null);
-        if (this.isBaby()) {
-            villager.setAge(-24000);
-        }
-        this.remove();
-        villager.setNoAi(this.isNoAi());
-        if (this.hasCustomName()) {
-            villager.setCustomName(this.getCustomName());
-            villager.setCustomNameVisible(this.isCustomNameVisible());
-        }
-        if (this.isPersistenceRequired()) {
-            villager.setPersistenceRequired();
-        }
-        villager.setInvulnerable(this.isInvulnerable());
-        serverLevel.addFreshEntityWithPassengers(villager);
         if (this.conversionStarter != null && (player = serverLevel.getPlayerByUUID(this.conversionStarter)) instanceof ServerPlayer) {
             CriteriaTriggers.CURED_ZOMBIE_VILLAGER.trigger((ServerPlayer)player, this, villager);
             serverLevel.onReputationEvent(ReputationEventType.ZOMBIE_VILLAGER_CURED, player, villager);

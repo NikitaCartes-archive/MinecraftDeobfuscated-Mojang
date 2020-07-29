@@ -31,6 +31,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.AmbientOcclusionStatus;
 import net.minecraft.client.AttackIndicatorStatus;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.KeyMapping;
@@ -151,13 +152,15 @@ public class Options {
     private final File optionsFile;
     public Difficulty difficulty = Difficulty.NORMAL;
     public boolean hideGui;
-    public int thirdPersonView;
+    private CameraType cameraType = CameraType.FIRST_PERSON;
     public boolean renderDebug;
     public boolean renderDebugCharts;
     public boolean renderFpsChart;
     public String lastMpIp = "";
     public boolean smoothCamera;
     public double fov = 70.0;
+    public float screenEffectScale = 1.0f;
+    public float fovEffectScale = 1.0f;
     public double gamma;
     public int guiScale;
     public ParticleStatus particles = ParticleStatus.ALL;
@@ -298,6 +301,12 @@ public class Options {
                     }
                     if ("fov".equals(string2)) {
                         this.fov = Options.readFloat(string22) * 40.0f + 70.0f;
+                    }
+                    if ("screenEffectScale".equals(string2)) {
+                        this.screenEffectScale = Options.readFloat(string22);
+                    }
+                    if ("fovEffectScale".equals(string2)) {
+                        this.fovEffectScale = Options.readFloat(string22);
                     }
                     if ("gamma".equals(string2)) {
                         this.gamma = Options.readFloat(string22);
@@ -509,6 +518,8 @@ public class Options {
             printWriter.println("toggleSprint:" + this.toggleSprint);
             printWriter.println("mouseSensitivity:" + this.sensitivity);
             printWriter.println("fov:" + (this.fov - 70.0) / 40.0);
+            printWriter.println("screenEffectScale:" + this.screenEffectScale);
+            printWriter.println("fovEffectScale:" + this.fovEffectScale);
             printWriter.println("gamma:" + this.gamma);
             printWriter.println("renderDistance:" + this.renderDistance);
             printWriter.println("entityDistanceScaling:" + this.entityDistanceScaling);
@@ -663,6 +674,14 @@ public class Options {
             set.add(pack.getId());
         }
         packRepository.setSelected(set);
+    }
+
+    public CameraType getCameraType() {
+        return this.cameraType;
+    }
+
+    public void setCameraType(CameraType cameraType) {
+        this.cameraType = cameraType;
     }
 }
 

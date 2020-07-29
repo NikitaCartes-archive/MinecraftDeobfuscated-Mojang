@@ -55,17 +55,17 @@ extends PathNavigation {
         }
         if (this.canUpdatePath()) {
             this.followThePath();
-        } else if (this.path != null && this.path.getIndex() < this.path.getSize()) {
-            vec3 = this.path.getPos(this.mob, this.path.getIndex());
+        } else if (this.path != null && !this.path.isDone()) {
+            vec3 = this.path.getNextEntityPos(this.mob);
             if (Mth.floor(this.mob.getX()) == Mth.floor(vec3.x) && Mth.floor(this.mob.getY()) == Mth.floor(vec3.y) && Mth.floor(this.mob.getZ()) == Mth.floor(vec3.z)) {
-                this.path.setIndex(this.path.getIndex() + 1);
+                this.path.advance();
             }
         }
         DebugPackets.sendPathFindingPacket(this.level, this.mob, this.path, this.maxDistanceToWaypoint);
         if (this.isDone()) {
             return;
         }
-        vec3 = this.path.currentPos(this.mob);
+        vec3 = this.path.getNextEntityPos(this.mob);
         this.mob.getMoveControl().setWantedPosition(vec3.x, vec3.y, vec3.z, this.speedModifier);
     }
 
@@ -82,14 +82,14 @@ extends PathNavigation {
             g = (float)((double)g * (vec32.length() * 6.0));
         }
         int i = 6;
-        Vec3 vec33 = Vec3.atBottomCenterOf(this.path.currentPos());
+        Vec3 vec33 = Vec3.atBottomCenterOf(this.path.getNextNodePos());
         if (Math.abs(this.mob.getX() - vec33.x) < (double)g && Math.abs(this.mob.getZ() - vec33.z) < (double)g && Math.abs(this.mob.getY() - vec33.y) < (double)(g * 2.0f)) {
-            this.path.next();
+            this.path.advance();
         }
-        for (int j = Math.min(this.path.getIndex() + 6, this.path.getSize() - 1); j > this.path.getIndex(); --j) {
-            vec33 = this.path.getPos(this.mob, j);
+        for (int j = Math.min(this.path.getNextNodeIndex() + 6, this.path.getNodeCount() - 1); j > this.path.getNextNodeIndex(); --j) {
+            vec33 = this.path.getEntityPosAtNode(this.mob, j);
             if (vec33.distanceToSqr(vec3) > 36.0 || !this.canMoveDirectly(vec3, vec33, 0, 0, 0)) continue;
-            this.path.setIndex(j);
+            this.path.setNextNodeIndex(j);
             break;
         }
         this.doStuckDetection(vec3);
@@ -105,7 +105,7 @@ extends PathNavigation {
             this.lastStuckCheckPos = vec3;
         }
         if (this.path != null && !this.path.isDone()) {
-            Vec3i vec3i = this.path.currentPos();
+            BlockPos vec3i = this.path.getNextNodePos();
             if (vec3i.equals(this.timeoutCachedNode)) {
                 this.timeoutTimer += Util.getMillis() - this.lastTimeoutCheck;
             } else {

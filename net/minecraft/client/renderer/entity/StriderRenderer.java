@@ -32,14 +32,12 @@ extends MobRenderer<Strider, StriderModel<Strider>> {
 
     @Override
     protected void scale(Strider strider, PoseStack poseStack, float f) {
-        float g = 0.9375f;
         if (strider.isBaby()) {
-            g *= 0.5f;
+            poseStack.scale(0.5f, 0.5f, 0.5f);
             this.shadowRadius = 0.25f;
         } else {
             this.shadowRadius = 0.5f;
         }
-        poseStack.scale(g, g, g);
     }
 
     @Override

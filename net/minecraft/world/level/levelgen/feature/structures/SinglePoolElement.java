@@ -3,7 +3,6 @@
  */
 package net.minecraft.world.level.levelgen.feature.structures;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.datafixers.util.Either;
@@ -20,6 +19,7 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -35,7 +35,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnorePr
 import net.minecraft.world.level.levelgen.structure.templatesystem.JigsawReplacementProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
@@ -44,7 +44,7 @@ extends StructurePoolElement {
     private static final Codec<Either<ResourceLocation, StructureTemplate>> TEMPLATE_CODEC = Codec.of(SinglePoolElement::encodeTemplate, ResourceLocation.CODEC.map(Either::left));
     public static final Codec<SinglePoolElement> CODEC = RecordCodecBuilder.create(instance -> instance.group(SinglePoolElement.templateCodec(), SinglePoolElement.processorsCodec(), SinglePoolElement.projectionCodec()).apply((Applicative)instance, SinglePoolElement::new));
     protected final Either<ResourceLocation, StructureTemplate> template;
-    protected final Supplier<ImmutableList<StructureProcessor>> processors;
+    protected final Supplier<StructureProcessorList> processors;
 
     private static <T> DataResult<T> encodeTemplate(Either<ResourceLocation, StructureTemplate> either, DynamicOps<T> dynamicOps, T object) {
         Optional<ResourceLocation> optional = either.left();
@@ -54,7 +54,7 @@ extends StructurePoolElement {
         return ResourceLocation.CODEC.encode(optional.get(), dynamicOps, object);
     }
 
-    protected static <E extends SinglePoolElement> RecordCodecBuilder<E, Supplier<ImmutableList<StructureProcessor>>> processorsCodec() {
+    protected static <E extends SinglePoolElement> RecordCodecBuilder<E, Supplier<StructureProcessorList>> processorsCodec() {
         return ((MapCodec)StructureProcessorType.LIST_CODEC.fieldOf("processors")).forGetter(singlePoolElement -> singlePoolElement.processors);
     }
 
@@ -62,14 +62,14 @@ extends StructurePoolElement {
         return ((MapCodec)TEMPLATE_CODEC.fieldOf("location")).forGetter(singlePoolElement -> singlePoolElement.template);
     }
 
-    protected SinglePoolElement(Either<ResourceLocation, StructureTemplate> either, Supplier<ImmutableList<StructureProcessor>> supplier, StructureTemplatePool.Projection projection) {
+    protected SinglePoolElement(Either<ResourceLocation, StructureTemplate> either, Supplier<StructureProcessorList> supplier, StructureTemplatePool.Projection projection) {
         super(projection);
         this.template = either;
         this.processors = supplier;
     }
 
     public SinglePoolElement(StructureTemplate structureTemplate) {
-        this(Either.right(structureTemplate), ImmutableList::of, StructureTemplatePool.Projection.RIGID);
+        this(Either.right(structureTemplate), () -> ProcessorLists.EMPTY, StructureTemplatePool.Projection.RIGID);
     }
 
     private StructureTemplate getTemplate(StructureManager structureManager) {
@@ -127,7 +127,7 @@ extends StructurePoolElement {
         if (!bl) {
             structurePlaceSettings.addProcessor(JigsawReplacementProcessor.INSTANCE);
         }
-        this.processors.get().forEach(structurePlaceSettings::addProcessor);
+        this.processors.get().list().forEach(structurePlaceSettings::addProcessor);
         this.getProjection().getProcessors().forEach(structurePlaceSettings::addProcessor);
         return structurePlaceSettings;
     }

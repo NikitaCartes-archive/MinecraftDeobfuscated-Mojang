@@ -15,6 +15,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderBaseConfiguration;
+import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilderConfiguration;
 import net.minecraft.world.level.levelgen.synth.PerlinSimplexNoise;
 import net.minecraft.world.level.material.Material;
 
@@ -60,8 +61,11 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
         }
         int q = i & 0xF;
         int r = j & 0xF;
-        BlockState blockState3 = biome.getSurfaceBuilderConfig().getUnderMaterial();
-        BlockState blockState4 = biome.getSurfaceBuilderConfig().getTopMaterial();
+        SurfaceBuilderConfiguration surfaceBuilderConfiguration = biome.getGenerationSettings().getSurfaceBuilderConfig();
+        BlockState blockState3 = surfaceBuilderConfiguration.getUnderMaterial();
+        BlockState blockState4 = surfaceBuilderConfiguration.getTopMaterial();
+        BlockState blockState5 = blockState3;
+        BlockState blockState6 = blockState4;
         int s = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
         int t = -1;
         int u = 0;
@@ -74,45 +78,45 @@ extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
             } else if (chunkAccess.getBlockState(mutableBlockPos).getMaterial() == Material.WATER && x > (int)f && x < l && f != 0.0 && random.nextDouble() > 0.15) {
                 chunkAccess.setBlockState(mutableBlockPos, PACKED_ICE, false);
             }
-            BlockState blockState5 = chunkAccess.getBlockState(mutableBlockPos);
-            if (blockState5.isAir()) {
+            BlockState blockState7 = chunkAccess.getBlockState(mutableBlockPos);
+            if (blockState7.isAir()) {
                 t = -1;
                 continue;
             }
-            if (blockState5.is(blockState.getBlock())) {
+            if (blockState7.is(blockState.getBlock())) {
                 if (t == -1) {
                     if (s <= 0) {
-                        blockState4 = AIR;
-                        blockState3 = blockState;
+                        blockState6 = AIR;
+                        blockState5 = blockState;
                     } else if (x >= l - 4 && x <= l + 1) {
-                        blockState4 = biome.getSurfaceBuilderConfig().getTopMaterial();
-                        blockState3 = biome.getSurfaceBuilderConfig().getUnderMaterial();
+                        blockState6 = blockState4;
+                        blockState5 = blockState3;
                     }
-                    if (x < l && (blockState4 == null || blockState4.isAir())) {
-                        blockState4 = biome.getTemperature(mutableBlockPos.set(i, x, j)) < 0.15f ? ICE : blockState2;
+                    if (x < l && (blockState6 == null || blockState6.isAir())) {
+                        blockState6 = biome.getTemperature(mutableBlockPos.set(i, x, j)) < 0.15f ? ICE : blockState2;
                     }
                     t = s;
                     if (x >= l - 1) {
-                        chunkAccess.setBlockState(mutableBlockPos, blockState4, false);
+                        chunkAccess.setBlockState(mutableBlockPos, blockState6, false);
                         continue;
                     }
                     if (x < l - 7 - s) {
-                        blockState4 = AIR;
-                        blockState3 = blockState;
+                        blockState6 = AIR;
+                        blockState5 = blockState;
                         chunkAccess.setBlockState(mutableBlockPos, GRAVEL, false);
                         continue;
                     }
-                    chunkAccess.setBlockState(mutableBlockPos, blockState3, false);
+                    chunkAccess.setBlockState(mutableBlockPos, blockState5, false);
                     continue;
                 }
                 if (t <= 0) continue;
-                chunkAccess.setBlockState(mutableBlockPos, blockState3, false);
-                if (--t != 0 || !blockState3.is(Blocks.SAND) || s <= 1) continue;
+                chunkAccess.setBlockState(mutableBlockPos, blockState5, false);
+                if (--t != 0 || !blockState5.is(Blocks.SAND) || s <= 1) continue;
                 t = random.nextInt(4) + Math.max(0, x - 63);
-                blockState3 = blockState3.is(Blocks.RED_SAND) ? Blocks.RED_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
+                blockState5 = blockState5.is(Blocks.RED_SAND) ? Blocks.RED_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
                 continue;
             }
-            if (!blockState5.is(Blocks.PACKED_ICE) || u > v || x <= w) continue;
+            if (!blockState7.is(Blocks.PACKED_ICE) || u > v || x <= w) continue;
             chunkAccess.setBlockState(mutableBlockPos, SNOW_BLOCK, false);
             ++u;
         }

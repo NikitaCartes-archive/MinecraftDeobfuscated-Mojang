@@ -120,18 +120,17 @@ extends Entity {
     }
 
     @Override
-    @Nullable
-    public AABB getCollideAgainstBox(Entity entity) {
-        if (entity.isPushable()) {
-            return entity.getBoundingBox();
-        }
-        return null;
+    public boolean canCollideWith(Entity entity) {
+        return Boat.canVehicleCollide(this, entity);
+    }
+
+    public static boolean canVehicleCollide(Entity entity, Entity entity2) {
+        return (entity2.canBeCollidedWith() || entity2.isPushable()) && !entity.isPassengerOfSameVehicle(entity2);
     }
 
     @Override
-    @Nullable
-    public AABB getCollideBox() {
-        return this.getBoundingBox();
+    public boolean canBeCollidedWith() {
+        return true;
     }
 
     @Override

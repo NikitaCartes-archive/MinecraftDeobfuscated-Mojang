@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class ItemCombinerMenu
 extends AbstractContainerMenu {
-    protected final Container resultSlots = new ResultContainer();
+    protected final ResultContainer resultSlots = new ResultContainer();
     protected final Container inputSlots = new SimpleContainer(2){
 
         @Override

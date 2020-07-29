@@ -26,13 +26,13 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 public final class ProjectileUtil {
-    public static HitResult getHitResult(Entity entity, Predicate<Entity> predicate, ClipContext.Block block) {
+    public static HitResult getHitResult(Entity entity, Predicate<Entity> predicate) {
         EntityHitResult hitResult2;
         Vec3 vec33;
         Vec3 vec3 = entity.getDeltaMovement();
         Level level = entity.level;
         Vec3 vec32 = entity.position();
-        HitResult hitResult = level.clip(new ClipContext(vec32, vec33 = vec32.add(vec3), block, ClipContext.Fluid.NONE, entity));
+        HitResult hitResult = level.clip(new ClipContext(vec32, vec33 = vec32.add(vec3), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity));
         if (((HitResult)hitResult).getType() != HitResult.Type.MISS) {
             vec33 = hitResult.getLocation();
         }

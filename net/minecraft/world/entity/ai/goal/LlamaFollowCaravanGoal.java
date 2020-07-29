@@ -10,6 +10,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.horse.Llama;
+import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.phys.Vec3;
 
 public class LlamaFollowCaravanGoal
@@ -95,6 +96,9 @@ extends Goal {
     @Override
     public void tick() {
         if (!this.llama.inCaravan()) {
+            return;
+        }
+        if (this.llama.getLeashHolder() instanceof LeashFenceKnotEntity) {
             return;
         }
         Llama llama = this.llama.getCaravanHead();

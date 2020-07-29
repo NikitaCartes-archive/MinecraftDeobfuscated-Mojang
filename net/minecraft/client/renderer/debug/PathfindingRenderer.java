@@ -72,11 +72,11 @@ implements DebugRenderer.SimpleDebugRenderer {
         BlockPos blockPos = path.getTarget();
         if (PathfindingRenderer.distanceToCamera(blockPos, d, e, g) <= 80.0f) {
             DebugRenderer.renderFilledBox(new AABB((float)blockPos.getX() + 0.25f, (float)blockPos.getY() + 0.25f, (double)blockPos.getZ() + 0.25, (float)blockPos.getX() + 0.75f, (float)blockPos.getY() + 0.75f, (float)blockPos.getZ() + 0.75f).move(-d, -e, -g), 0.0f, 1.0f, 0.0f, 0.5f);
-            for (i = 0; i < path.getSize(); ++i) {
-                Node node = path.get(i);
+            for (i = 0; i < path.getNodeCount(); ++i) {
+                Node node = path.getNode(i);
                 if (!(PathfindingRenderer.distanceToCamera(node.asBlockPos(), d, e, g) <= 80.0f)) continue;
-                float h = i == path.getIndex() ? 1.0f : 0.0f;
-                float j = i == path.getIndex() ? 0.0f : 1.0f;
+                float h = i == path.getNextNodeIndex() ? 1.0f : 0.0f;
+                float j = i == path.getNextNodeIndex() ? 0.0f : 1.0f;
                 DebugRenderer.renderFilledBox(new AABB((float)node.x + 0.5f - f, (float)node.y + 0.01f * (float)i, (float)node.z + 0.5f - f, (float)node.x + 0.5f + f, (float)node.y + 0.25f + 0.01f * (float)i, (float)node.z + 0.5f + f).move(-d, -e, -g), h, 0.0f, j, 0.5f);
             }
         }
@@ -91,8 +91,8 @@ implements DebugRenderer.SimpleDebugRenderer {
             }
         }
         if (bl2) {
-            for (i = 0; i < path.getSize(); ++i) {
-                Node node = path.get(i);
+            for (i = 0; i < path.getNodeCount(); ++i) {
+                Node node = path.getNode(i);
                 if (!(PathfindingRenderer.distanceToCamera(node.asBlockPos(), d, e, g) <= 80.0f)) continue;
                 DebugRenderer.renderFloatingText(String.format("%s", new Object[]{node.type}), (double)node.x + 0.5, (double)node.y + 0.75, (double)node.z + 0.5, -1, 0.02f, true, 0.0f, true);
                 DebugRenderer.renderFloatingText(String.format(Locale.ROOT, "%.2f", Float.valueOf(node.costMalus)), (double)node.x + 0.5, (double)node.y + 0.25, (double)node.z + 0.5, -1, 0.02f, true, 0.0f, true);
@@ -104,10 +104,10 @@ implements DebugRenderer.SimpleDebugRenderer {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         bufferBuilder.begin(3, DefaultVertexFormat.POSITION_COLOR);
-        for (int i = 0; i < path.getSize(); ++i) {
-            Node node = path.get(i);
+        for (int i = 0; i < path.getNodeCount(); ++i) {
+            Node node = path.getNode(i);
             if (PathfindingRenderer.distanceToCamera(node.asBlockPos(), d, e, f) > 80.0f) continue;
-            float g = (float)i / (float)path.getSize() * 0.33f;
+            float g = (float)i / (float)path.getNodeCount() * 0.33f;
             int j = i == 0 ? 0 : Mth.hsvToRgb(g, 0.9f, 0.9f);
             int k = j >> 16 & 0xFF;
             int l = j >> 8 & 0xFF;

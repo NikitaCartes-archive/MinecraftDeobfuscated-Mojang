@@ -3,7 +3,6 @@
  */
 package net.minecraft.data;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.mojang.serialization.Lifecycle;
 import java.util.Map;
@@ -26,7 +25,7 @@ import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 import net.minecraft.world.level.levelgen.surfacebuilders.ConfiguredSurfaceBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,7 +39,7 @@ public class BuiltinRegistries {
     public static final Registry<ConfiguredWorldCarver<?>> CONFIGURED_CARVER = BuiltinRegistries.registerSimple(Registry.CONFIGURED_CARVER_REGISTRY, () -> Carvers.CAVE);
     public static final Registry<ConfiguredFeature<?, ?>> CONFIGURED_FEATURE = BuiltinRegistries.registerSimple(Registry.CONFIGURED_FEATURE_REGISTRY, () -> Features.OAK);
     public static final Registry<ConfiguredStructureFeature<?, ?>> CONFIGURED_STRUCTURE_FEATURE = BuiltinRegistries.registerSimple(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, () -> StructureFeatures.MINESHAFT);
-    public static final Registry<ImmutableList<StructureProcessor>> PROCESSOR_LIST = BuiltinRegistries.registerSimple(Registry.PROCESSOR_LIST_REGISTRY, () -> ProcessorLists.ZOMBIE_PLAINS);
+    public static final Registry<StructureProcessorList> PROCESSOR_LIST = BuiltinRegistries.registerSimple(Registry.PROCESSOR_LIST_REGISTRY, () -> ProcessorLists.ZOMBIE_PLAINS);
     public static final Registry<StructureTemplatePool> TEMPLATE_POOL = BuiltinRegistries.registerSimple(Registry.TEMPLATE_POOL_REGISTRY, () -> Pools.EMPTY);
     public static final Registry<Biome> BIOME = BuiltinRegistries.registerSimple(Registry.BIOME_REGISTRY, () -> Biomes.DEFAULT);
     public static final Registry<NoiseGeneratorSettings> NOISE_GENERATOR_SETTINGS = BuiltinRegistries.registerSimple(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, () -> NoiseGeneratorSettings.OVERWORLD);

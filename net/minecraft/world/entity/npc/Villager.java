@@ -505,10 +505,15 @@ VillagerDataHolder {
         if (entity != null) {
             this.tellWitnessesThatIWasMurdered(entity);
         }
+        this.releaseAllPois();
+        super.die(damageSource);
+    }
+
+    private void releaseAllPois() {
         this.releasePoi(MemoryModuleType.HOME);
         this.releasePoi(MemoryModuleType.JOB_SITE);
+        this.releasePoi(MemoryModuleType.POTENTIAL_JOB_SITE);
         this.releasePoi(MemoryModuleType.MEETING_POINT);
-        super.die(damageSource);
     }
 
     private void tellWitnessesThatIWasMurdered(Entity entity) {
@@ -656,6 +661,7 @@ VillagerDataHolder {
             }
             witch.setPersistenceRequired();
             serverLevel.addFreshEntityWithPassengers(witch);
+            this.releaseAllPois();
             this.remove();
         } else {
             super.thunderHit(serverLevel, lightningBolt);

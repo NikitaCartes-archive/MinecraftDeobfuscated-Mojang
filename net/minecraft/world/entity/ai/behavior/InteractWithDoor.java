@@ -40,7 +40,7 @@ extends Behavior<LivingEntity> {
         if (path.notStarted() || path.isDone()) {
             return false;
         }
-        if (!Objects.equals(this.lastCheckedNode, path.currentNode())) {
+        if (!Objects.equals(this.lastCheckedNode, path.getNextNode())) {
             this.remainingCooldown = 20;
             return true;
         }
@@ -56,9 +56,9 @@ extends Behavior<LivingEntity> {
         BlockPos blockPos2;
         BlockState blockState2;
         Path path = livingEntity.getBrain().getMemory(MemoryModuleType.PATH).get();
-        this.lastCheckedNode = path.currentNode();
-        Node node = path.previousNode();
-        Node node2 = path.currentNode();
+        this.lastCheckedNode = path.getNextNode();
+        Node node = path.getPreviousNode();
+        Node node2 = path.getNextNode();
         BlockPos blockPos = node.asBlockPos();
         BlockState blockState = serverLevel.getBlockState(blockPos);
         if (blockState.is(BlockTags.WOODEN_DOORS)) {
@@ -123,11 +123,11 @@ extends Behavior<LivingEntity> {
         if (path.isDone()) {
             return false;
         }
-        Node node = path.previousNode();
+        Node node = path.getPreviousNode();
         if (node == null) {
             return false;
         }
-        Node node2 = path.currentNode();
+        Node node2 = path.getNextNode();
         return blockPos.equals(node.asBlockPos()) || blockPos.equals(node2.asBlockPos());
     }
 

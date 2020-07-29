@@ -18,7 +18,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -77,9 +76,10 @@ extends Projectile {
         if (this.shouldBurn()) {
             this.setSecondsOnFire(1);
         }
-        if ((hitResult = ProjectileUtil.getHitResult(this, this::canHitEntity, ClipContext.Block.COLLIDER)).getType() != HitResult.Type.MISS) {
+        if ((hitResult = ProjectileUtil.getHitResult(this, this::canHitEntity)).getType() != HitResult.Type.MISS) {
             this.onHit(hitResult);
         }
+        this.checkInsideBlocks();
         Vec3 vec3 = this.getDeltaMovement();
         double d = this.getX() + vec3.x;
         double e = this.getY() + vec3.y;

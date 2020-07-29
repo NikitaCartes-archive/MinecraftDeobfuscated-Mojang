@@ -72,7 +72,7 @@ extends EntityRenderer<FishingHook> {
         double e = Mth.cos(l);
         double m = (double)j * 0.35;
         double n = 0.8;
-        if (this.entityRenderDispatcher.options != null && this.entityRenderDispatcher.options.thirdPersonView > 0 || player != Minecraft.getInstance().player) {
+        if (this.entityRenderDispatcher.options != null && !this.entityRenderDispatcher.options.getCameraType().isFirstPerson() || player != Minecraft.getInstance().player) {
             o = Mth.lerp((double)g, player.xo, player.getX()) - e * m - d * 0.8;
             p = player.yo + (double)player.getEyeHeight() + (player.getY() - player.yo) * (double)g - 0.45;
             q = Mth.lerp((double)g, player.zo, player.getZ()) - d * m + e * 0.8;

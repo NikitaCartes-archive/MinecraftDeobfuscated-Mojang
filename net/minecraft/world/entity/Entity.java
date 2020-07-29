@@ -855,11 +855,6 @@ CommandSource {
         }
     }
 
-    @Nullable
-    public AABB getCollideBox() {
-        return null;
-    }
-
     public boolean fireImmune() {
         return this.getType().fireImmune();
     }
@@ -1213,6 +1208,14 @@ CommandSource {
         return new Vec3(d, e, g);
     }
 
+    @Environment(value=EnvType.CLIENT)
+    public final Vec3 getPosition(float f) {
+        double d = Mth.lerp((double)f, this.xo, this.getX());
+        double e = Mth.lerp((double)f, this.yo, this.getY());
+        double g = Mth.lerp((double)f, this.zo, this.getZ());
+        return new Vec3(d, e, g);
+    }
+
     public HitResult pick(double d, float f, boolean bl) {
         Vec3 vec3 = this.getEyePosition(f);
         Vec3 vec32 = this.getViewVector(f);
@@ -1475,9 +1478,12 @@ CommandSource {
         return InteractionResult.PASS;
     }
 
-    @Nullable
-    public AABB getCollideAgainstBox(Entity entity) {
-        return null;
+    public boolean canCollideWith(Entity entity) {
+        return entity.canBeCollidedWith() && !this.isPassengerOfSameVehicle(entity);
+    }
+
+    public boolean canBeCollidedWith() {
+        return false;
     }
 
     public void rideTick() {
@@ -2655,6 +2661,11 @@ CommandSource {
     }
 
     public void checkDespawn() {
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public Vec3 getRopeHoldPosition(float f) {
+        return this.getPosition(f).add(0.0, (double)this.eyeHeight * 0.7, 0.0);
     }
 
     @FunctionalInterface

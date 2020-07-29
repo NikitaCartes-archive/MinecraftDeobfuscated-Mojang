@@ -81,7 +81,7 @@ extends Behavior<PathfinderMob> {
             jitteredLinearRetry.markAttempt(l);
             return true;
         };
-        Set<BlockPos> set = poiManager.findAll(this.poiType.getPredicate(), predicate, pathfinderMob.blockPosition(), 48, PoiManager.Occupancy.HAS_SPACE).limit(5L).collect(Collectors.toSet());
+        Set<BlockPos> set = poiManager.findAllClosestFirst(this.poiType.getPredicate(), predicate, pathfinderMob.blockPosition(), 48, PoiManager.Occupancy.HAS_SPACE).limit(5L).collect(Collectors.toSet());
         Path path = pathfinderMob.getNavigation().createPath(set, this.poiType.getValidRange());
         if (path != null && path.canReach()) {
             BlockPos blockPos2 = path.getTarget();

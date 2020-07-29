@@ -107,6 +107,28 @@ public abstract class Option {
         }
         return progressOption.genericValueLabel((int)d);
     });
+    private static final Component ACCESSIBILITY_TOOLTIP_FOV_EFFECT = new TranslatableComponent("options.fovEffectScale.tooltip");
+    public static final ProgressOption FOV_EFFECTS_SCALE = new ProgressOption("options.fovEffectScale", 0.0, 1.0, 0.0f, options -> Math.pow(options.fovEffectScale, 2.0), (options, double_) -> {
+        options.fovEffectScale = Mth.sqrt(double_);
+    }, (options, progressOption) -> {
+        progressOption.setTooltip(Minecraft.getInstance().font.split(ACCESSIBILITY_TOOLTIP_FOV_EFFECT, 200));
+        double d = progressOption.toPct(progressOption.get((Options)options));
+        if (d == 0.0) {
+            return progressOption.genericValueLabel(new TranslatableComponent("options.fovEffectScale.off"));
+        }
+        return progressOption.percentValueLabel(d);
+    });
+    private static final Component ACCESSIBILITY_TOOLTIP_SCREEN_EFFECT = new TranslatableComponent("options.screenEffectScale.tooltip");
+    public static final ProgressOption SCREEN_EFFECTS_SCALE = new ProgressOption("options.screenEffectScale", 0.0, 1.0, 0.0f, options -> options.screenEffectScale, (options, double_) -> {
+        options.screenEffectScale = double_.floatValue();
+    }, (options, progressOption) -> {
+        progressOption.setTooltip(Minecraft.getInstance().font.split(ACCESSIBILITY_TOOLTIP_SCREEN_EFFECT, 200));
+        double d = progressOption.toPct(progressOption.get((Options)options));
+        if (d == 0.0) {
+            return progressOption.genericValueLabel(new TranslatableComponent("options.screenEffectScale.off"));
+        }
+        return progressOption.percentValueLabel(d);
+    });
     public static final ProgressOption FRAMERATE_LIMIT = new ProgressOption("options.framerateLimit", 10.0, 260.0, 10.0f, options -> options.framerateLimit, (options, double_) -> {
         options.framerateLimit = (int)double_.doubleValue();
         Minecraft.getInstance().getWindow().setFramerateLimit(options.framerateLimit);
