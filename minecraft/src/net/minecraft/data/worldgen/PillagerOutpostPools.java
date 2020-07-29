@@ -5,7 +5,6 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.feature.structures.StructurePoolElement;
 import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool;
-import net.minecraft.world.level.levelgen.structure.templatesystem.BlockRotProcessor;
 
 public class PillagerOutpostPools {
 	public static final StructureTemplatePool START = Pools.register(
@@ -30,7 +29,7 @@ public class PillagerOutpostPools {
 						StructurePoolElement.list(
 							ImmutableList.of(
 								StructurePoolElement.legacy("pillager_outpost/watchtower"),
-								StructurePoolElement.legacy("pillager_outpost/watchtower_overgrown", ImmutableList.of(new BlockRotProcessor(0.05F)))
+								StructurePoolElement.legacy("pillager_outpost/watchtower_overgrown", ProcessorLists.OUTPOST_ROT)
 							)
 						),
 						1

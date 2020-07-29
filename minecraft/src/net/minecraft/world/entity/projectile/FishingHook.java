@@ -30,7 +30,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -256,7 +255,7 @@ public class FishingHook extends Projectile {
 	}
 
 	private void checkCollision() {
-		HitResult hitResult = ProjectileUtil.getHitResult(this, this::canHitEntity, ClipContext.Block.COLLIDER);
+		HitResult hitResult = ProjectileUtil.getHitResult(this, this::canHitEntity);
 		this.onHit(hitResult);
 	}
 

@@ -107,6 +107,34 @@ public abstract class Option {
 			}
 		}
 	);
+	private static final Component ACCESSIBILITY_TOOLTIP_FOV_EFFECT = new TranslatableComponent("options.fovEffectScale.tooltip");
+	public static final ProgressOption FOV_EFFECTS_SCALE = new ProgressOption(
+		"options.fovEffectScale",
+		0.0,
+		1.0,
+		0.0F,
+		options -> Math.pow((double)options.fovEffectScale, 2.0),
+		(options, double_) -> options.fovEffectScale = Mth.sqrt(double_),
+		(options, progressOption) -> {
+			progressOption.setTooltip(Minecraft.getInstance().font.split(ACCESSIBILITY_TOOLTIP_FOV_EFFECT, 200));
+			double d = progressOption.toPct(progressOption.get(options));
+			return d == 0.0 ? progressOption.genericValueLabel(new TranslatableComponent("options.fovEffectScale.off")) : progressOption.percentValueLabel(d);
+		}
+	);
+	private static final Component ACCESSIBILITY_TOOLTIP_SCREEN_EFFECT = new TranslatableComponent("options.screenEffectScale.tooltip");
+	public static final ProgressOption SCREEN_EFFECTS_SCALE = new ProgressOption(
+		"options.screenEffectScale",
+		0.0,
+		1.0,
+		0.0F,
+		options -> (double)options.screenEffectScale,
+		(options, double_) -> options.screenEffectScale = double_.floatValue(),
+		(options, progressOption) -> {
+			progressOption.setTooltip(Minecraft.getInstance().font.split(ACCESSIBILITY_TOOLTIP_SCREEN_EFFECT, 200));
+			double d = progressOption.toPct(progressOption.get(options));
+			return d == 0.0 ? progressOption.genericValueLabel(new TranslatableComponent("options.screenEffectScale.off")) : progressOption.percentValueLabel(d);
+		}
+	);
 	public static final ProgressOption FRAMERATE_LIMIT = new ProgressOption(
 		"options.framerateLimit",
 		10.0,

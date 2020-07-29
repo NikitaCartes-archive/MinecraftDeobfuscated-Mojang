@@ -25,8 +25,6 @@ public interface ResourceManager {
 
 	List<Resource> getResources(ResourceLocation resourceLocation) throws IOException;
 
-	Collection<ResourceLocation> listResources(ResourceLocation resourceLocation, Predicate<String> predicate);
-
 	Collection<ResourceLocation> listResources(String string, Predicate<String> predicate);
 
 	@Environment(EnvType.CLIENT)
@@ -55,11 +53,6 @@ public interface ResourceManager {
 		@Override
 		public List<Resource> getResources(ResourceLocation resourceLocation) {
 			return ImmutableList.of();
-		}
-
-		@Override
-		public Collection<ResourceLocation> listResources(ResourceLocation resourceLocation, Predicate<String> predicate) {
-			return ImmutableSet.<ResourceLocation>of();
 		}
 
 		@Override

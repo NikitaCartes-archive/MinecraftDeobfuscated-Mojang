@@ -2,26 +2,21 @@ package net.minecraft.core;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
-import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.UnboundedMapCodec;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.RegistryReadOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
@@ -38,15 +33,15 @@ public interface RegistryAccess {
 	Logger LOGGER = LogManager.getLogger();
 	Map<ResourceKey<? extends Registry<?>>, RegistryAccess.RegistryData<?>> REGISTRIES = Util.make(() -> {
 		Builder<ResourceKey<? extends Registry<?>>, RegistryAccess.RegistryData<?>> builder = ImmutableMap.builder();
-		put(builder, Registry.DIMENSION_TYPE_REGISTRY, DimensionType.DIRECT_CODEC, true);
-		put(builder, Registry.BIOME_REGISTRY, Biome.DIRECT_CODEC, true);
-		put(builder, Registry.CONFIGURED_SURFACE_BUILDER_REGISTRY, ConfiguredSurfaceBuilder.DIRECT_CODEC, false);
-		put(builder, Registry.CONFIGURED_CARVER_REGISTRY, ConfiguredWorldCarver.DIRECT_CODEC, false);
-		put(builder, Registry.CONFIGURED_FEATURE_REGISTRY, ConfiguredFeature.DIRECT_CODEC, false);
-		put(builder, Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, ConfiguredStructureFeature.DIRECT_CODEC, false);
-		put(builder, Registry.PROCESSOR_LIST_REGISTRY, StructureProcessorType.DIRECT_CODEC, false);
-		put(builder, Registry.TEMPLATE_POOL_REGISTRY, StructureTemplatePool.DIRECT_CODEC, false);
-		put(builder, Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, NoiseGeneratorSettings.DIRECT_CODEC, false);
+		put(builder, Registry.DIMENSION_TYPE_REGISTRY, DimensionType.DIRECT_CODEC, DimensionType.DIRECT_CODEC);
+		put(builder, Registry.BIOME_REGISTRY, Biome.DIRECT_CODEC, Biome.NETWORK_CODEC);
+		put(builder, Registry.CONFIGURED_SURFACE_BUILDER_REGISTRY, ConfiguredSurfaceBuilder.DIRECT_CODEC);
+		put(builder, Registry.CONFIGURED_CARVER_REGISTRY, ConfiguredWorldCarver.DIRECT_CODEC);
+		put(builder, Registry.CONFIGURED_FEATURE_REGISTRY, ConfiguredFeature.DIRECT_CODEC);
+		put(builder, Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, ConfiguredStructureFeature.DIRECT_CODEC);
+		put(builder, Registry.PROCESSOR_LIST_REGISTRY, StructureProcessorType.DIRECT_CODEC);
+		put(builder, Registry.TEMPLATE_POOL_REGISTRY, StructureTemplatePool.DIRECT_CODEC);
+		put(builder, Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, NoiseGeneratorSettings.DIRECT_CODEC);
 		return builder.build();
 	});
 
@@ -60,13 +55,19 @@ public interface RegistryAccess {
 		return this.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
 	}
 
-	static <E> Builder<ResourceKey<? extends Registry<?>>, RegistryAccess.RegistryData<?>> put(
+	static <E> void put(
+		Builder<ResourceKey<? extends Registry<?>>, RegistryAccess.RegistryData<?>> builder, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec
+	) {
+		builder.put(resourceKey, new RegistryAccess.RegistryData<>(resourceKey, codec, null));
+	}
+
+	static <E> void put(
 		Builder<ResourceKey<? extends Registry<?>>, RegistryAccess.RegistryData<?>> builder,
 		ResourceKey<? extends Registry<E>> resourceKey,
-		MapCodec<E> mapCodec,
-		boolean bl
+		Codec<E> codec,
+		Codec<E> codec2
 	) {
-		return builder.put(resourceKey, new RegistryAccess.RegistryData<>(resourceKey, mapCodec, bl));
+		builder.put(resourceKey, new RegistryAccess.RegistryData<>(resourceKey, codec, codec2));
 	}
 
 	static RegistryAccess.RegistryHolder builtin() {
@@ -98,22 +99,13 @@ public interface RegistryAccess {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
-	static RegistryAccess.RegistryHolder load(ResourceManager resourceManager) {
-		RegistryAccess.RegistryHolder registryHolder = builtin();
-		RegistryReadOps<JsonElement> registryReadOps = RegistryReadOps.create(JsonOps.INSTANCE, resourceManager, registryHolder);
-
+	static void load(RegistryAccess.RegistryHolder registryHolder, RegistryReadOps<?> registryReadOps) {
 		for (RegistryAccess.RegistryData<?> registryData : REGISTRIES.values()) {
 			readRegistry(registryReadOps, registryHolder, registryData);
 		}
-
-		return registryHolder;
 	}
 
-	@Environment(EnvType.CLIENT)
-	static <E> void readRegistry(
-		RegistryReadOps<JsonElement> registryReadOps, RegistryAccess.RegistryHolder registryHolder, RegistryAccess.RegistryData<E> registryData
-	) {
+	static <E> void readRegistry(RegistryReadOps<?> registryReadOps, RegistryAccess.RegistryHolder registryHolder, RegistryAccess.RegistryData<E> registryData) {
 		ResourceKey<? extends Registry<E>> resourceKey = registryData.key();
 		MappedRegistry<E> mappedRegistry = (MappedRegistry<E>)Optional.ofNullable(registryHolder.registries.get(resourceKey))
 			.map(mappedRegistryx -> mappedRegistryx)
@@ -124,39 +116,44 @@ public interface RegistryAccess {
 
 	public static final class RegistryData<E> {
 		private final ResourceKey<? extends Registry<E>> key;
-		private final MapCodec<E> codec;
-		private final boolean sendToClient;
+		private final Codec<E> codec;
+		@Nullable
+		private final Codec<E> networkCodec;
 
-		public RegistryData(ResourceKey<? extends Registry<E>> resourceKey, MapCodec<E> mapCodec, boolean bl) {
+		public RegistryData(ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec, @Nullable Codec<E> codec2) {
 			this.key = resourceKey;
-			this.codec = mapCodec;
-			this.sendToClient = bl;
+			this.codec = codec;
+			this.networkCodec = codec2;
 		}
 
-		@Environment(EnvType.CLIENT)
 		public ResourceKey<? extends Registry<E>> key() {
 			return this.key;
 		}
 
-		public MapCodec<E> codec() {
+		public Codec<E> codec() {
 			return this.codec;
 		}
 
+		@Nullable
+		public Codec<E> networkCodec() {
+			return this.networkCodec;
+		}
+
 		public boolean sendToClient() {
-			return this.sendToClient;
+			return this.networkCodec != null;
 		}
 	}
 
 	public static final class RegistryHolder implements RegistryAccess {
-		public static final Codec<RegistryAccess.RegistryHolder> NETWORK_CODEC = makeDirectCodec();
+		public static final Codec<RegistryAccess.RegistryHolder> NETWORK_CODEC = makeNetworkCodec();
 		private final Map<? extends ResourceKey<? extends Registry<?>>, ? extends MappedRegistry<?>> registries;
 
-		private static <E> Codec<RegistryAccess.RegistryHolder> makeDirectCodec() {
+		private static <E> Codec<RegistryAccess.RegistryHolder> makeNetworkCodec() {
 			Codec<ResourceKey<? extends Registry<E>>> codec = ResourceLocation.CODEC.xmap(ResourceKey::createRegistryKey, ResourceKey::location);
 			Codec<MappedRegistry<E>> codec2 = codec.partialDispatch(
 				"type",
 				mappedRegistry -> DataResult.success(mappedRegistry.key()),
-				resourceKey -> getCodec(resourceKey).map(mapCodec -> MappedRegistry.networkCodec(resourceKey, Lifecycle.experimental(), mapCodec))
+				resourceKey -> getNetworkCodec(resourceKey).map(codecx -> MappedRegistry.networkCodec(resourceKey, Lifecycle.experimental(), codecx))
 			);
 			UnboundedMapCodec<? extends ResourceKey<? extends Registry<?>>, ? extends MappedRegistry<?>> unboundedMapCodec = Codec.unboundedMap(codec, codec2);
 			return captureMap(unboundedMapCodec);
@@ -175,10 +172,11 @@ public interface RegistryAccess {
 			);
 		}
 
-		private static <E> DataResult<? extends MapCodec<E>> getCodec(ResourceKey<? extends Registry<E>> resourceKey) {
-			return (DataResult<? extends MapCodec<E>>)Optional.ofNullable(REGISTRIES.get(resourceKey))
-				.map(registryData -> DataResult.success(registryData.codec()))
-				.orElseGet(() -> DataResult.error("Unknown registry: " + resourceKey));
+		private static <E> DataResult<? extends Codec<E>> getNetworkCodec(ResourceKey<? extends Registry<E>> resourceKey) {
+			return (DataResult<? extends Codec<E>>)Optional.ofNullable(REGISTRIES.get(resourceKey))
+				.map(registryData -> registryData.networkCodec())
+				.map(DataResult::success)
+				.orElseGet(() -> DataResult.error("Unknown or not serializable registry: " + resourceKey));
 		}
 
 		public RegistryHolder() {

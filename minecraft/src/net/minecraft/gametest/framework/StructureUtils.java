@@ -245,9 +245,9 @@ public class StructureUtils {
 				blockState = blockStates[blockPos.getY() - 1];
 			}
 		} else if (blockPos.getY() == i - 1) {
-			blockState = serverLevel.getBiome(blockPos).getSurfaceBuilderConfig().getTopMaterial();
+			blockState = serverLevel.getBiome(blockPos).getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial();
 		} else if (blockPos.getY() < i - 1) {
-			blockState = serverLevel.getBiome(blockPos).getSurfaceBuilderConfig().getUnderMaterial();
+			blockState = serverLevel.getBiome(blockPos).getGenerationSettings().getSurfaceBuilderConfig().getUnderMaterial();
 		}
 
 		if (blockState == null) {

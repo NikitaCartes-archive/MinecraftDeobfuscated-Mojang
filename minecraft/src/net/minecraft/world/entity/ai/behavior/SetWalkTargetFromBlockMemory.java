@@ -48,13 +48,13 @@ public class SetWalkTargetFromBlockMemory extends Behavior<Villager> {
 	protected void start(ServerLevel serverLevel, Villager villager, long l) {
 		Brain<?> brain = villager.getBrain();
 		brain.getMemory(this.memoryType).ifPresent(globalPos -> {
-			if (this.tiredOfTryingToFindTarget(serverLevel, villager)) {
+			if (this.wrongDimension(serverLevel, globalPos) || this.tiredOfTryingToFindTarget(serverLevel, villager)) {
 				this.dropPOI(villager, l);
-			} else if (this.tooFar(serverLevel, villager, globalPos)) {
+			} else if (this.tooFar(villager, globalPos)) {
 				Vec3 vec3 = null;
 				int i = 0;
 
-				for (int j = 1000; i < 1000 && (vec3 == null || this.tooFar(serverLevel, villager, GlobalPos.of(serverLevel.dimension(), new BlockPos(vec3)))); i++) {
+				for (int j = 1000; i < 1000 && (vec3 == null || this.tooFar(villager, GlobalPos.of(serverLevel.dimension(), new BlockPos(vec3)))); i++) {
 					vec3 = RandomPos.getPosTowards(villager, 15, 7, Vec3.atBottomCenterOf(globalPos.pos()));
 				}
 
@@ -75,8 +75,12 @@ public class SetWalkTargetFromBlockMemory extends Behavior<Villager> {
 		return optional.isPresent() ? serverLevel.getGameTime() - (Long)optional.get() > (long)this.tooLongUnreachableDuration : false;
 	}
 
-	private boolean tooFar(ServerLevel serverLevel, Villager villager, GlobalPos globalPos) {
-		return globalPos.dimension() != serverLevel.dimension() || globalPos.pos().distManhattan(villager.blockPosition()) > this.tooFarDistance;
+	private boolean tooFar(Villager villager, GlobalPos globalPos) {
+		return globalPos.pos().distManhattan(villager.blockPosition()) > this.tooFarDistance;
+	}
+
+	private boolean wrongDimension(ServerLevel serverLevel, GlobalPos globalPos) {
+		return globalPos.dimension() != serverLevel.dimension();
 	}
 
 	private boolean closeEnough(ServerLevel serverLevel, Villager villager, GlobalPos globalPos) {

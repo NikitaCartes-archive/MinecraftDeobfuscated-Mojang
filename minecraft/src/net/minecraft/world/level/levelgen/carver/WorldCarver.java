@@ -185,7 +185,9 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 					if (mutableBoolean.isTrue()) {
 						mutableBlockPos3.setWithOffset(mutableBlockPos, Direction.DOWN);
 						if (chunkAccess.getBlockState(mutableBlockPos3).is(Blocks.DIRT)) {
-							chunkAccess.setBlockState(mutableBlockPos3, ((Biome)function.apply(mutableBlockPos)).getSurfaceBuilderConfig().getTopMaterial(), false);
+							chunkAccess.setBlockState(
+								mutableBlockPos3, ((Biome)function.apply(mutableBlockPos)).getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial(), false
+							);
 						}
 					}
 				}

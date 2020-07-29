@@ -11,7 +11,6 @@ import java.io.PrintStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -121,13 +120,6 @@ public class FallbackResourceManager implements ResourceManager {
 		} else {
 			return list;
 		}
-	}
-
-	@Override
-	public Collection<ResourceLocation> listResources(ResourceLocation resourceLocation, Predicate<String> predicate) {
-		return (Collection<ResourceLocation>)(Objects.equals(resourceLocation.getNamespace(), this.namespace)
-			? this.listResources(resourceLocation.getPath(), predicate)
-			: ImmutableSet.<ResourceLocation>of());
 	}
 
 	@Override

@@ -55,6 +55,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.Pose;
@@ -1024,6 +1025,19 @@ public class LocalPlayer extends AbstractClientPlayer {
 			}
 
 			return this.wasUnderwater;
+		}
+	}
+
+	@Override
+	public Vec3 getRopeHoldPosition(float f) {
+		if (this.minecraft.options.getCameraType().isFirstPerson()) {
+			float g = Mth.lerp(f * 0.5F, this.yRot, this.yRotO) * (float) (Math.PI / 180.0);
+			float h = Mth.lerp(f * 0.5F, this.xRot, this.xRotO) * (float) (Math.PI / 180.0);
+			double d = this.getMainArm() == HumanoidArm.RIGHT ? -1.0 : 1.0;
+			Vec3 vec3 = new Vec3(0.39 * d, -0.6, 0.3);
+			return vec3.xRot(-h).yRot(-g).add(this.getEyePosition(f));
+		} else {
+			return super.getRopeHoldPosition(f);
 		}
 	}
 }

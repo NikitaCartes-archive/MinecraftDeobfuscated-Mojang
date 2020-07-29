@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.ai.util.RandomPos;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
@@ -35,14 +36,14 @@ public class MoveThroughVillageGoal extends Goal {
 		this.distanceToPoi = i;
 		this.canDealWithDoors = booleanSupplier;
 		this.setFlags(EnumSet.of(Goal.Flag.MOVE));
-		if (!this.hasGroundPathNavigation()) {
+		if (!GoalUtils.hasGroundPathNavigation(pathfinderMob)) {
 			throw new IllegalArgumentException("Unsupported mob for MoveThroughVillageGoal");
 		}
 	}
 
 	@Override
 	public boolean canUse() {
-		if (!this.hasGroundPathNavigation()) {
+		if (!GoalUtils.hasGroundPathNavigation(this.mob)) {
 			return false;
 		} else {
 			this.updateVisited();
@@ -90,8 +91,8 @@ public class MoveThroughVillageGoal extends Goal {
 								}
 							}
 
-							for (int i = 0; i < this.path.getSize(); i++) {
-								Node node = this.path.get(i);
+							for (int i = 0; i < this.path.getNodeCount(); i++) {
+								Node node = this.path.getNode(i);
 								BlockPos blockPos2 = new BlockPos(node.x, node.y + 1, node.z);
 								if (DoorBlock.isWoodenDoor(this.mob.level, blockPos2)) {
 									this.path = this.mob.getNavigation().createPath((double)node.x, (double)node.y, (double)node.z, 0);
@@ -138,9 +139,5 @@ public class MoveThroughVillageGoal extends Goal {
 		if (this.visited.size() > 15) {
 			this.visited.remove(0);
 		}
-	}
-
-	private boolean hasGroundPathNavigation() {
-		return this.mob.getNavigation() instanceof GroundPathNavigation;
 	}
 }

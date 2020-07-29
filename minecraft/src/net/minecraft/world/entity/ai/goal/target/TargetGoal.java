@@ -121,7 +121,7 @@ public abstract class TargetGoal extends Goal {
 		if (path == null) {
 			return false;
 		} else {
-			Node node = path.last();
+			Node node = path.getEndNode();
 			if (node == null) {
 				return false;
 			} else {

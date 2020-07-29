@@ -69,8 +69,11 @@ public class FrozenOceanSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBase
 
 		int q = i & 15;
 		int r = j & 15;
-		BlockState blockState3 = biome.getSurfaceBuilderConfig().getUnderMaterial();
-		BlockState blockState4 = biome.getSurfaceBuilderConfig().getTopMaterial();
+		SurfaceBuilderConfiguration surfaceBuilderConfiguration = biome.getGenerationSettings().getSurfaceBuilderConfig();
+		BlockState blockState3 = surfaceBuilderConfiguration.getUnderMaterial();
+		BlockState blockState4 = surfaceBuilderConfiguration.getTopMaterial();
+		BlockState blockState5 = blockState3;
+		BlockState blockState6 = blockState4;
 		int s = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
 		int t = -1;
 		int u = 0;
@@ -85,46 +88,46 @@ public class FrozenOceanSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBase
 				chunkAccess.setBlockState(mutableBlockPos, PACKED_ICE, false);
 			}
 
-			BlockState blockState5 = chunkAccess.getBlockState(mutableBlockPos);
-			if (blockState5.isAir()) {
+			BlockState blockState7 = chunkAccess.getBlockState(mutableBlockPos);
+			if (blockState7.isAir()) {
 				t = -1;
-			} else if (blockState5.is(blockState.getBlock())) {
+			} else if (blockState7.is(blockState.getBlock())) {
 				if (t == -1) {
 					if (s <= 0) {
-						blockState4 = AIR;
-						blockState3 = blockState;
+						blockState6 = AIR;
+						blockState5 = blockState;
 					} else if (x >= l - 4 && x <= l + 1) {
-						blockState4 = biome.getSurfaceBuilderConfig().getTopMaterial();
-						blockState3 = biome.getSurfaceBuilderConfig().getUnderMaterial();
+						blockState6 = blockState4;
+						blockState5 = blockState3;
 					}
 
-					if (x < l && (blockState4 == null || blockState4.isAir())) {
+					if (x < l && (blockState6 == null || blockState6.isAir())) {
 						if (biome.getTemperature(mutableBlockPos.set(i, x, j)) < 0.15F) {
-							blockState4 = ICE;
+							blockState6 = ICE;
 						} else {
-							blockState4 = blockState2;
+							blockState6 = blockState2;
 						}
 					}
 
 					t = s;
 					if (x >= l - 1) {
-						chunkAccess.setBlockState(mutableBlockPos, blockState4, false);
+						chunkAccess.setBlockState(mutableBlockPos, blockState6, false);
 					} else if (x < l - 7 - s) {
-						blockState4 = AIR;
-						blockState3 = blockState;
+						blockState6 = AIR;
+						blockState5 = blockState;
 						chunkAccess.setBlockState(mutableBlockPos, GRAVEL, false);
 					} else {
-						chunkAccess.setBlockState(mutableBlockPos, blockState3, false);
+						chunkAccess.setBlockState(mutableBlockPos, blockState5, false);
 					}
 				} else if (t > 0) {
 					t--;
-					chunkAccess.setBlockState(mutableBlockPos, blockState3, false);
-					if (t == 0 && blockState3.is(Blocks.SAND) && s > 1) {
+					chunkAccess.setBlockState(mutableBlockPos, blockState5, false);
+					if (t == 0 && blockState5.is(Blocks.SAND) && s > 1) {
 						t = random.nextInt(4) + Math.max(0, x - 63);
-						blockState3 = blockState3.is(Blocks.RED_SAND) ? Blocks.RED_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
+						blockState5 = blockState5.is(Blocks.RED_SAND) ? Blocks.RED_SANDSTONE.defaultBlockState() : Blocks.SANDSTONE.defaultBlockState();
 					}
 				}
-			} else if (blockState5.is(Blocks.PACKED_ICE) && u <= v && x > w) {
+			} else if (blockState7.is(Blocks.PACKED_ICE) && u <= v && x > w) {
 				chunkAccess.setBlockState(mutableBlockPos, SNOW_BLOCK, false);
 				u++;
 			}

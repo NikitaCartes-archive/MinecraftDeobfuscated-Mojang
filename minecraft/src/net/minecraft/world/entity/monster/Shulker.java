@@ -376,10 +376,9 @@ public class Shulker extends AbstractGolem implements Enemy {
 		return this.getRawPeekAmount() == 0;
 	}
 
-	@Nullable
 	@Override
-	public AABB getCollideBox() {
-		return this.isAlive() ? this.getBoundingBox() : null;
+	public boolean canBeCollidedWith() {
+		return this.isAlive();
 	}
 
 	public Direction getAttachFace() {

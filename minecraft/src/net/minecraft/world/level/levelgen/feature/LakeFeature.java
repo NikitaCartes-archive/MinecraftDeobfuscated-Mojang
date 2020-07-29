@@ -103,7 +103,7 @@ public class LakeFeature extends Feature<BlockStateConfiguration> {
 								BlockPos blockPos2 = blockPos.offset(j, txx - 1, s);
 								if (isDirt(worldGenLevel.getBlockState(blockPos2).getBlock()) && worldGenLevel.getBrightness(LightLayer.SKY, blockPos.offset(j, txx, s)) > 0) {
 									Biome biome = worldGenLevel.getBiome(blockPos2);
-									if (biome.getSurfaceBuilderConfig().getTopMaterial().is(Blocks.MYCELIUM)) {
+									if (biome.getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial().is(Blocks.MYCELIUM)) {
 										worldGenLevel.setBlock(blockPos2, Blocks.MYCELIUM.defaultBlockState(), 2);
 									} else {
 										worldGenLevel.setBlock(blockPos2, Blocks.GRASS_BLOCK.defaultBlockState(), 2);

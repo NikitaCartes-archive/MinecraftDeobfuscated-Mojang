@@ -143,7 +143,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 			this.setDeltaMovement(vec3);
 		}
 
-		HitResult hitResult = ProjectileUtil.getHitResult(this, this::canHitEntity, ClipContext.Block.COLLIDER);
+		HitResult hitResult = ProjectileUtil.getHitResult(this, this::canHitEntity);
 		if (!this.noPhysics) {
 			this.onHit(hitResult);
 			this.hasImpulse = true;

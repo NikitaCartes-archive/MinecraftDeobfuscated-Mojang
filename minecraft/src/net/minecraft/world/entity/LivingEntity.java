@@ -425,7 +425,7 @@ public abstract class LivingEntity extends Entity {
 	}
 
 	protected boolean onSoulSpeedBlock() {
-		return this.getBlockStateOn().is(BlockTags.SOUL_SPEED_BLOCKS);
+		return this.level.getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).is(BlockTags.SOUL_SPEED_BLOCKS);
 	}
 
 	@Override

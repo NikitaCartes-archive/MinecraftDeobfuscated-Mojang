@@ -202,7 +202,7 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			double d = Entity.getHorizontalDistanceSqr(vec32);
 			double e = Entity.getHorizontalDistanceSqr(vec3);
 			if (d > 0.0 && e > 0.0) {
-				double l = (vec32.x * vec3.x + vec32.z * vec3.z) / (Math.sqrt(d) * Math.sqrt(e));
+				double l = (vec32.x * vec3.x + vec32.z * vec3.z) / Math.sqrt(d * e);
 				double m = vec32.x * vec3.z - vec32.z * vec3.x;
 				poseStack.mulPose(Vector3f.YP.rotation((float)(Math.signum(m) * Math.acos(l))));
 			}

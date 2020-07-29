@@ -50,7 +50,10 @@ public class ErodedBadlandsSurfaceBuilder extends BadlandsSurfaceBuilder {
 		int o = i & 15;
 		int p = j & 15;
 		BlockState blockState3 = WHITE_TERRACOTTA;
-		BlockState blockState4 = biome.getSurfaceBuilderConfig().getUnderMaterial();
+		SurfaceBuilderConfiguration surfaceBuilderConfiguration = biome.getGenerationSettings().getSurfaceBuilderConfig();
+		BlockState blockState4 = surfaceBuilderConfiguration.getUnderMaterial();
+		BlockState blockState5 = surfaceBuilderConfiguration.getTopMaterial();
+		BlockState blockState6 = blockState4;
 		int q = (int)(d / 3.0 + 3.0 + random.nextDouble() * 0.25);
 		boolean bl = Math.cos(d / 3.0 * Math.PI) > 0.0;
 		int r = -1;
@@ -63,18 +66,18 @@ public class ErodedBadlandsSurfaceBuilder extends BadlandsSurfaceBuilder {
 				chunkAccess.setBlockState(mutableBlockPos, blockState, false);
 			}
 
-			BlockState blockState5 = chunkAccess.getBlockState(mutableBlockPos);
-			if (blockState5.isAir()) {
+			BlockState blockState7 = chunkAccess.getBlockState(mutableBlockPos);
+			if (blockState7.isAir()) {
 				r = -1;
-			} else if (blockState5.is(blockState.getBlock())) {
+			} else if (blockState7.is(blockState.getBlock())) {
 				if (r == -1) {
 					bl2 = false;
 					if (q <= 0) {
 						blockState3 = Blocks.AIR.defaultBlockState();
-						blockState4 = blockState;
+						blockState6 = blockState;
 					} else if (s >= l - 4 && s <= l + 1) {
 						blockState3 = WHITE_TERRACOTTA;
-						blockState4 = biome.getSurfaceBuilderConfig().getUnderMaterial();
+						blockState6 = blockState4;
 					}
 
 					if (s < l && (blockState3 == null || blockState3.isAir())) {
@@ -84,23 +87,23 @@ public class ErodedBadlandsSurfaceBuilder extends BadlandsSurfaceBuilder {
 					r = q + Math.max(0, s - l);
 					if (s >= l - 1) {
 						if (s > l + 3 + q) {
-							BlockState blockState6;
+							BlockState blockState8;
 							if (s < 64 || s > 127) {
-								blockState6 = ORANGE_TERRACOTTA;
+								blockState8 = ORANGE_TERRACOTTA;
 							} else if (bl) {
-								blockState6 = TERRACOTTA;
+								blockState8 = TERRACOTTA;
 							} else {
-								blockState6 = this.getBand(i, s, j);
+								blockState8 = this.getBand(i, s, j);
 							}
 
-							chunkAccess.setBlockState(mutableBlockPos, blockState6, false);
+							chunkAccess.setBlockState(mutableBlockPos, blockState8, false);
 						} else {
-							chunkAccess.setBlockState(mutableBlockPos, biome.getSurfaceBuilderConfig().getTopMaterial(), false);
+							chunkAccess.setBlockState(mutableBlockPos, blockState5, false);
 							bl2 = true;
 						}
 					} else {
-						chunkAccess.setBlockState(mutableBlockPos, blockState4, false);
-						Block block = blockState4.getBlock();
+						chunkAccess.setBlockState(mutableBlockPos, blockState6, false);
+						Block block = blockState6.getBlock();
 						if (block == Blocks.WHITE_TERRACOTTA
 							|| block == Blocks.ORANGE_TERRACOTTA
 							|| block == Blocks.MAGENTA_TERRACOTTA

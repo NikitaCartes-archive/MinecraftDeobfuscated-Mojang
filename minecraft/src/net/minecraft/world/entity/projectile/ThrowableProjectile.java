@@ -8,7 +8,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -48,7 +47,7 @@ public abstract class ThrowableProjectile extends Projectile {
 	@Override
 	public void tick() {
 		super.tick();
-		HitResult hitResult = ProjectileUtil.getHitResult(this, this::canHitEntity, ClipContext.Block.OUTLINE);
+		HitResult hitResult = ProjectileUtil.getHitResult(this, this::canHitEntity);
 		boolean bl = false;
 		if (hitResult.getType() == HitResult.Type.BLOCK) {
 			BlockPos blockPos = ((BlockHitResult)hitResult).getBlockPos();
@@ -70,6 +69,7 @@ public abstract class ThrowableProjectile extends Projectile {
 			this.onHit(hitResult);
 		}
 
+		this.checkInsideBlocks();
 		Vec3 vec3 = this.getDeltaMovement();
 		double d = this.getX() + vec3.x;
 		double e = this.getY() + vec3.y;

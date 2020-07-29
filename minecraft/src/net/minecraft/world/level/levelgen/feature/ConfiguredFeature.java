@@ -1,7 +1,6 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -18,8 +17,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class ConfiguredFeature<FC extends FeatureConfiguration, F extends Feature<FC>> implements Decoratable<ConfiguredFeature<?, ?>> {
-	public static final MapCodec<ConfiguredFeature<?, ?>> DIRECT_CODEC = Registry.FEATURE
-		.dispatchMap(configuredFeature -> configuredFeature.feature, Feature::configuredCodec);
+	public static final Codec<ConfiguredFeature<?, ?>> DIRECT_CODEC = Registry.FEATURE
+		.dispatch(configuredFeature -> configuredFeature.feature, Feature::configuredCodec);
 	public static final Codec<Supplier<ConfiguredFeature<?, ?>>> CODEC = RegistryFileCodec.create(Registry.CONFIGURED_FEATURE_REGISTRY, DIRECT_CODEC);
 	public static final Logger LOGGER = LogManager.getLogger();
 	public final F feature;

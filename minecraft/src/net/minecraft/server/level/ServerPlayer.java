@@ -675,10 +675,10 @@ public class ServerPlayer extends Player implements ContainerListener {
 				serverLevel2.getProfiler().push("placing");
 				this.setLevel(serverLevel);
 				serverLevel.addDuringPortalTeleport(this);
-				this.triggerDimensionChangeTriggers(serverLevel2);
 				this.setRot(portalInfo.yRot, portalInfo.xRot);
 				this.moveTo(portalInfo.pos.x, portalInfo.pos.y, portalInfo.pos.z);
 				serverLevel2.getProfiler().pop();
+				this.triggerDimensionChangeTriggers(serverLevel2);
 				this.gameMode.setLevel(serverLevel);
 				this.connection.send(new ClientboundPlayerAbilitiesPacket(this.abilities));
 				playerList.sendLevelInfo(this, serverLevel);

@@ -30,8 +30,10 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.GenerationStep;
@@ -73,7 +75,7 @@ public abstract class ChunkGenerator {
 				List<Biome> list = Lists.<Biome>newArrayList();
 
 				for (Biome biome : this.biomeSource.possibleBiomes()) {
-					if (biome.isValidStart(StructureFeature.STRONGHOLD)) {
+					if (biome.getGenerationSettings().isValidStart(StructureFeature.STRONGHOLD)) {
 						list.add(biome);
 					}
 				}
@@ -128,12 +130,12 @@ public abstract class ChunkGenerator {
 		ChunkPos chunkPos = chunkAccess.getPos();
 		int j = chunkPos.x;
 		int k = chunkPos.z;
-		Biome biome = this.biomeSource.getNoiseBiome(chunkPos.x << 2, 0, chunkPos.z << 2);
+		BiomeGenerationSettings biomeGenerationSettings = this.biomeSource.getNoiseBiome(chunkPos.x << 2, 0, chunkPos.z << 2).getGenerationSettings();
 		BitSet bitSet = ((ProtoChunk)chunkAccess).getOrCreateCarvingMask(carving);
 
 		for (int m = j - 8; m <= j + 8; m++) {
 			for (int n = k - 8; n <= k + 8; n++) {
-				List<Supplier<ConfiguredWorldCarver<?>>> list = biome.getCarvers(carving);
+				List<Supplier<ConfiguredWorldCarver<?>>> list = biomeGenerationSettings.getCarvers(carving);
 				ListIterator<Supplier<ConfiguredWorldCarver<?>>> listIterator = list.listIterator();
 
 				while (listIterator.hasNext()) {
@@ -221,8 +223,8 @@ public abstract class ChunkGenerator {
 		return 256;
 	}
 
-	public List<Biome.SpawnerData> getMobsAt(Biome biome, StructureFeatureManager structureFeatureManager, MobCategory mobCategory, BlockPos blockPos) {
-		return biome.getMobs(mobCategory);
+	public List<MobSpawnSettings.SpawnerData> getMobsAt(Biome biome, StructureFeatureManager structureFeatureManager, MobCategory mobCategory, BlockPos blockPos) {
+		return biome.getMobSettings().getMobs(mobCategory);
 	}
 
 	public void createStructures(
@@ -232,7 +234,7 @@ public abstract class ChunkGenerator {
 		Biome biome = this.biomeSource.getNoiseBiome((chunkPos.x << 2) + 2, 0, (chunkPos.z << 2) + 2);
 		this.createStructure(StructureFeatures.STRONGHOLD, registryAccess, structureFeatureManager, chunkAccess, structureManager, l, chunkPos, biome);
 
-		for (Supplier<ConfiguredStructureFeature<?, ?>> supplier : biome.structures()) {
+		for (Supplier<ConfiguredStructureFeature<?, ?>> supplier : biome.getGenerationSettings().structures()) {
 			this.createStructure(
 				(ConfiguredStructureFeature<?, ?>)supplier.get(), registryAccess, structureFeatureManager, chunkAccess, structureManager, l, chunkPos, biome
 			);

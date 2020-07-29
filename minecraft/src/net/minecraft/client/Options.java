@@ -176,13 +176,15 @@ public class Options {
 	private final File optionsFile;
 	public Difficulty difficulty = Difficulty.NORMAL;
 	public boolean hideGui;
-	public int thirdPersonView;
+	private CameraType cameraType = CameraType.FIRST_PERSON;
 	public boolean renderDebug;
 	public boolean renderDebugCharts;
 	public boolean renderFpsChart;
 	public String lastMpIp = "";
 	public boolean smoothCamera;
 	public double fov = 70.0;
+	public float screenEffectScale = 1.0F;
+	public float fovEffectScale = 1.0F;
 	public double gamma;
 	public int guiScale;
 	public ParticleStatus particles = ParticleStatus.ALL;
@@ -353,6 +355,14 @@ public class Options {
 
 					if ("fov".equals(string)) {
 						this.fov = (double)(readFloat(string2) * 40.0F + 70.0F);
+					}
+
+					if ("screenEffectScale".equals(string)) {
+						this.screenEffectScale = readFloat(string2);
+					}
+
+					if ("fovEffectScale".equals(string)) {
+						this.fovEffectScale = readFloat(string2);
 					}
 
 					if ("gamma".equals(string)) {
@@ -623,6 +633,8 @@ public class Options {
 				printWriter.println("toggleSprint:" + this.toggleSprint);
 				printWriter.println("mouseSensitivity:" + this.sensitivity);
 				printWriter.println("fov:" + (this.fov - 70.0) / 40.0);
+				printWriter.println("screenEffectScale:" + this.screenEffectScale);
+				printWriter.println("fovEffectScale:" + this.fovEffectScale);
 				printWriter.println("gamma:" + this.gamma);
 				printWriter.println("renderDistance:" + this.renderDistance);
 				printWriter.println("entityDistanceScaling:" + this.entityDistanceScaling);
@@ -796,5 +808,13 @@ public class Options {
 		}
 
 		packRepository.setSelected(set);
+	}
+
+	public CameraType getCameraType() {
+		return this.cameraType;
+	}
+
+	public void setCameraType(CameraType cameraType) {
+		this.cameraType = cameraType;
 	}
 }

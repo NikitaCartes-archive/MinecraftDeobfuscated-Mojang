@@ -1463,15 +1463,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	private void handleKeybinds() {
 		while (this.options.keyTogglePerspective.consumeClick()) {
-			this.options.thirdPersonView++;
-			if (this.options.thirdPersonView > 2) {
-				this.options.thirdPersonView = 0;
-			}
-
-			if (this.options.thirdPersonView == 0) {
-				this.gameRenderer.checkEntityPostEffect(this.getCameraEntity());
-			} else if (this.options.thirdPersonView == 1) {
-				this.gameRenderer.checkEntityPostEffect(null);
+			CameraType cameraType = this.options.getCameraType();
+			this.options.setCameraType(this.options.getCameraType().cycle());
+			if (cameraType.isFirstPerson() != this.options.getCameraType().isFirstPerson()) {
+				this.gameRenderer.checkEntityPostEffect(this.options.getCameraType().isFirstPerson() ? this.getCameraEntity() : null);
 			}
 
 			this.levelRenderer.needsUpdate();

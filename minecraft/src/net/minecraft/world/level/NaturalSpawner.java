@@ -28,6 +28,7 @@ import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.biome.NearestNeighborBiomeZoomer;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -66,8 +67,7 @@ public final class NaturalSpawner {
 				BlockPos blockPos = entity.blockPosition();
 				long l = ChunkPos.asLong(blockPos.getX() >> 4, blockPos.getZ() >> 4);
 				chunkGetter.query(l, levelChunk -> {
-					Biome biome = getRoughBiome(blockPos, levelChunk);
-					Biome.MobSpawnCost mobSpawnCost = biome.getMobSpawnCost(entity.getType());
+					MobSpawnSettings.MobSpawnCost mobSpawnCost = getRoughBiome(blockPos, levelChunk).getMobSettings().getMobSpawnCost(entity.getType());
 					if (mobSpawnCost != null) {
 						potentialCalculator.addCharge(entity.blockPosition(), mobSpawnCost.getCharge());
 					}
@@ -138,7 +138,7 @@ public final class NaturalSpawner {
 				int l = blockPos.getX();
 				int m = blockPos.getZ();
 				int n = 6;
-				Biome.SpawnerData spawnerData = null;
+				MobSpawnSettings.SpawnerData spawnerData = null;
 				SpawnGroupData spawnGroupData = null;
 				int o = Mth.ceil(serverLevel.random.nextFloat() * 4.0F);
 				int p = 0;
@@ -211,7 +211,7 @@ public final class NaturalSpawner {
 		MobCategory mobCategory,
 		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator chunkGenerator,
-		Biome.SpawnerData spawnerData,
+		MobSpawnSettings.SpawnerData spawnerData,
 		BlockPos.MutableBlockPos mutableBlockPos,
 		double d
 	) {
@@ -258,7 +258,7 @@ public final class NaturalSpawner {
 	}
 
 	@Nullable
-	private static Biome.SpawnerData getRandomSpawnMobAt(
+	private static MobSpawnSettings.SpawnerData getRandomSpawnMobAt(
 		ServerLevel serverLevel,
 		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator chunkGenerator,
@@ -270,7 +270,7 @@ public final class NaturalSpawner {
 		if (mobCategory == MobCategory.WATER_AMBIENT && biome.getBiomeCategory() == Biome.BiomeCategory.RIVER && random.nextFloat() < 0.98F) {
 			return null;
 		} else {
-			List<Biome.SpawnerData> list = mobsAt(serverLevel, structureFeatureManager, chunkGenerator, mobCategory, blockPos, biome);
+			List<MobSpawnSettings.SpawnerData> list = mobsAt(serverLevel, structureFeatureManager, chunkGenerator, mobCategory, blockPos, biome);
 			return list.isEmpty() ? null : WeighedRandom.getRandomItem(random, list);
 		}
 	}
@@ -280,13 +280,13 @@ public final class NaturalSpawner {
 		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator chunkGenerator,
 		MobCategory mobCategory,
-		Biome.SpawnerData spawnerData,
+		MobSpawnSettings.SpawnerData spawnerData,
 		BlockPos blockPos
 	) {
 		return mobsAt(serverLevel, structureFeatureManager, chunkGenerator, mobCategory, blockPos, null).contains(spawnerData);
 	}
 
-	private static List<Biome.SpawnerData> mobsAt(
+	private static List<MobSpawnSettings.SpawnerData> mobsAt(
 		ServerLevel serverLevel,
 		StructureFeatureManager structureFeatureManager,
 		ChunkGenerator chunkGenerator,
@@ -353,13 +353,14 @@ public final class NaturalSpawner {
 	}
 
 	public static void spawnMobsForChunkGeneration(ServerLevelAccessor serverLevelAccessor, Biome biome, int i, int j, Random random) {
-		List<Biome.SpawnerData> list = biome.getMobs(MobCategory.CREATURE);
+		MobSpawnSettings mobSpawnSettings = biome.getMobSettings();
+		List<MobSpawnSettings.SpawnerData> list = mobSpawnSettings.getMobs(MobCategory.CREATURE);
 		if (!list.isEmpty()) {
 			int k = i << 4;
 			int l = j << 4;
 
-			while (random.nextFloat() < biome.getCreatureProbability()) {
-				Biome.SpawnerData spawnerData = WeighedRandom.getRandomItem(random, list);
+			while (random.nextFloat() < mobSpawnSettings.getCreatureProbability()) {
+				MobSpawnSettings.SpawnerData spawnerData = WeighedRandom.getRandomItem(random, list);
 				int m = spawnerData.minCount + random.nextInt(1 + spawnerData.maxCount - spawnerData.minCount);
 				SpawnGroupData spawnGroupData = null;
 				int n = k + random.nextInt(16);
@@ -387,8 +388,8 @@ public final class NaturalSpawner {
 							Entity entity;
 							try {
 								entity = spawnerData.type.create(serverLevelAccessor.getLevel());
-							} catch (Exception var26) {
-								LOGGER.warn("Failed to create mob", (Throwable)var26);
+							} catch (Exception var27) {
+								LOGGER.warn("Failed to create mob", (Throwable)var27);
 								continue;
 							}
 
@@ -475,8 +476,7 @@ public final class NaturalSpawner {
 		private boolean canSpawn(EntityType<?> entityType, BlockPos blockPos, ChunkAccess chunkAccess) {
 			this.lastCheckedPos = blockPos;
 			this.lastCheckedType = entityType;
-			Biome biome = NaturalSpawner.getRoughBiome(blockPos, chunkAccess);
-			Biome.MobSpawnCost mobSpawnCost = biome.getMobSpawnCost(entityType);
+			MobSpawnSettings.MobSpawnCost mobSpawnCost = NaturalSpawner.getRoughBiome(blockPos, chunkAccess).getMobSettings().getMobSpawnCost(entityType);
 			if (mobSpawnCost == null) {
 				this.lastCharge = 0.0;
 				return true;
@@ -495,8 +495,7 @@ public final class NaturalSpawner {
 			if (blockPos.equals(this.lastCheckedPos) && entityType == this.lastCheckedType) {
 				d = this.lastCharge;
 			} else {
-				Biome biome = NaturalSpawner.getRoughBiome(blockPos, chunkAccess);
-				Biome.MobSpawnCost mobSpawnCost = biome.getMobSpawnCost(entityType);
+				MobSpawnSettings.MobSpawnCost mobSpawnCost = NaturalSpawner.getRoughBiome(blockPos, chunkAccess).getMobSettings().getMobSpawnCost(entityType);
 				if (mobSpawnCost != null) {
 					d = mobSpawnCost.getCharge();
 				} else {

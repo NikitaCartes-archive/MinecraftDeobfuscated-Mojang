@@ -48,6 +48,7 @@ import net.minecraft.world.entity.ai.goal.ZombieAttackGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.Turtle;
@@ -131,7 +132,7 @@ public class Zombie extends Monster {
 	}
 
 	public void setCanBreakDoors(boolean bl) {
-		if (this.supportsBreakDoorGoal()) {
+		if (this.supportsBreakDoorGoal() && GoalUtils.hasGroundPathNavigation(this)) {
 			if (this.canBreakDoors != bl) {
 				this.canBreakDoors = bl;
 				((GroundPathNavigation)this.getNavigation()).setCanOpenDoors(bl);
@@ -253,7 +254,7 @@ public class Zombie extends Monster {
 	}
 
 	protected void convertToZombieType(EntityType<? extends Zombie> entityType) {
-		Zombie zombie = this.convertTo(entityType);
+		Zombie zombie = this.convertTo(entityType, true);
 		if (zombie != null) {
 			zombie.handleAttributes(zombie.level.getCurrentDifficultyAt(zombie.blockPosition()).getSpecialMultiplier());
 			zombie.setCanBreakDoors(zombie.supportsBreakDoorGoal() && this.canBreakDoors());
@@ -401,9 +402,7 @@ public class Zombie extends Monster {
 			}
 
 			Villager villager = (Villager)livingEntity;
-			ZombieVillager zombieVillager = EntityType.ZOMBIE_VILLAGER.create(serverLevel);
-			zombieVillager.copyPosition(villager);
-			villager.remove();
+			ZombieVillager zombieVillager = villager.convertTo(EntityType.ZOMBIE_VILLAGER, false);
 			zombieVillager.finalizeSpawn(
 				serverLevel, serverLevel.getCurrentDifficultyAt(zombieVillager.blockPosition()), MobSpawnType.CONVERSION, new Zombie.ZombieGroupData(false, true), null
 			);
@@ -411,19 +410,6 @@ public class Zombie extends Monster {
 			zombieVillager.setGossips(villager.getGossips().store(NbtOps.INSTANCE).getValue());
 			zombieVillager.setTradeOffers(villager.getOffers().createTag());
 			zombieVillager.setVillagerXp(villager.getVillagerXp());
-			zombieVillager.setBaby(villager.isBaby());
-			zombieVillager.setNoAi(villager.isNoAi());
-			if (villager.hasCustomName()) {
-				zombieVillager.setCustomName(villager.getCustomName());
-				zombieVillager.setCustomNameVisible(villager.isCustomNameVisible());
-			}
-
-			if (villager.isPersistenceRequired()) {
-				zombieVillager.setPersistenceRequired();
-			}
-
-			zombieVillager.setInvulnerable(this.isInvulnerable());
-			serverLevel.addFreshEntityWithPassengers(zombieVillager);
 			if (!this.isSilent()) {
 				serverLevel.levelEvent(null, 1026, this.blockPosition(), 0);
 			}

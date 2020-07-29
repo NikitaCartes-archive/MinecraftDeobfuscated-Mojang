@@ -59,10 +59,10 @@ public class DragonTakeoffPhase extends AbstractDragonPhaseInstance {
 
 	private void navigateToNextPathNode() {
 		if (this.currentPath != null) {
-			this.currentPath.next();
+			this.currentPath.advance();
 			if (!this.currentPath.isDone()) {
-				Vec3i vec3i = this.currentPath.currentPos();
-				this.currentPath.next();
+				Vec3i vec3i = this.currentPath.getNextNodePos();
+				this.currentPath.advance();
 
 				double d;
 				do {

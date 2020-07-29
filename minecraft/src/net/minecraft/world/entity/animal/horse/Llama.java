@@ -53,6 +53,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WoolCarpetBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 	private static final Ingredient FOOD_ITEMS = Ingredient.of(Items.WHEAT, Blocks.HAY_BLOCK.asItem());
@@ -493,6 +494,12 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 	@Override
 	public void performRangedAttack(LivingEntity livingEntity, float f) {
 		this.spit(livingEntity);
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public Vec3 getLeashOffset() {
+		return new Vec3(0.0, 0.75 * (double)this.getEyeHeight(), (double)this.getBbWidth() * 0.5);
 	}
 
 	static class LlamaAttackWolfGoal extends NearestAttackableTargetGoal<Wolf> {

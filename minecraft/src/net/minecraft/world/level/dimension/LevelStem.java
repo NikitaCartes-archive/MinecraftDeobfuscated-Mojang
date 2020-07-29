@@ -3,8 +3,8 @@ package net.minecraft.world.level.dimension;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.Lifecycle;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -21,7 +21,7 @@ import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 
 public final class LevelStem {
-	public static final MapCodec<LevelStem> CODEC = RecordCodecBuilder.mapCodec(
+	public static final Codec<LevelStem> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					DimensionType.CODEC.fieldOf("type").forGetter(LevelStem::typeSupplier), ChunkGenerator.CODEC.fieldOf("generator").forGetter(LevelStem::generator)
 				)
@@ -58,9 +58,6 @@ public final class LevelStem {
 			LevelStem levelStem = mappedRegistry.get(resourceKey);
 			if (levelStem != null) {
 				mappedRegistry2.register(resourceKey, levelStem);
-				if (mappedRegistry.persistent(resourceKey)) {
-					mappedRegistry2.setPersistent(resourceKey);
-				}
 			}
 		}
 
@@ -68,9 +65,6 @@ public final class LevelStem {
 			ResourceKey<LevelStem> resourceKey2 = (ResourceKey<LevelStem>)entry.getKey();
 			if (!BUILTIN_ORDER.contains(resourceKey2)) {
 				mappedRegistry2.register(resourceKey2, entry.getValue());
-				if (mappedRegistry.persistent(resourceKey2)) {
-					mappedRegistry2.setPersistent(resourceKey2);
-				}
 			}
 		}
 

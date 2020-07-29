@@ -134,10 +134,9 @@ public abstract class AbstractMinecart extends Entity {
 		this.entityData.define(DATA_ID_CUSTOM_DISPLAY, false);
 	}
 
-	@Nullable
 	@Override
-	public AABB getCollideAgainstBox(Entity entity) {
-		return entity.isPushable() ? entity.getBoundingBox() : null;
+	public boolean canCollideWith(Entity entity) {
+		return Boat.canVehicleCollide(this, entity);
 	}
 
 	@Override

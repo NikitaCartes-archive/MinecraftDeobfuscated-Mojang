@@ -48,16 +48,16 @@ public class WaterBoundPathNavigation extends PathNavigation {
 		if (!this.isDone()) {
 			if (this.canUpdatePath()) {
 				this.followThePath();
-			} else if (this.path != null && this.path.getIndex() < this.path.getSize()) {
-				Vec3 vec3 = this.path.getPos(this.mob, this.path.getIndex());
+			} else if (this.path != null && !this.path.isDone()) {
+				Vec3 vec3 = this.path.getNextEntityPos(this.mob);
 				if (Mth.floor(this.mob.getX()) == Mth.floor(vec3.x) && Mth.floor(this.mob.getY()) == Mth.floor(vec3.y) && Mth.floor(this.mob.getZ()) == Mth.floor(vec3.z)) {
-					this.path.setIndex(this.path.getIndex() + 1);
+					this.path.advance();
 				}
 			}
 
 			DebugPackets.sendPathFindingPacket(this.level, this.mob, this.path, this.maxDistanceToWaypoint);
 			if (!this.isDone()) {
-				Vec3 vec3 = this.path.currentPos(this.mob);
+				Vec3 vec3 = this.path.getNextEntityPos(this.mob);
 				this.mob.getMoveControl().setWantedPosition(vec3.x, vec3.y, vec3.z, this.speedModifier);
 			}
 		}
@@ -75,17 +75,17 @@ public class WaterBoundPathNavigation extends PathNavigation {
 			}
 
 			int i = 6;
-			Vec3 vec33 = Vec3.atBottomCenterOf(this.path.currentPos());
+			Vec3 vec33 = Vec3.atBottomCenterOf(this.path.getNextNodePos());
 			if (Math.abs(this.mob.getX() - vec33.x) < (double)g
 				&& Math.abs(this.mob.getZ() - vec33.z) < (double)g
 				&& Math.abs(this.mob.getY() - vec33.y) < (double)(g * 2.0F)) {
-				this.path.next();
+				this.path.advance();
 			}
 
-			for (int j = Math.min(this.path.getIndex() + 6, this.path.getSize() - 1); j > this.path.getIndex(); j--) {
-				vec33 = this.path.getPos(this.mob, j);
+			for (int j = Math.min(this.path.getNextNodeIndex() + 6, this.path.getNodeCount() - 1); j > this.path.getNextNodeIndex(); j--) {
+				vec33 = this.path.getEntityPosAtNode(this.mob, j);
 				if (!(vec33.distanceToSqr(vec3) > 36.0) && this.canMoveDirectly(vec3, vec33, 0, 0, 0)) {
-					this.path.setIndex(j);
+					this.path.setNextNodeIndex(j);
 					break;
 				}
 			}
@@ -106,7 +106,7 @@ public class WaterBoundPathNavigation extends PathNavigation {
 		}
 
 		if (this.path != null && !this.path.isDone()) {
-			Vec3i vec3i = this.path.currentPos();
+			Vec3i vec3i = this.path.getNextNodePos();
 			if (vec3i.equals(this.timeoutCachedNode)) {
 				this.timeoutTimer = this.timeoutTimer + (Util.getMillis() - this.lastTimeoutCheck);
 			} else {

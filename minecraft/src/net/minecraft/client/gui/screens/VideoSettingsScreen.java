@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
-import java.util.Optional;
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -14,9 +12,7 @@ import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Option;
 import net.minecraft.client.Options;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.OptionButton;
 import net.minecraft.client.gui.components.OptionsList;
 import net.minecraft.client.renderer.GpuWarnlistManager;
 import net.minecraft.network.chat.CommonComponents;
@@ -49,10 +45,10 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 		Option.PARTICLES,
 		Option.MIPMAP_LEVELS,
 		Option.ENTITY_SHADOWS,
-		Option.ENTITY_DISTANCE_SCALING
+		Option.SCREEN_EFFECTS_SCALE,
+		Option.ENTITY_DISTANCE_SCALING,
+		Option.FOV_EFFECTS_SCALE
 	};
-	@Nullable
-	private List<FormattedCharSequence> tooltip;
 	private OptionsList list;
 	private final GpuWarnlistManager gpuWarnlistManager;
 	private final int oldMipmaps;
@@ -95,7 +91,6 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 	@Override
 	public boolean mouseClicked(double d, double e, int i) {
 		int j = this.options.guiScale;
-		GraphicsStatus graphicsStatus = this.options.graphicsMode;
 		if (super.mouseClicked(d, e, i)) {
 			if (this.options.guiScale != j) {
 				this.minecraft.resizeDisplay();
@@ -156,19 +151,13 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 
 	@Override
 	public void render(PoseStack poseStack, int i, int j, float f) {
-		this.tooltip = null;
-		Optional<AbstractWidget> optional = this.list.getMouseOver((double)i, (double)j);
-		if (optional.isPresent() && optional.get() instanceof OptionButton) {
-			Optional<List<FormattedCharSequence>> optional2 = ((OptionButton)optional.get()).getOption().getTooltip();
-			optional2.ifPresent(list -> this.tooltip = list);
-		}
-
 		this.renderBackground(poseStack);
 		this.list.render(poseStack, i, j, f);
 		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 5, 16777215);
 		super.render(poseStack, i, j, f);
-		if (this.tooltip != null) {
-			this.renderTooltip(poseStack, this.tooltip, i, j);
+		List<FormattedCharSequence> list = tooltipAt(this.list, i, j);
+		if (list != null) {
+			this.renderTooltip(poseStack, list, i, j);
 		}
 	}
 }

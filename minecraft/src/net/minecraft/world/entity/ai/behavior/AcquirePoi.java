@@ -80,7 +80,7 @@ public class AcquirePoi extends Behavior<PathfinderMob> {
 				return true;
 			}
 		};
-		Set<BlockPos> set = (Set<BlockPos>)poiManager.findAll(
+		Set<BlockPos> set = (Set<BlockPos>)poiManager.findAllClosestFirst(
 				this.poiType.getPredicate(), predicate, pathfinderMob.blockPosition(), 48, PoiManager.Occupancy.HAS_SPACE
 			)
 			.limit(5L)

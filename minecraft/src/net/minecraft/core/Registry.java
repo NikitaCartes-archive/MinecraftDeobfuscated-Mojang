@@ -1,6 +1,5 @@
 package net.minecraft.core;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -77,7 +76,7 @@ import net.minecraft.world.level.levelgen.feature.trunkplacers.TrunkPlacerType;
 import net.minecraft.world.level.levelgen.placement.FeatureDecorator;
 import net.minecraft.world.level.levelgen.structure.templatesystem.PosRuleTestType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.RuleTestType;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
 import net.minecraft.world.level.levelgen.surfacebuilders.ConfiguredSurfaceBuilder;
 import net.minecraft.world.level.levelgen.surfacebuilders.SurfaceBuilder;
@@ -177,7 +176,7 @@ public abstract class Registry<T> implements Codec<T>, Keyable, IdMap<T> {
 	public static final ResourceKey<Registry<ConfiguredStructureFeature<?, ?>>> CONFIGURED_STRUCTURE_FEATURE_REGISTRY = createRegistryKey(
 		"worldgen/configured_structure_feature"
 	);
-	public static final ResourceKey<Registry<ImmutableList<StructureProcessor>>> PROCESSOR_LIST_REGISTRY = createRegistryKey("worldgen/processor_list");
+	public static final ResourceKey<Registry<StructureProcessorList>> PROCESSOR_LIST_REGISTRY = createRegistryKey("worldgen/processor_list");
 	public static final ResourceKey<Registry<StructureTemplatePool>> TEMPLATE_POOL_REGISTRY = createRegistryKey("worldgen/template_pool");
 	public static final ResourceKey<Registry<Biome>> BIOME_REGISTRY = createRegistryKey("worldgen/biome");
 	public static final ResourceKey<Registry<SurfaceBuilder<?>>> SURFACE_BUILDER_REGISTRY = createRegistryKey("worldgen/surface_builder");
@@ -352,9 +351,9 @@ public abstract class Registry<T> implements Codec<T>, Keyable, IdMap<T> {
 
 	public abstract boolean containsKey(ResourceLocation resourceLocation);
 
-	public abstract boolean persistent(ResourceKey<T> resourceKey);
-
-	public abstract boolean containsId(int i);
+	public boolean containsId(int i) {
+		return this.byId(i) != null;
+	}
 
 	public static <T> T register(Registry<? super T> registry, String string, T object) {
 		return register(registry, new ResourceLocation(string), object);

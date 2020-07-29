@@ -45,7 +45,7 @@ public class WoodlandMansionFeature extends StructureFeature<NoneFeatureConfigur
 		NoneFeatureConfiguration noneFeatureConfiguration
 	) {
 		for (Biome biome2 : biomeSource.getBiomesWithin(i * 16 + 9, chunkGenerator.getSeaLevel(), j * 16 + 9, 32)) {
-			if (!biome2.isValidStart(this)) {
+			if (!biome2.getGenerationSettings().isValidStart(this)) {
 				return false;
 			}
 		}

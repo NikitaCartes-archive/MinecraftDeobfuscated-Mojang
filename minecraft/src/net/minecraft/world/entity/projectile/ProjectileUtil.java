@@ -21,12 +21,12 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public final class ProjectileUtil {
-	public static HitResult getHitResult(Entity entity, Predicate<Entity> predicate, ClipContext.Block block) {
+	public static HitResult getHitResult(Entity entity, Predicate<Entity> predicate) {
 		Vec3 vec3 = entity.getDeltaMovement();
 		Level level = entity.level;
 		Vec3 vec32 = entity.position();
 		Vec3 vec33 = vec32.add(vec3);
-		HitResult hitResult = level.clip(new ClipContext(vec32, vec33, block, ClipContext.Fluid.NONE, entity));
+		HitResult hitResult = level.clip(new ClipContext(vec32, vec33, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity));
 		if (hitResult.getType() != HitResult.Type.MISS) {
 			vec33 = hitResult.getLocation();
 		}

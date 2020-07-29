@@ -1,26 +1,27 @@
 package net.minecraft.world.level.levelgen.feature;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import java.util.List;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 
 public class PillagerOutpostFeature extends JigsawFeature {
-	private static final List<Biome.SpawnerData> OUTPOST_ENEMIES = Lists.<Biome.SpawnerData>newArrayList(new Biome.SpawnerData(EntityType.PILLAGER, 1, 1, 1));
+	private static final List<MobSpawnSettings.SpawnerData> OUTPOST_ENEMIES = ImmutableList.of(new MobSpawnSettings.SpawnerData(EntityType.PILLAGER, 1, 1, 1));
 
 	public PillagerOutpostFeature(Codec<JigsawConfiguration> codec) {
 		super(codec, 0, true, true);
 	}
 
 	@Override
-	public List<Biome.SpawnerData> getSpecialEnemies() {
+	public List<MobSpawnSettings.SpawnerData> getSpecialEnemies() {
 		return OUTPOST_ENEMIES;
 	}
 

@@ -1,12 +1,15 @@
 package net.minecraft.client.gui.components;
 
+import java.util.List;
+import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Options;
 import net.minecraft.client.ProgressOption;
+import net.minecraft.util.FormattedCharSequence;
 
 @Environment(EnvType.CLIENT)
-public class SliderButton extends AbstractOptionSliderButton {
+public class SliderButton extends AbstractOptionSliderButton implements TooltipAccessor {
 	private final ProgressOption option;
 
 	public SliderButton(Options options, int i, int j, int k, int l, ProgressOption progressOption) {
@@ -24,5 +27,10 @@ public class SliderButton extends AbstractOptionSliderButton {
 	@Override
 	protected void updateMessage() {
 		this.setMessage(this.option.getMessage(this.options));
+	}
+
+	@Override
+	public Optional<List<FormattedCharSequence>> getTooltip() {
+		return this.option.getTooltip();
 	}
 }

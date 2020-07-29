@@ -1,7 +1,6 @@
 package net.minecraft.world.level.levelgen.carver;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import java.util.BitSet;
 import java.util.Random;
 import java.util.function.Function;
@@ -13,8 +12,8 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
 public class ConfiguredWorldCarver<WC extends CarverConfiguration> {
-	public static final MapCodec<ConfiguredWorldCarver<?>> DIRECT_CODEC = Registry.CARVER
-		.dispatchMap(configuredWorldCarver -> configuredWorldCarver.worldCarver, WorldCarver::configuredCodec);
+	public static final Codec<ConfiguredWorldCarver<?>> DIRECT_CODEC = Registry.CARVER
+		.dispatch(configuredWorldCarver -> configuredWorldCarver.worldCarver, WorldCarver::configuredCodec);
 	public static final Codec<Supplier<ConfiguredWorldCarver<?>>> CODEC = RegistryFileCodec.create(Registry.CONFIGURED_CARVER_REGISTRY, DIRECT_CODEC);
 	private final WorldCarver<WC> worldCarver;
 	private final WC config;

@@ -14,7 +14,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
 
@@ -47,46 +46,32 @@ public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> exten
 
 	private <E extends Entity> void renderLeash(T mob, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, E entity) {
 		poseStack.pushPose();
-		double d = (double)(Mth.lerp(f * 0.5F, entity.yRot, entity.yRotO) * (float) (Math.PI / 180.0));
-		double e = (double)(Mth.lerp(f * 0.5F, entity.xRot, entity.xRotO) * (float) (Math.PI / 180.0));
-		double g = Math.cos(d);
-		double h = Math.sin(d);
-		double i = Math.sin(e);
-		if (entity instanceof HangingEntity) {
-			g = 0.0;
-			h = 0.0;
-			i = -1.0;
-		}
-
-		double j = Math.cos(e);
-		double k = Mth.lerp((double)f, entity.xo, entity.getX()) - g * 0.7 - h * 0.5 * j;
-		double l = Mth.lerp((double)f, entity.yo + (double)entity.getEyeHeight() * 0.7, entity.getY() + (double)entity.getEyeHeight() * 0.7) - i * 0.5 - 0.25;
-		double m = Mth.lerp((double)f, entity.zo, entity.getZ()) - h * 0.7 + g * 0.5 * j;
-		double n = (double)(Mth.lerp(f, mob.yBodyRot, mob.yBodyRotO) * (float) (Math.PI / 180.0)) + (Math.PI / 2);
-		Vec3 vec3 = mob.getLeashOffset();
-		g = Math.cos(n) * vec3.z + Math.sin(n) * vec3.x;
-		h = Math.sin(n) * vec3.z - Math.cos(n) * vec3.x;
-		double o = Mth.lerp((double)f, mob.xo, mob.getX()) + g;
-		double p = Mth.lerp((double)f, mob.yo, mob.getY()) + vec3.y;
-		double q = Mth.lerp((double)f, mob.zo, mob.getZ()) + h;
-		poseStack.translate(g, vec3.y, h);
-		float r = (float)(k - o);
-		float s = (float)(l - p);
-		float t = (float)(m - q);
-		float u = 0.025F;
+		Vec3 vec3 = entity.getRopeHoldPosition(f);
+		double d = (double)(Mth.lerp(f, mob.yBodyRot, mob.yBodyRotO) * (float) (Math.PI / 180.0)) + (Math.PI / 2);
+		Vec3 vec32 = mob.getLeashOffset();
+		double e = Math.cos(d) * vec32.z + Math.sin(d) * vec32.x;
+		double g = Math.sin(d) * vec32.z - Math.cos(d) * vec32.x;
+		double h = Mth.lerp((double)f, mob.xo, mob.getX()) + e;
+		double i = Mth.lerp((double)f, mob.yo, mob.getY()) + vec32.y;
+		double j = Mth.lerp((double)f, mob.zo, mob.getZ()) + g;
+		poseStack.translate(e, vec32.y, g);
+		float k = (float)(vec3.x - h);
+		float l = (float)(vec3.y - i);
+		float m = (float)(vec3.z - j);
+		float n = 0.025F;
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.leash());
 		Matrix4f matrix4f = poseStack.last().pose();
-		float v = Mth.fastInvSqrt(r * r + t * t) * 0.025F / 2.0F;
-		float w = t * v;
-		float x = r * v;
+		float o = Mth.fastInvSqrt(k * k + m * m) * 0.025F / 2.0F;
+		float p = m * o;
+		float q = k * o;
 		BlockPos blockPos = new BlockPos(mob.getEyePosition(f));
 		BlockPos blockPos2 = new BlockPos(entity.getEyePosition(f));
-		int y = this.getBlockLightLevel(mob, blockPos);
-		int z = this.entityRenderDispatcher.getRenderer(entity).getBlockLightLevel(entity, blockPos2);
-		int aa = mob.level.getBrightness(LightLayer.SKY, blockPos);
-		int ab = mob.level.getBrightness(LightLayer.SKY, blockPos2);
-		renderSide(vertexConsumer, matrix4f, r, s, t, y, z, aa, ab, 0.025F, 0.025F, w, x);
-		renderSide(vertexConsumer, matrix4f, r, s, t, y, z, aa, ab, 0.025F, 0.0F, w, x);
+		int r = this.getBlockLightLevel(mob, blockPos);
+		int s = this.entityRenderDispatcher.getRenderer(entity).getBlockLightLevel(entity, blockPos2);
+		int t = mob.level.getBrightness(LightLayer.SKY, blockPos);
+		int u = mob.level.getBrightness(LightLayer.SKY, blockPos2);
+		renderSide(vertexConsumer, matrix4f, k, l, m, r, s, t, u, 0.025F, 0.025F, p, q);
+		renderSide(vertexConsumer, matrix4f, k, l, m, r, s, t, u, 0.025F, 0.0F, p, q);
 		poseStack.popPose();
 	}
 

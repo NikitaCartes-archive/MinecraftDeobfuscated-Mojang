@@ -1118,13 +1118,12 @@ public abstract class Mob extends LivingEntity {
 	}
 
 	@Nullable
-	protected <T extends Mob> T convertTo(EntityType<T> entityType) {
+	public <T extends Mob> T convertTo(EntityType<T> entityType, boolean bl) {
 		if (this.removed) {
 			return null;
 		} else {
 			T mob = (T)entityType.create(this.level);
 			mob.copyPosition(this);
-			mob.setCanPickUpLoot(this.canPickUpLoot());
 			mob.setBaby(this.isBaby());
 			mob.setNoAi(this.isNoAi());
 			if (this.hasCustomName()) {
@@ -1137,17 +1136,26 @@ public abstract class Mob extends LivingEntity {
 			}
 
 			mob.setInvulnerable(this.isInvulnerable());
+			if (bl) {
+				mob.setCanPickUpLoot(this.canPickUpLoot());
 
-			for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-				ItemStack itemStack = this.getItemBySlot(equipmentSlot);
-				if (!itemStack.isEmpty()) {
-					mob.setItemSlot(equipmentSlot, itemStack.copy());
-					mob.setDropChance(equipmentSlot, this.getEquipmentDropChance(equipmentSlot));
-					itemStack.setCount(0);
+				for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+					ItemStack itemStack = this.getItemBySlot(equipmentSlot);
+					if (!itemStack.isEmpty()) {
+						mob.setItemSlot(equipmentSlot, itemStack.copy());
+						mob.setDropChance(equipmentSlot, this.getEquipmentDropChance(equipmentSlot));
+						itemStack.setCount(0);
+					}
 				}
 			}
 
 			this.level.addFreshEntity(mob);
+			if (this.isPassenger()) {
+				Entity entity = this.getVehicle();
+				this.stopRiding();
+				mob.startRiding(entity, true);
+			}
+
 			this.remove();
 			return mob;
 		}

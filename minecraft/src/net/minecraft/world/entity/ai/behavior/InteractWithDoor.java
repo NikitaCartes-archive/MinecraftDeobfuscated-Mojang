@@ -33,7 +33,7 @@ public class InteractWithDoor extends Behavior<LivingEntity> {
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity) {
 		Path path = (Path)livingEntity.getBrain().getMemory(MemoryModuleType.PATH).get();
 		if (!path.notStarted() && !path.isDone()) {
-			if (!Objects.equals(this.lastCheckedNode, path.currentNode())) {
+			if (!Objects.equals(this.lastCheckedNode, path.getNextNode())) {
 				this.remainingCooldown = 20;
 				return true;
 			} else {
@@ -51,9 +51,9 @@ public class InteractWithDoor extends Behavior<LivingEntity> {
 	@Override
 	protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
 		Path path = (Path)livingEntity.getBrain().getMemory(MemoryModuleType.PATH).get();
-		this.lastCheckedNode = path.currentNode();
-		Node node = path.previousNode();
-		Node node2 = path.currentNode();
+		this.lastCheckedNode = path.getNextNode();
+		Node node = path.getPreviousNode();
+		Node node2 = path.getNextNode();
 		BlockPos blockPos = node.asBlockPos();
 		BlockState blockState = serverLevel.getBlockState(blockPos);
 		if (blockState.is(BlockTags.WOODEN_DOORS)) {
@@ -129,11 +129,11 @@ public class InteractWithDoor extends Behavior<LivingEntity> {
 			if (path.isDone()) {
 				return false;
 			} else {
-				Node node = path.previousNode();
+				Node node = path.getPreviousNode();
 				if (node == null) {
 					return false;
 				} else {
-					Node node2 = path.currentNode();
+					Node node2 = path.getNextNode();
 					return blockPos.equals(node.asBlockPos()) || blockPos.equals(node2.asBlockPos());
 				}
 			}

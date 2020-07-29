@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class ItemCombinerMenu extends AbstractContainerMenu {
-	protected final Container resultSlots = new ResultContainer();
+	protected final ResultContainer resultSlots = new ResultContainer();
 	protected final Container inputSlots = new SimpleContainer(2) {
 		@Override
 		public void setChanged() {
