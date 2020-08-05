@@ -15,6 +15,7 @@ import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.RegistryFileCodec;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -36,19 +37,15 @@ public final class NoiseGeneratorSettings {
     private final int bedrockFloorPosition;
     private final int seaLevel;
     private final boolean disableMobGeneration;
-    private final Optional<ResourceLocation> preset;
-    public static final NoiseGeneratorSettings OVERWORLD = NoiseGeneratorSettings.register(NoiseGeneratorSettings.overworld(new StructureSettings(true), false, new ResourceLocation("overworld")));
-    public static final NoiseGeneratorSettings AMPLIFIED = NoiseGeneratorSettings.register(NoiseGeneratorSettings.overworld(new StructureSettings(true), true, new ResourceLocation("amplified")));
-    public static final NoiseGeneratorSettings NETHER = NoiseGeneratorSettings.register(NoiseGeneratorSettings.nether(new StructureSettings(false), Blocks.NETHERRACK.defaultBlockState(), Blocks.LAVA.defaultBlockState(), new ResourceLocation("nether")));
-    public static final NoiseGeneratorSettings END = NoiseGeneratorSettings.register(NoiseGeneratorSettings.end(new StructureSettings(false), Blocks.END_STONE.defaultBlockState(), Blocks.AIR.defaultBlockState(), new ResourceLocation("end"), true, true));
-    public static final NoiseGeneratorSettings CAVES = NoiseGeneratorSettings.register(NoiseGeneratorSettings.nether(new StructureSettings(false), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), new ResourceLocation("caves")));
-    public static final NoiseGeneratorSettings FLOATING_ISLANDS = NoiseGeneratorSettings.register(NoiseGeneratorSettings.end(new StructureSettings(false), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), new ResourceLocation("floating_islands"), false, false));
+    public static final ResourceKey<NoiseGeneratorSettings> OVERWORLD = ResourceKey.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("overworld"));
+    public static final ResourceKey<NoiseGeneratorSettings> AMPLIFIED = ResourceKey.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("amplified"));
+    public static final ResourceKey<NoiseGeneratorSettings> NETHER = ResourceKey.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("nether"));
+    public static final ResourceKey<NoiseGeneratorSettings> END = ResourceKey.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("end"));
+    public static final ResourceKey<NoiseGeneratorSettings> CAVES = ResourceKey.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("caves"));
+    public static final ResourceKey<NoiseGeneratorSettings> FLOATING_ISLANDS = ResourceKey.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, new ResourceLocation("floating_islands"));
+    private static final NoiseGeneratorSettings BUILTIN_OVERWORLD = NoiseGeneratorSettings.register(OVERWORLD, NoiseGeneratorSettings.overworld(new StructureSettings(true), false, OVERWORLD.location()));
 
     private NoiseGeneratorSettings(StructureSettings structureSettings, NoiseSettings noiseSettings, BlockState blockState, BlockState blockState2, int i, int j, int k, boolean bl) {
-        this(structureSettings, noiseSettings, blockState, blockState2, i, j, k, bl, Optional.empty());
-    }
-
-    private NoiseGeneratorSettings(StructureSettings structureSettings, NoiseSettings noiseSettings, BlockState blockState, BlockState blockState2, int i, int j, int k, boolean bl, Optional<ResourceLocation> optional) {
         this.structureSettings = structureSettings;
         this.noiseSettings = noiseSettings;
         this.defaultBlock = blockState;
@@ -57,7 +54,6 @@ public final class NoiseGeneratorSettings {
         this.bedrockFloorPosition = j;
         this.seaLevel = k;
         this.disableMobGeneration = bl;
-        this.preset = optional;
     }
 
     public StructureSettings structureSettings() {
@@ -93,28 +89,40 @@ public final class NoiseGeneratorSettings {
         return this.disableMobGeneration;
     }
 
-    public boolean stable(NoiseGeneratorSettings noiseGeneratorSettings) {
-        return Objects.equals(this.preset, noiseGeneratorSettings.preset);
+    public boolean stable(ResourceKey<NoiseGeneratorSettings> resourceKey) {
+        return Objects.equals(this, BuiltinRegistries.NOISE_GENERATOR_SETTINGS.get(resourceKey));
     }
 
-    private static NoiseGeneratorSettings register(NoiseGeneratorSettings noiseGeneratorSettings) {
-        BuiltinRegistries.register(BuiltinRegistries.NOISE_GENERATOR_SETTINGS, noiseGeneratorSettings.preset.orElseThrow(IllegalStateException::new), noiseGeneratorSettings);
+    private static NoiseGeneratorSettings register(ResourceKey<NoiseGeneratorSettings> resourceKey, NoiseGeneratorSettings noiseGeneratorSettings) {
+        BuiltinRegistries.register(BuiltinRegistries.NOISE_GENERATOR_SETTINGS, resourceKey.location(), noiseGeneratorSettings);
         return noiseGeneratorSettings;
     }
 
+    public static NoiseGeneratorSettings bootstrap() {
+        return BUILTIN_OVERWORLD;
+    }
+
     private static NoiseGeneratorSettings end(StructureSettings structureSettings, BlockState blockState, BlockState blockState2, ResourceLocation resourceLocation, boolean bl, boolean bl2) {
-        return new NoiseGeneratorSettings(structureSettings, new NoiseSettings(128, new NoiseSamplingSettings(2.0, 1.0, 80.0, 160.0), new NoiseSlideSettings(-3000, 64, -46), new NoiseSlideSettings(-30, 7, 1), 2, 1, 0.0, 0.0, true, false, bl2, false), blockState, blockState2, -10, -10, 0, bl, Optional.of(resourceLocation));
+        return new NoiseGeneratorSettings(structureSettings, new NoiseSettings(128, new NoiseSamplingSettings(2.0, 1.0, 80.0, 160.0), new NoiseSlideSettings(-3000, 64, -46), new NoiseSlideSettings(-30, 7, 1), 2, 1, 0.0, 0.0, true, false, bl2, false), blockState, blockState2, -10, -10, 0, bl);
     }
 
     private static NoiseGeneratorSettings nether(StructureSettings structureSettings, BlockState blockState, BlockState blockState2, ResourceLocation resourceLocation) {
         HashMap<StructureFeature<?>, StructureFeatureConfiguration> map = Maps.newHashMap(StructureSettings.DEFAULTS);
         map.put(StructureFeature.RUINED_PORTAL, new StructureFeatureConfiguration(25, 10, 34222645));
-        return new NoiseGeneratorSettings(new StructureSettings(Optional.ofNullable(structureSettings.stronghold()), map), new NoiseSettings(128, new NoiseSamplingSettings(1.0, 3.0, 80.0, 60.0), new NoiseSlideSettings(120, 3, 0), new NoiseSlideSettings(320, 4, -1), 1, 2, 0.0, 0.019921875, false, false, false, false), blockState, blockState2, 0, 0, 32, false, Optional.of(resourceLocation));
+        return new NoiseGeneratorSettings(new StructureSettings(Optional.ofNullable(structureSettings.stronghold()), map), new NoiseSettings(128, new NoiseSamplingSettings(1.0, 3.0, 80.0, 60.0), new NoiseSlideSettings(120, 3, 0), new NoiseSlideSettings(320, 4, -1), 1, 2, 0.0, 0.019921875, false, false, false, false), blockState, blockState2, 0, 0, 32, false);
     }
 
     private static NoiseGeneratorSettings overworld(StructureSettings structureSettings, boolean bl, ResourceLocation resourceLocation) {
         double d = 0.9999999814507745;
-        return new NoiseGeneratorSettings(structureSettings, new NoiseSettings(256, new NoiseSamplingSettings(0.9999999814507745, 0.9999999814507745, 80.0, 160.0), new NoiseSlideSettings(-10, 3, 0), new NoiseSlideSettings(-30, 0, 0), 1, 2, 1.0, -0.46875, true, true, false, bl), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), -10, 0, 63, false, Optional.of(resourceLocation));
+        return new NoiseGeneratorSettings(structureSettings, new NoiseSettings(256, new NoiseSamplingSettings(0.9999999814507745, 0.9999999814507745, 80.0, 160.0), new NoiseSlideSettings(-10, 3, 0), new NoiseSlideSettings(-30, 0, 0), 1, 2, 1.0, -0.46875, true, true, false, bl), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), -10, 0, 63, false);
+    }
+
+    static {
+        NoiseGeneratorSettings.register(AMPLIFIED, NoiseGeneratorSettings.overworld(new StructureSettings(true), true, AMPLIFIED.location()));
+        NoiseGeneratorSettings.register(NETHER, NoiseGeneratorSettings.nether(new StructureSettings(false), Blocks.NETHERRACK.defaultBlockState(), Blocks.LAVA.defaultBlockState(), NETHER.location()));
+        NoiseGeneratorSettings.register(END, NoiseGeneratorSettings.end(new StructureSettings(false), Blocks.END_STONE.defaultBlockState(), Blocks.AIR.defaultBlockState(), END.location(), true, true));
+        NoiseGeneratorSettings.register(CAVES, NoiseGeneratorSettings.nether(new StructureSettings(true), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), CAVES.location()));
+        NoiseGeneratorSettings.register(FLOATING_ISLANDS, NoiseGeneratorSettings.end(new StructureSettings(true), Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), FLOATING_ISLANDS.location(), false, false));
     }
 }
 

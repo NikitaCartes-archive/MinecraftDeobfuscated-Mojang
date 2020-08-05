@@ -679,22 +679,10 @@ implements ClientGamePacketListener {
             this.level.setSectionDirtyWithNeighbors(i, k, j);
         }
         for (CompoundTag compoundTag : clientboundLevelChunkPacket.getBlockEntitiesTags()) {
-            BlockPos blockPos2 = new BlockPos(compoundTag.getInt("x"), compoundTag.getInt("y"), compoundTag.getInt("z"));
-            BlockEntity blockEntity = this.level.getBlockEntity(blockPos2);
+            BlockPos blockPos = new BlockPos(compoundTag.getInt("x"), compoundTag.getInt("y"), compoundTag.getInt("z"));
+            BlockEntity blockEntity = this.level.getBlockEntity(blockPos);
             if (blockEntity == null) continue;
-            blockEntity.load(this.level.getBlockState(blockPos2), compoundTag);
-        }
-        if (!clientboundLevelChunkPacket.forgetOldData()) {
-            this.level.getLightEngine().enableLightSources(levelChunk.getPos(), false);
-            int k = clientboundLevelChunkPacket.getAvailableSections();
-            for (int l = 0; l < 16; ++l) {
-                if ((k & 1 << l) == 0) continue;
-                this.level.getLightEngine().queueSectionData(LightLayer.BLOCK, SectionPos.of(levelChunk.getPos(), l), new DataLayer(), false);
-                this.level.getLightEngine().queueSectionData(LightLayer.SKY, SectionPos.of(levelChunk.getPos(), l), new DataLayer(), false);
-            }
-            this.level.getLightEngine().runUpdates(Integer.MAX_VALUE, true, true);
-            this.level.getLightEngine().enableLightSources(levelChunk.getPos(), true);
-            levelChunk.getLights().forEach(blockPos -> this.level.getLightEngine().onBlockEmissionIncrease((BlockPos)blockPos, levelChunk.getLightEmission((BlockPos)blockPos)));
+            blockEntity.load(this.level.getBlockState(blockPos), compoundTag);
         }
     }
 

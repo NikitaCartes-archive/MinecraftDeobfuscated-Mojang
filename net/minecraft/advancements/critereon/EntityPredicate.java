@@ -184,7 +184,7 @@ public class EntityPredicate {
     }
 
     public static LootContext createContext(ServerPlayer serverPlayer, Entity entity) {
-        return new LootContext.Builder(serverPlayer.getLevel()).withParameter(LootContextParams.THIS_ENTITY, entity).withParameter(LootContextParams.BLOCK_POS, entity.blockPosition()).withParameter(LootContextParams.ORIGIN, serverPlayer.position()).withRandom(serverPlayer.getRandom()).create(LootContextParamSets.ADVANCEMENT_ENTITY);
+        return new LootContext.Builder(serverPlayer.getLevel()).withParameter(LootContextParams.THIS_ENTITY, entity).withParameter(LootContextParams.ORIGIN, serverPlayer.position()).withRandom(serverPlayer.getRandom()).create(LootContextParamSets.ADVANCEMENT_ENTITY);
     }
 
     public static class Composite {

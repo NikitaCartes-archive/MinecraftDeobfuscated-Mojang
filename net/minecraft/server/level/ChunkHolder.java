@@ -64,6 +64,7 @@ public class ChunkHolder {
     private final LevelChangeListener onLevelChange;
     private final PlayerProvider playerProvider;
     private boolean wasAccessibleSinceLastSave;
+    private boolean resendLight;
 
     public ChunkHolder(ChunkPos chunkPos, int i, LevelLightEngine levelLightEngine, LevelChangeListener levelChangeListener, PlayerProvider playerProvider) {
         this.pos = chunkPos;
@@ -164,19 +165,25 @@ public class ChunkHolder {
     }
 
     public void broadcastChanges(LevelChunk levelChunk) {
+        int j;
         if (!this.hasChangedSections && this.skyChangedLightSectionFilter == 0 && this.blockChangedLightSectionFilter == 0) {
             return;
         }
         Level level = levelChunk.getLevel();
+        int i = 0;
+        for (j = 0; j < this.changedBlocksPerSection.length; ++j) {
+            i += this.changedBlocksPerSection[j] != null ? this.changedBlocksPerSection[j].size() : 0;
+        }
+        this.resendLight |= i >= 64;
         if (this.skyChangedLightSectionFilter != 0 || this.blockChangedLightSectionFilter != 0) {
-            this.broadcast(new ClientboundLightUpdatePacket(levelChunk.getPos(), this.lightEngine, this.skyChangedLightSectionFilter, this.blockChangedLightSectionFilter, false), true);
+            this.broadcast(new ClientboundLightUpdatePacket(levelChunk.getPos(), this.lightEngine, this.skyChangedLightSectionFilter, this.blockChangedLightSectionFilter, false), !this.resendLight);
             this.skyChangedLightSectionFilter = 0;
             this.blockChangedLightSectionFilter = 0;
         }
-        for (int i = 0; i < this.changedBlocksPerSection.length; ++i) {
-            ShortSet shortSet = this.changedBlocksPerSection[i];
+        for (j = 0; j < this.changedBlocksPerSection.length; ++j) {
+            ShortSet shortSet = this.changedBlocksPerSection[j];
             if (shortSet == null) continue;
-            SectionPos sectionPos = SectionPos.of(levelChunk.getPos(), i);
+            SectionPos sectionPos = SectionPos.of(levelChunk.getPos(), j);
             if (shortSet.size() == 1) {
                 BlockPos blockPos2 = sectionPos.relativeToBlockPos(shortSet.iterator().nextShort());
                 BlockState blockState2 = level.getBlockState(blockPos2);
@@ -188,7 +195,7 @@ public class ChunkHolder {
                 this.broadcast(clientboundSectionBlocksUpdatePacket, false);
                 clientboundSectionBlocksUpdatePacket.runUpdates((blockPos, blockState) -> this.broadcastBlockEntityIfNeeded(level, (BlockPos)blockPos, (BlockState)blockState));
             }
-            this.changedBlocksPerSection[i] = null;
+            this.changedBlocksPerSection[j] = null;
         }
         this.hasChangedSections = false;
     }

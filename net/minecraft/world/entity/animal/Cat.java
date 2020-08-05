@@ -543,7 +543,7 @@ extends TamableAnimal {
             this.cat.randomTeleport(mutableBlockPos.getX() + random.nextInt(11) - 5, mutableBlockPos.getY() + random.nextInt(5) - 2, mutableBlockPos.getZ() + random.nextInt(11) - 5, false);
             mutableBlockPos.set(this.cat.blockPosition());
             LootTable lootTable = this.cat.level.getServer().getLootTables().get(BuiltInLootTables.CAT_MORNING_GIFT);
-            LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.cat.level).withParameter(LootContextParams.BLOCK_POS, mutableBlockPos).withParameter(LootContextParams.THIS_ENTITY, this.cat).withRandom(random);
+            LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.cat.level).withParameter(LootContextParams.ORIGIN, this.cat.position()).withParameter(LootContextParams.THIS_ENTITY, this.cat).withRandom(random);
             List<ItemStack> list = lootTable.getRandomItems(builder.create(LootContextParamSets.GIFT));
             for (ItemStack itemStack : list) {
                 this.cat.level.addFreshEntity(new ItemEntity(this.cat.level, (double)mutableBlockPos.getX() - (double)Mth.sin(this.cat.yBodyRot * ((float)Math.PI / 180)), mutableBlockPos.getY(), (double)mutableBlockPos.getZ() + (double)Mth.cos(this.cat.yBodyRot * ((float)Math.PI / 180)), itemStack));

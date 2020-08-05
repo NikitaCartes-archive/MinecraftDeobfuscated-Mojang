@@ -6,19 +6,30 @@ package net.minecraft.resources;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Maps;
+import com.google.gson.JsonElement;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Decoder;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.Encoder;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenCustomHashMap;
 import java.util.Collection;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.stream.Collectors;
+import net.minecraft.Util;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.DelegatingOps;
+import net.minecraft.resources.RegistryWriteOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -28,20 +39,27 @@ import org.apache.logging.log4j.Logger;
 public class RegistryReadOps<T>
 extends DelegatingOps<T> {
     private static final Logger LOGGER = LogManager.getLogger();
-    private final ResourceManager resourceManager;
+    private final ResourceAccess resources;
     private final RegistryAccess.RegistryHolder registryHolder;
-    private final Map<ResourceKey<? extends Registry<?>>, ReadCache<?>> readCache = Maps.newIdentityHashMap();
+    private final Map<ResourceKey<? extends Registry<?>>, ReadCache<?>> readCache;
+    private final RegistryReadOps<JsonElement> jsonOps;
 
     public static <T> RegistryReadOps<T> create(DynamicOps<T> dynamicOps, ResourceManager resourceManager, RegistryAccess.RegistryHolder registryHolder) {
-        RegistryReadOps<T> registryReadOps = new RegistryReadOps<T>(dynamicOps, resourceManager, registryHolder);
+        return RegistryReadOps.create(dynamicOps, ResourceAccess.forResourceManager(resourceManager), registryHolder);
+    }
+
+    public static <T> RegistryReadOps<T> create(DynamicOps<T> dynamicOps, ResourceAccess resourceAccess, RegistryAccess.RegistryHolder registryHolder) {
+        RegistryReadOps<T> registryReadOps = new RegistryReadOps<T>(dynamicOps, resourceAccess, registryHolder, Maps.newIdentityHashMap());
         RegistryAccess.load(registryHolder, registryReadOps);
         return registryReadOps;
     }
 
-    private RegistryReadOps(DynamicOps<T> dynamicOps, ResourceManager resourceManager, RegistryAccess.RegistryHolder registryHolder) {
+    private RegistryReadOps(DynamicOps<T> dynamicOps, ResourceAccess resourceAccess, RegistryAccess.RegistryHolder registryHolder, IdentityHashMap<ResourceKey<? extends Registry<?>>, ReadCache<?>> identityHashMap) {
         super(dynamicOps);
-        this.resourceManager = resourceManager;
+        this.resources = resourceAccess;
         this.registryHolder = registryHolder;
+        this.readCache = identityHashMap;
+        this.jsonOps = dynamicOps == JsonOps.INSTANCE ? this : new RegistryReadOps<JsonElement>(JsonOps.INSTANCE, resourceAccess, registryHolder, identityHashMap);
     }
 
     protected <E> DataResult<Pair<java.util.function.Supplier<E>, T>> decodeElement(T object, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec) {
@@ -52,7 +70,7 @@ extends DelegatingOps<T> {
         WritableRegistry writableRegistry = optional.get();
         DataResult dataResult = ResourceLocation.CODEC.decode(this.delegate, object);
         if (!dataResult.result().isPresent()) {
-            return codec.decode(this.delegate, object).map(pair -> pair.mapFirst(object -> () -> object));
+            return codec.decode(this, object).map(pair -> pair.mapFirst(object -> () -> object));
         }
         Pair pair2 = dataResult.result().get();
         ResourceLocation resourceLocation = (ResourceLocation)pair2.getFirst();
@@ -60,29 +78,28 @@ extends DelegatingOps<T> {
     }
 
     public <E> DataResult<MappedRegistry<E>> decodeElements(MappedRegistry<E> mappedRegistry2, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec) {
-        ResourceLocation resourceLocation = resourceKey.location();
-        Collection<ResourceLocation> collection = this.resourceManager.listResources(resourceLocation.getPath(), string -> string.endsWith(".json"));
+        Collection<ResourceLocation> collection = this.resources.listResources(resourceKey);
         DataResult<MappedRegistry<Object>> dataResult = DataResult.success(mappedRegistry2, Lifecycle.stable());
-        String string2 = resourceLocation.getPath() + "/";
-        for (ResourceLocation resourceLocation2 : collection) {
-            String string22 = resourceLocation2.getPath();
-            if (!string22.endsWith(".json")) {
-                LOGGER.warn("Skipping resource {} since it is not a json file", (Object)resourceLocation2);
+        String string = resourceKey.location().getPath() + "/";
+        for (ResourceLocation resourceLocation : collection) {
+            String string2 = resourceLocation.getPath();
+            if (!string2.endsWith(".json")) {
+                LOGGER.warn("Skipping resource {} since it is not a json file", (Object)resourceLocation);
                 continue;
             }
-            if (!string22.startsWith(string2)) {
-                LOGGER.warn("Skipping resource {} since it does not have a registry name prefix", (Object)resourceLocation2);
+            if (!string2.startsWith(string)) {
+                LOGGER.warn("Skipping resource {} since it does not have a registry name prefix", (Object)resourceLocation);
                 continue;
             }
-            String string3 = string22.substring(string2.length(), string22.length() - ".json".length());
-            ResourceLocation resourceLocation3 = new ResourceLocation(resourceLocation2.getNamespace(), string3);
-            dataResult = dataResult.flatMap(mappedRegistry -> this.readAndRegisterElement(resourceKey, (WritableRegistry)mappedRegistry, codec, resourceLocation3).map(supplier -> mappedRegistry));
+            String string3 = string2.substring(string.length(), string2.length() - ".json".length());
+            ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), string3);
+            dataResult = dataResult.flatMap(mappedRegistry -> this.readAndRegisterElement(resourceKey, (WritableRegistry)mappedRegistry, codec, resourceLocation2).map(supplier -> mappedRegistry));
         }
         return dataResult.setPartial(mappedRegistry2);
     }
 
     private <E> DataResult<java.util.function.Supplier<E>> readAndRegisterElement(ResourceKey<? extends Registry<E>> resourceKey, WritableRegistry<E> writableRegistry, Codec<E> codec, ResourceLocation resourceLocation) {
-        DataResult dataResult3;
+        DataResult<Object> dataResult3;
         ResourceKey resourceKey2 = ResourceKey.create(resourceKey, resourceLocation);
         ReadCache<E> readCache = this.readCache(resourceKey);
         DataResult dataResult = (DataResult)((ReadCache)readCache).values.get(resourceKey2);
@@ -97,74 +114,141 @@ extends DelegatingOps<T> {
             return object;
         });
         ((ReadCache)readCache).values.put(resourceKey2, DataResult.success(supplier));
-        DataResult<java.util.function.Supplier> dataResult2 = this.readElementFromFile(resourceKey, resourceKey2, codec);
+        DataResult<Pair<Object, OptionalInt>> dataResult2 = this.resources.parseElement(this.jsonOps, resourceKey, resourceKey2, codec);
         if (dataResult2.result().isPresent()) {
-            writableRegistry.registerOrOverride(resourceKey2, dataResult2.result().get());
-            dataResult3 = dataResult2;
+            Pair pair = dataResult2.result().get();
+            writableRegistry.registerOrOverride(pair.getSecond(), resourceKey2, pair.getFirst(), dataResult2.lifecycle());
+            dataResult3 = dataResult2.map(Pair::getFirst);
         } else {
             Object object2 = writableRegistry.get(resourceKey2);
-            dataResult3 = object2 != null ? DataResult.success(object2, Lifecycle.stable()) : dataResult2;
+            dataResult3 = object2 != null ? DataResult.success(object2, Lifecycle.stable()) : dataResult2.map(Pair::getFirst);
         }
         DataResult<java.util.function.Supplier<E>> dataResult4 = dataResult3.map(object -> () -> object);
         ((ReadCache)readCache).values.put(resourceKey2, dataResult4);
         return dataResult4;
     }
 
-    /*
-     * Exception decompiling
-     */
-    private <E> DataResult<E> readElementFromFile(ResourceKey<? extends Registry<E>> resourceKey, ResourceKey<E> resourceKey2, Codec<E> codec) {
-        /*
-         * This method has failed to decompile.  When submitting a bug report, please provide this stack trace, and (if you hold appropriate legal rights) the relevant class file.
-         * 
-         * org.benf.cfr.reader.util.ConfusedCFRException: Started 2 blocks at once
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op04StructuredStatement.getStartingBlocks(Op04StructuredStatement.java:412)
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op04StructuredStatement.buildNestedBlocks(Op04StructuredStatement.java:487)
-         *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op03SimpleStatement.createInitialStructuredBlock(Op03SimpleStatement.java:736)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisInner(CodeAnalyser.java:850)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisOrWrapFail(CodeAnalyser.java:278)
-         *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysis(CodeAnalyser.java:201)
-         *     at org.benf.cfr.reader.entities.attributes.AttributeCode.analyse(AttributeCode.java:94)
-         *     at org.benf.cfr.reader.entities.Method.analyse(Method.java:538)
-         *     at org.benf.cfr.reader.entities.ClassFile.analyseMid(ClassFile.java:1055)
-         *     at org.benf.cfr.reader.entities.ClassFile.analyseTop(ClassFile.java:942)
-         *     at org.benf.cfr.reader.Driver.doJarVersionTypes(Driver.java:261)
-         *     at org.benf.cfr.reader.Driver.doJar(Driver.java:143)
-         *     at net.fabricmc.loom.decompilers.cfr.LoomCFRDecompiler.decompile(LoomCFRDecompiler.java:89)
-         *     at net.fabricmc.loom.task.GenerateSourcesTask$DecompileAction.doDecompile(GenerateSourcesTask.java:269)
-         *     at net.fabricmc.loom.task.GenerateSourcesTask$DecompileAction.execute(GenerateSourcesTask.java:234)
-         *     at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:49)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:43)
-         *     at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
-         *     at org.gradle.workers.internal.AbstractClassLoaderWorker.executeInClassLoader(AbstractClassLoaderWorker.java:43)
-         *     at org.gradle.workers.internal.IsolatedClassloaderWorker.run(IsolatedClassloaderWorker.java:49)
-         *     at org.gradle.workers.internal.IsolatedClassloaderWorker.run(IsolatedClassloaderWorker.java:30)
-         *     at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:87)
-         *     at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:56)
-         *     at org.gradle.process.internal.worker.request.WorkerAction$1.call(WorkerAction.java:138)
-         *     at org.gradle.process.internal.worker.child.WorkerLogEventListener.withWorkerLoggingProtocol(WorkerLogEventListener.java:41)
-         *     at org.gradle.process.internal.worker.request.WorkerAction.run(WorkerAction.java:135)
-         *     at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-         *     at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-         *     at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-         *     at java.base/java.lang.reflect.Method.invoke(Method.java:568)
-         *     at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36)
-         *     at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
-         *     at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:182)
-         *     at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:164)
-         *     at org.gradle.internal.remote.internal.hub.MessageHub$Handler.run(MessageHub.java:414)
-         *     at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
-         *     at org.gradle.internal.concurrent.ManagedExecutorImpl$1.run(ManagedExecutorImpl.java:49)
-         *     at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-         *     at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-         *     at java.base/java.lang.Thread.run(Thread.java:833)
-         */
-        throw new IllegalStateException("Decompilation failed");
-    }
-
     private <E> ReadCache<E> readCache(ResourceKey<? extends Registry<E>> resourceKey2) {
         return this.readCache.computeIfAbsent(resourceKey2, resourceKey -> new ReadCache());
+    }
+
+    protected <E> DataResult<Registry<E>> registry(ResourceKey<? extends Registry<E>> resourceKey) {
+        return this.registryHolder.registry(resourceKey).map(writableRegistry -> DataResult.success(writableRegistry, writableRegistry.elementsLifecycle())).orElseGet(() -> DataResult.error("Unknown registry: " + resourceKey));
+    }
+
+    public static interface ResourceAccess {
+        public Collection<ResourceLocation> listResources(ResourceKey<? extends Registry<?>> var1);
+
+        public <E> DataResult<Pair<E, OptionalInt>> parseElement(DynamicOps<JsonElement> var1, ResourceKey<? extends Registry<E>> var2, ResourceKey<E> var3, Decoder<E> var4);
+
+        public static ResourceAccess forResourceManager(final ResourceManager resourceManager) {
+            return new ResourceAccess(){
+
+                @Override
+                public Collection<ResourceLocation> listResources(ResourceKey<? extends Registry<?>> resourceKey) {
+                    return resourceManager.listResources(resourceKey.location().getPath(), string -> string.endsWith(".json"));
+                }
+
+                /*
+                 * Exception decompiling
+                 */
+                @Override
+                public <E> DataResult<Pair<E, OptionalInt>> parseElement(DynamicOps<JsonElement> dynamicOps, ResourceKey<? extends Registry<E>> resourceKey, ResourceKey<E> resourceKey2, Decoder<E> decoder) {
+                    /*
+                     * This method has failed to decompile.  When submitting a bug report, please provide this stack trace, and (if you hold appropriate legal rights) the relevant class file.
+                     * 
+                     * org.benf.cfr.reader.util.ConfusedCFRException: Started 2 blocks at once
+                     *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op04StructuredStatement.getStartingBlocks(Op04StructuredStatement.java:412)
+                     *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op04StructuredStatement.buildNestedBlocks(Op04StructuredStatement.java:487)
+                     *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op03SimpleStatement.createInitialStructuredBlock(Op03SimpleStatement.java:736)
+                     *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisInner(CodeAnalyser.java:850)
+                     *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisOrWrapFail(CodeAnalyser.java:278)
+                     *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysis(CodeAnalyser.java:201)
+                     *     at org.benf.cfr.reader.entities.attributes.AttributeCode.analyse(AttributeCode.java:94)
+                     *     at org.benf.cfr.reader.entities.Method.analyse(Method.java:538)
+                     *     at org.benf.cfr.reader.entities.ClassFile.analyseMid(ClassFile.java:1055)
+                     *     at org.benf.cfr.reader.entities.ClassFile.analyseInnerClassesPass1(ClassFile.java:923)
+                     *     at org.benf.cfr.reader.entities.ClassFile.analyseMid(ClassFile.java:1035)
+                     *     at org.benf.cfr.reader.entities.ClassFile.analyseInnerClassesPass1(ClassFile.java:923)
+                     *     at org.benf.cfr.reader.entities.ClassFile.analyseMid(ClassFile.java:1035)
+                     *     at org.benf.cfr.reader.entities.ClassFile.analyseTop(ClassFile.java:942)
+                     *     at org.benf.cfr.reader.Driver.doJarVersionTypes(Driver.java:261)
+                     *     at org.benf.cfr.reader.Driver.doJar(Driver.java:143)
+                     *     at net.fabricmc.loom.decompilers.cfr.LoomCFRDecompiler.decompile(LoomCFRDecompiler.java:89)
+                     *     at net.fabricmc.loom.task.GenerateSourcesTask$DecompileAction.doDecompile(GenerateSourcesTask.java:269)
+                     *     at net.fabricmc.loom.task.GenerateSourcesTask$DecompileAction.execute(GenerateSourcesTask.java:234)
+                     *     at org.gradle.workers.internal.DefaultWorkerServer.execute(DefaultWorkerServer.java:63)
+                     *     at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:49)
+                     *     at org.gradle.workers.internal.AbstractClassLoaderWorker$1.create(AbstractClassLoaderWorker.java:43)
+                     *     at org.gradle.internal.classloader.ClassLoaderUtils.executeInClassloader(ClassLoaderUtils.java:100)
+                     *     at org.gradle.workers.internal.AbstractClassLoaderWorker.executeInClassLoader(AbstractClassLoaderWorker.java:43)
+                     *     at org.gradle.workers.internal.IsolatedClassloaderWorker.run(IsolatedClassloaderWorker.java:49)
+                     *     at org.gradle.workers.internal.IsolatedClassloaderWorker.run(IsolatedClassloaderWorker.java:30)
+                     *     at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:87)
+                     *     at org.gradle.workers.internal.WorkerDaemonServer.run(WorkerDaemonServer.java:56)
+                     *     at org.gradle.process.internal.worker.request.WorkerAction$1.call(WorkerAction.java:138)
+                     *     at org.gradle.process.internal.worker.child.WorkerLogEventListener.withWorkerLoggingProtocol(WorkerLogEventListener.java:41)
+                     *     at org.gradle.process.internal.worker.request.WorkerAction.run(WorkerAction.java:135)
+                     *     at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+                     *     at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+                     *     at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+                     *     at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+                     *     at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36)
+                     *     at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
+                     *     at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:182)
+                     *     at org.gradle.internal.remote.internal.hub.MessageHubBackedObjectConnection$DispatchWrapper.dispatch(MessageHubBackedObjectConnection.java:164)
+                     *     at org.gradle.internal.remote.internal.hub.MessageHub$Handler.run(MessageHub.java:414)
+                     *     at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+                     *     at org.gradle.internal.concurrent.ManagedExecutorImpl$1.run(ManagedExecutorImpl.java:49)
+                     *     at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+                     *     at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+                     *     at java.base/java.lang.Thread.run(Thread.java:833)
+                     */
+                    throw new IllegalStateException("Decompilation failed");
+                }
+
+                public String toString() {
+                    return "ResourceAccess[" + resourceManager + "]";
+                }
+
+                private static /* synthetic */ Pair method_31157(Object object) {
+                    return Pair.of(object, OptionalInt.empty());
+                }
+            };
+        }
+
+        public static final class MemoryMap
+        implements ResourceAccess {
+            private final Map<ResourceKey<?>, JsonElement> data = Maps.newIdentityHashMap();
+            private final Object2IntMap<ResourceKey<?>> ids = new Object2IntOpenCustomHashMap(Util.identityStrategy());
+            private final Map<ResourceKey<?>, Lifecycle> lifecycles = Maps.newIdentityHashMap();
+
+            public <E> void add(RegistryAccess.RegistryHolder registryHolder, ResourceKey<E> resourceKey, Encoder<E> encoder, int i, E object, Lifecycle lifecycle) {
+                DataResult<JsonElement> dataResult = encoder.encodeStart(RegistryWriteOps.create(JsonOps.INSTANCE, registryHolder), object);
+                Optional<DataResult.PartialResult<JsonElement>> optional = dataResult.error();
+                if (optional.isPresent()) {
+                    LOGGER.error("Error adding element: {}", (Object)optional.get().message());
+                    return;
+                }
+                this.data.put(resourceKey, dataResult.result().get());
+                this.ids.put((ResourceKey<?>)resourceKey, i);
+                this.lifecycles.put(resourceKey, lifecycle);
+            }
+
+            @Override
+            public Collection<ResourceLocation> listResources(ResourceKey<? extends Registry<?>> resourceKey) {
+                return this.data.keySet().stream().filter(resourceKey2 -> resourceKey2.isFor(resourceKey)).map(resourceKey2 -> new ResourceLocation(resourceKey2.location().getNamespace(), resourceKey.location().getPath() + "/" + resourceKey2.location().getPath() + ".json")).collect(Collectors.toList());
+            }
+
+            @Override
+            public <E> DataResult<Pair<E, OptionalInt>> parseElement(DynamicOps<JsonElement> dynamicOps, ResourceKey<? extends Registry<E>> resourceKey, ResourceKey<E> resourceKey2, Decoder<E> decoder) {
+                JsonElement jsonElement = this.data.get(resourceKey2);
+                if (jsonElement == null) {
+                    return DataResult.error("Unknown element: " + resourceKey2);
+                }
+                return decoder.parse(dynamicOps, jsonElement).setLifecycle(this.lifecycles.get(resourceKey2)).map(object -> Pair.of(object, OptionalInt.of(this.ids.getInt(resourceKey2))));
+            }
+        }
     }
 
     static final class ReadCache<E> {

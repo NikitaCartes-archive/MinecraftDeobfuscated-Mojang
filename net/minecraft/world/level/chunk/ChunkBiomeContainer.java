@@ -11,7 +11,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
-import net.minecraft.world.level.biome.Biomes;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -44,7 +43,7 @@ implements BiomeManager.NoiseBiomeSource {
             Biome biome = idMap.byId(j);
             if (biome == null) {
                 LOGGER.warn("Received invalid biome id: " + j);
-                this.biomes[i] = Biomes.PLAINS;
+                this.biomes[i] = idMap.byId(0);
                 continue;
             }
             this.biomes[i] = biome;

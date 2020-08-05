@@ -27,9 +27,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.OverworldBiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -43,10 +46,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class WorldGenSettings {
-    public static final Codec<WorldGenSettings> CODEC = RecordCodecBuilder.create((RecordCodecBuilder.Instance<O> instance) -> instance.group(((MapCodec)Codec.LONG.fieldOf("seed")).stable().forGetter(WorldGenSettings::seed), ((MapCodec)Codec.BOOL.fieldOf("generate_features")).orElse(true).stable().forGetter(WorldGenSettings::generateFeatures), ((MapCodec)Codec.BOOL.fieldOf("bonus_chest")).orElse(false).stable().forGetter(WorldGenSettings::generateBonusChest), ((MapCodec)MappedRegistry.dataPackCodec(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), LevelStem.CODEC).xmap(LevelStem::sortMap, Function.identity()).fieldOf("dimensions")).forGetter(WorldGenSettings::dimensions), Codec.STRING.optionalFieldOf("legacy_custom_options").stable().forGetter(worldGenSettings -> worldGenSettings.legacyCustomOptions)).apply((Applicative<WorldGenSettings, ?>)instance, instance.stable(WorldGenSettings::new))).comapFlatMap(WorldGenSettings::guardExperimental, Function.identity());
+    public static final Codec<WorldGenSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Codec.LONG.fieldOf("seed")).stable().forGetter(WorldGenSettings::seed), ((MapCodec)Codec.BOOL.fieldOf("generate_features")).orElse(true).stable().forGetter(WorldGenSettings::generateFeatures), ((MapCodec)Codec.BOOL.fieldOf("bonus_chest")).orElse(false).stable().forGetter(WorldGenSettings::generateBonusChest), ((MapCodec)MappedRegistry.dataPackCodec(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), LevelStem.CODEC).xmap(LevelStem::sortMap, Function.identity()).fieldOf("dimensions")).forGetter(WorldGenSettings::dimensions), Codec.STRING.optionalFieldOf("legacy_custom_options").stable().forGetter(worldGenSettings -> worldGenSettings.legacyCustomOptions)).apply((Applicative<WorldGenSettings, ?>)instance, instance.stable(WorldGenSettings::new))).comapFlatMap(WorldGenSettings::guardExperimental, Function.identity());
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final int DEMO_SEED = "North Carolina".hashCode();
-    public static final WorldGenSettings DEMO_SETTINGS = new WorldGenSettings(DEMO_SEED, true, true, WorldGenSettings.withOverworld(DimensionType.defaultDimensions(DEMO_SEED), WorldGenSettings.makeDefaultOverworld(DEMO_SEED)));
     private final long seed;
     private final boolean generateFeatures;
     private final boolean generateBonusChest;
@@ -54,6 +55,10 @@ public class WorldGenSettings {
     private final Optional<String> legacyCustomOptions;
 
     private DataResult<WorldGenSettings> guardExperimental() {
+        LevelStem levelStem = this.dimensions.get(LevelStem.OVERWORLD);
+        if (levelStem == null) {
+            return DataResult.error("Overworld settings missing");
+        }
         if (this.stable()) {
             return DataResult.success(this, Lifecycle.stable());
         }
@@ -66,6 +71,10 @@ public class WorldGenSettings {
 
     public WorldGenSettings(long l, boolean bl, boolean bl2, MappedRegistry<LevelStem> mappedRegistry) {
         this(l, bl, bl2, mappedRegistry, Optional.empty());
+        LevelStem levelStem = mappedRegistry.get(LevelStem.OVERWORLD);
+        if (levelStem == null) {
+            throw new IllegalStateException("Overworld settings missing");
+        }
     }
 
     private WorldGenSettings(long l, boolean bl, boolean bl2, MappedRegistry<LevelStem> mappedRegistry, Optional<String> optional) {
@@ -76,13 +85,21 @@ public class WorldGenSettings {
         this.legacyCustomOptions = optional;
     }
 
-    public static WorldGenSettings makeDefault() {
-        long l = new Random().nextLong();
-        return new WorldGenSettings(l, true, false, WorldGenSettings.withOverworld(DimensionType.defaultDimensions(l), WorldGenSettings.makeDefaultOverworld(l)));
+    public static WorldGenSettings demoSettings(RegistryAccess registryAccess) {
+        WritableRegistry<Biome> registry = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
+        int i = "North Carolina".hashCode();
+        WritableRegistry<DimensionType> registry2 = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+        WritableRegistry<NoiseGeneratorSettings> registry3 = registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
+        return new WorldGenSettings(i, true, true, WorldGenSettings.withOverworld(registry2, DimensionType.defaultDimensions(registry2, registry, registry3, i), (ChunkGenerator)WorldGenSettings.makeDefaultOverworld(registry, registry3, i)));
     }
 
-    public static NoiseBasedChunkGenerator makeDefaultOverworld(long l) {
-        return new NoiseBasedChunkGenerator(new OverworldBiomeSource(l, false, false), l, () -> NoiseGeneratorSettings.OVERWORLD);
+    public static WorldGenSettings makeDefault(Registry<DimensionType> registry, Registry<Biome> registry2, Registry<NoiseGeneratorSettings> registry3) {
+        long l = new Random().nextLong();
+        return new WorldGenSettings(l, true, false, WorldGenSettings.withOverworld(registry, DimensionType.defaultDimensions(registry, registry2, registry3, l), (ChunkGenerator)WorldGenSettings.makeDefaultOverworld(registry2, registry3, l)));
+    }
+
+    public static NoiseBasedChunkGenerator makeDefaultOverworld(Registry<Biome> registry, Registry<NoiseGeneratorSettings> registry2, long l) {
+        return new NoiseBasedChunkGenerator(new OverworldBiomeSource(l, false, false, registry), l, () -> registry2.getOrThrow(NoiseGeneratorSettings.OVERWORLD));
     }
 
     public long seed() {
@@ -97,19 +114,19 @@ public class WorldGenSettings {
         return this.generateBonusChest;
     }
 
-    public static MappedRegistry<LevelStem> withOverworld(MappedRegistry<LevelStem> mappedRegistry, ChunkGenerator chunkGenerator) {
+    public static MappedRegistry<LevelStem> withOverworld(Registry<DimensionType> registry, MappedRegistry<LevelStem> mappedRegistry, ChunkGenerator chunkGenerator) {
         LevelStem levelStem = mappedRegistry.get(LevelStem.OVERWORLD);
-        Supplier<DimensionType> supplier = () -> levelStem == null ? DimensionType.defaultOverworld() : levelStem.type();
+        Supplier<DimensionType> supplier = () -> levelStem == null ? registry.getOrThrow(DimensionType.OVERWORLD_LOCATION) : levelStem.type();
         return WorldGenSettings.withOverworld(mappedRegistry, supplier, chunkGenerator);
     }
 
     public static MappedRegistry<LevelStem> withOverworld(MappedRegistry<LevelStem> mappedRegistry, Supplier<DimensionType> supplier, ChunkGenerator chunkGenerator) {
         MappedRegistry<LevelStem> mappedRegistry2 = new MappedRegistry<LevelStem>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental());
-        mappedRegistry2.register(LevelStem.OVERWORLD, new LevelStem(supplier, chunkGenerator));
+        mappedRegistry2.register(LevelStem.OVERWORLD, new LevelStem(supplier, chunkGenerator), Lifecycle.stable());
         for (Map.Entry<ResourceKey<LevelStem>, LevelStem> entry : mappedRegistry.entrySet()) {
             ResourceKey<LevelStem> resourceKey = entry.getKey();
             if (resourceKey == LevelStem.OVERWORLD) continue;
-            mappedRegistry2.register(resourceKey, entry.getValue());
+            mappedRegistry2.register(resourceKey, entry.getValue(), mappedRegistry.lifecycle(entry.getValue()));
         }
         return mappedRegistry2;
     }
@@ -121,7 +138,7 @@ public class WorldGenSettings {
     public ChunkGenerator overworld() {
         LevelStem levelStem = this.dimensions.get(LevelStem.OVERWORLD);
         if (levelStem == null) {
-            return WorldGenSettings.makeDefaultOverworld(new Random().nextLong());
+            throw new IllegalStateException("Overworld settings missing");
         }
         return levelStem.generator();
     }
@@ -157,12 +174,7 @@ public class WorldGenSettings {
         return new WorldGenSettings(this.seed, this.generateFeatures, !this.generateBonusChest, this.dimensions);
     }
 
-    @Environment(value=EnvType.CLIENT)
-    public WorldGenSettings withDimensions(MappedRegistry<LevelStem> mappedRegistry) {
-        return new WorldGenSettings(this.seed, this.generateFeatures, this.generateBonusChest, mappedRegistry);
-    }
-
-    public static WorldGenSettings create(Properties properties) {
+    public static WorldGenSettings create(RegistryAccess registryAccess, Properties properties) {
         String string2 = MoreObjects.firstNonNull((String)properties.get("generator-settings"), "");
         properties.put("generator-settings", string2);
         String string22 = MoreObjects.firstNonNull((String)properties.get("level-seed"), "");
@@ -184,24 +196,27 @@ public class WorldGenSettings {
                 l = string22.hashCode();
             }
         }
-        MappedRegistry<LevelStem> mappedRegistry = DimensionType.defaultDimensions(l);
+        WritableRegistry<DimensionType> registry = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+        WritableRegistry<Biome> registry2 = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
+        WritableRegistry<NoiseGeneratorSettings> registry3 = registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
+        MappedRegistry<LevelStem> mappedRegistry = DimensionType.defaultDimensions(registry, registry2, registry3, l);
         switch (string5) {
             case "flat": {
                 JsonObject jsonObject = !string2.isEmpty() ? GsonHelper.parse(string2) : new JsonObject();
                 Dynamic<JsonObject> dynamic = new Dynamic<JsonObject>(JsonOps.INSTANCE, jsonObject);
-                return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(mappedRegistry, new FlatLevelSource(FlatLevelGeneratorSettings.CODEC.parse(dynamic).resultOrPartial(LOGGER::error).orElseGet(FlatLevelGeneratorSettings::getDefault))));
+                return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(registry, mappedRegistry, (ChunkGenerator)new FlatLevelSource(FlatLevelGeneratorSettings.CODEC.parse(dynamic).resultOrPartial(LOGGER::error).orElseGet(FlatLevelGeneratorSettings::getDefault))));
             }
             case "debug_all_block_states": {
-                return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(mappedRegistry, DebugLevelSource.INSTANCE));
+                return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(registry, mappedRegistry, (ChunkGenerator)DebugLevelSource.INSTANCE));
             }
             case "amplified": {
-                return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(mappedRegistry, new NoiseBasedChunkGenerator(new OverworldBiomeSource(l, false, false), l, () -> NoiseGeneratorSettings.AMPLIFIED)));
+                return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(registry, mappedRegistry, (ChunkGenerator)new NoiseBasedChunkGenerator(new OverworldBiomeSource(l, false, false, registry2), l, () -> registry3.getOrThrow(NoiseGeneratorSettings.AMPLIFIED))));
             }
             case "largebiomes": {
-                return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(mappedRegistry, new NoiseBasedChunkGenerator(new OverworldBiomeSource(l, false, true), l, () -> NoiseGeneratorSettings.OVERWORLD)));
+                return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(registry, mappedRegistry, (ChunkGenerator)new NoiseBasedChunkGenerator(new OverworldBiomeSource(l, false, true, registry2), l, () -> registry3.getOrThrow(NoiseGeneratorSettings.OVERWORLD))));
             }
         }
-        return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(mappedRegistry, WorldGenSettings.makeDefaultOverworld(l)));
+        return new WorldGenSettings(l, bl, false, WorldGenSettings.withOverworld(registry, mappedRegistry, (ChunkGenerator)WorldGenSettings.makeDefaultOverworld(registry2, registry3, l)));
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -213,7 +228,7 @@ public class WorldGenSettings {
             long m = optionalLong.getAsLong();
             for (Map.Entry<ResourceKey<LevelStem>, LevelStem> entry : this.dimensions.entrySet()) {
                 ResourceKey<LevelStem> resourceKey = entry.getKey();
-                mappedRegistry.register(resourceKey, new LevelStem(entry.getValue().typeSupplier(), entry.getValue().generator().withSeed(m)));
+                mappedRegistry.register(resourceKey, new LevelStem(entry.getValue().typeSupplier(), entry.getValue().generator().withSeed(m)), this.dimensions.lifecycle(entry.getValue()));
             }
         } else {
             mappedRegistry = this.dimensions;

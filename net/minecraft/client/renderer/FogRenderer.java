@@ -22,9 +22,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
 
 @Environment(value=EnvType.CLIENT)
@@ -165,10 +163,8 @@ public class FogRenderer {
     }
 
     public static void setupFog(Camera camera, FogMode fogMode, float f, boolean bl) {
-        boolean bl2;
         FluidState fluidState = camera.getFluidInCamera();
         Entity entity = camera.getEntity();
-        boolean bl3 = bl2 = fluidState.getType() != Fluids.EMPTY;
         if (fluidState.is(FluidTags.WATER)) {
             float g = 1.0f;
             g = 0.05f;
@@ -176,7 +172,7 @@ public class FogRenderer {
                 LocalPlayer localPlayer = (LocalPlayer)entity;
                 g -= localPlayer.getWaterVision() * localPlayer.getWaterVision() * 0.03f;
                 Biome biome = localPlayer.level.getBiome(localPlayer.blockPosition());
-                if (biome == Biomes.SWAMP || biome == Biomes.SWAMP_HILLS) {
+                if (biome.getBiomeCategory() == Biome.BiomeCategory.SWAMP) {
                     g += 0.005f;
                 }
             }

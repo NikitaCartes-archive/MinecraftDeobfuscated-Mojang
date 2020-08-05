@@ -42,7 +42,7 @@ extends BlockEntityRenderer<PistonMovingBlockEntity> {
         }
         BlockPos blockPos = pistonMovingBlockEntity.getBlockPos().relative(pistonMovingBlockEntity.getMovementDirection().getOpposite());
         BlockState blockState = pistonMovingBlockEntity.getMovedState();
-        if (blockState.isAir() || pistonMovingBlockEntity.getProgress(f) >= 1.0f) {
+        if (blockState.isAir()) {
             return;
         }
         ModelBlockRenderer.enableCaching();

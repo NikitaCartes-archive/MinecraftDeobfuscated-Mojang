@@ -8,7 +8,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.StaticTagHelper;
 import net.minecraft.tags.StaticTags;
 import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagCollection;
 import net.minecraft.tags.TagContainer;
 import net.minecraft.world.level.material.Fluid;
 
@@ -21,11 +20,7 @@ public final class FluidTags {
         return HELPER.bind(string);
     }
 
-    public static TagCollection<Fluid> getAllTags() {
-        return HELPER.getAllTags();
-    }
-
-    public static List<? extends Tag<Fluid>> getWrappers() {
+    public static List<? extends Tag.Named<Fluid>> getWrappers() {
         return HELPER.getWrappers();
     }
 }

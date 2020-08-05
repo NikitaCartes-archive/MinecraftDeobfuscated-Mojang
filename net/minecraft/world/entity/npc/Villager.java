@@ -630,7 +630,7 @@ VillagerDataHolder {
             this.setVillagerData(this.getVillagerData().setProfession(VillagerProfession.NONE));
         }
         if (mobSpawnType == MobSpawnType.COMMAND || mobSpawnType == MobSpawnType.SPAWN_EGG || mobSpawnType == MobSpawnType.SPAWNER || mobSpawnType == MobSpawnType.DISPENSER) {
-            this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(serverLevelAccessor.getBiome(this.blockPosition()))));
+            this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(serverLevelAccessor.getBiomeName(this.blockPosition()))));
         }
         if (mobSpawnType == MobSpawnType.STRUCTURE) {
             this.assignProfessionWhenSpawned = true;
@@ -641,7 +641,7 @@ VillagerDataHolder {
     @Override
     public Villager getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
         double d = this.random.nextDouble();
-        VillagerType villagerType = d < 0.5 ? VillagerType.byBiome(serverLevel.getBiome(this.blockPosition())) : (d < 0.75 ? this.getVillagerData().getType() : ((Villager)agableMob).getVillagerData().getType());
+        VillagerType villagerType = d < 0.5 ? VillagerType.byBiome(serverLevel.getBiomeName(this.blockPosition())) : (d < 0.75 ? this.getVillagerData().getType() : ((Villager)agableMob).getVillagerData().getType());
         Villager villager = new Villager(EntityType.VILLAGER, serverLevel, villagerType);
         villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.BREEDING, null, null);
         return villager;

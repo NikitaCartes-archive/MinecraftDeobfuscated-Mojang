@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -26,10 +27,11 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.CreateFlatWorldScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.WritableRegistry;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -124,7 +126,7 @@ extends Screen {
             return FlatLevelGeneratorSettings.getDefault();
         }
         FlatLevelGeneratorSettings flatLevelGeneratorSettings2 = flatLevelGeneratorSettings.withLayers(list, flatLevelGeneratorSettings.structureSettings());
-        Biome biome = Biomes.PLAINS;
+        Biome biome = registry.getOrThrow(Biomes.PLAINS);
         if (iterator.hasNext()) {
             try {
                 ResourceLocation resourceLocation = new ResourceLocation(iterator.next());
@@ -137,7 +139,7 @@ extends Screen {
         return flatLevelGeneratorSettings2;
     }
 
-    private static String save(RegistryAccess registryAccess, FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
+    private static String save(Registry<Biome> registry, FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < flatLevelGeneratorSettings.getLayersInfo().size(); ++i) {
             if (i > 0) {
@@ -146,7 +148,7 @@ extends Screen {
             stringBuilder.append(flatLevelGeneratorSettings.getLayersInfo().get(i));
         }
         stringBuilder.append(";");
-        stringBuilder.append(registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getKey(flatLevelGeneratorSettings.getBiome()));
+        stringBuilder.append(registry.getKey(flatLevelGeneratorSettings.getBiome()));
         return stringBuilder.toString();
     }
 
@@ -157,13 +159,14 @@ extends Screen {
         this.listText = new TranslatableComponent("createWorld.customize.presets.list");
         this.export = new EditBox(this.font, 50, 40, this.width - 100, 20, this.shareText);
         this.export.setMaxLength(1230);
-        this.export.setValue(PresetFlatWorldScreen.save(this.parent.parent.worldGenSettingsComponent.registryHolder(), this.parent.settings()));
+        WritableRegistry<Biome> registry = this.parent.parent.worldGenSettingsComponent.registryHolder().registryOrThrow(Registry.BIOME_REGISTRY);
+        this.export.setValue(PresetFlatWorldScreen.save(registry, this.parent.settings()));
         this.settings = this.parent.settings();
         this.children.add(this.export);
         this.list = new PresetsList();
         this.children.add(this.list);
         this.selectButton = this.addButton(new Button(this.width / 2 - 155, this.height - 28, 150, 20, new TranslatableComponent("createWorld.customize.presets.select"), button -> {
-            FlatLevelGeneratorSettings flatLevelGeneratorSettings = PresetFlatWorldScreen.fromString(this.parent.parent.worldGenSettingsComponent.registryHolder().registryOrThrow(Registry.BIOME_REGISTRY), this.export.getValue(), this.settings);
+            FlatLevelGeneratorSettings flatLevelGeneratorSettings = PresetFlatWorldScreen.fromString(registry, this.export.getValue(), this.settings);
             this.parent.setConfig(flatLevelGeneratorSettings);
             this.minecraft.setScreen(this.parent);
         }));
@@ -217,25 +220,27 @@ extends Screen {
         this.selectButton.active = bl || this.export.getValue().length() > 1;
     }
 
-    private static void preset(Component component, ItemLike itemLike, Biome biome, List<StructureFeature<?>> list, boolean bl, boolean bl2, boolean bl3, FlatLayerInfo ... flatLayerInfos) {
-        HashMap<StructureFeature<?>, StructureFeatureConfiguration> map = Maps.newHashMap();
-        for (StructureFeature<?> structureFeature : list) {
-            map.put(structureFeature, StructureSettings.DEFAULTS.get(structureFeature));
-        }
-        StructureSettings structureSettings = new StructureSettings(bl ? Optional.of(StructureSettings.DEFAULT_STRONGHOLD) : Optional.empty(), map);
-        FlatLevelGeneratorSettings flatLevelGeneratorSettings = new FlatLevelGeneratorSettings(structureSettings);
-        if (bl2) {
-            flatLevelGeneratorSettings.setDecoration();
-        }
-        if (bl3) {
-            flatLevelGeneratorSettings.setAddLakes();
-        }
-        for (int i = flatLayerInfos.length - 1; i >= 0; --i) {
-            flatLevelGeneratorSettings.getLayersInfo().add(flatLayerInfos[i]);
-        }
-        flatLevelGeneratorSettings.setBiome(biome);
-        flatLevelGeneratorSettings.updateLayers();
-        PRESETS.add(new PresetInfo(itemLike.asItem(), component, flatLevelGeneratorSettings.withStructureSettings(structureSettings)));
+    private static void preset(Component component, ItemLike itemLike, ResourceKey<Biome> resourceKey, List<StructureFeature<?>> list, boolean bl, boolean bl2, boolean bl3, FlatLayerInfo ... flatLayerInfos) {
+        PRESETS.add(new PresetInfo(itemLike.asItem(), component, registry -> {
+            HashMap<StructureFeature<?>, StructureFeatureConfiguration> map = Maps.newHashMap();
+            for (StructureFeature structureFeature : list) {
+                map.put(structureFeature, StructureSettings.DEFAULTS.get(structureFeature));
+            }
+            StructureSettings structureSettings = new StructureSettings(bl ? Optional.of(StructureSettings.DEFAULT_STRONGHOLD) : Optional.empty(), map);
+            FlatLevelGeneratorSettings flatLevelGeneratorSettings = new FlatLevelGeneratorSettings(structureSettings);
+            if (bl2) {
+                flatLevelGeneratorSettings.setDecoration();
+            }
+            if (bl3) {
+                flatLevelGeneratorSettings.setAddLakes();
+            }
+            for (int i = flatLayerInfos.length - 1; i >= 0; --i) {
+                flatLevelGeneratorSettings.getLayersInfo().add(flatLayerInfos[i]);
+            }
+            flatLevelGeneratorSettings.setBiome((Biome)registry.getOrThrow(resourceKey));
+            flatLevelGeneratorSettings.updateLayers();
+            return flatLevelGeneratorSettings.withStructureSettings(structureSettings);
+        }));
     }
 
     static {
@@ -254,12 +259,12 @@ extends Screen {
     static class PresetInfo {
         public final Item icon;
         public final Component name;
-        public final FlatLevelGeneratorSettings settings;
+        public final Function<Registry<Biome>, FlatLevelGeneratorSettings> settings;
 
-        public PresetInfo(Item item, Component component, FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
+        public PresetInfo(Item item, Component component, Function<Registry<Biome>, FlatLevelGeneratorSettings> function) {
             this.icon = item;
             this.name = component;
-            this.settings = flatLevelGeneratorSettings;
+            this.settings = function;
         }
 
         public Component getName() {
@@ -323,9 +328,10 @@ extends Screen {
             private void select() {
                 PresetsList.this.setSelected(this);
                 PresetInfo presetInfo = (PresetInfo)PRESETS.get(PresetsList.this.children().indexOf(this));
-                PresetFlatWorldScreen.this.export.setValue(PresetFlatWorldScreen.save(((PresetFlatWorldScreen)PresetFlatWorldScreen.this).parent.parent.worldGenSettingsComponent.registryHolder(), presetInfo.settings));
+                WritableRegistry<Biome> registry = ((PresetFlatWorldScreen)PresetFlatWorldScreen.this).parent.parent.worldGenSettingsComponent.registryHolder().registryOrThrow(Registry.BIOME_REGISTRY);
+                PresetFlatWorldScreen.this.settings = presetInfo.settings.apply(registry);
+                PresetFlatWorldScreen.this.export.setValue(PresetFlatWorldScreen.save(registry, PresetFlatWorldScreen.this.settings));
                 PresetFlatWorldScreen.this.export.moveCursorToStart();
-                PresetFlatWorldScreen.this.settings = presetInfo.settings;
             }
 
             private void blitSlot(PoseStack poseStack, int i, int j, Item item) {

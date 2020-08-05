@@ -409,7 +409,7 @@ CommandSource {
                     this.clearFire();
                 }
             } else {
-                if (this.remainingFireTicks % 20 == 0) {
+                if (this.remainingFireTicks % 20 == 0 && !this.isInLava()) {
                     this.hurt(DamageSource.ON_FIRE, 1.0f);
                 }
                 this.setRemainingFireTicks(this.remainingFireTicks - 1);
@@ -939,7 +939,7 @@ CommandSource {
         }
         BlockPos blockPos = new BlockPos(this.getX(), d, this.getZ());
         FluidState fluidState = this.level.getFluidState(blockPos);
-        for (Tag<Fluid> tag : FluidTags.getWrappers()) {
+        for (Tag tag : FluidTags.getWrappers()) {
             if (!fluidState.is(tag)) continue;
             double e = (float)blockPos.getY() + fluidState.getHeight(this.level, blockPos);
             if (e > d) {
@@ -2026,7 +2026,7 @@ CommandSource {
         double e = Math.max(-2.9999872E7, worldBorder.getMinZ() + 16.0);
         double f = Math.min(2.9999872E7, worldBorder.getMaxX() - 16.0);
         double g = Math.min(2.9999872E7, worldBorder.getMaxZ() - 16.0);
-        double h = Entity.getTeleportationScale(this.level.dimensionType(), serverLevel.dimensionType());
+        double h = DimensionType.getTeleportationScale(this.level.dimensionType(), serverLevel.dimensionType());
         BlockPos blockPos2 = new BlockPos(Mth.clamp(this.getX() * h, d, f), this.getY(), Mth.clamp(this.getZ() * h, e, g));
         return this.getExitPortal(serverLevel, blockPos2, bl3).map(foundRectangle -> {
             Vec3 vec3;
@@ -2050,18 +2050,6 @@ CommandSource {
 
     protected Optional<BlockUtil.FoundRectangle> getExitPortal(ServerLevel serverLevel, BlockPos blockPos, boolean bl) {
         return serverLevel.getPortalForcer().findPortalAround(blockPos, bl);
-    }
-
-    private static double getTeleportationScale(DimensionType dimensionType, DimensionType dimensionType2) {
-        boolean bl = dimensionType.shrunk();
-        boolean bl2 = dimensionType2.shrunk();
-        if (!bl && bl2) {
-            return 0.125;
-        }
-        if (bl && !bl2) {
-            return 8.0;
-        }
-        return 1.0;
     }
 
     public boolean canChangeDimensions() {

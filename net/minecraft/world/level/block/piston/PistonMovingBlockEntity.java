@@ -44,6 +44,7 @@ implements TickableBlockEntity {
     private float progress;
     private float progressO;
     private long lastTicked;
+    private int deathTicks;
 
     public PistonMovingBlockEntity() {
         super(BlockEntityType.PISTON);
@@ -238,7 +239,7 @@ implements TickableBlockEntity {
     }
 
     public void finalTick() {
-        if (this.progressO < 1.0f && this.level != null) {
+        if (!this.level.isClientSide && this.progressO < 1.0f && this.level != null) {
             this.progressO = this.progress = 1.0f;
             this.level.removeBlockEntity(this.worldPosition);
             this.setRemoved();
@@ -255,6 +256,10 @@ implements TickableBlockEntity {
         this.lastTicked = this.level.getGameTime();
         this.progressO = this.progress;
         if (this.progressO >= 1.0f) {
+            if (this.level.isClientSide && this.deathTicks < 5) {
+                ++this.deathTicks;
+                return;
+            }
             this.level.removeBlockEntity(this.worldPosition);
             this.setRemoved();
             if (this.movedState != null && this.level.getBlockState(this.worldPosition).is(Blocks.MOVING_PISTON)) {
@@ -318,6 +323,12 @@ implements TickableBlockEntity {
 
     public long getLastTicked() {
         return this.lastTicked;
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public double getViewDistance() {
+        return 68.0;
     }
 }
 

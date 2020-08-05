@@ -207,7 +207,7 @@ public class LootCommand {
         ServerLevel serverLevel = commandSourceStack.getLevel();
         BlockState blockState = serverLevel.getBlockState(blockPos);
         BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
-        LootContext.Builder builder = new LootContext.Builder(serverLevel).withParameter(LootContextParams.BLOCK_POS, blockPos).withParameter(LootContextParams.BLOCK_STATE, blockState).withOptionalParameter(LootContextParams.BLOCK_ENTITY, blockEntity).withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity()).withParameter(LootContextParams.TOOL, itemStack);
+        LootContext.Builder builder = new LootContext.Builder(serverLevel).withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(blockPos)).withParameter(LootContextParams.BLOCK_STATE, blockState).withOptionalParameter(LootContextParams.BLOCK_ENTITY, blockEntity).withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity()).withParameter(LootContextParams.TOOL, itemStack);
         List<ItemStack> list2 = blockState.getDrops(builder);
         return dropConsumer.accept(commandContext, list2, list -> LootCommand.callback(commandSourceStack, list, blockState.getBlock().getLootTable()));
     }
@@ -227,7 +227,7 @@ public class LootCommand {
         builder.withOptionalParameter(LootContextParams.DIRECT_KILLER_ENTITY, entity2);
         builder.withOptionalParameter(LootContextParams.KILLER_ENTITY, entity2);
         builder.withParameter(LootContextParams.THIS_ENTITY, entity);
-        builder.withParameter(LootContextParams.BLOCK_POS, new BlockPos(commandSourceStack.getPosition()));
+        builder.withParameter(LootContextParams.ORIGIN, commandSourceStack.getPosition());
         LootTable lootTable = commandSourceStack.getServer().getLootTables().get(resourceLocation);
         List<ItemStack> list2 = lootTable.getRandomItems(builder.create(LootContextParamSets.ENTITY));
         return dropConsumer.accept(commandContext, list2, list -> LootCommand.callback(commandSourceStack, list, resourceLocation));
@@ -235,13 +235,13 @@ public class LootCommand {
 
     private static int dropChestLoot(CommandContext<CommandSourceStack> commandContext, ResourceLocation resourceLocation, DropConsumer dropConsumer) throws CommandSyntaxException {
         CommandSourceStack commandSourceStack = commandContext.getSource();
-        LootContext.Builder builder = new LootContext.Builder(commandSourceStack.getLevel()).withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity()).withParameter(LootContextParams.BLOCK_POS, new BlockPos(commandSourceStack.getPosition()));
+        LootContext.Builder builder = new LootContext.Builder(commandSourceStack.getLevel()).withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity()).withParameter(LootContextParams.ORIGIN, commandSourceStack.getPosition());
         return LootCommand.drop(commandContext, resourceLocation, builder.create(LootContextParamSets.CHEST), dropConsumer);
     }
 
     private static int dropFishingLoot(CommandContext<CommandSourceStack> commandContext, ResourceLocation resourceLocation, BlockPos blockPos, ItemStack itemStack, DropConsumer dropConsumer) throws CommandSyntaxException {
         CommandSourceStack commandSourceStack = commandContext.getSource();
-        LootContext lootContext = new LootContext.Builder(commandSourceStack.getLevel()).withParameter(LootContextParams.BLOCK_POS, blockPos).withParameter(LootContextParams.TOOL, itemStack).withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity()).create(LootContextParamSets.FISHING);
+        LootContext lootContext = new LootContext.Builder(commandSourceStack.getLevel()).withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(blockPos)).withParameter(LootContextParams.TOOL, itemStack).withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity()).create(LootContextParamSets.FISHING);
         return LootCommand.drop(commandContext, resourceLocation, lootContext, dropConsumer);
     }
 

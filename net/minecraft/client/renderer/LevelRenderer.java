@@ -894,10 +894,8 @@ AutoCloseable {
             Lighting.setupLevel(poseStack.last().pose());
         }
         profilerFiller.popPush("entities");
-        profilerFiller.push("prepare");
         this.renderedEntities = 0;
         this.culledEntities = 0;
-        profilerFiller.popPush("entities");
         if (this.itemEntityTarget != null) {
             this.itemEntityTarget.clear(Minecraft.ON_OSX);
             this.itemEntityTarget.copyDepthFrom(this.minecraft.getMainRenderTarget());
@@ -1006,7 +1004,6 @@ AutoCloseable {
             poseStack.popPose();
         }
         this.checkPoseStack(poseStack);
-        profilerFiller.pop();
         HitResult hitResult = this.minecraft.hitResult;
         if (bl && hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
             profilerFiller.popPush("outline");

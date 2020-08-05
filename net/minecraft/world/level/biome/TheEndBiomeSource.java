@@ -4,11 +4,14 @@
 package net.minecraft.world.level.biome;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import java.util.List;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -18,14 +21,29 @@ import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 
 public class TheEndBiomeSource
 extends BiomeSource {
-    public static final Codec<TheEndBiomeSource> CODEC = ((MapCodec)Codec.LONG.fieldOf("seed")).xmap(TheEndBiomeSource::new, theEndBiomeSource -> theEndBiomeSource.seed).stable().codec();
+    public static final Codec<TheEndBiomeSource> CODEC = RecordCodecBuilder.create(instance -> instance.group(RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(theEndBiomeSource -> theEndBiomeSource.biomes), ((MapCodec)Codec.LONG.fieldOf("seed")).stable().forGetter(theEndBiomeSource -> theEndBiomeSource.seed)).apply((Applicative<TheEndBiomeSource, ?>)instance, instance.stable(TheEndBiomeSource::new)));
     private final SimplexNoise islandNoise;
-    private static final List<Biome> POSSIBLE_BIOMES = ImmutableList.of(Biomes.THE_END, Biomes.END_HIGHLANDS, Biomes.END_MIDLANDS, Biomes.SMALL_END_ISLANDS, Biomes.END_BARRENS);
+    private final Registry<Biome> biomes;
     private final long seed;
+    private final Biome end;
+    private final Biome highlands;
+    private final Biome midlands;
+    private final Biome islands;
+    private final Biome barrens;
 
-    public TheEndBiomeSource(long l) {
-        super(POSSIBLE_BIOMES);
+    public TheEndBiomeSource(Registry<Biome> registry, long l) {
+        this(registry, l, registry.getOrThrow(Biomes.THE_END), registry.getOrThrow(Biomes.END_HIGHLANDS), registry.getOrThrow(Biomes.END_MIDLANDS), registry.getOrThrow(Biomes.SMALL_END_ISLANDS), registry.getOrThrow(Biomes.END_BARRENS));
+    }
+
+    private TheEndBiomeSource(Registry<Biome> registry, long l, Biome biome, Biome biome2, Biome biome3, Biome biome4, Biome biome5) {
+        super(ImmutableList.of(biome, biome2, biome3, biome4, biome5));
+        this.biomes = registry;
         this.seed = l;
+        this.end = biome;
+        this.highlands = biome2;
+        this.midlands = biome3;
+        this.islands = biome4;
+        this.barrens = biome5;
         WorldgenRandom worldgenRandom = new WorldgenRandom(l);
         worldgenRandom.consumeCount(17292);
         this.islandNoise = new SimplexNoise(worldgenRandom);
@@ -39,7 +57,7 @@ extends BiomeSource {
     @Override
     @Environment(value=EnvType.CLIENT)
     public BiomeSource withSeed(long l) {
-        return new TheEndBiomeSource(l);
+        return new TheEndBiomeSource(this.biomes, l, this.end, this.highlands, this.midlands, this.islands, this.barrens);
     }
 
     @Override
@@ -47,19 +65,19 @@ extends BiomeSource {
         int l = i >> 2;
         int m = k >> 2;
         if ((long)l * (long)l + (long)m * (long)m <= 4096L) {
-            return Biomes.THE_END;
+            return this.end;
         }
         float f = TheEndBiomeSource.getHeightValue(this.islandNoise, l * 2 + 1, m * 2 + 1);
         if (f > 40.0f) {
-            return Biomes.END_HIGHLANDS;
+            return this.highlands;
         }
         if (f >= 0.0f) {
-            return Biomes.END_MIDLANDS;
+            return this.midlands;
         }
         if (f < -20.0f) {
-            return Biomes.SMALL_END_ISLANDS;
+            return this.islands;
         }
-        return Biomes.END_BARRENS;
+        return this.barrens;
     }
 
     public boolean stable(long l) {

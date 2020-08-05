@@ -48,10 +48,10 @@ extends ItemCombinerMenu {
 
     @Override
     protected ItemStack onTake(Player player, ItemStack itemStack) {
-        this.shrinkStackInSlot(0);
-        this.shrinkStackInSlot(1);
         itemStack.onCraftedBy(player.level, player, itemStack.getCount());
         this.resultSlots.awardUsedRecipes(player);
+        this.shrinkStackInSlot(0);
+        this.shrinkStackInSlot(1);
         this.access.execute((level, blockPos) -> level.levelEvent(1044, (BlockPos)blockPos, 0));
         return itemStack;
     }

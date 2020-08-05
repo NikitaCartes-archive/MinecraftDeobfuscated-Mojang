@@ -26,6 +26,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -254,8 +255,8 @@ extends Animal {
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag compoundTag) {
-        Biome biome = serverLevelAccessor.getBiome(this.blockPosition());
-        Type type = Type.byBiome(biome);
+        Optional<ResourceKey<Biome>> optional = serverLevelAccessor.getBiomeName(this.blockPosition());
+        Type type = Type.byBiome(optional);
         boolean bl = false;
         if (spawnGroupData instanceof FoxGroupData) {
             type = ((FoxGroupData)spawnGroupData).type;
@@ -1372,20 +1373,16 @@ extends Animal {
         private static final Map<String, Type> BY_NAME;
         private final int id;
         private final String name;
-        private final List<Biome> biomes;
+        private final List<ResourceKey<Biome>> biomes;
 
-        private Type(int j, String string2, Biome ... biomes) {
+        private Type(int j, String string2, ResourceKey<Biome> ... resourceKeys) {
             this.id = j;
             this.name = string2;
-            this.biomes = Arrays.asList(biomes);
+            this.biomes = Arrays.asList(resourceKeys);
         }
 
         public String getName() {
             return this.name;
-        }
-
-        public List<Biome> getBiomes() {
-            return this.biomes;
         }
 
         public int getId() {
@@ -1403,8 +1400,8 @@ extends Animal {
             return BY_ID[i];
         }
 
-        public static Type byBiome(Biome biome) {
-            return SNOW.getBiomes().contains(biome) ? SNOW : RED;
+        public static Type byBiome(Optional<ResourceKey<Biome>> optional) {
+            return optional.isPresent() && Type.SNOW.biomes.contains(optional.get()) ? SNOW : RED;
         }
 
         static {

@@ -76,14 +76,12 @@ extends Block {
 
     @Override
     public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
-        if (level.isClientSide) {
+        if (level.isClientSide || !level.getBlockState(blockPos).is(this)) {
             return;
         }
         RailShape railShape = blockState.getValue(this.getShapeProperty());
-        if (BaseRailBlock.shouldBeRemoved(blockPos, level, railShape) && !level.isEmptyBlock(blockPos)) {
-            if (!bl) {
-                BaseRailBlock.dropResources(blockState, level, blockPos);
-            }
+        if (BaseRailBlock.shouldBeRemoved(blockPos, level, railShape)) {
+            BaseRailBlock.dropResources(blockState, level, blockPos);
             level.removeBlock(blockPos, bl);
         } else {
             this.updateState(blockState, level, blockPos, block);

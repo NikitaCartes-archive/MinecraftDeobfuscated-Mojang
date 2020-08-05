@@ -16,6 +16,8 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.IdMap;
@@ -241,18 +243,18 @@ IdMap<T> {
     }
 
     private static <T> Registry<T> registerSimple(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, Supplier<T> supplier) {
-        return Registry.internalRegister(resourceKey, new MappedRegistry(resourceKey, lifecycle), supplier);
+        return Registry.internalRegister(resourceKey, new MappedRegistry(resourceKey, lifecycle), supplier, lifecycle);
     }
 
     private static <T> DefaultedRegistry<T> registerDefaulted(ResourceKey<? extends Registry<T>> resourceKey, String string, Lifecycle lifecycle, Supplier<T> supplier) {
-        return Registry.internalRegister(resourceKey, new DefaultedRegistry(string, resourceKey, lifecycle), supplier);
+        return Registry.internalRegister(resourceKey, new DefaultedRegistry(string, resourceKey, lifecycle), supplier, lifecycle);
     }
 
-    private static <T, R extends WritableRegistry<T>> R internalRegister(ResourceKey<? extends Registry<T>> resourceKey, R writableRegistry, Supplier<T> supplier) {
+    private static <T, R extends WritableRegistry<T>> R internalRegister(ResourceKey<? extends Registry<T>> resourceKey, R writableRegistry, Supplier<T> supplier, Lifecycle lifecycle) {
         ResourceLocation resourceLocation = resourceKey.location();
         LOADERS.put(resourceLocation, supplier);
         WritableRegistry<WritableRegistry<?>> writableRegistry2 = WRITABLE_REGISTRY;
-        return writableRegistry2.register(resourceKey, writableRegistry);
+        return writableRegistry2.register(resourceKey, writableRegistry, lifecycle);
     }
 
     protected Registry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle) {
@@ -272,19 +274,19 @@ IdMap<T> {
     public <U> DataResult<Pair<T, U>> decode(DynamicOps<U> dynamicOps, U object2) {
         if (dynamicOps.compressMaps()) {
             return dynamicOps.getNumberValue(object2).flatMap((? super R number) -> {
-                int i = number.intValue();
-                if (!this.containsId(i)) {
+                Object object = this.byId(number.intValue());
+                if (object == null) {
                     return DataResult.error("Unknown registry id: " + number);
                 }
-                Object object = this.byId(i);
-                return DataResult.success(object, this.lifecycle);
+                return DataResult.success(object, this.lifecycle(object));
             }).map((? super R object) -> Pair.of(object, dynamicOps.empty()));
         }
-        return ResourceLocation.CODEC.decode(dynamicOps, object2).addLifecycle(this.lifecycle).flatMap((? super R pair) -> {
-            if (!this.containsKey((ResourceLocation)pair.getFirst())) {
+        return ResourceLocation.CODEC.decode(dynamicOps, object2).flatMap((? super R pair) -> {
+            T object = this.get((ResourceLocation)pair.getFirst());
+            if (object == null) {
                 return DataResult.error("Unknown registry key: " + pair.getFirst());
             }
-            return DataResult.success(pair.mapFirst(this::get), this.lifecycle);
+            return DataResult.success(Pair.of(object, pair.getSecond()), this.lifecycle(object));
         });
     }
 
@@ -318,8 +320,20 @@ IdMap<T> {
     @Nullable
     public abstract T get(@Nullable ResourceLocation var1);
 
+    protected abstract Lifecycle lifecycle(T var1);
+
+    public abstract Lifecycle elementsLifecycle();
+
     public Optional<T> getOptional(@Nullable ResourceLocation resourceLocation) {
         return Optional.ofNullable(this.get(resourceLocation));
+    }
+
+    public T getOrThrow(ResourceKey<T> resourceKey) {
+        T object = this.get(resourceKey);
+        if (object == null) {
+            throw new IllegalStateException("Missing: " + resourceKey);
+        }
+        return object;
     }
 
     public abstract Set<ResourceLocation> keySet();
@@ -330,22 +344,19 @@ IdMap<T> {
         return StreamSupport.stream(this.spliterator(), false);
     }
 
+    @Environment(value=EnvType.CLIENT)
     public abstract boolean containsKey(ResourceLocation var1);
-
-    public boolean containsId(int i) {
-        return this.byId(i) != null;
-    }
 
     public static <T> T register(Registry<? super T> registry, String string, T object) {
         return Registry.register(registry, new ResourceLocation(string), object);
     }
 
     public static <V, T extends V> T register(Registry<V> registry, ResourceLocation resourceLocation, T object) {
-        return ((WritableRegistry)registry).register(ResourceKey.create(registry.key, resourceLocation), object);
+        return ((WritableRegistry)registry).register(ResourceKey.create(registry.key, resourceLocation), object, Lifecycle.stable());
     }
 
     public static <V, T extends V> T registerMapping(Registry<V> registry, int i, String string, T object) {
-        return ((WritableRegistry)registry).registerMapping(i, ResourceKey.create(registry.key, new ResourceLocation(string)), object);
+        return ((WritableRegistry)registry).registerMapping(i, ResourceKey.create(registry.key, new ResourceLocation(string)), object, Lifecycle.stable());
     }
 
     static {

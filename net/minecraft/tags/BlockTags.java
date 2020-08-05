@@ -3,6 +3,7 @@
  */
 package net.minecraft.tags;
 
+import java.util.List;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.StaticTagHelper;
 import net.minecraft.tags.StaticTags;
@@ -106,6 +107,10 @@ public final class BlockTags {
 
     public static TagCollection<Block> getAllTags() {
         return HELPER.getAllTags();
+    }
+
+    public static List<? extends Tag.Named<Block>> getWrappers() {
+        return HELPER.getWrappers();
     }
 }
 

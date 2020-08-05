@@ -208,16 +208,19 @@ extends DirectionalBlock {
     }
 
     public static boolean isPushable(BlockState blockState, Level level, BlockPos blockPos, Direction direction, boolean bl, Direction direction2) {
+        if (blockPos.getY() < 0 || blockPos.getY() > level.getMaxBuildHeight() - 1 || !level.getWorldBorder().isWithinBounds(blockPos)) {
+            return false;
+        }
+        if (blockState.isAir()) {
+            return true;
+        }
         if (blockState.is(Blocks.OBSIDIAN) || blockState.is(Blocks.CRYING_OBSIDIAN) || blockState.is(Blocks.RESPAWN_ANCHOR)) {
             return false;
         }
-        if (!level.getWorldBorder().isWithinBounds(blockPos)) {
+        if (direction == Direction.DOWN && blockPos.getY() == 0) {
             return false;
         }
-        if (blockPos.getY() < 0 || direction == Direction.DOWN && blockPos.getY() == 0) {
-            return false;
-        }
-        if (blockPos.getY() > level.getMaxBuildHeight() - 1 || direction == Direction.UP && blockPos.getY() == level.getMaxBuildHeight() - 1) {
+        if (direction == Direction.UP && blockPos.getY() == level.getMaxBuildHeight() - 1) {
             return false;
         }
         if (blockState.is(Blocks.PISTON) || blockState.is(Blocks.STICKY_PISTON)) {

@@ -24,11 +24,11 @@ extends MappedRegistry<T> {
     }
 
     @Override
-    public <V extends T> V registerMapping(int i, ResourceKey<T> resourceKey, V object) {
+    public <V extends T> V registerMapping(int i, ResourceKey<T> resourceKey, V object, Lifecycle lifecycle) {
         if (this.defaultKey.equals(resourceKey.location())) {
             this.defaultValue = object;
         }
-        return super.registerMapping(i, resourceKey, object);
+        return super.registerMapping(i, resourceKey, object, lifecycle);
     }
 
     @Override

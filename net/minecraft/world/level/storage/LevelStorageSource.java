@@ -42,12 +42,14 @@ import net.fabricmc.api.Environment;
 import net.minecraft.FileUtil;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.DirectoryLock;
 import net.minecraft.util.ProgressListener;
@@ -94,16 +96,21 @@ public class LevelStorageSource {
         return new LevelStorageSource(path, path.resolve("../backups"), DataFixers.getDataFixer());
     }
 
-    private static Pair<WorldGenSettings, Lifecycle> readWorldGenSettings(Dynamic<?> dynamic, DataFixer dataFixer, int i) {
-        Dynamic<?> dynamic2 = dynamic.get("WorldGenSettings").orElseEmptyMap();
+    private static <T> Pair<WorldGenSettings, Lifecycle> readWorldGenSettings(Dynamic<T> dynamic, DataFixer dataFixer, int i) {
+        Dynamic<T> dynamic2 = dynamic.get("WorldGenSettings").orElseEmptyMap();
         for (String string : OLD_SETTINGS_KEYS) {
-            Optional<Dynamic<?>> optional = dynamic.get(string).result();
+            Optional<Dynamic<T>> optional = dynamic.get(string).result();
             if (!optional.isPresent()) continue;
             dynamic2 = dynamic2.set(string, optional.get());
         }
-        Dynamic<?> dynamic3 = dataFixer.update(References.WORLD_GEN_SETTINGS, dynamic2, i, SharedConstants.getCurrentVersion().getWorldVersion());
+        Dynamic dynamic3 = dataFixer.update(References.WORLD_GEN_SETTINGS, dynamic2, i, SharedConstants.getCurrentVersion().getWorldVersion());
         DataResult dataResult = WorldGenSettings.CODEC.parse(dynamic3);
-        return Pair.of(dataResult.resultOrPartial(Util.prefix("WorldGenSettings: ", LOGGER::error)).orElseGet(WorldGenSettings::makeDefault), dataResult.lifecycle());
+        return Pair.of(dataResult.resultOrPartial(Util.prefix("WorldGenSettings: ", LOGGER::error)).orElseGet(() -> {
+            Registry registry = (Registry)RegistryLookupCodec.create(Registry.DIMENSION_TYPE_REGISTRY).codec().parse(dynamic3).resultOrPartial(Util.prefix("Dimension type registry: ", LOGGER::error)).orElseThrow(() -> new IllegalStateException("Failed to get dimension registry"));
+            Registry registry2 = (Registry)RegistryLookupCodec.create(Registry.BIOME_REGISTRY).codec().parse(dynamic3).resultOrPartial(Util.prefix("Biome registry: ", LOGGER::error)).orElseThrow(() -> new IllegalStateException("Failed to get biome registry"));
+            Registry registry3 = (Registry)RegistryLookupCodec.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY).codec().parse(dynamic3).resultOrPartial(Util.prefix("Noise settings registry: ", LOGGER::error)).orElseThrow(() -> new IllegalStateException("Failed to get noise settings registry"));
+            return WorldGenSettings.makeDefault(registry, registry2, registry3);
+        }), dataResult.lifecycle());
     }
 
     private static DataPackConfig readDataPackConfig(Dynamic<?> dynamic) {

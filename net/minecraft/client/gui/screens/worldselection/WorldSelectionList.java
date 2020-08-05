@@ -103,7 +103,7 @@ extends ObjectSelectionList<WorldListEntry> {
             Collections.sort(this.cachedList);
         }
         if (this.cachedList.isEmpty()) {
-            this.minecraft.setScreen(new CreateWorldScreen(null));
+            this.minecraft.setScreen(CreateWorldScreen.create(null));
             return;
         }
         String string = supplier.get().toLowerCase(Locale.ROOT);

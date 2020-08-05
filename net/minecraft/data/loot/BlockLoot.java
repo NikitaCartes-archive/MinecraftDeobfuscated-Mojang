@@ -631,6 +631,8 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.dropSelf(Blocks.CRACKED_NETHER_BRICKS);
         this.dropSelf(Blocks.QUARTZ_BRICKS);
         this.dropSelf(Blocks.CHAIN);
+        this.dropSelf(Blocks.WARPED_ROOTS);
+        this.dropSelf(Blocks.CRIMSON_ROOTS);
         this.dropOther(Blocks.FARMLAND, Blocks.DIRT);
         this.dropOther(Blocks.TRIPWIRE, Items.STRING);
         this.dropOther(Blocks.GRASS_PATH, Blocks.DIRT);
@@ -842,8 +844,6 @@ implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
         this.add(Blocks.TALL_SEAGRASS, BlockLoot.createDoublePlantShearsDrop(Blocks.SEAGRASS));
         this.add(Blocks.LARGE_FERN, (Block block) -> BlockLoot.createDoublePlantWithSeedDrops(block, Blocks.FERN));
         this.add(Blocks.TALL_GRASS, (Block block) -> BlockLoot.createDoublePlantWithSeedDrops(block, Blocks.GRASS));
-        this.add(Blocks.WARPED_ROOTS, BlockLoot::createShearsOnlyDrop);
-        this.add(Blocks.CRIMSON_ROOTS, BlockLoot::createShearsOnlyDrop);
         this.add(Blocks.MELON_STEM, (Block block) -> BlockLoot.createStemDrops(block, Items.MELON_SEEDS));
         this.add(Blocks.ATTACHED_MELON_STEM, (Block block) -> BlockLoot.createAttachedStemDrops(block, Items.MELON_SEEDS));
         this.add(Blocks.PUMPKIN_STEM, (Block block) -> BlockLoot.createStemDrops(block, Items.PUMPKIN_SEEDS));

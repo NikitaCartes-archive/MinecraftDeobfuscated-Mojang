@@ -22,7 +22,6 @@ import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -108,23 +107,23 @@ AutoCloseable {
     private final ResourceKey<Level> dimension;
     private final ResourceKey<DimensionType> dimensionTypeKey;
 
-    protected Level(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, ResourceKey<DimensionType> resourceKey2, DimensionType dimensionType, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l) {
+    protected Level(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, ResourceKey<DimensionType> resourceKey2, final DimensionType dimensionType, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l) {
         this.profiler = supplier;
         this.levelData = writableLevelData;
         this.dimensionType = dimensionType;
         this.dimension = resourceKey;
         this.dimensionTypeKey = resourceKey2;
         this.isClientSide = bl;
-        this.worldBorder = dimensionType.shrunk() ? new WorldBorder(){
+        this.worldBorder = dimensionType.coordinateScale() != 1.0 ? new WorldBorder(){
 
             @Override
             public double getCenterX() {
-                return super.getCenterX() / 8.0;
+                return super.getCenterX() / dimensionType.coordinateScale();
             }
 
             @Override
             public double getCenterZ() {
-                return super.getCenterZ() / 8.0;
+                return super.getCenterZ() / dimensionType.coordinateScale();
             }
         } : new WorldBorder();
         this.thread = Thread.currentThread();
@@ -991,8 +990,6 @@ AutoCloseable {
     public final boolean isDebug() {
         return this.isDebug;
     }
-
-    public abstract RegistryAccess registryAccess();
 
     @Override
     public /* synthetic */ ChunkAccess getChunk(int i, int j) {

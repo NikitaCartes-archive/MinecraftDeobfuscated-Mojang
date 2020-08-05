@@ -146,7 +146,15 @@ extends Screen {
     }
 
     private void createDemoMenuOptions(int i, int j) {
-        this.addButton(new Button(this.width / 2 - 100, i, 200, 20, new TranslatableComponent("menu.playdemo"), button -> this.minecraft.createLevel("Demo_World", MinecraftServer.DEMO_SETTINGS, RegistryAccess.builtin(), WorldGenSettings.DEMO_SETTINGS)));
+        boolean bl = this.checkDemoWorldPresence();
+        this.addButton(new Button(this.width / 2 - 100, i, 200, 20, new TranslatableComponent("menu.playdemo"), button -> {
+            if (bl) {
+                this.minecraft.loadLevel("Demo_World");
+            } else {
+                RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
+                this.minecraft.createLevel("Demo_World", MinecraftServer.DEMO_SETTINGS, registryHolder, WorldGenSettings.demoSettings(registryHolder));
+            }
+        }));
         this.resetDemoButton = this.addButton(new Button(this.width / 2 - 100, i + j * 1, 200, 20, new TranslatableComponent("menu.resetdemo"), button -> {
             LevelStorageSource levelStorageSource = this.minecraft.getLevelSource();
             try (LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess("Demo_World");){
@@ -159,14 +167,22 @@ extends Screen {
                 LOGGER.warn("Failed to access demo world", (Throwable)iOException);
             }
         }));
+        this.resetDemoButton.active = bl;
+    }
+
+    /*
+     * Enabled aggressive block sorting
+     * Enabled unnecessary exception pruning
+     * Enabled aggressive exception aggregation
+     */
+    private boolean checkDemoWorldPresence() {
         try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess("Demo_World");){
-            LevelSummary levelSummary = levelStorageAccess.getSummary();
-            if (levelSummary == null) {
-                this.resetDemoButton.active = false;
-            }
+            boolean bl = levelStorageAccess.getSummary() != null;
+            return bl;
         } catch (IOException iOException) {
             SystemToast.onWorldAccessFailure(this.minecraft, "Demo_World");
             LOGGER.warn("Failed to read demo world data", (Throwable)iOException);
+            return false;
         }
     }
 

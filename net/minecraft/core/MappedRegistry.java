@@ -8,6 +8,7 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Maps;
 import com.mojang.datafixers.kinds.Applicative;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Lifecycle;
@@ -23,8 +24,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Random;
 import java.util.Set;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
@@ -43,6 +47,8 @@ extends WritableRegistry<T> {
     private final Object2IntMap<T> toId = new Object2IntOpenCustomHashMap<T>(Util.identityStrategy());
     private final BiMap<ResourceLocation, T> storage;
     private final BiMap<ResourceKey<T>, T> keyStorage;
+    private final Map<T, Lifecycle> lifecycles;
+    private Lifecycle elementsLifecycle;
     protected Object[] randomCache;
     private int nextId;
 
@@ -51,6 +57,8 @@ extends WritableRegistry<T> {
         this.toId.defaultReturnValue(-1);
         this.storage = HashBiMap.create();
         this.keyStorage = HashBiMap.create();
+        this.lifecycles = Maps.newIdentityHashMap();
+        this.elementsLifecycle = lifecycle;
     }
 
     public static <T> MapCodec<RegistryEntry<T>> withNameAndId(ResourceKey<? extends Registry<T>> resourceKey, MapCodec<T> mapCodec) {
@@ -58,11 +66,11 @@ extends WritableRegistry<T> {
     }
 
     @Override
-    public <V extends T> V registerMapping(int i, ResourceKey<T> resourceKey, V object) {
-        return this.registerMapping(i, resourceKey, object, true);
+    public <V extends T> V registerMapping(int i, ResourceKey<T> resourceKey, V object, Lifecycle lifecycle) {
+        return this.registerMapping(i, resourceKey, object, lifecycle, true);
     }
 
-    private <V extends T> V registerMapping(int i, ResourceKey<T> resourceKey, V object, boolean bl) {
+    private <V extends T> V registerMapping(int i, ResourceKey<T> resourceKey, V object, Lifecycle lifecycle, boolean bl) {
         Validate.notNull(resourceKey);
         Validate.notNull(object);
         this.byId.size(Math.max(this.byId.size(), i + 1));
@@ -77,6 +85,8 @@ extends WritableRegistry<T> {
         }
         this.storage.put(resourceKey.location(), object);
         this.keyStorage.put(resourceKey, object);
+        this.lifecycles.put(object, lifecycle);
+        this.elementsLifecycle = this.elementsLifecycle.add(lifecycle);
         if (this.nextId <= i) {
             this.nextId = i + 1;
         }
@@ -84,23 +94,26 @@ extends WritableRegistry<T> {
     }
 
     @Override
-    public <V extends T> V register(ResourceKey<T> resourceKey, V object) {
-        return this.registerMapping(this.nextId, resourceKey, object);
+    public <V extends T> V register(ResourceKey<T> resourceKey, V object, Lifecycle lifecycle) {
+        return this.registerMapping(this.nextId, resourceKey, object, lifecycle);
     }
 
     @Override
-    public <V extends T> V registerOrOverride(ResourceKey<T> resourceKey, V object) {
+    public <V extends T> V registerOrOverride(OptionalInt optionalInt, ResourceKey<T> resourceKey, V object, Lifecycle lifecycle) {
         int i;
         Validate.notNull(resourceKey);
         Validate.notNull(object);
         Object object2 = this.keyStorage.get(resourceKey);
         if (object2 == null) {
-            i = this.nextId;
+            i = optionalInt.isPresent() ? optionalInt.getAsInt() : this.nextId;
         } else {
             i = this.toId.getInt(object2);
+            if (optionalInt.isPresent() && optionalInt.getAsInt() != i) {
+                throw new IllegalStateException("ID mismatch");
+            }
             this.toId.removeInt(object2);
         }
-        return this.registerMapping(i, resourceKey, object, false);
+        return this.registerMapping(i, resourceKey, object, lifecycle, false);
     }
 
     @Override
@@ -132,6 +145,16 @@ extends WritableRegistry<T> {
             return null;
         }
         return (T)this.byId.get(i);
+    }
+
+    @Override
+    public Lifecycle lifecycle(T object) {
+        return this.lifecycles.get(object);
+    }
+
+    @Override
+    public Lifecycle elementsLifecycle() {
+        return this.elementsLifecycle;
     }
 
     @Override
@@ -168,6 +191,7 @@ extends WritableRegistry<T> {
     }
 
     @Override
+    @Environment(value=EnvType.CLIENT)
     public boolean containsKey(ResourceLocation resourceLocation) {
         return this.storage.containsKey(resourceLocation);
     }
@@ -176,7 +200,7 @@ extends WritableRegistry<T> {
         return MappedRegistry.withNameAndId(resourceKey, codec.fieldOf("element")).codec().listOf().xmap(list -> {
             MappedRegistry mappedRegistry = new MappedRegistry(resourceKey, lifecycle);
             for (RegistryEntry registryEntry : list) {
-                mappedRegistry.registerMapping(registryEntry.id, registryEntry.key, registryEntry.value);
+                mappedRegistry.registerMapping(registryEntry.id, registryEntry.key, registryEntry.value, lifecycle);
             }
             return mappedRegistry;
         }, mappedRegistry -> {
@@ -195,7 +219,7 @@ extends WritableRegistry<T> {
     public static <T> Codec<MappedRegistry<T>> directCodec(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, Codec<T> codec) {
         return Codec.unboundedMap(ResourceLocation.CODEC.xmap(ResourceKey.elementKey(resourceKey), ResourceKey::location), codec).xmap(map -> {
             MappedRegistry mappedRegistry = new MappedRegistry(resourceKey, lifecycle);
-            map.forEach(mappedRegistry::register);
+            map.forEach((? super K resourceKey, ? super V object) -> mappedRegistry.register((ResourceKey)resourceKey, (Object)object, lifecycle));
             return mappedRegistry;
         }, mappedRegistry -> ImmutableMap.copyOf(mappedRegistry.keyStorage));
     }

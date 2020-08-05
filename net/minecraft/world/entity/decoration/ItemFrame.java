@@ -207,14 +207,14 @@ extends HangingEntity {
         if (this.fixed) {
             return;
         }
+        ItemStack itemStack = this.getItem();
+        this.setItem(ItemStack.EMPTY);
         if (!this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
             if (entity == null) {
-                this.removeFramedMap(this.getItem());
+                this.removeFramedMap(itemStack);
             }
             return;
         }
-        ItemStack itemStack = this.getItem();
-        this.setItem(ItemStack.EMPTY);
         if (entity instanceof Player) {
             Player player = (Player)entity;
             if (player.abilities.instabuild) {

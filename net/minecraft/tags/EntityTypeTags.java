@@ -3,6 +3,7 @@
  */
 package net.minecraft.tags;
 
+import java.util.List;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.StaticTagHelper;
 import net.minecraft.tags.StaticTags;
@@ -25,6 +26,10 @@ public final class EntityTypeTags {
 
     public static TagCollection<EntityType<?>> getAllTags() {
         return HELPER.getAllTags();
+    }
+
+    public static List<? extends Tag.Named<EntityType<?>>> getWrappers() {
+        return HELPER.getWrappers();
     }
 }
 

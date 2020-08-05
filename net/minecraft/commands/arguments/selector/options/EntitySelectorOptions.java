@@ -417,7 +417,7 @@ public class EntitySelectorOptions {
                 if (lootItemCondition == null) {
                     return false;
                 }
-                LootContext lootContext = new LootContext.Builder(serverLevel).withParameter(LootContextParams.THIS_ENTITY, entity).withParameter(LootContextParams.BLOCK_POS, entity.blockPosition()).create(LootContextParamSets.SELECTOR);
+                LootContext lootContext = new LootContext.Builder(serverLevel).withParameter(LootContextParams.THIS_ENTITY, entity).withParameter(LootContextParams.ORIGIN, entity.position()).create(LootContextParamSets.SELECTOR);
                 return bl ^ lootItemCondition.test(lootContext);
             });
         }, entitySelectorParser -> true, new TranslatableComponent("argument.entity.options.predicate.description"));

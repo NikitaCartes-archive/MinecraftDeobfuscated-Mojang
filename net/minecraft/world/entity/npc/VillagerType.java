@@ -5,13 +5,15 @@ package net.minecraft.world.entity.npc;
 
 import com.google.common.collect.Maps;
 import java.util.Map;
+import java.util.Optional;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 
-public interface VillagerType {
+public final class VillagerType {
     public static final VillagerType DESERT = VillagerType.register("desert");
     public static final VillagerType JUNGLE = VillagerType.register("jungle");
     public static final VillagerType PLAINS = VillagerType.register("plains");
@@ -19,7 +21,8 @@ public interface VillagerType {
     public static final VillagerType SNOW = VillagerType.register("snow");
     public static final VillagerType SWAMP = VillagerType.register("swamp");
     public static final VillagerType TAIGA = VillagerType.register("taiga");
-    public static final Map<Biome, VillagerType> BY_BIOME = Util.make(Maps.newHashMap(), hashMap -> {
+    private final String name;
+    private static final Map<ResourceKey<Biome>, VillagerType> BY_BIOME = Util.make(Maps.newHashMap(), hashMap -> {
         hashMap.put(Biomes.BADLANDS, DESERT);
         hashMap.put(Biomes.BADLANDS_PLATEAU, DESERT);
         hashMap.put(Biomes.DESERT, DESERT);
@@ -66,17 +69,20 @@ public interface VillagerType {
         hashMap.put(Biomes.WOODED_MOUNTAINS, TAIGA);
     });
 
-    public static VillagerType register(final String string) {
-        return Registry.register(Registry.VILLAGER_TYPE, new ResourceLocation(string), new VillagerType(){
-
-            public String toString() {
-                return string;
-            }
-        });
+    private VillagerType(String string) {
+        this.name = string;
     }
 
-    public static VillagerType byBiome(Biome biome) {
-        return BY_BIOME.getOrDefault(biome, PLAINS);
+    public String toString() {
+        return this.name;
+    }
+
+    private static VillagerType register(String string) {
+        return Registry.register(Registry.VILLAGER_TYPE, new ResourceLocation(string), new VillagerType(string));
+    }
+
+    public static VillagerType byBiome(Optional<ResourceKey<Biome>> optional) {
+        return optional.flatMap(resourceKey -> Optional.ofNullable(BY_BIOME.get(resourceKey))).orElse(PLAINS);
     }
 }
 

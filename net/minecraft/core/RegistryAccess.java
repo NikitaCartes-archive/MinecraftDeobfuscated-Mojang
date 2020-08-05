@@ -6,6 +6,7 @@ package net.minecraft.core;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.UnboundedMapCodec;
 import java.util.Map;
@@ -33,9 +34,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-public interface RegistryAccess {
-    public static final Logger LOGGER = LogManager.getLogger();
-    public static final Map<ResourceKey<? extends Registry<?>>, RegistryData<?>> REGISTRIES = Util.make(() -> {
+public abstract class RegistryAccess {
+    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Map<ResourceKey<? extends Registry<?>>, RegistryData<?>> REGISTRIES = Util.make(() -> {
         ImmutableMap.Builder<ResourceKey<Registry<?>>, RegistryData<?>> builder = ImmutableMap.builder();
         RegistryAccess.put(builder, Registry.DIMENSION_TYPE_REGISTRY, DimensionType.DIRECT_CODEC, DimensionType.DIRECT_CODEC);
         RegistryAccess.put(builder, Registry.BIOME_REGISTRY, Biome.DIRECT_CODEC, Biome.NETWORK_CODEC);
@@ -48,33 +49,57 @@ public interface RegistryAccess {
         RegistryAccess.put(builder, Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, NoiseGeneratorSettings.DIRECT_CODEC);
         return builder.build();
     });
+    private static final RegistryHolder BUILTIN = Util.make(() -> {
+        RegistryHolder registryHolder = new RegistryHolder();
+        DimensionType.registerBuiltin(registryHolder);
+        REGISTRIES.keySet().stream().filter(resourceKey -> !resourceKey.equals(Registry.DIMENSION_TYPE_REGISTRY)).forEach(resourceKey -> RegistryAccess.copyBuiltin(registryHolder, resourceKey));
+        return registryHolder;
+    });
 
-    public <E> Optional<WritableRegistry<E>> registry(ResourceKey<? extends Registry<E>> var1);
+    public abstract <E> Optional<WritableRegistry<E>> registry(ResourceKey<? extends Registry<E>> var1);
 
-    default public <E> WritableRegistry<E> registryOrThrow(ResourceKey<? extends Registry<E>> resourceKey) {
+    public <E> WritableRegistry<E> registryOrThrow(ResourceKey<? extends Registry<E>> resourceKey) {
         return this.registry(resourceKey).orElseThrow(() -> new IllegalStateException("Missing registry: " + resourceKey));
     }
 
-    default public Registry<DimensionType> dimensionTypes() {
+    public Registry<DimensionType> dimensionTypes() {
         return this.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
     }
 
-    public static <E> void put(ImmutableMap.Builder<ResourceKey<? extends Registry<?>>, RegistryData<?>> builder, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec) {
+    private static <E> void put(ImmutableMap.Builder<ResourceKey<? extends Registry<?>>, RegistryData<?>> builder, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec) {
         builder.put(resourceKey, new RegistryData<E>(resourceKey, codec, null));
     }
 
-    public static <E> void put(ImmutableMap.Builder<ResourceKey<? extends Registry<?>>, RegistryData<?>> builder, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec, Codec<E> codec2) {
+    private static <E> void put(ImmutableMap.Builder<ResourceKey<? extends Registry<?>>, RegistryData<?>> builder, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec, Codec<E> codec2) {
         builder.put(resourceKey, new RegistryData<E>(resourceKey, codec, codec2));
     }
 
     public static RegistryHolder builtin() {
         RegistryHolder registryHolder = new RegistryHolder();
-        DimensionType.registerBuiltin(registryHolder);
-        REGISTRIES.keySet().stream().filter(resourceKey -> !resourceKey.equals(Registry.DIMENSION_TYPE_REGISTRY)).forEach(resourceKey -> RegistryAccess.copyBuiltin(registryHolder, resourceKey));
+        RegistryReadOps.ResourceAccess.MemoryMap memoryMap = new RegistryReadOps.ResourceAccess.MemoryMap();
+        for (RegistryData<?> registryData : REGISTRIES.values()) {
+            RegistryAccess.addBuiltinElements(registryHolder, memoryMap, registryData);
+        }
+        RegistryReadOps.create(JsonOps.INSTANCE, memoryMap, registryHolder);
         return registryHolder;
     }
 
-    public static <R extends Registry<?>> void copyBuiltin(RegistryHolder registryHolder, ResourceKey<R> resourceKey) {
+    private static <E> void addBuiltinElements(RegistryHolder registryHolder, RegistryReadOps.ResourceAccess.MemoryMap memoryMap, RegistryData<E> registryData) {
+        ResourceKey<Registry<E>> resourceKey = registryData.key();
+        boolean bl = !resourceKey.equals(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY) && !resourceKey.equals(Registry.DIMENSION_TYPE_REGISTRY);
+        WritableRegistry<E> registry = BUILTIN.registryOrThrow(resourceKey);
+        WritableRegistry<E> writableRegistry = registryHolder.registryOrThrow(resourceKey);
+        for (Map.Entry entry : registry.entrySet()) {
+            Object object = entry.getValue();
+            if (bl) {
+                memoryMap.add(BUILTIN, entry.getKey(), registryData.codec(), registry.getId(object), object, registry.lifecycle(object));
+                continue;
+            }
+            writableRegistry.registerMapping(registry.getId(object), entry.getKey(), object, registry.lifecycle(object));
+        }
+    }
+
+    private static <R extends Registry<?>> void copyBuiltin(RegistryHolder registryHolder, ResourceKey<R> resourceKey) {
         Registry<Registry<?>> registry = BuiltinRegistries.REGISTRY;
         Registry<?> registry2 = registry.get(resourceKey);
         if (registry2 == null) {
@@ -83,10 +108,11 @@ public interface RegistryAccess {
         RegistryAccess.copy(registryHolder, registry2);
     }
 
-    public static <E> void copy(RegistryHolder registryHolder, Registry<E> registry) {
+    private static <E> void copy(RegistryHolder registryHolder, Registry<E> registry) {
         WritableRegistry<E> writableRegistry = registryHolder.registry(registry.key()).orElseThrow(() -> new IllegalStateException("Missing registry: " + registry.key()));
         for (Map.Entry<ResourceKey<E>, E> entry : registry.entrySet()) {
-            writableRegistry.registerMapping(registry.getId(entry.getValue()), entry.getKey(), entry.getValue());
+            E object = entry.getValue();
+            writableRegistry.registerMapping(registry.getId(object), entry.getKey(), object, registry.lifecycle(object));
         }
     }
 
@@ -96,7 +122,7 @@ public interface RegistryAccess {
         }
     }
 
-    public static <E> void readRegistry(RegistryReadOps<?> registryReadOps, RegistryHolder registryHolder, RegistryData<E> registryData) {
+    private static <E> void readRegistry(RegistryReadOps<?> registryReadOps, RegistryHolder registryHolder, RegistryData<E> registryData) {
         ResourceKey resourceKey = registryData.key();
         MappedRegistry mappedRegistry2 = Optional.ofNullable(registryHolder.registries.get(resourceKey)).map(mappedRegistry -> mappedRegistry).orElseThrow(() -> new IllegalStateException("Missing registry: " + resourceKey));
         DataResult<MappedRegistry<E>> dataResult = registryReadOps.decodeElements(mappedRegistry2, registryData.key(), registryData.codec());
@@ -104,7 +130,7 @@ public interface RegistryAccess {
     }
 
     public static final class RegistryHolder
-    implements RegistryAccess {
+    extends RegistryAccess {
         public static final Codec<RegistryHolder> NETWORK_CODEC = RegistryHolder.makeNetworkCodec();
         private final Map<? extends ResourceKey<? extends Registry<?>>, ? extends MappedRegistry<?>> registries;
 
@@ -132,7 +158,7 @@ public interface RegistryAccess {
         }
 
         private static <E> MappedRegistry<?> createRegistry(ResourceKey<? extends Registry<?>> resourceKey) {
-            return new MappedRegistry(resourceKey, Lifecycle.experimental());
+            return new MappedRegistry(resourceKey, Lifecycle.stable());
         }
 
         @Override
@@ -141,7 +167,7 @@ public interface RegistryAccess {
         }
     }
 
-    public static final class RegistryData<E> {
+    static final class RegistryData<E> {
         private final ResourceKey<? extends Registry<E>> key;
         private final Codec<E> codec;
         @Nullable

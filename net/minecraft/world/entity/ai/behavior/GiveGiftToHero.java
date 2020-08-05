@@ -117,7 +117,7 @@ extends Behavior<Villager> {
         VillagerProfession villagerProfession = villager.getVillagerData().getProfession();
         if (gifts.containsKey(villagerProfession)) {
             LootTable lootTable = villager.level.getServer().getLootTables().get(gifts.get(villagerProfession));
-            LootContext.Builder builder = new LootContext.Builder((ServerLevel)villager.level).withParameter(LootContextParams.BLOCK_POS, villager.blockPosition()).withParameter(LootContextParams.THIS_ENTITY, villager).withRandom(villager.getRandom());
+            LootContext.Builder builder = new LootContext.Builder((ServerLevel)villager.level).withParameter(LootContextParams.ORIGIN, villager.position()).withParameter(LootContextParams.THIS_ENTITY, villager).withRandom(villager.getRandom());
             return lootTable.getRandomItems(builder.create(LootContextParamSets.GIFT));
         }
         return ImmutableList.of(new ItemStack(Items.WHEAT_SEEDS));

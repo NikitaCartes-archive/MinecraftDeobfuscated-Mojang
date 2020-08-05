@@ -14,6 +14,7 @@ public final class Material {
     public static final Material PLANT = Builder.method_15808(new Builder(MaterialColor.PLANT).noCollider()).nonSolid().destroyOnPush().build();
     public static final Material WATER_PLANT = Builder.method_15808(new Builder(MaterialColor.WATER).noCollider()).nonSolid().destroyOnPush().build();
     public static final Material REPLACEABLE_PLANT = Builder.method_15808(new Builder(MaterialColor.PLANT).noCollider()).nonSolid().destroyOnPush().replaceable().flammable().build();
+    public static final Material REPLACEABLE_FIREPROOF_PLANT = Builder.method_15808(new Builder(MaterialColor.PLANT).noCollider()).nonSolid().destroyOnPush().replaceable().build();
     public static final Material REPLACEABLE_WATER_PLANT = Builder.method_15808(new Builder(MaterialColor.WATER).noCollider()).nonSolid().destroyOnPush().replaceable().build();
     public static final Material WATER = Builder.method_15808(new Builder(MaterialColor.WATER).noCollider()).nonSolid().destroyOnPush().replaceable().liquid().build();
     public static final Material BUBBLE_COLUMN = Builder.method_15808(new Builder(MaterialColor.WATER).noCollider()).nonSolid().destroyOnPush().replaceable().liquid().build();

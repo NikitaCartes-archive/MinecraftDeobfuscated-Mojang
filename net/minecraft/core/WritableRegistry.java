@@ -4,6 +4,7 @@
 package net.minecraft.core;
 
 import com.mojang.serialization.Lifecycle;
+import java.util.OptionalInt;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 
@@ -13,10 +14,10 @@ extends Registry<T> {
         super(resourceKey, lifecycle);
     }
 
-    public abstract <V extends T> V registerMapping(int var1, ResourceKey<T> var2, V var3);
+    public abstract <V extends T> V registerMapping(int var1, ResourceKey<T> var2, V var3, Lifecycle var4);
 
-    public abstract <V extends T> V register(ResourceKey<T> var1, V var2);
+    public abstract <V extends T> V register(ResourceKey<T> var1, V var2, Lifecycle var3);
 
-    public abstract <V extends T> V registerOrOverride(ResourceKey<T> var1, V var2);
+    public abstract <V extends T> V registerOrOverride(OptionalInt var1, ResourceKey<T> var2, V var3, Lifecycle var4);
 }
 

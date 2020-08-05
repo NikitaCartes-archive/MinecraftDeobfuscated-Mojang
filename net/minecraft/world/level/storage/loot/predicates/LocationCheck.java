@@ -14,6 +14,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
+import net.minecraft.world.phys.Vec3;
 
 public class LocationCheck
 implements LootItemCondition {
@@ -32,8 +33,8 @@ implements LootItemCondition {
 
     @Override
     public boolean test(LootContext lootContext) {
-        BlockPos blockPos = lootContext.getParamOrNull(LootContextParams.BLOCK_POS);
-        return blockPos != null && this.predicate.matches(lootContext.getLevel(), blockPos.getX() + this.offset.getX(), blockPos.getY() + this.offset.getY(), blockPos.getZ() + this.offset.getZ());
+        Vec3 vec3 = lootContext.getParamOrNull(LootContextParams.ORIGIN);
+        return vec3 != null && this.predicate.matches(lootContext.getLevel(), vec3.x() + (double)this.offset.getX(), vec3.y() + (double)this.offset.getY(), vec3.z() + (double)this.offset.getZ());
     }
 
     public static LootItemCondition.Builder checkLocation(LocationPredicate.Builder builder) {

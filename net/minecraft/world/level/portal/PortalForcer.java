@@ -33,7 +33,7 @@ public class PortalForcer {
         PoiManager poiManager = this.level.getPoiManager();
         int i = bl ? 16 : 128;
         poiManager.ensureLoadedAndValid(this.level, blockPos, i);
-        Optional<PoiRecord> optional = poiManager.getInSquare(poiType -> poiType == PoiType.NETHER_PORTAL, blockPos, i, PoiManager.Occupancy.ANY).min(Comparator.comparingDouble(poiRecord -> poiRecord.getPos().distSqr(blockPos)).thenComparingInt(poiRecord -> poiRecord.getPos().getY()));
+        Optional<PoiRecord> optional = poiManager.getInSquare(poiType -> poiType == PoiType.NETHER_PORTAL, blockPos, i, PoiManager.Occupancy.ANY).sorted(Comparator.comparingDouble(poiRecord -> poiRecord.getPos().distSqr(blockPos)).thenComparingInt(poiRecord -> poiRecord.getPos().getY())).filter(poiRecord -> this.level.getBlockState(poiRecord.getPos()).hasProperty(BlockStateProperties.HORIZONTAL_AXIS)).findFirst();
         return optional.map(poiRecord -> {
             BlockPos blockPos2 = poiRecord.getPos();
             this.level.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(blockPos2), 3, blockPos2);

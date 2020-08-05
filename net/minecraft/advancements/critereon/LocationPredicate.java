@@ -6,7 +6,6 @@ package net.minecraft.advancements.critereon;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.FluidPredicate;
@@ -14,7 +13,6 @@ import net.minecraft.advancements.critereon.LightPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -34,7 +32,7 @@ public class LocationPredicate {
     private final MinMaxBounds.Floats y;
     private final MinMaxBounds.Floats z;
     @Nullable
-    private final Biome biome;
+    private final ResourceKey<Biome> biome;
     @Nullable
     private final StructureFeature<?> feature;
     @Nullable
@@ -45,21 +43,21 @@ public class LocationPredicate {
     private final BlockPredicate block;
     private final FluidPredicate fluid;
 
-    public LocationPredicate(MinMaxBounds.Floats floats, MinMaxBounds.Floats floats2, MinMaxBounds.Floats floats3, @Nullable Biome biome, @Nullable StructureFeature<?> structureFeature, @Nullable ResourceKey<Level> resourceKey, @Nullable Boolean boolean_, LightPredicate lightPredicate, BlockPredicate blockPredicate, FluidPredicate fluidPredicate) {
+    public LocationPredicate(MinMaxBounds.Floats floats, MinMaxBounds.Floats floats2, MinMaxBounds.Floats floats3, @Nullable ResourceKey<Biome> resourceKey, @Nullable StructureFeature<?> structureFeature, @Nullable ResourceKey<Level> resourceKey2, @Nullable Boolean boolean_, LightPredicate lightPredicate, BlockPredicate blockPredicate, FluidPredicate fluidPredicate) {
         this.x = floats;
         this.y = floats2;
         this.z = floats3;
-        this.biome = biome;
+        this.biome = resourceKey;
         this.feature = structureFeature;
-        this.dimension = resourceKey;
+        this.dimension = resourceKey2;
         this.smokey = boolean_;
         this.light = lightPredicate;
         this.block = blockPredicate;
         this.fluid = fluidPredicate;
     }
 
-    public static LocationPredicate inBiome(Biome biome) {
-        return new LocationPredicate(MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, biome, null, null, null, LightPredicate.ANY, BlockPredicate.ANY, FluidPredicate.ANY);
+    public static LocationPredicate inBiome(ResourceKey<Biome> resourceKey) {
+        return new LocationPredicate(MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, MinMaxBounds.Floats.ANY, resourceKey, null, null, null, LightPredicate.ANY, BlockPredicate.ANY, FluidPredicate.ANY);
     }
 
     public static LocationPredicate inDimension(ResourceKey<Level> resourceKey) {
@@ -89,7 +87,7 @@ public class LocationPredicate {
         }
         BlockPos blockPos = new BlockPos(f, g, h);
         boolean bl = serverLevel.isLoaded(blockPos);
-        if (!(this.biome == null || bl && this.biome == serverLevel.getBiome(blockPos))) {
+        if (!(this.biome == null || bl && this.biome == serverLevel.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getResourceKey(serverLevel.getBiome(blockPos)).orElseThrow(() -> new IllegalStateException("Unregistered biome")))) {
             return false;
         }
         if (!(this.feature == null || bl && serverLevel.structureFeatureManager().getStructureAt(blockPos, true, this.feature).isValid())) {
@@ -126,7 +124,7 @@ public class LocationPredicate {
             jsonObject.addProperty("feature", this.feature.getFeatureName());
         }
         if (this.biome != null) {
-            jsonObject.addProperty("biome", BuiltinRegistries.BIOME.getKey(this.biome).toString());
+            jsonObject.addProperty("biome", this.biome.location().toString());
         }
         if (this.smokey != null) {
             jsonObject.addProperty("smokey", this.smokey);
@@ -148,16 +146,16 @@ public class LocationPredicate {
         MinMaxBounds.Floats floats3 = MinMaxBounds.Floats.fromJson(jsonObject2.get("z"));
         ResourceKey resourceKey = jsonObject.has("dimension") ? (ResourceKey)ResourceLocation.CODEC.parse(JsonOps.INSTANCE, jsonObject.get("dimension")).resultOrPartial(LOGGER::error).map(resourceLocation -> ResourceKey.create(Registry.DIMENSION_REGISTRY, resourceLocation)).orElse(null) : null;
         StructureFeature structureFeature = jsonObject.has("feature") ? (StructureFeature)StructureFeature.STRUCTURES_REGISTRY.get(GsonHelper.getAsString(jsonObject, "feature")) : null;
-        Biome biome = null;
+        ResourceKey<Biome> resourceKey2 = null;
         if (jsonObject.has("biome")) {
             ResourceLocation resourceLocation2 = new ResourceLocation(GsonHelper.getAsString(jsonObject, "biome"));
-            biome = BuiltinRegistries.BIOME.getOptional(resourceLocation2).orElseThrow(() -> new JsonSyntaxException("Unknown biome '" + resourceLocation2 + "'"));
+            resourceKey2 = ResourceKey.create(Registry.BIOME_REGISTRY, resourceLocation2);
         }
         Boolean boolean_ = jsonObject.has("smokey") ? Boolean.valueOf(jsonObject.get("smokey").getAsBoolean()) : null;
         LightPredicate lightPredicate = LightPredicate.fromJson(jsonObject.get("light"));
         BlockPredicate blockPredicate = BlockPredicate.fromJson(jsonObject.get("block"));
         FluidPredicate fluidPredicate = FluidPredicate.fromJson(jsonObject.get("fluid"));
-        return new LocationPredicate(floats, floats2, floats3, biome, structureFeature, resourceKey, boolean_, lightPredicate, blockPredicate, fluidPredicate);
+        return new LocationPredicate(floats, floats2, floats3, resourceKey2, structureFeature, resourceKey, boolean_, lightPredicate, blockPredicate, fluidPredicate);
     }
 
     public static class Builder {
@@ -165,7 +163,7 @@ public class LocationPredicate {
         private MinMaxBounds.Floats y = MinMaxBounds.Floats.ANY;
         private MinMaxBounds.Floats z = MinMaxBounds.Floats.ANY;
         @Nullable
-        private Biome biome;
+        private ResourceKey<Biome> biome;
         @Nullable
         private StructureFeature<?> feature;
         @Nullable
@@ -180,8 +178,8 @@ public class LocationPredicate {
             return new Builder();
         }
 
-        public Builder setBiome(@Nullable Biome biome) {
-            this.biome = biome;
+        public Builder setBiome(@Nullable ResourceKey<Biome> resourceKey) {
+            this.biome = resourceKey;
             return this;
         }
 

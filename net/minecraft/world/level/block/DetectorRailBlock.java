@@ -82,6 +82,9 @@ extends BaseRailBlock {
 
     private void checkPressed(Level level, BlockPos blockPos, BlockState blockState) {
         BlockState blockState2;
+        if (!this.canSurvive(blockState, level, blockPos)) {
+            return;
+        }
         boolean bl = blockState.getValue(POWERED);
         boolean bl2 = false;
         List<AbstractMinecart> list = this.getInteractingMinecartOfType(level, blockPos, AbstractMinecart.class, null);

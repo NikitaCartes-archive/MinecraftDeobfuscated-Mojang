@@ -487,15 +487,13 @@ extends Monster {
 
     @Override
     protected void dropCustomDeathLoot(DamageSource damageSource, int i, boolean bl) {
+        ItemStack itemStack;
         Creeper creeper;
         super.dropCustomDeathLoot(damageSource, i, bl);
         Entity entity = damageSource.getEntity();
-        if (entity instanceof Creeper && (creeper = (Creeper)entity).canDropMobsSkull()) {
+        if (entity instanceof Creeper && (creeper = (Creeper)entity).canDropMobsSkull() && !(itemStack = this.getSkull()).isEmpty()) {
             creeper.increaseDroppedSkulls();
-            ItemStack itemStack = this.getSkull();
-            if (!itemStack.isEmpty()) {
-                this.spawnAtLocation(itemStack);
-            }
+            this.spawnAtLocation(itemStack);
         }
     }
 

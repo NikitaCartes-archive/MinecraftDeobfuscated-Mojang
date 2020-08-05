@@ -6,6 +6,7 @@ package net.minecraft.server.dedicated;
 import java.nio.file.Path;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.dedicated.Settings;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
@@ -63,7 +64,7 @@ extends Settings<DedicatedServerProperties> {
     public final Settings.MutableValue<Boolean> whiteList;
     public final WorldGenSettings worldGenSettings;
 
-    public DedicatedServerProperties(Properties properties) {
+    public DedicatedServerProperties(Properties properties, RegistryAccess registryAccess) {
         super(properties);
         if (this.get("snooper-enabled", true)) {
             // empty if block
@@ -88,21 +89,21 @@ extends Settings<DedicatedServerProperties> {
         this.entityBroadcastRangePercentage = this.get("entity-broadcast-range-percentage", integer -> Mth.clamp(integer, 10, 1000), 100);
         this.playerIdleTimeout = this.getMutable("player-idle-timeout", 0);
         this.whiteList = this.getMutable("white-list", false);
-        this.worldGenSettings = WorldGenSettings.create(properties);
+        this.worldGenSettings = WorldGenSettings.create(registryAccess, properties);
     }
 
-    public static DedicatedServerProperties fromFile(Path path) {
-        return new DedicatedServerProperties(DedicatedServerProperties.loadFromFile(path));
-    }
-
-    @Override
-    protected DedicatedServerProperties reload(Properties properties) {
-        return new DedicatedServerProperties(properties);
+    public static DedicatedServerProperties fromFile(RegistryAccess registryAccess, Path path) {
+        return new DedicatedServerProperties(DedicatedServerProperties.loadFromFile(path), registryAccess);
     }
 
     @Override
-    protected /* synthetic */ Settings reload(Properties properties) {
-        return this.reload(properties);
+    protected DedicatedServerProperties reload(RegistryAccess registryAccess, Properties properties) {
+        return new DedicatedServerProperties(properties, registryAccess);
+    }
+
+    @Override
+    protected /* synthetic */ Settings reload(RegistryAccess registryAccess, Properties properties) {
+        return this.reload(registryAccess, properties);
     }
 }
 

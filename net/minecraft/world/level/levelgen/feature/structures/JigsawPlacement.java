@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
@@ -122,10 +123,16 @@ public class JigsawPlacement {
                 BlockPos blockPos3 = blockPos2.relative(direction);
                 int l = blockPos2.getY() - k;
                 int m = -1;
-                StructureTemplatePool structureTemplatePool = Placer.getPool(this.pools, new ResourceLocation(structureBlockInfo2.nbt.getString("pool")));
-                StructureTemplatePool structureTemplatePool2 = Placer.getPool(this.pools, structureTemplatePool.getFallback());
-                if (structureTemplatePool == Pools.INVALID || structureTemplatePool.size() == 0 && structureTemplatePool != Pools.EMPTY) {
-                    LOGGER.warn("Empty or none existent pool: {}", (Object)structureBlockInfo2.nbt.getString("pool"));
+                ResourceLocation resourceLocation = new ResourceLocation(structureBlockInfo2.nbt.getString("pool"));
+                Optional<StructureTemplatePool> optional = this.pools.getOptional(resourceLocation);
+                if (!optional.isPresent() || optional.get().size() == 0 && !Objects.equals(resourceLocation, Pools.EMPTY.location())) {
+                    LOGGER.warn("Empty or none existent pool: {}", (Object)resourceLocation);
+                    continue;
+                }
+                ResourceLocation resourceLocation2 = optional.get().getFallback();
+                Optional<StructureTemplatePool> optional2 = this.pools.getOptional(resourceLocation2);
+                if (!optional2.isPresent() || optional2.get().size() == 0 && !Objects.equals(resourceLocation2, Pools.EMPTY.location())) {
+                    LOGGER.warn("Empty or none existent fallback pool: {}", (Object)resourceLocation2);
                     continue;
                 }
                 boolean bl3 = boundingBox.isInside(blockPos3);
@@ -141,9 +148,9 @@ public class JigsawPlacement {
                 }
                 ArrayList<StructurePoolElement> list = Lists.newArrayList();
                 if (j != this.maxDepth) {
-                    list.addAll(structureTemplatePool.getShuffledTemplates(this.random));
+                    list.addAll(optional.get().getShuffledTemplates(this.random));
                 }
-                list.addAll(structureTemplatePool2.getShuffledTemplates(this.random));
+                list.addAll(optional2.get().getShuffledTemplates(this.random));
                 Iterator iterator = list.iterator();
                 while (iterator.hasNext() && (structurePoolElement2 = (StructurePoolElement)iterator.next()) != EmptyPoolElement.INSTANCE) {
                     for (Rotation rotation2 : Rotation.getShuffled(this.random)) {
@@ -154,9 +161,11 @@ public class JigsawPlacement {
                                 return 0;
                             }
                             ResourceLocation resourceLocation = new ResourceLocation(structureBlockInfo.nbt.getString("pool"));
-                            StructureTemplatePool structureTemplatePool = Placer.getPool(this.pools, resourceLocation);
-                            StructureTemplatePool structureTemplatePool2 = Placer.getPool(this.pools, structureTemplatePool.getFallback());
-                            return Math.max(structureTemplatePool.getMaxSize(this.structureManager), structureTemplatePool2.getMaxSize(this.structureManager));
+                            Optional<StructureTemplatePool> optional = this.pools.getOptional(resourceLocation);
+                            Optional<Integer> optional2 = optional.flatMap(structureTemplatePool -> this.pools.getOptional(structureTemplatePool.getFallback()));
+                            int i = optional.map(structureTemplatePool -> structureTemplatePool.getMaxSize(this.structureManager)).orElse(0);
+                            int j = optional2.map(structureTemplatePool -> structureTemplatePool.getMaxSize(this.structureManager)).orElse(0);
+                            return Math.max(i, j);
                         }).max().orElse(0);
                         for (StructureTemplate.StructureBlockInfo structureBlockInfo22 : list2) {
                             int w;
@@ -211,10 +220,6 @@ public class JigsawPlacement {
                     }
                 }
             }
-        }
-
-        private static StructureTemplatePool getPool(Registry<StructureTemplatePool> registry, ResourceLocation resourceLocation) {
-            return Optional.ofNullable(registry.get(resourceLocation)).orElse(Pools.INVALID);
         }
     }
 

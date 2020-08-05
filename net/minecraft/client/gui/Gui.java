@@ -85,7 +85,6 @@ import org.jetbrains.annotations.Nullable;
 public class Gui
 extends GuiComponent {
     private static final ResourceLocation VIGNETTE_LOCATION = new ResourceLocation("textures/misc/vignette.png");
-    private static final ResourceLocation NAUSEA_LOCATION = new ResourceLocation("textures/misc/nausea.png");
     private static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
     private static final ResourceLocation PUMPKIN_BLUR_LOCATION = new ResourceLocation("textures/misc/pumpkinblur.png");
     private static final Component DEMO_EXPIRED_TEXT = new TranslatableComponent("demo.demoExpired");
@@ -166,14 +165,8 @@ extends GuiComponent {
         if (this.minecraft.options.getCameraType().isFirstPerson() && itemStack.getItem() == Blocks.CARVED_PUMPKIN.asItem()) {
             this.renderPumpkin();
         }
-        if ((g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime)) > 0.0f) {
-            if (this.minecraft.player.hasEffect(MobEffects.CONFUSION)) {
-                if (this.minecraft.options.screenEffectScale < 1.0f) {
-                    this.renderConfusionOverlay(g * (1.0f - this.minecraft.options.screenEffectScale));
-                }
-            } else {
-                this.renderPortalOverlay(g);
-            }
+        if ((g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime)) > 0.0f && !this.minecraft.player.hasEffect(MobEffects.CONFUSION)) {
+            this.renderPortalOverlay(g);
         }
         if (this.minecraft.gameMode.getPlayerMode() == GameType.SPECTATOR) {
             this.spectatorGui.renderHotbar(poseStack, f);
@@ -906,34 +899,6 @@ extends GuiComponent {
         RenderSystem.enableDepthTest();
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         RenderSystem.defaultBlendFunc();
-    }
-
-    private void renderConfusionOverlay(float f) {
-        double d = Mth.lerp((double)f, 2.0, 1.0);
-        float g = 0.2f * f;
-        float h = 0.4f * f;
-        float i = 0.2f * f;
-        double e = (double)this.screenWidth * d;
-        double j = (double)this.screenHeight * d;
-        double k = ((double)this.screenWidth - e) / 2.0;
-        double l = ((double)this.screenHeight - j) / 2.0;
-        RenderSystem.disableDepthTest();
-        RenderSystem.depthMask(false);
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
-        RenderSystem.color4f(g, h, i, 1.0f);
-        this.minecraft.getTextureManager().bind(NAUSEA_LOCATION);
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.vertex(k, l + j, -90.0).uv(0.0f, 1.0f).endVertex();
-        bufferBuilder.vertex(k + e, l + j, -90.0).uv(1.0f, 1.0f).endVertex();
-        bufferBuilder.vertex(k + e, l, -90.0).uv(1.0f, 0.0f).endVertex();
-        bufferBuilder.vertex(k, l, -90.0).uv(0.0f, 0.0f).endVertex();
-        tesselator.end();
-        RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.depthMask(true);
-        RenderSystem.enableDepthTest();
     }
 
     private void renderPortalOverlay(float f) {

@@ -193,7 +193,7 @@ implements StatsUpdateListener {
                     this.killedBy = new TranslatableComponent("stat_type.minecraft.killed_by.none", this.mobName);
                     this.wasKilledBy = false;
                 } else {
-                    this.killedBy = new TranslatableComponent("stat_type.minecraft.killed_by", j, this.mobName);
+                    this.killedBy = new TranslatableComponent("stat_type.minecraft.killed_by", this.mobName, j);
                     this.wasKilledBy = true;
                 }
             }
