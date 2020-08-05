@@ -96,6 +96,7 @@ public class PiglinModel<T extends Mob> extends PlayerModel<T> {
 		this.leftSleeve.copyFrom(this.leftArm);
 		this.rightSleeve.copyFrom(this.rightArm);
 		this.jacket.copyFrom(this.body);
+		this.hat.copyFrom(this.head);
 	}
 
 	protected void setupAttackAnimation(T mob, float f) {

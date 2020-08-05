@@ -93,7 +93,7 @@ public abstract class ChunkGenerator {
 					double e = (double)(4 * i + i * m * 6) + (random.nextDouble() - 0.5) * (double)i * 2.5;
 					int o = (int)Math.round(Math.cos(d) * e);
 					int p = (int)Math.round(Math.sin(d) * e);
-					BlockPos blockPos = this.biomeSource.findBiomeHorizontal((o << 4) + 8, 0, (p << 4) + 8, 112, list, random);
+					BlockPos blockPos = this.biomeSource.findBiomeHorizontal((o << 4) + 8, 0, (p << 4) + 8, 112, list::contains, random);
 					if (blockPos != null) {
 						o = blockPos.getX() >> 4;
 						p = blockPos.getZ() >> 4;

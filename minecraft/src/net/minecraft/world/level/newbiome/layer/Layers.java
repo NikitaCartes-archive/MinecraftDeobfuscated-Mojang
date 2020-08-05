@@ -1,9 +1,9 @@
 package net.minecraft.world.level.newbiome.layer;
 
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import java.util.function.LongFunction;
-import net.minecraft.data.BuiltinRegistries;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.Util;
 import net.minecraft.world.level.newbiome.area.Area;
 import net.minecraft.world.level.newbiome.area.AreaFactory;
 import net.minecraft.world.level.newbiome.area.LazyArea;
@@ -12,16 +12,76 @@ import net.minecraft.world.level.newbiome.context.LazyAreaContext;
 import net.minecraft.world.level.newbiome.layer.traits.AreaTransformer1;
 
 public class Layers {
-	protected static final int WARM_OCEAN = BuiltinRegistries.BIOME.getId(Biomes.WARM_OCEAN);
-	protected static final int LUKEWARM_OCEAN = BuiltinRegistries.BIOME.getId(Biomes.LUKEWARM_OCEAN);
-	protected static final int OCEAN = BuiltinRegistries.BIOME.getId(Biomes.OCEAN);
-	protected static final int COLD_OCEAN = BuiltinRegistries.BIOME.getId(Biomes.COLD_OCEAN);
-	protected static final int FROZEN_OCEAN = BuiltinRegistries.BIOME.getId(Biomes.FROZEN_OCEAN);
-	protected static final int DEEP_WARM_OCEAN = BuiltinRegistries.BIOME.getId(Biomes.DEEP_WARM_OCEAN);
-	protected static final int DEEP_LUKEWARM_OCEAN = BuiltinRegistries.BIOME.getId(Biomes.DEEP_LUKEWARM_OCEAN);
-	protected static final int DEEP_OCEAN = BuiltinRegistries.BIOME.getId(Biomes.DEEP_OCEAN);
-	protected static final int DEEP_COLD_OCEAN = BuiltinRegistries.BIOME.getId(Biomes.DEEP_COLD_OCEAN);
-	protected static final int DEEP_FROZEN_OCEAN = BuiltinRegistries.BIOME.getId(Biomes.DEEP_FROZEN_OCEAN);
+	private static final Int2IntMap CATEGORIES = Util.make(new Int2IntOpenHashMap(), int2IntOpenHashMap -> {
+		register(int2IntOpenHashMap, Layers.Category.BEACH, 16);
+		register(int2IntOpenHashMap, Layers.Category.BEACH, 26);
+		register(int2IntOpenHashMap, Layers.Category.DESERT, 2);
+		register(int2IntOpenHashMap, Layers.Category.DESERT, 17);
+		register(int2IntOpenHashMap, Layers.Category.DESERT, 130);
+		register(int2IntOpenHashMap, Layers.Category.EXTREME_HILLS, 131);
+		register(int2IntOpenHashMap, Layers.Category.EXTREME_HILLS, 162);
+		register(int2IntOpenHashMap, Layers.Category.EXTREME_HILLS, 20);
+		register(int2IntOpenHashMap, Layers.Category.EXTREME_HILLS, 3);
+		register(int2IntOpenHashMap, Layers.Category.EXTREME_HILLS, 34);
+		register(int2IntOpenHashMap, Layers.Category.FOREST, 27);
+		register(int2IntOpenHashMap, Layers.Category.FOREST, 28);
+		register(int2IntOpenHashMap, Layers.Category.FOREST, 29);
+		register(int2IntOpenHashMap, Layers.Category.FOREST, 157);
+		register(int2IntOpenHashMap, Layers.Category.FOREST, 132);
+		register(int2IntOpenHashMap, Layers.Category.FOREST, 4);
+		register(int2IntOpenHashMap, Layers.Category.FOREST, 155);
+		register(int2IntOpenHashMap, Layers.Category.FOREST, 156);
+		register(int2IntOpenHashMap, Layers.Category.FOREST, 18);
+		register(int2IntOpenHashMap, Layers.Category.ICY, 140);
+		register(int2IntOpenHashMap, Layers.Category.ICY, 13);
+		register(int2IntOpenHashMap, Layers.Category.ICY, 12);
+		register(int2IntOpenHashMap, Layers.Category.JUNGLE, 168);
+		register(int2IntOpenHashMap, Layers.Category.JUNGLE, 169);
+		register(int2IntOpenHashMap, Layers.Category.JUNGLE, 21);
+		register(int2IntOpenHashMap, Layers.Category.JUNGLE, 23);
+		register(int2IntOpenHashMap, Layers.Category.JUNGLE, 22);
+		register(int2IntOpenHashMap, Layers.Category.JUNGLE, 149);
+		register(int2IntOpenHashMap, Layers.Category.JUNGLE, 151);
+		register(int2IntOpenHashMap, Layers.Category.MESA, 37);
+		register(int2IntOpenHashMap, Layers.Category.MESA, 165);
+		register(int2IntOpenHashMap, Layers.Category.MESA, 167);
+		register(int2IntOpenHashMap, Layers.Category.MESA, 166);
+		register(int2IntOpenHashMap, Layers.Category.BADLANDS_PLATEAU, 39);
+		register(int2IntOpenHashMap, Layers.Category.BADLANDS_PLATEAU, 38);
+		register(int2IntOpenHashMap, Layers.Category.MUSHROOM, 14);
+		register(int2IntOpenHashMap, Layers.Category.MUSHROOM, 15);
+		register(int2IntOpenHashMap, Layers.Category.NONE, 25);
+		register(int2IntOpenHashMap, Layers.Category.OCEAN, 46);
+		register(int2IntOpenHashMap, Layers.Category.OCEAN, 49);
+		register(int2IntOpenHashMap, Layers.Category.OCEAN, 50);
+		register(int2IntOpenHashMap, Layers.Category.OCEAN, 48);
+		register(int2IntOpenHashMap, Layers.Category.OCEAN, 24);
+		register(int2IntOpenHashMap, Layers.Category.OCEAN, 47);
+		register(int2IntOpenHashMap, Layers.Category.OCEAN, 10);
+		register(int2IntOpenHashMap, Layers.Category.OCEAN, 45);
+		register(int2IntOpenHashMap, Layers.Category.OCEAN, 0);
+		register(int2IntOpenHashMap, Layers.Category.OCEAN, 44);
+		register(int2IntOpenHashMap, Layers.Category.PLAINS, 1);
+		register(int2IntOpenHashMap, Layers.Category.PLAINS, 129);
+		register(int2IntOpenHashMap, Layers.Category.RIVER, 11);
+		register(int2IntOpenHashMap, Layers.Category.RIVER, 7);
+		register(int2IntOpenHashMap, Layers.Category.SAVANNA, 35);
+		register(int2IntOpenHashMap, Layers.Category.SAVANNA, 36);
+		register(int2IntOpenHashMap, Layers.Category.SAVANNA, 163);
+		register(int2IntOpenHashMap, Layers.Category.SAVANNA, 164);
+		register(int2IntOpenHashMap, Layers.Category.SWAMP, 6);
+		register(int2IntOpenHashMap, Layers.Category.SWAMP, 134);
+		register(int2IntOpenHashMap, Layers.Category.TAIGA, 160);
+		register(int2IntOpenHashMap, Layers.Category.TAIGA, 161);
+		register(int2IntOpenHashMap, Layers.Category.TAIGA, 32);
+		register(int2IntOpenHashMap, Layers.Category.TAIGA, 33);
+		register(int2IntOpenHashMap, Layers.Category.TAIGA, 30);
+		register(int2IntOpenHashMap, Layers.Category.TAIGA, 31);
+		register(int2IntOpenHashMap, Layers.Category.TAIGA, 158);
+		register(int2IntOpenHashMap, Layers.Category.TAIGA, 5);
+		register(int2IntOpenHashMap, Layers.Category.TAIGA, 19);
+		register(int2IntOpenHashMap, Layers.Category.TAIGA, 133);
+	});
 
 	private static <T extends Area, C extends BigContext<T>> AreaFactory<T> zoom(
 		long l, AreaTransformer1 areaTransformer1, AreaFactory<T> areaFactory, int i, LongFunction<C> longFunction
@@ -94,39 +154,37 @@ public class Layers {
 	}
 
 	public static boolean isSame(int i, int j) {
-		if (i == j) {
-			return true;
-		} else {
-			Biome biome = BuiltinRegistries.BIOME.byId(i);
-			Biome biome2 = BuiltinRegistries.BIOME.byId(j);
-			if (biome == null || biome2 == null) {
-				return false;
-			} else if (biome != Biomes.WOODED_BADLANDS_PLATEAU && biome != Biomes.BADLANDS_PLATEAU) {
-				return biome.getBiomeCategory() != Biome.BiomeCategory.NONE
-						&& biome2.getBiomeCategory() != Biome.BiomeCategory.NONE
-						&& biome.getBiomeCategory() == biome2.getBiomeCategory()
-					? true
-					: biome == biome2;
-			} else {
-				return biome2 == Biomes.WOODED_BADLANDS_PLATEAU || biome2 == Biomes.BADLANDS_PLATEAU;
-			}
-		}
+		return i == j ? true : CATEGORIES.get(i) == CATEGORIES.get(j);
+	}
+
+	private static void register(Int2IntOpenHashMap int2IntOpenHashMap, Layers.Category category, int i) {
+		int2IntOpenHashMap.put(i, category.ordinal());
 	}
 
 	protected static boolean isOcean(int i) {
-		return i == WARM_OCEAN
-			|| i == LUKEWARM_OCEAN
-			|| i == OCEAN
-			|| i == COLD_OCEAN
-			|| i == FROZEN_OCEAN
-			|| i == DEEP_WARM_OCEAN
-			|| i == DEEP_LUKEWARM_OCEAN
-			|| i == DEEP_OCEAN
-			|| i == DEEP_COLD_OCEAN
-			|| i == DEEP_FROZEN_OCEAN;
+		return i == 44 || i == 45 || i == 0 || i == 46 || i == 10 || i == 47 || i == 48 || i == 24 || i == 49 || i == 50;
 	}
 
 	protected static boolean isShallowOcean(int i) {
-		return i == WARM_OCEAN || i == LUKEWARM_OCEAN || i == OCEAN || i == COLD_OCEAN || i == FROZEN_OCEAN;
+		return i == 44 || i == 45 || i == 0 || i == 46 || i == 10;
+	}
+
+	static enum Category {
+		NONE,
+		TAIGA,
+		EXTREME_HILLS,
+		JUNGLE,
+		MESA,
+		BADLANDS_PLATEAU,
+		PLAINS,
+		SAVANNA,
+		ICY,
+		BEACH,
+		FOREST,
+		OCEAN,
+		DESERT,
+		RIVER,
+		SWAMP,
+		MUSHROOM;
 	}
 }

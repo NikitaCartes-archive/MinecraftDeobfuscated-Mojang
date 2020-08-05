@@ -10,6 +10,7 @@ import net.minecraft.world.item.crafting.Recipe;
 
 public class ResultContainer implements Container, RecipeHolder {
 	private final NonNullList<ItemStack> itemStacks = NonNullList.withSize(1, ItemStack.EMPTY);
+	@Nullable
 	private Recipe<?> recipeUsed;
 
 	@Override

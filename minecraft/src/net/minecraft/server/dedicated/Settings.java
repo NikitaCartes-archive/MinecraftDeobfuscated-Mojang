@@ -13,6 +13,7 @@ import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import javax.annotation.Nullable;
+import net.minecraft.core.RegistryAccess;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -193,7 +194,7 @@ public abstract class Settings<T extends Settings<T>> {
 		return properties;
 	}
 
-	protected abstract T reload(Properties properties);
+	protected abstract T reload(RegistryAccess registryAccess, Properties properties);
 
 	public class MutableValue<V> implements Supplier<V> {
 		private final String key;
@@ -210,10 +211,10 @@ public abstract class Settings<T extends Settings<T>> {
 			return this.value;
 		}
 
-		public T update(V object) {
+		public T update(RegistryAccess registryAccess, V object) {
 			Properties properties = Settings.this.cloneProperties();
 			properties.put(this.key, this.serializer.apply(object));
-			return Settings.this.reload(properties);
+			return Settings.this.reload(registryAccess, properties);
 		}
 	}
 }

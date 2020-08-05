@@ -1,8 +1,8 @@
 package net.minecraft.world.level.newbiome.layer;
 
-import net.minecraft.data.BuiltinRegistries;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import net.minecraft.Util;
 import net.minecraft.world.level.newbiome.area.Area;
 import net.minecraft.world.level.newbiome.context.Context;
 import net.minecraft.world.level.newbiome.layer.traits.AreaTransformer2;
@@ -14,32 +14,29 @@ public enum RegionHillsLayer implements AreaTransformer2, DimensionOffset1Transf
 	INSTANCE;
 
 	private static final Logger LOGGER = LogManager.getLogger();
-	private static final int BIRCH_FOREST = BuiltinRegistries.BIOME.getId(Biomes.BIRCH_FOREST);
-	private static final int BIRCH_FOREST_HILLS = BuiltinRegistries.BIOME.getId(Biomes.BIRCH_FOREST_HILLS);
-	private static final int DESERT = BuiltinRegistries.BIOME.getId(Biomes.DESERT);
-	private static final int DESERT_HILLS = BuiltinRegistries.BIOME.getId(Biomes.DESERT_HILLS);
-	private static final int MOUNTAINS = BuiltinRegistries.BIOME.getId(Biomes.MOUNTAINS);
-	private static final int WOODED_MOUNTAINS = BuiltinRegistries.BIOME.getId(Biomes.WOODED_MOUNTAINS);
-	private static final int FOREST = BuiltinRegistries.BIOME.getId(Biomes.FOREST);
-	private static final int WOODED_HILLS = BuiltinRegistries.BIOME.getId(Biomes.WOODED_HILLS);
-	private static final int SNOWY_TUNDRA = BuiltinRegistries.BIOME.getId(Biomes.SNOWY_TUNDRA);
-	private static final int SNOWY_MOUNTAIN = BuiltinRegistries.BIOME.getId(Biomes.SNOWY_MOUNTAINS);
-	private static final int JUNGLE = BuiltinRegistries.BIOME.getId(Biomes.JUNGLE);
-	private static final int JUNGLE_HILLS = BuiltinRegistries.BIOME.getId(Biomes.JUNGLE_HILLS);
-	private static final int BAMBOO_JUNGLE = BuiltinRegistries.BIOME.getId(Biomes.BAMBOO_JUNGLE);
-	private static final int BAMBOO_JUNGLE_HILLS = BuiltinRegistries.BIOME.getId(Biomes.BAMBOO_JUNGLE_HILLS);
-	private static final int BADLANDS = BuiltinRegistries.BIOME.getId(Biomes.BADLANDS);
-	private static final int WOODED_BADLANDS_PLATEAU = BuiltinRegistries.BIOME.getId(Biomes.WOODED_BADLANDS_PLATEAU);
-	private static final int PLAINS = BuiltinRegistries.BIOME.getId(Biomes.PLAINS);
-	private static final int GIANT_TREE_TAIGA = BuiltinRegistries.BIOME.getId(Biomes.GIANT_TREE_TAIGA);
-	private static final int GIANT_TREE_TAIGA_HILLS = BuiltinRegistries.BIOME.getId(Biomes.GIANT_TREE_TAIGA_HILLS);
-	private static final int DARK_FOREST = BuiltinRegistries.BIOME.getId(Biomes.DARK_FOREST);
-	private static final int SAVANNA = BuiltinRegistries.BIOME.getId(Biomes.SAVANNA);
-	private static final int SAVANNA_PLATEAU = BuiltinRegistries.BIOME.getId(Biomes.SAVANNA_PLATEAU);
-	private static final int TAIGA = BuiltinRegistries.BIOME.getId(Biomes.TAIGA);
-	private static final int SNOWY_TAIGA = BuiltinRegistries.BIOME.getId(Biomes.SNOWY_TAIGA);
-	private static final int SNOWY_TAIGA_HILLS = BuiltinRegistries.BIOME.getId(Biomes.SNOWY_TAIGA_HILLS);
-	private static final int TAIGA_HILLS = BuiltinRegistries.BIOME.getId(Biomes.TAIGA_HILLS);
+	private static final Int2IntMap MUTATIONS = Util.make(new Int2IntOpenHashMap(), int2IntOpenHashMap -> {
+		int2IntOpenHashMap.put(1, 129);
+		int2IntOpenHashMap.put(2, 130);
+		int2IntOpenHashMap.put(3, 131);
+		int2IntOpenHashMap.put(4, 132);
+		int2IntOpenHashMap.put(5, 133);
+		int2IntOpenHashMap.put(6, 134);
+		int2IntOpenHashMap.put(12, 140);
+		int2IntOpenHashMap.put(21, 149);
+		int2IntOpenHashMap.put(23, 151);
+		int2IntOpenHashMap.put(27, 155);
+		int2IntOpenHashMap.put(28, 156);
+		int2IntOpenHashMap.put(29, 157);
+		int2IntOpenHashMap.put(30, 158);
+		int2IntOpenHashMap.put(32, 160);
+		int2IntOpenHashMap.put(33, 161);
+		int2IntOpenHashMap.put(34, 162);
+		int2IntOpenHashMap.put(35, 163);
+		int2IntOpenHashMap.put(36, 164);
+		int2IntOpenHashMap.put(37, 165);
+		int2IntOpenHashMap.put(38, 166);
+		int2IntOpenHashMap.put(39, 167);
+	});
 
 	@Override
 	public int applyPixel(Context context, Area area, Area area2, int i, int j) {
@@ -51,85 +48,79 @@ public enum RegionHillsLayer implements AreaTransformer2, DimensionOffset1Transf
 
 		int m = (l - 2) % 29;
 		if (!Layers.isShallowOcean(k) && l >= 2 && m == 1) {
-			Biome biome = BuiltinRegistries.BIOME.byId(k);
-			if (biome == null || !biome.isMutated()) {
-				Biome biome2 = Biomes.getMutatedVariant(biome);
-				return biome2 == null ? k : BuiltinRegistries.BIOME.getId(biome2);
+			return MUTATIONS.getOrDefault(k, k);
+		} else {
+			if (context.nextRandom(3) == 0 || m == 0) {
+				int n = k;
+				if (k == 2) {
+					n = 17;
+				} else if (k == 4) {
+					n = 18;
+				} else if (k == 27) {
+					n = 28;
+				} else if (k == 29) {
+					n = 1;
+				} else if (k == 5) {
+					n = 19;
+				} else if (k == 32) {
+					n = 33;
+				} else if (k == 30) {
+					n = 31;
+				} else if (k == 1) {
+					n = context.nextRandom(3) == 0 ? 18 : 4;
+				} else if (k == 12) {
+					n = 13;
+				} else if (k == 21) {
+					n = 22;
+				} else if (k == 168) {
+					n = 169;
+				} else if (k == 0) {
+					n = 24;
+				} else if (k == 45) {
+					n = 48;
+				} else if (k == 46) {
+					n = 49;
+				} else if (k == 10) {
+					n = 50;
+				} else if (k == 3) {
+					n = 34;
+				} else if (k == 35) {
+					n = 36;
+				} else if (Layers.isSame(k, 38)) {
+					n = 37;
+				} else if ((k == 24 || k == 48 || k == 49 || k == 50) && context.nextRandom(3) == 0) {
+					n = context.nextRandom(2) == 0 ? 1 : 4;
+				}
+
+				if (m == 0 && n != k) {
+					n = MUTATIONS.getOrDefault(n, k);
+				}
+
+				if (n != k) {
+					int o = 0;
+					if (Layers.isSame(area.get(this.getParentX(i + 1), this.getParentY(j + 0)), k)) {
+						o++;
+					}
+
+					if (Layers.isSame(area.get(this.getParentX(i + 2), this.getParentY(j + 1)), k)) {
+						o++;
+					}
+
+					if (Layers.isSame(area.get(this.getParentX(i + 0), this.getParentY(j + 1)), k)) {
+						o++;
+					}
+
+					if (Layers.isSame(area.get(this.getParentX(i + 1), this.getParentY(j + 2)), k)) {
+						o++;
+					}
+
+					if (o >= 3) {
+						return n;
+					}
+				}
 			}
+
+			return k;
 		}
-
-		if (context.nextRandom(3) == 0 || m == 0) {
-			int n = k;
-			if (k == DESERT) {
-				n = DESERT_HILLS;
-			} else if (k == FOREST) {
-				n = WOODED_HILLS;
-			} else if (k == BIRCH_FOREST) {
-				n = BIRCH_FOREST_HILLS;
-			} else if (k == DARK_FOREST) {
-				n = PLAINS;
-			} else if (k == TAIGA) {
-				n = TAIGA_HILLS;
-			} else if (k == GIANT_TREE_TAIGA) {
-				n = GIANT_TREE_TAIGA_HILLS;
-			} else if (k == SNOWY_TAIGA) {
-				n = SNOWY_TAIGA_HILLS;
-			} else if (k == PLAINS) {
-				n = context.nextRandom(3) == 0 ? WOODED_HILLS : FOREST;
-			} else if (k == SNOWY_TUNDRA) {
-				n = SNOWY_MOUNTAIN;
-			} else if (k == JUNGLE) {
-				n = JUNGLE_HILLS;
-			} else if (k == BAMBOO_JUNGLE) {
-				n = BAMBOO_JUNGLE_HILLS;
-			} else if (k == Layers.OCEAN) {
-				n = Layers.DEEP_OCEAN;
-			} else if (k == Layers.LUKEWARM_OCEAN) {
-				n = Layers.DEEP_LUKEWARM_OCEAN;
-			} else if (k == Layers.COLD_OCEAN) {
-				n = Layers.DEEP_COLD_OCEAN;
-			} else if (k == Layers.FROZEN_OCEAN) {
-				n = Layers.DEEP_FROZEN_OCEAN;
-			} else if (k == MOUNTAINS) {
-				n = WOODED_MOUNTAINS;
-			} else if (k == SAVANNA) {
-				n = SAVANNA_PLATEAU;
-			} else if (Layers.isSame(k, WOODED_BADLANDS_PLATEAU)) {
-				n = BADLANDS;
-			} else if ((k == Layers.DEEP_OCEAN || k == Layers.DEEP_LUKEWARM_OCEAN || k == Layers.DEEP_COLD_OCEAN || k == Layers.DEEP_FROZEN_OCEAN)
-				&& context.nextRandom(3) == 0) {
-				n = context.nextRandom(2) == 0 ? PLAINS : FOREST;
-			}
-
-			if (m == 0 && n != k) {
-				Biome biome2 = Biomes.getMutatedVariant(BuiltinRegistries.BIOME.byId(n));
-				n = biome2 == null ? k : BuiltinRegistries.BIOME.getId(biome2);
-			}
-
-			if (n != k) {
-				int o = 0;
-				if (Layers.isSame(area.get(this.getParentX(i + 1), this.getParentY(j + 0)), k)) {
-					o++;
-				}
-
-				if (Layers.isSame(area.get(this.getParentX(i + 2), this.getParentY(j + 1)), k)) {
-					o++;
-				}
-
-				if (Layers.isSame(area.get(this.getParentX(i + 0), this.getParentY(j + 1)), k)) {
-					o++;
-				}
-
-				if (Layers.isSame(area.get(this.getParentX(i + 1), this.getParentY(j + 2)), k)) {
-					o++;
-				}
-
-				if (o >= 3) {
-					return n;
-				}
-			}
-		}
-
-		return k;
 	}
 }

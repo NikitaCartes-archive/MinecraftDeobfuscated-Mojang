@@ -18,12 +18,12 @@ public class DefaultedRegistry<T> extends MappedRegistry<T> {
 	}
 
 	@Override
-	public <V extends T> V registerMapping(int i, ResourceKey<T> resourceKey, V object) {
+	public <V extends T> V registerMapping(int i, ResourceKey<T> resourceKey, V object, Lifecycle lifecycle) {
 		if (this.defaultKey.equals(resourceKey.location())) {
 			this.defaultValue = (T)object;
 		}
 
-		return super.registerMapping(i, resourceKey, object);
+		return super.registerMapping(i, resourceKey, object, lifecycle);
 	}
 
 	@Override

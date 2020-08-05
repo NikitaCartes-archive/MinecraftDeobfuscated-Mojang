@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
@@ -19,6 +20,7 @@ import net.minecraft.util.ProgressListener;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.FixedBiomeSource;
@@ -55,16 +57,21 @@ public class McRegionUpgrader {
 		RegistryReadOps<Tag> registryReadOps = RegistryReadOps.create(NbtOps.INSTANCE, ResourceManager.Empty.INSTANCE, registryHolder);
 		WorldData worldData = levelStorageAccess.getDataTag(registryReadOps, DataPackConfig.DEFAULT);
 		long l = worldData != null ? worldData.worldGenSettings().seed() : 0L;
+		Registry<Biome> registry = registryHolder.registryOrThrow(Registry.BIOME_REGISTRY);
 		BiomeSource biomeSource;
 		if (worldData != null && worldData.worldGenSettings().isFlatWorld()) {
-			biomeSource = new FixedBiomeSource(Biomes.PLAINS);
+			biomeSource = new FixedBiomeSource(registry.getOrThrow(Biomes.PLAINS));
 		} else {
-			biomeSource = new OverworldBiomeSource(l, false, false);
+			biomeSource = new OverworldBiomeSource(l, false, false, registry);
 		}
 
 		convertRegions(registryHolder, new File(file, "region"), list, biomeSource, 0, i, progressListener);
-		convertRegions(registryHolder, new File(file2, "region"), list2, new FixedBiomeSource(Biomes.NETHER_WASTES), list.size(), i, progressListener);
-		convertRegions(registryHolder, new File(file3, "region"), list3, new FixedBiomeSource(Biomes.THE_END), list.size() + list2.size(), i, progressListener);
+		convertRegions(
+			registryHolder, new File(file2, "region"), list2, new FixedBiomeSource(registry.getOrThrow(Biomes.NETHER_WASTES)), list.size(), i, progressListener
+		);
+		convertRegions(
+			registryHolder, new File(file3, "region"), list3, new FixedBiomeSource(registry.getOrThrow(Biomes.THE_END)), list.size() + list2.size(), i, progressListener
+		);
 		makeMcrLevelDatBackup(levelStorageAccess);
 		levelStorageAccess.saveDataTag(registryHolder, worldData);
 		return true;

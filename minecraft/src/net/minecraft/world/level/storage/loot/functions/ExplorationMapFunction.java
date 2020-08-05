@@ -20,6 +20,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -51,7 +52,7 @@ public class ExplorationMapFunction extends LootItemConditionalFunction {
 
 	@Override
 	public Set<LootContextParam<?>> getReferencedContextParams() {
-		return ImmutableSet.of(LootContextParams.BLOCK_POS);
+		return ImmutableSet.of(LootContextParams.ORIGIN);
 	}
 
 	@Override
@@ -59,14 +60,14 @@ public class ExplorationMapFunction extends LootItemConditionalFunction {
 		if (itemStack.getItem() != Items.MAP) {
 			return itemStack;
 		} else {
-			BlockPos blockPos = lootContext.getParamOrNull(LootContextParams.BLOCK_POS);
-			if (blockPos != null) {
+			Vec3 vec3 = lootContext.getParamOrNull(LootContextParams.ORIGIN);
+			if (vec3 != null) {
 				ServerLevel serverLevel = lootContext.getLevel();
-				BlockPos blockPos2 = serverLevel.findNearestMapFeature(this.destination, blockPos, this.searchRadius, this.skipKnownStructures);
-				if (blockPos2 != null) {
-					ItemStack itemStack2 = MapItem.create(serverLevel, blockPos2.getX(), blockPos2.getZ(), this.zoom, true, true);
+				BlockPos blockPos = serverLevel.findNearestMapFeature(this.destination, new BlockPos(vec3), this.searchRadius, this.skipKnownStructures);
+				if (blockPos != null) {
+					ItemStack itemStack2 = MapItem.create(serverLevel, blockPos.getX(), blockPos.getZ(), this.zoom, true, true);
 					MapItem.renderBiomePreviewMap(serverLevel, itemStack2);
-					MapItemSavedData.addTargetDecoration(itemStack2, blockPos2, "+", this.mapDecoration);
+					MapItemSavedData.addTargetDecoration(itemStack2, blockPos, "+", this.mapDecoration);
 					itemStack2.setHoverName(new TranslatableComponent("filled_map." + this.destination.getFeatureName().toLowerCase(Locale.ROOT)));
 					return itemStack2;
 				}

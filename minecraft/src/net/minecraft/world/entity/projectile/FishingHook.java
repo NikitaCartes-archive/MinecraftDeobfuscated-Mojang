@@ -451,7 +451,7 @@ public class FishingHook extends Projectile {
 				i = this.hookedIn instanceof ItemEntity ? 3 : 5;
 			} else if (this.nibble > 0) {
 				LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level)
-					.withParameter(LootContextParams.BLOCK_POS, this.blockPosition())
+					.withParameter(LootContextParams.ORIGIN, this.position())
 					.withParameter(LootContextParams.TOOL, itemStack)
 					.withParameter(LootContextParams.THIS_ENTITY, this)
 					.withRandom(this.random)

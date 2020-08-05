@@ -3,7 +3,6 @@ package net.minecraft.client.gui.screens.worldselection;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.JsonOps;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,13 +29,13 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.RegistryReadOps;
 import net.minecraft.server.ServerResources;
 import net.minecraft.server.packs.repository.FolderRepositorySource;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -123,11 +122,21 @@ public class CreateWorldScreen extends Screen {
 		this.tempDataPackDir = path;
 	}
 
-	public CreateWorldScreen(@Nullable Screen screen) {
-		this(
+	public static CreateWorldScreen create(@Nullable Screen screen) {
+		RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
+		return new CreateWorldScreen(
 			screen,
 			DataPackConfig.DEFAULT,
-			new WorldGenSettingsComponent(RegistryAccess.builtin(), WorldGenSettings.makeDefault(), Optional.of(WorldPreset.NORMAL), OptionalLong.empty())
+			new WorldGenSettingsComponent(
+				registryHolder,
+				WorldGenSettings.makeDefault(
+					registryHolder.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY),
+					registryHolder.registryOrThrow(Registry.BIOME_REGISTRY),
+					registryHolder.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY)
+				),
+				Optional.of(WorldPreset.NORMAL),
+				OptionalLong.empty()
+			)
 		);
 	}
 
@@ -497,9 +506,7 @@ public class CreateWorldScreen extends Screen {
 						} else {
 							this.minecraft.tell(() -> {
 								this.dataPacks = dataPackConfig;
-								RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
-								RegistryReadOps.create(JsonOps.INSTANCE, serverResources.getResourceManager(), registryHolder);
-								this.worldGenSettingsComponent.setRegistryHolder(registryHolder);
+								this.worldGenSettingsComponent.updateDataPacks(serverResources);
 								serverResources.close();
 								this.minecraft.setScreen(this);
 							});

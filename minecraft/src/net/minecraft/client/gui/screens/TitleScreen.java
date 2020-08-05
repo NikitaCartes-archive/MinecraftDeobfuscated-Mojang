@@ -193,16 +193,15 @@ public class TitleScreen extends Screen {
 	}
 
 	private void createDemoMenuOptions(int i, int j) {
-		this.addButton(
-			new Button(
-				this.width / 2 - 100,
-				i,
-				200,
-				20,
-				new TranslatableComponent("menu.playdemo"),
-				button -> this.minecraft.createLevel("Demo_World", MinecraftServer.DEMO_SETTINGS, RegistryAccess.builtin(), WorldGenSettings.DEMO_SETTINGS)
-			)
-		);
+		boolean bl = this.checkDemoWorldPresence();
+		this.addButton(new Button(this.width / 2 - 100, i, 200, 20, new TranslatableComponent("menu.playdemo"), button -> {
+			if (bl) {
+				this.minecraft.loadLevel("Demo_World");
+			} else {
+				RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
+				this.minecraft.createLevel("Demo_World", MinecraftServer.DEMO_SETTINGS, registryHolder, WorldGenSettings.demoSettings(registryHolder));
+			}
+		}));
 		this.resetDemoButton = this.addButton(
 			new Button(
 				this.width / 2 - 100,
@@ -214,35 +213,36 @@ public class TitleScreen extends Screen {
 					LevelStorageSource levelStorageSource = this.minecraft.getLevelSource();
 
 					try (LevelStorageSource.LevelStorageAccess levelStorageAccess = levelStorageSource.createAccess("Demo_World")) {
-						LevelSummary levelSummaryx = levelStorageAccess.getSummary();
-						if (levelSummaryx != null) {
+						LevelSummary levelSummary = levelStorageAccess.getSummary();
+						if (levelSummary != null) {
 							this.minecraft
 								.setScreen(
 									new ConfirmScreen(
 										this::confirmDemo,
 										new TranslatableComponent("selectWorld.deleteQuestion"),
-										new TranslatableComponent("selectWorld.deleteWarning", levelSummaryx.getLevelName()),
+										new TranslatableComponent("selectWorld.deleteWarning", levelSummary.getLevelName()),
 										new TranslatableComponent("selectWorld.deleteButton"),
 										CommonComponents.GUI_CANCEL
 									)
 								);
 						}
-					} catch (IOException var16x) {
+					} catch (IOException var16) {
 						SystemToast.onWorldAccessFailure(this.minecraft, "Demo_World");
-						LOGGER.warn("Failed to access demo world", (Throwable)var16x);
+						LOGGER.warn("Failed to access demo world", (Throwable)var16);
 					}
 				}
 			)
 		);
+		this.resetDemoButton.active = bl;
+	}
 
+	private boolean checkDemoWorldPresence() {
 		try (LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess("Demo_World")) {
-			LevelSummary levelSummary = levelStorageAccess.getSummary();
-			if (levelSummary == null) {
-				this.resetDemoButton.active = false;
-			}
-		} catch (IOException var16) {
+			return levelStorageAccess.getSummary() != null;
+		} catch (IOException var15) {
 			SystemToast.onWorldAccessFailure(this.minecraft, "Demo_World");
-			LOGGER.warn("Failed to read demo world data", (Throwable)var16);
+			LOGGER.warn("Failed to read demo world data", (Throwable)var15);
+			return false;
 		}
 	}
 

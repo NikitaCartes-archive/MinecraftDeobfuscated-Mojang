@@ -57,14 +57,14 @@ public final class LevelStem {
 		for (ResourceKey<LevelStem> resourceKey : BUILTIN_ORDER) {
 			LevelStem levelStem = mappedRegistry.get(resourceKey);
 			if (levelStem != null) {
-				mappedRegistry2.register(resourceKey, levelStem);
+				mappedRegistry2.register(resourceKey, levelStem, mappedRegistry.lifecycle(levelStem));
 			}
 		}
 
 		for (Entry<ResourceKey<LevelStem>, LevelStem> entry : mappedRegistry.entrySet()) {
 			ResourceKey<LevelStem> resourceKey2 = (ResourceKey<LevelStem>)entry.getKey();
 			if (!BUILTIN_ORDER.contains(resourceKey2)) {
-				mappedRegistry2.register(resourceKey2, entry.getValue());
+				mappedRegistry2.register(resourceKey2, entry.getValue(), mappedRegistry.lifecycle((LevelStem)entry.getValue()));
 			}
 		}
 
@@ -81,12 +81,12 @@ public final class LevelStem {
 			Entry<ResourceKey<LevelStem>, LevelStem> entry3 = (Entry<ResourceKey<LevelStem>, LevelStem>)list.get(2);
 			if (entry.getKey() != OVERWORLD || entry2.getKey() != NETHER || entry3.getKey() != END) {
 				return false;
-			} else if (((LevelStem)entry.getValue()).type() != DimensionType.DEFAULT_OVERWORLD
+			} else if (!((LevelStem)entry.getValue()).type().equalTo(DimensionType.DEFAULT_OVERWORLD)
 				&& ((LevelStem)entry.getValue()).type() != DimensionType.DEFAULT_OVERWORLD_CAVES) {
 				return false;
-			} else if (((LevelStem)entry2.getValue()).type() != DimensionType.DEFAULT_NETHER) {
+			} else if (!((LevelStem)entry2.getValue()).type().equalTo(DimensionType.DEFAULT_NETHER)) {
 				return false;
-			} else if (((LevelStem)entry3.getValue()).type() != DimensionType.DEFAULT_END) {
+			} else if (!((LevelStem)entry3.getValue()).type().equalTo(DimensionType.DEFAULT_END)) {
 				return false;
 			} else if (((LevelStem)entry2.getValue()).generator() instanceof NoiseBasedChunkGenerator
 				&& ((LevelStem)entry3.getValue()).generator() instanceof NoiseBasedChunkGenerator) {

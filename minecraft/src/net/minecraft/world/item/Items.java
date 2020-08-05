@@ -911,31 +911,31 @@ public class Items {
 	public static final Item COOKED_COD = registerItem("cooked_cod", new Item(new Item.Properties().tab(CreativeModeTab.TAB_FOOD).food(Foods.COOKED_COD)));
 	public static final Item COOKED_SALMON = registerItem("cooked_salmon", new Item(new Item.Properties().tab(CreativeModeTab.TAB_FOOD).food(Foods.COOKED_SALMON)));
 	public static final Item INK_SAC = registerItem("ink_sac", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
-	public static final Item RED_DYE = registerItem("red_dye", new DyeItem(DyeColor.RED, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
-	public static final Item GREEN_DYE = registerItem("green_dye", new DyeItem(DyeColor.GREEN, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item COCOA_BEANS = registerItem(
 		"cocoa_beans", new ItemNameBlockItem(Blocks.COCOA, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS))
 	);
 	public static final Item LAPIS_LAZULI = registerItem("lapis_lazuli", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
-	public static final Item PURPLE_DYE = registerItem("purple_dye", new DyeItem(DyeColor.PURPLE, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
-	public static final Item CYAN_DYE = registerItem("cyan_dye", new DyeItem(DyeColor.CYAN, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
-	public static final Item LIGHT_GRAY_DYE = registerItem(
-		"light_gray_dye", new DyeItem(DyeColor.LIGHT_GRAY, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS))
-	);
-	public static final Item GRAY_DYE = registerItem("gray_dye", new DyeItem(DyeColor.GRAY, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
-	public static final Item PINK_DYE = registerItem("pink_dye", new DyeItem(DyeColor.PINK, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
-	public static final Item LIME_DYE = registerItem("lime_dye", new DyeItem(DyeColor.LIME, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
-	public static final Item YELLOW_DYE = registerItem("yellow_dye", new DyeItem(DyeColor.YELLOW, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+	public static final Item WHITE_DYE = registerItem("white_dye", new DyeItem(DyeColor.WHITE, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+	public static final Item ORANGE_DYE = registerItem("orange_dye", new DyeItem(DyeColor.ORANGE, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+	public static final Item MAGENTA_DYE = registerItem("magenta_dye", new DyeItem(DyeColor.MAGENTA, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item LIGHT_BLUE_DYE = registerItem(
 		"light_blue_dye", new DyeItem(DyeColor.LIGHT_BLUE, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS))
 	);
-	public static final Item MAGENTA_DYE = registerItem("magenta_dye", new DyeItem(DyeColor.MAGENTA, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
-	public static final Item ORANGE_DYE = registerItem("orange_dye", new DyeItem(DyeColor.ORANGE, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
-	public static final Item BONE_MEAL = registerItem("bone_meal", new BoneMealItem(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+	public static final Item YELLOW_DYE = registerItem("yellow_dye", new DyeItem(DyeColor.YELLOW, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+	public static final Item LIME_DYE = registerItem("lime_dye", new DyeItem(DyeColor.LIME, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+	public static final Item PINK_DYE = registerItem("pink_dye", new DyeItem(DyeColor.PINK, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+	public static final Item GRAY_DYE = registerItem("gray_dye", new DyeItem(DyeColor.GRAY, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+	public static final Item LIGHT_GRAY_DYE = registerItem(
+		"light_gray_dye", new DyeItem(DyeColor.LIGHT_GRAY, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS))
+	);
+	public static final Item CYAN_DYE = registerItem("cyan_dye", new DyeItem(DyeColor.CYAN, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+	public static final Item PURPLE_DYE = registerItem("purple_dye", new DyeItem(DyeColor.PURPLE, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item BLUE_DYE = registerItem("blue_dye", new DyeItem(DyeColor.BLUE, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item BROWN_DYE = registerItem("brown_dye", new DyeItem(DyeColor.BROWN, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+	public static final Item GREEN_DYE = registerItem("green_dye", new DyeItem(DyeColor.GREEN, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+	public static final Item RED_DYE = registerItem("red_dye", new DyeItem(DyeColor.RED, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item BLACK_DYE = registerItem("black_dye", new DyeItem(DyeColor.BLACK, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
-	public static final Item WHITE_DYE = registerItem("white_dye", new DyeItem(DyeColor.WHITE, new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+	public static final Item BONE_MEAL = registerItem("bone_meal", new BoneMealItem(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item BONE = registerItem("bone", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 	public static final Item SUGAR = registerItem("sugar", new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
 	public static final Item CAKE = registerBlock(new BlockItem(Blocks.CAKE, new Item.Properties().stacksTo(1).tab(CreativeModeTab.TAB_FOOD)));

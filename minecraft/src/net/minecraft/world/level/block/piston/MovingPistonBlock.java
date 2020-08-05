@@ -85,7 +85,7 @@ public class MovingPistonBlock extends BaseEntityBlock {
 
 	@Override
 	public List<ItemStack> getDrops(BlockState blockState, LootContext.Builder builder) {
-		PistonMovingBlockEntity pistonMovingBlockEntity = this.getBlockEntity(builder.getLevel(), builder.getParameter(LootContextParams.BLOCK_POS));
+		PistonMovingBlockEntity pistonMovingBlockEntity = this.getBlockEntity(builder.getLevel(), new BlockPos(builder.getParameter(LootContextParams.ORIGIN)));
 		return pistonMovingBlockEntity == null ? Collections.emptyList() : pistonMovingBlockEntity.getMovedState().getDrops(builder);
 	}
 

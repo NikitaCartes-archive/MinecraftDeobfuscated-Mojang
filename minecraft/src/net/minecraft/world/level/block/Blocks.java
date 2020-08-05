@@ -2533,12 +2533,14 @@ public class Blocks {
 	);
 	public static final Block WARPED_ROOTS = register(
 		"warped_roots",
-		new RootsBlock(BlockBehaviour.Properties.of(Material.REPLACEABLE_PLANT, MaterialColor.COLOR_CYAN).noCollission().instabreak().sound(SoundType.ROOTS))
+		new RootsBlock(
+			BlockBehaviour.Properties.of(Material.REPLACEABLE_FIREPROOF_PLANT, MaterialColor.COLOR_CYAN).noCollission().instabreak().sound(SoundType.ROOTS)
+		)
 	);
 	public static final Block NETHER_SPROUTS = register(
 		"nether_sprouts",
 		new NetherSproutsBlock(
-			BlockBehaviour.Properties.of(Material.REPLACEABLE_PLANT, MaterialColor.COLOR_CYAN).noCollission().instabreak().sound(SoundType.NETHER_SPROUTS)
+			BlockBehaviour.Properties.of(Material.REPLACEABLE_FIREPROOF_PLANT, MaterialColor.COLOR_CYAN).noCollission().instabreak().sound(SoundType.NETHER_SPROUTS)
 		)
 	);
 	public static final Block CRIMSON_STEM = register("crimson_stem", netherStem(MaterialColor.CRIMSON_STEM));
@@ -2591,7 +2593,7 @@ public class Blocks {
 	);
 	public static final Block CRIMSON_ROOTS = register(
 		"crimson_roots",
-		new RootsBlock(BlockBehaviour.Properties.of(Material.REPLACEABLE_PLANT, MaterialColor.NETHER).noCollission().instabreak().sound(SoundType.ROOTS))
+		new RootsBlock(BlockBehaviour.Properties.of(Material.REPLACEABLE_FIREPROOF_PLANT, MaterialColor.NETHER).noCollission().instabreak().sound(SoundType.ROOTS))
 	);
 	public static final Block CRIMSON_PLANKS = register(
 		"crimson_planks", new Block(BlockBehaviour.Properties.of(Material.NETHER_WOOD, MaterialColor.CRIMSON_STEM).strength(2.0F, 3.0F).sound(SoundType.WOOD))

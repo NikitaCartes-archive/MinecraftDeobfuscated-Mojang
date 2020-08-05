@@ -1,6 +1,8 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -38,7 +40,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
@@ -278,8 +279,7 @@ public class Slime extends Mob implements Enemy {
 		EntityType<Slime> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
 		if (levelAccessor.getDifficulty() != Difficulty.PEACEFUL) {
-			Biome biome = levelAccessor.getBiome(blockPos);
-			if (biome == Biomes.SWAMP
+			if (Objects.equals(levelAccessor.getBiomeName(blockPos), Optional.of(Biomes.SWAMP))
 				&& blockPos.getY() > 50
 				&& blockPos.getY() < 70
 				&& random.nextFloat() < 0.5F

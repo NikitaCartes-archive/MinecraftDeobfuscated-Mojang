@@ -1,6 +1,5 @@
 package net.minecraft.data.worldgen.biome;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.data.worldgen.BiomeDefaultFeatures;
 import net.minecraft.data.worldgen.Carvers;
@@ -31,7 +30,7 @@ public class VanillaBiomes {
 		return Mth.hsvToRgb(0.62222224F - g * 0.05F, 0.5F + g * 0.1F, 1.0F);
 	}
 
-	public static Biome giantTreeTaiga(float f, float g, float h, boolean bl, @Nullable String string) {
+	public static Biome giantTreeTaiga(float f, float g, float h, boolean bl) {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
 		BiomeDefaultFeatures.farmAnimals(builder);
 		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.WOLF, 8, 4, 4));
@@ -81,11 +80,10 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())
-			.parent(string)
 			.build();
 	}
 
-	public static Biome birchForestBiome(float f, float g, @Nullable String string, boolean bl) {
+	public static Biome birchForestBiome(float f, float g, boolean bl) {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
 		BiomeDefaultFeatures.farmAnimals(builder);
 		BiomeDefaultFeatures.commonSpawns(builder);
@@ -129,7 +127,6 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())
-			.parent(string)
 			.build();
 	}
 
@@ -140,13 +137,13 @@ public class VanillaBiomes {
 	public static Biome jungleEdgeBiome() {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
 		BiomeDefaultFeatures.baseJungleSpawns(builder);
-		return baseJungleBiome(null, 0.1F, 0.2F, 0.8F, false, true, false, builder);
+		return baseJungleBiome(0.1F, 0.2F, 0.8F, false, true, false, builder);
 	}
 
 	public static Biome modifiedJungleEdgeBiome() {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
 		BiomeDefaultFeatures.baseJungleSpawns(builder);
-		return baseJungleBiome("jungle_edge", 0.2F, 0.4F, 0.8F, false, true, true, builder);
+		return baseJungleBiome(0.2F, 0.4F, 0.8F, false, true, true, builder);
 	}
 
 	public static Biome modifiedJungleBiome() {
@@ -154,7 +151,7 @@ public class VanillaBiomes {
 		BiomeDefaultFeatures.baseJungleSpawns(builder);
 		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.PARROT, 10, 1, 1))
 			.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.OCELOT, 2, 1, 1));
-		return baseJungleBiome("jungle", 0.2F, 0.4F, 0.9F, false, false, true, builder);
+		return baseJungleBiome(0.2F, 0.4F, 0.9F, false, false, true, builder);
 	}
 
 	public static Biome jungleHillsBiome() {
@@ -175,7 +172,8 @@ public class VanillaBiomes {
 		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.PARROT, i, 1, j))
 			.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.OCELOT, 2, 1, k))
 			.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.PANDA, 1, 1, 2));
-		return baseJungleBiome(null, f, g, 0.9F, false, false, false, builder);
+		builder.setPlayerCanSpawn();
+		return baseJungleBiome(f, g, 0.9F, false, false, false, builder);
 	}
 
 	private static Biome bambooJungleBiome(float f, float g, int i, int j) {
@@ -184,12 +182,10 @@ public class VanillaBiomes {
 		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.PARROT, i, 1, j))
 			.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.PANDA, 80, 1, 2))
 			.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.OCELOT, 2, 1, 1));
-		return baseJungleBiome(null, f, g, 0.9F, true, false, false, builder);
+		return baseJungleBiome(f, g, 0.9F, true, false, false, builder);
 	}
 
-	private static Biome baseJungleBiome(
-		@Nullable String string, float f, float g, float h, boolean bl, boolean bl2, boolean bl3, MobSpawnSettings.Builder builder
-	) {
+	private static Biome baseJungleBiome(float f, float g, float h, boolean bl, boolean bl2, boolean bl3, MobSpawnSettings.Builder builder) {
 		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.GRASS);
 		if (!bl2 && !bl3) {
 			builder2.addStructureStart(StructureFeatures.JUNGLE_TEMPLE);
@@ -242,13 +238,10 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())
-			.parent(string)
 			.build();
 	}
 
-	public static Biome mountainBiome(
-		float f, float g, ConfiguredSurfaceBuilder<SurfaceBuilderBaseConfiguration> configuredSurfaceBuilder, boolean bl, @Nullable String string
-	) {
+	public static Biome mountainBiome(float f, float g, ConfiguredSurfaceBuilder<SurfaceBuilderBaseConfiguration> configuredSurfaceBuilder, boolean bl) {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
 		BiomeDefaultFeatures.farmAnimals(builder);
 		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.LLAMA, 5, 4, 6));
@@ -294,11 +287,10 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())
-			.parent(string)
 			.build();
 	}
 
-	public static Biome desertBiome(@Nullable String string, float f, float g, boolean bl, boolean bl2, boolean bl3) {
+	public static Biome desertBiome(float f, float g, boolean bl, boolean bl2, boolean bl3) {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
 		BiomeDefaultFeatures.desertSpawns(builder);
 		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.DESERT);
@@ -349,13 +341,16 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())
-			.parent(string)
 			.build();
 	}
 
-	public static Biome plainsBiome(@Nullable String string, boolean bl) {
+	public static Biome plainsBiome(boolean bl) {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
 		BiomeDefaultFeatures.plainsSpawns(builder);
+		if (!bl) {
+			builder.setPlayerCanSpawn();
+		}
+
 		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.GRASS);
 		if (!bl) {
 			builder2.addStructureStart(StructureFeatures.VILLAGE_PLAINS).addStructureStart(StructureFeatures.PILLAGER_OUTPOST);
@@ -406,7 +401,6 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())
-			.parent(string)
 			.build();
 	}
 
@@ -431,7 +425,6 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(builder2.build())
 			.generationSettings(builder.build())
-			.parent(null)
 			.build();
 	}
 
@@ -505,11 +498,10 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())
-			.parent(null)
 			.build();
 	}
 
-	private static Biome baseSavannaBiome(@Nullable String string, float f, float g, float h, boolean bl, boolean bl2, MobSpawnSettings.Builder builder) {
+	private static Biome baseSavannaBiome(float f, float g, float h, boolean bl, boolean bl2, MobSpawnSettings.Builder builder) {
 		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder()
 			.surfaceBuilder(bl2 ? SurfaceBuilders.SHATTERED_SAVANNA : SurfaceBuilders.GRASS);
 		if (!bl && !bl2) {
@@ -560,13 +552,12 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())
-			.parent(string)
 			.build();
 	}
 
-	public static Biome savannaBiome(@Nullable String string, float f, float g, float h, boolean bl, boolean bl2) {
+	public static Biome savannaBiome(float f, float g, float h, boolean bl, boolean bl2) {
 		MobSpawnSettings.Builder builder = savannaMobs();
-		return baseSavannaBiome(string, f, g, h, bl, bl2, builder);
+		return baseSavannaBiome(f, g, h, bl, bl2, builder);
 	}
 
 	private static MobSpawnSettings.Builder savannaMobs() {
@@ -581,11 +572,11 @@ public class VanillaBiomes {
 	public static Biome savanaPlateauBiome() {
 		MobSpawnSettings.Builder builder = savannaMobs();
 		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.LLAMA, 8, 4, 4));
-		return baseSavannaBiome(null, 1.5F, 0.025F, 1.0F, true, false, builder);
+		return baseSavannaBiome(1.5F, 0.025F, 1.0F, true, false, builder);
 	}
 
 	private static Biome baseBadlandsBiome(
-		@Nullable String string, ConfiguredSurfaceBuilder<SurfaceBuilderBaseConfiguration> configuredSurfaceBuilder, float f, float g, boolean bl, boolean bl2
+		ConfiguredSurfaceBuilder<SurfaceBuilderBaseConfiguration> configuredSurfaceBuilder, float f, float g, boolean bl, boolean bl2
 	) {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
 		BiomeDefaultFeatures.commonSpawns(builder);
@@ -628,20 +619,19 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())
-			.parent(string)
 			.build();
 	}
 
-	public static Biome badlandsBiome(@Nullable String string, float f, float g, boolean bl) {
-		return baseBadlandsBiome(string, SurfaceBuilders.BADLANDS, f, g, bl, false);
+	public static Biome badlandsBiome(float f, float g, boolean bl) {
+		return baseBadlandsBiome(SurfaceBuilders.BADLANDS, f, g, bl, false);
 	}
 
-	public static Biome woodedBadlandsPlateauBiome(@Nullable String string, float f, float g) {
-		return baseBadlandsBiome(string, SurfaceBuilders.WOODED_BADLANDS, f, g, true, true);
+	public static Biome woodedBadlandsPlateauBiome(float f, float g) {
+		return baseBadlandsBiome(SurfaceBuilders.WOODED_BADLANDS, f, g, true, true);
 	}
 
 	public static Biome erodedBadlandsBiome() {
-		return baseBadlandsBiome("badlands", SurfaceBuilders.ERODED_BADLANDS, 0.1F, 0.2F, true, false);
+		return baseBadlandsBiome(SurfaceBuilders.ERODED_BADLANDS, 0.1F, 0.2F, true, false);
 	}
 
 	private static Biome baseOceanBiome(MobSpawnSettings.Builder builder, int i, int j, boolean bl, BiomeGenerationSettings.Builder builder2) {
@@ -663,7 +653,6 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())
-			.parent(null)
 			.build();
 	}
 
@@ -824,11 +813,10 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())
-			.parent(null)
 			.build();
 	}
 
-	private static Biome baseForestBiome(@Nullable String string, float f, float g, boolean bl, MobSpawnSettings.Builder builder) {
+	private static Biome baseForestBiome(float f, float g, boolean bl, MobSpawnSettings.Builder builder) {
 		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.GRASS);
 		BiomeDefaultFeatures.addDefaultOverworldLandStructures(builder2);
 		builder2.addStructureStart(StructureFeatures.RUINED_PORTAL_STANDARD);
@@ -876,7 +864,6 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())
-			.parent(string)
 			.build();
 	}
 
@@ -888,21 +875,27 @@ public class VanillaBiomes {
 	}
 
 	public static Biome forestBiome(float f, float g) {
-		MobSpawnSettings.Builder builder = defaultSpawns().addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.WOLF, 5, 4, 4));
-		return baseForestBiome(null, f, g, false, builder);
+		MobSpawnSettings.Builder builder = defaultSpawns()
+			.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.WOLF, 5, 4, 4))
+			.setPlayerCanSpawn();
+		return baseForestBiome(f, g, false, builder);
 	}
 
 	public static Biome flowerForestBiome() {
 		MobSpawnSettings.Builder builder = defaultSpawns().addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.RABBIT, 4, 2, 3));
-		return baseForestBiome("forest", 0.1F, 0.4F, true, builder);
+		return baseForestBiome(0.1F, 0.4F, true, builder);
 	}
 
-	public static Biome taigaBiome(@Nullable String string, float f, float g, boolean bl, boolean bl2, boolean bl3, boolean bl4) {
+	public static Biome taigaBiome(float f, float g, boolean bl, boolean bl2, boolean bl3, boolean bl4) {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
 		BiomeDefaultFeatures.farmAnimals(builder);
 		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.WOLF, 8, 4, 4))
 			.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.RABBIT, 4, 2, 3))
 			.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.FOX, 8, 2, 4));
+		if (!bl && !bl2) {
+			builder.setPlayerCanSpawn();
+		}
+
 		BiomeDefaultFeatures.commonSpawns(builder);
 		float h = bl ? -0.5F : 0.25F;
 		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder().surfaceBuilder(SurfaceBuilders.GRASS);
@@ -955,11 +948,10 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())
-			.parent(string)
 			.build();
 	}
 
-	public static Biome darkForestBiome(@Nullable String string, float f, float g, boolean bl) {
+	public static Biome darkForestBiome(float f, float g, boolean bl) {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
 		BiomeDefaultFeatures.farmAnimals(builder);
 		BiomeDefaultFeatures.commonSpawns(builder);
@@ -1000,11 +992,10 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())
-			.parent(string)
 			.build();
 	}
 
-	public static Biome swampBiome(@Nullable String string, float f, float g, boolean bl) {
+	public static Biome swampBiome(float f, float g, boolean bl) {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
 		BiomeDefaultFeatures.farmAnimals(builder);
 		BiomeDefaultFeatures.commonSpawns(builder);
@@ -1057,11 +1048,10 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())
-			.parent(string)
 			.build();
 	}
 
-	public static Biome tundraBiome(@Nullable String string, float f, float g, boolean bl, boolean bl2) {
+	public static Biome tundraBiome(float f, float g, boolean bl, boolean bl2) {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder().creatureGenerationProbability(0.07F);
 		BiomeDefaultFeatures.snowySpawns(builder);
 		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder().surfaceBuilder(bl ? SurfaceBuilders.ICE_SPIKES : SurfaceBuilders.GRASS);
@@ -1111,7 +1101,6 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())
-			.parent(string)
 			.build();
 	}
 
@@ -1159,7 +1148,6 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())
-			.parent(null)
 			.build();
 	}
 
@@ -1210,7 +1198,6 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())
-			.parent(null)
 			.build();
 	}
 
@@ -1235,7 +1222,6 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(MobSpawnSettings.EMPTY)
 			.generationSettings(builder.build())
-			.parent(null)
 			.build();
 	}
 
@@ -1287,7 +1273,6 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(mobSpawnSettings)
 			.generationSettings(builder.build())
-			.parent(null)
 			.build();
 	}
 
@@ -1345,7 +1330,6 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(mobSpawnSettings)
 			.generationSettings(builder.build())
-			.parent(null)
 			.build();
 	}
 
@@ -1400,7 +1384,6 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(mobSpawnSettings)
 			.generationSettings(builder.build())
-			.parent(null)
 			.build();
 	}
 
@@ -1451,7 +1434,6 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(mobSpawnSettings)
 			.generationSettings(builder.build())
-			.parent(null)
 			.build();
 	}
 
@@ -1503,7 +1485,6 @@ public class VanillaBiomes {
 			)
 			.mobSpawnSettings(mobSpawnSettings)
 			.generationSettings(builder.build())
-			.parent(null)
 			.build();
 	}
 }

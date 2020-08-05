@@ -31,7 +31,9 @@ public class PortalForcer {
 		int i = bl ? 16 : 128;
 		poiManager.ensureLoadedAndValid(this.level, blockPos, i);
 		Optional<PoiRecord> optional = poiManager.getInSquare(poiType -> poiType == PoiType.NETHER_PORTAL, blockPos, i, PoiManager.Occupancy.ANY)
-			.min(Comparator.comparingDouble(poiRecord -> poiRecord.getPos().distSqr(blockPos)).thenComparingInt(poiRecord -> poiRecord.getPos().getY()));
+			.sorted(Comparator.comparingDouble(poiRecord -> poiRecord.getPos().distSqr(blockPos)).thenComparingInt(poiRecord -> poiRecord.getPos().getY()))
+			.filter(poiRecord -> this.level.getBlockState(poiRecord.getPos()).hasProperty(BlockStateProperties.HORIZONTAL_AXIS))
+			.findFirst();
 		return optional.map(
 			poiRecord -> {
 				BlockPos blockPosx = poiRecord.getPos();

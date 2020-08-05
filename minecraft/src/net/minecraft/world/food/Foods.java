@@ -61,7 +61,7 @@ public class Foods {
 		.saturationMod(0.1F)
 		.effect(new MobEffectInstance(MobEffects.POISON, 1200, 3), 1.0F)
 		.effect(new MobEffectInstance(MobEffects.HUNGER, 300, 2), 1.0F)
-		.effect(new MobEffectInstance(MobEffects.CONFUSION, 300, 1), 1.0F)
+		.effect(new MobEffectInstance(MobEffects.CONFUSION, 300, 0), 1.0F)
 		.build();
 	public static final FoodProperties PUMPKIN_PIE = new FoodProperties.Builder().nutrition(8).saturationMod(0.3F).build();
 	public static final FoodProperties RABBIT = new FoodProperties.Builder().nutrition(3).saturationMod(0.3F).meat().build();

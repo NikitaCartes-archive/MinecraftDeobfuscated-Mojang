@@ -628,7 +628,7 @@ public class ClientLevel extends Level {
 
 	@Override
 	public Biome getUncachedNoiseBiome(int i, int j, int k) {
-		return Biomes.PLAINS;
+		return this.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getOrThrow(Biomes.PLAINS);
 	}
 
 	public float getSkyDarken(float f) {

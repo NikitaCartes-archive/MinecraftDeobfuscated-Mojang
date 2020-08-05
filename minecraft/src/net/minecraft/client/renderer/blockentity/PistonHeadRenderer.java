@@ -33,7 +33,7 @@ public class PistonHeadRenderer extends BlockEntityRenderer<PistonMovingBlockEnt
 		if (level != null) {
 			BlockPos blockPos = pistonMovingBlockEntity.getBlockPos().relative(pistonMovingBlockEntity.getMovementDirection().getOpposite());
 			BlockState blockState = pistonMovingBlockEntity.getMovedState();
-			if (!blockState.isAir() && !(pistonMovingBlockEntity.getProgress(f) >= 1.0F)) {
+			if (!blockState.isAir()) {
 				ModelBlockRenderer.enableCaching();
 				poseStack.pushPose();
 				poseStack.translate((double)pistonMovingBlockEntity.getXOff(f), (double)pistonMovingBlockEntity.getYOff(f), (double)pistonMovingBlockEntity.getZOff(f));

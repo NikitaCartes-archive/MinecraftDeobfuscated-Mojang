@@ -7,6 +7,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.RegistryLookupCodec;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.newbiome.layer.Layer;
 import net.minecraft.world.level.newbiome.layer.Layers;
 
@@ -17,12 +20,13 @@ public class OverworldBiomeSource extends BiomeSource {
 					Codec.BOOL
 						.optionalFieldOf("legacy_biome_init_layer", Boolean.valueOf(false), Lifecycle.stable())
 						.forGetter(overworldBiomeSource -> overworldBiomeSource.legacyBiomeInitLayer),
-					Codec.BOOL.fieldOf("large_biomes").orElse(false).stable().forGetter(overworldBiomeSource -> overworldBiomeSource.largeBiomes)
+					Codec.BOOL.fieldOf("large_biomes").orElse(false).stable().forGetter(overworldBiomeSource -> overworldBiomeSource.largeBiomes),
+					RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(overworldBiomeSource -> overworldBiomeSource.biomes)
 				)
 				.apply(instance, instance.stable(OverworldBiomeSource::new))
 	);
 	private final Layer noiseBiomeLayer;
-	private static final List<Biome> POSSIBLE_BIOMES = ImmutableList.of(
+	private static final List<ResourceKey<Biome>> POSSIBLE_BIOMES = ImmutableList.of(
 		Biomes.OCEAN,
 		Biomes.PLAINS,
 		Biomes.DESERT,
@@ -93,12 +97,14 @@ public class OverworldBiomeSource extends BiomeSource {
 	private final long seed;
 	private final boolean legacyBiomeInitLayer;
 	private final boolean largeBiomes;
+	private final Registry<Biome> biomes;
 
-	public OverworldBiomeSource(long l, boolean bl, boolean bl2) {
-		super(POSSIBLE_BIOMES);
+	public OverworldBiomeSource(long l, boolean bl, boolean bl2, Registry<Biome> registry) {
+		super(POSSIBLE_BIOMES.stream().map(resourceKey -> () -> registry.getOrThrow(resourceKey)));
 		this.seed = l;
 		this.legacyBiomeInitLayer = bl;
 		this.largeBiomes = bl2;
+		this.biomes = registry;
 		this.noiseBiomeLayer = Layers.getDefaultLayer(l, bl, bl2 ? 6 : 4, 4);
 	}
 
@@ -110,11 +116,11 @@ public class OverworldBiomeSource extends BiomeSource {
 	@Environment(EnvType.CLIENT)
 	@Override
 	public BiomeSource withSeed(long l) {
-		return new OverworldBiomeSource(l, this.legacyBiomeInitLayer, this.largeBiomes);
+		return new OverworldBiomeSource(l, this.legacyBiomeInitLayer, this.largeBiomes, this.biomes);
 	}
 
 	@Override
 	public Biome getNoiseBiome(int i, int j, int k) {
-		return this.noiseBiomeLayer.get(i, k);
+		return this.noiseBiomeLayer.get(this.biomes, i, k);
 	}
 }

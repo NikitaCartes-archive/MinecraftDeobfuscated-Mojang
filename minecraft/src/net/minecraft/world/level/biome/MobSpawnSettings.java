@@ -28,7 +28,8 @@ public class MobSpawnSettings {
 		0.1F,
 		(Map<MobCategory, List<MobSpawnSettings.SpawnerData>>)Stream.of(MobCategory.values())
 			.collect(ImmutableMap.toImmutableMap(mobCategory -> mobCategory, mobCategory -> ImmutableList.of())),
-		ImmutableMap.of()
+		ImmutableMap.of(),
+		false
 	);
 	public static final MapCodec<MobSpawnSettings> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
@@ -44,18 +45,21 @@ public class MobSpawnSettings {
 						.forGetter(mobSpawnSettings -> mobSpawnSettings.spawners),
 					Codec.simpleMap(Registry.ENTITY_TYPE, MobSpawnSettings.MobSpawnCost.CODEC, Registry.ENTITY_TYPE)
 						.fieldOf("spawn_costs")
-						.forGetter(mobSpawnSettings -> mobSpawnSettings.mobSpawnCosts)
+						.forGetter(mobSpawnSettings -> mobSpawnSettings.mobSpawnCosts),
+					Codec.BOOL.fieldOf("player_spawn_friendly").orElse(false).forGetter(MobSpawnSettings::playerSpawnFriendly)
 				)
 				.apply(instance, MobSpawnSettings::new)
 	);
 	private final float creatureGenerationProbability;
 	private final Map<MobCategory, List<MobSpawnSettings.SpawnerData>> spawners;
 	private final Map<EntityType<?>, MobSpawnSettings.MobSpawnCost> mobSpawnCosts;
+	private final boolean playerSpawnFriendly;
 
-	private MobSpawnSettings(float f, Map<MobCategory, List<MobSpawnSettings.SpawnerData>> map, Map<EntityType<?>, MobSpawnSettings.MobSpawnCost> map2) {
+	private MobSpawnSettings(float f, Map<MobCategory, List<MobSpawnSettings.SpawnerData>> map, Map<EntityType<?>, MobSpawnSettings.MobSpawnCost> map2, boolean bl) {
 		this.creatureGenerationProbability = f;
 		this.spawners = map;
 		this.mobSpawnCosts = map2;
+		this.playerSpawnFriendly = bl;
 	}
 
 	public List<MobSpawnSettings.SpawnerData> getMobs(MobCategory mobCategory) {
@@ -71,6 +75,10 @@ public class MobSpawnSettings {
 		return this.creatureGenerationProbability;
 	}
 
+	public boolean playerSpawnFriendly() {
+		return this.playerSpawnFriendly;
+	}
+
 	public static class Builder {
 		private final Map<MobCategory, List<MobSpawnSettings.SpawnerData>> spawners = (Map<MobCategory, List<MobSpawnSettings.SpawnerData>>)Stream.of(
 				MobCategory.values()
@@ -78,6 +86,7 @@ public class MobSpawnSettings {
 			.collect(ImmutableMap.toImmutableMap(mobCategory -> mobCategory, mobCategory -> Lists.newArrayList()));
 		private final Map<EntityType<?>, MobSpawnSettings.MobSpawnCost> mobSpawnCosts = Maps.<EntityType<?>, MobSpawnSettings.MobSpawnCost>newLinkedHashMap();
 		private float creatureGenerationProbability = 0.1F;
+		private boolean playerCanSpawn;
 
 		public MobSpawnSettings.Builder addSpawn(MobCategory mobCategory, MobSpawnSettings.SpawnerData spawnerData) {
 			((List)this.spawners.get(mobCategory)).add(spawnerData);
@@ -94,11 +103,17 @@ public class MobSpawnSettings {
 			return this;
 		}
 
+		public MobSpawnSettings.Builder setPlayerCanSpawn() {
+			this.playerCanSpawn = true;
+			return this;
+		}
+
 		public MobSpawnSettings build() {
 			return new MobSpawnSettings(
 				this.creatureGenerationProbability,
 				(Map)this.spawners.entrySet().stream().collect(ImmutableMap.toImmutableMap(Entry::getKey, entry -> ImmutableList.copyOf((Collection)entry.getValue()))),
-				ImmutableMap.copyOf(this.mobSpawnCosts)
+				ImmutableMap.copyOf(this.mobSpawnCosts),
+				this.playerCanSpawn
 			);
 		}
 	}

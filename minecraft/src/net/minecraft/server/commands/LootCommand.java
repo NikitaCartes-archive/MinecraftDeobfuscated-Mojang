@@ -433,7 +433,7 @@ public class LootCommand {
 		BlockState blockState = serverLevel.getBlockState(blockPos);
 		BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
 		LootContext.Builder builder = new LootContext.Builder(serverLevel)
-			.withParameter(LootContextParams.BLOCK_POS, blockPos)
+			.withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(blockPos))
 			.withParameter(LootContextParams.BLOCK_STATE, blockState)
 			.withOptionalParameter(LootContextParams.BLOCK_ENTITY, blockEntity)
 			.withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity())
@@ -458,7 +458,7 @@ public class LootCommand {
 			builder.withOptionalParameter(LootContextParams.DIRECT_KILLER_ENTITY, entity2);
 			builder.withOptionalParameter(LootContextParams.KILLER_ENTITY, entity2);
 			builder.withParameter(LootContextParams.THIS_ENTITY, entity);
-			builder.withParameter(LootContextParams.BLOCK_POS, new BlockPos(commandSourceStack.getPosition()));
+			builder.withParameter(LootContextParams.ORIGIN, commandSourceStack.getPosition());
 			LootTable lootTable = commandSourceStack.getServer().getLootTables().get(resourceLocation);
 			List<ItemStack> list = lootTable.getRandomItems(builder.create(LootContextParamSets.ENTITY));
 			return dropConsumer.accept(commandContext, list, listx -> callback(commandSourceStack, listx, resourceLocation));
@@ -469,7 +469,7 @@ public class LootCommand {
 		CommandSourceStack commandSourceStack = commandContext.getSource();
 		LootContext.Builder builder = new LootContext.Builder(commandSourceStack.getLevel())
 			.withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity())
-			.withParameter(LootContextParams.BLOCK_POS, new BlockPos(commandSourceStack.getPosition()));
+			.withParameter(LootContextParams.ORIGIN, commandSourceStack.getPosition());
 		return drop(commandContext, resourceLocation, builder.create(LootContextParamSets.CHEST), dropConsumer);
 	}
 
@@ -482,7 +482,7 @@ public class LootCommand {
 	) throws CommandSyntaxException {
 		CommandSourceStack commandSourceStack = commandContext.getSource();
 		LootContext lootContext = new LootContext.Builder(commandSourceStack.getLevel())
-			.withParameter(LootContextParams.BLOCK_POS, blockPos)
+			.withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(blockPos))
 			.withParameter(LootContextParams.TOOL, itemStack)
 			.withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity())
 			.create(LootContextParamSets.FISHING);

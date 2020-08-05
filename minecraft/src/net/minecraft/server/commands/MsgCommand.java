@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import java.util.Collection;
 import java.util.UUID;
+import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
@@ -13,6 +14,7 @@ import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 
 public class MsgCommand {
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
@@ -36,17 +38,29 @@ public class MsgCommand {
 
 	private static int sendMessage(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, Component component) {
 		UUID uUID = commandSourceStack.getEntity() == null ? Util.NIL_UUID : commandSourceStack.getEntity().getUUID();
+		Entity entity = commandSourceStack.getEntity();
+		Consumer<Component> consumer;
+		if (entity instanceof ServerPlayer) {
+			ServerPlayer serverPlayer = (ServerPlayer)entity;
+			consumer = component2 -> serverPlayer.sendMessage(
+					new TranslatableComponent("commands.message.display.outgoing", component2, component)
+						.withStyle(new ChatFormatting[]{ChatFormatting.GRAY, ChatFormatting.ITALIC}),
+					serverPlayer.getUUID()
+				);
+		} else {
+			consumer = component2 -> commandSourceStack.sendSuccess(
+					new TranslatableComponent("commands.message.display.outgoing", component2, component)
+						.withStyle(new ChatFormatting[]{ChatFormatting.GRAY, ChatFormatting.ITALIC}),
+					false
+				);
+		}
 
-		for (ServerPlayer serverPlayer : collection) {
-			serverPlayer.sendMessage(
+		for (ServerPlayer serverPlayer2 : collection) {
+			consumer.accept(serverPlayer2.getDisplayName());
+			serverPlayer2.sendMessage(
 				new TranslatableComponent("commands.message.display.incoming", commandSourceStack.getDisplayName(), component)
 					.withStyle(new ChatFormatting[]{ChatFormatting.GRAY, ChatFormatting.ITALIC}),
 				uUID
-			);
-			commandSourceStack.sendSuccess(
-				new TranslatableComponent("commands.message.display.outgoing", serverPlayer.getDisplayName(), component)
-					.withStyle(new ChatFormatting[]{ChatFormatting.GRAY, ChatFormatting.ITALIC}),
-				false
 			);
 		}
 

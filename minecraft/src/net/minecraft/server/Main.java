@@ -83,8 +83,9 @@ public class Main {
 			Bootstrap.bootStrap();
 			Bootstrap.validate();
 			Util.startTimerHackThread();
+			RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
 			Path path = Paths.get("server.properties");
-			DedicatedServerSettings dedicatedServerSettings = new DedicatedServerSettings(path);
+			DedicatedServerSettings dedicatedServerSettings = new DedicatedServerSettings(registryHolder, path);
 			dedicatedServerSettings.forceSave();
 			Path path2 = Paths.get("eula.txt");
 			Eula eula = new Eula(path2);
@@ -139,7 +140,6 @@ public class Main {
 			}
 
 			serverResources.updateGlobals();
-			RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
 			RegistryReadOps<Tag> registryReadOps = RegistryReadOps.create(NbtOps.INSTANCE, serverResources.getResourceManager(), registryHolder);
 			WorldData worldData = levelStorageAccess.getDataTag(registryReadOps, dataPackConfig2);
 			if (worldData == null) {
@@ -147,7 +147,7 @@ public class Main {
 				WorldGenSettings worldGenSettings;
 				if (optionSet.has(optionSpec3)) {
 					levelSettings = MinecraftServer.DEMO_SETTINGS;
-					worldGenSettings = WorldGenSettings.DEMO_SETTINGS;
+					worldGenSettings = WorldGenSettings.demoSettings(registryHolder);
 				} else {
 					DedicatedServerProperties dedicatedServerProperties = dedicatedServerSettings.getProperties();
 					levelSettings = new LevelSettings(

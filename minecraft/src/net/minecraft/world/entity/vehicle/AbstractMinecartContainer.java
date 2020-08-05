@@ -192,7 +192,7 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
 
 			this.lootTable = null;
 			LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level)
-				.withParameter(LootContextParams.BLOCK_POS, this.blockPosition())
+				.withParameter(LootContextParams.ORIGIN, this.position())
 				.withOptionalRandomSeed(this.lootTableSeed);
 			if (player != null) {
 				builder.withLuck(player.getLuck()).withParameter(LootContextParams.THIS_ENTITY, player);

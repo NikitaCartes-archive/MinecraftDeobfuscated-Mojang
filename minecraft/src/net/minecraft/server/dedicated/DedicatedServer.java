@@ -440,7 +440,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	@Override
 	public void setPlayerIdleTimeout(int i) {
 		super.setPlayerIdleTimeout(i);
-		this.settings.update(dedicatedServerProperties -> dedicatedServerProperties.playerIdleTimeout.update(i));
+		this.settings.update(dedicatedServerProperties -> dedicatedServerProperties.playerIdleTimeout.update(this.registryAccess(), i));
 	}
 
 	@Override
@@ -546,7 +546,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	}
 
 	public void storeUsingWhiteList(boolean bl) {
-		this.settings.update(dedicatedServerProperties -> dedicatedServerProperties.whiteList.update(bl));
+		this.settings.update(dedicatedServerProperties -> dedicatedServerProperties.whiteList.update(this.registryAccess(), bl));
 	}
 
 	@Override

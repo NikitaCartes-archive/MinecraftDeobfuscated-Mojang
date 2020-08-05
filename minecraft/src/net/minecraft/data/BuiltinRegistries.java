@@ -13,10 +13,10 @@ import net.minecraft.data.worldgen.Pools;
 import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.data.worldgen.StructureFeatures;
 import net.minecraft.data.worldgen.SurfaceBuilders;
+import net.minecraft.data.worldgen.biome.Biomes;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -43,25 +43,27 @@ public class BuiltinRegistries {
 		Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, () -> StructureFeatures.MINESHAFT
 	);
 	public static final Registry<StructureProcessorList> PROCESSOR_LIST = registerSimple(Registry.PROCESSOR_LIST_REGISTRY, () -> ProcessorLists.ZOMBIE_PLAINS);
-	public static final Registry<StructureTemplatePool> TEMPLATE_POOL = registerSimple(Registry.TEMPLATE_POOL_REGISTRY, () -> Pools.EMPTY);
-	public static final Registry<Biome> BIOME = registerSimple(Registry.BIOME_REGISTRY, () -> Biomes.DEFAULT);
+	public static final Registry<StructureTemplatePool> TEMPLATE_POOL = registerSimple(Registry.TEMPLATE_POOL_REGISTRY, Pools::bootstrap);
+	public static final Registry<Biome> BIOME = registerSimple(Registry.BIOME_REGISTRY, () -> Biomes.PLAINS);
 	public static final Registry<NoiseGeneratorSettings> NOISE_GENERATOR_SETTINGS = registerSimple(
-		Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, () -> NoiseGeneratorSettings.OVERWORLD
+		Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, NoiseGeneratorSettings::bootstrap
 	);
 
 	private static <T> Registry<T> registerSimple(ResourceKey<? extends Registry<T>> resourceKey, Supplier<T> supplier) {
-		return registerSimple(resourceKey, Lifecycle.experimental(), supplier);
+		return registerSimple(resourceKey, Lifecycle.stable(), supplier);
 	}
 
 	private static <T> Registry<T> registerSimple(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, Supplier<T> supplier) {
-		return internalRegister(resourceKey, new MappedRegistry<>(resourceKey, lifecycle), supplier);
+		return internalRegister(resourceKey, new MappedRegistry<>(resourceKey, lifecycle), supplier, lifecycle);
 	}
 
-	private static <T, R extends WritableRegistry<T>> R internalRegister(ResourceKey<? extends Registry<T>> resourceKey, R writableRegistry, Supplier<T> supplier) {
+	private static <T, R extends WritableRegistry<T>> R internalRegister(
+		ResourceKey<? extends Registry<T>> resourceKey, R writableRegistry, Supplier<T> supplier, Lifecycle lifecycle
+	) {
 		ResourceLocation resourceLocation = resourceKey.location();
 		LOADERS.put(resourceLocation, supplier);
 		WritableRegistry<R> writableRegistry2 = WRITABLE_REGISTRY;
-		return writableRegistry2.register((ResourceKey<R>)resourceKey, writableRegistry);
+		return writableRegistry2.register((ResourceKey<R>)resourceKey, writableRegistry, lifecycle);
 	}
 
 	public static <T> T register(Registry<? super T> registry, String string, T object) {
@@ -69,11 +71,11 @@ public class BuiltinRegistries {
 	}
 
 	public static <V, T extends V> T register(Registry<V> registry, ResourceLocation resourceLocation, T object) {
-		return ((WritableRegistry)registry).register(ResourceKey.create(registry.key(), resourceLocation), object);
+		return ((WritableRegistry)registry).register(ResourceKey.create(registry.key(), resourceLocation), object, Lifecycle.stable());
 	}
 
-	public static <V, T extends V> T registerMapping(Registry<V> registry, int i, String string, T object) {
-		return ((WritableRegistry)registry).registerMapping(i, ResourceKey.create(registry.key(), new ResourceLocation(string)), object);
+	public static <V, T extends V> T registerMapping(Registry<V> registry, int i, ResourceKey<V> resourceKey, T object) {
+		return ((WritableRegistry)registry).registerMapping(i, resourceKey, object, Lifecycle.stable());
 	}
 
 	public static void bootstrap() {

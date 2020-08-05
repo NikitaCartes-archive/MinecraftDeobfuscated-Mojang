@@ -1,5 +1,7 @@
 package net.minecraft.data.advancements;
 
+import com.google.common.collect.ImmutableList;
+import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
@@ -31,6 +33,7 @@ import net.minecraft.advancements.critereon.PlayerInteractTrigger;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.effect.MobEffects;
@@ -47,9 +50,9 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyCondition;
 
 public class NetherAdvancements implements Consumer<Consumer<Advancement>> {
-	private static final Biome[] EXPLORABLE_BIOMES = new Biome[]{
+	private static final List<ResourceKey<Biome>> EXPLORABLE_BIOMES = ImmutableList.of(
 		Biomes.NETHER_WASTES, Biomes.SOUL_SAND_VALLEY, Biomes.WARPED_FOREST, Biomes.CRIMSON_FOREST, Biomes.BASALT_DELTAS
-	};
+	);
 	private static final EntityPredicate.Composite DISTRACT_PIGLIN_PLAYER_ARMOR_PREDICATE = EntityPredicate.Composite.create(
 		LootItemEntityPropertyCondition.hasProperties(
 				LootContext.EntityTarget.THIS,

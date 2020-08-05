@@ -16,6 +16,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.MobCategory;
@@ -140,8 +141,8 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		return new NoiseBasedChunkGenerator(this.biomeSource.withSeed(l), l, this.settings);
 	}
 
-	public boolean stable(long l, NoiseGeneratorSettings noiseGeneratorSettings) {
-		return this.seed == l && ((NoiseGeneratorSettings)this.settings.get()).stable(noiseGeneratorSettings);
+	public boolean stable(long l, ResourceKey<NoiseGeneratorSettings> resourceKey) {
+		return this.seed == l && ((NoiseGeneratorSettings)this.settings.get()).stable(resourceKey);
 	}
 
 	private double sampleAndClampNoise(int i, int j, int k, double d, double e, double f, double g) {

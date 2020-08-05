@@ -118,7 +118,6 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Block;
@@ -336,8 +335,12 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		ChunkGenerator chunkGenerator;
 		DimensionType dimensionType;
 		if (levelStem == null) {
-			dimensionType = DimensionType.defaultOverworld();
-			chunkGenerator = WorldGenSettings.makeDefaultOverworld(new Random().nextLong());
+			dimensionType = this.registryHolder.dimensionTypes().getOrThrow(DimensionType.OVERWORLD_LOCATION);
+			chunkGenerator = WorldGenSettings.makeDefaultOverworld(
+				this.registryHolder.registryOrThrow(Registry.BIOME_REGISTRY),
+				this.registryHolder.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY),
+				new Random().nextLong()
+			);
 		} else {
 			dimensionType = levelStem.type();
 			chunkGenerator = levelStem.generator();
@@ -434,9 +437,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			serverLevelData.setSpawn(BlockPos.ZERO.above(), 0.0F);
 		} else {
 			BiomeSource biomeSource = chunkGenerator.getBiomeSource();
-			List<Biome> list = biomeSource.getPlayerSpawnBiomes();
 			Random random = new Random(serverLevel.getSeed());
-			BlockPos blockPos = biomeSource.findBiomeHorizontal(0, serverLevel.getSeaLevel(), 0, 256, list, random);
+			BlockPos blockPos = biomeSource.findBiomeHorizontal(0, serverLevel.getSeaLevel(), 0, 256, biome -> biome.getMobSettings().playerSpawnFriendly(), random);
 			ChunkPos chunkPos = blockPos == null ? new ChunkPos(0, 0) : new ChunkPos(blockPos);
 			if (blockPos == null) {
 				LOGGER.warn("Unable to find spawn biome");

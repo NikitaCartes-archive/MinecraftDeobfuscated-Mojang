@@ -1,6 +1,6 @@
 package net.minecraft.world.level.biome;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.serialization.Codec;
@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -19,12 +22,13 @@ import net.minecraft.world.level.levelgen.feature.StructureFeature;
 
 public abstract class BiomeSource implements BiomeManager.NoiseBiomeSource {
 	public static final Codec<BiomeSource> CODEC = Registry.BIOME_SOURCE.dispatchStable(BiomeSource::codec, Function.identity());
-	private static final List<Biome> PLAYER_SPAWN_BIOMES = Lists.<Biome>newArrayList(
-		Biomes.FOREST, Biomes.PLAINS, Biomes.TAIGA, Biomes.TAIGA_HILLS, Biomes.WOODED_HILLS, Biomes.JUNGLE, Biomes.JUNGLE_HILLS
-	);
 	protected final Map<StructureFeature<?>, Boolean> supportedStructures = Maps.<StructureFeature<?>, Boolean>newHashMap();
 	protected final Set<BlockState> surfaceBlocks = Sets.<BlockState>newHashSet();
 	protected final List<Biome> possibleBiomes;
+
+	protected BiomeSource(Stream<Supplier<Biome>> stream) {
+		this((List<Biome>)stream.map(Supplier::get).collect(ImmutableList.toImmutableList()));
+	}
 
 	protected BiomeSource(List<Biome> list) {
 		this.possibleBiomes = list;
@@ -34,10 +38,6 @@ public abstract class BiomeSource implements BiomeManager.NoiseBiomeSource {
 
 	@Environment(EnvType.CLIENT)
 	public abstract BiomeSource withSeed(long l);
-
-	public List<Biome> getPlayerSpawnBiomes() {
-		return PLAYER_SPAWN_BIOMES;
-	}
 
 	public List<Biome> possibleBiomes() {
 		return this.possibleBiomes;
@@ -70,12 +70,12 @@ public abstract class BiomeSource implements BiomeManager.NoiseBiomeSource {
 	}
 
 	@Nullable
-	public BlockPos findBiomeHorizontal(int i, int j, int k, int l, List<Biome> list, Random random) {
-		return this.findBiomeHorizontal(i, j, k, l, 1, list, random, false);
+	public BlockPos findBiomeHorizontal(int i, int j, int k, int l, Predicate<Biome> predicate, Random random) {
+		return this.findBiomeHorizontal(i, j, k, l, 1, predicate, random, false);
 	}
 
 	@Nullable
-	public BlockPos findBiomeHorizontal(int i, int j, int k, int l, int m, List<Biome> list, Random random, boolean bl) {
+	public BlockPos findBiomeHorizontal(int i, int j, int k, int l, int m, Predicate<Biome> predicate, Random random, boolean bl) {
 		int n = i >> 2;
 		int o = k >> 2;
 		int p = l >> 2;
@@ -99,7 +99,7 @@ public abstract class BiomeSource implements BiomeManager.NoiseBiomeSource {
 
 					int w = n + v;
 					int x = o + u;
-					if (list.contains(this.getNoiseBiome(w, q, x))) {
+					if (predicate.test(this.getNoiseBiome(w, q, x))) {
 						if (blockPos == null || random.nextInt(r + 1) == 0) {
 							blockPos = new BlockPos(w << 2, j, x << 2);
 							if (bl) {

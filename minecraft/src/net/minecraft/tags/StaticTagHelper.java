@@ -44,7 +44,7 @@ public class StaticTagHelper<T> {
 		return this.source;
 	}
 
-	public List<? extends Tag<T>> getWrappers() {
+	public List<? extends Tag.Named<T>> getWrappers() {
 		return this.wrappers;
 	}
 

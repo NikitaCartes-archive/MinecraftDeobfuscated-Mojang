@@ -1,11 +1,15 @@
 package net.minecraft.client.renderer;
 
 import com.google.gson.JsonSyntaxException;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import java.io.IOException;
@@ -56,6 +60,7 @@ import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class GameRenderer implements ResourceManagerReloadListener, AutoCloseable {
+	private static final ResourceLocation NAUSEA_LOCATION = new ResourceLocation("textures/misc/nausea.png");
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final Minecraft minecraft;
 	private final ResourceManager resourceManager;
@@ -497,6 +502,13 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 			PoseStack poseStack = new PoseStack();
 			if (bl && this.minecraft.level != null) {
 				this.minecraft.getProfiler().popPush("gui");
+				if (this.minecraft.player != null) {
+					float g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime);
+					if (g > 0.0F && this.minecraft.player.hasEffect(MobEffects.CONFUSION) && this.minecraft.options.screenEffectScale < 1.0F) {
+						this.renderConfusionOverlay(g * (1.0F - this.minecraft.options.screenEffectScale));
+					}
+				}
+
 				if (!this.minecraft.options.hideGui || this.minecraft.screen != null) {
 					RenderSystem.defaultAlphaFunc();
 					this.renderItemActivationAnimation(this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight(), f);
@@ -631,11 +643,7 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 			* this.minecraft.options.screenEffectScale
 			* this.minecraft.options.screenEffectScale;
 		if (g > 0.0F) {
-			int i = 20;
-			if (this.minecraft.player.hasEffect(MobEffects.CONFUSION)) {
-				i = 7;
-			}
-
+			int i = this.minecraft.player.hasEffect(MobEffects.CONFUSION) ? 7 : 20;
 			float h = 5.0F / (g * g + 5.0F) - g * 0.04F;
 			h *= h;
 			Vector3f vector3f = new Vector3f(0.0F, Mth.SQRT_OF_TWO / 2.0F, Mth.SQRT_OF_TWO / 2.0F);
@@ -717,6 +725,38 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 			RenderSystem.enableCull();
 			RenderSystem.disableDepthTest();
 		}
+	}
+
+	private void renderConfusionOverlay(float f) {
+		int i = this.minecraft.getWindow().getGuiScaledWidth();
+		int j = this.minecraft.getWindow().getGuiScaledHeight();
+		double d = Mth.lerp((double)f, 2.0, 1.0);
+		float g = 0.2F * f;
+		float h = 0.4F * f;
+		float k = 0.2F * f;
+		double e = (double)i * d;
+		double l = (double)j * d;
+		double m = ((double)i - e) / 2.0;
+		double n = ((double)j - l) / 2.0;
+		RenderSystem.disableDepthTest();
+		RenderSystem.depthMask(false);
+		RenderSystem.enableBlend();
+		RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
+		RenderSystem.color4f(g, h, k, 1.0F);
+		this.minecraft.getTextureManager().bind(NAUSEA_LOCATION);
+		Tesselator tesselator = Tesselator.getInstance();
+		BufferBuilder bufferBuilder = tesselator.getBuilder();
+		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
+		bufferBuilder.vertex(m, n + l, -90.0).uv(0.0F, 1.0F).endVertex();
+		bufferBuilder.vertex(m + e, n + l, -90.0).uv(1.0F, 1.0F).endVertex();
+		bufferBuilder.vertex(m + e, n, -90.0).uv(1.0F, 0.0F).endVertex();
+		bufferBuilder.vertex(m, n, -90.0).uv(0.0F, 0.0F).endVertex();
+		tesselator.end();
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.defaultBlendFunc();
+		RenderSystem.disableBlend();
+		RenderSystem.depthMask(true);
+		RenderSystem.enableDepthTest();
 	}
 
 	public float getDarkenWorldAmount(float f) {

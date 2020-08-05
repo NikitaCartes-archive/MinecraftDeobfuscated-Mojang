@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.Set;
 import net.minecraft.advancements.critereon.DamageSourcePredicate;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
@@ -27,13 +26,13 @@ public class DamageSourceCondition implements LootItemCondition {
 
 	@Override
 	public Set<LootContextParam<?>> getReferencedContextParams() {
-		return ImmutableSet.of(LootContextParams.BLOCK_POS, LootContextParams.DAMAGE_SOURCE);
+		return ImmutableSet.of(LootContextParams.ORIGIN, LootContextParams.DAMAGE_SOURCE);
 	}
 
 	public boolean test(LootContext lootContext) {
 		DamageSource damageSource = lootContext.getParamOrNull(LootContextParams.DAMAGE_SOURCE);
-		BlockPos blockPos = lootContext.getParamOrNull(LootContextParams.BLOCK_POS);
-		return blockPos != null && damageSource != null && this.predicate.matches(lootContext.getLevel(), Vec3.atLowerCornerOf(blockPos), damageSource);
+		Vec3 vec3 = lootContext.getParamOrNull(LootContextParams.ORIGIN);
+		return vec3 != null && damageSource != null && this.predicate.matches(lootContext.getLevel(), vec3, damageSource);
 	}
 
 	public static LootItemCondition.Builder hasDamageSource(DamageSourcePredicate.Builder builder) {

@@ -496,7 +496,7 @@ public class EntitySelectorOptions {
 								} else {
 									LootContext lootContext = new LootContext.Builder(serverLevel)
 										.withParameter(LootContextParams.THIS_ENTITY, entity)
-										.withParameter(LootContextParams.BLOCK_POS, entity.blockPosition())
+										.withParameter(LootContextParams.ORIGIN, entity.position())
 										.create(LootContextParamSets.SELECTOR);
 									return bl ^ lootItemCondition.test(lootContext);
 								}

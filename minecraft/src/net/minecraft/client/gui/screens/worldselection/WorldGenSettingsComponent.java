@@ -40,6 +40,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.resources.RegistryWriteOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerResources;
 import net.minecraft.server.packs.repository.FolderRepositorySource;
@@ -272,7 +273,7 @@ public class WorldGenSettingsComponent implements TickableWidget, Widget {
 	}
 
 	private void importSettings(RegistryAccess.RegistryHolder registryHolder, WorldGenSettings worldGenSettings) {
-		this.setRegistryHolder(registryHolder);
+		this.registryHolder = registryHolder;
 		this.settings = worldGenSettings;
 		this.preset = WorldPreset.of(worldGenSettings);
 		this.seed = OptionalLong.of(worldGenSettings.seed());
@@ -360,7 +361,16 @@ public class WorldGenSettingsComponent implements TickableWidget, Widget {
 		return this.registryHolder;
 	}
 
-	protected void setRegistryHolder(RegistryAccess.RegistryHolder registryHolder) {
-		this.registryHolder = registryHolder;
+	void updateDataPacks(ServerResources serverResources) {
+		RegistryAccess.RegistryHolder registryHolder = RegistryAccess.builtin();
+		RegistryWriteOps<JsonElement> registryWriteOps = RegistryWriteOps.create(JsonOps.INSTANCE, this.registryHolder);
+		RegistryReadOps<JsonElement> registryReadOps = RegistryReadOps.create(JsonOps.INSTANCE, serverResources.getResourceManager(), registryHolder);
+		DataResult<WorldGenSettings> dataResult = WorldGenSettings.CODEC
+			.encodeStart(registryWriteOps, this.settings)
+			.flatMap(jsonElement -> WorldGenSettings.CODEC.parse(registryReadOps, jsonElement));
+		dataResult.resultOrPartial(Util.prefix("Error parsing worldgen settings after loading data packs: ", LOGGER::error)).ifPresent(worldGenSettings -> {
+			this.settings = worldGenSettings;
+			this.registryHolder = registryHolder;
+		});
 	}
 }

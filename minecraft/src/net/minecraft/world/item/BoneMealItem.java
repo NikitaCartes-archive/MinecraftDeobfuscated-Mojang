@@ -1,11 +1,14 @@
 package net.minecraft.world.item;
 
+import java.util.Objects;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
@@ -78,18 +81,17 @@ public class BoneMealItem extends Item {
 				label80:
 				for (int i = 0; i < 128; i++) {
 					BlockPos blockPos2 = blockPos;
-					Biome biome = level.getBiome(blockPos);
 					BlockState blockState = Blocks.SEAGRASS.defaultBlockState();
 
 					for (int j = 0; j < i / 16; j++) {
 						blockPos2 = blockPos2.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1);
-						biome = level.getBiome(blockPos2);
 						if (level.getBlockState(blockPos2).isCollisionShapeFullBlock(level, blockPos2)) {
 							continue label80;
 						}
 					}
 
-					if (biome == Biomes.WARM_OCEAN || biome == Biomes.DEEP_WARM_OCEAN) {
+					Optional<ResourceKey<Biome>> optional = level.getBiomeName(blockPos2);
+					if (Objects.equals(optional, Optional.of(Biomes.WARM_OCEAN)) || Objects.equals(optional, Optional.of(Biomes.DEEP_WARM_OCEAN))) {
 						if (i == 0 && direction != null && direction.getAxis().isHorizontal()) {
 							blockState = BlockTags.WALL_CORALS.getRandomElement(level.random).defaultBlockState().setValue(BaseCoralWallFanBlock.FACING, direction);
 						} else if (random.nextInt(4) == 0) {
@@ -98,7 +100,7 @@ public class BoneMealItem extends Item {
 					}
 
 					if (blockState.getBlock().is(BlockTags.WALL_CORALS)) {
-						for (int jx = 0; !blockState.canSurvive(level, blockPos2) && jx < 4; jx++) {
+						for (int k = 0; !blockState.canSurvive(level, blockPos2) && k < 4; k++) {
 							blockState = blockState.setValue(BaseCoralWallFanBlock.FACING, Direction.Plane.HORIZONTAL.getRandomDirection(random));
 						}
 					}

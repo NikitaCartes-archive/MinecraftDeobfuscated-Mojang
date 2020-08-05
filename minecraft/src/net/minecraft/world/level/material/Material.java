@@ -15,6 +15,13 @@ public final class Material {
 		.replaceable()
 		.flammable()
 		.build();
+	public static final Material REPLACEABLE_FIREPROOF_PLANT = new Material.Builder(MaterialColor.PLANT)
+		.noCollider()
+		.notSolidBlocking()
+		.nonSolid()
+		.destroyOnPush()
+		.replaceable()
+		.build();
 	public static final Material REPLACEABLE_WATER_PLANT = new Material.Builder(MaterialColor.WATER)
 		.noCollider()
 		.notSolidBlocking()

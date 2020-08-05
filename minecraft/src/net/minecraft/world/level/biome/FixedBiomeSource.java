@@ -3,9 +3,9 @@ package net.minecraft.world.level.biome;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.mojang.serialization.Codec;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -47,8 +47,8 @@ public class FixedBiomeSource extends BiomeSource {
 
 	@Nullable
 	@Override
-	public BlockPos findBiomeHorizontal(int i, int j, int k, int l, int m, List<Biome> list, Random random, boolean bl) {
-		if (list.contains(this.biome.get())) {
+	public BlockPos findBiomeHorizontal(int i, int j, int k, int l, int m, Predicate<Biome> predicate, Random random, boolean bl) {
+		if (predicate.test(this.biome.get())) {
 			return bl ? new BlockPos(i, j, k) : new BlockPos(i - l + random.nextInt(l * 2 + 1), j, k - l + random.nextInt(l * 2 + 1));
 		} else {
 			return null;

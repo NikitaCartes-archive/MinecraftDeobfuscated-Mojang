@@ -586,7 +586,7 @@ public class Cat extends TamableAnimal {
 			mutableBlockPos.set(this.cat.blockPosition());
 			LootTable lootTable = this.cat.level.getServer().getLootTables().get(BuiltInLootTables.CAT_MORNING_GIFT);
 			LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.cat.level)
-				.withParameter(LootContextParams.BLOCK_POS, mutableBlockPos)
+				.withParameter(LootContextParams.ORIGIN, this.cat.position())
 				.withParameter(LootContextParams.THIS_ENTITY, this.cat)
 				.withRandom(random);
 

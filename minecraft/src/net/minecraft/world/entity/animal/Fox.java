@@ -23,6 +23,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -296,8 +297,8 @@ public class Fox extends Animal {
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		Biome biome = serverLevelAccessor.getBiome(this.blockPosition());
-		Fox.Type type = Fox.Type.byBiome(biome);
+		Optional<ResourceKey<Biome>> optional = serverLevelAccessor.getBiomeName(this.blockPosition());
+		Fox.Type type = Fox.Type.byBiome(optional);
 		boolean bl = false;
 		if (spawnGroupData instanceof Fox.FoxGroupData) {
 			type = ((Fox.FoxGroupData)spawnGroupData).type;
@@ -1442,20 +1443,16 @@ public class Fox extends Animal {
 			.collect(Collectors.toMap(Fox.Type::getName, type -> type));
 		private final int id;
 		private final String name;
-		private final List<Biome> biomes;
+		private final List<ResourceKey<Biome>> biomes;
 
-		private Type(int j, String string2, Biome... biomes) {
+		private Type(int j, String string2, ResourceKey<Biome>... resourceKeys) {
 			this.id = j;
 			this.name = string2;
-			this.biomes = Arrays.asList(biomes);
+			this.biomes = Arrays.asList(resourceKeys);
 		}
 
 		public String getName() {
 			return this.name;
-		}
-
-		public List<Biome> getBiomes() {
-			return this.biomes;
 		}
 
 		public int getId() {
@@ -1474,8 +1471,8 @@ public class Fox extends Animal {
 			return BY_ID[i];
 		}
 
-		public static Fox.Type byBiome(Biome biome) {
-			return SNOW.getBiomes().contains(biome) ? SNOW : RED;
+		public static Fox.Type byBiome(Optional<ResourceKey<Biome>> optional) {
+			return optional.isPresent() && SNOW.biomes.contains(optional.get()) ? SNOW : RED;
 		}
 	}
 }

@@ -22,32 +22,32 @@ public enum OceanMixerLayer implements AreaTransformer2, DimensionOffset0Transfo
 				for (int p = -8; p <= 8; p += 4) {
 					int q = area.get(this.getParentX(i + o), this.getParentY(j + p));
 					if (!Layers.isOcean(q)) {
-						if (l == Layers.WARM_OCEAN) {
-							return Layers.LUKEWARM_OCEAN;
+						if (l == 44) {
+							return 45;
 						}
 
-						if (l == Layers.FROZEN_OCEAN) {
-							return Layers.COLD_OCEAN;
+						if (l == 10) {
+							return 46;
 						}
 					}
 				}
 			}
 
-			if (k == Layers.DEEP_OCEAN) {
-				if (l == Layers.LUKEWARM_OCEAN) {
-					return Layers.DEEP_LUKEWARM_OCEAN;
+			if (k == 24) {
+				if (l == 45) {
+					return 48;
 				}
 
-				if (l == Layers.OCEAN) {
-					return Layers.DEEP_OCEAN;
+				if (l == 0) {
+					return 24;
 				}
 
-				if (l == Layers.COLD_OCEAN) {
-					return Layers.DEEP_COLD_OCEAN;
+				if (l == 46) {
+					return 49;
 				}
 
-				if (l == Layers.FROZEN_OCEAN) {
-					return Layers.DEEP_FROZEN_OCEAN;
+				if (l == 10) {
+					return 50;
 				}
 			}
 

@@ -11,35 +11,33 @@ public class LootContextParamSets {
 	public static final LootContextParamSet EMPTY = register("empty", builder -> {
 	});
 	public static final LootContextParamSet CHEST = register(
-		"chest", builder -> builder.required(LootContextParams.BLOCK_POS).optional(LootContextParams.THIS_ENTITY)
+		"chest", builder -> builder.required(LootContextParams.ORIGIN).optional(LootContextParams.THIS_ENTITY)
 	);
 	public static final LootContextParamSet COMMAND = register(
-		"command", builder -> builder.required(LootContextParams.BLOCK_POS).optional(LootContextParams.THIS_ENTITY)
+		"command", builder -> builder.required(LootContextParams.ORIGIN).optional(LootContextParams.THIS_ENTITY)
 	);
 	public static final LootContextParamSet SELECTOR = register(
-		"selector", builder -> builder.required(LootContextParams.BLOCK_POS).required(LootContextParams.THIS_ENTITY)
+		"selector", builder -> builder.required(LootContextParams.ORIGIN).required(LootContextParams.THIS_ENTITY)
 	);
 	public static final LootContextParamSet FISHING = register(
-		"fishing", builder -> builder.required(LootContextParams.BLOCK_POS).required(LootContextParams.TOOL).optional(LootContextParams.THIS_ENTITY)
+		"fishing", builder -> builder.required(LootContextParams.ORIGIN).required(LootContextParams.TOOL).optional(LootContextParams.THIS_ENTITY)
 	);
 	public static final LootContextParamSet ENTITY = register(
 		"entity",
 		builder -> builder.required(LootContextParams.THIS_ENTITY)
-				.required(LootContextParams.BLOCK_POS)
+				.required(LootContextParams.ORIGIN)
 				.required(LootContextParams.DAMAGE_SOURCE)
 				.optional(LootContextParams.KILLER_ENTITY)
 				.optional(LootContextParams.DIRECT_KILLER_ENTITY)
 				.optional(LootContextParams.LAST_DAMAGE_PLAYER)
 	);
-	public static final LootContextParamSet GIFT = register(
-		"gift", builder -> builder.required(LootContextParams.BLOCK_POS).required(LootContextParams.THIS_ENTITY)
-	);
+	public static final LootContextParamSet GIFT = register("gift", builder -> builder.required(LootContextParams.ORIGIN).required(LootContextParams.THIS_ENTITY));
 	public static final LootContextParamSet PIGLIN_BARTER = register("barter", builder -> builder.required(LootContextParams.THIS_ENTITY));
 	public static final LootContextParamSet ADVANCEMENT_REWARD = register(
-		"advancement_reward", builder -> builder.required(LootContextParams.THIS_ENTITY).required(LootContextParams.BLOCK_POS)
+		"advancement_reward", builder -> builder.required(LootContextParams.THIS_ENTITY).required(LootContextParams.ORIGIN)
 	);
 	public static final LootContextParamSet ADVANCEMENT_ENTITY = register(
-		"advancement_entity", builder -> builder.required(LootContextParams.THIS_ENTITY).required(LootContextParams.ORIGIN).required(LootContextParams.BLOCK_POS)
+		"advancement_entity", builder -> builder.required(LootContextParams.THIS_ENTITY).required(LootContextParams.ORIGIN)
 	);
 	public static final LootContextParamSet ALL_PARAMS = register(
 		"generic",
@@ -48,7 +46,7 @@ public class LootContextParamSets {
 				.required(LootContextParams.DAMAGE_SOURCE)
 				.required(LootContextParams.KILLER_ENTITY)
 				.required(LootContextParams.DIRECT_KILLER_ENTITY)
-				.required(LootContextParams.BLOCK_POS)
+				.required(LootContextParams.ORIGIN)
 				.required(LootContextParams.BLOCK_STATE)
 				.required(LootContextParams.BLOCK_ENTITY)
 				.required(LootContextParams.TOOL)
@@ -57,7 +55,7 @@ public class LootContextParamSets {
 	public static final LootContextParamSet BLOCK = register(
 		"block",
 		builder -> builder.required(LootContextParams.BLOCK_STATE)
-				.required(LootContextParams.BLOCK_POS)
+				.required(LootContextParams.ORIGIN)
 				.required(LootContextParams.TOOL)
 				.optional(LootContextParams.THIS_ENTITY)
 				.optional(LootContextParams.BLOCK_ENTITY)

@@ -1,7 +1,6 @@
 package net.minecraft.server.level;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -1166,7 +1165,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		return this.getChunkSource()
 			.getGenerator()
 			.getBiomeSource()
-			.findBiomeHorizontal(blockPos.getX(), blockPos.getY(), blockPos.getZ(), i, j, ImmutableList.of(biome), this.random, true);
+			.findBiomeHorizontal(blockPos.getX(), blockPos.getY(), blockPos.getZ(), i, j, biome2 -> biome2 == biome, this.random, true);
 	}
 
 	@Override

@@ -37,7 +37,6 @@ public class RealmsPlayerScreen extends RealmsScreen {
 	private static final ResourceLocation USER_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/user_icon.png");
 	private static final ResourceLocation CROSS_ICON_LOCATION = new ResourceLocation("realms", "textures/gui/realms/cross_player_icon.png");
 	private static final ResourceLocation OPTIONS_BACKGROUND = new ResourceLocation("minecraft", "textures/gui/options_background.png");
-	private static final Component DISABLED_ACTIVITY_FEED_LABEL = new TranslatableComponent("mco.configure.world.activityfeed.disabled");
 	private static final Component NORMAL_USER_TOOLTIP = new TranslatableComponent("mco.configure.world.invites.normal.tooltip");
 	private static final Component OP_TOOLTIP = new TranslatableComponent("mco.configure.world.invites.ops.tooltip");
 	private static final Component REMOVE_ENTRY_TOOLTIP = new TranslatableComponent("mco.configure.world.invites.remove.tooltip");
@@ -331,8 +330,6 @@ public class RealmsPlayerScreen extends RealmsScreen {
 			}
 
 			RealmsPlayerScreen.this.drawRemoveIcon(poseStack, RealmsPlayerScreen.this.column1X + RealmsPlayerScreen.this.columnWidth - 22, j + 2, k, l);
-			RealmsPlayerScreen.this.font
-				.draw(poseStack, RealmsPlayerScreen.DISABLED_ACTIVITY_FEED_LABEL, (float)RealmsPlayerScreen.this.column2X, (float)RealmsPlayerScreen.row(5), 10526880);
 			RealmsTextureManager.withBoundFace(playerInfo.getUuid(), () -> {
 				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 				GuiComponent.blit(poseStack, RealmsPlayerScreen.this.column1X + 2 + 2, j + 1, 8, 8, 8.0F, 8.0F, 8, 8, 64, 64);

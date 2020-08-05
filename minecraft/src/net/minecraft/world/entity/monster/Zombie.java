@@ -525,9 +525,9 @@ public class Zombie extends Monster {
 		if (entity instanceof Creeper) {
 			Creeper creeper = (Creeper)entity;
 			if (creeper.canDropMobsSkull()) {
-				creeper.increaseDroppedSkulls();
 				ItemStack itemStack = this.getSkull();
 				if (!itemStack.isEmpty()) {
+					creeper.increaseDroppedSkulls();
 					this.spawnAtLocation(itemStack);
 				}
 			}

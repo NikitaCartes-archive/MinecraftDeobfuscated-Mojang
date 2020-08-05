@@ -44,7 +44,7 @@ public class AdvancementRewards {
 		serverPlayer.giveExperiencePoints(this.experience);
 		LootContext lootContext = new LootContext.Builder(serverPlayer.getLevel())
 			.withParameter(LootContextParams.THIS_ENTITY, serverPlayer)
-			.withParameter(LootContextParams.BLOCK_POS, serverPlayer.blockPosition())
+			.withParameter(LootContextParams.ORIGIN, serverPlayer.position())
 			.withRandom(serverPlayer.getRandom())
 			.create(LootContextParamSets.ADVANCEMENT_REWARD);
 		boolean bl = false;

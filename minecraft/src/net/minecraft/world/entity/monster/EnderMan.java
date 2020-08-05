@@ -49,12 +49,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -427,29 +426,31 @@ public class EnderMan extends Monster implements NeutralMob {
 		@Override
 		public void tick() {
 			Random random = this.enderman.getRandom();
-			LevelAccessor levelAccessor = this.enderman.level;
+			Level level = this.enderman.level;
 			int i = Mth.floor(this.enderman.getX() - 1.0 + random.nextDouble() * 2.0);
 			int j = Mth.floor(this.enderman.getY() + random.nextDouble() * 2.0);
 			int k = Mth.floor(this.enderman.getZ() - 1.0 + random.nextDouble() * 2.0);
 			BlockPos blockPos = new BlockPos(i, j, k);
-			BlockState blockState = levelAccessor.getBlockState(blockPos);
+			BlockState blockState = level.getBlockState(blockPos);
 			BlockPos blockPos2 = blockPos.below();
-			BlockState blockState2 = levelAccessor.getBlockState(blockPos2);
+			BlockState blockState2 = level.getBlockState(blockPos2);
 			BlockState blockState3 = this.enderman.getCarriedBlock();
-			if (blockState3 != null && this.canPlaceBlock(levelAccessor, blockPos, blockState3, blockState, blockState2, blockPos2)) {
-				levelAccessor.setBlock(blockPos, blockState3, 3);
-				this.enderman.setCarriedBlock(null);
+			if (blockState3 != null) {
+				blockState3 = Block.updateFromNeighbourShapes(blockState3, this.enderman.level, blockPos);
+				if (this.canPlaceBlock(level, blockPos, blockState3, blockState, blockState2, blockPos2)) {
+					level.setBlock(blockPos, blockState3, 3);
+					this.enderman.setCarriedBlock(null);
+				}
 			}
 		}
 
-		private boolean canPlaceBlock(
-			LevelReader levelReader, BlockPos blockPos, BlockState blockState, BlockState blockState2, BlockState blockState3, BlockPos blockPos2
-		) {
+		private boolean canPlaceBlock(Level level, BlockPos blockPos, BlockState blockState, BlockState blockState2, BlockState blockState3, BlockPos blockPos2) {
 			return blockState2.isAir()
 				&& !blockState3.isAir()
 				&& !blockState3.is(Blocks.BEDROCK)
-				&& blockState3.isCollisionShapeFullBlock(levelReader, blockPos2)
-				&& blockState.canSurvive(levelReader, blockPos);
+				&& blockState3.isCollisionShapeFullBlock(level, blockPos2)
+				&& blockState.canSurvive(level, blockPos)
+				&& level.getEntities(this.enderman, AABB.unitCubeFromLowerCorner(Vec3.atLowerCornerOf(blockPos))).isEmpty();
 		}
 	}
 
@@ -563,8 +564,8 @@ public class EnderMan extends Monster implements NeutralMob {
 			BlockHitResult blockHitResult = level.clip(new ClipContext(vec3, vec32, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.enderman));
 			boolean bl = blockHitResult.getBlockPos().equals(blockPos);
 			if (block.is(BlockTags.ENDERMAN_HOLDABLE) && bl) {
-				this.enderman.setCarriedBlock(blockState);
 				level.removeBlock(blockPos, false);
+				this.enderman.setCarriedBlock(blockState.getBlock().defaultBlockState());
 			}
 		}
 	}

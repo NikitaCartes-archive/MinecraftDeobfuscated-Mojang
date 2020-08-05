@@ -33,6 +33,10 @@ public class ResourceKey<T> {
 		return "ResourceKey[" + this.registryName + " / " + this.location + ']';
 	}
 
+	public boolean isFor(ResourceKey<? extends Registry<?>> resourceKey) {
+		return this.registryName.equals(resourceKey.location());
+	}
+
 	public ResourceLocation location() {
 		return this.location;
 	}

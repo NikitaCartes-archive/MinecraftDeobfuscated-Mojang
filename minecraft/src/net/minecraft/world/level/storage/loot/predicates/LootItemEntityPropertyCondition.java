@@ -29,7 +29,7 @@ public class LootItemEntityPropertyCondition implements LootItemCondition {
 
 	@Override
 	public Set<LootContextParam<?>> getReferencedContextParams() {
-		return ImmutableSet.of(LootContextParams.BLOCK_POS, this.entityTarget.getParam());
+		return ImmutableSet.of(LootContextParams.ORIGIN, this.entityTarget.getParam());
 	}
 
 	public boolean test(LootContext lootContext) {

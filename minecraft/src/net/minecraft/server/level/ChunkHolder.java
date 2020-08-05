@@ -65,6 +65,7 @@ public class ChunkHolder {
 	private final ChunkHolder.LevelChangeListener onLevelChange;
 	private final ChunkHolder.PlayerProvider playerProvider;
 	private boolean wasAccessibleSinceLastSave;
+	private boolean resendLight;
 
 	public ChunkHolder(
 		ChunkPos chunkPos, int i, LevelLightEngine levelLightEngine, ChunkHolder.LevelChangeListener levelChangeListener, ChunkHolder.PlayerProvider playerProvider
@@ -170,19 +171,26 @@ public class ChunkHolder {
 	public void broadcastChanges(LevelChunk levelChunk) {
 		if (this.hasChangedSections || this.skyChangedLightSectionFilter != 0 || this.blockChangedLightSectionFilter != 0) {
 			Level level = levelChunk.getLevel();
+			int i = 0;
+
+			for (int j = 0; j < this.changedBlocksPerSection.length; j++) {
+				i += this.changedBlocksPerSection[j] != null ? this.changedBlocksPerSection[j].size() : 0;
+			}
+
+			this.resendLight |= i >= 64;
 			if (this.skyChangedLightSectionFilter != 0 || this.blockChangedLightSectionFilter != 0) {
 				this.broadcast(
 					new ClientboundLightUpdatePacket(levelChunk.getPos(), this.lightEngine, this.skyChangedLightSectionFilter, this.blockChangedLightSectionFilter, false),
-					true
+					!this.resendLight
 				);
 				this.skyChangedLightSectionFilter = 0;
 				this.blockChangedLightSectionFilter = 0;
 			}
 
-			for (int i = 0; i < this.changedBlocksPerSection.length; i++) {
-				ShortSet shortSet = this.changedBlocksPerSection[i];
+			for (int j = 0; j < this.changedBlocksPerSection.length; j++) {
+				ShortSet shortSet = this.changedBlocksPerSection[j];
 				if (shortSet != null) {
-					SectionPos sectionPos = SectionPos.of(levelChunk.getPos(), i);
+					SectionPos sectionPos = SectionPos.of(levelChunk.getPos(), j);
 					if (shortSet.size() == 1) {
 						BlockPos blockPos = sectionPos.relativeToBlockPos(shortSet.iterator().nextShort());
 						BlockState blockState = level.getBlockState(blockPos);
@@ -197,7 +205,7 @@ public class ChunkHolder {
 						clientboundSectionBlocksUpdatePacket.runUpdates((blockPos, blockState) -> this.broadcastBlockEntityIfNeeded(level, blockPos, blockState));
 					}
 
-					this.changedBlocksPerSection[i] = null;
+					this.changedBlocksPerSection[j] = null;
 				}
 			}
 

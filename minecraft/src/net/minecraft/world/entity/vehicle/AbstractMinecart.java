@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.BlockUtil;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -142,6 +143,11 @@ public abstract class AbstractMinecart extends Entity {
 	@Override
 	public boolean isPushable() {
 		return true;
+	}
+
+	@Override
+	protected Vec3 getRelativePortalPosition(Direction.Axis axis, BlockUtil.FoundRectangle foundRectangle) {
+		return LivingEntity.resetForwardDirectionOfRelativePortalPosition(super.getRelativePortalPosition(axis, foundRectangle));
 	}
 
 	@Override

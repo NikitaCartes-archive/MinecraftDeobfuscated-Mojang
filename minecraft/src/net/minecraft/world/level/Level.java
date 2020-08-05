@@ -20,7 +20,6 @@ import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -115,16 +114,16 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		this.dimension = resourceKey;
 		this.dimensionTypeKey = resourceKey2;
 		this.isClientSide = bl;
-		if (dimensionType.shrunk()) {
+		if (dimensionType.coordinateScale() != 1.0) {
 			this.worldBorder = new WorldBorder() {
 				@Override
 				public double getCenterX() {
-					return super.getCenterX() / 8.0;
+					return super.getCenterX() / dimensionType.coordinateScale();
 				}
 
 				@Override
 				public double getCenterZ() {
-					return super.getCenterZ() / 8.0;
+					return super.getCenterZ() / dimensionType.coordinateScale();
 				}
 			};
 		} else {
@@ -1073,6 +1072,4 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	public final boolean isDebug() {
 		return this.isDebug;
 	}
-
-	public abstract RegistryAccess registryAccess();
 }

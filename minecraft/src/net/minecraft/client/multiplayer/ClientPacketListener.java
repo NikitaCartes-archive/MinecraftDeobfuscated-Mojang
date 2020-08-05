@@ -772,22 +772,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 				blockEntity.load(this.level.getBlockState(blockPos), compoundTag);
 			}
 		}
-
-		if (!clientboundLevelChunkPacket.forgetOldData()) {
-			this.level.getLightEngine().enableLightSources(levelChunk.getPos(), false);
-			int k = clientboundLevelChunkPacket.getAvailableSections();
-
-			for (int l = 0; l < 16; l++) {
-				if ((k & 1 << l) != 0) {
-					this.level.getLightEngine().queueSectionData(LightLayer.BLOCK, SectionPos.of(levelChunk.getPos(), l), new DataLayer(), false);
-					this.level.getLightEngine().queueSectionData(LightLayer.SKY, SectionPos.of(levelChunk.getPos(), l), new DataLayer(), false);
-				}
-			}
-
-			this.level.getLightEngine().runUpdates(Integer.MAX_VALUE, true, true);
-			this.level.getLightEngine().enableLightSources(levelChunk.getPos(), true);
-			levelChunk.getLights().forEach(blockPosx -> this.level.getLightEngine().onBlockEmissionIncrease(blockPosx, levelChunk.getLightEmission(blockPosx)));
-		}
 	}
 
 	@Override

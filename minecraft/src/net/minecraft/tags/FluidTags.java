@@ -13,11 +13,7 @@ public final class FluidTags {
 		return HELPER.bind(string);
 	}
 
-	public static TagCollection<Fluid> getAllTags() {
-		return HELPER.getAllTags();
-	}
-
-	public static List<? extends Tag<Fluid>> getWrappers() {
+	public static List<? extends Tag.Named<Fluid>> getWrappers() {
 		return HELPER.getWrappers();
 	}
 }

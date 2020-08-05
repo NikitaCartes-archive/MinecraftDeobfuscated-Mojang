@@ -11,6 +11,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
@@ -288,6 +289,11 @@ public class WorldGenRegion implements WorldGenLevel {
 	@Override
 	public ServerLevel getLevel() {
 		return this.level;
+	}
+
+	@Override
+	public RegistryAccess registryAccess() {
+		return this.level.registryAccess();
 	}
 
 	@Override

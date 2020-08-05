@@ -226,37 +226,35 @@ public class PistonBaseBlock extends DirectionalBlock {
 	}
 
 	public static boolean isPushable(BlockState blockState, Level level, BlockPos blockPos, Direction direction, boolean bl, Direction direction2) {
-		if (!blockState.is(Blocks.OBSIDIAN) && !blockState.is(Blocks.CRYING_OBSIDIAN) && !blockState.is(Blocks.RESPAWN_ANCHOR)) {
-			if (!level.getWorldBorder().isWithinBounds(blockPos)) {
-				return false;
-			} else if (blockPos.getY() >= 0 && (direction != Direction.DOWN || blockPos.getY() != 0)) {
-				if (blockPos.getY() <= level.getMaxBuildHeight() - 1 && (direction != Direction.UP || blockPos.getY() != level.getMaxBuildHeight() - 1)) {
-					if (!blockState.is(Blocks.PISTON) && !blockState.is(Blocks.STICKY_PISTON)) {
-						if (blockState.getDestroySpeed(level, blockPos) == -1.0F) {
-							return false;
-						}
-
-						switch (blockState.getPistonPushReaction()) {
-							case BLOCK:
-								return false;
-							case DESTROY:
-								return bl;
-							case PUSH_ONLY:
-								return direction == direction2;
-						}
-					} else if ((Boolean)blockState.getValue(EXTENDED)) {
-						return false;
-					}
-
-					return !blockState.getBlock().isEntityBlock();
-				} else {
+		if (blockPos.getY() < 0 || blockPos.getY() > level.getMaxBuildHeight() - 1 || !level.getWorldBorder().isWithinBounds(blockPos)) {
+			return false;
+		} else if (blockState.isAir()) {
+			return true;
+		} else if (blockState.is(Blocks.OBSIDIAN) || blockState.is(Blocks.CRYING_OBSIDIAN) || blockState.is(Blocks.RESPAWN_ANCHOR)) {
+			return false;
+		} else if (direction == Direction.DOWN && blockPos.getY() == 0) {
+			return false;
+		} else if (direction == Direction.UP && blockPos.getY() == level.getMaxBuildHeight() - 1) {
+			return false;
+		} else {
+			if (!blockState.is(Blocks.PISTON) && !blockState.is(Blocks.STICKY_PISTON)) {
+				if (blockState.getDestroySpeed(level, blockPos) == -1.0F) {
 					return false;
 				}
-			} else {
+
+				switch (blockState.getPistonPushReaction()) {
+					case BLOCK:
+						return false;
+					case DESTROY:
+						return bl;
+					case PUSH_ONLY:
+						return direction == direction2;
+				}
+			} else if ((Boolean)blockState.getValue(EXTENDED)) {
 				return false;
 			}
-		} else {
-			return false;
+
+			return !blockState.getBlock().isEntityBlock();
 		}
 	}
 

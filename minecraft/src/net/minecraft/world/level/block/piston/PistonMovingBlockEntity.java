@@ -36,6 +36,7 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 	private float progress;
 	private float progressO;
 	private long lastTicked;
+	private int deathTicks;
 
 	public PistonMovingBlockEntity() {
 		super(BlockEntityType.PISTON);
@@ -259,7 +260,7 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 	}
 
 	public void finalTick() {
-		if (this.progressO < 1.0F && this.level != null) {
+		if (!this.level.isClientSide && this.progressO < 1.0F && this.level != null) {
 			this.progress = 1.0F;
 			this.progressO = this.progress;
 			this.level.removeBlockEntity(this.worldPosition);
@@ -283,20 +284,24 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 		this.lastTicked = this.level.getGameTime();
 		this.progressO = this.progress;
 		if (this.progressO >= 1.0F) {
-			this.level.removeBlockEntity(this.worldPosition);
-			this.setRemoved();
-			if (this.movedState != null && this.level.getBlockState(this.worldPosition).is(Blocks.MOVING_PISTON)) {
-				BlockState blockState = Block.updateFromNeighbourShapes(this.movedState, this.level, this.worldPosition);
-				if (blockState.isAir()) {
-					this.level.setBlock(this.worldPosition, this.movedState, 84);
-					Block.updateOrDestroy(this.movedState, blockState, this.level, this.worldPosition, 3);
-				} else {
-					if (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && (Boolean)blockState.getValue(BlockStateProperties.WATERLOGGED)) {
-						blockState = blockState.setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(false));
-					}
+			if (this.level.isClientSide && this.deathTicks < 5) {
+				this.deathTicks++;
+			} else {
+				this.level.removeBlockEntity(this.worldPosition);
+				this.setRemoved();
+				if (this.movedState != null && this.level.getBlockState(this.worldPosition).is(Blocks.MOVING_PISTON)) {
+					BlockState blockState = Block.updateFromNeighbourShapes(this.movedState, this.level, this.worldPosition);
+					if (blockState.isAir()) {
+						this.level.setBlock(this.worldPosition, this.movedState, 84);
+						Block.updateOrDestroy(this.movedState, blockState, this.level, this.worldPosition, 3);
+					} else {
+						if (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && (Boolean)blockState.getValue(BlockStateProperties.WATERLOGGED)) {
+							blockState = blockState.setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(false));
+						}
 
-					this.level.setBlock(this.worldPosition, blockState, 67);
-					this.level.neighborChanged(this.worldPosition, blockState.getBlock(), this.worldPosition);
+						this.level.setBlock(this.worldPosition, blockState, 67);
+						this.level.neighborChanged(this.worldPosition, blockState.getBlock(), this.worldPosition);
+					}
 				}
 			}
 		} else {
@@ -364,5 +369,11 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 
 	public long getLastTicked() {
 		return this.lastTicked;
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public double getViewDistance() {
+		return 68.0;
 	}
 }

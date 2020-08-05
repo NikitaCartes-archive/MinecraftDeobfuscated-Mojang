@@ -724,7 +724,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			|| mobSpawnType == MobSpawnType.SPAWN_EGG
 			|| mobSpawnType == MobSpawnType.SPAWNER
 			|| mobSpawnType == MobSpawnType.DISPENSER) {
-			this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(serverLevelAccessor.getBiome(this.blockPosition()))));
+			this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(serverLevelAccessor.getBiomeName(this.blockPosition()))));
 		}
 
 		if (mobSpawnType == MobSpawnType.STRUCTURE) {
@@ -738,7 +738,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		double d = this.random.nextDouble();
 		VillagerType villagerType;
 		if (d < 0.5) {
-			villagerType = VillagerType.byBiome(serverLevel.getBiome(this.blockPosition()));
+			villagerType = VillagerType.byBiome(serverLevel.getBiomeName(this.blockPosition()));
 		} else if (d < 0.75) {
 			villagerType = this.getVillagerData().getType();
 		} else {

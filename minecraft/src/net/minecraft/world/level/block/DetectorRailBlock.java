@@ -70,36 +70,38 @@ public class DetectorRailBlock extends BaseRailBlock {
 	}
 
 	private void checkPressed(Level level, BlockPos blockPos, BlockState blockState) {
-		boolean bl = (Boolean)blockState.getValue(POWERED);
-		boolean bl2 = false;
-		List<AbstractMinecart> list = this.getInteractingMinecartOfType(level, blockPos, AbstractMinecart.class, null);
-		if (!list.isEmpty()) {
-			bl2 = true;
-		}
+		if (this.canSurvive(blockState, level, blockPos)) {
+			boolean bl = (Boolean)blockState.getValue(POWERED);
+			boolean bl2 = false;
+			List<AbstractMinecart> list = this.getInteractingMinecartOfType(level, blockPos, AbstractMinecart.class, null);
+			if (!list.isEmpty()) {
+				bl2 = true;
+			}
 
-		if (bl2 && !bl) {
-			BlockState blockState2 = blockState.setValue(POWERED, Boolean.valueOf(true));
-			level.setBlock(blockPos, blockState2, 3);
-			this.updatePowerToConnected(level, blockPos, blockState2, true);
-			level.updateNeighborsAt(blockPos, this);
-			level.updateNeighborsAt(blockPos.below(), this);
-			level.setBlocksDirty(blockPos, blockState, blockState2);
-		}
+			if (bl2 && !bl) {
+				BlockState blockState2 = blockState.setValue(POWERED, Boolean.valueOf(true));
+				level.setBlock(blockPos, blockState2, 3);
+				this.updatePowerToConnected(level, blockPos, blockState2, true);
+				level.updateNeighborsAt(blockPos, this);
+				level.updateNeighborsAt(blockPos.below(), this);
+				level.setBlocksDirty(blockPos, blockState, blockState2);
+			}
 
-		if (!bl2 && bl) {
-			BlockState blockState2 = blockState.setValue(POWERED, Boolean.valueOf(false));
-			level.setBlock(blockPos, blockState2, 3);
-			this.updatePowerToConnected(level, blockPos, blockState2, false);
-			level.updateNeighborsAt(blockPos, this);
-			level.updateNeighborsAt(blockPos.below(), this);
-			level.setBlocksDirty(blockPos, blockState, blockState2);
-		}
+			if (!bl2 && bl) {
+				BlockState blockState2 = blockState.setValue(POWERED, Boolean.valueOf(false));
+				level.setBlock(blockPos, blockState2, 3);
+				this.updatePowerToConnected(level, blockPos, blockState2, false);
+				level.updateNeighborsAt(blockPos, this);
+				level.updateNeighborsAt(blockPos.below(), this);
+				level.setBlocksDirty(blockPos, blockState, blockState2);
+			}
 
-		if (bl2) {
-			level.getBlockTicks().scheduleTick(blockPos, this, 20);
-		}
+			if (bl2) {
+				level.getBlockTicks().scheduleTick(blockPos, this, 20);
+			}
 
-		level.updateNeighbourForOutputSignal(blockPos, this);
+			level.updateNeighbourForOutputSignal(blockPos, this);
+		}
 	}
 
 	protected void updatePowerToConnected(Level level, BlockPos blockPos, BlockState blockState, boolean bl) {
