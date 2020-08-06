@@ -237,12 +237,12 @@ public class WorldGenSettings {
 							(FlatLevelGeneratorSettings)FlatLevelGeneratorSettings.CODEC
 								.parse(dynamic)
 								.resultOrPartial(LOGGER::error)
-								.orElseGet(FlatLevelGeneratorSettings::getDefault)
+								.orElseGet(() -> FlatLevelGeneratorSettings.getDefault(registry2))
 						)
 					)
 				);
 			case "debug_all_block_states":
-				return new WorldGenSettings(l, bl, false, withOverworld(registry, mappedRegistry, DebugLevelSource.INSTANCE));
+				return new WorldGenSettings(l, bl, false, withOverworld(registry, mappedRegistry, new DebugLevelSource(registry2)));
 			case "amplified":
 				return new WorldGenSettings(
 					l,

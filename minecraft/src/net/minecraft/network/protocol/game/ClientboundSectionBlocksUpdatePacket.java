@@ -3,6 +3,8 @@ package net.minecraft.network.protocol.game;
 import it.unimi.dsi.fastutil.shorts.ShortSet;
 import java.io.IOException;
 import java.util.function.BiConsumer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -15,12 +17,14 @@ public class ClientboundSectionBlocksUpdatePacket implements Packet<ClientGamePa
 	private SectionPos sectionPos;
 	private short[] positions;
 	private BlockState[] states;
+	private boolean suppressLightUpdates;
 
 	public ClientboundSectionBlocksUpdatePacket() {
 	}
 
-	public ClientboundSectionBlocksUpdatePacket(SectionPos sectionPos, ShortSet shortSet, LevelChunkSection levelChunkSection) {
+	public ClientboundSectionBlocksUpdatePacket(SectionPos sectionPos, ShortSet shortSet, LevelChunkSection levelChunkSection, boolean bl) {
 		this.sectionPos = sectionPos;
+		this.suppressLightUpdates = bl;
 		this.initFields(shortSet.size());
 		int i = 0;
 
@@ -39,6 +43,7 @@ public class ClientboundSectionBlocksUpdatePacket implements Packet<ClientGamePa
 	@Override
 	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
 		this.sectionPos = SectionPos.of(friendlyByteBuf.readLong());
+		this.suppressLightUpdates = friendlyByteBuf.readBoolean();
 		int i = friendlyByteBuf.readVarInt();
 		this.initFields(i);
 
@@ -52,6 +57,7 @@ public class ClientboundSectionBlocksUpdatePacket implements Packet<ClientGamePa
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
 		friendlyByteBuf.writeLong(this.sectionPos.asLong());
+		friendlyByteBuf.writeBoolean(this.suppressLightUpdates);
 		friendlyByteBuf.writeVarInt(this.positions.length);
 
 		for (int i = 0; i < this.positions.length; i++) {
@@ -71,5 +77,10 @@ public class ClientboundSectionBlocksUpdatePacket implements Packet<ClientGamePa
 			mutableBlockPos.set(this.sectionPos.relativeToBlockX(s), this.sectionPos.relativeToBlockY(s), this.sectionPos.relativeToBlockZ(s));
 			biConsumer.accept(mutableBlockPos, this.states[i]);
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public boolean shouldSuppressLightUpdates() {
+		return this.suppressLightUpdates;
 	}
 }

@@ -197,9 +197,10 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 
 			if (this.isInWaterRainOrBubble()) {
 				this.isWet = true;
-				this.isShaking = false;
-				this.shakeAnim = 0.0F;
-				this.shakeAnimO = 0.0F;
+				if (this.isShaking && !this.level.isClientSide) {
+					this.level.broadcastEntityEvent(this, (byte)56);
+					this.cancelShake();
+				}
 			} else if ((this.isWet || this.isShaking) && this.isShaking) {
 				if (this.shakeAnim == 0.0F) {
 					this.playSound(SoundEvents.WOLF_SHAKE, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
@@ -229,6 +230,12 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		}
 	}
 
+	private void cancelShake() {
+		this.isShaking = false;
+		this.shakeAnim = 0.0F;
+		this.shakeAnimO = 0.0F;
+	}
+
 	@Override
 	public void die(DamageSource damageSource) {
 		this.isWet = false;
@@ -245,7 +252,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 
 	@Environment(EnvType.CLIENT)
 	public float getWetShade(float f) {
-		return 0.75F + Mth.lerp(f, this.shakeAnimO, this.shakeAnim) / 2.0F * 0.25F;
+		return Math.min(0.5F + Mth.lerp(f, this.shakeAnimO, this.shakeAnim) / 2.0F * 0.5F, 1.0F);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -382,6 +389,8 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 			this.isShaking = true;
 			this.shakeAnim = 0.0F;
 			this.shakeAnimO = 0.0F;
+		} else if (b == 56) {
+			this.cancelShake();
 		} else {
 			super.handleEntityEvent(b);
 		}

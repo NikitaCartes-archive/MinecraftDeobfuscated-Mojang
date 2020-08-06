@@ -14,7 +14,7 @@ public class ProcessorRule {
 		instance -> instance.group(
 					RuleTest.CODEC.fieldOf("input_predicate").forGetter(processorRule -> processorRule.inputPredicate),
 					RuleTest.CODEC.fieldOf("location_predicate").forGetter(processorRule -> processorRule.locPredicate),
-					PosRuleTest.CODEC.fieldOf("position_predicate").forGetter(processorRule -> processorRule.posPredicate),
+					PosRuleTest.CODEC.optionalFieldOf("position_predicate", PosAlwaysTrueTest.INSTANCE).forGetter(processorRule -> processorRule.posPredicate),
 					BlockState.CODEC.fieldOf("output_state").forGetter(processorRule -> processorRule.outputState),
 					CompoundTag.CODEC.optionalFieldOf("output_nbt").forGetter(processorRule -> Optional.ofNullable(processorRule.outputTag))
 				)

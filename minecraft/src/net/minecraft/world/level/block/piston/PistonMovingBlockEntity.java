@@ -260,7 +260,7 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 	}
 
 	public void finalTick() {
-		if (!this.level.isClientSide && this.progressO < 1.0F && this.level != null) {
+		if (this.progressO < 1.0F && this.level != null) {
 			this.progress = 1.0F;
 			this.progressO = this.progress;
 			this.level.removeBlockEntity(this.worldPosition);

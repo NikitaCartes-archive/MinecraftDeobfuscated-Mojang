@@ -647,7 +647,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 			this.connection
 				.send(
 					new ClientboundRespawnPacket(
-						serverLevel.dimensionTypeKey(),
+						serverLevel.dimensionType(),
 						serverLevel.dimension(),
 						BiomeManager.obfuscateSeed(serverLevel.getSeed()),
 						this.gameMode.getGameModeForPlayer(),
@@ -1368,7 +1368,7 @@ public class ServerPlayer extends Player implements ContainerListener {
 			this.connection
 				.send(
 					new ClientboundRespawnPacket(
-						serverLevel.dimensionTypeKey(),
+						serverLevel.dimensionType(),
 						serverLevel.dimension(),
 						BiomeManager.obfuscateSeed(serverLevel.getSeed()),
 						this.gameMode.getGameModeForPlayer(),

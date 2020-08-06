@@ -361,9 +361,8 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		Collections.shuffle(arrayList);
 		this.levels = Sets.<ResourceKey<Level>>newLinkedHashSet(arrayList);
 		this.registryAccess = clientboundLoginPacket.registryAccess();
-		ResourceKey<DimensionType> resourceKey = clientboundLoginPacket.getDimensionType();
-		ResourceKey<Level> resourceKey2 = clientboundLoginPacket.getDimension();
-		DimensionType dimensionType = this.registryAccess.dimensionTypes().get(resourceKey);
+		ResourceKey<Level> resourceKey = clientboundLoginPacket.getDimension();
+		DimensionType dimensionType = clientboundLoginPacket.getDimensionType();
 		this.serverChunkRadius = clientboundLoginPacket.getChunkRadius();
 		boolean bl = clientboundLoginPacket.isDebug();
 		boolean bl2 = clientboundLoginPacket.isFlat();
@@ -372,7 +371,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 		this.level = new ClientLevel(
 			this,
 			clientLevelData,
-			resourceKey2,
 			resourceKey,
 			dimensionType,
 			this.serverChunkRadius,
@@ -735,7 +733,8 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	@Override
 	public void handleChunkBlocksUpdate(ClientboundSectionBlocksUpdatePacket clientboundSectionBlocksUpdatePacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSectionBlocksUpdatePacket, this, this.minecraft);
-		clientboundSectionBlocksUpdatePacket.runUpdates(this.level::setKnownState);
+		int i = 19 | (clientboundSectionBlocksUpdatePacket.shouldSuppressLightUpdates() ? 128 : 0);
+		clientboundSectionBlocksUpdatePacket.runUpdates((blockPos, blockState) -> this.level.setBlock(blockPos, blockState, i));
 	}
 
 	@Override
@@ -1046,13 +1045,12 @@ public class ClientPacketListener implements ClientGamePacketListener {
 	@Override
 	public void handleRespawn(ClientboundRespawnPacket clientboundRespawnPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundRespawnPacket, this, this.minecraft);
-		ResourceKey<DimensionType> resourceKey = clientboundRespawnPacket.getDimensionType();
-		ResourceKey<Level> resourceKey2 = clientboundRespawnPacket.getDimension();
-		DimensionType dimensionType = this.registryAccess.dimensionTypes().get(resourceKey);
+		ResourceKey<Level> resourceKey = clientboundRespawnPacket.getDimension();
+		DimensionType dimensionType = clientboundRespawnPacket.getDimensionType();
 		LocalPlayer localPlayer = this.minecraft.player;
 		int i = localPlayer.getId();
 		this.started = false;
-		if (resourceKey2 != localPlayer.level.dimension()) {
+		if (resourceKey != localPlayer.level.dimension()) {
 			Scoreboard scoreboard = this.level.getScoreboard();
 			boolean bl = clientboundRespawnPacket.isDebug();
 			boolean bl2 = clientboundRespawnPacket.isFlat();
@@ -1061,7 +1059,6 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			this.level = new ClientLevel(
 				this,
 				clientLevelData,
-				resourceKey2,
 				resourceKey,
 				dimensionType,
 				this.serverChunkRadius,
@@ -1083,7 +1080,7 @@ public class ClientPacketListener implements ClientGamePacketListener {
 			.createPlayer(this.level, localPlayer.getStats(), localPlayer.getRecipeBook(), localPlayer.isShiftKeyDown(), localPlayer.isSprinting());
 		localPlayer2.setId(i);
 		this.minecraft.player = localPlayer2;
-		if (resourceKey2 != localPlayer.level.dimension()) {
+		if (resourceKey != localPlayer.level.dimension()) {
 			this.minecraft.getMusicManager().stopPlaying();
 		}
 

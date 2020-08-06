@@ -12,7 +12,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 
 public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener> {
-	private ResourceKey<DimensionType> dimensionType;
+	private DimensionType dimensionType;
 	private ResourceKey<Level> dimension;
 	private long seed;
 	private GameType playerGameType;
@@ -25,10 +25,10 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 	}
 
 	public ClientboundRespawnPacket(
-		ResourceKey<DimensionType> resourceKey, ResourceKey<Level> resourceKey2, long l, GameType gameType, GameType gameType2, boolean bl, boolean bl2, boolean bl3
+		DimensionType dimensionType, ResourceKey<Level> resourceKey, long l, GameType gameType, GameType gameType2, boolean bl, boolean bl2, boolean bl3
 	) {
-		this.dimensionType = resourceKey;
-		this.dimension = resourceKey2;
+		this.dimensionType = dimensionType;
+		this.dimension = resourceKey;
 		this.seed = l;
 		this.playerGameType = gameType;
 		this.previousPlayerGameType = gameType2;
@@ -43,7 +43,7 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 
 	@Override
 	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-		this.dimensionType = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, friendlyByteBuf.readResourceLocation());
+		this.dimensionType = (DimensionType)friendlyByteBuf.readWithCodec(DimensionType.CODEC).get();
 		this.dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation());
 		this.seed = friendlyByteBuf.readLong();
 		this.playerGameType = GameType.byId(friendlyByteBuf.readUnsignedByte());
@@ -55,7 +55,7 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
-		friendlyByteBuf.writeResourceLocation(this.dimensionType.location());
+		friendlyByteBuf.writeWithCodec(DimensionType.CODEC, () -> this.dimensionType);
 		friendlyByteBuf.writeResourceLocation(this.dimension.location());
 		friendlyByteBuf.writeLong(this.seed);
 		friendlyByteBuf.writeByte(this.playerGameType.getId());
@@ -66,7 +66,7 @@ public class ClientboundRespawnPacket implements Packet<ClientGamePacketListener
 	}
 
 	@Environment(EnvType.CLIENT)
-	public ResourceKey<DimensionType> getDimensionType() {
+	public DimensionType getDimensionType() {
 		return this.dimensionType;
 	}
 

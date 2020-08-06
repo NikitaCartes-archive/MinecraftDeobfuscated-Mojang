@@ -40,7 +40,7 @@ public abstract class WorldPreset {
 	private static final WorldPreset FLAT = new WorldPreset("flat") {
 		@Override
 		protected ChunkGenerator generator(Registry<Biome> registry, Registry<NoiseGeneratorSettings> registry2, long l) {
-			return new FlatLevelSource(FlatLevelGeneratorSettings.getDefault());
+			return new FlatLevelSource(FlatLevelGeneratorSettings.getDefault(registry));
 		}
 	};
 	private static final WorldPreset LARGE_BIOMES = new WorldPreset("large_biomes") {
@@ -97,7 +97,7 @@ public abstract class WorldPreset {
 	private static final WorldPreset DEBUG = new WorldPreset("debug_all_block_states") {
 		@Override
 		protected ChunkGenerator generator(Registry<Biome> registry, Registry<NoiseGeneratorSettings> registry2, long l) {
-			return DebugLevelSource.INSTANCE;
+			return new DebugLevelSource(registry);
 		}
 	};
 	protected static final List<WorldPreset> PRESETS = Lists.<WorldPreset>newArrayList(
@@ -122,7 +122,9 @@ public abstract class WorldPreset {
 								)
 							)
 						),
-				chunkGenerator instanceof FlatLevelSource ? ((FlatLevelSource)chunkGenerator).settings() : FlatLevelGeneratorSettings.getDefault()
+				chunkGenerator instanceof FlatLevelSource
+					? ((FlatLevelSource)chunkGenerator).settings()
+					: FlatLevelGeneratorSettings.getDefault(createWorldScreen.worldGenSettingsComponent.registryHolder().registryOrThrow(Registry.BIOME_REGISTRY))
 			);
 		},
 		Optional.of(SINGLE_BIOME_SURFACE),

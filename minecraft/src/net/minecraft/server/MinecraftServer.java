@@ -346,24 +346,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			chunkGenerator = levelStem.generator();
 		}
 
-		ResourceKey<DimensionType> resourceKey = (ResourceKey<DimensionType>)this.registryHolder
-			.dimensionTypes()
-			.getResourceKey(dimensionType)
-			.orElseThrow(() -> new IllegalStateException("Unregistered dimension type: " + dimensionType));
 		ServerLevel serverLevel = new ServerLevel(
-			this,
-			this.executor,
-			this.storageSource,
-			serverLevelData,
-			Level.OVERWORLD,
-			resourceKey,
-			dimensionType,
-			chunkProgressListener,
-			chunkGenerator,
-			bl,
-			m,
-			list,
-			true
+			this, this.executor, this.storageSource, serverLevelData, Level.OVERWORLD, dimensionType, chunkProgressListener, chunkGenerator, bl, m, list, true
 		);
 		this.levels.put(Level.OVERWORLD, serverLevel);
 		DimensionDataStorage dimensionDataStorage = serverLevel.getDataStorage();
@@ -378,12 +362,12 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				if (bl) {
 					this.setupDebugLevel(this.worldData);
 				}
-			} catch (Throwable var28) {
-				CrashReport crashReport = CrashReport.forThrowable(var28, "Exception initializing level");
+			} catch (Throwable var26) {
+				CrashReport crashReport = CrashReport.forThrowable(var26, "Exception initializing level");
 
 				try {
 					serverLevel.fillReportDetails(crashReport);
-				} catch (Throwable var27) {
+				} catch (Throwable var25) {
 				}
 
 				throw new ReportedException(crashReport);
@@ -398,14 +382,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		}
 
 		for (Entry<ResourceKey<LevelStem>, LevelStem> entry : mappedRegistry.entrySet()) {
-			ResourceKey<LevelStem> resourceKey2 = (ResourceKey<LevelStem>)entry.getKey();
-			if (resourceKey2 != LevelStem.OVERWORLD) {
-				ResourceKey<Level> resourceKey3 = ResourceKey.create(Registry.DIMENSION_REGISTRY, resourceKey2.location());
+			ResourceKey<LevelStem> resourceKey = (ResourceKey<LevelStem>)entry.getKey();
+			if (resourceKey != LevelStem.OVERWORLD) {
+				ResourceKey<Level> resourceKey2 = ResourceKey.create(Registry.DIMENSION_REGISTRY, resourceKey.location());
 				DimensionType dimensionType2 = ((LevelStem)entry.getValue()).type();
-				ResourceKey<DimensionType> resourceKey4 = (ResourceKey<DimensionType>)this.registryHolder
-					.dimensionTypes()
-					.getResourceKey(dimensionType2)
-					.orElseThrow(() -> new IllegalStateException("Unregistered dimension type: " + dimensionType2));
 				ChunkGenerator chunkGenerator2 = ((LevelStem)entry.getValue()).generator();
 				DerivedLevelData derivedLevelData = new DerivedLevelData(this.worldData, serverLevelData);
 				ServerLevel serverLevel2 = new ServerLevel(
@@ -413,8 +393,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 					this.executor,
 					this.storageSource,
 					derivedLevelData,
-					resourceKey3,
-					resourceKey4,
+					resourceKey2,
 					dimensionType2,
 					chunkProgressListener,
 					chunkGenerator2,
@@ -424,7 +403,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 					false
 				);
 				worldBorder.addListener(new BorderChangeListener.DelegateBorderChangeListener(serverLevel2.getWorldBorder()));
-				this.levels.put(resourceKey3, serverLevel2);
+				this.levels.put(resourceKey2, serverLevel2);
 			}
 		}
 	}

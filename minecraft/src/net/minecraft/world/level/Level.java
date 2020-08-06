@@ -96,12 +96,10 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	private final WorldBorder worldBorder;
 	private final BiomeManager biomeManager;
 	private final ResourceKey<Level> dimension;
-	private final ResourceKey<DimensionType> dimensionTypeKey;
 
 	protected Level(
 		WritableLevelData writableLevelData,
 		ResourceKey<Level> resourceKey,
-		ResourceKey<DimensionType> resourceKey2,
 		DimensionType dimensionType,
 		Supplier<ProfilerFiller> supplier,
 		boolean bl,
@@ -112,7 +110,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		this.levelData = writableLevelData;
 		this.dimensionType = dimensionType;
 		this.dimension = resourceKey;
-		this.dimensionTypeKey = resourceKey2;
 		this.isClientSide = bl;
 		if (dimensionType.coordinateScale() != 1.0) {
 			this.worldBorder = new WorldBorder() {
@@ -206,7 +203,8 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 				return false;
 			} else {
 				BlockState blockState3 = this.getBlockState(blockPos);
-				if (blockState3 != blockState2
+				if ((i & 128) == 0
+					&& blockState3 != blockState2
 					&& (
 						blockState3.getLightBlock(this, blockPos) != blockState2.getLightBlock(this, blockPos)
 							|| blockState3.getLightEmission() != blockState2.getLightEmission()
@@ -1022,10 +1020,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	@Override
 	public DimensionType dimensionType() {
 		return this.dimensionType;
-	}
-
-	public ResourceKey<DimensionType> dimensionTypeKey() {
-		return this.dimensionTypeKey;
 	}
 
 	public ResourceKey<Level> dimension() {

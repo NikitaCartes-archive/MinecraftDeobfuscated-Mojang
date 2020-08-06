@@ -133,6 +133,7 @@ public class ChatComponent extends GuiComponent {
 	}
 
 	public void clearMessages(boolean bl) {
+		this.chatQueue.clear();
 		this.trimmedMessages.clear();
 		this.allMessages.clear();
 		if (bl) {

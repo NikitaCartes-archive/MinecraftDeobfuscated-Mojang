@@ -28,7 +28,7 @@ public abstract class EntityRenderer<T extends Entity> {
 	}
 
 	public final int getPackedLightCoords(T entity, float f) {
-		BlockPos blockPos = new BlockPos(entity.getEyePosition(f));
+		BlockPos blockPos = new BlockPos(entity.getLightProbePosition(f));
 		return LightTexture.pack(this.getBlockLightLevel(entity, blockPos), this.getSkyLightLevel(entity, blockPos));
 	}
 
