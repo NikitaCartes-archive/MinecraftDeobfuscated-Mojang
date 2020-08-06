@@ -202,9 +202,10 @@ implements NeutralMob {
         this.interestedAngle = this.isInterested() ? (this.interestedAngle += (1.0f - this.interestedAngle) * 0.4f) : (this.interestedAngle += (0.0f - this.interestedAngle) * 0.4f);
         if (this.isInWaterRainOrBubble()) {
             this.isWet = true;
-            this.isShaking = false;
-            this.shakeAnim = 0.0f;
-            this.shakeAnimO = 0.0f;
+            if (this.isShaking && !this.level.isClientSide) {
+                this.level.broadcastEntityEvent(this, (byte)56);
+                this.cancelShake();
+            }
         } else if ((this.isWet || this.isShaking) && this.isShaking) {
             if (this.shakeAnim == 0.0f) {
                 this.playSound(SoundEvents.WOLF_SHAKE, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2f + 1.0f);
@@ -230,6 +231,12 @@ implements NeutralMob {
         }
     }
 
+    private void cancelShake() {
+        this.isShaking = false;
+        this.shakeAnim = 0.0f;
+        this.shakeAnimO = 0.0f;
+    }
+
     @Override
     public void die(DamageSource damageSource) {
         this.isWet = false;
@@ -246,7 +253,7 @@ implements NeutralMob {
 
     @Environment(value=EnvType.CLIENT)
     public float getWetShade(float f) {
-        return 0.75f + Mth.lerp(f, this.shakeAnimO, this.shakeAnim) / 2.0f * 0.25f;
+        return Math.min(0.5f + Mth.lerp(f, this.shakeAnimO, this.shakeAnim) / 2.0f * 0.5f, 1.0f);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -372,6 +379,8 @@ implements NeutralMob {
             this.isShaking = true;
             this.shakeAnim = 0.0f;
             this.shakeAnimO = 0.0f;
+        } else if (b == 56) {
+            this.cancelShake();
         } else {
             super.handleEntityEvent(b);
         }

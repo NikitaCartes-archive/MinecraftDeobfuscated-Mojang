@@ -180,8 +180,8 @@ implements WorldGenLevel {
     private final StructureFeatureManager structureFeatureManager;
     private final boolean tickTime;
 
-    public ServerLevel(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, ServerLevelData serverLevelData, ResourceKey<Level> resourceKey, ResourceKey<DimensionType> resourceKey2, DimensionType dimensionType, ChunkProgressListener chunkProgressListener, ChunkGenerator chunkGenerator, boolean bl, long l, List<CustomSpawner> list, boolean bl2) {
-        super(serverLevelData, resourceKey, resourceKey2, dimensionType, minecraftServer::getProfiler, false, bl, l);
+    public ServerLevel(MinecraftServer minecraftServer, Executor executor, LevelStorageSource.LevelStorageAccess levelStorageAccess, ServerLevelData serverLevelData, ResourceKey<Level> resourceKey, DimensionType dimensionType, ChunkProgressListener chunkProgressListener, ChunkGenerator chunkGenerator, boolean bl, long l, List<CustomSpawner> list, boolean bl2) {
+        super(serverLevelData, resourceKey, dimensionType, minecraftServer::getProfiler, false, bl, l);
         this.tickTime = bl2;
         this.server = minecraftServer;
         this.customSpawners = list;

@@ -100,8 +100,8 @@ extends Level {
     });
     private final ClientChunkCache chunkSource;
 
-    public ClientLevel(ClientPacketListener clientPacketListener, ClientLevelData clientLevelData, ResourceKey<Level> resourceKey, ResourceKey<DimensionType> resourceKey2, DimensionType dimensionType, int i, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer, boolean bl, long l) {
-        super(clientLevelData, resourceKey, resourceKey2, dimensionType, supplier, true, bl, l);
+    public ClientLevel(ClientPacketListener clientPacketListener, ClientLevelData clientLevelData, ResourceKey<Level> resourceKey, DimensionType dimensionType, int i, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer, boolean bl, long l) {
+        super(clientLevelData, resourceKey, dimensionType, supplier, true, bl, l);
         this.connection = clientPacketListener;
         this.chunkSource = new ClientChunkCache(this, i);
         this.clientLevelData = clientLevelData;

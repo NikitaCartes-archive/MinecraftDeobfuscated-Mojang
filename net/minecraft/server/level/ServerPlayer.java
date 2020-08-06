@@ -598,7 +598,7 @@ implements ContainerListener {
             return this;
         }
         LevelData levelData = serverLevel.getLevelData();
-        this.connection.send(new ClientboundRespawnPacket(serverLevel.dimensionTypeKey(), serverLevel.dimension(), BiomeManager.obfuscateSeed(serverLevel.getSeed()), this.gameMode.getGameModeForPlayer(), this.gameMode.getPreviousGameModeForPlayer(), serverLevel.isDebug(), serverLevel.isFlat(), true));
+        this.connection.send(new ClientboundRespawnPacket(serverLevel.dimensionType(), serverLevel.dimension(), BiomeManager.obfuscateSeed(serverLevel.getSeed()), this.gameMode.getGameModeForPlayer(), this.gameMode.getPreviousGameModeForPlayer(), serverLevel.isDebug(), serverLevel.isFlat(), true));
         this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
         PlayerList playerList = this.server.getPlayerList();
         playerList.sendPlayerPermissionLevel(this);
@@ -1272,7 +1272,7 @@ implements ContainerListener {
         } else {
             ServerLevel serverLevel2 = this.getLevel();
             LevelData levelData = serverLevel.getLevelData();
-            this.connection.send(new ClientboundRespawnPacket(serverLevel.dimensionTypeKey(), serverLevel.dimension(), BiomeManager.obfuscateSeed(serverLevel.getSeed()), this.gameMode.getGameModeForPlayer(), this.gameMode.getPreviousGameModeForPlayer(), serverLevel.isDebug(), serverLevel.isFlat(), true));
+            this.connection.send(new ClientboundRespawnPacket(serverLevel.dimensionType(), serverLevel.dimension(), BiomeManager.obfuscateSeed(serverLevel.getSeed()), this.gameMode.getGameModeForPlayer(), this.gameMode.getPreviousGameModeForPlayer(), serverLevel.isDebug(), serverLevel.isFlat(), true));
             this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
             this.server.getPlayerList().sendPlayerPermissionLevel(this);
             serverLevel2.removePlayerImmediately(this);

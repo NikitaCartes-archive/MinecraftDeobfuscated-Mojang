@@ -1209,6 +1209,11 @@ CommandSource {
     }
 
     @Environment(value=EnvType.CLIENT)
+    public Vec3 getLightProbePosition(float f) {
+        return this.getEyePosition(f);
+    }
+
+    @Environment(value=EnvType.CLIENT)
     public final Vec3 getPosition(float f) {
         double d = Mth.lerp((double)f, this.xo, this.getX());
         double e = Mth.lerp((double)f, this.yo, this.getY());

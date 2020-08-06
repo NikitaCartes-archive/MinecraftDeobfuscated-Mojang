@@ -27,7 +27,7 @@ implements Packet<ClientGamePacketListener> {
     private GameType previousGameType;
     private Set<ResourceKey<Level>> levels;
     private RegistryAccess.RegistryHolder registryHolder;
-    private ResourceKey<DimensionType> dimensionType;
+    private DimensionType dimensionType;
     private ResourceKey<Level> dimension;
     private int maxPlayers;
     private int chunkRadius;
@@ -39,12 +39,12 @@ implements Packet<ClientGamePacketListener> {
     public ClientboundLoginPacket() {
     }
 
-    public ClientboundLoginPacket(int i, GameType gameType, GameType gameType2, long l, boolean bl, Set<ResourceKey<Level>> set, RegistryAccess.RegistryHolder registryHolder, ResourceKey<DimensionType> resourceKey, ResourceKey<Level> resourceKey2, int j, int k, boolean bl2, boolean bl3, boolean bl4, boolean bl5) {
+    public ClientboundLoginPacket(int i, GameType gameType, GameType gameType2, long l, boolean bl, Set<ResourceKey<Level>> set, RegistryAccess.RegistryHolder registryHolder, DimensionType dimensionType, ResourceKey<Level> resourceKey, int j, int k, boolean bl2, boolean bl3, boolean bl4, boolean bl5) {
         this.playerId = i;
         this.levels = set;
         this.registryHolder = registryHolder;
-        this.dimensionType = resourceKey;
-        this.dimension = resourceKey2;
+        this.dimensionType = dimensionType;
+        this.dimension = resourceKey;
         this.seed = l;
         this.gameType = gameType;
         this.previousGameType = gameType2;
@@ -69,7 +69,7 @@ implements Packet<ClientGamePacketListener> {
             this.levels.add(ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation()));
         }
         this.registryHolder = friendlyByteBuf.readWithCodec(RegistryAccess.RegistryHolder.NETWORK_CODEC);
-        this.dimensionType = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, friendlyByteBuf.readResourceLocation());
+        this.dimensionType = friendlyByteBuf.readWithCodec(DimensionType.CODEC).get();
         this.dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation());
         this.seed = friendlyByteBuf.readLong();
         this.maxPlayers = friendlyByteBuf.readVarInt();
@@ -91,7 +91,7 @@ implements Packet<ClientGamePacketListener> {
             friendlyByteBuf.writeResourceLocation(resourceKey.location());
         }
         friendlyByteBuf.writeWithCodec(RegistryAccess.RegistryHolder.NETWORK_CODEC, this.registryHolder);
-        friendlyByteBuf.writeResourceLocation(this.dimensionType.location());
+        friendlyByteBuf.writeWithCodec(DimensionType.CODEC, () -> this.dimensionType);
         friendlyByteBuf.writeResourceLocation(this.dimension.location());
         friendlyByteBuf.writeLong(this.seed);
         friendlyByteBuf.writeVarInt(this.maxPlayers);
@@ -143,7 +143,7 @@ implements Packet<ClientGamePacketListener> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public ResourceKey<DimensionType> getDimensionType() {
+    public DimensionType getDimensionType() {
         return this.dimensionType;
     }
 

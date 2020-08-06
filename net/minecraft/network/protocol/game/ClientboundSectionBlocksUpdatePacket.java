@@ -7,6 +7,8 @@ import it.unimi.dsi.fastutil.shorts.ShortIterator;
 import it.unimi.dsi.fastutil.shorts.ShortSet;
 import java.io.IOException;
 import java.util.function.BiConsumer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -21,12 +23,14 @@ implements Packet<ClientGamePacketListener> {
     private SectionPos sectionPos;
     private short[] positions;
     private BlockState[] states;
+    private boolean suppressLightUpdates;
 
     public ClientboundSectionBlocksUpdatePacket() {
     }
 
-    public ClientboundSectionBlocksUpdatePacket(SectionPos sectionPos, ShortSet shortSet, LevelChunkSection levelChunkSection) {
+    public ClientboundSectionBlocksUpdatePacket(SectionPos sectionPos, ShortSet shortSet, LevelChunkSection levelChunkSection, boolean bl) {
         this.sectionPos = sectionPos;
+        this.suppressLightUpdates = bl;
         this.initFields(shortSet.size());
         int i = 0;
         ShortIterator shortIterator = shortSet.iterator();
@@ -46,6 +50,7 @@ implements Packet<ClientGamePacketListener> {
     @Override
     public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
         this.sectionPos = SectionPos.of(friendlyByteBuf.readLong());
+        this.suppressLightUpdates = friendlyByteBuf.readBoolean();
         int i = friendlyByteBuf.readVarInt();
         this.initFields(i);
         for (int j = 0; j < this.positions.length; ++j) {
@@ -58,6 +63,7 @@ implements Packet<ClientGamePacketListener> {
     @Override
     public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
         friendlyByteBuf.writeLong(this.sectionPos.asLong());
+        friendlyByteBuf.writeBoolean(this.suppressLightUpdates);
         friendlyByteBuf.writeVarInt(this.positions.length);
         for (int i = 0; i < this.positions.length; ++i) {
             friendlyByteBuf.writeVarLong(Block.getId(this.states[i]) << 12 | this.positions[i]);
@@ -76,6 +82,11 @@ implements Packet<ClientGamePacketListener> {
             mutableBlockPos.set(this.sectionPos.relativeToBlockX(s), this.sectionPos.relativeToBlockY(s), this.sectionPos.relativeToBlockZ(s));
             biConsumer.accept(mutableBlockPos, this.states[i]);
         }
+    }
+
+    @Environment(value=EnvType.CLIENT)
+    public boolean shouldSuppressLightUpdates() {
+        return this.suppressLightUpdates;
     }
 }
 

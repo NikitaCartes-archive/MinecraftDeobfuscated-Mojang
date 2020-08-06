@@ -581,13 +581,7 @@ extends RealmsScreen {
                         if (realmsServer != null) {
                             RealmsClient realmsClient = RealmsClient.create();
                             realmsClient.uninviteMyselfFrom(realmsServer.id);
-                            REALMS_DATA_FETCHER.removeItem(realmsServer);
-                            RealmsMainScreen.this.realmsServers.remove(realmsServer);
-                            RealmsMainScreen.this.realmSelectionList.children().removeIf(entry -> entry instanceof ServerEntry && ((ServerEntry)((ServerEntry)entry)).serverData.id == RealmsMainScreen.this.selectedServerId);
-                            RealmsMainScreen.this.realmSelectionList.setSelected((Entry)null);
-                            RealmsMainScreen.this.updateButtonStates(null);
-                            RealmsMainScreen.this.selectedServerId = -1L;
-                            ((RealmsMainScreen)RealmsMainScreen.this).playButton.active = false;
+                            RealmsMainScreen.this.minecraft.execute(() -> RealmsMainScreen.this.removeServer(realmsServer));
                         }
                     } catch (RealmsServiceException realmsServiceException) {
                         LOGGER.error("Couldn't configure world");
@@ -597,6 +591,16 @@ extends RealmsScreen {
             }.start();
         }
         this.minecraft.setScreen(this);
+    }
+
+    private void removeServer(RealmsServer realmsServer) {
+        REALMS_DATA_FETCHER.removeItem(realmsServer);
+        this.realmsServers.remove(realmsServer);
+        this.realmSelectionList.children().removeIf(entry -> entry instanceof ServerEntry && ((ServerEntry)((ServerEntry)entry)).serverData.id == this.selectedServerId);
+        this.realmSelectionList.setSelected((Entry)null);
+        this.updateButtonStates(null);
+        this.selectedServerId = -1L;
+        this.playButton.active = false;
     }
 
     public void removeSelection() {

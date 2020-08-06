@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Rotations;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -37,9 +38,11 @@ import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,6 +54,8 @@ extends LivingEntity {
     private static final Rotations DEFAULT_RIGHT_ARM_POSE = new Rotations(-15.0f, 0.0f, 10.0f);
     private static final Rotations DEFAULT_LEFT_LEG_POSE = new Rotations(-1.0f, 0.0f, -1.0f);
     private static final Rotations DEFAULT_RIGHT_LEG_POSE = new Rotations(1.0f, 0.0f, 1.0f);
+    private static final EntityDimensions MARKER_DIMENSIONS = new EntityDimensions(0.0f, 0.0f, true);
+    private static final EntityDimensions BABY_DIMENSIONS = EntityType.ARMOR_STAND.getDimensions().scale(0.5f);
     public static final EntityDataAccessor<Byte> DATA_CLIENT_FLAGS = SynchedEntityData.defineId(ArmorStand.class, EntityDataSerializers.BYTE);
     public static final EntityDataAccessor<Rotations> DATA_HEAD_POSE = SynchedEntityData.defineId(ArmorStand.class, EntityDataSerializers.ROTATIONS);
     public static final EntityDataAccessor<Rotations> DATA_BODY_POSE = SynchedEntityData.defineId(ArmorStand.class, EntityDataSerializers.ROTATIONS);
@@ -775,8 +780,35 @@ extends LivingEntity {
 
     @Override
     public EntityDimensions getDimensions(Pose pose) {
-        float f = this.isMarker() ? 0.0f : (this.isBaby() ? 0.5f : 1.0f);
-        return this.getType().getDimensions().scale(f);
+        return this.getDimensionsMarker(this.isMarker());
+    }
+
+    private EntityDimensions getDimensionsMarker(boolean bl) {
+        if (bl) {
+            return MARKER_DIMENSIONS;
+        }
+        return this.isBaby() ? BABY_DIMENSIONS : this.getType().getDimensions();
+    }
+
+    @Override
+    @Environment(value=EnvType.CLIENT)
+    public Vec3 getLightProbePosition(float f) {
+        if (this.isMarker()) {
+            AABB aABB = this.getDimensionsMarker(false).makeBoundingBox(this.position());
+            BlockPos blockPos = this.blockPosition();
+            int i = Integer.MIN_VALUE;
+            for (BlockPos blockPos2 : BlockPos.betweenClosed(new BlockPos(aABB.minX, aABB.minY, aABB.minZ), new BlockPos(aABB.maxX, aABB.maxY, aABB.maxZ))) {
+                int j = Math.max(this.level.getBrightness(LightLayer.BLOCK, blockPos2), this.level.getBrightness(LightLayer.SKY, blockPos2));
+                if (j == 15) {
+                    return Vec3.atCenterOf(blockPos2);
+                }
+                if (j <= i) continue;
+                i = j;
+                blockPos = blockPos2.immutable();
+            }
+            return Vec3.atCenterOf(blockPos);
+        }
+        return super.getLightProbePosition(f);
     }
 }
 

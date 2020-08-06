@@ -105,14 +105,12 @@ AutoCloseable {
     private final WorldBorder worldBorder;
     private final BiomeManager biomeManager;
     private final ResourceKey<Level> dimension;
-    private final ResourceKey<DimensionType> dimensionTypeKey;
 
-    protected Level(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, ResourceKey<DimensionType> resourceKey2, final DimensionType dimensionType, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l) {
+    protected Level(WritableLevelData writableLevelData, ResourceKey<Level> resourceKey, final DimensionType dimensionType, Supplier<ProfilerFiller> supplier, boolean bl, boolean bl2, long l) {
         this.profiler = supplier;
         this.levelData = writableLevelData;
         this.dimensionType = dimensionType;
         this.dimension = resourceKey;
-        this.dimensionTypeKey = resourceKey2;
         this.isClientSide = bl;
         this.worldBorder = dimensionType.coordinateScale() != 1.0 ? new WorldBorder(){
 
@@ -201,7 +199,7 @@ AutoCloseable {
         BlockState blockState2 = levelChunk.setBlockState(blockPos, blockState, (i & 0x40) != 0);
         if (blockState2 != null) {
             BlockState blockState3 = this.getBlockState(blockPos);
-            if (blockState3 != blockState2 && (blockState3.getLightBlock(this, blockPos) != blockState2.getLightBlock(this, blockPos) || blockState3.getLightEmission() != blockState2.getLightEmission() || blockState3.useShapeForLightOcclusion() || blockState2.useShapeForLightOcclusion())) {
+            if ((i & 0x80) == 0 && blockState3 != blockState2 && (blockState3.getLightBlock(this, blockPos) != blockState2.getLightBlock(this, blockPos) || blockState3.getLightEmission() != blockState2.getLightEmission() || blockState3.useShapeForLightOcclusion() || blockState2.useShapeForLightOcclusion())) {
                 this.getProfiler().push("queueCheckLight");
                 this.getChunkSource().getLightEngine().checkBlock(blockPos);
                 this.getProfiler().pop();
@@ -940,10 +938,6 @@ AutoCloseable {
     @Override
     public DimensionType dimensionType() {
         return this.dimensionType;
-    }
-
-    public ResourceKey<DimensionType> dimensionTypeKey() {
-        return this.dimensionTypeKey;
     }
 
     public ResourceKey<Level> dimension() {

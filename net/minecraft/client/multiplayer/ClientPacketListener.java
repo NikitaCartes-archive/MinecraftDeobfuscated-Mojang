@@ -294,6 +294,7 @@ import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -371,14 +372,13 @@ implements ClientGamePacketListener {
         Collections.shuffle(arrayList);
         this.levels = Sets.newLinkedHashSet(arrayList);
         this.registryAccess = clientboundLoginPacket.registryAccess();
-        ResourceKey<DimensionType> resourceKey = clientboundLoginPacket.getDimensionType();
-        ResourceKey<Level> resourceKey2 = clientboundLoginPacket.getDimension();
-        DimensionType dimensionType = this.registryAccess.dimensionTypes().get(resourceKey);
+        ResourceKey<Level> resourceKey = clientboundLoginPacket.getDimension();
+        DimensionType dimensionType = clientboundLoginPacket.getDimensionType();
         this.serverChunkRadius = clientboundLoginPacket.getChunkRadius();
         boolean bl = clientboundLoginPacket.isDebug();
         boolean bl2 = clientboundLoginPacket.isFlat();
         this.levelData = clientLevelData = new ClientLevel.ClientLevelData(Difficulty.NORMAL, clientboundLoginPacket.isHardcore(), bl2);
-        this.level = new ClientLevel(this, clientLevelData, resourceKey2, resourceKey, dimensionType, this.serverChunkRadius, this.minecraft::getProfiler, this.minecraft.levelRenderer, bl, clientboundLoginPacket.getSeed());
+        this.level = new ClientLevel(this, clientLevelData, resourceKey, dimensionType, this.serverChunkRadius, this.minecraft::getProfiler, this.minecraft.levelRenderer, bl, clientboundLoginPacket.getSeed());
         this.minecraft.setLevel(this.level);
         if (this.minecraft.player == null) {
             this.minecraft.player = this.minecraft.gameMode.createPlayer(this.level, new StatsCounter(), new ClientRecipeBook());
@@ -662,7 +662,8 @@ implements ClientGamePacketListener {
     @Override
     public void handleChunkBlocksUpdate(ClientboundSectionBlocksUpdatePacket clientboundSectionBlocksUpdatePacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundSectionBlocksUpdatePacket, this, this.minecraft);
-        clientboundSectionBlocksUpdatePacket.runUpdates(this.level::setKnownState);
+        int i = 0x13 | (clientboundSectionBlocksUpdatePacket.shouldSuppressLightUpdates() ? 128 : 0);
+        clientboundSectionBlocksUpdatePacket.runUpdates((blockPos, blockState) -> this.level.setBlock((BlockPos)blockPos, (BlockState)blockState, i));
     }
 
     @Override
@@ -910,19 +911,18 @@ implements ClientGamePacketListener {
     @Override
     public void handleRespawn(ClientboundRespawnPacket clientboundRespawnPacket) {
         PacketUtils.ensureRunningOnSameThread(clientboundRespawnPacket, this, this.minecraft);
-        ResourceKey<DimensionType> resourceKey = clientboundRespawnPacket.getDimensionType();
-        ResourceKey<Level> resourceKey2 = clientboundRespawnPacket.getDimension();
-        DimensionType dimensionType = this.registryAccess.dimensionTypes().get(resourceKey);
+        ResourceKey<Level> resourceKey = clientboundRespawnPacket.getDimension();
+        DimensionType dimensionType = clientboundRespawnPacket.getDimensionType();
         LocalPlayer localPlayer = this.minecraft.player;
         int i = localPlayer.getId();
         this.started = false;
-        if (resourceKey2 != localPlayer.level.dimension()) {
+        if (resourceKey != localPlayer.level.dimension()) {
             ClientLevel.ClientLevelData clientLevelData;
             Scoreboard scoreboard = this.level.getScoreboard();
             boolean bl = clientboundRespawnPacket.isDebug();
             boolean bl2 = clientboundRespawnPacket.isFlat();
             this.levelData = clientLevelData = new ClientLevel.ClientLevelData(this.levelData.getDifficulty(), this.levelData.isHardcore(), bl2);
-            this.level = new ClientLevel(this, clientLevelData, resourceKey2, resourceKey, dimensionType, this.serverChunkRadius, this.minecraft::getProfiler, this.minecraft.levelRenderer, bl, clientboundRespawnPacket.getSeed());
+            this.level = new ClientLevel(this, clientLevelData, resourceKey, dimensionType, this.serverChunkRadius, this.minecraft::getProfiler, this.minecraft.levelRenderer, bl, clientboundRespawnPacket.getSeed());
             this.level.setScoreboard(scoreboard);
             this.minecraft.setLevel(this.level);
             this.minecraft.setScreen(new ReceivingLevelScreen());
@@ -933,7 +933,7 @@ implements ClientGamePacketListener {
         LocalPlayer localPlayer2 = this.minecraft.gameMode.createPlayer(this.level, localPlayer.getStats(), localPlayer.getRecipeBook(), localPlayer.isShiftKeyDown(), localPlayer.isSprinting());
         localPlayer2.setId(i);
         this.minecraft.player = localPlayer2;
-        if (resourceKey2 != localPlayer.level.dimension()) {
+        if (resourceKey != localPlayer.level.dimension()) {
             this.minecraft.getMusicManager().stopPlaying();
         }
         this.minecraft.cameraEntity = localPlayer2;

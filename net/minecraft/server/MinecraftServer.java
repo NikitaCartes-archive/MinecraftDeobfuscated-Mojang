@@ -340,8 +340,7 @@ AutoCloseable {
             dimensionType = levelStem.type();
             chunkGenerator = levelStem.generator();
         }
-        ResourceKey<DimensionType> resourceKey = this.registryHolder.dimensionTypes().getResourceKey(dimensionType).orElseThrow(() -> new IllegalStateException("Unregistered dimension type: " + dimensionType));
-        ServerLevel serverLevel = new ServerLevel(this, this.executor, this.storageSource, serverLevelData, Level.OVERWORLD, resourceKey, dimensionType, chunkProgressListener, chunkGenerator, bl, m, list, true);
+        ServerLevel serverLevel = new ServerLevel(this, this.executor, this.storageSource, serverLevelData, Level.OVERWORLD, dimensionType, chunkProgressListener, chunkGenerator, bl, m, list, true);
         this.levels.put(Level.OVERWORLD, serverLevel);
         DimensionDataStorage dimensionDataStorage = serverLevel.getDataStorage();
         this.readScoreboard(dimensionDataStorage);
@@ -371,16 +370,15 @@ AutoCloseable {
             this.getCustomBossEvents().load(this.worldData.getCustomBossEvents());
         }
         for (Map.Entry<ResourceKey<LevelStem>, LevelStem> entry : mappedRegistry.entrySet()) {
-            ResourceKey<LevelStem> resourceKey2 = entry.getKey();
-            if (resourceKey2 == LevelStem.OVERWORLD) continue;
-            ResourceKey<Level> resourceKey3 = ResourceKey.create(Registry.DIMENSION_REGISTRY, resourceKey2.location());
+            ResourceKey<LevelStem> resourceKey = entry.getKey();
+            if (resourceKey == LevelStem.OVERWORLD) continue;
+            ResourceKey<Level> resourceKey2 = ResourceKey.create(Registry.DIMENSION_REGISTRY, resourceKey.location());
             DimensionType dimensionType2 = entry.getValue().type();
-            ResourceKey<DimensionType> resourceKey4 = this.registryHolder.dimensionTypes().getResourceKey(dimensionType2).orElseThrow(() -> new IllegalStateException("Unregistered dimension type: " + dimensionType2));
             ChunkGenerator chunkGenerator2 = entry.getValue().generator();
             DerivedLevelData derivedLevelData = new DerivedLevelData(this.worldData, serverLevelData);
-            ServerLevel serverLevel2 = new ServerLevel(this, this.executor, this.storageSource, derivedLevelData, resourceKey3, resourceKey4, dimensionType2, chunkProgressListener, chunkGenerator2, bl, m, ImmutableList.of(), false);
+            ServerLevel serverLevel2 = new ServerLevel(this, this.executor, this.storageSource, derivedLevelData, resourceKey2, dimensionType2, chunkProgressListener, chunkGenerator2, bl, m, ImmutableList.of(), false);
             worldBorder.addListener(new BorderChangeListener.DelegateBorderChangeListener(serverLevel2.getWorldBorder()));
-            this.levels.put(resourceKey3, serverLevel2);
+            this.levels.put(resourceKey2, serverLevel2);
         }
     }
 
