@@ -125,17 +125,19 @@ public class PresetFlatWorldScreen extends Screen {
 				return FlatLevelGeneratorSettings.getDefault(registry);
 			} else {
 				FlatLevelGeneratorSettings flatLevelGeneratorSettings2 = flatLevelGeneratorSettings.withLayers(list, flatLevelGeneratorSettings.structureSettings());
-				Biome biome = registry.getOrThrow(Biomes.PLAINS);
+				ResourceKey<Biome> resourceKey = Biomes.PLAINS;
 				if (iterator.hasNext()) {
 					try {
 						ResourceLocation resourceLocation = new ResourceLocation((String)iterator.next());
-						biome = (Biome)registry.getOptional(resourceLocation).orElseThrow(() -> new IllegalArgumentException("Invalid Biome: " + resourceLocation));
+						resourceKey = ResourceKey.create(Registry.BIOME_REGISTRY, resourceLocation);
+						registry.getOptional(resourceKey).orElseThrow(() -> new IllegalArgumentException("Invalid Biome: " + resourceLocation));
 					} catch (Exception var8) {
 						LOGGER.error("Error while parsing flat world string => {}", var8.getMessage());
 					}
 				}
 
-				flatLevelGeneratorSettings2.setBiome(biome);
+				ResourceKey<Biome> resourceKey2 = resourceKey;
+				flatLevelGeneratorSettings2.setBiome(() -> registry.getOrThrow(resourceKey2));
 				return flatLevelGeneratorSettings2;
 			}
 		}
@@ -258,7 +260,7 @@ public class PresetFlatWorldScreen extends Screen {
 				flatLevelGeneratorSettings.getLayersInfo().add(flatLayerInfos[i]);
 			}
 
-			flatLevelGeneratorSettings.setBiome(registry.getOrThrow(resourceKey));
+			flatLevelGeneratorSettings.setBiome(() -> registry.getOrThrow(resourceKey));
 			flatLevelGeneratorSettings.updateLayers();
 			return flatLevelGeneratorSettings.withStructureSettings(structureSettings);
 		}));

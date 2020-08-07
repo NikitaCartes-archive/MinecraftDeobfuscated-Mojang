@@ -70,7 +70,7 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 		this.jsonOps = dynamicOps == JsonOps.INSTANCE ? this : new RegistryReadOps<>(JsonOps.INSTANCE, resourceAccess, registryHolder, identityHashMap);
 	}
 
-	protected <E> DataResult<Pair<Supplier<E>, T>> decodeElement(T object, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec) {
+	protected <E> DataResult<Pair<Supplier<E>, T>> decodeElement(T object, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec, boolean bl) {
 		Optional<WritableRegistry<E>> optional = this.registryHolder.registry(resourceKey);
 		if (!optional.isPresent()) {
 			return DataResult.error("Unknown registry: " + resourceKey);
@@ -78,7 +78,7 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 			WritableRegistry<E> writableRegistry = (WritableRegistry<E>)optional.get();
 			DataResult<Pair<ResourceLocation, T>> dataResult = ResourceLocation.CODEC.decode(this.delegate, object);
 			if (!dataResult.result().isPresent()) {
-				return codec.decode(this, object).map(pairx -> pairx.mapFirst(objectx -> () -> objectx));
+				return !bl ? DataResult.error("Inline definitions not allowed here") : codec.decode(this, object).map(pairx -> pairx.mapFirst(objectx -> () -> objectx));
 			} else {
 				Pair<ResourceLocation, T> pair = (Pair<ResourceLocation, T>)dataResult.result().get();
 				ResourceLocation resourceLocation = pair.getFirst();
@@ -129,23 +129,21 @@ public class RegistryReadOps<T> extends DelegatingOps<T> {
 			});
 			readCache.values.put(resourceKey2, DataResult.success(supplier));
 			DataResult<Pair<E, OptionalInt>> dataResult2 = this.resources.parseElement(this.jsonOps, resourceKey, resourceKey2, codec);
-			DataResult<E> dataResult3;
-			if (dataResult2.result().isPresent()) {
-				Pair<E, OptionalInt> pair = (Pair<E, OptionalInt>)dataResult2.result().get();
+			Optional<Pair<E, OptionalInt>> optional = dataResult2.result();
+			if (optional.isPresent()) {
+				Pair<E, OptionalInt> pair = (Pair<E, OptionalInt>)optional.get();
 				writableRegistry.registerOrOverride(pair.getSecond(), resourceKey2, pair.getFirst(), dataResult2.lifecycle());
-				dataResult3 = dataResult2.map(Pair::getFirst);
-			} else {
-				E object = writableRegistry.get(resourceKey2);
-				if (object != null) {
-					dataResult3 = DataResult.success(object, Lifecycle.stable());
-				} else {
-					dataResult3 = dataResult2.map(Pair::getFirst);
-				}
 			}
 
-			DataResult<Supplier<E>> dataResult4 = dataResult3.map(objectx -> () -> object);
-			readCache.values.put(resourceKey2, dataResult4);
-			return dataResult4;
+			DataResult<Supplier<E>> dataResult3;
+			if (!optional.isPresent() && writableRegistry.get(resourceKey2) != null) {
+				dataResult3 = DataResult.success(() -> writableRegistry.get(resourceKey2), Lifecycle.stable());
+			} else {
+				dataResult3 = dataResult2.map(pair -> () -> writableRegistry.get(resourceKey2));
+			}
+
+			readCache.values.put(resourceKey2, dataResult3);
+			return dataResult3;
 		}
 	}
 

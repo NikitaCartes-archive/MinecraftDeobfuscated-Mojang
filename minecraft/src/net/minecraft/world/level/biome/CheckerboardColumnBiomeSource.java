@@ -10,7 +10,7 @@ import net.fabricmc.api.Environment;
 public class CheckerboardColumnBiomeSource extends BiomeSource {
 	public static final Codec<CheckerboardColumnBiomeSource> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					Biome.CODEC.listOf().fieldOf("biomes").forGetter(checkerboardColumnBiomeSource -> checkerboardColumnBiomeSource.allowedBiomes),
+					Biome.LIST_CODEC.fieldOf("biomes").forGetter(checkerboardColumnBiomeSource -> checkerboardColumnBiomeSource.allowedBiomes),
 					Codec.intRange(0, 62).fieldOf("scale").orElse(2).forGetter(checkerboardColumnBiomeSource -> checkerboardColumnBiomeSource.size)
 				)
 				.apply(instance, CheckerboardColumnBiomeSource::new)

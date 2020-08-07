@@ -7,8 +7,7 @@ import java.util.stream.Stream;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 
 public class SimpleRandomFeatureConfiguration implements FeatureConfiguration {
-	public static final Codec<SimpleRandomFeatureConfiguration> CODEC = ConfiguredFeature.CODEC
-		.listOf()
+	public static final Codec<SimpleRandomFeatureConfiguration> CODEC = ConfiguredFeature.LIST_CODEC
 		.fieldOf("features")
 		.<SimpleRandomFeatureConfiguration>xmap(SimpleRandomFeatureConfiguration::new, simpleRandomFeatureConfiguration -> simpleRandomFeatureConfiguration.features)
 		.codec();

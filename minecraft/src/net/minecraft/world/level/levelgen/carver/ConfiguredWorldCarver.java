@@ -2,6 +2,7 @@ package net.minecraft.world.level.levelgen.carver;
 
 import com.mojang.serialization.Codec;
 import java.util.BitSet;
+import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -15,6 +16,9 @@ public class ConfiguredWorldCarver<WC extends CarverConfiguration> {
 	public static final Codec<ConfiguredWorldCarver<?>> DIRECT_CODEC = Registry.CARVER
 		.dispatch(configuredWorldCarver -> configuredWorldCarver.worldCarver, WorldCarver::configuredCodec);
 	public static final Codec<Supplier<ConfiguredWorldCarver<?>>> CODEC = RegistryFileCodec.create(Registry.CONFIGURED_CARVER_REGISTRY, DIRECT_CODEC);
+	public static final Codec<List<Supplier<ConfiguredWorldCarver<?>>>> LIST_CODEC = RegistryFileCodec.homogeneousList(
+		Registry.CONFIGURED_CARVER_REGISTRY, DIRECT_CODEC
+	);
 	private final WorldCarver<WC> worldCarver;
 	private final WC config;
 

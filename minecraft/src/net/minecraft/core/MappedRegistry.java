@@ -118,6 +118,7 @@ public class MappedRegistry<T> extends WritableRegistry<T> {
 			}
 
 			this.toId.removeInt(object2);
+			this.lifecycles.remove(object2);
 		}
 
 		return this.registerMapping(i, resourceKey, object, lifecycle, false);

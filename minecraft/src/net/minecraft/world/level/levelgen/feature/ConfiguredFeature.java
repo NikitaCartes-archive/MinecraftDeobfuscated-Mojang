@@ -1,6 +1,7 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
+import java.util.List;
 import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -20,6 +21,9 @@ public class ConfiguredFeature<FC extends FeatureConfiguration, F extends Featur
 	public static final Codec<ConfiguredFeature<?, ?>> DIRECT_CODEC = Registry.FEATURE
 		.dispatch(configuredFeature -> configuredFeature.feature, Feature::configuredCodec);
 	public static final Codec<Supplier<ConfiguredFeature<?, ?>>> CODEC = RegistryFileCodec.create(Registry.CONFIGURED_FEATURE_REGISTRY, DIRECT_CODEC);
+	public static final Codec<List<Supplier<ConfiguredFeature<?, ?>>>> LIST_CODEC = RegistryFileCodec.homogeneousList(
+		Registry.CONFIGURED_FEATURE_REGISTRY, DIRECT_CODEC
+	);
 	public static final Logger LOGGER = LogManager.getLogger();
 	public final F feature;
 	public final FC config;

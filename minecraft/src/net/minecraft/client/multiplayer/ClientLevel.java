@@ -109,7 +109,7 @@ public class ClientLevel extends Level {
 		this.chunkSource = new ClientChunkCache(this, i);
 		this.clientLevelData = clientLevelData;
 		this.levelRenderer = levelRenderer;
-		this.effects = DimensionSpecialEffects.forType(clientPacketListener.registryAccess().dimensionTypes().getResourceKey(dimensionType));
+		this.effects = DimensionSpecialEffects.forType(dimensionType);
 		this.setDefaultSpawnPos(new BlockPos(8, 64, 8), 0.0F);
 		this.updateSkyBrightness();
 		this.prepareWeather();
