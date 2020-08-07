@@ -5,12 +5,13 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -88,11 +89,17 @@ public abstract class HangingEntity extends Entity {
 
 	@Override
 	public void tick() {
-		if (this.checkInterval++ == 100 && !this.level.isClientSide) {
-			this.checkInterval = 0;
-			if (!this.removed && !this.survives()) {
-				this.remove();
-				this.dropItem(null);
+		if (!this.level.isClientSide) {
+			if (this.getY() < -64.0) {
+				this.outOfWorld();
+			}
+
+			if (this.checkInterval++ == 100) {
+				this.checkInterval = 0;
+				if (!this.removed && !this.survives()) {
+					this.remove();
+					this.dropItem(null);
+				}
 			}
 		}
 	}
@@ -176,7 +183,6 @@ public abstract class HangingEntity extends Entity {
 
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
-		compoundTag.putByte("Facing", (byte)this.direction.get2DDataValue());
 		BlockPos blockPos = this.getPos();
 		compoundTag.putInt("TileX", blockPos.getX());
 		compoundTag.putInt("TileY", blockPos.getY());
@@ -186,7 +192,6 @@ public abstract class HangingEntity extends Entity {
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		this.pos = new BlockPos(compoundTag.getInt("TileX"), compoundTag.getInt("TileY"), compoundTag.getInt("TileZ"));
-		this.direction = Direction.from2DDataValue(compoundTag.getByte("Facing"));
 	}
 
 	public abstract int getWidth();
@@ -261,7 +266,7 @@ public abstract class HangingEntity extends Entity {
 	}
 
 	@Override
-	public void thunderHit(LightningBolt lightningBolt) {
+	public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
 	}
 
 	@Override

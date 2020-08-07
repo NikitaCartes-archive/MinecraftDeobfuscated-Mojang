@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -48,7 +49,7 @@ public class DebugStickItem extends Item {
 			this.handleInteraction(player, level.getBlockState(blockPos), level, blockPos, true, useOnContext.getItemInHand());
 		}
 
-		return InteractionResult.SUCCESS;
+		return InteractionResult.sidedSuccess(level.isClientSide);
 	}
 
 	private void handleInteraction(Player player, BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, boolean bl, ItemStack itemStack) {
@@ -90,7 +91,7 @@ public class DebugStickItem extends Item {
 	}
 
 	private static void message(Player player, Component component) {
-		((ServerPlayer)player).sendMessage(component, ChatType.GAME_INFO);
+		((ServerPlayer)player).sendMessage(component, ChatType.GAME_INFO, Util.NIL_UUID);
 	}
 
 	private static <T extends Comparable<T>> String getNameHelper(BlockState blockState, Property<T> property) {

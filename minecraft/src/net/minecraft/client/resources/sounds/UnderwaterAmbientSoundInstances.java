@@ -26,7 +26,7 @@ public class UnderwaterAmbientSoundInstances {
 		@Override
 		public void tick() {
 			if (this.player.removed || !this.player.isUnderWater()) {
-				this.stopped = true;
+				this.stop();
 			}
 		}
 	}
@@ -58,7 +58,7 @@ public class UnderwaterAmbientSoundInstances {
 				this.fade = Math.min(this.fade, 40);
 				this.volume = Math.max(0.0F, Math.min((float)this.fade / 40.0F, 1.0F));
 			} else {
-				this.stopped = true;
+				this.stop();
 			}
 		}
 	}

@@ -1,5 +1,6 @@
 package com.mojang.blaze3d.font;
 
+import it.unimi.dsi.fastutil.ints.IntSet;
 import java.io.Closeable;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -11,7 +12,9 @@ public interface GlyphProvider extends Closeable {
 	}
 
 	@Nullable
-	default RawGlyph getGlyph(char c) {
+	default RawGlyph getGlyph(int i) {
 		return null;
 	}
+
+	IntSet getSupportedGlyphs();
 }

@@ -20,6 +20,7 @@ import java.util.Map.Entry;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -218,7 +219,7 @@ public class FilledProfileResults implements ProfileResults {
 
 	private void appendProfilerResults(int i, String string, StringBuilder stringBuilder) {
 		List<ResultField> list = this.getTimes(string);
-		Object2LongMap<String> object2LongMap = ((ProfilerPathEntry)this.entries.get(string)).getCounters();
+		Object2LongMap<String> object2LongMap = ObjectUtils.firstNonNull((ProfilerPathEntry)this.entries.get(string), EMPTY).getCounters();
 		object2LongMap.forEach(
 			(stringx, long_) -> indentLine(stringBuilder, i)
 					.append('#')

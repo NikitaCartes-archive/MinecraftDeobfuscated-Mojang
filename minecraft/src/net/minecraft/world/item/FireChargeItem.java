@@ -4,10 +4,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.CampfireBlock;
-import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class FireChargeItem extends Item {
@@ -21,24 +21,22 @@ public class FireChargeItem extends Item {
 		BlockPos blockPos = useOnContext.getClickedPos();
 		BlockState blockState = level.getBlockState(blockPos);
 		boolean bl = false;
-		if (blockState.getBlock() == Blocks.CAMPFIRE) {
-			if (!(Boolean)blockState.getValue(CampfireBlock.LIT) && !(Boolean)blockState.getValue(CampfireBlock.WATERLOGGED)) {
-				this.playSound(level, blockPos);
-				level.setBlockAndUpdate(blockPos, blockState.setValue(CampfireBlock.LIT, Boolean.valueOf(true)));
-				bl = true;
-			}
+		if (CampfireBlock.canLight(blockState)) {
+			this.playSound(level, blockPos);
+			level.setBlockAndUpdate(blockPos, blockState.setValue(CampfireBlock.LIT, Boolean.valueOf(true)));
+			bl = true;
 		} else {
 			blockPos = blockPos.relative(useOnContext.getClickedFace());
-			if (level.getBlockState(blockPos).isAir()) {
+			if (BaseFireBlock.canBePlacedAt(level, blockPos, useOnContext.getHorizontalDirection())) {
 				this.playSound(level, blockPos);
-				level.setBlockAndUpdate(blockPos, ((FireBlock)Blocks.FIRE).getStateForPlacement(level, blockPos));
+				level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(level, blockPos));
 				bl = true;
 			}
 		}
 
 		if (bl) {
 			useOnContext.getItemInHand().shrink(1);
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			return InteractionResult.FAIL;
 		}

@@ -1,6 +1,5 @@
 package net.minecraft.world.level;
 
-import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 
 public interface TickList<T> {
@@ -13,6 +12,4 @@ public interface TickList<T> {
 	void scheduleTick(BlockPos blockPos, T object, int i, TickPriority tickPriority);
 
 	boolean willTickThisTick(BlockPos blockPos, T object);
-
-	void addAll(Stream<TickNextTickData<T>> stream);
 }

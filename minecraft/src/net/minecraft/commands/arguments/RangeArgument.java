@@ -1,6 +1,5 @@
 package net.minecraft.commands.arguments;
 
-import com.google.gson.JsonObject;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -9,12 +8,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.synchronization.ArgumentSerializer;
-import net.minecraft.network.FriendlyByteBuf;
 
 public interface RangeArgument<T extends MinMaxBounds<?>> extends ArgumentType<T> {
 	static RangeArgument.Ints intRange() {
 		return new RangeArgument.Ints();
+	}
+
+	static RangeArgument.Floats floatRange() {
+		return new RangeArgument.Floats();
 	}
 
 	public static class Floats implements RangeArgument<MinMaxBounds.Floats> {
@@ -27,12 +28,6 @@ public interface RangeArgument<T extends MinMaxBounds<?>> extends ArgumentType<T
 		@Override
 		public Collection<String> getExamples() {
 			return EXAMPLES;
-		}
-
-		public static class Serializer extends RangeArgument.Serializer<RangeArgument.Floats> {
-			public RangeArgument.Floats deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
-				return new RangeArgument.Floats();
-			}
 		}
 	}
 
@@ -50,20 +45,6 @@ public interface RangeArgument<T extends MinMaxBounds<?>> extends ArgumentType<T
 		@Override
 		public Collection<String> getExamples() {
 			return EXAMPLES;
-		}
-
-		public static class Serializer extends RangeArgument.Serializer<RangeArgument.Ints> {
-			public RangeArgument.Ints deserializeFromNetwork(FriendlyByteBuf friendlyByteBuf) {
-				return new RangeArgument.Ints();
-			}
-		}
-	}
-
-	public abstract static class Serializer<T extends RangeArgument<?>> implements ArgumentSerializer<T> {
-		public void serializeToNetwork(T rangeArgument, FriendlyByteBuf friendlyByteBuf) {
-		}
-
-		public void serializeToJson(T rangeArgument, JsonObject jsonObject) {
 		}
 	}
 }

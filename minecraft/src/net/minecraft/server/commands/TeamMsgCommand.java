@@ -5,7 +5,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import java.util.List;
-import java.util.function.Consumer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.MessageArgument;
@@ -19,6 +18,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.PlayerTeam;
 
 public class TeamMsgCommand {
+	private static final Style SUGGEST_STYLE = Style.EMPTY
+		.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("chat.type.team.hover")))
+		.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/teammsg "));
 	private static final SimpleCommandExceptionType ERROR_NOT_ON_TEAM = new SimpleCommandExceptionType(new TranslatableComponent("commands.teammsg.failed.noteam"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
@@ -38,21 +40,14 @@ public class TeamMsgCommand {
 		if (playerTeam == null) {
 			throw ERROR_NOT_ON_TEAM.create();
 		} else {
-			Consumer<Style> consumer = style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("chat.type.team.hover")))
-					.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/teammsg "));
-			Component component2 = playerTeam.getFormattedDisplayName().withStyle(consumer);
-
-			for (Component component3 : component2.getSiblings()) {
-				component3.withStyle(consumer);
-			}
-
+			Component component2 = playerTeam.getFormattedDisplayName().withStyle(SUGGEST_STYLE);
 			List<ServerPlayer> list = commandSourceStack.getServer().getPlayerList().getPlayers();
 
 			for (ServerPlayer serverPlayer : list) {
 				if (serverPlayer == entity) {
-					serverPlayer.sendMessage(new TranslatableComponent("chat.type.team.sent", component2, commandSourceStack.getDisplayName(), component.deepCopy()));
+					serverPlayer.sendMessage(new TranslatableComponent("chat.type.team.sent", component2, commandSourceStack.getDisplayName(), component), entity.getUUID());
 				} else if (serverPlayer.getTeam() == playerTeam) {
-					serverPlayer.sendMessage(new TranslatableComponent("chat.type.team.text", component2, commandSourceStack.getDisplayName(), component.deepCopy()));
+					serverPlayer.sendMessage(new TranslatableComponent("chat.type.team.text", component2, commandSourceStack.getDisplayName(), component), entity.getUUID());
 				}
 			}
 

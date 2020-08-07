@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block.piston;
 
+import java.util.Iterator;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -7,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
@@ -34,6 +36,7 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 	private float progress;
 	private float progressO;
 	private long lastTicked;
+	private int deathTicks;
 
 	public PistonMovingBlockEntity() {
 		super(BlockEntityType.PISTON);
@@ -95,7 +98,8 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 		return !this.isExtending() && this.isSourcePiston() && this.movedState.getBlock() instanceof PistonBaseBlock
 			? Blocks.PISTON_HEAD
 				.defaultBlockState()
-				.setValue(PistonHeadBlock.TYPE, this.movedState.getBlock() == Blocks.STICKY_PISTON ? PistonType.STICKY : PistonType.DEFAULT)
+				.setValue(PistonHeadBlock.SHORT, Boolean.valueOf(this.progress > 0.25F))
+				.setValue(PistonHeadBlock.TYPE, this.movedState.is(Blocks.STICKY_PISTON) ? PistonType.STICKY : PistonType.DEFAULT)
 				.setValue(PistonHeadBlock.FACING, this.movedState.getValue(PistonBaseBlock.FACING))
 			: this.movedState;
 	}
@@ -105,52 +109,66 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 		double d = (double)(f - this.progress);
 		VoxelShape voxelShape = this.getCollisionRelatedBlockState().getCollisionShape(this.level, this.getBlockPos());
 		if (!voxelShape.isEmpty()) {
-			List<AABB> list = voxelShape.toAabbs();
-			AABB aABB = this.moveByPositionAndProgress(this.getMinMaxPiecesAABB(list));
-			List<Entity> list2 = this.level.getEntities(null, PistonMath.getMovementArea(aABB, direction, d).minmax(aABB));
-			if (!list2.isEmpty()) {
-				boolean bl = this.movedState.getBlock() == Blocks.SLIME_BLOCK;
+			AABB aABB = this.moveByPositionAndProgress(voxelShape.bounds());
+			List<Entity> list = this.level.getEntities(null, PistonMath.getMovementArea(aABB, direction, d).minmax(aABB));
+			if (!list.isEmpty()) {
+				List<AABB> list2 = voxelShape.toAabbs();
+				boolean bl = this.movedState.is(Blocks.SLIME_BLOCK);
+				Iterator var10 = list.iterator();
 
-				for (Entity entity : list2) {
-					if (entity.getPistonPushReaction() != PushReaction.IGNORE) {
-						if (bl) {
-							Vec3 vec3 = entity.getDeltaMovement();
-							double e = vec3.x;
-							double g = vec3.y;
-							double h = vec3.z;
-							switch (direction.getAxis()) {
-								case X:
-									e = (double)direction.getStepX();
-									break;
-								case Y:
-									g = (double)direction.getStepY();
-									break;
-								case Z:
-									h = (double)direction.getStepZ();
-							}
-
-							entity.setDeltaMovement(e, g, h);
+				while (true) {
+					Entity entity;
+					while (true) {
+						if (!var10.hasNext()) {
+							return;
 						}
 
-						double i = 0.0;
+						entity = (Entity)var10.next();
+						if (entity.getPistonPushReaction() != PushReaction.IGNORE) {
+							if (!bl) {
+								break;
+							}
 
-						for (AABB aABB2 : list) {
-							AABB aABB3 = PistonMath.getMovementArea(this.moveByPositionAndProgress(aABB2), direction, d);
-							AABB aABB4 = entity.getBoundingBox();
-							if (aABB3.intersects(aABB4)) {
-								i = Math.max(i, getMovement(aABB3, direction, aABB4));
-								if (i >= d) {
-									break;
+							if (!(entity instanceof ServerPlayer)) {
+								Vec3 vec3 = entity.getDeltaMovement();
+								double e = vec3.x;
+								double g = vec3.y;
+								double h = vec3.z;
+								switch (direction.getAxis()) {
+									case X:
+										e = (double)direction.getStepX();
+										break;
+									case Y:
+										g = (double)direction.getStepY();
+										break;
+									case Z:
+										h = (double)direction.getStepZ();
 								}
+
+								entity.setDeltaMovement(e, g, h);
+								break;
 							}
 						}
+					}
 
-						if (!(i <= 0.0)) {
-							i = Math.min(i, d) + 0.01;
-							moveEntityByPiston(direction, entity, i, direction);
-							if (!this.extending && this.isSourcePiston) {
-								this.fixEntityWithinPistonBase(entity, direction, d);
+					double i = 0.0;
+
+					for (AABB aABB2 : list2) {
+						AABB aABB3 = PistonMath.getMovementArea(this.moveByPositionAndProgress(aABB2), direction, d);
+						AABB aABB4 = entity.getBoundingBox();
+						if (aABB3.intersects(aABB4)) {
+							i = Math.max(i, getMovement(aABB3, direction, aABB4));
+							if (i >= d) {
+								break;
 							}
+						}
+					}
+
+					if (!(i <= 0.0)) {
+						i = Math.min(i, d) + 0.01;
+						moveEntityByPiston(direction, entity, i, direction);
+						if (!this.extending && this.isSourcePiston) {
+							this.fixEntityWithinPistonBase(entity, direction, d);
 						}
 					}
 				}
@@ -181,7 +199,7 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 
 	private static boolean matchesStickyCritera(AABB aABB, Entity entity) {
 		return entity.getPistonPushReaction() == PushReaction.NORMAL
-			&& entity.onGround
+			&& entity.isOnGround()
 			&& entity.getX() >= aABB.minX
 			&& entity.getX() <= aABB.maxX
 			&& entity.getZ() >= aABB.minZ
@@ -189,31 +207,11 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 	}
 
 	private boolean isStickyForEntities() {
-		return this.movedState.getBlock() == Blocks.HONEY_BLOCK;
+		return this.movedState.is(Blocks.HONEY_BLOCK);
 	}
 
 	public Direction getMovementDirection() {
 		return this.extending ? this.direction : this.direction.getOpposite();
-	}
-
-	private AABB getMinMaxPiecesAABB(List<AABB> list) {
-		double d = 0.0;
-		double e = 0.0;
-		double f = 0.0;
-		double g = 1.0;
-		double h = 1.0;
-		double i = 1.0;
-
-		for (AABB aABB : list) {
-			d = Math.min(aABB.minX, d);
-			e = Math.min(aABB.minY, e);
-			f = Math.min(aABB.minZ, f);
-			g = Math.max(aABB.maxX, g);
-			h = Math.max(aABB.maxY, h);
-			i = Math.max(aABB.maxZ, i);
-		}
-
-		return new AABB(d, e, f, g, h, i);
 	}
 
 	private static double getMovement(AABB aABB, Direction direction, AABB aABB2) {
@@ -267,7 +265,7 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 			this.progressO = this.progress;
 			this.level.removeBlockEntity(this.worldPosition);
 			this.setRemoved();
-			if (this.level.getBlockState(this.worldPosition).getBlock() == Blocks.MOVING_PISTON) {
+			if (this.level.getBlockState(this.worldPosition).is(Blocks.MOVING_PISTON)) {
 				BlockState blockState;
 				if (this.isSourcePiston) {
 					blockState = Blocks.AIR.defaultBlockState();
@@ -286,20 +284,24 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 		this.lastTicked = this.level.getGameTime();
 		this.progressO = this.progress;
 		if (this.progressO >= 1.0F) {
-			this.level.removeBlockEntity(this.worldPosition);
-			this.setRemoved();
-			if (this.movedState != null && this.level.getBlockState(this.worldPosition).getBlock() == Blocks.MOVING_PISTON) {
-				BlockState blockState = Block.updateFromNeighbourShapes(this.movedState, this.level, this.worldPosition);
-				if (blockState.isAir()) {
-					this.level.setBlock(this.worldPosition, this.movedState, 84);
-					Block.updateOrDestroy(this.movedState, blockState, this.level, this.worldPosition, 3);
-				} else {
-					if (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && (Boolean)blockState.getValue(BlockStateProperties.WATERLOGGED)) {
-						blockState = blockState.setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(false));
-					}
+			if (this.level.isClientSide && this.deathTicks < 5) {
+				this.deathTicks++;
+			} else {
+				this.level.removeBlockEntity(this.worldPosition);
+				this.setRemoved();
+				if (this.movedState != null && this.level.getBlockState(this.worldPosition).is(Blocks.MOVING_PISTON)) {
+					BlockState blockState = Block.updateFromNeighbourShapes(this.movedState, this.level, this.worldPosition);
+					if (blockState.isAir()) {
+						this.level.setBlock(this.worldPosition, this.movedState, 84);
+						Block.updateOrDestroy(this.movedState, blockState, this.level, this.worldPosition, 3);
+					} else {
+						if (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && (Boolean)blockState.getValue(BlockStateProperties.WATERLOGGED)) {
+							blockState = blockState.setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(false));
+						}
 
-					this.level.setBlock(this.worldPosition, blockState, 67);
-					this.level.neighborChanged(this.worldPosition, blockState.getBlock(), this.worldPosition);
+						this.level.setBlock(this.worldPosition, blockState, 67);
+						this.level.neighborChanged(this.worldPosition, blockState.getBlock(), this.worldPosition);
+					}
 				}
 			}
 		} else {
@@ -314,8 +316,8 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		this.movedState = NbtUtils.readBlockState(compoundTag.getCompound("blockState"));
 		this.direction = Direction.from3DDataValue(compoundTag.getInt("facing"));
 		this.progress = compoundTag.getFloat("progress");
@@ -352,7 +354,7 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 				blockState = Blocks.PISTON_HEAD
 					.defaultBlockState()
 					.setValue(PistonHeadBlock.FACING, this.direction)
-					.setValue(PistonHeadBlock.SHORT, Boolean.valueOf(this.extending != 1.0F - this.progress < 4.0F));
+					.setValue(PistonHeadBlock.SHORT, Boolean.valueOf(this.extending != 1.0F - this.progress < 0.25F));
 			} else {
 				blockState = this.movedState;
 			}
@@ -367,5 +369,11 @@ public class PistonMovingBlockEntity extends BlockEntity implements TickableBloc
 
 	public long getLastTicked() {
 		return this.lastTicked;
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public double getViewDistance() {
+		return 68.0;
 	}
 }

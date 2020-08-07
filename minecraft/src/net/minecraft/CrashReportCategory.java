@@ -172,7 +172,7 @@ public class CrashReportCategory {
 		private final String key;
 		private final String value;
 
-		public Entry(String string, Object object) {
+		public Entry(String string, @Nullable Object object) {
 			this.key = string;
 			if (object == null) {
 				this.value = "~~NULL~~";

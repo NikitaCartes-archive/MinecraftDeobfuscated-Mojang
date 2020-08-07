@@ -1,32 +1,18 @@
 package net.minecraft.world.item;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.fishing.FishingHook;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 
-public class FishingRodItem extends Item {
+public class FishingRodItem extends Item implements Vanishable {
 	public FishingRodItem(Item.Properties properties) {
 		super(properties);
-		this.addProperty(new ResourceLocation("cast"), (itemStack, level, livingEntity) -> {
-			if (livingEntity == null) {
-				return 0.0F;
-			} else {
-				boolean bl = livingEntity.getMainHandItem() == itemStack;
-				boolean bl2 = livingEntity.getOffhandItem() == itemStack;
-				if (livingEntity.getMainHandItem().getItem() instanceof FishingRodItem) {
-					bl2 = false;
-				}
-
-				return (bl || bl2) && livingEntity instanceof Player && ((Player)livingEntity).fishing != null ? 1.0F : 0.0F;
-			}
-		});
 	}
 
 	@Override
@@ -61,7 +47,7 @@ public class FishingRodItem extends Item {
 			player.awardStat(Stats.ITEM_USED.get(this));
 		}
 
-		return InteractionResultHolder.success(itemStack);
+		return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
 	}
 
 	@Override

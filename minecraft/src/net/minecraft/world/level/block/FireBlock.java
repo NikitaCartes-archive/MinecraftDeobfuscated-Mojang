@@ -1,37 +1,33 @@
 package net.minecraft.world.level.block;
 
+import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.Map;
 import java.util.Random;
-import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.dimension.end.TheEndDimension;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class FireBlock extends Block {
+public class FireBlock extends BaseFireBlock {
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_15;
 	public static final BooleanProperty NORTH = PipeBlock.NORTH;
 	public static final BooleanProperty EAST = PipeBlock.EAST;
@@ -43,11 +39,17 @@ public class FireBlock extends Block {
 		.stream()
 		.filter(entry -> entry.getKey() != Direction.DOWN)
 		.collect(Util.toMap());
+	private static final VoxelShape UP_AABB = Block.box(0.0, 15.0, 0.0, 16.0, 16.0, 16.0);
+	private static final VoxelShape WEST_AABB = Block.box(0.0, 0.0, 0.0, 1.0, 16.0, 16.0);
+	private static final VoxelShape EAST_AABB = Block.box(15.0, 0.0, 0.0, 16.0, 16.0, 16.0);
+	private static final VoxelShape NORTH_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 1.0);
+	private static final VoxelShape SOUTH_AABB = Block.box(0.0, 0.0, 15.0, 16.0, 16.0, 16.0);
+	private final Map<BlockState, VoxelShape> shapesCache;
 	private final Object2IntMap<Block> flameOdds = new Object2IntOpenHashMap<>();
 	private final Object2IntMap<Block> burnOdds = new Object2IntOpenHashMap<>();
 
-	protected FireBlock(Block.Properties properties) {
-		super(properties);
+	public FireBlock(BlockBehaviour.Properties properties) {
+		super(properties, 1.0F);
 		this.registerDefaultState(
 			this.stateDefinition
 				.any()
@@ -58,11 +60,38 @@ public class FireBlock extends Block {
 				.setValue(WEST, Boolean.valueOf(false))
 				.setValue(UP, Boolean.valueOf(false))
 		);
+		this.shapesCache = ImmutableMap.copyOf(
+			(Map<? extends BlockState, ? extends VoxelShape>)this.stateDefinition
+				.getPossibleStates()
+				.stream()
+				.filter(blockState -> (Integer)blockState.getValue(AGE) == 0)
+				.collect(Collectors.toMap(Function.identity(), FireBlock::calculateShape))
+		);
 	}
 
-	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-		return Shapes.empty();
+	private static VoxelShape calculateShape(BlockState blockState) {
+		VoxelShape voxelShape = Shapes.empty();
+		if ((Boolean)blockState.getValue(UP)) {
+			voxelShape = UP_AABB;
+		}
+
+		if ((Boolean)blockState.getValue(NORTH)) {
+			voxelShape = Shapes.or(voxelShape, NORTH_AABB);
+		}
+
+		if ((Boolean)blockState.getValue(SOUTH)) {
+			voxelShape = Shapes.or(voxelShape, SOUTH_AABB);
+		}
+
+		if ((Boolean)blockState.getValue(EAST)) {
+			voxelShape = Shapes.or(voxelShape, EAST_AABB);
+		}
+
+		if ((Boolean)blockState.getValue(WEST)) {
+			voxelShape = Shapes.or(voxelShape, WEST_AABB);
+		}
+
+		return voxelShape.isEmpty() ? DOWN_AABB : voxelShape;
 	}
 
 	@Override
@@ -70,17 +99,21 @@ public class FireBlock extends Block {
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		return this.canSurvive(blockState, levelAccessor, blockPos)
-			? this.getStateForPlacement(levelAccessor, blockPos).setValue(AGE, blockState.getValue(AGE))
+			? this.getStateWithAge(levelAccessor, blockPos, (Integer)blockState.getValue(AGE))
 			: Blocks.AIR.defaultBlockState();
 	}
 
-	@Nullable
+	@Override
+	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+		return (VoxelShape)this.shapesCache.get(blockState.setValue(AGE, Integer.valueOf(0)));
+	}
+
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
 		return this.getStateForPlacement(blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos());
 	}
 
-	public BlockState getStateForPlacement(BlockGetter blockGetter, BlockPos blockPos) {
+	protected BlockState getStateForPlacement(BlockGetter blockGetter, BlockPos blockPos) {
 		BlockPos blockPos2 = blockPos.below();
 		BlockState blockState = blockGetter.getBlockState(blockPos2);
 		if (!this.canBurn(blockState) && !blockState.isFaceSturdy(blockGetter, blockPos2, Direction.UP)) {
@@ -106,19 +139,15 @@ public class FireBlock extends Block {
 	}
 
 	@Override
-	public int getTickDelay(LevelReader levelReader) {
-		return 30;
-	}
-
-	@Override
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		serverLevel.getBlockTicks().scheduleTick(blockPos, this, getFireTickDelay(serverLevel.random));
 		if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOFIRETICK)) {
 			if (!blockState.canSurvive(serverLevel, blockPos)) {
 				serverLevel.removeBlock(blockPos, false);
 			}
 
-			Block block = serverLevel.getBlockState(blockPos.below()).getBlock();
-			boolean bl = serverLevel.dimension instanceof TheEndDimension && block == Blocks.BEDROCK || block == Blocks.NETHERRACK || block == Blocks.MAGMA_BLOCK;
+			BlockState blockState2 = serverLevel.getBlockState(blockPos.below());
+			boolean bl = blockState2.is(serverLevel.dimensionType().infiniburn());
 			int i = (Integer)blockState.getValue(AGE);
 			if (!bl && serverLevel.isRaining() && this.isNearRain(serverLevel, blockPos) && random.nextFloat() < 0.2F + (float)i * 0.03F) {
 				serverLevel.removeBlock(blockPos, false);
@@ -130,7 +159,6 @@ public class FireBlock extends Block {
 				}
 
 				if (!bl) {
-					serverLevel.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(serverLevel) + random.nextInt(10));
 					if (!this.isValidFireLocation(serverLevel, blockPos)) {
 						BlockPos blockPos2 = blockPos.below();
 						if (!serverLevel.getBlockState(blockPos2).isFaceSturdy(serverLevel, blockPos2, Direction.UP) || i > 3) {
@@ -165,7 +193,7 @@ public class FireBlock extends Block {
 									o += (n - 1) * 100;
 								}
 
-								mutableBlockPos.set(blockPos).move(l, n, m);
+								mutableBlockPos.setWithOffset(blockPos, l, n, m);
 								int p = this.getFireOdds(serverLevel, mutableBlockPos);
 								if (p > 0) {
 									int q = (p + 40 + serverLevel.getDifficulty().getId() * 7) / (i + 30);
@@ -175,7 +203,7 @@ public class FireBlock extends Block {
 
 									if (q > 0 && random.nextInt(o) <= q && (!serverLevel.isRaining() || !this.isNearRain(serverLevel, mutableBlockPos))) {
 										int r = Math.min(15, i + random.nextInt(5) / 4);
-										serverLevel.setBlock(mutableBlockPos, this.getStateForPlacement(serverLevel, mutableBlockPos).setValue(AGE, Integer.valueOf(r)), 3);
+										serverLevel.setBlock(mutableBlockPos, this.getStateWithAge(serverLevel, mutableBlockPos, r), 3);
 									}
 								}
 							}
@@ -212,7 +240,7 @@ public class FireBlock extends Block {
 			BlockState blockState = level.getBlockState(blockPos);
 			if (random.nextInt(j + 10) < 5 && !level.isRainingAt(blockPos)) {
 				int l = Math.min(j + random.nextInt(5) / 4, 15);
-				level.setBlock(blockPos, this.getStateForPlacement(level, blockPos).setValue(AGE, Integer.valueOf(l)), 3);
+				level.setBlock(blockPos, this.getStateWithAge(level, blockPos, l), 3);
 			} else {
 				level.removeBlock(blockPos, false);
 			}
@@ -222,6 +250,11 @@ public class FireBlock extends Block {
 				TntBlock.explode(level, blockPos);
 			}
 		}
+	}
+
+	private BlockState getStateWithAge(LevelAccessor levelAccessor, BlockPos blockPos, int i) {
+		BlockState blockState = getState(levelAccessor, blockPos);
+		return blockState.is(Blocks.FIRE) ? blockState.setValue(AGE, Integer.valueOf(i)) : blockState;
 	}
 
 	private boolean isValidFireLocation(BlockGetter blockGetter, BlockPos blockPos) {
@@ -249,95 +282,19 @@ public class FireBlock extends Block {
 		}
 	}
 
-	public boolean canBurn(BlockState blockState) {
+	@Override
+	protected boolean canBurn(BlockState blockState) {
 		return this.getFlameOdds(blockState) > 0;
 	}
 
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState2.getBlock() != blockState.getBlock()) {
-			if (level.dimension.getType() != DimensionType.OVERWORLD && level.dimension.getType() != DimensionType.NETHER
-				|| !((NetherPortalBlock)Blocks.NETHER_PORTAL).trySpawnPortal(level, blockPos)) {
-				if (!blockState.canSurvive(level, blockPos)) {
-					level.removeBlock(blockPos, false);
-				} else {
-					level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level) + level.random.nextInt(10));
-				}
-			}
-		}
+		super.onPlace(blockState, level, blockPos, blockState2, bl);
+		level.getBlockTicks().scheduleTick(blockPos, this, getFireTickDelay(level.random));
 	}
 
-	@Environment(EnvType.CLIENT)
-	@Override
-	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		if (random.nextInt(24) == 0) {
-			level.playLocalSound(
-				(double)((float)blockPos.getX() + 0.5F),
-				(double)((float)blockPos.getY() + 0.5F),
-				(double)((float)blockPos.getZ() + 0.5F),
-				SoundEvents.FIRE_AMBIENT,
-				SoundSource.BLOCKS,
-				1.0F + random.nextFloat(),
-				random.nextFloat() * 0.7F + 0.3F,
-				false
-			);
-		}
-
-		BlockPos blockPos2 = blockPos.below();
-		BlockState blockState2 = level.getBlockState(blockPos2);
-		if (!this.canBurn(blockState2) && !blockState2.isFaceSturdy(level, blockPos2, Direction.UP)) {
-			if (this.canBurn(level.getBlockState(blockPos.west()))) {
-				for (int i = 0; i < 2; i++) {
-					double d = (double)blockPos.getX() + random.nextDouble() * 0.1F;
-					double e = (double)blockPos.getY() + random.nextDouble();
-					double f = (double)blockPos.getZ() + random.nextDouble();
-					level.addParticle(ParticleTypes.LARGE_SMOKE, d, e, f, 0.0, 0.0, 0.0);
-				}
-			}
-
-			if (this.canBurn(level.getBlockState(blockPos.east()))) {
-				for (int i = 0; i < 2; i++) {
-					double d = (double)(blockPos.getX() + 1) - random.nextDouble() * 0.1F;
-					double e = (double)blockPos.getY() + random.nextDouble();
-					double f = (double)blockPos.getZ() + random.nextDouble();
-					level.addParticle(ParticleTypes.LARGE_SMOKE, d, e, f, 0.0, 0.0, 0.0);
-				}
-			}
-
-			if (this.canBurn(level.getBlockState(blockPos.north()))) {
-				for (int i = 0; i < 2; i++) {
-					double d = (double)blockPos.getX() + random.nextDouble();
-					double e = (double)blockPos.getY() + random.nextDouble();
-					double f = (double)blockPos.getZ() + random.nextDouble() * 0.1F;
-					level.addParticle(ParticleTypes.LARGE_SMOKE, d, e, f, 0.0, 0.0, 0.0);
-				}
-			}
-
-			if (this.canBurn(level.getBlockState(blockPos.south()))) {
-				for (int i = 0; i < 2; i++) {
-					double d = (double)blockPos.getX() + random.nextDouble();
-					double e = (double)blockPos.getY() + random.nextDouble();
-					double f = (double)(blockPos.getZ() + 1) - random.nextDouble() * 0.1F;
-					level.addParticle(ParticleTypes.LARGE_SMOKE, d, e, f, 0.0, 0.0, 0.0);
-				}
-			}
-
-			if (this.canBurn(level.getBlockState(blockPos.above()))) {
-				for (int i = 0; i < 2; i++) {
-					double d = (double)blockPos.getX() + random.nextDouble();
-					double e = (double)(blockPos.getY() + 1) - random.nextDouble() * 0.1F;
-					double f = (double)blockPos.getZ() + random.nextDouble();
-					level.addParticle(ParticleTypes.LARGE_SMOKE, d, e, f, 0.0, 0.0, 0.0);
-				}
-			}
-		} else {
-			for (int i = 0; i < 3; i++) {
-				double d = (double)blockPos.getX() + random.nextDouble();
-				double e = (double)blockPos.getY() + random.nextDouble() * 0.5 + 0.5;
-				double f = (double)blockPos.getZ() + random.nextDouble();
-				level.addParticle(ParticleTypes.LARGE_SMOKE, d, e, f, 0.0, 0.0, 0.0);
-			}
-		}
+	private static int getFireTickDelay(Random random) {
+		return 30 + random.nextInt(10);
 	}
 
 	@Override
@@ -345,7 +302,7 @@ public class FireBlock extends Block {
 		builder.add(AGE, NORTH, EAST, SOUTH, WEST, UP);
 	}
 
-	public void setFlammable(Block block, int i, int j) {
+	private void setFlammable(Block block, int i, int j) {
 		this.flameOdds.put(block, i);
 		this.burnOdds.put(block, j);
 	}
@@ -455,6 +412,7 @@ public class FireBlock extends Block {
 		fireBlock.setFlammable(Blocks.VINE, 15, 100);
 		fireBlock.setFlammable(Blocks.COAL_BLOCK, 5, 5);
 		fireBlock.setFlammable(Blocks.HAY_BLOCK, 60, 20);
+		fireBlock.setFlammable(Blocks.TARGET, 15, 20);
 		fireBlock.setFlammable(Blocks.WHITE_CARPET, 60, 20);
 		fireBlock.setFlammable(Blocks.ORANGE_CARPET, 60, 20);
 		fireBlock.setFlammable(Blocks.MAGENTA_CARPET, 60, 20);

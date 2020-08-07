@@ -22,8 +22,8 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.item.DirectionalPlaceContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.DirectionalPlaceContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -65,7 +65,7 @@ public class FallingBlockEntity extends Entity {
 		this.xo = d;
 		this.yo = e;
 		this.zo = f;
-		this.setStartPos(new BlockPos(this));
+		this.setStartPos(this.blockPosition());
 	}
 
 	@Override
@@ -104,8 +104,8 @@ public class FallingBlockEntity extends Entity {
 		} else {
 			Block block = this.blockState.getBlock();
 			if (this.time++ == 0) {
-				BlockPos blockPos = new BlockPos(this);
-				if (this.level.getBlockState(blockPos).getBlock() == block) {
+				BlockPos blockPos = this.blockPosition();
+				if (this.level.getBlockState(blockPos).is(block)) {
 					this.level.removeBlock(blockPos, false);
 				} else if (!this.level.isClientSide) {
 					this.remove();
@@ -119,7 +119,7 @@ public class FallingBlockEntity extends Entity {
 
 			this.move(MoverType.SELF, this.getDeltaMovement());
 			if (!this.level.isClientSide) {
-				BlockPos blockPos = new BlockPos(this);
+				BlockPos blockPos = this.blockPosition();
 				boolean bl = this.blockState.getBlock() instanceof ConcretePowderBlock;
 				boolean bl2 = bl && this.level.getFluidState(blockPos).is(FluidTags.WATER);
 				double d = this.getDeltaMovement().lengthSqr();
@@ -135,7 +135,7 @@ public class FallingBlockEntity extends Entity {
 				if (this.onGround || bl2) {
 					BlockState blockState = this.level.getBlockState(blockPos);
 					this.setDeltaMovement(this.getDeltaMovement().multiply(0.7, -0.5, 0.7));
-					if (blockState.getBlock() != Blocks.MOVING_PISTON) {
+					if (!blockState.is(Blocks.MOVING_PISTON)) {
 						this.remove();
 						if (!this.cancelDrop) {
 							boolean bl3 = blockState.canBeReplaced(new DirectionalPlaceContext(this.level, blockPos, Direction.DOWN, ItemStack.EMPTY, Direction.UP));
@@ -148,7 +148,7 @@ public class FallingBlockEntity extends Entity {
 
 								if (this.level.setBlock(blockPos, this.blockState, 3)) {
 									if (block instanceof FallingBlock) {
-										((FallingBlock)block).onLand(this.level, blockPos, this.blockState, blockState);
+										((FallingBlock)block).onLand(this.level, blockPos, this.blockState, blockState, this);
 									}
 
 									if (this.blockData != null && block instanceof EntityBlock) {
@@ -163,7 +163,7 @@ public class FallingBlockEntity extends Entity {
 												}
 											}
 
-											blockEntity.load(compoundTag);
+											blockEntity.load(this.blockState, compoundTag);
 											blockEntity.setChanged();
 										}
 									}
@@ -174,7 +174,7 @@ public class FallingBlockEntity extends Entity {
 								this.spawnAtLocation(block);
 							}
 						} else if (block instanceof FallingBlock) {
-							((FallingBlock)block).onBroken(this.level, blockPos);
+							((FallingBlock)block).onBroken(this.level, blockPos, this);
 						}
 					}
 				} else if (!this.level.isClientSide && (this.time > 100 && (blockPos.getY() < 1 || blockPos.getY() > 256) || this.time > 600)) {

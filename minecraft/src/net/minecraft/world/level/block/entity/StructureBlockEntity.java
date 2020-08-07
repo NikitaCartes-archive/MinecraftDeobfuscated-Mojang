@@ -52,6 +52,12 @@ public class StructureBlockEntity extends BlockEntity {
 		super(BlockEntityType.STRUCTURE_BLOCK);
 	}
 
+	@Environment(EnvType.CLIENT)
+	@Override
+	public double getViewDistance() {
+		return 96.0;
+	}
+
 	@Override
 	public CompoundTag save(CompoundTag compoundTag) {
 		super.save(compoundTag);
@@ -77,35 +83,35 @@ public class StructureBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		this.setStructureName(compoundTag.getString("name"));
 		this.author = compoundTag.getString("author");
 		this.metaData = compoundTag.getString("metadata");
-		int i = Mth.clamp(compoundTag.getInt("posX"), -32, 32);
-		int j = Mth.clamp(compoundTag.getInt("posY"), -32, 32);
-		int k = Mth.clamp(compoundTag.getInt("posZ"), -32, 32);
+		int i = Mth.clamp(compoundTag.getInt("posX"), -48, 48);
+		int j = Mth.clamp(compoundTag.getInt("posY"), -48, 48);
+		int k = Mth.clamp(compoundTag.getInt("posZ"), -48, 48);
 		this.structurePos = new BlockPos(i, j, k);
-		int l = Mth.clamp(compoundTag.getInt("sizeX"), 0, 32);
-		int m = Mth.clamp(compoundTag.getInt("sizeY"), 0, 32);
-		int n = Mth.clamp(compoundTag.getInt("sizeZ"), 0, 32);
+		int l = Mth.clamp(compoundTag.getInt("sizeX"), 0, 48);
+		int m = Mth.clamp(compoundTag.getInt("sizeY"), 0, 48);
+		int n = Mth.clamp(compoundTag.getInt("sizeZ"), 0, 48);
 		this.structureSize = new BlockPos(l, m, n);
 
 		try {
 			this.rotation = Rotation.valueOf(compoundTag.getString("rotation"));
-		} catch (IllegalArgumentException var11) {
+		} catch (IllegalArgumentException var12) {
 			this.rotation = Rotation.NONE;
 		}
 
 		try {
 			this.mirror = Mirror.valueOf(compoundTag.getString("mirror"));
-		} catch (IllegalArgumentException var10) {
+		} catch (IllegalArgumentException var11) {
 			this.mirror = Mirror.NONE;
 		}
 
 		try {
 			this.mode = StructureMode.valueOf(compoundTag.getString("mode"));
-		} catch (IllegalArgumentException var9) {
+		} catch (IllegalArgumentException var10) {
 			this.mode = StructureMode.DATA;
 		}
 
@@ -127,7 +133,7 @@ public class StructureBlockEntity extends BlockEntity {
 		if (this.level != null) {
 			BlockPos blockPos = this.getBlockPos();
 			BlockState blockState = this.level.getBlockState(blockPos);
-			if (blockState.getBlock() == Blocks.STRUCTURE_BLOCK) {
+			if (blockState.is(Blocks.STRUCTURE_BLOCK)) {
 				this.level.setBlock(blockPos, blockState.setValue(StructureBlock.MODE, this.mode), 2);
 			}
 		}
@@ -180,6 +186,7 @@ public class StructureBlockEntity extends BlockEntity {
 		this.author = livingEntity.getName().getString();
 	}
 
+	@Environment(EnvType.CLIENT)
 	public BlockPos getStructurePos() {
 		return this.structurePos;
 	}
@@ -205,7 +212,6 @@ public class StructureBlockEntity extends BlockEntity {
 		this.mirror = mirror;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Rotation getRotation() {
 		return this.rotation;
 	}
@@ -230,7 +236,7 @@ public class StructureBlockEntity extends BlockEntity {
 	public void setMode(StructureMode structureMode) {
 		this.mode = structureMode;
 		BlockState blockState = this.level.getBlockState(this.getBlockPos());
-		if (blockState.getBlock() == Blocks.STRUCTURE_BLOCK) {
+		if (blockState.is(Blocks.STRUCTURE_BLOCK)) {
 			this.level.setBlock(this.getBlockPos(), blockState.setValue(StructureBlock.MODE, structureMode), 2);
 		}
 	}
@@ -318,7 +324,7 @@ public class StructureBlockEntity extends BlockEntity {
 
 		for (BlockPos blockPos3 : BlockPos.betweenClosed(blockPos, blockPos2)) {
 			BlockState blockState = this.level.getBlockState(blockPos3);
-			if (blockState.getBlock() == Blocks.STRUCTURE_BLOCK) {
+			if (blockState.is(Blocks.STRUCTURE_BLOCK)) {
 				BlockEntity blockEntity = this.level.getBlockEntity(blockPos3);
 				if (blockEntity != null && blockEntity instanceof StructureBlockEntity) {
 					list.add((StructureBlockEntity)blockEntity);
@@ -395,17 +401,16 @@ public class StructureBlockEntity extends BlockEntity {
 		}
 	}
 
-	public boolean loadStructure() {
-		return this.loadStructure(true);
+	public boolean loadStructure(ServerLevel serverLevel) {
+		return this.loadStructure(serverLevel, true);
 	}
 
 	private static Random createRandom(long l) {
 		return l == 0L ? new Random(Util.getMillis()) : new Random(l);
 	}
 
-	public boolean loadStructure(boolean bl) {
-		if (this.mode == StructureMode.LOAD && !this.level.isClientSide && this.structureName != null) {
-			ServerLevel serverLevel = (ServerLevel)this.level;
+	public boolean loadStructure(ServerLevel serverLevel, boolean bl) {
+		if (this.mode == StructureMode.LOAD && this.structureName != null) {
 			StructureManager structureManager = serverLevel.getStructureManager();
 
 			StructureTemplate structureTemplate;
@@ -415,13 +420,13 @@ public class StructureBlockEntity extends BlockEntity {
 				return false;
 			}
 
-			return structureTemplate == null ? false : this.loadStructure(bl, structureTemplate);
+			return structureTemplate == null ? false : this.loadStructure(serverLevel, bl, structureTemplate);
 		} else {
 			return false;
 		}
 	}
 
-	public boolean loadStructure(boolean bl, StructureTemplate structureTemplate) {
+	public boolean loadStructure(ServerLevel serverLevel, boolean bl, StructureTemplate structureTemplate) {
 		BlockPos blockPos = this.getBlockPos();
 		if (!StringUtil.isNullOrEmpty(structureTemplate.getAuthor())) {
 			this.author = structureTemplate.getAuthor();
@@ -432,8 +437,8 @@ public class StructureBlockEntity extends BlockEntity {
 		if (!bl2) {
 			this.structureSize = blockPos2;
 			this.setChanged();
-			BlockState blockState = this.level.getBlockState(blockPos);
-			this.level.sendBlockUpdated(blockPos, blockState, blockState, 3);
+			BlockState blockState = serverLevel.getBlockState(blockPos);
+			serverLevel.sendBlockUpdated(blockPos, blockState, blockState, 3);
 		}
 
 		if (bl && !bl2) {
@@ -449,7 +454,7 @@ public class StructureBlockEntity extends BlockEntity {
 			}
 
 			BlockPos blockPos3 = blockPos.offset(this.structurePos);
-			structureTemplate.placeInWorldChunk(this.level, blockPos3, structurePlaceSettings);
+			structureTemplate.placeInWorldChunk(serverLevel, blockPos3, structurePlaceSettings, createRandom(this.seed));
 			return true;
 		}
 	}

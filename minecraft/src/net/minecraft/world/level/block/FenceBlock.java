@@ -6,13 +6,14 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.LeadItem;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -20,12 +21,13 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class FenceBlock extends CrossCollisionBlock {
 	private final VoxelShape[] occlusionByIndex;
 
-	public FenceBlock(Block.Properties properties) {
+	public FenceBlock(BlockBehaviour.Properties properties) {
 		super(2.0F, 2.0F, 16.0F, 16.0F, 24.0F, properties);
 		this.registerDefaultState(
 			this.stateDefinition
@@ -45,15 +47,24 @@ public class FenceBlock extends CrossCollisionBlock {
 	}
 
 	@Override
+	public VoxelShape getVisualShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+		return this.getShape(blockState, blockGetter, blockPos, collisionContext);
+	}
+
+	@Override
 	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
 	}
 
 	public boolean connectsTo(BlockState blockState, boolean bl, Direction direction) {
 		Block block = blockState.getBlock();
-		boolean bl2 = block.is(BlockTags.FENCES) && blockState.getMaterial() == this.material;
+		boolean bl2 = this.isSameFence(block);
 		boolean bl3 = block instanceof FenceGateBlock && FenceGateBlock.connectsToDirection(blockState, direction);
 		return !isExceptionForConnection(block) && bl || bl2 || bl3;
+	}
+
+	private boolean isSameFence(Block block) {
+		return block.is(BlockTags.FENCES) && block.is(BlockTags.WOODEN_FENCES) == this.defaultBlockState().is(BlockTags.WOODEN_FENCES);
 	}
 
 	@Override

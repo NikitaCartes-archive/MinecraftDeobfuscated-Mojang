@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block.piston;
 
+import java.util.Arrays;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
@@ -15,6 +16,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -47,30 +49,36 @@ public class PistonHeadBlock extends DirectionalBlock {
 	protected static final VoxelShape SHORT_NORTH_ARM_AABB = Block.box(6.0, 6.0, 4.0, 10.0, 10.0, 16.0);
 	protected static final VoxelShape SHORT_EAST_ARM_AABB = Block.box(0.0, 6.0, 6.0, 12.0, 10.0, 10.0);
 	protected static final VoxelShape SHORT_WEST_ARM_AABB = Block.box(4.0, 6.0, 6.0, 16.0, 10.0, 10.0);
+	private static final VoxelShape[] SHAPES_SHORT = makeShapes(true);
+	private static final VoxelShape[] SHAPES_LONG = makeShapes(false);
 
-	public PistonHeadBlock(Block.Properties properties) {
+	private static VoxelShape[] makeShapes(boolean bl) {
+		return (VoxelShape[])Arrays.stream(Direction.values()).map(direction -> calculateShape(direction, bl)).toArray(VoxelShape[]::new);
+	}
+
+	private static VoxelShape calculateShape(Direction direction, boolean bl) {
+		switch (direction) {
+			case DOWN:
+			default:
+				return Shapes.or(DOWN_AABB, bl ? SHORT_DOWN_ARM_AABB : DOWN_ARM_AABB);
+			case UP:
+				return Shapes.or(UP_AABB, bl ? SHORT_UP_ARM_AABB : UP_ARM_AABB);
+			case NORTH:
+				return Shapes.or(NORTH_AABB, bl ? SHORT_NORTH_ARM_AABB : NORTH_ARM_AABB);
+			case SOUTH:
+				return Shapes.or(SOUTH_AABB, bl ? SHORT_SOUTH_ARM_AABB : SOUTH_ARM_AABB);
+			case WEST:
+				return Shapes.or(WEST_AABB, bl ? SHORT_WEST_ARM_AABB : WEST_ARM_AABB);
+			case EAST:
+				return Shapes.or(EAST_AABB, bl ? SHORT_EAST_ARM_AABB : EAST_ARM_AABB);
+		}
+	}
+
+	public PistonHeadBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(TYPE, PistonType.DEFAULT).setValue(SHORT, Boolean.valueOf(false))
 		);
-	}
-
-	private VoxelShape getBaseShape(BlockState blockState) {
-		switch ((Direction)blockState.getValue(FACING)) {
-			case DOWN:
-			default:
-				return DOWN_AABB;
-			case UP:
-				return UP_AABB;
-			case NORTH:
-				return NORTH_AABB;
-			case SOUTH:
-				return SOUTH_AABB;
-			case WEST:
-				return WEST_AABB;
-			case EAST:
-				return EAST_AABB;
-		}
 	}
 
 	@Override
@@ -80,35 +88,20 @@ public class PistonHeadBlock extends DirectionalBlock {
 
 	@Override
 	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-		return Shapes.or(this.getBaseShape(blockState), this.getArmShape(blockState));
+		return (blockState.getValue(SHORT) ? SHAPES_SHORT : SHAPES_LONG)[((Direction)blockState.getValue(FACING)).ordinal()];
 	}
 
-	private VoxelShape getArmShape(BlockState blockState) {
-		boolean bl = (Boolean)blockState.getValue(SHORT);
-		switch ((Direction)blockState.getValue(FACING)) {
-			case DOWN:
-			default:
-				return bl ? SHORT_DOWN_ARM_AABB : DOWN_ARM_AABB;
-			case UP:
-				return bl ? SHORT_UP_ARM_AABB : UP_ARM_AABB;
-			case NORTH:
-				return bl ? SHORT_NORTH_ARM_AABB : NORTH_ARM_AABB;
-			case SOUTH:
-				return bl ? SHORT_SOUTH_ARM_AABB : SOUTH_ARM_AABB;
-			case WEST:
-				return bl ? SHORT_WEST_ARM_AABB : WEST_ARM_AABB;
-			case EAST:
-				return bl ? SHORT_EAST_ARM_AABB : EAST_ARM_AABB;
-		}
+	private boolean isFittingBase(BlockState blockState, BlockState blockState2) {
+		Block block = blockState.getValue(TYPE) == PistonType.DEFAULT ? Blocks.PISTON : Blocks.STICKY_PISTON;
+		return blockState2.is(block) && (Boolean)blockState2.getValue(PistonBaseBlock.EXTENDED) && blockState2.getValue(FACING) == blockState.getValue(FACING);
 	}
 
 	@Override
 	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
 		if (!level.isClientSide && player.abilities.instabuild) {
 			BlockPos blockPos2 = blockPos.relative(((Direction)blockState.getValue(FACING)).getOpposite());
-			Block block = level.getBlockState(blockPos2).getBlock();
-			if (block == Blocks.PISTON || block == Blocks.STICKY_PISTON) {
-				level.removeBlock(blockPos2, false);
+			if (this.isFittingBase(blockState, level.getBlockState(blockPos2))) {
+				level.destroyBlock(blockPos2, false);
 			}
 		}
 
@@ -117,14 +110,11 @@ public class PistonHeadBlock extends DirectionalBlock {
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState.getBlock() != blockState2.getBlock()) {
+		if (!blockState.is(blockState2.getBlock())) {
 			super.onRemove(blockState, level, blockPos, blockState2, bl);
-			Direction direction = ((Direction)blockState.getValue(FACING)).getOpposite();
-			blockPos = blockPos.relative(direction);
-			BlockState blockState3 = level.getBlockState(blockPos);
-			if ((blockState3.getBlock() == Blocks.PISTON || blockState3.getBlock() == Blocks.STICKY_PISTON) && (Boolean)blockState3.getValue(PistonBaseBlock.EXTENDED)) {
-				dropResources(blockState3, level, blockPos);
-				level.removeBlock(blockPos, false);
+			BlockPos blockPos2 = blockPos.relative(((Direction)blockState.getValue(FACING)).getOpposite());
+			if (this.isFittingBase(blockState, level.getBlockState(blockPos2))) {
+				level.destroyBlock(blockPos2, true);
 			}
 		}
 	}
@@ -140,8 +130,8 @@ public class PistonHeadBlock extends DirectionalBlock {
 
 	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
-		Block block = levelReader.getBlockState(blockPos.relative(((Direction)blockState.getValue(FACING)).getOpposite())).getBlock();
-		return block == Blocks.PISTON || block == Blocks.STICKY_PISTON || block == Blocks.MOVING_PISTON;
+		BlockState blockState2 = levelReader.getBlockState(blockPos.relative(((Direction)blockState.getValue(FACING)).getOpposite()));
+		return this.isFittingBase(blockState, blockState2) || blockState2.is(Blocks.MOVING_PISTON) && blockState2.getValue(FACING) == blockState.getValue(FACING);
 	}
 
 	@Override

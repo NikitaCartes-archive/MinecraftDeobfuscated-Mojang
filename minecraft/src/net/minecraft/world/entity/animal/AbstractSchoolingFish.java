@@ -10,7 +10,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.goal.FollowFlockLeaderGoal;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 
 public abstract class AbstractSchoolingFish extends AbstractFish {
 	private AbstractSchoolingFish leader;
@@ -101,13 +101,13 @@ public abstract class AbstractSchoolingFish extends AbstractFish {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 		if (spawnGroupData == null) {
 			spawnGroupData = new AbstractSchoolingFish.SchoolSpawnGroupData(this);
 		} else {

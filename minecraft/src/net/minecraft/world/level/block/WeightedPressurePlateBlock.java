@@ -7,7 +7,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -17,7 +17,7 @@ public class WeightedPressurePlateBlock extends BasePressurePlateBlock {
 	public static final IntegerProperty POWER = BlockStateProperties.POWER;
 	private final int maxWeight;
 
-	protected WeightedPressurePlateBlock(int i, Block.Properties properties) {
+	protected WeightedPressurePlateBlock(int i, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(POWER, Integer.valueOf(0)));
 		this.maxWeight = i;
@@ -55,7 +55,7 @@ public class WeightedPressurePlateBlock extends BasePressurePlateBlock {
 	}
 
 	@Override
-	public int getTickDelay(LevelReader levelReader) {
+	protected int getPressedTime() {
 		return 10;
 	}
 

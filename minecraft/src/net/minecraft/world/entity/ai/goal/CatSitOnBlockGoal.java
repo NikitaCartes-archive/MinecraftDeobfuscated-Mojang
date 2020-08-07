@@ -5,7 +5,6 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BedBlock;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FurnaceBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
@@ -22,30 +21,25 @@ public class CatSitOnBlockGoal extends MoveToBlockGoal {
 
 	@Override
 	public boolean canUse() {
-		return this.cat.isTame() && !this.cat.isSitting() && super.canUse();
+		return this.cat.isTame() && !this.cat.isOrderedToSit() && super.canUse();
 	}
 
 	@Override
 	public void start() {
 		super.start();
-		this.cat.getSitGoal().wantToSit(false);
+		this.cat.setInSittingPose(false);
 	}
 
 	@Override
 	public void stop() {
 		super.stop();
-		this.cat.setSitting(false);
+		this.cat.setInSittingPose(false);
 	}
 
 	@Override
 	public void tick() {
 		super.tick();
-		this.cat.getSitGoal().wantToSit(false);
-		if (!this.isReachedTarget()) {
-			this.cat.setSitting(false);
-		} else if (!this.cat.isSitting()) {
-			this.cat.setSitting(true);
-		}
+		this.cat.setInSittingPose(this.isReachedTarget());
 	}
 
 	@Override
@@ -54,13 +48,14 @@ public class CatSitOnBlockGoal extends MoveToBlockGoal {
 			return false;
 		} else {
 			BlockState blockState = levelReader.getBlockState(blockPos);
-			Block block = blockState.getBlock();
-			if (block == Blocks.CHEST) {
+			if (blockState.is(Blocks.CHEST)) {
 				return ChestBlockEntity.getOpenCount(levelReader, blockPos) < 1;
 			} else {
-				return block == Blocks.FURNACE && blockState.getValue(FurnaceBlock.LIT)
+				return blockState.is(Blocks.FURNACE) && blockState.getValue(FurnaceBlock.LIT)
 					? true
-					: block.is(BlockTags.BEDS) && blockState.getValue(BedBlock.PART) != BedPart.HEAD;
+					: blockState.is(
+						BlockTags.BEDS, blockStateBase -> (Boolean)blockStateBase.getOptionalValue(BedBlock.PART).map(bedPart -> bedPart != BedPart.HEAD).orElse(true)
+					);
 			}
 		}
 	}

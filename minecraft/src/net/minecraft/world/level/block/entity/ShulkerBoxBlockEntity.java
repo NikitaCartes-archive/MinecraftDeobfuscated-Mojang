@@ -221,8 +221,8 @@ public class ShulkerBoxBlockEntity extends RandomizableContainerBlockEntity impl
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		this.loadFromTag(compoundTag);
 	}
 
@@ -290,6 +290,10 @@ public class ShulkerBoxBlockEntity extends RandomizableContainerBlockEntity impl
 	@Override
 	protected AbstractContainerMenu createMenu(int i, Inventory inventory) {
 		return new ShulkerBoxMenu(i, inventory, this);
+	}
+
+	public boolean isClosed() {
+		return this.animationStatus == ShulkerBoxBlockEntity.AnimationStatus.CLOSED;
 	}
 
 	public static enum AnimationStatus {

@@ -21,6 +21,7 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -41,7 +42,7 @@ public class CauldronBlock extends Block {
 		BooleanOp.ONLY_FIRST
 	);
 
-	public CauldronBlock(Block.Properties properties) {
+	public CauldronBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(LEVEL, Integer.valueOf(0)));
 	}
@@ -87,7 +88,7 @@ public class CauldronBlock extends Block {
 					level.playSound(null, blockPos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
 				}
 
-				return InteractionResult.SUCCESS;
+				return InteractionResult.sidedSuccess(level.isClientSide);
 			} else if (item == Items.BUCKET) {
 				if (i == 3 && !level.isClientSide) {
 					if (!player.abilities.instabuild) {
@@ -104,7 +105,7 @@ public class CauldronBlock extends Block {
 					level.playSound(null, blockPos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
 				}
 
-				return InteractionResult.SUCCESS;
+				return InteractionResult.sidedSuccess(level.isClientSide);
 			} else if (item == Items.GLASS_BOTTLE) {
 				if (i > 0 && !level.isClientSide) {
 					if (!player.abilities.instabuild) {
@@ -124,7 +125,7 @@ public class CauldronBlock extends Block {
 					this.setWaterLevel(level, blockPos, blockState, i - 1);
 				}
 
-				return InteractionResult.SUCCESS;
+				return InteractionResult.sidedSuccess(level.isClientSide);
 			} else if (item == Items.POTION && PotionUtils.getPotion(itemStack) == Potions.WATER) {
 				if (i < 3 && !level.isClientSide) {
 					if (!player.abilities.instabuild) {
@@ -140,7 +141,7 @@ public class CauldronBlock extends Block {
 					this.setWaterLevel(level, blockPos, blockState, i + 1);
 				}
 
-				return InteractionResult.SUCCESS;
+				return InteractionResult.sidedSuccess(level.isClientSide);
 			} else {
 				if (i > 0 && item instanceof DyeableLeatherItem) {
 					DyeableLeatherItem dyeableLeatherItem = (DyeableLeatherItem)item;
@@ -172,7 +173,7 @@ public class CauldronBlock extends Block {
 						}
 					}
 
-					return InteractionResult.SUCCESS;
+					return InteractionResult.sidedSuccess(level.isClientSide);
 				} else if (i > 0 && item instanceof BlockItem) {
 					Block block = ((BlockItem)item).getBlock();
 					if (block instanceof ShulkerBoxBlock && !level.isClientSide()) {

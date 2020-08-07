@@ -7,7 +7,6 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.List;
-import javax.annotation.Nullable;
 import javax.sound.sampled.AudioFormat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -168,7 +167,6 @@ public class OggAudioStream implements AudioStream {
 		return this.audioFormat;
 	}
 
-	@Nullable
 	@Override
 	public ByteBuffer read(int i) throws IOException {
 		OggAudioStream.OutputConcat outputConcat = new OggAudioStream.OutputConcat(i + 8192);
@@ -179,7 +177,6 @@ public class OggAudioStream implements AudioStream {
 		return outputConcat.get();
 	}
 
-	@Override
 	public ByteBuffer readAll() throws IOException {
 		OggAudioStream.OutputConcat outputConcat = new OggAudioStream.OutputConcat(16384);
 

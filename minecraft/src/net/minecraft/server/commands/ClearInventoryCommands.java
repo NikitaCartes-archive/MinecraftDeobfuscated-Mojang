@@ -62,14 +62,15 @@ public class ClearInventoryCommands {
 		int j = 0;
 
 		for (ServerPlayer serverPlayer : collection) {
-			j += serverPlayer.inventory.clearInventory(predicate, i);
+			j += serverPlayer.inventory.clearOrCountMatchingItems(predicate, i, serverPlayer.inventoryMenu.getCraftSlots());
 			serverPlayer.containerMenu.broadcastChanges();
+			serverPlayer.inventoryMenu.slotsChanged(serverPlayer.inventory);
 			serverPlayer.broadcastCarriedItem();
 		}
 
 		if (j == 0) {
 			if (collection.size() == 1) {
-				throw ERROR_SINGLE.create(((ServerPlayer)collection.iterator().next()).getName().getColoredString());
+				throw ERROR_SINGLE.create(((ServerPlayer)collection.iterator().next()).getName());
 			} else {
 				throw ERROR_MULTIPLE.create(collection.size());
 			}

@@ -1,11 +1,10 @@
 package net.minecraft.world.level.levelgen.carver;
 
 import com.google.common.collect.ImmutableSet;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.BitSet;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -21,22 +20,19 @@ import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeat
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public abstract class WorldCarver<C extends CarverConfiguration> {
-	public static final WorldCarver<ProbabilityFeatureConfiguration> CAVE = register(
-		"cave", new CaveWorldCarver(ProbabilityFeatureConfiguration::deserialize, 256)
+	public static final WorldCarver<ProbabilityFeatureConfiguration> CAVE = register("cave", new CaveWorldCarver(ProbabilityFeatureConfiguration.CODEC, 256));
+	public static final WorldCarver<ProbabilityFeatureConfiguration> NETHER_CAVE = register(
+		"nether_cave", new NetherWorldCarver(ProbabilityFeatureConfiguration.CODEC)
 	);
-	public static final WorldCarver<ProbabilityFeatureConfiguration> HELL_CAVE = register(
-		"hell_cave", new HellCaveWorldCarver(ProbabilityFeatureConfiguration::deserialize)
-	);
-	public static final WorldCarver<ProbabilityFeatureConfiguration> CANYON = register(
-		"canyon", new CanyonWorldCarver(ProbabilityFeatureConfiguration::deserialize)
-	);
+	public static final WorldCarver<ProbabilityFeatureConfiguration> CANYON = register("canyon", new CanyonWorldCarver(ProbabilityFeatureConfiguration.CODEC));
 	public static final WorldCarver<ProbabilityFeatureConfiguration> UNDERWATER_CANYON = register(
-		"underwater_canyon", new UnderwaterCanyonWorldCarver(ProbabilityFeatureConfiguration::deserialize)
+		"underwater_canyon", new UnderwaterCanyonWorldCarver(ProbabilityFeatureConfiguration.CODEC)
 	);
 	public static final WorldCarver<ProbabilityFeatureConfiguration> UNDERWATER_CAVE = register(
-		"underwater_cave", new UnderwaterCaveWorldCarver(ProbabilityFeatureConfiguration::deserialize)
+		"underwater_cave", new UnderwaterCaveWorldCarver(ProbabilityFeatureConfiguration.CODEC)
 	);
 	protected static final BlockState AIR = Blocks.AIR.defaultBlockState();
 	protected static final BlockState CAVE_AIR = Blocks.CAVE_AIR.defaultBlockState();
@@ -75,16 +71,24 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 		Blocks.PACKED_ICE
 	);
 	protected Set<Fluid> liquids = ImmutableSet.of(Fluids.WATER);
-	private final Function<Dynamic<?>, ? extends C> configurationFactory;
+	private final Codec<ConfiguredWorldCarver<C>> configuredCodec;
 	protected final int genHeight;
 
 	private static <C extends CarverConfiguration, F extends WorldCarver<C>> F register(String string, F worldCarver) {
 		return Registry.register(Registry.CARVER, string, worldCarver);
 	}
 
-	public WorldCarver(Function<Dynamic<?>, ? extends C> function, int i) {
-		this.configurationFactory = function;
+	public WorldCarver(Codec<C> codec, int i) {
 		this.genHeight = i;
+		this.configuredCodec = codec.fieldOf("config").<ConfiguredWorldCarver<C>>xmap(this::configured, ConfiguredWorldCarver::config).codec();
+	}
+
+	public ConfiguredWorldCarver<C> configured(C carverConfiguration) {
+		return new ConfiguredWorldCarver<>(this, carverConfiguration);
+	}
+
+	public Codec<ConfiguredWorldCarver<C>> configuredCodec() {
+		return this.configuredCodec;
 	}
 
 	public int getRange() {
@@ -120,13 +124,13 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 						int y = x + k * 16;
 						double z = ((double)y + 0.5 - f) / g;
 						if (!(w * w + z * z >= 1.0)) {
-							AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+							MutableBoolean mutableBoolean = new MutableBoolean(false);
 
 							for (int aa = r; aa > q; aa--) {
 								double ab = ((double)aa - 0.5 - e) / h;
 								if (!this.skip(w, ab, z, aa)) {
 									bl |= this.carveBlock(
-										chunkAccess, function, bitSet, random, mutableBlockPos, mutableBlockPos2, mutableBlockPos3, i, j, k, v, y, u, aa, x, atomicBoolean
+										chunkAccess, function, bitSet, random, mutableBlockPos, mutableBlockPos2, mutableBlockPos3, i, j, k, v, y, u, aa, x, mutableBoolean
 									);
 								}
 							}
@@ -157,7 +161,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 		int n,
 		int o,
 		int p,
-		AtomicBoolean atomicBoolean
+		MutableBoolean mutableBoolean
 	) {
 		int q = n | p << 4 | o << 8;
 		if (bitSet.get(q)) {
@@ -166,9 +170,9 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 			bitSet.set(q);
 			mutableBlockPos.set(l, o, m);
 			BlockState blockState = chunkAccess.getBlockState(mutableBlockPos);
-			BlockState blockState2 = chunkAccess.getBlockState(mutableBlockPos2.set(mutableBlockPos).move(Direction.UP));
-			if (blockState.getBlock() == Blocks.GRASS_BLOCK || blockState.getBlock() == Blocks.MYCELIUM) {
-				atomicBoolean.set(true);
+			BlockState blockState2 = chunkAccess.getBlockState(mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.UP));
+			if (blockState.is(Blocks.GRASS_BLOCK) || blockState.is(Blocks.MYCELIUM)) {
+				mutableBoolean.setTrue();
 			}
 
 			if (!this.canReplaceBlock(blockState, blockState2)) {
@@ -178,10 +182,12 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 					chunkAccess.setBlockState(mutableBlockPos, LAVA.createLegacyBlock(), false);
 				} else {
 					chunkAccess.setBlockState(mutableBlockPos, CAVE_AIR, false);
-					if (atomicBoolean.get()) {
-						mutableBlockPos3.set(mutableBlockPos).move(Direction.DOWN);
-						if (chunkAccess.getBlockState(mutableBlockPos3).getBlock() == Blocks.DIRT) {
-							chunkAccess.setBlockState(mutableBlockPos3, ((Biome)function.apply(mutableBlockPos)).getSurfaceBuilderConfig().getTopMaterial(), false);
+					if (mutableBoolean.isTrue()) {
+						mutableBlockPos3.setWithOffset(mutableBlockPos, Direction.DOWN);
+						if (chunkAccess.getBlockState(mutableBlockPos3).is(Blocks.DIRT)) {
+							chunkAccess.setBlockState(
+								mutableBlockPos3, ((Biome)function.apply(mutableBlockPos)).getGenerationSettings().getSurfaceBuilderConfig().getTopMaterial(), false
+							);
 						}
 					}
 				}
@@ -202,8 +208,7 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 	}
 
 	protected boolean canReplaceBlock(BlockState blockState, BlockState blockState2) {
-		Block block = blockState.getBlock();
-		return this.canReplaceBlock(blockState) || (block == Blocks.SAND || block == Blocks.GRAVEL) && !blockState2.getFluidState().is(FluidTags.WATER);
+		return this.canReplaceBlock(blockState) || (blockState.is(Blocks.SAND) || blockState.is(Blocks.GRAVEL)) && !blockState2.getFluidState().is(FluidTags.WATER);
 	}
 
 	protected boolean hasWater(ChunkAccess chunkAccess, int i, int j, int k, int l, int m, int n, int o, int p) {

@@ -13,7 +13,7 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
 
 public class InteractWith<E extends LivingEntity, T extends LivingEntity> extends Behavior<E> {
 	private final int maxDist;
-	private final float speed;
+	private final float speedModifier;
 	private final EntityType<? extends T> type;
 	private final int interactionRangeSqr;
 	private final Predicate<T> targetFilter;
@@ -29,14 +29,12 @@ public class InteractWith<E extends LivingEntity, T extends LivingEntity> extend
 				MemoryStatus.REGISTERED,
 				MemoryModuleType.WALK_TARGET,
 				MemoryStatus.VALUE_ABSENT,
-				memoryModuleType,
-				MemoryStatus.VALUE_ABSENT,
 				MemoryModuleType.VISIBLE_LIVING_ENTITIES,
 				MemoryStatus.VALUE_PRESENT
 			)
 		);
 		this.type = entityType;
-		this.speed = f;
+		this.speedModifier = f;
 		this.interactionRangeSqr = i * i;
 		this.maxDist = j;
 		this.targetFilter = predicate2;
@@ -52,10 +50,16 @@ public class InteractWith<E extends LivingEntity, T extends LivingEntity> extend
 
 	@Override
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, E livingEntity) {
-		return this.selfFilter.test(livingEntity)
-			&& ((List)livingEntity.getBrain().getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).get())
-				.stream()
-				.anyMatch(livingEntityx -> this.type.equals(livingEntityx.getType()) && this.targetFilter.test(livingEntityx));
+		return this.selfFilter.test(livingEntity) && this.seesAtLeastOneValidTarget(livingEntity);
+	}
+
+	private boolean seesAtLeastOneValidTarget(E livingEntity) {
+		List<LivingEntity> list = (List<LivingEntity>)livingEntity.getBrain().getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).get();
+		return list.stream().anyMatch(this::isTargetValid);
+	}
+
+	private boolean isTargetValid(LivingEntity livingEntity) {
+		return this.type.equals(livingEntity.getType()) && this.targetFilter.test(livingEntity);
 	}
 
 	@Override
@@ -71,8 +75,8 @@ public class InteractWith<E extends LivingEntity, T extends LivingEntity> extend
 						.findFirst()
 						.ifPresent(livingEntityxx -> {
 							brain.setMemory(this.memory, (T)livingEntityxx);
-							brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityPosWrapper(livingEntityxx));
-							brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityPosWrapper(livingEntityxx), this.speed, this.maxDist));
+							brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(livingEntityxx, true));
+							brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityTracker(livingEntityxx, false), this.speedModifier, this.maxDist));
 						})
 			);
 	}

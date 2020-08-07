@@ -7,15 +7,16 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.PatrollingMonster;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class PatrolSpawner {
+public class PatrolSpawner implements CustomSpawner {
 	private int nextTick;
 
+	@Override
 	public int tick(ServerLevel serverLevel, boolean bl, boolean bl2) {
 		if (!bl) {
 			return 0;
@@ -41,12 +42,12 @@ public class PatrolSpawner {
 						Player player = (Player)serverLevel.players().get(random.nextInt(i));
 						if (player.isSpectator()) {
 							return 0;
-						} else if (serverLevel.isVillage(player.getCommandSenderBlockPosition())) {
+						} else if (serverLevel.isCloseToVillage(player.blockPosition(), 2)) {
 							return 0;
 						} else {
 							int j = (24 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1);
 							int k = (24 + random.nextInt(24)) * (random.nextBoolean() ? -1 : 1);
-							BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(player).move(j, 0, k);
+							BlockPos.MutableBlockPos mutableBlockPos = player.blockPosition().mutable().move(j, 0, k);
 							if (!serverLevel.hasChunksAt(
 								mutableBlockPos.getX() - 10,
 								mutableBlockPos.getY() - 10,
@@ -90,14 +91,14 @@ public class PatrolSpawner {
 		}
 	}
 
-	private boolean spawnPatrolMember(Level level, BlockPos blockPos, Random random, boolean bl) {
-		BlockState blockState = level.getBlockState(blockPos);
-		if (!NaturalSpawner.isValidEmptySpawnBlock(level, blockPos, blockState, blockState.getFluidState())) {
+	private boolean spawnPatrolMember(ServerLevel serverLevel, BlockPos blockPos, Random random, boolean bl) {
+		BlockState blockState = serverLevel.getBlockState(blockPos);
+		if (!NaturalSpawner.isValidEmptySpawnBlock(serverLevel, blockPos, blockState, blockState.getFluidState(), EntityType.PILLAGER)) {
 			return false;
-		} else if (!PatrollingMonster.checkPatrollingMonsterSpawnRules(EntityType.PILLAGER, level, MobSpawnType.PATROL, blockPos, random)) {
+		} else if (!PatrollingMonster.checkPatrollingMonsterSpawnRules(EntityType.PILLAGER, serverLevel, MobSpawnType.PATROL, blockPos, random)) {
 			return false;
 		} else {
-			PatrollingMonster patrollingMonster = EntityType.PILLAGER.create(level);
+			PatrollingMonster patrollingMonster = EntityType.PILLAGER.create(serverLevel);
 			if (patrollingMonster != null) {
 				if (bl) {
 					patrollingMonster.setPatrolLeader(true);
@@ -105,8 +106,8 @@ public class PatrolSpawner {
 				}
 
 				patrollingMonster.setPos((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
-				patrollingMonster.finalizeSpawn(level, level.getCurrentDifficultyAt(blockPos), MobSpawnType.PATROL, null, null);
-				level.addFreshEntity(patrollingMonster);
+				patrollingMonster.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(blockPos), MobSpawnType.PATROL, null, null);
+				serverLevel.addFreshEntityWithPassengers(patrollingMonster);
 				return true;
 			} else {
 				return false;

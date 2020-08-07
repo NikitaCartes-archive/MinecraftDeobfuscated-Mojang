@@ -1,87 +1,58 @@
 package net.minecraft.world.level.newbiome.layer;
 
-import net.minecraft.core.Registry;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.world.level.newbiome.context.Context;
 import net.minecraft.world.level.newbiome.layer.traits.CastleTransformer;
 
 public enum ShoreLayer implements CastleTransformer {
 	INSTANCE;
 
-	private static final int BEACH = Registry.BIOME.getId(Biomes.BEACH);
-	private static final int SNOWY_BEACH = Registry.BIOME.getId(Biomes.SNOWY_BEACH);
-	private static final int DESERT = Registry.BIOME.getId(Biomes.DESERT);
-	private static final int MOUNTAINS = Registry.BIOME.getId(Biomes.MOUNTAINS);
-	private static final int WOODED_MOUNTAINS = Registry.BIOME.getId(Biomes.WOODED_MOUNTAINS);
-	private static final int FOREST = Registry.BIOME.getId(Biomes.FOREST);
-	private static final int JUNGLE = Registry.BIOME.getId(Biomes.JUNGLE);
-	private static final int JUNGLE_EDGE = Registry.BIOME.getId(Biomes.JUNGLE_EDGE);
-	private static final int JUNGLE_HILLS = Registry.BIOME.getId(Biomes.JUNGLE_HILLS);
-	private static final int BADLANDS = Registry.BIOME.getId(Biomes.BADLANDS);
-	private static final int WOODED_BADLANDS_PLATEAU = Registry.BIOME.getId(Biomes.WOODED_BADLANDS_PLATEAU);
-	private static final int BADLANDS_PLATEAU = Registry.BIOME.getId(Biomes.BADLANDS_PLATEAU);
-	private static final int ERODED_BADLANDS = Registry.BIOME.getId(Biomes.ERODED_BADLANDS);
-	private static final int MODIFIED_WOODED_BADLANDS_PLATEAU = Registry.BIOME.getId(Biomes.MODIFIED_WOODED_BADLANDS_PLATEAU);
-	private static final int MODIFIED_BADLANDS_PLATEAU = Registry.BIOME.getId(Biomes.MODIFIED_BADLANDS_PLATEAU);
-	private static final int MUSHROOM_FIELDS = Registry.BIOME.getId(Biomes.MUSHROOM_FIELDS);
-	private static final int MUSHROOM_FIELD_SHORE = Registry.BIOME.getId(Biomes.MUSHROOM_FIELD_SHORE);
-	private static final int RIVER = Registry.BIOME.getId(Biomes.RIVER);
-	private static final int MOUNTAIN_EDGE = Registry.BIOME.getId(Biomes.MOUNTAIN_EDGE);
-	private static final int STONE_SHORE = Registry.BIOME.getId(Biomes.STONE_SHORE);
-	private static final int SWAMP = Registry.BIOME.getId(Biomes.SWAMP);
-	private static final int TAIGA = Registry.BIOME.getId(Biomes.TAIGA);
+	private static final IntSet SNOWY = new IntOpenHashSet(new int[]{26, 11, 12, 13, 140, 30, 31, 158, 10});
+	private static final IntSet JUNGLES = new IntOpenHashSet(new int[]{168, 169, 21, 22, 23, 149, 151});
 
 	@Override
 	public int apply(Context context, int i, int j, int k, int l, int m) {
-		Biome biome = Registry.BIOME.byId(m);
-		if (m == MUSHROOM_FIELDS) {
+		if (m == 14) {
 			if (Layers.isShallowOcean(i) || Layers.isShallowOcean(j) || Layers.isShallowOcean(k) || Layers.isShallowOcean(l)) {
-				return MUSHROOM_FIELD_SHORE;
+				return 15;
 			}
-		} else if (biome != null && biome.getBiomeCategory() == Biome.BiomeCategory.JUNGLE) {
+		} else if (JUNGLES.contains(m)) {
 			if (!isJungleCompatible(i) || !isJungleCompatible(j) || !isJungleCompatible(k) || !isJungleCompatible(l)) {
-				return JUNGLE_EDGE;
+				return 23;
 			}
 
 			if (Layers.isOcean(i) || Layers.isOcean(j) || Layers.isOcean(k) || Layers.isOcean(l)) {
-				return BEACH;
+				return 16;
 			}
-		} else if (m != MOUNTAINS && m != WOODED_MOUNTAINS && m != MOUNTAIN_EDGE) {
-			if (biome != null && biome.getPrecipitation() == Biome.Precipitation.SNOW) {
+		} else if (m != 3 && m != 34 && m != 20) {
+			if (SNOWY.contains(m)) {
 				if (!Layers.isOcean(m) && (Layers.isOcean(i) || Layers.isOcean(j) || Layers.isOcean(k) || Layers.isOcean(l))) {
-					return SNOWY_BEACH;
+					return 26;
 				}
-			} else if (m != BADLANDS && m != WOODED_BADLANDS_PLATEAU) {
-				if (!Layers.isOcean(m) && m != RIVER && m != SWAMP && (Layers.isOcean(i) || Layers.isOcean(j) || Layers.isOcean(k) || Layers.isOcean(l))) {
-					return BEACH;
+			} else if (m != 37 && m != 38) {
+				if (!Layers.isOcean(m) && m != 7 && m != 6 && (Layers.isOcean(i) || Layers.isOcean(j) || Layers.isOcean(k) || Layers.isOcean(l))) {
+					return 16;
 				}
 			} else if (!Layers.isOcean(i)
 				&& !Layers.isOcean(j)
 				&& !Layers.isOcean(k)
 				&& !Layers.isOcean(l)
 				&& (!this.isMesa(i) || !this.isMesa(j) || !this.isMesa(k) || !this.isMesa(l))) {
-				return DESERT;
+				return 2;
 			}
 		} else if (!Layers.isOcean(m) && (Layers.isOcean(i) || Layers.isOcean(j) || Layers.isOcean(k) || Layers.isOcean(l))) {
-			return STONE_SHORE;
+			return 25;
 		}
 
 		return m;
 	}
 
 	private static boolean isJungleCompatible(int i) {
-		return Registry.BIOME.byId(i) != null && Registry.BIOME.byId(i).getBiomeCategory() == Biome.BiomeCategory.JUNGLE
-			? true
-			: i == JUNGLE_EDGE || i == JUNGLE || i == JUNGLE_HILLS || i == FOREST || i == TAIGA || Layers.isOcean(i);
+		return JUNGLES.contains(i) || i == 4 || i == 5 || Layers.isOcean(i);
 	}
 
 	private boolean isMesa(int i) {
-		return i == BADLANDS
-			|| i == WOODED_BADLANDS_PLATEAU
-			|| i == BADLANDS_PLATEAU
-			|| i == ERODED_BADLANDS
-			|| i == MODIFIED_WOODED_BADLANDS_PLATEAU
-			|| i == MODIFIED_BADLANDS_PLATEAU;
+		return i == 37 || i == 38 || i == 39 || i == 165 || i == 166 || i == 167;
 	}
 }

@@ -1,5 +1,7 @@
 package net.minecraft.world.entity.animal.horse;
 
+import javax.annotation.Nullable;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
@@ -20,9 +22,21 @@ public class Donkey extends AbstractChestedHorse {
 	}
 
 	@Override
+	protected SoundEvent getAngrySound() {
+		super.getAngrySound();
+		return SoundEvents.DONKEY_ANGRY;
+	}
+
+	@Override
 	protected SoundEvent getDeathSound() {
 		super.getDeathSound();
 		return SoundEvents.DONKEY_DEATH;
+	}
+
+	@Nullable
+	@Override
+	protected SoundEvent getEatingSound() {
+		return SoundEvents.DONKEY_EAT;
 	}
 
 	@Override
@@ -41,9 +55,9 @@ public class Donkey extends AbstractChestedHorse {
 	}
 
 	@Override
-	public AgableMob getBreedOffspring(AgableMob agableMob) {
+	public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
 		EntityType<? extends AbstractHorse> entityType = agableMob instanceof Horse ? EntityType.MULE : EntityType.DONKEY;
-		AbstractHorse abstractHorse = entityType.create(this.level);
+		AbstractHorse abstractHorse = entityType.create(serverLevel);
 		this.setOffspringAttributes(agableMob, abstractHorse);
 		return abstractHorse;
 	}

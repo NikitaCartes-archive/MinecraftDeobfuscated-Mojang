@@ -3,6 +3,7 @@ package net.minecraft.client.gui.screens.inventory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -11,16 +12,18 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.ComponentRenderUtils;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -36,15 +39,16 @@ public class BookViewScreen extends Screen {
 		}
 
 		@Override
-		public Component getPageRaw(int i) {
-			return new TextComponent("");
+		public FormattedText getPageRaw(int i) {
+			return FormattedText.EMPTY;
 		}
 	};
 	public static final ResourceLocation BOOK_LOCATION = new ResourceLocation("textures/gui/book.png");
 	private BookViewScreen.BookAccess bookAccess;
 	private int currentPage;
-	private List<Component> cachedPageComponents = Collections.emptyList();
+	private List<FormattedCharSequence> cachedPageComponents = Collections.emptyList();
 	private int cachedPage = -1;
+	private Component pageMsg = TextComponent.EMPTY;
 	private PageButton forwardButton;
 	private PageButton backButton;
 	private final boolean playTurnSound;
@@ -93,7 +97,7 @@ public class BookViewScreen extends Screen {
 	}
 
 	protected void createMenuControls() {
-		this.addButton(new Button(this.width / 2 - 100, 196, 200, 20, I18n.get("gui.done"), button -> this.minecraft.setScreen(null)));
+		this.addButton(new Button(this.width / 2 - 100, 196, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(null)));
 	}
 
 	protected void createPageControlButtons() {
@@ -148,46 +152,42 @@ public class BookViewScreen extends Screen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.minecraft.getTextureManager().bind(BOOK_LOCATION);
 		int k = (this.width - 192) / 2;
 		int l = 2;
-		this.blit(k, 2, 0, 0, 192, 192);
-		String string = I18n.get("book.pageIndicator", this.currentPage + 1, Math.max(this.getNumPages(), 1));
+		this.blit(poseStack, k, 2, 0, 0, 192, 192);
 		if (this.cachedPage != this.currentPage) {
-			Component component = this.bookAccess.getPage(this.currentPage);
-			this.cachedPageComponents = ComponentRenderUtils.wrapComponents(component, 114, this.font, true, true);
+			FormattedText formattedText = this.bookAccess.getPage(this.currentPage);
+			this.cachedPageComponents = this.font.split(formattedText, 114);
+			this.pageMsg = new TranslatableComponent("book.pageIndicator", this.currentPage + 1, Math.max(this.getNumPages(), 1));
 		}
 
 		this.cachedPage = this.currentPage;
-		int m = this.strWidth(string);
-		this.font.draw(string, (float)(k - m + 192 - 44), 18.0F, 0);
+		int m = this.font.width(this.pageMsg);
+		this.font.draw(poseStack, this.pageMsg, (float)(k - m + 192 - 44), 18.0F, 0);
 		int n = Math.min(128 / 9, this.cachedPageComponents.size());
 
 		for (int o = 0; o < n; o++) {
-			Component component2 = (Component)this.cachedPageComponents.get(o);
-			this.font.draw(component2.getColoredString(), (float)(k + 36), (float)(32 + o * 9), 0);
+			FormattedCharSequence formattedCharSequence = (FormattedCharSequence)this.cachedPageComponents.get(o);
+			this.font.draw(poseStack, formattedCharSequence, (float)(k + 36), (float)(32 + o * 9), 0);
 		}
 
-		Component component3 = this.getClickedComponentAt((double)i, (double)j);
-		if (component3 != null) {
-			this.renderComponentHoverEffect(component3, i, j);
+		Style style = this.getClickedComponentStyleAt((double)i, (double)j);
+		if (style != null) {
+			this.renderComponentHoverEffect(poseStack, style, i, j);
 		}
 
-		super.render(i, j, f);
-	}
-
-	private int strWidth(String string) {
-		return this.font.width(this.font.isBidirectional() ? this.font.bidirectionalShaping(string) : string);
+		super.render(poseStack, i, j, f);
 	}
 
 	@Override
 	public boolean mouseClicked(double d, double e, int i) {
 		if (i == 0) {
-			Component component = this.getClickedComponentAt(d, e);
-			if (component != null && this.handleComponentClicked(component)) {
+			Style style = this.getClickedComponentStyleAt(d, e);
+			if (style != null && this.handleComponentClicked(style)) {
 				return true;
 			}
 		}
@@ -196,8 +196,8 @@ public class BookViewScreen extends Screen {
 	}
 
 	@Override
-	public boolean handleComponentClicked(Component component) {
-		ClickEvent clickEvent = component.getStyle().getClickEvent();
+	public boolean handleComponentClicked(Style style) {
+		ClickEvent clickEvent = style.getClickEvent();
 		if (clickEvent == null) {
 			return false;
 		} else if (clickEvent.getAction() == ClickEvent.Action.CHANGE_PAGE) {
@@ -210,7 +210,7 @@ public class BookViewScreen extends Screen {
 				return false;
 			}
 		} else {
-			boolean bl = super.handleComponentClicked(component);
+			boolean bl = super.handleComponentClicked(style);
 			if (bl && clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
 				this.minecraft.setScreen(null);
 			}
@@ -220,8 +220,8 @@ public class BookViewScreen extends Screen {
 	}
 
 	@Nullable
-	public Component getClickedComponentAt(double d, double e) {
-		if (this.cachedPageComponents == null) {
+	public Style getClickedComponentStyleAt(double d, double e) {
+		if (this.cachedPageComponents.isEmpty()) {
 			return null;
 		} else {
 			int i = Mth.floor(d - (double)((this.width - 192) / 2) - 36.0);
@@ -231,20 +231,11 @@ public class BookViewScreen extends Screen {
 				if (i <= 114 && j < 9 * k + k) {
 					int l = j / 9;
 					if (l >= 0 && l < this.cachedPageComponents.size()) {
-						Component component = (Component)this.cachedPageComponents.get(l);
-						int m = 0;
-
-						for (Component component2 : component) {
-							if (component2 instanceof TextComponent) {
-								m += this.minecraft.font.width(component2.getColoredString());
-								if (m > i) {
-									return component2;
-								}
-							}
-						}
+						FormattedCharSequence formattedCharSequence = (FormattedCharSequence)this.cachedPageComponents.get(l);
+						return this.minecraft.font.getSplitter().componentStyleAtWidth(formattedCharSequence, i);
+					} else {
+						return null;
 					}
-
-					return null;
 				} else {
 					return null;
 				}
@@ -269,10 +260,10 @@ public class BookViewScreen extends Screen {
 	public interface BookAccess {
 		int getPageCount();
 
-		Component getPageRaw(int i);
+		FormattedText getPageRaw(int i);
 
-		default Component getPage(int i) {
-			return (Component)(i >= 0 && i < this.getPageCount() ? this.getPageRaw(i) : new TextComponent(""));
+		default FormattedText getPage(int i) {
+			return i >= 0 && i < this.getPageCount() ? this.getPageRaw(i) : FormattedText.EMPTY;
 		}
 
 		static BookViewScreen.BookAccess fromItem(ItemStack itemStack) {
@@ -304,8 +295,8 @@ public class BookViewScreen extends Screen {
 		}
 
 		@Override
-		public Component getPageRaw(int i) {
-			return new TextComponent((String)this.pages.get(i));
+		public FormattedText getPageRaw(int i) {
+			return FormattedText.of((String)this.pages.get(i));
 		}
 	}
 
@@ -321,7 +312,7 @@ public class BookViewScreen extends Screen {
 			CompoundTag compoundTag = itemStack.getTag();
 			return (List<String>)(compoundTag != null && WrittenBookItem.makeSureTagIsValid(compoundTag)
 				? BookViewScreen.convertPages(compoundTag)
-				: ImmutableList.of(new TranslatableComponent("book.invalid.tag").withStyle(ChatFormatting.DARK_RED).getColoredString()));
+				: ImmutableList.of(Component.Serializer.toJson(new TranslatableComponent("book.invalid.tag").withStyle(ChatFormatting.DARK_RED))));
 		}
 
 		@Override
@@ -330,18 +321,18 @@ public class BookViewScreen extends Screen {
 		}
 
 		@Override
-		public Component getPageRaw(int i) {
+		public FormattedText getPageRaw(int i) {
 			String string = (String)this.pages.get(i);
 
 			try {
-				Component component = Component.Serializer.fromJson(string);
-				if (component != null) {
-					return component;
+				FormattedText formattedText = Component.Serializer.fromJson(string);
+				if (formattedText != null) {
+					return formattedText;
 				}
 			} catch (Exception var4) {
 			}
 
-			return new TextComponent(string);
+			return FormattedText.of(string);
 		}
 	}
 }

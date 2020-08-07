@@ -18,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -32,7 +33,7 @@ public class SweetBerryBushBlock extends BushBlock implements BonemealableBlock 
 	private static final VoxelShape SAPLING_SHAPE = Block.box(3.0, 0.0, 3.0, 13.0, 8.0, 13.0);
 	private static final VoxelShape MID_GROWTH_SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 16.0, 15.0);
 
-	public SweetBerryBushBlock(Block.Properties properties) {
+	public SweetBerryBushBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(AGE, Integer.valueOf(0)));
 	}
@@ -53,8 +54,12 @@ public class SweetBerryBushBlock extends BushBlock implements BonemealableBlock 
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		super.tick(blockState, serverLevel, blockPos, random);
+	public boolean isRandomlyTicking(BlockState blockState) {
+		return (Integer)blockState.getValue(AGE) < 3;
+	}
+
+	@Override
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		int i = (Integer)blockState.getValue(AGE);
 		if (i < 3 && random.nextInt(5) == 0 && serverLevel.getRawBrightness(blockPos.above(), 0) >= 9) {
 			serverLevel.setBlock(blockPos, blockState.setValue(AGE, Integer.valueOf(i + 1)), 2);
@@ -88,7 +93,7 @@ public class SweetBerryBushBlock extends BushBlock implements BonemealableBlock 
 			popResource(level, blockPos, new ItemStack(Items.SWEET_BERRIES, j + (bl ? 1 : 0)));
 			level.playSound(null, blockPos, SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, SoundSource.BLOCKS, 1.0F, 0.8F + level.random.nextFloat() * 0.4F);
 			level.setBlock(blockPos, blockState.setValue(AGE, Integer.valueOf(1)), 2);
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
 		}

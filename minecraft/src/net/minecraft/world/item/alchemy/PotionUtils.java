@@ -1,6 +1,7 @@
 package net.minecraft.world.item.alchemy;
 
 import com.google.common.collect.Lists;
+import com.mojang.datafixers.util.Pair;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -13,10 +14,10 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
@@ -25,6 +26,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
 
 public class PotionUtils {
+	private static final MutableComponent NO_EFFECT = new TranslatableComponent("effect.none").withStyle(ChatFormatting.GRAY);
+
 	public static List<MobEffectInstance> getMobEffects(ItemStack itemStack) {
 		return getAllEffects(itemStack.getTag());
 	}
@@ -150,12 +153,12 @@ public class PotionUtils {
 	@Environment(EnvType.CLIENT)
 	public static void addPotionTooltip(ItemStack itemStack, List<Component> list, float f) {
 		List<MobEffectInstance> list2 = getMobEffects(itemStack);
-		List<Tuple<String, AttributeModifier>> list3 = Lists.<Tuple<String, AttributeModifier>>newArrayList();
+		List<Pair<Attribute, AttributeModifier>> list3 = Lists.<Pair<Attribute, AttributeModifier>>newArrayList();
 		if (list2.isEmpty()) {
-			list.add(new TranslatableComponent("effect.none").withStyle(ChatFormatting.GRAY));
+			list.add(NO_EFFECT);
 		} else {
 			for (MobEffectInstance mobEffectInstance : list2) {
-				Component component = new TranslatableComponent(mobEffectInstance.getDescriptionId());
+				MutableComponent mutableComponent = new TranslatableComponent(mobEffectInstance.getDescriptionId());
 				MobEffect mobEffect = mobEffectInstance.getEffect();
 				Map<Attribute, AttributeModifier> map = mobEffect.getAttributeModifiers();
 				if (!map.isEmpty()) {
@@ -164,28 +167,30 @@ public class PotionUtils {
 						AttributeModifier attributeModifier2 = new AttributeModifier(
 							attributeModifier.getName(), mobEffect.getAttributeModifierValue(mobEffectInstance.getAmplifier(), attributeModifier), attributeModifier.getOperation()
 						);
-						list3.add(new Tuple<>(((Attribute)entry.getKey()).getName(), attributeModifier2));
+						list3.add(new Pair<>(entry.getKey(), attributeModifier2));
 					}
 				}
 
 				if (mobEffectInstance.getAmplifier() > 0) {
-					component.append(" ").append(new TranslatableComponent("potion.potency." + mobEffectInstance.getAmplifier()));
+					mutableComponent = new TranslatableComponent(
+						"potion.withAmplifier", mutableComponent, new TranslatableComponent("potion.potency." + mobEffectInstance.getAmplifier())
+					);
 				}
 
 				if (mobEffectInstance.getDuration() > 20) {
-					component.append(" (").append(MobEffectUtil.formatDuration(mobEffectInstance, f)).append(")");
+					mutableComponent = new TranslatableComponent("potion.withDuration", mutableComponent, MobEffectUtil.formatDuration(mobEffectInstance, f));
 				}
 
-				list.add(component.withStyle(mobEffect.getCategory().getTooltipFormatting()));
+				list.add(mutableComponent.withStyle(mobEffect.getCategory().getTooltipFormatting()));
 			}
 		}
 
 		if (!list3.isEmpty()) {
-			list.add(new TextComponent(""));
+			list.add(TextComponent.EMPTY);
 			list.add(new TranslatableComponent("potion.whenDrank").withStyle(ChatFormatting.DARK_PURPLE));
 
-			for (Tuple<String, AttributeModifier> tuple : list3) {
-				AttributeModifier attributeModifier3 = tuple.getB();
+			for (Pair<Attribute, AttributeModifier> pair : list3) {
+				AttributeModifier attributeModifier3 = pair.getSecond();
 				double d = attributeModifier3.getAmount();
 				double e;
 				if (attributeModifier3.getOperation() != AttributeModifier.Operation.MULTIPLY_BASE
@@ -200,7 +205,7 @@ public class PotionUtils {
 						new TranslatableComponent(
 								"attribute.modifier.plus." + attributeModifier3.getOperation().toValue(),
 								ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e),
-								new TranslatableComponent("attribute.name." + tuple.getA())
+								new TranslatableComponent(pair.getFirst().getDescriptionId())
 							)
 							.withStyle(ChatFormatting.BLUE)
 					);
@@ -210,7 +215,7 @@ public class PotionUtils {
 						new TranslatableComponent(
 								"attribute.modifier.take." + attributeModifier3.getOperation().toValue(),
 								ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(e),
-								new TranslatableComponent("attribute.name." + tuple.getA())
+								new TranslatableComponent(pair.getFirst().getDescriptionId())
 							)
 							.withStyle(ChatFormatting.RED)
 					);

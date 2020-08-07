@@ -4,13 +4,14 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.types.templates.List.ListType;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Dynamic;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -75,7 +76,8 @@ public class BedBlockEntityInjecter extends DataFix {
 								map.put(dynamic2.createString("z"), dynamic2.createInt(q + (j << 4)));
 								map.put(dynamic2.createString("color"), dynamic2.createShort((short)14));
 								list.add(
-									type2.read(dynamic2.createMap(map)).getSecond().orElseThrow(() -> new IllegalStateException("Could not parse newly created bed block entity."))
+									((Pair)type2.read(dynamic2.createMap(map)).result().orElseThrow(() -> new IllegalStateException("Could not parse newly created bed block entity.")))
+										.getFirst()
 								);
 							}
 

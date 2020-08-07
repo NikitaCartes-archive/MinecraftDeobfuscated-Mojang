@@ -32,4 +32,8 @@ public class InteractionResultHolder<T> {
 	public static <T> InteractionResultHolder<T> fail(T object) {
 		return new InteractionResultHolder<>(InteractionResult.FAIL, object);
 	}
+
+	public static <T> InteractionResultHolder<T> sidedSuccess(T object, boolean bl) {
+		return bl ? success(object) : consume(object);
+	}
 }

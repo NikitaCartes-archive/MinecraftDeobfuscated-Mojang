@@ -1,16 +1,24 @@
 package net.minecraft.world.level.block;
 
 import com.google.common.collect.Lists;
+import com.mojang.math.OctahedralGroup;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import net.minecraft.Util;
 import net.minecraft.core.Direction;
 
 public enum Rotation {
-	NONE,
-	CLOCKWISE_90,
-	CLOCKWISE_180,
-	COUNTERCLOCKWISE_90;
+	NONE(OctahedralGroup.IDENTITY),
+	CLOCKWISE_90(OctahedralGroup.ROT_90_Y_NEG),
+	CLOCKWISE_180(OctahedralGroup.ROT_180_FACE_XZ),
+	COUNTERCLOCKWISE_90(OctahedralGroup.ROT_90_Y_POS);
+
+	private final OctahedralGroup rotation;
+
+	private Rotation(OctahedralGroup octahedralGroup) {
+		this.rotation = octahedralGroup;
+	}
 
 	public Rotation getRotated(Rotation rotation) {
 		switch (rotation) {
@@ -52,6 +60,10 @@ public enum Rotation {
 		}
 	}
 
+	public OctahedralGroup rotation() {
+		return this.rotation;
+	}
+
 	public Direction rotate(Direction direction) {
 		if (direction.getAxis() == Direction.Axis.Y) {
 			return direction;
@@ -83,8 +95,7 @@ public enum Rotation {
 	}
 
 	public static Rotation getRandom(Random random) {
-		Rotation[] rotations = values();
-		return rotations[random.nextInt(rotations.length)];
+		return Util.getRandom(values(), random);
 	}
 
 	public static List<Rotation> getShuffled(Random random) {

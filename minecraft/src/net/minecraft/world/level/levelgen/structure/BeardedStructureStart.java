@@ -1,9 +1,10 @@
 package net.minecraft.world.level.levelgen.structure;
 
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
-public abstract class BeardedStructureStart extends StructureStart {
-	public BeardedStructureStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+public abstract class BeardedStructureStart<C extends FeatureConfiguration> extends StructureStart<C> {
+	public BeardedStructureStart(StructureFeature<C> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
 		super(structureFeature, i, j, boundingBox, k, l);
 	}
 

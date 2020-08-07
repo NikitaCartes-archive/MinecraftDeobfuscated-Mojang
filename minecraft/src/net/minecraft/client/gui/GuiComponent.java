@@ -1,16 +1,20 @@
 package net.minecraft.client.gui;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
-import com.mojang.math.Transformation;
+import java.util.function.BiConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 
 @Environment(EnvType.CLIENT)
 public abstract class GuiComponent {
@@ -19,31 +23,31 @@ public abstract class GuiComponent {
 	public static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation("textures/gui/icons.png");
 	private int blitOffset;
 
-	protected void hLine(int i, int j, int k, int l) {
+	protected void hLine(PoseStack poseStack, int i, int j, int k, int l) {
 		if (j < i) {
 			int m = i;
 			i = j;
 			j = m;
 		}
 
-		fill(i, k, j + 1, k + 1, l);
+		fill(poseStack, i, k, j + 1, k + 1, l);
 	}
 
-	protected void vLine(int i, int j, int k, int l) {
+	protected void vLine(PoseStack poseStack, int i, int j, int k, int l) {
 		if (k < j) {
 			int m = j;
 			j = k;
 			k = m;
 		}
 
-		fill(i, j + 1, i + 1, k, l);
+		fill(poseStack, i, j + 1, i + 1, k, l);
 	}
 
-	public static void fill(int i, int j, int k, int l, int m) {
-		fill(Transformation.identity().getMatrix(), i, j, k, l, m);
+	public static void fill(PoseStack poseStack, int i, int j, int k, int l, int m) {
+		innerFill(poseStack.last().pose(), i, j, k, l, m);
 	}
 
-	public static void fill(Matrix4f matrix4f, int i, int j, int k, int l, int m) {
+	private static void innerFill(Matrix4f matrix4f, int i, int j, int k, int l, int m) {
 		if (i < k) {
 			int n = i;
 			i = k;
@@ -75,15 +79,7 @@ public abstract class GuiComponent {
 		RenderSystem.disableBlend();
 	}
 
-	protected void fillGradient(int i, int j, int k, int l, int m, int n) {
-		float f = (float)(m >> 24 & 0xFF) / 255.0F;
-		float g = (float)(m >> 16 & 0xFF) / 255.0F;
-		float h = (float)(m >> 8 & 0xFF) / 255.0F;
-		float o = (float)(m & 0xFF) / 255.0F;
-		float p = (float)(n >> 24 & 0xFF) / 255.0F;
-		float q = (float)(n >> 16 & 0xFF) / 255.0F;
-		float r = (float)(n >> 8 & 0xFF) / 255.0F;
-		float s = (float)(n & 0xFF) / 255.0F;
+	protected void fillGradient(PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
 		RenderSystem.disableTexture();
 		RenderSystem.enableBlend();
 		RenderSystem.disableAlphaTest();
@@ -92,10 +88,7 @@ public abstract class GuiComponent {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
-		bufferBuilder.vertex((double)k, (double)j, (double)this.blitOffset).color(g, h, o, f).endVertex();
-		bufferBuilder.vertex((double)i, (double)j, (double)this.blitOffset).color(g, h, o, f).endVertex();
-		bufferBuilder.vertex((double)i, (double)l, (double)this.blitOffset).color(q, r, s, p).endVertex();
-		bufferBuilder.vertex((double)k, (double)l, (double)this.blitOffset).color(q, r, s, p).endVertex();
+		fillGradient(poseStack.last().pose(), bufferBuilder, i, j, k, l, this.blitOffset, m, n);
 		tesselator.end();
 		RenderSystem.shadeModel(7424);
 		RenderSystem.disableBlend();
@@ -103,49 +96,95 @@ public abstract class GuiComponent {
 		RenderSystem.enableTexture();
 	}
 
-	public void drawCenteredString(Font font, String string, int i, int j, int k) {
-		font.drawShadow(string, (float)(i - font.width(string) / 2), (float)j, k);
+	protected static void fillGradient(Matrix4f matrix4f, BufferBuilder bufferBuilder, int i, int j, int k, int l, int m, int n, int o) {
+		float f = (float)(n >> 24 & 0xFF) / 255.0F;
+		float g = (float)(n >> 16 & 0xFF) / 255.0F;
+		float h = (float)(n >> 8 & 0xFF) / 255.0F;
+		float p = (float)(n & 0xFF) / 255.0F;
+		float q = (float)(o >> 24 & 0xFF) / 255.0F;
+		float r = (float)(o >> 16 & 0xFF) / 255.0F;
+		float s = (float)(o >> 8 & 0xFF) / 255.0F;
+		float t = (float)(o & 0xFF) / 255.0F;
+		bufferBuilder.vertex(matrix4f, (float)k, (float)j, (float)m).color(g, h, p, f).endVertex();
+		bufferBuilder.vertex(matrix4f, (float)i, (float)j, (float)m).color(g, h, p, f).endVertex();
+		bufferBuilder.vertex(matrix4f, (float)i, (float)l, (float)m).color(r, s, t, q).endVertex();
+		bufferBuilder.vertex(matrix4f, (float)k, (float)l, (float)m).color(r, s, t, q).endVertex();
 	}
 
-	public void drawRightAlignedString(Font font, String string, int i, int j, int k) {
-		font.drawShadow(string, (float)(i - font.width(string)), (float)j, k);
+	public static void drawCenteredString(PoseStack poseStack, Font font, String string, int i, int j, int k) {
+		font.drawShadow(poseStack, string, (float)(i - font.width(string) / 2), (float)j, k);
 	}
 
-	public void drawString(Font font, String string, int i, int j, int k) {
-		font.drawShadow(string, (float)i, (float)j, k);
+	public static void drawCenteredString(PoseStack poseStack, Font font, Component component, int i, int j, int k) {
+		FormattedCharSequence formattedCharSequence = component.getVisualOrderText();
+		font.drawShadow(poseStack, formattedCharSequence, (float)(i - font.width(formattedCharSequence) / 2), (float)j, k);
 	}
 
-	public static void blit(int i, int j, int k, int l, int m, TextureAtlasSprite textureAtlasSprite) {
-		innerBlit(i, i + l, j, j + m, k, textureAtlasSprite.getU0(), textureAtlasSprite.getU1(), textureAtlasSprite.getV0(), textureAtlasSprite.getV1());
+	public static void drawString(PoseStack poseStack, Font font, String string, int i, int j, int k) {
+		font.drawShadow(poseStack, string, (float)i, (float)j, k);
 	}
 
-	public void blit(int i, int j, int k, int l, int m, int n) {
-		blit(i, j, this.blitOffset, (float)k, (float)l, m, n, 256, 256);
+	public static void drawString(PoseStack poseStack, Font font, Component component, int i, int j, int k) {
+		font.drawShadow(poseStack, component, (float)i, (float)j, k);
 	}
 
-	public static void blit(int i, int j, int k, float f, float g, int l, int m, int n, int o) {
-		innerBlit(i, i + l, j, j + m, k, l, m, f, g, o, n);
+	public void blitOutlineBlack(int i, int j, BiConsumer<Integer, Integer> biConsumer) {
+		RenderSystem.blendFuncSeparate(
+			GlStateManager.SourceFactor.ZERO,
+			GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+			GlStateManager.SourceFactor.SRC_ALPHA,
+			GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA
+		);
+		biConsumer.accept(i + 1, j);
+		biConsumer.accept(i - 1, j);
+		biConsumer.accept(i, j + 1);
+		biConsumer.accept(i, j - 1);
+		RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+		biConsumer.accept(i, j);
 	}
 
-	public static void blit(int i, int j, int k, int l, float f, float g, int m, int n, int o, int p) {
-		innerBlit(i, i + k, j, j + l, 0, m, n, f, g, o, p);
+	public static void blit(PoseStack poseStack, int i, int j, int k, int l, int m, TextureAtlasSprite textureAtlasSprite) {
+		innerBlit(
+			poseStack.last().pose(),
+			i,
+			i + l,
+			j,
+			j + m,
+			k,
+			textureAtlasSprite.getU0(),
+			textureAtlasSprite.getU1(),
+			textureAtlasSprite.getV0(),
+			textureAtlasSprite.getV1()
+		);
 	}
 
-	public static void blit(int i, int j, float f, float g, int k, int l, int m, int n) {
-		blit(i, j, k, l, f, g, k, l, m, n);
+	public void blit(PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
+		blit(poseStack, i, j, this.blitOffset, (float)k, (float)l, m, n, 256, 256);
 	}
 
-	private static void innerBlit(int i, int j, int k, int l, int m, int n, int o, float f, float g, int p, int q) {
-		innerBlit(i, j, k, l, m, (f + 0.0F) / (float)p, (f + (float)n) / (float)p, (g + 0.0F) / (float)q, (g + (float)o) / (float)q);
+	public static void blit(PoseStack poseStack, int i, int j, int k, float f, float g, int l, int m, int n, int o) {
+		innerBlit(poseStack, i, i + l, j, j + m, k, l, m, f, g, o, n);
 	}
 
-	protected static void innerBlit(int i, int j, int k, int l, int m, float f, float g, float h, float n) {
+	public static void blit(PoseStack poseStack, int i, int j, int k, int l, float f, float g, int m, int n, int o, int p) {
+		innerBlit(poseStack, i, i + k, j, j + l, 0, m, n, f, g, o, p);
+	}
+
+	public static void blit(PoseStack poseStack, int i, int j, float f, float g, int k, int l, int m, int n) {
+		blit(poseStack, i, j, k, l, f, g, k, l, m, n);
+	}
+
+	private static void innerBlit(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, float f, float g, int p, int q) {
+		innerBlit(poseStack.last().pose(), i, j, k, l, m, (f + 0.0F) / (float)p, (f + (float)n) / (float)p, (g + 0.0F) / (float)q, (g + (float)o) / (float)q);
+	}
+
+	private static void innerBlit(Matrix4f matrix4f, int i, int j, int k, int l, int m, float f, float g, float h, float n) {
 		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-		bufferBuilder.vertex((double)i, (double)l, (double)m).uv(f, n).endVertex();
-		bufferBuilder.vertex((double)j, (double)l, (double)m).uv(g, n).endVertex();
-		bufferBuilder.vertex((double)j, (double)k, (double)m).uv(g, h).endVertex();
-		bufferBuilder.vertex((double)i, (double)k, (double)m).uv(f, h).endVertex();
+		bufferBuilder.vertex(matrix4f, (float)i, (float)l, (float)m).uv(f, n).endVertex();
+		bufferBuilder.vertex(matrix4f, (float)j, (float)l, (float)m).uv(g, n).endVertex();
+		bufferBuilder.vertex(matrix4f, (float)j, (float)k, (float)m).uv(g, h).endVertex();
+		bufferBuilder.vertex(matrix4f, (float)i, (float)k, (float)m).uv(f, h).endVertex();
 		bufferBuilder.end();
 		RenderSystem.enableAlphaTest();
 		BufferUploader.end(bufferBuilder);

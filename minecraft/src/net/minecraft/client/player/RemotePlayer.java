@@ -1,6 +1,7 @@
 package net.minecraft.client.player;
 
 import com.mojang.authlib.GameProfile;
+import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -36,16 +37,7 @@ public class RemotePlayer extends AbstractClientPlayer {
 	@Override
 	public void tick() {
 		super.tick();
-		this.animationSpeedOld = this.animationSpeed;
-		double d = this.getX() - this.xo;
-		double e = this.getZ() - this.zo;
-		float f = Mth.sqrt(d * d + e * e) * 4.0F;
-		if (f > 1.0F) {
-			f = 1.0F;
-		}
-
-		this.animationSpeed = this.animationSpeed + (f - this.animationSpeed) * 0.4F;
-		this.animationPosition = this.animationPosition + this.animationSpeed;
+		this.calculateEntityAnimation(this, false);
 	}
 
 	@Override
@@ -69,13 +61,13 @@ public class RemotePlayer extends AbstractClientPlayer {
 		this.oBob = this.bob;
 		this.updateSwingTime();
 		float g;
-		if (this.onGround && !(this.getHealth() <= 0.0F)) {
+		if (this.onGround && !this.isDeadOrDying()) {
 			g = Math.min(0.1F, Mth.sqrt(getHorizontalDistanceSqr(this.getDeltaMovement())));
 		} else {
 			g = 0.0F;
 		}
 
-		if (!this.onGround && !(this.getHealth() <= 0.0F)) {
+		if (!this.onGround && !this.isDeadOrDying()) {
 			float h = (float)Math.atan(-this.getDeltaMovement().y * 0.2F) * 15.0F;
 		} else {
 			float h = 0.0F;
@@ -92,7 +84,10 @@ public class RemotePlayer extends AbstractClientPlayer {
 	}
 
 	@Override
-	public void sendMessage(Component component) {
-		Minecraft.getInstance().gui.getChat().addMessage(component);
+	public void sendMessage(Component component, UUID uUID) {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (!minecraft.isBlocked(uUID)) {
+			minecraft.gui.getChat().addMessage(component);
+		}
 	}
 }

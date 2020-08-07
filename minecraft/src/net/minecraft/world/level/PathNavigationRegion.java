@@ -1,7 +1,10 @@
 package net.minecraft.world.level;
 
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -11,6 +14,8 @@ import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class PathNavigationRegion implements BlockGetter, CollisionGetter {
 	protected final int centerX;
@@ -86,6 +91,16 @@ public class PathNavigationRegion implements BlockGetter, CollisionGetter {
 			ChunkAccess chunkAccess = this.getChunk(blockPos);
 			return chunkAccess.getBlockState(blockPos);
 		}
+	}
+
+	@Override
+	public Stream<VoxelShape> getEntityCollisions(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
+		return Stream.empty();
+	}
+
+	@Override
+	public Stream<VoxelShape> getCollisions(@Nullable Entity entity, AABB aABB, Predicate<Entity> predicate) {
+		return this.getBlockCollisions(entity, aABB);
 	}
 
 	@Override

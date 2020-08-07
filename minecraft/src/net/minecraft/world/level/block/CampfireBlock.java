@@ -12,6 +12,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -19,10 +20,9 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Fireball;
-import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.BlockGetter;
@@ -31,6 +31,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -52,9 +53,13 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 	private static final VoxelShape VIRTUAL_FENCE_POST = Block.box(6.0, 0.0, 6.0, 10.0, 16.0, 10.0);
+	private final boolean spawnParticles;
+	private final int fireDamage;
 
-	public CampfireBlock(Block.Properties properties) {
+	public CampfireBlock(boolean bl, int i, BlockBehaviour.Properties properties) {
 		super(properties);
+		this.spawnParticles = bl;
+		this.fireDamage = i;
 		this.registerDefaultState(
 			this.stateDefinition
 				.any()
@@ -69,21 +74,19 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 	public InteractionResult use(
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		if ((Boolean)blockState.getValue(LIT)) {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof CampfireBlockEntity) {
-				CampfireBlockEntity campfireBlockEntity = (CampfireBlockEntity)blockEntity;
-				ItemStack itemStack = player.getItemInHand(interactionHand);
-				Optional<CampfireCookingRecipe> optional = campfireBlockEntity.getCookableRecipe(itemStack);
-				if (optional.isPresent()) {
-					if (!level.isClientSide
-						&& campfireBlockEntity.placeFood(player.abilities.instabuild ? itemStack.copy() : itemStack, ((CampfireCookingRecipe)optional.get()).getCookingTime())) {
-						player.awardStat(Stats.INTERACT_WITH_CAMPFIRE);
-						return InteractionResult.SUCCESS;
-					}
-
-					return InteractionResult.CONSUME;
+		BlockEntity blockEntity = level.getBlockEntity(blockPos);
+		if (blockEntity instanceof CampfireBlockEntity) {
+			CampfireBlockEntity campfireBlockEntity = (CampfireBlockEntity)blockEntity;
+			ItemStack itemStack = player.getItemInHand(interactionHand);
+			Optional<CampfireCookingRecipe> optional = campfireBlockEntity.getCookableRecipe(itemStack);
+			if (optional.isPresent()) {
+				if (!level.isClientSide
+					&& campfireBlockEntity.placeFood(player.abilities.instabuild ? itemStack.copy() : itemStack, ((CampfireCookingRecipe)optional.get()).getCookingTime())) {
+					player.awardStat(Stats.INTERACT_WITH_CAMPFIRE);
+					return InteractionResult.SUCCESS;
 				}
+
+				return InteractionResult.CONSUME;
 			}
 		}
 
@@ -93,7 +96,7 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 	@Override
 	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (!entity.fireImmune() && (Boolean)blockState.getValue(LIT) && entity instanceof LivingEntity && !EnchantmentHelper.hasFrostWalker((LivingEntity)entity)) {
-			entity.hurt(DamageSource.IN_FIRE, 1.0F);
+			entity.hurt(DamageSource.IN_FIRE, (float)this.fireDamage);
 		}
 
 		super.entityInside(blockState, level, blockPos, entity);
@@ -101,7 +104,7 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState.getBlock() != blockState2.getBlock()) {
+		if (!blockState.is(blockState2.getBlock())) {
 			BlockEntity blockEntity = level.getBlockEntity(blockPos);
 			if (blockEntity instanceof CampfireBlockEntity) {
 				Containers.dropContents(level, blockPos, ((CampfireBlockEntity)blockEntity).getItems());
@@ -138,12 +141,7 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 	}
 
 	private boolean isSmokeSource(BlockState blockState) {
-		return blockState.getBlock() == Blocks.HAY_BLOCK;
-	}
-
-	@Override
-	public int getLightEmission(BlockState blockState) {
-		return blockState.getValue(LIT) ? super.getLightEmission(blockState) : 0;
+		return blockState.is(Blocks.HAY_BLOCK);
 	}
 
 	@Override
@@ -162,9 +160,9 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 		if ((Boolean)blockState.getValue(LIT)) {
 			if (random.nextInt(10) == 0) {
 				level.playLocalSound(
-					(double)((float)blockPos.getX() + 0.5F),
-					(double)((float)blockPos.getY() + 0.5F),
-					(double)((float)blockPos.getZ() + 0.5F),
+					(double)blockPos.getX() + 0.5,
+					(double)blockPos.getY() + 0.5,
+					(double)blockPos.getZ() + 0.5,
 					SoundEvents.CAMPFIRE_CRACKLE,
 					SoundSource.BLOCKS,
 					0.5F + random.nextFloat(),
@@ -173,13 +171,13 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 				);
 			}
 
-			if (random.nextInt(5) == 0) {
+			if (this.spawnParticles && random.nextInt(5) == 0) {
 				for (int i = 0; i < random.nextInt(1) + 1; i++) {
 					level.addParticle(
 						ParticleTypes.LAVA,
-						(double)((float)blockPos.getX() + 0.5F),
-						(double)((float)blockPos.getY() + 0.5F),
-						(double)((float)blockPos.getZ() + 0.5F),
+						(double)blockPos.getX() + 0.5,
+						(double)blockPos.getY() + 0.5,
+						(double)blockPos.getZ() + 0.5,
 						(double)(random.nextFloat() / 2.0F),
 						5.0E-5,
 						(double)(random.nextFloat() / 2.0F)
@@ -189,23 +187,29 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 		}
 	}
 
+	public static void dowse(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState) {
+		if (levelAccessor.isClientSide()) {
+			for (int i = 0; i < 20; i++) {
+				makeParticles((Level)levelAccessor, blockPos, (Boolean)blockState.getValue(SIGNAL_FIRE), true);
+			}
+		}
+
+		BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos);
+		if (blockEntity instanceof CampfireBlockEntity) {
+			((CampfireBlockEntity)blockEntity).dowse();
+		}
+	}
+
 	@Override
 	public boolean placeLiquid(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState, FluidState fluidState) {
 		if (!(Boolean)blockState.getValue(BlockStateProperties.WATERLOGGED) && fluidState.getType() == Fluids.WATER) {
 			boolean bl = (Boolean)blockState.getValue(LIT);
 			if (bl) {
-				if (levelAccessor.isClientSide()) {
-					for (int i = 0; i < 20; i++) {
-						makeParticles(levelAccessor.getLevel(), blockPos, (Boolean)blockState.getValue(SIGNAL_FIRE), true);
-					}
-				} else {
+				if (!levelAccessor.isClientSide()) {
 					levelAccessor.playSound(null, blockPos, SoundEvents.GENERIC_EXTINGUISH_FIRE, SoundSource.BLOCKS, 1.0F, 1.0F);
 				}
 
-				BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos);
-				if (blockEntity instanceof CampfireBlockEntity) {
-					((CampfireBlockEntity)blockEntity).dowse();
-				}
+				dowse(levelAccessor, blockPos, blockState);
 			}
 
 			levelAccessor.setBlock(blockPos, blockState.setValue(WATERLOGGED, Boolean.valueOf(true)).setValue(LIT, Boolean.valueOf(false)), 3);
@@ -216,26 +220,14 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 		}
 	}
 
-	@Nullable
-	private Entity getShooter(Entity entity) {
-		if (entity instanceof Fireball) {
-			return ((Fireball)entity).owner;
-		} else {
-			return entity instanceof AbstractArrow ? ((AbstractArrow)entity).getOwner() : null;
-		}
-	}
-
 	@Override
-	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Entity entity) {
-		if (!level.isClientSide) {
-			boolean bl = entity instanceof Fireball || entity instanceof AbstractArrow && entity.isOnFire();
-			if (bl) {
-				Entity entity2 = this.getShooter(entity);
-				boolean bl2 = entity2 == null || entity2 instanceof Player || level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
-				if (bl2 && !(Boolean)blockState.getValue(LIT) && !(Boolean)blockState.getValue(WATERLOGGED)) {
-					BlockPos blockPos = blockHitResult.getBlockPos();
-					level.setBlock(blockPos, blockState.setValue(BlockStateProperties.LIT, Boolean.valueOf(true)), 11);
-				}
+	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
+		if (!level.isClientSide && projectile.isOnFire()) {
+			Entity entity = projectile.getOwner();
+			boolean bl = entity == null || entity instanceof Player || level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
+			if (bl && !(Boolean)blockState.getValue(LIT) && !(Boolean)blockState.getValue(WATERLOGGED)) {
+				BlockPos blockPos = blockHitResult.getBlockPos();
+				level.setBlock(blockPos, blockState.setValue(BlockStateProperties.LIT, Boolean.valueOf(true)), 11);
 			}
 		}
 	}
@@ -266,9 +258,9 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 		}
 	}
 
-	public static boolean isSmokeyPos(Level level, BlockPos blockPos, int i) {
-		for (int j = 1; j <= i; j++) {
-			BlockPos blockPos2 = blockPos.below(j);
+	public static boolean isSmokeyPos(Level level, BlockPos blockPos) {
+		for (int i = 1; i <= 5; i++) {
+			BlockPos blockPos2 = blockPos.below(i);
 			BlockState blockState = level.getBlockState(blockPos2);
 			if (isLitCampfire(blockState)) {
 				return true;
@@ -284,8 +276,8 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 		return false;
 	}
 
-	private static boolean isLitCampfire(BlockState blockState) {
-		return blockState.getBlock() == Blocks.CAMPFIRE && (Boolean)blockState.getValue(LIT);
+	public static boolean isLitCampfire(BlockState blockState) {
+		return blockState.hasProperty(LIT) && blockState.is(BlockTags.CAMPFIRES) && (Boolean)blockState.getValue(LIT);
 	}
 
 	@Override
@@ -316,5 +308,13 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 	@Override
 	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
+	}
+
+	public static boolean canLight(BlockState blockState) {
+		return blockState.is(
+				BlockTags.CAMPFIRES, blockStateBase -> blockStateBase.hasProperty(BlockStateProperties.WATERLOGGED) && blockStateBase.hasProperty(BlockStateProperties.LIT)
+			)
+			&& !(Boolean)blockState.getValue(BlockStateProperties.WATERLOGGED)
+			&& !(Boolean)blockState.getValue(BlockStateProperties.LIT);
 	}
 }

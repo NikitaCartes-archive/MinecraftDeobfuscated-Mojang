@@ -1,31 +1,37 @@
 package com.mojang.realmsclient.gui.screens;
 
+import com.google.common.collect.Sets;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.exception.RealmsDefaultUncaughtExceptionHandler;
-import com.mojang.realmsclient.gui.LongRunningTask;
-import com.mojang.realmsclient.gui.RealmsConstants;
+import com.mojang.realmsclient.gui.ErrorCallback;
+import com.mojang.realmsclient.util.task.LongRunningTask;
+import java.util.Set;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.realms.Realms;
-import net.minecraft.realms.RealmsButton;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
-public class RealmsLongRunningMcoTaskScreen extends RealmsScreen {
+public class RealmsLongRunningMcoTaskScreen extends RealmsScreen implements ErrorCallback {
 	private static final Logger LOGGER = LogManager.getLogger();
-	private final int BUTTON_CANCEL_ID = 666;
-	private final int BUTTON_BACK_ID = 667;
-	private final RealmsScreen lastScreen;
-	private final LongRunningTask taskThread;
-	private volatile String title = "";
-	private volatile boolean error;
-	private volatile String errorMessage;
+	private final Screen lastScreen;
+	private volatile Component title = TextComponent.EMPTY;
+	@Nullable
+	private volatile Component errorMessage;
 	private volatile boolean aborted;
 	private int animTicks;
 	private final LongRunningTask task;
 	private final int buttonLength = 212;
-	public static final String[] symbols = new String[]{
+	public static final String[] SYMBOLS = new String[]{
 		"▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃",
 		"_ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄",
 		"_ _ ▃ ▄ ▅ ▆ ▇ █ ▇ ▆ ▅",
@@ -48,15 +54,11 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen {
 		"▄ ▅ ▆ ▇ █ ▇ ▆ ▅ ▄ ▃ _"
 	};
 
-	public RealmsLongRunningMcoTaskScreen(RealmsScreen realmsScreen, LongRunningTask longRunningTask) {
-		this.lastScreen = realmsScreen;
+	public RealmsLongRunningMcoTaskScreen(Screen screen, LongRunningTask longRunningTask) {
+		this.lastScreen = screen;
 		this.task = longRunningTask;
 		longRunningTask.setScreen(this);
-		this.taskThread = longRunningTask;
-	}
-
-	public void start() {
-		Thread thread = new Thread(this.taskThread, "Realms-long-running-task");
+		Thread thread = new Thread(longRunningTask, "Realms-long-running-task");
 		thread.setUncaughtExceptionHandler(new RealmsDefaultUncaughtExceptionHandler(LOGGER));
 		thread.start();
 	}
@@ -64,7 +66,7 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen {
 	@Override
 	public void tick() {
 		super.tick();
-		Realms.narrateRepeatedly(this.title);
+		NarrationHelper.repeatedly(this.title.getString());
 		this.animTicks++;
 		this.task.tick();
 	}
@@ -82,50 +84,45 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen {
 	@Override
 	public void init() {
 		this.task.init();
-		this.buttonsAdd(new RealmsButton(666, this.width() / 2 - 106, RealmsConstants.row(12), 212, 20, getLocalizedString("gui.cancel")) {
-			@Override
-			public void onPress() {
-				RealmsLongRunningMcoTaskScreen.this.cancelOrBackButtonClicked();
-			}
-		});
+		this.addButton(new Button(this.width / 2 - 106, row(12), 212, 20, CommonComponents.GUI_CANCEL, button -> this.cancelOrBackButtonClicked()));
 	}
 
 	private void cancelOrBackButtonClicked() {
 		this.aborted = true;
 		this.task.abortTask();
-		Realms.setScreen(this.lastScreen);
+		this.minecraft.setScreen(this.lastScreen);
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
-		this.drawCenteredString(this.title, this.width() / 2, RealmsConstants.row(3), 16777215);
-		if (!this.error) {
-			this.drawCenteredString(symbols[this.animTicks % symbols.length], this.width() / 2, RealmsConstants.row(8), 8421504);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, row(3), 16777215);
+		Component component = this.errorMessage;
+		if (component == null) {
+			drawCenteredString(poseStack, this.font, SYMBOLS[this.animTicks % SYMBOLS.length], this.width / 2, row(8), 8421504);
+		} else {
+			drawCenteredString(poseStack, this.font, component, this.width / 2, row(8), 16711680);
 		}
 
-		if (this.error) {
-			this.drawCenteredString(this.errorMessage, this.width() / 2, RealmsConstants.row(8), 16711680);
-		}
-
-		super.render(i, j, f);
+		super.render(poseStack, i, j, f);
 	}
 
-	public void error(String string) {
-		this.error = true;
-		this.errorMessage = string;
-		Realms.narrateNow(string);
+	@Override
+	public void error(Component component) {
+		this.errorMessage = component;
+		NarrationHelper.now(component.getString());
 		this.buttonsClear();
-		this.buttonsAdd(new RealmsButton(667, this.width() / 2 - 106, this.height() / 4 + 120 + 12, getLocalizedString("gui.back")) {
-			@Override
-			public void onPress() {
-				RealmsLongRunningMcoTaskScreen.this.cancelOrBackButtonClicked();
-			}
-		});
+		this.addButton(new Button(this.width / 2 - 106, this.height / 4 + 120 + 12, 200, 20, CommonComponents.GUI_BACK, button -> this.cancelOrBackButtonClicked()));
 	}
 
-	public void setTitle(String string) {
-		this.title = string;
+	private void buttonsClear() {
+		Set<GuiEventListener> set = Sets.<GuiEventListener>newHashSet(this.buttons);
+		this.children.removeIf(set::contains);
+		this.buttons.clear();
+	}
+
+	public void setTitle(Component component) {
+		this.title = component;
 	}
 
 	public boolean aborted() {

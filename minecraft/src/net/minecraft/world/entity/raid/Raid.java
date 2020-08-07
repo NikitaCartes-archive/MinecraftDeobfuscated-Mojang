@@ -21,6 +21,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
@@ -55,9 +56,9 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
 public class Raid {
-	private static final TranslatableComponent RAID_NAME_COMPONENT = new TranslatableComponent("event.minecraft.raid");
-	private static final TranslatableComponent VICTORY = new TranslatableComponent("event.minecraft.raid.victory");
-	private static final TranslatableComponent DEFEAT = new TranslatableComponent("event.minecraft.raid.defeat");
+	private static final Component RAID_NAME_COMPONENT = new TranslatableComponent("event.minecraft.raid");
+	private static final Component VICTORY = new TranslatableComponent("event.minecraft.raid.victory");
+	private static final Component DEFEAT = new TranslatableComponent("event.minecraft.raid.defeat");
 	private static final Component RAID_BAR_VICTORY_COMPONENT = RAID_NAME_COMPONENT.copy().append(" - ").append(VICTORY);
 	private static final Component RAID_BAR_DEFEAT_COMPONENT = RAID_NAME_COMPONENT.copy().append(" - ").append(DEFEAT);
 	private final Map<Integer, Raider> groupToLeaderMap = Maps.<Integer, Raider>newHashMap();
@@ -108,12 +109,10 @@ public class Raid {
 		this.status = Raid.RaidStatus.getByName(compoundTag.getString("Status"));
 		this.heroesOfTheVillage.clear();
 		if (compoundTag.contains("HeroesOfTheVillage", 9)) {
-			ListTag listTag = compoundTag.getList("HeroesOfTheVillage", 10);
+			ListTag listTag = compoundTag.getList("HeroesOfTheVillage", 11);
 
 			for (int i = 0; i < listTag.size(); i++) {
-				CompoundTag compoundTag2 = listTag.getCompound(i);
-				UUID uUID = compoundTag2.getUUID("UUID");
-				this.heroesOfTheVillage.add(uUID);
+				this.heroesOfTheVillage.add(NbtUtils.loadUUID(listTag.get(i)));
 			}
 		}
 	}
@@ -156,7 +155,7 @@ public class Raid {
 
 	private Predicate<ServerPlayer> validPlayer() {
 		return serverPlayer -> {
-			BlockPos blockPos = new BlockPos(serverPlayer);
+			BlockPos blockPos = serverPlayer.blockPosition();
 			return serverPlayer.isAlive() && this.level.getRaidAt(blockPos) == this;
 		};
 	}
@@ -398,8 +397,8 @@ public class Raid {
 			Set<Raider> set2 = (Set<Raider>)iterator.next();
 
 			for (Raider raider : set2) {
-				BlockPos blockPos = new BlockPos(raider);
-				if (raider.removed || raider.dimension != this.level.getDimension().getType() || this.center.distSqr(blockPos) >= 12544.0) {
+				BlockPos blockPos = raider.blockPosition();
+				if (raider.removed || raider.level.dimension() != this.level.dimension() || this.center.distSqr(blockPos) >= 12544.0) {
 					set.add(raider);
 				} else if (raider.tickCount > 600) {
 					if (this.level.getEntity(raider.getUUID()) == null) {
@@ -429,7 +428,7 @@ public class Raid {
 
 		for (ServerPlayer serverPlayer : this.level.players()) {
 			Vec3 vec3 = serverPlayer.position();
-			Vec3 vec32 = new Vec3(blockPos);
+			Vec3 vec32 = Vec3.atCenterOf(blockPos);
 			float g = Mth.sqrt((vec32.x - vec3.x) * (vec32.x - vec3.x) + (vec32.z - vec3.z) * (vec32.z - vec3.z));
 			double d = vec3.x + (double)(13.0F / g) * (vec32.x - vec3.x);
 			double e = vec3.z + (double)(13.0F / g) * (vec32.z - vec3.z);
@@ -498,8 +497,8 @@ public class Raid {
 				raider.setPos((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 1.0, (double)blockPos.getZ() + 0.5);
 				raider.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(blockPos), MobSpawnType.EVENT, null, null);
 				raider.applyRaidBuffs(i, false);
-				raider.onGround = true;
-				this.level.addFreshEntity(raider);
+				raider.setOnGround(true);
+				this.level.addFreshEntityWithPassengers(raider);
 			}
 		}
 	}
@@ -562,6 +561,7 @@ public class Raid {
 			.addPattern(BannerPattern.BORDER, DyeColor.BLACK)
 			.toListTag();
 		compoundTag.put("Patterns", listTag);
+		itemStack.hideTooltipPart(ItemStack.TooltipPart.ADDITIONAL);
 		itemStack.setHoverName(new TranslatableComponent("block.minecraft.ominous_banner").withStyle(ChatFormatting.GOLD));
 		return itemStack;
 	}
@@ -595,7 +595,7 @@ public class Raid {
 				&& this.level.getChunkSource().isEntityTickingChunk(new ChunkPos(mutableBlockPos))
 				&& (
 					NaturalSpawner.isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, this.level, mutableBlockPos, EntityType.RAVAGER)
-						|| this.level.getBlockState(mutableBlockPos.below()).getBlock() == Blocks.SNOW && this.level.getBlockState(mutableBlockPos).isAir()
+						|| this.level.getBlockState(mutableBlockPos.below()).is(Blocks.SNOW) && this.level.getBlockState(mutableBlockPos).isAir()
 				)) {
 				return mutableBlockPos;
 			}
@@ -716,9 +716,7 @@ public class Raid {
 		ListTag listTag = new ListTag();
 
 		for (UUID uUID : this.heroesOfTheVillage) {
-			CompoundTag compoundTag2 = new CompoundTag();
-			compoundTag2.putUUID("UUID", uUID);
-			listTag.add(compoundTag2);
+			listTag.add(NbtUtils.createUUID(uUID));
 		}
 
 		compoundTag.put("HeroesOfTheVillage", listTag);

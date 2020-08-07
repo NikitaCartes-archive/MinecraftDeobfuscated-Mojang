@@ -12,6 +12,11 @@ public class AlternativesEntry extends CompositeEntryBase {
 	}
 
 	@Override
+	public LootPoolEntryType getType() {
+		return LootPoolEntries.ALTERNATIVES;
+	}
+
+	@Override
 	protected ComposableEntryContainer compose(ComposableEntryContainer[] composableEntryContainers) {
 		switch (composableEntryContainers.length) {
 			case 0:

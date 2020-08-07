@@ -18,6 +18,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -45,9 +46,9 @@ public abstract class LavaFluid extends FlowingFluid {
 		BlockPos blockPos2 = blockPos.above();
 		if (level.getBlockState(blockPos2).isAir() && !level.getBlockState(blockPos2).isSolidRender(level, blockPos2)) {
 			if (random.nextInt(100) == 0) {
-				double d = (double)((float)blockPos.getX() + random.nextFloat());
-				double e = (double)(blockPos.getY() + 1);
-				double f = (double)((float)blockPos.getZ() + random.nextFloat());
+				double d = (double)blockPos.getX() + random.nextDouble();
+				double e = (double)blockPos.getY() + 1.0;
+				double f = (double)blockPos.getZ() + random.nextDouble();
 				level.addParticle(ParticleTypes.LAVA, d, e, f, 0.0, 0.0, 0.0);
 				level.playLocalSound(d, e, f, SoundEvents.LAVA_POP, SoundSource.BLOCKS, 0.2F + random.nextFloat() * 0.2F, 0.9F + random.nextFloat() * 0.15F, false);
 			}
@@ -83,7 +84,7 @@ public abstract class LavaFluid extends FlowingFluid {
 					BlockState blockState = level.getBlockState(blockPos2);
 					if (blockState.isAir()) {
 						if (this.hasFlammableNeighbours(level, blockPos2)) {
-							level.setBlockAndUpdate(blockPos2, Blocks.FIRE.defaultBlockState());
+							level.setBlockAndUpdate(blockPos2, BaseFireBlock.getState(level, blockPos2));
 							return;
 						}
 					} else if (blockState.getMaterial().blocksMotion()) {
@@ -98,7 +99,7 @@ public abstract class LavaFluid extends FlowingFluid {
 					}
 
 					if (level.isEmptyBlock(blockPos3.above()) && this.isFlammable(level, blockPos3)) {
-						level.setBlockAndUpdate(blockPos3.above(), Blocks.FIRE.defaultBlockState());
+						level.setBlockAndUpdate(blockPos3.above(), BaseFireBlock.getState(level, blockPos3));
 					}
 				}
 			}
@@ -135,7 +136,7 @@ public abstract class LavaFluid extends FlowingFluid {
 
 	@Override
 	public int getSlopeFindDistance(LevelReader levelReader) {
-		return levelReader.getDimension().isUltraWarm() ? 4 : 2;
+		return levelReader.dimensionType().ultraWarm() ? 4 : 2;
 	}
 
 	@Override
@@ -150,7 +151,7 @@ public abstract class LavaFluid extends FlowingFluid {
 
 	@Override
 	public int getDropOff(LevelReader levelReader) {
-		return levelReader.getDimension().isUltraWarm() ? 1 : 2;
+		return levelReader.dimensionType().ultraWarm() ? 1 : 2;
 	}
 
 	@Override
@@ -160,7 +161,7 @@ public abstract class LavaFluid extends FlowingFluid {
 
 	@Override
 	public int getTickDelay(LevelReader levelReader) {
-		return levelReader.getDimension().isHasCeiling() ? 10 : 30;
+		return levelReader.dimensionType().ultraWarm() ? 10 : 30;
 	}
 
 	@Override

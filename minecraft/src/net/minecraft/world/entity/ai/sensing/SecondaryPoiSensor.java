@@ -6,11 +6,12 @@ import java.util.List;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.Level;
 
 public class SecondaryPoiSensor extends Sensor<Villager> {
 	public SecondaryPoiSensor() {
@@ -18,8 +19,8 @@ public class SecondaryPoiSensor extends Sensor<Villager> {
 	}
 
 	protected void doTick(ServerLevel serverLevel, Villager villager) {
-		DimensionType dimensionType = serverLevel.getDimension().getType();
-		BlockPos blockPos = new BlockPos(villager);
+		ResourceKey<Level> resourceKey = serverLevel.dimension();
+		BlockPos blockPos = villager.blockPosition();
 		List<GlobalPos> list = Lists.<GlobalPos>newArrayList();
 		int i = 4;
 
@@ -28,7 +29,7 @@ public class SecondaryPoiSensor extends Sensor<Villager> {
 				for (int l = -4; l <= 4; l++) {
 					BlockPos blockPos2 = blockPos.offset(j, k, l);
 					if (villager.getVillagerData().getProfession().getSecondaryPoi().contains(serverLevel.getBlockState(blockPos2).getBlock())) {
-						list.add(GlobalPos.of(dimensionType, blockPos2));
+						list.add(GlobalPos.of(resourceKey, blockPos2));
 					}
 				}
 			}

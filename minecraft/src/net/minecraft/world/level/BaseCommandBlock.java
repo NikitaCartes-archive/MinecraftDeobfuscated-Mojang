@@ -2,6 +2,7 @@ package net.minecraft.world.level;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -17,6 +18,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.StringUtil;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
@@ -27,6 +29,7 @@ public abstract class BaseCommandBlock implements CommandSource {
 	private boolean updateLastExecution = true;
 	private int successCount;
 	private boolean trackOutput = true;
+	@Nullable
 	private Component lastOutput;
 	private String command = "";
 	private Component name = DEFAULT_NAME;
@@ -40,7 +43,7 @@ public abstract class BaseCommandBlock implements CommandSource {
 	}
 
 	public Component getLastOutput() {
-		return (Component)(this.lastOutput == null ? new TextComponent("") : this.lastOutput);
+		return this.lastOutput == null ? TextComponent.EMPTY : this.lastOutput;
 	}
 
 	public CompoundTag save(CompoundTag compoundTag) {
@@ -111,7 +114,7 @@ public abstract class BaseCommandBlock implements CommandSource {
 		} else {
 			this.successCount = 0;
 			MinecraftServer minecraftServer = this.getLevel().getServer();
-			if (minecraftServer != null && minecraftServer.isInitialized() && minecraftServer.isCommandBlockEnabled() && !StringUtil.isNullOrEmpty(this.command)) {
+			if (minecraftServer.isCommandBlockEnabled() && !StringUtil.isNullOrEmpty(this.command)) {
 				try {
 					this.lastOutput = null;
 					CommandSourceStack commandSourceStack = this.createCommandSourceStack().withCallback((commandContext, bl, i) -> {
@@ -152,7 +155,7 @@ public abstract class BaseCommandBlock implements CommandSource {
 	}
 
 	@Override
-	public void sendMessage(Component component) {
+	public void sendMessage(Component component, UUID uUID) {
 		if (this.trackOutput) {
 			this.lastOutput = new TextComponent("[" + TIME_FORMAT.format(new Date()) + "] ").append(component);
 			this.onUpdated();
@@ -176,15 +179,15 @@ public abstract class BaseCommandBlock implements CommandSource {
 		return this.trackOutput;
 	}
 
-	public boolean usedBy(Player player) {
+	public InteractionResult usedBy(Player player) {
 		if (!player.canUseGameMasterBlocks()) {
-			return false;
+			return InteractionResult.PASS;
 		} else {
 			if (player.getCommandSenderWorld().isClientSide) {
 				player.openMinecartCommandBlock(this);
 			}
 
-			return true;
+			return InteractionResult.sidedSuccess(player.level.isClientSide);
 		}
 	}
 

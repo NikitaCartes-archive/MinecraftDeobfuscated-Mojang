@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.global.LightningBolt;
+import net.minecraft.world.entity.LightningBolt;
 
 @Environment(EnvType.CLIENT)
 public class LightningBoltRenderer extends EntityRenderer<LightningBolt> {

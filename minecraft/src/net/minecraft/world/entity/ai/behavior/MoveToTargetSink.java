@@ -17,26 +17,51 @@ import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 
 public class MoveToTargetSink extends Behavior<Mob> {
+	private int remainingCooldown;
 	@Nullable
 	private Path path;
 	@Nullable
 	private BlockPos lastTargetPos;
-	private float speed;
-	private int remainingDelay;
+	private float speedModifier;
 
-	public MoveToTargetSink(int i) {
-		super(ImmutableMap.of(MemoryModuleType.PATH, MemoryStatus.VALUE_ABSENT, MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_PRESENT), i);
+	public MoveToTargetSink() {
+		this(150, 250);
+	}
+
+	public MoveToTargetSink(int i, int j) {
+		super(
+			ImmutableMap.of(
+				MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE,
+				MemoryStatus.REGISTERED,
+				MemoryModuleType.PATH,
+				MemoryStatus.VALUE_ABSENT,
+				MemoryModuleType.WALK_TARGET,
+				MemoryStatus.VALUE_PRESENT
+			),
+			i,
+			j
+		);
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Mob mob) {
-		Brain<?> brain = mob.getBrain();
-		WalkTarget walkTarget = (WalkTarget)brain.getMemory(MemoryModuleType.WALK_TARGET).get();
-		if (!this.reachedTarget(mob, walkTarget) && this.tryComputePath(mob, walkTarget, serverLevel.getGameTime())) {
-			this.lastTargetPos = walkTarget.getTarget().getPos();
-			return true;
-		} else {
-			brain.eraseMemory(MemoryModuleType.WALK_TARGET);
+		if (this.remainingCooldown > 0) {
+			this.remainingCooldown--;
 			return false;
+		} else {
+			Brain<?> brain = mob.getBrain();
+			WalkTarget walkTarget = (WalkTarget)brain.getMemory(MemoryModuleType.WALK_TARGET).get();
+			boolean bl = this.reachedTarget(mob, walkTarget);
+			if (!bl && this.tryComputePath(mob, walkTarget, serverLevel.getGameTime())) {
+				this.lastTargetPos = walkTarget.getTarget().currentBlockPosition();
+				return true;
+			} else {
+				brain.eraseMemory(MemoryModuleType.WALK_TARGET);
+				if (bl) {
+					brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
+				}
+
+				return false;
+			}
 		}
 	}
 
@@ -51,6 +76,11 @@ public class MoveToTargetSink extends Behavior<Mob> {
 	}
 
 	protected void stop(ServerLevel serverLevel, Mob mob, long l) {
+		if (mob.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET)
+			&& !this.reachedTarget(mob, (WalkTarget)mob.getBrain().getMemory(MemoryModuleType.WALK_TARGET).get())) {
+			this.remainingCooldown = serverLevel.getRandom().nextInt(40);
+		}
+
 		mob.getNavigation().stop();
 		mob.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
 		mob.getBrain().eraseMemory(MemoryModuleType.PATH);
@@ -59,39 +89,37 @@ public class MoveToTargetSink extends Behavior<Mob> {
 
 	protected void start(ServerLevel serverLevel, Mob mob, long l) {
 		mob.getBrain().setMemory(MemoryModuleType.PATH, this.path);
-		mob.getNavigation().moveTo(this.path, (double)this.speed);
-		this.remainingDelay = serverLevel.getRandom().nextInt(10);
+		mob.getNavigation().moveTo(this.path, (double)this.speedModifier);
 	}
 
 	protected void tick(ServerLevel serverLevel, Mob mob, long l) {
-		this.remainingDelay--;
-		if (this.remainingDelay <= 0) {
-			Path path = mob.getNavigation().getPath();
-			Brain<?> brain = mob.getBrain();
-			if (this.path != path) {
-				this.path = path;
-				brain.setMemory(MemoryModuleType.PATH, path);
-			}
+		Path path = mob.getNavigation().getPath();
+		Brain<?> brain = mob.getBrain();
+		if (this.path != path) {
+			this.path = path;
+			brain.setMemory(MemoryModuleType.PATH, path);
+		}
 
-			if (path != null && this.lastTargetPos != null) {
-				WalkTarget walkTarget = (WalkTarget)brain.getMemory(MemoryModuleType.WALK_TARGET).get();
-				if (walkTarget.getTarget().getPos().distSqr(this.lastTargetPos) > 4.0 && this.tryComputePath(mob, walkTarget, serverLevel.getGameTime())) {
-					this.lastTargetPos = walkTarget.getTarget().getPos();
-					this.start(serverLevel, mob, l);
-				}
+		if (path != null && this.lastTargetPos != null) {
+			WalkTarget walkTarget = (WalkTarget)brain.getMemory(MemoryModuleType.WALK_TARGET).get();
+			if (walkTarget.getTarget().currentBlockPosition().distSqr(this.lastTargetPos) > 4.0 && this.tryComputePath(mob, walkTarget, serverLevel.getGameTime())) {
+				this.lastTargetPos = walkTarget.getTarget().currentBlockPosition();
+				this.start(serverLevel, mob, l);
 			}
 		}
 	}
 
 	private boolean tryComputePath(Mob mob, WalkTarget walkTarget, long l) {
-		BlockPos blockPos = walkTarget.getTarget().getPos();
+		BlockPos blockPos = walkTarget.getTarget().currentBlockPosition();
 		this.path = mob.getNavigation().createPath(blockPos, 0);
-		this.speed = walkTarget.getSpeed();
-		if (!this.reachedTarget(mob, walkTarget)) {
-			Brain<?> brain = mob.getBrain();
+		this.speedModifier = walkTarget.getSpeedModifier();
+		Brain<?> brain = mob.getBrain();
+		if (this.reachedTarget(mob, walkTarget)) {
+			brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
+		} else {
 			boolean bl = this.path != null && this.path.canReach();
 			if (bl) {
-				brain.setMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, Optional.empty());
+				brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
 			} else if (!brain.hasMemoryValue(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE)) {
 				brain.setMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, l);
 			}
@@ -100,7 +128,7 @@ public class MoveToTargetSink extends Behavior<Mob> {
 				return true;
 			}
 
-			Vec3 vec3 = RandomPos.getPosTowards((PathfinderMob)mob, 10, 7, new Vec3(blockPos));
+			Vec3 vec3 = RandomPos.getPosTowards((PathfinderMob)mob, 10, 7, Vec3.atBottomCenterOf(blockPos));
 			if (vec3 != null) {
 				this.path = mob.getNavigation().createPath(vec3.x, vec3.y, vec3.z, 0);
 				return this.path != null;
@@ -111,6 +139,6 @@ public class MoveToTargetSink extends Behavior<Mob> {
 	}
 
 	private boolean reachedTarget(Mob mob, WalkTarget walkTarget) {
-		return walkTarget.getTarget().getPos().distManhattan(new BlockPos(mob)) <= walkTarget.getCloseEnoughDist();
+		return walkTarget.getTarget().currentBlockPosition().distManhattan(mob.blockPosition()) <= walkTarget.getCloseEnoughDist();
 	}
 }

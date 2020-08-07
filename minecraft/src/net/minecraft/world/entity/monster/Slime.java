@@ -1,12 +1,15 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -26,6 +29,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -34,8 +38,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelType;
-import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
@@ -70,19 +74,13 @@ public class Slime extends Mob implements Enemy {
 		this.entityData.define(ID_SIZE, 1);
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
-	}
-
 	protected void setSize(int i, boolean bl) {
 		this.entityData.set(ID_SIZE, i);
 		this.reapplyPosition();
 		this.refreshDimensions();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue((double)(i * i));
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue((double)(0.2F + 0.1F * (float)i));
-		this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue((double)i);
+		this.getAttribute(Attributes.MAX_HEALTH).setBaseValue((double)(i * i));
+		this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue((double)(0.2F + 0.1F * (float)i));
+		this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue((double)i);
 		if (bl) {
 			this.setHealth(this.getMaxHealth());
 		}
@@ -191,24 +189,26 @@ public class Slime extends Mob implements Enemy {
 	@Override
 	public void remove() {
 		int i = this.getSize();
-		if (!this.level.isClientSide && i > 1 && this.getHealth() <= 0.0F) {
-			int j = 2 + this.random.nextInt(3);
+		if (!this.level.isClientSide && i > 1 && this.isDeadOrDying()) {
+			Component component = this.getCustomName();
+			boolean bl = this.isNoAi();
+			float f = (float)i / 4.0F;
+			int j = i / 2;
+			int k = 2 + this.random.nextInt(3);
 
-			for (int k = 0; k < j; k++) {
-				float f = ((float)(k % 2) - 0.5F) * (float)i / 4.0F;
-				float g = ((float)(k / 2) - 0.5F) * (float)i / 4.0F;
+			for (int l = 0; l < k; l++) {
+				float g = ((float)(l % 2) - 0.5F) * f;
+				float h = ((float)(l / 2) - 0.5F) * f;
 				Slime slime = this.getType().create(this.level);
-				if (this.hasCustomName()) {
-					slime.setCustomName(this.getCustomName());
-				}
-
 				if (this.isPersistenceRequired()) {
 					slime.setPersistenceRequired();
 				}
 
+				slime.setCustomName(component);
+				slime.setNoAi(bl);
 				slime.setInvulnerable(this.isInvulnerable());
-				slime.setSize(i / 2, true);
-				slime.moveTo(this.getX() + (double)f, this.getY() + 0.5, this.getZ() + (double)g, this.random.nextFloat() * 360.0F, 0.0F);
+				slime.setSize(j, true);
+				slime.moveTo(this.getX() + (double)g, this.getY() + 0.5, this.getZ() + (double)h, this.random.nextFloat() * 360.0F, 0.0F);
 				this.level.addFreshEntity(slime);
 			}
 		}
@@ -253,7 +253,7 @@ public class Slime extends Mob implements Enemy {
 	}
 
 	protected float getAttackDamage() {
-		return (float)this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
+		return (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
 	}
 
 	@Override
@@ -278,29 +278,28 @@ public class Slime extends Mob implements Enemy {
 	public static boolean checkSlimeSpawnRules(
 		EntityType<Slime> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
-		if (levelAccessor.getLevelData().getGeneratorType() == LevelType.FLAT && random.nextInt(4) != 1) {
-			return false;
-		} else {
-			if (levelAccessor.getDifficulty() != Difficulty.PEACEFUL) {
-				Biome biome = levelAccessor.getBiome(blockPos);
-				if (biome == Biomes.SWAMP
-					&& blockPos.getY() > 50
-					&& blockPos.getY() < 70
-					&& random.nextFloat() < 0.5F
-					&& random.nextFloat() < levelAccessor.getMoonBrightness()
-					&& levelAccessor.getMaxLocalRawBrightness(blockPos) <= random.nextInt(8)) {
-					return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random);
-				}
-
-				ChunkPos chunkPos = new ChunkPos(blockPos);
-				boolean bl = WorldgenRandom.seedSlimeChunk(chunkPos.x, chunkPos.z, levelAccessor.getSeed(), 987234911L).nextInt(10) == 0;
-				if (random.nextInt(10) == 0 && bl && blockPos.getY() < 40) {
-					return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random);
-				}
+		if (levelAccessor.getDifficulty() != Difficulty.PEACEFUL) {
+			if (Objects.equals(levelAccessor.getBiomeName(blockPos), Optional.of(Biomes.SWAMP))
+				&& blockPos.getY() > 50
+				&& blockPos.getY() < 70
+				&& random.nextFloat() < 0.5F
+				&& random.nextFloat() < levelAccessor.getMoonBrightness()
+				&& levelAccessor.getMaxLocalRawBrightness(blockPos) <= random.nextInt(8)) {
+				return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random);
 			}
 
-			return false;
+			if (!(levelAccessor instanceof WorldGenLevel)) {
+				return false;
+			}
+
+			ChunkPos chunkPos = new ChunkPos(blockPos);
+			boolean bl = WorldgenRandom.seedSlimeChunk(chunkPos.x, chunkPos.z, ((WorldGenLevel)levelAccessor).getSeed(), 987234911L).nextInt(10) == 0;
+			if (random.nextInt(10) == 0 && bl && blockPos.getY() < 40) {
+				return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random);
+			}
 		}
+
+		return false;
 	}
 
 	@Override
@@ -327,7 +326,7 @@ public class Slime extends Mob implements Enemy {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
@@ -340,7 +339,12 @@ public class Slime extends Mob implements Enemy {
 
 		int j = 1 << i;
 		this.setSize(j, true);
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+	}
+
+	private float getSoundPitch() {
+		float f = this.isTiny() ? 1.4F : 0.8F;
+		return ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F) * f;
 	}
 
 	protected SoundEvent getJumpSound() {
@@ -474,8 +478,8 @@ public class Slime extends Mob implements Enemy {
 				this.mob.setZza(0.0F);
 			} else {
 				this.operation = MoveControl.Operation.WAIT;
-				if (this.mob.onGround) {
-					this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue()));
+				if (this.mob.isOnGround()) {
+					this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED)));
 					if (this.jumpDelay-- <= 0) {
 						this.jumpDelay = this.slime.getJumpDelay();
 						if (this.isAggressive) {
@@ -484,12 +488,7 @@ public class Slime extends Mob implements Enemy {
 
 						this.slime.getJumpControl().jump();
 						if (this.slime.doPlayJumpSound()) {
-							this.slime
-								.playSound(
-									this.slime.getJumpSound(),
-									this.slime.getSoundVolume(),
-									((this.slime.getRandom().nextFloat() - this.slime.getRandom().nextFloat()) * 0.2F + 1.0F) * 0.8F
-								);
+							this.slime.playSound(this.slime.getJumpSound(), this.slime.getSoundVolume(), this.slime.getSoundPitch());
 						}
 					} else {
 						this.slime.xxa = 0.0F;
@@ -497,7 +496,7 @@ public class Slime extends Mob implements Enemy {
 						this.mob.setSpeed(0.0F);
 					}
 				} else {
-					this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue()));
+					this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED)));
 				}
 			}
 		}

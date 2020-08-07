@@ -8,11 +8,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -34,7 +35,7 @@ public class TripWireBlock extends Block {
 	protected static final VoxelShape NOT_ATTACHED_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 8.0, 16.0);
 	private final TripWireHookBlock hook;
 
-	public TripWireBlock(TripWireHookBlock tripWireHookBlock, Block.Properties properties) {
+	public TripWireBlock(TripWireHookBlock tripWireHookBlock, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition
@@ -77,14 +78,14 @@ public class TripWireBlock extends Block {
 
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState2.getBlock() != blockState.getBlock()) {
+		if (!blockState2.is(blockState.getBlock())) {
 			this.updateSource(level, blockPos, blockState);
 		}
 	}
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (!bl && blockState.getBlock() != blockState2.getBlock()) {
+		if (!bl && !blockState.is(blockState2.getBlock())) {
 			this.updateSource(level, blockPos, blockState.setValue(POWERED, Boolean.valueOf(true)));
 		}
 	}
@@ -103,14 +104,14 @@ public class TripWireBlock extends Block {
 			for (int i = 1; i < 42; i++) {
 				BlockPos blockPos2 = blockPos.relative(direction, i);
 				BlockState blockState2 = level.getBlockState(blockPos2);
-				if (blockState2.getBlock() == this.hook) {
+				if (blockState2.is(this.hook)) {
 					if (blockState2.getValue(TripWireHookBlock.FACING) == direction.getOpposite()) {
 						this.hook.calculateState(level, blockPos2, blockState2, false, true, i, blockState);
 					}
 					break;
 				}
 
-				if (blockState2.getBlock() != this) {
+				if (!blockState2.is(this)) {
 					break;
 				}
 			}
@@ -154,7 +155,7 @@ public class TripWireBlock extends Block {
 		}
 
 		if (bl2) {
-			level.getBlockTicks().scheduleTick(new BlockPos(blockPos), this, this.getTickDelay(level));
+			level.getBlockTicks().scheduleTick(new BlockPos(blockPos), this, 10);
 		}
 	}
 

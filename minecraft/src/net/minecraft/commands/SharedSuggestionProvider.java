@@ -10,12 +10,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 
 public interface SharedSuggestionProvider {
 	Collection<String> getOnlinePlayerNames();
@@ -40,6 +44,10 @@ public interface SharedSuggestionProvider {
 		return Collections.singleton(SharedSuggestionProvider.TextCoordinates.DEFAULT_GLOBAL);
 	}
 
+	Set<ResourceKey<Level>> levels();
+
+	RegistryAccess registryAccess();
+
 	boolean hasPermission(int i);
 
 	static <T> void filterResources(Iterable<T> iterable, String string, Function<T, ResourceLocation> function, Consumer<T> consumer) {
@@ -49,11 +57,11 @@ public interface SharedSuggestionProvider {
 			ResourceLocation resourceLocation = (ResourceLocation)function.apply(object);
 			if (bl) {
 				String string2 = resourceLocation.toString();
-				if (string2.startsWith(string)) {
+				if (matchesSubStr(string, string2)) {
 					consumer.accept(object);
 				}
-			} else if (resourceLocation.getNamespace().startsWith(string)
-				|| resourceLocation.getNamespace().equals("minecraft") && resourceLocation.getPath().startsWith(string)) {
+			} else if (matchesSubStr(string, resourceLocation.getNamespace())
+				|| resourceLocation.getNamespace().equals("minecraft") && matchesSubStr(string, resourceLocation.getPath())) {
 				consumer.accept(object);
 			}
 		}
@@ -170,7 +178,7 @@ public interface SharedSuggestionProvider {
 		String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
 
 		for (String string2 : iterable) {
-			if (string2.toLowerCase(Locale.ROOT).startsWith(string)) {
+			if (matchesSubStr(string, string2.toLowerCase(Locale.ROOT))) {
 				suggestionsBuilder.suggest(string2);
 			}
 		}
@@ -180,7 +188,7 @@ public interface SharedSuggestionProvider {
 
 	static CompletableFuture<Suggestions> suggest(Stream<String> stream, SuggestionsBuilder suggestionsBuilder) {
 		String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
-		stream.filter(string2 -> string2.toLowerCase(Locale.ROOT).startsWith(string)).forEach(suggestionsBuilder::suggest);
+		stream.filter(string2 -> matchesSubStr(string, string2.toLowerCase(Locale.ROOT))).forEach(suggestionsBuilder::suggest);
 		return suggestionsBuilder.buildFuture();
 	}
 
@@ -188,12 +196,23 @@ public interface SharedSuggestionProvider {
 		String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
 
 		for (String string2 : strings) {
-			if (string2.toLowerCase(Locale.ROOT).startsWith(string)) {
+			if (matchesSubStr(string, string2.toLowerCase(Locale.ROOT))) {
 				suggestionsBuilder.suggest(string2);
 			}
 		}
 
 		return suggestionsBuilder.buildFuture();
+	}
+
+	static boolean matchesSubStr(String string, String string2) {
+		for (int i = 0; !string2.startsWith(string, i); i++) {
+			i = string2.indexOf(95, i);
+			if (i < 0) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	public static class TextCoordinates {

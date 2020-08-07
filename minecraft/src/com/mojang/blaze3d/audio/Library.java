@@ -193,6 +193,7 @@ public class Library {
 		@Override
 		public Channel acquire() {
 			if (this.activeChannels.size() >= this.limit) {
+				Library.LOGGER.warn("Maximum sound pool size {} reached", this.limit);
 				return null;
 			} else {
 				Channel channel = Channel.create();

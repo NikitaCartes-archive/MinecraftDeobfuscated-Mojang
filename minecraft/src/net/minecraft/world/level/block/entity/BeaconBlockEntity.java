@@ -19,6 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.effect.MobEffect;
@@ -192,8 +193,7 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Tick
 
 			for (int n = i - l; n <= i + l && bl; n++) {
 				for (int o = k - l; o <= k + l; o++) {
-					Block block = this.level.getBlockState(new BlockPos(n, m, o)).getBlock();
-					if (block != Blocks.EMERALD_BLOCK && block != Blocks.GOLD_BLOCK && block != Blocks.DIAMOND_BLOCK && block != Blocks.IRON_BLOCK) {
+					if (!this.level.getBlockState(new BlockPos(n, m, o)).is(BlockTags.BEACON_BASE_BLOCKS)) {
 						bl = false;
 						break;
 					}
@@ -263,7 +263,7 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Tick
 	@Environment(EnvType.CLIENT)
 	@Override
 	public double getViewDistance() {
-		return 65536.0;
+		return 256.0;
 	}
 
 	@Nullable
@@ -273,8 +273,8 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Tick
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		this.primaryPower = getValidEffectById(compoundTag.getInt("Primary"));
 		this.secondaryPower = getValidEffectById(compoundTag.getInt("Secondary"));
 		if (compoundTag.contains("CustomName", 8)) {

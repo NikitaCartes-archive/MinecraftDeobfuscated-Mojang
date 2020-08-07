@@ -39,7 +39,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ChunkTickList;
 import net.minecraft.world.level.EmptyTickList;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelType;
 import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -48,6 +47,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
@@ -59,6 +59,7 @@ import org.apache.logging.log4j.Logger;
 
 public class LevelChunk implements ChunkAccess {
 	private static final Logger LOGGER = LogManager.getLogger();
+	@Nullable
 	public static final LevelChunkSection EMPTY_SECTION = null;
 	private final LevelChunkSection[] sections = new LevelChunkSection[16];
 	private ChunkBiomeContainer biomes;
@@ -69,8 +70,8 @@ public class LevelChunk implements ChunkAccess {
 	private final UpgradeData upgradeData;
 	private final Map<BlockPos, BlockEntity> blockEntities = Maps.<BlockPos, BlockEntity>newHashMap();
 	private final ClassInstanceMultiMap<Entity>[] entitySections;
-	private final Map<String, StructureStart> structureStarts = Maps.<String, StructureStart>newHashMap();
-	private final Map<String, LongSet> structuresRefences = Maps.<String, LongSet>newHashMap();
+	private final Map<StructureFeature<?>, StructureStart<?>> structureStarts = Maps.<StructureFeature<?>, StructureStart<?>>newHashMap();
+	private final Map<StructureFeature<?>, LongSet> structuresRefences = Maps.<StructureFeature<?>, LongSet>newHashMap();
 	private final ShortList[] postProcessing = new ShortList[16];
 	private TickList<Block> blockTicks;
 	private TickList<Fluid> liquidTicks;
@@ -194,7 +195,7 @@ public class LevelChunk implements ChunkAccess {
 		int i = blockPos.getX();
 		int j = blockPos.getY();
 		int k = blockPos.getZ();
-		if (this.level.getGeneratorType() == LevelType.DEBUG_ALL_BLOCK_STATES) {
+		if (this.level.isDebug()) {
 			BlockState blockState = null;
 			if (j == 60) {
 				blockState = Blocks.BARRIER.defaultBlockState();
@@ -285,7 +286,7 @@ public class LevelChunk implements ChunkAccess {
 				this.level.removeBlockEntity(blockPos);
 			}
 
-			if (levelChunkSection.getBlockState(i, j & 15, k).getBlock() != block) {
+			if (!levelChunkSection.getBlockState(i, j & 15, k).is(block)) {
 				return null;
 			} else {
 				if (block2 instanceof EntityBlock) {
@@ -482,18 +483,21 @@ public class LevelChunk implements ChunkAccess {
 		j = Mth.clamp(j, 0, this.entitySections.length - 1);
 
 		for (int k = i; k <= j; k++) {
-			if (!this.entitySections[k].isEmpty()) {
-				for (Entity entity2 : this.entitySections[k]) {
-					if (entity2.getBoundingBox().intersects(aABB) && entity2 != entity) {
-						if (predicate == null || predicate.test(entity2)) {
-							list.add(entity2);
-						}
+			ClassInstanceMultiMap<Entity> classInstanceMultiMap = this.entitySections[k];
+			List<Entity> list2 = classInstanceMultiMap.getAllInstances();
+			int l = list2.size();
 
-						if (entity2 instanceof EnderDragon) {
-							for (EnderDragonPart enderDragonPart : ((EnderDragon)entity2).getSubEntities()) {
-								if (enderDragonPart != entity && enderDragonPart.getBoundingBox().intersects(aABB) && (predicate == null || predicate.test(enderDragonPart))) {
-									list.add(enderDragonPart);
-								}
+			for (int m = 0; m < l; m++) {
+				Entity entity2 = (Entity)list2.get(m);
+				if (entity2.getBoundingBox().intersects(aABB) && entity2 != entity) {
+					if (predicate == null || predicate.test(entity2)) {
+						list.add(entity2);
+					}
+
+					if (entity2 instanceof EnderDragon) {
+						for (EnderDragonPart enderDragonPart : ((EnderDragon)entity2).getSubEntities()) {
+							if (enderDragonPart != entity && enderDragonPart.getBoundingBox().intersects(aABB) && (predicate == null || predicate.test(enderDragonPart))) {
+								list.add(enderDragonPart);
 							}
 						}
 					}
@@ -651,43 +655,43 @@ public class LevelChunk implements ChunkAccess {
 
 	@Nullable
 	@Override
-	public StructureStart getStartForFeature(String string) {
-		return (StructureStart)this.structureStarts.get(string);
+	public StructureStart<?> getStartForFeature(StructureFeature<?> structureFeature) {
+		return (StructureStart<?>)this.structureStarts.get(structureFeature);
 	}
 
 	@Override
-	public void setStartForFeature(String string, StructureStart structureStart) {
-		this.structureStarts.put(string, structureStart);
+	public void setStartForFeature(StructureFeature<?> structureFeature, StructureStart<?> structureStart) {
+		this.structureStarts.put(structureFeature, structureStart);
 	}
 
 	@Override
-	public Map<String, StructureStart> getAllStarts() {
+	public Map<StructureFeature<?>, StructureStart<?>> getAllStarts() {
 		return this.structureStarts;
 	}
 
 	@Override
-	public void setAllStarts(Map<String, StructureStart> map) {
+	public void setAllStarts(Map<StructureFeature<?>, StructureStart<?>> map) {
 		this.structureStarts.clear();
 		this.structureStarts.putAll(map);
 	}
 
 	@Override
-	public LongSet getReferencesForFeature(String string) {
-		return (LongSet)this.structuresRefences.computeIfAbsent(string, stringx -> new LongOpenHashSet());
+	public LongSet getReferencesForFeature(StructureFeature<?> structureFeature) {
+		return (LongSet)this.structuresRefences.computeIfAbsent(structureFeature, structureFeaturex -> new LongOpenHashSet());
 	}
 
 	@Override
-	public void addReferenceForFeature(String string, long l) {
-		((LongSet)this.structuresRefences.computeIfAbsent(string, stringx -> new LongOpenHashSet())).add(l);
+	public void addReferenceForFeature(StructureFeature<?> structureFeature, long l) {
+		((LongSet)this.structuresRefences.computeIfAbsent(structureFeature, structureFeaturex -> new LongOpenHashSet())).add(l);
 	}
 
 	@Override
-	public Map<String, LongSet> getAllReferences() {
+	public Map<StructureFeature<?>, LongSet> getAllReferences() {
 		return this.structuresRefences;
 	}
 
 	@Override
-	public void setAllReferences(Map<String, LongSet> map) {
+	public void setAllReferences(Map<StructureFeature<?>, LongSet> map) {
 		this.structuresRefences.clear();
 		this.structuresRefences.putAll(map);
 	}
@@ -730,24 +734,25 @@ public class LevelChunk implements ChunkAccess {
 
 	@Nullable
 	private BlockEntity promotePendingBlockEntity(BlockPos blockPos, CompoundTag compoundTag) {
+		BlockState blockState = this.getBlockState(blockPos);
 		BlockEntity blockEntity;
 		if ("DUMMY".equals(compoundTag.getString("id"))) {
-			Block block = this.getBlockState(blockPos).getBlock();
+			Block block = blockState.getBlock();
 			if (block instanceof EntityBlock) {
 				blockEntity = ((EntityBlock)block).newBlockEntity(this.level);
 			} else {
 				blockEntity = null;
-				LOGGER.warn("Tried to load a DUMMY block entity @ {} but found not block entity block {} at location", blockPos, this.getBlockState(blockPos));
+				LOGGER.warn("Tried to load a DUMMY block entity @ {} but found not block entity block {} at location", blockPos, blockState);
 			}
 		} else {
-			blockEntity = BlockEntity.loadStatic(compoundTag);
+			blockEntity = BlockEntity.loadStatic(blockState, compoundTag);
 		}
 
 		if (blockEntity != null) {
 			blockEntity.setLevelAndPosition(this.level, blockPos);
 			this.addBlockEntity(blockEntity);
 		} else {
-			LOGGER.warn("Tried to load a block entity for block {} but failed at location {}", this.getBlockState(blockPos), blockPos);
+			LOGGER.warn("Tried to load a block entity for block {} but failed at location {}", blockState, blockPos);
 		}
 
 		return blockEntity;
@@ -768,7 +773,7 @@ public class LevelChunk implements ChunkAccess {
 			((ProtoTickList)this.blockTicks).copyOut(this.level.getBlockTicks(), blockPos -> this.getBlockState(blockPos).getBlock());
 			this.blockTicks = EmptyTickList.empty();
 		} else if (this.blockTicks instanceof ChunkTickList) {
-			this.level.getBlockTicks().addAll(((ChunkTickList)this.blockTicks).ticks());
+			((ChunkTickList)this.blockTicks).copyOut(this.level.getBlockTicks());
 			this.blockTicks = EmptyTickList.empty();
 		}
 
@@ -776,19 +781,23 @@ public class LevelChunk implements ChunkAccess {
 			((ProtoTickList)this.liquidTicks).copyOut(this.level.getLiquidTicks(), blockPos -> this.getFluidState(blockPos).getType());
 			this.liquidTicks = EmptyTickList.empty();
 		} else if (this.liquidTicks instanceof ChunkTickList) {
-			this.level.getLiquidTicks().addAll(((ChunkTickList)this.liquidTicks).ticks());
+			((ChunkTickList)this.liquidTicks).copyOut(this.level.getLiquidTicks());
 			this.liquidTicks = EmptyTickList.empty();
 		}
 	}
 
 	public void packTicks(ServerLevel serverLevel) {
 		if (this.blockTicks == EmptyTickList.empty()) {
-			this.blockTicks = new ChunkTickList<>(Registry.BLOCK::getKey, serverLevel.getBlockTicks().fetchTicksInChunk(this.chunkPos, true, false));
+			this.blockTicks = new ChunkTickList<>(
+				Registry.BLOCK::getKey, serverLevel.getBlockTicks().fetchTicksInChunk(this.chunkPos, true, false), serverLevel.getGameTime()
+			);
 			this.setUnsaved(true);
 		}
 
 		if (this.liquidTicks == EmptyTickList.empty()) {
-			this.liquidTicks = new ChunkTickList<>(Registry.FLUID::getKey, serverLevel.getLiquidTicks().fetchTicksInChunk(this.chunkPos, true, false));
+			this.liquidTicks = new ChunkTickList<>(
+				Registry.FLUID::getKey, serverLevel.getLiquidTicks().fetchTicksInChunk(this.chunkPos, true, false), serverLevel.getGameTime()
+			);
 			this.setUnsaved(true);
 		}
 	}

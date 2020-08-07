@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.ItemTags;
@@ -22,6 +23,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.FollowParentGoal;
@@ -37,21 +40,23 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.monster.RangedAttackMob;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.LlamaSpit;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.WoolCarpetBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 public class Llama extends AbstractChestedHorse implements RangedAttackMob {
+	private static final Ingredient FOOD_ITEMS = Ingredient.of(Items.WHEAT, Blocks.HAY_BLOCK.asItem());
 	private static final EntityDataAccessor<Integer> DATA_STRENGTH_ID = SynchedEntityData.defineId(Llama.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_SWAG_ID = SynchedEntityData.defineId(Llama.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(Llama.class, EntityDataSerializers.INT);
@@ -102,7 +107,7 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 			this.inventory.setItem(1, ItemStack.of(compoundTag.getCompound("DecorItem")));
 		}
 
-		this.updateEquipment();
+		this.updateContainerEquipment();
 	}
 
 	@Override
@@ -121,10 +126,8 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		this.targetSelector.addGoal(2, new Llama.LlamaAttackWolfGoal(this));
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(40.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return createBaseChestedHorseAttributes().add(Attributes.FOLLOW_RANGE, 40.0);
 	}
 
 	@Override
@@ -154,18 +157,25 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 			float f = Mth.cos(this.yBodyRot * (float) (Math.PI / 180.0));
 			float g = Mth.sin(this.yBodyRot * (float) (Math.PI / 180.0));
 			float h = 0.3F;
-			entity.setPos(this.getX() + (double)(0.3F * g), this.getY() + this.getRideHeight() + entity.getRidingHeight(), this.getZ() - (double)(0.3F * f));
+			entity.setPos(
+				this.getX() + (double)(0.3F * g), this.getY() + this.getPassengersRidingOffset() + entity.getMyRidingOffset(), this.getZ() - (double)(0.3F * f)
+			);
 		}
 	}
 
 	@Override
-	public double getRideHeight() {
+	public double getPassengersRidingOffset() {
 		return (double)this.getBbHeight() * 0.67;
 	}
 
 	@Override
 	public boolean canBeControlledByRider() {
 		return false;
+	}
+
+	@Override
+	public boolean isFood(ItemStack itemStack) {
+		return FOOD_ITEMS.test(itemStack);
 	}
 
 	@Override
@@ -211,17 +221,20 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		}
 
 		if (bl && !this.isSilent()) {
-			this.level
-				.playSound(
-					null,
-					this.getX(),
-					this.getY(),
-					this.getZ(),
-					SoundEvents.LLAMA_EAT,
-					this.getSoundSource(),
-					1.0F,
-					1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F
-				);
+			SoundEvent soundEvent = this.getEatingSound();
+			if (soundEvent != null) {
+				this.level
+					.playSound(
+						null,
+						this.getX(),
+						this.getY(),
+						this.getZ(),
+						this.getEatingSound(),
+						this.getSoundSource(),
+						1.0F,
+						1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F
+					);
+			}
 		}
 
 		return bl;
@@ -229,13 +242,13 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 
 	@Override
 	protected boolean isImmobile() {
-		return this.getHealth() <= 0.0F || this.isEating();
+		return this.isDeadOrDying() || this.isEating();
 	}
 
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
@@ -251,7 +264,7 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		}
 
 		this.setVariant(i);
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	@Override
@@ -272,6 +285,12 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 	@Override
 	protected SoundEvent getDeathSound() {
 		return SoundEvents.LLAMA_DEATH;
+	}
+
+	@Nullable
+	@Override
+	protected SoundEvent getEatingSound() {
+		return SoundEvents.LLAMA_EAT;
 	}
 
 	@Override
@@ -298,8 +317,13 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 	}
 
 	@Override
-	public boolean wearsArmor() {
+	public boolean canWearArmor() {
 		return true;
+	}
+
+	@Override
+	public boolean isWearingArmor() {
+		return !this.inventory.getItem(1).isEmpty();
 	}
 
 	@Override
@@ -309,7 +333,7 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 	}
 
 	@Override
-	public boolean canBeSaddled() {
+	public boolean isSaddleable() {
 		return false;
 	}
 
@@ -324,9 +348,9 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 	}
 
 	@Override
-	protected void updateEquipment() {
+	protected void updateContainerEquipment() {
 		if (!this.level.isClientSide) {
-			super.updateEquipment();
+			super.updateContainerEquipment();
 			this.setSwag(getDyeColor(this.inventory.getItem(1)));
 		}
 	}
@@ -357,7 +381,7 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		return animal != this && animal instanceof Llama && this.canParent() && ((Llama)animal).canParent();
 	}
 
-	public Llama getBreedOffspring(AgableMob agableMob) {
+	public Llama getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
 		Llama llama = this.makeBabyLlama();
 		this.setOffspringAttributes(agableMob, llama);
 		Llama llama2 = (Llama)agableMob;
@@ -382,17 +406,20 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		double f = livingEntity.getZ() - this.getZ();
 		float g = Mth.sqrt(d * d + f * f) * 0.2F;
 		llamaSpit.shoot(d, e + (double)g, f, 1.5F, 10.0F);
-		this.level
-			.playSound(
-				null,
-				this.getX(),
-				this.getY(),
-				this.getZ(),
-				SoundEvents.LLAMA_SPIT,
-				this.getSoundSource(),
-				1.0F,
-				1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F
-			);
+		if (!this.isSilent()) {
+			this.level
+				.playSound(
+					null,
+					this.getX(),
+					this.getY(),
+					this.getZ(),
+					SoundEvents.LLAMA_SPIT,
+					this.getSoundSource(),
+					1.0F,
+					1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F
+				);
+		}
+
 		this.level.addFreshEntity(llamaSpit);
 		this.didSpit = true;
 	}
@@ -469,6 +496,12 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		this.spit(livingEntity);
 	}
 
+	@Environment(EnvType.CLIENT)
+	@Override
+	public Vec3 getLeashOffset() {
+		return new Vec3(0.0, 0.75 * (double)this.getEyeHeight(), (double)this.getBbWidth() * 0.5);
+	}
+
 	static class LlamaAttackWolfGoal extends NearestAttackableTargetGoal<Wolf> {
 		public LlamaAttackWolfGoal(Llama llama) {
 			super(llama, Wolf.class, 16, false, true, livingEntity -> !((Wolf)livingEntity).isTame());
@@ -484,6 +517,7 @@ public class Llama extends AbstractChestedHorse implements RangedAttackMob {
 		public final int variant;
 
 		private LlamaGroupData(int i) {
+			super(true);
 			this.variant = i;
 		}
 	}

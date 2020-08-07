@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.SerializableUUID;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 
@@ -20,16 +21,23 @@ public class ClientboundGameProfilePacket implements Packet<ClientLoginPacketLis
 
 	@Override
 	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
-		String string = friendlyByteBuf.readUtf(36);
-		String string2 = friendlyByteBuf.readUtf(16);
-		UUID uUID = UUID.fromString(string);
-		this.gameProfile = new GameProfile(uUID, string2);
+		int[] is = new int[4];
+
+		for (int i = 0; i < is.length; i++) {
+			is[i] = friendlyByteBuf.readInt();
+		}
+
+		UUID uUID = SerializableUUID.uuidFromIntArray(is);
+		String string = friendlyByteBuf.readUtf(16);
+		this.gameProfile = new GameProfile(uUID, string);
 	}
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
-		UUID uUID = this.gameProfile.getId();
-		friendlyByteBuf.writeUtf(uUID == null ? "" : uUID.toString());
+		for (int i : SerializableUUID.uuidToIntArray(this.gameProfile.getId())) {
+			friendlyByteBuf.writeInt(i);
+		}
+
 		friendlyByteBuf.writeUtf(this.gameProfile.getName());
 	}
 

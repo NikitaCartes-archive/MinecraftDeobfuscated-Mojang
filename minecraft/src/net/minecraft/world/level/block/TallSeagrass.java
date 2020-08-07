@@ -6,11 +6,12 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
@@ -20,11 +21,11 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class TallSeagrass extends ShearableDoublePlantBlock implements LiquidBlockContainer {
-	public static final EnumProperty<DoubleBlockHalf> HALF = ShearableDoublePlantBlock.HALF;
+public class TallSeagrass extends DoublePlantBlock implements LiquidBlockContainer {
+	public static final EnumProperty<DoubleBlockHalf> HALF = DoublePlantBlock.HALF;
 	protected static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 16.0, 14.0);
 
-	public TallSeagrass(Block.Properties properties) {
+	public TallSeagrass(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 
@@ -35,7 +36,7 @@ public class TallSeagrass extends ShearableDoublePlantBlock implements LiquidBlo
 
 	@Override
 	protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return blockState.isFaceSturdy(blockGetter, blockPos, Direction.UP) && blockState.getBlock() != Blocks.MAGMA_BLOCK;
+		return blockState.isFaceSturdy(blockGetter, blockPos, Direction.UP) && !blockState.is(Blocks.MAGMA_BLOCK);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -62,7 +63,7 @@ public class TallSeagrass extends ShearableDoublePlantBlock implements LiquidBlo
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		if (blockState.getValue(HALF) == DoubleBlockHalf.UPPER) {
 			BlockState blockState2 = levelReader.getBlockState(blockPos.below());
-			return blockState2.getBlock() == this && blockState2.getValue(HALF) == DoubleBlockHalf.LOWER;
+			return blockState2.is(this) && blockState2.getValue(HALF) == DoubleBlockHalf.LOWER;
 		} else {
 			FluidState fluidState = levelReader.getFluidState(blockPos);
 			return super.canSurvive(blockState, levelReader, blockPos) && fluidState.is(FluidTags.WATER) && fluidState.getAmount() == 8;

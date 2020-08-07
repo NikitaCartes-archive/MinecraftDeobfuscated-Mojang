@@ -1,76 +1,71 @@
 package com.mojang.realmsclient.gui.screens;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.realms.Realms;
-import net.minecraft.realms.RealmsButton;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
 
 @Environment(EnvType.CLIENT)
 public class RealmsGenericErrorScreen extends RealmsScreen {
-	private final RealmsScreen nextScreen;
-	private String line1;
-	private String line2;
+	private final Screen nextScreen;
+	private Component line1;
+	private Component line2;
 
-	public RealmsGenericErrorScreen(RealmsServiceException realmsServiceException, RealmsScreen realmsScreen) {
-		this.nextScreen = realmsScreen;
+	public RealmsGenericErrorScreen(RealmsServiceException realmsServiceException, Screen screen) {
+		this.nextScreen = screen;
 		this.errorMessage(realmsServiceException);
 	}
 
-	public RealmsGenericErrorScreen(String string, RealmsScreen realmsScreen) {
-		this.nextScreen = realmsScreen;
-		this.errorMessage(string);
+	public RealmsGenericErrorScreen(Component component, Screen screen) {
+		this.nextScreen = screen;
+		this.errorMessage(component);
 	}
 
-	public RealmsGenericErrorScreen(String string, String string2, RealmsScreen realmsScreen) {
-		this.nextScreen = realmsScreen;
-		this.errorMessage(string, string2);
+	public RealmsGenericErrorScreen(Component component, Component component2, Screen screen) {
+		this.nextScreen = screen;
+		this.errorMessage(component, component2);
 	}
 
 	private void errorMessage(RealmsServiceException realmsServiceException) {
 		if (realmsServiceException.errorCode == -1) {
-			this.line1 = "An error occurred (" + realmsServiceException.httpResultCode + "):";
-			this.line2 = realmsServiceException.httpResponseContent;
+			this.line1 = new TextComponent("An error occurred (" + realmsServiceException.httpResultCode + "):");
+			this.line2 = new TextComponent(realmsServiceException.httpResponseContent);
 		} else {
-			this.line1 = "Realms (" + realmsServiceException.errorCode + "):";
+			this.line1 = new TextComponent("Realms (" + realmsServiceException.errorCode + "):");
 			String string = "mco.errorMessage." + realmsServiceException.errorCode;
-			String string2 = getLocalizedString(string);
-			this.line2 = string2.equals(string) ? realmsServiceException.errorMsg : string2;
+			this.line2 = (Component)(I18n.exists(string) ? new TranslatableComponent(string) : Component.nullToEmpty(realmsServiceException.errorMsg));
 		}
 	}
 
-	private void errorMessage(String string) {
-		this.line1 = "An error occurred: ";
-		this.line2 = string;
+	private void errorMessage(Component component) {
+		this.line1 = new TextComponent("An error occurred: ");
+		this.line2 = component;
 	}
 
-	private void errorMessage(String string, String string2) {
-		this.line1 = string;
-		this.line2 = string2;
+	private void errorMessage(Component component, Component component2) {
+		this.line1 = component;
+		this.line2 = component2;
 	}
 
 	@Override
 	public void init() {
-		Realms.narrateNow(this.line1 + ": " + this.line2);
-		this.buttonsAdd(new RealmsButton(10, this.width() / 2 - 100, this.height() - 52, 200, 20, "Ok") {
-			@Override
-			public void onPress() {
-				Realms.setScreen(RealmsGenericErrorScreen.this.nextScreen);
-			}
-		});
+		NarrationHelper.now(this.line1.getString() + ": " + this.line2.getString());
+		this.addButton(new Button(this.width / 2 - 100, this.height - 52, 200, 20, new TextComponent("Ok"), button -> this.minecraft.setScreen(this.nextScreen)));
 	}
 
 	@Override
-	public void tick() {
-		super.tick();
-	}
-
-	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
-		this.drawCenteredString(this.line1, this.width() / 2, 80, 16777215);
-		this.drawCenteredString(this.line2, this.width() / 2, 100, 16711680);
-		super.render(i, j, f);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		drawCenteredString(poseStack, this.font, this.line1, this.width / 2, 80, 16777215);
+		drawCenteredString(poseStack, this.font, this.line2, this.width / 2, 100, 16711680);
+		super.render(poseStack, i, j, f);
 	}
 }

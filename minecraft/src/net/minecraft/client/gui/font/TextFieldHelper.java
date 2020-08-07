@@ -1,170 +1,247 @@
 package net.minecraft.client.gui.font;
 
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
+import net.minecraft.client.StringSplitter;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class TextFieldHelper {
-	private final Minecraft minecraft;
-	private final Font font;
 	private final Supplier<String> getMessageFn;
 	private final Consumer<String> setMessageFn;
-	private final int maxWidth;
+	private final Supplier<String> getClipboardFn;
+	private final Consumer<String> setClipboardFn;
+	private final Predicate<String> stringValidator;
 	private int cursorPos;
 	private int selectionPos;
 
-	public TextFieldHelper(Minecraft minecraft, Supplier<String> supplier, Consumer<String> consumer, int i) {
-		this.minecraft = minecraft;
-		this.font = minecraft.font;
+	public TextFieldHelper(
+		Supplier<String> supplier, Consumer<String> consumer, Supplier<String> supplier2, Consumer<String> consumer2, Predicate<String> predicate
+	) {
 		this.getMessageFn = supplier;
 		this.setMessageFn = consumer;
-		this.maxWidth = i;
-		this.setEnd();
+		this.getClipboardFn = supplier2;
+		this.setClipboardFn = consumer2;
+		this.stringValidator = predicate;
+		this.setCursorToEnd();
+	}
+
+	public static Supplier<String> createClipboardGetter(Minecraft minecraft) {
+		return () -> getClipboardContents(minecraft);
+	}
+
+	public static String getClipboardContents(Minecraft minecraft) {
+		return ChatFormatting.stripFormatting(minecraft.keyboardHandler.getClipboard().replaceAll("\\r", ""));
+	}
+
+	public static Consumer<String> createClipboardSetter(Minecraft minecraft) {
+		return string -> setClipboardContents(minecraft, string);
+	}
+
+	public static void setClipboardContents(Minecraft minecraft, String string) {
+		minecraft.keyboardHandler.setClipboard(string);
 	}
 
 	public boolean charTyped(char c) {
 		if (SharedConstants.isAllowedChatCharacter(c)) {
-			this.insertText(Character.toString(c));
+			this.insertText((String)this.getMessageFn.get(), Character.toString(c));
 		}
 
 		return true;
 	}
 
-	private void insertText(String string) {
-		if (this.selectionPos != this.cursorPos) {
-			this.deleteSelection();
-		}
-
-		String string2 = (String)this.getMessageFn.get();
-		this.cursorPos = Mth.clamp(this.cursorPos, 0, string2.length());
-		String string3 = new StringBuilder(string2).insert(this.cursorPos, string).toString();
-		if (this.font.width(string3) <= this.maxWidth) {
-			this.setMessageFn.accept(string3);
-			this.selectionPos = this.cursorPos = Math.min(string3.length(), this.cursorPos + string.length());
-		}
-	}
-
 	public boolean keyPressed(int i) {
-		String string = (String)this.getMessageFn.get();
 		if (Screen.isSelectAll(i)) {
-			this.selectionPos = 0;
-			this.cursorPos = string.length();
+			this.selectAll();
 			return true;
 		} else if (Screen.isCopy(i)) {
-			this.minecraft.keyboardHandler.setClipboard(this.getSelected());
+			this.copy();
 			return true;
 		} else if (Screen.isPaste(i)) {
-			this.insertText(SharedConstants.filterText(ChatFormatting.stripFormatting(this.minecraft.keyboardHandler.getClipboard().replaceAll("\\r", ""))));
-			this.selectionPos = this.cursorPos;
+			this.paste();
 			return true;
 		} else if (Screen.isCut(i)) {
-			this.minecraft.keyboardHandler.setClipboard(this.getSelected());
-			this.deleteSelection();
+			this.cut();
 			return true;
 		} else if (i == 259) {
-			if (!string.isEmpty()) {
-				if (this.selectionPos != this.cursorPos) {
-					this.deleteSelection();
-				} else if (this.cursorPos > 0) {
-					string = new StringBuilder(string).deleteCharAt(Math.max(0, this.cursorPos - 1)).toString();
-					this.selectionPos = this.cursorPos = Math.max(0, this.cursorPos - 1);
-					this.setMessageFn.accept(string);
-				}
-			}
-
-			return true;
-		} else if (i == 261) {
-			if (!string.isEmpty()) {
-				if (this.selectionPos != this.cursorPos) {
-					this.deleteSelection();
-				} else if (this.cursorPos < string.length()) {
-					string = new StringBuilder(string).deleteCharAt(Math.max(0, this.cursorPos)).toString();
-					this.setMessageFn.accept(string);
-				}
-			}
-
-			return true;
-		} else if (i == 263) {
-			int j = this.font.isBidirectional() ? 1 : -1;
-			if (Screen.hasControlDown()) {
-				this.cursorPos = this.font.getWordPosition(string, j, this.cursorPos, true);
-			} else {
-				this.cursorPos = Math.max(0, Math.min(string.length(), this.cursorPos + j));
-			}
-
-			if (!Screen.hasShiftDown()) {
-				this.selectionPos = this.cursorPos;
-			}
-
-			return true;
-		} else if (i == 262) {
-			int jx = this.font.isBidirectional() ? -1 : 1;
-			if (Screen.hasControlDown()) {
-				this.cursorPos = this.font.getWordPosition(string, jx, this.cursorPos, true);
-			} else {
-				this.cursorPos = Math.max(0, Math.min(string.length(), this.cursorPos + jx));
-			}
-
-			if (!Screen.hasShiftDown()) {
-				this.selectionPos = this.cursorPos;
-			}
-
-			return true;
-		} else if (i == 268) {
-			this.cursorPos = 0;
-			if (!Screen.hasShiftDown()) {
-				this.selectionPos = this.cursorPos;
-			}
-
-			return true;
-		} else if (i == 269) {
-			this.cursorPos = ((String)this.getMessageFn.get()).length();
-			if (!Screen.hasShiftDown()) {
-				this.selectionPos = this.cursorPos;
-			}
-
+			this.removeCharsFromCursor(-1);
 			return true;
 		} else {
+			if (i == 261) {
+				this.removeCharsFromCursor(1);
+			} else {
+				if (i == 263) {
+					if (Screen.hasControlDown()) {
+						this.moveByWords(-1, Screen.hasShiftDown());
+					} else {
+						this.moveByChars(-1, Screen.hasShiftDown());
+					}
+
+					return true;
+				}
+
+				if (i == 262) {
+					if (Screen.hasControlDown()) {
+						this.moveByWords(1, Screen.hasShiftDown());
+					} else {
+						this.moveByChars(1, Screen.hasShiftDown());
+					}
+
+					return true;
+				}
+
+				if (i == 268) {
+					this.setCursorToStart(Screen.hasShiftDown());
+					return true;
+				}
+
+				if (i == 269) {
+					this.setCursorToEnd(Screen.hasShiftDown());
+					return true;
+				}
+			}
+
 			return false;
 		}
 	}
 
-	private String getSelected() {
+	private int clampToMsgLength(int i) {
+		return Mth.clamp(i, 0, ((String)this.getMessageFn.get()).length());
+	}
+
+	private void insertText(String string, String string2) {
+		if (this.selectionPos != this.cursorPos) {
+			string = this.deleteSelection(string);
+		}
+
+		this.cursorPos = Mth.clamp(this.cursorPos, 0, string.length());
+		String string3 = new StringBuilder(string).insert(this.cursorPos, string2).toString();
+		if (this.stringValidator.test(string3)) {
+			this.setMessageFn.accept(string3);
+			this.selectionPos = this.cursorPos = Math.min(string3.length(), this.cursorPos + string2.length());
+		}
+	}
+
+	public void insertText(String string) {
+		this.insertText((String)this.getMessageFn.get(), string);
+	}
+
+	private void resetSelectionIfNeeded(boolean bl) {
+		if (!bl) {
+			this.selectionPos = this.cursorPos;
+		}
+	}
+
+	public void moveByChars(int i, boolean bl) {
+		this.cursorPos = Util.offsetByCodepoints((String)this.getMessageFn.get(), this.cursorPos, i);
+		this.resetSelectionIfNeeded(bl);
+	}
+
+	public void moveByWords(int i, boolean bl) {
+		this.cursorPos = StringSplitter.getWordPosition((String)this.getMessageFn.get(), i, this.cursorPos, true);
+		this.resetSelectionIfNeeded(bl);
+	}
+
+	public void removeCharsFromCursor(int i) {
 		String string = (String)this.getMessageFn.get();
+		if (!string.isEmpty()) {
+			String string2;
+			if (this.selectionPos != this.cursorPos) {
+				string2 = this.deleteSelection(string);
+			} else {
+				int j = Util.offsetByCodepoints(string, this.cursorPos, i);
+				int k = Math.min(j, this.cursorPos);
+				int l = Math.max(j, this.cursorPos);
+				string2 = new StringBuilder(string).delete(k, l).toString();
+				if (i < 0) {
+					this.selectionPos = this.cursorPos = k;
+				}
+			}
+
+			this.setMessageFn.accept(string2);
+		}
+	}
+
+	public void cut() {
+		String string = (String)this.getMessageFn.get();
+		this.setClipboardFn.accept(this.getSelected(string));
+		this.setMessageFn.accept(this.deleteSelection(string));
+	}
+
+	public void paste() {
+		this.insertText((String)this.getMessageFn.get(), (String)this.getClipboardFn.get());
+		this.selectionPos = this.cursorPos;
+	}
+
+	public void copy() {
+		this.setClipboardFn.accept(this.getSelected((String)this.getMessageFn.get()));
+	}
+
+	public void selectAll() {
+		this.selectionPos = 0;
+		this.cursorPos = ((String)this.getMessageFn.get()).length();
+	}
+
+	private String getSelected(String string) {
 		int i = Math.min(this.cursorPos, this.selectionPos);
 		int j = Math.max(this.cursorPos, this.selectionPos);
 		return string.substring(i, j);
 	}
 
-	private void deleteSelection() {
-		if (this.selectionPos != this.cursorPos) {
-			String string = (String)this.getMessageFn.get();
+	private String deleteSelection(String string) {
+		if (this.selectionPos == this.cursorPos) {
+			return string;
+		} else {
 			int i = Math.min(this.cursorPos, this.selectionPos);
 			int j = Math.max(this.cursorPos, this.selectionPos);
 			String string2 = string.substring(0, i) + string.substring(j);
-			this.cursorPos = i;
-			this.selectionPos = this.cursorPos;
-			this.setMessageFn.accept(string2);
+			this.selectionPos = this.cursorPos = i;
+			return string2;
 		}
 	}
 
-	public void setEnd() {
-		this.selectionPos = this.cursorPos = ((String)this.getMessageFn.get()).length();
+	private void setCursorToStart(boolean bl) {
+		this.cursorPos = 0;
+		this.resetSelectionIfNeeded(bl);
+	}
+
+	public void setCursorToEnd() {
+		this.setCursorToEnd(false);
+	}
+
+	private void setCursorToEnd(boolean bl) {
+		this.cursorPos = ((String)this.getMessageFn.get()).length();
+		this.resetSelectionIfNeeded(bl);
 	}
 
 	public int getCursorPos() {
 		return this.cursorPos;
 	}
 
+	public void setCursorPos(int i, boolean bl) {
+		this.cursorPos = this.clampToMsgLength(i);
+		this.resetSelectionIfNeeded(bl);
+	}
+
 	public int getSelectionPos() {
 		return this.selectionPos;
+	}
+
+	public void setSelectionRange(int i, int j) {
+		int k = ((String)this.getMessageFn.get()).length();
+		this.cursorPos = Mth.clamp(i, 0, k);
+		this.selectionPos = Mth.clamp(j, 0, k);
+	}
+
+	public boolean isSelecting() {
+		return this.cursorPos != this.selectionPos;
 	}
 }

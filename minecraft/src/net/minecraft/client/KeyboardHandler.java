@@ -15,10 +15,11 @@ import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.AccessibilityOptionsScreen;
-import net.minecraft.client.gui.screens.ChatOptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.SimpleOptionsSubScreen;
 import net.minecraft.client.gui.screens.controls.ControlsScreen;
+import net.minecraft.client.gui.screens.debug.GameModeSwitcherScreen;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -30,7 +31,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -91,38 +91,33 @@ public class KeyboardHandler {
 				case 67:
 					if (this.minecraft.player.isReducedDebugInfo()) {
 						return false;
-					}
+					} else {
+						ClientPacketListener clientPacketListener = this.minecraft.player.connection;
+						if (clientPacketListener == null) {
+							return false;
+						}
 
-					this.debugFeedbackTranslated("debug.copy_location.message");
-					this.setClipboard(
-						String.format(
-							Locale.ROOT,
-							"/execute in %s run tp @s %.2f %.2f %.2f %.2f %.2f",
-							DimensionType.getName(this.minecraft.player.level.dimension.getType()),
-							this.minecraft.player.getX(),
-							this.minecraft.player.getY(),
-							this.minecraft.player.getZ(),
-							this.minecraft.player.yRot,
-							this.minecraft.player.xRot
-						)
-					);
-					return true;
+						this.debugFeedbackTranslated("debug.copy_location.message");
+						this.setClipboard(
+							String.format(
+								Locale.ROOT,
+								"/execute in %s run tp @s %.2f %.2f %.2f %.2f %.2f",
+								this.minecraft.player.level.dimension().location(),
+								this.minecraft.player.getX(),
+								this.minecraft.player.getY(),
+								this.minecraft.player.getZ(),
+								this.minecraft.player.yRot,
+								this.minecraft.player.xRot
+							)
+						);
+						return true;
+					}
 				case 68:
 					if (this.minecraft.gui != null) {
 						this.minecraft.gui.getChat().clearMessages(false);
 					}
 
 					return true;
-				case 69:
-				case 74:
-				case 75:
-				case 76:
-				case 77:
-				case 79:
-				case 82:
-				case 83:
-				default:
-					return false;
 				case 70:
 					Option.RENDER_DISTANCE
 						.set(
@@ -153,10 +148,10 @@ public class KeyboardHandler {
 				case 78:
 					if (!this.minecraft.player.hasPermissions(2)) {
 						this.debugFeedbackTranslated("debug.creative_spectator.error");
-					} else if (this.minecraft.player.isCreative()) {
+					} else if (!this.minecraft.player.isSpectator()) {
 						this.minecraft.player.chat("/gamemode spectator");
 					} else {
-						this.minecraft.player.chat("/gamemode creative");
+						this.minecraft.player.chat("/gamemode " + this.minecraft.gameMode.getPreviousPlayerMode().getName());
 					}
 
 					return true;
@@ -181,11 +176,22 @@ public class KeyboardHandler {
 					chatComponent.addMessage(new TranslatableComponent("debug.help.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.reload_resourcepacks.help"));
 					chatComponent.addMessage(new TranslatableComponent("debug.pause.help"));
+					chatComponent.addMessage(new TranslatableComponent("debug.gamemodes.help"));
 					return true;
 				case 84:
 					this.debugFeedbackTranslated("debug.reload_resourcepacks.message");
 					this.minecraft.reloadResourcePacks();
 					return true;
+				case 293:
+					if (!this.minecraft.player.hasPermissions(2)) {
+						this.debugFeedbackTranslated("debug.gamemodes.error");
+					} else {
+						this.minecraft.setScreen(new GameModeSwitcherScreen());
+					}
+
+					return true;
+				default:
+					return false;
 			}
 		}
 	}
@@ -256,8 +262,7 @@ public class KeyboardHandler {
 	private void copyCreateEntityCommand(ResourceLocation resourceLocation, Vec3 vec3, @Nullable CompoundTag compoundTag) {
 		String string2;
 		if (compoundTag != null) {
-			compoundTag.remove("UUIDMost");
-			compoundTag.remove("UUIDLeast");
+			compoundTag.remove("UUID");
 			compoundTag.remove("Pos");
 			compoundTag.remove("Dimension");
 			String string = compoundTag.getPrettyDisplay().getString();
@@ -289,6 +294,7 @@ public class KeyboardHandler {
 				if (this.minecraft.options.keyFullscreen.matches(i, j)) {
 					this.minecraft.getWindow().toggleFullScreen();
 					this.minecraft.options.fullscreen = this.minecraft.getWindow().isFullscreen();
+					this.minecraft.options.save();
 					return;
 				}
 
@@ -312,12 +318,8 @@ public class KeyboardHandler {
 				|| !((EditBox)containerEventHandler.getFocused()).canConsumeInput();
 			if (k != 0 && i == 66 && Screen.hasControlDown() && bl) {
 				Option.NARRATOR.toggle(this.minecraft.options, 1);
-				if (containerEventHandler instanceof ChatOptionsScreen) {
-					((ChatOptionsScreen)containerEventHandler).updateNarratorButton();
-				}
-
-				if (containerEventHandler instanceof AccessibilityOptionsScreen) {
-					((AccessibilityOptionsScreen)containerEventHandler).updateNarratorButton();
+				if (containerEventHandler instanceof SimpleOptionsSubScreen) {
+					((SimpleOptionsSubScreen)containerEventHandler).updateNarratorButton();
 				}
 			}
 
@@ -376,16 +378,8 @@ public class KeyboardHandler {
 						KeyMapping.click(key);
 					}
 
-					if (this.minecraft.options.renderDebugCharts) {
-						if (i == 48) {
-							this.minecraft.debugFpsMeterKeyPress(0);
-						}
-
-						for (int n = 0; n < 9; n++) {
-							if (i == 49 + n) {
-								this.minecraft.debugFpsMeterKeyPress(n + 1);
-							}
-						}
+					if (this.minecraft.options.renderDebugCharts && i >= 48 && i <= 57) {
+						this.minecraft.debugFpsMeterKeyPress(i - 48);
 					}
 				}
 			}

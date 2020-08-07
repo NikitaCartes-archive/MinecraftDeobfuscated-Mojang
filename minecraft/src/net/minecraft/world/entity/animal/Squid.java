@@ -15,11 +15,13 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -54,10 +56,8 @@ public class Squid extends WaterAnimal {
 		this.goalSelector.addGoal(1, new Squid.SquidFleeGoal());
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(10.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10.0);
 	}
 
 	@Override
@@ -281,7 +281,7 @@ public class Squid extends WaterAnimal {
 			int i = this.squid.getNoActionTime();
 			if (i > 100) {
 				this.squid.setMovementVector(0.0F, 0.0F, 0.0F);
-			} else if (this.squid.getRandom().nextInt(50) == 0 || !this.squid.wasInWater || !this.squid.hasMovementVector()) {
+			} else if (this.squid.getRandom().nextInt(50) == 0 || !this.squid.wasTouchingWater || !this.squid.hasMovementVector()) {
 				float f = this.squid.getRandom().nextFloat() * (float) (Math.PI * 2);
 				float g = Mth.cos(f) * 0.2F;
 				float h = -0.1F + this.squid.getRandom().nextFloat() * 0.2F;

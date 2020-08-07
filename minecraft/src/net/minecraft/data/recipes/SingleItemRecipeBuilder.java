@@ -56,7 +56,7 @@ public class SingleItemRecipeBuilder {
 		this.ensureValid(resourceLocation);
 		this.advancement
 			.parent(new ResourceLocation("recipes/root"))
-			.addCriterion("has_the_recipe", new RecipeUnlockedTrigger.TriggerInstance(resourceLocation))
+			.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(resourceLocation))
 			.rewards(AdvancementRewards.Builder.recipe(resourceLocation))
 			.requirements(RequirementsStrategy.OR);
 		consumer.accept(

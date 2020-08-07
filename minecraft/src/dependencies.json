@@ -3,9 +3,9 @@
 		"name": "Java 8"
 	},
 	{
-		"sha1sum": "9834cdf236c22e84b946bba989e2f94ef5897c3c",
-		"name": "authlib-1.5.25.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/authlib/1.5.25/authlib-1.5.25.jar"
+		"sha1sum": "5bd0ce00c1e1f483641f85bccb02d1956dd77ec0",
+		"name": "authlib-1.6.25.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/authlib/1.6.25/authlib-1.6.25.jar"
 	},
 	{
 		"sha1sum": "c6b7dc51dd44379cc751b7504816006e9be4b1e6",
@@ -38,9 +38,9 @@
 		"url": "https://libraries.minecraft.net/commons-logging/commons-logging/1.1.3/commons-logging-1.1.3.jar"
 	},
 	{
-		"sha1sum": "0944c24a8519981847ffb36c6dcd059d96fcb4b0",
-		"name": "datafixerupper-2.0.24.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/datafixerupper/2.0.24/datafixerupper-2.0.24.jar"
+		"sha1sum": "ebd6690f33871ccee9b6132c6480668ee2e35020",
+		"name": "datafixerupper-4.0.26.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/datafixerupper/4.0.26/datafixerupper-4.0.26.jar"
 	},
 	{
 		"sha1sum": "5ad88f325e424f8dbc2be5459e21ea5cab3864e9",
@@ -68,9 +68,9 @@
 		"url": "https://libraries.minecraft.net/org/apache/httpcomponents/httpcore/4.3.2/httpcore-4.3.2.jar"
 	},
 	{
-		"sha1sum": "63d216a9311cca6be337c1e458e587f99d382b84",
-		"name": "icu4j-core-mojang-51.2.jar",
-		"url": "https://libraries.minecraft.net/com/ibm/icu/icu4j-core-mojang/51.2/icu4j-core-mojang-51.2.jar"
+		"sha1sum": "72c7519b6d91f7a1f993bd44a99fe95d67211b27",
+		"name": "icu4j-66.1.jar",
+		"url": "https://libraries.minecraft.net/com/ibm/icu/icu4j/66.1/icu4j-66.1.jar"
 	},
 	{
 		"sha1sum": "6aa6453aa99a52a5cd91749da1af6ab70e082ab3",

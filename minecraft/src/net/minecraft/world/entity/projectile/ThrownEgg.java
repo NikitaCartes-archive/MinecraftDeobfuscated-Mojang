@@ -49,11 +49,14 @@ public class ThrownEgg extends ThrowableItemProjectile {
 	}
 
 	@Override
-	protected void onHit(HitResult hitResult) {
-		if (hitResult.getType() == HitResult.Type.ENTITY) {
-			((EntityHitResult)hitResult).getEntity().hurt(DamageSource.thrown(this, this.getOwner()), 0.0F);
-		}
+	protected void onHitEntity(EntityHitResult entityHitResult) {
+		super.onHitEntity(entityHitResult);
+		entityHitResult.getEntity().hurt(DamageSource.thrown(this, this.getOwner()), 0.0F);
+	}
 
+	@Override
+	protected void onHit(HitResult hitResult) {
+		super.onHit(hitResult);
 		if (!this.level.isClientSide) {
 			if (this.random.nextInt(8) == 0) {
 				int i = 1;

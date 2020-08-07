@@ -6,6 +6,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -94,28 +95,28 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 					for (int j = -1; j <= 1; j++) {
 						for (int k = -1; k <= 1; k++) {
 							if ((j != 0 || k != 0) && level.isEmptyBlock(blockPos.offset(k, 0, j)) && level.isEmptyBlock(blockPos.offset(k, 1, j))) {
-								if (level.getBlockState(blockPos.offset(k * 2, 0, j * 2)).getBlock() == Blocks.BOOKSHELF) {
+								if (level.getBlockState(blockPos.offset(k * 2, 0, j * 2)).is(Blocks.BOOKSHELF)) {
 									ix++;
 								}
 
-								if (level.getBlockState(blockPos.offset(k * 2, 1, j * 2)).getBlock() == Blocks.BOOKSHELF) {
+								if (level.getBlockState(blockPos.offset(k * 2, 1, j * 2)).is(Blocks.BOOKSHELF)) {
 									ix++;
 								}
 
 								if (k != 0 && j != 0) {
-									if (level.getBlockState(blockPos.offset(k * 2, 0, j)).getBlock() == Blocks.BOOKSHELF) {
+									if (level.getBlockState(blockPos.offset(k * 2, 0, j)).is(Blocks.BOOKSHELF)) {
 										ix++;
 									}
 
-									if (level.getBlockState(blockPos.offset(k * 2, 1, j)).getBlock() == Blocks.BOOKSHELF) {
+									if (level.getBlockState(blockPos.offset(k * 2, 1, j)).is(Blocks.BOOKSHELF)) {
 										ix++;
 									}
 
-									if (level.getBlockState(blockPos.offset(k, 0, j * 2)).getBlock() == Blocks.BOOKSHELF) {
+									if (level.getBlockState(blockPos.offset(k, 0, j * 2)).is(Blocks.BOOKSHELF)) {
 										ix++;
 									}
 
-									if (level.getBlockState(blockPos.offset(k, 1, j * 2)).getBlock() == Blocks.BOOKSHELF) {
+									if (level.getBlockState(blockPos.offset(k, 1, j * 2)).is(Blocks.BOOKSHELF)) {
 										ix++;
 									}
 								}
@@ -177,6 +178,11 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 					boolean bl = itemStack.getItem() == Items.BOOK;
 					if (bl) {
 						itemStack3 = new ItemStack(Items.ENCHANTED_BOOK);
+						CompoundTag compoundTag = itemStack.getTag();
+						if (compoundTag != null) {
+							itemStack3.setTag(compoundTag.copy());
+						}
+
 						this.enchantSlots.setItem(0, itemStack3);
 					}
 
@@ -267,13 +273,10 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 					return ItemStack.EMPTY;
 				}
 
-				if (itemStack2.hasTag() && itemStack2.getCount() == 1) {
-					((Slot)this.slots.get(0)).set(itemStack2.copy());
-					itemStack2.setCount(0);
-				} else if (!itemStack2.isEmpty()) {
-					((Slot)this.slots.get(0)).set(new ItemStack(itemStack2.getItem()));
-					itemStack2.shrink(1);
-				}
+				ItemStack itemStack3 = itemStack2.copy();
+				itemStack3.setCount(1);
+				itemStack2.shrink(1);
+				((Slot)this.slots.get(0)).set(itemStack3);
 			}
 
 			if (itemStack2.isEmpty()) {

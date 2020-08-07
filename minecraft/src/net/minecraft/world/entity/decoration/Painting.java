@@ -71,13 +71,16 @@ public class Painting extends HangingEntity {
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		compoundTag.putString("Motive", Registry.MOTIVE.getKey(this.motive).toString());
+		compoundTag.putByte("Facing", (byte)this.direction.get2DDataValue());
 		super.addAdditionalSaveData(compoundTag);
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		this.motive = Registry.MOTIVE.get(ResourceLocation.tryParse(compoundTag.getString("Motive")));
+		this.direction = Direction.from2DDataValue(compoundTag.getByte("Facing"));
 		super.readAdditionalSaveData(compoundTag);
+		this.setDirection(this.direction);
 	}
 
 	@Override

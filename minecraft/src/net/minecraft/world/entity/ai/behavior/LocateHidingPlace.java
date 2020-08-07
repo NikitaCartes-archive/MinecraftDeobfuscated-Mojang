@@ -14,7 +14,7 @@ import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 
 public class LocateHidingPlace extends Behavior<LivingEntity> {
-	private final float speed;
+	private final float speedModifier;
 	private final int radius;
 	private final int closeEnoughDist;
 	private Optional<BlockPos> currentPos = Optional.empty();
@@ -31,14 +31,14 @@ public class LocateHidingPlace extends Behavior<LivingEntity> {
 			)
 		);
 		this.radius = i;
-		this.speed = f;
+		this.speedModifier = f;
 		this.closeEnoughDist = j;
 	}
 
 	@Override
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity) {
 		Optional<BlockPos> optional = serverLevel.getPoiManager()
-			.find(poiType -> poiType == PoiType.HOME, blockPos -> true, new BlockPos(livingEntity), this.closeEnoughDist + 1, PoiManager.Occupancy.ANY);
+			.find(poiType -> poiType == PoiType.HOME, blockPos -> true, livingEntity.blockPosition(), this.closeEnoughDist + 1, PoiManager.Occupancy.ANY);
 		if (optional.isPresent() && ((BlockPos)optional.get()).closerThan(livingEntity.position(), (double)this.closeEnoughDist)) {
 			this.currentPos = optional;
 		} else {
@@ -55,7 +55,7 @@ public class LocateHidingPlace extends Behavior<LivingEntity> {
 		if (!optional.isPresent()) {
 			optional = serverLevel.getPoiManager()
 				.getRandom(
-					poiType -> poiType == PoiType.HOME, blockPos -> true, PoiManager.Occupancy.ANY, new BlockPos(livingEntity), this.radius, livingEntity.getRandom()
+					poiType -> poiType == PoiType.HOME, blockPos -> true, PoiManager.Occupancy.ANY, livingEntity.blockPosition(), this.radius, livingEntity.getRandom()
 				);
 			if (!optional.isPresent()) {
 				Optional<GlobalPos> optional2 = brain.getMemory(MemoryModuleType.HOME);
@@ -70,9 +70,9 @@ public class LocateHidingPlace extends Behavior<LivingEntity> {
 			brain.eraseMemory(MemoryModuleType.LOOK_TARGET);
 			brain.eraseMemory(MemoryModuleType.BREED_TARGET);
 			brain.eraseMemory(MemoryModuleType.INTERACTION_TARGET);
-			brain.setMemory(MemoryModuleType.HIDING_PLACE, GlobalPos.of(serverLevel.getDimension().getType(), (BlockPos)optional.get()));
+			brain.setMemory(MemoryModuleType.HIDING_PLACE, GlobalPos.of(serverLevel.dimension(), (BlockPos)optional.get()));
 			if (!((BlockPos)optional.get()).closerThan(livingEntity.position(), (double)this.closeEnoughDist)) {
-				brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget((BlockPos)optional.get(), this.speed, this.closeEnoughDist));
+				brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget((BlockPos)optional.get(), this.speedModifier, this.closeEnoughDist));
 			}
 		}
 	}

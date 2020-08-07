@@ -8,6 +8,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -19,7 +20,7 @@ public class PressurePlateBlock extends BasePressurePlateBlock {
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	private final PressurePlateBlock.Sensitivity sensitivity;
 
-	protected PressurePlateBlock(PressurePlateBlock.Sensitivity sensitivity, Block.Properties properties) {
+	protected PressurePlateBlock(PressurePlateBlock.Sensitivity sensitivity, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(POWERED, Boolean.valueOf(false)));
 		this.sensitivity = sensitivity;
@@ -37,19 +38,19 @@ public class PressurePlateBlock extends BasePressurePlateBlock {
 
 	@Override
 	protected void playOnSound(LevelAccessor levelAccessor, BlockPos blockPos) {
-		if (this.material == Material.WOOD) {
-			levelAccessor.playSound(null, blockPos, SoundEvents.WOODEN_PRESSURE_PLATE_CLICK_ON, SoundSource.BLOCKS, 0.3F, 0.8F);
-		} else {
+		if (this.material != Material.WOOD && this.material != Material.NETHER_WOOD) {
 			levelAccessor.playSound(null, blockPos, SoundEvents.STONE_PRESSURE_PLATE_CLICK_ON, SoundSource.BLOCKS, 0.3F, 0.6F);
+		} else {
+			levelAccessor.playSound(null, blockPos, SoundEvents.WOODEN_PRESSURE_PLATE_CLICK_ON, SoundSource.BLOCKS, 0.3F, 0.8F);
 		}
 	}
 
 	@Override
 	protected void playOffSound(LevelAccessor levelAccessor, BlockPos blockPos) {
-		if (this.material == Material.WOOD) {
-			levelAccessor.playSound(null, blockPos, SoundEvents.WOODEN_PRESSURE_PLATE_CLICK_OFF, SoundSource.BLOCKS, 0.3F, 0.7F);
-		} else {
+		if (this.material != Material.WOOD && this.material != Material.NETHER_WOOD) {
 			levelAccessor.playSound(null, blockPos, SoundEvents.STONE_PRESSURE_PLATE_CLICK_OFF, SoundSource.BLOCKS, 0.3F, 0.5F);
+		} else {
+			levelAccessor.playSound(null, blockPos, SoundEvents.WOODEN_PRESSURE_PLATE_CLICK_OFF, SoundSource.BLOCKS, 0.3F, 0.7F);
 		}
 	}
 

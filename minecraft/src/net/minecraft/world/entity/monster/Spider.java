@@ -22,6 +22,8 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LeapAtTargetGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
@@ -35,7 +37,7 @@ import net.minecraft.world.entity.ai.navigation.WallClimberNavigation;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -61,7 +63,7 @@ public class Spider extends Monster {
 	}
 
 	@Override
-	public double getRideHeight() {
+	public double getPassengersRidingOffset() {
 		return (double)(this.getBbHeight() * 0.5F);
 	}
 
@@ -84,11 +86,8 @@ public class Spider extends Monster {
 		}
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(16.0);
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.3F);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 16.0).add(Attributes.MOVEMENT_SPEED, 0.3F);
 	}
 
 	@Override
@@ -112,13 +111,13 @@ public class Spider extends Monster {
 	}
 
 	@Override
-	public boolean onLadder() {
+	public boolean onClimbable() {
 		return this.isClimbing();
 	}
 
 	@Override
 	public void makeStuckInBlock(BlockState blockState, Vec3 vec3) {
-		if (blockState.getBlock() != Blocks.COBWEB) {
+		if (!blockState.is(Blocks.COBWEB)) {
 			super.makeStuckInBlock(blockState, vec3);
 		}
 	}
@@ -151,25 +150,26 @@ public class Spider extends Monster {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		spawnGroupData = super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
-		if (levelAccessor.getRandom().nextInt(100) == 0) {
+		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		if (serverLevelAccessor.getRandom().nextInt(100) == 0) {
 			Skeleton skeleton = EntityType.SKELETON.create(this.level);
 			skeleton.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0F);
-			skeleton.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, null, null);
-			levelAccessor.addFreshEntity(skeleton);
+			skeleton.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, null, null);
 			skeleton.startRiding(this);
 		}
 
 		if (spawnGroupData == null) {
 			spawnGroupData = new Spider.SpiderEffectsGroupData();
-			if (levelAccessor.getDifficulty() == Difficulty.HARD && levelAccessor.getRandom().nextFloat() < 0.1F * difficultyInstance.getSpecialMultiplier()) {
-				((Spider.SpiderEffectsGroupData)spawnGroupData).setRandomEffect(levelAccessor.getRandom());
+			if (serverLevelAccessor.getDifficulty() == Difficulty.HARD && serverLevelAccessor.getRandom().nextFloat() < 0.1F * difficultyInstance.getSpecialMultiplier()
+				)
+			 {
+				((Spider.SpiderEffectsGroupData)spawnGroupData).setRandomEffect(serverLevelAccessor.getRandom());
 			}
 		}
 

@@ -10,12 +10,13 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -25,14 +26,14 @@ import net.minecraft.world.phys.BlockHitResult;
 public class TntBlock extends Block {
 	public static final BooleanProperty UNSTABLE = BlockStateProperties.UNSTABLE;
 
-	public TntBlock(Block.Properties properties) {
+	public TntBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.defaultBlockState().setValue(UNSTABLE, Boolean.valueOf(false)));
 	}
 
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState2.getBlock() != blockState.getBlock()) {
+		if (!blockState2.is(blockState.getBlock())) {
 			if (level.hasNeighborSignal(blockPos)) {
 				explode(level, blockPos);
 				level.removeBlock(blockPos, false);
@@ -60,9 +61,7 @@ public class TntBlock extends Block {
 	@Override
 	public void wasExploded(Level level, BlockPos blockPos, Explosion explosion) {
 		if (!level.isClientSide) {
-			PrimedTnt primedTnt = new PrimedTnt(
-				level, (double)((float)blockPos.getX() + 0.5F), (double)blockPos.getY(), (double)((float)blockPos.getZ() + 0.5F), explosion.getSourceMob()
-			);
+			PrimedTnt primedTnt = new PrimedTnt(level, (double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, explosion.getSourceMob());
 			primedTnt.setFuse((short)(level.random.nextInt(primedTnt.getLife() / 4) + primedTnt.getLife() / 8));
 			level.addFreshEntity(primedTnt);
 		}
@@ -99,18 +98,17 @@ public class TntBlock extends Block {
 				}
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
 	}
 
 	@Override
-	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Entity entity) {
-		if (!level.isClientSide && entity instanceof AbstractArrow) {
-			AbstractArrow abstractArrow = (AbstractArrow)entity;
-			Entity entity2 = abstractArrow.getOwner();
-			if (abstractArrow.isOnFire()) {
+	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
+		if (!level.isClientSide) {
+			Entity entity = projectile.getOwner();
+			if (projectile.isOnFire()) {
 				BlockPos blockPos = blockHitResult.getBlockPos();
-				explode(level, blockPos, entity2 instanceof LivingEntity ? (LivingEntity)entity2 : null);
+				explode(level, blockPos, entity instanceof LivingEntity ? (LivingEntity)entity : null);
 				level.removeBlock(blockPos, false);
 			}
 		}

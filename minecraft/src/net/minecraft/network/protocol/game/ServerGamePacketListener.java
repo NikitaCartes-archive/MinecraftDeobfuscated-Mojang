@@ -57,7 +57,9 @@ public interface ServerGamePacketListener extends PacketListener {
 
 	void handleAcceptTeleportPacket(ServerboundAcceptTeleportationPacket serverboundAcceptTeleportationPacket);
 
-	void handleRecipeBookUpdatePacket(ServerboundRecipeBookUpdatePacket serverboundRecipeBookUpdatePacket);
+	void handleRecipeBookSeenRecipePacket(ServerboundRecipeBookSeenRecipePacket serverboundRecipeBookSeenRecipePacket);
+
+	void handleRecipeBookChangeSettingsPacket(ServerboundRecipeBookChangeSettingsPacket serverboundRecipeBookChangeSettingsPacket);
 
 	void handleSeenAdvancements(ServerboundSeenAdvancementsPacket serverboundSeenAdvancementsPacket);
 
@@ -84,6 +86,8 @@ public interface ServerGamePacketListener extends PacketListener {
 	void handleBlockEntityTagQuery(ServerboundBlockEntityTagQuery serverboundBlockEntityTagQuery);
 
 	void handleSetJigsawBlock(ServerboundSetJigsawBlockPacket serverboundSetJigsawBlockPacket);
+
+	void handleJigsawGenerate(ServerboundJigsawGeneratePacket serverboundJigsawGeneratePacket);
 
 	void handleChangeDifficulty(ServerboundChangeDifficultyPacket serverboundChangeDifficultyPacket);
 

@@ -49,8 +49,8 @@ public class ShulkerRenderer extends MobRenderer<Shulker, ShulkerModel<Shulker>>
 			return true;
 		} else {
 			if (shulker.getClientSideTeleportInterpolation() > 0 && shulker.hasValidInterpolationPositions()) {
-				Vec3 vec3 = new Vec3(shulker.getAttachPosition());
-				Vec3 vec32 = new Vec3(shulker.getOldAttachPosition());
+				Vec3 vec3 = Vec3.atLowerCornerOf(shulker.getAttachPosition());
+				Vec3 vec32 = Vec3.atLowerCornerOf(shulker.getOldAttachPosition());
 				if (frustum.isVisible(new AABB(vec32.x, vec32.y, vec32.z, vec3.x, vec3.y, vec3.z))) {
 					return true;
 				}
@@ -65,14 +65,9 @@ public class ShulkerRenderer extends MobRenderer<Shulker, ShulkerModel<Shulker>>
 	}
 
 	protected void setupRotations(Shulker shulker, PoseStack poseStack, float f, float g, float h) {
-		super.setupRotations(shulker, poseStack, f, g, h);
+		super.setupRotations(shulker, poseStack, f, g + 180.0F, h);
 		poseStack.translate(0.0, 0.5, 0.0);
 		poseStack.mulPose(shulker.getAttachFace().getOpposite().getRotation());
 		poseStack.translate(0.0, -0.5, 0.0);
-	}
-
-	protected void scale(Shulker shulker, PoseStack poseStack, float f) {
-		float g = 0.999F;
-		poseStack.scale(0.999F, 0.999F, 0.999F);
 	}
 }

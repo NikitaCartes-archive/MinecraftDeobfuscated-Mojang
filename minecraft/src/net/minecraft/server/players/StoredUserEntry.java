@@ -3,15 +3,11 @@ package net.minecraft.server.players;
 import com.google.gson.JsonObject;
 import javax.annotation.Nullable;
 
-public class StoredUserEntry<T> {
+public abstract class StoredUserEntry<T> {
 	@Nullable
 	private final T user;
 
-	public StoredUserEntry(T object) {
-		this.user = object;
-	}
-
-	protected StoredUserEntry(@Nullable T object, JsonObject jsonObject) {
+	public StoredUserEntry(@Nullable T object) {
 		this.user = object;
 	}
 
@@ -24,6 +20,5 @@ public class StoredUserEntry<T> {
 		return false;
 	}
 
-	protected void serialize(JsonObject jsonObject) {
-	}
+	protected abstract void serialize(JsonObject jsonObject);
 }

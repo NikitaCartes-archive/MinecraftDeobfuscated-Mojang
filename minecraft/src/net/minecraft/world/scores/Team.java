@@ -9,6 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
 public abstract class Team {
@@ -18,7 +19,7 @@ public abstract class Team {
 
 	public abstract String getName();
 
-	public abstract Component getFormattedName(Component component);
+	public abstract MutableComponent getFormattedName(Component component);
 
 	@Environment(EnvType.CLIENT)
 	public abstract boolean canSeeFriendlyInvisibles();

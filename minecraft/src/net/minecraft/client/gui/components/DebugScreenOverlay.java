@@ -7,12 +7,14 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.datafixers.DataFixUtils;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Transformation;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
@@ -21,6 +23,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -43,14 +47,15 @@ import net.minecraft.util.FrameTimer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
@@ -88,28 +93,28 @@ public class DebugScreenOverlay extends GuiComponent {
 		this.clientChunk = null;
 	}
 
-	public void render() {
+	public void render(PoseStack poseStack) {
 		this.minecraft.getProfiler().push("debug");
 		RenderSystem.pushMatrix();
 		Entity entity = this.minecraft.getCameraEntity();
 		this.block = entity.pick(20.0, 0.0F, false);
 		this.liquid = entity.pick(20.0, 0.0F, true);
-		this.drawGameInformation();
-		this.drawSystemInformation();
+		this.drawGameInformation(poseStack);
+		this.drawSystemInformation(poseStack);
 		RenderSystem.popMatrix();
 		if (this.minecraft.options.renderFpsChart) {
 			int i = this.minecraft.getWindow().getGuiScaledWidth();
-			this.drawChart(this.minecraft.getFrameTimer(), 0, i / 2, true);
+			this.drawChart(poseStack, this.minecraft.getFrameTimer(), 0, i / 2, true);
 			IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
 			if (integratedServer != null) {
-				this.drawChart(integratedServer.getFrameTimer(), i - Math.min(i / 2, 240), i / 2, false);
+				this.drawChart(poseStack, integratedServer.getFrameTimer(), i - Math.min(i / 2, 240), i / 2, false);
 			}
 		}
 
 		this.minecraft.getProfiler().pop();
 	}
 
-	protected void drawGameInformation() {
+	protected void drawGameInformation(PoseStack poseStack) {
 		List<String> list = this.getGameInformation();
 		list.add("");
 		boolean bl = this.minecraft.getSingleplayerServer() != null;
@@ -129,13 +134,13 @@ public class DebugScreenOverlay extends GuiComponent {
 				int k = this.font.width(string);
 				int l = 2;
 				int m = 2 + j * i;
-				fill(1, m - 1, 2 + k + 1, m + j - 1, -1873784752);
-				this.font.draw(string, 2.0F, (float)m, 14737632);
+				fill(poseStack, 1, m - 1, 2 + k + 1, m + j - 1, -1873784752);
+				this.font.draw(poseStack, string, 2.0F, (float)m, 14737632);
 			}
 		}
 	}
 
-	protected void drawSystemInformation() {
+	protected void drawSystemInformation(PoseStack poseStack) {
 		List<String> list = this.getSystemInformation();
 
 		for (int i = 0; i < list.size(); i++) {
@@ -145,8 +150,8 @@ public class DebugScreenOverlay extends GuiComponent {
 				int k = this.font.width(string);
 				int l = this.minecraft.getWindow().getGuiScaledWidth() - 2 - k;
 				int m = 2 + j * i;
-				fill(l - 1, m - 1, l + k + 1, m + j - 1, -1873784752);
-				this.font.draw(string, (float)l, (float)m, 14737632);
+				fill(poseStack, l - 1, m - 1, l + k + 1, m + j - 1, -1873784752);
+				this.font.draw(poseStack, string, (float)l, (float)m, 14737632);
 			}
 		}
 	}
@@ -163,7 +168,7 @@ public class DebugScreenOverlay extends GuiComponent {
 			string = String.format("\"%s\" server, %.0f tx, %.0f rx", this.minecraft.player.getServerBrand(), f, g);
 		}
 
-		BlockPos blockPos = new BlockPos(this.minecraft.getCameraEntity());
+		BlockPos blockPos = this.minecraft.getCameraEntity().blockPosition();
 		if (this.minecraft.showOnlyReducedInfo()) {
 			return Lists.<String>newArrayList(
 				"Minecraft "
@@ -232,7 +237,7 @@ public class DebugScreenOverlay extends GuiComponent {
 				list.add(string3);
 			}
 
-			list.add(DimensionType.getName(this.minecraft.level.dimension.getType()).toString() + " FC: " + Integer.toString(longSet.size()));
+			list.add(this.minecraft.level.dimension().location() + " FC: " + longSet.size());
 			list.add("");
 			list.add(
 				String.format(
@@ -305,7 +310,7 @@ public class DebugScreenOverlay extends GuiComponent {
 
 						list.add(stringBuilder.toString());
 						if (blockPos.getY() >= 0 && blockPos.getY() < 256) {
-							list.add("Biome: " + Registry.BIOME.getKey(this.minecraft.level.getBiome(blockPos)));
+							list.add("Biome: " + this.minecraft.level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.minecraft.level.getBiome(blockPos)));
 							long l = 0L;
 							float h = 0.0F;
 							if (levelChunk2 != null) {
@@ -332,42 +337,51 @@ public class DebugScreenOverlay extends GuiComponent {
 				list.add("Outside of world...");
 			}
 
+			ServerLevel serverLevel = this.getServerLevel();
+			if (serverLevel != null) {
+				NaturalSpawner.SpawnState spawnState = serverLevel.getChunkSource().getLastSpawnState();
+				if (spawnState != null) {
+					Object2IntMap<MobCategory> object2IntMap = spawnState.getMobCategoryCounts();
+					int kx = spawnState.getSpawnableChunkCount();
+					list.add(
+						"SC: "
+							+ kx
+							+ ", "
+							+ (String)Stream.of(MobCategory.values())
+								.map(mobCategory -> Character.toUpperCase(mobCategory.getName().charAt(0)) + ": " + object2IntMap.getInt(mobCategory))
+								.collect(Collectors.joining(", "))
+					);
+				} else {
+					list.add("SC: N/A");
+				}
+			}
+
 			PostChain postChain = this.minecraft.gameRenderer.currentEffect();
 			if (postChain != null) {
 				list.add("Shader: " + postChain.getName());
 			}
 
-			if (this.block.getType() == HitResult.Type.BLOCK) {
-				BlockPos blockPos2 = ((BlockHitResult)this.block).getBlockPos();
-				list.add(String.format("Looking at block: %d %d %d", blockPos2.getX(), blockPos2.getY(), blockPos2.getZ()));
-			}
-
-			if (this.liquid.getType() == HitResult.Type.BLOCK) {
-				BlockPos blockPos2 = ((BlockHitResult)this.liquid).getBlockPos();
-				list.add(String.format("Looking at liquid: %d %d %d", blockPos2.getX(), blockPos2.getY(), blockPos2.getZ()));
-			}
-
-			list.add(this.minecraft.getSoundManager().getDebugString());
+			list.add(this.minecraft.getSoundManager().getDebugString() + String.format(" (Mood %d%%)", Math.round(this.minecraft.player.getCurrentMood() * 100.0F)));
 			return list;
 		}
 	}
 
 	@Nullable
-	private String getServerChunkStats() {
+	private ServerLevel getServerLevel() {
 		IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
-		if (integratedServer != null) {
-			ServerLevel serverLevel = integratedServer.getLevel(this.minecraft.level.getDimension().getType());
-			if (serverLevel != null) {
-				return serverLevel.gatherChunkSourceStats();
-			}
-		}
+		return integratedServer != null ? integratedServer.getLevel(this.minecraft.level.dimension()) : null;
+	}
 
-		return null;
+	@Nullable
+	private String getServerChunkStats() {
+		ServerLevel serverLevel = this.getServerLevel();
+		return serverLevel != null ? serverLevel.gatherChunkSourceStats() : null;
 	}
 
 	private Level getLevel() {
 		return DataFixUtils.orElse(
-			Optional.ofNullable(this.minecraft.getSingleplayerServer()).map(integratedServer -> integratedServer.getLevel(this.minecraft.level.dimension.getType())),
+			Optional.ofNullable(this.minecraft.getSingleplayerServer())
+				.flatMap(integratedServer -> Optional.ofNullable(integratedServer.getLevel(this.minecraft.level.dimension()))),
 			this.minecraft.level
 		);
 	}
@@ -375,14 +389,11 @@ public class DebugScreenOverlay extends GuiComponent {
 	@Nullable
 	private LevelChunk getServerChunk() {
 		if (this.serverChunk == null) {
-			IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
-			if (integratedServer != null) {
-				ServerLevel serverLevel = integratedServer.getLevel(this.minecraft.level.dimension.getType());
-				if (serverLevel != null) {
-					this.serverChunk = serverLevel.getChunkSource()
-						.getChunkFuture(this.lastPos.x, this.lastPos.z, ChunkStatus.FULL, false)
-						.thenApply(either -> either.map(chunkAccess -> (LevelChunk)chunkAccess, chunkLoadingFailure -> null));
-				}
+			ServerLevel serverLevel = this.getServerLevel();
+			if (serverLevel != null) {
+				this.serverChunk = serverLevel.getChunkSource()
+					.getChunkFuture(this.lastPos.x, this.lastPos.z, ChunkStatus.FULL, false)
+					.thenApply(either -> either.map(chunkAccess -> (LevelChunk)chunkAccess, chunkLoadingFailure -> null));
 			}
 
 			if (this.serverChunk == null) {
@@ -424,7 +435,7 @@ public class DebugScreenOverlay extends GuiComponent {
 				BlockPos blockPos = ((BlockHitResult)this.block).getBlockPos();
 				BlockState blockState = this.minecraft.level.getBlockState(blockPos);
 				list.add("");
-				list.add(ChatFormatting.UNDERLINE + "Targeted Block");
+				list.add(ChatFormatting.UNDERLINE + "Targeted Block: " + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ());
 				list.add(String.valueOf(Registry.BLOCK.getKey(blockState.getBlock())));
 
 				for (Entry<Property<?>, Comparable<?>> entry : blockState.getValues().entrySet()) {
@@ -440,7 +451,7 @@ public class DebugScreenOverlay extends GuiComponent {
 				BlockPos blockPos = ((BlockHitResult)this.liquid).getBlockPos();
 				FluidState fluidState = this.minecraft.level.getFluidState(blockPos);
 				list.add("");
-				list.add(ChatFormatting.UNDERLINE + "Targeted Fluid");
+				list.add(ChatFormatting.UNDERLINE + "Targeted Fluid: " + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ());
 				list.add(String.valueOf(Registry.FLUID.getKey(fluidState.getType())));
 
 				for (Entry<Property<?>, Comparable<?>> entry : fluidState.getValues().entrySet()) {
@@ -476,7 +487,7 @@ public class DebugScreenOverlay extends GuiComponent {
 		return property.getName() + ": " + string;
 	}
 
-	private void drawChart(FrameTimer frameTimer, int i, int j, boolean bl) {
+	private void drawChart(PoseStack poseStack, FrameTimer frameTimer, int i, int j, boolean bl) {
 		RenderSystem.disableDepthTest();
 		int k = frameTimer.getLogStart();
 		int l = frameTimer.getLogEnd();
@@ -497,7 +508,7 @@ public class DebugScreenOverlay extends GuiComponent {
 		}
 
 		int t = this.minecraft.getWindow().getGuiScaledHeight();
-		fill(i, t - 60, i + p, t, -1873784752);
+		fill(poseStack, i, t - 60, i + p, t, -1873784752);
 		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 		RenderSystem.enableBlend();
 		RenderSystem.disableTexture();
@@ -513,9 +524,9 @@ public class DebugScreenOverlay extends GuiComponent {
 			int aa = x >> 8 & 0xFF;
 			int ab = x & 0xFF;
 			bufferBuilder.vertex(matrix4f, (float)(n + 1), (float)t, 0.0F).color(z, aa, ab, y).endVertex();
-			bufferBuilder.vertex(matrix4f, (float)n, (float)t, 0.0F).color(z, aa, ab, y).endVertex();
-			bufferBuilder.vertex(matrix4f, (float)n, (float)(t - v + 1), 0.0F).color(z, aa, ab, y).endVertex();
 			bufferBuilder.vertex(matrix4f, (float)(n + 1), (float)(t - v + 1), 0.0F).color(z, aa, ab, y).endVertex();
+			bufferBuilder.vertex(matrix4f, (float)n, (float)(t - v + 1), 0.0F).color(z, aa, ab, y).endVertex();
+			bufferBuilder.vertex(matrix4f, (float)n, (float)t, 0.0F).color(z, aa, ab, y).endVertex();
 			n++;
 		}
 
@@ -524,31 +535,31 @@ public class DebugScreenOverlay extends GuiComponent {
 		RenderSystem.enableTexture();
 		RenderSystem.disableBlend();
 		if (bl) {
-			fill(i + 1, t - 30 + 1, i + 14, t - 30 + 10, -1873784752);
-			this.font.draw("60 FPS", (float)(i + 2), (float)(t - 30 + 2), 14737632);
-			this.hLine(i, i + p - 1, t - 30, -1);
-			fill(i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
-			this.font.draw("30 FPS", (float)(i + 2), (float)(t - 60 + 2), 14737632);
-			this.hLine(i, i + p - 1, t - 60, -1);
+			fill(poseStack, i + 1, t - 30 + 1, i + 14, t - 30 + 10, -1873784752);
+			this.font.draw(poseStack, "60 FPS", (float)(i + 2), (float)(t - 30 + 2), 14737632);
+			this.hLine(poseStack, i, i + p - 1, t - 30, -1);
+			fill(poseStack, i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
+			this.font.draw(poseStack, "30 FPS", (float)(i + 2), (float)(t - 60 + 2), 14737632);
+			this.hLine(poseStack, i, i + p - 1, t - 60, -1);
 		} else {
-			fill(i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
-			this.font.draw("20 TPS", (float)(i + 2), (float)(t - 60 + 2), 14737632);
-			this.hLine(i, i + p - 1, t - 60, -1);
+			fill(poseStack, i + 1, t - 60 + 1, i + 14, t - 60 + 10, -1873784752);
+			this.font.draw(poseStack, "20 TPS", (float)(i + 2), (float)(t - 60 + 2), 14737632);
+			this.hLine(poseStack, i, i + p - 1, t - 60, -1);
 		}
 
-		this.hLine(i, i + p - 1, t - 1, -1);
-		this.vLine(i, t - 60, t, -1);
-		this.vLine(i + p - 1, t - 60, t, -1);
+		this.hLine(poseStack, i, i + p - 1, t - 1, -1);
+		this.vLine(poseStack, i, t - 60, t, -1);
+		this.vLine(poseStack, i + p - 1, t - 60, t, -1);
 		if (bl && this.minecraft.options.framerateLimit > 0 && this.minecraft.options.framerateLimit <= 250) {
-			this.hLine(i, i + p - 1, t - 1 - (int)(1800.0 / (double)this.minecraft.options.framerateLimit), -16711681);
+			this.hLine(poseStack, i, i + p - 1, t - 1 - (int)(1800.0 / (double)this.minecraft.options.framerateLimit), -16711681);
 		}
 
 		String string = r + " ms min";
 		String string2 = q / (long)p + " ms avg";
 		String string3 = s + " ms max";
-		this.font.drawShadow(string, (float)(i + 2), (float)(t - 60 - 9), 14737632);
-		this.font.drawShadow(string2, (float)(i + p / 2 - this.font.width(string2) / 2), (float)(t - 60 - 9), 14737632);
-		this.font.drawShadow(string3, (float)(i + p - this.font.width(string3)), (float)(t - 60 - 9), 14737632);
+		this.font.drawShadow(poseStack, string, (float)(i + 2), (float)(t - 60 - 9), 14737632);
+		this.font.drawShadow(poseStack, string2, (float)(i + p / 2 - this.font.width(string2) / 2), (float)(t - 60 - 9), 14737632);
+		this.font.drawShadow(poseStack, string3, (float)(i + p - this.font.width(string3)), (float)(t - 60 - 9), 14737632);
 		RenderSystem.enableDepthTest();
 	}
 

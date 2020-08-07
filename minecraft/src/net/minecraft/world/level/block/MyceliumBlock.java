@@ -6,10 +6,11 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class MyceliumBlock extends SpreadingSnowyDirtBlock {
-	public MyceliumBlock(Block.Properties properties) {
+	public MyceliumBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 
@@ -20,9 +21,9 @@ public class MyceliumBlock extends SpreadingSnowyDirtBlock {
 		if (random.nextInt(10) == 0) {
 			level.addParticle(
 				ParticleTypes.MYCELIUM,
-				(double)blockPos.getX() + (double)random.nextFloat(),
+				(double)blockPos.getX() + random.nextDouble(),
 				(double)blockPos.getY() + 1.1,
-				(double)blockPos.getZ() + (double)random.nextFloat(),
+				(double)blockPos.getZ() + random.nextDouble(),
 				0.0,
 				0.0,
 				0.0

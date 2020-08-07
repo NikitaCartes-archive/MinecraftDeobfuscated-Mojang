@@ -1,10 +1,12 @@
 package net.minecraft.world.level.levelgen.feature.configurations;
 
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import java.util.stream.Stream;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 
 public interface FeatureConfiguration {
-	NoneFeatureConfiguration NONE = new NoneFeatureConfiguration();
+	NoneFeatureConfiguration NONE = NoneFeatureConfiguration.INSTANCE;
 
-	<T> Dynamic<T> serialize(DynamicOps<T> dynamicOps);
+	default Stream<ConfiguredFeature<?, ?>> getFeatures() {
+		return Stream.empty();
+	}
 }

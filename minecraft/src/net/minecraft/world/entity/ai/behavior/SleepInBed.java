@@ -1,12 +1,9 @@
 package net.minecraft.world.entity.ai.behavior;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.SerializableLong;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
@@ -31,18 +28,21 @@ public class SleepInBed extends Behavior<LivingEntity> {
 		} else {
 			Brain<?> brain = livingEntity.getBrain();
 			GlobalPos globalPos = (GlobalPos)brain.getMemory(MemoryModuleType.HOME).get();
-			if (!Objects.equals(serverLevel.getDimension().getType(), globalPos.dimension())) {
+			if (serverLevel.dimension() != globalPos.dimension()) {
 				return false;
 			} else {
-				Optional<SerializableLong> optional = brain.getMemory(MemoryModuleType.LAST_WOKEN);
-				if (optional.isPresent() && serverLevel.getGameTime() - ((SerializableLong)optional.get()).value() < 100L) {
-					return false;
-				} else {
-					BlockState blockState = serverLevel.getBlockState(globalPos.pos());
-					return globalPos.pos().closerThan(livingEntity.position(), 2.0)
-						&& blockState.getBlock().is(BlockTags.BEDS)
-						&& !(Boolean)blockState.getValue(BedBlock.OCCUPIED);
+				Optional<Long> optional = brain.getMemory(MemoryModuleType.LAST_WOKEN);
+				if (optional.isPresent()) {
+					long l = serverLevel.getGameTime() - (Long)optional.get();
+					if (l > 0L && l < 100L) {
+						return false;
+					}
 				}
+
+				BlockState blockState = serverLevel.getBlockState(globalPos.pos());
+				return globalPos.pos().closerThan(livingEntity.position(), 2.0)
+					&& blockState.getBlock().is(BlockTags.BEDS)
+					&& !(Boolean)blockState.getValue(BedBlock.OCCUPIED);
 			}
 		}
 	}
@@ -63,9 +63,7 @@ public class SleepInBed extends Behavior<LivingEntity> {
 	@Override
 	protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
 		if (l > this.nextOkStartTime) {
-			livingEntity.getBrain()
-				.getMemory(MemoryModuleType.OPENED_DOORS)
-				.ifPresent(set -> InteractWithDoor.closeAllOpenedDoors(serverLevel, ImmutableList.of(), 0, livingEntity, livingEntity.getBrain()));
+			InteractWithDoor.closeDoorsThatIHaveOpenedOrPassedThrough(serverLevel, livingEntity, null, null);
 			livingEntity.startSleeping(((GlobalPos)livingEntity.getBrain().getMemory(MemoryModuleType.HOME).get()).pos());
 		}
 	}

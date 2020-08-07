@@ -5,7 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 public class InactiveProfiler implements ProfileCollector {
-	public static final InactiveProfiler INACTIVE = new InactiveProfiler();
+	public static final InactiveProfiler INSTANCE = new InactiveProfiler();
 
 	private InactiveProfiler() {
 	}

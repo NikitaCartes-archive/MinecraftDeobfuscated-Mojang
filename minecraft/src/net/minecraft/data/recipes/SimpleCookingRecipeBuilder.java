@@ -46,7 +46,7 @@ public class SimpleCookingRecipeBuilder {
 		return cooking(ingredient, itemLike, f, i, RecipeSerializer.SMELTING_RECIPE);
 	}
 
-	public SimpleCookingRecipeBuilder unlocks(String string, CriterionTriggerInstance criterionTriggerInstance) {
+	public SimpleCookingRecipeBuilder unlockedBy(String string, CriterionTriggerInstance criterionTriggerInstance) {
 		this.advancement.addCriterion(string, criterionTriggerInstance);
 		return this;
 	}
@@ -69,7 +69,7 @@ public class SimpleCookingRecipeBuilder {
 		this.ensureValid(resourceLocation);
 		this.advancement
 			.parent(new ResourceLocation("recipes/root"))
-			.addCriterion("has_the_recipe", new RecipeUnlockedTrigger.TriggerInstance(resourceLocation))
+			.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(resourceLocation))
 			.rewards(AdvancementRewards.Builder.recipe(resourceLocation))
 			.requirements(RequirementsStrategy.OR);
 		consumer.accept(

@@ -9,10 +9,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.SnowGolem;
-import net.minecraft.world.item.BlockPlaceContext;
-import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.item.Wearable;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
@@ -23,7 +24,7 @@ import net.minecraft.world.level.block.state.predicate.BlockStatePredicate;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.Material;
 
-public class CarvedPumpkinBlock extends HorizontalDirectionalBlock {
+public class CarvedPumpkinBlock extends HorizontalDirectionalBlock implements Wearable {
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	@Nullable
 	private BlockPattern snowGolemBase;
@@ -34,16 +35,16 @@ public class CarvedPumpkinBlock extends HorizontalDirectionalBlock {
 	@Nullable
 	private BlockPattern ironGolemFull;
 	private static final Predicate<BlockState> PUMPKINS_PREDICATE = blockState -> blockState != null
-			&& (blockState.getBlock() == Blocks.CARVED_PUMPKIN || blockState.getBlock() == Blocks.JACK_O_LANTERN);
+			&& (blockState.is(Blocks.CARVED_PUMPKIN) || blockState.is(Blocks.JACK_O_LANTERN));
 
-	protected CarvedPumpkinBlock(Block.Properties properties) {
+	protected CarvedPumpkinBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
 	}
 
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState2.getBlock() != blockState.getBlock()) {
+		if (!blockState2.is(blockState.getBlock())) {
 			this.trySpawnGolem(level, blockPos);
 		}
 	}
@@ -161,10 +162,5 @@ public class CarvedPumpkinBlock extends HorizontalDirectionalBlock {
 		}
 
 		return this.ironGolemFull;
-	}
-
-	@Override
-	public boolean isValidSpawn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, EntityType<?> entityType) {
-		return true;
 	}
 }

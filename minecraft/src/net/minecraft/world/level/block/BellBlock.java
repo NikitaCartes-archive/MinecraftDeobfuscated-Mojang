@@ -10,14 +10,15 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BellBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BellAttachType;
@@ -34,7 +35,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class BellBlock extends BaseEntityBlock {
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
-	private static final EnumProperty<BellAttachType> ATTACHMENT = BlockStateProperties.BELL_ATTACHMENT;
+	public static final EnumProperty<BellAttachType> ATTACHMENT = BlockStateProperties.BELL_ATTACHMENT;
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	private static final VoxelShape NORTH_SOUTH_FLOOR_SHAPE = Block.box(0.0, 0.0, 4.0, 16.0, 16.0, 12.0);
 	private static final VoxelShape EAST_WEST_FLOOR_SHAPE = Block.box(4.0, 0.0, 0.0, 12.0, 16.0, 16.0);
@@ -49,7 +50,7 @@ public class BellBlock extends BaseEntityBlock {
 	private static final VoxelShape TO_SOUTH = Shapes.or(BELL_SHAPE, Block.box(7.0, 13.0, 3.0, 9.0, 15.0, 16.0));
 	private static final VoxelShape CEILING_SHAPE = Shapes.or(BELL_SHAPE, Block.box(7.0, 13.0, 7.0, 9.0, 16.0, 9.0));
 
-	public BellBlock(Block.Properties properties) {
+	public BellBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(ATTACHMENT, BellAttachType.FLOOR).setValue(POWERED, Boolean.valueOf(false))
@@ -69,19 +70,17 @@ public class BellBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Entity entity) {
-		if (entity instanceof AbstractArrow) {
-			Entity entity2 = ((AbstractArrow)entity).getOwner();
-			Player player = entity2 instanceof Player ? (Player)entity2 : null;
-			this.onHit(level, blockState, blockHitResult, player, true);
-		}
+	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
+		Entity entity = projectile.getOwner();
+		Player player = entity instanceof Player ? (Player)entity : null;
+		this.onHit(level, blockState, blockHitResult, player, true);
 	}
 
 	@Override
 	public InteractionResult use(
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		return this.onHit(level, blockState, blockHitResult, player, true) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+		return this.onHit(level, blockState, blockHitResult, player, true) ? InteractionResult.sidedSuccess(level.isClientSide) : InteractionResult.PASS;
 	}
 
 	public boolean onHit(Level level, BlockState blockState, BlockHitResult blockHitResult, @Nullable Player player, boolean bl) {
@@ -233,7 +232,10 @@ public class BellBlock extends BaseEntityBlock {
 
 	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
-		return FaceAttachedHorizontalDirectionalBlock.canAttach(levelReader, blockPos, getConnectedDirection(blockState).getOpposite());
+		Direction direction = getConnectedDirection(blockState).getOpposite();
+		return direction == Direction.UP
+			? Block.canSupportCenter(levelReader, blockPos.above(), Direction.DOWN)
+			: FaceAttachedHorizontalDirectionalBlock.canAttach(levelReader, blockPos, direction);
 	}
 
 	private static Direction getConnectedDirection(BlockState blockState) {

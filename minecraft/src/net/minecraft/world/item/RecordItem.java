@@ -9,11 +9,13 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.JukeboxBlock;
@@ -36,7 +38,7 @@ public class RecordItem extends Item {
 		Level level = useOnContext.getLevel();
 		BlockPos blockPos = useOnContext.getClickedPos();
 		BlockState blockState = level.getBlockState(blockPos);
-		if (blockState.getBlock() == Blocks.JUKEBOX && !(Boolean)blockState.getValue(JukeboxBlock.HAS_RECORD)) {
+		if (blockState.is(Blocks.JUKEBOX) && !(Boolean)blockState.getValue(JukeboxBlock.HAS_RECORD)) {
 			ItemStack itemStack = useOnContext.getItemInHand();
 			if (!level.isClientSide) {
 				((JukeboxBlock)Blocks.JUKEBOX).setRecord(level, blockPos, blockState, itemStack);
@@ -48,7 +50,7 @@ public class RecordItem extends Item {
 				}
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			return InteractionResult.PASS;
 		}
@@ -65,7 +67,7 @@ public class RecordItem extends Item {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public Component getDisplayName() {
+	public MutableComponent getDisplayName() {
 		return new TranslatableComponent(this.getDescriptionId() + ".desc");
 	}
 

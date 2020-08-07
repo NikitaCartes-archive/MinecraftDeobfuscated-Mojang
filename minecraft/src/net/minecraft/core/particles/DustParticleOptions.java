@@ -2,6 +2,8 @@ package net.minecraft.core.particles;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Locale;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -11,6 +13,15 @@ import net.minecraft.util.Mth;
 
 public class DustParticleOptions implements ParticleOptions {
 	public static final DustParticleOptions REDSTONE = new DustParticleOptions(1.0F, 0.0F, 0.0F, 1.0F);
+	public static final Codec<DustParticleOptions> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					Codec.FLOAT.fieldOf("r").forGetter(dustParticleOptions -> dustParticleOptions.r),
+					Codec.FLOAT.fieldOf("g").forGetter(dustParticleOptions -> dustParticleOptions.g),
+					Codec.FLOAT.fieldOf("b").forGetter(dustParticleOptions -> dustParticleOptions.b),
+					Codec.FLOAT.fieldOf("scale").forGetter(dustParticleOptions -> dustParticleOptions.scale)
+				)
+				.apply(instance, DustParticleOptions::new)
+	);
 	public static final ParticleOptions.Deserializer<DustParticleOptions> DESERIALIZER = new ParticleOptions.Deserializer<DustParticleOptions>() {
 		public DustParticleOptions fromCommand(ParticleType<DustParticleOptions> particleType, StringReader stringReader) throws CommandSyntaxException {
 			stringReader.expect(' ');

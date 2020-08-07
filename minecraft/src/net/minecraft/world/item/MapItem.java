@@ -15,19 +15,20 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.MaterialColor;
@@ -40,7 +41,7 @@ public class MapItem extends ComplexItem {
 
 	public static ItemStack create(Level level, int i, int j, byte b, boolean bl, boolean bl2) {
 		ItemStack itemStack = new ItemStack(Items.FILLED_MAP);
-		createAndStoreSavedData(itemStack, level, i, j, b, bl, bl2, level.dimension.getType());
+		createAndStoreSavedData(itemStack, level, i, j, b, bl, bl2, level.dimension());
 		return itemStack;
 	}
 
@@ -52,9 +53,9 @@ public class MapItem extends ComplexItem {
 	@Nullable
 	public static MapItemSavedData getOrCreateSavedData(ItemStack itemStack, Level level) {
 		MapItemSavedData mapItemSavedData = getSavedData(itemStack, level);
-		if (mapItemSavedData == null && !level.isClientSide) {
+		if (mapItemSavedData == null && level instanceof ServerLevel) {
 			mapItemSavedData = createAndStoreSavedData(
-				itemStack, level, level.getLevelData().getXSpawn(), level.getLevelData().getZSpawn(), 3, false, false, level.dimension.getType()
+				itemStack, level, level.getLevelData().getXSpawn(), level.getLevelData().getZSpawn(), 3, false, false, level.dimension()
 			);
 		}
 
@@ -67,11 +68,11 @@ public class MapItem extends ComplexItem {
 	}
 
 	private static MapItemSavedData createAndStoreSavedData(
-		ItemStack itemStack, Level level, int i, int j, int k, boolean bl, boolean bl2, DimensionType dimensionType
+		ItemStack itemStack, Level level, int i, int j, int k, boolean bl, boolean bl2, ResourceKey<Level> resourceKey
 	) {
 		int l = level.getFreeMapId();
 		MapItemSavedData mapItemSavedData = new MapItemSavedData(makeKey(l));
-		mapItemSavedData.setProperties(i, j, k, bl, bl2, dimensionType);
+		mapItemSavedData.setProperties(i, j, k, bl, bl2, resourceKey);
 		level.setMapData(mapItemSavedData);
 		itemStack.getOrCreateTag().putInt("map", l);
 		return mapItemSavedData;
@@ -82,14 +83,14 @@ public class MapItem extends ComplexItem {
 	}
 
 	public void update(Level level, Entity entity, MapItemSavedData mapItemSavedData) {
-		if (level.dimension.getType() == mapItemSavedData.dimension && entity instanceof Player) {
+		if (level.dimension() == mapItemSavedData.dimension && entity instanceof Player) {
 			int i = 1 << mapItemSavedData.scale;
 			int j = mapItemSavedData.x;
 			int k = mapItemSavedData.z;
 			int l = Mth.floor(entity.getX() - (double)j) / i + 64;
 			int m = Mth.floor(entity.getZ() - (double)k) / i + 64;
 			int n = 128 / i;
-			if (level.dimension.isHasCeiling()) {
+			if (level.dimensionType().hasCeiling()) {
 				n /= 2;
 			}
 
@@ -117,7 +118,7 @@ public class MapItem extends ComplexItem {
 								int v = t & 15;
 								int w = 0;
 								double e = 0.0;
-								if (level.dimension.isHasCeiling()) {
+								if (level.dimensionType().hasCeiling()) {
 									int x = s + t * 231871;
 									x = x * x * 31287121 + x * 11;
 									if ((x >> 20 & 1) == 0) {
@@ -219,7 +220,7 @@ public class MapItem extends ComplexItem {
 	public static void renderBiomePreviewMap(ServerLevel serverLevel, ItemStack itemStack) {
 		MapItemSavedData mapItemSavedData = getOrCreateSavedData(itemStack, serverLevel);
 		if (mapItemSavedData != null) {
-			if (serverLevel.dimension.getType() == mapItemSavedData.dimension) {
+			if (serverLevel.dimension() == mapItemSavedData.dimension) {
 				int i = 1 << mapItemSavedData.scale;
 				int j = mapItemSavedData.x;
 				int k = mapItemSavedData.z;
@@ -337,6 +338,9 @@ public class MapItem extends ComplexItem {
 		if (compoundTag != null && compoundTag.contains("map_scale_direction", 99)) {
 			scaleMap(itemStack, level, compoundTag.getInt("map_scale_direction"));
 			compoundTag.remove("map_scale_direction");
+		} else if (compoundTag != null && compoundTag.contains("map_to_lock", 1) && compoundTag.getBoolean("map_to_lock")) {
+			lockMap(level, itemStack);
+			compoundTag.remove("map_to_lock");
 		}
 	}
 
@@ -356,18 +360,13 @@ public class MapItem extends ComplexItem {
 		}
 	}
 
-	@Nullable
-	public static ItemStack lockMap(Level level, ItemStack itemStack) {
+	public static void lockMap(Level level, ItemStack itemStack) {
 		MapItemSavedData mapItemSavedData = getOrCreateSavedData(itemStack, level);
 		if (mapItemSavedData != null) {
-			ItemStack itemStack2 = itemStack.copy();
 			MapItemSavedData mapItemSavedData2 = createAndStoreSavedData(
-				itemStack2, level, 0, 0, mapItemSavedData.scale, mapItemSavedData.trackingPosition, mapItemSavedData.unlimitedTracking, mapItemSavedData.dimension
+				itemStack, level, 0, 0, mapItemSavedData.scale, mapItemSavedData.trackingPosition, mapItemSavedData.unlimitedTracking, mapItemSavedData.dimension
 			);
 			mapItemSavedData2.lockData(mapItemSavedData);
-			return itemStack2;
-		} else {
-			return null;
 		}
 	}
 
@@ -405,12 +404,12 @@ public class MapItem extends ComplexItem {
 	public InteractionResult useOn(UseOnContext useOnContext) {
 		BlockState blockState = useOnContext.getLevel().getBlockState(useOnContext.getClickedPos());
 		if (blockState.is(BlockTags.BANNERS)) {
-			if (!useOnContext.level.isClientSide) {
+			if (!useOnContext.getLevel().isClientSide) {
 				MapItemSavedData mapItemSavedData = getOrCreateSavedData(useOnContext.getItemInHand(), useOnContext.getLevel());
 				mapItemSavedData.toggleBanner(useOnContext.getLevel(), useOnContext.getClickedPos());
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(useOnContext.getLevel().isClientSide);
 		} else {
 			return super.useOn(useOnContext);
 		}

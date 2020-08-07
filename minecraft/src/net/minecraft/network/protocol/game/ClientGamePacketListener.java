@@ -7,8 +7,6 @@ public interface ClientGamePacketListener extends PacketListener {
 
 	void handleAddExperienceOrb(ClientboundAddExperienceOrbPacket clientboundAddExperienceOrbPacket);
 
-	void handleAddGlobalEntity(ClientboundAddGlobalEntityPacket clientboundAddGlobalEntityPacket);
-
 	void handleAddMob(ClientboundAddMobPacket clientboundAddMobPacket);
 
 	void handleAddObjective(ClientboundSetObjectivePacket clientboundSetObjectivePacket);
@@ -35,7 +33,7 @@ public interface ClientGamePacketListener extends PacketListener {
 
 	void handleChat(ClientboundChatPacket clientboundChatPacket);
 
-	void handleChunkBlocksUpdate(ClientboundChunkBlocksUpdatePacket clientboundChunkBlocksUpdatePacket);
+	void handleChunkBlocksUpdate(ClientboundSectionBlocksUpdatePacket clientboundSectionBlocksUpdatePacket);
 
 	void handleMapItemData(ClientboundMapItemDataPacket clientboundMapItemDataPacket);
 
@@ -101,7 +99,7 @@ public interface ClientGamePacketListener extends PacketListener {
 
 	void handleSetEntityMotion(ClientboundSetEntityMotionPacket clientboundSetEntityMotionPacket);
 
-	void handleSetEquippedItem(ClientboundSetEquippedItemPacket clientboundSetEquippedItemPacket);
+	void handleSetEquipment(ClientboundSetEquipmentPacket clientboundSetEquipmentPacket);
 
 	void handleSetExperience(ClientboundSetExperiencePacket clientboundSetExperiencePacket);
 
@@ -111,7 +109,7 @@ public interface ClientGamePacketListener extends PacketListener {
 
 	void handleSetScore(ClientboundSetScorePacket clientboundSetScorePacket);
 
-	void handleSetSpawn(ClientboundSetSpawnPositionPacket clientboundSetSpawnPositionPacket);
+	void handleSetSpawn(ClientboundSetDefaultSpawnPositionPacket clientboundSetDefaultSpawnPositionPacket);
 
 	void handleSetTime(ClientboundSetTimePacket clientboundSetTimePacket);
 

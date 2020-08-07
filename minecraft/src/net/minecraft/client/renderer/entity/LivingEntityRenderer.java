@@ -107,9 +107,11 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 
 		this.model.prepareMobModel(livingEntity, o, n, g);
 		this.model.setupAnim(livingEntity, o, n, lx, k, m);
+		Minecraft minecraft = Minecraft.getInstance();
 		boolean bl = this.isBodyVisible(livingEntity);
-		boolean bl2 = !bl && !livingEntity.isInvisibleTo(Minecraft.getInstance().player);
-		RenderType renderType = this.getRenderType(livingEntity, bl, bl2);
+		boolean bl2 = !bl && !livingEntity.isInvisibleTo(minecraft.player);
+		boolean bl3 = minecraft.shouldEntityAppearGlowing(livingEntity);
+		RenderType renderType = this.getRenderType(livingEntity, bl, bl2, bl3);
 		if (renderType != null) {
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(renderType);
 			int p = getOverlayCoords(livingEntity, this.getWhiteOverlayProgress(livingEntity, g));
@@ -127,14 +129,14 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 	}
 
 	@Nullable
-	protected RenderType getRenderType(T livingEntity, boolean bl, boolean bl2) {
+	protected RenderType getRenderType(T livingEntity, boolean bl, boolean bl2, boolean bl3) {
 		ResourceLocation resourceLocation = this.getTextureLocation(livingEntity);
 		if (bl2) {
-			return RenderType.entityTranslucent(resourceLocation);
+			return RenderType.itemEntityTranslucentCull(resourceLocation);
 		} else if (bl) {
 			return this.model.renderType(resourceLocation);
 		} else {
-			return livingEntity.isGlowing() ? RenderType.outline(resourceLocation) : null;
+			return bl3 ? RenderType.outline(resourceLocation) : null;
 		}
 	}
 
@@ -161,7 +163,15 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 		}
 	}
 
+	protected boolean isShaking(T livingEntity) {
+		return false;
+	}
+
 	protected void setupRotations(T livingEntity, PoseStack poseStack, float f, float g, float h) {
+		if (this.isShaking(livingEntity)) {
+			g += (float)(Math.cos((double)livingEntity.tickCount * 3.25) * Math.PI * 0.4F);
+		}
+
 		Pose pose = livingEntity.getPose();
 		if (pose != Pose.SLEEPING) {
 			poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - g));

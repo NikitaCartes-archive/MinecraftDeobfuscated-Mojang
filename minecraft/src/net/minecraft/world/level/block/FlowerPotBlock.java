@@ -16,7 +16,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -26,7 +28,7 @@ public class FlowerPotBlock extends Block {
 	protected static final VoxelShape SHAPE = Block.box(5.0, 0.0, 5.0, 11.0, 6.0, 11.0);
 	private final Block content;
 
-	public FlowerPotBlock(Block block, Block.Properties properties) {
+	public FlowerPotBlock(Block block, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.content = block;
 		POTTED_BY_CONTENT.put(block, this);
@@ -69,7 +71,7 @@ public class FlowerPotBlock extends Block {
 				level.setBlock(blockPos, Blocks.FLOWER_POT.defaultBlockState(), 3);
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			return InteractionResult.CONSUME;
 		}
@@ -92,5 +94,10 @@ public class FlowerPotBlock extends Block {
 
 	public Block getContent() {
 		return this.content;
+	}
+
+	@Override
+	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+		return false;
 	}
 }

@@ -5,41 +5,41 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.Vec3;
 
 public class LocationCheck implements LootItemCondition {
 	private final LocationPredicate predicate;
 	private final BlockPos offset;
 
-	public LocationCheck(LocationPredicate locationPredicate, BlockPos blockPos) {
+	private LocationCheck(LocationPredicate locationPredicate, BlockPos blockPos) {
 		this.predicate = locationPredicate;
 		this.offset = blockPos;
 	}
 
+	@Override
+	public LootItemConditionType getType() {
+		return LootItemConditions.LOCATION_CHECK;
+	}
+
 	public boolean test(LootContext lootContext) {
-		BlockPos blockPos = lootContext.getParamOrNull(LootContextParams.BLOCK_POS);
-		return blockPos != null
+		Vec3 vec3 = lootContext.getParamOrNull(LootContextParams.ORIGIN);
+		return vec3 != null
 			&& this.predicate
-				.matches(
-					lootContext.getLevel(),
-					(float)(blockPos.getX() + this.offset.getX()),
-					(float)(blockPos.getY() + this.offset.getY()),
-					(float)(blockPos.getZ() + this.offset.getZ())
-				);
+				.matches(lootContext.getLevel(), vec3.x() + (double)this.offset.getX(), vec3.y() + (double)this.offset.getY(), vec3.z() + (double)this.offset.getZ());
 	}
 
 	public static LootItemCondition.Builder checkLocation(LocationPredicate.Builder builder) {
 		return () -> new LocationCheck(builder.build(), BlockPos.ZERO);
 	}
 
-	public static class Serializer extends LootItemCondition.Serializer<LocationCheck> {
-		public Serializer() {
-			super(new ResourceLocation("location_check"), LocationCheck.class);
-		}
+	public static LootItemCondition.Builder checkLocation(LocationPredicate.Builder builder, BlockPos blockPos) {
+		return () -> new LocationCheck(builder.build(), blockPos);
+	}
 
+	public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<LocationCheck> {
 		public void serialize(JsonObject jsonObject, LocationCheck locationCheck, JsonSerializationContext jsonSerializationContext) {
 			jsonObject.add("predicate", locationCheck.predicate.serializeToJson());
 			if (locationCheck.offset.getX() != 0) {

@@ -31,7 +31,7 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.UseOnContext;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
@@ -44,7 +44,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.PosAndRot;
 import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -61,7 +60,8 @@ public class MultiPlayerGameMode {
 	private int destroyDelay;
 	private boolean isDestroying;
 	private GameType localPlayerMode = GameType.SURVIVAL;
-	private final Object2ObjectLinkedOpenHashMap<Pair<BlockPos, ServerboundPlayerActionPacket.Action>, PosAndRot> unAckedActions = new Object2ObjectLinkedOpenHashMap<>();
+	private GameType previousLocalPlayerMode = GameType.NOT_SET;
+	private final Object2ObjectLinkedOpenHashMap<Pair<BlockPos, ServerboundPlayerActionPacket.Action>, Vec3> unAckedActions = new Object2ObjectLinkedOpenHashMap<>();
 	private int carriedIndex;
 
 	public MultiPlayerGameMode(Minecraft minecraft, ClientPacketListener clientPacketListener) {
@@ -69,17 +69,19 @@ public class MultiPlayerGameMode {
 		this.connection = clientPacketListener;
 	}
 
-	public static void creativeDestroyBlock(Minecraft minecraft, MultiPlayerGameMode multiPlayerGameMode, BlockPos blockPos, Direction direction) {
-		if (!minecraft.level.extinguishFire(minecraft.player, blockPos, direction)) {
-			multiPlayerGameMode.destroyBlock(blockPos);
-		}
-	}
-
 	public void adjustPlayer(Player player) {
 		this.localPlayerMode.updatePlayerAbilities(player.abilities);
 	}
 
+	public void setPreviousLocalMode(GameType gameType) {
+		this.previousLocalPlayerMode = gameType;
+	}
+
 	public void setLocalMode(GameType gameType) {
+		if (gameType != this.localPlayerMode) {
+			this.previousLocalPlayerMode = this.localPlayerMode;
+		}
+
 		this.localPlayerMode = gameType;
 		this.localPlayerMode.updatePlayerAbilities(this.minecraft.player.abilities);
 	}
@@ -123,14 +125,14 @@ public class MultiPlayerGameMode {
 			return false;
 		} else {
 			if (this.localPlayerMode != GameType.SPECTATOR) {
-				this.minecraft.player.resetAttackStrengthTicker();
+				this.minecraft.player.resetAttackStrengthTicker(false);
 			}
 
 			if (this.localPlayerMode.isCreative()) {
 				BlockState blockState = this.minecraft.level.getBlockState(blockPos);
 				this.minecraft.getTutorial().onDestroyBlock(this.minecraft.level, blockPos, blockState, 1.0F);
 				this.sendBlockAction(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, direction);
-				creativeDestroyBlock(this.minecraft, this, blockPos, direction);
+				this.destroyBlock(blockPos);
 				this.destroyDelay = 5;
 			} else if (!this.isDestroying || !this.sameDestroyTarget(blockPos)) {
 				if (this.isDestroying) {
@@ -179,7 +181,7 @@ public class MultiPlayerGameMode {
 			return true;
 		} else {
 			if (this.localPlayerMode != GameType.SPECTATOR) {
-				this.minecraft.player.resetAttackStrengthTicker();
+				this.minecraft.player.resetAttackStrengthTicker(false);
 			}
 
 			if (this.localPlayerMode.isCreative() && this.minecraft.level.getWorldBorder().isWithinBounds(blockPos)) {
@@ -187,7 +189,7 @@ public class MultiPlayerGameMode {
 				BlockState blockState = this.minecraft.level.getBlockState(blockPos);
 				this.minecraft.getTutorial().onDestroyBlock(this.minecraft.level, blockPos, blockState, 1.0F);
 				this.sendBlockAction(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, direction);
-				creativeDestroyBlock(this.minecraft, this, blockPos, direction);
+				this.destroyBlock(blockPos);
 				return true;
 			} else if (this.sameDestroyTarget(blockPos)) {
 				BlockState blockState = this.minecraft.level.getBlockState(blockPos);
@@ -318,7 +320,7 @@ public class MultiPlayerGameMode {
 				int i = itemStack.getCount();
 				InteractionResultHolder<ItemStack> interactionResultHolder = itemStack.use(level, player, interactionHand);
 				ItemStack itemStack2 = interactionResultHolder.getObject();
-				if (itemStack2 != itemStack || itemStack2.getCount() != i) {
+				if (itemStack2 != itemStack) {
 					player.setItemInHand(interactionHand, itemStack2);
 				}
 
@@ -328,28 +330,32 @@ public class MultiPlayerGameMode {
 	}
 
 	public LocalPlayer createPlayer(ClientLevel clientLevel, StatsCounter statsCounter, ClientRecipeBook clientRecipeBook) {
-		return new LocalPlayer(this.minecraft, clientLevel, this.connection, statsCounter, clientRecipeBook);
+		return this.createPlayer(clientLevel, statsCounter, clientRecipeBook, false, false);
+	}
+
+	public LocalPlayer createPlayer(ClientLevel clientLevel, StatsCounter statsCounter, ClientRecipeBook clientRecipeBook, boolean bl, boolean bl2) {
+		return new LocalPlayer(this.minecraft, clientLevel, this.connection, statsCounter, clientRecipeBook, bl, bl2);
 	}
 
 	public void attack(Player player, Entity entity) {
 		this.ensureHasSentCarriedItem();
-		this.connection.send(new ServerboundInteractPacket(entity));
+		this.connection.send(new ServerboundInteractPacket(entity, player.isShiftKeyDown()));
 		if (this.localPlayerMode != GameType.SPECTATOR) {
 			player.attack(entity);
-			player.resetAttackStrengthTicker();
+			player.resetAttackStrengthTicker(true);
 		}
 	}
 
 	public InteractionResult interact(Player player, Entity entity, InteractionHand interactionHand) {
 		this.ensureHasSentCarriedItem();
-		this.connection.send(new ServerboundInteractPacket(entity, interactionHand));
+		this.connection.send(new ServerboundInteractPacket(entity, interactionHand, player.isShiftKeyDown()));
 		return this.localPlayerMode == GameType.SPECTATOR ? InteractionResult.PASS : player.interactOn(entity, interactionHand);
 	}
 
 	public InteractionResult interactAt(Player player, Entity entity, EntityHitResult entityHitResult, InteractionHand interactionHand) {
 		this.ensureHasSentCarriedItem();
 		Vec3 vec3 = entityHitResult.getLocation().subtract(entity.getX(), entity.getY(), entity.getZ());
-		this.connection.send(new ServerboundInteractPacket(entity, interactionHand, vec3));
+		this.connection.send(new ServerboundInteractPacket(entity, interactionHand, vec3, player.isShiftKeyDown()));
 		return this.localPlayerMode == GameType.SPECTATOR ? InteractionResult.PASS : entity.interactAt(player, vec3, interactionHand);
 	}
 
@@ -357,7 +363,8 @@ public class MultiPlayerGameMode {
 		this.ensureHasSentCarriedItem();
 		this.connection.send(new ServerboundInteractPacket());
 		if (this.localPlayerMode != GameType.SPECTATOR) {
-			player.resetAttackStrengthTicker();
+			player.attackAir();
+			player.resetAttackStrengthTicker(false);
 		}
 	}
 
@@ -414,6 +421,10 @@ public class MultiPlayerGameMode {
 		return this.localPlayerMode == GameType.SPECTATOR;
 	}
 
+	public GameType getPreviousPlayerMode() {
+		return this.previousLocalPlayerMode;
+	}
+
 	public GameType getPlayerMode() {
 		return this.localPlayerMode;
 	}
@@ -428,17 +439,18 @@ public class MultiPlayerGameMode {
 
 	private void sendBlockAction(ServerboundPlayerActionPacket.Action action, BlockPos blockPos, Direction direction) {
 		LocalPlayer localPlayer = this.minecraft.player;
-		this.unAckedActions.put(Pair.of(blockPos, action), new PosAndRot(localPlayer.position(), localPlayer.xRot, localPlayer.yRot));
+		this.unAckedActions.put(Pair.of(blockPos, action), localPlayer.position());
 		this.connection.send(new ServerboundPlayerActionPacket(action, blockPos, direction));
 	}
 
 	public void handleBlockBreakAck(ClientLevel clientLevel, BlockPos blockPos, BlockState blockState, ServerboundPlayerActionPacket.Action action, boolean bl) {
-		PosAndRot posAndRot = this.unAckedActions.remove(Pair.of(blockPos, action));
-		if (posAndRot == null || !bl || action != ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK && clientLevel.getBlockState(blockPos) != blockState) {
+		Vec3 vec3 = this.unAckedActions.remove(Pair.of(blockPos, action));
+		BlockState blockState2 = clientLevel.getBlockState(blockPos);
+		if ((vec3 == null || !bl || action != ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK && blockState2 != blockState) && blockState2 != blockState) {
 			clientLevel.setKnownState(blockPos, blockState);
-			if (posAndRot != null) {
-				Vec3 vec3 = posAndRot.pos();
-				this.minecraft.player.absMoveTo(vec3.x, vec3.y, vec3.z, posAndRot.yRot(), posAndRot.xRot());
+			Player player = this.minecraft.player;
+			if (vec3 != null && clientLevel == player.level && player.isColliding(blockPos, blockState)) {
+				player.absMoveTo(vec3.x, vec3.y, vec3.z);
 			}
 		}
 

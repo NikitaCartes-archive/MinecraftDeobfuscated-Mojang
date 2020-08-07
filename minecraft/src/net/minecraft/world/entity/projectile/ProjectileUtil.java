@@ -1,14 +1,10 @@
 package net.minecraft.world.entity.projectile;
 
-import com.google.common.collect.ImmutableSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -20,58 +16,29 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public final class ProjectileUtil {
-	public static HitResult forwardsRaycast(Entity entity, boolean bl, boolean bl2, @Nullable Entity entity2, ClipContext.Block block) {
-		return forwardsRaycast(
-			entity,
-			bl,
-			bl2,
-			entity2,
-			block,
-			true,
-			entity2x -> !entity2x.isSpectator() && entity2x.isPickable() && (bl2 || !entity2x.is(entity2)) && !entity2x.noPhysics,
-			entity.getBoundingBox().expandTowards(entity.getDeltaMovement()).inflate(1.0)
-		);
-	}
-
-	public static HitResult getHitResult(Entity entity, AABB aABB, Predicate<Entity> predicate, ClipContext.Block block, boolean bl) {
-		return forwardsRaycast(entity, bl, false, null, block, false, predicate, aABB);
-	}
-
-	@Nullable
-	public static EntityHitResult getHitResult(Level level, Entity entity, Vec3 vec3, Vec3 vec32, AABB aABB, Predicate<Entity> predicate) {
-		return getHitResult(level, entity, vec3, vec32, aABB, predicate, Double.MAX_VALUE);
-	}
-
-	private static HitResult forwardsRaycast(
-		Entity entity, boolean bl, boolean bl2, @Nullable Entity entity2, ClipContext.Block block, boolean bl3, Predicate<Entity> predicate, AABB aABB
-	) {
+	public static HitResult getHitResult(Entity entity, Predicate<Entity> predicate) {
 		Vec3 vec3 = entity.getDeltaMovement();
 		Level level = entity.level;
 		Vec3 vec32 = entity.position();
-		if (bl3 && !level.noCollision(entity, entity.getBoundingBox(), (Set<Entity>)(!bl2 && entity2 != null ? getIgnoredEntities(entity2) : ImmutableSet.of()))) {
-			return new BlockHitResult(vec32, Direction.getNearest(vec3.x, vec3.y, vec3.z), new BlockPos(entity), false);
-		} else {
-			Vec3 vec33 = vec32.add(vec3);
-			HitResult hitResult = level.clip(new ClipContext(vec32, vec33, block, ClipContext.Fluid.NONE, entity));
-			if (bl) {
-				if (hitResult.getType() != HitResult.Type.MISS) {
-					vec33 = hitResult.getLocation();
-				}
-
-				HitResult hitResult2 = getHitResult(level, entity, vec32, vec33, aABB, predicate);
-				if (hitResult2 != null) {
-					hitResult = hitResult2;
-				}
-			}
-
-			return hitResult;
+		Vec3 vec33 = vec32.add(vec3);
+		HitResult hitResult = level.clip(new ClipContext(vec32, vec33, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity));
+		if (hitResult.getType() != HitResult.Type.MISS) {
+			vec33 = hitResult.getLocation();
 		}
+
+		HitResult hitResult2 = getEntityHitResult(
+			level, entity, vec32, vec33, entity.getBoundingBox().expandTowards(entity.getDeltaMovement()).inflate(1.0), predicate
+		);
+		if (hitResult2 != null) {
+			hitResult = hitResult2;
+		}
+
+		return hitResult;
 	}
 
 	@Nullable
@@ -113,54 +80,51 @@ public final class ProjectileUtil {
 	}
 
 	@Nullable
-	public static EntityHitResult getHitResult(Level level, Entity entity, Vec3 vec3, Vec3 vec32, AABB aABB, Predicate<Entity> predicate, double d) {
-		double e = d;
+	public static EntityHitResult getEntityHitResult(Level level, Entity entity, Vec3 vec3, Vec3 vec32, AABB aABB, Predicate<Entity> predicate) {
+		double d = Double.MAX_VALUE;
 		Entity entity2 = null;
 
 		for (Entity entity3 : level.getEntities(entity, aABB, predicate)) {
 			AABB aABB2 = entity3.getBoundingBox().inflate(0.3F);
 			Optional<Vec3> optional = aABB2.clip(vec3, vec32);
 			if (optional.isPresent()) {
-				double f = vec3.distanceToSqr((Vec3)optional.get());
-				if (f < e) {
+				double e = vec3.distanceToSqr((Vec3)optional.get());
+				if (e < d) {
 					entity2 = entity3;
-					e = f;
+					d = e;
 				}
 			}
 		}
 
-		return entity2 == null ? null : new EntityHitResult(entity2, Mth.sqrt(e));
-	}
-
-	private static Set<Entity> getIgnoredEntities(Entity entity) {
-		Entity entity2 = entity.getVehicle();
-		return entity2 != null ? ImmutableSet.of(entity, entity2) : ImmutableSet.of(entity);
+		return entity2 == null ? null : new EntityHitResult(entity2, Mth.sqrt(d));
 	}
 
 	public static final void rotateTowardsMovement(Entity entity, float f) {
 		Vec3 vec3 = entity.getDeltaMovement();
-		float g = Mth.sqrt(Entity.getHorizontalDistanceSqr(vec3));
-		entity.yRot = (float)(Mth.atan2(vec3.z, vec3.x) * 180.0F / (float)Math.PI) + 90.0F;
-		entity.xRot = (float)(Mth.atan2((double)g, vec3.y) * 180.0F / (float)Math.PI) - 90.0F;
+		if (vec3.lengthSqr() != 0.0) {
+			float g = Mth.sqrt(Entity.getHorizontalDistanceSqr(vec3));
+			entity.yRot = (float)(Mth.atan2(vec3.z, vec3.x) * 180.0F / (float)Math.PI) + 90.0F;
+			entity.xRot = (float)(Mth.atan2((double)g, vec3.y) * 180.0F / (float)Math.PI) - 90.0F;
 
-		while (entity.xRot - entity.xRotO < -180.0F) {
-			entity.xRotO -= 360.0F;
+			while (entity.xRot - entity.xRotO < -180.0F) {
+				entity.xRotO -= 360.0F;
+			}
+
+			while (entity.xRot - entity.xRotO >= 180.0F) {
+				entity.xRotO += 360.0F;
+			}
+
+			while (entity.yRot - entity.yRotO < -180.0F) {
+				entity.yRotO -= 360.0F;
+			}
+
+			while (entity.yRot - entity.yRotO >= 180.0F) {
+				entity.yRotO += 360.0F;
+			}
+
+			entity.xRot = Mth.lerp(f, entity.xRotO, entity.xRot);
+			entity.yRot = Mth.lerp(f, entity.yRotO, entity.yRot);
 		}
-
-		while (entity.xRot - entity.xRotO >= 180.0F) {
-			entity.xRotO += 360.0F;
-		}
-
-		while (entity.yRot - entity.yRotO < -180.0F) {
-			entity.yRotO -= 360.0F;
-		}
-
-		while (entity.yRot - entity.yRotO >= 180.0F) {
-			entity.yRotO += 360.0F;
-		}
-
-		entity.xRot = Mth.lerp(f, entity.xRotO, entity.xRot);
-		entity.yRot = Mth.lerp(f, entity.yRotO, entity.yRot);
 	}
 
 	public static InteractionHand getWeaponHoldingHand(LivingEntity livingEntity, Item item) {

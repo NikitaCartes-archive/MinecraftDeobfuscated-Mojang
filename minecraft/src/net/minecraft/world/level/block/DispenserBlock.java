@@ -20,16 +20,16 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.entity.DropperBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -48,14 +48,9 @@ public class DispenserBlock extends BaseEntityBlock {
 		DISPENSER_REGISTRY.put(itemLike.asItem(), dispenseItemBehavior);
 	}
 
-	protected DispenserBlock(Block.Properties properties) {
+	protected DispenserBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(TRIGGERED, Boolean.valueOf(false)));
-	}
-
-	@Override
-	public int getTickDelay(LevelReader levelReader) {
-		return 4;
 	}
 
 	@Override
@@ -75,16 +70,16 @@ public class DispenserBlock extends BaseEntityBlock {
 				}
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		}
 	}
 
-	protected void dispenseFrom(Level level, BlockPos blockPos) {
-		BlockSourceImpl blockSourceImpl = new BlockSourceImpl(level, blockPos);
+	protected void dispenseFrom(ServerLevel serverLevel, BlockPos blockPos) {
+		BlockSourceImpl blockSourceImpl = new BlockSourceImpl(serverLevel, blockPos);
 		DispenserBlockEntity dispenserBlockEntity = blockSourceImpl.getEntity();
 		int i = dispenserBlockEntity.getRandomSlot();
 		if (i < 0) {
-			level.levelEvent(1001, blockPos, 0);
+			serverLevel.levelEvent(1001, blockPos, 0);
 		} else {
 			ItemStack itemStack = dispenserBlockEntity.getItem(i);
 			DispenseItemBehavior dispenseItemBehavior = this.getDispenseMethod(itemStack);
@@ -103,7 +98,7 @@ public class DispenserBlock extends BaseEntityBlock {
 		boolean bl2 = level.hasNeighborSignal(blockPos) || level.hasNeighborSignal(blockPos.above());
 		boolean bl3 = (Boolean)blockState.getValue(TRIGGERED);
 		if (bl2 && !bl3) {
-			level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
+			level.getBlockTicks().scheduleTick(blockPos, this, 4);
 			level.setBlock(blockPos, blockState.setValue(TRIGGERED, Boolean.valueOf(true)), 4);
 		} else if (!bl2 && bl3) {
 			level.setBlock(blockPos, blockState.setValue(TRIGGERED, Boolean.valueOf(false)), 4);
@@ -137,7 +132,7 @@ public class DispenserBlock extends BaseEntityBlock {
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState.getBlock() != blockState2.getBlock()) {
+		if (!blockState.is(blockState2.getBlock())) {
 			BlockEntity blockEntity = level.getBlockEntity(blockPos);
 			if (blockEntity instanceof DispenserBlockEntity) {
 				Containers.dropContents(level, blockPos, (DispenserBlockEntity)blockEntity);

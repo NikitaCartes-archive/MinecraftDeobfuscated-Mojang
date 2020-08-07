@@ -13,6 +13,7 @@ import net.minecraft.data.info.BlockListReport;
 import net.minecraft.data.info.CommandsReport;
 import net.minecraft.data.info.RegistryDumpReport;
 import net.minecraft.data.loot.LootTableProvider;
+import net.minecraft.data.models.ModelProvider;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.structures.NbtToSnbt;
 import net.minecraft.data.structures.SnbtToNbt;
@@ -21,6 +22,7 @@ import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.data.tags.EntityTypeTagsProvider;
 import net.minecraft.data.tags.FluidTagsProvider;
 import net.minecraft.data.tags.ItemTagsProvider;
+import net.minecraft.data.worldgen.biome.BiomeReport;
 
 public class Main {
 	public static void main(String[] strings) throws IOException {
@@ -58,10 +60,15 @@ public class Main {
 			dataGenerator.addProvider(new SnbtToNbt(dataGenerator).addFilter(new StructureUpdater()));
 		}
 
+		if (bl) {
+			dataGenerator.addProvider(new ModelProvider(dataGenerator));
+		}
+
 		if (bl2) {
 			dataGenerator.addProvider(new FluidTagsProvider(dataGenerator));
-			dataGenerator.addProvider(new BlockTagsProvider(dataGenerator));
-			dataGenerator.addProvider(new ItemTagsProvider(dataGenerator));
+			BlockTagsProvider blockTagsProvider = new BlockTagsProvider(dataGenerator);
+			dataGenerator.addProvider(blockTagsProvider);
+			dataGenerator.addProvider(new ItemTagsProvider(dataGenerator, blockTagsProvider));
 			dataGenerator.addProvider(new EntityTypeTagsProvider(dataGenerator));
 			dataGenerator.addProvider(new RecipeProvider(dataGenerator));
 			dataGenerator.addProvider(new AdvancementProvider(dataGenerator));
@@ -76,6 +83,7 @@ public class Main {
 			dataGenerator.addProvider(new BlockListReport(dataGenerator));
 			dataGenerator.addProvider(new RegistryDumpReport(dataGenerator));
 			dataGenerator.addProvider(new CommandsReport(dataGenerator));
+			dataGenerator.addProvider(new BiomeReport(dataGenerator));
 		}
 
 		return dataGenerator;

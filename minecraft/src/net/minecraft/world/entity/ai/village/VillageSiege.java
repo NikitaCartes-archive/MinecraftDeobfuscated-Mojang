@@ -9,11 +9,15 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public class VillageSiege {
+public class VillageSiege implements CustomSpawner {
+	private static final Logger LOGGER = LogManager.getLogger();
 	private boolean hasSetupSiege;
 	private VillageSiege.State siegeState = VillageSiege.State.SIEGE_DONE;
 	private int zombiesToSpawn;
@@ -22,6 +26,7 @@ public class VillageSiege {
 	private int spawnY;
 	private int spawnZ;
 
+	@Override
 	public int tick(ServerLevel serverLevel, boolean bl, boolean bl2) {
 		if (!serverLevel.isDay() && bl) {
 			float f = serverLevel.getTimeOfDay(0.0F);
@@ -65,7 +70,7 @@ public class VillageSiege {
 	private boolean tryToSetupSiege(ServerLevel serverLevel) {
 		for (Player player : serverLevel.players()) {
 			if (!player.isSpectator()) {
-				BlockPos blockPos = player.getCommandSenderBlockPosition();
+				BlockPos blockPos = player.blockPosition();
 				if (serverLevel.isVillage(blockPos) && serverLevel.getBiome(blockPos).getBiomeCategory() != Biome.BiomeCategory.MUSHROOM) {
 					for (int i = 0; i < 10; i++) {
 						float f = serverLevel.random.nextFloat() * (float) (Math.PI * 2);
@@ -93,14 +98,14 @@ public class VillageSiege {
 			Zombie zombie;
 			try {
 				zombie = new Zombie(serverLevel);
-				zombie.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(new BlockPos(zombie)), MobSpawnType.EVENT, null, null);
+				zombie.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(zombie.blockPosition()), MobSpawnType.EVENT, null, null);
 			} catch (Exception var5) {
-				var5.printStackTrace();
+				LOGGER.warn("Failed to create zombie for village siege at {}", vec3, var5);
 				return;
 			}
 
 			zombie.moveTo(vec3.x, vec3.y, vec3.z, serverLevel.random.nextFloat() * 360.0F, 0.0F);
-			serverLevel.addFreshEntity(zombie);
+			serverLevel.addFreshEntityWithPassengers(zombie);
 		}
 	}
 
@@ -112,7 +117,7 @@ public class VillageSiege {
 			int l = serverLevel.getHeight(Heightmap.Types.WORLD_SURFACE, j, k);
 			BlockPos blockPos2 = new BlockPos(j, l, k);
 			if (serverLevel.isVillage(blockPos2) && Monster.checkMonsterSpawnRules(EntityType.ZOMBIE, serverLevel, MobSpawnType.EVENT, blockPos2, serverLevel.random)) {
-				return new Vec3((double)blockPos2.getX() + 0.5, (double)blockPos2.getY(), (double)blockPos2.getZ() + 0.5);
+				return Vec3.atBottomCenterOf(blockPos2);
 			}
 		}
 

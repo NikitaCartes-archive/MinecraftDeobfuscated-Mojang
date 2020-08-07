@@ -14,9 +14,9 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 
@@ -80,13 +80,13 @@ public class LegacyStructureDataHandler {
 		CompoundTag compoundTag4 = compoundTag3.getCompound("References");
 
 		for (String string : this.currentKeys) {
-			StructureFeature<?> structureFeature = (StructureFeature<?>)Feature.STRUCTURES_REGISTRY.get(string.toLowerCase(Locale.ROOT));
+			StructureFeature<?> structureFeature = (StructureFeature<?>)StructureFeature.STRUCTURES_REGISTRY.get(string.toLowerCase(Locale.ROOT));
 			if (!compoundTag4.contains(string, 12) && structureFeature != null) {
-				int i = structureFeature.getLookupRange();
+				int i = 8;
 				LongList longList = new LongArrayList();
 
-				for (int j = chunkPos.x - i; j <= chunkPos.x + i; j++) {
-					for (int k = chunkPos.z - i; k <= chunkPos.z + i; k++) {
+				for (int j = chunkPos.x - 8; j <= chunkPos.x + 8; j++) {
+					for (int k = chunkPos.z - 8; k <= chunkPos.z + 8; k++) {
 						if (this.hasLegacyStart(j, k, string)) {
 							longList.add(ChunkPos.asLong(j, k));
 						}
@@ -199,21 +199,21 @@ public class LegacyStructureDataHandler {
 		}
 	}
 
-	public static LegacyStructureDataHandler getLegacyStructureHandler(DimensionType dimensionType, @Nullable DimensionDataStorage dimensionDataStorage) {
-		if (dimensionType == DimensionType.OVERWORLD) {
+	public static LegacyStructureDataHandler getLegacyStructureHandler(ResourceKey<Level> resourceKey, @Nullable DimensionDataStorage dimensionDataStorage) {
+		if (resourceKey == Level.OVERWORLD) {
 			return new LegacyStructureDataHandler(
 				dimensionDataStorage,
 				ImmutableList.of("Monument", "Stronghold", "Village", "Mineshaft", "Temple", "Mansion"),
 				ImmutableList.of("Village", "Mineshaft", "Mansion", "Igloo", "Desert_Pyramid", "Jungle_Pyramid", "Swamp_Hut", "Stronghold", "Monument")
 			);
-		} else if (dimensionType == DimensionType.NETHER) {
+		} else if (resourceKey == Level.NETHER) {
 			List<String> list = ImmutableList.of("Fortress");
 			return new LegacyStructureDataHandler(dimensionDataStorage, list, list);
-		} else if (dimensionType == DimensionType.THE_END) {
+		} else if (resourceKey == Level.END) {
 			List<String> list = ImmutableList.of("EndCity");
 			return new LegacyStructureDataHandler(dimensionDataStorage, list, list);
 		} else {
-			throw new RuntimeException(String.format("Unknown dimension type : %s", dimensionType));
+			throw new RuntimeException(String.format("Unknown dimension type : %s", resourceKey));
 		}
 	}
 }

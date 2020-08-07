@@ -2,16 +2,18 @@ package net.minecraft.world.level.block;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -22,7 +24,7 @@ import net.minecraft.world.phys.BlockHitResult;
 public class StructureBlock extends BaseEntityBlock {
 	public static final EnumProperty<StructureMode> MODE = BlockStateProperties.STRUCTUREBLOCK_MODE;
 
-	protected StructureBlock(Block.Properties properties) {
+	protected StructureBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 
@@ -37,7 +39,7 @@ public class StructureBlock extends BaseEntityBlock {
 	) {
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
 		if (blockEntity instanceof StructureBlockEntity) {
-			return ((StructureBlockEntity)blockEntity).usedBy(player) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+			return ((StructureBlockEntity)blockEntity).usedBy(player) ? InteractionResult.sidedSuccess(level.isClientSide) : InteractionResult.PASS;
 		} else {
 			return InteractionResult.PASS;
 		}
@@ -72,7 +74,7 @@ public class StructureBlock extends BaseEntityBlock {
 
 	@Override
 	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
-		if (!level.isClientSide) {
+		if (level instanceof ServerLevel) {
 			BlockEntity blockEntity = level.getBlockEntity(blockPos);
 			if (blockEntity instanceof StructureBlockEntity) {
 				StructureBlockEntity structureBlockEntity = (StructureBlockEntity)blockEntity;
@@ -80,7 +82,7 @@ public class StructureBlock extends BaseEntityBlock {
 				boolean bl3 = structureBlockEntity.isPowered();
 				if (bl2 && !bl3) {
 					structureBlockEntity.setPowered(true);
-					this.trigger(structureBlockEntity);
+					this.trigger((ServerLevel)level, structureBlockEntity);
 				} else if (!bl2 && bl3) {
 					structureBlockEntity.setPowered(false);
 				}
@@ -88,13 +90,13 @@ public class StructureBlock extends BaseEntityBlock {
 		}
 	}
 
-	private void trigger(StructureBlockEntity structureBlockEntity) {
+	private void trigger(ServerLevel serverLevel, StructureBlockEntity structureBlockEntity) {
 		switch (structureBlockEntity.getMode()) {
 			case SAVE:
 				structureBlockEntity.saveStructure(false);
 				break;
 			case LOAD:
-				structureBlockEntity.loadStructure(false);
+				structureBlockEntity.loadStructure(serverLevel, false);
 				break;
 			case CORNER:
 				structureBlockEntity.unloadStructure();

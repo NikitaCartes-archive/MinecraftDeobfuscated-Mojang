@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.SliderButton;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
@@ -16,7 +17,7 @@ public class ProgressOption extends Option {
 	protected double maxValue;
 	private final Function<Options, Double> getter;
 	private final BiConsumer<Options, Double> setter;
-	private final BiFunction<Options, ProgressOption, String> toString;
+	private final BiFunction<Options, ProgressOption, Component> toString;
 
 	public ProgressOption(
 		String string,
@@ -25,7 +26,7 @@ public class ProgressOption extends Option {
 		float f,
 		Function<Options, Double> function,
 		BiConsumer<Options, Double> biConsumer,
-		BiFunction<Options, ProgressOption, String> biFunction
+		BiFunction<Options, ProgressOption, Component> biFunction
 	) {
 		super(string);
 		this.minValue = d;
@@ -77,7 +78,7 @@ public class ProgressOption extends Option {
 		return (Double)this.getter.apply(options);
 	}
 
-	public String getMessage(Options options) {
-		return (String)this.toString.apply(options, this);
+	public Component getMessage(Options options) {
+		return (Component)this.toString.apply(options, this);
 	}
 }

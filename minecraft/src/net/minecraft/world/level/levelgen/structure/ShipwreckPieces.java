@@ -2,11 +2,14 @@ package net.minecraft.world.level.levelgen.structure;
 
 import java.util.List;
 import java.util.Random;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
@@ -66,9 +69,7 @@ public class ShipwreckPieces {
 		Random random,
 		ShipwreckConfiguration shipwreckConfiguration
 	) {
-		ResourceLocation resourceLocation = shipwreckConfiguration.isBeached
-			? STRUCTURE_LOCATION_BEACHED[random.nextInt(STRUCTURE_LOCATION_BEACHED.length)]
-			: STRUCTURE_LOCATION_OCEAN[random.nextInt(STRUCTURE_LOCATION_OCEAN.length)];
+		ResourceLocation resourceLocation = Util.getRandom(shipwreckConfiguration.isBeached ? STRUCTURE_LOCATION_BEACHED : STRUCTURE_LOCATION_OCEAN, random);
 		list.add(new ShipwreckPieces.ShipwreckPiece(structureManager, resourceLocation, blockPos, rotation, shipwreckConfiguration.isBeached));
 	}
 
@@ -113,30 +114,38 @@ public class ShipwreckPieces {
 		}
 
 		@Override
-		protected void handleDataMarker(String string, BlockPos blockPos, LevelAccessor levelAccessor, Random random, BoundingBox boundingBox) {
+		protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, Random random, BoundingBox boundingBox) {
 			if ("map_chest".equals(string)) {
-				RandomizableContainerBlockEntity.setLootTable(levelAccessor, random, blockPos.below(), BuiltInLootTables.SHIPWRECK_MAP);
+				RandomizableContainerBlockEntity.setLootTable(serverLevelAccessor, random, blockPos.below(), BuiltInLootTables.SHIPWRECK_MAP);
 			} else if ("treasure_chest".equals(string)) {
-				RandomizableContainerBlockEntity.setLootTable(levelAccessor, random, blockPos.below(), BuiltInLootTables.SHIPWRECK_TREASURE);
+				RandomizableContainerBlockEntity.setLootTable(serverLevelAccessor, random, blockPos.below(), BuiltInLootTables.SHIPWRECK_TREASURE);
 			} else if ("supply_chest".equals(string)) {
-				RandomizableContainerBlockEntity.setLootTable(levelAccessor, random, blockPos.below(), BuiltInLootTables.SHIPWRECK_SUPPLY);
+				RandomizableContainerBlockEntity.setLootTable(serverLevelAccessor, random, blockPos.below(), BuiltInLootTables.SHIPWRECK_SUPPLY);
 			}
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			WorldGenLevel worldGenLevel,
+			StructureFeatureManager structureFeatureManager,
+			ChunkGenerator chunkGenerator,
+			Random random,
+			BoundingBox boundingBox,
+			ChunkPos chunkPos,
+			BlockPos blockPos
+		) {
 			int i = 256;
 			int j = 0;
-			BlockPos blockPos = this.template.getSize();
+			BlockPos blockPos2 = this.template.getSize();
 			Heightmap.Types types = this.isBeached ? Heightmap.Types.WORLD_SURFACE_WG : Heightmap.Types.OCEAN_FLOOR_WG;
-			int k = blockPos.getX() * blockPos.getZ();
+			int k = blockPos2.getX() * blockPos2.getZ();
 			if (k == 0) {
-				j = levelAccessor.getHeight(types, this.templatePosition.getX(), this.templatePosition.getZ());
+				j = worldGenLevel.getHeight(types, this.templatePosition.getX(), this.templatePosition.getZ());
 			} else {
-				BlockPos blockPos2 = this.templatePosition.offset(blockPos.getX() - 1, 0, blockPos.getZ() - 1);
+				BlockPos blockPos3 = this.templatePosition.offset(blockPos2.getX() - 1, 0, blockPos2.getZ() - 1);
 
-				for (BlockPos blockPos3 : BlockPos.betweenClosed(this.templatePosition, blockPos2)) {
-					int l = levelAccessor.getHeight(types, blockPos3.getX(), blockPos3.getZ());
+				for (BlockPos blockPos4 : BlockPos.betweenClosed(this.templatePosition, blockPos3)) {
+					int l = worldGenLevel.getHeight(types, blockPos4.getX(), blockPos4.getZ());
 					j += l;
 					i = Math.min(i, l);
 				}
@@ -144,9 +153,9 @@ public class ShipwreckPieces {
 				j /= k;
 			}
 
-			int m = this.isBeached ? i - blockPos.getY() / 2 - random.nextInt(3) : j;
+			int m = this.isBeached ? i - blockPos2.getY() / 2 - random.nextInt(3) : j;
 			this.templatePosition = new BlockPos(this.templatePosition.getX(), m, this.templatePosition.getZ());
-			return super.postProcess(levelAccessor, chunkGenerator, random, boundingBox, chunkPos);
+			return super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
 		}
 	}
 }

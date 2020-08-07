@@ -1,26 +1,28 @@
 package net.minecraft.world.entity.vehicle;
 
 import javax.annotation.Nullable;
-import net.minecraft.core.BlockPos;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -46,6 +48,12 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
 		super.destroy(damageSource);
 		if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
 			Containers.dropContents(this.level, this, this);
+			if (!this.level.isClientSide) {
+				Entity entity = damageSource.getDirectEntity();
+				if (entity != null && entity.getType() == EntityType.PLAYER) {
+					PiglinAi.angerNearbyPiglins((Player)entity, true);
+				}
+			}
 		}
 	}
 
@@ -114,9 +122,9 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
 
 	@Nullable
 	@Override
-	public Entity changeDimension(DimensionType dimensionType) {
+	public Entity changeDimension(ServerLevel serverLevel) {
 		this.dropEquipment = false;
-		return super.changeDimension(dimensionType);
+		return super.changeDimension(serverLevel);
 	}
 
 	@Override
@@ -154,9 +162,14 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
 	}
 
 	@Override
-	public boolean interact(Player player, InteractionHand interactionHand) {
+	public InteractionResult interact(Player player, InteractionHand interactionHand) {
 		player.openMenu(this);
-		return true;
+		if (!player.level.isClientSide) {
+			PiglinAi.angerNearbyPiglins(player, true);
+			return InteractionResult.CONSUME;
+		} else {
+			return InteractionResult.SUCCESS;
+		}
 	}
 
 	@Override
@@ -173,9 +186,13 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
 	public void unpackLootTable(@Nullable Player player) {
 		if (this.lootTable != null && this.level.getServer() != null) {
 			LootTable lootTable = this.level.getServer().getLootTables().get(this.lootTable);
+			if (player instanceof ServerPlayer) {
+				CriteriaTriggers.GENERATE_LOOT.trigger((ServerPlayer)player, this.lootTable);
+			}
+
 			this.lootTable = null;
 			LootContext.Builder builder = new LootContext.Builder((ServerLevel)this.level)
-				.withParameter(LootContextParams.BLOCK_POS, new BlockPos(this))
+				.withParameter(LootContextParams.ORIGIN, this.position())
 				.withOptionalRandomSeed(this.lootTableSeed);
 			if (player != null) {
 				builder.withLuck(player.getLuck()).withParameter(LootContextParams.THIS_ENTITY, player);

@@ -2,14 +2,14 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
 public class NoteParticle extends TextureSheetParticle {
-	private NoteParticle(Level level, double d, double e, double f, double g) {
-		super(level, d, e, f, 0.0, 0.0, 0.0);
+	private NoteParticle(ClientLevel clientLevel, double d, double e, double f, double g) {
+		super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
 		this.xd *= 0.01F;
 		this.yd *= 0.01F;
 		this.zd *= 0.01F;
@@ -63,8 +63,8 @@ public class NoteParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			NoteParticle noteParticle = new NoteParticle(level, d, e, f, g);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			NoteParticle noteParticle = new NoteParticle(clientLevel, d, e, f, g);
 			noteParticle.pickSprite(this.sprite);
 			return noteParticle;
 		}

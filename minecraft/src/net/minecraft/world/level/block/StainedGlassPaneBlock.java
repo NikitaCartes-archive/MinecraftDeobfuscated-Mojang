@@ -1,11 +1,12 @@
 package net.minecraft.world.level.block;
 
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 
 public class StainedGlassPaneBlock extends IronBarsBlock implements BeaconBeamBlock {
 	private final DyeColor color;
 
-	public StainedGlassPaneBlock(DyeColor dyeColor, Block.Properties properties) {
+	public StainedGlassPaneBlock(DyeColor dyeColor, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.color = dyeColor;
 		this.registerDefaultState(

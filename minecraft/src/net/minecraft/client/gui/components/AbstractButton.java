@@ -3,11 +3,12 @@ package net.minecraft.client.gui.components;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractButton extends AbstractWidget {
-	public AbstractButton(int i, int j, int k, int l, String string) {
-		super(i, j, k, l, string);
+	public AbstractButton(int i, int j, int k, int l, Component component) {
+		super(i, j, k, l, component);
 	}
 
 	public abstract void onPress();

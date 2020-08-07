@@ -2,6 +2,7 @@ package net.minecraft.core.particles;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 
@@ -15,14 +16,19 @@ public class SimpleParticleType extends ParticleType<SimpleParticleType> impleme
 			return (SimpleParticleType)particleType;
 		}
 	};
+	private final Codec<SimpleParticleType> codec = Codec.unit(this::getType);
 
 	protected SimpleParticleType(boolean bl) {
 		super(bl, DESERIALIZER);
 	}
 
-	@Override
-	public ParticleType<SimpleParticleType> getType() {
+	public SimpleParticleType getType() {
 		return this;
+	}
+
+	@Override
+	public Codec<SimpleParticleType> codec() {
+		return this.codec;
 	}
 
 	@Override

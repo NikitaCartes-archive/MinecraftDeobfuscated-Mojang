@@ -5,14 +5,16 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TheEndPortalBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -22,7 +24,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class EndPortalBlock extends BaseEntityBlock {
 	protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 12.0, 16.0);
 
-	protected EndPortalBlock(Block.Properties properties) {
+	protected EndPortalBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 
@@ -38,7 +40,7 @@ public class EndPortalBlock extends BaseEntityBlock {
 
 	@Override
 	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-		if (!level.isClientSide
+		if (level instanceof ServerLevel
 			&& !entity.isPassenger()
 			&& !entity.isVehicle()
 			&& entity.canChangeDimensions()
@@ -47,19 +49,22 @@ public class EndPortalBlock extends BaseEntityBlock {
 				blockState.getShape(level, blockPos),
 				BooleanOp.AND
 			)) {
-			entity.changeDimension(level.dimension.getType() == DimensionType.THE_END ? DimensionType.OVERWORLD : DimensionType.THE_END);
+			ResourceKey<Level> resourceKey = level.dimension() == Level.END ? Level.OVERWORLD : Level.END;
+			ServerLevel serverLevel = ((ServerLevel)level).getServer().getLevel(resourceKey);
+			if (serverLevel == null) {
+				return;
+			}
+
+			entity.changeDimension(serverLevel);
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		double d = (double)blockPos.getX() + (double)random.nextFloat();
+		double d = (double)blockPos.getX() + random.nextDouble();
 		double e = (double)blockPos.getY() + 0.8;
-		double f = (double)blockPos.getZ() + (double)random.nextFloat();
-		double g = 0.0;
-		double h = 0.0;
-		double i = 0.0;
+		double f = (double)blockPos.getZ() + random.nextDouble();
 		level.addParticle(ParticleTypes.SMOKE, d, e, f, 0.0, 0.0, 0.0);
 	}
 

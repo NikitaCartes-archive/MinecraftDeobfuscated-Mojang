@@ -14,6 +14,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -28,7 +29,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class BubbleColumnBlock extends Block implements BucketPickup {
 	public static final BooleanProperty DRAG_DOWN = BlockStateProperties.DRAG;
 
-	public BubbleColumnBlock(Block.Properties properties) {
+	public BubbleColumnBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(DRAG_DOWN, Boolean.valueOf(true)));
 	}
@@ -44,9 +45,9 @@ public class BubbleColumnBlock extends Block implements BucketPickup {
 				for (int i = 0; i < 2; i++) {
 					serverLevel.sendParticles(
 						ParticleTypes.SPLASH,
-						(double)((float)blockPos.getX() + level.random.nextFloat()),
+						(double)blockPos.getX() + level.random.nextDouble(),
 						(double)(blockPos.getY() + 1),
-						(double)((float)blockPos.getZ() + level.random.nextFloat()),
+						(double)blockPos.getZ() + level.random.nextDouble(),
 						1,
 						0.0,
 						0.0,
@@ -55,9 +56,9 @@ public class BubbleColumnBlock extends Block implements BucketPickup {
 					);
 					serverLevel.sendParticles(
 						ParticleTypes.BUBBLE,
-						(double)((float)blockPos.getX() + level.random.nextFloat()),
+						(double)blockPos.getX() + level.random.nextDouble(),
 						(double)(blockPos.getY() + 1),
-						(double)((float)blockPos.getZ() + level.random.nextFloat()),
+						(double)blockPos.getZ() + level.random.nextDouble(),
 						1,
 						0.0,
 						0.01,
@@ -94,18 +95,12 @@ public class BubbleColumnBlock extends Block implements BucketPickup {
 
 	public static boolean canExistIn(LevelAccessor levelAccessor, BlockPos blockPos) {
 		FluidState fluidState = levelAccessor.getFluidState(blockPos);
-		return levelAccessor.getBlockState(blockPos).getBlock() == Blocks.WATER && fluidState.getAmount() >= 8 && fluidState.isSource();
+		return levelAccessor.getBlockState(blockPos).is(Blocks.WATER) && fluidState.getAmount() >= 8 && fluidState.isSource();
 	}
 
 	private static boolean getDrag(BlockGetter blockGetter, BlockPos blockPos) {
 		BlockState blockState = blockGetter.getBlockState(blockPos);
-		Block block = blockState.getBlock();
-		return block == Blocks.BUBBLE_COLUMN ? (Boolean)blockState.getValue(DRAG_DOWN) : block != Blocks.SOUL_SAND;
-	}
-
-	@Override
-	public int getTickDelay(LevelReader levelReader) {
-		return 5;
+		return blockState.is(Blocks.BUBBLE_COLUMN) ? (Boolean)blockState.getValue(DRAG_DOWN) : !blockState.is(Blocks.SOUL_SAND);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -143,8 +138,8 @@ public class BubbleColumnBlock extends Block implements BucketPickup {
 		} else {
 			if (direction == Direction.DOWN) {
 				levelAccessor.setBlock(blockPos, Blocks.BUBBLE_COLUMN.defaultBlockState().setValue(DRAG_DOWN, Boolean.valueOf(getDrag(levelAccessor, blockPos2))), 2);
-			} else if (direction == Direction.UP && blockState2.getBlock() != Blocks.BUBBLE_COLUMN && canExistIn(levelAccessor, blockPos2)) {
-				levelAccessor.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(levelAccessor));
+			} else if (direction == Direction.UP && !blockState2.is(Blocks.BUBBLE_COLUMN) && canExistIn(levelAccessor, blockPos2)) {
+				levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 5);
 			}
 
 			levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
@@ -154,8 +149,8 @@ public class BubbleColumnBlock extends Block implements BucketPickup {
 
 	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
-		Block block = levelReader.getBlockState(blockPos.below()).getBlock();
-		return block == Blocks.BUBBLE_COLUMN || block == Blocks.MAGMA_BLOCK || block == Blocks.SOUL_SAND;
+		BlockState blockState2 = levelReader.getBlockState(blockPos.below());
+		return blockState2.is(Blocks.BUBBLE_COLUMN) || blockState2.is(Blocks.MAGMA_BLOCK) || blockState2.is(Blocks.SOUL_SAND);
 	}
 
 	@Override

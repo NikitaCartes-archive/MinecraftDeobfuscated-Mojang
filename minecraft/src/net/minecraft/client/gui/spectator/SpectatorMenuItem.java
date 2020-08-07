@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.spectator;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
@@ -10,7 +11,7 @@ public interface SpectatorMenuItem {
 
 	Component getName();
 
-	void renderIcon(float f, int i);
+	void renderIcon(PoseStack poseStack, float f, int i);
 
 	boolean isEnabled();
 }

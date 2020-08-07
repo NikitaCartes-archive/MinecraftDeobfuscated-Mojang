@@ -1,7 +1,6 @@
 package net.minecraft.world.level.saveddata;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
@@ -45,29 +44,9 @@ public abstract class SavedData {
 			compoundTag.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
 
 			try {
-				FileOutputStream fileOutputStream = new FileOutputStream(file);
-				Throwable var4 = null;
-
-				try {
-					NbtIo.writeCompressed(compoundTag, fileOutputStream);
-				} catch (Throwable var14) {
-					var4 = var14;
-					throw var14;
-				} finally {
-					if (fileOutputStream != null) {
-						if (var4 != null) {
-							try {
-								fileOutputStream.close();
-							} catch (Throwable var13) {
-								var4.addSuppressed(var13);
-							}
-						} else {
-							fileOutputStream.close();
-						}
-					}
-				}
-			} catch (IOException var16) {
-				LOGGER.error("Could not save data {}", this, var16);
+				NbtIo.writeCompressed(compoundTag, file);
+			} catch (IOException var4) {
+				LOGGER.error("Could not save data {}", this, var4);
 			}
 
 			this.setDirty(false);

@@ -1,23 +1,30 @@
 package net.minecraft.world.item;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.ImmutableMultimap.Builder;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-public abstract class DiggerItem extends TieredItem {
+public abstract class DiggerItem extends TieredItem implements Vanishable {
 	private final Set<Block> blocks;
 	protected final float speed;
+	private final Multimap<Attribute, AttributeModifier> defaultModifiers;
 
 	protected DiggerItem(Tier tier, Set<Block> set, Item.Properties properties) {
 		super(tier, properties);
 		this.blocks = set;
 		this.speed = tier.getSpeed();
+		Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+		this.getWeaponType().addCombatAttributes(this.getTier(), builder);
+		this.defaultModifiers = builder.build();
 	}
 
 	@Override
@@ -43,12 +50,11 @@ public abstract class DiggerItem extends TieredItem {
 	protected abstract WeaponType getWeaponType();
 
 	@Override
-	public Multimap<String, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
-		Multimap<String, AttributeModifier> multimap = super.getDefaultAttributeModifiers(equipmentSlot);
-		if (equipmentSlot == EquipmentSlot.MAINHAND) {
-			this.getWeaponType().addCombatAttributes(this.getTier(), multimap);
-		}
+	public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
+		return equipmentSlot == EquipmentSlot.MAINHAND ? this.defaultModifiers : super.getDefaultAttributeModifiers(equipmentSlot);
+	}
 
-		return multimap;
+	public float getAttackDamage() {
+		return this.getWeaponType().getDamage(this.getTier());
 	}
 }

@@ -134,5 +134,9 @@ public class ItemTransforms {
 		GUI,
 		GROUND,
 		FIXED;
+
+		public boolean firstPerson() {
+			return this == FIRST_PERSON_LEFT_HAND || this == FIRST_PERSON_RIGHT_HAND;
+		}
 	}
 }

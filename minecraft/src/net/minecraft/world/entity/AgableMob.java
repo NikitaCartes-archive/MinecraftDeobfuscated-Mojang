@@ -6,14 +6,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 
 public abstract class AgableMob extends PathfinderMob {
 	private static final EntityDataAccessor<Boolean> DATA_BABY_ID = SynchedEntityData.defineId(AgableMob.class, EntityDataSerializers.BOOLEAN);
@@ -27,14 +23,14 @@ public abstract class AgableMob extends PathfinderMob {
 
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
 		if (spawnGroupData == null) {
-			spawnGroupData = new AgableMob.AgableMobGroupData();
+			spawnGroupData = new AgableMob.AgableMobGroupData(true);
 		}
 
 		AgableMob.AgableMobGroupData agableMobGroupData = (AgableMob.AgableMobGroupData)spawnGroupData;
@@ -43,47 +39,20 @@ public abstract class AgableMob extends PathfinderMob {
 		}
 
 		agableMobGroupData.increaseGroupSizeByOne();
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	@Nullable
-	public abstract AgableMob getBreedOffspring(AgableMob agableMob);
-
-	protected void onOffspringSpawnedFromEgg(Player player, AgableMob agableMob) {
-	}
-
-	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
-		ItemStack itemStack = player.getItemInHand(interactionHand);
-		Item item = itemStack.getItem();
-		if (item instanceof SpawnEggItem && ((SpawnEggItem)item).spawnsEntity(itemStack.getTag(), this.getType())) {
-			if (!this.level.isClientSide) {
-				AgableMob agableMob = this.getBreedOffspring(this);
-				if (agableMob != null) {
-					agableMob.setAge(-24000);
-					agableMob.moveTo(this.getX(), this.getY(), this.getZ(), 0.0F, 0.0F);
-					this.level.addFreshEntity(agableMob);
-					if (itemStack.hasCustomHoverName()) {
-						agableMob.setCustomName(itemStack.getHoverName());
-					}
-
-					this.onOffspringSpawnedFromEgg(player, agableMob);
-					if (!player.abilities.instabuild) {
-						itemStack.shrink(1);
-					}
-				}
-			}
-
-			return true;
-		} else {
-			return false;
-		}
-	}
+	public abstract AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob);
 
 	@Override
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		this.entityData.define(DATA_BABY_ID, false);
+	}
+
+	public boolean canBreed() {
+		return false;
 	}
 
 	public int getAge() {
@@ -180,10 +149,28 @@ public abstract class AgableMob extends PathfinderMob {
 		return this.getAge() < 0;
 	}
 
+	@Override
+	public void setBaby(boolean bl) {
+		this.setAge(bl ? -24000 : 0);
+	}
+
 	public static class AgableMobGroupData implements SpawnGroupData {
 		private int groupSize;
-		private boolean shouldSpawnBaby = true;
-		private float babySpawnChance = 0.05F;
+		private final boolean shouldSpawnBaby;
+		private final float babySpawnChance;
+
+		private AgableMobGroupData(boolean bl, float f) {
+			this.shouldSpawnBaby = bl;
+			this.babySpawnChance = f;
+		}
+
+		public AgableMobGroupData(boolean bl) {
+			this(bl, 0.05F);
+		}
+
+		public AgableMobGroupData(float f) {
+			this(true, f);
+		}
 
 		public int getGroupSize() {
 			return this.groupSize;
@@ -197,16 +184,8 @@ public abstract class AgableMob extends PathfinderMob {
 			return this.shouldSpawnBaby;
 		}
 
-		public void setShouldSpawnBaby(boolean bl) {
-			this.shouldSpawnBaby = bl;
-		}
-
 		public float getBabySpawnChance() {
 			return this.babySpawnChance;
-		}
-
-		public void setBabySpawnChance(float f) {
-			this.babySpawnChance = f;
 		}
 	}
 }

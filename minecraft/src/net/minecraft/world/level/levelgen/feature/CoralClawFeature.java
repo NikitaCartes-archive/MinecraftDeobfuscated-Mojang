@@ -1,11 +1,11 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.google.common.collect.Lists;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Function;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.LevelAccessor;
@@ -13,8 +13,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class CoralClawFeature extends CoralFeature {
-	public CoralClawFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-		super(function);
+	public CoralClawFeature(Codec<NoneFeatureConfiguration> codec) {
+		super(codec);
 	}
 
 	@Override
@@ -28,7 +28,7 @@ public class CoralClawFeature extends CoralFeature {
 			Collections.shuffle(list, random);
 
 			for (Direction direction2 : list.subList(0, i)) {
-				BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos);
+				BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 				int j = random.nextInt(2) + 1;
 				mutableBlockPos.move(direction2);
 				int k;
@@ -39,7 +39,7 @@ public class CoralClawFeature extends CoralFeature {
 				} else {
 					mutableBlockPos.move(Direction.UP);
 					Direction[] directions = new Direction[]{direction2, Direction.UP};
-					direction3 = directions[random.nextInt(directions.length)];
+					direction3 = Util.getRandom(directions, random);
 					k = random.nextInt(3) + 3;
 				}
 

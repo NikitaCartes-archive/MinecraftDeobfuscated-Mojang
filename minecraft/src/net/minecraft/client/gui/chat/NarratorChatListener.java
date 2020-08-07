@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.chat;
 
 import com.mojang.text2speech.Narrator;
+import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
@@ -17,26 +18,28 @@ import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class NarratorChatListener implements ChatListener {
-	public static final Component NO_TITLE = new TextComponent("");
+	public static final Component NO_TITLE = TextComponent.EMPTY;
 	private static final Logger LOGGER = LogManager.getLogger();
 	public static final NarratorChatListener INSTANCE = new NarratorChatListener();
 	private final Narrator narrator = Narrator.getNarrator();
 
 	@Override
-	public void handle(ChatType chatType, Component component) {
-		NarratorStatus narratorStatus = getStatus();
-		if (narratorStatus != NarratorStatus.OFF && this.narrator.active()) {
-			if (narratorStatus == NarratorStatus.ALL
-				|| narratorStatus == NarratorStatus.CHAT && chatType == ChatType.CHAT
-				|| narratorStatus == NarratorStatus.SYSTEM && chatType == ChatType.SYSTEM) {
-				Component component2;
-				if (component instanceof TranslatableComponent && "chat.type.text".equals(((TranslatableComponent)component).getKey())) {
-					component2 = new TranslatableComponent("chat.type.text.narrate", ((TranslatableComponent)component).getArgs());
-				} else {
-					component2 = component;
-				}
+	public void handle(ChatType chatType, Component component, UUID uUID) {
+		if (!Minecraft.getInstance().isBlocked(uUID)) {
+			NarratorStatus narratorStatus = getStatus();
+			if (narratorStatus != NarratorStatus.OFF && this.narrator.active()) {
+				if (narratorStatus == NarratorStatus.ALL
+					|| narratorStatus == NarratorStatus.CHAT && chatType == ChatType.CHAT
+					|| narratorStatus == NarratorStatus.SYSTEM && chatType == ChatType.SYSTEM) {
+					Component component2;
+					if (component instanceof TranslatableComponent && "chat.type.text".equals(((TranslatableComponent)component).getKey())) {
+						component2 = new TranslatableComponent("chat.type.text.narrate", ((TranslatableComponent)component).getArgs());
+					} else {
+						component2 = component;
+					}
 
-				this.doSay(chatType.shouldInterrupt(), component2.getString());
+					this.doSay(chatType.shouldInterrupt(), component2.getString());
+				}
 			}
 		}
 	}
@@ -55,7 +58,7 @@ public class NarratorChatListener implements ChatListener {
 
 	private void doSay(boolean bl, String string) {
 		if (SharedConstants.IS_RUNNING_IN_IDE) {
-			LOGGER.debug("Narrating: {}", string);
+			LOGGER.debug("Narrating: {}", string.replaceAll("\n", "\\\\n"));
 		}
 
 		this.narrator.say(string, bl);
@@ -63,17 +66,14 @@ public class NarratorChatListener implements ChatListener {
 
 	public void updateNarratorStatus(NarratorStatus narratorStatus) {
 		this.clear();
-		this.narrator.say(new TranslatableComponent("options.narrator").getString() + " : " + new TranslatableComponent(narratorStatus.getKey()).getString(), true);
+		this.narrator.say(new TranslatableComponent("options.narrator").append(" : ").append(narratorStatus.getName()).getString(), true);
 		ToastComponent toastComponent = Minecraft.getInstance().getToasts();
 		if (this.narrator.active()) {
 			if (narratorStatus == NarratorStatus.OFF) {
 				SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.NARRATOR_TOGGLE, new TranslatableComponent("narrator.toast.disabled"), null);
 			} else {
 				SystemToast.addOrUpdate(
-					toastComponent,
-					SystemToast.SystemToastIds.NARRATOR_TOGGLE,
-					new TranslatableComponent("narrator.toast.enabled"),
-					new TranslatableComponent(narratorStatus.getKey())
+					toastComponent, SystemToast.SystemToastIds.NARRATOR_TOGGLE, new TranslatableComponent("narrator.toast.enabled"), narratorStatus.getName()
 				);
 			}
 		} else {

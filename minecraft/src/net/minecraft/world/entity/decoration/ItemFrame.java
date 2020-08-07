@@ -13,10 +13,12 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -29,6 +31,7 @@ import net.minecraft.world.level.block.DiodeBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,6 +41,7 @@ public class ItemFrame extends HangingEntity {
 	private static final EntityDataAccessor<ItemStack> DATA_ITEM = SynchedEntityData.defineId(ItemFrame.class, EntityDataSerializers.ITEM_STACK);
 	private static final EntityDataAccessor<Integer> DATA_ROTATION = SynchedEntityData.defineId(ItemFrame.class, EntityDataSerializers.INT);
 	private float dropChance = 1.0F;
+	private boolean fixed;
 
 	public ItemFrame(EntityType<? extends ItemFrame> entityType, Level level) {
 		super(entityType, level);
@@ -108,13 +112,29 @@ public class ItemFrame extends HangingEntity {
 
 	@Override
 	public boolean survives() {
-		if (!this.level.noCollision(this)) {
+		if (this.fixed) {
+			return true;
+		} else if (!this.level.noCollision(this)) {
 			return false;
 		} else {
 			BlockState blockState = this.level.getBlockState(this.pos.relative(this.direction.getOpposite()));
 			return blockState.getMaterial().isSolid() || this.direction.getAxis().isHorizontal() && DiodeBlock.isDiode(blockState)
 				? this.level.getEntities(this, this.getBoundingBox(), HANGING_ENTITY).isEmpty()
 				: false;
+		}
+	}
+
+	@Override
+	public void move(MoverType moverType, Vec3 vec3) {
+		if (!this.fixed) {
+			super.move(moverType, vec3);
+		}
+	}
+
+	@Override
+	public void push(double d, double e, double f) {
+		if (!this.fixed) {
+			super.push(d, e, f);
 		}
 	}
 
@@ -131,7 +151,9 @@ public class ItemFrame extends HangingEntity {
 
 	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
-		if (this.isInvulnerableTo(damageSource)) {
+		if (this.fixed) {
+			return damageSource != DamageSource.OUT_OF_WORLD && !damageSource.isCreativePlayer() ? false : super.hurt(damageSource, f);
+		} else if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else if (!damageSource.isExplosion() && !this.getItem().isEmpty()) {
 			if (!this.level.isClientSide) {
@@ -175,30 +197,32 @@ public class ItemFrame extends HangingEntity {
 	}
 
 	private void dropItem(@Nullable Entity entity, boolean bl) {
-		if (!this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-			if (entity == null) {
-				this.removeFramedMap(this.getItem());
-			}
-		} else {
+		if (!this.fixed) {
 			ItemStack itemStack = this.getItem();
 			this.setItem(ItemStack.EMPTY);
-			if (entity instanceof Player) {
-				Player player = (Player)entity;
-				if (player.abilities.instabuild) {
+			if (!this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+				if (entity == null) {
 					this.removeFramedMap(itemStack);
-					return;
 				}
-			}
+			} else {
+				if (entity instanceof Player) {
+					Player player = (Player)entity;
+					if (player.abilities.instabuild) {
+						this.removeFramedMap(itemStack);
+						return;
+					}
+				}
 
-			if (bl) {
-				this.spawnAtLocation(Items.ITEM_FRAME);
-			}
+				if (bl) {
+					this.spawnAtLocation(Items.ITEM_FRAME);
+				}
 
-			if (!itemStack.isEmpty()) {
-				itemStack = itemStack.copy();
-				this.removeFramedMap(itemStack);
-				if (this.random.nextFloat() < this.dropChance) {
-					this.spawnAtLocation(itemStack);
+				if (!itemStack.isEmpty()) {
+					itemStack = itemStack.copy();
+					this.removeFramedMap(itemStack);
+					if (this.random.nextFloat() < this.dropChance) {
+						this.spawnAtLocation(itemStack);
+					}
 				}
 			}
 		}
@@ -211,7 +235,7 @@ public class ItemFrame extends HangingEntity {
 			mapItemSavedData.setDirty(true);
 		}
 
-		itemStack.setFramed(null);
+		itemStack.setEntityRepresentation(null);
 	}
 
 	public ItemStack getItem() {
@@ -226,7 +250,7 @@ public class ItemFrame extends HangingEntity {
 		if (!itemStack.isEmpty()) {
 			itemStack = itemStack.copy();
 			itemStack.setCount(1);
-			itemStack.setFramed(this);
+			itemStack.setEntityRepresentation(this);
 		}
 
 		this.getEntityData().set(DATA_ITEM, itemStack);
@@ -254,7 +278,7 @@ public class ItemFrame extends HangingEntity {
 		if (entityDataAccessor.equals(DATA_ITEM)) {
 			ItemStack itemStack = this.getItem();
 			if (!itemStack.isEmpty() && itemStack.getFrame() != this) {
-				itemStack.setFramed(this);
+				itemStack.setEntityRepresentation(this);
 			}
 		}
 	}
@@ -284,6 +308,8 @@ public class ItemFrame extends HangingEntity {
 		}
 
 		compoundTag.putByte("Facing", (byte)this.direction.get3DDataValue());
+		compoundTag.putBoolean("Invisible", this.isInvisible());
+		compoundTag.putBoolean("Fixed", this.fixed);
 	}
 
 	@Override
@@ -309,16 +335,20 @@ public class ItemFrame extends HangingEntity {
 		}
 
 		this.setDirection(Direction.from3DDataValue(compoundTag.getByte("Facing")));
+		this.setInvisible(compoundTag.getBoolean("Invisible"));
+		this.fixed = compoundTag.getBoolean("Fixed");
 	}
 
 	@Override
-	public boolean interact(Player player, InteractionHand interactionHand) {
+	public InteractionResult interact(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		boolean bl = !this.getItem().isEmpty();
 		boolean bl2 = !itemStack.isEmpty();
-		if (!this.level.isClientSide) {
+		if (this.fixed) {
+			return InteractionResult.PASS;
+		} else if (!this.level.isClientSide) {
 			if (!bl) {
-				if (bl2) {
+				if (bl2 && !this.removed) {
 					this.setItem(itemStack);
 					if (!player.abilities.instabuild) {
 						itemStack.shrink(1);
@@ -329,9 +359,9 @@ public class ItemFrame extends HangingEntity {
 				this.setRotation(this.getRotation() + 1);
 			}
 
-			return true;
+			return InteractionResult.CONSUME;
 		} else {
-			return bl || bl2;
+			return !bl && !bl2 ? InteractionResult.PASS : InteractionResult.SUCCESS;
 		}
 	}
 

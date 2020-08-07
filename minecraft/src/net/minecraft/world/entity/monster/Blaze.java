@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -12,6 +11,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal;
@@ -50,12 +51,8 @@ public class Blaze extends Monster {
 		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, Player.class, true));
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(6.0);
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23F);
-		this.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(48.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Monster.createMonsterAttributes().add(Attributes.ATTACK_DAMAGE, 6.0).add(Attributes.MOVEMENT_SPEED, 0.23F).add(Attributes.FOLLOW_RANGE, 48.0);
 	}
 
 	@Override
@@ -114,11 +111,12 @@ public class Blaze extends Monster {
 	}
 
 	@Override
-	protected void customServerAiStep() {
-		if (this.isInWaterRainOrBubble()) {
-			this.hurt(DamageSource.DROWN, 1.0F);
-		}
+	public boolean isSensitiveToWater() {
+		return true;
+	}
 
+	@Override
+	protected void customServerAiStep() {
 		this.nextHeightOffsetChangeTick--;
 		if (this.nextHeightOffsetChangeTick <= 0) {
 			this.nextHeightOffsetChangeTick = 100;
@@ -231,7 +229,9 @@ public class Blaze extends Monster {
 
 						if (this.attackStep > 1) {
 							float h = Mth.sqrt(Mth.sqrt(d)) * 0.5F;
-							this.blaze.level.levelEvent(null, 1018, new BlockPos(this.blaze), 0);
+							if (!this.blaze.isSilent()) {
+								this.blaze.level.levelEvent(null, 1018, this.blaze.blockPosition(), 0);
+							}
 
 							for (int i = 0; i < 1; i++) {
 								SmallFireball smallFireball = new SmallFireball(
@@ -253,7 +253,7 @@ public class Blaze extends Monster {
 		}
 
 		private double getFollowDistance() {
-			return this.blaze.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).getValue();
+			return this.blaze.getAttributeValue(Attributes.FOLLOW_RANGE);
 		}
 	}
 }

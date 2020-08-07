@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.Level;
@@ -40,25 +41,27 @@ public class RenderChunkRegion implements BlockAndTintGetter {
 			}
 		}
 
-		boolean bl = true;
-
-		for (int o = blockPos.getX() >> 4; o <= blockPos2.getX() >> 4; o++) {
-			for (int p = blockPos.getZ() >> 4; p <= blockPos2.getZ() >> 4; p++) {
-				LevelChunk levelChunk = levelChunks[o - j][p - k];
-				if (!levelChunk.isYSpaceEmpty(blockPos.getY(), blockPos2.getY())) {
-					bl = false;
-				}
-			}
-		}
-
-		if (bl) {
+		if (isAllEmpty(blockPos, blockPos2, j, k, levelChunks)) {
 			return null;
 		} else {
-			int o = 1;
+			int n = 1;
 			BlockPos blockPos3 = blockPos.offset(-1, -1, -1);
 			BlockPos blockPos4 = blockPos2.offset(1, 1, 1);
 			return new RenderChunkRegion(level, j, k, levelChunks, blockPos3, blockPos4);
 		}
+	}
+
+	public static boolean isAllEmpty(BlockPos blockPos, BlockPos blockPos2, int i, int j, LevelChunk[][] levelChunks) {
+		for (int k = blockPos.getX() >> 4; k <= blockPos2.getX() >> 4; k++) {
+			for (int l = blockPos.getZ() >> 4; l <= blockPos2.getZ() >> 4; l++) {
+				LevelChunk levelChunk = levelChunks[k - i][l - j];
+				if (!levelChunk.isYSpaceEmpty(blockPos.getY(), blockPos2.getY())) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	public RenderChunkRegion(Level level, int i, int j, LevelChunk[][] levelChunks, BlockPos blockPos, BlockPos blockPos2) {
@@ -102,6 +105,11 @@ public class RenderChunkRegion implements BlockAndTintGetter {
 	@Override
 	public FluidState getFluidState(BlockPos blockPos) {
 		return this.fluidStates[this.index(blockPos)];
+	}
+
+	@Override
+	public float getShade(Direction direction, boolean bl) {
+		return this.level.getShade(direction, bl);
 	}
 
 	@Override

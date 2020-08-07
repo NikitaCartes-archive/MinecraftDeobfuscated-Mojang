@@ -9,10 +9,11 @@ import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -24,7 +25,7 @@ public class RepeaterBlock extends DiodeBlock {
 	public static final BooleanProperty LOCKED = BlockStateProperties.LOCKED;
 	public static final IntegerProperty DELAY = BlockStateProperties.DELAY;
 
-	protected RepeaterBlock(Block.Properties properties) {
+	protected RepeaterBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition
@@ -44,7 +45,7 @@ public class RepeaterBlock extends DiodeBlock {
 			return InteractionResult.PASS;
 		} else {
 			level.setBlock(blockPos, blockState.cycle(DELAY), 3);
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
 	}
 
@@ -83,9 +84,9 @@ public class RepeaterBlock extends DiodeBlock {
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
 		if ((Boolean)blockState.getValue(POWERED)) {
 			Direction direction = blockState.getValue(FACING);
-			double d = (double)((float)blockPos.getX() + 0.5F) + (double)(random.nextFloat() - 0.5F) * 0.2;
-			double e = (double)((float)blockPos.getY() + 0.4F) + (double)(random.nextFloat() - 0.5F) * 0.2;
-			double f = (double)((float)blockPos.getZ() + 0.5F) + (double)(random.nextFloat() - 0.5F) * 0.2;
+			double d = (double)blockPos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.2;
+			double e = (double)blockPos.getY() + 0.4 + (random.nextDouble() - 0.5) * 0.2;
+			double f = (double)blockPos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.2;
 			float g = -5.0F;
 			if (random.nextBoolean()) {
 				g = (float)((Integer)blockState.getValue(DELAY) * 2 - 1);

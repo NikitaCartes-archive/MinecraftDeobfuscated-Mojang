@@ -1,69 +1,49 @@
 package com.mojang.realmsclient.gui.screens;
 
-import com.mojang.realmsclient.gui.RealmsConstants;
+import com.mojang.blaze3d.vertex.PoseStack;
+import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.realms.Realms;
-import net.minecraft.realms.RealmsButton;
-import net.minecraft.realms.RealmsConfirmResultListener;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
 
 @Environment(EnvType.CLIENT)
 public class RealmsLongConfirmationScreen extends RealmsScreen {
 	private final RealmsLongConfirmationScreen.Type type;
-	private final String line2;
-	private final String line3;
-	protected final RealmsConfirmResultListener listener;
-	protected final String yesButton;
-	protected final String noButton;
-	private final String okButton;
-	protected final int id;
+	private final Component line2;
+	private final Component line3;
+	protected final BooleanConsumer callback;
 	private final boolean yesNoQuestion;
 
 	public RealmsLongConfirmationScreen(
-		RealmsConfirmResultListener realmsConfirmResultListener, RealmsLongConfirmationScreen.Type type, String string, String string2, boolean bl, int i
+		BooleanConsumer booleanConsumer, RealmsLongConfirmationScreen.Type type, Component component, Component component2, boolean bl
 	) {
-		this.listener = realmsConfirmResultListener;
-		this.id = i;
+		this.callback = booleanConsumer;
 		this.type = type;
-		this.line2 = string;
-		this.line3 = string2;
+		this.line2 = component;
+		this.line3 = component2;
 		this.yesNoQuestion = bl;
-		this.yesButton = getLocalizedString("gui.yes");
-		this.noButton = getLocalizedString("gui.no");
-		this.okButton = getLocalizedString("mco.gui.ok");
 	}
 
 	@Override
 	public void init() {
-		Realms.narrateNow(this.type.text, this.line2, this.line3);
+		NarrationHelper.now(this.type.text, this.line2.getString(), this.line3.getString());
 		if (this.yesNoQuestion) {
-			this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 105, RealmsConstants.row(8), 100, 20, this.yesButton) {
-				@Override
-				public void onPress() {
-					RealmsLongConfirmationScreen.this.listener.confirmResult(true, RealmsLongConfirmationScreen.this.id);
-				}
-			});
-			this.buttonsAdd(new RealmsButton(1, this.width() / 2 + 5, RealmsConstants.row(8), 100, 20, this.noButton) {
-				@Override
-				public void onPress() {
-					RealmsLongConfirmationScreen.this.listener.confirmResult(false, RealmsLongConfirmationScreen.this.id);
-				}
-			});
+			this.addButton(new Button(this.width / 2 - 105, row(8), 100, 20, CommonComponents.GUI_YES, button -> this.callback.accept(true)));
+			this.addButton(new Button(this.width / 2 + 5, row(8), 100, 20, CommonComponents.GUI_NO, button -> this.callback.accept(false)));
 		} else {
-			this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 50, RealmsConstants.row(8), 100, 20, this.okButton) {
-				@Override
-				public void onPress() {
-					RealmsLongConfirmationScreen.this.listener.confirmResult(true, RealmsLongConfirmationScreen.this.id);
-				}
-			});
+			this.addButton(new Button(this.width / 2 - 50, row(8), 100, 20, new TranslatableComponent("mco.gui.ok"), button -> this.callback.accept(true)));
 		}
 	}
 
 	@Override
 	public boolean keyPressed(int i, int j, int k) {
 		if (i == 256) {
-			this.listener.confirmResult(false, this.id);
+			this.callback.accept(false);
 			return true;
 		} else {
 			return super.keyPressed(i, j, k);
@@ -71,12 +51,12 @@ public class RealmsLongConfirmationScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
-		this.drawCenteredString(this.type.text, this.width() / 2, RealmsConstants.row(2), this.type.colorCode);
-		this.drawCenteredString(this.line2, this.width() / 2, RealmsConstants.row(4), 16777215);
-		this.drawCenteredString(this.line3, this.width() / 2, RealmsConstants.row(6), 16777215);
-		super.render(i, j, f);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		drawCenteredString(poseStack, this.font, this.type.text, this.width / 2, row(2), this.type.colorCode);
+		drawCenteredString(poseStack, this.font, this.line2, this.width / 2, row(4), 16777215);
+		drawCenteredString(poseStack, this.font, this.line3, this.width / 2, row(6), 16777215);
+		super.render(poseStack, i, j, f);
 	}
 
 	@Environment(EnvType.CLIENT)

@@ -1,5 +1,6 @@
 package com.mojang.realmsclient.util;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.List;
@@ -9,7 +10,8 @@ import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public class TextRenderingUtils {
-	static List<String> lineBreak(String string) {
+	@VisibleForTesting
+	protected static List<String> lineBreak(String string) {
 		return Arrays.asList(string.split("\\n"));
 	}
 
@@ -30,7 +32,7 @@ public class TextRenderingUtils {
 			List<TextRenderingUtils.LineSegment> list4 = Lists.<TextRenderingUtils.LineSegment>newArrayList();
 
 			for (String string2 : split(string, "%link")) {
-				if (string2.equals("%link")) {
+				if ("%link".equals(string2)) {
 					list4.add(list2.get(i++));
 				} else {
 					list4.add(TextRenderingUtils.LineSegment.text(string2));
@@ -98,9 +100,9 @@ public class TextRenderingUtils {
 
 	@Environment(EnvType.CLIENT)
 	public static class LineSegment {
-		final String fullText;
-		final String linkTitle;
-		final String linkUrl;
+		private final String fullText;
+		private final String linkTitle;
+		private final String linkUrl;
 
 		private LineSegment(String string) {
 			this.fullText = string;
@@ -155,7 +157,8 @@ public class TextRenderingUtils {
 			return new TextRenderingUtils.LineSegment(null, string, string2);
 		}
 
-		static TextRenderingUtils.LineSegment text(String string) {
+		@VisibleForTesting
+		protected static TextRenderingUtils.LineSegment text(String string) {
 			return new TextRenderingUtils.LineSegment(string);
 		}
 	}

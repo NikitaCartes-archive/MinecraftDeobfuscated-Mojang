@@ -9,25 +9,19 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.phys.AABB;
 
 public class NearestLivingEntitySensor extends Sensor<LivingEntity> {
-	private static final TargetingConditions TARGETING = new TargetingConditions().range(16.0).allowSameTeam().allowNonAttackable().allowUnseeable();
-
 	@Override
 	protected void doTick(ServerLevel serverLevel, LivingEntity livingEntity) {
-		List<LivingEntity> list = serverLevel.getEntitiesOfClass(
-			LivingEntity.class, livingEntity.getBoundingBox().inflate(16.0, 16.0, 16.0), livingEntity2 -> livingEntity2 != livingEntity && livingEntity2.isAlive()
-		);
+		AABB aABB = livingEntity.getBoundingBox().inflate(16.0, 16.0, 16.0);
+		List<LivingEntity> list = serverLevel.getEntitiesOfClass(LivingEntity.class, aABB, livingEntity2 -> livingEntity2 != livingEntity && livingEntity2.isAlive());
 		list.sort(Comparator.comparingDouble(livingEntity::distanceToSqr));
 		Brain<?> brain = livingEntity.getBrain();
 		brain.setMemory(MemoryModuleType.LIVING_ENTITIES, list);
 		brain.setMemory(
 			MemoryModuleType.VISIBLE_LIVING_ENTITIES,
-			(List<LivingEntity>)list.stream()
-				.filter(livingEntity2 -> TARGETING.test(livingEntity, livingEntity2))
-				.filter(livingEntity::canSee)
-				.collect(Collectors.toList())
+			(List<LivingEntity>)list.stream().filter(livingEntity2 -> isEntityTargetable(livingEntity, livingEntity2)).collect(Collectors.toList())
 		);
 	}
 

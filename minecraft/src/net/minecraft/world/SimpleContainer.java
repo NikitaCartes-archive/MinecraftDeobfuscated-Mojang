@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.StackedContentsCompatible;
@@ -40,6 +42,12 @@ public class SimpleContainer implements Container, StackedContentsCompatible {
 	@Override
 	public ItemStack getItem(int i) {
 		return i >= 0 && i < this.items.size() ? this.items.get(i) : ItemStack.EMPTY;
+	}
+
+	public List<ItemStack> removeAllItems() {
+		List<ItemStack> list = (List<ItemStack>)this.items.stream().filter(itemStack -> !itemStack.isEmpty()).collect(Collectors.toList());
+		this.clearContent();
+		return list;
 	}
 
 	@Override
@@ -83,6 +91,19 @@ public class SimpleContainer implements Container, StackedContentsCompatible {
 			this.moveItemToEmptySlots(itemStack2);
 			return itemStack2.isEmpty() ? ItemStack.EMPTY : itemStack2;
 		}
+	}
+
+	public boolean canAddItem(ItemStack itemStack) {
+		boolean bl = false;
+
+		for (ItemStack itemStack2 : this.items) {
+			if (itemStack2.isEmpty() || this.isSameItem(itemStack2, itemStack) && itemStack2.getCount() < itemStack2.getMaxStackSize()) {
+				bl = true;
+				break;
+			}
+		}
+
+		return bl;
 	}
 
 	@Override
@@ -167,13 +188,17 @@ public class SimpleContainer implements Container, StackedContentsCompatible {
 	private void moveItemToOccupiedSlotsWithSameType(ItemStack itemStack) {
 		for (int i = 0; i < this.size; i++) {
 			ItemStack itemStack2 = this.getItem(i);
-			if (ItemStack.isSame(itemStack2, itemStack)) {
+			if (this.isSameItem(itemStack2, itemStack)) {
 				this.moveItemsBetweenStacks(itemStack, itemStack2);
 				if (itemStack.isEmpty()) {
 					return;
 				}
 			}
 		}
+	}
+
+	private boolean isSameItem(ItemStack itemStack, ItemStack itemStack2) {
+		return itemStack.getItem() == itemStack2.getItem() && ItemStack.tagMatches(itemStack, itemStack2);
 	}
 
 	private void moveItemsBetweenStacks(ItemStack itemStack, ItemStack itemStack2) {
@@ -184,5 +209,27 @@ public class SimpleContainer implements Container, StackedContentsCompatible {
 			itemStack.shrink(j);
 			this.setChanged();
 		}
+	}
+
+	public void fromTag(ListTag listTag) {
+		for (int i = 0; i < listTag.size(); i++) {
+			ItemStack itemStack = ItemStack.of(listTag.getCompound(i));
+			if (!itemStack.isEmpty()) {
+				this.addItem(itemStack);
+			}
+		}
+	}
+
+	public ListTag createTag() {
+		ListTag listTag = new ListTag();
+
+		for (int i = 0; i < this.getContainerSize(); i++) {
+			ItemStack itemStack = this.getItem(i);
+			if (!itemStack.isEmpty()) {
+				listTag.add(itemStack.save(new CompoundTag()));
+			}
+		}
+
+		return listTag;
 	}
 }

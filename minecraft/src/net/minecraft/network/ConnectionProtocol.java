@@ -14,7 +14,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
-import net.minecraft.network.protocol.game.ClientboundAddGlobalEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
 import net.minecraft.network.protocol.game.ClientboundAddPaintingPacket;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
@@ -28,7 +27,6 @@ import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundChatPacket;
-import net.minecraft.network.protocol.game.ClientboundChunkBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerAckPacket;
@@ -70,24 +68,25 @@ import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
+import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSelectAdvancementsTabPacket;
 import net.minecraft.network.protocol.game.ClientboundSetBorderPacket;
 import net.minecraft.network.protocol.game.ClientboundSetCameraPacket;
 import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheCenterPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
+import net.minecraft.network.protocol.game.ClientboundSetDefaultSpawnPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEquippedItemPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.protocol.game.ClientboundSetExperiencePacket;
 import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
-import net.minecraft.network.protocol.game.ClientboundSetSpawnPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
@@ -117,6 +116,7 @@ import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
 import net.minecraft.network.protocol.game.ServerboundEntityTagQuery;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.network.protocol.game.ServerboundJigsawGeneratePacket;
 import net.minecraft.network.protocol.game.ServerboundKeepAlivePacket;
 import net.minecraft.network.protocol.game.ServerboundLockDifficultyPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
@@ -128,7 +128,8 @@ import net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
-import net.minecraft.network.protocol.game.ServerboundRecipeBookUpdatePacket;
+import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPacket;
+import net.minecraft.network.protocol.game.ServerboundRecipeBookSeenRecipePacket;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
 import net.minecraft.network.protocol.game.ServerboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ServerboundSeenAdvancementsPacket;
@@ -172,7 +173,6 @@ public enum ConnectionProtocol {
 				new ConnectionProtocol.PacketSet()
 					.addPacket(ClientboundAddEntityPacket.class, ClientboundAddEntityPacket::new)
 					.addPacket(ClientboundAddExperienceOrbPacket.class, ClientboundAddExperienceOrbPacket::new)
-					.addPacket(ClientboundAddGlobalEntityPacket.class, ClientboundAddGlobalEntityPacket::new)
 					.addPacket(ClientboundAddMobPacket.class, ClientboundAddMobPacket::new)
 					.addPacket(ClientboundAddPaintingPacket.class, ClientboundAddPaintingPacket::new)
 					.addPacket(ClientboundAddPlayerPacket.class, ClientboundAddPlayerPacket::new)
@@ -186,7 +186,6 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundBossEventPacket.class, ClientboundBossEventPacket::new)
 					.addPacket(ClientboundChangeDifficultyPacket.class, ClientboundChangeDifficultyPacket::new)
 					.addPacket(ClientboundChatPacket.class, ClientboundChatPacket::new)
-					.addPacket(ClientboundChunkBlocksUpdatePacket.class, ClientboundChunkBlocksUpdatePacket::new)
 					.addPacket(ClientboundCommandSuggestionsPacket.class, ClientboundCommandSuggestionsPacket::new)
 					.addPacket(ClientboundCommandsPacket.class, ClientboundCommandsPacket::new)
 					.addPacket(ClientboundContainerAckPacket.class, ClientboundContainerAckPacket::new)
@@ -231,24 +230,25 @@ public enum ConnectionProtocol {
 					.addPacket(ClientboundResourcePackPacket.class, ClientboundResourcePackPacket::new)
 					.addPacket(ClientboundRespawnPacket.class, ClientboundRespawnPacket::new)
 					.addPacket(ClientboundRotateHeadPacket.class, ClientboundRotateHeadPacket::new)
+					.addPacket(ClientboundSectionBlocksUpdatePacket.class, ClientboundSectionBlocksUpdatePacket::new)
 					.addPacket(ClientboundSelectAdvancementsTabPacket.class, ClientboundSelectAdvancementsTabPacket::new)
 					.addPacket(ClientboundSetBorderPacket.class, ClientboundSetBorderPacket::new)
 					.addPacket(ClientboundSetCameraPacket.class, ClientboundSetCameraPacket::new)
 					.addPacket(ClientboundSetCarriedItemPacket.class, ClientboundSetCarriedItemPacket::new)
 					.addPacket(ClientboundSetChunkCacheCenterPacket.class, ClientboundSetChunkCacheCenterPacket::new)
 					.addPacket(ClientboundSetChunkCacheRadiusPacket.class, ClientboundSetChunkCacheRadiusPacket::new)
+					.addPacket(ClientboundSetDefaultSpawnPositionPacket.class, ClientboundSetDefaultSpawnPositionPacket::new)
 					.addPacket(ClientboundSetDisplayObjectivePacket.class, ClientboundSetDisplayObjectivePacket::new)
 					.addPacket(ClientboundSetEntityDataPacket.class, ClientboundSetEntityDataPacket::new)
 					.addPacket(ClientboundSetEntityLinkPacket.class, ClientboundSetEntityLinkPacket::new)
 					.addPacket(ClientboundSetEntityMotionPacket.class, ClientboundSetEntityMotionPacket::new)
-					.addPacket(ClientboundSetEquippedItemPacket.class, ClientboundSetEquippedItemPacket::new)
+					.addPacket(ClientboundSetEquipmentPacket.class, ClientboundSetEquipmentPacket::new)
 					.addPacket(ClientboundSetExperiencePacket.class, ClientboundSetExperiencePacket::new)
 					.addPacket(ClientboundSetHealthPacket.class, ClientboundSetHealthPacket::new)
 					.addPacket(ClientboundSetObjectivePacket.class, ClientboundSetObjectivePacket::new)
 					.addPacket(ClientboundSetPassengersPacket.class, ClientboundSetPassengersPacket::new)
 					.addPacket(ClientboundSetPlayerTeamPacket.class, ClientboundSetPlayerTeamPacket::new)
 					.addPacket(ClientboundSetScorePacket.class, ClientboundSetScorePacket::new)
-					.addPacket(ClientboundSetSpawnPositionPacket.class, ClientboundSetSpawnPositionPacket::new)
 					.addPacket(ClientboundSetTimePacket.class, ClientboundSetTimePacket::new)
 					.addPacket(ClientboundSetTitlesPacket.class, ClientboundSetTitlesPacket::new)
 					.addPacket(ClientboundSoundEntityPacket.class, ClientboundSoundEntityPacket::new)
@@ -282,6 +282,7 @@ public enum ConnectionProtocol {
 					.addPacket(ServerboundEditBookPacket.class, ServerboundEditBookPacket::new)
 					.addPacket(ServerboundEntityTagQuery.class, ServerboundEntityTagQuery::new)
 					.addPacket(ServerboundInteractPacket.class, ServerboundInteractPacket::new)
+					.addPacket(ServerboundJigsawGeneratePacket.class, ServerboundJigsawGeneratePacket::new)
 					.addPacket(ServerboundKeepAlivePacket.class, ServerboundKeepAlivePacket::new)
 					.addPacket(ServerboundLockDifficultyPacket.class, ServerboundLockDifficultyPacket::new)
 					.addPacket(ServerboundMovePlayerPacket.Pos.class, ServerboundMovePlayerPacket.Pos::new)
@@ -296,7 +297,8 @@ public enum ConnectionProtocol {
 					.addPacket(ServerboundPlayerActionPacket.class, ServerboundPlayerActionPacket::new)
 					.addPacket(ServerboundPlayerCommandPacket.class, ServerboundPlayerCommandPacket::new)
 					.addPacket(ServerboundPlayerInputPacket.class, ServerboundPlayerInputPacket::new)
-					.addPacket(ServerboundRecipeBookUpdatePacket.class, ServerboundRecipeBookUpdatePacket::new)
+					.addPacket(ServerboundRecipeBookChangeSettingsPacket.class, ServerboundRecipeBookChangeSettingsPacket::new)
+					.addPacket(ServerboundRecipeBookSeenRecipePacket.class, ServerboundRecipeBookSeenRecipePacket::new)
 					.addPacket(ServerboundRenameItemPacket.class, ServerboundRenameItemPacket::new)
 					.addPacket(ServerboundResourcePackPacket.class, ServerboundResourcePackPacket::new)
 					.addPacket(ServerboundSeenAdvancementsPacket.class, ServerboundSeenAdvancementsPacket::new)

@@ -2,15 +2,15 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
 public class WaterDropParticle extends TextureSheetParticle {
-	protected WaterDropParticle(Level level, double d, double e, double f) {
-		super(level, d, e, f, 0.0, 0.0, 0.0);
+	protected WaterDropParticle(ClientLevel clientLevel, double d, double e, double f) {
+		super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
 		this.xd *= 0.3F;
 		this.yd = Math.random() * 0.2F + 0.1F;
 		this.zd *= 0.3F;
@@ -68,8 +68,8 @@ public class WaterDropParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			WaterDropParticle waterDropParticle = new WaterDropParticle(level, d, e, f);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			WaterDropParticle waterDropParticle = new WaterDropParticle(clientLevel, d, e, f);
 			waterDropParticle.pickSprite(this.sprite);
 			return waterDropParticle;
 		}

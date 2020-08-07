@@ -3,8 +3,9 @@ package net.minecraft.world.entity.npc;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.SerializableLong;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -36,8 +36,10 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -46,26 +48,29 @@ import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ReputationEventHandler;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.VillagerGoalPackages;
 import net.minecraft.world.entity.ai.gossip.GossipContainer;
 import net.minecraft.world.entity.ai.gossip.GossipType;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.sensing.GolemSensor;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.ReputationEventType;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raid;
@@ -77,7 +82,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
 public class Villager extends AbstractVillager implements ReputationEventHandler, VillagerDataHolder {
@@ -98,22 +104,25 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	private long lastRestockGameTime;
 	private int numberOfRestocksToday;
 	private long lastRestockCheckDayTime;
+	private boolean assignProfessionWhenSpawned;
 	private static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(
 		MemoryModuleType.HOME,
 		MemoryModuleType.JOB_SITE,
+		MemoryModuleType.POTENTIAL_JOB_SITE,
 		MemoryModuleType.MEETING_POINT,
 		MemoryModuleType.LIVING_ENTITIES,
 		MemoryModuleType.VISIBLE_LIVING_ENTITIES,
 		MemoryModuleType.VISIBLE_VILLAGER_BABIES,
 		MemoryModuleType.NEAREST_PLAYERS,
 		MemoryModuleType.NEAREST_VISIBLE_PLAYER,
+		MemoryModuleType.NEAREST_VISIBLE_TARGETABLE_PLAYER,
+		MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM,
 		MemoryModuleType.WALK_TARGET,
 		MemoryModuleType.LOOK_TARGET,
 		MemoryModuleType.INTERACTION_TARGET,
 		MemoryModuleType.BREED_TARGET,
 		MemoryModuleType.PATH,
-		MemoryModuleType.INTERACTABLE_DOORS,
-		MemoryModuleType.OPENED_DOORS,
+		MemoryModuleType.DOORS_TO_CLOSE,
 		MemoryModuleType.NEAREST_BED,
 		MemoryModuleType.HURT_BY,
 		MemoryModuleType.HURT_BY_ENTITY,
@@ -125,24 +134,26 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		MemoryModuleType.LAST_SLEPT,
 		MemoryModuleType.LAST_WOKEN,
 		MemoryModuleType.LAST_WORKED_AT_POI,
-		MemoryModuleType.GOLEM_LAST_SEEN_TIME
+		MemoryModuleType.GOLEM_DETECTED_RECENTLY
 	);
 	private static final ImmutableList<SensorType<? extends Sensor<? super Villager>>> SENSOR_TYPES = ImmutableList.of(
 		SensorType.NEAREST_LIVING_ENTITIES,
 		SensorType.NEAREST_PLAYERS,
-		SensorType.INTERACTABLE_DOORS,
+		SensorType.NEAREST_ITEMS,
 		SensorType.NEAREST_BED,
 		SensorType.HURT_BY,
 		SensorType.VILLAGER_HOSTILES,
 		SensorType.VILLAGER_BABIES,
 		SensorType.SECONDARY_POIS,
-		SensorType.GOLEM_LAST_SEEN
+		SensorType.GOLEM_DETECTED
 	);
 	public static final Map<MemoryModuleType<GlobalPos>, BiPredicate<Villager, PoiType>> POI_MEMORIES = ImmutableMap.of(
 		MemoryModuleType.HOME,
 		(villager, poiType) -> poiType == PoiType.HOME,
 		MemoryModuleType.JOB_SITE,
 		(villager, poiType) -> villager.getVillagerData().getProfession().getJobPoiType() == poiType,
+		MemoryModuleType.POTENTIAL_JOB_SITE,
+		(villager, poiType) -> PoiType.ALL_JOBS.test(poiType),
 		MemoryModuleType.MEETING_POINT,
 		(villager, poiType) -> poiType == PoiType.MEETING
 	);
@@ -157,7 +168,6 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		this.getNavigation().setCanFloat(true);
 		this.setCanPickUpLoot(true);
 		this.setVillagerData(this.getVillagerData().setType(villagerType).setProfession(VillagerProfession.NONE));
-		this.brain = this.makeBrain(new Dynamic<>(NbtOps.INSTANCE, new CompoundTag()));
 	}
 
 	@Override
@@ -166,8 +176,13 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	}
 
 	@Override
+	protected Brain.Provider<Villager> brainProvider() {
+		return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
+	}
+
+	@Override
 	protected Brain<?> makeBrain(Dynamic<?> dynamic) {
-		Brain<Villager> brain = new Brain<>(MEMORY_TYPES, SENSOR_TYPES, dynamic);
+		Brain<Villager> brain = this.brainProvider().makeBrain(dynamic);
 		this.registerBrainGoals(brain);
 		return brain;
 	}
@@ -175,39 +190,40 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	public void refreshBrain(ServerLevel serverLevel) {
 		Brain<Villager> brain = this.getBrain();
 		brain.stopAll(serverLevel, this);
-		this.brain = brain.copyWithoutGoals();
+		this.brain = brain.copyWithoutBehaviors();
 		this.registerBrainGoals(this.getBrain());
 	}
 
 	private void registerBrainGoals(Brain<Villager> brain) {
 		VillagerProfession villagerProfession = this.getVillagerData().getProfession();
-		float f = (float)this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue();
 		if (this.isBaby()) {
 			brain.setSchedule(Schedule.VILLAGER_BABY);
-			brain.addActivity(Activity.PLAY, VillagerGoalPackages.getPlayPackage(f));
+			brain.addActivity(Activity.PLAY, VillagerGoalPackages.getPlayPackage(0.5F));
 		} else {
 			brain.setSchedule(Schedule.VILLAGER_DEFAULT);
-			brain.addActivity(
-				Activity.WORK, VillagerGoalPackages.getWorkPackage(villagerProfession, f), ImmutableSet.of(Pair.of(MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_PRESENT))
+			brain.addActivityWithConditions(
+				Activity.WORK,
+				VillagerGoalPackages.getWorkPackage(villagerProfession, 0.5F),
+				ImmutableSet.of(Pair.of(MemoryModuleType.JOB_SITE, MemoryStatus.VALUE_PRESENT))
 			);
 		}
 
-		brain.addActivity(Activity.CORE, VillagerGoalPackages.getCorePackage(villagerProfession, f));
-		brain.addActivity(
+		brain.addActivity(Activity.CORE, VillagerGoalPackages.getCorePackage(villagerProfession, 0.5F));
+		brain.addActivityWithConditions(
 			Activity.MEET,
-			VillagerGoalPackages.getMeetPackage(villagerProfession, f),
+			VillagerGoalPackages.getMeetPackage(villagerProfession, 0.5F),
 			ImmutableSet.of(Pair.of(MemoryModuleType.MEETING_POINT, MemoryStatus.VALUE_PRESENT))
 		);
-		brain.addActivity(Activity.REST, VillagerGoalPackages.getRestPackage(villagerProfession, f));
-		brain.addActivity(Activity.IDLE, VillagerGoalPackages.getIdlePackage(villagerProfession, f));
-		brain.addActivity(Activity.PANIC, VillagerGoalPackages.getPanicPackage(villagerProfession, f));
-		brain.addActivity(Activity.PRE_RAID, VillagerGoalPackages.getPreRaidPackage(villagerProfession, f));
-		brain.addActivity(Activity.RAID, VillagerGoalPackages.getRaidPackage(villagerProfession, f));
-		brain.addActivity(Activity.HIDE, VillagerGoalPackages.getHidePackage(villagerProfession, f));
+		brain.addActivity(Activity.REST, VillagerGoalPackages.getRestPackage(villagerProfession, 0.5F));
+		brain.addActivity(Activity.IDLE, VillagerGoalPackages.getIdlePackage(villagerProfession, 0.5F));
+		brain.addActivity(Activity.PANIC, VillagerGoalPackages.getPanicPackage(villagerProfession, 0.5F));
+		brain.addActivity(Activity.PRE_RAID, VillagerGoalPackages.getPreRaidPackage(villagerProfession, 0.5F));
+		brain.addActivity(Activity.RAID, VillagerGoalPackages.getRaidPackage(villagerProfession, 0.5F));
+		brain.addActivity(Activity.HIDE, VillagerGoalPackages.getHidePackage(villagerProfession, 0.5F));
 		brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
 		brain.setDefaultActivity(Activity.IDLE);
-		brain.setActivity(Activity.IDLE);
-		brain.updateActivity(this.level.getDayTime(), this.level.getGameTime());
+		brain.setActiveActivityIfPossible(Activity.IDLE);
+		brain.updateActivityFromSchedule(this.level.getDayTime(), this.level.getGameTime());
 	}
 
 	@Override
@@ -218,18 +234,23 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		}
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.5);
-		this.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(48.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.5).add(Attributes.FOLLOW_RANGE, 48.0);
+	}
+
+	public boolean assignProfessionWhenSpawned() {
+		return this.assignProfessionWhenSpawned;
 	}
 
 	@Override
 	protected void customServerAiStep() {
-		this.level.getProfiler().push("brain");
+		this.level.getProfiler().push("villagerBrain");
 		this.getBrain().tick((ServerLevel)this.level, this);
 		this.level.getProfiler().pop();
+		if (this.assignProfessionWhenSpawned) {
+			this.assignProfessionWhenSpawned = false;
+		}
+
 		if (!this.isTrading() && this.updateMerchantTimer > 0) {
 			this.updateMerchantTimer--;
 			if (this.updateMerchantTimer <= 0) {
@@ -249,7 +270,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		}
 
 		if (!this.isNoAi() && this.random.nextInt(100) == 0) {
-			Raid raid = ((ServerLevel)this.level).getRaidAt(new BlockPos(this));
+			Raid raid = ((ServerLevel)this.level).getRaidAt(this.blockPosition());
 			if (raid != null && raid.isActive() && !raid.isOver()) {
 				this.level.broadcastEntityEvent(this, (byte)42);
 			}
@@ -273,35 +294,31 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	}
 
 	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		boolean bl = itemStack.getItem() == Items.NAME_TAG;
-		if (bl) {
-			itemStack.interactEnemy(player, this, interactionHand);
-			return true;
-		} else if (itemStack.getItem() == Items.VILLAGER_SPAWN_EGG || !this.isAlive() || this.isTrading() || this.isSleeping()) {
+		if (itemStack.getItem() == Items.VILLAGER_SPAWN_EGG || !this.isAlive() || this.isTrading() || this.isSleeping()) {
 			return super.mobInteract(player, interactionHand);
 		} else if (this.isBaby()) {
 			this.setUnhappy();
-			return super.mobInteract(player, interactionHand);
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		} else {
-			boolean bl2 = this.getOffers().isEmpty();
+			boolean bl = this.getOffers().isEmpty();
 			if (interactionHand == InteractionHand.MAIN_HAND) {
-				if (bl2 && !this.level.isClientSide) {
+				if (bl && !this.level.isClientSide) {
 					this.setUnhappy();
 				}
 
 				player.awardStat(Stats.TALKED_TO_VILLAGER);
 			}
 
-			if (bl2) {
-				return super.mobInteract(player, interactionHand);
+			if (bl) {
+				return InteractionResult.sidedSuccess(this.level.isClientSide);
 			} else {
 				if (!this.level.isClientSide && !this.offers.isEmpty()) {
 					this.startTrading(player);
 				}
 
-				return true;
+				return InteractionResult.sidedSuccess(this.level.isClientSide);
 			}
 		}
 	}
@@ -350,10 +367,6 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 
 		for (MerchantOffer merchantOffer : this.getOffers()) {
 			merchantOffer.resetUses();
-		}
-
-		if (this.getVillagerData().getProfession() == VillagerProfession.FARMER) {
-			this.makeBread();
 		}
 
 		this.lastRestockGameTime = this.level.getGameTime();
@@ -442,20 +455,24 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		compoundTag.put("VillagerData", this.getVillagerData().serialize(NbtOps.INSTANCE));
+		VillagerData.CODEC.encodeStart(NbtOps.INSTANCE, this.getVillagerData()).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("VillagerData", tag));
 		compoundTag.putByte("FoodLevel", this.foodLevel);
 		compoundTag.put("Gossips", this.gossips.store(NbtOps.INSTANCE).getValue());
 		compoundTag.putInt("Xp", this.villagerXp);
 		compoundTag.putLong("LastRestock", this.lastRestockGameTime);
 		compoundTag.putLong("LastGossipDecay", this.lastGossipDecayTime);
 		compoundTag.putInt("RestocksToday", this.numberOfRestocksToday);
+		if (this.assignProfessionWhenSpawned) {
+			compoundTag.putBoolean("AssignProfessionWhenSpawned", true);
+		}
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
 		if (compoundTag.contains("VillagerData", 10)) {
-			this.setVillagerData(new VillagerData(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("VillagerData"))));
+			DataResult<VillagerData> dataResult = VillagerData.CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("VillagerData")));
+			dataResult.resultOrPartial(LOGGER::error).ifPresent(this::setVillagerData);
 		}
 
 		if (compoundTag.contains("Offers", 10)) {
@@ -480,6 +497,9 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		}
 
 		this.numberOfRestocksToday = compoundTag.getInt("RestocksToday");
+		if (compoundTag.contains("AssignProfessionWhenSpawned")) {
+			this.assignProfessionWhenSpawned = compoundTag.getBoolean("AssignProfessionWhenSpawned");
+		}
 	}
 
 	@Override
@@ -564,10 +584,15 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			this.tellWitnessesThatIWasMurdered(entity);
 		}
 
+		this.releaseAllPois();
+		super.die(damageSource);
+	}
+
+	private void releaseAllPois() {
 		this.releasePoi(MemoryModuleType.HOME);
 		this.releasePoi(MemoryModuleType.JOB_SITE);
+		this.releasePoi(MemoryModuleType.POTENTIAL_JOB_SITE);
 		this.releasePoi(MemoryModuleType.MEETING_POINT);
-		super.die(damageSource);
 	}
 
 	private void tellWitnessesThatIWasMurdered(Entity entity) {
@@ -588,17 +613,20 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			MinecraftServer minecraftServer = ((ServerLevel)this.level).getServer();
 			this.brain.getMemory(memoryModuleType).ifPresent(globalPos -> {
 				ServerLevel serverLevel = minecraftServer.getLevel(globalPos.dimension());
-				PoiManager poiManager = serverLevel.getPoiManager();
-				Optional<PoiType> optional = poiManager.getType(globalPos.pos());
-				BiPredicate<Villager, PoiType> biPredicate = (BiPredicate<Villager, PoiType>)POI_MEMORIES.get(memoryModuleType);
-				if (optional.isPresent() && biPredicate.test(this, optional.get())) {
-					poiManager.release(globalPos.pos());
-					DebugPackets.sendPoiTicketCountPacket(serverLevel, globalPos.pos());
+				if (serverLevel != null) {
+					PoiManager poiManager = serverLevel.getPoiManager();
+					Optional<PoiType> optional = poiManager.getType(globalPos.pos());
+					BiPredicate<Villager, PoiType> biPredicate = (BiPredicate<Villager, PoiType>)POI_MEMORIES.get(memoryModuleType);
+					if (optional.isPresent() && biPredicate.test(this, optional.get())) {
+						poiManager.release(globalPos.pos());
+						DebugPackets.sendPoiTicketCountPacket(serverLevel, globalPos.pos());
+					}
 				}
 			});
 		}
 	}
 
+	@Override
 	public boolean canBreed() {
 		return this.foodLevel + this.countFoodPointsInInventory() >= 12 && this.getAge() == 0;
 	}
@@ -682,7 +710,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
@@ -696,73 +724,65 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			|| mobSpawnType == MobSpawnType.SPAWN_EGG
 			|| mobSpawnType == MobSpawnType.SPAWNER
 			|| mobSpawnType == MobSpawnType.DISPENSER) {
-			this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(levelAccessor.getBiome(new BlockPos(this)))));
+			this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(serverLevelAccessor.getBiomeName(this.blockPosition()))));
 		}
 
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		if (mobSpawnType == MobSpawnType.STRUCTURE) {
+			this.assignProfessionWhenSpawned = true;
+		}
+
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
-	public Villager getBreedOffspring(AgableMob agableMob) {
+	public Villager getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
 		double d = this.random.nextDouble();
 		VillagerType villagerType;
 		if (d < 0.5) {
-			villagerType = VillagerType.byBiome(this.level.getBiome(new BlockPos(this)));
+			villagerType = VillagerType.byBiome(serverLevel.getBiomeName(this.blockPosition()));
 		} else if (d < 0.75) {
 			villagerType = this.getVillagerData().getType();
 		} else {
 			villagerType = ((Villager)agableMob).getVillagerData().getType();
 		}
 
-		Villager villager = new Villager(EntityType.VILLAGER, this.level, villagerType);
-		villager.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(new BlockPos(villager)), MobSpawnType.BREEDING, null, null);
+		Villager villager = new Villager(EntityType.VILLAGER, serverLevel, villagerType);
+		villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.BREEDING, null, null);
 		return villager;
 	}
 
 	@Override
-	public void thunderHit(LightningBolt lightningBolt) {
-		Witch witch = EntityType.WITCH.create(this.level);
-		witch.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
-		witch.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(new BlockPos(witch)), MobSpawnType.CONVERSION, null, null);
-		witch.setNoAi(this.isNoAi());
-		if (this.hasCustomName()) {
-			witch.setCustomName(this.getCustomName());
-			witch.setCustomNameVisible(this.isCustomNameVisible());
-		}
+	public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
+		if (serverLevel.getDifficulty() != Difficulty.PEACEFUL) {
+			LOGGER.info("Villager {} was struck by lightning {}.", this, lightningBolt);
+			Witch witch = EntityType.WITCH.create(serverLevel);
+			witch.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, this.xRot);
+			witch.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(witch.blockPosition()), MobSpawnType.CONVERSION, null, null);
+			witch.setNoAi(this.isNoAi());
+			if (this.hasCustomName()) {
+				witch.setCustomName(this.getCustomName());
+				witch.setCustomNameVisible(this.isCustomNameVisible());
+			}
 
-		this.level.addFreshEntity(witch);
-		this.remove();
+			witch.setPersistenceRequired();
+			serverLevel.addFreshEntityWithPassengers(witch);
+			this.releaseAllPois();
+			this.remove();
+		} else {
+			super.thunderHit(serverLevel, lightningBolt);
+		}
 	}
 
 	@Override
 	protected void pickUpItem(ItemEntity itemEntity) {
 		ItemStack itemStack = itemEntity.getItem();
-		Item item = itemStack.getItem();
-		if (this.wantToPickUp(item)) {
+		if (this.wantsToPickUp(itemStack)) {
 			SimpleContainer simpleContainer = this.getInventory();
-			boolean bl = false;
-
-			for (int i = 0; i < simpleContainer.getContainerSize(); i++) {
-				ItemStack itemStack2 = simpleContainer.getItem(i);
-				if (itemStack2.isEmpty() || itemStack2.getItem() == item && itemStack2.getCount() < itemStack2.getMaxStackSize()) {
-					bl = true;
-					break;
-				}
-			}
-
+			boolean bl = simpleContainer.canAddItem(itemStack);
 			if (!bl) {
 				return;
 			}
 
-			int ix = simpleContainer.countItem(item);
-			if (ix == 256) {
-				return;
-			}
-
-			if (ix > 256) {
-				simpleContainer.removeItemType(item, ix - 256);
-				return;
-			}
-
+			this.onItemPickup(itemEntity);
 			this.take(itemEntity, itemStack.getCount());
 			ItemStack itemStack2 = simpleContainer.addItem(itemStack);
 			if (itemStack2.isEmpty()) {
@@ -773,8 +793,11 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		}
 	}
 
-	public boolean wantToPickUp(Item item) {
-		return WANTED_ITEMS.contains(item) || this.getVillagerData().getProfession().getRequestedItems().contains(item);
+	@Override
+	public boolean wantsToPickUp(ItemStack itemStack) {
+		Item item = itemStack.getItem();
+		return (WANTED_ITEMS.contains(item) || this.getVillagerData().getProfession().getRequestedItems().contains(item))
+			&& this.getInventory().canAddItem(itemStack);
 	}
 
 	public boolean hasExcessFood() {
@@ -790,23 +813,8 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		return FOOD_POINTS.entrySet().stream().mapToInt(entry -> simpleContainer.countItem((Item)entry.getKey()) * (Integer)entry.getValue()).sum();
 	}
 
-	private void makeBread() {
-		SimpleContainer simpleContainer = this.getInventory();
-		int i = simpleContainer.countItem(Items.WHEAT);
-		int j = i / 3;
-		if (j != 0) {
-			int k = j * 3;
-			simpleContainer.removeItemType(Items.WHEAT, k);
-			ItemStack itemStack = simpleContainer.addItem(new ItemStack(Items.BREAD, j));
-			if (!itemStack.isEmpty()) {
-				this.spawnAtLocation(itemStack, 0.5F);
-			}
-		}
-	}
-
 	public boolean hasFarmSeeds() {
-		SimpleContainer simpleContainer = this.getInventory();
-		return simpleContainer.hasAnyOf(ImmutableSet.of(Items.WHEAT_SEEDS, Items.POTATO, Items.CARROT, Items.BEETROOT_SEEDS));
+		return this.getInventory().hasAnyOf(ImmutableSet.of(Items.WHEAT_SEEDS, Items.POTATO, Items.CARROT, Items.BEETROOT_SEEDS));
 	}
 
 	@Override
@@ -823,12 +831,12 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		}
 	}
 
-	public void gossip(Villager villager, long l) {
+	public void gossip(ServerLevel serverLevel, Villager villager, long l) {
 		if ((l < this.lastGossipTime || l >= this.lastGossipTime + 1200L) && (l < villager.lastGossipTime || l >= villager.lastGossipTime + 1200L)) {
 			this.gossips.transferFrom(villager.gossips, this.random, 10);
 			this.lastGossipTime = l;
 			villager.lastGossipTime = l;
-			this.spawnGolemIfNeeded(l, 5);
+			this.spawnGolemIfNeeded(serverLevel, l, 5);
 		}
 	}
 
@@ -842,70 +850,61 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		}
 	}
 
-	public void spawnGolemIfNeeded(long l, int i) {
+	public void spawnGolemIfNeeded(ServerLevel serverLevel, long l, int i) {
 		if (this.wantsToSpawnGolem(l)) {
 			AABB aABB = this.getBoundingBox().inflate(10.0, 10.0, 10.0);
-			List<Villager> list = this.level.getEntitiesOfClass(Villager.class, aABB);
+			List<Villager> list = serverLevel.getEntitiesOfClass(Villager.class, aABB);
 			List<Villager> list2 = (List<Villager>)list.stream().filter(villager -> villager.wantsToSpawnGolem(l)).limit(5L).collect(Collectors.toList());
 			if (list2.size() >= i) {
-				IronGolem ironGolem = this.trySpawnGolem();
+				IronGolem ironGolem = this.trySpawnGolem(serverLevel);
 				if (ironGolem != null) {
-					list.forEach(villager -> villager.sawGolem(l));
+					list.forEach(GolemSensor::golemDetected);
 				}
 			}
-		}
-	}
-
-	private void sawGolem(long l) {
-		this.brain.setMemory(MemoryModuleType.GOLEM_LAST_SEEN_TIME, l);
-	}
-
-	private boolean hasSeenGolemRecently(long l) {
-		Optional<Long> optional = this.brain.getMemory(MemoryModuleType.GOLEM_LAST_SEEN_TIME);
-		if (!optional.isPresent()) {
-			return false;
-		} else {
-			Long long_ = (Long)optional.get();
-			return l - long_ <= 600L;
 		}
 	}
 
 	public boolean wantsToSpawnGolem(long l) {
-		VillagerData villagerData = this.getVillagerData();
-		if (villagerData.getProfession() == VillagerProfession.NONE || villagerData.getProfession() == VillagerProfession.NITWIT) {
-			return false;
-		} else {
-			return !this.golemSpawnConditionsMet(this.level.getGameTime()) ? false : !this.hasSeenGolemRecently(l);
-		}
+		return !this.golemSpawnConditionsMet(this.level.getGameTime()) ? false : !this.brain.hasMemoryValue(MemoryModuleType.GOLEM_DETECTED_RECENTLY);
 	}
 
 	@Nullable
-	private IronGolem trySpawnGolem() {
-		BlockPos blockPos = new BlockPos(this);
+	private IronGolem trySpawnGolem(ServerLevel serverLevel) {
+		BlockPos blockPos = this.blockPosition();
 
 		for (int i = 0; i < 10; i++) {
-			double d = (double)(this.level.random.nextInt(16) - 8);
-			double e = (double)(this.level.random.nextInt(16) - 8);
-			double f = 6.0;
+			double d = (double)(serverLevel.random.nextInt(16) - 8);
+			double e = (double)(serverLevel.random.nextInt(16) - 8);
+			BlockPos blockPos2 = this.findSpawnPositionForGolemInColumn(blockPos, d, e);
+			if (blockPos2 != null) {
+				IronGolem ironGolem = EntityType.IRON_GOLEM.create(serverLevel, null, null, null, blockPos2, MobSpawnType.MOB_SUMMONED, false, false);
+				if (ironGolem != null) {
+					if (ironGolem.checkSpawnRules(serverLevel, MobSpawnType.MOB_SUMMONED) && ironGolem.checkSpawnObstruction(serverLevel)) {
+						serverLevel.addFreshEntityWithPassengers(ironGolem);
+						return ironGolem;
+					}
 
-			for (int j = 0; j >= -12; j--) {
-				BlockPos blockPos2 = blockPos.offset(d, f + (double)j, e);
-				if ((this.level.getBlockState(blockPos2).isAir() || this.level.getBlockState(blockPos2).getMaterial().isLiquid())
-					&& this.level.getBlockState(blockPos2.below()).getMaterial().isSolidBlocking()) {
-					f += (double)j;
-					break;
+					ironGolem.remove();
 				}
 			}
+		}
 
-			BlockPos blockPos3 = blockPos.offset(d, f, e);
-			IronGolem ironGolem = EntityType.IRON_GOLEM.create(this.level, null, null, null, blockPos3, MobSpawnType.MOB_SUMMONED, false, false);
-			if (ironGolem != null) {
-				if (ironGolem.checkSpawnRules(this.level, MobSpawnType.MOB_SUMMONED) && ironGolem.checkSpawnObstruction(this.level)) {
-					this.level.addFreshEntity(ironGolem);
-					return ironGolem;
-				}
+		return null;
+	}
 
-				ironGolem.remove();
+	@Nullable
+	private BlockPos findSpawnPositionForGolemInColumn(BlockPos blockPos, double d, double e) {
+		int i = 6;
+		BlockPos blockPos2 = blockPos.offset(d, 6.0, e);
+		BlockState blockState = this.level.getBlockState(blockPos2);
+
+		for (int j = 6; j >= -6; j--) {
+			BlockPos blockPos3 = blockPos2;
+			BlockState blockState2 = blockState;
+			blockPos2 = blockPos2.below();
+			blockState = this.level.getBlockState(blockPos2);
+			if ((blockState2.isAir() || blockState2.getMaterial().isLiquid()) && blockState.getMaterial().isSolidBlocking()) {
+				return blockPos3;
 			}
 		}
 
@@ -957,20 +956,19 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	@Override
 	public void startSleeping(BlockPos blockPos) {
 		super.startSleeping(blockPos);
-		this.brain.setMemory(MemoryModuleType.LAST_SLEPT, SerializableLong.of(this.level.getGameTime()));
+		this.brain.setMemory(MemoryModuleType.LAST_SLEPT, this.level.getGameTime());
+		this.brain.eraseMemory(MemoryModuleType.WALK_TARGET);
+		this.brain.eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
 	}
 
 	@Override
 	public void stopSleeping() {
 		super.stopSleeping();
-		this.brain.setMemory(MemoryModuleType.LAST_WOKEN, SerializableLong.of(this.level.getGameTime()));
+		this.brain.setMemory(MemoryModuleType.LAST_WOKEN, this.level.getGameTime());
 	}
 
 	private boolean golemSpawnConditionsMet(long l) {
-		Optional<SerializableLong> optional = this.brain.getMemory(MemoryModuleType.LAST_SLEPT);
-		Optional<SerializableLong> optional2 = this.brain.getMemory(MemoryModuleType.LAST_WORKED_AT_POI);
-		return optional.isPresent() && optional2.isPresent()
-			? l - ((SerializableLong)optional.get()).value() < 24000L && l - ((SerializableLong)optional2.get()).value() < 36000L
-			: false;
+		Optional<Long> optional = this.brain.getMemory(MemoryModuleType.LAST_SLEPT);
+		return optional.isPresent() ? l - (Long)optional.get() < 24000L : false;
 	}
 }

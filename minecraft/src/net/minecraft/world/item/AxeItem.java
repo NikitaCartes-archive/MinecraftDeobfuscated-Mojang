@@ -11,6 +11,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -19,31 +20,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 
 public class AxeItem extends DiggerItem {
-	private static final Set<Block> DIGGABLES = Sets.<Block>newHashSet(
-		Blocks.OAK_PLANKS,
-		Blocks.SPRUCE_PLANKS,
-		Blocks.BIRCH_PLANKS,
-		Blocks.JUNGLE_PLANKS,
-		Blocks.ACACIA_PLANKS,
-		Blocks.DARK_OAK_PLANKS,
-		Blocks.BOOKSHELF,
-		Blocks.OAK_WOOD,
-		Blocks.SPRUCE_WOOD,
-		Blocks.BIRCH_WOOD,
-		Blocks.JUNGLE_WOOD,
-		Blocks.ACACIA_WOOD,
-		Blocks.DARK_OAK_WOOD,
-		Blocks.OAK_LOG,
-		Blocks.SPRUCE_LOG,
-		Blocks.BIRCH_LOG,
-		Blocks.JUNGLE_LOG,
-		Blocks.ACACIA_LOG,
-		Blocks.DARK_OAK_LOG,
-		Blocks.CHEST,
-		Blocks.PUMPKIN,
-		Blocks.CARVED_PUMPKIN,
-		Blocks.JACK_O_LANTERN,
-		Blocks.MELON,
+	private static final Set<Material> DIGGABLE_MATERIALS = Sets.<Material>newHashSet(
+		Material.WOOD, Material.NETHER_WOOD, Material.PLANT, Material.REPLACEABLE_PLANT, Material.BAMBOO, Material.VEGETABLE
+	);
+	private static final Set<Block> OTHER_DIGGABLE_BLOCKS = Sets.<Block>newHashSet(
 		Blocks.LADDER,
 		Blocks.SCAFFOLDING,
 		Blocks.OAK_BUTTON,
@@ -52,12 +32,8 @@ public class AxeItem extends DiggerItem {
 		Blocks.JUNGLE_BUTTON,
 		Blocks.DARK_OAK_BUTTON,
 		Blocks.ACACIA_BUTTON,
-		Blocks.OAK_PRESSURE_PLATE,
-		Blocks.SPRUCE_PRESSURE_PLATE,
-		Blocks.BIRCH_PRESSURE_PLATE,
-		Blocks.JUNGLE_PRESSURE_PLATE,
-		Blocks.DARK_OAK_PRESSURE_PLATE,
-		Blocks.ACACIA_PRESSURE_PLATE
+		Blocks.CRIMSON_BUTTON,
+		Blocks.WARPED_BUTTON
 	);
 	protected static final Map<Block, Block> STRIPABLES = new Builder<Block, Block>()
 		.put(Blocks.OAK_WOOD, Blocks.STRIPPED_OAK_WOOD)
@@ -72,18 +48,20 @@ public class AxeItem extends DiggerItem {
 		.put(Blocks.JUNGLE_LOG, Blocks.STRIPPED_JUNGLE_LOG)
 		.put(Blocks.SPRUCE_WOOD, Blocks.STRIPPED_SPRUCE_WOOD)
 		.put(Blocks.SPRUCE_LOG, Blocks.STRIPPED_SPRUCE_LOG)
+		.put(Blocks.WARPED_STEM, Blocks.STRIPPED_WARPED_STEM)
+		.put(Blocks.WARPED_HYPHAE, Blocks.STRIPPED_WARPED_HYPHAE)
+		.put(Blocks.CRIMSON_STEM, Blocks.STRIPPED_CRIMSON_STEM)
+		.put(Blocks.CRIMSON_HYPHAE, Blocks.STRIPPED_CRIMSON_HYPHAE)
 		.build();
 
 	protected AxeItem(Tier tier, Item.Properties properties) {
-		super(tier, DIGGABLES, properties);
+		super(tier, OTHER_DIGGABLE_BLOCKS, properties);
 	}
 
 	@Override
 	public float getDestroySpeed(ItemStack itemStack, BlockState blockState) {
 		Material material = blockState.getMaterial();
-		return material != Material.WOOD && material != Material.PLANT && material != Material.REPLACEABLE_PLANT && material != Material.BAMBOO
-			? super.getDestroySpeed(itemStack, blockState)
-			: this.speed;
+		return DIGGABLE_MATERIALS.contains(material) ? this.speed : super.getDestroySpeed(itemStack, blockState);
 	}
 
 	@Override
@@ -107,7 +85,7 @@ public class AxeItem extends DiggerItem {
 				}
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			return InteractionResult.PASS;
 		}

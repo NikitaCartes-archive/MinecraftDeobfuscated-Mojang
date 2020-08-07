@@ -33,6 +33,6 @@ public class EggItem extends Item {
 		}
 
 		player.getCooldowns().addCooldown(this, 4);
-		return InteractionResultHolder.success(itemStack);
+		return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
 	}
 }

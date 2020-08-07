@@ -40,6 +40,12 @@ public class RandomPos {
 	}
 
 	@Nullable
+	public static Vec3 getLandPosTowards(PathfinderMob pathfinderMob, int i, int j, Vec3 vec3) {
+		Vec3 vec32 = vec3.subtract(pathfinderMob.getX(), pathfinderMob.getY(), pathfinderMob.getZ());
+		return generateRandomPos(pathfinderMob, i, j, 0, vec32, false, (float) (Math.PI / 2), pathfinderMob::getWalkTargetValue, true, 0, 0, true);
+	}
+
+	@Nullable
 	public static Vec3 getPosTowards(PathfinderMob pathfinderMob, int i, int j, Vec3 vec3) {
 		Vec3 vec32 = vec3.subtract(pathfinderMob.getX(), pathfinderMob.getY(), pathfinderMob.getZ());
 		return generateRandomPos(pathfinderMob, i, j, 0, vec32, true, (float) (Math.PI / 2), pathfinderMob::getWalkTargetValue, false, 0, 0, true);
@@ -95,7 +101,7 @@ public class RandomPos {
 
 		boolean bl5 = false;
 		double e = Double.NEGATIVE_INFINITY;
-		BlockPos blockPos = new BlockPos(pathfinderMob);
+		BlockPos blockPos = pathfinderMob.blockPosition();
 
 		for (int n = 0; n < 10; n++) {
 			BlockPos blockPos2 = getRandomDelta(random, i, j, k, vec3, d);
@@ -133,7 +139,7 @@ public class RandomPos {
 					}
 
 					if (bl || !pathfinderMob.level.getFluidState(blockPos3x).is(FluidTags.WATER)) {
-						BlockPathTypes blockPathTypes = WalkNodeEvaluator.getBlockPathTypeStatic(pathfinderMob.level, blockPos3x.getX(), blockPos3x.getY(), blockPos3x.getZ());
+						BlockPathTypes blockPathTypes = WalkNodeEvaluator.getBlockPathTypeStatic(pathfinderMob.level, blockPos3x.mutable());
 						if (pathfinderMob.getPathfindingMalus(blockPathTypes) == 0.0F) {
 							double f = toDoubleFunction.applyAsDouble(blockPos3x);
 							if (f > e) {
@@ -147,7 +153,7 @@ public class RandomPos {
 			}
 		}
 
-		return bl5 ? new Vec3(blockPos) : null;
+		return bl5 ? Vec3.atBottomCenterOf(blockPos) : null;
 	}
 
 	@Nullable

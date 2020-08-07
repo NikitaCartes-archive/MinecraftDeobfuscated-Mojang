@@ -62,6 +62,9 @@ public abstract class RenderType extends RenderStateShard {
 			.createCompositeState(true)
 	);
 	private static final RenderType TRANSLUCENT = create("translucent", DefaultVertexFormat.BLOCK, 7, 262144, true, true, translucentState());
+	private static final RenderType TRANSLUCENT_MOVING_BLOCK = create(
+		"translucent_moving_block", DefaultVertexFormat.BLOCK, 7, 262144, false, true, translucentMovingBlockState()
+	);
 	private static final RenderType TRANSLUCENT_NO_CRUMBLING = create(
 		"translucent_no_crumbling", DefaultVertexFormat.BLOCK, 7, 262144, false, true, translucentState()
 	);
@@ -79,8 +82,67 @@ public abstract class RenderType extends RenderStateShard {
 		256,
 		RenderType.CompositeState.builder().setTextureState(NO_TEXTURE).setWriteMaskState(DEPTH_WRITE).createCompositeState(false)
 	);
+	private static final RenderType ARMOR_GLINT = create(
+		"armor_glint",
+		DefaultVertexFormat.POSITION_TEX,
+		7,
+		256,
+		RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, true, false))
+			.setWriteMaskState(COLOR_WRITE)
+			.setCullState(NO_CULL)
+			.setDepthTestState(EQUAL_DEPTH_TEST)
+			.setTransparencyState(GLINT_TRANSPARENCY)
+			.setTexturingState(GLINT_TEXTURING)
+			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
+			.createCompositeState(false)
+	);
+	private static final RenderType ARMOR_ENTITY_GLINT = create(
+		"armor_entity_glint",
+		DefaultVertexFormat.POSITION_TEX,
+		7,
+		256,
+		RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, true, false))
+			.setWriteMaskState(COLOR_WRITE)
+			.setCullState(NO_CULL)
+			.setDepthTestState(EQUAL_DEPTH_TEST)
+			.setTransparencyState(GLINT_TRANSPARENCY)
+			.setTexturingState(ENTITY_GLINT_TEXTURING)
+			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
+			.createCompositeState(false)
+	);
+	private static final RenderType GLINT_TRANSLUCENT = create(
+		"glint_translucent",
+		DefaultVertexFormat.POSITION_TEX,
+		7,
+		256,
+		RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, true, false))
+			.setWriteMaskState(COLOR_WRITE)
+			.setCullState(NO_CULL)
+			.setDepthTestState(EQUAL_DEPTH_TEST)
+			.setTransparencyState(GLINT_TRANSPARENCY)
+			.setTexturingState(GLINT_TEXTURING)
+			.setOutputState(ITEM_ENTITY_TARGET)
+			.createCompositeState(false)
+	);
 	private static final RenderType GLINT = create(
 		"glint",
+		DefaultVertexFormat.POSITION_TEX,
+		7,
+		256,
+		RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, true, false))
+			.setWriteMaskState(COLOR_WRITE)
+			.setCullState(NO_CULL)
+			.setDepthTestState(EQUAL_DEPTH_TEST)
+			.setTransparencyState(GLINT_TRANSPARENCY)
+			.setTexturingState(GLINT_TEXTURING)
+			.createCompositeState(false)
+	);
+	private static final RenderType GLINT_DIRECT = create(
+		"glint_direct",
 		DefaultVertexFormat.POSITION_TEX,
 		7,
 		256,
@@ -104,6 +166,21 @@ public abstract class RenderType extends RenderStateShard {
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
 			.setTransparencyState(GLINT_TRANSPARENCY)
+			.setOutputState(ITEM_ENTITY_TARGET)
+			.setTexturingState(ENTITY_GLINT_TEXTURING)
+			.createCompositeState(false)
+	);
+	private static final RenderType ENTITY_GLINT_DIRECT = create(
+		"entity_glint_direct",
+		DefaultVertexFormat.POSITION_TEX,
+		7,
+		256,
+		RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANT_GLINT_LOCATION, true, false))
+			.setWriteMaskState(COLOR_WRITE)
+			.setCullState(NO_CULL)
+			.setDepthTestState(EQUAL_DEPTH_TEST)
+			.setTransparencyState(GLINT_TRANSPARENCY)
 			.setTexturingState(ENTITY_GLINT_TEXTURING)
 			.createCompositeState(false)
 	);
@@ -115,11 +192,13 @@ public abstract class RenderType extends RenderStateShard {
 		false,
 		true,
 		RenderType.CompositeState.builder()
-			.setWriteMaskState(COLOR_WRITE)
+			.setWriteMaskState(COLOR_DEPTH_WRITE)
 			.setTransparencyState(LIGHTNING_TRANSPARENCY)
+			.setOutputState(WEATHER_TARGET)
 			.setShadeModelState(SMOOTH_SHADE)
 			.createCompositeState(false)
 	);
+	private static final RenderType TRIPWIRE = create("tripwire", DefaultVertexFormat.BLOCK, 7, 262144, true, true, tripwireState());
 	public static final RenderType.CompositeRenderType LINES = create(
 		"lines",
 		DefaultVertexFormat.POSITION_COLOR,
@@ -127,9 +206,10 @@ public abstract class RenderType extends RenderStateShard {
 		256,
 		RenderType.CompositeState.builder()
 			.setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
-			.setLayeringState(PROJECTION_LAYERING)
+			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
 			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-			.setWriteMaskState(COLOR_WRITE)
+			.setOutputState(ITEM_ENTITY_TARGET)
+			.setWriteMaskState(COLOR_DEPTH_WRITE)
 			.createCompositeState(false)
 	);
 	private final VertexFormat format;
@@ -157,6 +237,7 @@ public abstract class RenderType extends RenderStateShard {
 			.setLightmapState(LIGHTMAP)
 			.setTextureState(BLOCK_SHEET_MIPPED)
 			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+			.setOutputState(TRANSLUCENT_TARGET)
 			.createCompositeState(true);
 	}
 
@@ -164,8 +245,36 @@ public abstract class RenderType extends RenderStateShard {
 		return TRANSLUCENT;
 	}
 
+	private static RenderType.CompositeState translucentMovingBlockState() {
+		return RenderType.CompositeState.builder()
+			.setShadeModelState(SMOOTH_SHADE)
+			.setLightmapState(LIGHTMAP)
+			.setTextureState(BLOCK_SHEET_MIPPED)
+			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+			.setOutputState(ITEM_ENTITY_TARGET)
+			.createCompositeState(true);
+	}
+
+	public static RenderType translucentMovingBlock() {
+		return TRANSLUCENT_MOVING_BLOCK;
+	}
+
 	public static RenderType translucentNoCrumbling() {
 		return TRANSLUCENT_NO_CRUMBLING;
+	}
+
+	public static RenderType armorCutoutNoCull(ResourceLocation resourceLocation) {
+		RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+			.setTransparencyState(NO_TRANSPARENCY)
+			.setDiffuseLightingState(DIFFUSE_LIGHTING)
+			.setAlphaState(DEFAULT_ALPHA)
+			.setCullState(NO_CULL)
+			.setLightmapState(LIGHTMAP)
+			.setOverlayState(OVERLAY)
+			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
+			.createCompositeState(true);
+		return create("armor_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, false, compositeState);
 	}
 
 	public static RenderType entitySolid(ResourceLocation resourceLocation) {
@@ -206,6 +315,38 @@ public abstract class RenderType extends RenderStateShard {
 
 	public static RenderType entityCutoutNoCull(ResourceLocation resourceLocation) {
 		return entityCutoutNoCull(resourceLocation, true);
+	}
+
+	public static RenderType entityCutoutNoCullZOffset(ResourceLocation resourceLocation, boolean bl) {
+		RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+			.setTransparencyState(NO_TRANSPARENCY)
+			.setDiffuseLightingState(DIFFUSE_LIGHTING)
+			.setAlphaState(DEFAULT_ALPHA)
+			.setCullState(NO_CULL)
+			.setLightmapState(LIGHTMAP)
+			.setOverlayState(OVERLAY)
+			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
+			.createCompositeState(bl);
+		return create("entity_cutout_no_cull_z_offset", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, false, compositeState);
+	}
+
+	public static RenderType entityCutoutNoCullZOffset(ResourceLocation resourceLocation) {
+		return entityCutoutNoCullZOffset(resourceLocation, true);
+	}
+
+	public static RenderType itemEntityTranslucentCull(ResourceLocation resourceLocation) {
+		RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+			.setOutputState(ITEM_ENTITY_TARGET)
+			.setDiffuseLightingState(DIFFUSE_LIGHTING)
+			.setAlphaState(DEFAULT_ALPHA)
+			.setLightmapState(LIGHTMAP)
+			.setOverlayState(OVERLAY)
+			.setWriteMaskState(RenderStateShard.COLOR_DEPTH_WRITE)
+			.createCompositeState(true);
+		return create("item_entity_translucent_cull", DefaultVertexFormat.NEW_ENTITY, 7, 256, true, true, compositeState);
 	}
 
 	public static RenderType entityTranslucentCull(ResourceLocation resourceLocation) {
@@ -286,7 +427,23 @@ public abstract class RenderType extends RenderStateShard {
 		return create("entity_no_outline", DefaultVertexFormat.NEW_ENTITY, 7, 256, false, true, compositeState);
 	}
 
-	public static RenderType entityAlpha(ResourceLocation resourceLocation, float f) {
+	public static RenderType entityShadow(ResourceLocation resourceLocation) {
+		RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+			.setDiffuseLightingState(DIFFUSE_LIGHTING)
+			.setAlphaState(DEFAULT_ALPHA)
+			.setCullState(CULL)
+			.setLightmapState(LIGHTMAP)
+			.setOverlayState(OVERLAY)
+			.setWriteMaskState(COLOR_WRITE)
+			.setDepthTestState(LEQUAL_DEPTH_TEST)
+			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
+			.createCompositeState(false);
+		return create("entity_shadow", DefaultVertexFormat.NEW_ENTITY, 7, 256, false, false, compositeState);
+	}
+
+	public static RenderType dragonExplosionAlpha(ResourceLocation resourceLocation, float f) {
 		RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 			.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
 			.setAlphaState(new RenderStateShard.AlphaStateShard(f))
@@ -344,6 +501,10 @@ public abstract class RenderType extends RenderStateShard {
 	}
 
 	public static RenderType outline(ResourceLocation resourceLocation) {
+		return outline(resourceLocation, NO_CULL);
+	}
+
+	public static RenderType outline(ResourceLocation resourceLocation, RenderStateShard.CullStateShard cullStateShard) {
 		return create(
 			"outline",
 			DefaultVertexFormat.POSITION_COLOR_TEX,
@@ -351,7 +512,7 @@ public abstract class RenderType extends RenderStateShard {
 			256,
 			RenderType.CompositeState.builder()
 				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
-				.setCullState(NO_CULL)
+				.setCullState(cullStateShard)
 				.setDepthTestState(NO_DEPTH_TEST)
 				.setAlphaState(DEFAULT_ALPHA)
 				.setTexturingState(OUTLINE_TEXTURING)
@@ -361,12 +522,32 @@ public abstract class RenderType extends RenderStateShard {
 		);
 	}
 
+	public static RenderType armorGlint() {
+		return ARMOR_GLINT;
+	}
+
+	public static RenderType armorEntityGlint() {
+		return ARMOR_ENTITY_GLINT;
+	}
+
+	public static RenderType glintTranslucent() {
+		return GLINT_TRANSLUCENT;
+	}
+
 	public static RenderType glint() {
 		return GLINT;
 	}
 
+	public static RenderType glintDirect() {
+		return GLINT_DIRECT;
+	}
+
 	public static RenderType entityGlint() {
 		return ENTITY_GLINT;
+	}
+
+	public static RenderType entityGlintDirect() {
+		return ENTITY_GLINT_DIRECT;
 	}
 
 	public static RenderType crumbling(ResourceLocation resourceLocation) {
@@ -426,6 +607,20 @@ public abstract class RenderType extends RenderStateShard {
 
 	public static RenderType lightning() {
 		return LIGHTNING;
+	}
+
+	private static RenderType.CompositeState tripwireState() {
+		return RenderType.CompositeState.builder()
+			.setShadeModelState(SMOOTH_SHADE)
+			.setLightmapState(LIGHTMAP)
+			.setTextureState(BLOCK_SHEET_MIPPED)
+			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+			.setOutputState(WEATHER_TARGET)
+			.createCompositeState(true);
+	}
+
+	public static RenderType tripwire() {
+		return TRIPWIRE;
 	}
 
 	public static RenderType endPortal(int i) {
@@ -492,12 +687,13 @@ public abstract class RenderType extends RenderStateShard {
 		}
 	}
 
+	@Override
 	public String toString() {
 		return this.name;
 	}
 
 	public static List<RenderType> chunkBufferLayers() {
-		return ImmutableList.of(solid(), cutoutMipped(), cutout(), translucent());
+		return ImmutableList.of(solid(), cutoutMipped(), cutout(), translucent(), tripwire());
 	}
 
 	public int bufferSize() {
@@ -551,7 +747,7 @@ public abstract class RenderType extends RenderStateShard {
 			);
 			this.state = compositeState;
 			this.outline = compositeState.outlineProperty == RenderType.OutlineProperty.AFFECTS_OUTLINE
-				? compositeState.textureState.texture().map(RenderType::outline)
+				? compositeState.textureState.texture().map(resourceLocation -> outline(resourceLocation, compositeState.cullState))
 				: Optional.empty();
 			this.isOutline = compositeState.outlineProperty == RenderType.OutlineProperty.IS_OUTLINE;
 			this.hashCode = Objects.hash(new Object[]{super.hashCode(), compositeState});
@@ -581,6 +777,11 @@ public abstract class RenderType extends RenderStateShard {
 		@Override
 		public int hashCode() {
 			return this.hashCode;
+		}
+
+		@Override
+		public String toString() {
+			return "RenderType[" + this.state + ']';
 		}
 
 		@Environment(EnvType.CLIENT)
@@ -687,6 +888,10 @@ public abstract class RenderType extends RenderStateShard {
 
 		public int hashCode() {
 			return Objects.hash(new Object[]{this.states, this.outlineProperty});
+		}
+
+		public String toString() {
+			return "CompositeState[" + this.states + ", outlineProperty=" + this.outlineProperty + ']';
 		}
 
 		public static RenderType.CompositeState.CompositeStateBuilder builder() {
@@ -818,8 +1023,18 @@ public abstract class RenderType extends RenderStateShard {
 
 	@Environment(EnvType.CLIENT)
 	static enum OutlineProperty {
-		NONE,
-		IS_OUTLINE,
-		AFFECTS_OUTLINE;
+		NONE("none"),
+		IS_OUTLINE("is_outline"),
+		AFFECTS_OUTLINE("affects_outline");
+
+		private final String name;
+
+		private OutlineProperty(String string2) {
+			this.name = string2;
+		}
+
+		public String toString() {
+			return this.name;
+		}
 	}
 }

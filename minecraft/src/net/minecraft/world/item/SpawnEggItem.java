@@ -4,23 +4,27 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -28,6 +32,7 @@ import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 public class SpawnEggItem extends Item {
 	private static final Map<EntityType<?>, SpawnEggItem> BY_ID = Maps.<EntityType<?>, SpawnEggItem>newIdentityHashMap();
@@ -46,15 +51,14 @@ public class SpawnEggItem extends Item {
 	@Override
 	public InteractionResult useOn(UseOnContext useOnContext) {
 		Level level = useOnContext.getLevel();
-		if (level.isClientSide) {
+		if (!(level instanceof ServerLevel)) {
 			return InteractionResult.SUCCESS;
 		} else {
 			ItemStack itemStack = useOnContext.getItemInHand();
 			BlockPos blockPos = useOnContext.getClickedPos();
 			Direction direction = useOnContext.getClickedFace();
 			BlockState blockState = level.getBlockState(blockPos);
-			Block block = blockState.getBlock();
-			if (block == Blocks.SPAWNER) {
+			if (blockState.is(Blocks.SPAWNER)) {
 				BlockEntity blockEntity = level.getBlockEntity(blockPos);
 				if (blockEntity instanceof SpawnerBlockEntity) {
 					BaseSpawner baseSpawner = ((SpawnerBlockEntity)blockEntity).getSpawner();
@@ -63,7 +67,7 @@ public class SpawnEggItem extends Item {
 					blockEntity.setChanged();
 					level.sendBlockUpdated(blockPos, blockState, blockState, 3);
 					itemStack.shrink(1);
-					return InteractionResult.SUCCESS;
+					return InteractionResult.CONSUME;
 				}
 			}
 
@@ -76,13 +80,19 @@ public class SpawnEggItem extends Item {
 
 			EntityType<?> entityType2 = this.getType(itemStack.getTag());
 			if (entityType2.spawn(
-					level, itemStack, useOnContext.getPlayer(), blockPos2, MobSpawnType.SPAWN_EGG, true, !Objects.equals(blockPos, blockPos2) && direction == Direction.UP
+					(ServerLevel)level,
+					itemStack,
+					useOnContext.getPlayer(),
+					blockPos2,
+					MobSpawnType.SPAWN_EGG,
+					true,
+					!Objects.equals(blockPos, blockPos2) && direction == Direction.UP
 				)
 				!= null) {
 				itemStack.shrink(1);
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		}
 	}
 
@@ -92,7 +102,7 @@ public class SpawnEggItem extends Item {
 		HitResult hitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
 		if (hitResult.getType() != HitResult.Type.BLOCK) {
 			return InteractionResultHolder.pass(itemStack);
-		} else if (level.isClientSide) {
+		} else if (!(level instanceof ServerLevel)) {
 			return InteractionResultHolder.success(itemStack);
 		} else {
 			BlockHitResult blockHitResult = (BlockHitResult)hitResult;
@@ -101,7 +111,7 @@ public class SpawnEggItem extends Item {
 				return InteractionResultHolder.pass(itemStack);
 			} else if (level.mayInteract(player, blockPos) && player.mayUseItemAt(blockPos, blockHitResult.getDirection(), itemStack)) {
 				EntityType<?> entityType = this.getType(itemStack.getTag());
-				if (entityType.spawn(level, itemStack, player, blockPos, MobSpawnType.SPAWN_EGG, false, false) == null) {
+				if (entityType.spawn((ServerLevel)level, itemStack, player, blockPos, MobSpawnType.SPAWN_EGG, false, false) == null) {
 					return InteractionResultHolder.pass(itemStack);
 				} else {
 					if (!player.abilities.instabuild) {
@@ -109,7 +119,7 @@ public class SpawnEggItem extends Item {
 					}
 
 					player.awardStat(Stats.ITEM_USED.get(this));
-					return InteractionResultHolder.success(itemStack);
+					return InteractionResultHolder.consume(itemStack);
 				}
 			} else {
 				return InteractionResultHolder.fail(itemStack);
@@ -145,5 +155,41 @@ public class SpawnEggItem extends Item {
 		}
 
 		return this.defaultType;
+	}
+
+	public Optional<Mob> spawnOffspringFromSpawnEgg(
+		Player player, Mob mob, EntityType<? extends Mob> entityType, ServerLevel serverLevel, Vec3 vec3, ItemStack itemStack
+	) {
+		if (!this.spawnsEntity(itemStack.getTag(), entityType)) {
+			return Optional.empty();
+		} else {
+			Mob mob2;
+			if (mob instanceof AgableMob) {
+				mob2 = ((AgableMob)mob).getBreedOffspring(serverLevel, (AgableMob)mob);
+			} else {
+				mob2 = entityType.create(serverLevel);
+			}
+
+			if (mob2 == null) {
+				return Optional.empty();
+			} else {
+				mob2.setBaby(true);
+				if (!mob2.isBaby()) {
+					return Optional.empty();
+				} else {
+					mob2.moveTo(vec3.x(), vec3.y(), vec3.z(), 0.0F, 0.0F);
+					serverLevel.addFreshEntityWithPassengers(mob2);
+					if (itemStack.hasCustomHoverName()) {
+						mob2.setCustomName(itemStack.getHoverName());
+					}
+
+					if (!player.abilities.instabuild) {
+						itemStack.shrink(1);
+					}
+
+					return Optional.of(mob2);
+				}
+			}
+		}
 	}
 }

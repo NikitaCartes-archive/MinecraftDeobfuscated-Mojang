@@ -1,43 +1,62 @@
 package net.minecraft.world.level.levelgen.feature.foliageplacers;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.datafixers.Products.P3;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.UniformInt;
 import net.minecraft.world.level.LevelSimulatedRW;
-import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class BlobFoliagePlacer extends FoliagePlacer {
-	public BlobFoliagePlacer(int i, int j) {
-		super(i, j, FoliagePlacerType.BLOB_FOLIAGE_PLACER);
+	public static final Codec<BlobFoliagePlacer> CODEC = RecordCodecBuilder.create(instance -> blobParts(instance).apply(instance, BlobFoliagePlacer::new));
+	protected final int height;
+
+	protected static <P extends BlobFoliagePlacer> P3<Mu<P>, UniformInt, UniformInt, Integer> blobParts(Instance<P> instance) {
+		return foliagePlacerParts(instance).and(Codec.intRange(0, 16).fieldOf("height").forGetter(blobFoliagePlacer -> blobFoliagePlacer.height));
 	}
 
-	public <T> BlobFoliagePlacer(Dynamic<T> dynamic) {
-		this(dynamic.get("radius").asInt(0), dynamic.get("radius_random").asInt(0));
+	public BlobFoliagePlacer(UniformInt uniformInt, UniformInt uniformInt2, int i) {
+		super(uniformInt, uniformInt2);
+		this.height = i;
 	}
 
 	@Override
-	public void createFoliage(
-		LevelSimulatedRW levelSimulatedRW, Random random, SmallTreeConfiguration smallTreeConfiguration, int i, int j, int k, BlockPos blockPos, Set<BlockPos> set
+	protected FoliagePlacerType<?> type() {
+		return FoliagePlacerType.BLOB_FOLIAGE_PLACER;
+	}
+
+	@Override
+	protected void createFoliage(
+		LevelSimulatedRW levelSimulatedRW,
+		Random random,
+		TreeConfiguration treeConfiguration,
+		int i,
+		FoliagePlacer.FoliageAttachment foliageAttachment,
+		int j,
+		int k,
+		Set<BlockPos> set,
+		int l,
+		BoundingBox boundingBox
 	) {
-		for (int l = i; l >= j; l--) {
-			int m = Math.max(k - 1 - (l - i) / 2, 0);
-			this.placeLeavesRow(levelSimulatedRW, random, smallTreeConfiguration, i, blockPos, l, m, set);
+		for (int m = l; m >= l - j; m--) {
+			int n = Math.max(k + foliageAttachment.radiusOffset() - 1 - m / 2, 0);
+			this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, foliageAttachment.foliagePos(), n, set, m, foliageAttachment.doubleTrunk(), boundingBox);
 		}
 	}
 
 	@Override
-	public int foliageRadius(Random random, int i, int j, SmallTreeConfiguration smallTreeConfiguration) {
-		return this.radius + random.nextInt(this.radiusRandom + 1);
+	public int foliageHeight(Random random, int i, TreeConfiguration treeConfiguration) {
+		return this.height;
 	}
 
 	@Override
-	protected boolean shouldSkipLocation(Random random, int i, int j, int k, int l, int m) {
-		return Math.abs(j) == m && Math.abs(l) == m && (random.nextInt(2) == 0 || k == i);
-	}
-
-	@Override
-	public int getTreeRadiusForHeight(int i, int j, int k, int l) {
-		return l == 0 ? 0 : 1;
+	protected boolean shouldSkipLocation(Random random, int i, int j, int k, int l, boolean bl) {
+		return i == l && k == l && (random.nextInt(2) == 0 || j == 0);
 	}
 }

@@ -4,11 +4,11 @@ import com.google.gson.JsonParseException;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.DataFixUtils;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
+import com.mojang.serialization.Dynamic;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.GsonHelper;
@@ -21,7 +21,7 @@ public class ItemWrittenBookPagesStrictJsonFix extends DataFix {
 
 	public Dynamic<?> fixTag(Dynamic<?> dynamic) {
 		return dynamic.update("pages", dynamic2 -> DataFixUtils.orElse(dynamic2.asStreamOpt().map(stream -> stream.map(dynamicxx -> {
-					if (!dynamicxx.asString().isPresent()) {
+					if (!dynamicxx.asString().result().isPresent()) {
 						return dynamicxx;
 					} else {
 						String string = dynamicxx.asString("");
@@ -31,7 +31,7 @@ public class ItemWrittenBookPagesStrictJsonFix extends DataFix {
 								try {
 									component = GsonHelper.fromJson(BlockEntitySignTextStrictJsonFix.GSON, string, Component.class, true);
 									if (component == null) {
-										component = new TextComponent("");
+										component = TextComponent.EMPTY;
 									}
 								} catch (JsonParseException var6) {
 								}
@@ -57,12 +57,12 @@ public class ItemWrittenBookPagesStrictJsonFix extends DataFix {
 								component = new TextComponent(string);
 							}
 						} else {
-							component = new TextComponent("");
+							component = TextComponent.EMPTY;
 						}
 
 						return dynamicxx.createString(Component.Serializer.toJson(component));
 					}
-				})).map(dynamic::createList), dynamic.emptyList()));
+				})).map(dynamic::createList).result(), dynamic.emptyList()));
 	}
 
 	@Override

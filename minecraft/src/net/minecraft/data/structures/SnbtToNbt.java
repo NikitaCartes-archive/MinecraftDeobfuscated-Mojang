@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -20,11 +21,14 @@ import net.minecraft.data.HashCache;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.TagParser;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class SnbtToNbt implements DataProvider {
+	@Nullable
+	private static final Path dumpSnbtTo = null;
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final DataGenerator generator;
 	private final List<SnbtToNbt.Filter> filters = Lists.<SnbtToNbt.Filter>newArrayList();
@@ -78,24 +82,32 @@ public class SnbtToNbt implements DataProvider {
 			BufferedReader bufferedReader = Files.newBufferedReader(path);
 			Throwable var4 = null;
 
-			SnbtToNbt.TaskResult var9;
+			SnbtToNbt.TaskResult var11;
 			try {
 				String string2 = IOUtils.toString(bufferedReader);
+				CompoundTag compoundTag = this.applyFilters(string, TagParser.parseTag(string2));
 				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-				NbtIo.writeCompressed(this.applyFilters(string, TagParser.parseTag(string2)), byteArrayOutputStream);
+				NbtIo.writeCompressed(compoundTag, byteArrayOutputStream);
 				byte[] bs = byteArrayOutputStream.toByteArray();
 				String string3 = SHA1.hashBytes(bs).toString();
-				var9 = new SnbtToNbt.TaskResult(string, bs, string3);
-			} catch (Throwable var20) {
-				var4 = var20;
-				throw var20;
+				String string4;
+				if (dumpSnbtTo != null) {
+					string4 = compoundTag.getPrettyDisplay("    ", 0).getString() + "\n";
+				} else {
+					string4 = null;
+				}
+
+				var11 = new SnbtToNbt.TaskResult(string, bs, string4, string3);
+			} catch (Throwable var22) {
+				var4 = var22;
+				throw var22;
 			} finally {
 				if (bufferedReader != null) {
 					if (var4 != null) {
 						try {
 							bufferedReader.close();
-						} catch (Throwable var19) {
-							var4.addSuppressed(var19);
+						} catch (Throwable var21) {
+							var4.addSuppressed(var21);
 						}
 					} else {
 						bufferedReader.close();
@@ -103,17 +115,27 @@ public class SnbtToNbt implements DataProvider {
 				}
 			}
 
-			return var9;
-		} catch (CommandSyntaxException var22) {
-			LOGGER.error("Couldn't convert {} from SNBT to NBT at {} as it's invalid SNBT", string, path, var22);
-		} catch (IOException var23) {
-			LOGGER.error("Couldn't convert {} from SNBT to NBT at {}", string, path, var23);
+			return var11;
+		} catch (CommandSyntaxException var24) {
+			LOGGER.error("Couldn't convert {} from SNBT to NBT at {} as it's invalid SNBT", string, path, var24);
+		} catch (IOException var25) {
+			LOGGER.error("Couldn't convert {} from SNBT to NBT at {}", string, path, var25);
 		}
 
 		return null;
 	}
 
 	private void storeStructureIfChanged(HashCache hashCache, SnbtToNbt.TaskResult taskResult, Path path) {
+		if (taskResult.snbtPayload != null) {
+			Path path2 = dumpSnbtTo.resolve(taskResult.name + ".snbt");
+
+			try {
+				FileUtils.write(path2.toFile(), taskResult.snbtPayload, StandardCharsets.UTF_8);
+			} catch (IOException var18) {
+				LOGGER.error("Couldn't write structure SNBT {} at {}", taskResult.name, path2, var18);
+			}
+		}
+
 		Path path2 = path.resolve(taskResult.name + ".nbt");
 
 		try {
@@ -124,16 +146,16 @@ public class SnbtToNbt implements DataProvider {
 
 				try {
 					outputStream.write(taskResult.payload);
-				} catch (Throwable var16) {
-					var6 = var16;
-					throw var16;
+				} catch (Throwable var17) {
+					var6 = var17;
+					throw var17;
 				} finally {
 					if (outputStream != null) {
 						if (var6 != null) {
 							try {
 								outputStream.close();
-							} catch (Throwable var15) {
-								var6.addSuppressed(var15);
+							} catch (Throwable var16) {
+								var6.addSuppressed(var16);
 							}
 						} else {
 							outputStream.close();
@@ -143,8 +165,8 @@ public class SnbtToNbt implements DataProvider {
 			}
 
 			hashCache.putNew(path2, taskResult.hash);
-		} catch (IOException var18) {
-			LOGGER.error("Couldn't write structure {} at {}", taskResult.name, path2, var18);
+		} catch (IOException var20) {
+			LOGGER.error("Couldn't write structure {} at {}", taskResult.name, path2, var20);
 		}
 	}
 
@@ -156,12 +178,15 @@ public class SnbtToNbt implements DataProvider {
 	static class TaskResult {
 		private final String name;
 		private final byte[] payload;
+		@Nullable
+		private final String snbtPayload;
 		private final String hash;
 
-		public TaskResult(String string, byte[] bs, String string2) {
+		public TaskResult(String string, byte[] bs, @Nullable String string2, String string3) {
 			this.name = string;
 			this.payload = bs;
-			this.hash = string2;
+			this.snbtPayload = string2;
+			this.hash = string3;
 		}
 	}
 }

@@ -14,6 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.AttachFace;
@@ -34,7 +35,7 @@ public class LeverBlock extends FaceAttachedHorizontalDirectionalBlock {
 	protected static final VoxelShape DOWN_AABB_Z = Block.box(5.0, 10.0, 4.0, 11.0, 16.0, 12.0);
 	protected static final VoxelShape DOWN_AABB_X = Block.box(4.0, 10.0, 5.0, 12.0, 16.0, 11.0);
 
-	protected LeverBlock(Block.Properties properties) {
+	protected LeverBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(POWERED, Boolean.valueOf(false)).setValue(FACE, AttachFace.WALL)
@@ -91,7 +92,7 @@ public class LeverBlock extends FaceAttachedHorizontalDirectionalBlock {
 			BlockState blockState2 = this.pull(blockState, level, blockPos);
 			float f = blockState2.getValue(POWERED) ? 0.6F : 0.5F;
 			level.playSound(null, blockPos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 0.3F, f);
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		}
 	}
 
@@ -121,7 +122,7 @@ public class LeverBlock extends FaceAttachedHorizontalDirectionalBlock {
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (!bl && blockState.getBlock() != blockState2.getBlock()) {
+		if (!bl && !blockState.is(blockState2.getBlock())) {
 			if ((Boolean)blockState.getValue(POWERED)) {
 				this.updateNeighbours(blockState, level, blockPos);
 			}

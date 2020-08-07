@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
 import java.util.Optional;
 
-public class BooleanProperty extends AbstractProperty<Boolean> {
+public class BooleanProperty extends Property<Boolean> {
 	private final ImmutableSet<Boolean> values = ImmutableSet.of(true, false);
 
 	protected BooleanProperty(String string) {

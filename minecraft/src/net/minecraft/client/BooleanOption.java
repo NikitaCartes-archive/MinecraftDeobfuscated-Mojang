@@ -6,7 +6,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.OptionButton;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class BooleanOption extends Option {
@@ -44,7 +45,7 @@ public class BooleanOption extends Option {
 		});
 	}
 
-	public String getMessage(Options options) {
-		return this.getCaption() + I18n.get(this.get(options) ? "options.on" : "options.off");
+	public Component getMessage(Options options) {
+		return CommonComponents.optionStatus(this.getCaption(), this.get(options));
 	}
 }

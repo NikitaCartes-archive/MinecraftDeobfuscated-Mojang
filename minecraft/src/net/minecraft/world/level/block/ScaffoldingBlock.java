@@ -5,11 +5,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.FallingBlockEntity;
-import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -30,7 +31,7 @@ public class ScaffoldingBlock extends Block implements SimpleWaterloggedBlock {
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	public static final BooleanProperty BOTTOM = BlockStateProperties.BOTTOM;
 
-	protected ScaffoldingBlock(Block.Properties properties) {
+	protected ScaffoldingBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(DISTANCE, Integer.valueOf(7)).setValue(WATERLOGGED, Boolean.valueOf(false)).setValue(BOTTOM, Boolean.valueOf(false))
@@ -139,22 +140,22 @@ public class ScaffoldingBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	private boolean isBottom(BlockGetter blockGetter, BlockPos blockPos, int i) {
-		return i > 0 && blockGetter.getBlockState(blockPos.below()).getBlock() != this;
+		return i > 0 && !blockGetter.getBlockState(blockPos.below()).is(this);
 	}
 
 	public static int getDistance(BlockGetter blockGetter, BlockPos blockPos) {
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos).move(Direction.DOWN);
+		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable().move(Direction.DOWN);
 		BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
 		int i = 7;
-		if (blockState.getBlock() == Blocks.SCAFFOLDING) {
+		if (blockState.is(Blocks.SCAFFOLDING)) {
 			i = (Integer)blockState.getValue(DISTANCE);
 		} else if (blockState.isFaceSturdy(blockGetter, mutableBlockPos, Direction.UP)) {
 			return 0;
 		}
 
 		for (Direction direction : Direction.Plane.HORIZONTAL) {
-			BlockState blockState2 = blockGetter.getBlockState(mutableBlockPos.set(blockPos).move(direction));
-			if (blockState2.getBlock() == Blocks.SCAFFOLDING) {
+			BlockState blockState2 = blockGetter.getBlockState(mutableBlockPos.setWithOffset(blockPos, direction));
+			if (blockState2.is(Blocks.SCAFFOLDING)) {
 				i = Math.min(i, (Integer)blockState2.getValue(DISTANCE) + 1);
 				if (i == 1) {
 					break;

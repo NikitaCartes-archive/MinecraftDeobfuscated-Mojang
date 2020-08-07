@@ -23,11 +23,13 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -44,6 +46,8 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
@@ -64,15 +68,14 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
@@ -146,6 +149,7 @@ public class Fox extends Animal {
 				)
 			);
 		this.goalSelector.addGoal(4, new AvoidEntityGoal(this, Wolf.class, 8.0F, 1.6, 1.4, livingEntity -> !((Wolf)livingEntity).isTame() && !this.isDefending()));
+		this.goalSelector.addGoal(4, new AvoidEntityGoal(this, PolarBear.class, 8.0F, 1.6, 1.4, livingEntity -> !this.isDefending()));
 		this.goalSelector.addGoal(5, new Fox.StalkPreyGoal());
 		this.goalSelector.addGoal(6, new Fox.FoxPounceGoal());
 		this.goalSelector.addGoal(6, new Fox.SeekShelterGoal(1.25));
@@ -213,7 +217,7 @@ public class Fox extends Animal {
 
 	@Override
 	protected boolean isImmobile() {
-		return this.getHealth() <= 0.0F;
+		return this.isDeadOrDying();
 	}
 
 	private boolean canEat(ItemStack itemStack) {
@@ -270,17 +274,16 @@ public class Fox extends Animal {
 		}
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.3F);
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(10.0);
-		this.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(32.0);
-		this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(2.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Mob.createMobAttributes()
+			.add(Attributes.MOVEMENT_SPEED, 0.3F)
+			.add(Attributes.MAX_HEALTH, 10.0)
+			.add(Attributes.FOLLOW_RANGE, 32.0)
+			.add(Attributes.ATTACK_DAMAGE, 2.0);
 	}
 
-	public Fox getBreedOffspring(AgableMob agableMob) {
-		Fox fox = EntityType.FOX.create(this.level);
+	public Fox getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+		Fox fox = EntityType.FOX.create(serverLevel);
 		fox.setFoxType(this.random.nextBoolean() ? this.getFoxType() : ((Fox)agableMob).getFoxType());
 		return fox;
 	}
@@ -288,14 +291,14 @@ public class Fox extends Animal {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		Biome biome = levelAccessor.getBiome(new BlockPos(this));
-		Fox.Type type = Fox.Type.byBiome(biome);
+		Optional<ResourceKey<Biome>> optional = serverLevelAccessor.getBiomeName(this.blockPosition());
+		Fox.Type type = Fox.Type.byBiome(optional);
 		boolean bl = false;
 		if (spawnGroupData instanceof Fox.FoxGroupData) {
 			type = ((Fox.FoxGroupData)spawnGroupData).type;
@@ -311,9 +314,12 @@ public class Fox extends Animal {
 			this.setAge(-24000);
 		}
 
-		this.setTargetGoals();
+		if (serverLevelAccessor instanceof ServerLevel) {
+			this.setTargetGoals();
+		}
+
 		this.populateDefaultEquipmentSlots(difficultyInstance);
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	private void setTargetGoals() {
@@ -373,11 +379,11 @@ public class Fox extends Animal {
 
 		for (UUID uUID : list) {
 			if (uUID != null) {
-				listTag.add(NbtUtils.createUUIDTag(uUID));
+				listTag.add(NbtUtils.createUUID(uUID));
 			}
 		}
 
-		compoundTag.put("TrustedUUIDs", listTag);
+		compoundTag.put("Trusted", listTag);
 		compoundTag.putBoolean("Sleeping", this.isSleeping());
 		compoundTag.putString("Type", this.getFoxType().getName());
 		compoundTag.putBoolean("Sitting", this.isSitting());
@@ -387,17 +393,19 @@ public class Fox extends Animal {
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		ListTag listTag = compoundTag.getList("TrustedUUIDs", 10);
+		ListTag listTag = compoundTag.getList("Trusted", 11);
 
 		for (int i = 0; i < listTag.size(); i++) {
-			this.addTrustedUUID(NbtUtils.loadUUIDTag(listTag.getCompound(i)));
+			this.addTrustedUUID(NbtUtils.loadUUID(listTag.get(i)));
 		}
 
 		this.setSleeping(compoundTag.getBoolean("Sleeping"));
 		this.setFoxType(Fox.Type.byName(compoundTag.getString("Type")));
 		this.setSitting(compoundTag.getBoolean("Sitting"));
 		this.setIsCrouching(compoundTag.getBoolean("Crouching"));
-		this.setTargetGoals();
+		if (this.level instanceof ServerLevel) {
+			this.setTargetGoals();
+		}
 	}
 
 	public boolean isSitting() {
@@ -452,7 +460,7 @@ public class Fox extends Animal {
 	}
 
 	@Override
-	protected boolean canHoldItem(ItemStack itemStack) {
+	public boolean canHoldItem(ItemStack itemStack) {
 		Item item = itemStack.getItem();
 		ItemStack itemStack2 = this.getItemBySlot(EquipmentSlot.MAINHAND);
 		return itemStack2.isEmpty() || this.ticksSinceEaten > 0 && item.isEdible() && !itemStack2.getItem().isEdible();
@@ -483,6 +491,7 @@ public class Fox extends Animal {
 			}
 
 			this.spitOutItem(this.getItemBySlot(EquipmentSlot.MAINHAND));
+			this.onItemPickup(itemEntity);
 			this.setItemSlot(EquipmentSlot.MAINHAND, itemStack.split(1));
 			this.handDropChances[EquipmentSlot.MAINHAND.getIndex()] = 2.0F;
 			this.take(itemEntity, itemStack.getCount());
@@ -505,7 +514,7 @@ public class Fox extends Animal {
 			}
 
 			if (this.isFaceplanted() && this.level.random.nextFloat() < 0.2F) {
-				BlockPos blockPos = new BlockPos(this);
+				BlockPos blockPos = this.blockPosition();
 				BlockState blockState = this.level.getBlockState(blockPos);
 				this.level.levelEvent(2001, blockPos, Block.getId(blockState));
 			}
@@ -535,8 +544,8 @@ public class Fox extends Animal {
 	}
 
 	@Override
-	protected void onOffspringSpawnedFromEgg(Player player, AgableMob agableMob) {
-		((Fox)agableMob).addTrustedUUID(player.getUUID());
+	protected void onOffspringSpawnedFromEgg(Player player, Mob mob) {
+		((Fox)mob).addTrustedUUID(player.getUUID());
 	}
 
 	public boolean isPouncing() {
@@ -683,6 +692,12 @@ public class Fox extends Animal {
 		return true;
 	}
 
+	@Environment(EnvType.CLIENT)
+	@Override
+	public Vec3 getLeashOffset() {
+		return new Vec3(0.0, (double)(0.55F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.4F));
+	}
+
 	class DefendTrustedTargetGoal extends NearestAttackableTargetGoal<LivingEntity> {
 		@Nullable
 		private LivingEntity trustedLastHurtBy;
@@ -717,7 +732,7 @@ public class Fox extends Animal {
 
 		@Override
 		public void start() {
-			Fox.this.setTarget(this.trustedLastHurtBy);
+			this.setTarget(this.trustedLastHurtBy);
 			this.target = this.trustedLastHurtBy;
 			if (this.trustedLastHurt != null) {
 				this.timestamp = this.trustedLastHurt.getLastHurtByMobTimestamp();
@@ -789,7 +804,7 @@ public class Fox extends Animal {
 		}
 
 		protected boolean hasShelter() {
-			BlockPos blockPos = new BlockPos(Fox.this);
+			BlockPos blockPos = new BlockPos(Fox.this.getX(), Fox.this.getBoundingBox().maxY, Fox.this.getZ());
 			return !Fox.this.level.canSeeSky(blockPos) && Fox.this.getWalkTargetValue(blockPos) >= 0.0F;
 		}
 
@@ -814,7 +829,8 @@ public class Fox extends Animal {
 
 		@Override
 		protected void breed() {
-			Fox fox = (Fox)this.animal.getBreedOffspring(this.partner);
+			ServerLevel serverLevel = (ServerLevel)this.level;
+			Fox fox = (Fox)this.animal.getBreedOffspring(serverLevel, this.partner);
 			if (fox != null) {
 				ServerPlayer serverPlayer = this.animal.getLoveCause();
 				ServerPlayer serverPlayer2 = this.partner.getLoveCause();
@@ -834,14 +850,13 @@ public class Fox extends Animal {
 					CriteriaTriggers.BRED_ANIMALS.trigger(serverPlayer3, this.animal, this.partner, fox);
 				}
 
-				int i = 6000;
 				this.animal.setAge(6000);
 				this.partner.setAge(6000);
 				this.animal.resetLove();
 				this.partner.resetLove();
 				fox.setAge(-24000);
 				fox.moveTo(this.animal.getX(), this.animal.getY(), this.animal.getZ(), 0.0F, 0.0F);
-				this.level.addFreshEntity(fox);
+				serverLevel.addFreshEntityWithPassengers(fox);
 				this.level.broadcastEntityEvent(this.animal, (byte)18);
 				if (this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
 					this.level
@@ -871,7 +886,7 @@ public class Fox extends Animal {
 		@Override
 		protected boolean isValidTarget(LevelReader levelReader, BlockPos blockPos) {
 			BlockState blockState = levelReader.getBlockState(blockPos);
-			return blockState.getBlock() == Blocks.SWEET_BERRY_BUSH && (Integer)blockState.getValue(SweetBerryBushBlock.AGE) >= 2;
+			return blockState.is(Blocks.SWEET_BERRY_BUSH) && (Integer)blockState.getValue(SweetBerryBushBlock.AGE) >= 2;
 		}
 
 		@Override
@@ -892,7 +907,7 @@ public class Fox extends Animal {
 		protected void onReachedTarget() {
 			if (Fox.this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 				BlockState blockState = Fox.this.level.getBlockState(this.blockPos);
-				if (blockState.getBlock() == Blocks.SWEET_BERRY_BUSH) {
+				if (blockState.is(Blocks.SWEET_BERRY_BUSH)) {
 					int i = (Integer)blockState.getValue(SweetBerryBushBlock.AGE);
 					blockState.setValue(SweetBerryBushBlock.AGE, Integer.valueOf(1));
 					int j = 1 + Fox.this.level.random.nextInt(2) + (i == 3 ? 1 : 0);
@@ -938,7 +953,7 @@ public class Fox extends Animal {
 
 		@Override
 		public boolean canUse() {
-			return Fox.this.isInWater() && Fox.this.getWaterHeight() > 0.25 || Fox.this.isInLava();
+			return Fox.this.isInWater() && Fox.this.getFluidHeight(FluidTags.WATER) > 0.25 || Fox.this.isInLava();
 		}
 	}
 
@@ -971,7 +986,7 @@ public class Fox extends Animal {
 		public final Fox.Type type;
 
 		public FoxGroupData(Fox.Type type) {
-			this.setShouldSpawnBaby(false);
+			super(false);
 			this.type = type;
 		}
 	}
@@ -1018,8 +1033,8 @@ public class Fox extends Animal {
 		@Override
 		protected void checkAndPerformAttack(LivingEntity livingEntity, double d) {
 			double e = this.getAttackReachSqr(livingEntity);
-			if (d <= e && this.attackTime <= 0) {
-				this.attackTime = 20;
+			if (d <= e && this.isTimeToAttack()) {
+				this.resetAttackCooldown();
 				this.mob.doHurtTarget(livingEntity);
 				Fox.this.playSound(SoundEvents.FOX_BITE, 1.0F, 1.0F);
 			}
@@ -1147,7 +1162,7 @@ public class Fox extends Animal {
 			} else if (Fox.this.xRot > 0.0F
 				&& Fox.this.onGround
 				&& (float)Fox.this.getDeltaMovement().y != 0.0F
-				&& Fox.this.level.getBlockState(new BlockPos(Fox.this)).getBlock() == Blocks.SNOW) {
+				&& Fox.this.level.getBlockState(Fox.this.blockPosition()).is(Blocks.SNOW)) {
 				Fox.this.xRot = 60.0F;
 				Fox.this.setTarget(null);
 				Fox.this.setFaceplanted(true);
@@ -1298,7 +1313,7 @@ public class Fox extends Animal {
 				return false;
 			} else {
 				this.interval = 100;
-				BlockPos blockPos = new BlockPos(this.mob);
+				BlockPos blockPos = this.mob.blockPosition();
 				return Fox.this.level.isDay() && Fox.this.level.canSeeSky(blockPos) && !((ServerLevel)Fox.this.level).isVillage(blockPos) && this.setWantedPos();
 			}
 		}
@@ -1428,20 +1443,16 @@ public class Fox extends Animal {
 			.collect(Collectors.toMap(Fox.Type::getName, type -> type));
 		private final int id;
 		private final String name;
-		private final List<Biome> biomes;
+		private final List<ResourceKey<Biome>> biomes;
 
-		private Type(int j, String string2, Biome... biomes) {
+		private Type(int j, String string2, ResourceKey<Biome>... resourceKeys) {
 			this.id = j;
 			this.name = string2;
-			this.biomes = Arrays.asList(biomes);
+			this.biomes = Arrays.asList(resourceKeys);
 		}
 
 		public String getName() {
 			return this.name;
-		}
-
-		public List<Biome> getBiomes() {
-			return this.biomes;
 		}
 
 		public int getId() {
@@ -1460,8 +1471,8 @@ public class Fox extends Animal {
 			return BY_ID[i];
 		}
 
-		public static Fox.Type byBiome(Biome biome) {
-			return SNOW.getBiomes().contains(biome) ? SNOW : RED;
+		public static Fox.Type byBiome(Optional<ResourceKey<Biome>> optional) {
+			return optional.isPresent() && SNOW.biomes.contains(optional.get()) ? SNOW : RED;
 		}
 	}
 }

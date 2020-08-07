@@ -10,9 +10,11 @@ import net.minecraft.world.level.levelgen.structure.IglooPieces;
 import net.minecraft.world.level.levelgen.structure.JunglePyramidPiece;
 import net.minecraft.world.level.levelgen.structure.MineShaftPieces;
 import net.minecraft.world.level.levelgen.structure.NetherBridgePieces;
+import net.minecraft.world.level.levelgen.structure.NetherFossilPieces;
 import net.minecraft.world.level.levelgen.structure.OceanMonumentPieces;
 import net.minecraft.world.level.levelgen.structure.OceanRuinPieces;
-import net.minecraft.world.level.levelgen.structure.PillagerOutpostPieces;
+import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
+import net.minecraft.world.level.levelgen.structure.RuinedPortalPiece;
 import net.minecraft.world.level.levelgen.structure.ShipwreckPieces;
 import net.minecraft.world.level.levelgen.structure.StrongholdPieces;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
@@ -25,8 +27,6 @@ public interface StructurePieceType {
 	StructurePieceType MINE_SHAFT_CROSSING = setPieceId(MineShaftPieces.MineShaftCrossing::new, "MSCrossing");
 	StructurePieceType MINE_SHAFT_ROOM = setPieceId(MineShaftPieces.MineShaftRoom::new, "MSRoom");
 	StructurePieceType MINE_SHAFT_STAIRS = setPieceId(MineShaftPieces.MineShaftStairs::new, "MSStairs");
-	StructurePieceType PILLAGER_OUTPOST = setPieceId(PillagerOutpostPieces.PillagerOutpostPiece::new, "PCP");
-	StructurePieceType VILLAGE = setPieceId(VillagePieces.VillagePiece::new, "NVi");
 	StructurePieceType NETHER_FORTRESS_BRIDGE_CROSSING = setPieceId(NetherBridgePieces.BridgeCrossing::new, "NeBCr");
 	StructurePieceType NETHER_FORTRESS_BRIDGE_END_FILLER = setPieceId(NetherBridgePieces.BridgeEndFiller::new, "NeBEF");
 	StructurePieceType NETHER_FORTRESS_BRIDGE_STRAIGHT = setPieceId(NetherBridgePieces.BridgeStraight::new, "NeBS");
@@ -58,6 +58,7 @@ public interface StructurePieceType {
 	StructurePieceType JUNGLE_PYRAMID_PIECE = setPieceId(JunglePyramidPiece::new, "TeJP");
 	StructurePieceType OCEAN_RUIN = setPieceId(OceanRuinPieces.OceanRuinPiece::new, "ORP");
 	StructurePieceType IGLOO = setPieceId(IglooPieces.IglooPiece::new, "Iglu");
+	StructurePieceType RUINED_PORTAL = setPieceId(RuinedPortalPiece::new, "RUPO");
 	StructurePieceType SWAMPLAND_HUT = setPieceId(SwamplandHutPiece::new, "TeSH");
 	StructurePieceType DESERT_PYRAMID_PIECE = setPieceId(DesertPyramidPiece::new, "TeDP");
 	StructurePieceType OCEAN_MONUMENT_BUILDING = setPieceId(OceanMonumentPieces.MonumentBuilding::new, "OMB");
@@ -76,6 +77,8 @@ public interface StructurePieceType {
 	StructurePieceType WOODLAND_MANSION_PIECE = setPieceId(WoodlandMansionPieces.WoodlandMansionPiece::new, "WMP");
 	StructurePieceType BURIED_TREASURE_PIECE = setPieceId(BuriedTreasurePieces.BuriedTreasurePiece::new, "BTP");
 	StructurePieceType SHIPWRECK_PIECE = setPieceId(ShipwreckPieces.ShipwreckPiece::new, "Shipwreck");
+	StructurePieceType NETHER_FOSSIL = setPieceId(NetherFossilPieces.NetherFossilPiece::new, "NeFos");
+	StructurePieceType JIGSAW = setPieceId(PoolElementStructurePiece::new, "jigsaw");
 
 	StructurePiece load(StructureManager structureManager, CompoundTag compoundTag);
 

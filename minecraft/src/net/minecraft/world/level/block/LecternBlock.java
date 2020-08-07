@@ -4,6 +4,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -14,12 +15,13 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -65,7 +67,7 @@ public class LecternBlock extends BaseEntityBlock {
 		SHAPE_COMMON
 	);
 
-	protected LecternBlock(Block.Properties properties) {
+	protected LecternBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(POWERED, Boolean.valueOf(false)).setValue(HAS_BOOK, Boolean.valueOf(false))
@@ -89,7 +91,19 @@ public class LecternBlock extends BaseEntityBlock {
 
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-		return this.defaultBlockState().setValue(FACING, blockPlaceContext.getHorizontalDirection().getOpposite());
+		Level level = blockPlaceContext.getLevel();
+		ItemStack itemStack = blockPlaceContext.getItemInHand();
+		CompoundTag compoundTag = itemStack.getTag();
+		Player player = blockPlaceContext.getPlayer();
+		boolean bl = false;
+		if (!level.isClientSide && player != null && compoundTag != null && player.canUseGameMasterBlocks() && compoundTag.contains("BlockEntityTag")) {
+			CompoundTag compoundTag2 = compoundTag.getCompound("BlockEntityTag");
+			if (compoundTag2.contains("Book")) {
+				bl = true;
+			}
+		}
+
+		return this.defaultBlockState().setValue(FACING, blockPlaceContext.getHorizontalDirection().getOpposite()).setValue(HAS_BOOK, Boolean.valueOf(bl));
 	}
 
 	@Override
@@ -183,7 +197,7 @@ public class LecternBlock extends BaseEntityBlock {
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState.getBlock() != blockState2.getBlock()) {
+		if (!blockState.is(blockState2.getBlock())) {
 			if ((Boolean)blockState.getValue(HAS_BOOK)) {
 				this.popBook(blockState, level, blockPos);
 			}
@@ -254,7 +268,7 @@ public class LecternBlock extends BaseEntityBlock {
 				this.openScreen(level, blockPos, player);
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			ItemStack itemStack = player.getItemInHand(interactionHand);
 			return !itemStack.isEmpty() && !itemStack.getItem().is(ItemTags.LECTERN_BOOKS) ? InteractionResult.CONSUME : InteractionResult.PASS;

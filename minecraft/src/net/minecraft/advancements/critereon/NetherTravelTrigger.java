@@ -1,7 +1,5 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -16,17 +14,18 @@ public class NetherTravelTrigger extends SimpleCriterionTrigger<NetherTravelTrig
 		return ID;
 	}
 
-	public NetherTravelTrigger.TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+	public NetherTravelTrigger.TriggerInstance createInstance(
+		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+	) {
 		LocationPredicate locationPredicate = LocationPredicate.fromJson(jsonObject.get("entered"));
 		LocationPredicate locationPredicate2 = LocationPredicate.fromJson(jsonObject.get("exited"));
 		DistancePredicate distancePredicate = DistancePredicate.fromJson(jsonObject.get("distance"));
-		return new NetherTravelTrigger.TriggerInstance(locationPredicate, locationPredicate2, distancePredicate);
+		return new NetherTravelTrigger.TriggerInstance(composite, locationPredicate, locationPredicate2, distancePredicate);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Vec3 vec3) {
 		this.trigger(
-			serverPlayer.getAdvancements(),
-			triggerInstance -> triggerInstance.matches(serverPlayer.getLevel(), vec3, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ())
+			serverPlayer, triggerInstance -> triggerInstance.matches(serverPlayer.getLevel(), vec3, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ())
 		);
 	}
 
@@ -35,15 +34,17 @@ public class NetherTravelTrigger extends SimpleCriterionTrigger<NetherTravelTrig
 		private final LocationPredicate exited;
 		private final DistancePredicate distance;
 
-		public TriggerInstance(LocationPredicate locationPredicate, LocationPredicate locationPredicate2, DistancePredicate distancePredicate) {
-			super(NetherTravelTrigger.ID);
+		public TriggerInstance(
+			EntityPredicate.Composite composite, LocationPredicate locationPredicate, LocationPredicate locationPredicate2, DistancePredicate distancePredicate
+		) {
+			super(NetherTravelTrigger.ID, composite);
 			this.entered = locationPredicate;
 			this.exited = locationPredicate2;
 			this.distance = distancePredicate;
 		}
 
 		public static NetherTravelTrigger.TriggerInstance travelledThroughNether(DistancePredicate distancePredicate) {
-			return new NetherTravelTrigger.TriggerInstance(LocationPredicate.ANY, LocationPredicate.ANY, distancePredicate);
+			return new NetherTravelTrigger.TriggerInstance(EntityPredicate.Composite.ANY, LocationPredicate.ANY, LocationPredicate.ANY, distancePredicate);
 		}
 
 		public boolean matches(ServerLevel serverLevel, Vec3 vec3, double d, double e, double f) {
@@ -55,8 +56,8 @@ public class NetherTravelTrigger extends SimpleCriterionTrigger<NetherTravelTrig
 		}
 
 		@Override
-		public JsonElement serializeToJson() {
-			JsonObject jsonObject = new JsonObject();
+		public JsonObject serializeToJson(SerializationContext serializationContext) {
+			JsonObject jsonObject = super.serializeToJson(serializationContext);
 			jsonObject.add("entered", this.entered.serializeToJson());
 			jsonObject.add("exited", this.exited.serializeToJson());
 			jsonObject.add("distance", this.distance.serializeToJson());

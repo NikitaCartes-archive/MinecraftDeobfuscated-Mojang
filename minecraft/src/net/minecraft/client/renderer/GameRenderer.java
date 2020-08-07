@@ -1,11 +1,15 @@
 package net.minecraft.client.renderer;
 
 import com.google.gson.JsonSyntaxException;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import java.io.IOException;
@@ -30,7 +34,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.minecraft.server.packs.resources.SimpleResource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -54,7 +57,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Environment(EnvType.CLIENT)
-public class GameRenderer implements AutoCloseable, ResourceManagerReloadListener {
+public class GameRenderer implements ResourceManagerReloadListener, AutoCloseable {
+	private static final ResourceLocation NAUSEA_LOCATION = new ResourceLocation("textures/misc/nausea.png");
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final Minecraft minecraft;
 	private final ResourceManager resourceManager;
@@ -175,7 +179,7 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			this.effectIndex = EFFECT_NONE;
 			this.effectActive = false;
 		} catch (JsonSyntaxException var4) {
-			LOGGER.warn("Failed to load shader: {}", resourceLocation, var4);
+			LOGGER.warn("Failed to parse shader: {}", resourceLocation, var4);
 			this.effectIndex = EFFECT_NONE;
 			this.effectActive = false;
 		}
@@ -271,8 +275,6 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 					this.minecraft.hitResult = hitResult;
 				} else if (entityHitResult != null) {
 					this.minecraft.hitResult = entityHitResult;
-					this.minecraft.hitResultAimAssist = entityHitResult;
-					this.minecraft.hitResultAimAssistTicks = 6;
 					this.minecraft.crosshairPickEntity = entityHitResult.getEntity();
 				} else {
 					this.minecraft.hitResult = hitResult;
@@ -311,7 +313,7 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 				d *= (double)Mth.lerp(f, this.oldFov, this.fov);
 			}
 
-			if (camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).getHealth() <= 0.0F) {
+			if (camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).isDeadOrDying()) {
 				float g = Math.min((float)((LivingEntity)camera.getEntity()).deathTime + f, 20.0F);
 				d /= (double)((1.0F - 500.0F / (g + 500.0F)) * 2.0F + 1.0F);
 			}
@@ -329,7 +331,7 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 		if (this.minecraft.getCameraEntity() instanceof LivingEntity) {
 			LivingEntity livingEntity = (LivingEntity)this.minecraft.getCameraEntity();
 			float g = (float)livingEntity.hurtTime - f;
-			if (livingEntity.getHealth() <= 0.0F) {
+			if (livingEntity.isDeadOrDying()) {
 				float h = Math.min((float)livingEntity.deathTime + f, 20.0F);
 				poseStack.mulPose(Vector3f.ZP.rotationDegrees(40.0F - 8000.0F / (h + 200.0F)));
 			}
@@ -372,7 +374,10 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			}
 
 			boolean bl = this.minecraft.getCameraEntity() instanceof LivingEntity && ((LivingEntity)this.minecraft.getCameraEntity()).isSleeping();
-			if (this.minecraft.options.thirdPersonView == 0 && !bl && !this.minecraft.options.hideGui && this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR) {
+			if (this.minecraft.options.getCameraType().isFirstPerson()
+				&& !bl
+				&& !this.minecraft.options.hideGui
+				&& this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR) {
 				this.lightTexture.turnOnLightLayer();
 				this.itemInHandRenderer
 					.renderHandsWithItems(
@@ -386,7 +391,7 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			}
 
 			poseStack.popPose();
-			if (this.minecraft.options.thirdPersonView == 0 && !bl) {
+			if (this.minecraft.options.getCameraType().isFirstPerson() && !bl) {
 				ScreenEffectRenderer.renderScreenEffect(this.minecraft, poseStack);
 				this.bobHurt(poseStack, f);
 			}
@@ -448,11 +453,10 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			int j = (int)(
 				this.minecraft.mouseHandler.ypos() * (double)this.minecraft.getWindow().getGuiScaledHeight() / (double)this.minecraft.getWindow().getScreenHeight()
 			);
-			PoseStack poseStack = new PoseStack();
 			RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
 			if (bl && this.minecraft.level != null) {
 				this.minecraft.getProfiler().push("level");
-				this.renderLevel(f, l, poseStack);
+				this.renderLevel(f, l, new PoseStack());
 				if (this.minecraft.hasSingleplayerServer() && this.lastScreenshotAttempt < Util.getMillis() - 1000L) {
 					this.lastScreenshotAttempt = Util.getMillis();
 					if (!this.minecraft.getSingleplayerServer().hasWorldScreenshot()) {
@@ -485,12 +489,20 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			RenderSystem.loadIdentity();
 			RenderSystem.translatef(0.0F, 0.0F, -2000.0F);
 			Lighting.setupFor3DItems();
+			PoseStack poseStack = new PoseStack();
 			if (bl && this.minecraft.level != null) {
 				this.minecraft.getProfiler().popPush("gui");
+				if (this.minecraft.player != null) {
+					float g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime);
+					if (g > 0.0F && this.minecraft.player.hasEffect(MobEffects.CONFUSION) && this.minecraft.options.screenEffectScale < 1.0F) {
+						this.renderConfusionOverlay(g * (1.0F - this.minecraft.options.screenEffectScale));
+					}
+				}
+
 				if (!this.minecraft.options.hideGui || this.minecraft.screen != null) {
 					RenderSystem.defaultAlphaFunc();
 					this.renderItemActivationAnimation(this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight(), f);
-					this.minecraft.gui.render(f);
+					this.minecraft.gui.render(poseStack, f);
 					RenderSystem.clear(256, Minecraft.ON_OSX);
 				}
 
@@ -499,7 +511,7 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 
 			if (this.minecraft.overlay != null) {
 				try {
-					this.minecraft.overlay.render(i, j, this.minecraft.getDeltaFrameTime());
+					this.minecraft.overlay.render(poseStack, i, j, this.minecraft.getDeltaFrameTime());
 				} catch (Throwable var13) {
 					CrashReport crashReport = CrashReport.forThrowable(var13, "Rendering overlay");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Overlay render details");
@@ -508,7 +520,7 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 				}
 			} else if (this.minecraft.screen != null) {
 				try {
-					this.minecraft.screen.render(i, j, this.minecraft.getDeltaFrameTime());
+					this.minecraft.screen.render(poseStack, i, j, this.minecraft.getDeltaFrameTime());
 				} catch (Throwable var12) {
 					CrashReport crashReport = CrashReport.forThrowable(var12, "Rendering screen");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Screen render details");
@@ -544,7 +556,7 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			NativeImage nativeImage = Screenshot.takeScreenshot(
 				this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight(), this.minecraft.getMainRenderTarget()
 			);
-			SimpleResource.IO_EXECUTOR.execute(() -> {
+			Util.ioPool().execute(() -> {
 				int i = nativeImage.getWidth();
 				int j = nativeImage.getHeight();
 				int k = 0;
@@ -617,13 +629,11 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			this.bobView(poseStack2, f);
 		}
 
-		float g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime);
+		float g = Mth.lerp(f, this.minecraft.player.oPortalTime, this.minecraft.player.portalTime)
+			* this.minecraft.options.screenEffectScale
+			* this.minecraft.options.screenEffectScale;
 		if (g > 0.0F) {
-			int i = 20;
-			if (this.minecraft.player.hasEffect(MobEffects.CONFUSION)) {
-				i = 7;
-			}
-
+			int i = this.minecraft.player.hasEffect(MobEffects.CONFUSION) ? 7 : 20;
 			float h = 5.0F / (g * g + 5.0F) - g * 0.04F;
 			h *= h;
 			Vector3f vector3f = new Vector3f(0.0F, Mth.SQRT_OF_TWO / 2.0F, Mth.SQRT_OF_TWO / 2.0F);
@@ -638,8 +648,8 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 		camera.setup(
 			this.minecraft.level,
 			(Entity)(this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity()),
-			this.minecraft.options.thirdPersonView > 0,
-			this.minecraft.options.thirdPersonView == 2,
+			!this.minecraft.options.getCameraType().isFirstPerson(),
+			this.minecraft.options.getCameraType().isMirrored(),
 			f
 		);
 		poseStack.mulPose(Vector3f.XP.rotationDegrees(camera.getXRot()));
@@ -705,6 +715,38 @@ public class GameRenderer implements AutoCloseable, ResourceManagerReloadListene
 			RenderSystem.enableCull();
 			RenderSystem.disableDepthTest();
 		}
+	}
+
+	private void renderConfusionOverlay(float f) {
+		int i = this.minecraft.getWindow().getGuiScaledWidth();
+		int j = this.minecraft.getWindow().getGuiScaledHeight();
+		double d = Mth.lerp((double)f, 2.0, 1.0);
+		float g = 0.2F * f;
+		float h = 0.4F * f;
+		float k = 0.2F * f;
+		double e = (double)i * d;
+		double l = (double)j * d;
+		double m = ((double)i - e) / 2.0;
+		double n = ((double)j - l) / 2.0;
+		RenderSystem.disableDepthTest();
+		RenderSystem.depthMask(false);
+		RenderSystem.enableBlend();
+		RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
+		RenderSystem.color4f(g, h, k, 1.0F);
+		this.minecraft.getTextureManager().bind(NAUSEA_LOCATION);
+		Tesselator tesselator = Tesselator.getInstance();
+		BufferBuilder bufferBuilder = tesselator.getBuilder();
+		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
+		bufferBuilder.vertex(m, n + l, -90.0).uv(0.0F, 1.0F).endVertex();
+		bufferBuilder.vertex(m + e, n + l, -90.0).uv(1.0F, 1.0F).endVertex();
+		bufferBuilder.vertex(m + e, n, -90.0).uv(1.0F, 0.0F).endVertex();
+		bufferBuilder.vertex(m, n, -90.0).uv(0.0F, 0.0F).endVertex();
+		tesselator.end();
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+		RenderSystem.defaultBlendFunc();
+		RenderSystem.disableBlend();
+		RenderSystem.depthMask(true);
+		RenderSystem.enableDepthTest();
 	}
 
 	public float getDarkenWorldAmount(float f) {

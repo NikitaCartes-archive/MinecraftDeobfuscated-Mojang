@@ -1,15 +1,19 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.network.protocol.game.ServerboundSetBeaconPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -26,6 +30,8 @@ import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 @Environment(EnvType.CLIENT)
 public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 	private static final ResourceLocation BEACON_LOCATION = new ResourceLocation("textures/gui/container/beacon.png");
+	private static final Component PRIMARY_EFFECT_LABEL = new TranslatableComponent("block.minecraft.beacon.primary");
+	private static final Component SECONDARY_EFFECT_LABEL = new TranslatableComponent("block.minecraft.beacon.secondary");
 	private BeaconScreen.BeaconConfirmButton confirmButton;
 	private boolean initPowerButtons;
 	private MobEffect primary;
@@ -121,38 +127,39 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 	}
 
 	@Override
-	protected void renderLabels(int i, int j) {
-		this.drawCenteredString(this.font, I18n.get("block.minecraft.beacon.primary"), 62, 10, 14737632);
-		this.drawCenteredString(this.font, I18n.get("block.minecraft.beacon.secondary"), 169, 10, 14737632);
+	protected void renderLabels(PoseStack poseStack, int i, int j) {
+		drawCenteredString(poseStack, this.font, PRIMARY_EFFECT_LABEL, 62, 10, 14737632);
+		drawCenteredString(poseStack, this.font, SECONDARY_EFFECT_LABEL, 169, 10, 14737632);
 
 		for (AbstractWidget abstractWidget : this.buttons) {
 			if (abstractWidget.isHovered()) {
-				abstractWidget.renderToolTip(i - this.leftPos, j - this.topPos);
+				abstractWidget.renderToolTip(poseStack, i - this.leftPos, j - this.topPos);
 				break;
 			}
 		}
 	}
 
 	@Override
-	protected void renderBg(float f, int i, int j) {
+	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.minecraft.getTextureManager().bind(BEACON_LOCATION);
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
-		this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
+		this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
 		this.itemRenderer.blitOffset = 100.0F;
-		this.itemRenderer.renderAndDecorateItem(new ItemStack(Items.EMERALD), k + 42, l + 109);
-		this.itemRenderer.renderAndDecorateItem(new ItemStack(Items.DIAMOND), k + 42 + 22, l + 109);
+		this.itemRenderer.renderAndDecorateItem(new ItemStack(Items.NETHERITE_INGOT), k + 20, l + 109);
+		this.itemRenderer.renderAndDecorateItem(new ItemStack(Items.EMERALD), k + 41, l + 109);
+		this.itemRenderer.renderAndDecorateItem(new ItemStack(Items.DIAMOND), k + 41 + 22, l + 109);
 		this.itemRenderer.renderAndDecorateItem(new ItemStack(Items.GOLD_INGOT), k + 42 + 44, l + 109);
 		this.itemRenderer.renderAndDecorateItem(new ItemStack(Items.IRON_INGOT), k + 42 + 66, l + 109);
 		this.itemRenderer.blitOffset = 0.0F;
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
-		super.render(i, j, f);
-		this.renderTooltip(i, j);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		super.render(poseStack, i, j, f);
+		this.renderTooltip(poseStack, i, j);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -168,8 +175,8 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		}
 
 		@Override
-		public void renderToolTip(int i, int j) {
-			BeaconScreen.this.renderTooltip(I18n.get("gui.cancel"), i, j);
+		public void renderToolTip(PoseStack poseStack, int i, int j) {
+			BeaconScreen.this.renderTooltip(poseStack, CommonComponents.GUI_CANCEL, i, j);
 		}
 	}
 
@@ -189,8 +196,8 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		}
 
 		@Override
-		public void renderToolTip(int i, int j) {
-			BeaconScreen.this.renderTooltip(I18n.get("gui.done"), i, j);
+		public void renderToolTip(PoseStack poseStack, int i, int j) {
+			BeaconScreen.this.renderTooltip(poseStack, CommonComponents.GUI_DONE, i, j);
 		}
 	}
 
@@ -199,12 +206,23 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		private final MobEffect effect;
 		private final TextureAtlasSprite sprite;
 		private final boolean isPrimary;
+		private final Component tooltip;
 
 		public BeaconPowerButton(int i, int j, MobEffect mobEffect, boolean bl) {
 			super(i, j);
 			this.effect = mobEffect;
 			this.sprite = Minecraft.getInstance().getMobEffectTextures().get(mobEffect);
 			this.isPrimary = bl;
+			this.tooltip = this.createTooltip(mobEffect, bl);
+		}
+
+		private Component createTooltip(MobEffect mobEffect, boolean bl) {
+			MutableComponent mutableComponent = new TranslatableComponent(mobEffect.getDescriptionId());
+			if (!bl && mobEffect != MobEffects.REGENERATION) {
+				mutableComponent.append(" II");
+			}
+
+			return mutableComponent;
 		}
 
 		@Override
@@ -224,19 +242,14 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		}
 
 		@Override
-		public void renderToolTip(int i, int j) {
-			String string = I18n.get(this.effect.getDescriptionId());
-			if (!this.isPrimary && this.effect != MobEffects.REGENERATION) {
-				string = string + " II";
-			}
-
-			BeaconScreen.this.renderTooltip(string, i, j);
+		public void renderToolTip(PoseStack poseStack, int i, int j) {
+			BeaconScreen.this.renderTooltip(poseStack, this.tooltip, i, j);
 		}
 
 		@Override
-		protected void renderIcon() {
+		protected void renderIcon(PoseStack poseStack) {
 			Minecraft.getInstance().getTextureManager().bind(this.sprite.atlas().location());
-			blit(this.x + 2, this.y + 2, this.getBlitOffset(), 18, 18, this.sprite);
+			blit(poseStack, this.x + 2, this.y + 2, this.getBlitOffset(), 18, 18, this.sprite);
 		}
 	}
 
@@ -245,11 +258,11 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		private boolean selected;
 
 		protected BeaconScreenButton(int i, int j) {
-			super(i, j, 22, 22, "");
+			super(i, j, 22, 22, TextComponent.EMPTY);
 		}
 
 		@Override
-		public void renderButton(int i, int j, float f) {
+		public void renderButton(PoseStack poseStack, int i, int j, float f) {
 			Minecraft.getInstance().getTextureManager().bind(BeaconScreen.BEACON_LOCATION);
 			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			int k = 219;
@@ -262,11 +275,11 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 				l += this.width * 3;
 			}
 
-			this.blit(this.x, this.y, l, 219, this.width, this.height);
-			this.renderIcon();
+			this.blit(poseStack, this.x, this.y, l, 219, this.width, this.height);
+			this.renderIcon(poseStack);
 		}
 
-		protected abstract void renderIcon();
+		protected abstract void renderIcon(PoseStack poseStack);
 
 		public boolean isSelected() {
 			return this.selected;
@@ -289,8 +302,8 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		}
 
 		@Override
-		protected void renderIcon() {
-			this.blit(this.x + 2, this.y + 2, this.iconX, this.iconY, 18, 18);
+		protected void renderIcon(PoseStack poseStack) {
+			this.blit(poseStack, this.x + 2, this.y + 2, this.iconX, this.iconY, 18, 18);
 		}
 	}
 }

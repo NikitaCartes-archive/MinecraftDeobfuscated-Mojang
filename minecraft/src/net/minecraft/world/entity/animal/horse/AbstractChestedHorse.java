@@ -5,15 +5,15 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
@@ -26,17 +26,18 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 	}
 
 	@Override
+	protected void randomizeAttributes() {
+		this.getAttribute(Attributes.MAX_HEALTH).setBaseValue((double)this.generateRandomMaxHealth());
+	}
+
+	@Override
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		this.entityData.define(DATA_ID_CHEST, false);
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue((double)this.generateRandomMaxHealth());
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.175F);
-		this.getAttribute(JUMP_STRENGTH).setBaseValue(0.5);
+	public static AttributeSupplier.Builder createBaseChestedHorseAttributes() {
+		return createBaseHorseAttributes().add(Attributes.MOVEMENT_SPEED, 0.175F).add(Attributes.JUMP_STRENGTH, 0.5);
 	}
 
 	public boolean hasChest() {
@@ -53,14 +54,8 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 	}
 
 	@Override
-	public double getRideHeight() {
-		return super.getRideHeight() - 0.25;
-	}
-
-	@Override
-	protected SoundEvent getAngrySound() {
-		super.getAngrySound();
-		return SoundEvents.DONKEY_ANGRY;
+	public double getPassengersRidingOffset() {
+		return super.getPassengersRidingOffset() - 0.25;
 	}
 
 	@Override
@@ -113,7 +108,7 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 			}
 		}
 
-		this.updateEquipment();
+		this.updateContainerEquipment();
 	}
 
 	@Override
@@ -136,62 +131,51 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 	}
 
 	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.getItem() instanceof SpawnEggItem) {
+		if (!this.isBaby()) {
+			if (this.isTamed() && player.isSecondaryUseActive()) {
+				this.openInventory(player);
+				return InteractionResult.sidedSuccess(this.level.isClientSide);
+			}
+
+			if (this.isVehicle()) {
+				return super.mobInteract(player, interactionHand);
+			}
+		}
+
+		if (!itemStack.isEmpty()) {
+			if (this.isFood(itemStack)) {
+				return this.fedFood(player, itemStack);
+			}
+
+			if (!this.isTamed()) {
+				this.makeMad();
+				return InteractionResult.sidedSuccess(this.level.isClientSide);
+			}
+
+			if (!this.hasChest() && itemStack.getItem() == Blocks.CHEST.asItem()) {
+				this.setChest(true);
+				this.playChestEquipsSound();
+				if (!player.abilities.instabuild) {
+					itemStack.shrink(1);
+				}
+
+				this.createInventory();
+				return InteractionResult.sidedSuccess(this.level.isClientSide);
+			}
+
+			if (!this.isBaby() && !this.isSaddled() && itemStack.getItem() == Items.SADDLE) {
+				this.openInventory(player);
+				return InteractionResult.sidedSuccess(this.level.isClientSide);
+			}
+		}
+
+		if (this.isBaby()) {
 			return super.mobInteract(player, interactionHand);
 		} else {
-			if (!this.isBaby()) {
-				if (this.isTamed() && player.isSecondaryUseActive()) {
-					this.openInventory(player);
-					return true;
-				}
-
-				if (this.isVehicle()) {
-					return super.mobInteract(player, interactionHand);
-				}
-			}
-
-			if (!itemStack.isEmpty()) {
-				boolean bl = this.handleEating(player, itemStack);
-				if (!bl) {
-					if (!this.isTamed() || itemStack.getItem() == Items.NAME_TAG) {
-						if (itemStack.interactEnemy(player, this, interactionHand)) {
-							return true;
-						} else {
-							this.makeMad();
-							return true;
-						}
-					}
-
-					if (!this.hasChest() && itemStack.getItem() == Blocks.CHEST.asItem()) {
-						this.setChest(true);
-						this.playChestEquipsSound();
-						bl = true;
-						this.createInventory();
-					}
-
-					if (!this.isBaby() && !this.isSaddled() && itemStack.getItem() == Items.SADDLE) {
-						this.openInventory(player);
-						return true;
-					}
-				}
-
-				if (bl) {
-					if (!player.abilities.instabuild) {
-						itemStack.shrink(1);
-					}
-
-					return true;
-				}
-			}
-
-			if (this.isBaby()) {
-				return super.mobInteract(player, interactionHand);
-			} else {
-				this.doPlayerRide(player);
-				return true;
-			}
+			this.doPlayerRide(player);
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		}
 	}
 

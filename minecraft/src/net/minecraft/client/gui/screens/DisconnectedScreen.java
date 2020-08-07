@@ -1,24 +1,24 @@
 package net.minecraft.client.gui.screens;
 
-import java.util.List;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class DisconnectedScreen extends Screen {
 	private final Component reason;
-	private List<String> lines;
+	private MultiLineLabel message = MultiLineLabel.EMPTY;
 	private final Screen parent;
 	private int textHeight;
 
-	public DisconnectedScreen(Screen screen, String string, Component component) {
-		super(new TranslatableComponent(string));
+	public DisconnectedScreen(Screen screen, Component component, Component component2) {
+		super(component);
 		this.parent = screen;
-		this.reason = component;
+		this.reason = component2;
 	}
 
 	@Override
@@ -28,32 +28,25 @@ public class DisconnectedScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.lines = this.font.split(this.reason.getColoredString(), this.width - 50);
-		this.textHeight = this.lines.size() * 9;
+		this.message = MultiLineLabel.create(this.font, this.reason, this.width - 50);
+		this.textHeight = this.message.getLineCount() * 9;
 		this.addButton(
 			new Button(
 				this.width / 2 - 100,
 				Math.min(this.height / 2 + this.textHeight / 2 + 9, this.height - 30),
 				200,
 				20,
-				I18n.get("gui.toMenu"),
+				new TranslatableComponent("gui.toMenu"),
 				button -> this.minecraft.setScreen(this.parent)
 			)
 		);
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
-		this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, this.height / 2 - this.textHeight / 2 - 9 * 2, 11184810);
-		int k = this.height / 2 - this.textHeight / 2;
-		if (this.lines != null) {
-			for (String string : this.lines) {
-				this.drawCenteredString(this.font, string, this.width / 2, k, 16777215);
-				k += 9;
-			}
-		}
-
-		super.render(i, j, f);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, this.height / 2 - this.textHeight / 2 - 9 * 2, 11184810);
+		this.message.renderCentered(poseStack, this.width / 2, this.height / 2 - this.textHeight / 2);
+		super.render(poseStack, i, j, f);
 	}
 }

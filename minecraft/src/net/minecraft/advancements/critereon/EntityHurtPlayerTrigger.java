@@ -1,7 +1,5 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -15,25 +13,27 @@ public class EntityHurtPlayerTrigger extends SimpleCriterionTrigger<EntityHurtPl
 		return ID;
 	}
 
-	public EntityHurtPlayerTrigger.TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+	public EntityHurtPlayerTrigger.TriggerInstance createInstance(
+		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+	) {
 		DamagePredicate damagePredicate = DamagePredicate.fromJson(jsonObject.get("damage"));
-		return new EntityHurtPlayerTrigger.TriggerInstance(damagePredicate);
+		return new EntityHurtPlayerTrigger.TriggerInstance(composite, damagePredicate);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, DamageSource damageSource, float f, float g, boolean bl) {
-		this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(serverPlayer, damageSource, f, g, bl));
+		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(serverPlayer, damageSource, f, g, bl));
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final DamagePredicate damage;
 
-		public TriggerInstance(DamagePredicate damagePredicate) {
-			super(EntityHurtPlayerTrigger.ID);
+		public TriggerInstance(EntityPredicate.Composite composite, DamagePredicate damagePredicate) {
+			super(EntityHurtPlayerTrigger.ID, composite);
 			this.damage = damagePredicate;
 		}
 
 		public static EntityHurtPlayerTrigger.TriggerInstance entityHurtPlayer(DamagePredicate.Builder builder) {
-			return new EntityHurtPlayerTrigger.TriggerInstance(builder.build());
+			return new EntityHurtPlayerTrigger.TriggerInstance(EntityPredicate.Composite.ANY, builder.build());
 		}
 
 		public boolean matches(ServerPlayer serverPlayer, DamageSource damageSource, float f, float g, boolean bl) {
@@ -41,8 +41,8 @@ public class EntityHurtPlayerTrigger extends SimpleCriterionTrigger<EntityHurtPl
 		}
 
 		@Override
-		public JsonElement serializeToJson() {
-			JsonObject jsonObject = new JsonObject();
+		public JsonObject serializeToJson(SerializationContext serializationContext) {
+			JsonObject jsonObject = super.serializeToJson(serializationContext);
 			jsonObject.add("damage", this.damage.serializeToJson());
 			return jsonObject;
 		}

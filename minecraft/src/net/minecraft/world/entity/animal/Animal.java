@@ -5,22 +5,29 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 
 public abstract class Animal extends AgableMob {
 	private int inLove;
@@ -28,6 +35,8 @@ public abstract class Animal extends AgableMob {
 
 	protected Animal(EntityType<? extends Animal> entityType, Level level) {
 		super(entityType, level);
+		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0F);
+		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
 	}
 
 	@Override
@@ -69,7 +78,7 @@ public abstract class Animal extends AgableMob {
 
 	@Override
 	public float getWalkTargetValue(BlockPos blockPos, LevelReader levelReader) {
-		return levelReader.getBlockState(blockPos.below()).getBlock() == Blocks.GRASS_BLOCK ? 10.0F : levelReader.getBrightness(blockPos) - 0.5F;
+		return levelReader.getBlockState(blockPos.below()).is(Blocks.GRASS_BLOCK) ? 10.0F : levelReader.getBrightness(blockPos) - 0.5F;
 	}
 
 	@Override
@@ -82,7 +91,7 @@ public abstract class Animal extends AgableMob {
 	}
 
 	@Override
-	public double getRidingHeight() {
+	public double getMyRidingOffset() {
 		return 0.14;
 	}
 
@@ -96,7 +105,7 @@ public abstract class Animal extends AgableMob {
 	public static boolean checkAnimalSpawnRules(
 		EntityType<? extends Animal> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
-		return levelAccessor.getBlockState(blockPos.below()).getBlock() == Blocks.GRASS_BLOCK && levelAccessor.getRawBrightness(blockPos, 0) > 8;
+		return levelAccessor.getBlockState(blockPos.below()).is(Blocks.GRASS_BLOCK) && levelAccessor.getRawBrightness(blockPos, 0) > 8;
 	}
 
 	@Override
@@ -119,20 +128,24 @@ public abstract class Animal extends AgableMob {
 	}
 
 	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (this.isFood(itemStack)) {
-			if (!this.level.isClientSide && this.getAge() == 0 && this.canFallInLove()) {
+			int i = this.getAge();
+			if (!this.level.isClientSide && i == 0 && this.canFallInLove()) {
 				this.usePlayerItem(player, itemStack);
 				this.setInLove(player);
-				player.swing(interactionHand, true);
-				return true;
+				return InteractionResult.SUCCESS;
 			}
 
 			if (this.isBaby()) {
 				this.usePlayerItem(player, itemStack);
-				this.ageUp((int)((float)(-this.getAge() / 20) * 0.1F), true);
-				return true;
+				this.ageUp((int)((float)(-i / 20) * 0.1F), true);
+				return InteractionResult.sidedSuccess(this.level.isClientSide);
+			}
+
+			if (this.level.isClientSide) {
+				return InteractionResult.CONSUME;
 			}
 		}
 
@@ -162,6 +175,10 @@ public abstract class Animal extends AgableMob {
 		this.inLove = i;
 	}
 
+	public int getInLoveTime() {
+		return this.inLove;
+	}
+
 	@Nullable
 	public ServerPlayer getLoveCause() {
 		if (this.loveCause == null) {
@@ -185,6 +202,33 @@ public abstract class Animal extends AgableMob {
 			return false;
 		} else {
 			return animal.getClass() != this.getClass() ? false : this.isInLove() && animal.isInLove();
+		}
+	}
+
+	public void spawnChildFromBreeding(ServerLevel serverLevel, Animal animal) {
+		AgableMob agableMob = this.getBreedOffspring(serverLevel, animal);
+		if (agableMob != null) {
+			ServerPlayer serverPlayer = this.getLoveCause();
+			if (serverPlayer == null && animal.getLoveCause() != null) {
+				serverPlayer = animal.getLoveCause();
+			}
+
+			if (serverPlayer != null) {
+				serverPlayer.awardStat(Stats.ANIMALS_BRED);
+				CriteriaTriggers.BRED_ANIMALS.trigger(serverPlayer, this, animal, agableMob);
+			}
+
+			this.setAge(6000);
+			animal.setAge(6000);
+			this.resetLove();
+			animal.resetLove();
+			agableMob.setBaby(true);
+			agableMob.moveTo(this.getX(), this.getY(), this.getZ(), 0.0F, 0.0F);
+			serverLevel.addFreshEntityWithPassengers(agableMob);
+			serverLevel.broadcastEntityEvent(this, (byte)18);
+			if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+				serverLevel.addFreshEntity(new ExperienceOrb(serverLevel, this.getX(), this.getY(), this.getZ(), this.getRandom().nextInt(7) + 1));
+			}
 		}
 	}
 

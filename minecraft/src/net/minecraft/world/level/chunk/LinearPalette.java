@@ -1,6 +1,7 @@
 package net.minecraft.world.level.chunk;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -8,7 +9,6 @@ import net.minecraft.core.IdMapper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
-import org.apache.commons.lang3.ArrayUtils;
 
 public class LinearPalette<T> implements Palette<T> {
 	private final IdMapper<T> registry;
@@ -45,8 +45,14 @@ public class LinearPalette<T> implements Palette<T> {
 	}
 
 	@Override
-	public boolean maybeHas(T object) {
-		return ArrayUtils.contains(this.values, object);
+	public boolean maybeHas(Predicate<T> predicate) {
+		for (int i = 0; i < this.size; i++) {
+			if (predicate.test(this.values[i])) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	@Nullable

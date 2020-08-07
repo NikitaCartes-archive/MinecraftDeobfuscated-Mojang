@@ -1,57 +1,55 @@
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class GlowstoneFeature extends Feature<NoneFeatureConfiguration> {
-	public GlowstoneFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-		super(function);
+	public GlowstoneFeature(Codec<NoneFeatureConfiguration> codec) {
+		super(codec);
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
-		Random random,
-		BlockPos blockPos,
-		NoneFeatureConfiguration noneFeatureConfiguration
+		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration
 	) {
-		if (!levelAccessor.isEmptyBlock(blockPos)) {
-			return false;
-		} else if (levelAccessor.getBlockState(blockPos.above()).getBlock() != Blocks.NETHERRACK) {
+		if (!worldGenLevel.isEmptyBlock(blockPos)) {
 			return false;
 		} else {
-			levelAccessor.setBlock(blockPos, Blocks.GLOWSTONE.defaultBlockState(), 2);
+			BlockState blockState = worldGenLevel.getBlockState(blockPos.above());
+			if (!blockState.is(Blocks.NETHERRACK) && !blockState.is(Blocks.BASALT) && !blockState.is(Blocks.BLACKSTONE)) {
+				return false;
+			} else {
+				worldGenLevel.setBlock(blockPos, Blocks.GLOWSTONE.defaultBlockState(), 2);
 
-			for (int i = 0; i < 1500; i++) {
-				BlockPos blockPos2 = blockPos.offset(random.nextInt(8) - random.nextInt(8), -random.nextInt(12), random.nextInt(8) - random.nextInt(8));
-				if (levelAccessor.getBlockState(blockPos2).isAir()) {
-					int j = 0;
+				for (int i = 0; i < 1500; i++) {
+					BlockPos blockPos2 = blockPos.offset(random.nextInt(8) - random.nextInt(8), -random.nextInt(12), random.nextInt(8) - random.nextInt(8));
+					if (worldGenLevel.getBlockState(blockPos2).isAir()) {
+						int j = 0;
 
-					for (Direction direction : Direction.values()) {
-						if (levelAccessor.getBlockState(blockPos2.relative(direction)).getBlock() == Blocks.GLOWSTONE) {
-							j++;
+						for (Direction direction : Direction.values()) {
+							if (worldGenLevel.getBlockState(blockPos2.relative(direction)).is(Blocks.GLOWSTONE)) {
+								j++;
+							}
+
+							if (j > 1) {
+								break;
+							}
 						}
 
-						if (j > 1) {
-							break;
+						if (j == 1) {
+							worldGenLevel.setBlock(blockPos2, Blocks.GLOWSTONE.defaultBlockState(), 2);
 						}
-					}
-
-					if (j == 1) {
-						levelAccessor.setBlock(blockPos2, Blocks.GLOWSTONE.defaultBlockState(), 2);
 					}
 				}
-			}
 
-			return true;
+				return true;
+			}
 		}
 	}
 }

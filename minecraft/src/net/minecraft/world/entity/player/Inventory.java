@@ -20,6 +20,7 @@ import net.minecraft.tags.Tag;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Nameable;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
@@ -169,40 +170,14 @@ public class Inventory implements Container, Nameable {
 		}
 	}
 
-	public int clearInventory(Predicate<ItemStack> predicate, int i) {
+	public int clearOrCountMatchingItems(Predicate<ItemStack> predicate, int i, Container container) {
 		int j = 0;
-
-		for (int k = 0; k < this.getContainerSize(); k++) {
-			ItemStack itemStack = this.getItem(k);
-			if (!itemStack.isEmpty() && predicate.test(itemStack)) {
-				int l = i <= 0 ? itemStack.getCount() : Math.min(i - j, itemStack.getCount());
-				j += l;
-				if (i != 0) {
-					itemStack.shrink(l);
-					if (itemStack.isEmpty()) {
-						this.setItem(k, ItemStack.EMPTY);
-					}
-
-					if (i > 0 && j >= i) {
-						return j;
-					}
-				}
-			}
-		}
-
-		if (!this.carried.isEmpty() && predicate.test(this.carried)) {
-			int kx = i <= 0 ? this.carried.getCount() : Math.min(i - j, this.carried.getCount());
-			j += kx;
-			if (i != 0) {
-				this.carried.shrink(kx);
-				if (this.carried.isEmpty()) {
-					this.carried = ItemStack.EMPTY;
-				}
-
-				if (i > 0 && j >= i) {
-					return j;
-				}
-			}
+		boolean bl = i == 0;
+		j += ContainerHelper.clearOrCountMatchingItems(this, predicate, i - j, bl);
+		j += ContainerHelper.clearOrCountMatchingItems(container, predicate, i - j, bl);
+		j += ContainerHelper.clearOrCountMatchingItems(this.carried, predicate, i - j, bl);
+		if (this.carried.isEmpty()) {
+			this.carried = ItemStack.EMPTY;
 		}
 
 		return j;
@@ -522,16 +497,12 @@ public class Inventory implements Container, Nameable {
 		return new TranslatableComponent("container.inventory");
 	}
 
-	public boolean canDestroy(BlockState blockState) {
-		return this.getItem(this.selected).canDestroySpecial(blockState);
-	}
-
 	@Environment(EnvType.CLIENT)
 	public ItemStack getArmor(int i) {
 		return this.armor.get(i);
 	}
 
-	public void hurtArmor(float f) {
+	public void hurtArmor(DamageSource damageSource, float f) {
 		if (!(f <= 0.0F)) {
 			f /= 4.0F;
 			if (f < 1.0F) {
@@ -540,7 +511,7 @@ public class Inventory implements Container, Nameable {
 
 			for (int i = 0; i < this.armor.size(); i++) {
 				ItemStack itemStack = this.armor.get(i);
-				if (itemStack.getItem() instanceof ArmorItem) {
+				if ((!damageSource.isFire() || !itemStack.getItem().isFireResistant()) && itemStack.getItem() instanceof ArmorItem) {
 					int j = i;
 					itemStack.hurtAndBreak((int)f, this.player, player -> player.broadcastBreakEvent(EquipmentSlot.byTypeAndIndex(EquipmentSlot.Type.ARMOR, j)));
 				}

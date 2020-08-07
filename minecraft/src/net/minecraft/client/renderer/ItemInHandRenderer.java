@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
-import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -21,6 +20,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -368,7 +368,7 @@ public class ItemInHandRenderer {
 
 						if (nx > 0.1F) {
 							float o = Mth.sin((mxx - 0.1F) * 1.3F);
-							float p = nx - 0.1F;
+							float p = BowItem.getFatigueForTime((int)mxx) - 0.1F;
 							float r = o * p;
 							poseStack.translate((double)(r * 0.0F), (double)(r * 0.004F), (double)(r * 0.0F));
 						}
@@ -436,14 +436,22 @@ public class ItemInHandRenderer {
 		LocalPlayer localPlayer = this.minecraft.player;
 		ItemStack itemStack = localPlayer.getMainHandItem();
 		ItemStack itemStack2 = localPlayer.getOffhandItem();
+		if (ItemStack.matches(this.mainHandItem, itemStack)) {
+			this.mainHandItem = itemStack;
+		}
+
+		if (ItemStack.matches(this.offHandItem, itemStack2)) {
+			this.offHandItem = itemStack2;
+		}
+
 		if (localPlayer.isHandsBusy()) {
 			this.mainHandHeight = Mth.clamp(this.mainHandHeight - 0.4F, 0.0F, 1.0F);
 			this.offHandHeight = Mth.clamp(this.offHandHeight - 0.4F, 0.0F, 1.0F);
 		} else {
 			float f = localPlayer.getAttackStrengthScale(1.0F) * 0.5F;
 			f = f * f * f * 0.25F + 0.75F;
-			this.mainHandHeight = this.mainHandHeight + Mth.clamp((Objects.equals(this.mainHandItem, itemStack) ? f : 0.0F) - this.mainHandHeight, -0.4F, 0.4F);
-			this.offHandHeight = this.offHandHeight + Mth.clamp((float)(Objects.equals(this.offHandItem, itemStack2) ? 1 : 0) - this.offHandHeight, -0.4F, 0.4F);
+			this.mainHandHeight = this.mainHandHeight + Mth.clamp((this.mainHandItem == itemStack ? f * f * f : 0.0F) - this.mainHandHeight, -0.4F, 0.4F);
+			this.offHandHeight = this.offHandHeight + Mth.clamp((float)(this.offHandItem == itemStack2 ? 1 : 0) - this.offHandHeight, -0.4F, 0.4F);
 		}
 
 		if (this.mainHandHeight < 0.1F) {

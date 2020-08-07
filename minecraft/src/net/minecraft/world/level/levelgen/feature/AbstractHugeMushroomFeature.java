@@ -1,21 +1,20 @@
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 
 public abstract class AbstractHugeMushroomFeature extends Feature<HugeMushroomFeatureConfiguration> {
-	public AbstractHugeMushroomFeature(Function<Dynamic<?>, ? extends HugeMushroomFeatureConfiguration> function) {
-		super(function);
+	public AbstractHugeMushroomFeature(Codec<HugeMushroomFeatureConfiguration> codec) {
+		super(codec);
 	}
 
 	protected void placeTrunk(
@@ -53,7 +52,7 @@ public abstract class AbstractHugeMushroomFeature extends Feature<HugeMushroomFe
 		int j = blockPos.getY();
 		if (j >= 1 && j + i + 1 < 256) {
 			Block block = levelAccessor.getBlockState(blockPos.below()).getBlock();
-			if (!isDirt(block)) {
+			if (!isDirt(block) && !block.is(BlockTags.MUSHROOM_GROW_BLOCK)) {
 				return false;
 			} else {
 				for (int k = 0; k <= i; k++) {
@@ -61,7 +60,7 @@ public abstract class AbstractHugeMushroomFeature extends Feature<HugeMushroomFe
 
 					for (int m = -l; m <= l; m++) {
 						for (int n = -l; n <= l; n++) {
-							BlockState blockState = levelAccessor.getBlockState(mutableBlockPos.set(blockPos).move(m, k, n));
+							BlockState blockState = levelAccessor.getBlockState(mutableBlockPos.setWithOffset(blockPos, m, k, n));
 							if (!blockState.isAir() && !blockState.is(BlockTags.LEAVES)) {
 								return false;
 							}
@@ -77,19 +76,19 @@ public abstract class AbstractHugeMushroomFeature extends Feature<HugeMushroomFe
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
+		WorldGenLevel worldGenLevel,
+		ChunkGenerator chunkGenerator,
 		Random random,
 		BlockPos blockPos,
 		HugeMushroomFeatureConfiguration hugeMushroomFeatureConfiguration
 	) {
 		int i = this.getTreeHeight(random);
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-		if (!this.isValidPosition(levelAccessor, blockPos, i, mutableBlockPos, hugeMushroomFeatureConfiguration)) {
+		if (!this.isValidPosition(worldGenLevel, blockPos, i, mutableBlockPos, hugeMushroomFeatureConfiguration)) {
 			return false;
 		} else {
-			this.makeCap(levelAccessor, random, blockPos, i, mutableBlockPos, hugeMushroomFeatureConfiguration);
-			this.placeTrunk(levelAccessor, random, blockPos, hugeMushroomFeatureConfiguration, i, mutableBlockPos);
+			this.makeCap(worldGenLevel, random, blockPos, i, mutableBlockPos, hugeMushroomFeatureConfiguration);
+			this.placeTrunk(worldGenLevel, random, blockPos, hugeMushroomFeatureConfiguration, i, mutableBlockPos);
 			return true;
 		}
 	}

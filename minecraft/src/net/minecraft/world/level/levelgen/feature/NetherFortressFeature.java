@@ -1,14 +1,16 @@
 package net.minecraft.world.level.levelgen.feature;
 
-import com.google.common.collect.Lists;
-import com.mojang.datafixers.Dynamic;
+import com.google.common.collect.ImmutableList;
+import com.mojang.serialization.Codec;
 import java.util.List;
-import java.util.Random;
-import java.util.function.Function;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.NetherBridgePieces;
@@ -17,60 +19,56 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 public class NetherFortressFeature extends StructureFeature<NoneFeatureConfiguration> {
-	private static final List<Biome.SpawnerData> FORTRESS_ENEMIES = Lists.<Biome.SpawnerData>newArrayList(
-		new Biome.SpawnerData(EntityType.BLAZE, 10, 2, 3),
-		new Biome.SpawnerData(EntityType.ZOMBIE_PIGMAN, 5, 4, 4),
-		new Biome.SpawnerData(EntityType.WITHER_SKELETON, 8, 5, 5),
-		new Biome.SpawnerData(EntityType.SKELETON, 2, 5, 5),
-		new Biome.SpawnerData(EntityType.MAGMA_CUBE, 3, 4, 4)
+	private static final List<MobSpawnSettings.SpawnerData> FORTRESS_ENEMIES = ImmutableList.of(
+		new MobSpawnSettings.SpawnerData(EntityType.BLAZE, 10, 2, 3),
+		new MobSpawnSettings.SpawnerData(EntityType.ZOMBIFIED_PIGLIN, 5, 4, 4),
+		new MobSpawnSettings.SpawnerData(EntityType.WITHER_SKELETON, 8, 5, 5),
+		new MobSpawnSettings.SpawnerData(EntityType.SKELETON, 2, 5, 5),
+		new MobSpawnSettings.SpawnerData(EntityType.MAGMA_CUBE, 3, 4, 4)
 	);
 
-	public NetherFortressFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-		super(function);
+	public NetherFortressFeature(Codec<NoneFeatureConfiguration> codec) {
+		super(codec);
+	}
+
+	protected boolean isFeatureChunk(
+		ChunkGenerator chunkGenerator,
+		BiomeSource biomeSource,
+		long l,
+		WorldgenRandom worldgenRandom,
+		int i,
+		int j,
+		Biome biome,
+		ChunkPos chunkPos,
+		NoneFeatureConfiguration noneFeatureConfiguration
+	) {
+		return worldgenRandom.nextInt(5) < 2;
 	}
 
 	@Override
-	public boolean isFeatureChunk(BiomeManager biomeManager, ChunkGenerator<?> chunkGenerator, Random random, int i, int j, Biome biome) {
-		int k = i >> 4;
-		int l = j >> 4;
-		random.setSeed((long)(k ^ l << 4) ^ chunkGenerator.getSeed());
-		random.nextInt();
-		if (random.nextInt(3) != 0) {
-			return false;
-		} else if (i != (k << 4) + 4 + random.nextInt(8)) {
-			return false;
-		} else {
-			return j != (l << 4) + 4 + random.nextInt(8) ? false : chunkGenerator.isBiomeValidStartForStructure(biome, this);
-		}
-	}
-
-	@Override
-	public StructureFeature.StructureStartFactory getStartFactory() {
+	public StructureFeature.StructureStartFactory<NoneFeatureConfiguration> getStartFactory() {
 		return NetherFortressFeature.NetherBridgeStart::new;
 	}
 
 	@Override
-	public String getFeatureName() {
-		return "Fortress";
-	}
-
-	@Override
-	public int getLookupRange() {
-		return 8;
-	}
-
-	@Override
-	public List<Biome.SpawnerData> getSpecialEnemies() {
+	public List<MobSpawnSettings.SpawnerData> getSpecialEnemies() {
 		return FORTRESS_ENEMIES;
 	}
 
-	public static class NetherBridgeStart extends StructureStart {
-		public NetherBridgeStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+	public static class NetherBridgeStart extends StructureStart<NoneFeatureConfiguration> {
+		public NetherBridgeStart(StructureFeature<NoneFeatureConfiguration> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
 			super(structureFeature, i, j, boundingBox, k, l);
 		}
 
-		@Override
-		public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+		public void generatePieces(
+			RegistryAccess registryAccess,
+			ChunkGenerator chunkGenerator,
+			StructureManager structureManager,
+			int i,
+			int j,
+			Biome biome,
+			NoneFeatureConfiguration noneFeatureConfiguration
+		) {
 			NetherBridgePieces.StartPiece startPiece = new NetherBridgePieces.StartPiece(this.random, (i << 4) + 2, (j << 4) + 2);
 			this.pieces.add(startPiece);
 			startPiece.addChildren(startPiece, this.pieces, this.random);

@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
@@ -30,7 +31,7 @@ public class BlockInput implements Predicate<BlockInWorld> {
 
 	public boolean test(BlockInWorld blockInWorld) {
 		BlockState blockState = blockInWorld.getState();
-		if (blockState.getBlock() != this.state.getBlock()) {
+		if (!blockState.is(this.state.getBlock())) {
 			return false;
 		} else {
 			for (Property<?> property : this.properties) {
@@ -49,7 +50,12 @@ public class BlockInput implements Predicate<BlockInWorld> {
 	}
 
 	public boolean place(ServerLevel serverLevel, BlockPos blockPos, int i) {
-		if (!serverLevel.setBlock(blockPos, this.state, i)) {
+		BlockState blockState = Block.updateFromNeighbourShapes(this.state, serverLevel, blockPos);
+		if (blockState.isAir()) {
+			blockState = this.state;
+		}
+
+		if (!serverLevel.setBlock(blockPos, blockState, i)) {
 			return false;
 		} else {
 			if (this.tag != null) {
@@ -59,7 +65,7 @@ public class BlockInput implements Predicate<BlockInWorld> {
 					compoundTag.putInt("x", blockPos.getX());
 					compoundTag.putInt("y", blockPos.getY());
 					compoundTag.putInt("z", blockPos.getZ());
-					blockEntity.load(compoundTag);
+					blockEntity.load(blockState, compoundTag);
 				}
 			}
 

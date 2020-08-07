@@ -12,11 +12,11 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.server.packs.resources.SimpleResource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,14 +48,14 @@ public class Screenshot {
 			file3 = new File(file2, string);
 		}
 
-		SimpleResource.IO_EXECUTOR
+		Util.ioPool()
 			.execute(
 				() -> {
 					try {
 						nativeImage.writeToFile(file3);
 						Component component = new TextComponent(file3.getName())
 							.withStyle(ChatFormatting.UNDERLINE)
-							.withStyle(style -> style.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file3.getAbsolutePath())));
+							.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file3.getAbsolutePath())));
 						consumer.accept(new TranslatableComponent("screenshot.success", component));
 					} catch (Exception var7x) {
 						LOGGER.warn("Couldn't save screenshot", (Throwable)var7x);
@@ -71,7 +71,7 @@ public class Screenshot {
 		i = renderTarget.width;
 		j = renderTarget.height;
 		NativeImage nativeImage = new NativeImage(i, j, false);
-		RenderSystem.bindTexture(renderTarget.colorTextureId);
+		RenderSystem.bindTexture(renderTarget.getColorTextureId());
 		nativeImage.downloadTexture(0, true);
 		nativeImage.flipY();
 		return nativeImage;

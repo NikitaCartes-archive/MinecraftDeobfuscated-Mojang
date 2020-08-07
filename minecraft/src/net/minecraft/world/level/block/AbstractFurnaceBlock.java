@@ -8,29 +8,27 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 public abstract class AbstractFurnaceBlock extends BaseEntityBlock {
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
-	public static final BooleanProperty LIT = RedstoneTorchBlock.LIT;
+	public static final BooleanProperty LIT = BlockStateProperties.LIT;
 
-	protected AbstractFurnaceBlock(Block.Properties properties) {
+	protected AbstractFurnaceBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(LIT, Boolean.valueOf(false)));
-	}
-
-	@Override
-	public int getLightEmission(BlockState blockState) {
-		return blockState.getValue(LIT) ? super.getLightEmission(blockState) : 0;
 	}
 
 	@Override
@@ -41,7 +39,7 @@ public abstract class AbstractFurnaceBlock extends BaseEntityBlock {
 			return InteractionResult.SUCCESS;
 		} else {
 			this.openContainer(level, blockPos, player);
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		}
 	}
 
@@ -64,10 +62,11 @@ public abstract class AbstractFurnaceBlock extends BaseEntityBlock {
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState.getBlock() != blockState2.getBlock()) {
+		if (!blockState.is(blockState2.getBlock())) {
 			BlockEntity blockEntity = level.getBlockEntity(blockPos);
 			if (blockEntity instanceof AbstractFurnaceBlockEntity) {
 				Containers.dropContents(level, blockPos, (AbstractFurnaceBlockEntity)blockEntity);
+				((AbstractFurnaceBlockEntity)blockEntity).getRecipesToAwardAndPopExperience(level, Vec3.atCenterOf(blockPos));
 				level.updateNeighbourForOutputSignal(blockPos, this);
 			}
 

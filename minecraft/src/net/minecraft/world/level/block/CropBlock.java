@@ -15,6 +15,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -35,7 +36,7 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
 		Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 16.0)
 	};
 
-	protected CropBlock(Block.Properties properties) {
+	protected CropBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(this.getAgeProperty(), Integer.valueOf(0)));
 	}
@@ -47,7 +48,7 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
 
 	@Override
 	protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return blockState.getBlock() == Blocks.FARMLAND;
+		return blockState.is(Blocks.FARMLAND);
 	}
 
 	public IntegerProperty getAgeProperty() {
@@ -71,8 +72,12 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		super.tick(blockState, serverLevel, blockPos, random);
+	public boolean isRandomlyTicking(BlockState blockState) {
+		return !this.isMaxAge(blockState);
+	}
+
+	@Override
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if (serverLevel.getRawBrightness(blockPos, 0) >= 9) {
 			int i = this.getAge(blockState);
 			if (i < this.getMaxAge()) {
@@ -106,7 +111,7 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
 			for (int j = -1; j <= 1; j++) {
 				float g = 0.0F;
 				BlockState blockState = blockGetter.getBlockState(blockPos2.offset(i, 0, j));
-				if (blockState.getBlock() == Blocks.FARMLAND) {
+				if (blockState.is(Blocks.FARMLAND)) {
 					g = 1.0F;
 					if ((Integer)blockState.getValue(FarmBlock.MOISTURE) > 0) {
 						g = 3.0F;

@@ -1,6 +1,5 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -14,23 +13,25 @@ public class UsedEnderEyeTrigger extends SimpleCriterionTrigger<UsedEnderEyeTrig
 		return ID;
 	}
 
-	public UsedEnderEyeTrigger.TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+	public UsedEnderEyeTrigger.TriggerInstance createInstance(
+		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+	) {
 		MinMaxBounds.Floats floats = MinMaxBounds.Floats.fromJson(jsonObject.get("distance"));
-		return new UsedEnderEyeTrigger.TriggerInstance(floats);
+		return new UsedEnderEyeTrigger.TriggerInstance(composite, floats);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, BlockPos blockPos) {
 		double d = serverPlayer.getX() - (double)blockPos.getX();
 		double e = serverPlayer.getZ() - (double)blockPos.getZ();
 		double f = d * d + e * e;
-		this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(f));
+		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(f));
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final MinMaxBounds.Floats level;
 
-		public TriggerInstance(MinMaxBounds.Floats floats) {
-			super(UsedEnderEyeTrigger.ID);
+		public TriggerInstance(EntityPredicate.Composite composite, MinMaxBounds.Floats floats) {
+			super(UsedEnderEyeTrigger.ID, composite);
 			this.level = floats;
 		}
 

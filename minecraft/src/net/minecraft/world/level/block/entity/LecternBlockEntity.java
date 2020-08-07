@@ -22,6 +22,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.WrittenBookItem;
 import net.minecraft.world.level.block.LecternBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
@@ -196,7 +197,7 @@ public class LecternBlockEntity extends BlockEntity implements Clearable, MenuPr
 			component = player.getDisplayName();
 		}
 
-		Vec3 vec3 = new Vec3((double)this.worldPosition.getX() + 0.5, (double)this.worldPosition.getY() + 0.5, (double)this.worldPosition.getZ() + 0.5);
+		Vec3 vec3 = Vec3.atCenterOf(this.worldPosition);
 		return new CommandSourceStack(CommandSource.NULL, vec3, Vec2.ZERO, (ServerLevel)this.level, 2, string, component, this.level.getServer(), player);
 	}
 
@@ -206,8 +207,8 @@ public class LecternBlockEntity extends BlockEntity implements Clearable, MenuPr
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		if (compoundTag.contains("Book", 10)) {
 			this.book = this.resolveBook(ItemStack.of(compoundTag.getCompound("Book")), null);
 		} else {

@@ -9,6 +9,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LecternBlock;
@@ -24,8 +25,10 @@ public class WritableBookItem extends Item {
 		Level level = useOnContext.getLevel();
 		BlockPos blockPos = useOnContext.getClickedPos();
 		BlockState blockState = level.getBlockState(blockPos);
-		if (blockState.getBlock() == Blocks.LECTERN) {
-			return LecternBlock.tryPlaceBook(level, blockPos, blockState, useOnContext.getItemInHand()) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+		if (blockState.is(Blocks.LECTERN)) {
+			return LecternBlock.tryPlaceBook(level, blockPos, blockState, useOnContext.getItemInHand())
+				? InteractionResult.sidedSuccess(level.isClientSide)
+				: InteractionResult.PASS;
 		} else {
 			return InteractionResult.PASS;
 		}
@@ -36,7 +39,7 @@ public class WritableBookItem extends Item {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		player.openItemGui(itemStack, interactionHand);
 		player.awardStat(Stats.ITEM_USED.get(this));
-		return InteractionResultHolder.success(itemStack);
+		return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
 	}
 
 	public static boolean makeSureTagIsValid(@Nullable CompoundTag compoundTag) {

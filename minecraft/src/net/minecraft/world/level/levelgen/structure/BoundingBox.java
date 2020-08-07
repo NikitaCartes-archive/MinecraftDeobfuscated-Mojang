@@ -1,8 +1,6 @@
 package net.minecraft.world.level.levelgen.structure;
 
 import com.google.common.base.MoreObjects;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -32,6 +30,10 @@ public class BoundingBox {
 
 	public static BoundingBox getUnknownBox() {
 		return new BoundingBox(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
+	}
+
+	public static BoundingBox infinite() {
+		return new BoundingBox(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
 	}
 
 	public static BoundingBox orientBox(int i, int j, int k, int l, int m, int n, int o, int p, int q, Direction direction) {
@@ -124,6 +126,10 @@ public class BoundingBox {
 		return new BoundingBox(this.x0 + i, this.y0 + j, this.z0 + k, this.x1 + i, this.y1 + j, this.z1 + k);
 	}
 
+	public void move(Vec3i vec3i) {
+		this.move(vec3i.getX(), vec3i.getY(), vec3i.getZ());
+	}
+
 	public boolean isInside(Vec3i vec3i) {
 		return vec3i.getX() >= this.x0
 			&& vec3i.getX() <= this.x1
@@ -149,7 +155,6 @@ public class BoundingBox {
 		return this.z1 - this.z0 + 1;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public Vec3i getCenter() {
 		return new BlockPos(this.x0 + (this.x1 - this.x0 + 1) / 2, this.y0 + (this.y1 - this.y0 + 1) / 2, this.z0 + (this.z1 - this.z0 + 1) / 2);
 	}

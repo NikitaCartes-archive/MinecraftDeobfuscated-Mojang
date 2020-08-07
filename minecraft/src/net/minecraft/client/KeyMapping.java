@@ -4,13 +4,14 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 @Environment(EnvType.CLIENT)
 public class KeyMapping implements Comparable<KeyMapping> {
@@ -123,9 +124,9 @@ public class KeyMapping implements Comparable<KeyMapping> {
 			: ((Integer)CATEGORY_SORT_ORDER.get(this.category)).compareTo((Integer)CATEGORY_SORT_ORDER.get(keyMapping.category));
 	}
 
-	public static Supplier<String> createNameSupplier(String string) {
+	public static Supplier<Component> createNameSupplier(String string) {
 		KeyMapping keyMapping = (KeyMapping)ALL.get(string);
-		return keyMapping == null ? () -> string : keyMapping::getTranslatedKeyMessage;
+		return keyMapping == null ? () -> new TranslatableComponent(string) : keyMapping::getTranslatedKeyMessage;
 	}
 
 	public boolean same(KeyMapping keyMapping) {
@@ -146,23 +147,8 @@ public class KeyMapping implements Comparable<KeyMapping> {
 		return this.key.getType() == InputConstants.Type.MOUSE && this.key.getValue() == i;
 	}
 
-	public String getTranslatedKeyMessage() {
-		String string = this.key.getName();
-		int i = this.key.getValue();
-		String string2 = null;
-		switch (this.key.getType()) {
-			case KEYSYM:
-				string2 = InputConstants.translateKeyCode(i);
-				break;
-			case SCANCODE:
-				string2 = InputConstants.translateScanCode(i);
-				break;
-			case MOUSE:
-				String string3 = I18n.get(string);
-				string2 = Objects.equals(string3, string) ? I18n.get(InputConstants.Type.MOUSE.getDefaultPrefix(), i + 1) : string3;
-		}
-
-		return string2 == null ? I18n.get(string) : string2;
+	public Component getTranslatedKeyMessage() {
+		return this.key.getDisplayName();
 	}
 
 	public boolean isDefault() {

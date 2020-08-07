@@ -29,16 +29,20 @@ public interface SoundInstance {
 
 	float getPitch();
 
-	float getX();
+	double getX();
 
-	float getY();
+	double getY();
 
-	float getZ();
+	double getZ();
 
 	SoundInstance.Attenuation getAttenuation();
 
 	default boolean canStartSilent() {
 		return false;
+	}
+
+	default boolean canPlaySound() {
+		return true;
 	}
 
 	@Environment(EnvType.CLIENT)

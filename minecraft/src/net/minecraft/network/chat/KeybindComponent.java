@@ -1,27 +1,45 @@
 package net.minecraft.network.chat;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 public class KeybindComponent extends BaseComponent {
-	public static Function<String, Supplier<String>> keyResolver = string -> () -> string;
+	private static Function<String, Supplier<Component>> keyResolver = string -> () -> new TextComponent(string);
 	private final String name;
-	private Supplier<String> nameResolver;
+	private Supplier<Component> nameResolver;
 
 	public KeybindComponent(String string) {
 		this.name = string;
 	}
 
-	@Override
-	public String getContents() {
-		if (this.nameResolver == null) {
-			this.nameResolver = (Supplier<String>)keyResolver.apply(this.name);
-		}
-
-		return (String)this.nameResolver.get();
+	@Environment(EnvType.CLIENT)
+	public static void setKeyResolver(Function<String, Supplier<Component>> function) {
+		keyResolver = function;
 	}
 
-	public KeybindComponent copy() {
+	private Component getNestedComponent() {
+		if (this.nameResolver == null) {
+			this.nameResolver = (Supplier<Component>)keyResolver.apply(this.name);
+		}
+
+		return (Component)this.nameResolver.get();
+	}
+
+	@Override
+	public <T> Optional<T> visitSelf(FormattedText.ContentConsumer<T> contentConsumer) {
+		return this.getNestedComponent().visit(contentConsumer);
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public <T> Optional<T> visitSelf(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
+		return this.getNestedComponent().visit(styledContentConsumer, style);
+	}
+
+	public KeybindComponent plainCopy() {
 		return new KeybindComponent(this.name);
 	}
 

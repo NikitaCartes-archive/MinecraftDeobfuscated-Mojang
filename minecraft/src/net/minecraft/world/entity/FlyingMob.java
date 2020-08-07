@@ -1,7 +1,6 @@
 package net.minecraft.world.entity;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -47,20 +46,11 @@ public abstract class FlyingMob extends Mob {
 			this.setDeltaMovement(this.getDeltaMovement().scale((double)f));
 		}
 
-		this.animationSpeedOld = this.animationSpeed;
-		double d = this.getX() - this.xo;
-		double e = this.getZ() - this.zo;
-		float h = Mth.sqrt(d * d + e * e) * 4.0F;
-		if (h > 1.0F) {
-			h = 1.0F;
-		}
-
-		this.animationSpeed = this.animationSpeed + (h - this.animationSpeed) * 0.4F;
-		this.animationPosition = this.animationPosition + this.animationSpeed;
+		this.calculateEntityAnimation(this, false);
 	}
 
 	@Override
-	public boolean onLadder() {
+	public boolean onClimbable() {
 		return false;
 	}
 }

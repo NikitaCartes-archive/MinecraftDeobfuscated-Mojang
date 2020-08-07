@@ -7,15 +7,14 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.PathNavigationRegion;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Node;
@@ -31,11 +30,10 @@ public abstract class PathNavigation {
 	@Nullable
 	protected Path path;
 	protected double speedModifier;
-	private final AttributeInstance followRange;
 	protected int tick;
 	protected int lastStuckCheck;
 	protected Vec3 lastStuckCheckPos = Vec3.ZERO;
-	protected Vec3 timeoutCachedNode = Vec3.ZERO;
+	protected Vec3i timeoutCachedNode = Vec3i.ZERO;
 	protected long timeoutTimer;
 	protected long lastTimeoutCheck;
 	protected double timeoutLimit;
@@ -51,8 +49,7 @@ public abstract class PathNavigation {
 	public PathNavigation(Mob mob, Level level) {
 		this.mob = mob;
 		this.level = level;
-		this.followRange = mob.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
-		int i = Mth.floor(this.followRange.getValue() * 16.0);
+		int i = Mth.floor(mob.getAttributeValue(Attributes.FOLLOW_RANGE) * 16.0);
 		this.pathFinder = this.createPathFinder(i);
 	}
 
@@ -102,13 +99,18 @@ public abstract class PathNavigation {
 	}
 
 	@Nullable
+	public Path createPath(Set<BlockPos> set, int i) {
+		return this.createPath(set, 8, false, i);
+	}
+
+	@Nullable
 	public Path createPath(BlockPos blockPos, int i) {
 		return this.createPath(ImmutableSet.of(blockPos), 8, false, i);
 	}
 
 	@Nullable
 	public Path createPath(Entity entity, int i) {
-		return this.createPath(ImmutableSet.of(new BlockPos(entity)), 16, true, i);
+		return this.createPath(ImmutableSet.of(entity.blockPosition()), 16, true, i);
 	}
 
 	@Nullable
@@ -123,8 +125,8 @@ public abstract class PathNavigation {
 			return this.path;
 		} else {
 			this.level.getProfiler().push("pathfind");
-			float f = (float)this.followRange.getValue();
-			BlockPos blockPos = bl ? new BlockPos(this.mob).above() : new BlockPos(this.mob);
+			float f = (float)this.mob.getAttributeValue(Attributes.FOLLOW_RANGE);
+			BlockPos blockPos = bl ? this.mob.blockPosition().above() : this.mob.blockPosition();
 			int k = (int)(f + (float)i);
 			PathNavigationRegion pathNavigationRegion = new PathNavigationRegion(this.level, blockPos.offset(-k, -k, -k), blockPos.offset(k, k, k));
 			Path path = this.pathFinder.findPath(pathNavigationRegion, this.mob, set, f, j, this.maxVisitedNodesMultiplier);
@@ -132,6 +134,7 @@ public abstract class PathNavigation {
 			if (path != null && path.getTarget() != null) {
 				this.targetPos = path.getTarget();
 				this.reachRange = j;
+				this.resetStuckTimeout();
 			}
 
 			return path;
@@ -160,7 +163,7 @@ public abstract class PathNavigation {
 				return false;
 			} else {
 				this.trimPath();
-				if (this.path.getSize() <= 0) {
+				if (this.path.getNodeCount() <= 0) {
 					return false;
 				} else {
 					this.speedModifier = d;
@@ -186,18 +189,18 @@ public abstract class PathNavigation {
 
 		if (!this.isDone()) {
 			if (this.canUpdatePath()) {
-				this.updatePath();
-			} else if (this.path != null && this.path.getIndex() < this.path.getSize()) {
+				this.followThePath();
+			} else if (this.path != null && !this.path.isDone()) {
 				Vec3 vec3 = this.getTempMobPos();
-				Vec3 vec32 = this.path.getPos(this.mob, this.path.getIndex());
-				if (vec3.y > vec32.y && !this.mob.onGround && Mth.floor(vec3.x) == Mth.floor(vec32.x) && Mth.floor(vec3.z) == Mth.floor(vec32.z)) {
-					this.path.setIndex(this.path.getIndex() + 1);
+				Vec3 vec32 = this.path.getNextEntityPos(this.mob);
+				if (vec3.y > vec32.y && !this.mob.isOnGround() && Mth.floor(vec3.x) == Mth.floor(vec32.x) && Mth.floor(vec3.z) == Mth.floor(vec32.z)) {
+					this.path.advance();
 				}
 			}
 
 			DebugPackets.sendPathFindingPacket(this.level, this.mob, this.path, this.maxDistanceToWaypoint);
 			if (!this.isDone()) {
-				Vec3 vec3 = this.path.currentPos(this.mob);
+				Vec3 vec3 = this.path.getNextEntityPos(this.mob);
 				BlockPos blockPos = new BlockPos(vec3);
 				this.mob
 					.getMoveControl()
@@ -208,17 +211,35 @@ public abstract class PathNavigation {
 		}
 	}
 
-	protected void updatePath() {
+	protected void followThePath() {
 		Vec3 vec3 = this.getTempMobPos();
 		this.maxDistanceToWaypoint = this.mob.getBbWidth() > 0.75F ? this.mob.getBbWidth() / 2.0F : 0.75F - this.mob.getBbWidth() / 2.0F;
-		Vec3 vec32 = this.path.currentPos();
-		if (Math.abs(this.mob.getX() - (vec32.x + 0.5)) < (double)this.maxDistanceToWaypoint
-			&& Math.abs(this.mob.getZ() - (vec32.z + 0.5)) < (double)this.maxDistanceToWaypoint
-			&& Math.abs(this.mob.getY() - vec32.y) < 1.0) {
-			this.path.setIndex(this.path.getIndex() + 1);
+		Vec3i vec3i = this.path.getNextNodePos();
+		double d = Math.abs(this.mob.getX() - ((double)vec3i.getX() + 0.5));
+		double e = Math.abs(this.mob.getY() - (double)vec3i.getY());
+		double f = Math.abs(this.mob.getZ() - ((double)vec3i.getZ() + 0.5));
+		boolean bl = d < (double)this.maxDistanceToWaypoint && f < (double)this.maxDistanceToWaypoint && e < 1.0;
+		if (bl || this.mob.canCutCorner(this.path.getNextNode().type) && this.shouldTargetNextNodeInDirection(vec3)) {
+			this.path.advance();
 		}
 
 		this.doStuckDetection(vec3);
+	}
+
+	private boolean shouldTargetNextNodeInDirection(Vec3 vec3) {
+		if (this.path.getNextNodeIndex() + 1 >= this.path.getNodeCount()) {
+			return false;
+		} else {
+			Vec3 vec32 = Vec3.atBottomCenterOf(this.path.getNextNodePos());
+			if (!vec3.closerThan(vec32, 2.0)) {
+				return false;
+			} else {
+				Vec3 vec33 = Vec3.atBottomCenterOf(this.path.getNodePos(this.path.getNextNodeIndex() + 1));
+				Vec3 vec34 = vec33.subtract(vec32);
+				Vec3 vec35 = vec3.subtract(vec32);
+				return vec34.dot(vec35) > 0.0;
+			}
+		}
 	}
 
 	protected void doStuckDetection(Vec3 vec3) {
@@ -232,24 +253,28 @@ public abstract class PathNavigation {
 		}
 
 		if (this.path != null && !this.path.isDone()) {
-			Vec3 vec32 = this.path.currentPos();
-			if (vec32.equals(this.timeoutCachedNode)) {
+			Vec3i vec3i = this.path.getNextNodePos();
+			if (vec3i.equals(this.timeoutCachedNode)) {
 				this.timeoutTimer = this.timeoutTimer + (Util.getMillis() - this.lastTimeoutCheck);
 			} else {
-				this.timeoutCachedNode = vec32;
-				double d = vec3.distanceTo(this.timeoutCachedNode);
+				this.timeoutCachedNode = vec3i;
+				double d = vec3.distanceTo(Vec3.atBottomCenterOf(this.timeoutCachedNode));
 				this.timeoutLimit = this.mob.getSpeed() > 0.0F ? d / (double)this.mob.getSpeed() * 1000.0 : 0.0;
 			}
 
 			if (this.timeoutLimit > 0.0 && (double)this.timeoutTimer > this.timeoutLimit * 3.0) {
-				this.timeoutCachedNode = Vec3.ZERO;
-				this.timeoutTimer = 0L;
-				this.timeoutLimit = 0.0;
+				this.resetStuckTimeout();
 				this.stop();
 			}
 
 			this.lastTimeoutCheck = Util.getMillis();
 		}
+	}
+
+	private void resetStuckTimeout() {
+		this.timeoutCachedNode = Vec3i.ZERO;
+		this.timeoutTimer = 0L;
+		this.timeoutLimit = 0.0;
 	}
 
 	public boolean isDone() {
@@ -274,15 +299,14 @@ public abstract class PathNavigation {
 
 	protected void trimPath() {
 		if (this.path != null) {
-			for (int i = 0; i < this.path.getSize(); i++) {
-				Node node = this.path.get(i);
-				Node node2 = i + 1 < this.path.getSize() ? this.path.get(i + 1) : null;
+			for (int i = 0; i < this.path.getNodeCount(); i++) {
+				Node node = this.path.getNode(i);
+				Node node2 = i + 1 < this.path.getNodeCount() ? this.path.getNode(i + 1) : null;
 				BlockState blockState = this.level.getBlockState(new BlockPos(node.x, node.y, node.z));
-				Block block = blockState.getBlock();
-				if (block == Blocks.CAULDRON) {
-					this.path.set(i, node.cloneMove(node.x, node.y + 1, node.z));
+				if (blockState.is(Blocks.CAULDRON)) {
+					this.path.replaceNode(i, node.cloneAndMove(node.x, node.y + 1, node.z));
 					if (node2 != null && node.y >= node2.y) {
-						this.path.set(i + 1, node2.cloneMove(node2.x, node.y + 1, node2.z));
+						this.path.replaceNode(i + 1, node.cloneAndMove(node2.x, node.y + 1, node2.z));
 					}
 				}
 			}
@@ -309,10 +333,10 @@ public abstract class PathNavigation {
 	}
 
 	public void recomputePath(BlockPos blockPos) {
-		if (this.path != null && !this.path.isDone() && this.path.getSize() != 0) {
-			Node node = this.path.last();
+		if (this.path != null && !this.path.isDone() && this.path.getNodeCount() != 0) {
+			Node node = this.path.getEndNode();
 			Vec3 vec3 = new Vec3(((double)node.x + this.mob.getX()) / 2.0, ((double)node.y + this.mob.getY()) / 2.0, ((double)node.z + this.mob.getZ()) / 2.0);
-			if (blockPos.closerThan(vec3, (double)(this.path.getSize() - this.path.getIndex()))) {
+			if (blockPos.closerThan(vec3, (double)(this.path.getNodeCount() - this.path.getNextNodeIndex()))) {
 				this.recomputePath();
 			}
 		}

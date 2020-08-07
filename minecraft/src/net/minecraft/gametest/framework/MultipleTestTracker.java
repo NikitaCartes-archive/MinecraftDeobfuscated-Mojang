@@ -2,12 +2,13 @@ package net.minecraft.gametest.framework;
 
 import com.google.common.collect.Lists;
 import java.util.Collection;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
 public class MultipleTestTracker {
 	private final Collection<GameTestInfo> tests = Lists.<GameTestInfo>newArrayList();
 	@Nullable
-	private GameTestListener listener;
+	private Collection<GameTestListener> listeners = Lists.<GameTestListener>newArrayList();
 
 	public MultipleTestTracker() {
 	}
@@ -16,16 +17,27 @@ public class MultipleTestTracker {
 		this.tests.addAll(collection);
 	}
 
-	public void add(GameTestInfo gameTestInfo) {
+	public void addTestToTrack(GameTestInfo gameTestInfo) {
 		this.tests.add(gameTestInfo);
-		if (this.listener != null) {
-			gameTestInfo.addListener(this.listener);
-		}
+		this.listeners.forEach(gameTestInfo::addListener);
 	}
 
-	public void setListener(GameTestListener gameTestListener) {
-		this.listener = gameTestListener;
+	public void addListener(GameTestListener gameTestListener) {
+		this.listeners.add(gameTestListener);
 		this.tests.forEach(gameTestInfo -> gameTestInfo.addListener(gameTestListener));
+	}
+
+	public void addFailureListener(Consumer<GameTestInfo> consumer) {
+		this.addListener(new GameTestListener() {
+			@Override
+			public void testStructureLoaded(GameTestInfo gameTestInfo) {
+			}
+
+			@Override
+			public void testFailed(GameTestInfo gameTestInfo) {
+				consumer.accept(gameTestInfo);
+			}
+		});
 	}
 
 	public int getFailedRequiredCount() {

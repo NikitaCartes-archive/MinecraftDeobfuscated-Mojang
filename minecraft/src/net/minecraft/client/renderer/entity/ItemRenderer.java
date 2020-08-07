@@ -7,11 +7,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -24,6 +24,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -46,10 +47,14 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.HalfTransparentBlock;
+import net.minecraft.world.level.block.StainedGlassPaneBlock;
 
 @Environment(EnvType.CLIENT)
 public class ItemRenderer implements ResourceManagerReloadListener {
@@ -102,36 +107,92 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	) {
 		if (!itemStack.isEmpty()) {
 			poseStack.pushPose();
-			boolean bl2 = transformType == ItemTransforms.TransformType.GUI;
-			boolean bl3 = bl2 || transformType == ItemTransforms.TransformType.GROUND || transformType == ItemTransforms.TransformType.FIXED;
-			if (itemStack.getItem() == Items.TRIDENT && bl3) {
+			boolean bl2 = transformType == ItemTransforms.TransformType.GUI
+				|| transformType == ItemTransforms.TransformType.GROUND
+				|| transformType == ItemTransforms.TransformType.FIXED;
+			if (itemStack.getItem() == Items.TRIDENT && bl2) {
 				bakedModel = this.itemModelShaper.getModelManager().getModel(new ModelResourceLocation("minecraft:trident#inventory"));
 			}
 
 			bakedModel.getTransforms().getTransform(transformType).apply(bl, poseStack);
 			poseStack.translate(-0.5, -0.5, -0.5);
-			if (!bakedModel.isCustomRenderer() && (itemStack.getItem() != Items.TRIDENT || bl3)) {
-				RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack);
-				RenderType renderType2;
-				if (bl2 && Objects.equals(renderType, Sheets.translucentBlockSheet())) {
-					renderType2 = Sheets.translucentCullBlockSheet();
+			if (!bakedModel.isCustomRenderer() && (itemStack.getItem() != Items.TRIDENT || bl2)) {
+				boolean bl3;
+				if (transformType != ItemTransforms.TransformType.GUI && !transformType.firstPerson() && itemStack.getItem() instanceof BlockItem) {
+					Block block = ((BlockItem)itemStack.getItem()).getBlock();
+					bl3 = !(block instanceof HalfTransparentBlock) && !(block instanceof StainedGlassPaneBlock);
 				} else {
-					renderType2 = renderType;
+					bl3 = true;
 				}
 
-				VertexConsumer vertexConsumer = getFoilBuffer(multiBufferSource, renderType2, true, itemStack.hasFoil());
+				RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack, bl3);
+				VertexConsumer vertexConsumer;
+				if (itemStack.getItem() == Items.COMPASS && itemStack.hasFoil()) {
+					poseStack.pushPose();
+					PoseStack.Pose pose = poseStack.last();
+					if (transformType == ItemTransforms.TransformType.GUI) {
+						pose.pose().multiply(0.5F);
+					} else if (transformType.firstPerson()) {
+						pose.pose().multiply(0.75F);
+					}
+
+					if (bl3) {
+						vertexConsumer = getCompassFoilBufferDirect(multiBufferSource, renderType, pose);
+					} else {
+						vertexConsumer = getCompassFoilBuffer(multiBufferSource, renderType, pose);
+					}
+
+					poseStack.popPose();
+				} else if (bl3) {
+					vertexConsumer = getFoilBufferDirect(multiBufferSource, renderType, true, itemStack.hasFoil());
+				} else {
+					vertexConsumer = getFoilBuffer(multiBufferSource, renderType, true, itemStack.hasFoil());
+				}
+
 				this.renderModelLists(bakedModel, itemStack, i, j, poseStack, vertexConsumer);
 			} else {
-				BlockEntityWithoutLevelRenderer.instance.renderByItem(itemStack, poseStack, multiBufferSource, i, j);
+				BlockEntityWithoutLevelRenderer.instance.renderByItem(itemStack, transformType, poseStack, multiBufferSource, i, j);
 			}
 
 			poseStack.popPose();
 		}
 	}
 
-	public static VertexConsumer getFoilBuffer(MultiBufferSource multiBufferSource, RenderType renderType, boolean bl, boolean bl2) {
+	public static VertexConsumer getArmorFoilBuffer(MultiBufferSource multiBufferSource, RenderType renderType, boolean bl, boolean bl2) {
 		return bl2
-			? VertexMultiConsumer.create(multiBufferSource.getBuffer(bl ? RenderType.glint() : RenderType.entityGlint()), multiBufferSource.getBuffer(renderType))
+			? VertexMultiConsumer.create(
+				multiBufferSource.getBuffer(bl ? RenderType.armorGlint() : RenderType.armorEntityGlint()), multiBufferSource.getBuffer(renderType)
+			)
+			: multiBufferSource.getBuffer(renderType);
+	}
+
+	public static VertexConsumer getCompassFoilBuffer(MultiBufferSource multiBufferSource, RenderType renderType, PoseStack.Pose pose) {
+		return VertexMultiConsumer.create(
+			new SheetedDecalTextureGenerator(multiBufferSource.getBuffer(RenderType.glint()), pose.pose(), pose.normal()), multiBufferSource.getBuffer(renderType)
+		);
+	}
+
+	public static VertexConsumer getCompassFoilBufferDirect(MultiBufferSource multiBufferSource, RenderType renderType, PoseStack.Pose pose) {
+		return VertexMultiConsumer.create(
+			new SheetedDecalTextureGenerator(multiBufferSource.getBuffer(RenderType.glintDirect()), pose.pose(), pose.normal()), multiBufferSource.getBuffer(renderType)
+		);
+	}
+
+	public static VertexConsumer getFoilBuffer(MultiBufferSource multiBufferSource, RenderType renderType, boolean bl, boolean bl2) {
+		if (bl2) {
+			return Minecraft.useShaderTransparency() && renderType == Sheets.translucentItemSheet()
+				? VertexMultiConsumer.create(multiBufferSource.getBuffer(RenderType.glintTranslucent()), multiBufferSource.getBuffer(renderType))
+				: VertexMultiConsumer.create(multiBufferSource.getBuffer(bl ? RenderType.glint() : RenderType.entityGlint()), multiBufferSource.getBuffer(renderType));
+		} else {
+			return multiBufferSource.getBuffer(renderType);
+		}
+	}
+
+	public static VertexConsumer getFoilBufferDirect(MultiBufferSource multiBufferSource, RenderType renderType, boolean bl, boolean bl2) {
+		return bl2
+			? VertexMultiConsumer.create(
+				multiBufferSource.getBuffer(bl ? RenderType.glintDirect() : RenderType.entityGlintDirect()), multiBufferSource.getBuffer(renderType)
+			)
 			: multiBufferSource.getBuffer(renderType);
 	}
 
@@ -161,11 +222,8 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 			bakedModel = this.itemModelShaper.getItemModel(itemStack);
 		}
 
-		return !item.hasProperties() ? bakedModel : this.resolveOverrides(bakedModel, itemStack, level, livingEntity);
-	}
-
-	private BakedModel resolveOverrides(BakedModel bakedModel, ItemStack itemStack, @Nullable Level level, @Nullable LivingEntity livingEntity) {
-		BakedModel bakedModel2 = bakedModel.getOverrides().resolve(bakedModel, itemStack, level, livingEntity);
+		ClientLevel clientLevel = level instanceof ClientLevel ? (ClientLevel)level : null;
+		BakedModel bakedModel2 = bakedModel.getOverrides().resolve(bakedModel, itemStack, clientLevel, livingEntity);
 		return bakedModel2 == null ? this.itemModelShaper.getModelManager().getMissingModel() : bakedModel2;
 	}
 
@@ -230,10 +288,18 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	}
 
 	public void renderAndDecorateItem(ItemStack itemStack, int i, int j) {
-		this.renderAndDecorateItem(Minecraft.getInstance().player, itemStack, i, j);
+		this.tryRenderGuiItem(Minecraft.getInstance().player, itemStack, i, j);
 	}
 
-	public void renderAndDecorateItem(@Nullable LivingEntity livingEntity, ItemStack itemStack, int i, int j) {
+	public void renderAndDecorateFakeItem(ItemStack itemStack, int i, int j) {
+		this.tryRenderGuiItem(null, itemStack, i, j);
+	}
+
+	public void renderAndDecorateItem(LivingEntity livingEntity, ItemStack itemStack, int i, int j) {
+		this.tryRenderGuiItem(livingEntity, itemStack, i, j);
+	}
+
+	private void tryRenderGuiItem(@Nullable LivingEntity livingEntity, ItemStack itemStack, int i, int j) {
 		if (!itemStack.isEmpty()) {
 			this.blitOffset += 50.0F;
 

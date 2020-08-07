@@ -2,7 +2,6 @@ package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.GlobalPos;
@@ -15,7 +14,7 @@ import net.minecraft.world.entity.npc.Villager;
 public class StrollToPoiList extends Behavior<Villager> {
 	private final MemoryModuleType<List<GlobalPos>> strollToMemoryType;
 	private final MemoryModuleType<GlobalPos> mustBeCloseToMemoryType;
-	private final float speed;
+	private final float speedModifier;
 	private final int closeEnoughDist;
 	private final int maxDistanceFromPoi;
 	private long nextOkStartTime;
@@ -29,7 +28,7 @@ public class StrollToPoiList extends Behavior<Villager> {
 			)
 		);
 		this.strollToMemoryType = memoryModuleType;
-		this.speed = f;
+		this.speedModifier = f;
 		this.closeEnoughDist = i;
 		this.maxDistanceFromPoi = j;
 		this.mustBeCloseToMemoryType = memoryModuleType2;
@@ -43,7 +42,7 @@ public class StrollToPoiList extends Behavior<Villager> {
 			if (!list.isEmpty()) {
 				this.targetPos = (GlobalPos)list.get(serverLevel.getRandom().nextInt(list.size()));
 				return this.targetPos != null
-					&& Objects.equals(serverLevel.getDimension().getType(), this.targetPos.dimension())
+					&& serverLevel.dimension() == this.targetPos.dimension()
 					&& ((GlobalPos)optional2.get()).pos().closerThan(villager.position(), (double)this.maxDistanceFromPoi);
 			}
 		}
@@ -53,7 +52,7 @@ public class StrollToPoiList extends Behavior<Villager> {
 
 	protected void start(ServerLevel serverLevel, Villager villager, long l) {
 		if (l > this.nextOkStartTime && this.targetPos != null) {
-			villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(this.targetPos.pos(), this.speed, this.closeEnoughDist));
+			villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(this.targetPos.pos(), this.speedModifier, this.closeEnoughDist));
 			this.nextOkStartTime = l + 100L;
 		}
 	}

@@ -8,24 +8,31 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class LeavesBlock extends Block {
 	public static final IntegerProperty DISTANCE = BlockStateProperties.DISTANCE;
 	public static final BooleanProperty PERSISTENT = BlockStateProperties.PERSISTENT;
 
-	public LeavesBlock(Block.Properties properties) {
+	public LeavesBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(DISTANCE, Integer.valueOf(7)).setValue(PERSISTENT, Boolean.valueOf(false)));
+	}
+
+	@Override
+	public VoxelShape getBlockSupportShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+		return Shapes.empty();
 	}
 
 	@Override
@@ -65,14 +72,13 @@ public class LeavesBlock extends Block {
 
 	private static BlockState updateDistance(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
 		int i = 7;
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-			for (Direction direction : Direction.values()) {
-				pooledMutableBlockPos.set(blockPos).move(direction);
-				i = Math.min(i, getDistanceAt(levelAccessor.getBlockState(pooledMutableBlockPos)) + 1);
-				if (i == 1) {
-					break;
-				}
+		for (Direction direction : Direction.values()) {
+			mutableBlockPos.setWithOffset(blockPos, direction);
+			i = Math.min(i, getDistanceAt(levelAccessor.getBlockState(mutableBlockPos)) + 1);
+			if (i == 1) {
+				break;
 			}
 		}
 
@@ -95,23 +101,13 @@ public class LeavesBlock extends Block {
 				BlockPos blockPos2 = blockPos.below();
 				BlockState blockState2 = level.getBlockState(blockPos2);
 				if (!blockState2.canOcclude() || !blockState2.isFaceSturdy(level, blockPos2, Direction.UP)) {
-					double d = (double)((float)blockPos.getX() + random.nextFloat());
+					double d = (double)blockPos.getX() + random.nextDouble();
 					double e = (double)blockPos.getY() - 0.05;
-					double f = (double)((float)blockPos.getZ() + random.nextFloat());
+					double f = (double)blockPos.getZ() + random.nextDouble();
 					level.addParticle(ParticleTypes.DRIPPING_WATER, d, e, f, 0.0, 0.0, 0.0);
 				}
 			}
 		}
-	}
-
-	@Override
-	public boolean isSuffocating(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return false;
-	}
-
-	@Override
-	public boolean isValidSpawn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, EntityType<?> entityType) {
-		return entityType == EntityType.OCELOT || entityType == EntityType.PARROT;
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package net.minecraft.client.resources.model;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.color.block.BlockColors;
@@ -19,6 +20,7 @@ import net.minecraft.world.level.material.FluidState;
 @Environment(EnvType.CLIENT)
 public class ModelManager extends SimplePreparableReloadListener<ModelBakery> implements AutoCloseable {
 	private Map<ResourceLocation, BakedModel> bakedRegistry;
+	@Nullable
 	private AtlasSet atlases;
 	private final BlockModelShaper blockModelShaper;
 	private final TextureManager textureManager;
@@ -93,7 +95,9 @@ public class ModelManager extends SimplePreparableReloadListener<ModelBakery> im
 	}
 
 	public void close() {
-		this.atlases.close();
+		if (this.atlases != null) {
+			this.atlases.close();
+		}
 	}
 
 	public void updateMaxMipLevel(int i) {

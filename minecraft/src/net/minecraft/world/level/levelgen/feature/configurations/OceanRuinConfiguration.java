@@ -1,11 +1,18 @@
 package net.minecraft.world.level.levelgen.feature.configurations;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.level.levelgen.structure.OceanRuinFeature;
 
 public class OceanRuinConfiguration implements FeatureConfiguration {
+	public static final Codec<OceanRuinConfiguration> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					OceanRuinFeature.Type.CODEC.fieldOf("biome_temp").forGetter(oceanRuinConfiguration -> oceanRuinConfiguration.biomeTemp),
+					Codec.floatRange(0.0F, 1.0F).fieldOf("large_probability").forGetter(oceanRuinConfiguration -> oceanRuinConfiguration.largeProbability),
+					Codec.floatRange(0.0F, 1.0F).fieldOf("cluster_probability").forGetter(oceanRuinConfiguration -> oceanRuinConfiguration.clusterProbability)
+				)
+				.apply(instance, OceanRuinConfiguration::new)
+	);
 	public final OceanRuinFeature.Type biomeTemp;
 	public final float largeProbability;
 	public final float clusterProbability;
@@ -14,29 +21,5 @@ public class OceanRuinConfiguration implements FeatureConfiguration {
 		this.biomeTemp = type;
 		this.largeProbability = f;
 		this.clusterProbability = g;
-	}
-
-	@Override
-	public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-		return new Dynamic<>(
-			dynamicOps,
-			dynamicOps.createMap(
-				ImmutableMap.of(
-					dynamicOps.createString("biome_temp"),
-					dynamicOps.createString(this.biomeTemp.getName()),
-					dynamicOps.createString("large_probability"),
-					dynamicOps.createFloat(this.largeProbability),
-					dynamicOps.createString("cluster_probability"),
-					dynamicOps.createFloat(this.clusterProbability)
-				)
-			)
-		);
-	}
-
-	public static <T> OceanRuinConfiguration deserialize(Dynamic<T> dynamic) {
-		OceanRuinFeature.Type type = OceanRuinFeature.Type.byName(dynamic.get("biome_temp").asString(""));
-		float f = dynamic.get("large_probability").asFloat(0.0F);
-		float g = dynamic.get("cluster_probability").asFloat(0.0F);
-		return new OceanRuinConfiguration(type, f, g);
 	}
 }

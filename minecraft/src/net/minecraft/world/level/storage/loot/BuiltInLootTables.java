@@ -45,6 +45,11 @@ public class BuiltInLootTables {
 	public static final ResourceLocation SHIPWRECK_SUPPLY = register("chests/shipwreck_supply");
 	public static final ResourceLocation SHIPWRECK_TREASURE = register("chests/shipwreck_treasure");
 	public static final ResourceLocation PILLAGER_OUTPOST = register("chests/pillager_outpost");
+	public static final ResourceLocation BASTION_TREASURE = register("chests/bastion_treasure");
+	public static final ResourceLocation BASTION_OTHER = register("chests/bastion_other");
+	public static final ResourceLocation BASTION_BRIDGE = register("chests/bastion_bridge");
+	public static final ResourceLocation BASTION_HOGLIN_STABLE = register("chests/bastion_hoglin_stable");
+	public static final ResourceLocation RUINED_PORTAL = register("chests/ruined_portal");
 	public static final ResourceLocation SHEEP_WHITE = register("entities/sheep/white");
 	public static final ResourceLocation SHEEP_ORANGE = register("entities/sheep/orange");
 	public static final ResourceLocation SHEEP_MAGENTA = register("entities/sheep/magenta");
@@ -79,6 +84,7 @@ public class BuiltInLootTables {
 	public static final ResourceLocation SHEPHERD_GIFT = register("gameplay/hero_of_the_village/shepherd_gift");
 	public static final ResourceLocation TOOLSMITH_GIFT = register("gameplay/hero_of_the_village/toolsmith_gift");
 	public static final ResourceLocation WEAPONSMITH_GIFT = register("gameplay/hero_of_the_village/weaponsmith_gift");
+	public static final ResourceLocation PIGLIN_BARTERING = register("gameplay/piglin_bartering");
 
 	private static ResourceLocation register(String string) {
 		return register(new ResourceLocation(string));

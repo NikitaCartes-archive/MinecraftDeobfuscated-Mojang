@@ -1,11 +1,12 @@
 package net.minecraft.commands;
 
+import java.util.UUID;
 import net.minecraft.network.chat.Component;
 
 public interface CommandSource {
 	CommandSource NULL = new CommandSource() {
 		@Override
-		public void sendMessage(Component component) {
+		public void sendMessage(Component component, UUID uUID) {
 		}
 
 		@Override
@@ -24,7 +25,7 @@ public interface CommandSource {
 		}
 	};
 
-	void sendMessage(Component component);
+	void sendMessage(Component component, UUID uUID);
 
 	boolean acceptsSuccess();
 

@@ -1,19 +1,18 @@
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.material.Material;
@@ -26,16 +25,12 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 	private static final EntityType<?>[] MOBS = new EntityType[]{EntityType.SKELETON, EntityType.ZOMBIE, EntityType.ZOMBIE, EntityType.SPIDER};
 	private static final BlockState AIR = Blocks.CAVE_AIR.defaultBlockState();
 
-	public MonsterRoomFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-		super(function);
+	public MonsterRoomFeature(Codec<NoneFeatureConfiguration> codec) {
+		super(codec);
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
-		Random random,
-		BlockPos blockPos,
-		NoneFeatureConfiguration noneFeatureConfiguration
+		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration
 	) {
 		int i = 3;
 		int j = random.nextInt(2) + 2;
@@ -52,7 +47,7 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 			for (int t = -1; t <= 4; t++) {
 				for (int u = p; u <= q; u++) {
 					BlockPos blockPos2 = blockPos.offset(s, t, u);
-					Material material = levelAccessor.getBlockState(blockPos2).getMaterial();
+					Material material = worldGenLevel.getBlockState(blockPos2).getMaterial();
 					boolean bl = material.isSolid();
 					if (t == -1 && !bl) {
 						return false;
@@ -62,7 +57,7 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 						return false;
 					}
 
-					if ((s == k || s == l || u == p || u == q) && t == 0 && levelAccessor.isEmptyBlock(blockPos2) && levelAccessor.isEmptyBlock(blockPos2.above())) {
+					if ((s == k || s == l || u == p || u == q) && t == 0 && worldGenLevel.isEmptyBlock(blockPos2) && worldGenLevel.isEmptyBlock(blockPos2.above())) {
 						r++;
 					}
 				}
@@ -74,17 +69,18 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 				for (int t = 3; t >= -1; t--) {
 					for (int u = p; u <= q; u++) {
 						BlockPos blockPos2x = blockPos.offset(s, t, u);
+						BlockState blockState = worldGenLevel.getBlockState(blockPos2x);
 						if (s != k && t != -1 && u != p && s != l && t != 4 && u != q) {
-							if (levelAccessor.getBlockState(blockPos2x).getBlock() != Blocks.CHEST) {
-								levelAccessor.setBlock(blockPos2x, AIR, 2);
+							if (!blockState.is(Blocks.CHEST) && !blockState.is(Blocks.SPAWNER)) {
+								worldGenLevel.setBlock(blockPos2x, AIR, 2);
 							}
-						} else if (blockPos2x.getY() >= 0 && !levelAccessor.getBlockState(blockPos2x.below()).getMaterial().isSolid()) {
-							levelAccessor.setBlock(blockPos2x, AIR, 2);
-						} else if (levelAccessor.getBlockState(blockPos2x).getMaterial().isSolid() && levelAccessor.getBlockState(blockPos2x).getBlock() != Blocks.CHEST) {
+						} else if (blockPos2x.getY() >= 0 && !worldGenLevel.getBlockState(blockPos2x.below()).getMaterial().isSolid()) {
+							worldGenLevel.setBlock(blockPos2x, AIR, 2);
+						} else if (blockState.getMaterial().isSolid() && !blockState.is(Blocks.CHEST)) {
 							if (t == -1 && random.nextInt(4) != 0) {
-								levelAccessor.setBlock(blockPos2x, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), 2);
+								worldGenLevel.setBlock(blockPos2x, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), 2);
 							} else {
-								levelAccessor.setBlock(blockPos2x, Blocks.COBBLESTONE.defaultBlockState(), 2);
+								worldGenLevel.setBlock(blockPos2x, Blocks.COBBLESTONE.defaultBlockState(), 2);
 							}
 						}
 					}
@@ -97,26 +93,26 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 					int v = blockPos.getY();
 					int w = blockPos.getZ() + random.nextInt(o * 2 + 1) - o;
 					BlockPos blockPos3 = new BlockPos(ux, v, w);
-					if (levelAccessor.isEmptyBlock(blockPos3)) {
+					if (worldGenLevel.isEmptyBlock(blockPos3)) {
 						int x = 0;
 
 						for (Direction direction : Direction.Plane.HORIZONTAL) {
-							if (levelAccessor.getBlockState(blockPos3.relative(direction)).getMaterial().isSolid()) {
+							if (worldGenLevel.getBlockState(blockPos3.relative(direction)).getMaterial().isSolid()) {
 								x++;
 							}
 						}
 
 						if (x == 1) {
-							levelAccessor.setBlock(blockPos3, StructurePiece.reorient(levelAccessor, blockPos3, Blocks.CHEST.defaultBlockState()), 2);
-							RandomizableContainerBlockEntity.setLootTable(levelAccessor, random, blockPos3, BuiltInLootTables.SIMPLE_DUNGEON);
+							worldGenLevel.setBlock(blockPos3, StructurePiece.reorient(worldGenLevel, blockPos3, Blocks.CHEST.defaultBlockState()), 2);
+							RandomizableContainerBlockEntity.setLootTable(worldGenLevel, random, blockPos3, BuiltInLootTables.SIMPLE_DUNGEON);
 							break;
 						}
 					}
 				}
 			}
 
-			levelAccessor.setBlock(blockPos, Blocks.SPAWNER.defaultBlockState(), 2);
-			BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos);
+			worldGenLevel.setBlock(blockPos, Blocks.SPAWNER.defaultBlockState(), 2);
+			BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos);
 			if (blockEntity instanceof SpawnerBlockEntity) {
 				((SpawnerBlockEntity)blockEntity).getSpawner().setEntityId(this.randomEntityId(random));
 			} else {
@@ -130,6 +126,6 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 	}
 
 	private EntityType<?> randomEntityId(Random random) {
-		return MOBS[random.nextInt(MOBS.length)];
+		return Util.getRandom(MOBS, random);
 	}
 }

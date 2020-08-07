@@ -1,8 +1,11 @@
 package net.minecraft.world.level.block;
 
 import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
@@ -13,9 +16,10 @@ import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -36,9 +40,9 @@ public class AnvilBlock extends FallingBlock {
 	private static final VoxelShape Z_TOP = Block.box(3.0, 10.0, 0.0, 13.0, 16.0, 16.0);
 	private static final VoxelShape X_AXIS_AABB = Shapes.or(BASE, X_LEG1, X_LEG2, X_TOP);
 	private static final VoxelShape Z_AXIS_AABB = Shapes.or(BASE, Z_LEG1, Z_LEG2, Z_TOP);
-	private static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.repair");
+	private static final Component CONTAINER_TITLE = new TranslatableComponent("container.repair");
 
-	public AnvilBlock(Block.Properties properties) {
+	public AnvilBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
 	}
@@ -57,7 +61,7 @@ public class AnvilBlock extends FallingBlock {
 		} else {
 			player.openMenu(blockState.getMenuProvider(level, blockPos));
 			player.awardStat(Stats.INTERACT_WITH_ANVIL);
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		}
 	}
 
@@ -79,22 +83,25 @@ public class AnvilBlock extends FallingBlock {
 	}
 
 	@Override
-	public void onLand(Level level, BlockPos blockPos, BlockState blockState, BlockState blockState2) {
-		level.levelEvent(1031, blockPos, 0);
+	public void onLand(Level level, BlockPos blockPos, BlockState blockState, BlockState blockState2, FallingBlockEntity fallingBlockEntity) {
+		if (!fallingBlockEntity.isSilent()) {
+			level.levelEvent(1031, blockPos, 0);
+		}
 	}
 
 	@Override
-	public void onBroken(Level level, BlockPos blockPos) {
-		level.levelEvent(1029, blockPos, 0);
+	public void onBroken(Level level, BlockPos blockPos, FallingBlockEntity fallingBlockEntity) {
+		if (!fallingBlockEntity.isSilent()) {
+			level.levelEvent(1029, blockPos, 0);
+		}
 	}
 
 	@Nullable
 	public static BlockState damage(BlockState blockState) {
-		Block block = blockState.getBlock();
-		if (block == Blocks.ANVIL) {
+		if (blockState.is(Blocks.ANVIL)) {
 			return Blocks.CHIPPED_ANVIL.defaultBlockState().setValue(FACING, blockState.getValue(FACING));
 		} else {
-			return block == Blocks.CHIPPED_ANVIL ? Blocks.DAMAGED_ANVIL.defaultBlockState().setValue(FACING, blockState.getValue(FACING)) : null;
+			return blockState.is(Blocks.CHIPPED_ANVIL) ? Blocks.DAMAGED_ANVIL.defaultBlockState().setValue(FACING, blockState.getValue(FACING)) : null;
 		}
 	}
 
@@ -111,5 +118,11 @@ public class AnvilBlock extends FallingBlock {
 	@Override
 	public boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
 		return false;
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public int getDustColor(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+		return blockState.getMapColor(blockGetter, blockPos).col;
 	}
 }

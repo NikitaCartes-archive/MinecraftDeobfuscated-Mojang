@@ -20,6 +20,8 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -33,7 +35,7 @@ import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
 
 public class Vex extends Monster {
@@ -81,11 +83,8 @@ public class Vex extends Monster {
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, Player.class, true));
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(14.0);
-		this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(4.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 14.0).add(Attributes.ATTACK_DAMAGE, 4.0);
 	}
 
 	@Override
@@ -189,7 +188,7 @@ public class Vex extends Monster {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
@@ -197,7 +196,7 @@ public class Vex extends Monster {
 	) {
 		this.populateDefaultEquipmentSlots(difficultyInstance);
 		this.populateDefaultEquipmentEnchantments(difficultyInstance);
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	@Override
@@ -321,7 +320,7 @@ public class Vex extends Monster {
 		public void tick() {
 			BlockPos blockPos = Vex.this.getBoundOrigin();
 			if (blockPos == null) {
-				blockPos = new BlockPos(Vex.this);
+				blockPos = Vex.this.blockPosition();
 			}
 
 			for (int i = 0; i < 3; i++) {

@@ -1,18 +1,24 @@
 package net.minecraft.core.dispenser;
 
+import java.util.List;
 import java.util.Random;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.Saddleable;
+import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -31,7 +37,6 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BoneMealItem;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.FlintAndSteelItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -40,12 +45,15 @@ import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BucketPickup;
+import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.CarvedPumpkinBlock;
 import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.TntBlock;
@@ -210,28 +218,109 @@ public interface DispenseItemBehavior {
 				return itemStack;
 			}
 		});
-		DispenserBlock.registerBehavior(Items.FIREWORK_ROCKET, new DefaultDispenseItemBehavior() {
+		DispenserBlock.registerBehavior(Items.SADDLE, new OptionalDispenseItemBehavior() {
 			@Override
 			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
-				double d = (double)direction.getStepX();
-				double e = (double)direction.getStepY();
-				double f = (double)direction.getStepZ();
-				double g = blockSource.x() + d;
-				double h = (double)((float)blockSource.getPos().getY() + 0.2F);
-				double i = blockSource.z() + f;
-				FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(blockSource.getLevel(), itemStack, g, h, i, true);
-				fireworkRocketEntity.shoot(d, e, f, 0.5F, 1.0F);
-				blockSource.getLevel().addFreshEntity(fireworkRocketEntity);
-				itemStack.shrink(1);
-				return itemStack;
-			}
-
-			@Override
-			protected void playSound(BlockSource blockSource) {
-				blockSource.getLevel().levelEvent(1004, blockSource.getPos(), 0);
+				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+				List<LivingEntity> list = blockSource.getLevel().getEntitiesOfClass(LivingEntity.class, new AABB(blockPos), livingEntity -> {
+					if (!(livingEntity instanceof Saddleable)) {
+						return false;
+					} else {
+						Saddleable saddleable = (Saddleable)livingEntity;
+						return !saddleable.isSaddled() && saddleable.isSaddleable();
+					}
+				});
+				if (!list.isEmpty()) {
+					((Saddleable)list.get(0)).equipSaddle(SoundSource.BLOCKS);
+					itemStack.shrink(1);
+					this.setSuccess(true);
+					return itemStack;
+				} else {
+					return super.execute(blockSource, itemStack);
+				}
 			}
 		});
+		DefaultDispenseItemBehavior defaultDispenseItemBehavior2 = new OptionalDispenseItemBehavior() {
+			@Override
+			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+
+				for (AbstractHorse abstractHorse : blockSource.getLevel()
+					.getEntitiesOfClass(AbstractHorse.class, new AABB(blockPos), abstractHorsex -> abstractHorsex.isAlive() && abstractHorsex.canWearArmor())) {
+					if (abstractHorse.isArmor(itemStack) && !abstractHorse.isWearingArmor() && abstractHorse.isTamed()) {
+						abstractHorse.setSlot(401, itemStack.split(1));
+						this.setSuccess(true);
+						return itemStack;
+					}
+				}
+
+				return super.execute(blockSource, itemStack);
+			}
+		};
+		DispenserBlock.registerBehavior(Items.LEATHER_HORSE_ARMOR, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.IRON_HORSE_ARMOR, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.GOLDEN_HORSE_ARMOR, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.DIAMOND_HORSE_ARMOR, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.WHITE_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.ORANGE_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.CYAN_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.BLUE_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.BROWN_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.BLACK_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.GRAY_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.GREEN_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.LIGHT_BLUE_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.LIGHT_GRAY_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.LIME_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.MAGENTA_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.PINK_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.PURPLE_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.RED_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(Items.YELLOW_CARPET, defaultDispenseItemBehavior2);
+		DispenserBlock.registerBehavior(
+			Items.CHEST,
+			new OptionalDispenseItemBehavior() {
+				@Override
+				public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+					BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+
+					for (AbstractChestedHorse abstractChestedHorse : blockSource.getLevel()
+						.getEntitiesOfClass(
+							AbstractChestedHorse.class, new AABB(blockPos), abstractChestedHorsex -> abstractChestedHorsex.isAlive() && !abstractChestedHorsex.hasChest()
+						)) {
+						if (abstractChestedHorse.isTamed() && abstractChestedHorse.setSlot(499, itemStack)) {
+							itemStack.shrink(1);
+							this.setSuccess(true);
+							return itemStack;
+						}
+					}
+
+					return super.execute(blockSource, itemStack);
+				}
+			}
+		);
+		DispenserBlock.registerBehavior(
+			Items.FIREWORK_ROCKET,
+			new DefaultDispenseItemBehavior() {
+				@Override
+				public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+					Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
+					FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(
+						blockSource.getLevel(), itemStack, blockSource.x(), blockSource.y(), blockSource.x(), true
+					);
+					DispenseItemBehavior.setEntityPokingOutOfBlock(blockSource, fireworkRocketEntity, direction);
+					fireworkRocketEntity.shoot((double)direction.getStepX(), (double)direction.getStepY(), (double)direction.getStepZ(), 0.5F, 1.0F);
+					blockSource.getLevel().addFreshEntity(fireworkRocketEntity);
+					itemStack.shrink(1);
+					return itemStack;
+				}
+
+				@Override
+				protected void playSound(BlockSource blockSource) {
+					blockSource.getLevel().levelEvent(1004, blockSource.getPos(), 0);
+				}
+			}
+		);
 		DispenserBlock.registerBehavior(Items.FIRE_CHARGE, new DefaultDispenseItemBehavior() {
 			@Override
 			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
@@ -318,21 +407,22 @@ public interface DispenseItemBehavior {
 			@Override
 			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
 				Level level = blockSource.getLevel();
-				this.success = true;
-				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+				this.setSuccess(true);
+				Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
+				BlockPos blockPos = blockSource.getPos().relative(direction);
 				BlockState blockState = level.getBlockState(blockPos);
-				if (FlintAndSteelItem.canUse(blockState, level, blockPos)) {
-					level.setBlockAndUpdate(blockPos, Blocks.FIRE.defaultBlockState());
-				} else if (FlintAndSteelItem.canLightCampFire(blockState)) {
+				if (BaseFireBlock.canBePlacedAt(level, blockPos, direction)) {
+					level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(level, blockPos));
+				} else if (CampfireBlock.canLight(blockState)) {
 					level.setBlockAndUpdate(blockPos, blockState.setValue(BlockStateProperties.LIT, Boolean.valueOf(true)));
 				} else if (blockState.getBlock() instanceof TntBlock) {
 					TntBlock.explode(level, blockPos);
 					level.removeBlock(blockPos, false);
 				} else {
-					this.success = false;
+					this.setSuccess(false);
 				}
 
-				if (this.success && itemStack.hurt(1, level.random, null)) {
+				if (this.isSuccess() && itemStack.hurt(1, level.random, null)) {
 					itemStack.setCount(0);
 				}
 
@@ -342,11 +432,11 @@ public interface DispenseItemBehavior {
 		DispenserBlock.registerBehavior(Items.BONE_MEAL, new OptionalDispenseItemBehavior() {
 			@Override
 			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				this.success = true;
+				this.setSuccess(true);
 				Level level = blockSource.getLevel();
 				BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
 				if (!BoneMealItem.growCrop(itemStack, level, blockPos) && !BoneMealItem.growWaterPlant(itemStack, level, blockPos, null)) {
-					this.success = false;
+					this.setSuccess(false);
 				} else if (!level.isClientSide) {
 					level.levelEvent(2005, blockPos, 0);
 				}
@@ -369,7 +459,7 @@ public interface DispenseItemBehavior {
 		DispenseItemBehavior dispenseItemBehavior2 = new OptionalDispenseItemBehavior() {
 			@Override
 			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				this.success = ArmorItem.dispenseArmor(blockSource, itemStack);
+				this.setSuccess(ArmorItem.dispenseArmor(blockSource, itemStack));
 				return itemStack;
 			}
 		};
@@ -400,9 +490,9 @@ public interface DispenseItemBehavior {
 						}
 
 						itemStack.shrink(1);
-						this.success = true;
+						this.setSuccess(true);
 					} else {
-						this.success = ArmorItem.dispenseArmor(blockSource, itemStack);
+						this.setSuccess(ArmorItem.dispenseArmor(blockSource, itemStack));
 					}
 
 					return itemStack;
@@ -421,9 +511,9 @@ public interface DispenseItemBehavior {
 					}
 
 					itemStack.shrink(1);
-					this.success = true;
+					this.setSuccess(true);
 				} else {
-					this.success = ArmorItem.dispenseArmor(blockSource, itemStack);
+					this.setSuccess(ArmorItem.dispenseArmor(blockSource, itemStack));
 				}
 
 				return itemStack;
@@ -455,18 +545,18 @@ public interface DispenseItemBehavior {
 
 				@Override
 				public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-					this.success = false;
-					LevelAccessor levelAccessor = blockSource.getLevel();
+					this.setSuccess(false);
+					ServerLevel serverLevel = blockSource.getLevel();
 					BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
-					BlockState blockState = levelAccessor.getBlockState(blockPos);
-					Block block = blockState.getBlock();
-					if (block.is(BlockTags.BEEHIVES) && (Integer)blockState.getValue(BeehiveBlock.HONEY_LEVEL) >= 5) {
+					BlockState blockState = serverLevel.getBlockState(blockPos);
+					if (blockState.is(BlockTags.BEEHIVES, blockStateBase -> blockStateBase.hasProperty(BeehiveBlock.HONEY_LEVEL))
+						&& (Integer)blockState.getValue(BeehiveBlock.HONEY_LEVEL) >= 5) {
 						((BeehiveBlock)blockState.getBlock())
-							.releaseBeesAndResetHoneyLevel(levelAccessor.getLevel(), blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
-						this.success = true;
+							.releaseBeesAndResetHoneyLevel(serverLevel, blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
+						this.setSuccess(true);
 						return this.takeLiquid(blockSource, itemStack, new ItemStack(Items.HONEY_BOTTLE));
-					} else if (levelAccessor.getFluidState(blockPos).is(FluidTags.WATER)) {
-						this.success = true;
+					} else if (serverLevel.getFluidState(blockPos).is(FluidTags.WATER)) {
+						this.setSuccess(true);
 						return this.takeLiquid(blockSource, itemStack, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER));
 					} else {
 						return super.execute(blockSource, itemStack);
@@ -474,49 +564,36 @@ public interface DispenseItemBehavior {
 				}
 			}
 		);
-		DispenserBlock.registerBehavior(
-			Items.SHEARS.asItem(),
-			new OptionalDispenseItemBehavior() {
-				@Override
-				protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-					Level level = blockSource.getLevel();
-					if (!level.isClientSide()) {
-						this.success = false;
-						BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
-
-						for (Sheep sheep : level.getEntitiesOfClass(Sheep.class, new AABB(blockPos))) {
-							if (sheep.isAlive() && !sheep.isSheared() && !sheep.isBaby()) {
-								sheep.shear();
-								if (itemStack.hurt(1, level.random, null)) {
-									itemStack.setCount(0);
-								}
-
-								this.success = true;
-								break;
-							}
-						}
-
-						if (!this.success) {
-							BlockState blockState = level.getBlockState(blockPos);
-							if (blockState.is(BlockTags.BEEHIVES)) {
-								int i = (Integer)blockState.getValue(BeehiveBlock.HONEY_LEVEL);
-								if (i >= 5) {
-									if (itemStack.hurt(1, level.random, null)) {
-										itemStack.setCount(0);
-									}
-
-									BeehiveBlock.dropHoneycomb(level, blockPos);
-									((BeehiveBlock)blockState.getBlock())
-										.releaseBeesAndResetHoneyLevel(level, blockState, blockPos, null, BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED);
-									this.success = true;
-								}
-							}
-						}
+		DispenserBlock.registerBehavior(Items.GLOWSTONE, new OptionalDispenseItemBehavior() {
+			@Override
+			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+				Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
+				BlockPos blockPos = blockSource.getPos().relative(direction);
+				Level level = blockSource.getLevel();
+				BlockState blockState = level.getBlockState(blockPos);
+				this.setSuccess(true);
+				if (blockState.is(Blocks.RESPAWN_ANCHOR)) {
+					if ((Integer)blockState.getValue(RespawnAnchorBlock.CHARGE) != 4) {
+						RespawnAnchorBlock.charge(level, blockPos, blockState);
+						itemStack.shrink(1);
+					} else {
+						this.setSuccess(false);
 					}
 
 					return itemStack;
+				} else {
+					return super.execute(blockSource, itemStack);
 				}
 			}
+		});
+		DispenserBlock.registerBehavior(Items.SHEARS.asItem(), new ShearsDispenseItemBehavior());
+	}
+
+	static void setEntityPokingOutOfBlock(BlockSource blockSource, Entity entity, Direction direction) {
+		entity.setPos(
+			blockSource.x() + (double)direction.getStepX() * (0.5000099999997474 - (double)entity.getBbWidth() / 2.0),
+			blockSource.y() + (double)direction.getStepY() * (0.5000099999997474 - (double)entity.getBbHeight() / 2.0) - (double)entity.getBbHeight() / 2.0,
+			blockSource.z() + (double)direction.getStepZ() * (0.5000099999997474 - (double)entity.getBbWidth() / 2.0)
 		);
 	}
 }

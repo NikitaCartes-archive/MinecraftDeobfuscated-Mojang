@@ -8,12 +8,13 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -23,7 +24,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 public class DoublePlantBlock extends BushBlock {
 	public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
 
-	public DoublePlantBlock(Block.Properties properties) {
+	public DoublePlantBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(HALF, DoubleBlockHalf.LOWER));
 	}
@@ -35,7 +36,7 @@ public class DoublePlantBlock extends BushBlock {
 		DoubleBlockHalf doubleBlockHalf = blockState.getValue(HALF);
 		if (direction.getAxis() != Direction.Axis.Y
 			|| doubleBlockHalf == DoubleBlockHalf.LOWER != (direction == Direction.UP)
-			|| blockState2.getBlock() == this && blockState2.getValue(HALF) != doubleBlockHalf) {
+			|| blockState2.is(this) && blockState2.getValue(HALF) != doubleBlockHalf) {
 			return doubleBlockHalf == DoubleBlockHalf.LOWER && direction == Direction.DOWN && !blockState.canSurvive(levelAccessor, blockPos)
 				? Blocks.AIR.defaultBlockState()
 				: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
@@ -64,7 +65,7 @@ public class DoublePlantBlock extends BushBlock {
 			return super.canSurvive(blockState, levelReader, blockPos);
 		} else {
 			BlockState blockState2 = levelReader.getBlockState(blockPos.below());
-			return blockState2.getBlock() == this && blockState2.getValue(HALF) == DoubleBlockHalf.LOWER;
+			return blockState2.is(this) && blockState2.getValue(HALF) == DoubleBlockHalf.LOWER;
 		}
 	}
 
@@ -74,25 +75,33 @@ public class DoublePlantBlock extends BushBlock {
 	}
 
 	@Override
-	public void playerDestroy(Level level, Player player, BlockPos blockPos, BlockState blockState, @Nullable BlockEntity blockEntity, ItemStack itemStack) {
-		super.playerDestroy(level, player, blockPos, Blocks.AIR.defaultBlockState(), blockEntity, itemStack);
-	}
-
-	@Override
 	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
-		DoubleBlockHalf doubleBlockHalf = blockState.getValue(HALF);
-		BlockPos blockPos2 = doubleBlockHalf == DoubleBlockHalf.LOWER ? blockPos.above() : blockPos.below();
-		BlockState blockState2 = level.getBlockState(blockPos2);
-		if (blockState2.getBlock() == this && blockState2.getValue(HALF) != doubleBlockHalf) {
-			level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 35);
-			level.levelEvent(player, 2001, blockPos2, Block.getId(blockState2));
-			if (!level.isClientSide && !player.isCreative()) {
+		if (!level.isClientSide) {
+			if (player.isCreative()) {
+				preventCreativeDropFromBottomPart(level, blockPos, blockState, player);
+			} else {
 				dropResources(blockState, level, blockPos, null, player, player.getMainHandItem());
-				dropResources(blockState2, level, blockPos2, null, player, player.getMainHandItem());
 			}
 		}
 
 		super.playerWillDestroy(level, blockPos, blockState, player);
+	}
+
+	@Override
+	public void playerDestroy(Level level, Player player, BlockPos blockPos, BlockState blockState, @Nullable BlockEntity blockEntity, ItemStack itemStack) {
+		super.playerDestroy(level, player, blockPos, Blocks.AIR.defaultBlockState(), blockEntity, itemStack);
+	}
+
+	protected static void preventCreativeDropFromBottomPart(Level level, BlockPos blockPos, BlockState blockState, Player player) {
+		DoubleBlockHalf doubleBlockHalf = blockState.getValue(HALF);
+		if (doubleBlockHalf == DoubleBlockHalf.UPPER) {
+			BlockPos blockPos2 = blockPos.below();
+			BlockState blockState2 = level.getBlockState(blockPos2);
+			if (blockState2.getBlock() == blockState.getBlock() && blockState2.getValue(HALF) == DoubleBlockHalf.LOWER) {
+				level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 35);
+				level.levelEvent(player, 2001, blockPos2, Block.getId(blockState2));
+			}
+		}
 	}
 
 	@Override
@@ -101,8 +110,8 @@ public class DoublePlantBlock extends BushBlock {
 	}
 
 	@Override
-	public Block.OffsetType getOffsetType() {
-		return Block.OffsetType.XZ;
+	public BlockBehaviour.OffsetType getOffsetType() {
+		return BlockBehaviour.OffsetType.XZ;
 	}
 
 	@Environment(EnvType.CLIENT)

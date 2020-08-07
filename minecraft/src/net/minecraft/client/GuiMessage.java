@@ -2,21 +2,20 @@ package net.minecraft.client;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
-public class GuiMessage {
+public class GuiMessage<T> {
 	private final int addedTime;
-	private final Component message;
+	private final T message;
 	private final int id;
 
-	public GuiMessage(int i, Component component, int j) {
-		this.message = component;
+	public GuiMessage(int i, T object, int j) {
+		this.message = object;
 		this.addedTime = i;
 		this.id = j;
 	}
 
-	public Component getMessage() {
+	public T getMessage() {
 		return this.message;
 	}
 

@@ -6,8 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import java.util.Set;
 import net.minecraft.advancements.critereon.EntityPredicate;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -25,14 +23,19 @@ public class LootItemEntityPropertyCondition implements LootItemCondition {
 	}
 
 	@Override
+	public LootItemConditionType getType() {
+		return LootItemConditions.ENTITY_PROPERTIES;
+	}
+
+	@Override
 	public Set<LootContextParam<?>> getReferencedContextParams() {
-		return ImmutableSet.of(LootContextParams.BLOCK_POS, this.entityTarget.getParam());
+		return ImmutableSet.of(LootContextParams.ORIGIN, this.entityTarget.getParam());
 	}
 
 	public boolean test(LootContext lootContext) {
 		Entity entity = lootContext.getParamOrNull(this.entityTarget.getParam());
-		BlockPos blockPos = lootContext.getParamOrNull(LootContextParams.BLOCK_POS);
-		return this.predicate.matches(lootContext.getLevel(), blockPos != null ? new Vec3(blockPos) : null, entity);
+		Vec3 vec3 = lootContext.getParamOrNull(LootContextParams.ORIGIN);
+		return this.predicate.matches(lootContext.getLevel(), vec3, entity);
 	}
 
 	public static LootItemCondition.Builder entityPresent(LootContext.EntityTarget entityTarget) {
@@ -43,11 +46,11 @@ public class LootItemEntityPropertyCondition implements LootItemCondition {
 		return () -> new LootItemEntityPropertyCondition(builder.build(), entityTarget);
 	}
 
-	public static class Serializer extends LootItemCondition.Serializer<LootItemEntityPropertyCondition> {
-		protected Serializer() {
-			super(new ResourceLocation("entity_properties"), LootItemEntityPropertyCondition.class);
-		}
+	public static LootItemCondition.Builder hasProperties(LootContext.EntityTarget entityTarget, EntityPredicate entityPredicate) {
+		return () -> new LootItemEntityPropertyCondition(entityPredicate, entityTarget);
+	}
 
+	public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<LootItemEntityPropertyCondition> {
 		public void serialize(
 			JsonObject jsonObject, LootItemEntityPropertyCondition lootItemEntityPropertyCondition, JsonSerializationContext jsonSerializationContext
 		) {

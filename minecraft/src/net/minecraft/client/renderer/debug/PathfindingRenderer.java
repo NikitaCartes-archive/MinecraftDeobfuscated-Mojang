@@ -83,11 +83,11 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 				0.5F
 			);
 
-			for (int i = 0; i < path.getSize(); i++) {
-				Node node = path.get(i);
+			for (int i = 0; i < path.getNodeCount(); i++) {
+				Node node = path.getNode(i);
 				if (distanceToCamera(node.asBlockPos(), d, e, g) <= 80.0F) {
-					float h = i == path.getIndex() ? 1.0F : 0.0F;
-					float j = i == path.getIndex() ? 0.0F : 1.0F;
+					float h = i == path.getNextNodeIndex() ? 1.0F : 0.0F;
+					float j = i == path.getNextNodeIndex() ? 0.0F : 1.0F;
 					DebugRenderer.renderFilledBox(
 						new AABB(
 								(double)((float)node.x + 0.5F - f),
@@ -150,11 +150,15 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 		}
 
 		if (bl2) {
-			for (int ix = 0; ix < path.getSize(); ix++) {
-				Node node = path.get(ix);
+			for (int ix = 0; ix < path.getNodeCount(); ix++) {
+				Node node = path.getNode(ix);
 				if (distanceToCamera(node.asBlockPos(), d, e, g) <= 80.0F) {
-					DebugRenderer.renderFloatingText(String.format("%s", node.type), (double)node.x + 0.5, (double)node.y + 0.75, (double)node.z + 0.5, -1);
-					DebugRenderer.renderFloatingText(String.format(Locale.ROOT, "%.2f", node.costMalus), (double)node.x + 0.5, (double)node.y + 0.25, (double)node.z + 0.5, -1);
+					DebugRenderer.renderFloatingText(
+						String.format("%s", node.type), (double)node.x + 0.5, (double)node.y + 0.75, (double)node.z + 0.5, -1, 0.02F, true, 0.0F, true
+					);
+					DebugRenderer.renderFloatingText(
+						String.format(Locale.ROOT, "%.2f", node.costMalus), (double)node.x + 0.5, (double)node.y + 0.25, (double)node.z + 0.5, -1, 0.02F, true, 0.0F, true
+					);
 				}
 			}
 		}
@@ -165,10 +169,10 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		bufferBuilder.begin(3, DefaultVertexFormat.POSITION_COLOR);
 
-		for (int i = 0; i < path.getSize(); i++) {
-			Node node = path.get(i);
+		for (int i = 0; i < path.getNodeCount(); i++) {
+			Node node = path.getNode(i);
 			if (!(distanceToCamera(node.asBlockPos(), d, e, f) > 80.0F)) {
-				float g = (float)i / (float)path.getSize() * 0.33F;
+				float g = (float)i / (float)path.getNodeCount() * 0.33F;
 				int j = i == 0 ? 0 : Mth.hsvToRgb(g, 0.9F, 0.9F);
 				int k = j >> 16 & 0xFF;
 				int l = j >> 8 & 0xFF;

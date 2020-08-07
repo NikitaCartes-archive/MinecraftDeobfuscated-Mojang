@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.screens.inventory;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -8,11 +9,18 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CommandSuggestions;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.BaseCommandBlock;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractCommandBlockEditScreen extends Screen {
+	private static final Component SET_COMMAND_LABEL = new TranslatableComponent("advMode.setCommand");
+	private static final Component COMMAND_LABEL = new TranslatableComponent("advMode.command");
+	private static final Component PREVIOUS_OUTPUT_LABEL = new TranslatableComponent("advMode.previousOutput");
 	protected EditBox commandEdit;
 	protected EditBox previousEdit;
 	protected Button doneButton;
@@ -37,23 +45,25 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
 	@Override
 	protected void init() {
 		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
-		this.doneButton = this.addButton(new Button(this.width / 2 - 4 - 150, this.height / 4 + 120 + 12, 150, 20, I18n.get("gui.done"), button -> this.onDone()));
-		this.cancelButton = this.addButton(new Button(this.width / 2 + 4, this.height / 4 + 120 + 12, 150, 20, I18n.get("gui.cancel"), button -> this.onClose()));
-		this.outputButton = this.addButton(new Button(this.width / 2 + 150 - 20, this.getPreviousY(), 20, 20, "O", button -> {
+		this.doneButton = this.addButton(
+			new Button(this.width / 2 - 4 - 150, this.height / 4 + 120 + 12, 150, 20, CommonComponents.GUI_DONE, button -> this.onDone())
+		);
+		this.cancelButton = this.addButton(new Button(this.width / 2 + 4, this.height / 4 + 120 + 12, 150, 20, CommonComponents.GUI_CANCEL, button -> this.onClose()));
+		this.outputButton = this.addButton(new Button(this.width / 2 + 150 - 20, this.getPreviousY(), 20, 20, new TextComponent("O"), button -> {
 			BaseCommandBlock baseCommandBlock = this.getCommandBlock();
 			baseCommandBlock.setTrackOutput(!baseCommandBlock.isTrackOutput());
 			this.updateCommandOutput();
 		}));
-		this.commandEdit = new EditBox(this.font, this.width / 2 - 150, 50, 300, 20, I18n.get("advMode.command")) {
+		this.commandEdit = new EditBox(this.font, this.width / 2 - 150, 50, 300, 20, new TranslatableComponent("advMode.command")) {
 			@Override
-			protected String getNarrationMessage() {
-				return super.getNarrationMessage() + AbstractCommandBlockEditScreen.this.commandSuggestions.getNarrationMessage();
+			protected MutableComponent createNarrationMessage() {
+				return super.createNarrationMessage().append(AbstractCommandBlockEditScreen.this.commandSuggestions.getNarrationMessage());
 			}
 		};
 		this.commandEdit.setMaxLength(32500);
 		this.commandEdit.setResponder(this::onEdited);
 		this.children.add(this.commandEdit);
-		this.previousEdit = new EditBox(this.font, this.width / 2 - 150, this.getPreviousY(), 276, 20, I18n.get("advMode.previousOutput"));
+		this.previousEdit = new EditBox(this.font, this.width / 2 - 150, this.getPreviousY(), 276, 20, new TranslatableComponent("advMode.previousOutput"));
 		this.previousEdit.setMaxLength(32500);
 		this.previousEdit.setEditable(false);
 		this.previousEdit.setValue("-");
@@ -75,10 +85,10 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
 
 	protected void updateCommandOutput() {
 		if (this.getCommandBlock().isTrackOutput()) {
-			this.outputButton.setMessage("O");
+			this.outputButton.setMessage(new TextComponent("O"));
 			this.previousEdit.setValue(this.getCommandBlock().getLastOutput().getString());
 		} else {
-			this.outputButton.setMessage("X");
+			this.outputButton.setMessage(new TextComponent("X"));
 			this.previousEdit.setValue("-");
 		}
 	}
@@ -135,19 +145,19 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
-		this.drawCenteredString(this.font, I18n.get("advMode.setCommand"), this.width / 2, 20, 16777215);
-		this.drawString(this.font, I18n.get("advMode.command"), this.width / 2 - 150, 40, 10526880);
-		this.commandEdit.render(i, j, f);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		drawCenteredString(poseStack, this.font, SET_COMMAND_LABEL, this.width / 2, 20, 16777215);
+		drawString(poseStack, this.font, COMMAND_LABEL, this.width / 2 - 150, 40, 10526880);
+		this.commandEdit.render(poseStack, i, j, f);
 		int k = 75;
 		if (!this.previousEdit.getValue().isEmpty()) {
 			k += 5 * 9 + 1 + this.getPreviousY() - 135;
-			this.drawString(this.font, I18n.get("advMode.previousOutput"), this.width / 2 - 150, k + 4, 10526880);
-			this.previousEdit.render(i, j, f);
+			drawString(poseStack, this.font, PREVIOUS_OUTPUT_LABEL, this.width / 2 - 150, k + 4, 10526880);
+			this.previousEdit.render(poseStack, i, j, f);
 		}
 
-		super.render(i, j, f);
-		this.commandSuggestions.render(i, j);
+		super.render(poseStack, i, j, f);
+		this.commandSuggestions.render(poseStack, i, j);
 	}
 }

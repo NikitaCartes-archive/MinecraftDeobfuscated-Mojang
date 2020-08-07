@@ -7,7 +7,7 @@ import net.minecraft.sounds.SoundSource;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractTickableSoundInstance extends AbstractSoundInstance implements TickableSoundInstance {
-	protected boolean stopped;
+	private boolean stopped;
 
 	protected AbstractTickableSoundInstance(SoundEvent soundEvent, SoundSource soundSource) {
 		super(soundEvent, soundSource);
@@ -16,5 +16,10 @@ public abstract class AbstractTickableSoundInstance extends AbstractSoundInstanc
 	@Override
 	public boolean isStopped() {
 		return this.stopped;
+	}
+
+	protected final void stop() {
+		this.stopped = true;
+		this.looping = false;
 	}
 }

@@ -18,7 +18,7 @@ public class TradeWithPlayerGoal extends Goal {
 			return false;
 		} else if (this.mob.isInWater()) {
 			return false;
-		} else if (!this.mob.onGround) {
+		} else if (!this.mob.isOnGround()) {
 			return false;
 		} else if (this.mob.hurtMarked) {
 			return false;

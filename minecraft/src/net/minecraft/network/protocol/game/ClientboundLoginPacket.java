@@ -1,12 +1,17 @@
 package net.minecraft.network.protocol.game;
 
+import com.google.common.collect.Sets;
 import java.io.IOException;
+import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.LevelType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 
 public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> {
@@ -14,67 +19,102 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 	private long seed;
 	private boolean hardcore;
 	private GameType gameType;
-	private DimensionType dimension;
+	private GameType previousGameType;
+	private Set<ResourceKey<Level>> levels;
+	private RegistryAccess.RegistryHolder registryHolder;
+	private DimensionType dimensionType;
+	private ResourceKey<Level> dimension;
 	private int maxPlayers;
-	private LevelType levelType;
 	private int chunkRadius;
 	private boolean reducedDebugInfo;
 	private boolean showDeathScreen;
+	private boolean isDebug;
+	private boolean isFlat;
 
 	public ClientboundLoginPacket() {
 	}
 
 	public ClientboundLoginPacket(
-		int i, GameType gameType, long l, boolean bl, DimensionType dimensionType, int j, LevelType levelType, int k, boolean bl2, boolean bl3
+		int i,
+		GameType gameType,
+		GameType gameType2,
+		long l,
+		boolean bl,
+		Set<ResourceKey<Level>> set,
+		RegistryAccess.RegistryHolder registryHolder,
+		DimensionType dimensionType,
+		ResourceKey<Level> resourceKey,
+		int j,
+		int k,
+		boolean bl2,
+		boolean bl3,
+		boolean bl4,
+		boolean bl5
 	) {
 		this.playerId = i;
-		this.dimension = dimensionType;
+		this.levels = set;
+		this.registryHolder = registryHolder;
+		this.dimensionType = dimensionType;
+		this.dimension = resourceKey;
 		this.seed = l;
 		this.gameType = gameType;
+		this.previousGameType = gameType2;
 		this.maxPlayers = j;
 		this.hardcore = bl;
-		this.levelType = levelType;
 		this.chunkRadius = k;
 		this.reducedDebugInfo = bl2;
 		this.showDeathScreen = bl3;
+		this.isDebug = bl4;
+		this.isFlat = bl5;
 	}
 
 	@Override
 	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
 		this.playerId = friendlyByteBuf.readInt();
-		int i = friendlyByteBuf.readUnsignedByte();
-		this.hardcore = (i & 8) == 8;
-		i &= -9;
-		this.gameType = GameType.byId(i);
-		this.dimension = DimensionType.getById(friendlyByteBuf.readInt());
-		this.seed = friendlyByteBuf.readLong();
-		this.maxPlayers = friendlyByteBuf.readUnsignedByte();
-		this.levelType = LevelType.getLevelType(friendlyByteBuf.readUtf(16));
-		if (this.levelType == null) {
-			this.levelType = LevelType.NORMAL;
+		this.hardcore = friendlyByteBuf.readBoolean();
+		this.gameType = GameType.byId(friendlyByteBuf.readByte());
+		this.previousGameType = GameType.byId(friendlyByteBuf.readByte());
+		int i = friendlyByteBuf.readVarInt();
+		this.levels = Sets.<ResourceKey<Level>>newHashSet();
+
+		for (int j = 0; j < i; j++) {
+			this.levels.add(ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation()));
 		}
 
+		this.registryHolder = friendlyByteBuf.readWithCodec(RegistryAccess.RegistryHolder.NETWORK_CODEC);
+		this.dimensionType = (DimensionType)friendlyByteBuf.readWithCodec(DimensionType.CODEC).get();
+		this.dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, friendlyByteBuf.readResourceLocation());
+		this.seed = friendlyByteBuf.readLong();
+		this.maxPlayers = friendlyByteBuf.readVarInt();
 		this.chunkRadius = friendlyByteBuf.readVarInt();
 		this.reducedDebugInfo = friendlyByteBuf.readBoolean();
 		this.showDeathScreen = friendlyByteBuf.readBoolean();
+		this.isDebug = friendlyByteBuf.readBoolean();
+		this.isFlat = friendlyByteBuf.readBoolean();
 	}
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
 		friendlyByteBuf.writeInt(this.playerId);
-		int i = this.gameType.getId();
-		if (this.hardcore) {
-			i |= 8;
+		friendlyByteBuf.writeBoolean(this.hardcore);
+		friendlyByteBuf.writeByte(this.gameType.getId());
+		friendlyByteBuf.writeByte(this.previousGameType.getId());
+		friendlyByteBuf.writeVarInt(this.levels.size());
+
+		for (ResourceKey<Level> resourceKey : this.levels) {
+			friendlyByteBuf.writeResourceLocation(resourceKey.location());
 		}
 
-		friendlyByteBuf.writeByte(i);
-		friendlyByteBuf.writeInt(this.dimension.getId());
+		friendlyByteBuf.writeWithCodec(RegistryAccess.RegistryHolder.NETWORK_CODEC, this.registryHolder);
+		friendlyByteBuf.writeWithCodec(DimensionType.CODEC, () -> this.dimensionType);
+		friendlyByteBuf.writeResourceLocation(this.dimension.location());
 		friendlyByteBuf.writeLong(this.seed);
-		friendlyByteBuf.writeByte(this.maxPlayers);
-		friendlyByteBuf.writeUtf(this.levelType.getName());
+		friendlyByteBuf.writeVarInt(this.maxPlayers);
 		friendlyByteBuf.writeVarInt(this.chunkRadius);
 		friendlyByteBuf.writeBoolean(this.reducedDebugInfo);
 		friendlyByteBuf.writeBoolean(this.showDeathScreen);
+		friendlyByteBuf.writeBoolean(this.isDebug);
+		friendlyByteBuf.writeBoolean(this.isFlat);
 	}
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {
@@ -102,13 +142,28 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 	}
 
 	@Environment(EnvType.CLIENT)
-	public DimensionType getDimension() {
-		return this.dimension;
+	public GameType getPreviousGameType() {
+		return this.previousGameType;
 	}
 
 	@Environment(EnvType.CLIENT)
-	public LevelType getLevelType() {
-		return this.levelType;
+	public Set<ResourceKey<Level>> levels() {
+		return this.levels;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public RegistryAccess registryAccess() {
+		return this.registryHolder;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public DimensionType getDimensionType() {
+		return this.dimensionType;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public ResourceKey<Level> getDimension() {
+		return this.dimension;
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -124,5 +179,15 @@ public class ClientboundLoginPacket implements Packet<ClientGamePacketListener> 
 	@Environment(EnvType.CLIENT)
 	public boolean shouldShowDeathScreen() {
 		return this.showDeathScreen;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public boolean isDebug() {
+		return this.isDebug;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public boolean isFlat() {
+		return this.isFlat;
 	}
 }

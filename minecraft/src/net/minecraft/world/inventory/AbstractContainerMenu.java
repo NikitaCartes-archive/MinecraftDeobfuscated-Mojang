@@ -7,7 +7,12 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.CrashReportDetail;
+import net.minecraft.ReportedException;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
@@ -40,7 +45,7 @@ public abstract class AbstractContainerMenu {
 
 	protected static boolean stillValid(ContainerLevelAccess containerLevelAccess, Player player, Block block) {
 		return containerLevelAccess.evaluate(
-			(level, blockPos) -> level.getBlockState(blockPos).getBlock() != block
+			(level, blockPos) -> !level.getBlockState(blockPos).is(block)
 					? false
 					: player.distanceToSqr((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5) <= 64.0,
 			true
@@ -115,11 +120,11 @@ public abstract class AbstractContainerMenu {
 			ItemStack itemStack = ((Slot)this.slots.get(i)).getItem();
 			ItemStack itemStack2 = this.lastSlots.get(i);
 			if (!ItemStack.matches(itemStack2, itemStack)) {
-				itemStack2 = itemStack.copy();
-				this.lastSlots.set(i, itemStack2);
+				ItemStack itemStack3 = itemStack.copy();
+				this.lastSlots.set(i, itemStack3);
 
 				for (ContainerListener containerListener : this.containerListeners) {
-					containerListener.slotChanged(this, i, itemStack2);
+					containerListener.slotChanged(this, i, itemStack3);
 				}
 			}
 		}
@@ -148,6 +153,24 @@ public abstract class AbstractContainerMenu {
 	}
 
 	public ItemStack clicked(int i, int j, ClickType clickType, Player player) {
+		try {
+			return this.doClick(i, j, clickType, player);
+		} catch (Exception var8) {
+			CrashReport crashReport = CrashReport.forThrowable(var8, "Container click");
+			CrashReportCategory crashReportCategory = crashReport.addCategory("Click info");
+			crashReportCategory.setDetail(
+				"Menu Type", (CrashReportDetail<String>)(() -> this.menuType != null ? Registry.MENU.getKey(this.menuType).toString() : "<no type>")
+			);
+			crashReportCategory.setDetail("Menu Class", (CrashReportDetail<String>)(() -> this.getClass().getCanonicalName()));
+			crashReportCategory.setDetail("Slot Count", this.slots.size());
+			crashReportCategory.setDetail("Slot", i);
+			crashReportCategory.setDetail("Button", j);
+			crashReportCategory.setDetail("Type", clickType);
+			throw new ReportedException(crashReport);
+		}
+	}
+
+	private ItemStack doClick(int i, int j, ClickType clickType, Player player) {
 		ItemStack itemStack = ItemStack.EMPTY;
 		Inventory inventory = player.inventory;
 		if (clickType == ClickType.QUICK_CRAFT) {
@@ -308,7 +331,7 @@ public abstract class AbstractContainerMenu {
 					slot3.setChanged();
 				}
 			}
-		} else if (clickType == ClickType.SWAP && j >= 0 && j < 9) {
+		} else if (clickType == ClickType.SWAP) {
 			Slot slot3 = (Slot)this.slots.get(i);
 			ItemStack itemStack3x = inventory.getItem(j);
 			ItemStack itemStack2x = slot3.getItem();

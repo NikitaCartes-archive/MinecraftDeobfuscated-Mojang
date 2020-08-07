@@ -8,4 +8,6 @@ public interface WindowEventHandler {
 	void setWindowActive(boolean bl);
 
 	void resizeDisplay();
+
+	void cursorEntered();
 }

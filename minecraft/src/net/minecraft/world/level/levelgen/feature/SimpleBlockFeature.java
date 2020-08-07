@@ -1,30 +1,24 @@
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
 
 public class SimpleBlockFeature extends Feature<SimpleBlockConfiguration> {
-	public SimpleBlockFeature(Function<Dynamic<?>, ? extends SimpleBlockConfiguration> function) {
-		super(function);
+	public SimpleBlockFeature(Codec<SimpleBlockConfiguration> codec) {
+		super(codec);
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
-		Random random,
-		BlockPos blockPos,
-		SimpleBlockConfiguration simpleBlockConfiguration
+		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, SimpleBlockConfiguration simpleBlockConfiguration
 	) {
-		if (simpleBlockConfiguration.placeOn.contains(levelAccessor.getBlockState(blockPos.below()))
-			&& simpleBlockConfiguration.placeIn.contains(levelAccessor.getBlockState(blockPos))
-			&& simpleBlockConfiguration.placeUnder.contains(levelAccessor.getBlockState(blockPos.above()))) {
-			levelAccessor.setBlock(blockPos, simpleBlockConfiguration.toPlace, 2);
+		if (simpleBlockConfiguration.placeOn.contains(worldGenLevel.getBlockState(blockPos.below()))
+			&& simpleBlockConfiguration.placeIn.contains(worldGenLevel.getBlockState(blockPos))
+			&& simpleBlockConfiguration.placeUnder.contains(worldGenLevel.getBlockState(blockPos.above()))) {
+			worldGenLevel.setBlock(blockPos, simpleBlockConfiguration.toPlace, 2);
 			return true;
 		} else {
 			return false;

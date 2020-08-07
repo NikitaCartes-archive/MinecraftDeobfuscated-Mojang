@@ -351,7 +351,10 @@ public class AreaEffectCloud extends Entity {
 		this.radiusOnUse = compoundTag.getFloat("RadiusOnUse");
 		this.radiusPerTick = compoundTag.getFloat("RadiusPerTick");
 		this.setRadius(compoundTag.getFloat("Radius"));
-		this.ownerUUID = compoundTag.getUUID("OwnerUUID");
+		if (compoundTag.hasUUID("Owner")) {
+			this.ownerUUID = compoundTag.getUUID("Owner");
+		}
+
 		if (compoundTag.contains("Particle", 8)) {
 			try {
 				this.setParticle(ParticleArgument.readParticle(new StringReader(compoundTag.getString("Particle"))));
@@ -393,7 +396,7 @@ public class AreaEffectCloud extends Entity {
 		compoundTag.putFloat("Radius", this.getRadius());
 		compoundTag.putString("Particle", this.getParticle().writeToString());
 		if (this.ownerUUID != null) {
-			compoundTag.putUUID("OwnerUUID", this.ownerUUID);
+			compoundTag.putUUID("Owner", this.ownerUUID);
 		}
 
 		if (this.fixedColor) {

@@ -76,6 +76,10 @@ public class Sound implements Weighted<Sound> {
 		return this.attenuationDistance;
 	}
 
+	public String toString() {
+		return "Sound[" + this.location + "]";
+	}
+
 	@Environment(EnvType.CLIENT)
 	public static enum Type {
 		FILE("file"),

@@ -33,6 +33,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.PowerableMob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
@@ -44,7 +46,6 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.RangedAttackMob;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.WitherSkull;
@@ -248,7 +249,9 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 					? Explosion.BlockInteraction.DESTROY
 					: Explosion.BlockInteraction.NONE;
 				this.level.explode(this, this.getX(), this.getEyeY(), this.getZ(), 7.0F, false, blockInteraction);
-				this.level.globalLevelEvent(1023, new BlockPos(this), 0);
+				if (!this.isSilent()) {
+					this.level.globalLevelEvent(1023, this.blockPosition(), 0);
+				}
 			}
 
 			this.setInvulnerableTicks(i);
@@ -335,7 +338,7 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 					}
 
 					if (bl) {
-						this.level.levelEvent(null, 1022, new BlockPos(this), 0);
+						this.level.levelEvent(null, 1022, this.blockPosition(), 0);
 					}
 				}
 			}
@@ -417,7 +420,10 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 	}
 
 	private void performRangedAttack(int i, double d, double e, double f, boolean bl) {
-		this.level.levelEvent(null, 1024, new BlockPos(this), 0);
+		if (!this.isSilent()) {
+			this.level.levelEvent(null, 1024, this.blockPosition(), 0);
+		}
+
 		double g = this.getHeadX(i);
 		double h = this.getHeadY(i);
 		double j = this.getHeadZ(i);
@@ -425,6 +431,7 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 		double l = e - h;
 		double m = f - j;
 		WitherSkull witherSkull = new WitherSkull(this.level, this, k, l, m);
+		witherSkull.setOwner(this);
 		if (bl) {
 			witherSkull.setDangerous(true);
 		}
@@ -499,13 +506,12 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 		return false;
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(300.0);
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.6F);
-		this.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(40.0);
-		this.getAttribute(SharedMonsterAttributes.ARMOR).setBaseValue(4.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Monster.createMonsterAttributes()
+			.add(Attributes.MAX_HEALTH, 300.0)
+			.add(Attributes.MOVEMENT_SPEED, 0.6F)
+			.add(Attributes.FOLLOW_RANGE, 40.0)
+			.add(Attributes.ARMOR, 4.0);
 	}
 
 	@Environment(EnvType.CLIENT)

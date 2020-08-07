@@ -11,10 +11,13 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -23,14 +26,9 @@ import net.minecraft.world.phys.BlockHitResult;
 public class RedStoneOreBlock extends Block {
 	public static final BooleanProperty LIT = RedstoneTorchBlock.LIT;
 
-	public RedStoneOreBlock(Block.Properties properties) {
+	public RedStoneOreBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.defaultBlockState().setValue(LIT, Boolean.valueOf(false)));
-	}
-
-	@Override
-	public int getLightEmission(BlockState blockState) {
-		return blockState.getValue(LIT) ? super.getLightEmission(blockState) : 0;
 	}
 
 	@Override
@@ -51,11 +49,14 @@ public class RedStoneOreBlock extends Block {
 	) {
 		if (level.isClientSide) {
 			spawnParticles(level, blockPos);
-			return InteractionResult.SUCCESS;
 		} else {
 			interact(blockState, level, blockPos);
-			return InteractionResult.PASS;
 		}
+
+		ItemStack itemStack = player.getItemInHand(interactionHand);
+		return itemStack.getItem() instanceof BlockItem && new BlockPlaceContext(player, interactionHand, itemStack, blockHitResult).canPlace()
+			? InteractionResult.PASS
+			: InteractionResult.SUCCESS;
 	}
 
 	private static void interact(BlockState blockState, Level level, BlockPos blockPos) {
@@ -66,18 +67,23 @@ public class RedStoneOreBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+	public boolean isRandomlyTicking(BlockState blockState) {
+		return (Boolean)blockState.getValue(LIT);
+	}
+
+	@Override
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if ((Boolean)blockState.getValue(LIT)) {
 			serverLevel.setBlock(blockPos, blockState.setValue(LIT, Boolean.valueOf(false)), 3);
 		}
 	}
 
 	@Override
-	public void spawnAfterBreak(BlockState blockState, Level level, BlockPos blockPos, ItemStack itemStack) {
-		super.spawnAfterBreak(blockState, level, blockPos, itemStack);
+	public void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack) {
+		super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack);
 		if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, itemStack) == 0) {
-			int i = 1 + level.random.nextInt(5);
-			this.popExperience(level, blockPos, i);
+			int i = 1 + serverLevel.random.nextInt(5);
+			this.popExperience(serverLevel, blockPos, i);
 		}
 	}
 

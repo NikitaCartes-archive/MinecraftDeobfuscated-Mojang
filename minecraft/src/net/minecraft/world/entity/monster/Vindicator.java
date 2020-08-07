@@ -7,7 +7,6 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -24,6 +23,8 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.BreakDoorGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -33,7 +34,7 @@ import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
-import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
@@ -45,7 +46,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 
 public class Vindicator extends AbstractIllager {
 	private static final Predicate<Difficulty> DOOR_BREAKING_PREDICATE = difficulty -> difficulty == Difficulty.NORMAL || difficulty == Difficulty.HARD;
@@ -75,24 +76,20 @@ public class Vindicator extends AbstractIllager {
 
 	@Override
 	protected void customServerAiStep() {
-		if (!this.isNoAi()) {
-			PathNavigation pathNavigation = this.getNavigation();
-			if (pathNavigation instanceof GroundPathNavigation) {
-				boolean bl = ((ServerLevel)this.level).isRaided(new BlockPos(this));
-				((GroundPathNavigation)pathNavigation).setCanOpenDoors(bl);
-			}
+		if (!this.isNoAi() && GoalUtils.hasGroundPathNavigation(this)) {
+			boolean bl = ((ServerLevel)this.level).isRaided(this.blockPosition());
+			((GroundPathNavigation)this.getNavigation()).setCanOpenDoors(bl);
 		}
 
 		super.customServerAiStep();
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.35F);
-		this.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(12.0);
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(24.0);
-		this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(5.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Monster.createMonsterAttributes()
+			.add(Attributes.MOVEMENT_SPEED, 0.35F)
+			.add(Attributes.FOLLOW_RANGE, 12.0)
+			.add(Attributes.MAX_HEALTH, 24.0)
+			.add(Attributes.ATTACK_DAMAGE, 5.0);
 	}
 
 	@Override
@@ -129,13 +126,13 @@ public class Vindicator extends AbstractIllager {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		SpawnGroupData spawnGroupData2 = super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		SpawnGroupData spawnGroupData2 = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 		((GroundPathNavigation)this.getNavigation()).setCanOpenDoors(true);
 		this.populateDefaultEquipmentSlots(difficultyInstance);
 		this.populateDefaultEquipmentEnchantments(difficultyInstance);

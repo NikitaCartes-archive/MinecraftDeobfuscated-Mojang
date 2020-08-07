@@ -13,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -34,7 +35,7 @@ public class StemBlock extends BushBlock implements BonemealableBlock {
 	};
 	private final StemGrownBlock fruit;
 
-	protected StemBlock(StemGrownBlock stemGrownBlock, Block.Properties properties) {
+	protected StemBlock(StemGrownBlock stemGrownBlock, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.fruit = stemGrownBlock;
 		this.registerDefaultState(this.stateDefinition.any().setValue(AGE, Integer.valueOf(0)));
@@ -47,12 +48,11 @@ public class StemBlock extends BushBlock implements BonemealableBlock {
 
 	@Override
 	protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return blockState.getBlock() == Blocks.FARMLAND;
+		return blockState.is(Blocks.FARMLAND);
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		super.tick(blockState, serverLevel, blockPos, random);
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if (serverLevel.getRawBrightness(blockPos, 0) >= 9) {
 			float f = CropBlock.getGrowthSpeed(this, serverLevel, blockPos);
 			if (random.nextInt((int)(25.0F / f) + 1) == 0) {
@@ -63,9 +63,15 @@ public class StemBlock extends BushBlock implements BonemealableBlock {
 				} else {
 					Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
 					BlockPos blockPos2 = blockPos.relative(direction);
-					Block block = serverLevel.getBlockState(blockPos2.below()).getBlock();
+					BlockState blockState2 = serverLevel.getBlockState(blockPos2.below());
 					if (serverLevel.getBlockState(blockPos2).isAir()
-						&& (block == Blocks.FARMLAND || block == Blocks.DIRT || block == Blocks.COARSE_DIRT || block == Blocks.PODZOL || block == Blocks.GRASS_BLOCK)) {
+						&& (
+							blockState2.is(Blocks.FARMLAND)
+								|| blockState2.is(Blocks.DIRT)
+								|| blockState2.is(Blocks.COARSE_DIRT)
+								|| blockState2.is(Blocks.PODZOL)
+								|| blockState2.is(Blocks.GRASS_BLOCK)
+						)) {
 						serverLevel.setBlockAndUpdate(blockPos2, this.fruit.defaultBlockState());
 						serverLevel.setBlockAndUpdate(blockPos, this.fruit.getAttachedStem().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, direction));
 					}
@@ -107,7 +113,7 @@ public class StemBlock extends BushBlock implements BonemealableBlock {
 		BlockState blockState2 = blockState.setValue(AGE, Integer.valueOf(i));
 		serverLevel.setBlock(blockPos, blockState2, 2);
 		if (i == 7) {
-			blockState2.tick(serverLevel, blockPos, serverLevel.random);
+			blockState2.randomTick(serverLevel, blockPos, serverLevel.random);
 		}
 	}
 

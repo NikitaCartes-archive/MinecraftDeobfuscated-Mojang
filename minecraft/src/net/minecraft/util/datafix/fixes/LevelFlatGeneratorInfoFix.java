@@ -5,9 +5,9 @@ import com.google.common.base.Splitter;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.DataFixUtils;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
+import com.mojang.serialization.Dynamic;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,7 +34,9 @@ public class LevelFlatGeneratorInfoFix extends DataFix {
 
 	private Dynamic<?> fix(Dynamic<?> dynamic) {
 		return dynamic.get("generatorName").asString("").equalsIgnoreCase("flat")
-			? dynamic.update("generatorOptions", dynamicx -> DataFixUtils.orElse(dynamicx.asString().map(this::fixString).map(dynamicx::createString), dynamicx))
+			? dynamic.update(
+				"generatorOptions", dynamicx -> DataFixUtils.orElse(dynamicx.asString().map(this::fixString).map(dynamicx::createString).result(), dynamicx)
+			)
 			: dynamic;
 	}
 

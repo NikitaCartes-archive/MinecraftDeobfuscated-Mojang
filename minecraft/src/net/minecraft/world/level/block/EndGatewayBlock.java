@@ -10,11 +10,12 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 
 public class EndGatewayBlock extends BaseEntityBlock {
-	protected EndGatewayBlock(Block.Properties properties) {
+	protected EndGatewayBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 
@@ -31,12 +32,12 @@ public class EndGatewayBlock extends BaseEntityBlock {
 			int i = ((TheEndGatewayBlockEntity)blockEntity).getParticleAmount();
 
 			for (int j = 0; j < i; j++) {
-				double d = (double)blockPos.getX() + (double)random.nextFloat();
-				double e = (double)blockPos.getY() + (double)random.nextFloat();
-				double f = (double)blockPos.getZ() + (double)random.nextFloat();
-				double g = ((double)random.nextFloat() - 0.5) * 0.5;
-				double h = ((double)random.nextFloat() - 0.5) * 0.5;
-				double k = ((double)random.nextFloat() - 0.5) * 0.5;
+				double d = (double)blockPos.getX() + random.nextDouble();
+				double e = (double)blockPos.getY() + random.nextDouble();
+				double f = (double)blockPos.getZ() + random.nextDouble();
+				double g = (random.nextDouble() - 0.5) * 0.5;
+				double h = (random.nextDouble() - 0.5) * 0.5;
+				double k = (random.nextDouble() - 0.5) * 0.5;
 				int l = random.nextInt(2) * 2 - 1;
 				if (random.nextBoolean()) {
 					f = (double)blockPos.getZ() + 0.5 + 0.25 * (double)l;

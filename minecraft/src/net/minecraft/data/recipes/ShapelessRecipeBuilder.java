@@ -70,7 +70,7 @@ public class ShapelessRecipeBuilder {
 		return this;
 	}
 
-	public ShapelessRecipeBuilder unlocks(String string, CriterionTriggerInstance criterionTriggerInstance) {
+	public ShapelessRecipeBuilder unlockedBy(String string, CriterionTriggerInstance criterionTriggerInstance) {
 		this.advancement.addCriterion(string, criterionTriggerInstance);
 		return this;
 	}
@@ -97,7 +97,7 @@ public class ShapelessRecipeBuilder {
 		this.ensureValid(resourceLocation);
 		this.advancement
 			.parent(new ResourceLocation("recipes/root"))
-			.addCriterion("has_the_recipe", new RecipeUnlockedTrigger.TriggerInstance(resourceLocation))
+			.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(resourceLocation))
 			.rewards(AdvancementRewards.Builder.recipe(resourceLocation))
 			.requirements(RequirementsStrategy.OR);
 		consumer.accept(

@@ -1,6 +1,7 @@
 package net.minecraft.network.protocol.game;
 
 import java.io.IOException;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
@@ -23,6 +24,19 @@ public class ClientboundMoveEntityPacket implements Packet<ClientGamePacketListe
 
 	public static long entityToPacket(double d) {
 		return Mth.lfloor(d * 4096.0);
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static double packetToEntity(long l) {
+		return (double)l / 4096.0;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Vec3 updateEntityPosition(Vec3 vec3) {
+		double d = this.xa == 0 ? vec3.x : packetToEntity(entityToPacket(vec3.x) + (long)this.xa);
+		double e = this.ya == 0 ? vec3.y : packetToEntity(entityToPacket(vec3.y) + (long)this.ya);
+		double f = this.za == 0 ? vec3.z : packetToEntity(entityToPacket(vec3.z) + (long)this.za);
+		return new Vec3(d, e, f);
 	}
 
 	public static Vec3 packetToEntity(long l, long m, long n) {
@@ -54,24 +68,10 @@ public class ClientboundMoveEntityPacket implements Packet<ClientGamePacketListe
 		return "Entity_" + super.toString();
 	}
 
+	@Nullable
 	@Environment(EnvType.CLIENT)
 	public Entity getEntity(Level level) {
 		return level.getEntity(this.entityId);
-	}
-
-	@Environment(EnvType.CLIENT)
-	public short getXa() {
-		return this.xa;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public short getYa() {
-		return this.ya;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public short getZa() {
-		return this.za;
 	}
 
 	@Environment(EnvType.CLIENT)

@@ -8,7 +8,6 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.ProfileLookupCallback;
 import com.mojang.authlib.yggdrasil.ProfileNotFoundException;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -18,10 +17,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import javax.annotation.Nullable;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.storage.LevelResource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -65,7 +66,7 @@ public class OldUsersConverter {
 			if (userBanList.getFile().exists()) {
 				try {
 					userBanList.load();
-				} catch (FileNotFoundException var6) {
+				} catch (IOException var6) {
 					LOGGER.warn("Could not load existing file {}", userBanList.getFile().getName(), var6);
 				}
 			}
@@ -120,7 +121,7 @@ public class OldUsersConverter {
 			if (ipBanList.getFile().exists()) {
 				try {
 					ipBanList.load();
-				} catch (FileNotFoundException var11) {
+				} catch (IOException var11) {
 					LOGGER.warn("Could not load existing file {}", ipBanList.getFile().getName(), var11);
 				}
 			}
@@ -156,7 +157,7 @@ public class OldUsersConverter {
 			if (serverOpList.getFile().exists()) {
 				try {
 					serverOpList.load();
-				} catch (FileNotFoundException var6) {
+				} catch (IOException var6) {
 					LOGGER.warn("Could not load existing file {}", serverOpList.getFile().getName(), var6);
 				}
 			}
@@ -200,7 +201,7 @@ public class OldUsersConverter {
 			if (userWhiteList.getFile().exists()) {
 				try {
 					userWhiteList.load();
-				} catch (FileNotFoundException var6) {
+				} catch (IOException var6) {
 					LOGGER.warn("Could not load existing file {}", userWhiteList.getFile().getName(), var6);
 				}
 			}
@@ -238,11 +239,12 @@ public class OldUsersConverter {
 		}
 	}
 
-	public static String convertMobOwnerIfNecessary(MinecraftServer minecraftServer, String string) {
+	@Nullable
+	public static UUID convertMobOwnerIfNecessary(MinecraftServer minecraftServer, String string) {
 		if (!StringUtil.isNullOrEmpty(string) && string.length() <= 16) {
 			GameProfile gameProfile = minecraftServer.getProfileCache().get(string);
 			if (gameProfile != null && gameProfile.getId() != null) {
-				return gameProfile.getId().toString();
+				return gameProfile.getId();
 			} else if (!minecraftServer.isSingleplayer() && minecraftServer.usesAuthentication()) {
 				final List<GameProfile> list = Lists.<GameProfile>newArrayList();
 				ProfileLookupCallback profileLookupCallback = new ProfileLookupCallback() {
@@ -258,12 +260,16 @@ public class OldUsersConverter {
 					}
 				};
 				lookupPlayers(minecraftServer, Lists.<String>newArrayList(string), profileLookupCallback);
-				return !list.isEmpty() && ((GameProfile)list.get(0)).getId() != null ? ((GameProfile)list.get(0)).getId().toString() : "";
+				return !list.isEmpty() && ((GameProfile)list.get(0)).getId() != null ? ((GameProfile)list.get(0)).getId() : null;
 			} else {
-				return Player.createPlayerUUID(new GameProfile(null, string)).toString();
+				return Player.createPlayerUUID(new GameProfile(null, string));
 			}
 		} else {
-			return string;
+			try {
+				return UUID.fromString(string);
+			} catch (IllegalArgumentException var5) {
+				return null;
+			}
 		}
 	}
 
@@ -421,9 +427,7 @@ public class OldUsersConverter {
 	}
 
 	private static File getWorldPlayersDirectory(MinecraftServer minecraftServer) {
-		String string = minecraftServer.getLevelIdName();
-		File file = new File(string);
-		return new File(file, "players");
+		return minecraftServer.getWorldPath(LevelResource.PLAYER_OLD_DATA_DIR).toFile();
 	}
 
 	private static void renameOldFile(File file) {

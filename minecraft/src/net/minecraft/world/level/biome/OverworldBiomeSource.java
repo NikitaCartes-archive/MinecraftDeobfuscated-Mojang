@@ -1,13 +1,32 @@
 package net.minecraft.world.level.biome;
 
-import com.google.common.collect.ImmutableSet;
-import java.util.Set;
+import com.google.common.collect.ImmutableList;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.Lifecycle;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.RegistryLookupCodec;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.newbiome.layer.Layer;
 import net.minecraft.world.level.newbiome.layer.Layers;
 
 public class OverworldBiomeSource extends BiomeSource {
+	public static final Codec<OverworldBiomeSource> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					Codec.LONG.fieldOf("seed").stable().forGetter(overworldBiomeSource -> overworldBiomeSource.seed),
+					Codec.BOOL
+						.optionalFieldOf("legacy_biome_init_layer", Boolean.valueOf(false), Lifecycle.stable())
+						.forGetter(overworldBiomeSource -> overworldBiomeSource.legacyBiomeInitLayer),
+					Codec.BOOL.fieldOf("large_biomes").orElse(false).stable().forGetter(overworldBiomeSource -> overworldBiomeSource.largeBiomes),
+					RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(overworldBiomeSource -> overworldBiomeSource.biomes)
+				)
+				.apply(instance, instance.stable(OverworldBiomeSource::new))
+	);
 	private final Layer noiseBiomeLayer;
-	private static final Set<Biome> POSSIBLE_BIOMES = ImmutableSet.of(
+	private static final List<ResourceKey<Biome>> POSSIBLE_BIOMES = ImmutableList.of(
 		Biomes.OCEAN,
 		Biomes.PLAINS,
 		Biomes.DESERT,
@@ -75,16 +94,33 @@ public class OverworldBiomeSource extends BiomeSource {
 		Biomes.MODIFIED_WOODED_BADLANDS_PLATEAU,
 		Biomes.MODIFIED_BADLANDS_PLATEAU
 	);
+	private final long seed;
+	private final boolean legacyBiomeInitLayer;
+	private final boolean largeBiomes;
+	private final Registry<Biome> biomes;
 
-	public OverworldBiomeSource(OverworldBiomeSourceSettings overworldBiomeSourceSettings) {
-		super(POSSIBLE_BIOMES);
-		this.noiseBiomeLayer = Layers.getDefaultLayer(
-			overworldBiomeSourceSettings.getSeed(), overworldBiomeSourceSettings.getGeneratorType(), overworldBiomeSourceSettings.getGeneratorSettings()
-		);
+	public OverworldBiomeSource(long l, boolean bl, boolean bl2, Registry<Biome> registry) {
+		super(POSSIBLE_BIOMES.stream().map(resourceKey -> () -> registry.getOrThrow(resourceKey)));
+		this.seed = l;
+		this.legacyBiomeInitLayer = bl;
+		this.largeBiomes = bl2;
+		this.biomes = registry;
+		this.noiseBiomeLayer = Layers.getDefaultLayer(l, bl, bl2 ? 6 : 4, 4);
+	}
+
+	@Override
+	protected Codec<? extends BiomeSource> codec() {
+		return CODEC;
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public BiomeSource withSeed(long l) {
+		return new OverworldBiomeSource(l, this.legacyBiomeInitLayer, this.largeBiomes, this.biomes);
 	}
 
 	@Override
 	public Biome getNoiseBiome(int i, int j, int k) {
-		return this.noiseBiomeLayer.get(i, k);
+		return this.noiseBiomeLayer.get(this.biomes, i, k);
 	}
 }

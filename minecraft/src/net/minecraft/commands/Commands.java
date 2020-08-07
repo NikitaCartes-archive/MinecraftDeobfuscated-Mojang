@@ -12,21 +12,26 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.gametest.framework.TestCommand;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundCommandsPacket;
 import net.minecraft.server.commands.AdvancementCommands;
+import net.minecraft.server.commands.AttributeCommand;
 import net.minecraft.server.commands.BanIpCommands;
 import net.minecraft.server.commands.BanListCommands;
 import net.minecraft.server.commands.BanPlayerCommands;
@@ -53,6 +58,7 @@ import net.minecraft.server.commands.HelpCommand;
 import net.minecraft.server.commands.KickCommand;
 import net.minecraft.server.commands.KillCommand;
 import net.minecraft.server.commands.ListPlayersCommand;
+import net.minecraft.server.commands.LocateBiomeCommand;
 import net.minecraft.server.commands.LocateCommand;
 import net.minecraft.server.commands.LootCommand;
 import net.minecraft.server.commands.MsgCommand;
@@ -101,8 +107,9 @@ public class Commands {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private final CommandDispatcher<CommandSourceStack> dispatcher = new CommandDispatcher<>();
 
-	public Commands(boolean bl) {
+	public Commands(Commands.CommandSelection commandSelection) {
 		AdvancementCommands.register(this.dispatcher);
+		AttributeCommand.register(this.dispatcher);
 		ExecuteCommand.register(this.dispatcher);
 		BossBarCommands.register(this.dispatcher);
 		ClearInventoryCommands.register(this.dispatcher);
@@ -127,18 +134,18 @@ public class Commands {
 		KillCommand.register(this.dispatcher);
 		ListPlayersCommand.register(this.dispatcher);
 		LocateCommand.register(this.dispatcher);
+		LocateBiomeCommand.register(this.dispatcher);
 		LootCommand.register(this.dispatcher);
 		MsgCommand.register(this.dispatcher);
 		ParticleCommand.register(this.dispatcher);
 		PlaySoundCommand.register(this.dispatcher);
-		PublishCommand.register(this.dispatcher);
 		ReloadCommand.register(this.dispatcher);
 		RecipeCommand.register(this.dispatcher);
 		ReplaceItemCommand.register(this.dispatcher);
 		SayCommand.register(this.dispatcher);
 		ScheduleCommand.register(this.dispatcher);
 		ScoreboardCommand.register(this.dispatcher);
-		SeedCommand.register(this.dispatcher);
+		SeedCommand.register(this.dispatcher, commandSelection != Commands.CommandSelection.INTEGRATED);
 		SetBlockCommand.register(this.dispatcher);
 		SetSpawnCommand.register(this.dispatcher);
 		SetWorldSpawnCommand.register(this.dispatcher);
@@ -160,7 +167,7 @@ public class Commands {
 			TestCommand.register(this.dispatcher);
 		}
 
-		if (bl) {
+		if (commandSelection.includeDedicated) {
 			BanIpCommands.register(this.dispatcher);
 			BanListCommands.register(this.dispatcher);
 			BanPlayerCommands.register(this.dispatcher);
@@ -176,13 +183,17 @@ public class Commands {
 			WhitelistCommand.register(this.dispatcher);
 		}
 
+		if (commandSelection.includeIntegrated) {
+			PublishCommand.register(this.dispatcher);
+		}
+
 		this.dispatcher
 			.findAmbiguities(
 				(commandNode, commandNode2, commandNode3, collection) -> LOGGER.warn(
 						"Ambiguity between arguments {} and {} with inputs: {}", this.dispatcher.getPath(commandNode2), this.dispatcher.getPath(commandNode3), collection
 					)
 			);
-		this.dispatcher.setConsumer((commandContext, blx, i) -> commandContext.getSource().onCommandComplete(commandContext, blx, i));
+		this.dispatcher.setConsumer((commandContext, bl, i) -> commandContext.getSource().onCommandComplete(commandContext, bl, i));
 	}
 
 	public int performCommand(CommandSourceStack commandSourceStack, String string) {
@@ -203,32 +214,32 @@ public class Commands {
 			commandSourceStack.sendFailure(ComponentUtils.fromMessage(var14.getRawMessage()));
 			if (var14.getInput() != null && var14.getCursor() >= 0) {
 				int i = Math.min(var14.getInput().length(), var14.getCursor());
-				Component component = new TextComponent("")
+				MutableComponent mutableComponent = new TextComponent("")
 					.withStyle(ChatFormatting.GRAY)
-					.withStyle(style -> style.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, string)));
+					.withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, string)));
 				if (i > 10) {
-					component.append("...");
+					mutableComponent.append("...");
 				}
 
-				component.append(var14.getInput().substring(Math.max(0, i - 10), i));
+				mutableComponent.append(var14.getInput().substring(Math.max(0, i - 10), i));
 				if (i < var14.getInput().length()) {
-					Component component2 = new TextComponent(var14.getInput().substring(i)).withStyle(new ChatFormatting[]{ChatFormatting.RED, ChatFormatting.UNDERLINE});
-					component.append(component2);
+					Component component = new TextComponent(var14.getInput().substring(i)).withStyle(new ChatFormatting[]{ChatFormatting.RED, ChatFormatting.UNDERLINE});
+					mutableComponent.append(component);
 				}
 
-				component.append(new TranslatableComponent("command.context.here").withStyle(new ChatFormatting[]{ChatFormatting.RED, ChatFormatting.ITALIC}));
-				commandSourceStack.sendFailure(component);
+				mutableComponent.append(new TranslatableComponent("command.context.here").withStyle(new ChatFormatting[]{ChatFormatting.RED, ChatFormatting.ITALIC}));
+				commandSourceStack.sendFailure(mutableComponent);
 			}
 
 			return 0;
 		} catch (Exception var15) {
-			Component component3 = new TextComponent(var15.getMessage() == null ? var15.getClass().getName() : var15.getMessage());
+			MutableComponent mutableComponent2 = new TextComponent(var15.getMessage() == null ? var15.getClass().getName() : var15.getMessage());
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.error("Command exception: {}", string, var15);
 				StackTraceElement[] stackTraceElements = var15.getStackTrace();
 
 				for (int j = 0; j < Math.min(stackTraceElements.length, 3); j++) {
-					component3.append("\n\n")
+					mutableComponent2.append("\n\n")
 						.append(stackTraceElements[j].getMethodName())
 						.append("\n ")
 						.append(stackTraceElements[j].getFileName())
@@ -238,7 +249,7 @@ public class Commands {
 			}
 
 			commandSourceStack.sendFailure(
-				new TranslatableComponent("command.failed").withStyle(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component3)))
+				new TranslatableComponent("command.failed").withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, mutableComponent2)))
 			);
 			if (SharedConstants.IS_RUNNING_IN_IDE) {
 				commandSourceStack.sendFailure(new TextComponent(Util.describeError(var15)));
@@ -329,6 +340,34 @@ public class Commands {
 			return parseResults.getContext().getRange().isEmpty()
 				? CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().createWithContext(parseResults.getReader())
 				: CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parseResults.getReader());
+		}
+	}
+
+	public static void validate() {
+		RootCommandNode<CommandSourceStack> rootCommandNode = new Commands(Commands.CommandSelection.ALL).getDispatcher().getRoot();
+		Set<ArgumentType<?>> set = ArgumentTypes.findUsedArgumentTypes(rootCommandNode);
+		Set<ArgumentType<?>> set2 = (Set<ArgumentType<?>>)set.stream()
+			.filter(argumentType -> !ArgumentTypes.isTypeRegistered(argumentType))
+			.collect(Collectors.toSet());
+		if (!set2.isEmpty()) {
+			LOGGER.warn(
+				"Missing type registration for following arguments:\n {}", set2.stream().map(argumentType -> "\t" + argumentType).collect(Collectors.joining(",\n"))
+			);
+			throw new IllegalStateException("Unregistered argument types");
+		}
+	}
+
+	public static enum CommandSelection {
+		ALL(true, true),
+		DEDICATED(false, true),
+		INTEGRATED(true, false);
+
+		private final boolean includeIntegrated;
+		private final boolean includeDedicated;
+
+		private CommandSelection(boolean bl, boolean bl2) {
+			this.includeIntegrated = bl;
+			this.includeDedicated = bl2;
 		}
 	}
 

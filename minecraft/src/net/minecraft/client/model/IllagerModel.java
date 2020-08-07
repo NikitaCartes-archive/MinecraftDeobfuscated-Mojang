@@ -19,7 +19,6 @@ public class IllagerModel<T extends AbstractIllager> extends ListModel<T> implem
 	private final ModelPart rightLeg;
 	private final ModelPart rightArm;
 	private final ModelPart leftArm;
-	private float itemUseTicks;
 
 	public IllagerModel(float f, float g, int i, int j) {
 		this.head = new ModelPart(this).setTexSize(i, j);
@@ -102,28 +101,11 @@ public class IllagerModel<T extends AbstractIllager> extends ListModel<T> implem
 
 		AbstractIllager.IllagerArmPose illagerArmPose = abstractIllager.getArmPose();
 		if (illagerArmPose == AbstractIllager.IllagerArmPose.ATTACKING) {
-			float k = Mth.sin(this.attackTime * (float) Math.PI);
-			float l = Mth.sin((1.0F - (1.0F - this.attackTime) * (1.0F - this.attackTime)) * (float) Math.PI);
-			this.rightArm.zRot = 0.0F;
-			this.leftArm.zRot = 0.0F;
-			this.rightArm.yRot = (float) (Math.PI / 20);
-			this.leftArm.yRot = (float) (-Math.PI / 20);
-			if (abstractIllager.getMainArm() == HumanoidArm.RIGHT) {
-				this.rightArm.xRot = -1.8849558F + Mth.cos(h * 0.09F) * 0.15F;
-				this.leftArm.xRot = -0.0F + Mth.cos(h * 0.19F) * 0.5F;
-				this.rightArm.xRot += k * 2.2F - l * 0.4F;
-				this.leftArm.xRot += k * 1.2F - l * 0.4F;
+			if (abstractIllager.getMainHandItem().isEmpty()) {
+				AnimationUtils.animateZombieArms(this.leftArm, this.rightArm, true, this.attackTime, h);
 			} else {
-				this.rightArm.xRot = -0.0F + Mth.cos(h * 0.19F) * 0.5F;
-				this.leftArm.xRot = -1.8849558F + Mth.cos(h * 0.09F) * 0.15F;
-				this.rightArm.xRot += k * 1.2F - l * 0.4F;
-				this.leftArm.xRot += k * 2.2F - l * 0.4F;
+				AnimationUtils.swingWeaponDown(this.rightArm, this.leftArm, abstractIllager, this.attackTime, h);
 			}
-
-			this.rightArm.zRot = this.rightArm.zRot + Mth.cos(h * 0.09F) * 0.05F + 0.05F;
-			this.leftArm.zRot = this.leftArm.zRot - (Mth.cos(h * 0.09F) * 0.05F + 0.05F);
-			this.rightArm.xRot = this.rightArm.xRot + Mth.sin(h * 0.067F) * 0.05F;
-			this.leftArm.xRot = this.leftArm.xRot - Mth.sin(h * 0.067F) * 0.05F;
 		} else if (illagerArmPose == AbstractIllager.IllagerArmPose.SPELLCASTING) {
 			this.rightArm.z = 0.0F;
 			this.rightArm.x = -5.0F;
@@ -142,17 +124,9 @@ public class IllagerModel<T extends AbstractIllager> extends ListModel<T> implem
 			this.leftArm.yRot = this.head.yRot - 0.4F;
 			this.leftArm.zRot = (float) (Math.PI / 2);
 		} else if (illagerArmPose == AbstractIllager.IllagerArmPose.CROSSBOW_HOLD) {
-			this.rightArm.yRot = -0.3F + this.head.yRot;
-			this.leftArm.yRot = 0.6F + this.head.yRot;
-			this.rightArm.xRot = (float) (-Math.PI / 2) + this.head.xRot + 0.1F;
-			this.leftArm.xRot = -1.5F + this.head.xRot;
+			AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, true);
 		} else if (illagerArmPose == AbstractIllager.IllagerArmPose.CROSSBOW_CHARGE) {
-			this.rightArm.yRot = -0.8F;
-			this.rightArm.xRot = -0.97079635F;
-			this.leftArm.xRot = -0.97079635F;
-			float k = Mth.clamp(this.itemUseTicks, 0.0F, 25.0F);
-			this.leftArm.yRot = Mth.lerp(k / 25.0F, 0.4F, 0.85F);
-			this.leftArm.xRot = Mth.lerp(k / 25.0F, this.leftArm.xRot, (float) (-Math.PI / 2));
+			AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, abstractIllager, true);
 		} else if (illagerArmPose == AbstractIllager.IllagerArmPose.CELEBRATING) {
 			this.rightArm.z = 0.0F;
 			this.rightArm.x = -5.0F;
@@ -170,11 +144,6 @@ public class IllagerModel<T extends AbstractIllager> extends ListModel<T> implem
 		this.arms.visible = bl;
 		this.leftArm.visible = !bl;
 		this.rightArm.visible = !bl;
-	}
-
-	public void prepareMobModel(T abstractIllager, float f, float g, float h) {
-		this.itemUseTicks = (float)abstractIllager.getTicksUsingItem();
-		super.prepareMobModel(abstractIllager, f, g, h);
 	}
 
 	private ModelPart getArm(HumanoidArm humanoidArm) {

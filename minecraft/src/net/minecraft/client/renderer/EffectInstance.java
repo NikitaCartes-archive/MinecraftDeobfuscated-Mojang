@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.shaders.AbstractUniform;
 import com.mojang.blaze3d.shaders.BlendMode;
@@ -14,15 +13,17 @@ import com.mojang.blaze3d.shaders.Program;
 import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.function.IntSupplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ChainedJsonException;
 import net.minecraft.server.packs.resources.Resource;
@@ -38,7 +39,7 @@ public class EffectInstance implements Effect, AutoCloseable {
 	private static final AbstractUniform DUMMY_UNIFORM = new AbstractUniform();
 	private static EffectInstance lastAppliedEffect;
 	private static int lastProgramId = -1;
-	private final Map<String, Object> samplerMap = Maps.<String, Object>newHashMap();
+	private final Map<String, IntSupplier> samplerMap = Maps.<String, IntSupplier>newHashMap();
 	private final List<String> samplerNames = Lists.<String>newArrayList();
 	private final List<Integer> samplerLocations = Lists.<Integer>newArrayList();
 	private final List<Uniform> uniforms = Lists.<Uniform>newArrayList();
@@ -46,7 +47,6 @@ public class EffectInstance implements Effect, AutoCloseable {
 	private final Map<String, Uniform> uniformMap = Maps.<String, Uniform>newHashMap();
 	private final int programId;
 	private final String name;
-	private final boolean cull;
 	private boolean dirty;
 	private final BlendMode blend;
 	private final List<Integer> attributes;
@@ -121,7 +121,6 @@ public class EffectInstance implements Effect, AutoCloseable {
 			}
 
 			this.blend = parseBlendNode(GsonHelper.getAsJsonObject(jsonObject, "blend", null));
-			this.cull = GsonHelper.getAsBoolean(jsonObject, "cull", true);
 			this.vertexProgram = getOrCreate(resourceManager, Program.Type.VERTEX, string2);
 			this.fragmentProgram = getOrCreate(resourceManager, Program.Type.FRAGMENT, string3);
 			this.programId = ProgramManager.createProgram();
@@ -134,8 +133,15 @@ public class EffectInstance implements Effect, AutoCloseable {
 				}
 			}
 		} catch (Exception var25) {
+			String string3x;
+			if (resource != null) {
+				string3x = " (" + resource.getSourceName() + ")";
+			} else {
+				string3x = "";
+			}
+
 			ChainedJsonException chainedJsonException4 = ChainedJsonException.forException(var25);
-			chainedJsonException4.setFilenameAndFlush(resourceLocation.getPath());
+			chainedJsonException4.setFilenameAndFlush(resourceLocation.getPath() + string3x);
 			throw chainedJsonException4;
 		} finally {
 			IOUtils.closeQuietly(resource);
@@ -151,7 +157,7 @@ public class EffectInstance implements Effect, AutoCloseable {
 			Resource resource = resourceManager.getResource(resourceLocation);
 
 			try {
-				program = Program.compileShader(type, string, resource.getInputStream());
+				program = Program.compileShader(type, string, resource.getInputStream(), resource.getSourceName());
 			} finally {
 				IOUtils.closeQuietly(resource);
 			}
@@ -235,6 +241,7 @@ public class EffectInstance implements Effect, AutoCloseable {
 		for (int i = 0; i < this.samplerLocations.size(); i++) {
 			if (this.samplerMap.get(this.samplerNames.get(i)) != null) {
 				GlStateManager._activeTexture(33984 + i);
+				GlStateManager._disableTexture();
 				GlStateManager._bindTexture(0);
 			}
 		}
@@ -250,29 +257,16 @@ public class EffectInstance implements Effect, AutoCloseable {
 			lastProgramId = this.programId;
 		}
 
-		if (this.cull) {
-			RenderSystem.enableCull();
-		} else {
-			RenderSystem.disableCull();
-		}
-
 		for (int i = 0; i < this.samplerLocations.size(); i++) {
-			if (this.samplerMap.get(this.samplerNames.get(i)) != null) {
+			String string = (String)this.samplerNames.get(i);
+			IntSupplier intSupplier = (IntSupplier)this.samplerMap.get(string);
+			if (intSupplier != null) {
 				RenderSystem.activeTexture(33984 + i);
 				RenderSystem.enableTexture();
-				Object object = this.samplerMap.get(this.samplerNames.get(i));
-				int j = -1;
-				if (object instanceof RenderTarget) {
-					j = ((RenderTarget)object).colorTextureId;
-				} else if (object instanceof AbstractTexture) {
-					j = ((AbstractTexture)object).getId();
-				} else if (object instanceof Integer) {
-					j = (Integer)object;
-				}
-
+				int j = intSupplier.getAsInt();
 				if (j != -1) {
 					RenderSystem.bindTexture(j);
-					Uniform.uploadInteger(Uniform.glGetUniformLocation(this.programId, (CharSequence)this.samplerNames.get(i)), i);
+					Uniform.uploadInteger((Integer)this.samplerLocations.get(i), i);
 				}
 			}
 		}
@@ -301,32 +295,33 @@ public class EffectInstance implements Effect, AutoCloseable {
 
 	private void updateLocations() {
 		RenderSystem.assertThread(RenderSystem::isOnRenderThread);
-		int i = 0;
+		IntList intList = new IntArrayList();
 
-		for (int j = 0; i < this.samplerNames.size(); j++) {
+		for (int i = 0; i < this.samplerNames.size(); i++) {
 			String string = (String)this.samplerNames.get(i);
-			int k = Uniform.glGetUniformLocation(this.programId, string);
-			if (k == -1) {
-				LOGGER.warn("Shader {}could not find sampler named {} in the specified shader program.", this.name, string);
+			int j = Uniform.glGetUniformLocation(this.programId, string);
+			if (j == -1) {
+				LOGGER.warn("Shader {} could not find sampler named {} in the specified shader program.", this.name, string);
 				this.samplerMap.remove(string);
-				this.samplerNames.remove(j);
-				j--;
+				intList.add(i);
 			} else {
-				this.samplerLocations.add(k);
+				this.samplerLocations.add(j);
 			}
+		}
 
-			i++;
+		for (int ix = intList.size() - 1; ix >= 0; ix--) {
+			this.samplerNames.remove(intList.getInt(ix));
 		}
 
 		for (Uniform uniform : this.uniforms) {
-			String string = uniform.getName();
-			int k = Uniform.glGetUniformLocation(this.programId, string);
+			String string2 = uniform.getName();
+			int k = Uniform.glGetUniformLocation(this.programId, string2);
 			if (k == -1) {
-				LOGGER.warn("Could not find uniform named {} in the specified shader program.", string);
+				LOGGER.warn("Could not find uniform named {} in the specified shader program.", string2);
 			} else {
 				this.uniformLocations.add(k);
 				uniform.setLocation(k);
-				this.uniformMap.put(string, uniform);
+				this.uniformMap.put(string2, uniform);
 			}
 		}
 	}
@@ -342,12 +337,12 @@ public class EffectInstance implements Effect, AutoCloseable {
 		}
 	}
 
-	public void setSampler(String string, Object object) {
+	public void setSampler(String string, IntSupplier intSupplier) {
 		if (this.samplerMap.containsKey(string)) {
 			this.samplerMap.remove(string);
 		}
 
-		this.samplerMap.put(string, object);
+		this.samplerMap.put(string, intSupplier);
 		this.markDirty();
 	}
 

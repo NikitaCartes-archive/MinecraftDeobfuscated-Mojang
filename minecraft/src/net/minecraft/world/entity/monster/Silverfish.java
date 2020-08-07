@@ -13,6 +13,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
@@ -47,21 +49,17 @@ public class Silverfish extends Monster {
 	}
 
 	@Override
-	public double getRidingHeight() {
+	public double getMyRidingOffset() {
 		return 0.1;
 	}
 
 	@Override
 	protected float getStandingEyeHeight(Pose pose, EntityDimensions entityDimensions) {
-		return 0.1F;
+		return 0.13F;
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(8.0);
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25);
-		this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 8.0).add(Attributes.MOVEMENT_SPEED, 0.25).add(Attributes.ATTACK_DAMAGE, 1.0);
 	}
 
 	@Override
@@ -153,7 +151,7 @@ public class Silverfish extends Monster {
 			} else {
 				Random random = this.mob.getRandom();
 				if (this.mob.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && random.nextInt(10) == 0) {
-					this.selectedDirection = Direction.getRandomFace(random);
+					this.selectedDirection = Direction.getRandom(random);
 					BlockPos blockPos = new BlockPos(this.mob.getX(), this.mob.getY() + 0.5, this.mob.getZ()).relative(this.selectedDirection);
 					BlockState blockState = this.mob.level.getBlockState(blockPos);
 					if (InfestedBlock.isCompatibleHostBlock(blockState)) {
@@ -214,7 +212,7 @@ public class Silverfish extends Monster {
 			if (this.lookForFriends <= 0) {
 				Level level = this.silverfish.level;
 				Random random = this.silverfish.getRandom();
-				BlockPos blockPos = new BlockPos(this.silverfish);
+				BlockPos blockPos = this.silverfish.blockPosition();
 
 				for (int i = 0; i <= 5 && i >= -5; i = (i <= 0 ? 1 : 0) - i) {
 					for (int j = 0; j <= 10 && j >= -10; j = (j <= 0 ? 1 : 0) - j) {

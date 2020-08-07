@@ -3,34 +3,18 @@ package net.minecraft.client.gui.screens.recipebook;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 
 @Environment(EnvType.CLIENT)
 public class BlastingRecipeBookComponent extends AbstractFurnaceRecipeBookComponent {
-	@Override
-	protected boolean getFilteringCraftable() {
-		return this.book.isBlastingFurnaceFilteringCraftable();
-	}
+	private static final Component FILTER_NAME = new TranslatableComponent("gui.recipebook.toggleRecipes.blastable");
 
 	@Override
-	protected void setFilteringCraftable(boolean bl) {
-		this.book.setBlastingFurnaceFilteringCraftable(bl);
-	}
-
-	@Override
-	protected boolean isGuiOpen() {
-		return this.book.isBlastingFurnaceGuiOpen();
-	}
-
-	@Override
-	protected void setGuiOpen(boolean bl) {
-		this.book.setBlastingFurnaceGuiOpen(bl);
-	}
-
-	@Override
-	protected String getRecipeFilterName() {
-		return "gui.recipebook.toggleRecipes.blastable";
+	protected Component getRecipeFilterName() {
+		return FILTER_NAME;
 	}
 
 	@Override

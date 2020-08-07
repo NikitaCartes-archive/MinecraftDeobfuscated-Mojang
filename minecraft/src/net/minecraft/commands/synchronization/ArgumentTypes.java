@@ -1,6 +1,7 @@
 package net.minecraft.commands.synchronization;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
@@ -11,12 +12,14 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
+import net.minecraft.commands.arguments.AngleArgument;
 import net.minecraft.commands.arguments.ColorArgument;
 import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.CompoundTagArgument;
-import net.minecraft.commands.arguments.DimensionTypeArgument;
+import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.EntitySummonArgument;
@@ -37,6 +40,7 @@ import net.minecraft.commands.arguments.ScoreboardSlotArgument;
 import net.minecraft.commands.arguments.SlotArgument;
 import net.minecraft.commands.arguments.TeamArgument;
 import net.minecraft.commands.arguments.TimeArgument;
+import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
@@ -96,6 +100,7 @@ public class ArgumentTypes {
 		register("objective_criteria", ObjectiveCriteriaArgument.class, new EmptyArgumentSerializer(ObjectiveCriteriaArgument::criteria));
 		register("operation", OperationArgument.class, new EmptyArgumentSerializer(OperationArgument::operation));
 		register("particle", ParticleArgument.class, new EmptyArgumentSerializer(ParticleArgument::particle));
+		register("angle", AngleArgument.class, new EmptyArgumentSerializer(AngleArgument::angle));
 		register("rotation", RotationArgument.class, new EmptyArgumentSerializer(RotationArgument::rotation));
 		register("scoreboard_slot", ScoreboardSlotArgument.class, new EmptyArgumentSerializer(ScoreboardSlotArgument::displaySlot));
 		register("score_holder", ScoreHolderArgument.class, new ScoreHolderArgument.Serializer());
@@ -106,12 +111,13 @@ public class ArgumentTypes {
 		register("mob_effect", MobEffectArgument.class, new EmptyArgumentSerializer(MobEffectArgument::effect));
 		register("function", FunctionArgument.class, new EmptyArgumentSerializer(FunctionArgument::functions));
 		register("entity_anchor", EntityAnchorArgument.class, new EmptyArgumentSerializer(EntityAnchorArgument::anchor));
-		register("int_range", RangeArgument.Ints.class, new RangeArgument.Ints.Serializer());
-		register("float_range", RangeArgument.Floats.class, new RangeArgument.Floats.Serializer());
+		register("int_range", RangeArgument.Ints.class, new EmptyArgumentSerializer(RangeArgument::intRange));
+		register("float_range", RangeArgument.Floats.class, new EmptyArgumentSerializer(RangeArgument::floatRange));
 		register("item_enchantment", ItemEnchantmentArgument.class, new EmptyArgumentSerializer(ItemEnchantmentArgument::enchantment));
 		register("entity_summon", EntitySummonArgument.class, new EmptyArgumentSerializer(EntitySummonArgument::id));
-		register("dimension", DimensionTypeArgument.class, new EmptyArgumentSerializer(DimensionTypeArgument::dimension));
+		register("dimension", DimensionArgument.class, new EmptyArgumentSerializer(DimensionArgument::dimension));
 		register("time", TimeArgument.class, new EmptyArgumentSerializer(TimeArgument::time));
+		register("uuid", UuidArgument.class, new EmptyArgumentSerializer(UuidArgument::uuid));
 		if (SharedConstants.IS_RUNNING_IN_IDE) {
 			register("test_argument", TestFunctionArgument.class, new EmptyArgumentSerializer(TestFunctionArgument::testFunctionArgument));
 			register("test_class", TestClassNameArgument.class, new EmptyArgumentSerializer(TestClassNameArgument::testClassName));
@@ -208,6 +214,31 @@ public class ArgumentTypes {
 		}
 
 		return jsonObject;
+	}
+
+	public static boolean isTypeRegistered(ArgumentType<?> argumentType) {
+		return get(argumentType) != null;
+	}
+
+	public static <T> Set<ArgumentType<?>> findUsedArgumentTypes(CommandNode<T> commandNode) {
+		Set<CommandNode<T>> set = Sets.newIdentityHashSet();
+		Set<ArgumentType<?>> set2 = Sets.<ArgumentType<?>>newHashSet();
+		findUsedArgumentTypes(commandNode, set2, set);
+		return set2;
+	}
+
+	private static <T> void findUsedArgumentTypes(CommandNode<T> commandNode, Set<ArgumentType<?>> set, Set<CommandNode<T>> set2) {
+		if (set2.add(commandNode)) {
+			if (commandNode instanceof ArgumentCommandNode) {
+				set.add(((ArgumentCommandNode)commandNode).getType());
+			}
+
+			commandNode.getChildren().forEach(commandNodex -> findUsedArgumentTypes(commandNodex, set, set2));
+			CommandNode<T> commandNode2 = commandNode.getRedirect();
+			if (commandNode2 != null) {
+				findUsedArgumentTypes(commandNode2, set, set2);
+			}
+		}
 	}
 
 	static class Entry<T extends ArgumentType<?>> {

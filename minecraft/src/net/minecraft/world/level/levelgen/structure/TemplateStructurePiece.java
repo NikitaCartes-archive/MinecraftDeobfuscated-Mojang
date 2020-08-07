@@ -8,7 +8,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
@@ -51,15 +53,23 @@ public abstract class TemplateStructurePiece extends StructurePiece {
 	}
 
 	@Override
-	public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+	public boolean postProcess(
+		WorldGenLevel worldGenLevel,
+		StructureFeatureManager structureFeatureManager,
+		ChunkGenerator chunkGenerator,
+		Random random,
+		BoundingBox boundingBox,
+		ChunkPos chunkPos,
+		BlockPos blockPos
+	) {
 		this.placeSettings.setBoundingBox(boundingBox);
 		this.boundingBox = this.template.getBoundingBox(this.placeSettings, this.templatePosition);
-		if (this.template.placeInWorld(levelAccessor, this.templatePosition, this.placeSettings, 2)) {
+		if (this.template.placeInWorld(worldGenLevel, this.templatePosition, blockPos, this.placeSettings, random, 2)) {
 			for (StructureTemplate.StructureBlockInfo structureBlockInfo : this.template.filterBlocks(this.templatePosition, this.placeSettings, Blocks.STRUCTURE_BLOCK)) {
 				if (structureBlockInfo.nbt != null) {
 					StructureMode structureMode = StructureMode.valueOf(structureBlockInfo.nbt.getString("mode"));
 					if (structureMode == StructureMode.DATA) {
-						this.handleDataMarker(structureBlockInfo.nbt.getString("metadata"), structureBlockInfo.pos, levelAccessor, random, boundingBox);
+						this.handleDataMarker(structureBlockInfo.nbt.getString("metadata"), structureBlockInfo.pos, worldGenLevel, random, boundingBox);
 					}
 				}
 			}
@@ -78,11 +88,11 @@ public abstract class TemplateStructurePiece extends StructurePiece {
 						} else {
 							LOGGER.error("Error while parsing blockstate {} in jigsaw block @ {}", string, structureBlockInfo2.pos);
 						}
-					} catch (CommandSyntaxException var14) {
+					} catch (CommandSyntaxException var16) {
 						LOGGER.error("Error while parsing blockstate {} in jigsaw block @ {}", string, structureBlockInfo2.pos);
 					}
 
-					levelAccessor.setBlock(structureBlockInfo2.pos, blockState, 3);
+					worldGenLevel.setBlock(structureBlockInfo2.pos, blockState, 3);
 				}
 			}
 		}
@@ -90,7 +100,7 @@ public abstract class TemplateStructurePiece extends StructurePiece {
 		return true;
 	}
 
-	protected abstract void handleDataMarker(String string, BlockPos blockPos, LevelAccessor levelAccessor, Random random, BoundingBox boundingBox);
+	protected abstract void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, Random random, BoundingBox boundingBox);
 
 	@Override
 	public void move(int i, int j, int k) {

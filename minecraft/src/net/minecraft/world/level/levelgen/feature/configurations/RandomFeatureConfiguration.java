@@ -1,33 +1,38 @@
 package net.minecraft.world.level.levelgen.feature.configurations;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.WeightedConfiguredFeature;
 
 public class RandomFeatureConfiguration implements FeatureConfiguration {
-	public final List<WeightedConfiguredFeature<?>> features;
-	public final ConfiguredFeature<?, ?> defaultFeature;
+	public static final Codec<RandomFeatureConfiguration> CODEC = RecordCodecBuilder.create(
+		instance -> instance.apply2(
+				RandomFeatureConfiguration::new,
+				WeightedConfiguredFeature.CODEC.listOf().fieldOf("features").forGetter(randomFeatureConfiguration -> randomFeatureConfiguration.features),
+				ConfiguredFeature.CODEC.fieldOf("default").forGetter(randomFeatureConfiguration -> randomFeatureConfiguration.defaultFeature)
+			)
+	);
+	public final List<WeightedConfiguredFeature> features;
+	public final Supplier<ConfiguredFeature<?, ?>> defaultFeature;
 
-	public RandomFeatureConfiguration(List<WeightedConfiguredFeature<?>> list, ConfiguredFeature<?, ?> configuredFeature) {
+	public RandomFeatureConfiguration(List<WeightedConfiguredFeature> list, ConfiguredFeature<?, ?> configuredFeature) {
+		this(list, () -> configuredFeature);
+	}
+
+	private RandomFeatureConfiguration(List<WeightedConfiguredFeature> list, Supplier<ConfiguredFeature<?, ?>> supplier) {
 		this.features = list;
-		this.defaultFeature = configuredFeature;
+		this.defaultFeature = supplier;
 	}
 
 	@Override
-	public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-		T object = dynamicOps.createList(this.features.stream().map(weightedConfiguredFeature -> weightedConfiguredFeature.serialize(dynamicOps).getValue()));
-		T object2 = this.defaultFeature.serialize(dynamicOps).getValue();
-		return new Dynamic<>(
-			dynamicOps, dynamicOps.createMap(ImmutableMap.of(dynamicOps.createString("features"), object, dynamicOps.createString("default"), object2))
+	public Stream<ConfiguredFeature<?, ?>> getFeatures() {
+		return Stream.concat(
+			this.features.stream().flatMap(weightedConfiguredFeature -> ((ConfiguredFeature)weightedConfiguredFeature.feature.get()).getFeatures()),
+			((ConfiguredFeature)this.defaultFeature.get()).getFeatures()
 		);
-	}
-
-	public static <T> RandomFeatureConfiguration deserialize(Dynamic<T> dynamic) {
-		List<WeightedConfiguredFeature<?>> list = dynamic.get("features").asList(WeightedConfiguredFeature::deserialize);
-		ConfiguredFeature<?, ?> configuredFeature = ConfiguredFeature.deserialize(dynamic.get("default").orElseEmptyMap());
-		return new RandomFeatureConfiguration(list, configuredFeature);
 	}
 }

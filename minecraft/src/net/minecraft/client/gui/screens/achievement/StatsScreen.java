@@ -3,22 +3,25 @@ package net.minecraft.client.gui.screens.achievement;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.Registry;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
@@ -36,6 +39,7 @@ import net.minecraft.world.level.block.Block;
 
 @Environment(EnvType.CLIENT)
 public class StatsScreen extends Screen implements StatsUpdateListener {
+	private static final Component PENDING_TEXT = new TranslatableComponent("multiplayer.downloadingStats");
 	protected final Screen lastScreen;
 	private StatsScreen.GeneralStatisticsList statsList;
 	private StatsScreen.ItemStatisticsList itemStatsList;
@@ -64,14 +68,16 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 	}
 
 	public void initButtons() {
-		this.addButton(new Button(this.width / 2 - 120, this.height - 52, 80, 20, I18n.get("stat.generalButton"), buttonx -> this.setActiveList(this.statsList)));
+		this.addButton(
+			new Button(this.width / 2 - 120, this.height - 52, 80, 20, new TranslatableComponent("stat.generalButton"), buttonx -> this.setActiveList(this.statsList))
+		);
 		Button button = this.addButton(
-			new Button(this.width / 2 - 40, this.height - 52, 80, 20, I18n.get("stat.itemsButton"), buttonx -> this.setActiveList(this.itemStatsList))
+			new Button(this.width / 2 - 40, this.height - 52, 80, 20, new TranslatableComponent("stat.itemsButton"), buttonx -> this.setActiveList(this.itemStatsList))
 		);
 		Button button2 = this.addButton(
-			new Button(this.width / 2 + 40, this.height - 52, 80, 20, I18n.get("stat.mobsButton"), buttonx -> this.setActiveList(this.mobsStatsList))
+			new Button(this.width / 2 + 40, this.height - 52, 80, 20, new TranslatableComponent("stat.mobsButton"), buttonx -> this.setActiveList(this.mobsStatsList))
 		);
-		this.addButton(new Button(this.width / 2 - 100, this.height - 28, 200, 20, I18n.get("gui.done"), buttonx -> this.minecraft.setScreen(this.lastScreen)));
+		this.addButton(new Button(this.width / 2 - 100, this.height - 28, 200, 20, CommonComponents.GUI_DONE, buttonx -> this.minecraft.setScreen(this.lastScreen)));
 		if (this.itemStatsList.children().isEmpty()) {
 			button.active = false;
 		}
@@ -82,17 +88,17 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
+	public void render(PoseStack poseStack, int i, int j, float f) {
 		if (this.isLoading) {
-			this.renderBackground();
-			this.drawCenteredString(this.font, I18n.get("multiplayer.downloadingStats"), this.width / 2, this.height / 2, 16777215);
-			this.drawCenteredString(
-				this.font, LOADING_SYMBOLS[(int)(Util.getMillis() / 150L % (long)LOADING_SYMBOLS.length)], this.width / 2, this.height / 2 + 9 * 2, 16777215
+			this.renderBackground(poseStack);
+			drawCenteredString(poseStack, this.font, PENDING_TEXT, this.width / 2, this.height / 2, 16777215);
+			drawCenteredString(
+				poseStack, this.font, LOADING_SYMBOLS[(int)(Util.getMillis() / 150L % (long)LOADING_SYMBOLS.length)], this.width / 2, this.height / 2 + 9 * 2, 16777215
 			);
 		} else {
-			this.getActiveList().render(i, j, f);
-			this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 20, 16777215);
-			super.render(i, j, f);
+			this.getActiveList().render(poseStack, i, j, f);
+			drawCenteredString(poseStack, this.font, this.title, this.width / 2, 20, 16777215);
+			super.render(poseStack, i, j, f);
 		}
 	}
 
@@ -126,54 +132,59 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 		}
 	}
 
+	private static String getTranslationKey(Stat<ResourceLocation> stat) {
+		return "stat." + stat.getValue().toString().replace(':', '.');
+	}
+
 	private int getColumnX(int i) {
 		return 115 + 40 * i;
 	}
 
-	private void blitSlot(int i, int j, Item item) {
-		this.blitSlotIcon(i + 1, j + 1, 0, 0);
+	private void blitSlot(PoseStack poseStack, int i, int j, Item item) {
+		this.blitSlotIcon(poseStack, i + 1, j + 1, 0, 0);
 		RenderSystem.enableRescaleNormal();
 		this.itemRenderer.renderGuiItem(item.getDefaultInstance(), i + 2, j + 2);
 		RenderSystem.disableRescaleNormal();
 	}
 
-	private void blitSlotIcon(int i, int j, int k, int l) {
+	private void blitSlotIcon(PoseStack poseStack, int i, int j, int k, int l) {
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.minecraft.getTextureManager().bind(STATS_ICON_LOCATION);
-		blit(i, j, this.getBlitOffset(), (float)k, (float)l, 18, 18, 128, 128);
+		blit(poseStack, i, j, this.getBlitOffset(), (float)k, (float)l, 18, 18, 128, 128);
 	}
 
 	@Environment(EnvType.CLIENT)
 	class GeneralStatisticsList extends ObjectSelectionList<StatsScreen.GeneralStatisticsList.Entry> {
 		public GeneralStatisticsList(Minecraft minecraft) {
 			super(minecraft, StatsScreen.this.width, StatsScreen.this.height, 32, StatsScreen.this.height - 64, 10);
+			ObjectArrayList<Stat<ResourceLocation>> objectArrayList = new ObjectArrayList<>(Stats.CUSTOM.iterator());
+			objectArrayList.sort(Comparator.comparing(statx -> I18n.get(StatsScreen.getTranslationKey(statx))));
 
-			for (Stat<ResourceLocation> stat : Stats.CUSTOM) {
+			for (Stat<ResourceLocation> stat : objectArrayList) {
 				this.addEntry(new StatsScreen.GeneralStatisticsList.Entry(stat));
 			}
 		}
 
 		@Override
-		protected void renderBackground() {
-			StatsScreen.this.renderBackground();
+		protected void renderBackground(PoseStack poseStack) {
+			StatsScreen.this.renderBackground(poseStack);
 		}
 
 		@Environment(EnvType.CLIENT)
 		class Entry extends ObjectSelectionList.Entry<StatsScreen.GeneralStatisticsList.Entry> {
 			private final Stat<ResourceLocation> stat;
+			private final Component statDisplay;
 
 			private Entry(Stat<ResourceLocation> stat) {
 				this.stat = stat;
+				this.statDisplay = new TranslatableComponent(StatsScreen.getTranslationKey(stat));
 			}
 
 			@Override
-			public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-				Component component = new TranslatableComponent("stat." + this.stat.getValue().toString().replace(':', '.')).withStyle(ChatFormatting.GRAY);
-				GeneralStatisticsList.this.drawString(StatsScreen.this.font, component.getString(), k + 2, j + 1, i % 2 == 0 ? 16777215 : 9474192);
+			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+				GuiComponent.drawString(poseStack, StatsScreen.this.font, this.statDisplay, k + 2, j + 1, i % 2 == 0 ? 16777215 : 9474192);
 				String string = this.stat.format(StatsScreen.this.stats.getValue(this.stat));
-				GeneralStatisticsList.this.drawString(
-					StatsScreen.this.font, string, k + 2 + 213 - StatsScreen.this.font.width(string), j + 1, i % 2 == 0 ? 16777215 : 9474192
-				);
+				GuiComponent.drawString(poseStack, StatsScreen.this.font, string, k + 2 + 213 - StatsScreen.this.font.width(string), j + 1, i % 2 == 0 ? 16777215 : 9474192);
 			}
 		}
 	}
@@ -235,24 +246,24 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 		}
 
 		@Override
-		protected void renderHeader(int i, int j, Tesselator tesselator) {
+		protected void renderHeader(PoseStack poseStack, int i, int j, Tesselator tesselator) {
 			if (!this.minecraft.mouseHandler.isLeftPressed()) {
 				this.headerPressed = -1;
 			}
 
 			for (int k = 0; k < this.iconOffsets.length; k++) {
-				StatsScreen.this.blitSlotIcon(i + StatsScreen.this.getColumnX(k) - 18, j + 1, 0, this.headerPressed == k ? 0 : 18);
+				StatsScreen.this.blitSlotIcon(poseStack, i + StatsScreen.this.getColumnX(k) - 18, j + 1, 0, this.headerPressed == k ? 0 : 18);
 			}
 
 			if (this.sortColumn != null) {
 				int k = StatsScreen.this.getColumnX(this.getColumnIndex(this.sortColumn)) - 36;
 				int l = this.sortOrder == 1 ? 2 : 1;
-				StatsScreen.this.blitSlotIcon(i + k, j + 1, 18 * l, 0);
+				StatsScreen.this.blitSlotIcon(poseStack, i + k, j + 1, 18 * l, 0);
 			}
 
 			for (int k = 0; k < this.iconOffsets.length; k++) {
 				int l = this.headerPressed == k ? 1 : 0;
-				StatsScreen.this.blitSlotIcon(i + StatsScreen.this.getColumnX(k) - 18 + l, j + 1 + l, 18 * this.iconOffsets[k], 18);
+				StatsScreen.this.blitSlotIcon(poseStack, i + StatsScreen.this.getColumnX(k) - 18 + l, j + 1 + l, 18 * this.iconOffsets[k], 18);
 			}
 		}
 
@@ -267,8 +278,8 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 		}
 
 		@Override
-		protected void renderBackground() {
-			StatsScreen.this.renderBackground();
+		protected void renderBackground(PoseStack poseStack) {
+			StatsScreen.this.renderBackground(poseStack);
 		}
 
 		@Override
@@ -304,7 +315,7 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 		}
 
 		@Override
-		protected void renderDecorations(int i, int j) {
+		protected void renderDecorations(PoseStack poseStack, int i, int j) {
 			if (j >= this.y0 && j <= this.y1) {
 				StatsScreen.ItemStatisticsList.ItemRow itemRow = this.getEntryAtPosition((double)i, (double)j);
 				int k = (this.width - this.getRowWidth()) / 2;
@@ -314,7 +325,7 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 					}
 
 					Item item = (Item)this.statItemList.get(this.children().indexOf(itemRow));
-					this.renderMousehoverTooltip(this.getString(item), i, j);
+					this.renderMousehoverTooltip(poseStack, this.getString(item), i, j);
 				} else {
 					Component component = null;
 					int l = i - k;
@@ -322,26 +333,25 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 					for (int m = 0; m < this.iconOffsets.length; m++) {
 						int n = StatsScreen.this.getColumnX(m);
 						if (l >= n - 18 && l <= n) {
-							component = new TranslatableComponent(this.getColumn(m).getTranslationKey());
+							component = this.getColumn(m).getDisplayName();
 							break;
 						}
 					}
 
-					this.renderMousehoverTooltip(component, i, j);
+					this.renderMousehoverTooltip(poseStack, component, i, j);
 				}
 			}
 		}
 
-		protected void renderMousehoverTooltip(@Nullable Component component, int i, int j) {
+		protected void renderMousehoverTooltip(PoseStack poseStack, @Nullable Component component, int i, int j) {
 			if (component != null) {
-				String string = component.getColoredString();
 				int k = i + 12;
 				int l = j - 12;
-				int m = StatsScreen.this.font.width(string);
-				this.fillGradient(k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
+				int m = StatsScreen.this.font.width(component);
+				this.fillGradient(poseStack, k - 3, l - 3, k + m + 3, l + 8 + 3, -1073741824, -1073741824);
 				RenderSystem.pushMatrix();
 				RenderSystem.translatef(0.0F, 0.0F, 400.0F);
-				StatsScreen.this.font.drawShadow(string, (float)k, (float)l, -1);
+				StatsScreen.this.font.drawShadow(poseStack, component, (float)k, (float)l, -1);
 				RenderSystem.popMatrix();
 			}
 		}
@@ -397,9 +407,9 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 			}
 
 			@Override
-			public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 				Item item = (Item)StatsScreen.this.itemStatsList.statItemList.get(i);
-				StatsScreen.this.blitSlot(k + 40, j, item);
+				StatsScreen.this.blitSlot(poseStack, k + 40, j, item);
 
 				for (int p = 0; p < StatsScreen.this.itemStatsList.blockColumns.size(); p++) {
 					Stat<Block> stat;
@@ -409,11 +419,12 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 						stat = null;
 					}
 
-					this.renderStat(stat, k + StatsScreen.this.getColumnX(p), j, i % 2 == 0);
+					this.renderStat(poseStack, stat, k + StatsScreen.this.getColumnX(p), j, i % 2 == 0);
 				}
 
 				for (int p = 0; p < StatsScreen.this.itemStatsList.itemColumns.size(); p++) {
 					this.renderStat(
+						poseStack,
 						((StatType)StatsScreen.this.itemStatsList.itemColumns.get(p)).get(item),
 						k + StatsScreen.this.getColumnX(p + StatsScreen.this.itemStatsList.blockColumns.size()),
 						j,
@@ -422,9 +433,9 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 				}
 			}
 
-			protected void renderStat(@Nullable Stat<?> stat, int i, int j, boolean bl) {
+			protected void renderStat(PoseStack poseStack, @Nullable Stat<?> stat, int i, int j, boolean bl) {
 				String string = stat == null ? "-" : stat.format(StatsScreen.this.stats.getValue(stat));
-				ItemStatisticsList.this.drawString(StatsScreen.this.font, string, i - StatsScreen.this.font.width(string), j + 5, bl ? 16777215 : 9474192);
+				GuiComponent.drawString(poseStack, StatsScreen.this.font, string, i - StatsScreen.this.font.width(string), j + 5, bl ? 16777215 : 9474192);
 			}
 		}
 	}
@@ -444,36 +455,46 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 		}
 
 		@Override
-		protected void renderBackground() {
-			StatsScreen.this.renderBackground();
+		protected void renderBackground(PoseStack poseStack) {
+			StatsScreen.this.renderBackground(poseStack);
 		}
 
 		@Environment(EnvType.CLIENT)
 		class MobRow extends ObjectSelectionList.Entry<StatsScreen.MobsStatisticsList.MobRow> {
 			private final EntityType<?> type;
+			private final Component mobName;
+			private final Component kills;
+			private final boolean hasKills;
+			private final Component killedBy;
+			private final boolean wasKilledBy;
 
 			public MobRow(EntityType<?> entityType) {
 				this.type = entityType;
+				this.mobName = entityType.getDescription();
+				int i = StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED.get(entityType));
+				if (i == 0) {
+					this.kills = new TranslatableComponent("stat_type.minecraft.killed.none", this.mobName);
+					this.hasKills = false;
+				} else {
+					this.kills = new TranslatableComponent("stat_type.minecraft.killed", i, this.mobName);
+					this.hasKills = true;
+				}
+
+				int j = StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED_BY.get(entityType));
+				if (j == 0) {
+					this.killedBy = new TranslatableComponent("stat_type.minecraft.killed_by.none", this.mobName);
+					this.wasKilledBy = false;
+				} else {
+					this.killedBy = new TranslatableComponent("stat_type.minecraft.killed_by", this.mobName, j);
+					this.wasKilledBy = true;
+				}
 			}
 
 			@Override
-			public void render(int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-				String string = I18n.get(Util.makeDescriptionId("entity", EntityType.getKey(this.type)));
-				int p = StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED.get(this.type));
-				int q = StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED_BY.get(this.type));
-				MobsStatisticsList.this.drawString(StatsScreen.this.font, string, k + 2, j + 1, 16777215);
-				MobsStatisticsList.this.drawString(StatsScreen.this.font, this.killsMessage(string, p), k + 2 + 10, j + 1 + 9, p == 0 ? 6316128 : 9474192);
-				MobsStatisticsList.this.drawString(StatsScreen.this.font, this.killedByMessage(string, q), k + 2 + 10, j + 1 + 9 * 2, q == 0 ? 6316128 : 9474192);
-			}
-
-			private String killsMessage(String string, int i) {
-				String string2 = Stats.ENTITY_KILLED.getTranslationKey();
-				return i == 0 ? I18n.get(string2 + ".none", string) : I18n.get(string2, i, string);
-			}
-
-			private String killedByMessage(String string, int i) {
-				String string2 = Stats.ENTITY_KILLED_BY.getTranslationKey();
-				return i == 0 ? I18n.get(string2 + ".none", string) : I18n.get(string2, string, i);
+			public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+				GuiComponent.drawString(poseStack, StatsScreen.this.font, this.mobName, k + 2, j + 1, 16777215);
+				GuiComponent.drawString(poseStack, StatsScreen.this.font, this.kills, k + 2 + 10, j + 1 + 9, this.hasKills ? 9474192 : 6316128);
+				GuiComponent.drawString(poseStack, StatsScreen.this.font, this.killedBy, k + 2 + 10, j + 1 + 9 * 2, this.wasKilledBy ? 9474192 : 6316128);
 			}
 		}
 	}

@@ -2,8 +2,6 @@ package net.minecraft.advancements.critereon;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.Collection;
 import java.util.Iterator;
@@ -13,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.storage.loot.LootContext;
 
 public class KilledByCrossbowTrigger extends SimpleCriterionTrigger<KilledByCrossbowTrigger.TriggerInstance> {
 	private static final ResourceLocation ID = new ResourceLocation("killed_by_crossbow");
@@ -22,53 +21,63 @@ public class KilledByCrossbowTrigger extends SimpleCriterionTrigger<KilledByCros
 		return ID;
 	}
 
-	public KilledByCrossbowTrigger.TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
-		EntityPredicate[] entityPredicates = EntityPredicate.fromJsonArray(jsonObject.get("victims"));
+	public KilledByCrossbowTrigger.TriggerInstance createInstance(
+		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+	) {
+		EntityPredicate.Composite[] composites = EntityPredicate.Composite.fromJsonArray(jsonObject, "victims", deserializationContext);
 		MinMaxBounds.Ints ints = MinMaxBounds.Ints.fromJson(jsonObject.get("unique_entity_types"));
-		return new KilledByCrossbowTrigger.TriggerInstance(entityPredicates, ints);
+		return new KilledByCrossbowTrigger.TriggerInstance(composite, composites, ints);
 	}
 
-	public void trigger(ServerPlayer serverPlayer, Collection<Entity> collection, int i) {
-		this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(serverPlayer, collection, i));
+	public void trigger(ServerPlayer serverPlayer, Collection<Entity> collection) {
+		List<LootContext> list = Lists.<LootContext>newArrayList();
+		Set<EntityType<?>> set = Sets.<EntityType<?>>newHashSet();
+
+		for (Entity entity : collection) {
+			set.add(entity.getType());
+			list.add(EntityPredicate.createContext(serverPlayer, entity));
+		}
+
+		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(list, set.size()));
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-		private final EntityPredicate[] victims;
+		private final EntityPredicate.Composite[] victims;
 		private final MinMaxBounds.Ints uniqueEntityTypes;
 
-		public TriggerInstance(EntityPredicate[] entityPredicates, MinMaxBounds.Ints ints) {
-			super(KilledByCrossbowTrigger.ID);
-			this.victims = entityPredicates;
+		public TriggerInstance(EntityPredicate.Composite composite, EntityPredicate.Composite[] composites, MinMaxBounds.Ints ints) {
+			super(KilledByCrossbowTrigger.ID, composite);
+			this.victims = composites;
 			this.uniqueEntityTypes = ints;
 		}
 
 		public static KilledByCrossbowTrigger.TriggerInstance crossbowKilled(EntityPredicate.Builder... builders) {
-			EntityPredicate[] entityPredicates = new EntityPredicate[builders.length];
+			EntityPredicate.Composite[] composites = new EntityPredicate.Composite[builders.length];
 
 			for (int i = 0; i < builders.length; i++) {
 				EntityPredicate.Builder builder = builders[i];
-				entityPredicates[i] = builder.build();
+				composites[i] = EntityPredicate.Composite.wrap(builder.build());
 			}
 
-			return new KilledByCrossbowTrigger.TriggerInstance(entityPredicates, MinMaxBounds.Ints.ANY);
+			return new KilledByCrossbowTrigger.TriggerInstance(EntityPredicate.Composite.ANY, composites, MinMaxBounds.Ints.ANY);
 		}
 
 		public static KilledByCrossbowTrigger.TriggerInstance crossbowKilled(MinMaxBounds.Ints ints) {
-			EntityPredicate[] entityPredicates = new EntityPredicate[0];
-			return new KilledByCrossbowTrigger.TriggerInstance(entityPredicates, ints);
+			EntityPredicate.Composite[] composites = new EntityPredicate.Composite[0];
+			return new KilledByCrossbowTrigger.TriggerInstance(EntityPredicate.Composite.ANY, composites, ints);
 		}
 
-		public boolean matches(ServerPlayer serverPlayer, Collection<Entity> collection, int i) {
+		public boolean matches(Collection<LootContext> collection, int i) {
 			if (this.victims.length > 0) {
-				List<Entity> list = Lists.<Entity>newArrayList(collection);
+				List<LootContext> list = Lists.<LootContext>newArrayList(collection);
 
-				for (EntityPredicate entityPredicate : this.victims) {
+				for (EntityPredicate.Composite composite : this.victims) {
 					boolean bl = false;
-					Iterator<Entity> iterator = list.iterator();
+					Iterator<LootContext> iterator = list.iterator();
 
 					while (iterator.hasNext()) {
-						Entity entity = (Entity)iterator.next();
-						if (entityPredicate.matches(serverPlayer, entity)) {
+						LootContext lootContext = (LootContext)iterator.next();
+						if (composite.matches(lootContext)) {
 							iterator.remove();
 							bl = true;
 							break;
@@ -81,23 +90,13 @@ public class KilledByCrossbowTrigger extends SimpleCriterionTrigger<KilledByCros
 				}
 			}
 
-			if (this.uniqueEntityTypes == MinMaxBounds.Ints.ANY) {
-				return true;
-			} else {
-				Set<EntityType<?>> set = Sets.<EntityType<?>>newHashSet();
-
-				for (Entity entity2 : collection) {
-					set.add(entity2.getType());
-				}
-
-				return this.uniqueEntityTypes.matches(set.size()) && this.uniqueEntityTypes.matches(i);
-			}
+			return this.uniqueEntityTypes.matches(i);
 		}
 
 		@Override
-		public JsonElement serializeToJson() {
-			JsonObject jsonObject = new JsonObject();
-			jsonObject.add("victims", EntityPredicate.serializeArrayToJson(this.victims));
+		public JsonObject serializeToJson(SerializationContext serializationContext) {
+			JsonObject jsonObject = super.serializeToJson(serializationContext);
+			jsonObject.add("victims", EntityPredicate.Composite.toJson(this.victims, serializationContext));
 			jsonObject.add("unique_entity_types", this.uniqueEntityTypes.serializeToJson());
 			return jsonObject;
 		}

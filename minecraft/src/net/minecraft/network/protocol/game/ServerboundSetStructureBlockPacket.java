@@ -70,21 +70,23 @@ public class ServerboundSetStructureBlockPacket implements Packet<ServerGamePack
 		this.updateType = friendlyByteBuf.readEnum(StructureBlockEntity.UpdateType.class);
 		this.mode = friendlyByteBuf.readEnum(StructureMode.class);
 		this.name = friendlyByteBuf.readUtf(32767);
+		int i = 48;
 		this.offset = new BlockPos(
-			Mth.clamp(friendlyByteBuf.readByte(), -32, 32), Mth.clamp(friendlyByteBuf.readByte(), -32, 32), Mth.clamp(friendlyByteBuf.readByte(), -32, 32)
+			Mth.clamp(friendlyByteBuf.readByte(), -48, 48), Mth.clamp(friendlyByteBuf.readByte(), -48, 48), Mth.clamp(friendlyByteBuf.readByte(), -48, 48)
 		);
+		int j = 48;
 		this.size = new BlockPos(
-			Mth.clamp(friendlyByteBuf.readByte(), 0, 32), Mth.clamp(friendlyByteBuf.readByte(), 0, 32), Mth.clamp(friendlyByteBuf.readByte(), 0, 32)
+			Mth.clamp(friendlyByteBuf.readByte(), 0, 48), Mth.clamp(friendlyByteBuf.readByte(), 0, 48), Mth.clamp(friendlyByteBuf.readByte(), 0, 48)
 		);
 		this.mirror = friendlyByteBuf.readEnum(Mirror.class);
 		this.rotation = friendlyByteBuf.readEnum(Rotation.class);
 		this.data = friendlyByteBuf.readUtf(12);
 		this.integrity = Mth.clamp(friendlyByteBuf.readFloat(), 0.0F, 1.0F);
 		this.seed = friendlyByteBuf.readVarLong();
-		int i = friendlyByteBuf.readByte();
-		this.ignoreEntities = (i & 1) != 0;
-		this.showAir = (i & 2) != 0;
-		this.showBoundingBox = (i & 4) != 0;
+		int k = friendlyByteBuf.readByte();
+		this.ignoreEntities = (k & 1) != 0;
+		this.showAir = (k & 2) != 0;
+		this.showBoundingBox = (k & 4) != 0;
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -15,6 +16,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
@@ -60,12 +63,8 @@ public class Evoker extends SpellcasterIllager {
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, IronGolem.class, false));
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.5);
-		this.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(12.0);
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(24.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.5).add(Attributes.FOLLOW_RANGE, 12.0).add(Attributes.MAX_HEALTH, 24.0);
 	}
 
 	@Override
@@ -267,15 +266,17 @@ public class Evoker extends SpellcasterIllager {
 
 		@Override
 		protected void performSpellCasting() {
+			ServerLevel serverLevel = (ServerLevel)Evoker.this.level;
+
 			for (int i = 0; i < 3; i++) {
-				BlockPos blockPos = new BlockPos(Evoker.this).offset(-2 + Evoker.this.random.nextInt(5), 1, -2 + Evoker.this.random.nextInt(5));
+				BlockPos blockPos = Evoker.this.blockPosition().offset(-2 + Evoker.this.random.nextInt(5), 1, -2 + Evoker.this.random.nextInt(5));
 				Vex vex = EntityType.VEX.create(Evoker.this.level);
 				vex.moveTo(blockPos, 0.0F, 0.0F);
-				vex.finalizeSpawn(Evoker.this.level, Evoker.this.level.getCurrentDifficultyAt(blockPos), MobSpawnType.MOB_SUMMONED, null, null);
+				vex.finalizeSpawn(serverLevel, Evoker.this.level.getCurrentDifficultyAt(blockPos), MobSpawnType.MOB_SUMMONED, null, null);
 				vex.setOwner(Evoker.this);
 				vex.setBoundOrigin(blockPos);
 				vex.setLimitedLife(20 * (30 + Evoker.this.random.nextInt(90)));
-				Evoker.this.level.addFreshEntity(vex);
+				serverLevel.addFreshEntityWithPassengers(vex);
 			}
 		}
 

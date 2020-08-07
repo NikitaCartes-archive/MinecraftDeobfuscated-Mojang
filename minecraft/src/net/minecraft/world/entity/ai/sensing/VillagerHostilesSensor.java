@@ -21,6 +21,7 @@ public class VillagerHostilesSensor extends Sensor<LivingEntity> {
 		.put(EntityType.RAVAGER, 12.0F)
 		.put(EntityType.VEX, 8.0F)
 		.put(EntityType.VINDICATOR, 10.0F)
+		.put(EntityType.ZOGLIN, 10.0F)
 		.put(EntityType.ZOMBIE, 8.0F)
 		.put(EntityType.ZOMBIE_VILLAGER, 8.0F)
 		.build();

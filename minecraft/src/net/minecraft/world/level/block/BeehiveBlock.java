@@ -5,6 +5,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -18,6 +19,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -26,9 +28,9 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.WitherSkull;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.BlockGetter;
@@ -37,6 +39,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -49,11 +52,11 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class BeehiveBlock extends BaseEntityBlock {
-	public static final Direction[] SPAWN_DIRECTIONS = new Direction[]{Direction.WEST, Direction.EAST, Direction.SOUTH};
+	private static final Direction[] SPAWN_DIRECTIONS = new Direction[]{Direction.WEST, Direction.EAST, Direction.SOUTH};
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	public static final IntegerProperty HONEY_LEVEL = BlockStateProperties.LEVEL_HONEY;
 
-	public BeehiveBlock(Block.Properties properties) {
+	public BeehiveBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(HONEY_LEVEL, Integer.valueOf(0)).setValue(FACING, Direction.NORTH));
 	}
@@ -91,7 +94,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 
 			for (Bee bee : list) {
 				if (bee.getTarget() == null) {
-					bee.makeAngry((Entity)list2.get(level.random.nextInt(i)));
+					bee.setTarget((LivingEntity)list2.get(level.random.nextInt(i)));
 				}
 			}
 		}
@@ -106,7 +109,6 @@ public class BeehiveBlock extends BaseEntityBlock {
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		ItemStack itemStack2 = itemStack.copy();
 		int i = (Integer)blockState.getValue(HONEY_LEVEL);
 		boolean bl = false;
 		if (i >= 5) {
@@ -129,7 +131,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 		}
 
 		if (bl) {
-			if (!CampfireBlock.isSmokeyPos(level, blockPos, 5)) {
+			if (!CampfireBlock.isSmokeyPos(level, blockPos)) {
 				if (this.hiveContainsBees(level, blockPos)) {
 					this.angerNearbyBees(level, blockPos);
 				}
@@ -137,12 +139,9 @@ public class BeehiveBlock extends BaseEntityBlock {
 				this.releaseBeesAndResetHoneyLevel(level, blockState, blockPos, player, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
 			} else {
 				this.resetHoneyLevel(level, blockState, blockPos);
-				if (player instanceof ServerPlayer) {
-					CriteriaTriggers.SAFELY_HARVEST_HONEY.trigger((ServerPlayer)player, blockPos, itemStack2);
-				}
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);
 		}
@@ -305,5 +304,9 @@ public class BeehiveBlock extends BaseEntityBlock {
 		}
 
 		return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+	}
+
+	public static Direction getRandomOffset(Random random) {
+		return Util.getRandom(SPAWN_DIRECTIONS, random);
 	}
 }

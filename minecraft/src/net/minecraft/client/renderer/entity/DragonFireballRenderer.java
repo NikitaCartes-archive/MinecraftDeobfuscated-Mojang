@@ -10,6 +10,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.projectile.DragonFireball;
 
@@ -22,7 +23,7 @@ public class DragonFireballRenderer extends EntityRenderer<DragonFireball> {
 		super(entityRenderDispatcher);
 	}
 
-	protected int getBlockLightLevel(DragonFireball dragonFireball, float f) {
+	protected int getBlockLightLevel(DragonFireball dragonFireball, BlockPos blockPos) {
 		return 15;
 	}
 

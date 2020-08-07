@@ -8,6 +8,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class EnchantmentTableBlockEntity extends BlockEntity implements Nameable, TickableBlockEntity {
 	public int time;
@@ -38,8 +39,8 @@ public class EnchantmentTableBlockEntity extends BlockEntity implements Nameable
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		if (compoundTag.contains("CustomName", 8)) {
 			this.name = Component.Serializer.fromJson(compoundTag.getString("CustomName"));
 		}
@@ -50,13 +51,7 @@ public class EnchantmentTableBlockEntity extends BlockEntity implements Nameable
 		this.oOpen = this.open;
 		this.oRot = this.rot;
 		Player player = this.level
-			.getNearestPlayer(
-				(double)((float)this.worldPosition.getX() + 0.5F),
-				(double)((float)this.worldPosition.getY() + 0.5F),
-				(double)((float)this.worldPosition.getZ() + 0.5F),
-				3.0,
-				false
-			);
+			.getNearestPlayer((double)this.worldPosition.getX() + 0.5, (double)this.worldPosition.getY() + 0.5, (double)this.worldPosition.getZ() + 0.5, 3.0, false);
 		if (player != null) {
 			double d = player.getX() - ((double)this.worldPosition.getX() + 0.5);
 			double e = player.getZ() - ((double)this.worldPosition.getZ() + 0.5);

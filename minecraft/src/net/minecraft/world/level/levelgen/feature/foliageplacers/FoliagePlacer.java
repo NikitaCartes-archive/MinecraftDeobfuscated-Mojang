@@ -1,69 +1,140 @@
 package net.minecraft.world.level.levelgen.feature.foliageplacers;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.Products.P2;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.util.Serializable;
+import net.minecraft.util.UniformInt;
 import net.minecraft.world.level.LevelSimulatedRW;
-import net.minecraft.world.level.levelgen.feature.AbstractTreeFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.TreeFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
-public abstract class FoliagePlacer implements Serializable {
-	protected final int radius;
-	protected final int radiusRandom;
-	protected final FoliagePlacerType<?> type;
+public abstract class FoliagePlacer {
+	public static final Codec<FoliagePlacer> CODEC = Registry.FOLIAGE_PLACER_TYPES.dispatch(FoliagePlacer::type, FoliagePlacerType::codec);
+	protected final UniformInt radius;
+	protected final UniformInt offset;
 
-	public FoliagePlacer(int i, int j, FoliagePlacerType<?> foliagePlacerType) {
-		this.radius = i;
-		this.radiusRandom = j;
-		this.type = foliagePlacerType;
+	protected static <P extends FoliagePlacer> P2<Mu<P>, UniformInt, UniformInt> foliagePlacerParts(Instance<P> instance) {
+		return instance.group(
+			UniformInt.codec(0, 8, 8).fieldOf("radius").forGetter(foliagePlacer -> foliagePlacer.radius),
+			UniformInt.codec(0, 8, 8).fieldOf("offset").forGetter(foliagePlacer -> foliagePlacer.offset)
+		);
 	}
 
-	public abstract void createFoliage(
-		LevelSimulatedRW levelSimulatedRW, Random random, SmallTreeConfiguration smallTreeConfiguration, int i, int j, int k, BlockPos blockPos, Set<BlockPos> set
+	public FoliagePlacer(UniformInt uniformInt, UniformInt uniformInt2) {
+		this.radius = uniformInt;
+		this.offset = uniformInt2;
+	}
+
+	protected abstract FoliagePlacerType<?> type();
+
+	public void createFoliage(
+		LevelSimulatedRW levelSimulatedRW,
+		Random random,
+		TreeConfiguration treeConfiguration,
+		int i,
+		FoliagePlacer.FoliageAttachment foliageAttachment,
+		int j,
+		int k,
+		Set<BlockPos> set,
+		BoundingBox boundingBox
+	) {
+		this.createFoliage(levelSimulatedRW, random, treeConfiguration, i, foliageAttachment, j, k, set, this.offset(random), boundingBox);
+	}
+
+	protected abstract void createFoliage(
+		LevelSimulatedRW levelSimulatedRW,
+		Random random,
+		TreeConfiguration treeConfiguration,
+		int i,
+		FoliagePlacer.FoliageAttachment foliageAttachment,
+		int j,
+		int k,
+		Set<BlockPos> set,
+		int l,
+		BoundingBox boundingBox
 	);
 
-	public abstract int foliageRadius(Random random, int i, int j, SmallTreeConfiguration smallTreeConfiguration);
+	public abstract int foliageHeight(Random random, int i, TreeConfiguration treeConfiguration);
 
-	protected abstract boolean shouldSkipLocation(Random random, int i, int j, int k, int l, int m);
+	public int foliageRadius(Random random, int i) {
+		return this.radius.sample(random);
+	}
 
-	public abstract int getTreeRadiusForHeight(int i, int j, int k, int l);
+	private int offset(Random random) {
+		return this.offset.sample(random);
+	}
+
+	protected abstract boolean shouldSkipLocation(Random random, int i, int j, int k, int l, boolean bl);
+
+	protected boolean shouldSkipLocationSigned(Random random, int i, int j, int k, int l, boolean bl) {
+		int m;
+		int n;
+		if (bl) {
+			m = Math.min(Math.abs(i), Math.abs(i - 1));
+			n = Math.min(Math.abs(k), Math.abs(k - 1));
+		} else {
+			m = Math.abs(i);
+			n = Math.abs(k);
+		}
+
+		return this.shouldSkipLocation(random, m, j, n, l, bl);
+	}
 
 	protected void placeLeavesRow(
-		LevelSimulatedRW levelSimulatedRW, Random random, SmallTreeConfiguration smallTreeConfiguration, int i, BlockPos blockPos, int j, int k, Set<BlockPos> set
+		LevelSimulatedRW levelSimulatedRW,
+		Random random,
+		TreeConfiguration treeConfiguration,
+		BlockPos blockPos,
+		int i,
+		Set<BlockPos> set,
+		int j,
+		boolean bl,
+		BoundingBox boundingBox
 	) {
+		int k = bl ? 1 : 0;
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		for (int l = -k; l <= k; l++) {
-			for (int m = -k; m <= k; m++) {
-				if (!this.shouldSkipLocation(random, i, l, j, m, k)) {
-					mutableBlockPos.set(l + blockPos.getX(), j + blockPos.getY(), m + blockPos.getZ());
-					this.placeLeaf(levelSimulatedRW, random, mutableBlockPos, smallTreeConfiguration, set);
+		for (int l = -i; l <= i + k; l++) {
+			for (int m = -i; m <= i + k; m++) {
+				if (!this.shouldSkipLocationSigned(random, l, j, m, i, bl)) {
+					mutableBlockPos.setWithOffset(blockPos, l, j, m);
+					if (TreeFeature.validTreePos(levelSimulatedRW, mutableBlockPos)) {
+						levelSimulatedRW.setBlock(mutableBlockPos, treeConfiguration.leavesProvider.getState(random, mutableBlockPos), 19);
+						boundingBox.expand(new BoundingBox(mutableBlockPos, mutableBlockPos));
+						set.add(mutableBlockPos.immutable());
+					}
 				}
 			}
 		}
 	}
 
-	protected void placeLeaf(LevelSimulatedRW levelSimulatedRW, Random random, BlockPos blockPos, SmallTreeConfiguration smallTreeConfiguration, Set<BlockPos> set) {
-		if (AbstractTreeFeature.isAirOrLeaves(levelSimulatedRW, blockPos)
-			|| AbstractTreeFeature.isReplaceablePlant(levelSimulatedRW, blockPos)
-			|| AbstractTreeFeature.isBlockWater(levelSimulatedRW, blockPos)) {
-			levelSimulatedRW.setBlock(blockPos, smallTreeConfiguration.leavesProvider.getState(random, blockPos), 19);
-			set.add(blockPos.immutable());
-		}
-	}
+	public static final class FoliageAttachment {
+		private final BlockPos foliagePos;
+		private final int radiusOffset;
+		private final boolean doubleTrunk;
 
-	@Override
-	public <T> T serialize(DynamicOps<T> dynamicOps) {
-		Builder<T, T> builder = ImmutableMap.builder();
-		builder.put(dynamicOps.createString("type"), dynamicOps.createString(Registry.FOLIAGE_PLACER_TYPES.getKey(this.type).toString()))
-			.put(dynamicOps.createString("radius"), dynamicOps.createInt(this.radius))
-			.put(dynamicOps.createString("radius_random"), dynamicOps.createInt(this.radiusRandom));
-		return new Dynamic<>(dynamicOps, dynamicOps.createMap(builder.build())).getValue();
+		public FoliageAttachment(BlockPos blockPos, int i, boolean bl) {
+			this.foliagePos = blockPos;
+			this.radiusOffset = i;
+			this.doubleTrunk = bl;
+		}
+
+		public BlockPos foliagePos() {
+			return this.foliagePos;
+		}
+
+		public int radiusOffset() {
+			return this.radiusOffset;
+		}
+
+		public boolean doubleTrunk() {
+			return this.doubleTrunk;
+		}
 	}
 }

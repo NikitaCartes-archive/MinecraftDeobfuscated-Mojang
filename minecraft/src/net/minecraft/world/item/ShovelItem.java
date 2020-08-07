@@ -11,6 +11,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -48,7 +49,8 @@ public class ShovelItem extends DiggerItem {
 		Blocks.BROWN_CONCRETE_POWDER,
 		Blocks.GREEN_CONCRETE_POWDER,
 		Blocks.RED_CONCRETE_POWDER,
-		Blocks.BLACK_CONCRETE_POWDER
+		Blocks.BLACK_CONCRETE_POWDER,
+		Blocks.SOUL_SOIL
 	);
 	protected static final Map<Block, BlockState> FLATTENABLES = Maps.<Block, BlockState>newHashMap(
 		ImmutableMap.of(Blocks.GRASS_BLOCK, Blocks.GRASS_PATH.defaultBlockState())
@@ -59,9 +61,8 @@ public class ShovelItem extends DiggerItem {
 	}
 
 	@Override
-	public boolean canDestroySpecial(BlockState blockState) {
-		Block block = blockState.getBlock();
-		return block == Blocks.SNOW || block == Blocks.SNOW_BLOCK;
+	public boolean isCorrectToolForDrops(BlockState blockState) {
+		return blockState.is(Blocks.SNOW) || blockState.is(Blocks.SNOW_BLOCK);
 	}
 
 	@Override
@@ -79,7 +80,11 @@ public class ShovelItem extends DiggerItem {
 				level.playSound(player, blockPos, SoundEvents.SHOVEL_FLATTEN, SoundSource.BLOCKS, 1.0F, 1.0F);
 				blockState3 = blockState2;
 			} else if (blockState.getBlock() instanceof CampfireBlock && (Boolean)blockState.getValue(CampfireBlock.LIT)) {
-				level.levelEvent(null, 1009, blockPos, 0);
+				if (!level.isClientSide()) {
+					level.levelEvent(null, 1009, blockPos, 0);
+				}
+
+				CampfireBlock.dowse(level, blockPos, blockState);
 				blockState3 = blockState.setValue(CampfireBlock.LIT, Boolean.valueOf(false));
 			}
 
@@ -91,7 +96,7 @@ public class ShovelItem extends DiggerItem {
 					}
 				}
 
-				return InteractionResult.SUCCESS;
+				return InteractionResult.sidedSuccess(level.isClientSide);
 			} else {
 				return InteractionResult.PASS;
 			}

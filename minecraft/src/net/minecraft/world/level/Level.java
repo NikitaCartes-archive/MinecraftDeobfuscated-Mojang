@@ -1,12 +1,12 @@
 package net.minecraft.world.level;
 
 import com.google.common.collect.Lists;
+import com.mojang.serialization.Codec;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -23,11 +23,13 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.TagManager;
+import net.minecraft.tags.TagContainer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.DifficultyInstance;
@@ -39,27 +41,26 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.TickableBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.predicate.BlockMaterialPredicate;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.dimension.Dimension;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.scores.Scoreboard;
 import org.apache.logging.log4j.LogManager;
@@ -67,12 +68,18 @@ import org.apache.logging.log4j.Logger;
 
 public abstract class Level implements LevelAccessor, AutoCloseable {
 	protected static final Logger LOGGER = LogManager.getLogger();
+	public static final Codec<ResourceKey<Level>> RESOURCE_KEY_CODEC = ResourceLocation.CODEC
+		.xmap(ResourceKey.elementKey(Registry.DIMENSION_REGISTRY), ResourceKey::location);
+	public static final ResourceKey<Level> OVERWORLD = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("overworld"));
+	public static final ResourceKey<Level> NETHER = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("the_nether"));
+	public static final ResourceKey<Level> END = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation("the_end"));
 	private static final Direction[] DIRECTIONS = Direction.values();
 	public final List<BlockEntity> blockEntityList = Lists.<BlockEntity>newArrayList();
 	public final List<BlockEntity> tickableBlockEntities = Lists.<BlockEntity>newArrayList();
 	protected final List<BlockEntity> pendingBlockEntities = Lists.<BlockEntity>newArrayList();
 	protected final List<BlockEntity> blockEntitiesToUnload = Lists.<BlockEntity>newArrayList();
 	private final Thread thread;
+	private final boolean isDebug;
 	private int skyDarken;
 	protected int randValue = new Random().nextInt();
 	protected final int addend = 1013904223;
@@ -81,26 +88,48 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	protected float oThunderLevel;
 	protected float thunderLevel;
 	public final Random random = new Random();
-	public final Dimension dimension;
-	protected final ChunkSource chunkSource;
-	protected final LevelData levelData;
-	private final ProfilerFiller profiler;
+	private final DimensionType dimensionType;
+	protected final WritableLevelData levelData;
+	private final Supplier<ProfilerFiller> profiler;
 	public final boolean isClientSide;
 	protected boolean updatingBlockEntities;
 	private final WorldBorder worldBorder;
 	private final BiomeManager biomeManager;
+	private final ResourceKey<Level> dimension;
 
 	protected Level(
-		LevelData levelData, DimensionType dimensionType, BiFunction<Level, Dimension, ChunkSource> biFunction, ProfilerFiller profilerFiller, boolean bl
+		WritableLevelData writableLevelData,
+		ResourceKey<Level> resourceKey,
+		DimensionType dimensionType,
+		Supplier<ProfilerFiller> supplier,
+		boolean bl,
+		boolean bl2,
+		long l
 	) {
-		this.profiler = profilerFiller;
-		this.levelData = levelData;
-		this.dimension = dimensionType.create(this);
-		this.chunkSource = (ChunkSource)biFunction.apply(this, this.dimension);
+		this.profiler = supplier;
+		this.levelData = writableLevelData;
+		this.dimensionType = dimensionType;
+		this.dimension = resourceKey;
 		this.isClientSide = bl;
-		this.worldBorder = this.dimension.createWorldBorder();
+		if (dimensionType.coordinateScale() != 1.0) {
+			this.worldBorder = new WorldBorder() {
+				@Override
+				public double getCenterX() {
+					return super.getCenterX() / dimensionType.coordinateScale();
+				}
+
+				@Override
+				public double getCenterZ() {
+					return super.getCenterZ() / dimensionType.coordinateScale();
+				}
+			};
+		} else {
+			this.worldBorder = new WorldBorder();
+		}
+
 		this.thread = Thread.currentThread();
-		this.biomeManager = new BiomeManager(this, bl ? levelData.getSeed() : LevelData.obfuscateSeed(levelData.getSeed()), dimensionType.getBiomeZoomer());
+		this.biomeManager = new BiomeManager(this, l, dimensionType.getBiomeZoomer());
+		this.isDebug = bl2;
 	}
 
 	@Override
@@ -113,27 +142,20 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		return null;
 	}
 
-	@Environment(EnvType.CLIENT)
-	public void validateSpawn() {
-		this.setSpawnPos(new BlockPos(8, 64, 8));
-	}
-
-	public BlockState getTopBlockState(BlockPos blockPos) {
-		BlockPos blockPos2 = new BlockPos(blockPos.getX(), this.getSeaLevel(), blockPos.getZ());
-
-		while (!this.isEmptyBlock(blockPos2.above())) {
-			blockPos2 = blockPos2.above();
-		}
-
-		return this.getBlockState(blockPos2);
-	}
-
 	public static boolean isInWorldBounds(BlockPos blockPos) {
-		return !isOutsideBuildHeight(blockPos)
-			&& blockPos.getX() >= -30000000
-			&& blockPos.getZ() >= -30000000
-			&& blockPos.getX() < 30000000
-			&& blockPos.getZ() < 30000000;
+		return !isOutsideBuildHeight(blockPos) && isInWorldBoundsHorizontal(blockPos);
+	}
+
+	public static boolean isInSpawnableBounds(BlockPos blockPos) {
+		return !isOutsideSpawnableHeight(blockPos.getY()) && isInWorldBoundsHorizontal(blockPos);
+	}
+
+	private static boolean isInWorldBoundsHorizontal(BlockPos blockPos) {
+		return blockPos.getX() >= -30000000 && blockPos.getZ() >= -30000000 && blockPos.getX() < 30000000 && blockPos.getZ() < 30000000;
+	}
+
+	private static boolean isOutsideSpawnableHeight(int i) {
+		return i < -20000000 || i >= 20000000;
 	}
 
 	public static boolean isOutsideBuildHeight(BlockPos blockPos) {
@@ -154,7 +176,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	@Override
 	public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
-		ChunkAccess chunkAccess = this.chunkSource.getChunk(i, j, chunkStatus, bl);
+		ChunkAccess chunkAccess = this.getChunkSource().getChunk(i, j, chunkStatus, bl);
 		if (chunkAccess == null && bl) {
 			throw new IllegalStateException("Should always be able to create a chunk!");
 		} else {
@@ -164,9 +186,14 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	@Override
 	public boolean setBlock(BlockPos blockPos, BlockState blockState, int i) {
+		return this.setBlock(blockPos, blockState, i, 512);
+	}
+
+	@Override
+	public boolean setBlock(BlockPos blockPos, BlockState blockState, int i, int j) {
 		if (isOutsideBuildHeight(blockPos)) {
 			return false;
-		} else if (!this.isClientSide && this.levelData.getGeneratorType() == LevelType.DEBUG_ALL_BLOCK_STATES) {
+		} else if (!this.isClientSide && this.isDebug()) {
 			return false;
 		} else {
 			LevelChunk levelChunk = this.getChunkAt(blockPos);
@@ -176,16 +203,17 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 				return false;
 			} else {
 				BlockState blockState3 = this.getBlockState(blockPos);
-				if (blockState3 != blockState2
+				if ((i & 128) == 0
+					&& blockState3 != blockState2
 					&& (
 						blockState3.getLightBlock(this, blockPos) != blockState2.getLightBlock(this, blockPos)
 							|| blockState3.getLightEmission() != blockState2.getLightEmission()
 							|| blockState3.useShapeForLightOcclusion()
 							|| blockState2.useShapeForLightOcclusion()
 					)) {
-					this.profiler.push("queueCheckLight");
+					this.getProfiler().push("queueCheckLight");
 					this.getChunkSource().getLightEngine().checkBlock(blockPos);
-					this.profiler.pop();
+					this.getProfiler().pop();
 				}
 
 				if (blockState3 == blockState) {
@@ -199,18 +227,18 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 						this.sendBlockUpdated(blockPos, blockState2, blockState, i);
 					}
 
-					if (!this.isClientSide && (i & 1) != 0) {
+					if ((i & 1) != 0) {
 						this.blockUpdated(blockPos, blockState2.getBlock());
-						if (blockState.hasAnalogOutputSignal()) {
+						if (!this.isClientSide && blockState.hasAnalogOutputSignal()) {
 							this.updateNeighbourForOutputSignal(blockPos, block);
 						}
 					}
 
-					if ((i & 16) == 0) {
-						int j = i & -2;
-						blockState2.updateIndirectNeighbourShapes(this, blockPos, j);
-						blockState.updateNeighbourShapes(this, blockPos, j);
-						blockState.updateIndirectNeighbourShapes(this, blockPos, j);
+					if ((i & 16) == 0 && j > 0) {
+						int k = i & -34;
+						blockState2.updateIndirectNeighbourShapes(this, blockPos, k, j - 1);
+						blockState.updateNeighbourShapes(this, blockPos, k, j - 1);
+						blockState.updateIndirectNeighbourShapes(this, blockPos, k, j - 1);
 					}
 
 					this.onBlockStateChange(blockPos, blockState2, blockState3);
@@ -231,19 +259,22 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	@Override
-	public boolean destroyBlock(BlockPos blockPos, boolean bl, @Nullable Entity entity) {
+	public boolean destroyBlock(BlockPos blockPos, boolean bl, @Nullable Entity entity, int i) {
 		BlockState blockState = this.getBlockState(blockPos);
 		if (blockState.isAir()) {
 			return false;
 		} else {
 			FluidState fluidState = this.getFluidState(blockPos);
-			this.levelEvent(2001, blockPos, Block.getId(blockState));
+			if (!(blockState.getBlock() instanceof BaseFireBlock)) {
+				this.levelEvent(2001, blockPos, Block.getId(blockState));
+			}
+
 			if (bl) {
 				BlockEntity blockEntity = blockState.getBlock().isEntityBlock() ? this.getBlockEntity(blockPos) : null;
 				Block.dropResources(blockState, this, blockPos, blockEntity, entity, ItemStack.EMPTY);
 			}
 
-			return this.setBlock(blockPos, fluidState.createLegacyBlock(), 3);
+			return this.setBlock(blockPos, fluidState.createLegacyBlock(), 3, i);
 		}
 	}
 
@@ -252,13 +283,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public abstract void sendBlockUpdated(BlockPos blockPos, BlockState blockState, BlockState blockState2, int i);
-
-	@Override
-	public void blockUpdated(BlockPos blockPos, Block block) {
-		if (this.levelData.getGeneratorType() != LevelType.DEBUG_ALL_BLOCK_STATES) {
-			this.updateNeighborsAt(blockPos, block);
-		}
-	}
 
 	public void setBlocksDirty(BlockPos blockPos, BlockState blockState, BlockState blockState2) {
 	}
@@ -362,11 +386,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public boolean isDay() {
-		return this.dimension.getType() == DimensionType.OVERWORLD && this.skyDarken < 4;
+		return !this.dimensionType().hasFixedTime() && this.skyDarken < 4;
 	}
 
 	public boolean isNight() {
-		return this.dimension.getType() == DimensionType.OVERWORLD && !this.isDay();
+		return !this.dimensionType().hasFixedTime() && !this.isDay();
 	}
 
 	@Override
@@ -445,7 +469,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 			BlockEntity blockEntity = (BlockEntity)iterator.next();
 			if (!blockEntity.isRemoved() && blockEntity.hasLevel()) {
 				BlockPos blockPos = blockEntity.getBlockPos();
-				if (this.chunkSource.isTickingChunk(blockPos) && this.getWorldBorder().isWithinBounds(blockPos)) {
+				if (this.getChunkSource().isTickingChunk(blockPos) && this.getWorldBorder().isWithinBounds(blockPos)) {
 					try {
 						profilerFiller.push((Supplier<String>)(() -> String.valueOf(BlockEntityType.getKey(blockEntity.getType()))));
 						if (blockEntity.getType().isValid(this.getBlockState(blockPos).getBlock())) {
@@ -509,130 +533,34 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		}
 	}
 
-	public boolean containsAnyBlocks(AABB aABB) {
-		int i = Mth.floor(aABB.minX);
-		int j = Mth.ceil(aABB.maxX);
-		int k = Mth.floor(aABB.minY);
-		int l = Mth.ceil(aABB.maxY);
-		int m = Mth.floor(aABB.minZ);
-		int n = Mth.ceil(aABB.maxZ);
-
-		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-			for (int o = i; o < j; o++) {
-				for (int p = k; p < l; p++) {
-					for (int q = m; q < n; q++) {
-						BlockState blockState = this.getBlockState(pooledMutableBlockPos.set(o, p, q));
-						if (!blockState.isAir()) {
-							return true;
-						}
-					}
-				}
-			}
-
-			return false;
-		}
-	}
-
-	public boolean containsFireBlock(AABB aABB) {
-		int i = Mth.floor(aABB.minX);
-		int j = Mth.ceil(aABB.maxX);
-		int k = Mth.floor(aABB.minY);
-		int l = Mth.ceil(aABB.maxY);
-		int m = Mth.floor(aABB.minZ);
-		int n = Mth.ceil(aABB.maxZ);
-		if (this.hasChunksAt(i, k, m, j, l, n)) {
-			try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-				for (int o = i; o < j; o++) {
-					for (int p = k; p < l; p++) {
-						for (int q = m; q < n; q++) {
-							Block block = this.getBlockState(pooledMutableBlockPos.set(o, p, q)).getBlock();
-							if (block == Blocks.FIRE || block == Blocks.LAVA) {
-								return true;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
-	@Nullable
-	@Environment(EnvType.CLIENT)
-	public BlockState containsBlock(AABB aABB, Block block) {
-		int i = Mth.floor(aABB.minX);
-		int j = Mth.ceil(aABB.maxX);
-		int k = Mth.floor(aABB.minY);
-		int l = Mth.ceil(aABB.maxY);
-		int m = Mth.floor(aABB.minZ);
-		int n = Mth.ceil(aABB.maxZ);
-		if (this.hasChunksAt(i, k, m, j, l, n)) {
-			try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-				for (int o = i; o < j; o++) {
-					for (int p = k; p < l; p++) {
-						for (int q = m; q < n; q++) {
-							BlockState blockState = this.getBlockState(pooledMutableBlockPos.set(o, p, q));
-							if (blockState.getBlock() == block) {
-								return blockState;
-							}
-						}
-					}
-				}
-
-				return null;
-			}
-		} else {
-			return null;
-		}
-	}
-
-	public boolean containsMaterial(AABB aABB, Material material) {
-		int i = Mth.floor(aABB.minX);
-		int j = Mth.ceil(aABB.maxX);
-		int k = Mth.floor(aABB.minY);
-		int l = Mth.ceil(aABB.maxY);
-		int m = Mth.floor(aABB.minZ);
-		int n = Mth.ceil(aABB.maxZ);
-		BlockMaterialPredicate blockMaterialPredicate = BlockMaterialPredicate.forMaterial(material);
-		return BlockPos.betweenClosedStream(i, k, m, j - 1, l - 1, n - 1).anyMatch(blockPos -> blockMaterialPredicate.test(this.getBlockState(blockPos)));
-	}
-
 	public Explosion explode(@Nullable Entity entity, double d, double e, double f, float g, Explosion.BlockInteraction blockInteraction) {
-		return this.explode(entity, null, d, e, f, g, false, blockInteraction);
+		return this.explode(entity, null, null, d, e, f, g, false, blockInteraction);
 	}
 
 	public Explosion explode(@Nullable Entity entity, double d, double e, double f, float g, boolean bl, Explosion.BlockInteraction blockInteraction) {
-		return this.explode(entity, null, d, e, f, g, bl, blockInteraction);
+		return this.explode(entity, null, null, d, e, f, g, bl, blockInteraction);
 	}
 
 	public Explosion explode(
-		@Nullable Entity entity, @Nullable DamageSource damageSource, double d, double e, double f, float g, boolean bl, Explosion.BlockInteraction blockInteraction
+		@Nullable Entity entity,
+		@Nullable DamageSource damageSource,
+		@Nullable ExplosionDamageCalculator explosionDamageCalculator,
+		double d,
+		double e,
+		double f,
+		float g,
+		boolean bl,
+		Explosion.BlockInteraction blockInteraction
 	) {
-		Explosion explosion = new Explosion(this, entity, d, e, f, g, bl, blockInteraction);
-		if (damageSource != null) {
-			explosion.setDamageSource(damageSource);
-		}
-
+		Explosion explosion = new Explosion(this, entity, damageSource, explosionDamageCalculator, d, e, f, g, bl, blockInteraction);
 		explosion.explode();
 		explosion.finalizeExplosion(true);
 		return explosion;
 	}
 
-	public boolean extinguishFire(@Nullable Player player, BlockPos blockPos, Direction direction) {
-		blockPos = blockPos.relative(direction);
-		if (this.getBlockState(blockPos).getBlock() == Blocks.FIRE) {
-			this.levelEvent(player, 1009, blockPos, 0);
-			this.removeBlock(blockPos, false);
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	@Environment(EnvType.CLIENT)
 	public String gatherChunkSourceStats() {
-		return this.chunkSource.gatherStats();
+		return this.getChunkSource().gatherStats();
 	}
 
 	@Nullable
@@ -713,16 +641,20 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public boolean isLoaded(BlockPos blockPos) {
-		return isOutsideBuildHeight(blockPos) ? false : this.chunkSource.hasChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+		return isOutsideBuildHeight(blockPos) ? false : this.getChunkSource().hasChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4);
 	}
 
-	public boolean loadedAndEntityCanStandOn(BlockPos blockPos, Entity entity) {
+	public boolean loadedAndEntityCanStandOnFace(BlockPos blockPos, Entity entity, Direction direction) {
 		if (isOutsideBuildHeight(blockPos)) {
 			return false;
 		} else {
 			ChunkAccess chunkAccess = this.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4, ChunkStatus.FULL, false);
-			return chunkAccess == null ? false : chunkAccess.getBlockState(blockPos).entityCanStandOn(this, blockPos, entity);
+			return chunkAccess == null ? false : chunkAccess.getBlockState(blockPos).entityCanStandOnFace(this, blockPos, entity, direction);
 		}
+	}
+
+	public boolean loadedAndEntityCanStandOn(BlockPos blockPos, Entity entity) {
+		return this.loadedAndEntityCanStandOnFace(blockPos, entity, Direction.UP);
 	}
 
 	public void updateSkyBrightness() {
@@ -746,7 +678,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public void close() throws IOException {
-		this.chunkSource.close();
+		this.getChunkSource().close();
 	}
 
 	@Nullable
@@ -763,10 +695,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		int j = Mth.floor((aABB.maxX + 2.0) / 16.0);
 		int k = Mth.floor((aABB.minZ - 2.0) / 16.0);
 		int l = Mth.floor((aABB.maxZ + 2.0) / 16.0);
+		ChunkSource chunkSource = this.getChunkSource();
 
 		for (int m = i; m <= j; m++) {
 			for (int n = k; n <= l; n++) {
-				LevelChunk levelChunk = this.getChunkSource().getChunk(m, n, false);
+				LevelChunk levelChunk = chunkSource.getChunk(m, n, false);
 				if (levelChunk != null) {
 					levelChunk.getEntities(entity, aABB, list, predicate);
 				}
@@ -854,15 +787,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		return 63;
 	}
 
-	@Override
-	public Level getLevel() {
-		return this;
-	}
-
-	public LevelType getGeneratorType() {
-		return this.levelData.getGeneratorType();
-	}
-
 	public int getDirectSignalTo(BlockPos blockPos) {
 		int i = 0;
 		i = Math.max(i, this.getDirectSignal(blockPos.below(), Direction.DOWN));
@@ -900,7 +824,8 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	public int getSignal(BlockPos blockPos, Direction direction) {
 		BlockState blockState = this.getBlockState(blockPos);
-		return blockState.isRedstoneConductor(this, blockPos) ? this.getDirectSignalTo(blockPos) : blockState.getSignal(this, blockPos, direction);
+		int i = blockState.getSignal(this, blockPos, direction);
+		return blockState.isRedstoneConductor(this, blockPos) ? Math.max(i, this.getDirectSignalTo(blockPos)) : i;
 	}
 
 	public boolean hasNeighborSignal(BlockPos blockPos) {
@@ -938,15 +863,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	public void disconnect() {
 	}
 
-	public void setGameTime(long l) {
-		this.levelData.setGameTime(l);
-	}
-
-	@Override
-	public long getSeed() {
-		return this.levelData.getSeed();
-	}
-
 	public long getGameTime() {
 		return this.levelData.getGameTime();
 	}
@@ -955,41 +871,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		return this.levelData.getDayTime();
 	}
 
-	public void setDayTime(long l) {
-		this.levelData.setDayTime(l);
-	}
-
-	protected void tickTime() {
-		this.setGameTime(this.levelData.getGameTime() + 1L);
-		if (this.levelData.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
-			this.setDayTime(this.levelData.getDayTime() + 1L);
-		}
-	}
-
-	@Override
-	public BlockPos getSharedSpawnPos() {
-		BlockPos blockPos = new BlockPos(this.levelData.getXSpawn(), this.levelData.getYSpawn(), this.levelData.getZSpawn());
-		if (!this.getWorldBorder().isWithinBounds(blockPos)) {
-			blockPos = this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(this.getWorldBorder().getCenterX(), 0.0, this.getWorldBorder().getCenterZ()));
-		}
-
-		return blockPos;
-	}
-
-	public void setSpawnPos(BlockPos blockPos) {
-		this.levelData.setSpawn(blockPos);
-	}
-
 	public boolean mayInteract(Player player, BlockPos blockPos) {
 		return true;
 	}
 
 	public void broadcastEntityEvent(Entity entity, byte b) {
-	}
-
-	@Override
-	public ChunkSource getChunkSource() {
-		return this.chunkSource;
 	}
 
 	public void blockEvent(BlockPos blockPos, Block block, int i, int j) {
@@ -1026,7 +912,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public boolean isThundering() {
-		return this.dimension.isHasSkyLight() && !this.dimension.isHasCeiling() ? (double)this.getThunderLevel(1.0F) > 0.9 : false;
+		return this.dimensionType().hasSkyLight() && !this.dimensionType().hasCeiling() ? (double)this.getThunderLevel(1.0F) > 0.9 : false;
 	}
 
 	public boolean isRaining() {
@@ -1038,10 +924,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 			return false;
 		} else if (!this.canSeeSky(blockPos)) {
 			return false;
+		} else if (this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos).getY() > blockPos.getY()) {
+			return false;
 		} else {
-			return this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos).getY() > blockPos.getY()
-				? false
-				: this.getBiome(blockPos).getPrecipitation() == Biome.Precipitation.RAIN;
+			Biome biome = this.getBiome(blockPos);
+			return biome.getPrecipitation() == Biome.Precipitation.RAIN && biome.getTemperature(blockPos) >= 0.15F;
 		}
 	}
 
@@ -1060,15 +947,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	public void globalLevelEvent(int i, BlockPos blockPos, int j) {
 	}
 
-	public int getHeight() {
-		return this.dimension.isHasCeiling() ? 128 : 256;
-	}
-
 	public CrashReportCategory fillReportDetails(CrashReport crashReport) {
 		CrashReportCategory crashReportCategory = crashReport.addCategory("Affected level", 1);
 		crashReportCategory.setDetail("All players", (CrashReportDetail<String>)(() -> this.players().size() + " total; " + this.players()));
-		crashReportCategory.setDetail("Chunk stats", this.chunkSource::gatherStats);
-		crashReportCategory.setDetail("Level dimension", (CrashReportDetail<String>)(() -> this.dimension.getType().toString()));
+		crashReportCategory.setDetail("Chunk stats", this.getChunkSource()::gatherStats);
+		crashReportCategory.setDetail("Level dimension", (CrashReportDetail<String>)(() -> this.dimension().location().toString()));
 
 		try {
 			this.levelData.fillCrashReportCategory(crashReportCategory);
@@ -1092,12 +975,12 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 			BlockPos blockPos2 = blockPos.relative(direction);
 			if (this.hasChunkAt(blockPos2)) {
 				BlockState blockState = this.getBlockState(blockPos2);
-				if (blockState.getBlock() == Blocks.COMPARATOR) {
+				if (blockState.is(Blocks.COMPARATOR)) {
 					blockState.neighborChanged(this, blockPos2, block, blockPos, false);
 				} else if (blockState.isRedstoneConductor(this, blockPos2)) {
 					blockPos2 = blockPos2.relative(direction);
 					blockState = this.getBlockState(blockPos2);
-					if (blockState.getBlock() == Blocks.COMPARATOR) {
+					if (blockState.is(Blocks.COMPARATOR)) {
 						blockState.neighborChanged(this, blockPos2, block, blockPos, false);
 					}
 				}
@@ -1135,7 +1018,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	@Override
-	public Dimension getDimension() {
+	public DimensionType dimensionType() {
+		return this.dimensionType;
+	}
+
+	public ResourceKey<Level> dimension() {
 		return this.dimension;
 	}
 
@@ -1151,7 +1038,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	public abstract RecipeManager getRecipeManager();
 
-	public abstract TagManager getTagManager();
+	public abstract TagContainer getTagManager();
 
 	public BlockPos getBlockRandomPos(int i, int j, int k, int l) {
 		this.randValue = this.randValue * 3 + 1013904223;
@@ -1164,11 +1051,19 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public ProfilerFiller getProfiler() {
+		return (ProfilerFiller)this.profiler.get();
+	}
+
+	public Supplier<ProfilerFiller> getProfilerSupplier() {
 		return this.profiler;
 	}
 
 	@Override
 	public BiomeManager getBiomeManager() {
 		return this.biomeManager;
+	}
+
+	public final boolean isDebug() {
+		return this.isDebug;
 	}
 }

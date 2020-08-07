@@ -15,8 +15,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.global.LightningBolt;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -149,11 +149,12 @@ public class ThrownTrident extends AbstractArrow {
 		this.setDeltaMovement(this.getDeltaMovement().multiply(-0.01, -0.1, -0.01));
 		float g = 1.0F;
 		if (this.level instanceof ServerLevel && this.level.isThundering() && EnchantmentHelper.hasChanneling(this.tridentItem)) {
-			BlockPos blockPos = entity.getCommandSenderBlockPosition();
+			BlockPos blockPos = entity.blockPosition();
 			if (this.level.canSeeSky(blockPos)) {
-				LightningBolt lightningBolt = new LightningBolt(this.level, (double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, false);
+				LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(this.level);
+				lightningBolt.moveTo(Vec3.atBottomCenterOf(blockPos));
 				lightningBolt.setCause(entity2 instanceof ServerPlayer ? (ServerPlayer)entity2 : null);
-				((ServerLevel)this.level).addGlobalEntity(lightningBolt);
+				this.level.addFreshEntity(lightningBolt);
 				soundEvent = SoundEvents.TRIDENT_THUNDER;
 				g = 5.0F;
 			}

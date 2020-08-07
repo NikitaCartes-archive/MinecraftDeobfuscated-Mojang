@@ -43,22 +43,14 @@ public class CommandBlockEntity extends BlockEntity {
 		@Environment(EnvType.CLIENT)
 		@Override
 		public Vec3 getPosition() {
-			return new Vec3(
-				(double)CommandBlockEntity.this.worldPosition.getX() + 0.5,
-				(double)CommandBlockEntity.this.worldPosition.getY() + 0.5,
-				(double)CommandBlockEntity.this.worldPosition.getZ() + 0.5
-			);
+			return Vec3.atCenterOf(CommandBlockEntity.this.worldPosition);
 		}
 
 		@Override
 		public CommandSourceStack createCommandSourceStack() {
 			return new CommandSourceStack(
 				this,
-				new Vec3(
-					(double)CommandBlockEntity.this.worldPosition.getX() + 0.5,
-					(double)CommandBlockEntity.this.worldPosition.getY() + 0.5,
-					(double)CommandBlockEntity.this.worldPosition.getZ() + 0.5
-				),
+				Vec3.atCenterOf(CommandBlockEntity.this.worldPosition),
 				Vec2.ZERO,
 				this.getLevel(),
 				2,
@@ -85,8 +77,8 @@ public class CommandBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		this.commandBlock.load(compoundTag);
 		this.powered = compoundTag.getBoolean("powered");
 		this.conditionMet = compoundTag.getBoolean("conditionMet");
@@ -145,7 +137,7 @@ public class CommandBlockEntity extends BlockEntity {
 		Block block = this.getBlockState().getBlock();
 		if (block instanceof CommandBlock) {
 			this.markConditionMet();
-			this.level.getBlockTicks().scheduleTick(this.worldPosition, block, block.getTickDelay(this.level));
+			this.level.getBlockTicks().scheduleTick(this.worldPosition, block, 1);
 		}
 	}
 
@@ -177,13 +169,13 @@ public class CommandBlockEntity extends BlockEntity {
 	}
 
 	public CommandBlockEntity.Mode getMode() {
-		Block block = this.getBlockState().getBlock();
-		if (block == Blocks.COMMAND_BLOCK) {
+		BlockState blockState = this.getBlockState();
+		if (blockState.is(Blocks.COMMAND_BLOCK)) {
 			return CommandBlockEntity.Mode.REDSTONE;
-		} else if (block == Blocks.REPEATING_COMMAND_BLOCK) {
+		} else if (blockState.is(Blocks.REPEATING_COMMAND_BLOCK)) {
 			return CommandBlockEntity.Mode.AUTO;
 		} else {
-			return block == Blocks.CHAIN_COMMAND_BLOCK ? CommandBlockEntity.Mode.SEQUENCE : CommandBlockEntity.Mode.REDSTONE;
+			return blockState.is(Blocks.CHAIN_COMMAND_BLOCK) ? CommandBlockEntity.Mode.SEQUENCE : CommandBlockEntity.Mode.REDSTONE;
 		}
 	}
 

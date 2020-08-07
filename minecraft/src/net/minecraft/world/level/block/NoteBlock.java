@@ -8,9 +8,10 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -25,7 +26,7 @@ public class NoteBlock extends Block {
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	public static final IntegerProperty NOTE = BlockStateProperties.NOTE;
 
-	public NoteBlock(Block.Properties properties) {
+	public NoteBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(INSTRUMENT, NoteBlockInstrument.HARP).setValue(NOTE, Integer.valueOf(0)).setValue(POWERED, Boolean.valueOf(false))
@@ -76,7 +77,7 @@ public class NoteBlock extends Block {
 			level.setBlock(blockPos, blockState, 3);
 			this.playNote(level, blockPos);
 			player.awardStat(Stats.TUNE_NOTEBLOCK);
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		}
 	}
 

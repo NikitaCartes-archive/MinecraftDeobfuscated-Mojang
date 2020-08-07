@@ -1,12 +1,11 @@
 package net.minecraft.advancements.critereon;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.storage.loot.LootContext;
 
 public class PlayerHurtEntityTrigger extends SimpleCriterionTrigger<PlayerHurtEntityTrigger.TriggerInstance> {
 	private static final ResourceLocation ID = new ResourceLocation("player_hurt_entity");
@@ -16,39 +15,42 @@ public class PlayerHurtEntityTrigger extends SimpleCriterionTrigger<PlayerHurtEn
 		return ID;
 	}
 
-	public PlayerHurtEntityTrigger.TriggerInstance createInstance(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+	public PlayerHurtEntityTrigger.TriggerInstance createInstance(
+		JsonObject jsonObject, EntityPredicate.Composite composite, DeserializationContext deserializationContext
+	) {
 		DamagePredicate damagePredicate = DamagePredicate.fromJson(jsonObject.get("damage"));
-		EntityPredicate entityPredicate = EntityPredicate.fromJson(jsonObject.get("entity"));
-		return new PlayerHurtEntityTrigger.TriggerInstance(damagePredicate, entityPredicate);
+		EntityPredicate.Composite composite2 = EntityPredicate.Composite.fromJson(jsonObject, "entity", deserializationContext);
+		return new PlayerHurtEntityTrigger.TriggerInstance(composite, damagePredicate, composite2);
 	}
 
 	public void trigger(ServerPlayer serverPlayer, Entity entity, DamageSource damageSource, float f, float g, boolean bl) {
-		this.trigger(serverPlayer.getAdvancements(), triggerInstance -> triggerInstance.matches(serverPlayer, entity, damageSource, f, g, bl));
+		LootContext lootContext = EntityPredicate.createContext(serverPlayer, entity);
+		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(serverPlayer, lootContext, damageSource, f, g, bl));
 	}
 
 	public static class TriggerInstance extends AbstractCriterionTriggerInstance {
 		private final DamagePredicate damage;
-		private final EntityPredicate entity;
+		private final EntityPredicate.Composite entity;
 
-		public TriggerInstance(DamagePredicate damagePredicate, EntityPredicate entityPredicate) {
-			super(PlayerHurtEntityTrigger.ID);
+		public TriggerInstance(EntityPredicate.Composite composite, DamagePredicate damagePredicate, EntityPredicate.Composite composite2) {
+			super(PlayerHurtEntityTrigger.ID, composite);
 			this.damage = damagePredicate;
-			this.entity = entityPredicate;
+			this.entity = composite2;
 		}
 
 		public static PlayerHurtEntityTrigger.TriggerInstance playerHurtEntity(DamagePredicate.Builder builder) {
-			return new PlayerHurtEntityTrigger.TriggerInstance(builder.build(), EntityPredicate.ANY);
+			return new PlayerHurtEntityTrigger.TriggerInstance(EntityPredicate.Composite.ANY, builder.build(), EntityPredicate.Composite.ANY);
 		}
 
-		public boolean matches(ServerPlayer serverPlayer, Entity entity, DamageSource damageSource, float f, float g, boolean bl) {
-			return !this.damage.matches(serverPlayer, damageSource, f, g, bl) ? false : this.entity.matches(serverPlayer, entity);
+		public boolean matches(ServerPlayer serverPlayer, LootContext lootContext, DamageSource damageSource, float f, float g, boolean bl) {
+			return !this.damage.matches(serverPlayer, damageSource, f, g, bl) ? false : this.entity.matches(lootContext);
 		}
 
 		@Override
-		public JsonElement serializeToJson() {
-			JsonObject jsonObject = new JsonObject();
+		public JsonObject serializeToJson(SerializationContext serializationContext) {
+			JsonObject jsonObject = super.serializeToJson(serializationContext);
 			jsonObject.add("damage", this.damage.serializeToJson());
-			jsonObject.add("entity", this.entity.serializeToJson());
+			jsonObject.add("entity", this.entity.toJson(serializationContext));
 			return jsonObject;
 		}
 	}

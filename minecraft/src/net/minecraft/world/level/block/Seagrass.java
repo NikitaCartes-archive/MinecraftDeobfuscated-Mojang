@@ -6,10 +6,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.material.Fluid;
@@ -21,7 +22,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class Seagrass extends BushBlock implements BonemealableBlock, LiquidBlockContainer {
 	protected static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 12.0, 14.0);
 
-	protected Seagrass(Block.Properties properties) {
+	protected Seagrass(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 
@@ -32,7 +33,7 @@ public class Seagrass extends BushBlock implements BonemealableBlock, LiquidBloc
 
 	@Override
 	protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return blockState.isFaceSturdy(blockGetter, blockPos, Direction.UP) && blockState.getBlock() != Blocks.MAGMA_BLOCK;
+		return blockState.isFaceSturdy(blockGetter, blockPos, Direction.UP) && !blockState.is(Blocks.MAGMA_BLOCK);
 	}
 
 	@Nullable
@@ -74,7 +75,7 @@ public class Seagrass extends BushBlock implements BonemealableBlock, LiquidBloc
 		BlockState blockState2 = Blocks.TALL_SEAGRASS.defaultBlockState();
 		BlockState blockState3 = blockState2.setValue(TallSeagrass.HALF, DoubleBlockHalf.UPPER);
 		BlockPos blockPos2 = blockPos.above();
-		if (serverLevel.getBlockState(blockPos2).getBlock() == Blocks.WATER) {
+		if (serverLevel.getBlockState(blockPos2).is(Blocks.WATER)) {
 			serverLevel.setBlock(blockPos, blockState2, 2);
 			serverLevel.setBlock(blockPos2, blockState3, 2);
 		}

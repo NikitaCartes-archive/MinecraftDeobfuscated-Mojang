@@ -10,7 +10,7 @@ public class UserWhiteListEntry extends StoredUserEntry<GameProfile> {
 	}
 
 	public UserWhiteListEntry(JsonObject jsonObject) {
-		super(createGameProfile(jsonObject), jsonObject);
+		super(createGameProfile(jsonObject));
 	}
 
 	@Override
@@ -18,7 +18,6 @@ public class UserWhiteListEntry extends StoredUserEntry<GameProfile> {
 		if (this.getUser() != null) {
 			jsonObject.addProperty("uuid", this.getUser().getId() == null ? "" : this.getUser().getId().toString());
 			jsonObject.addProperty("name", this.getUser().getName());
-			super.serialize(jsonObject);
 		}
 	}
 

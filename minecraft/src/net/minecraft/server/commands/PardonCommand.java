@@ -19,7 +19,7 @@ public class PardonCommand {
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
 			Commands.literal("pardon")
-				.requires(commandSourceStack -> commandSourceStack.getServer().getPlayerList().getIpBans().isEnabled() && commandSourceStack.hasPermission(3))
+				.requires(commandSourceStack -> commandSourceStack.hasPermission(3))
 				.then(
 					Commands.argument("targets", GameProfileArgument.gameProfile())
 						.suggests(

@@ -182,7 +182,7 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 				)
 				.withPool(
 					LootPool.lootPool()
-						.add(TagEntry.expandTag(ItemTags.MUSIC_DISCS))
+						.add(TagEntry.expandTag(ItemTags.CREEPER_DROP_MUSIC_DISCS))
 						.when(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.KILLER, EntityPredicate.Builder.entity().of(EntityTypeTags.SKELETONS)))
 				)
 		);
@@ -785,6 +785,19 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 				)
 		);
 		this.add(
+			EntityType.STRIDER,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantIntValue.exactly(1))
+						.add(
+							LootItem.lootTableItem(Items.STRING)
+								.apply(SetItemCountFunction.setCount(RandomValueBounds.between(2.0F, 5.0F)))
+								.apply(LootingEnchantFunction.lootingMultiplier(RandomValueBounds.between(0.0F, 1.0F)))
+						)
+				)
+		);
+		this.add(
 			EntityType.TRADER_LLAMA,
 			LootTable.lootTable()
 				.withPool(
@@ -925,6 +938,19 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 		);
 		this.add(EntityType.WOLF, LootTable.lootTable());
 		this.add(
+			EntityType.ZOGLIN,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantIntValue.exactly(1))
+						.add(
+							LootItem.lootTableItem(Items.ROTTEN_FLESH)
+								.apply(SetItemCountFunction.setCount(RandomValueBounds.between(1.0F, 3.0F)))
+								.apply(LootingEnchantFunction.lootingMultiplier(RandomValueBounds.between(0.0F, 1.0F)))
+						)
+				)
+		);
+		this.add(
 			EntityType.ZOMBIE,
 			LootTable.lootTable()
 				.withPool(
@@ -960,7 +986,7 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 				)
 		);
 		this.add(
-			EntityType.ZOMBIE_PIGMAN,
+			EntityType.ZOMBIFIED_PIGLIN,
 			LootTable.lootTable()
 				.withPool(
 					LootPool.lootPool()
@@ -988,6 +1014,31 @@ public class EntityLoot implements Consumer<BiConsumer<ResourceLocation, LootTab
 						.when(LootItemRandomChanceWithLootingCondition.randomChanceAndLootingBoost(0.025F, 0.01F))
 				)
 		);
+		this.add(
+			EntityType.HOGLIN,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantIntValue.exactly(1))
+						.add(
+							LootItem.lootTableItem(Items.PORKCHOP)
+								.apply(SetItemCountFunction.setCount(RandomValueBounds.between(2.0F, 4.0F)))
+								.apply(SmeltItemFunction.smelted().when(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, ENTITY_ON_FIRE)))
+								.apply(LootingEnchantFunction.lootingMultiplier(RandomValueBounds.between(0.0F, 1.0F)))
+						)
+				)
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantIntValue.exactly(1))
+						.add(
+							LootItem.lootTableItem(Items.LEATHER)
+								.apply(SetItemCountFunction.setCount(RandomValueBounds.between(0.0F, 1.0F)))
+								.apply(LootingEnchantFunction.lootingMultiplier(RandomValueBounds.between(0.0F, 1.0F)))
+						)
+				)
+		);
+		this.add(EntityType.PIGLIN, LootTable.lootTable());
+		this.add(EntityType.PIGLIN_BRUTE, LootTable.lootTable());
 		this.add(
 			EntityType.ZOMBIE_VILLAGER,
 			LootTable.lootTable()

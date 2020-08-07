@@ -19,14 +19,14 @@ import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.level.pathfinder.Path;
 
 public class SetClosestHomeAsWalkTarget extends Behavior<LivingEntity> {
-	private final float speed;
+	private final float speedModifier;
 	private final Long2LongMap batchCache = new Long2LongOpenHashMap();
 	private int triedCount;
 	private long lastUpdate;
 
 	public SetClosestHomeAsWalkTarget(float f) {
 		super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, MemoryModuleType.HOME, MemoryStatus.VALUE_ABSENT));
-		this.speed = f;
+		this.speedModifier = f;
 	}
 
 	@Override
@@ -36,8 +36,8 @@ public class SetClosestHomeAsWalkTarget extends Behavior<LivingEntity> {
 		} else {
 			PathfinderMob pathfinderMob = (PathfinderMob)livingEntity;
 			PoiManager poiManager = serverLevel.getPoiManager();
-			Optional<BlockPos> optional = poiManager.findClosest(PoiType.HOME.getPredicate(), blockPos -> true, new BlockPos(livingEntity), 48, PoiManager.Occupancy.ANY);
-			return optional.isPresent() && !(((BlockPos)optional.get()).distSqr(new BlockPos(pathfinderMob)) <= 4.0);
+			Optional<BlockPos> optional = poiManager.findClosest(PoiType.HOME.getPredicate(), livingEntity.blockPosition(), 48, PoiManager.Occupancy.ANY);
+			return optional.isPresent() && !(((BlockPos)optional.get()).distSqr(pathfinderMob.blockPosition()) <= 4.0);
 		}
 	}
 
@@ -58,13 +58,13 @@ public class SetClosestHomeAsWalkTarget extends Behavior<LivingEntity> {
 				return true;
 			}
 		};
-		Stream<BlockPos> stream = poiManager.findAll(PoiType.HOME.getPredicate(), predicate, new BlockPos(livingEntity), 48, PoiManager.Occupancy.ANY);
+		Stream<BlockPos> stream = poiManager.findAll(PoiType.HOME.getPredicate(), predicate, livingEntity.blockPosition(), 48, PoiManager.Occupancy.ANY);
 		Path path = pathfinderMob.getNavigation().createPath(stream, PoiType.HOME.getValidRange());
 		if (path != null && path.canReach()) {
 			BlockPos blockPos = path.getTarget();
 			Optional<PoiType> optional = poiManager.getType(blockPos);
 			if (optional.isPresent()) {
-				livingEntity.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, this.speed, 1));
+				livingEntity.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPos, this.speedModifier, 1));
 				DebugPackets.sendPoiTicketCountPacket(serverLevel, blockPos);
 			}
 		} else if (this.triedCount < 5) {

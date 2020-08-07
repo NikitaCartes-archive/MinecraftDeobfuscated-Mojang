@@ -1,26 +1,18 @@
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.LayerConfiguration;
 
 public class FillLayerFeature extends Feature<LayerConfiguration> {
-	public FillLayerFeature(Function<Dynamic<?>, ? extends LayerConfiguration> function) {
-		super(function);
+	public FillLayerFeature(Codec<LayerConfiguration> codec) {
+		super(codec);
 	}
 
-	public boolean place(
-		LevelAccessor levelAccessor,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
-		Random random,
-		BlockPos blockPos,
-		LayerConfiguration layerConfiguration
-	) {
+	public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, LayerConfiguration layerConfiguration) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 		for (int i = 0; i < 16; i++) {
@@ -29,8 +21,8 @@ public class FillLayerFeature extends Feature<LayerConfiguration> {
 				int l = blockPos.getZ() + j;
 				int m = layerConfiguration.height;
 				mutableBlockPos.set(k, m, l);
-				if (levelAccessor.getBlockState(mutableBlockPos).isAir()) {
-					levelAccessor.setBlock(mutableBlockPos, layerConfiguration.state, 2);
+				if (worldGenLevel.getBlockState(mutableBlockPos).isAir()) {
+					worldGenLevel.setBlock(mutableBlockPos, layerConfiguration.state, 2);
 				}
 			}
 		}

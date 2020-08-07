@@ -1,5 +1,7 @@
 package net.minecraft.world.level.chunk.storage;
 
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.ChunkPos;
@@ -32,7 +34,9 @@ public class OldChunkStorage {
 		return oldLevelChunk;
 	}
 
-	public static void convertToAnvilFormat(OldChunkStorage.OldLevelChunk oldLevelChunk, CompoundTag compoundTag, BiomeSource biomeSource) {
+	public static void convertToAnvilFormat(
+		RegistryAccess.RegistryHolder registryHolder, OldChunkStorage.OldLevelChunk oldLevelChunk, CompoundTag compoundTag, BiomeSource biomeSource
+	) {
 		compoundTag.putInt("xPos", oldLevelChunk.x);
 		compoundTag.putInt("zPos", oldLevelChunk.z);
 		compoundTag.putLong("LastUpdate", oldLevelChunk.lastUpdated);
@@ -92,7 +96,10 @@ public class OldChunkStorage {
 		}
 
 		compoundTag.put("Sections", listTag);
-		compoundTag.putIntArray("Biomes", new ChunkBiomeContainer(new ChunkPos(oldLevelChunk.x, oldLevelChunk.z), biomeSource).writeBiomes());
+		compoundTag.putIntArray(
+			"Biomes",
+			new ChunkBiomeContainer(registryHolder.registryOrThrow(Registry.BIOME_REGISTRY), new ChunkPos(oldLevelChunk.x, oldLevelChunk.z), biomeSource).writeBiomes()
+		);
 		compoundTag.put("Entities", oldLevelChunk.entities);
 		compoundTag.put("TileEntities", oldLevelChunk.blockEntities);
 		if (oldLevelChunk.blockTicks != null) {

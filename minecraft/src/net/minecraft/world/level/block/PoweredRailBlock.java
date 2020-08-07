@@ -2,6 +2,7 @@ package net.minecraft.world.level.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -14,7 +15,7 @@ public class PoweredRailBlock extends BaseRailBlock {
 	public static final EnumProperty<RailShape> SHAPE = BlockStateProperties.RAIL_SHAPE_STRAIGHT;
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
-	protected PoweredRailBlock(Block.Properties properties) {
+	protected PoweredRailBlock(BlockBehaviour.Properties properties) {
 		super(true, properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(SHAPE, RailShape.NORTH_SOUTH).setValue(POWERED, Boolean.valueOf(false)));
 	}
@@ -96,7 +97,7 @@ public class PoweredRailBlock extends BaseRailBlock {
 
 	protected boolean isSameRailWithPower(Level level, BlockPos blockPos, boolean bl, int i, RailShape railShape) {
 		BlockState blockState = level.getBlockState(blockPos);
-		if (blockState.getBlock() != this) {
+		if (!blockState.is(this)) {
 			return false;
 		} else {
 			RailShape railShape2 = blockState.getValue(SHAPE);

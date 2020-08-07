@@ -11,14 +11,14 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.CubicSampler;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
@@ -71,25 +71,30 @@ public class FogRenderer {
 			float v = (float)vec3.x;
 			float w = (float)vec3.y;
 			float x = (float)vec3.z;
-			Vec3 vec32 = clientLevel.getFogColor(f);
-			fogRed = (float)vec32.x;
-			fogGreen = (float)vec32.y;
-			fogBlue = (float)vec32.z;
+			float y = Mth.clamp(Mth.cos(clientLevel.getTimeOfDay(f) * (float) (Math.PI * 2)) * 2.0F + 0.5F, 0.0F, 1.0F);
+			BiomeManager biomeManager = clientLevel.getBiomeManager();
+			Vec3 vec32 = camera.getPosition().subtract(2.0, 2.0, 2.0).scale(0.25);
+			Vec3 vec33 = CubicSampler.gaussianSampleVec3(
+				vec32, (ix, jx, k) -> clientLevel.effects().getBrightnessDependentFogColor(Vec3.fromRGB24(biomeManager.getNoiseBiomeAtQuart(ix, jx, k).getFogColor()), y)
+			);
+			fogRed = (float)vec33.x();
+			fogGreen = (float)vec33.y();
+			fogBlue = (float)vec33.z();
 			if (i >= 4) {
-				float y = Mth.sin(clientLevel.getSunAngle(f)) > 0.0F ? -1.0F : 1.0F;
-				Vector3f vector3f = new Vector3f(y, 0.0F, 0.0F);
-				float z = camera.getLookVector().dot(vector3f);
-				if (z < 0.0F) {
-					z = 0.0F;
+				float h = Mth.sin(clientLevel.getSunAngle(f)) > 0.0F ? -1.0F : 1.0F;
+				Vector3f vector3f = new Vector3f(h, 0.0F, 0.0F);
+				float s = camera.getLookVector().dot(vector3f);
+				if (s < 0.0F) {
+					s = 0.0F;
 				}
 
-				if (z > 0.0F) {
-					float[] fs = clientLevel.dimension.getSunriseColor(clientLevel.getTimeOfDay(f), f);
+				if (s > 0.0F) {
+					float[] fs = clientLevel.effects().getSunriseColor(clientLevel.getTimeOfDay(f), f);
 					if (fs != null) {
-						z *= fs[3];
-						fogRed = fogRed * (1.0F - z) + fs[0] * z;
-						fogGreen = fogGreen * (1.0F - z) + fs[1] * z;
-						fogBlue = fogBlue * (1.0F - z) + fs[2] * z;
+						s *= fs[3];
+						fogRed = fogRed * (1.0F - s) + fs[0] * s;
+						fogGreen = fogGreen * (1.0F - s) + fs[1] * s;
+						fogBlue = fogBlue * (1.0F - s) + fs[2] * s;
 					}
 				}
 			}
@@ -97,27 +102,27 @@ public class FogRenderer {
 			fogRed = fogRed + (v - fogRed) * u;
 			fogGreen = fogGreen + (w - fogGreen) * u;
 			fogBlue = fogBlue + (x - fogBlue) * u;
-			float yx = clientLevel.getRainLevel(f);
-			if (yx > 0.0F) {
-				float aa = 1.0F - yx * 0.5F;
-				float zx = 1.0F - yx * 0.4F;
-				fogRed *= aa;
-				fogGreen *= aa;
-				fogBlue *= zx;
+			float hx = clientLevel.getRainLevel(f);
+			if (hx > 0.0F) {
+				float r = 1.0F - hx * 0.5F;
+				float sx = 1.0F - hx * 0.4F;
+				fogRed *= r;
+				fogGreen *= r;
+				fogBlue *= sx;
 			}
 
-			float aa = clientLevel.getThunderLevel(f);
-			if (aa > 0.0F) {
-				float zx = 1.0F - aa * 0.5F;
-				fogRed *= zx;
-				fogGreen *= zx;
-				fogBlue *= zx;
+			float r = clientLevel.getThunderLevel(f);
+			if (r > 0.0F) {
+				float sx = 1.0F - r * 0.5F;
+				fogRed *= sx;
+				fogGreen *= sx;
+				fogBlue *= sx;
 			}
 
 			biomeChangedTime = -1L;
 		}
 
-		double d = camera.getPosition().y * clientLevel.dimension.getClearColorScale();
+		double d = camera.getPosition().y * clientLevel.getLevelData().getClearColorScale();
 		if (camera.getEntity() instanceof LivingEntity && ((LivingEntity)camera.getEntity()).hasEffect(MobEffects.BLINDNESS)) {
 			int jx = ((LivingEntity)camera.getEntity()).getEffect(MobEffects.BLINDNESS).getDuration();
 			if (jx < 20) {
@@ -127,7 +132,7 @@ public class FogRenderer {
 			}
 		}
 
-		if (d < 1.0) {
+		if (d < 1.0 && !fluidState.is(FluidTags.LAVA)) {
 			if (d < 0.0) {
 				d = 0.0;
 			}
@@ -174,51 +179,54 @@ public class FogRenderer {
 	public static void setupFog(Camera camera, FogRenderer.FogMode fogMode, float f, boolean bl) {
 		FluidState fluidState = camera.getFluidInCamera();
 		Entity entity = camera.getEntity();
-		boolean bl2 = fluidState.getType() != Fluids.EMPTY;
-		if (bl2) {
+		if (fluidState.is(FluidTags.WATER)) {
 			float g = 1.0F;
-			if (fluidState.is(FluidTags.WATER)) {
-				g = 0.05F;
-				if (entity instanceof LocalPlayer) {
-					LocalPlayer localPlayer = (LocalPlayer)entity;
-					g -= localPlayer.getWaterVision() * localPlayer.getWaterVision() * 0.03F;
-					Biome biome = localPlayer.level.getBiome(new BlockPos(localPlayer));
-					if (biome == Biomes.SWAMP || biome == Biomes.SWAMP_HILLS) {
-						g += 0.005F;
-					}
+			g = 0.05F;
+			if (entity instanceof LocalPlayer) {
+				LocalPlayer localPlayer = (LocalPlayer)entity;
+				g -= localPlayer.getWaterVision() * localPlayer.getWaterVision() * 0.03F;
+				Biome biome = localPlayer.level.getBiome(localPlayer.blockPosition());
+				if (biome.getBiomeCategory() == Biome.BiomeCategory.SWAMP) {
+					g += 0.005F;
 				}
-			} else if (fluidState.is(FluidTags.LAVA)) {
-				g = 2.0F;
 			}
 
 			RenderSystem.fogDensity(g);
 			RenderSystem.fogMode(GlStateManager.FogMode.EXP2);
 		} else {
 			float g;
-			float j;
-			if (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS)) {
+			float h;
+			if (fluidState.is(FluidTags.LAVA)) {
+				if (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.FIRE_RESISTANCE)) {
+					g = 0.0F;
+					h = 3.0F;
+				} else {
+					g = 0.25F;
+					h = 1.0F;
+				}
+			} else if (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS)) {
 				int i = ((LivingEntity)entity).getEffect(MobEffects.BLINDNESS).getDuration();
-				float h = Mth.lerp(Math.min(1.0F, (float)i / 20.0F), f, 5.0F);
+				float j = Mth.lerp(Math.min(1.0F, (float)i / 20.0F), f, 5.0F);
 				if (fogMode == FogRenderer.FogMode.FOG_SKY) {
 					g = 0.0F;
-					j = h * 0.8F;
+					h = j * 0.8F;
 				} else {
-					g = h * 0.25F;
-					j = h;
+					g = j * 0.25F;
+					h = j;
 				}
 			} else if (bl) {
 				g = f * 0.05F;
-				j = Math.min(f, 192.0F) * 0.5F;
+				h = Math.min(f, 192.0F) * 0.5F;
 			} else if (fogMode == FogRenderer.FogMode.FOG_SKY) {
 				g = 0.0F;
-				j = f;
+				h = f;
 			} else {
 				g = f * 0.75F;
-				j = f;
+				h = f;
 			}
 
 			RenderSystem.fogStart(g);
-			RenderSystem.fogEnd(j);
+			RenderSystem.fogEnd(h);
 			RenderSystem.fogMode(GlStateManager.FogMode.LINEAR);
 			RenderSystem.setupNvFogDistance();
 		}

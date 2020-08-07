@@ -9,8 +9,11 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -19,6 +22,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.ServerLevelAccessor;
 
 public abstract class Monster extends PathfinderMob implements Enemy {
 	protected Monster(EntityType<? extends Monster> entityType, Level level) {
@@ -85,21 +89,23 @@ public abstract class Monster extends PathfinderMob implements Enemy {
 		return 0.5F - levelReader.getBrightness(blockPos);
 	}
 
-	public static boolean isDarkEnoughToSpawn(LevelAccessor levelAccessor, BlockPos blockPos, Random random) {
-		if (levelAccessor.getBrightness(LightLayer.SKY, blockPos) > random.nextInt(32)) {
+	public static boolean isDarkEnoughToSpawn(ServerLevelAccessor serverLevelAccessor, BlockPos blockPos, Random random) {
+		if (serverLevelAccessor.getBrightness(LightLayer.SKY, blockPos) > random.nextInt(32)) {
 			return false;
 		} else {
-			int i = levelAccessor.getLevel().isThundering() ? levelAccessor.getMaxLocalRawBrightness(blockPos, 10) : levelAccessor.getMaxLocalRawBrightness(blockPos);
+			int i = serverLevelAccessor.getLevel().isThundering()
+				? serverLevelAccessor.getMaxLocalRawBrightness(blockPos, 10)
+				: serverLevelAccessor.getMaxLocalRawBrightness(blockPos);
 			return i <= random.nextInt(8);
 		}
 	}
 
 	public static boolean checkMonsterSpawnRules(
-		EntityType<? extends Monster> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+		EntityType<? extends Monster> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
-		return levelAccessor.getDifficulty() != Difficulty.PEACEFUL
-			&& isDarkEnoughToSpawn(levelAccessor, blockPos, random)
-			&& checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random);
+		return serverLevelAccessor.getDifficulty() != Difficulty.PEACEFUL
+			&& isDarkEnoughToSpawn(serverLevelAccessor, blockPos, random)
+			&& checkMobSpawnRules(entityType, serverLevelAccessor, mobSpawnType, blockPos, random);
 	}
 
 	public static boolean checkAnyLightMonsterSpawnRules(
@@ -108,14 +114,17 @@ public abstract class Monster extends PathfinderMob implements Enemy {
 		return levelAccessor.getDifficulty() != Difficulty.PEACEFUL && checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random);
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
+	public static AttributeSupplier.Builder createMonsterAttributes() {
+		return Mob.createMobAttributes().add(Attributes.ATTACK_DAMAGE);
 	}
 
 	@Override
 	protected boolean shouldDropExperience() {
+		return true;
+	}
+
+	@Override
+	protected boolean shouldDropLoot() {
 		return true;
 	}
 

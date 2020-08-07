@@ -26,6 +26,11 @@ public class BonusLevelTableCondition implements LootItemCondition {
 	}
 
 	@Override
+	public LootItemConditionType getType() {
+		return LootItemConditions.TABLE_BONUS;
+	}
+
+	@Override
 	public Set<LootContextParam<?>> getReferencedContextParams() {
 		return ImmutableSet.of(LootContextParams.TOOL);
 	}
@@ -41,11 +46,7 @@ public class BonusLevelTableCondition implements LootItemCondition {
 		return () -> new BonusLevelTableCondition(enchantment, fs);
 	}
 
-	public static class Serializer extends LootItemCondition.Serializer<BonusLevelTableCondition> {
-		public Serializer() {
-			super(new ResourceLocation("table_bonus"), BonusLevelTableCondition.class);
-		}
-
+	public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<BonusLevelTableCondition> {
 		public void serialize(JsonObject jsonObject, BonusLevelTableCondition bonusLevelTableCondition, JsonSerializationContext jsonSerializationContext) {
 			jsonObject.addProperty("enchantment", Registry.ENCHANTMENT.getKey(bonusLevelTableCondition.enchantment).toString());
 			jsonObject.add("chances", jsonSerializationContext.serialize(bonusLevelTableCondition.values));

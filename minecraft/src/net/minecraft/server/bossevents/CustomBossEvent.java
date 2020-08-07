@@ -76,9 +76,9 @@ public class CustomBossEvent extends ServerBossEvent {
 	public final Component getDisplayName() {
 		return ComponentUtils.wrapInSquareBrackets(this.getName())
 			.withStyle(
-				style -> style.setColor(this.getColor().getFormatting())
-						.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(this.getTextId().toString())))
-						.setInsertion(this.getTextId().toString())
+				style -> style.withColor(this.getColor().getFormatting())
+						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(this.getTextId().toString())))
+						.withInsertion(this.getTextId().toString())
 			);
 	}
 
@@ -148,7 +148,7 @@ public class CustomBossEvent extends ServerBossEvent {
 		ListTag listTag = new ListTag();
 
 		for (UUID uUID : this.players) {
-			listTag.add(NbtUtils.createUUIDTag(uUID));
+			listTag.add(NbtUtils.createUUID(uUID));
 		}
 
 		compoundTag.put("Players", listTag);
@@ -165,10 +165,10 @@ public class CustomBossEvent extends ServerBossEvent {
 		customBossEvent.setDarkenScreen(compoundTag.getBoolean("DarkenScreen"));
 		customBossEvent.setPlayBossMusic(compoundTag.getBoolean("PlayBossMusic"));
 		customBossEvent.setCreateWorldFog(compoundTag.getBoolean("CreateWorldFog"));
-		ListTag listTag = compoundTag.getList("Players", 10);
+		ListTag listTag = compoundTag.getList("Players", 11);
 
 		for (int i = 0; i < listTag.size(); i++) {
-			customBossEvent.addOfflinePlayer(NbtUtils.loadUUIDTag(listTag.getCompound(i)));
+			customBossEvent.addOfflinePlayer(NbtUtils.loadUUID(listTag.get(i)));
 		}
 
 		return customBossEvent;

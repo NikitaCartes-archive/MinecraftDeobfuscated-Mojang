@@ -4,6 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -12,7 +13,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class StructureVoidBlock extends Block {
 	private static final VoxelShape SHAPE = Block.box(5.0, 5.0, 5.0, 11.0, 11.0, 11.0);
 
-	protected StructureVoidBlock(Block.Properties properties) {
+	protected StructureVoidBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 

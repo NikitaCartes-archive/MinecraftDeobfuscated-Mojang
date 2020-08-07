@@ -1,5 +1,8 @@
 package net.minecraft.client.gui.screens;
 
+import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Option;
@@ -8,11 +11,14 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.LockIconButton;
 import net.minecraft.client.gui.components.OptionButton;
 import net.minecraft.client.gui.screens.controls.ControlsScreen;
-import net.minecraft.client.gui.screens.resourcepacks.ResourcePackSelectScreen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ServerboundLockDifficultyPacket;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.world.Difficulty;
 
 @Environment(EnvType.CLIENT)
@@ -98,7 +104,7 @@ public class OptionsScreen extends Screen {
 				this.height / 6 + 48 - 6,
 				150,
 				20,
-				I18n.get("options.skinCustomisation"),
+				new TranslatableComponent("options.skinCustomisation"),
 				button -> this.minecraft.setScreen(new SkinCustomizationScreen(this, this.options))
 			)
 		);
@@ -108,7 +114,7 @@ public class OptionsScreen extends Screen {
 				this.height / 6 + 48 - 6,
 				150,
 				20,
-				I18n.get("options.sounds"),
+				new TranslatableComponent("options.sounds"),
 				button -> this.minecraft.setScreen(new SoundOptionsScreen(this, this.options))
 			)
 		);
@@ -118,7 +124,7 @@ public class OptionsScreen extends Screen {
 				this.height / 6 + 72 - 6,
 				150,
 				20,
-				I18n.get("options.video"),
+				new TranslatableComponent("options.video"),
 				button -> this.minecraft.setScreen(new VideoSettingsScreen(this, this.options))
 			)
 		);
@@ -128,7 +134,7 @@ public class OptionsScreen extends Screen {
 				this.height / 6 + 72 - 6,
 				150,
 				20,
-				I18n.get("options.controls"),
+				new TranslatableComponent("options.controls"),
 				button -> this.minecraft.setScreen(new ControlsScreen(this, this.options))
 			)
 		);
@@ -138,7 +144,7 @@ public class OptionsScreen extends Screen {
 				this.height / 6 + 96 - 6,
 				150,
 				20,
-				I18n.get("options.language"),
+				new TranslatableComponent("options.language"),
 				button -> this.minecraft.setScreen(new LanguageSelectScreen(this, this.options, this.minecraft.getLanguageManager()))
 			)
 		);
@@ -148,7 +154,7 @@ public class OptionsScreen extends Screen {
 				this.height / 6 + 96 - 6,
 				150,
 				20,
-				I18n.get("options.chat.title"),
+				new TranslatableComponent("options.chat.title"),
 				button -> this.minecraft.setScreen(new ChatOptionsScreen(this, this.options))
 			)
 		);
@@ -158,8 +164,17 @@ public class OptionsScreen extends Screen {
 				this.height / 6 + 120 - 6,
 				150,
 				20,
-				I18n.get("options.resourcepack"),
-				button -> this.minecraft.setScreen(new ResourcePackSelectScreen(this, this.options))
+				new TranslatableComponent("options.resourcepack"),
+				button -> this.minecraft
+						.setScreen(
+							new PackSelectionScreen(
+								this,
+								this.minecraft.getResourcePackRepository(),
+								this::updatePackList,
+								this.minecraft.getResourcePackDirectory(),
+								new TranslatableComponent("resourcePack.title")
+							)
+						)
 			)
 		);
 		this.addButton(
@@ -168,15 +183,38 @@ public class OptionsScreen extends Screen {
 				this.height / 6 + 120 - 6,
 				150,
 				20,
-				I18n.get("options.accessibility.title"),
+				new TranslatableComponent("options.accessibility.title"),
 				button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.options))
 			)
 		);
-		this.addButton(new Button(this.width / 2 - 100, this.height / 6 + 168, 200, 20, I18n.get("gui.done"), button -> this.minecraft.setScreen(this.lastScreen)));
+		this.addButton(
+			new Button(this.width / 2 - 100, this.height / 6 + 168, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen))
+		);
 	}
 
-	public String getDifficultyText(Difficulty difficulty) {
-		return new TranslatableComponent("options.difficulty").append(": ").append(difficulty.getDisplayName()).getColoredString();
+	private void updatePackList(PackRepository packRepository) {
+		List<String> list = ImmutableList.copyOf(this.options.resourcePacks);
+		this.options.resourcePacks.clear();
+		this.options.incompatibleResourcePacks.clear();
+
+		for (Pack pack : packRepository.getSelectedPacks()) {
+			if (!pack.isFixedPosition()) {
+				this.options.resourcePacks.add(pack.getId());
+				if (!pack.getCompatibility().isCompatible()) {
+					this.options.incompatibleResourcePacks.add(pack.getId());
+				}
+			}
+		}
+
+		this.options.save();
+		List<String> list2 = ImmutableList.copyOf(this.options.resourcePacks);
+		if (!list2.equals(list)) {
+			this.minecraft.reloadResourcePacks();
+		}
+	}
+
+	private Component getDifficultyText(Difficulty difficulty) {
+		return new TranslatableComponent("options.difficulty").append(": ").append(difficulty.getDisplayName());
 	}
 
 	private void lockCallback(boolean bl) {
@@ -195,9 +233,9 @@ public class OptionsScreen extends Screen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
-		this.drawCenteredString(this.font, this.title.getColoredString(), this.width / 2, 15, 16777215);
-		super.render(i, j, f);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		drawCenteredString(poseStack, this.font, this.title, this.width / 2, 15, 16777215);
+		super.render(poseStack, i, j, f);
 	}
 }

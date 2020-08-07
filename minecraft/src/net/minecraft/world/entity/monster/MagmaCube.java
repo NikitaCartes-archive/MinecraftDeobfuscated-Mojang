@@ -13,6 +13,8 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -25,10 +27,8 @@ public class MagmaCube extends Slime {
 		super(entityType, level);
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.2F);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.2F);
 	}
 
 	public static boolean checkMagmaCubeSpawnRules(
@@ -45,7 +45,7 @@ public class MagmaCube extends Slime {
 	@Override
 	protected void setSize(int i, boolean bl) {
 		super.setSize(i, bl);
-		this.getAttribute(SharedMonsterAttributes.ARMOR).setBaseValue((double)(i * 3));
+		this.getAttribute(Attributes.ARMOR).setBaseValue((double)(i * 3));
 	}
 
 	@Override

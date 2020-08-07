@@ -12,6 +12,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.EyeOfEnder;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -19,6 +20,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EndPortalFrameBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
@@ -32,7 +34,7 @@ public class EnderEyeItem extends Item {
 		Level level = useOnContext.getLevel();
 		BlockPos blockPos = useOnContext.getClickedPos();
 		BlockState blockState = level.getBlockState(blockPos);
-		if (blockState.getBlock() != Blocks.END_PORTAL_FRAME || (Boolean)blockState.getValue(EndPortalFrameBlock.HAS_EYE)) {
+		if (!blockState.is(Blocks.END_PORTAL_FRAME) || (Boolean)blockState.getValue(EndPortalFrameBlock.HAS_EYE)) {
 			return InteractionResult.PASS;
 		} else if (level.isClientSide) {
 			return InteractionResult.SUCCESS;
@@ -56,7 +58,7 @@ public class EnderEyeItem extends Item {
 				level.globalLevelEvent(1038, blockPos2.offset(1, 0, 1), 0);
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		}
 	}
 
@@ -64,12 +66,15 @@ public class EnderEyeItem extends Item {
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		HitResult hitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.NONE);
-		if (hitResult.getType() == HitResult.Type.BLOCK && level.getBlockState(((BlockHitResult)hitResult).getBlockPos()).getBlock() == Blocks.END_PORTAL_FRAME) {
+		if (hitResult.getType() == HitResult.Type.BLOCK && level.getBlockState(((BlockHitResult)hitResult).getBlockPos()).is(Blocks.END_PORTAL_FRAME)) {
 			return InteractionResultHolder.pass(itemStack);
 		} else {
 			player.startUsingItem(interactionHand);
 			if (level instanceof ServerLevel) {
-				BlockPos blockPos = ((ServerLevel)level).getChunkSource().getGenerator().findNearestMapFeature(level, "Stronghold", new BlockPos(player), 100, false);
+				BlockPos blockPos = ((ServerLevel)level)
+					.getChunkSource()
+					.getGenerator()
+					.findNearestMapFeature((ServerLevel)level, StructureFeature.STRONGHOLD, player.blockPosition(), 100, false);
 				if (blockPos != null) {
 					EyeOfEnder eyeOfEnder = new EyeOfEnder(level, player.getX(), player.getY(0.5), player.getZ());
 					eyeOfEnder.setItem(itemStack);
@@ -82,7 +87,7 @@ public class EnderEyeItem extends Item {
 					level.playSound(
 						null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDER_EYE_LAUNCH, SoundSource.NEUTRAL, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F)
 					);
-					level.levelEvent(null, 1003, new BlockPos(player), 0);
+					level.levelEvent(null, 1003, player.blockPosition(), 0);
 					if (!player.abilities.instabuild) {
 						itemStack.shrink(1);
 					}

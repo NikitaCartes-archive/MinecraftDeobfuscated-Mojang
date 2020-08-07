@@ -10,13 +10,13 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -44,7 +44,7 @@ public class DoorBlock extends Block {
 	protected static final VoxelShape WEST_AABB = Block.box(13.0, 0.0, 0.0, 16.0, 16.0, 16.0);
 	protected static final VoxelShape EAST_AABB = Block.box(0.0, 0.0, 0.0, 3.0, 16.0, 16.0);
 
-	protected DoorBlock(Block.Properties properties) {
+	protected DoorBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition
@@ -85,7 +85,7 @@ public class DoorBlock extends Block {
 				? Blocks.AIR.defaultBlockState()
 				: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
 		} else {
-			return blockState2.getBlock() == this && blockState2.getValue(HALF) != doubleBlockHalf
+			return blockState2.is(this) && blockState2.getValue(HALF) != doubleBlockHalf
 				? blockState.setValue(FACING, blockState2.getValue(FACING))
 					.setValue(OPEN, blockState2.getValue(OPEN))
 					.setValue(HINGE, blockState2.getValue(HINGE))
@@ -95,23 +95,9 @@ public class DoorBlock extends Block {
 	}
 
 	@Override
-	public void playerDestroy(Level level, Player player, BlockPos blockPos, BlockState blockState, @Nullable BlockEntity blockEntity, ItemStack itemStack) {
-		super.playerDestroy(level, player, blockPos, Blocks.AIR.defaultBlockState(), blockEntity, itemStack);
-	}
-
-	@Override
 	public void playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
-		DoubleBlockHalf doubleBlockHalf = blockState.getValue(HALF);
-		BlockPos blockPos2 = doubleBlockHalf == DoubleBlockHalf.LOWER ? blockPos.above() : blockPos.below();
-		BlockState blockState2 = level.getBlockState(blockPos2);
-		if (blockState2.getBlock() == this && blockState2.getValue(HALF) != doubleBlockHalf) {
-			level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 35);
-			level.levelEvent(player, 2001, blockPos2, Block.getId(blockState2));
-			ItemStack itemStack = player.getMainHandItem();
-			if (!level.isClientSide && !player.isCreative() && player.canDestroy(blockState2)) {
-				Block.dropResources(blockState, level, blockPos, null, player, itemStack);
-				Block.dropResources(blockState2, level, blockPos2, null, player, itemStack);
-			}
+		if (!level.isClientSide && player.isCreative()) {
+			DoublePlantBlock.preventCreativeDropFromBottomPart(level, blockPos, blockState, player);
 		}
 
 		super.playerWillDestroy(level, blockPos, blockState, player);
@@ -181,8 +167,8 @@ public class DoorBlock extends Block {
 			+ (blockState2.isCollisionShapeFullBlock(blockGetter, blockPos4) ? -1 : 0)
 			+ (blockState3.isCollisionShapeFullBlock(blockGetter, blockPos5) ? 1 : 0)
 			+ (blockState4.isCollisionShapeFullBlock(blockGetter, blockPos6) ? 1 : 0);
-		boolean bl = blockState.getBlock() == this && blockState.getValue(HALF) == DoubleBlockHalf.LOWER;
-		boolean bl2 = blockState3.getBlock() == this && blockState3.getValue(HALF) == DoubleBlockHalf.LOWER;
+		boolean bl = blockState.is(this) && blockState.getValue(HALF) == DoubleBlockHalf.LOWER;
+		boolean bl2 = blockState3.is(this) && blockState3.getValue(HALF) == DoubleBlockHalf.LOWER;
 		if ((!bl || bl2) && i <= 0) {
 			if ((!bl2 || bl) && i >= 0) {
 				int j = direction.getStepX();
@@ -209,13 +195,16 @@ public class DoorBlock extends Block {
 			blockState = blockState.cycle(OPEN);
 			level.setBlock(blockPos, blockState, 10);
 			level.levelEvent(player, blockState.getValue(OPEN) ? this.getOpenSound() : this.getCloseSound(), blockPos, 0);
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
 	}
 
-	public void setOpen(Level level, BlockPos blockPos, boolean bl) {
-		BlockState blockState = level.getBlockState(blockPos);
-		if (blockState.getBlock() == this && (Boolean)blockState.getValue(OPEN) != bl) {
+	public boolean isOpen(BlockState blockState) {
+		return (Boolean)blockState.getValue(OPEN);
+	}
+
+	public void setOpen(Level level, BlockState blockState, BlockPos blockPos, boolean bl) {
+		if (blockState.is(this) && (Boolean)blockState.getValue(OPEN) != bl) {
 			level.setBlock(blockPos, blockState.setValue(OPEN, Boolean.valueOf(bl)), 10);
 			this.playSound(level, blockPos, bl);
 		}
@@ -238,7 +227,7 @@ public class DoorBlock extends Block {
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockPos blockPos2 = blockPos.below();
 		BlockState blockState2 = levelReader.getBlockState(blockPos2);
-		return blockState.getValue(HALF) == DoubleBlockHalf.LOWER ? blockState2.isFaceSturdy(levelReader, blockPos2, Direction.UP) : blockState2.getBlock() == this;
+		return blockState.getValue(HALF) == DoubleBlockHalf.LOWER ? blockState2.isFaceSturdy(levelReader, blockPos2, Direction.UP) : blockState2.is(this);
 	}
 
 	private void playSound(Level level, BlockPos blockPos, boolean bl) {
@@ -269,5 +258,13 @@ public class DoorBlock extends Block {
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(HALF, FACING, OPEN, HINGE, POWERED);
+	}
+
+	public static boolean isWoodenDoor(Level level, BlockPos blockPos) {
+		return isWoodenDoor(level.getBlockState(blockPos));
+	}
+
+	public static boolean isWoodenDoor(BlockState blockState) {
+		return blockState.getBlock() instanceof DoorBlock && (blockState.getMaterial() == Material.WOOD || blockState.getMaterial() == Material.NETHER_WOOD);
 	}
 }

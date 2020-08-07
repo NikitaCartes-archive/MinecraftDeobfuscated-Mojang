@@ -2,6 +2,7 @@ package net.minecraft.client.gui.screens.advancements;
 
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -12,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -25,7 +27,7 @@ public class AdvancementTab extends GuiComponent {
 	private final Advancement advancement;
 	private final DisplayInfo display;
 	private final ItemStack icon;
-	private final String title;
+	private final Component title;
 	private final AdvancementWidget root;
 	private final Map<Advancement, AdvancementWidget> widgets = Maps.<Advancement, AdvancementWidget>newLinkedHashMap();
 	private double scrollX;
@@ -47,7 +49,7 @@ public class AdvancementTab extends GuiComponent {
 		this.advancement = advancement;
 		this.display = displayInfo;
 		this.icon = displayInfo.getIcon();
-		this.title = displayInfo.getTitle().getColoredString();
+		this.title = displayInfo.getTitle();
 		this.root = new AdvancementWidget(this, minecraft, advancement, displayInfo);
 		this.addWidget(this.root, advancement);
 	}
@@ -56,19 +58,19 @@ public class AdvancementTab extends GuiComponent {
 		return this.advancement;
 	}
 
-	public String getTitle() {
+	public Component getTitle() {
 		return this.title;
 	}
 
-	public void drawTab(int i, int j, boolean bl) {
-		this.type.draw(this, i, j, bl, this.index);
+	public void drawTab(PoseStack poseStack, int i, int j, boolean bl) {
+		this.type.draw(poseStack, this, i, j, bl, this.index);
 	}
 
 	public void drawIcon(int i, int j, ItemRenderer itemRenderer) {
 		this.type.drawIcon(i, j, this.index, itemRenderer, this.icon);
 	}
 
-	public void drawContents() {
+	public void drawContents(PoseStack poseStack) {
 		if (!this.centered) {
 			this.scrollX = (double)(117 - (this.maxX + this.minX) / 2);
 			this.scrollY = (double)(56 - (this.maxY + this.minY) / 2);
@@ -79,11 +81,11 @@ public class AdvancementTab extends GuiComponent {
 		RenderSystem.enableDepthTest();
 		RenderSystem.translatef(0.0F, 0.0F, 950.0F);
 		RenderSystem.colorMask(false, false, false, false);
-		fill(4680, 2260, -4680, -2260, -16777216);
+		fill(poseStack, 4680, 2260, -4680, -2260, -16777216);
 		RenderSystem.colorMask(true, true, true, true);
 		RenderSystem.translatef(0.0F, 0.0F, -950.0F);
 		RenderSystem.depthFunc(518);
-		fill(234, 113, 0, 0, -16777216);
+		fill(poseStack, 234, 113, 0, 0, -16777216);
 		RenderSystem.depthFunc(515);
 		ResourceLocation resourceLocation = this.display.getBackground();
 		if (resourceLocation != null) {
@@ -99,27 +101,27 @@ public class AdvancementTab extends GuiComponent {
 
 		for (int m = -1; m <= 15; m++) {
 			for (int n = -1; n <= 8; n++) {
-				blit(k + 16 * m, l + 16 * n, 0.0F, 0.0F, 16, 16, 16, 16);
+				blit(poseStack, k + 16 * m, l + 16 * n, 0.0F, 0.0F, 16, 16, 16, 16);
 			}
 		}
 
-		this.root.drawConnectivity(i, j, true);
-		this.root.drawConnectivity(i, j, false);
-		this.root.draw(i, j);
+		this.root.drawConnectivity(poseStack, i, j, true);
+		this.root.drawConnectivity(poseStack, i, j, false);
+		this.root.draw(poseStack, i, j);
 		RenderSystem.depthFunc(518);
 		RenderSystem.translatef(0.0F, 0.0F, -950.0F);
 		RenderSystem.colorMask(false, false, false, false);
-		fill(4680, 2260, -4680, -2260, -16777216);
+		fill(poseStack, 4680, 2260, -4680, -2260, -16777216);
 		RenderSystem.colorMask(true, true, true, true);
 		RenderSystem.translatef(0.0F, 0.0F, 950.0F);
 		RenderSystem.depthFunc(515);
 		RenderSystem.popMatrix();
 	}
 
-	public void drawTooltips(int i, int j, int k, int l) {
+	public void drawTooltips(PoseStack poseStack, int i, int j, int k, int l) {
 		RenderSystem.pushMatrix();
 		RenderSystem.translatef(0.0F, 0.0F, 200.0F);
-		fill(0, 0, 234, 113, Mth.floor(this.fade * 255.0F) << 24);
+		fill(poseStack, 0, 0, 234, 113, Mth.floor(this.fade * 255.0F) << 24);
 		boolean bl = false;
 		int m = Mth.floor(this.scrollX);
 		int n = Mth.floor(this.scrollY);
@@ -127,7 +129,7 @@ public class AdvancementTab extends GuiComponent {
 			for (AdvancementWidget advancementWidget : this.widgets.values()) {
 				if (advancementWidget.isMouseOver(m, n, i, j)) {
 					bl = true;
-					advancementWidget.drawHover(m, n, this.fade, k, l);
+					advancementWidget.drawHover(poseStack, m, n, this.fade, k, l);
 					break;
 				}
 			}

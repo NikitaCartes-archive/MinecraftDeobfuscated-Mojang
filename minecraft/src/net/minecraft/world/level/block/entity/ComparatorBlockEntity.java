@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block.entity;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class ComparatorBlockEntity extends BlockEntity {
 	private int output;
@@ -17,8 +18,8 @@ public class ComparatorBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		this.output = compoundTag.getInt("OutputSignal");
 	}
 

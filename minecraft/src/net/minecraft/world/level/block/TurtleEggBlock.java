@@ -6,18 +6,21 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ambient.Bat;
 import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -31,7 +34,7 @@ public class TurtleEggBlock extends Block {
 	public static final IntegerProperty HATCH = BlockStateProperties.HATCH;
 	public static final IntegerProperty EGGS = BlockStateProperties.EGGS;
 
-	public TurtleEggBlock(Block.Properties properties) {
+	public TurtleEggBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(HATCH, Integer.valueOf(0)).setValue(EGGS, Integer.valueOf(1)));
 	}
@@ -52,11 +55,12 @@ public class TurtleEggBlock extends Block {
 	}
 
 	private void destroyEgg(Level level, BlockPos blockPos, Entity entity, int i) {
-		if (!this.canDestroyEgg(level, entity)) {
-			super.stepOn(level, blockPos, entity);
-		} else {
+		if (this.canDestroyEgg(level, entity)) {
 			if (!level.isClientSide && level.random.nextInt(i) == 0) {
-				this.decreaseEggs(level, blockPos, level.getBlockState(blockPos));
+				BlockState blockState = level.getBlockState(blockPos);
+				if (blockState.is(Blocks.TURTLE_EGG)) {
+					this.decreaseEggs(level, blockPos, blockState);
+				}
 			}
 		}
 	}
@@ -73,8 +77,8 @@ public class TurtleEggBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		if (this.shouldUpdateHatchLevel(serverLevel) && this.onSand(serverLevel, blockPos)) {
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		if (this.shouldUpdateHatchLevel(serverLevel) && onSand(serverLevel, blockPos)) {
 			int i = (Integer)blockState.getValue(HATCH);
 			if (i < 2) {
 				serverLevel.playSound(null, blockPos, SoundEvents.TURTLE_EGG_CRACK, SoundSource.BLOCKS, 0.7F, 0.9F + random.nextFloat() * 0.2F);
@@ -95,13 +99,17 @@ public class TurtleEggBlock extends Block {
 		}
 	}
 
-	private boolean onSand(BlockGetter blockGetter, BlockPos blockPos) {
-		return blockGetter.getBlockState(blockPos.below()).getBlock() == Blocks.SAND;
+	public static boolean onSand(BlockGetter blockGetter, BlockPos blockPos) {
+		return isSand(blockGetter, blockPos.below());
+	}
+
+	public static boolean isSand(BlockGetter blockGetter, BlockPos blockPos) {
+		return blockGetter.getBlockState(blockPos).is(BlockTags.SAND);
 	}
 
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (this.onSand(level, blockPos) && !level.isClientSide) {
+		if (onSand(level, blockPos) && !level.isClientSide) {
 			level.levelEvent(2005, blockPos, 0);
 		}
 	}
@@ -128,7 +136,7 @@ public class TurtleEggBlock extends Block {
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
 		BlockState blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos());
-		return blockState.getBlock() == this
+		return blockState.is(this)
 			? blockState.setValue(EGGS, Integer.valueOf(Math.min(4, (Integer)blockState.getValue(EGGS) + 1)))
 			: super.getStateForPlacement(blockPlaceContext);
 	}
@@ -144,10 +152,10 @@ public class TurtleEggBlock extends Block {
 	}
 
 	private boolean canDestroyEgg(Level level, Entity entity) {
-		if (entity instanceof Turtle) {
+		if (entity instanceof Turtle || entity instanceof Bat) {
 			return false;
 		} else {
-			return entity instanceof LivingEntity && !(entity instanceof Player) ? level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) : true;
+			return !(entity instanceof LivingEntity) ? false : entity instanceof Player || level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
 		}
 	}
 }

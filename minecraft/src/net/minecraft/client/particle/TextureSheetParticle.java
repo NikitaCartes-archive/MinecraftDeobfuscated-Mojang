@@ -2,19 +2,19 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
 public abstract class TextureSheetParticle extends SingleQuadParticle {
 	protected TextureAtlasSprite sprite;
 
-	protected TextureSheetParticle(Level level, double d, double e, double f) {
-		super(level, d, e, f);
+	protected TextureSheetParticle(ClientLevel clientLevel, double d, double e, double f) {
+		super(clientLevel, d, e, f);
 	}
 
-	protected TextureSheetParticle(Level level, double d, double e, double f, double g, double h, double i) {
-		super(level, d, e, f, g, h, i);
+	protected TextureSheetParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+		super(clientLevel, d, e, f, g, h, i);
 	}
 
 	protected void setSprite(TextureAtlasSprite textureAtlasSprite) {

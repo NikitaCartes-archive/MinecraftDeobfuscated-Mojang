@@ -113,16 +113,6 @@ public abstract class VoxelShape {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public double min(Direction.Axis axis, double d, double e) {
-		Direction.Axis axis2 = AxisCycle.FORWARD.cycle(axis);
-		Direction.Axis axis3 = AxisCycle.BACKWARD.cycle(axis);
-		int i = this.findIndex(axis2, d);
-		int j = this.findIndex(axis3, e);
-		int k = this.shape.firstFull(axis, i, j);
-		return k >= this.shape.getSize(axis) ? Double.POSITIVE_INFINITY : this.get(axis, k);
-	}
-
-	@Environment(EnvType.CLIENT)
 	public double max(Direction.Axis axis, double d, double e) {
 		Direction.Axis axis2 = AxisCycle.FORWARD.cycle(axis);
 		Direction.Axis axis3 = AxisCycle.BACKWARD.cycle(axis);

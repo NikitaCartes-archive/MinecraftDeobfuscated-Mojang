@@ -1,7 +1,6 @@
 package net.minecraft.world.item;
 
 import java.util.function.Predicate;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -14,20 +13,9 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 
-public class BowItem extends ProjectileWeaponItem {
+public class BowItem extends ProjectileWeaponItem implements Vanishable {
 	public BowItem(Item.Properties properties) {
 		super(properties);
-		this.addProperty(new ResourceLocation("pull"), (itemStack, level, livingEntity) -> {
-			if (livingEntity == null) {
-				return 0.0F;
-			} else {
-				return livingEntity.getUseItem().getItem() != Items.BOW ? 0.0F : (float)(itemStack.getUseDuration() - livingEntity.getUseItemRemainingTicks()) / 20.0F;
-			}
-		});
-		this.addProperty(
-			new ResourceLocation("pulling"),
-			(itemStack, level, livingEntity) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
-		);
 	}
 
 	@Override
@@ -44,11 +32,12 @@ public class BowItem extends ProjectileWeaponItem {
 				int j = this.getUseDuration(itemStack) - i;
 				float f = getPowerForTime(j);
 				if (!((double)f < 0.1)) {
+					float g = getFatigueForTime(j);
 					boolean bl2 = bl && itemStack2.getItem() == Items.ARROW;
 					if (!level.isClientSide) {
 						ArrowItem arrowItem = (ArrowItem)(itemStack2.getItem() instanceof ArrowItem ? itemStack2.getItem() : Items.ARROW);
 						AbstractArrow abstractArrow = arrowItem.createArrow(level, itemStack2, player);
-						abstractArrow.shootFromRotation(player, player.xRot, player.yRot, 0.0F, f * 3.0F, 0.25F);
+						abstractArrow.shootFromRotation(player, player.xRot, player.yRot, 0.0F, f * 3.0F, 0.25F * g);
 						if (f == 1.0F) {
 							abstractArrow.setCritArrow(true);
 						}
@@ -108,6 +97,14 @@ public class BowItem extends ProjectileWeaponItem {
 		return f;
 	}
 
+	public static float getFatigueForTime(int i) {
+		if (i < 30) {
+			return 0.5F;
+		} else {
+			return i >= 100 ? 10.5F : 0.5F + 10.0F * (float)(i - 30) / 70.0F;
+		}
+	}
+
 	@Override
 	public int getUseDuration(ItemStack itemStack) {
 		return 72000;
@@ -133,5 +130,10 @@ public class BowItem extends ProjectileWeaponItem {
 	@Override
 	public Predicate<ItemStack> getAllSupportedProjectiles() {
 		return ARROW_ONLY;
+	}
+
+	@Override
+	public int getDefaultProjectileRange() {
+		return 15;
 	}
 }

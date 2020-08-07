@@ -13,22 +13,22 @@ import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.phys.Vec3;
 
 public class GoToClosestVillage extends Behavior<Villager> {
-	private final float speed;
+	private final float speedModifier;
 	private final int closeEnoughDistance;
 
 	public GoToClosestVillage(float f, int i) {
 		super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT));
-		this.speed = f;
+		this.speedModifier = f;
 		this.closeEnoughDistance = i;
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Villager villager) {
-		return !serverLevel.isVillage(new BlockPos(villager));
+		return !serverLevel.isVillage(villager.blockPosition());
 	}
 
 	protected void start(ServerLevel serverLevel, Villager villager, long l) {
 		PoiManager poiManager = serverLevel.getPoiManager();
-		int i = poiManager.sectionsToVillage(SectionPos.of(new BlockPos(villager)));
+		int i = poiManager.sectionsToVillage(SectionPos.of(villager.blockPosition()));
 		Vec3 vec3 = null;
 
 		for (int j = 0; j < 5; j++) {
@@ -47,7 +47,7 @@ public class GoToClosestVillage extends Behavior<Villager> {
 		}
 
 		if (vec3 != null) {
-			villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(vec3, this.speed, this.closeEnoughDistance));
+			villager.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(vec3, this.speedModifier, this.closeEnoughDistance));
 		}
 	}
 }

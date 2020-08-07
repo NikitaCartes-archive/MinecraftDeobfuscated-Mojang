@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -36,7 +37,7 @@ public class MovingPistonBlock extends BaseEntityBlock {
 	public static final DirectionProperty FACING = PistonHeadBlock.FACING;
 	public static final EnumProperty<PistonType> TYPE = PistonHeadBlock.TYPE;
 
-	public MovingPistonBlock(Block.Properties properties) {
+	public MovingPistonBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(TYPE, PistonType.DEFAULT));
 	}
@@ -53,7 +54,7 @@ public class MovingPistonBlock extends BaseEntityBlock {
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState.getBlock() != blockState2.getBlock()) {
+		if (!blockState.is(blockState2.getBlock())) {
 			BlockEntity blockEntity = level.getBlockEntity(blockPos);
 			if (blockEntity instanceof PistonMovingBlockEntity) {
 				((PistonMovingBlockEntity)blockEntity).finalTick();
@@ -71,16 +72,6 @@ public class MovingPistonBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public boolean isRedstoneConductor(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return false;
-	}
-
-	@Override
-	public boolean isSuffocating(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return false;
-	}
-
-	@Override
 	public InteractionResult use(
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
@@ -94,7 +85,7 @@ public class MovingPistonBlock extends BaseEntityBlock {
 
 	@Override
 	public List<ItemStack> getDrops(BlockState blockState, LootContext.Builder builder) {
-		PistonMovingBlockEntity pistonMovingBlockEntity = this.getBlockEntity(builder.getLevel(), builder.getParameter(LootContextParams.BLOCK_POS));
+		PistonMovingBlockEntity pistonMovingBlockEntity = this.getBlockEntity(builder.getLevel(), new BlockPos(builder.getParameter(LootContextParams.ORIGIN)));
 		return pistonMovingBlockEntity == null ? Collections.emptyList() : pistonMovingBlockEntity.getMovedState().getDrops(builder);
 	}
 

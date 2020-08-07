@@ -7,7 +7,6 @@ import com.google.gson.JsonSerializationContext;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -126,11 +125,7 @@ public abstract class LootPoolSingletonContainer extends LootPoolEntryContainer 
 	}
 
 	public abstract static class Serializer<T extends LootPoolSingletonContainer> extends LootPoolEntryContainer.Serializer<T> {
-		public Serializer(ResourceLocation resourceLocation, Class<T> class_) {
-			super(resourceLocation, class_);
-		}
-
-		public void serialize(JsonObject jsonObject, T lootPoolSingletonContainer, JsonSerializationContext jsonSerializationContext) {
+		public void serializeCustom(JsonObject jsonObject, T lootPoolSingletonContainer, JsonSerializationContext jsonSerializationContext) {
 			if (lootPoolSingletonContainer.weight != 1) {
 				jsonObject.addProperty("weight", lootPoolSingletonContainer.weight);
 			}
@@ -144,7 +139,7 @@ public abstract class LootPoolSingletonContainer extends LootPoolEntryContainer 
 			}
 		}
 
-		public final T deserialize(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
+		public final T deserializeCustom(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext, LootItemCondition[] lootItemConditions) {
 			int i = GsonHelper.getAsInt(jsonObject, "weight", 1);
 			int j = GsonHelper.getAsInt(jsonObject, "quality", 0);
 			LootItemFunction[] lootItemFunctions = GsonHelper.getAsObject(

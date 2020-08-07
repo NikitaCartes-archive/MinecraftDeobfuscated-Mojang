@@ -1,12 +1,18 @@
 package net.minecraft.world.level.levelgen.feature.configurations;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 
 public class EndGatewayConfiguration implements FeatureConfiguration {
+	public static final Codec<EndGatewayConfiguration> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					BlockPos.CODEC.optionalFieldOf("exit").forGetter(endGatewayConfiguration -> endGatewayConfiguration.exit),
+					Codec.BOOL.fieldOf("exact").forGetter(endGatewayConfiguration -> endGatewayConfiguration.exact)
+				)
+				.apply(instance, EndGatewayConfiguration::new)
+	);
 	private final Optional<BlockPos> exit;
 	private final boolean exact;
 
@@ -29,40 +35,5 @@ public class EndGatewayConfiguration implements FeatureConfiguration {
 
 	public boolean isExitExact() {
 		return this.exact;
-	}
-
-	@Override
-	public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-		return new Dynamic<>(
-			dynamicOps,
-			(T)this.exit
-				.map(
-					blockPos -> dynamicOps.createMap(
-							ImmutableMap.of(
-								dynamicOps.createString("exit_x"),
-								dynamicOps.createInt(blockPos.getX()),
-								dynamicOps.createString("exit_y"),
-								dynamicOps.createInt(blockPos.getY()),
-								dynamicOps.createString("exit_z"),
-								dynamicOps.createInt(blockPos.getZ()),
-								dynamicOps.createString("exact"),
-								dynamicOps.createBoolean(this.exact)
-							)
-						)
-				)
-				.orElse(dynamicOps.emptyMap())
-		);
-	}
-
-	public static <T> EndGatewayConfiguration deserialize(Dynamic<T> dynamic) {
-		Optional<BlockPos> optional = dynamic.get("exit_x")
-			.asNumber()
-			.flatMap(
-				number -> dynamic.get("exit_y")
-						.asNumber()
-						.flatMap(number2 -> dynamic.get("exit_z").asNumber().map(number3 -> new BlockPos(number.intValue(), number2.intValue(), number3.intValue())))
-			);
-		boolean bl = dynamic.get("exact").asBoolean(false);
-		return new EndGatewayConfiguration(optional, bl);
 	}
 }

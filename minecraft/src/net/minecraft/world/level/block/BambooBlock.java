@@ -7,12 +7,13 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.SwordItem;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
@@ -33,7 +34,7 @@ public class BambooBlock extends Block implements BonemealableBlock {
 	public static final EnumProperty<BambooLeaves> LEAVES = BlockStateProperties.BAMBOO_LEAVES;
 	public static final IntegerProperty STAGE = BlockStateProperties.STAGE;
 
-	public BambooBlock(Block.Properties properties) {
+	public BambooBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(AGE, Integer.valueOf(0)).setValue(LEAVES, BambooLeaves.NONE).setValue(STAGE, Integer.valueOf(0))
@@ -46,8 +47,8 @@ public class BambooBlock extends Block implements BonemealableBlock {
 	}
 
 	@Override
-	public Block.OffsetType getOffsetType() {
-		return Block.OffsetType.XZ;
+	public BlockBehaviour.OffsetType getOffsetType() {
+		return BlockBehaviour.OffsetType.XZ;
 	}
 
 	@Override
@@ -82,14 +83,16 @@ public class BambooBlock extends Block implements BonemealableBlock {
 		} else {
 			BlockState blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos().below());
 			if (blockState.is(BlockTags.BAMBOO_PLANTABLE_ON)) {
-				Block block = blockState.getBlock();
-				if (block == Blocks.BAMBOO_SAPLING) {
+				if (blockState.is(Blocks.BAMBOO_SAPLING)) {
 					return this.defaultBlockState().setValue(AGE, Integer.valueOf(0));
-				} else if (block == Blocks.BAMBOO) {
+				} else if (blockState.is(Blocks.BAMBOO)) {
 					int i = blockState.getValue(AGE) > 0 ? 1 : 0;
 					return this.defaultBlockState().setValue(AGE, Integer.valueOf(i));
 				} else {
-					return Blocks.BAMBOO_SAPLING.defaultBlockState();
+					BlockState blockState2 = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos().above());
+					return !blockState2.is(Blocks.BAMBOO) && !blockState2.is(Blocks.BAMBOO_SAPLING)
+						? Blocks.BAMBOO_SAPLING.defaultBlockState()
+						: this.defaultBlockState().setValue(AGE, blockState2.getValue(AGE));
 				}
 			} else {
 				return null;
@@ -101,7 +104,17 @@ public class BambooBlock extends Block implements BonemealableBlock {
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if (!blockState.canSurvive(serverLevel, blockPos)) {
 			serverLevel.destroyBlock(blockPos, true);
-		} else if ((Integer)blockState.getValue(STAGE) == 0) {
+		}
+	}
+
+	@Override
+	public boolean isRandomlyTicking(BlockState blockState) {
+		return (Integer)blockState.getValue(STAGE) == 0;
+	}
+
+	@Override
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		if ((Integer)blockState.getValue(STAGE) == 0) {
 			if (random.nextInt(3) == 0 && serverLevel.isEmptyBlock(blockPos.above()) && serverLevel.getRawBrightness(blockPos.above(), 0) >= 9) {
 				int i = this.getHeightBelowUpToMax(serverLevel, blockPos) + 1;
 				if (i < 16) {
@@ -124,7 +137,7 @@ public class BambooBlock extends Block implements BonemealableBlock {
 			levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
 		}
 
-		if (direction == Direction.UP && blockState2.getBlock() == Blocks.BAMBOO && (Integer)blockState2.getValue(AGE) > (Integer)blockState.getValue(AGE)) {
+		if (direction == Direction.UP && blockState2.is(Blocks.BAMBOO) && (Integer)blockState2.getValue(AGE) > (Integer)blockState.getValue(AGE)) {
 			levelAccessor.setBlock(blockPos, blockState.cycle(AGE), 2);
 		}
 
@@ -174,18 +187,18 @@ public class BambooBlock extends Block implements BonemealableBlock {
 		BlockState blockState3 = level.getBlockState(blockPos2);
 		BambooLeaves bambooLeaves = BambooLeaves.NONE;
 		if (i >= 1) {
-			if (blockState2.getBlock() != Blocks.BAMBOO || blockState2.getValue(LEAVES) == BambooLeaves.NONE) {
+			if (!blockState2.is(Blocks.BAMBOO) || blockState2.getValue(LEAVES) == BambooLeaves.NONE) {
 				bambooLeaves = BambooLeaves.SMALL;
-			} else if (blockState2.getBlock() == Blocks.BAMBOO && blockState2.getValue(LEAVES) != BambooLeaves.NONE) {
+			} else if (blockState2.is(Blocks.BAMBOO) && blockState2.getValue(LEAVES) != BambooLeaves.NONE) {
 				bambooLeaves = BambooLeaves.LARGE;
-				if (blockState3.getBlock() == Blocks.BAMBOO) {
+				if (blockState3.is(Blocks.BAMBOO)) {
 					level.setBlock(blockPos.below(), blockState2.setValue(LEAVES, BambooLeaves.SMALL), 3);
 					level.setBlock(blockPos2, blockState3.setValue(LEAVES, BambooLeaves.NONE), 3);
 				}
 			}
 		}
 
-		int j = blockState.getValue(AGE) != 1 && blockState3.getBlock() != Blocks.BAMBOO ? 0 : 1;
+		int j = blockState.getValue(AGE) != 1 && !blockState3.is(Blocks.BAMBOO) ? 0 : 1;
 		int k = (i < 11 || !(random.nextFloat() < 0.25F)) && i != 15 ? 0 : 1;
 		level.setBlock(
 			blockPos.above(), this.defaultBlockState().setValue(AGE, Integer.valueOf(j)).setValue(LEAVES, bambooLeaves).setValue(STAGE, Integer.valueOf(k)), 3
@@ -195,7 +208,7 @@ public class BambooBlock extends Block implements BonemealableBlock {
 	protected int getHeightAboveUpToMax(BlockGetter blockGetter, BlockPos blockPos) {
 		int i = 0;
 
-		while (i < 16 && blockGetter.getBlockState(blockPos.above(i + 1)).getBlock() == Blocks.BAMBOO) {
+		while (i < 16 && blockGetter.getBlockState(blockPos.above(i + 1)).is(Blocks.BAMBOO)) {
 			i++;
 		}
 
@@ -205,7 +218,7 @@ public class BambooBlock extends Block implements BonemealableBlock {
 	protected int getHeightBelowUpToMax(BlockGetter blockGetter, BlockPos blockPos) {
 		int i = 0;
 
-		while (i < 16 && blockGetter.getBlockState(blockPos.below(i + 1)).getBlock() == Blocks.BAMBOO) {
+		while (i < 16 && blockGetter.getBlockState(blockPos.below(i + 1)).is(Blocks.BAMBOO)) {
 			i++;
 		}
 

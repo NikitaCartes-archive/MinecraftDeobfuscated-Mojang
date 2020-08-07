@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -12,7 +13,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class TallGrassBlock extends BushBlock implements BonemealableBlock {
 	protected static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 13.0, 14.0);
 
-	protected TallGrassBlock(Block.Properties properties) {
+	protected TallGrassBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 
@@ -40,7 +41,7 @@ public class TallGrassBlock extends BushBlock implements BonemealableBlock {
 	}
 
 	@Override
-	public Block.OffsetType getOffsetType() {
-		return Block.OffsetType.XYZ;
+	public BlockBehaviour.OffsetType getOffsetType() {
+		return BlockBehaviour.OffsetType.XYZ;
 	}
 }

@@ -5,27 +5,28 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.data.worldgen.Features;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.dimension.end.TheEndDimension;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.LogManager;
@@ -59,8 +60,8 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		this.age = compoundTag.getLong("Age");
 		if (compoundTag.contains("ExitPortal", 10)) {
 			this.exitPortal = NbtUtils.readBlockPos(compoundTag.getCompound("ExitPortal"));
@@ -72,7 +73,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 	@Environment(EnvType.CLIENT)
 	@Override
 	public double getViewDistance() {
-		return 65536.0;
+		return 256.0;
 	}
 
 	@Override
@@ -83,9 +84,9 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 		if (bl2) {
 			this.teleportCooldown--;
 		} else if (!this.level.isClientSide) {
-			List<Entity> list = this.level.getEntitiesOfClass(Entity.class, new AABB(this.getBlockPos()));
+			List<Entity> list = this.level.getEntitiesOfClass(Entity.class, new AABB(this.getBlockPos()), TheEndGatewayBlockEntity::canEntityTeleport);
 			if (!list.isEmpty()) {
-				this.teleportEntity(((Entity)list.get(0)).getRootVehicle());
+				this.teleportEntity((Entity)list.get(this.level.random.nextInt(list.size())));
 			}
 
 			if (this.age % 2400L == 0L) {
@@ -96,6 +97,10 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 		if (bl != this.isSpawning() || bl2 != this.isCoolingDown()) {
 			this.setChanged();
 		}
+	}
+
+	public static boolean canEntityTeleport(Entity entity) {
+		return EntitySelector.NO_SPECTATORS.test(entity) && !entity.getRootVehicle().isOnPortalCooldown();
 	}
 
 	public boolean isSpawning() {
@@ -148,13 +153,31 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 	public void teleportEntity(Entity entity) {
 		if (this.level instanceof ServerLevel && !this.isCoolingDown()) {
 			this.teleportCooldown = 100;
-			if (this.exitPortal == null && this.level.dimension instanceof TheEndDimension) {
+			if (this.exitPortal == null && this.level.dimension() == Level.END) {
 				this.findExitPortal((ServerLevel)this.level);
 			}
 
 			if (this.exitPortal != null) {
 				BlockPos blockPos = this.exactTeleport ? this.exitPortal : this.findExitPosition();
-				entity.teleportToWithTicket((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5);
+				Entity entity3;
+				if (entity instanceof ThrownEnderpearl) {
+					Entity entity2 = ((ThrownEnderpearl)entity).getOwner();
+					if (entity2 instanceof ServerPlayer) {
+						CriteriaTriggers.ENTER_BLOCK.trigger((ServerPlayer)entity2, this.level.getBlockState(this.getBlockPos()));
+					}
+
+					if (entity2 != null) {
+						entity3 = entity2;
+						entity.remove();
+					} else {
+						entity3 = entity;
+					}
+				} else {
+					entity3 = entity.getRootVehicle();
+				}
+
+				entity3.setPortalCooldown();
+				entity3.teleportToWithTicket((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5);
 			}
 
 			this.triggerCooldown();
@@ -162,7 +185,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 	}
 
 	private BlockPos findExitPosition() {
-		BlockPos blockPos = findTallestBlock(this.level, this.exitPortal, 5, false);
+		BlockPos blockPos = findTallestBlock(this.level, this.exitPortal.offset(0, 2, 0), 5, false);
 		LOGGER.debug("Best exit position for portal at {} is {}", this.exitPortal, blockPos);
 		return blockPos.above();
 	}
@@ -185,14 +208,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 		if (this.exitPortal == null) {
 			this.exitPortal = new BlockPos(vec32.x + 0.5, 75.0, vec32.z + 0.5);
 			LOGGER.debug("Failed to find suitable block, settling on {}", this.exitPortal);
-			Feature.END_ISLAND
-				.configured(FeatureConfiguration.NONE)
-				.place(
-					serverLevel,
-					(ChunkGenerator<? extends ChunkGeneratorSettings>)serverLevel.getChunkSource().getGenerator(),
-					new Random(this.exitPortal.asLong()),
-					this.exitPortal
-				);
+			Features.END_ISLAND.place(serverLevel, serverLevel.getChunkSource().getGenerator(), new Random(this.exitPortal.asLong()), this.exitPortal);
 		} else {
 			LOGGER.debug("Found block at {}", this.exitPortal);
 		}
@@ -213,7 +229,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 					for (int l = 255; l > (blockPos2 == null ? 0 : blockPos2.getY()); l--) {
 						BlockPos blockPos3 = new BlockPos(blockPos.getX() + j, l, blockPos.getZ() + k);
 						BlockState blockState = blockGetter.getBlockState(blockPos3);
-						if (blockState.isCollisionShapeFullBlock(blockGetter, blockPos3) && (bl || blockState.getBlock() != Blocks.BEDROCK)) {
+						if (blockState.isCollisionShapeFullBlock(blockGetter, blockPos3) && (bl || !blockState.is(Blocks.BEDROCK))) {
 							blockPos2 = blockPos3;
 							break;
 						}
@@ -242,7 +258,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 			BlockState blockState = levelChunk.getBlockState(blockPos4);
 			BlockPos blockPos5 = blockPos4.above();
 			BlockPos blockPos6 = blockPos4.above(2);
-			if (blockState.getBlock() == Blocks.END_STONE
+			if (blockState.is(Blocks.END_STONE)
 				&& !levelChunk.getBlockState(blockPos5).isCollisionShapeFullBlock(levelChunk, blockPos5)
 				&& !levelChunk.getBlockState(blockPos6).isCollisionShapeFullBlock(levelChunk, blockPos6)) {
 				double e = blockPos4.distSqr(0.0, 0.0, 0.0, true);
@@ -259,7 +275,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity implements
 	private void createExitPortal(ServerLevel serverLevel, BlockPos blockPos) {
 		Feature.END_GATEWAY
 			.configured(EndGatewayConfiguration.knownExit(this.getBlockPos(), false))
-			.place(serverLevel, (ChunkGenerator<? extends ChunkGeneratorSettings>)serverLevel.getChunkSource().getGenerator(), new Random(), blockPos);
+			.place(serverLevel, serverLevel.getChunkSource().getGenerator(), new Random(), blockPos);
 	}
 
 	@Environment(EnvType.CLIENT)

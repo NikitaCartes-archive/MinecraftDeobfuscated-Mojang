@@ -5,6 +5,7 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
+import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.Arrays;
@@ -15,9 +16,11 @@ import java.util.Map;
 import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.Entity;
@@ -238,8 +241,8 @@ public enum Direction implements StringRepresentable {
 		return (float)((this.data2d & 3) * 90);
 	}
 
-	public static Direction getRandomFace(Random random) {
-		return values()[random.nextInt(values().length)];
+	public static Direction getRandom(Random random) {
+		return Util.getRandom(VALUES, random);
 	}
 
 	public static Direction getNearest(double d, double e, double f) {
@@ -271,7 +274,7 @@ public enum Direction implements StringRepresentable {
 	}
 
 	public static Direction get(Direction.AxisDirection axisDirection, Direction.Axis axis) {
-		for (Direction direction : values()) {
+		for (Direction direction : VALUES) {
 			if (direction.getAxisDirection() == axisDirection && direction.getAxis() == axis) {
 				return direction;
 			}
@@ -282,6 +285,13 @@ public enum Direction implements StringRepresentable {
 
 	public Vec3i getNormal() {
 		return this.normal;
+	}
+
+	public boolean isFacingAngle(float f) {
+		float g = f * (float) (Math.PI / 180.0);
+		float h = -Mth.sin(g);
+		float i = Mth.cos(g);
+		return (float)this.normal.getX() * h + (float)this.normal.getZ() * i > 0.0F;
 	}
 
 	public static enum Axis implements StringRepresentable, Predicate<Direction> {
@@ -319,7 +329,9 @@ public enum Direction implements StringRepresentable {
 			}
 		};
 
-		private static final Map<String, Direction.Axis> BY_NAME = (Map<String, Direction.Axis>)Arrays.stream(values())
+		private static final Direction.Axis[] VALUES = values();
+		public static final Codec<Direction.Axis> CODEC = StringRepresentable.fromEnum(Direction.Axis::values, Direction.Axis::byName);
+		private static final Map<String, Direction.Axis> BY_NAME = (Map<String, Direction.Axis>)Arrays.stream(VALUES)
 			.collect(Collectors.toMap(Direction.Axis::getName, axis -> axis));
 		private final String name;
 
@@ -328,7 +340,6 @@ public enum Direction implements StringRepresentable {
 		}
 
 		@Nullable
-		@Environment(EnvType.CLIENT)
 		public static Direction.Axis byName(String string) {
 			return (Direction.Axis)BY_NAME.get(string.toLowerCase(Locale.ROOT));
 		}
@@ -349,8 +360,8 @@ public enum Direction implements StringRepresentable {
 			return this.name;
 		}
 
-		public static Direction.Axis getRandomAxis(Random random) {
-			return values()[random.nextInt(values().length)];
+		public static Direction.Axis getRandom(Random random) {
+			return Util.getRandom(VALUES, random);
 		}
 
 		public boolean test(@Nullable Direction direction) {
@@ -398,6 +409,10 @@ public enum Direction implements StringRepresentable {
 		public String toString() {
 			return this.name;
 		}
+
+		public Direction.AxisDirection opposite() {
+			return this == POSITIVE ? NEGATIVE : POSITIVE;
+		}
 	}
 
 	public static enum Plane implements Iterable<Direction>, Predicate<Direction> {
@@ -413,7 +428,7 @@ public enum Direction implements StringRepresentable {
 		}
 
 		public Direction getRandomDirection(Random random) {
-			return this.faces[random.nextInt(this.faces.length)];
+			return Util.getRandom(this.faces, random);
 		}
 
 		public boolean test(@Nullable Direction direction) {
@@ -422,6 +437,10 @@ public enum Direction implements StringRepresentable {
 
 		public Iterator<Direction> iterator() {
 			return Iterators.forArray(this.faces);
+		}
+
+		public Stream<Direction> stream() {
+			return Arrays.stream(this.faces);
 		}
 	}
 }

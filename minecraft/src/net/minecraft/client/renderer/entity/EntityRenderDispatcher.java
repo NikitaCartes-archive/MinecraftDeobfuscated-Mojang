@@ -49,7 +49,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 @Environment(EnvType.CLIENT)
 public class EntityRenderDispatcher {
-	private static final RenderType SHADOW_RENDER_TYPE = RenderType.entityNoOutline(new ResourceLocation("textures/misc/shadow.png"));
+	private static final RenderType SHADOW_RENDER_TYPE = RenderType.entityShadow(new ResourceLocation("textures/misc/shadow.png"));
 	private final Map<EntityType<?>, EntityRenderer<?>> renderers = Maps.<EntityType<?>, EntityRenderer<?>>newHashMap();
 	private final Map<String, PlayerRenderer> playerRenderers = Maps.<String, PlayerRenderer>newHashMap();
 	private final PlayerRenderer defaultPlayerRenderer;
@@ -112,13 +112,14 @@ public class EntityRenderDispatcher {
 		this.register(EntityType.GHAST, new GhastRenderer(this));
 		this.register(EntityType.GIANT, new GiantMobRenderer(this, 6.0F));
 		this.register(EntityType.GUARDIAN, new GuardianRenderer(this));
+		this.register(EntityType.HOGLIN, new HoglinRenderer(this));
 		this.register(EntityType.HOPPER_MINECART, new MinecartRenderer<>(this));
 		this.register(EntityType.HORSE, new HorseRenderer(this));
 		this.register(EntityType.HUSK, new HuskRenderer(this));
 		this.register(EntityType.ILLUSIONER, new IllusionerRenderer(this));
 		this.register(EntityType.IRON_GOLEM, new IronGolemRenderer(this));
-		this.register(EntityType.ITEM_FRAME, new ItemFrameRenderer(this, itemRenderer));
 		this.register(EntityType.ITEM, new ItemEntityRenderer(this, itemRenderer));
+		this.register(EntityType.ITEM_FRAME, new ItemFrameRenderer(this, itemRenderer));
 		this.register(EntityType.LEASH_KNOT, new LeashKnotRenderer(this));
 		this.register(EntityType.LIGHTNING_BOLT, new LightningBoltRenderer(this));
 		this.register(EntityType.LLAMA, new LlamaRenderer(this));
@@ -133,6 +134,8 @@ public class EntityRenderDispatcher {
 		this.register(EntityType.PARROT, new ParrotRenderer(this));
 		this.register(EntityType.PHANTOM, new PhantomRenderer(this));
 		this.register(EntityType.PIG, new PigRenderer(this));
+		this.register(EntityType.PIGLIN, new PiglinRenderer(this, false));
+		this.register(EntityType.PIGLIN_BRUTE, new PiglinRenderer(this, false));
 		this.register(EntityType.PILLAGER, new PillagerRenderer(this));
 		this.register(EntityType.POLAR_BEAR, new PolarBearRenderer(this));
 		this.register(EntityType.POTION, new ThrownItemRenderer<>(this, itemRenderer));
@@ -170,10 +173,12 @@ public class EntityRenderDispatcher {
 		this.register(EntityType.WITHER_SKELETON, new WitherSkeletonRenderer(this));
 		this.register(EntityType.WITHER_SKULL, new WitherSkullRenderer(this));
 		this.register(EntityType.WOLF, new WolfRenderer(this));
+		this.register(EntityType.ZOGLIN, new ZoglinRenderer(this));
 		this.register(EntityType.ZOMBIE_HORSE, new UndeadHorseRenderer(this));
 		this.register(EntityType.ZOMBIE, new ZombieRenderer(this));
-		this.register(EntityType.ZOMBIE_PIGMAN, new PigZombieRenderer(this));
+		this.register(EntityType.ZOMBIFIED_PIGLIN, new PiglinRenderer(this, true));
 		this.register(EntityType.ZOMBIE_VILLAGER, new ZombieVillagerRenderer(this, reloadableResourceManager));
+		this.register(EntityType.STRIDER, new StriderRenderer(this));
 	}
 
 	public EntityRenderDispatcher(
@@ -280,9 +285,9 @@ public class EntityRenderDispatcher {
 		float g = entity.getBbWidth() / 2.0F;
 		this.renderBox(poseStack, vertexConsumer, entity, 1.0F, 1.0F, 1.0F);
 		if (entity instanceof EnderDragon) {
-			double d = entity.getX() - Mth.lerp((double)f, entity.xOld, entity.getX());
-			double e = entity.getY() - Mth.lerp((double)f, entity.yOld, entity.getY());
-			double h = entity.getZ() - Mth.lerp((double)f, entity.zOld, entity.getZ());
+			double d = -Mth.lerp((double)f, entity.xOld, entity.getX());
+			double e = -Mth.lerp((double)f, entity.yOld, entity.getY());
+			double h = -Mth.lerp((double)f, entity.zOld, entity.getZ());
 
 			for (EnderDragonPart enderDragonPart : ((EnderDragon)entity).getSubEntities()) {
 				poseStack.pushPose();
@@ -426,7 +431,7 @@ public class EntityRenderDispatcher {
 						double n = (double)blockPos.getZ() + aABB.maxZ;
 						float o = (float)(j - d);
 						float p = (float)(k - d);
-						float q = (float)(l - e + 0.015625);
+						float q = (float)(l - e);
 						float r = (float)(m - f);
 						float s = (float)(n - f);
 						float t = -o / 2.0F / g + 0.5F;

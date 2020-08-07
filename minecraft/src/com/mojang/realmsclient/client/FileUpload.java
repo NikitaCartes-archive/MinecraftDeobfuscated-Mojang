@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.User;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
@@ -48,14 +49,14 @@ public class FileUpload {
 		.setConnectTimeout((int)TimeUnit.SECONDS.toMillis(15L))
 		.build();
 
-	public FileUpload(File file, long l, int i, UploadInfo uploadInfo, String string, String string2, String string3, UploadStatus uploadStatus) {
+	public FileUpload(File file, long l, int i, UploadInfo uploadInfo, User user, String string, UploadStatus uploadStatus) {
 		this.file = file;
 		this.worldId = l;
 		this.slotId = i;
 		this.uploadInfo = uploadInfo;
-		this.sessionId = string;
-		this.username = string2;
-		this.clientVersion = string3;
+		this.sessionId = user.getSessionId();
+		this.username = user.getName();
+		this.clientVersion = string;
 		this.uploadStatus = uploadStatus;
 	}
 
@@ -80,9 +81,7 @@ public class FileUpload {
 			return builder.build();
 		} else {
 			this.uploadStatus.totalBytes = this.file.length();
-			HttpPost httpPost = new HttpPost(
-				"http://" + this.uploadInfo.getUploadEndpoint() + ":" + this.uploadInfo.getPort() + "/upload" + "/" + this.worldId + "/" + this.slotId
-			);
+			HttpPost httpPost = new HttpPost(this.uploadInfo.getUploadEndpoint().resolve("/upload/" + this.worldId + "/" + this.slotId));
 			CloseableHttpClient closeableHttpClient = HttpClientBuilder.create().setDefaultRequestConfig(this.requestConfig).build();
 
 			UploadResult var8;
@@ -192,8 +191,7 @@ public class FileUpload {
 				if (this.length < 0L) {
 					while ((i = inputStream.read(bs)) != -1) {
 						outputStream.write(bs, 0, i);
-						UploadStatus var12 = this.uploadStatus;
-						var12.bytesWritten = var12.bytesWritten + (long)i;
+						this.uploadStatus.bytesWritten += (long)i;
 					}
 				} else {
 					long l = this.length;
@@ -205,8 +203,7 @@ public class FileUpload {
 						}
 
 						outputStream.write(bs, 0, i);
-						UploadStatus var7 = this.uploadStatus;
-						var7.bytesWritten = var7.bytesWritten + (long)i;
+						this.uploadStatus.bytesWritten += (long)i;
 						l -= (long)i;
 						outputStream.flush();
 					}

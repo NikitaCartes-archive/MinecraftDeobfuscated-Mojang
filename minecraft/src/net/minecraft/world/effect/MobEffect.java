@@ -16,8 +16,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.BaseAttributeMap;
 import net.minecraft.world.entity.player.Player;
 
 public class MobEffect {
@@ -140,22 +140,22 @@ public class MobEffect {
 		return this.attributeModifiers;
 	}
 
-	public void removeAttributeModifiers(LivingEntity livingEntity, BaseAttributeMap baseAttributeMap, int i) {
+	public void removeAttributeModifiers(LivingEntity livingEntity, AttributeMap attributeMap, int i) {
 		for (Entry<Attribute, AttributeModifier> entry : this.attributeModifiers.entrySet()) {
-			AttributeInstance attributeInstance = baseAttributeMap.getInstance((Attribute)entry.getKey());
+			AttributeInstance attributeInstance = attributeMap.getInstance((Attribute)entry.getKey());
 			if (attributeInstance != null) {
 				attributeInstance.removeModifier((AttributeModifier)entry.getValue());
 			}
 		}
 	}
 
-	public void addAttributeModifiers(LivingEntity livingEntity, BaseAttributeMap baseAttributeMap, int i) {
+	public void addAttributeModifiers(LivingEntity livingEntity, AttributeMap attributeMap, int i) {
 		for (Entry<Attribute, AttributeModifier> entry : this.attributeModifiers.entrySet()) {
-			AttributeInstance attributeInstance = baseAttributeMap.getInstance((Attribute)entry.getKey());
+			AttributeInstance attributeInstance = attributeMap.getInstance((Attribute)entry.getKey());
 			if (attributeInstance != null) {
 				AttributeModifier attributeModifier = (AttributeModifier)entry.getValue();
 				attributeInstance.removeModifier(attributeModifier);
-				attributeInstance.addModifier(
+				attributeInstance.addPermanentModifier(
 					new AttributeModifier(
 						attributeModifier.getId(), this.getDescriptionId() + " " + i, this.getAttributeModifierValue(i, attributeModifier), attributeModifier.getOperation()
 					)

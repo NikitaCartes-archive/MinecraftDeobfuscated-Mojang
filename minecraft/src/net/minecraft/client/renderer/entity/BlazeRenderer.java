@@ -3,6 +3,7 @@ package net.minecraft.client.renderer.entity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.BlazeModel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.monster.Blaze;
 
@@ -14,7 +15,7 @@ public class BlazeRenderer extends MobRenderer<Blaze, BlazeModel<Blaze>> {
 		super(entityRenderDispatcher, new BlazeModel<>(), 0.5F);
 	}
 
-	protected int getBlockLightLevel(Blaze blaze, float f) {
+	protected int getBlockLightLevel(Blaze blaze, BlockPos blockPos) {
 		return 15;
 	}
 

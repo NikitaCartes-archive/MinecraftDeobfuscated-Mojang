@@ -2,14 +2,14 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
 public class LavaParticle extends TextureSheetParticle {
-	private LavaParticle(Level level, double d, double e, double f) {
-		super(level, d, e, f, 0.0, 0.0, 0.0);
+	private LavaParticle(ClientLevel clientLevel, double d, double e, double f) {
+		super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
 		this.xd *= 0.8F;
 		this.yd *= 0.8F;
 		this.zd *= 0.8F;
@@ -70,8 +70,8 @@ public class LavaParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			LavaParticle lavaParticle = new LavaParticle(level, d, e, f);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			LavaParticle lavaParticle = new LavaParticle(clientLevel, d, e, f);
 			lavaParticle.pickSprite(this.sprite);
 			return lavaParticle;
 		}

@@ -31,6 +31,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
@@ -51,7 +52,6 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -66,7 +66,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT,
 		ParticleRenderType.CUSTOM
 	);
-	protected Level level;
+	protected ClientLevel level;
 	private final Map<ParticleRenderType, Queue<Particle>> particles = Maps.<ParticleRenderType, Queue<Particle>>newIdentityHashMap();
 	private final Queue<TrackingEmitter> trackingEmitters = Queues.<TrackingEmitter>newArrayDeque();
 	private final TextureManager textureManager;
@@ -76,9 +76,9 @@ public class ParticleEngine implements PreparableReloadListener {
 	private final Map<ResourceLocation, ParticleEngine.MutableSpriteSet> spriteSets = Maps.<ResourceLocation, ParticleEngine.MutableSpriteSet>newHashMap();
 	private final TextureAtlas textureAtlas = new TextureAtlas(TextureAtlas.LOCATION_PARTICLES);
 
-	public ParticleEngine(Level level, TextureManager textureManager) {
+	public ParticleEngine(ClientLevel clientLevel, TextureManager textureManager) {
 		textureManager.register(this.textureAtlas.location(), this.textureAtlas);
-		this.level = level;
+		this.level = clientLevel;
 		this.textureManager = textureManager;
 		this.registerProviders();
 	}
@@ -118,6 +118,8 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.FIREWORK, FireworkParticles.SparkProvider::new);
 		this.register(ParticleTypes.FISHING, WakeParticle.Provider::new);
 		this.register(ParticleTypes.FLAME, FlameParticle.Provider::new);
+		this.register(ParticleTypes.SOUL, SoulParticle.Provider::new);
+		this.register(ParticleTypes.SOUL_FIRE_FLAME, FlameParticle.Provider::new);
 		this.register(ParticleTypes.FLASH, FireworkParticles.FlashProvider::new);
 		this.register(ParticleTypes.HAPPY_VILLAGER, SuspendedTownParticle.HappyVillagerProvider::new);
 		this.register(ParticleTypes.HEART, HeartParticle.Provider::new);
@@ -139,13 +141,21 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.SWEEP_ATTACK, AttackSweepParticle.Provider::new);
 		this.register(ParticleTypes.TOTEM_OF_UNDYING, TotemParticle.Provider::new);
 		this.register(ParticleTypes.SQUID_INK, SquidInkParticle.Provider::new);
-		this.register(ParticleTypes.UNDERWATER, SuspendedParticle.Provider::new);
+		this.register(ParticleTypes.UNDERWATER, SuspendedParticle.UnderwaterProvider::new);
 		this.register(ParticleTypes.SPLASH, SplashParticle.Provider::new);
 		this.register(ParticleTypes.WITCH, SpellParticle.WitchProvider::new);
 		this.register(ParticleTypes.DRIPPING_HONEY, DripParticle.HoneyHangProvider::new);
 		this.register(ParticleTypes.FALLING_HONEY, DripParticle.HoneyFallProvider::new);
 		this.register(ParticleTypes.LANDING_HONEY, DripParticle.HoneyLandProvider::new);
 		this.register(ParticleTypes.FALLING_NECTAR, DripParticle.NectarFallProvider::new);
+		this.register(ParticleTypes.ASH, AshParticle.Provider::new);
+		this.register(ParticleTypes.CRIMSON_SPORE, SuspendedParticle.CrimsonSporeProvider::new);
+		this.register(ParticleTypes.WARPED_SPORE, SuspendedParticle.WarpedSporeProvider::new);
+		this.register(ParticleTypes.DRIPPING_OBSIDIAN_TEAR, DripParticle.ObsidianTearHangProvider::new);
+		this.register(ParticleTypes.FALLING_OBSIDIAN_TEAR, DripParticle.ObsidianTearFallProvider::new);
+		this.register(ParticleTypes.LANDING_OBSIDIAN_TEAR, DripParticle.ObsidianTearLandProvider::new);
+		this.register(ParticleTypes.REVERSE_PORTAL, ReversePortalParticle.ReversePortalProvider::new);
+		this.register(ParticleTypes.WHITE_ASH, WhiteAshParticle.Provider::new);
 	}
 
 	private <T extends ParticleOptions> void register(ParticleType<T> particleType, ParticleProvider<T> particleProvider) {
@@ -303,8 +313,7 @@ public class ParticleEngine implements PreparableReloadListener {
 
 	@Nullable
 	private <T extends ParticleOptions> Particle makeParticle(T particleOptions, double d, double e, double f, double g, double h, double i) {
-		ParticleProvider<T> particleProvider = (ParticleProvider<T>)this.providers
-			.get(Registry.PARTICLE_TYPE.getId((ParticleType<? extends ParticleOptions>)particleOptions.getType()));
+		ParticleProvider<T> particleProvider = (ParticleProvider<T>)this.providers.get(Registry.PARTICLE_TYPE.getId(particleOptions.getType()));
 		return particleProvider == null ? null : particleProvider.createParticle(particleOptions, this.level, d, e, f, g, h, i);
 	}
 
@@ -400,14 +409,15 @@ public class ParticleEngine implements PreparableReloadListener {
 
 		RenderSystem.popMatrix();
 		RenderSystem.depthMask(true);
+		RenderSystem.depthFunc(515);
 		RenderSystem.disableBlend();
 		RenderSystem.defaultAlphaFunc();
 		lightTexture.turnOffLightLayer();
 		RenderSystem.disableFog();
 	}
 
-	public void setLevel(@Nullable Level level) {
-		this.level = level;
+	public void setLevel(@Nullable ClientLevel clientLevel) {
+		this.level = clientLevel;
 		this.particles.clear();
 		this.trackingEmitters.clear();
 	}

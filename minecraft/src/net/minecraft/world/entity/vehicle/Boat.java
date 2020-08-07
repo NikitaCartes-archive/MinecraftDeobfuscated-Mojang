@@ -4,6 +4,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -19,13 +20,15 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
@@ -92,6 +95,11 @@ public class Boat extends Entity {
 	}
 
 	@Override
+	protected float getEyeHeight(Pose pose, EntityDimensions entityDimensions) {
+		return entityDimensions.height;
+	}
+
+	@Override
 	protected boolean isMovementNoisy() {
 		return false;
 	}
@@ -107,16 +115,18 @@ public class Boat extends Entity {
 		this.entityData.define(DATA_ID_BUBBLE_TIME, 0);
 	}
 
-	@Nullable
 	@Override
-	public AABB getCollideAgainstBox(Entity entity) {
-		return entity.isPushable() ? entity.getBoundingBox() : null;
+	public boolean canCollideWith(Entity entity) {
+		return canVehicleCollide(this, entity);
 	}
 
-	@Nullable
+	public static boolean canVehicleCollide(Entity entity, Entity entity2) {
+		return (entity2.canBeCollidedWith() || entity2.isPushable()) && !entity.isPassengerOfSameVehicle(entity2);
+	}
+
 	@Override
-	public AABB getCollideBox() {
-		return this.getBoundingBox();
+	public boolean canBeCollidedWith() {
+		return true;
 	}
 
 	@Override
@@ -125,7 +135,12 @@ public class Boat extends Entity {
 	}
 
 	@Override
-	public double getRideHeight() {
+	protected Vec3 getRelativePortalPosition(Direction.Axis axis, BlockUtil.FoundRectangle foundRectangle) {
+		return LivingEntity.resetForwardDirectionOfRelativePortalPosition(super.getRelativePortalPosition(axis, foundRectangle));
+	}
+
+	@Override
+	public double getPassengersRidingOffset() {
 		return -0.1;
 	}
 
@@ -133,11 +148,7 @@ public class Boat extends Entity {
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
-		} else if (this.level.isClientSide || this.removed) {
-			return true;
-		} else if (damageSource instanceof IndirectEntityDamageSource && damageSource.getEntity() != null && this.hasPassenger(damageSource.getEntity())) {
-			return false;
-		} else {
+		} else if (!this.level.isClientSide && !this.removed) {
 			this.setHurtDir(-this.getHurtDir());
 			this.setHurtTime(10);
 			this.setDamage(this.getDamage() + f * 10.0F);
@@ -151,6 +162,8 @@ public class Boat extends Entity {
 				this.remove();
 			}
 
+			return true;
+		} else {
 			return true;
 		}
 	}
@@ -428,39 +441,32 @@ public class Boat extends Entity {
 		int l = Mth.ceil(aABB.maxY - this.lastYd);
 		int m = Mth.floor(aABB.minZ);
 		int n = Mth.ceil(aABB.maxZ);
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-			label136:
-			for (int o = k; o < l; o++) {
-				float f = 0.0F;
-				int p = i;
+		label39:
+		for (int o = k; o < l; o++) {
+			float f = 0.0F;
 
-				while (true) {
-					if (p < j) {
-						for (int q = m; q < n; q++) {
-							pooledMutableBlockPos.set(p, o, q);
-							FluidState fluidState = this.level.getFluidState(pooledMutableBlockPos);
-							if (fluidState.is(FluidTags.WATER)) {
-								f = Math.max(f, fluidState.getHeight(this.level, pooledMutableBlockPos));
-							}
+			for (int p = i; p < j; p++) {
+				for (int q = m; q < n; q++) {
+					mutableBlockPos.set(p, o, q);
+					FluidState fluidState = this.level.getFluidState(mutableBlockPos);
+					if (fluidState.is(FluidTags.WATER)) {
+						f = Math.max(f, fluidState.getHeight(this.level, mutableBlockPos));
+					}
 
-							if (f >= 1.0F) {
-								continue label136;
-							}
-						}
-
-						p++;
-					} else {
-						if (f < 1.0F) {
-							return (float)pooledMutableBlockPos.getY() + f;
-						}
-						break;
+					if (f >= 1.0F) {
+						continue label39;
 					}
 				}
 			}
 
-			return (float)(l + 1);
+			if (f < 1.0F) {
+				return (float)mutableBlockPos.getY() + f;
+			}
 		}
+
+		return (float)(l + 1);
 	}
 
 	public float getGroundFriction() {
@@ -475,23 +481,20 @@ public class Boat extends Entity {
 		VoxelShape voxelShape = Shapes.create(aABB2);
 		float f = 0.0F;
 		int o = 0;
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-			for (int p = i; p < j; p++) {
-				for (int q = m; q < n; q++) {
-					int r = (p != i && p != j - 1 ? 0 : 1) + (q != m && q != n - 1 ? 0 : 1);
-					if (r != 2) {
-						for (int s = k; s < l; s++) {
-							if (r <= 0 || s != k && s != l - 1) {
-								pooledMutableBlockPos.set(p, s, q);
-								BlockState blockState = this.level.getBlockState(pooledMutableBlockPos);
-								if (!(blockState.getBlock() instanceof WaterlilyBlock)
-									&& Shapes.joinIsNotEmpty(
-										blockState.getCollisionShape(this.level, pooledMutableBlockPos).move((double)p, (double)s, (double)q), voxelShape, BooleanOp.AND
-									)) {
-									f += blockState.getBlock().getFriction();
-									o++;
-								}
+		for (int p = i; p < j; p++) {
+			for (int q = m; q < n; q++) {
+				int r = (p != i && p != j - 1 ? 0 : 1) + (q != m && q != n - 1 ? 0 : 1);
+				if (r != 2) {
+					for (int s = k; s < l; s++) {
+						if (r <= 0 || s != k && s != l - 1) {
+							mutableBlockPos.set(p, s, q);
+							BlockState blockState = this.level.getBlockState(mutableBlockPos);
+							if (!(blockState.getBlock() instanceof WaterlilyBlock)
+								&& Shapes.joinIsNotEmpty(blockState.getCollisionShape(this.level, mutableBlockPos).move((double)p, (double)s, (double)q), voxelShape, BooleanOp.AND)) {
+								f += blockState.getBlock().getFriction();
+								o++;
 							}
 						}
 					}
@@ -512,18 +515,17 @@ public class Boat extends Entity {
 		int n = Mth.ceil(aABB.maxZ);
 		boolean bl = false;
 		this.waterLevel = Double.MIN_VALUE;
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-			for (int o = i; o < j; o++) {
-				for (int p = k; p < l; p++) {
-					for (int q = m; q < n; q++) {
-						pooledMutableBlockPos.set(o, p, q);
-						FluidState fluidState = this.level.getFluidState(pooledMutableBlockPos);
-						if (fluidState.is(FluidTags.WATER)) {
-							float f = (float)p + fluidState.getHeight(this.level, pooledMutableBlockPos);
-							this.waterLevel = Math.max((double)f, this.waterLevel);
-							bl |= aABB.minY < (double)f;
-						}
+		for (int o = i; o < j; o++) {
+			for (int p = k; p < l; p++) {
+				for (int q = m; q < n; q++) {
+					mutableBlockPos.set(o, p, q);
+					FluidState fluidState = this.level.getFluidState(mutableBlockPos);
+					if (fluidState.is(FluidTags.WATER)) {
+						float f = (float)p + fluidState.getHeight(this.level, mutableBlockPos);
+						this.waterLevel = Math.max((double)f, this.waterLevel);
+						bl |= aABB.minY < (double)f;
 					}
 				}
 			}
@@ -543,20 +545,19 @@ public class Boat extends Entity {
 		int m = Mth.floor(aABB.minZ);
 		int n = Mth.ceil(aABB.maxZ);
 		boolean bl = false;
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-			for (int o = i; o < j; o++) {
-				for (int p = k; p < l; p++) {
-					for (int q = m; q < n; q++) {
-						pooledMutableBlockPos.set(o, p, q);
-						FluidState fluidState = this.level.getFluidState(pooledMutableBlockPos);
-						if (fluidState.is(FluidTags.WATER) && d < (double)((float)pooledMutableBlockPos.getY() + fluidState.getHeight(this.level, pooledMutableBlockPos))) {
-							if (!fluidState.isSource()) {
-								return Boat.Status.UNDER_FLOWING_WATER;
-							}
-
-							bl = true;
+		for (int o = i; o < j; o++) {
+			for (int p = k; p < l; p++) {
+				for (int q = m; q < n; q++) {
+					mutableBlockPos.set(o, p, q);
+					FluidState fluidState = this.level.getFluidState(mutableBlockPos);
+					if (fluidState.is(FluidTags.WATER) && d < (double)((float)mutableBlockPos.getY() + fluidState.getHeight(this.level, mutableBlockPos))) {
+						if (!fluidState.isSource()) {
+							return Boat.Status.UNDER_FLOWING_WATER;
 						}
+
+						bl = true;
 					}
 				}
 			}
@@ -641,7 +642,7 @@ public class Boat extends Entity {
 	public void positionRider(Entity entity) {
 		if (this.hasPassenger(entity)) {
 			float f = 0.0F;
-			float g = (float)((this.removed ? 0.01F : this.getRideHeight()) + entity.getRidingHeight());
+			float g = (float)((this.removed ? 0.01F : this.getPassengersRidingOffset()) + entity.getMyRidingOffset());
 			if (this.getPassengers().size() > 1) {
 				int i = this.getPassengers().indexOf(entity);
 				if (i == 0) {
@@ -666,6 +667,35 @@ public class Boat extends Entity {
 				entity.setYHeadRot(entity.getYHeadRot() + (float)j);
 			}
 		}
+	}
+
+	@Override
+	public Vec3 getDismountLocationForPassenger(LivingEntity livingEntity) {
+		Vec3 vec3 = getCollisionHorizontalEscapeVector((double)(this.getBbWidth() * Mth.SQRT_OF_TWO), (double)livingEntity.getBbWidth(), this.yRot);
+		double d = this.getX() + vec3.x;
+		double e = this.getZ() + vec3.z;
+		BlockPos blockPos = new BlockPos(d, this.getBoundingBox().maxY, e);
+		BlockPos blockPos2 = blockPos.below();
+		if (!this.level.isWaterAt(blockPos2)) {
+			double f = (double)blockPos.getY() + this.level.getBlockFloorHeight(blockPos);
+			double g = (double)blockPos.getY() + this.level.getBlockFloorHeight(blockPos2);
+
+			for (Pose pose : livingEntity.getDismountPoses()) {
+				Vec3 vec32 = DismountHelper.findDismountLocation(this.level, d, f, e, livingEntity, pose);
+				if (vec32 != null) {
+					livingEntity.setPose(pose);
+					return vec32;
+				}
+
+				Vec3 vec33 = DismountHelper.findDismountLocation(this.level, d, g, e, livingEntity, pose);
+				if (vec33 != null) {
+					livingEntity.setPose(pose);
+					return vec33;
+				}
+			}
+		}
+
+		return super.getDismountLocationForPassenger(livingEntity);
 	}
 
 	protected void clampRotation(Entity entity) {
@@ -696,11 +726,17 @@ public class Boat extends Entity {
 	}
 
 	@Override
-	public boolean interact(Player player, InteractionHand interactionHand) {
+	public InteractionResult interact(Player player, InteractionHand interactionHand) {
 		if (player.isSecondaryUseActive()) {
-			return false;
+			return InteractionResult.PASS;
+		} else if (this.outOfControlTicks < 60.0F) {
+			if (!this.level.isClientSide) {
+				return player.startRiding(this) ? InteractionResult.CONSUME : InteractionResult.PASS;
+			} else {
+				return InteractionResult.SUCCESS;
+			}
 		} else {
-			return !this.level.isClientSide && this.outOfControlTicks < 60.0F ? player.startRiding(this) : false;
+			return InteractionResult.PASS;
 		}
 	}
 
@@ -731,7 +767,7 @@ public class Boat extends Entity {
 				}
 
 				this.fallDistance = 0.0F;
-			} else if (!this.level.getFluidState(new BlockPos(this).below()).is(FluidTags.WATER) && d < 0.0) {
+			} else if (!this.level.getFluidState(this.blockPosition().below()).is(FluidTags.WATER) && d < 0.0) {
 				this.fallDistance = (float)((double)this.fallDistance - d);
 			}
 		}
@@ -788,7 +824,7 @@ public class Boat extends Entity {
 
 	@Override
 	protected boolean canAddPassenger(Entity entity) {
-		return this.getPassengers().size() < 2 && !this.isUnderLiquid(FluidTags.WATER);
+		return this.getPassengers().size() < 2 && !this.isEyeInFluid(FluidTags.WATER);
 	}
 
 	@Nullable
@@ -809,6 +845,11 @@ public class Boat extends Entity {
 	@Override
 	public Packet<?> getAddEntityPacket() {
 		return new ClientboundAddEntityPacket(this);
+	}
+
+	@Override
+	public boolean isUnderWater() {
+		return this.status == Boat.Status.UNDER_WATER || this.status == Boat.Status.UNDER_FLOWING_WATER;
 	}
 
 	public static enum Status {

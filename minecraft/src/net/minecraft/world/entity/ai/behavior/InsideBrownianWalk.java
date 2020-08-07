@@ -13,19 +13,19 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 
 public class InsideBrownianWalk extends Behavior<PathfinderMob> {
-	private final float speed;
+	private final float speedModifier;
 
 	public InsideBrownianWalk(float f) {
 		super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT));
-		this.speed = f;
+		this.speedModifier = f;
 	}
 
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, PathfinderMob pathfinderMob) {
-		return !serverLevel.canSeeSky(new BlockPos(pathfinderMob));
+		return !serverLevel.canSeeSky(pathfinderMob.blockPosition());
 	}
 
 	protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {
-		BlockPos blockPos = new BlockPos(pathfinderMob);
+		BlockPos blockPos = pathfinderMob.blockPosition();
 		List<BlockPos> list = (List<BlockPos>)BlockPos.betweenClosedStream(blockPos.offset(-1, -1, -1), blockPos.offset(1, 1, 1))
 			.map(BlockPos::immutable)
 			.collect(Collectors.toList());
@@ -35,6 +35,6 @@ public class InsideBrownianWalk extends Behavior<PathfinderMob> {
 			.filter(blockPosx -> serverLevel.loadedAndEntityCanStandOn(blockPosx, pathfinderMob))
 			.filter(blockPosx -> serverLevel.noCollision(pathfinderMob))
 			.findFirst();
-		optional.ifPresent(blockPosx -> pathfinderMob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPosx, this.speed, 0)));
+		optional.ifPresent(blockPosx -> pathfinderMob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(blockPosx, this.speedModifier, 0)));
 	}
 }

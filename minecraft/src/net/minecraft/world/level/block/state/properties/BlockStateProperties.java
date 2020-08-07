@@ -2,6 +2,7 @@ package net.minecraft.world.level.block.state.properties;
 
 import java.util.function.Predicate;
 import net.minecraft.core.Direction;
+import net.minecraft.core.FrontAndTop;
 
 public class BlockStateProperties {
 	public static final BooleanProperty ATTACHED = BooleanProperty.create("attached");
@@ -33,6 +34,7 @@ public class BlockStateProperties {
 	public static final BooleanProperty TRIGGERED = BooleanProperty.create("triggered");
 	public static final BooleanProperty UNSTABLE = BooleanProperty.create("unstable");
 	public static final BooleanProperty WATERLOGGED = BooleanProperty.create("waterlogged");
+	public static final BooleanProperty VINE_END = BooleanProperty.create("vine_end");
 	public static final EnumProperty<Direction.Axis> HORIZONTAL_AXIS = EnumProperty.create("axis", Direction.Axis.class, Direction.Axis.X, Direction.Axis.Z);
 	public static final EnumProperty<Direction.Axis> AXIS = EnumProperty.create("axis", Direction.Axis.class);
 	public static final BooleanProperty UP = BooleanProperty.create("up");
@@ -46,8 +48,13 @@ public class BlockStateProperties {
 	);
 	public static final DirectionProperty FACING_HOPPER = DirectionProperty.create("facing", (Predicate<Direction>)(direction -> direction != Direction.UP));
 	public static final DirectionProperty HORIZONTAL_FACING = DirectionProperty.create("facing", Direction.Plane.HORIZONTAL);
+	public static final EnumProperty<FrontAndTop> ORIENTATION = EnumProperty.create("orientation", FrontAndTop.class);
 	public static final EnumProperty<AttachFace> ATTACH_FACE = EnumProperty.create("face", AttachFace.class);
 	public static final EnumProperty<BellAttachType> BELL_ATTACHMENT = EnumProperty.create("attachment", BellAttachType.class);
+	public static final EnumProperty<WallSide> EAST_WALL = EnumProperty.create("east", WallSide.class);
+	public static final EnumProperty<WallSide> NORTH_WALL = EnumProperty.create("north", WallSide.class);
+	public static final EnumProperty<WallSide> SOUTH_WALL = EnumProperty.create("south", WallSide.class);
+	public static final EnumProperty<WallSide> WEST_WALL = EnumProperty.create("west", WallSide.class);
 	public static final EnumProperty<RedstoneSide> EAST_REDSTONE = EnumProperty.create("east", RedstoneSide.class);
 	public static final EnumProperty<RedstoneSide> NORTH_REDSTONE = EnumProperty.create("north", RedstoneSide.class);
 	public static final EnumProperty<RedstoneSide> SOUTH_REDSTONE = EnumProperty.create("south", RedstoneSide.class);
@@ -87,6 +94,7 @@ public class BlockStateProperties {
 	public static final IntegerProperty POWER = IntegerProperty.create("power", 0, 15);
 	public static final IntegerProperty STAGE = IntegerProperty.create("stage", 0, 1);
 	public static final IntegerProperty STABILITY_DISTANCE = IntegerProperty.create("distance", 0, 7);
+	public static final IntegerProperty RESPAWN_ANCHOR_CHARGES = IntegerProperty.create("charges", 0, 4);
 	public static final IntegerProperty ROTATION_16 = IntegerProperty.create("rotation", 0, 15);
 	public static final EnumProperty<BedPart> BED_PART = EnumProperty.create("part", BedPart.class);
 	public static final EnumProperty<ChestType> CHEST_TYPE = EnumProperty.create("type", ChestType.class);

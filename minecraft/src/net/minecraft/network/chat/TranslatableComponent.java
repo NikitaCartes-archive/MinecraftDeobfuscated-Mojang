@@ -1,69 +1,57 @@
 package net.minecraft.network.chat;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Streams;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.Arrays;
-import java.util.IllegalFormatException;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.locale.Language;
 import net.minecraft.world.entity.Entity;
 
 public class TranslatableComponent extends BaseComponent implements ContextAwareComponent {
-	private static final Language DEFAULT_LANGUAGE = new Language();
-	private static final Language LANGUAGE = Language.getInstance();
+	private static final Object[] NO_ARGS = new Object[0];
+	private static final FormattedText TEXT_PERCENT = FormattedText.of("%");
+	private static final FormattedText TEXT_NULL = FormattedText.of("null");
 	private final String key;
 	private final Object[] args;
-	private final Object decomposeLock = new Object();
-	private long decomposedLanguageTime = -1L;
-	protected final List<Component> decomposedParts = Lists.<Component>newArrayList();
-	public static final Pattern FORMAT_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
+	@Nullable
+	private Language decomposedWith;
+	private final List<FormattedText> decomposedParts = Lists.<FormattedText>newArrayList();
+	private static final Pattern FORMAT_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
+
+	public TranslatableComponent(String string) {
+		this.key = string;
+		this.args = NO_ARGS;
+	}
 
 	public TranslatableComponent(String string, Object... objects) {
 		this.key = string;
 		this.args = objects;
+	}
 
-		for (int i = 0; i < objects.length; i++) {
-			Object object = objects[i];
-			if (object instanceof Component) {
-				Component component = ((Component)object).deepCopy();
-				this.args[i] = component;
-				component.getStyle().inheritFrom(this.getStyle());
-			} else if (object == null) {
-				this.args[i] = "null";
+	private void decompose() {
+		Language language = Language.getInstance();
+		if (language != this.decomposedWith) {
+			this.decomposedWith = language;
+			this.decomposedParts.clear();
+			String string = language.getOrDefault(this.key);
+
+			try {
+				this.decomposeTemplate(string);
+			} catch (TranslatableFormatException var4) {
+				this.decomposedParts.clear();
+				this.decomposedParts.add(FormattedText.of(string));
 			}
 		}
 	}
 
-	@VisibleForTesting
-	synchronized void decompose() {
-		synchronized (this.decomposeLock) {
-			long l = LANGUAGE.getLastUpdateTime();
-			if (l == this.decomposedLanguageTime) {
-				return;
-			}
-
-			this.decomposedLanguageTime = l;
-			this.decomposedParts.clear();
-		}
-
-		String string = LANGUAGE.getElement(this.key);
-
-		try {
-			this.decomposeTemplate(string);
-		} catch (TranslatableFormatException var5) {
-			this.decomposedParts.clear();
-			this.decomposedParts.add(new TextComponent(string));
-		}
-	}
-
-	protected void decomposeTemplate(String string) {
+	private void decomposeTemplate(String string) {
 		Matcher matcher = FORMAT_PATTERN.matcher(string);
 
 		try {
@@ -74,17 +62,18 @@ public class TranslatableComponent extends BaseComponent implements ContextAware
 				int k = matcher.start();
 				int l = matcher.end();
 				if (k > j) {
-					Component component = new TextComponent(String.format(string.substring(j, k)));
-					component.getStyle().inheritFrom(this.getStyle());
-					this.decomposedParts.add(component);
+					String string2 = string.substring(j, k);
+					if (string2.indexOf(37) != -1) {
+						throw new IllegalArgumentException();
+					}
+
+					this.decomposedParts.add(FormattedText.of(string2));
 				}
 
 				String string2 = matcher.group(2);
 				String string3 = string.substring(k, l);
 				if ("%".equals(string2) && "%%".equals(string3)) {
-					Component component2 = new TextComponent("%");
-					component2.getStyle().inheritFrom(this.getStyle());
-					this.decomposedParts.add(component2);
+					this.decomposedParts.add(TEXT_PERCENT);
 				} else {
 					if (!"s".equals(string2)) {
 						throw new TranslatableFormatException(this, "Unsupported format: '" + string3 + "'");
@@ -93,7 +82,7 @@ public class TranslatableComponent extends BaseComponent implements ContextAware
 					String string4 = matcher.group(1);
 					int m = string4 != null ? Integer.parseInt(string4) - 1 : i++;
 					if (m < this.args.length) {
-						this.decomposedParts.add(this.getComponent(m));
+						this.decomposedParts.add(this.getArgument(m));
 					}
 				}
 
@@ -101,85 +90,66 @@ public class TranslatableComponent extends BaseComponent implements ContextAware
 			}
 
 			if (j < string.length()) {
-				Component component3 = new TextComponent(String.format(string.substring(j)));
-				component3.getStyle().inheritFrom(this.getStyle());
-				this.decomposedParts.add(component3);
+				String string5 = string.substring(j);
+				if (string5.indexOf(37) != -1) {
+					throw new IllegalArgumentException();
+				}
+
+				this.decomposedParts.add(FormattedText.of(string5));
 			}
-		} catch (IllegalFormatException var11) {
+		} catch (IllegalArgumentException var11) {
 			throw new TranslatableFormatException(this, var11);
 		}
 	}
 
-	private Component getComponent(int i) {
+	private FormattedText getArgument(int i) {
 		if (i >= this.args.length) {
 			throw new TranslatableFormatException(this, i);
 		} else {
 			Object object = this.args[i];
-			Component component;
 			if (object instanceof Component) {
-				component = (Component)object;
+				return (Component)object;
 			} else {
-				component = new TextComponent(object == null ? "null" : object.toString());
-				component.getStyle().inheritFrom(this.getStyle());
+				return object == null ? TEXT_NULL : FormattedText.of(object.toString());
 			}
-
-			return component;
 		}
 	}
 
-	@Override
-	public Component setStyle(Style style) {
-		super.setStyle(style);
-
-		for (Object object : this.args) {
-			if (object instanceof Component) {
-				((Component)object).getStyle().inheritFrom(this.getStyle());
-			}
-		}
-
-		if (this.decomposedLanguageTime > -1L) {
-			for (Component component : this.decomposedParts) {
-				component.getStyle().inheritFrom(style);
-			}
-		}
-
-		return this;
+	public TranslatableComponent plainCopy() {
+		return new TranslatableComponent(this.key, this.args);
 	}
 
+	@Environment(EnvType.CLIENT)
 	@Override
-	public Stream<Component> stream() {
+	public <T> Optional<T> visitSelf(FormattedText.StyledContentConsumer<T> styledContentConsumer, Style style) {
 		this.decompose();
-		return Streams.concat(this.decomposedParts.stream(), this.siblings.stream()).flatMap(Component::stream);
-	}
 
-	@Override
-	public String getContents() {
-		this.decompose();
-		StringBuilder stringBuilder = new StringBuilder();
-
-		for (Component component : this.decomposedParts) {
-			stringBuilder.append(component.getContents());
-		}
-
-		return stringBuilder.toString();
-	}
-
-	public TranslatableComponent copy() {
-		Object[] objects = new Object[this.args.length];
-
-		for (int i = 0; i < this.args.length; i++) {
-			if (this.args[i] instanceof Component) {
-				objects[i] = ((Component)this.args[i]).deepCopy();
-			} else {
-				objects[i] = this.args[i];
+		for (FormattedText formattedText : this.decomposedParts) {
+			Optional<T> optional = formattedText.visit(styledContentConsumer, style);
+			if (optional.isPresent()) {
+				return optional;
 			}
 		}
 
-		return new TranslatableComponent(this.key, objects);
+		return Optional.empty();
 	}
 
 	@Override
-	public Component resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
+	public <T> Optional<T> visitSelf(FormattedText.ContentConsumer<T> contentConsumer) {
+		this.decompose();
+
+		for (FormattedText formattedText : this.decomposedParts) {
+			Optional<T> optional = formattedText.visit(contentConsumer);
+			if (optional.isPresent()) {
+				return optional;
+			}
+		}
+
+		return Optional.empty();
+	}
+
+	@Override
+	public MutableComponent resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
 		Object[] objects = new Object[this.args.length];
 
 		for (int j = 0; j < objects.length; j++) {

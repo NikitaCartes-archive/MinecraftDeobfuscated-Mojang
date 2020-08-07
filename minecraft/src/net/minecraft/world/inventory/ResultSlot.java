@@ -49,7 +49,7 @@ public class ResultSlot extends Slot {
 		}
 
 		if (this.container instanceof RecipeHolder) {
-			((RecipeHolder)this.container).awardAndReset(this.player);
+			((RecipeHolder)this.container).awardUsedRecipes(this.player);
 		}
 
 		this.removeCount = 0;

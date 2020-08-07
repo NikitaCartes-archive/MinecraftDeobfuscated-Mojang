@@ -11,8 +11,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -42,15 +43,10 @@ public class PistonBaseBlock extends DirectionalBlock {
 	protected static final VoxelShape DOWN_AABB = Block.box(0.0, 4.0, 0.0, 16.0, 16.0, 16.0);
 	private final boolean isSticky;
 
-	public PistonBaseBlock(boolean bl, Block.Properties properties) {
+	public PistonBaseBlock(boolean bl, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(EXTENDED, Boolean.valueOf(false)));
 		this.isSticky = bl;
-	}
-
-	@Override
-	public boolean isSuffocating(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return !(Boolean)blockState.getValue(EXTENDED);
 	}
 
 	@Override
@@ -77,11 +73,6 @@ public class PistonBaseBlock extends DirectionalBlock {
 	}
 
 	@Override
-	public boolean isRedstoneConductor(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return false;
-	}
-
-	@Override
 	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
 		if (!level.isClientSide) {
 			this.checkIfExtend(level, blockPos, blockState);
@@ -97,7 +88,7 @@ public class PistonBaseBlock extends DirectionalBlock {
 
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState2.getBlock() != blockState.getBlock()) {
+		if (!blockState2.is(blockState.getBlock())) {
 			if (!level.isClientSide && level.getBlockEntity(blockPos) == null) {
 				this.checkIfExtend(level, blockPos, blockState);
 			}
@@ -120,7 +111,7 @@ public class PistonBaseBlock extends DirectionalBlock {
 			BlockPos blockPos2 = blockPos.relative(direction, 2);
 			BlockState blockState2 = level.getBlockState(blockPos2);
 			int i = 1;
-			if (blockState2.getBlock() == Blocks.MOVING_PISTON && blockState2.getValue(FACING) == direction) {
+			if (blockState2.is(Blocks.MOVING_PISTON) && blockState2.getValue(FACING) == direction) {
 				BlockEntity blockEntity = level.getBlockEntity(blockPos2);
 				if (blockEntity instanceof PistonMovingBlockEntity) {
 					PistonMovingBlockEntity pistonMovingBlockEntity = (PistonMovingBlockEntity)blockEntity;
@@ -189,23 +180,21 @@ public class PistonBaseBlock extends DirectionalBlock {
 				((PistonMovingBlockEntity)blockEntity).finalTick();
 			}
 
-			level.setBlock(
-				blockPos,
-				Blocks.MOVING_PISTON
-					.defaultBlockState()
-					.setValue(MovingPistonBlock.FACING, direction)
-					.setValue(MovingPistonBlock.TYPE, this.isSticky ? PistonType.STICKY : PistonType.DEFAULT),
-				3
-			);
+			BlockState blockState2 = Blocks.MOVING_PISTON
+				.defaultBlockState()
+				.setValue(MovingPistonBlock.FACING, direction)
+				.setValue(MovingPistonBlock.TYPE, this.isSticky ? PistonType.STICKY : PistonType.DEFAULT);
+			level.setBlock(blockPos, blockState2, 20);
 			level.setBlockEntity(
 				blockPos, MovingPistonBlock.newMovingBlockEntity(this.defaultBlockState().setValue(FACING, Direction.from3DDataValue(j & 7)), direction, false, true)
 			);
+			level.blockUpdated(blockPos, blockState2.getBlock());
+			blockState2.updateNeighbourShapes(level, blockPos, 2);
 			if (this.isSticky) {
 				BlockPos blockPos2 = blockPos.offset(direction.getStepX() * 2, direction.getStepY() * 2, direction.getStepZ() * 2);
-				BlockState blockState2 = level.getBlockState(blockPos2);
-				Block block = blockState2.getBlock();
+				BlockState blockState3 = level.getBlockState(blockPos2);
 				boolean bl2 = false;
-				if (block == Blocks.MOVING_PISTON) {
+				if (blockState3.is(Blocks.MOVING_PISTON)) {
 					BlockEntity blockEntity2 = level.getBlockEntity(blockPos2);
 					if (blockEntity2 instanceof PistonMovingBlockEntity) {
 						PistonMovingBlockEntity pistonMovingBlockEntity = (PistonMovingBlockEntity)blockEntity2;
@@ -218,9 +207,9 @@ public class PistonBaseBlock extends DirectionalBlock {
 
 				if (!bl2) {
 					if (i != 1
-						|| blockState2.isAir()
-						|| !isPushable(blockState2, level, blockPos2, direction.getOpposite(), false, direction)
-						|| blockState2.getPistonPushReaction() != PushReaction.NORMAL && block != Blocks.PISTON && block != Blocks.STICKY_PISTON) {
+						|| blockState3.isAir()
+						|| !isPushable(blockState3, level, blockPos2, direction.getOpposite(), false, direction)
+						|| blockState3.getPistonPushReaction() != PushReaction.NORMAL && !blockState3.is(Blocks.PISTON) && !blockState3.is(Blocks.STICKY_PISTON)) {
 						level.removeBlock(blockPos.relative(direction), false);
 					} else {
 						this.moveBlocks(level, blockPos, direction, false);
@@ -237,42 +226,41 @@ public class PistonBaseBlock extends DirectionalBlock {
 	}
 
 	public static boolean isPushable(BlockState blockState, Level level, BlockPos blockPos, Direction direction, boolean bl, Direction direction2) {
-		Block block = blockState.getBlock();
-		if (block == Blocks.OBSIDIAN) {
+		if (blockPos.getY() < 0 || blockPos.getY() > level.getMaxBuildHeight() - 1 || !level.getWorldBorder().isWithinBounds(blockPos)) {
 			return false;
-		} else if (!level.getWorldBorder().isWithinBounds(blockPos)) {
+		} else if (blockState.isAir()) {
+			return true;
+		} else if (blockState.is(Blocks.OBSIDIAN) || blockState.is(Blocks.CRYING_OBSIDIAN) || blockState.is(Blocks.RESPAWN_ANCHOR)) {
 			return false;
-		} else if (blockPos.getY() >= 0 && (direction != Direction.DOWN || blockPos.getY() != 0)) {
-			if (blockPos.getY() <= level.getMaxBuildHeight() - 1 && (direction != Direction.UP || blockPos.getY() != level.getMaxBuildHeight() - 1)) {
-				if (block != Blocks.PISTON && block != Blocks.STICKY_PISTON) {
-					if (blockState.getDestroySpeed(level, blockPos) == -1.0F) {
-						return false;
-					}
-
-					switch (blockState.getPistonPushReaction()) {
-						case BLOCK:
-							return false;
-						case DESTROY:
-							return bl;
-						case PUSH_ONLY:
-							return direction == direction2;
-					}
-				} else if ((Boolean)blockState.getValue(EXTENDED)) {
+		} else if (direction == Direction.DOWN && blockPos.getY() == 0) {
+			return false;
+		} else if (direction == Direction.UP && blockPos.getY() == level.getMaxBuildHeight() - 1) {
+			return false;
+		} else {
+			if (!blockState.is(Blocks.PISTON) && !blockState.is(Blocks.STICKY_PISTON)) {
+				if (blockState.getDestroySpeed(level, blockPos) == -1.0F) {
 					return false;
 				}
 
-				return !block.isEntityBlock();
-			} else {
+				switch (blockState.getPistonPushReaction()) {
+					case BLOCK:
+						return false;
+					case DESTROY:
+						return bl;
+					case PUSH_ONLY:
+						return direction == direction2;
+				}
+			} else if ((Boolean)blockState.getValue(EXTENDED)) {
 				return false;
 			}
-		} else {
-			return false;
+
+			return !blockState.getBlock().isEntityBlock();
 		}
 	}
 
 	private boolean moveBlocks(Level level, BlockPos blockPos, Direction direction, boolean bl) {
 		BlockPos blockPos2 = blockPos.relative(direction);
-		if (!bl && level.getBlockState(blockPos2).getBlock() == Blocks.PISTON_HEAD) {
+		if (!bl && level.getBlockState(blockPos2).is(Blocks.PISTON_HEAD)) {
 			level.setBlock(blockPos2, Blocks.AIR.defaultBlockState(), 20);
 		}
 
@@ -292,9 +280,9 @@ public class PistonBaseBlock extends DirectionalBlock {
 			}
 
 			List<BlockPos> list3 = pistonStructureResolver.getToDestroy();
-			int j = list.size() + list3.size();
-			BlockState[] blockStates = new BlockState[j];
+			BlockState[] blockStates = new BlockState[list.size() + list3.size()];
 			Direction direction2 = bl ? direction : direction.getOpposite();
+			int j = 0;
 
 			for (int k = list3.size() - 1; k >= 0; k--) {
 				BlockPos blockPos4 = (BlockPos)list3.get(k);
@@ -302,8 +290,7 @@ public class PistonBaseBlock extends DirectionalBlock {
 				BlockEntity blockEntity = blockState2.getBlock().isEntityBlock() ? level.getBlockEntity(blockPos4) : null;
 				dropResources(blockState2, level, blockPos4, blockEntity);
 				level.setBlock(blockPos4, Blocks.AIR.defaultBlockState(), 18);
-				j--;
-				blockStates[j] = blockState2;
+				blockStates[j++] = blockState2;
 			}
 
 			for (int k = list.size() - 1; k >= 0; k--) {
@@ -313,8 +300,7 @@ public class PistonBaseBlock extends DirectionalBlock {
 				map.remove(blockPos4);
 				level.setBlock(blockPos4, Blocks.MOVING_PISTON.defaultBlockState().setValue(FACING, direction), 68);
 				level.setBlockEntity(blockPos4, MovingPistonBlock.newMovingBlockEntity((BlockState)list2.get(k), direction, bl, false));
-				j--;
-				blockStates[j] = blockState2;
+				blockStates[j++] = blockState2;
 			}
 
 			if (bl) {
@@ -342,6 +328,8 @@ public class PistonBaseBlock extends DirectionalBlock {
 				blockState4.updateNeighbourShapes(level, blockPos6, 2);
 				blockState4.updateIndirectNeighbourShapes(level, blockPos6, 2);
 			}
+
+			j = 0;
 
 			for (int l = list3.size() - 1; l >= 0; l--) {
 				BlockState blockState2 = blockStates[j++];

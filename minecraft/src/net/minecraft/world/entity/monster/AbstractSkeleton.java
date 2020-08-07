@@ -19,6 +19,8 @@ import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.FleeSunGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
@@ -37,8 +39,9 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -77,10 +80,8 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, Turtle.class, 10, true, false, Turtle.BABY_ON_LAND_SELECTOR));
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Monster.createMonsterAttributes().add(Attributes.MOVEMENT_SPEED, 0.25);
 	}
 
 	@Override
@@ -138,13 +139,13 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		spawnGroupData = super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 		this.populateDefaultEquipmentSlots(difficultyInstance);
 		this.populateDefaultEquipmentEnchantments(difficultyInstance);
 		this.reassessWeaponGoal();
@@ -199,6 +200,11 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 	}
 
 	@Override
+	public boolean canFireProjectileWeapon(ProjectileWeaponItem projectileWeaponItem) {
+		return projectileWeaponItem == Items.BOW;
+	}
+
+	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
 		this.reassessWeaponGoal();
@@ -218,7 +224,7 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 	}
 
 	@Override
-	public double getRidingHeight() {
+	public double getMyRidingOffset() {
 		return -0.6;
 	}
 }

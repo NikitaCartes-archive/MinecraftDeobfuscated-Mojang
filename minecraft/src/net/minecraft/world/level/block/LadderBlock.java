@@ -3,10 +3,11 @@ package net.minecraft.world.level.block;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -25,7 +26,7 @@ public class LadderBlock extends Block implements SimpleWaterloggedBlock {
 	protected static final VoxelShape SOUTH_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 3.0);
 	protected static final VoxelShape NORTH_AABB = Block.box(0.0, 0.0, 13.0, 16.0, 16.0, 16.0);
 
-	protected LadderBlock(Block.Properties properties) {
+	protected LadderBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, Boolean.valueOf(false)));
 	}
@@ -47,7 +48,7 @@ public class LadderBlock extends Block implements SimpleWaterloggedBlock {
 
 	private boolean canAttachTo(BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
 		BlockState blockState = blockGetter.getBlockState(blockPos);
-		return !blockState.isSignalSource() && blockState.isFaceSturdy(blockGetter, blockPos, direction);
+		return blockState.isFaceSturdy(blockGetter, blockPos, direction);
 	}
 
 	@Override
@@ -77,7 +78,7 @@ public class LadderBlock extends Block implements SimpleWaterloggedBlock {
 		if (!blockPlaceContext.replacingClickedOnBlock()) {
 			BlockState blockState = blockPlaceContext.getLevel()
 				.getBlockState(blockPlaceContext.getClickedPos().relative(blockPlaceContext.getClickedFace().getOpposite()));
-			if (blockState.getBlock() == this && blockState.getValue(FACING) == blockPlaceContext.getClickedFace()) {
+			if (blockState.is(this) && blockState.getValue(FACING) == blockPlaceContext.getClickedFace()) {
 				return null;
 			}
 		}

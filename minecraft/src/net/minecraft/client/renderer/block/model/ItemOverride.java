@@ -12,13 +12,14 @@ import java.util.Map.Entry;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.client.renderer.item.ItemPropertyFunction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemPropertyFunction;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
 public class ItemOverride {
@@ -34,12 +35,12 @@ public class ItemOverride {
 		return this.model;
 	}
 
-	boolean test(ItemStack itemStack, @Nullable Level level, @Nullable LivingEntity livingEntity) {
+	boolean test(ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity) {
 		Item item = itemStack.getItem();
 
 		for (Entry<ResourceLocation, Float> entry : this.predicates.entrySet()) {
-			ItemPropertyFunction itemPropertyFunction = item.getProperty((ResourceLocation)entry.getKey());
-			if (itemPropertyFunction == null || itemPropertyFunction.call(itemStack, level, livingEntity) < (Float)entry.getValue()) {
+			ItemPropertyFunction itemPropertyFunction = ItemProperties.getProperty(item, (ResourceLocation)entry.getKey());
+			if (itemPropertyFunction == null || itemPropertyFunction.call(itemStack, clientLevel, livingEntity) < (Float)entry.getValue()) {
 				return false;
 			}
 		}

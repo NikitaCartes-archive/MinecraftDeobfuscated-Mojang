@@ -25,7 +25,6 @@ public class PotionItem extends Item {
 		super(properties);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
 	public ItemStack getDefaultInstance() {
 		return PotionUtils.setPotion(super.getDefaultInstance(), Potions.WATER);
@@ -80,8 +79,7 @@ public class PotionItem extends Item {
 
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
-		player.startUsingItem(interactionHand);
-		return InteractionResultHolder.success(player.getItemInHand(interactionHand));
+		return ItemUtils.useDrink(level, player, interactionHand);
 	}
 
 	@Override

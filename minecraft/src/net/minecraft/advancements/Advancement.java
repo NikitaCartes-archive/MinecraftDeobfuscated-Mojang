@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import java.util.Arrays;
@@ -17,9 +16,12 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.advancements.critereon.DeserializationContext;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -60,9 +62,9 @@ public class Advancement {
 		} else {
 			Component component = displayInfo.getTitle();
 			ChatFormatting chatFormatting = displayInfo.getFrame().getChatColor();
-			Component component2 = component.deepCopy().withStyle(chatFormatting).append("\n").append(displayInfo.getDescription());
-			Component component3 = component.deepCopy().withStyle(style -> style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component2)));
-			this.chatComponent = new TextComponent("[").append(component3).append("]").withStyle(chatFormatting);
+			Component component2 = ComponentUtils.mergeStyles(component.copy(), Style.EMPTY.withColor(chatFormatting)).append("\n").append(displayInfo.getDescription());
+			Component component3 = component.copy().withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, component2)));
+			this.chatComponent = ComponentUtils.wrapInSquareBrackets(component3).withStyle(chatFormatting);
 		}
 	}
 
@@ -353,15 +355,13 @@ public class Advancement {
 				+ '}';
 		}
 
-		public static Advancement.Builder fromJson(JsonObject jsonObject, JsonDeserializationContext jsonDeserializationContext) {
+		public static Advancement.Builder fromJson(JsonObject jsonObject, DeserializationContext deserializationContext) {
 			ResourceLocation resourceLocation = jsonObject.has("parent") ? new ResourceLocation(GsonHelper.getAsString(jsonObject, "parent")) : null;
-			DisplayInfo displayInfo = jsonObject.has("display")
-				? DisplayInfo.fromJson(GsonHelper.getAsJsonObject(jsonObject, "display"), jsonDeserializationContext)
-				: null;
-			AdvancementRewards advancementRewards = GsonHelper.getAsObject(
-				jsonObject, "rewards", AdvancementRewards.EMPTY, jsonDeserializationContext, AdvancementRewards.class
-			);
-			Map<String, Criterion> map = Criterion.criteriaFromJson(GsonHelper.getAsJsonObject(jsonObject, "criteria"), jsonDeserializationContext);
+			DisplayInfo displayInfo = jsonObject.has("display") ? DisplayInfo.fromJson(GsonHelper.getAsJsonObject(jsonObject, "display")) : null;
+			AdvancementRewards advancementRewards = jsonObject.has("rewards")
+				? AdvancementRewards.deserialize(GsonHelper.getAsJsonObject(jsonObject, "rewards"))
+				: AdvancementRewards.EMPTY;
+			Map<String, Criterion> map = Criterion.criteriaFromJson(GsonHelper.getAsJsonObject(jsonObject, "criteria"), deserializationContext);
 			if (map.isEmpty()) {
 				throw new JsonSyntaxException("Advancement criteria cannot be empty");
 			} else {

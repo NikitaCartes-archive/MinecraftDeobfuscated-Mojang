@@ -6,13 +6,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.AbstractFlowerFeature;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
 
 public class GrassBlock extends SpreadingSnowyDirtBlock implements BonemealableBlock {
-	public GrassBlock(Block.Properties properties) {
+	public GrassBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 
@@ -37,27 +37,27 @@ public class GrassBlock extends SpreadingSnowyDirtBlock implements BonemealableB
 
 			for (int j = 0; j < i / 16; j++) {
 				blockPos3 = blockPos3.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1);
-				if (serverLevel.getBlockState(blockPos3.below()).getBlock() != this
-					|| serverLevel.getBlockState(blockPos3).isCollisionShapeFullBlock(serverLevel, blockPos3)) {
+				if (!serverLevel.getBlockState(blockPos3.below()).is(this) || serverLevel.getBlockState(blockPos3).isCollisionShapeFullBlock(serverLevel, blockPos3)) {
 					continue label48;
 				}
 			}
 
 			BlockState blockState3 = serverLevel.getBlockState(blockPos3);
-			if (blockState3.getBlock() == blockState2.getBlock() && random.nextInt(10) == 0) {
+			if (blockState3.is(blockState2.getBlock()) && random.nextInt(10) == 0) {
 				((BonemealableBlock)blockState2.getBlock()).performBonemeal(serverLevel, random, blockPos3, blockState3);
 			}
 
 			if (blockState3.isAir()) {
 				BlockState blockState4;
 				if (random.nextInt(8) == 0) {
-					List<ConfiguredFeature<?, ?>> list = serverLevel.getBiome(blockPos3).getFlowerFeatures();
+					List<ConfiguredFeature<?, ?>> list = serverLevel.getBiome(blockPos3).getGenerationSettings().getFlowerFeatures();
 					if (list.isEmpty()) {
 						continue;
 					}
 
-					ConfiguredFeature<?, ?> configuredFeature = ((DecoratedFeatureConfiguration)((ConfiguredFeature)list.get(0)).config).feature;
-					blockState4 = ((AbstractFlowerFeature)configuredFeature.feature).getRandomFlower(random, blockPos3, configuredFeature.config);
+					ConfiguredFeature<?, ?> configuredFeature = (ConfiguredFeature<?, ?>)list.get(0);
+					AbstractFlowerFeature abstractFlowerFeature = (AbstractFlowerFeature)configuredFeature.feature;
+					blockState4 = abstractFlowerFeature.getRandomFlower(random, blockPos3, configuredFeature.config());
 				} else {
 					blockState4 = blockState2;
 				}

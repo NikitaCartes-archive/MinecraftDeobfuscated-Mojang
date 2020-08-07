@@ -21,6 +21,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.EnchantmentTableBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
@@ -30,7 +31,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class EnchantmentTableBlock extends BaseEntityBlock {
 	protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 12.0, 16.0);
 
-	protected EnchantmentTableBlock(Block.Properties properties) {
+	protected EnchantmentTableBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 
@@ -58,7 +59,7 @@ public class EnchantmentTableBlock extends BaseEntityBlock {
 				if (random.nextInt(16) == 0) {
 					for (int k = 0; k <= 1; k++) {
 						BlockPos blockPos2 = blockPos.offset(i, k, j);
-						if (level.getBlockState(blockPos2).getBlock() == Blocks.BOOKSHELF) {
+						if (level.getBlockState(blockPos2).is(Blocks.BOOKSHELF)) {
 							if (!level.isEmptyBlock(blockPos.offset(i / 2, 0, j / 2))) {
 								break;
 							}
@@ -97,7 +98,7 @@ public class EnchantmentTableBlock extends BaseEntityBlock {
 			return InteractionResult.SUCCESS;
 		} else {
 			player.openMenu(blockState.getMenuProvider(level, blockPos));
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		}
 	}
 

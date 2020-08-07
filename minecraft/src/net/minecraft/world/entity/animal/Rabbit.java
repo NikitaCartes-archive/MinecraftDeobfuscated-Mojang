@@ -12,6 +12,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -22,8 +23,11 @@ import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.JumpControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
@@ -38,7 +42,6 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -48,6 +51,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -90,8 +94,8 @@ public class Rabbit extends Animal {
 	protected float getJumpPower() {
 		if (!this.horizontalCollision && (!this.moveControl.hasWanted() || !(this.moveControl.getWantedY() > this.getY() + 0.5))) {
 			Path path = this.navigation.getPath();
-			if (path != null && path.getIndex() < path.getSize()) {
-				Vec3 vec3 = path.currentPos(this);
+			if (path != null && !path.isDone()) {
+				Vec3 vec3 = path.getNextEntityPos(this);
 				if (vec3.y > this.getY() + 0.5) {
 					return 0.5F;
 				}
@@ -183,8 +187,8 @@ public class Rabbit extends Animal {
 				if (this.moveControl.hasWanted() && this.jumpDelayTicks == 0) {
 					Path path = this.navigation.getPath();
 					Vec3 vec3 = new Vec3(this.moveControl.getWantedX(), this.moveControl.getWantedY(), this.moveControl.getWantedZ());
-					if (path != null && path.getIndex() < path.getSize()) {
-						vec3 = path.currentPos(this);
+					if (path != null && !path.isDone()) {
+						vec3 = path.getNextEntityPos(this);
 					}
 
 					this.facePoint(vec3.x, vec3.z);
@@ -199,7 +203,8 @@ public class Rabbit extends Animal {
 	}
 
 	@Override
-	public void updateSprintingState() {
+	public boolean canSpawnSprintParticle() {
+		return false;
 	}
 
 	private void facePoint(double d, double e) {
@@ -239,11 +244,8 @@ public class Rabbit extends Animal {
 		}
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(3.0);
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.3F);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 3.0).add(Attributes.MOVEMENT_SPEED, 0.3F);
 	}
 
 	@Override
@@ -303,9 +305,9 @@ public class Rabbit extends Animal {
 		return item == Items.CARROT || item == Items.GOLDEN_CARROT || item == Blocks.DANDELION.asItem();
 	}
 
-	public Rabbit getBreedOffspring(AgableMob agableMob) {
-		Rabbit rabbit = EntityType.RABBIT.create(this.level);
-		int i = this.getRandomRabbitType(this.level);
+	public Rabbit getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+		Rabbit rabbit = EntityType.RABBIT.create(serverLevel);
+		int i = this.getRandomRabbitType(serverLevel);
 		if (this.random.nextInt(20) != 0) {
 			if (agableMob instanceof Rabbit && this.random.nextBoolean()) {
 				i = ((Rabbit)agableMob).getRabbitType();
@@ -329,7 +331,7 @@ public class Rabbit extends Animal {
 
 	public void setRabbitType(int i) {
 		if (i == 99) {
-			this.getAttribute(SharedMonsterAttributes.ARMOR).setBaseValue(8.0);
+			this.getAttribute(Attributes.ARMOR).setBaseValue(8.0);
 			this.goalSelector.addGoal(4, new Rabbit.EvilRabbitAttackGoal(this));
 			this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
 			this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, Player.class, true));
@@ -345,13 +347,13 @@ public class Rabbit extends Animal {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		int i = this.getRandomRabbitType(levelAccessor);
+		int i = this.getRandomRabbitType(serverLevelAccessor);
 		if (spawnGroupData instanceof Rabbit.RabbitGroupData) {
 			i = ((Rabbit.RabbitGroupData)spawnGroupData).rabbitType;
 		} else {
@@ -359,11 +361,11 @@ public class Rabbit extends Animal {
 		}
 
 		this.setRabbitType(i);
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	private int getRandomRabbitType(LevelAccessor levelAccessor) {
-		Biome biome = levelAccessor.getBiome(new BlockPos(this));
+		Biome biome = levelAccessor.getBiome(this.blockPosition());
 		int i = this.random.nextInt(100);
 		if (biome.getPrecipitation() == Biome.Precipitation.SNOW) {
 			return i < 80 ? 1 : 3;
@@ -377,8 +379,8 @@ public class Rabbit extends Animal {
 	public static boolean checkRabbitSpawnRules(
 		EntityType<Rabbit> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
-		Block block = levelAccessor.getBlockState(blockPos.below()).getBlock();
-		return (block == Blocks.GRASS_BLOCK || block == Blocks.SNOW || block == Blocks.SAND) && levelAccessor.getRawBrightness(blockPos, 0) > 8;
+		BlockState blockState = levelAccessor.getBlockState(blockPos.below());
+		return (blockState.is(Blocks.GRASS_BLOCK) || blockState.is(Blocks.SNOW) || blockState.is(Blocks.SAND)) && levelAccessor.getRawBrightness(blockPos, 0) > 8;
 	}
 
 	private boolean wantsMoreFood() {
@@ -389,12 +391,18 @@ public class Rabbit extends Animal {
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 1) {
-			this.doSprintParticleEffect();
+			this.spawnSprintParticle();
 			this.jumpDuration = 10;
 			this.jumpTicks = 0;
 		} else {
 			super.handleEntityEvent(b);
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public Vec3 getLeashOffset() {
+		return new Vec3(0.0, (double)(0.6F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.4F));
 	}
 
 	static class EvilRabbitAttackGoal extends MeleeAttackGoal {
@@ -426,8 +434,8 @@ public class Rabbit extends Animal {
 		public final int rabbitType;
 
 		public RabbitGroupData(int i) {
+			super(1.0F);
 			this.rabbitType = i;
-			this.setBabySpawnChance(1.0F);
 		}
 	}
 

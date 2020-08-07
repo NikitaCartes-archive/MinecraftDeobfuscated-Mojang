@@ -5,63 +5,31 @@ import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.util.GsonHelper;
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class StoredUserList<K, V extends StoredUserEntry<K>> {
+public abstract class StoredUserList<K, V extends StoredUserEntry<K>> {
 	protected static final Logger LOGGER = LogManager.getLogger();
-	protected final Gson gson;
+	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	private final File file;
 	private final Map<String, V> map = Maps.<String, V>newHashMap();
-	private boolean enabled = true;
-	private static final ParameterizedType USERLIST_ENTRY_TYPE = new ParameterizedType() {
-		public Type[] getActualTypeArguments() {
-			return new Type[]{StoredUserEntry.class};
-		}
-
-		public Type getRawType() {
-			return List.class;
-		}
-
-		public Type getOwnerType() {
-			return null;
-		}
-	};
 
 	public StoredUserList(File file) {
 		this.file = file;
-		GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting();
-		gsonBuilder.registerTypeHierarchyAdapter(StoredUserEntry.class, new StoredUserList.Serializer());
-		this.gson = gsonBuilder.create();
-	}
-
-	public boolean isEnabled() {
-		return this.enabled;
-	}
-
-	public void setEnabled(boolean bl) {
-		this.enabled = bl;
 	}
 
 	public File getFile() {
@@ -128,65 +96,69 @@ public class StoredUserList<K, V extends StoredUserEntry<K>> {
 		}
 	}
 
-	protected StoredUserEntry<K> createEntry(JsonObject jsonObject) {
-		return new StoredUserEntry<>(null, jsonObject);
-	}
+	protected abstract StoredUserEntry<K> createEntry(JsonObject jsonObject);
 
 	public Collection<V> getEntries() {
 		return this.map.values();
 	}
 
 	public void save() throws IOException {
-		Collection<V> collection = this.map.values();
-		String string = this.gson.toJson(collection);
-		BufferedWriter bufferedWriter = null;
+		JsonArray jsonArray = new JsonArray();
+		this.map.values().stream().map(storedUserEntry -> Util.make(new JsonObject(), storedUserEntry::serialize)).forEach(jsonArray::add);
+		BufferedWriter bufferedWriter = Files.newWriter(this.file, StandardCharsets.UTF_8);
+		Throwable var3 = null;
 
 		try {
-			bufferedWriter = Files.newWriter(this.file, StandardCharsets.UTF_8);
-			bufferedWriter.write(string);
+			GSON.toJson(jsonArray, bufferedWriter);
+		} catch (Throwable var12) {
+			var3 = var12;
+			throw var12;
 		} finally {
-			IOUtils.closeQuietly(bufferedWriter);
-		}
-	}
-
-	public void load() throws FileNotFoundException {
-		if (this.file.exists()) {
-			BufferedReader bufferedReader = null;
-
-			try {
-				bufferedReader = Files.newReader(this.file, StandardCharsets.UTF_8);
-				Collection<StoredUserEntry<K>> collection = GsonHelper.fromJson(this.gson, bufferedReader, USERLIST_ENTRY_TYPE);
-				if (collection != null) {
-					this.map.clear();
-
-					for (StoredUserEntry<K> storedUserEntry : collection) {
-						if (storedUserEntry.getUser() != null) {
-							this.map.put(this.getKeyForUser(storedUserEntry.getUser()), storedUserEntry);
-						}
+			if (bufferedWriter != null) {
+				if (var3 != null) {
+					try {
+						bufferedWriter.close();
+					} catch (Throwable var11) {
+						var3.addSuppressed(var11);
 					}
+				} else {
+					bufferedWriter.close();
 				}
-			} finally {
-				IOUtils.closeQuietly(bufferedReader);
 			}
 		}
 	}
 
-	class Serializer implements JsonDeserializer<StoredUserEntry<K>>, JsonSerializer<StoredUserEntry<K>> {
-		private Serializer() {
-		}
+	public void load() throws IOException {
+		if (this.file.exists()) {
+			BufferedReader bufferedReader = Files.newReader(this.file, StandardCharsets.UTF_8);
+			Throwable var2 = null;
 
-		public JsonElement serialize(StoredUserEntry<K> storedUserEntry, Type type, JsonSerializationContext jsonSerializationContext) {
-			JsonObject jsonObject = new JsonObject();
-			storedUserEntry.serialize(jsonObject);
-			return jsonObject;
-		}
+			try {
+				JsonArray jsonArray = GSON.fromJson(bufferedReader, JsonArray.class);
+				this.map.clear();
 
-		public StoredUserEntry<K> deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-			if (jsonElement.isJsonObject()) {
-				JsonObject jsonObject = jsonElement.getAsJsonObject();
-				return StoredUserList.this.createEntry(jsonObject);
-			} else {
-				return null;
+				for (JsonElement jsonElement : jsonArray) {
+					JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "entry");
+					StoredUserEntry<K> storedUserEntry = this.createEntry(jsonObject);
+					if (storedUserEntry.getUser() != null) {
+						this.map.put(this.getKeyForUser(storedUserEntry.getUser()), storedUserEntry);
+					}
+				}
+			} catch (Throwable var15) {
+				var2 = var15;
+				throw var15;
+			} finally {
+				if (bufferedReader != null) {
+					if (var2 != null) {
+						try {
+							bufferedReader.close();
+						} catch (Throwable var14) {
+							var2.addSuppressed(var14);
+						}
+					} else {
+						bufferedReader.close();
+					}
+				}
 			}
 		}
 	}

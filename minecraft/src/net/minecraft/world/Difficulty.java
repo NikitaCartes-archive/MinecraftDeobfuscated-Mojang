@@ -3,6 +3,8 @@ package net.minecraft.world;
 import java.util.Arrays;
 import java.util.Comparator;
 import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -46,5 +48,10 @@ public enum Difficulty {
 
 	public String getKey() {
 		return this.key;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Difficulty nextById() {
+		return BY_ID[(this.id + 1) % BY_ID.length];
 	}
 }

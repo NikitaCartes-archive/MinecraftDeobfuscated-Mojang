@@ -28,18 +28,9 @@ public class NeighborsUpdateRenderer implements DebugRenderer.SimpleDebugRendere
 	}
 
 	public void addUpdate(long l, BlockPos blockPos) {
-		Map<BlockPos, Integer> map = (Map<BlockPos, Integer>)this.lastUpdate.get(l);
-		if (map == null) {
-			map = Maps.<BlockPos, Integer>newHashMap();
-			this.lastUpdate.put(l, map);
-		}
-
-		Integer integer = (Integer)map.get(blockPos);
-		if (integer == null) {
-			integer = 0;
-		}
-
-		map.put(blockPos, integer + 1);
+		Map<BlockPos, Integer> map = (Map<BlockPos, Integer>)this.lastUpdate.computeIfAbsent(l, long_ -> Maps.newHashMap());
+		int i = (Integer)map.getOrDefault(blockPos, 0);
+		map.put(blockPos, i + 1);
 	}
 
 	@Override
@@ -69,7 +60,7 @@ public class NeighborsUpdateRenderer implements DebugRenderer.SimpleDebugRendere
 							.deflate(0.0025 * (double)m)
 							.move((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ())
 							.move(-d, -e, -f);
-						LevelRenderer.renderLineBox(vertexConsumer, aABB.minX, aABB.minY, aABB.minZ, aABB.maxX, aABB.maxY, aABB.maxZ, 1.0F, 1.0F, 1.0F, 1.0F);
+						LevelRenderer.renderLineBox(poseStack, vertexConsumer, aABB.minX, aABB.minY, aABB.minZ, aABB.maxX, aABB.maxY, aABB.maxZ, 1.0F, 1.0F, 1.0F, 1.0F);
 						map.put(blockPos, integer);
 					}
 				}

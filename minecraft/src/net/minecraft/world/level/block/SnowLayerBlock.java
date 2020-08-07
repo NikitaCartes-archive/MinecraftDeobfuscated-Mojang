@@ -5,11 +5,12 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -33,7 +34,7 @@ public class SnowLayerBlock extends Block {
 		Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 16.0)
 	};
 
-	protected SnowLayerBlock(Block.Properties properties) {
+	protected SnowLayerBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(LAYERS, Integer.valueOf(1)));
 	}
@@ -63,6 +64,16 @@ public class SnowLayerBlock extends Block {
 	}
 
 	@Override
+	public VoxelShape getBlockSupportShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+		return SHAPE_BY_LAYER[blockState.getValue(LAYERS)];
+	}
+
+	@Override
+	public VoxelShape getVisualShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+		return SHAPE_BY_LAYER[blockState.getValue(LAYERS)];
+	}
+
+	@Override
 	public boolean useShapeForLightOcclusion(BlockState blockState) {
 		return true;
 	}
@@ -70,13 +81,12 @@ public class SnowLayerBlock extends Block {
 	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockState blockState2 = levelReader.getBlockState(blockPos.below());
-		Block block = blockState2.getBlock();
-		if (block == Blocks.ICE || block == Blocks.PACKED_ICE || block == Blocks.BARRIER) {
+		if (blockState2.is(Blocks.ICE) || blockState2.is(Blocks.PACKED_ICE) || blockState2.is(Blocks.BARRIER)) {
 			return false;
 		} else {
-			return block != Blocks.HONEY_BLOCK && block != Blocks.SOUL_SAND
+			return !blockState2.is(Blocks.HONEY_BLOCK) && !blockState2.is(Blocks.SOUL_SAND)
 				? Block.isFaceFull(blockState2.getCollisionShape(levelReader, blockPos.below()), Direction.UP)
-					|| block == this && (Integer)blockState2.getValue(LAYERS) == 8
+					|| blockState2.getBlock() == this && (Integer)blockState2.getValue(LAYERS) == 8
 				: true;
 		}
 	}
@@ -91,7 +101,7 @@ public class SnowLayerBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if (serverLevel.getBrightness(LightLayer.BLOCK, blockPos) > 11) {
 			dropResources(blockState, serverLevel, blockPos);
 			serverLevel.removeBlock(blockPos, false);
@@ -112,7 +122,7 @@ public class SnowLayerBlock extends Block {
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
 		BlockState blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos());
-		if (blockState.getBlock() == this) {
+		if (blockState.is(this)) {
 			int i = (Integer)blockState.getValue(LAYERS);
 			return blockState.setValue(LAYERS, Integer.valueOf(Math.min(8, i + 1)));
 		} else {

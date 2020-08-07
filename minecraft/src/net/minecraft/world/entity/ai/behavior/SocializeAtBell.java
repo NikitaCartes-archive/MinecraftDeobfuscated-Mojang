@@ -2,7 +2,6 @@ package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
@@ -37,7 +36,7 @@ public class SocializeAtBell extends Behavior<LivingEntity> {
 		Optional<GlobalPos> optional = brain.getMemory(MemoryModuleType.MEETING_POINT);
 		return serverLevel.getRandom().nextInt(100) == 0
 			&& optional.isPresent()
-			&& Objects.equals(serverLevel.getDimension().getType(), ((GlobalPos)optional.get()).dimension())
+			&& serverLevel.dimension() == ((GlobalPos)optional.get()).dimension()
 			&& ((GlobalPos)optional.get()).pos().closerThan(livingEntity.position(), 4.0)
 			&& ((List)brain.getMemory(MemoryModuleType.VISIBLE_LIVING_ENTITIES).get())
 				.stream()
@@ -55,8 +54,8 @@ public class SocializeAtBell extends Behavior<LivingEntity> {
 						.findFirst()
 						.ifPresent(livingEntityxx -> {
 							brain.setMemory(MemoryModuleType.INTERACTION_TARGET, livingEntityxx);
-							brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityPosWrapper(livingEntityxx));
-							brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityPosWrapper(livingEntityxx), 0.3F, 1));
+							brain.setMemory(MemoryModuleType.LOOK_TARGET, new EntityTracker(livingEntityxx, true));
+							brain.setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityTracker(livingEntityxx, false), 0.3F, 1));
 						})
 			);
 	}

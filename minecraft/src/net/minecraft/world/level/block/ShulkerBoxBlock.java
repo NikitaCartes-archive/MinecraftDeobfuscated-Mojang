@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -18,26 +19,28 @@ import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ShulkerSharedHelper;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -49,7 +52,7 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 	@Nullable
 	private final DyeColor color;
 
-	public ShulkerBoxBlock(@Nullable DyeColor dyeColor, Block.Properties properties) {
+	public ShulkerBoxBlock(@Nullable DyeColor dyeColor, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.color = dyeColor;
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.UP));
@@ -58,11 +61,6 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 	@Override
 	public BlockEntity newBlockEntity(BlockGetter blockGetter) {
 		return new ShulkerBoxBlockEntity(this.color);
-	}
-
-	@Override
-	public boolean isSuffocating(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return true;
 	}
 
 	@Override
@@ -77,19 +75,15 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 		if (level.isClientSide) {
 			return InteractionResult.SUCCESS;
 		} else if (player.isSpectator()) {
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		} else {
 			BlockEntity blockEntity = level.getBlockEntity(blockPos);
 			if (blockEntity instanceof ShulkerBoxBlockEntity) {
-				Direction direction = blockState.getValue(FACING);
 				ShulkerBoxBlockEntity shulkerBoxBlockEntity = (ShulkerBoxBlockEntity)blockEntity;
 				boolean bl;
 				if (shulkerBoxBlockEntity.getAnimationStatus() == ShulkerBoxBlockEntity.AnimationStatus.CLOSED) {
-					AABB aABB = Shapes.block()
-						.bounds()
-						.expandTowards((double)(0.5F * (float)direction.getStepX()), (double)(0.5F * (float)direction.getStepY()), (double)(0.5F * (float)direction.getStepZ()))
-						.contract((double)direction.getStepX(), (double)direction.getStepY(), (double)direction.getStepZ());
-					bl = level.noCollision(aABB.move(blockPos.relative(direction)));
+					Direction direction = blockState.getValue(FACING);
+					bl = level.noCollision(ShulkerSharedHelper.openBoundingBox(blockPos, direction));
 				} else {
 					bl = true;
 				}
@@ -97,9 +91,10 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 				if (bl) {
 					player.openMenu(shulkerBoxBlockEntity);
 					player.awardStat(Stats.OPEN_SHULKER_BOX);
+					PiglinAi.angerNearbyPiglins(player, true);
 				}
 
-				return InteractionResult.SUCCESS;
+				return InteractionResult.CONSUME;
 			} else {
 				return InteractionResult.PASS;
 			}
@@ -132,7 +127,7 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 					itemStack.setHoverName(shulkerBoxBlockEntity.getCustomName());
 				}
 
-				ItemEntity itemEntity = new ItemEntity(level, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack);
+				ItemEntity itemEntity = new ItemEntity(level, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, itemStack);
 				itemEntity.setDefaultPickUpDelay();
 				level.addFreshEntity(itemEntity);
 			} else {
@@ -170,7 +165,7 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState.getBlock() != blockState2.getBlock()) {
+		if (!blockState.is(blockState2.getBlock())) {
 			BlockEntity blockEntity = level.getBlockEntity(blockPos);
 			if (blockEntity instanceof ShulkerBoxBlockEntity) {
 				level.updateNeighbourForOutputSignal(blockPos, blockState.getBlock());
@@ -201,9 +196,9 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 						j++;
 						if (i <= 4) {
 							i++;
-							Component component = itemStack2.getHoverName().deepCopy();
-							component.append(" x").append(String.valueOf(itemStack2.getCount()));
-							list.add(component);
+							MutableComponent mutableComponent = itemStack2.getHoverName().copy();
+							mutableComponent.append(" x").append(String.valueOf(itemStack2.getCount()));
+							list.add(mutableComponent);
 						}
 					}
 				}

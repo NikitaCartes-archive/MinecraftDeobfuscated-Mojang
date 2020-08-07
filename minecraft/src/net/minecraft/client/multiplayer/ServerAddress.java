@@ -1,7 +1,9 @@
 package net.minecraft.client.multiplayer;
 
+import com.mojang.datafixers.util.Pair;
 import java.net.IDN;
 import java.util.Hashtable;
+import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
@@ -56,16 +58,16 @@ public class ServerAddress {
 			String string4 = strings[0];
 			int j = strings.length > 1 ? parseInt(strings[1], 25565) : 25565;
 			if (j == 25565) {
-				String[] strings2 = lookupSrv(string4);
-				string4 = strings2[0];
-				j = parseInt(strings2[1], 25565);
+				Pair<String, Integer> pair = lookupSrv(string4);
+				string4 = pair.getFirst();
+				j = pair.getSecond();
 			}
 
 			return new ServerAddress(string4, j);
 		}
 	}
 
-	private static String[] lookupSrv(String string) {
+	private static Pair<String, Integer> lookupSrv(String string) {
 		try {
 			String string2 = "com.sun.jndi.dns.DnsContextFactory";
 			Class.forName("com.sun.jndi.dns.DnsContextFactory");
@@ -75,11 +77,15 @@ public class ServerAddress {
 			hashtable.put("com.sun.jndi.dns.timeout.retries", "1");
 			DirContext dirContext = new InitialDirContext(hashtable);
 			Attributes attributes = dirContext.getAttributes("_minecraft._tcp." + string, new String[]{"SRV"});
-			String[] strings = attributes.get("srv").get().toString().split(" ", 4);
-			return new String[]{strings[3], strings[2]};
-		} catch (Throwable var6) {
-			return new String[]{string, Integer.toString(25565)};
+			Attribute attribute = attributes.get("srv");
+			if (attribute != null) {
+				String[] strings = attribute.get().toString().split(" ", 4);
+				return Pair.of(strings[3], parseInt(strings[2], 25565));
+			}
+		} catch (Throwable var7) {
 		}
+
+		return Pair.of(string, 25565);
 	}
 
 	private static int parseInt(String string, int i) {

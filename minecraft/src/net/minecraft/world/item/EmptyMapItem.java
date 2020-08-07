@@ -1,5 +1,6 @@
 package net.minecraft.world.item;
 
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -20,15 +21,16 @@ public class EmptyMapItem extends ComplexItem {
 			itemStack2.shrink(1);
 		}
 
+		player.awardStat(Stats.ITEM_USED.get(this));
+		player.playSound(SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, 1.0F, 1.0F);
 		if (itemStack2.isEmpty()) {
-			return InteractionResultHolder.success(itemStack);
+			return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
 		} else {
 			if (!player.inventory.add(itemStack.copy())) {
 				player.drop(itemStack, false);
 			}
 
-			player.awardStat(Stats.ITEM_USED.get(this));
-			return InteractionResultHolder.success(itemStack2);
+			return InteractionResultHolder.sidedSuccess(itemStack2, level.isClientSide());
 		}
 	}
 }

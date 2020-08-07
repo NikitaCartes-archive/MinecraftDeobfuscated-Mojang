@@ -23,6 +23,8 @@ import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.client.renderer.entity.layers.ParrotOnShoulderLayer;
 import net.minecraft.client.renderer.entity.layers.SpinAttackEffectLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -84,8 +86,12 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			playerModel.leftSleeve.visible = abstractClientPlayer.isModelPartShown(PlayerModelPart.LEFT_SLEEVE);
 			playerModel.rightSleeve.visible = abstractClientPlayer.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE);
 			playerModel.crouching = abstractClientPlayer.isCrouching();
-			HumanoidModel.ArmPose armPose = this.getArmPose(abstractClientPlayer, itemStack, itemStack2, InteractionHand.MAIN_HAND);
-			HumanoidModel.ArmPose armPose2 = this.getArmPose(abstractClientPlayer, itemStack, itemStack2, InteractionHand.OFF_HAND);
+			HumanoidModel.ArmPose armPose = getArmPose(abstractClientPlayer, itemStack, itemStack2, InteractionHand.MAIN_HAND);
+			HumanoidModel.ArmPose armPose2 = getArmPose(abstractClientPlayer, itemStack, itemStack2, InteractionHand.OFF_HAND);
+			if (armPose.isTwoHanded()) {
+				armPose2 = abstractClientPlayer.getOffhandItem().isEmpty() ? HumanoidModel.ArmPose.EMPTY : HumanoidModel.ArmPose.ITEM;
+			}
+
 			if (abstractClientPlayer.getMainArm() == HumanoidArm.RIGHT) {
 				playerModel.rightArmPose = armPose;
 				playerModel.leftArmPose = armPose2;
@@ -96,7 +102,9 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		}
 	}
 
-	private HumanoidModel.ArmPose getArmPose(AbstractClientPlayer abstractClientPlayer, ItemStack itemStack, ItemStack itemStack2, InteractionHand interactionHand) {
+	private static HumanoidModel.ArmPose getArmPose(
+		AbstractClientPlayer abstractClientPlayer, ItemStack itemStack, ItemStack itemStack2, InteractionHand interactionHand
+	) {
 		HumanoidModel.ArmPose armPose = HumanoidModel.ArmPose.EMPTY;
 		ItemStack itemStack3 = interactionHand == InteractionHand.MAIN_HAND ? itemStack : itemStack2;
 		if (!itemStack3.isEmpty()) {
@@ -141,7 +149,7 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		poseStack.scale(0.9375F, 0.9375F, 0.9375F);
 	}
 
-	protected void renderNameTag(AbstractClientPlayer abstractClientPlayer, String string, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+	protected void renderNameTag(AbstractClientPlayer abstractClientPlayer, Component component, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		double d = this.entityRenderDispatcher.distanceToSqr(abstractClientPlayer);
 		poseStack.pushPose();
 		if (d < 100.0) {
@@ -149,12 +157,18 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			Objective objective = scoreboard.getDisplayObjective(2);
 			if (objective != null) {
 				Score score = scoreboard.getOrCreatePlayerScore(abstractClientPlayer.getScoreboardName(), objective);
-				super.renderNameTag(abstractClientPlayer, score.getScore() + " " + objective.getDisplayName().getColoredString(), poseStack, multiBufferSource, i);
+				super.renderNameTag(
+					abstractClientPlayer,
+					new TextComponent(Integer.toString(score.getScore())).append(" ").append(objective.getDisplayName()),
+					poseStack,
+					multiBufferSource,
+					i
+				);
 				poseStack.translate(0.0, (double)(9.0F * 1.15F * 0.025F), 0.0);
 			}
 		}
 
-		super.renderNameTag(abstractClientPlayer, string, poseStack, multiBufferSource, i);
+		super.renderNameTag(abstractClientPlayer, component, poseStack, multiBufferSource, i);
 		poseStack.popPose();
 	}
 
@@ -198,7 +212,7 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			double d = Entity.getHorizontalDistanceSqr(vec32);
 			double e = Entity.getHorizontalDistanceSqr(vec3);
 			if (d > 0.0 && e > 0.0) {
-				double l = (vec32.x * vec3.x + vec32.z * vec3.z) / (Math.sqrt(d) * Math.sqrt(e));
+				double l = (vec32.x * vec3.x + vec32.z * vec3.z) / Math.sqrt(d * e);
 				double m = vec32.x * vec3.z - vec32.z * vec3.x;
 				poseStack.mulPose(Vector3f.YP.rotation((float)(Math.signum(m) * Math.acos(l))));
 			}

@@ -5,11 +5,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Dynamic;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -148,10 +149,10 @@ public class StatsCounterFix extends DataFix {
 			typed -> {
 				Dynamic<?> dynamic = typed.get(DSL.remainderFinder());
 				Map<Dynamic<?>, Dynamic<?>> map = Maps.<Dynamic<?>, Dynamic<?>>newHashMap();
-				Optional<? extends Map<? extends Dynamic<?>, ? extends Dynamic<?>>> optional = dynamic.getMapValues();
+				Optional<? extends Map<? extends Dynamic<?>, ? extends Dynamic<?>>> optional = dynamic.getMapValues().result();
 				if (optional.isPresent()) {
 					for (Entry<? extends Dynamic<?>, ? extends Dynamic<?>> entry : ((Map)optional.get()).entrySet()) {
-						if (((Dynamic)entry.getValue()).asNumber().isPresent()) {
+						if (((Dynamic)entry.getValue()).asNumber().result().isPresent()) {
 							String string = ((Dynamic)entry.getKey()).asString("");
 							if (!SKIP.contains(string)) {
 								String string2;
@@ -193,9 +194,10 @@ public class StatsCounterFix extends DataFix {
 					}
 				}
 
-				return (Typed)type.readTyped(dynamic.emptyMap().set("stats", dynamic.createMap(map)))
-					.getSecond()
-					.orElseThrow(() -> new IllegalStateException("Could not parse new stats object."));
+				return (Typed)((Pair)type.readTyped(dynamic.emptyMap().set("stats", dynamic.createMap(map)))
+						.result()
+						.orElseThrow(() -> new IllegalStateException("Could not parse new stats object.")))
+					.getFirst();
 			}
 		);
 	}

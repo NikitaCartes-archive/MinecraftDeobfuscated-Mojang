@@ -43,6 +43,7 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.LazyLoadedValue;
+import net.minecraft.util.Mth;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -149,7 +150,6 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 
 	public void setListener(PacketListener packetListener) {
 		Validate.notNull(packetListener, "packetListener");
-		LOGGER.debug("Set listener of {} to {}", this, packetListener);
 		this.packetListener = packetListener;
 	}
 
@@ -228,11 +228,15 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 		}
 
 		if (this.tickCount++ % 20 == 0) {
-			this.averageSentPackets = this.averageSentPackets * 0.75F + (float)this.sentPackets * 0.25F;
-			this.averageReceivedPackets = this.averageReceivedPackets * 0.75F + (float)this.receivedPackets * 0.25F;
-			this.sentPackets = 0;
-			this.receivedPackets = 0;
+			this.tickSecond();
 		}
+	}
+
+	protected void tickSecond() {
+		this.averageSentPackets = Mth.lerp(0.75F, (float)this.sentPackets, this.averageSentPackets);
+		this.averageReceivedPackets = Mth.lerp(0.75F, (float)this.receivedPackets, this.averageReceivedPackets);
+		this.sentPackets = 0;
+		this.receivedPackets = 0;
 	}
 
 	public SocketAddress getRemoteAddress() {
@@ -373,7 +377,6 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 		}
 	}
 
-	@Environment(EnvType.CLIENT)
 	public float getAverageReceivedPackets() {
 		return this.averageReceivedPackets;
 	}

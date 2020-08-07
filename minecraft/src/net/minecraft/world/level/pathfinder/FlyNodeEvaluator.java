@@ -5,12 +5,14 @@ import java.util.EnumSet;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class FlyNodeEvaluator extends WalkNodeEvaluator {
 	@Override
@@ -39,7 +41,7 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 			i = Mth.floor(this.mob.getY() + 0.5);
 		}
 
-		BlockPos blockPos = new BlockPos(this.mob);
+		BlockPos blockPos = this.mob.blockPosition();
 		BlockPathTypes blockPathTypes = this.getBlockPathType(this.mob, blockPos.getX(), i, blockPos.getZ());
 		if (this.mob.getPathfindingMalus(blockPathTypes) < 0.0F) {
 			Set<BlockPos> set = Sets.<BlockPos>newHashSet();
@@ -158,42 +160,88 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 		}
 
 		Node node20 = this.getNode(node.x + 1, node.y + 1, node.z - 1);
-		if (this.isOpen(node20) && this.hasMalus(node16) && this.hasMalus(node11) && this.hasMalus(node10)) {
+		if (this.isOpen(node20)
+			&& this.hasMalus(node16)
+			&& this.hasMalus(node5)
+			&& this.hasMalus(node4)
+			&& this.hasMalus(node6)
+			&& this.hasMalus(node11)
+			&& this.hasMalus(node10)) {
 			nodes[i++] = node20;
 		}
 
 		Node node21 = this.getNode(node.x + 1, node.y + 1, node.z + 1);
-		if (this.isOpen(node21) && this.hasMalus(node17) && this.hasMalus(node8) && this.hasMalus(node10)) {
+		if (this.isOpen(node21)
+			&& this.hasMalus(node17)
+			&& this.hasMalus(node2)
+			&& this.hasMalus(node4)
+			&& this.hasMalus(node6)
+			&& this.hasMalus(node8)
+			&& this.hasMalus(node10)) {
 			nodes[i++] = node21;
 		}
 
 		Node node22 = this.getNode(node.x - 1, node.y + 1, node.z - 1);
-		if (this.isOpen(node22) && this.hasMalus(node18) && this.hasMalus(node11) && this.hasMalus(node9)) {
+		if (this.isOpen(node22)
+			&& this.hasMalus(node18)
+			&& this.hasMalus(node5)
+			&& this.hasMalus(node3) & this.hasMalus(node6)
+			&& this.hasMalus(node11)
+			&& this.hasMalus(node9)) {
 			nodes[i++] = node22;
 		}
 
 		Node node23 = this.getNode(node.x - 1, node.y + 1, node.z + 1);
-		if (this.isOpen(node23) && this.hasMalus(node19) && this.hasMalus(node8) && this.hasMalus(node9)) {
+		if (this.isOpen(node23)
+			&& this.hasMalus(node19)
+			&& this.hasMalus(node2)
+			&& this.hasMalus(node3) & this.hasMalus(node6)
+			&& this.hasMalus(node8)
+			&& this.hasMalus(node9)) {
 			nodes[i++] = node23;
 		}
 
 		Node node24 = this.getNode(node.x + 1, node.y - 1, node.z - 1);
-		if (this.isOpen(node24) && this.hasMalus(node16) && this.hasMalus(node15) && this.hasMalus(node14)) {
+		if (this.isOpen(node24)
+			&& this.hasMalus(node16)
+			&& this.hasMalus(node5)
+			&& this.hasMalus(node4)
+			&& this.hasMalus(node7)
+			&& this.hasMalus(node15)
+			&& this.hasMalus(node14)) {
 			nodes[i++] = node24;
 		}
 
 		Node node25 = this.getNode(node.x + 1, node.y - 1, node.z + 1);
-		if (this.isOpen(node25) && this.hasMalus(node17) && this.hasMalus(node12) && this.hasMalus(node14)) {
+		if (this.isOpen(node25)
+			&& this.hasMalus(node17)
+			&& this.hasMalus(node2)
+			&& this.hasMalus(node4)
+			&& this.hasMalus(node7)
+			&& this.hasMalus(node12)
+			&& this.hasMalus(node14)) {
 			nodes[i++] = node25;
 		}
 
 		Node node26 = this.getNode(node.x - 1, node.y - 1, node.z - 1);
-		if (this.isOpen(node26) && this.hasMalus(node18) && this.hasMalus(node15) && this.hasMalus(node13)) {
+		if (this.isOpen(node26)
+			&& this.hasMalus(node18)
+			&& this.hasMalus(node5)
+			&& this.hasMalus(node3)
+			&& this.hasMalus(node7)
+			&& this.hasMalus(node15)
+			&& this.hasMalus(node13)) {
 			nodes[i++] = node26;
 		}
 
 		Node node27 = this.getNode(node.x - 1, node.y - 1, node.z + 1);
-		if (this.isOpen(node27) && this.hasMalus(node19) && this.hasMalus(node12) && this.hasMalus(node13)) {
+		if (this.isOpen(node27)
+			&& this.hasMalus(node19)
+			&& this.hasMalus(node2)
+			&& this.hasMalus(node3)
+			&& this.hasMalus(node7)
+			&& this.hasMalus(node12)
+			&& this.hasMalus(node13)) {
 			nodes[i++] = node27;
 		}
 
@@ -230,7 +278,7 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 	public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k, Mob mob, int l, int m, int n, boolean bl, boolean bl2) {
 		EnumSet<BlockPathTypes> enumSet = EnumSet.noneOf(BlockPathTypes.class);
 		BlockPathTypes blockPathTypes = BlockPathTypes.BLOCKED;
-		BlockPos blockPos = new BlockPos(mob);
+		BlockPos blockPos = mob.blockPosition();
 		blockPathTypes = this.getBlockPathTypes(blockGetter, i, j, k, l, m, n, bl, bl2, enumSet, blockPathTypes, blockPos);
 		if (enumSet.contains(BlockPathTypes.FENCE)) {
 			return BlockPathTypes.FENCE;
@@ -253,11 +301,15 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 
 	@Override
 	public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k) {
-		BlockPathTypes blockPathTypes = getBlockPathTypeRaw(blockGetter, i, j, k);
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+		BlockPathTypes blockPathTypes = getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j, k));
 		if (blockPathTypes == BlockPathTypes.OPEN && j >= 1) {
-			Block block = blockGetter.getBlockState(new BlockPos(i, j - 1, k)).getBlock();
-			BlockPathTypes blockPathTypes2 = getBlockPathTypeRaw(blockGetter, i, j - 1, k);
-			if (blockPathTypes2 == BlockPathTypes.DAMAGE_FIRE || block == Blocks.MAGMA_BLOCK || blockPathTypes2 == BlockPathTypes.LAVA || block == Blocks.CAMPFIRE) {
+			BlockState blockState = blockGetter.getBlockState(mutableBlockPos.set(i, j - 1, k));
+			BlockPathTypes blockPathTypes2 = getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j - 1, k));
+			if (blockPathTypes2 == BlockPathTypes.DAMAGE_FIRE
+				|| blockState.is(Blocks.MAGMA_BLOCK)
+				|| blockPathTypes2 == BlockPathTypes.LAVA
+				|| blockState.is(BlockTags.CAMPFIRES)) {
 				blockPathTypes = BlockPathTypes.DAMAGE_FIRE;
 			} else if (blockPathTypes2 == BlockPathTypes.DAMAGE_CACTUS) {
 				blockPathTypes = BlockPathTypes.DAMAGE_CACTUS;
@@ -275,7 +327,7 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 		}
 
 		if (blockPathTypes == BlockPathTypes.WALKABLE || blockPathTypes == BlockPathTypes.OPEN) {
-			blockPathTypes = checkNeighbourBlocks(blockGetter, i, j, k, blockPathTypes);
+			blockPathTypes = checkNeighbourBlocks(blockGetter, mutableBlockPos.set(i, j, k), blockPathTypes);
 		}
 
 		return blockPathTypes;

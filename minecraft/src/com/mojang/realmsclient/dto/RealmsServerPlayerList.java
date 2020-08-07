@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class RealmsServerPlayerList extends ValueObject {
 	private static final Logger LOGGER = LogManager.getLogger();
-	private static final JsonParser jsonParser = new JsonParser();
+	private static final JsonParser JSON_PARSER = new JsonParser();
 	public long serverId;
 	public List<String> players;
 
@@ -26,7 +26,7 @@ public class RealmsServerPlayerList extends ValueObject {
 			realmsServerPlayerList.serverId = JsonUtils.getLongOr("serverId", jsonObject, -1L);
 			String string = JsonUtils.getStringOr("playerList", jsonObject, null);
 			if (string != null) {
-				JsonElement jsonElement = jsonParser.parse(string);
+				JsonElement jsonElement = JSON_PARSER.parse(string);
 				if (jsonElement.isJsonArray()) {
 					realmsServerPlayerList.players = parsePlayers(jsonElement.getAsJsonArray());
 				} else {

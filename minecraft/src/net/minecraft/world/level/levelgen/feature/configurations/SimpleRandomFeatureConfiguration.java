@@ -1,33 +1,25 @@
 package net.minecraft.world.level.levelgen.feature.configurations;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
 import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 
 public class SimpleRandomFeatureConfiguration implements FeatureConfiguration {
-	public final List<ConfiguredFeature<?, ?>> features;
+	public static final Codec<SimpleRandomFeatureConfiguration> CODEC = ConfiguredFeature.CODEC
+		.listOf()
+		.fieldOf("features")
+		.<SimpleRandomFeatureConfiguration>xmap(SimpleRandomFeatureConfiguration::new, simpleRandomFeatureConfiguration -> simpleRandomFeatureConfiguration.features)
+		.codec();
+	public final List<Supplier<ConfiguredFeature<?, ?>>> features;
 
-	public SimpleRandomFeatureConfiguration(List<ConfiguredFeature<?, ?>> list) {
+	public SimpleRandomFeatureConfiguration(List<Supplier<ConfiguredFeature<?, ?>>> list) {
 		this.features = list;
 	}
 
 	@Override
-	public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-		return new Dynamic<>(
-			dynamicOps,
-			dynamicOps.createMap(
-				ImmutableMap.of(
-					dynamicOps.createString("features"),
-					dynamicOps.createList(this.features.stream().map(configuredFeature -> configuredFeature.serialize(dynamicOps).getValue()))
-				)
-			)
-		);
-	}
-
-	public static <T> SimpleRandomFeatureConfiguration deserialize(Dynamic<T> dynamic) {
-		List<ConfiguredFeature<?, ?>> list = dynamic.get("features").asList(ConfiguredFeature::deserialize);
-		return new SimpleRandomFeatureConfiguration(list);
+	public Stream<ConfiguredFeature<?, ?>> getFeatures() {
+		return this.features.stream().flatMap(supplier -> ((ConfiguredFeature)supplier.get()).getFeatures());
 	}
 }

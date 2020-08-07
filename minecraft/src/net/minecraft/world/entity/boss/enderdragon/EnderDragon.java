@@ -11,6 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -26,20 +27,20 @@ import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.boss.enderdragon.phases.DragonPhaseInstance;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhaseManager;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.end.EndDragonFight;
-import net.minecraft.world.level.dimension.end.TheEndDimension;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.EndPodiumFeature;
 import net.minecraft.world.level.material.Material;
@@ -96,8 +97,8 @@ public class EnderDragon extends Mob implements Enemy {
 		this.setHealth(this.getMaxHealth());
 		this.noPhysics = true;
 		this.noCulling = true;
-		if (!level.isClientSide && level.dimension instanceof TheEndDimension) {
-			this.dragonFight = ((TheEndDimension)level.dimension).getDragonFight();
+		if (level instanceof ServerLevel) {
+			this.dragonFight = ((ServerLevel)level).dragonFight();
 		} else {
 			this.dragonFight = null;
 		}
@@ -105,10 +106,8 @@ public class EnderDragon extends Mob implements Enemy {
 		this.phaseManager = new EnderDragonPhaseManager(this);
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(200.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 200.0);
 	}
 
 	@Override
@@ -118,7 +117,7 @@ public class EnderDragon extends Mob implements Enemy {
 	}
 
 	public double[] getLatencyPos(int i, float f) {
-		if (this.getHealth() <= 0.0F) {
+		if (this.isDeadOrDying()) {
 			f = 0.0F;
 		}
 
@@ -161,7 +160,7 @@ public class EnderDragon extends Mob implements Enemy {
 		}
 
 		this.oFlapTime = this.flapTime;
-		if (this.getHealth() <= 0.0F) {
+		if (this.isDeadOrDying()) {
 			float fx = (this.random.nextFloat() - 0.5F) * 8.0F;
 			float gx = (this.random.nextFloat() - 0.5F) * 4.0F;
 			float h = (this.random.nextFloat() - 0.5F) * 8.0F;
@@ -454,7 +453,7 @@ public class EnderDragon extends Mob implements Enemy {
 				if (damageSource.getEntity() instanceof Player || damageSource.isExplosion()) {
 					float g = this.getHealth();
 					this.reallyHurt(damageSource, f);
-					if (this.getHealth() <= 0.0F && !this.phaseManager.getCurrentPhase().isSitting()) {
+					if (this.isDeadOrDying() && !this.phaseManager.getCurrentPhase().isSitting()) {
 						this.setHealth(1.0F);
 						this.phaseManager.setPhase(EnderDragonPhase.DYING);
 					}
@@ -520,8 +519,8 @@ public class EnderDragon extends Mob implements Enemy {
 				this.dropExperience(Mth.floor((float)i * 0.08F));
 			}
 
-			if (this.dragonDeathTime == 1) {
-				this.level.globalLevelEvent(1028, new BlockPos(this), 0);
+			if (this.dragonDeathTime == 1 && !this.isSilent()) {
+				this.level.globalLevelEvent(1028, this.blockPosition(), 0);
 			}
 		}
 

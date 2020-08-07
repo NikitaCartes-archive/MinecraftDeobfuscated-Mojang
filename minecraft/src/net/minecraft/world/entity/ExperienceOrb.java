@@ -57,13 +57,13 @@ public class ExperienceOrb extends Entity {
 		this.xo = this.getX();
 		this.yo = this.getY();
 		this.zo = this.getZ();
-		if (this.isUnderLiquid(FluidTags.WATER)) {
+		if (this.isEyeInFluid(FluidTags.WATER)) {
 			this.setUnderwaterMovement();
 		} else if (!this.isNoGravity()) {
 			this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.03, 0.0));
 		}
 
-		if (this.level.getFluidState(new BlockPos(this)).is(FluidTags.LAVA)) {
+		if (this.level.getFluidState(this.blockPosition()).is(FluidTags.LAVA)) {
 			this.setDeltaMovement(
 				(double)((this.random.nextFloat() - this.random.nextFloat()) * 0.2F), 0.2F, (double)((this.random.nextFloat() - this.random.nextFloat()) * 0.2F)
 			);
@@ -71,7 +71,7 @@ public class ExperienceOrb extends Entity {
 		}
 
 		if (!this.level.noCollision(this.getBoundingBox())) {
-			this.checkInBlock(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
+			this.moveTowardsClosestSpace(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
 		}
 
 		double d = 8.0;
@@ -128,11 +128,6 @@ public class ExperienceOrb extends Entity {
 	}
 
 	@Override
-	protected void burn(int i) {
-		this.hurt(DamageSource.IN_FIRE, (float)i);
-	}
-
-	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
@@ -167,7 +162,7 @@ public class ExperienceOrb extends Entity {
 			if (this.throwTime == 0 && player.takeXpDelay == 0) {
 				player.takeXpDelay = 2;
 				player.take(this, 1);
-				Entry<EquipmentSlot, ItemStack> entry = EnchantmentHelper.getRandomItemWith(Enchantments.MENDING, player);
+				Entry<EquipmentSlot, ItemStack> entry = EnchantmentHelper.getRandomItemWith(Enchantments.MENDING, player, ItemStack::isDamaged);
 				if (entry != null) {
 					ItemStack itemStack = (ItemStack)entry.getValue();
 					if (!itemStack.isEmpty() && itemStack.isDamaged()) {

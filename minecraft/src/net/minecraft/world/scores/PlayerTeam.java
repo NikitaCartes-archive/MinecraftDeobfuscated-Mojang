@@ -10,6 +10,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 
 public class PlayerTeam extends Team {
@@ -17,19 +19,21 @@ public class PlayerTeam extends Team {
 	private final String name;
 	private final Set<String> players = Sets.<String>newHashSet();
 	private Component displayName;
-	private Component playerPrefix = new TextComponent("");
-	private Component playerSuffix = new TextComponent("");
+	private Component playerPrefix = TextComponent.EMPTY;
+	private Component playerSuffix = TextComponent.EMPTY;
 	private boolean allowFriendlyFire = true;
 	private boolean seeFriendlyInvisibles = true;
 	private Team.Visibility nameTagVisibility = Team.Visibility.ALWAYS;
 	private Team.Visibility deathMessageVisibility = Team.Visibility.ALWAYS;
 	private ChatFormatting color = ChatFormatting.RESET;
 	private Team.CollisionRule collisionRule = Team.CollisionRule.ALWAYS;
+	private final Style displayNameStyle;
 
 	public PlayerTeam(Scoreboard scoreboard, String string) {
 		this.scoreboard = scoreboard;
 		this.name = string;
 		this.displayName = new TextComponent(string);
+		this.displayNameStyle = Style.EMPTY.withInsertion(string).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(string)));
 	}
 
 	@Override
@@ -41,18 +45,14 @@ public class PlayerTeam extends Team {
 		return this.displayName;
 	}
 
-	public Component getFormattedDisplayName() {
-		Component component = ComponentUtils.wrapInSquareBrackets(
-			this.displayName
-				.deepCopy()
-				.withStyle(style -> style.setInsertion(this.name).setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(this.name))))
-		);
+	public MutableComponent getFormattedDisplayName() {
+		MutableComponent mutableComponent = ComponentUtils.wrapInSquareBrackets(this.displayName.copy().withStyle(this.displayNameStyle));
 		ChatFormatting chatFormatting = this.getColor();
 		if (chatFormatting != ChatFormatting.RESET) {
-			component.withStyle(chatFormatting);
+			mutableComponent.withStyle(chatFormatting);
 		}
 
-		return component;
+		return mutableComponent;
 	}
 
 	public void setDisplayName(Component component) {
@@ -65,7 +65,7 @@ public class PlayerTeam extends Team {
 	}
 
 	public void setPlayerPrefix(@Nullable Component component) {
-		this.playerPrefix = (Component)(component == null ? new TextComponent("") : component.deepCopy());
+		this.playerPrefix = component == null ? TextComponent.EMPTY : component;
 		this.scoreboard.onTeamChanged(this);
 	}
 
@@ -74,7 +74,7 @@ public class PlayerTeam extends Team {
 	}
 
 	public void setPlayerSuffix(@Nullable Component component) {
-		this.playerSuffix = (Component)(component == null ? new TextComponent("") : component.deepCopy());
+		this.playerSuffix = component == null ? TextComponent.EMPTY : component;
 		this.scoreboard.onTeamChanged(this);
 	}
 
@@ -88,18 +88,18 @@ public class PlayerTeam extends Team {
 	}
 
 	@Override
-	public Component getFormattedName(Component component) {
-		Component component2 = new TextComponent("").append(this.playerPrefix).append(component).append(this.playerSuffix);
+	public MutableComponent getFormattedName(Component component) {
+		MutableComponent mutableComponent = new TextComponent("").append(this.playerPrefix).append(component).append(this.playerSuffix);
 		ChatFormatting chatFormatting = this.getColor();
 		if (chatFormatting != ChatFormatting.RESET) {
-			component2.withStyle(chatFormatting);
+			mutableComponent.withStyle(chatFormatting);
 		}
 
-		return component2;
+		return mutableComponent;
 	}
 
-	public static Component formatNameForTeam(@Nullable Team team, Component component) {
-		return team == null ? component.deepCopy() : team.getFormattedName(component);
+	public static MutableComponent formatNameForTeam(@Nullable Team team, Component component) {
+		return team == null ? component.copy() : team.getFormattedName(component);
 	}
 
 	@Override

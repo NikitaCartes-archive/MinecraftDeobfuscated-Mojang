@@ -11,21 +11,28 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
 public class HurtBySensor extends Sensor<LivingEntity> {
 	@Override
+	public Set<MemoryModuleType<?>> requires() {
+		return ImmutableSet.of(MemoryModuleType.HURT_BY, MemoryModuleType.HURT_BY_ENTITY);
+	}
+
+	@Override
 	protected void doTick(ServerLevel serverLevel, LivingEntity livingEntity) {
 		Brain<?> brain = livingEntity.getBrain();
-		if (livingEntity.getLastDamageSource() != null) {
+		DamageSource damageSource = livingEntity.getLastDamageSource();
+		if (damageSource != null) {
 			brain.setMemory(MemoryModuleType.HURT_BY, livingEntity.getLastDamageSource());
-			Entity entity = ((DamageSource)brain.getMemory(MemoryModuleType.HURT_BY).get()).getEntity();
+			Entity entity = damageSource.getEntity();
 			if (entity instanceof LivingEntity) {
 				brain.setMemory(MemoryModuleType.HURT_BY_ENTITY, (LivingEntity)entity);
 			}
 		} else {
 			brain.eraseMemory(MemoryModuleType.HURT_BY);
 		}
-	}
 
-	@Override
-	public Set<MemoryModuleType<?>> requires() {
-		return ImmutableSet.of(MemoryModuleType.HURT_BY, MemoryModuleType.HURT_BY_ENTITY);
+		brain.getMemory(MemoryModuleType.HURT_BY_ENTITY).ifPresent(livingEntityx -> {
+			if (!livingEntityx.isAlive() || livingEntityx.level != serverLevel) {
+				brain.eraseMemory(MemoryModuleType.HURT_BY_ENTITY);
+			}
+		});
 	}
 }

@@ -5,6 +5,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -15,7 +16,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.OldUsersConverter;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.ai.goal.SitGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
@@ -27,7 +27,7 @@ public abstract class TamableAnimal extends Animal {
 	protected static final EntityDataAccessor<Optional<UUID>> DATA_OWNERUUID_ID = SynchedEntityData.defineId(
 		TamableAnimal.class, EntityDataSerializers.OPTIONAL_UUID
 	);
-	protected SitGoal sitGoal;
+	private boolean orderedToSit;
 
 	protected TamableAnimal(EntityType<? extends TamableAnimal> entityType, Level level) {
 		super(entityType, level);
@@ -44,40 +44,35 @@ public abstract class TamableAnimal extends Animal {
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		if (this.getOwnerUUID() == null) {
-			compoundTag.putString("OwnerUUID", "");
-		} else {
-			compoundTag.putString("OwnerUUID", this.getOwnerUUID().toString());
+		if (this.getOwnerUUID() != null) {
+			compoundTag.putUUID("Owner", this.getOwnerUUID());
 		}
 
-		compoundTag.putBoolean("Sitting", this.isSitting());
+		compoundTag.putBoolean("Sitting", this.orderedToSit);
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		String string;
-		if (compoundTag.contains("OwnerUUID", 8)) {
-			string = compoundTag.getString("OwnerUUID");
+		UUID uUID;
+		if (compoundTag.hasUUID("Owner")) {
+			uUID = compoundTag.getUUID("Owner");
 		} else {
-			String string2 = compoundTag.getString("Owner");
-			string = OldUsersConverter.convertMobOwnerIfNecessary(this.getServer(), string2);
+			String string = compoundTag.getString("Owner");
+			uUID = OldUsersConverter.convertMobOwnerIfNecessary(this.getServer(), string);
 		}
 
-		if (!string.isEmpty()) {
+		if (uUID != null) {
 			try {
-				this.setOwnerUUID(UUID.fromString(string));
+				this.setOwnerUUID(uUID);
 				this.setTame(true);
 			} catch (Throwable var4) {
 				this.setTame(false);
 			}
 		}
 
-		if (this.sitGoal != null) {
-			this.sitGoal.wantToSit(compoundTag.getBoolean("Sitting"));
-		}
-
-		this.setSitting(compoundTag.getBoolean("Sitting"));
+		this.orderedToSit = compoundTag.getBoolean("Sitting");
+		this.setInSittingPose(this.orderedToSit);
 	}
 
 	@Override
@@ -130,11 +125,11 @@ public abstract class TamableAnimal extends Animal {
 	protected void reassessTameGoals() {
 	}
 
-	public boolean isSitting() {
+	public boolean isInSittingPose() {
 		return (this.entityData.get(DATA_FLAGS_ID) & 1) != 0;
 	}
 
-	public void setSitting(boolean bl) {
+	public void setInSittingPose(boolean bl) {
 		byte b = this.entityData.get(DATA_FLAGS_ID);
 		if (bl) {
 			this.entityData.set(DATA_FLAGS_ID, (byte)(b | 1));
@@ -179,10 +174,6 @@ public abstract class TamableAnimal extends Animal {
 		return livingEntity == this.getOwner();
 	}
 
-	public SitGoal getSitGoal() {
-		return this.sitGoal;
-	}
-
 	public boolean wantsToAttack(LivingEntity livingEntity, LivingEntity livingEntity2) {
 		return true;
 	}
@@ -218,9 +209,17 @@ public abstract class TamableAnimal extends Animal {
 	@Override
 	public void die(DamageSource damageSource) {
 		if (!this.level.isClientSide && this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && this.getOwner() instanceof ServerPlayer) {
-			this.getOwner().sendMessage(this.getCombatTracker().getDeathMessage());
+			this.getOwner().sendMessage(this.getCombatTracker().getDeathMessage(), Util.NIL_UUID);
 		}
 
 		super.die(damageSource);
+	}
+
+	public boolean isOrderedToSit() {
+		return this.orderedToSit;
+	}
+
+	public void setOrderedToSit(boolean bl) {
+		this.orderedToSit = bl;
 	}
 }

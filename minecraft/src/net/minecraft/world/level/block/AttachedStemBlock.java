@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -34,7 +35,7 @@ public class AttachedStemBlock extends BushBlock {
 		)
 	);
 
-	protected AttachedStemBlock(StemGrownBlock stemGrownBlock, Block.Properties properties) {
+	protected AttachedStemBlock(StemGrownBlock stemGrownBlock, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
 		this.fruit = stemGrownBlock;
@@ -49,14 +50,14 @@ public class AttachedStemBlock extends BushBlock {
 	public BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
-		return blockState2.getBlock() != this.fruit && direction == blockState.getValue(FACING)
+		return !blockState2.is(this.fruit) && direction == blockState.getValue(FACING)
 			? this.fruit.getStem().defaultBlockState().setValue(StemBlock.AGE, Integer.valueOf(7))
 			: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
 	}
 
 	@Override
 	protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return blockState.getBlock() == Blocks.FARMLAND;
+		return blockState.is(Blocks.FARMLAND);
 	}
 
 	@Environment(EnvType.CLIENT)

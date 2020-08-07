@@ -5,6 +5,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,6 +15,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
@@ -28,7 +30,7 @@ public class WitherSkullBlock extends SkullBlock {
 	@Nullable
 	private static BlockPattern witherPatternBase;
 
-	protected WitherSkullBlock(Block.Properties properties) {
+	protected WitherSkullBlock(BlockBehaviour.Properties properties) {
 		super(SkullBlock.Types.WITHER_SKELETON, properties);
 	}
 
@@ -43,9 +45,9 @@ public class WitherSkullBlock extends SkullBlock {
 
 	public static void checkSpawn(Level level, BlockPos blockPos, SkullBlockEntity skullBlockEntity) {
 		if (!level.isClientSide) {
-			Block block = skullBlockEntity.getBlockState().getBlock();
-			boolean bl = block == Blocks.WITHER_SKELETON_SKULL || block == Blocks.WITHER_SKELETON_WALL_SKULL;
-			if (bl && blockPos.getY() >= 2 && level.getDifficulty() != Difficulty.PEACEFUL) {
+			BlockState blockState = skullBlockEntity.getBlockState();
+			boolean bl = blockState.is(Blocks.WITHER_SKELETON_SKULL) || blockState.is(Blocks.WITHER_SKELETON_WALL_SKULL);
+			if (bl && blockPos.getY() >= 0 && level.getDifficulty() != Difficulty.PEACEFUL) {
 				BlockPattern blockPattern = getOrCreateWitherFull();
 				BlockPattern.BlockPatternMatch blockPatternMatch = blockPattern.find(level, blockPos);
 				if (blockPatternMatch != null) {
@@ -95,7 +97,7 @@ public class WitherSkullBlock extends SkullBlock {
 		if (witherPatternFull == null) {
 			witherPatternFull = BlockPatternBuilder.start()
 				.aisle("^^^", "###", "~#~")
-				.where('#', BlockInWorld.hasState(BlockStatePredicate.forBlock(Blocks.SOUL_SAND)))
+				.where('#', blockInWorld -> blockInWorld.getState().is(BlockTags.WITHER_SUMMON_BASE_BLOCKS))
 				.where(
 					'^', BlockInWorld.hasState(BlockStatePredicate.forBlock(Blocks.WITHER_SKELETON_SKULL).or(BlockStatePredicate.forBlock(Blocks.WITHER_SKELETON_WALL_SKULL)))
 				)
@@ -110,7 +112,7 @@ public class WitherSkullBlock extends SkullBlock {
 		if (witherPatternBase == null) {
 			witherPatternBase = BlockPatternBuilder.start()
 				.aisle("   ", "###", "~#~")
-				.where('#', BlockInWorld.hasState(BlockStatePredicate.forBlock(Blocks.SOUL_SAND)))
+				.where('#', blockInWorld -> blockInWorld.getState().is(BlockTags.WITHER_SUMMON_BASE_BLOCKS))
 				.where('~', BlockInWorld.hasState(BlockMaterialPredicate.forMaterial(Material.AIR)))
 				.build();
 		}

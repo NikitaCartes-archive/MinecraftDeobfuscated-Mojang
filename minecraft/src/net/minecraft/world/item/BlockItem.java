@@ -16,6 +16,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -37,8 +39,8 @@ public class BlockItem extends Item {
 	@Override
 	public InteractionResult useOn(UseOnContext useOnContext) {
 		InteractionResult interactionResult = this.place(new BlockPlaceContext(useOnContext));
-		return interactionResult != InteractionResult.SUCCESS && this.isEdible()
-			? this.use(useOnContext.level, useOnContext.player, useOnContext.hand).getResult()
+		return !interactionResult.consumesAction() && this.isEdible()
+			? this.use(useOnContext.getLevel(), useOnContext.getPlayer(), useOnContext.getHand()).getResult()
 			: interactionResult;
 	}
 
@@ -73,8 +75,11 @@ public class BlockItem extends Item {
 
 					SoundType soundType = blockState2.getSoundType();
 					level.playSound(player, blockPos, this.getPlaceSound(blockState2), SoundSource.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
-					itemStack.shrink(1);
-					return InteractionResult.SUCCESS;
+					if (player == null || !player.abilities.instabuild) {
+						itemStack.shrink(1);
+					}
+
+					return InteractionResult.sidedSuccess(level.isClientSide);
 				}
 			}
 		}
@@ -161,7 +166,7 @@ public class BlockItem extends Item {
 					compoundTag2.putInt("y", blockPos.getY());
 					compoundTag2.putInt("z", blockPos.getZ());
 					if (!compoundTag2.equals(compoundTag3)) {
-						blockEntity.load(compoundTag2);
+						blockEntity.load(level.getBlockState(blockPos), compoundTag2);
 						blockEntity.setChanged();
 						return true;
 					}

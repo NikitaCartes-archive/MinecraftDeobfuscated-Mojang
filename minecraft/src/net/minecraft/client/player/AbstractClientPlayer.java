@@ -13,9 +13,9 @@ import net.minecraft.client.renderer.texture.HttpTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -29,7 +29,7 @@ public abstract class AbstractClientPlayer extends Player {
 	public final ClientLevel clientLevel;
 
 	public AbstractClientPlayer(ClientLevel clientLevel, GameProfile gameProfile) {
-		super(clientLevel, gameProfile);
+		super(clientLevel, clientLevel.getSharedSpawnPos(), clientLevel.getSharedSpawnAngle(), gameProfile);
 		this.clientLevel = clientLevel;
 	}
 
@@ -116,8 +116,7 @@ public abstract class AbstractClientPlayer extends Player {
 			f *= 1.1F;
 		}
 
-		AttributeInstance attributeInstance = this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
-		f = (float)((double)f * ((attributeInstance.getValue() / (double)this.abilities.getWalkingSpeed() + 1.0) / 2.0));
+		f = (float)((double)f * ((this.getAttributeValue(Attributes.MOVEMENT_SPEED) / (double)this.abilities.getWalkingSpeed() + 1.0) / 2.0));
 		if (this.abilities.getWalkingSpeed() == 0.0F || Float.isNaN(f) || Float.isInfinite(f)) {
 			f = 1.0F;
 		}
@@ -134,6 +133,6 @@ public abstract class AbstractClientPlayer extends Player {
 			f *= 1.0F - g * 0.15F;
 		}
 
-		return f;
+		return Mth.lerp(Minecraft.getInstance().options.fovEffectScale, 1.0F, f);
 	}
 }

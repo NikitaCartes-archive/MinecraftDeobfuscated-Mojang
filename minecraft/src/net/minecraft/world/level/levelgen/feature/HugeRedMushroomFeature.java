@@ -1,16 +1,15 @@
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.HugeMushroomBlock;
 import net.minecraft.world.level.levelgen.feature.configurations.HugeMushroomFeatureConfiguration;
 
 public class HugeRedMushroomFeature extends AbstractHugeMushroomFeature {
-	public HugeRedMushroomFeature(Function<Dynamic<?>, ? extends HugeMushroomFeatureConfiguration> function) {
-		super(function);
+	public HugeRedMushroomFeature(Codec<HugeMushroomFeatureConfiguration> codec) {
+		super(codec);
 	}
 
 	@Override
@@ -35,7 +34,7 @@ public class HugeRedMushroomFeature extends AbstractHugeMushroomFeature {
 					boolean bl5 = bl || bl2;
 					boolean bl6 = bl3 || bl4;
 					if (j >= i || bl5 != bl6) {
-						mutableBlockPos.set(blockPos).move(m, j, n);
+						mutableBlockPos.setWithOffset(blockPos, m, j, n);
 						if (!levelAccessor.getBlockState(mutableBlockPos).isSolidRender(levelAccessor, mutableBlockPos)) {
 							this.setBlock(
 								levelAccessor,

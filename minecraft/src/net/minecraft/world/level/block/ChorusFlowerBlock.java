@@ -5,10 +5,12 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -19,7 +21,7 @@ public class ChorusFlowerBlock extends Block {
 	public static final IntegerProperty AGE = BlockStateProperties.AGE_5;
 	private final ChorusPlantBlock plant;
 
-	protected ChorusFlowerBlock(ChorusPlantBlock chorusPlantBlock, Block.Properties properties) {
+	protected ChorusFlowerBlock(ChorusPlantBlock chorusPlantBlock, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.plant = chorusPlantBlock;
 		this.registerDefaultState(this.stateDefinition.any().setValue(AGE, Integer.valueOf(0)));
@@ -29,69 +31,77 @@ public class ChorusFlowerBlock extends Block {
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if (!blockState.canSurvive(serverLevel, blockPos)) {
 			serverLevel.destroyBlock(blockPos, true);
-		} else {
-			BlockPos blockPos2 = blockPos.above();
-			if (serverLevel.isEmptyBlock(blockPos2) && blockPos2.getY() < 256) {
-				int i = (Integer)blockState.getValue(AGE);
-				if (i < 5) {
-					boolean bl = false;
-					boolean bl2 = false;
-					BlockState blockState2 = serverLevel.getBlockState(blockPos.below());
-					Block block = blockState2.getBlock();
-					if (block == Blocks.END_STONE) {
-						bl = true;
-					} else if (block == this.plant) {
-						int j = 1;
+		}
+	}
 
-						for (int k = 0; k < 4; k++) {
-							Block block2 = serverLevel.getBlockState(blockPos.below(j + 1)).getBlock();
-							if (block2 != this.plant) {
-								if (block2 == Blocks.END_STONE) {
-									bl2 = true;
-								}
-								break;
+	@Override
+	public boolean isRandomlyTicking(BlockState blockState) {
+		return (Integer)blockState.getValue(AGE) < 5;
+	}
+
+	@Override
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		BlockPos blockPos2 = blockPos.above();
+		if (serverLevel.isEmptyBlock(blockPos2) && blockPos2.getY() < 256) {
+			int i = (Integer)blockState.getValue(AGE);
+			if (i < 5) {
+				boolean bl = false;
+				boolean bl2 = false;
+				BlockState blockState2 = serverLevel.getBlockState(blockPos.below());
+				Block block = blockState2.getBlock();
+				if (block == Blocks.END_STONE) {
+					bl = true;
+				} else if (block == this.plant) {
+					int j = 1;
+
+					for (int k = 0; k < 4; k++) {
+						Block block2 = serverLevel.getBlockState(blockPos.below(j + 1)).getBlock();
+						if (block2 != this.plant) {
+							if (block2 == Blocks.END_STONE) {
+								bl2 = true;
 							}
-
-							j++;
+							break;
 						}
 
-						if (j < 2 || j <= random.nextInt(bl2 ? 5 : 4)) {
-							bl = true;
-						}
-					} else if (blockState2.isAir()) {
-						bl = true;
+						j++;
 					}
 
-					if (bl && allNeighborsEmpty(serverLevel, blockPos2, null) && serverLevel.isEmptyBlock(blockPos.above(2))) {
+					if (j < 2 || j <= random.nextInt(bl2 ? 5 : 4)) {
+						bl = true;
+					}
+				} else if (blockState2.isAir()) {
+					bl = true;
+				}
+
+				if (bl && allNeighborsEmpty(serverLevel, blockPos2, null) && serverLevel.isEmptyBlock(blockPos.above(2))) {
+					serverLevel.setBlock(blockPos, this.plant.getStateForPlacement(serverLevel, blockPos), 2);
+					this.placeGrownFlower(serverLevel, blockPos2, i);
+				} else if (i < 4) {
+					int j = random.nextInt(4);
+					if (bl2) {
+						j++;
+					}
+
+					boolean bl3 = false;
+
+					for (int l = 0; l < j; l++) {
+						Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
+						BlockPos blockPos3 = blockPos.relative(direction);
+						if (serverLevel.isEmptyBlock(blockPos3)
+							&& serverLevel.isEmptyBlock(blockPos3.below())
+							&& allNeighborsEmpty(serverLevel, blockPos3, direction.getOpposite())) {
+							this.placeGrownFlower(serverLevel, blockPos3, i + 1);
+							bl3 = true;
+						}
+					}
+
+					if (bl3) {
 						serverLevel.setBlock(blockPos, this.plant.getStateForPlacement(serverLevel, blockPos), 2);
-						this.placeGrownFlower(serverLevel, blockPos2, i);
-					} else if (i < 4) {
-						int j = random.nextInt(4);
-						if (bl2) {
-							j++;
-						}
-
-						boolean bl3 = false;
-
-						for (int l = 0; l < j; l++) {
-							Direction direction = Direction.Plane.HORIZONTAL.getRandomDirection(random);
-							BlockPos blockPos3 = blockPos.relative(direction);
-							if (serverLevel.isEmptyBlock(blockPos3)
-								&& serverLevel.isEmptyBlock(blockPos3.below())
-								&& allNeighborsEmpty(serverLevel, blockPos3, direction.getOpposite())) {
-								this.placeGrownFlower(serverLevel, blockPos3, i + 1);
-								bl3 = true;
-							}
-						}
-
-						if (bl3) {
-							serverLevel.setBlock(blockPos, this.plant.getStateForPlacement(serverLevel, blockPos), 2);
-						} else {
-							this.placeDeadFlower(serverLevel, blockPos);
-						}
 					} else {
 						this.placeDeadFlower(serverLevel, blockPos);
 					}
+				} else {
+					this.placeDeadFlower(serverLevel, blockPos);
 				}
 			}
 		}
@@ -131,8 +141,7 @@ public class ChorusFlowerBlock extends Block {
 	@Override
 	public boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		BlockState blockState2 = levelReader.getBlockState(blockPos.below());
-		Block block = blockState2.getBlock();
-		if (block != this.plant && block != Blocks.END_STONE) {
+		if (blockState2.getBlock() != this.plant && !blockState2.is(Blocks.END_STONE)) {
 			if (!blockState2.isAir()) {
 				return false;
 			} else {
@@ -140,7 +149,7 @@ public class ChorusFlowerBlock extends Block {
 
 				for (Direction direction : Direction.Plane.HORIZONTAL) {
 					BlockState blockState3 = levelReader.getBlockState(blockPos.relative(direction));
-					if (blockState3.getBlock() == this.plant) {
+					if (blockState3.is(this.plant)) {
 						if (bl) {
 							return false;
 						}
@@ -216,8 +225,10 @@ public class ChorusFlowerBlock extends Block {
 	}
 
 	@Override
-	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Entity entity) {
-		BlockPos blockPos = blockHitResult.getBlockPos();
-		level.destroyBlock(blockPos, true, entity);
+	public void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
+		if (projectile.getType().is(EntityTypeTags.IMPACT_PROJECTILES)) {
+			BlockPos blockPos = blockHitResult.getBlockPos();
+			level.destroyBlock(blockPos, true, projectile);
+		}
 	}
 }

@@ -5,8 +5,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
@@ -54,7 +54,7 @@ public class MoveControl {
 
 	public void tick() {
 		if (this.operation == MoveControl.Operation.STRAFE) {
-			float f = (float)this.mob.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue();
+			float f = (float)this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED);
 			float g = (float)this.speedModifier * f;
 			float h = this.strafeForwards;
 			float i = this.strafeRight;
@@ -70,18 +70,9 @@ public class MoveControl {
 			float l = Mth.cos(this.mob.yRot * (float) (Math.PI / 180.0));
 			float m = h * l - i * k;
 			float n = i * l + h * k;
-			PathNavigation pathNavigation = this.mob.getNavigation();
-			if (pathNavigation != null) {
-				NodeEvaluator nodeEvaluator = pathNavigation.getNodeEvaluator();
-				if (nodeEvaluator != null
-					&& nodeEvaluator.getBlockPathType(
-							this.mob.level, Mth.floor(this.mob.getX() + (double)m), Mth.floor(this.mob.getY()), Mth.floor(this.mob.getZ() + (double)n)
-						)
-						!= BlockPathTypes.WALKABLE) {
-					this.strafeForwards = 1.0F;
-					this.strafeRight = 0.0F;
-					g = f;
-				}
+			if (!this.isWalkable(m, n)) {
+				this.strafeForwards = 1.0F;
+				this.strafeRight = 0.0F;
 			}
 
 			this.mob.setSpeed(g);
@@ -101,8 +92,8 @@ public class MoveControl {
 
 			float n = (float)(Mth.atan2(e, d) * 180.0F / (float)Math.PI) - 90.0F;
 			this.mob.yRot = this.rotlerp(this.mob.yRot, n, 90.0F);
-			this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue()));
-			BlockPos blockPos = new BlockPos(this.mob);
+			this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED)));
+			BlockPos blockPos = this.mob.blockPosition();
 			BlockState blockState = this.mob.level.getBlockState(blockPos);
 			Block block = blockState.getBlock();
 			VoxelShape voxelShape = blockState.getCollisionShape(this.mob.level, blockPos);
@@ -115,13 +106,29 @@ public class MoveControl {
 				this.operation = MoveControl.Operation.JUMPING;
 			}
 		} else if (this.operation == MoveControl.Operation.JUMPING) {
-			this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue()));
-			if (this.mob.onGround) {
+			this.mob.setSpeed((float)(this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED)));
+			if (this.mob.isOnGround()) {
 				this.operation = MoveControl.Operation.WAIT;
 			}
 		} else {
 			this.mob.setZza(0.0F);
 		}
+	}
+
+	private boolean isWalkable(float f, float g) {
+		PathNavigation pathNavigation = this.mob.getNavigation();
+		if (pathNavigation != null) {
+			NodeEvaluator nodeEvaluator = pathNavigation.getNodeEvaluator();
+			if (nodeEvaluator != null
+				&& nodeEvaluator.getBlockPathType(
+						this.mob.level, Mth.floor(this.mob.getX() + (double)f), Mth.floor(this.mob.getY()), Mth.floor(this.mob.getZ() + (double)g)
+					)
+					!= BlockPathTypes.WALKABLE) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	protected float rotlerp(float f, float g, float h) {

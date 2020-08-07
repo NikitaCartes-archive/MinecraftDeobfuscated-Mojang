@@ -2,6 +2,7 @@ package net.minecraft.world.entity.animal;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -11,7 +12,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.FollowParentGoal;
@@ -20,7 +24,6 @@ import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -62,11 +65,8 @@ public class Chicken extends Animal {
 		return this.isBaby() ? entityDimensions.height * 0.85F : entityDimensions.height * 0.92F;
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(4.0);
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 4.0).add(Attributes.MOVEMENT_SPEED, 0.25);
 	}
 
 	@Override
@@ -119,8 +119,8 @@ public class Chicken extends Animal {
 		this.playSound(SoundEvents.CHICKEN_STEP, 0.15F, 1.0F);
 	}
 
-	public Chicken getBreedOffspring(AgableMob agableMob) {
-		return EntityType.CHICKEN.create(this.level);
+	public Chicken getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+		return EntityType.CHICKEN.create(serverLevel);
 	}
 
 	@Override
@@ -151,7 +151,7 @@ public class Chicken extends Animal {
 
 	@Override
 	public boolean removeWhenFarAway(double d) {
-		return this.isChickenJockey() && !this.isVehicle();
+		return this.isChickenJockey();
 	}
 
 	@Override
@@ -161,7 +161,7 @@ public class Chicken extends Animal {
 		float g = Mth.cos(this.yBodyRot * (float) (Math.PI / 180.0));
 		float h = 0.1F;
 		float i = 0.0F;
-		entity.setPos(this.getX() + (double)(0.1F * f), this.getY(0.5) + entity.getRidingHeight() + 0.0, this.getZ() - (double)(0.1F * g));
+		entity.setPos(this.getX() + (double)(0.1F * f), this.getY(0.5) + entity.getMyRidingOffset() + 0.0, this.getZ() - (double)(0.1F * g));
 		if (entity instanceof LivingEntity) {
 			((LivingEntity)entity).yBodyRot = this.yBodyRot;
 		}

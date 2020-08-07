@@ -14,35 +14,35 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
 public class MoveToSkySeeingSpot extends Behavior<LivingEntity> {
-	private final float speed;
+	private final float speedModifier;
 
 	public MoveToSkySeeingSpot(float f) {
 		super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT));
-		this.speed = f;
+		this.speedModifier = f;
 	}
 
 	@Override
 	protected void start(ServerLevel serverLevel, LivingEntity livingEntity, long l) {
 		Optional<Vec3> optional = Optional.ofNullable(this.getOutdoorPosition(serverLevel, livingEntity));
 		if (optional.isPresent()) {
-			livingEntity.getBrain().setMemory(MemoryModuleType.WALK_TARGET, optional.map(vec3 -> new WalkTarget(vec3, this.speed, 0)));
+			livingEntity.getBrain().setMemory(MemoryModuleType.WALK_TARGET, optional.map(vec3 -> new WalkTarget(vec3, this.speedModifier, 0)));
 		}
 	}
 
 	@Override
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity) {
-		return !serverLevel.canSeeSky(new BlockPos(livingEntity));
+		return !serverLevel.canSeeSky(livingEntity.blockPosition());
 	}
 
 	@Nullable
 	private Vec3 getOutdoorPosition(ServerLevel serverLevel, LivingEntity livingEntity) {
 		Random random = livingEntity.getRandom();
-		BlockPos blockPos = new BlockPos(livingEntity);
+		BlockPos blockPos = livingEntity.blockPosition();
 
 		for (int i = 0; i < 10; i++) {
 			BlockPos blockPos2 = blockPos.offset(random.nextInt(20) - 10, random.nextInt(6) - 3, random.nextInt(20) - 10);
 			if (hasNoBlocksAbove(serverLevel, livingEntity, blockPos2)) {
-				return new Vec3(blockPos2);
+				return Vec3.atBottomCenterOf(blockPos2);
 			}
 		}
 

@@ -33,13 +33,14 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		Camera camera = this.minecraft.gameRenderer.getMainCamera();
 		LevelAccessor levelAccessor = this.minecraft.level;
-		DimensionType dimensionType = levelAccessor.getDimension().getType();
+		DimensionType dimensionType = levelAccessor.dimensionType();
 		BlockPos blockPos = new BlockPos(camera.getPosition().x, 0.0, camera.getPosition().z);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());
 		if (this.postMainBoxes.containsKey(dimensionType)) {
 			for (BoundingBox boundingBox : ((Map)this.postMainBoxes.get(dimensionType)).values()) {
 				if (blockPos.closerThan(boundingBox.getCenter(), 500.0)) {
 					LevelRenderer.renderLineBox(
+						poseStack,
 						vertexConsumer,
 						(double)boundingBox.x0 - d,
 						(double)boundingBox.y0 - e,
@@ -47,6 +48,9 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 						(double)(boundingBox.x1 + 1) - d,
 						(double)(boundingBox.y1 + 1) - e,
 						(double)(boundingBox.z1 + 1) - f,
+						1.0F,
+						1.0F,
+						1.0F,
 						1.0F,
 						1.0F,
 						1.0F,
@@ -64,6 +68,7 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 				if (blockPos.closerThan(boundingBox2.getCenter(), 500.0)) {
 					if (boolean_) {
 						LevelRenderer.renderLineBox(
+							poseStack,
 							vertexConsumer,
 							(double)boundingBox2.x0 - d,
 							(double)boundingBox2.y0 - e,
@@ -74,10 +79,14 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 							0.0F,
 							1.0F,
 							0.0F,
-							1.0F
+							1.0F,
+							0.0F,
+							1.0F,
+							0.0F
 						);
 					} else {
 						LevelRenderer.renderLineBox(
+							poseStack,
 							vertexConsumer,
 							(double)boundingBox2.x0 - d,
 							(double)boundingBox2.y0 - e,
@@ -88,6 +97,9 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 							0.0F,
 							0.0F,
 							1.0F,
+							1.0F,
+							0.0F,
+							0.0F,
 							1.0F
 						);
 					}

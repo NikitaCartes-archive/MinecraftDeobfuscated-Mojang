@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.IronGolem;
 
 @Environment(EnvType.CLIENT)
@@ -49,8 +50,8 @@ public class IronGolemModel<T extends IronGolem> extends ListModel<T> {
 	public void setupAnim(T ironGolem, float f, float g, float h, float i, float j) {
 		this.head.yRot = i * (float) (Math.PI / 180.0);
 		this.head.xRot = j * (float) (Math.PI / 180.0);
-		this.leg0.xRot = -1.5F * this.triangleWave(f, 13.0F) * g;
-		this.leg1.xRot = 1.5F * this.triangleWave(f, 13.0F) * g;
+		this.leg0.xRot = -1.5F * Mth.triangleWave(f, 13.0F) * g;
+		this.leg1.xRot = 1.5F * Mth.triangleWave(f, 13.0F) * g;
 		this.leg0.yRot = 0.0F;
 		this.leg1.yRot = 0.0F;
 	}
@@ -58,22 +59,18 @@ public class IronGolemModel<T extends IronGolem> extends ListModel<T> {
 	public void prepareMobModel(T ironGolem, float f, float g, float h) {
 		int i = ironGolem.getAttackAnimationTick();
 		if (i > 0) {
-			this.arm0.xRot = -2.0F + 1.5F * this.triangleWave((float)i - h, 10.0F);
-			this.arm1.xRot = -2.0F + 1.5F * this.triangleWave((float)i - h, 10.0F);
+			this.arm0.xRot = -2.0F + 1.5F * Mth.triangleWave((float)i - h, 10.0F);
+			this.arm1.xRot = -2.0F + 1.5F * Mth.triangleWave((float)i - h, 10.0F);
 		} else {
 			int j = ironGolem.getOfferFlowerTick();
 			if (j > 0) {
-				this.arm0.xRot = -0.8F + 0.025F * this.triangleWave((float)j, 70.0F);
+				this.arm0.xRot = -0.8F + 0.025F * Mth.triangleWave((float)j, 70.0F);
 				this.arm1.xRot = 0.0F;
 			} else {
-				this.arm0.xRot = (-0.2F + 1.5F * this.triangleWave(f, 13.0F)) * g;
-				this.arm1.xRot = (-0.2F - 1.5F * this.triangleWave(f, 13.0F)) * g;
+				this.arm0.xRot = (-0.2F + 1.5F * Mth.triangleWave(f, 13.0F)) * g;
+				this.arm1.xRot = (-0.2F - 1.5F * Mth.triangleWave(f, 13.0F)) * g;
 			}
 		}
-	}
-
-	private float triangleWave(float f, float g) {
-		return (Math.abs(f % g - g * 0.5F) - g * 0.25F) / (g * 0.25F);
 	}
 
 	public ModelPart getFlowerHoldingArm() {

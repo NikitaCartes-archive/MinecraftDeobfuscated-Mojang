@@ -1,5 +1,6 @@
 package net.minecraft.world.level;
 
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -12,7 +13,7 @@ import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraft.world.level.dimension.Dimension;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 
@@ -33,6 +34,16 @@ public interface LevelReader extends BlockAndTintGetter, CollisionGetter, BiomeM
 		return this.getBiomeManager().getBiome(blockPos);
 	}
 
+	default Stream<BlockState> getBlockStatesIfLoaded(AABB aABB) {
+		int i = Mth.floor(aABB.minX);
+		int j = Mth.floor(aABB.maxX);
+		int k = Mth.floor(aABB.minY);
+		int l = Mth.floor(aABB.maxY);
+		int m = Mth.floor(aABB.minZ);
+		int n = Mth.floor(aABB.maxZ);
+		return this.hasChunksAt(i, k, m, j, l, n) ? this.getBlockStates(aABB) : Stream.empty();
+	}
+
 	@Environment(EnvType.CLIENT)
 	@Override
 	default int getBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
@@ -49,9 +60,10 @@ public interface LevelReader extends BlockAndTintGetter, CollisionGetter, BiomeM
 
 	boolean isClientSide();
 
+	@Deprecated
 	int getSeaLevel();
 
-	Dimension getDimension();
+	DimensionType dimensionType();
 
 	default BlockPos getHeightmapPos(Heightmap.Types types, BlockPos blockPos) {
 		return new BlockPos(blockPos.getX(), this.getHeight(types, blockPos.getX(), blockPos.getZ()), blockPos.getZ());
@@ -83,7 +95,7 @@ public interface LevelReader extends BlockAndTintGetter, CollisionGetter, BiomeM
 
 	@Deprecated
 	default float getBrightness(BlockPos blockPos) {
-		return this.getDimension().getBrightness(this.getMaxLocalRawBrightness(blockPos));
+		return this.dimensionType().brightness(this.getMaxLocalRawBrightness(blockPos));
 	}
 
 	default int getDirectSignal(BlockPos blockPos, Direction direction) {
@@ -119,21 +131,20 @@ public interface LevelReader extends BlockAndTintGetter, CollisionGetter, BiomeM
 		int l = Mth.ceil(aABB.maxY);
 		int m = Mth.floor(aABB.minZ);
 		int n = Mth.ceil(aABB.maxZ);
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-			for (int o = i; o < j; o++) {
-				for (int p = k; p < l; p++) {
-					for (int q = m; q < n; q++) {
-						BlockState blockState = this.getBlockState(pooledMutableBlockPos.set(o, p, q));
-						if (!blockState.getFluidState().isEmpty()) {
-							return true;
-						}
+		for (int o = i; o < j; o++) {
+			for (int p = k; p < l; p++) {
+				for (int q = m; q < n; q++) {
+					BlockState blockState = this.getBlockState(mutableBlockPos.set(o, p, q));
+					if (!blockState.getFluidState().isEmpty()) {
+						return true;
 					}
 				}
 			}
-
-			return false;
 		}
+
+		return false;
 	}
 
 	default int getMaxLocalRawBrightness(BlockPos blockPos) {

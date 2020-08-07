@@ -6,24 +6,37 @@ import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.MineshaftConfiguration;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
-public abstract class StructureStart {
-	public static final StructureStart INVALID_START = new StructureStart(Feature.MINESHAFT, 0, 0, BoundingBox.getUnknownBox(), 0, 0L) {
-		@Override
-		public void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome) {
+public abstract class StructureStart<C extends FeatureConfiguration> {
+	public static final StructureStart<?> INVALID_START = new StructureStart<MineshaftConfiguration>(
+		StructureFeature.MINESHAFT, 0, 0, BoundingBox.getUnknownBox(), 0, 0L
+	) {
+		public void generatePieces(
+			RegistryAccess registryAccess,
+			ChunkGenerator chunkGenerator,
+			StructureManager structureManager,
+			int i,
+			int j,
+			Biome biome,
+			MineshaftConfiguration mineshaftConfiguration
+		) {
 		}
 	};
-	private final StructureFeature<?> feature;
+	private final StructureFeature<C> feature;
 	protected final List<StructurePiece> pieces = Lists.<StructurePiece>newArrayList();
 	protected BoundingBox boundingBox;
 	private final int chunkX;
@@ -31,7 +44,7 @@ public abstract class StructureStart {
 	private int references;
 	protected final WorldgenRandom random;
 
-	public StructureStart(StructureFeature<?> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
+	public StructureStart(StructureFeature<C> structureFeature, int i, int j, BoundingBox boundingBox, int k, long l) {
 		this.feature = structureFeature;
 		this.chunkX = i;
 		this.chunkZ = j;
@@ -41,7 +54,9 @@ public abstract class StructureStart {
 		this.boundingBox = boundingBox;
 	}
 
-	public abstract void generatePieces(ChunkGenerator<?> chunkGenerator, StructureManager structureManager, int i, int j, Biome biome);
+	public abstract void generatePieces(
+		RegistryAccess registryAccess, ChunkGenerator chunkGenerator, StructureManager structureManager, int i, int j, Biome biome, C featureConfiguration
+	);
 
 	public BoundingBox getBoundingBox() {
 		return this.boundingBox;
@@ -51,18 +66,31 @@ public abstract class StructureStart {
 		return this.pieces;
 	}
 
-	public void postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+	public void placeInChunk(
+		WorldGenLevel worldGenLevel,
+		StructureFeatureManager structureFeatureManager,
+		ChunkGenerator chunkGenerator,
+		Random random,
+		BoundingBox boundingBox,
+		ChunkPos chunkPos
+	) {
 		synchronized (this.pieces) {
-			Iterator<StructurePiece> iterator = this.pieces.iterator();
+			if (!this.pieces.isEmpty()) {
+				BoundingBox boundingBox2 = ((StructurePiece)this.pieces.get(0)).boundingBox;
+				Vec3i vec3i = boundingBox2.getCenter();
+				BlockPos blockPos = new BlockPos(vec3i.getX(), boundingBox2.y0, vec3i.getZ());
+				Iterator<StructurePiece> iterator = this.pieces.iterator();
 
-			while (iterator.hasNext()) {
-				StructurePiece structurePiece = (StructurePiece)iterator.next();
-				if (structurePiece.getBoundingBox().intersects(boundingBox) && !structurePiece.postProcess(levelAccessor, chunkGenerator, random, boundingBox, chunkPos)) {
-					iterator.remove();
+				while (iterator.hasNext()) {
+					StructurePiece structurePiece = (StructurePiece)iterator.next();
+					if (structurePiece.getBoundingBox().intersects(boundingBox)
+						&& !structurePiece.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos)) {
+						iterator.remove();
+					}
 				}
-			}
 
-			this.calculateBoundingBox();
+				this.calculateBoundingBox();
+			}
 		}
 	}
 

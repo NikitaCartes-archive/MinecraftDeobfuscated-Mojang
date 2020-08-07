@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.List;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -12,6 +11,8 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 
 public class ElderGuardian extends Guardian {
@@ -25,12 +26,8 @@ public class ElderGuardian extends Guardian {
 		}
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.3F);
-		this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(8.0);
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(80.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Guardian.createAttributes().add(Attributes.MOVEMENT_SPEED, 0.3F).add(Attributes.ATTACK_DAMAGE, 8.0).add(Attributes.MAX_HEALTH, 80.0);
 	}
 
 	@Override
@@ -72,14 +69,14 @@ public class ElderGuardian extends Guardian {
 
 			for (ServerPlayer serverPlayer : list) {
 				if (!serverPlayer.hasEffect(mobEffect) || serverPlayer.getEffect(mobEffect).getAmplifier() < 2 || serverPlayer.getEffect(mobEffect).getDuration() < 1200) {
-					serverPlayer.connection.send(new ClientboundGameEventPacket(10, 0.0F));
+					serverPlayer.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.GUARDIAN_ELDER_EFFECT, this.isSilent() ? 0.0F : 1.0F));
 					serverPlayer.addEffect(new MobEffectInstance(mobEffect, 6000, 2));
 				}
 			}
 		}
 
 		if (!this.hasRestriction()) {
-			this.restrictTo(new BlockPos(this), 16);
+			this.restrictTo(this.blockPosition(), 16);
 		}
 	}
 }

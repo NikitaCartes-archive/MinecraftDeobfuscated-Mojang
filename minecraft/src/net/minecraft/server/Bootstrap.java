@@ -5,17 +5,21 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
 import net.minecraft.SharedConstants;
+import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
 import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraft.core.Registry;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.locale.Language;
+import net.minecraft.tags.StaticTags;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.FireBlock;
@@ -30,7 +34,7 @@ public class Bootstrap {
 	public static void bootStrap() {
 		if (!isBootstrapped) {
 			isBootstrapped = true;
-			if (Registry.REGISTRY.isEmpty()) {
+			if (Registry.REGISTRY.keySet().isEmpty()) {
 				throw new IllegalStateException("Unable to load registries");
 			} else {
 				FireBlock.bootStrap();
@@ -42,31 +46,45 @@ public class Bootstrap {
 					EntitySelectorOptions.bootStrap();
 					DispenseItemBehavior.bootStrap();
 					ArgumentTypes.bootStrap();
+					StaticTags.bootStrap();
 					wrapStreams();
 				}
 			}
 		}
 	}
 
-	private static <T> void checkTranslations(Registry<T> registry, Function<T, String> function, Set<String> set) {
+	private static <T> void checkTranslations(Iterable<T> iterable, Function<T, String> function, Set<String> set) {
 		Language language = Language.getInstance();
-		registry.iterator().forEachRemaining(object -> {
+		iterable.forEach(object -> {
 			String string = (String)function.apply(object);
-			if (!language.exists(string)) {
+			if (!language.has(string)) {
 				set.add(string);
+			}
+		});
+	}
+
+	private static void checkGameruleTranslations(Set<String> set) {
+		final Language language = Language.getInstance();
+		GameRules.visitGameRuleTypes(new GameRules.GameRuleTypeVisitor() {
+			@Override
+			public <T extends GameRules.Value<T>> void visit(GameRules.Key<T> key, GameRules.Type<T> type) {
+				if (!language.has(key.getDescriptionId())) {
+					set.add(key.getId());
+				}
 			}
 		});
 	}
 
 	public static Set<String> getMissingTranslations() {
 		Set<String> set = new TreeSet();
+		checkTranslations(Registry.ATTRIBUTE, Attribute::getDescriptionId, set);
 		checkTranslations(Registry.ENTITY_TYPE, EntityType::getDescriptionId, set);
 		checkTranslations(Registry.MOB_EFFECT, MobEffect::getDescriptionId, set);
 		checkTranslations(Registry.ITEM, Item::getDescriptionId, set);
 		checkTranslations(Registry.ENCHANTMENT, Enchantment::getDescriptionId, set);
-		checkTranslations(Registry.BIOME, Biome::getDescriptionId, set);
 		checkTranslations(Registry.BLOCK, Block::getDescriptionId, set);
 		checkTranslations(Registry.CUSTOM_STAT, resourceLocation -> "stat." + resourceLocation.toString().replace(':', '.'), set);
+		checkGameruleTranslations(set);
 		return set;
 	}
 
@@ -76,7 +94,10 @@ public class Bootstrap {
 		} else {
 			if (SharedConstants.IS_RUNNING_IN_IDE) {
 				getMissingTranslations().forEach(string -> LOGGER.error("Missing translations: " + string));
+				Commands.validate();
 			}
+
+			DefaultAttributes.validate();
 		}
 	}
 

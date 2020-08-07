@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 public class DetectedVersion implements GameVersion {
 	private static final Logger LOGGER = LogManager.getLogger();
+	public static final GameVersion BUILT_IN = new DetectedVersion();
 	private final String id;
 	private final String name;
 	private final boolean stable;
@@ -24,18 +25,18 @@ public class DetectedVersion implements GameVersion {
 	private final Date buildTime;
 	private final String releaseTarget;
 
-	public DetectedVersion() {
+	private DetectedVersion() {
 		this.id = UUID.randomUUID().toString().replaceAll("-", "");
-		this.name = "1.15.2 - Combat Test";
+		this.name = "1.16.2 - Combat Test 6";
 		this.stable = true;
-		this.worldVersion = 2321;
-		this.protocolVersion = 601;
+		this.worldVersion = 2701;
+		this.protocolVersion = 801;
 		this.packVersion = 5;
 		this.buildTime = new Date();
-		this.releaseTarget = "1.15.2";
+		this.releaseTarget = "1.16.2";
 	}
 
-	protected DetectedVersion(JsonObject jsonObject) {
+	private DetectedVersion(JsonObject jsonObject) {
 		this.id = GsonHelper.getAsString(jsonObject, "id");
 		this.name = GsonHelper.getAsString(jsonObject, "name");
 		this.releaseTarget = GsonHelper.getAsString(jsonObject, "release_target");
@@ -55,7 +56,7 @@ public class DetectedVersion implements GameVersion {
 			try {
 				if (inputStream == null) {
 					LOGGER.warn("Missing version information!");
-					return new DetectedVersion();
+					return BUILT_IN;
 				}
 
 				InputStreamReader inputStreamReader = new InputStreamReader(inputStream);

@@ -13,10 +13,17 @@ public class Activity {
 	public static final Activity RAID = register("raid");
 	public static final Activity PRE_RAID = register("pre_raid");
 	public static final Activity HIDE = register("hide");
+	public static final Activity FIGHT = register("fight");
+	public static final Activity CELEBRATE = register("celebrate");
+	public static final Activity ADMIRE_ITEM = register("admire_item");
+	public static final Activity AVOID = register("avoid");
+	public static final Activity RIDE = register("ride");
 	private final String name;
+	private final int hashCode;
 
 	private Activity(String string) {
 		this.name = string;
+		this.hashCode = string.hashCode();
 	}
 
 	public String getName() {
@@ -25,6 +32,21 @@ public class Activity {
 
 	private static Activity register(String string) {
 		return Registry.register(Registry.ACTIVITY, string, new Activity(string));
+	}
+
+	public boolean equals(Object object) {
+		if (this == object) {
+			return true;
+		} else if (object != null && this.getClass() == object.getClass()) {
+			Activity activity = (Activity)object;
+			return this.name.equals(activity.name);
+		} else {
+			return false;
+		}
+	}
+
+	public int hashCode() {
+		return this.hashCode;
 	}
 
 	public String toString() {

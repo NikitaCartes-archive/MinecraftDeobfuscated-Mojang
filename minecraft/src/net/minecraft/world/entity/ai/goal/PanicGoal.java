@@ -16,6 +16,7 @@ public class PanicGoal extends Goal {
 	protected double posX;
 	protected double posY;
 	protected double posZ;
+	protected boolean isRunning;
 
 	public PanicGoal(PathfinderMob pathfinderMob, double d) {
 		this.mob = pathfinderMob;
@@ -54,9 +55,19 @@ public class PanicGoal extends Goal {
 		}
 	}
 
+	public boolean isRunning() {
+		return this.isRunning;
+	}
+
 	@Override
 	public void start() {
 		this.mob.getNavigation().moveTo(this.posX, this.posY, this.posZ, this.speedModifier);
+		this.isRunning = true;
+	}
+
+	@Override
+	public void stop() {
+		this.isRunning = false;
 	}
 
 	@Override
@@ -66,7 +77,7 @@ public class PanicGoal extends Goal {
 
 	@Nullable
 	protected BlockPos lookForWater(BlockGetter blockGetter, Entity entity, int i, int j) {
-		BlockPos blockPos = new BlockPos(entity);
+		BlockPos blockPos = entity.blockPosition();
 		int k = blockPos.getX();
 		int l = blockPos.getY();
 		int m = blockPos.getZ();

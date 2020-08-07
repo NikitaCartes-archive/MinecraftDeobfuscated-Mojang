@@ -56,6 +56,10 @@ public class AABB {
 		);
 	}
 
+	public static AABB unitCubeFromLowerCorner(Vec3 vec3) {
+		return new AABB(vec3.x, vec3.y, vec3.z, vec3.x + 1.0, vec3.y + 1.0, vec3.z + 1.0);
+	}
+
 	public double min(Direction.Axis axis) {
 		return axis.choose(this.minX, this.minY, this.minZ);
 	}
@@ -350,7 +354,7 @@ public class AABB {
 	}
 
 	public String toString() {
-		return "box[" + this.minX + ", " + this.minY + ", " + this.minZ + "] -> [" + this.maxX + ", " + this.maxY + ", " + this.maxZ + "]";
+		return "AABB[" + this.minX + ", " + this.minY + ", " + this.minZ + "] -> [" + this.maxX + ", " + this.maxY + ", " + this.maxZ + "]";
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -365,5 +369,9 @@ public class AABB {
 
 	public Vec3 getCenter() {
 		return new Vec3(Mth.lerp(0.5, this.minX, this.maxX), Mth.lerp(0.5, this.minY, this.maxY), Mth.lerp(0.5, this.minZ, this.maxZ));
+	}
+
+	public static AABB ofSize(double d, double e, double f) {
+		return new AABB(-d / 2.0, -e / 2.0, -f / 2.0, d / 2.0, e / 2.0, f / 2.0);
 	}
 }

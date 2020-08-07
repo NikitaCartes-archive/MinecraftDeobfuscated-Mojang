@@ -5,7 +5,10 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,8 +20,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.util.FormattedCharSequence;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,10 +34,12 @@ public class WinScreen extends Screen {
 	private static final ResourceLocation LOGO_LOCATION = new ResourceLocation("textures/gui/title/minecraft.png");
 	private static final ResourceLocation EDITION_LOCATION = new ResourceLocation("textures/gui/title/edition.png");
 	private static final ResourceLocation VIGNETTE_LOCATION = new ResourceLocation("textures/misc/vignette.png");
+	private static final String OBFUSCATE_TOKEN = "" + ChatFormatting.WHITE + ChatFormatting.OBFUSCATED + ChatFormatting.GREEN + ChatFormatting.AQUA;
 	private final boolean poem;
 	private final Runnable onFinished;
 	private float time;
-	private List<String> lines;
+	private List<FormattedCharSequence> lines;
+	private IntSet centeredLines;
 	private int totalScrollLength;
 	private float scrollSpeed = 0.5F;
 
@@ -68,11 +75,11 @@ public class WinScreen extends Screen {
 	@Override
 	protected void init() {
 		if (this.lines == null) {
-			this.lines = Lists.<String>newArrayList();
+			this.lines = Lists.<FormattedCharSequence>newArrayList();
+			this.centeredLines = new IntOpenHashSet();
 			Resource resource = null;
 
 			try {
-				String string = "" + ChatFormatting.WHITE + ChatFormatting.OBFUSCATED + ChatFormatting.GREEN + ChatFormatting.AQUA;
 				int i = 274;
 				if (this.poem) {
 					resource = this.minecraft.getResourceManager().getResource(new ResourceLocation("texts/end.txt"));
@@ -80,43 +87,58 @@ public class WinScreen extends Screen {
 					BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 					Random random = new Random(8124371L);
 
-					String string2;
-					while ((string2 = bufferedReader.readLine()) != null) {
-						string2 = string2.replaceAll("PLAYERNAME", this.minecraft.getUser().getName());
+					String string;
+					while ((string = bufferedReader.readLine()) != null) {
+						string = string.replaceAll("PLAYERNAME", this.minecraft.getUser().getName());
 
-						while (string2.contains(string)) {
-							int j = string2.indexOf(string);
-							String string3 = string2.substring(0, j);
-							String string4 = string2.substring(j + string.length());
-							string2 = string3 + ChatFormatting.WHITE + ChatFormatting.OBFUSCATED + "XXXXXXXX".substring(0, random.nextInt(4) + 3) + string4;
+						int j;
+						while ((j = string.indexOf(OBFUSCATE_TOKEN)) != -1) {
+							String string2 = string.substring(0, j);
+							String string3 = string.substring(j + OBFUSCATE_TOKEN.length());
+							string = string2 + ChatFormatting.WHITE + ChatFormatting.OBFUSCATED + "XXXXXXXX".substring(0, random.nextInt(4) + 3) + string3;
 						}
 
-						this.lines.addAll(this.minecraft.font.split(string2, 274));
-						this.lines.add("");
+						this.lines.addAll(this.minecraft.font.split(new TextComponent(string), 274));
+						this.lines.add(FormattedCharSequence.EMPTY);
 					}
 
 					inputStream.close();
 
 					for (int j = 0; j < 8; j++) {
-						this.lines.add("");
+						this.lines.add(FormattedCharSequence.EMPTY);
 					}
 				}
 
 				InputStream inputStream = this.minecraft.getResourceManager().getResource(new ResourceLocation("texts/credits.txt")).getInputStream();
 				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-				String string5;
-				while ((string5 = bufferedReader.readLine()) != null) {
-					string5 = string5.replaceAll("PLAYERNAME", this.minecraft.getUser().getName());
-					string5 = string5.replaceAll("\t", "    ");
-					this.lines.addAll(this.minecraft.font.split(string5, 274));
-					this.lines.add("");
+				String string4;
+				while ((string4 = bufferedReader.readLine()) != null) {
+					string4 = string4.replaceAll("PLAYERNAME", this.minecraft.getUser().getName());
+					string4 = string4.replaceAll("\t", "    ");
+					boolean bl;
+					if (string4.startsWith("[C]")) {
+						string4 = string4.substring(3);
+						bl = true;
+					} else {
+						bl = false;
+					}
+
+					for (FormattedCharSequence formattedCharSequence : this.minecraft.font.split(new TextComponent(string4), 274)) {
+						if (bl) {
+							this.centeredLines.add(this.lines.size());
+						}
+
+						this.lines.add(formattedCharSequence);
+					}
+
+					this.lines.add(FormattedCharSequence.EMPTY);
 				}
 
 				inputStream.close();
 				this.totalScrollLength = this.lines.size() * 12;
-			} catch (Exception var14) {
-				LOGGER.error("Couldn't load credits", (Throwable)var14);
+			} catch (Exception var13) {
+				LOGGER.error("Couldn't load credits", (Throwable)var13);
 			} finally {
 				IOUtils.closeQuietly(resource);
 			}
@@ -153,7 +175,7 @@ public class WinScreen extends Screen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
+	public void render(PoseStack poseStack, int i, int j, float f) {
 		this.renderBg(i, j, f);
 		int k = 274;
 		int l = this.width / 2 - 137;
@@ -165,10 +187,14 @@ public class WinScreen extends Screen {
 		this.minecraft.getTextureManager().bind(LOGO_LOCATION);
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.enableAlphaTest();
-		this.blit(l, m, 0, 0, 155, 44);
-		this.blit(l + 155, m, 0, 45, 155, 44);
+		RenderSystem.enableBlend();
+		this.blitOutlineBlack(l, m, (integer, integer2) -> {
+			this.blit(poseStack, integer + 0, integer2, 0, 0, 155, 44);
+			this.blit(poseStack, integer + 155, integer2, 0, 45, 155, 44);
+		});
+		RenderSystem.disableBlend();
 		this.minecraft.getTextureManager().bind(EDITION_LOCATION);
-		blit(l + 88, m + 37, 0.0F, 0.0F, 98, 14, 128, 16);
+		blit(poseStack, l + 88, m + 37, 0.0F, 0.0F, 98, 14, 128, 16);
 		RenderSystem.disableAlphaTest();
 		int n = m + 100;
 
@@ -181,12 +207,12 @@ public class WinScreen extends Screen {
 			}
 
 			if ((float)n + g + 12.0F + 8.0F > 0.0F && (float)n + g < (float)this.height) {
-				String string = (String)this.lines.get(o);
-				if (string.startsWith("[C]")) {
-					this.font.drawShadow(string.substring(3), (float)(l + (274 - this.font.width(string.substring(3))) / 2), (float)n, 16777215);
+				FormattedCharSequence formattedCharSequence = (FormattedCharSequence)this.lines.get(o);
+				if (this.centeredLines.contains(o)) {
+					this.font.drawShadow(poseStack, formattedCharSequence, (float)(l + (274 - this.font.width(formattedCharSequence)) / 2), (float)n, 16777215);
 				} else {
 					this.font.random.setSeed((long)((float)((long)o * 4238972211L) + this.time / 4.0F));
-					this.font.drawShadow(string, (float)l, (float)n, 16777215);
+					this.font.drawShadow(poseStack, formattedCharSequence, (float)l, (float)n, 16777215);
 				}
 			}
 
@@ -208,6 +234,6 @@ public class WinScreen extends Screen {
 		bufferBuilder.vertex(0.0, 0.0, (double)this.getBlitOffset()).uv(0.0F, 0.0F).color(1.0F, 1.0F, 1.0F, 1.0F).endVertex();
 		tesselator.end();
 		RenderSystem.disableBlend();
-		super.render(i, j, f);
+		super.render(poseStack, i, j, f);
 	}
 }

@@ -18,6 +18,7 @@ import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
@@ -59,7 +60,7 @@ public abstract class PatrollingMonster extends Monster {
 	}
 
 	@Override
-	public double getRidingHeight() {
+	public double getMyRidingOffset() {
 		return -0.45;
 	}
 
@@ -70,7 +71,7 @@ public abstract class PatrollingMonster extends Monster {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
@@ -93,7 +94,7 @@ public abstract class PatrollingMonster extends Monster {
 			this.patrolling = true;
 		}
 
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	public static boolean checkPatrollingMonsterSpawnRules(
@@ -136,7 +137,7 @@ public abstract class PatrollingMonster extends Monster {
 	}
 
 	public void findPatrolTarget() {
-		this.patrolTarget = new BlockPos(this).offset(-500 + this.random.nextInt(1000), 0, -500 + this.random.nextInt(1000));
+		this.patrolTarget = this.blockPosition().offset(-500 + this.random.nextInt(1000), 0, -500 + this.random.nextInt(1000));
 		this.patrolling = true;
 	}
 
@@ -187,7 +188,7 @@ public abstract class PatrollingMonster extends Monster {
 				} else if (bl && this.mob.getPatrolTarget().closerThan(this.mob.position(), 10.0)) {
 					this.mob.findPatrolTarget();
 				} else {
-					Vec3 vec3 = new Vec3(this.mob.getPatrolTarget());
+					Vec3 vec3 = Vec3.atBottomCenterOf(this.mob.getPatrolTarget());
 					Vec3 vec32 = this.mob.position();
 					Vec3 vec33 = vec32.subtract(vec3);
 					vec3 = vec33.yRot(90.0F).scale(0.4).add(vec3);
@@ -220,7 +221,7 @@ public abstract class PatrollingMonster extends Monster {
 			Random random = this.mob.getRandom();
 			BlockPos blockPos = this.mob
 				.level
-				.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(this.mob).offset(-8 + random.nextInt(16), 0, -8 + random.nextInt(16)));
+				.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, this.mob.blockPosition().offset(-8 + random.nextInt(16), 0, -8 + random.nextInt(16)));
 			return this.mob.getNavigation().moveTo((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), this.speedModifier);
 		}
 	}

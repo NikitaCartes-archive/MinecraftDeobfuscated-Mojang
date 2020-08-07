@@ -2,23 +2,20 @@ package net.minecraft.server.dedicated;
 
 import com.mojang.authlib.GameProfile;
 import java.io.IOException;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class DedicatedPlayerList extends PlayerList {
 	private static final Logger LOGGER = LogManager.getLogger();
 
-	public DedicatedPlayerList(DedicatedServer dedicatedServer) {
-		super(dedicatedServer, dedicatedServer.getProperties().maxPlayers);
+	public DedicatedPlayerList(DedicatedServer dedicatedServer, RegistryAccess.RegistryHolder registryHolder, PlayerDataStorage playerDataStorage) {
+		super(dedicatedServer, registryHolder, playerDataStorage, dedicatedServer.getProperties().maxPlayers);
 		DedicatedServerProperties dedicatedServerProperties = dedicatedServer.getProperties();
 		this.setViewDistance(dedicatedServerProperties.viewDistance);
 		super.setUsingWhiteList(dedicatedServerProperties.whiteList.get());
-		if (!dedicatedServer.isSingleplayer()) {
-			this.getBans().setEnabled(true);
-			this.getIpBans().setEnabled(true);
-		}
-
 		this.loadUserBanList();
 		this.saveUserBanList();
 		this.loadIpBanList();

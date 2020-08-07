@@ -232,7 +232,7 @@ public class V1460 extends NamespacedSchema {
 	@Override
 	public void registerTypes(Schema schema, Map<String, Supplier<TypeTemplate>> map, Map<String, Supplier<TypeTemplate>> map2) {
 		schema.registerType(false, References.LEVEL, DSL::remainder);
-		schema.registerType(false, References.RECIPE, () -> DSL.constType(DSL.namespacedString()));
+		schema.registerType(false, References.RECIPE, () -> DSL.constType(namespacedString()));
 		schema.registerType(
 			false,
 			References.PLAYER,
@@ -270,11 +270,11 @@ public class V1460 extends NamespacedSchema {
 					)
 				)
 		);
-		schema.registerType(true, References.BLOCK_ENTITY, () -> DSL.taggedChoiceLazy("id", DSL.namespacedString(), map2));
+		schema.registerType(true, References.BLOCK_ENTITY, () -> DSL.taggedChoiceLazy("id", namespacedString(), map2));
 		schema.registerType(
 			true, References.ENTITY_TREE, () -> DSL.optionalFields("Passengers", DSL.list(References.ENTITY_TREE.in(schema)), References.ENTITY.in(schema))
 		);
-		schema.registerType(true, References.ENTITY, () -> DSL.taggedChoiceLazy("id", DSL.namespacedString(), map));
+		schema.registerType(true, References.ENTITY, () -> DSL.taggedChoiceLazy("id", namespacedString(), map));
 		schema.registerType(
 			true,
 			References.ITEM_STACK,
@@ -312,8 +312,8 @@ public class V1460 extends NamespacedSchema {
 					DSL.list(References.BLOCK_STATE.in(schema))
 				)
 		);
-		schema.registerType(false, References.BLOCK_NAME, () -> DSL.constType(DSL.namespacedString()));
-		schema.registerType(false, References.ITEM_NAME, () -> DSL.constType(DSL.namespacedString()));
+		schema.registerType(false, References.BLOCK_NAME, () -> DSL.constType(namespacedString()));
+		schema.registerType(false, References.ITEM_NAME, () -> DSL.constType(namespacedString()));
 		schema.registerType(false, References.BLOCK_STATE, DSL::remainder);
 		Supplier<TypeTemplate> supplier = () -> DSL.compoundList(References.ITEM_NAME.in(schema), DSL.constType(DSL.intType()));
 		schema.registerType(
@@ -340,7 +340,7 @@ public class V1460 extends NamespacedSchema {
 							"minecraft:killed_by",
 							DSL.compoundList(References.ENTITY_NAME.in(schema), DSL.constType(DSL.intType())),
 							"minecraft:custom",
-							DSL.compoundList(DSL.constType(DSL.namespacedString()), DSL.constType(DSL.intType()))
+							DSL.compoundList(DSL.constType(namespacedString()), DSL.constType(DSL.intType()))
 						)
 					)
 				)
@@ -402,8 +402,9 @@ public class V1460 extends NamespacedSchema {
 					DSL.optionalFields("criteria", DSL.compoundList(References.ENTITY_NAME.in(schema), DSL.constType(DSL.string())))
 				)
 		);
-		schema.registerType(false, References.BIOME, () -> DSL.constType(DSL.namespacedString()));
-		schema.registerType(false, References.ENTITY_NAME, () -> DSL.constType(DSL.namespacedString()));
+		schema.registerType(false, References.BIOME, () -> DSL.constType(namespacedString()));
+		schema.registerType(false, References.ENTITY_NAME, () -> DSL.constType(namespacedString()));
 		schema.registerType(false, References.POI_CHUNK, DSL::remainder);
+		schema.registerType(true, References.WORLD_GEN_SETTINGS, DSL::remainder);
 	}
 }

@@ -8,6 +8,7 @@ import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.util.Pair;
 import java.util.Objects;
 import java.util.function.Function;
+import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public abstract class ItemRenameFix extends DataFix {
 	private final String name;
@@ -19,7 +20,7 @@ public abstract class ItemRenameFix extends DataFix {
 
 	@Override
 	public TypeRewriteRule makeRule() {
-		Type<Pair<String, String>> type = DSL.named(References.ITEM_NAME.typeName(), DSL.namespacedString());
+		Type<Pair<String, String>> type = DSL.named(References.ITEM_NAME.typeName(), NamespacedSchema.namespacedString());
 		if (!Objects.equals(this.getInputSchema().getType(References.ITEM_NAME), type)) {
 			throw new IllegalStateException("item name type is not what was expected.");
 		} else {

@@ -71,7 +71,7 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 					Bee bee = (Bee)entity;
 					if (player.position().distanceToSqr(entity.position()) <= 16.0) {
 						if (!this.isSedated()) {
-							bee.makeAngry(player);
+							bee.setTarget(player);
 						} else {
 							bee.setStayOutOfHiveCountdown(400);
 						}
@@ -83,7 +83,7 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 
 	private List<Entity> releaseAllOccupants(BlockState blockState, BeehiveBlockEntity.BeeReleaseStatus beeReleaseStatus) {
 		List<Entity> list = Lists.<Entity>newArrayList();
-		this.stored.removeIf(beeData -> this.releaseOccupant(blockState, beeData.entityData, list, beeReleaseStatus));
+		this.stored.removeIf(beeData -> this.releaseOccupant(blockState, beeData, list, beeReleaseStatus));
 		return list;
 	}
 
@@ -100,7 +100,7 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 	}
 
 	public boolean isSedated() {
-		return CampfireBlock.isSmokeyPos(this.level, this.getBlockPos(), 5);
+		return CampfireBlock.isSmokeyPos(this.level, this.getBlockPos());
 	}
 
 	protected void sendDebugPackets() {
@@ -132,15 +132,16 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 	}
 
 	private boolean releaseOccupant(
-		BlockState blockState, CompoundTag compoundTag, @Nullable List<Entity> list, BeehiveBlockEntity.BeeReleaseStatus beeReleaseStatus
+		BlockState blockState, BeehiveBlockEntity.BeeData beeData, @Nullable List<Entity> list, BeehiveBlockEntity.BeeReleaseStatus beeReleaseStatus
 	) {
-		BlockPos blockPos = this.getBlockPos();
 		if ((this.level.isNight() || this.level.isRaining()) && beeReleaseStatus != BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY) {
 			return false;
 		} else {
+			BlockPos blockPos = this.getBlockPos();
+			CompoundTag compoundTag = beeData.entityData;
 			compoundTag.remove("Passengers");
 			compoundTag.remove("Leash");
-			compoundTag.removeUUID("UUID");
+			compoundTag.remove("UUID");
 			Direction direction = blockState.getValue(BeehiveBlock.FACING);
 			BlockPos blockPos2 = blockPos.relative(direction);
 			boolean bl = !this.level.getBlockState(blockPos2).getCollisionShape(this.level, blockPos2).isEmpty();
@@ -149,12 +150,6 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 			} else {
 				Entity entity = EntityType.loadEntityRecursive(compoundTag, this.level, entityx -> entityx);
 				if (entity != null) {
-					float f = entity.getBbWidth();
-					double d = bl ? 0.0 : 0.55 + (double)(f / 2.0F);
-					double e = (double)blockPos.getX() + 0.5 + d * (double)direction.getStepX();
-					double g = (double)blockPos.getY() + 0.5 - (double)(entity.getBbHeight() / 2.0F);
-					double h = (double)blockPos.getZ() + 0.5 + d * (double)direction.getStepZ();
-					entity.moveTo(e, g, h, entity.yRot, entity.xRot);
 					if (!entity.getType().is(EntityTypeTags.BEEHIVE_INHABITORS)) {
 						return false;
 					} else {
@@ -179,15 +174,20 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 								}
 							}
 
-							bee.resetTicksWithoutNectarSinceExitingHive();
+							this.setBeeReleaseData(beeData.ticksInHive, bee);
 							if (list != null) {
 								list.add(bee);
 							}
+
+							float f = entity.getBbWidth();
+							double d = bl ? 0.0 : 0.55 + (double)(f / 2.0F);
+							double e = (double)blockPos.getX() + 0.5 + d * (double)direction.getStepX();
+							double g = (double)blockPos.getY() + 0.5 - (double)(entity.getBbHeight() / 2.0F);
+							double h = (double)blockPos.getZ() + 0.5 + d * (double)direction.getStepZ();
+							entity.moveTo(e, g, h, entity.yRot, entity.xRot);
 						}
 
-						BlockPos blockPos3 = this.getBlockPos();
-						this.level
-							.playSound(null, (double)blockPos3.getX(), (double)blockPos3.getY(), (double)blockPos3.getZ(), SoundEvents.BEEHIVE_EXIT, SoundSource.BLOCKS, 1.0F, 1.0F);
+						this.level.playSound(null, blockPos, SoundEvents.BEEHIVE_EXIT, SoundSource.BLOCKS, 1.0F, 1.0F);
 						return this.level.addFreshEntity(entity);
 					}
 				} else {
@@ -195,6 +195,18 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 				}
 			}
 		}
+	}
+
+	private void setBeeReleaseData(int i, Bee bee) {
+		int j = bee.getAge();
+		if (j < 0) {
+			bee.setAge(Math.min(0, j + i));
+		} else if (j > 0) {
+			bee.setAge(Math.max(0, j - i));
+		}
+
+		bee.setInLoveTime(Math.max(0, bee.getInLoveTime() - i));
+		bee.resetTicksWithoutNectarSinceExitingHive();
 	}
 
 	private boolean hasSavedFlowerPos() {
@@ -208,16 +220,15 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 		while (iterator.hasNext()) {
 			BeehiveBlockEntity.BeeData beeData = (BeehiveBlockEntity.BeeData)iterator.next();
 			if (beeData.ticksInHive > beeData.minOccupationTicks) {
-				CompoundTag compoundTag = beeData.entityData;
-				BeehiveBlockEntity.BeeReleaseStatus beeReleaseStatus = compoundTag.getBoolean("HasNectar")
+				BeehiveBlockEntity.BeeReleaseStatus beeReleaseStatus = beeData.entityData.getBoolean("HasNectar")
 					? BeehiveBlockEntity.BeeReleaseStatus.HONEY_DELIVERED
 					: BeehiveBlockEntity.BeeReleaseStatus.BEE_RELEASED;
-				if (this.releaseOccupant(blockState, compoundTag, null, beeReleaseStatus)) {
+				if (this.releaseOccupant(blockState, beeData, null, beeReleaseStatus)) {
 					iterator.remove();
 				}
-			} else {
-				beeData.ticksInHive++;
 			}
+
+			beeData.ticksInHive++;
 		}
 	}
 
@@ -238,8 +249,8 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		this.stored.clear();
 		ListTag listTag = compoundTag.getList("Bees", 10);
 
@@ -272,7 +283,7 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 		ListTag listTag = new ListTag();
 
 		for (BeehiveBlockEntity.BeeData beeData : this.stored) {
-			beeData.entityData.removeUUID("UUID");
+			beeData.entityData.remove("UUID");
 			CompoundTag compoundTag = new CompoundTag();
 			compoundTag.put("EntityData", beeData.entityData);
 			compoundTag.putInt("TicksInHive", beeData.ticksInHive);
@@ -289,7 +300,7 @@ public class BeehiveBlockEntity extends BlockEntity implements TickableBlockEnti
 		private final int minOccupationTicks;
 
 		private BeeData(CompoundTag compoundTag, int i, int j) {
-			compoundTag.removeUUID("UUID");
+			compoundTag.remove("UUID");
 			this.entityData = compoundTag;
 			this.ticksInHive = i;
 			this.minOccupationTicks = j;

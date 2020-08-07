@@ -33,7 +33,7 @@ public class SimpleReloadInstance<S> implements ReloadInstance {
 			resourceManager,
 			list,
 			(preparationBarrier, resourceManagerx, preparableReloadListener, executor2x, executor3) -> preparableReloadListener.reload(
-					preparationBarrier, resourceManagerx, InactiveProfiler.INACTIVE, InactiveProfiler.INACTIVE, executor, executor3
+					preparationBarrier, resourceManagerx, InactiveProfiler.INSTANCE, InactiveProfiler.INSTANCE, executor, executor3
 				),
 			completableFuture
 		);

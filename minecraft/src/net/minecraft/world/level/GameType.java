@@ -67,7 +67,7 @@ public enum GameType {
 
 	@Environment(EnvType.CLIENT)
 	public float getInteractionRange() {
-		return 2.5F;
+		return 3.0F;
 	}
 
 	@Environment(EnvType.CLIENT)

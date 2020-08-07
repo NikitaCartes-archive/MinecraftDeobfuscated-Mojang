@@ -97,13 +97,13 @@ public class LevelLightEngine implements LightEventListener {
 		return "n/a";
 	}
 
-	public void queueSectionData(LightLayer lightLayer, SectionPos sectionPos, @Nullable DataLayer dataLayer) {
+	public void queueSectionData(LightLayer lightLayer, SectionPos sectionPos, @Nullable DataLayer dataLayer, boolean bl) {
 		if (lightLayer == LightLayer.BLOCK) {
 			if (this.blockEngine != null) {
-				this.blockEngine.queueSectionData(sectionPos.asLong(), dataLayer);
+				this.blockEngine.queueSectionData(sectionPos.asLong(), dataLayer, bl);
 			}
 		} else if (this.skyEngine != null) {
-			this.skyEngine.queueSectionData(sectionPos.asLong(), dataLayer);
+			this.skyEngine.queueSectionData(sectionPos.asLong(), dataLayer, bl);
 		}
 	}
 

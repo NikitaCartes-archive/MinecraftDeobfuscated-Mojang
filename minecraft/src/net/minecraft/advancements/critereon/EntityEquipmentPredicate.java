@@ -98,4 +98,41 @@ public class EntityEquipmentPredicate {
 			return jsonObject;
 		}
 	}
+
+	public static class Builder {
+		private ItemPredicate head = ItemPredicate.ANY;
+		private ItemPredicate chest = ItemPredicate.ANY;
+		private ItemPredicate legs = ItemPredicate.ANY;
+		private ItemPredicate feet = ItemPredicate.ANY;
+		private ItemPredicate mainhand = ItemPredicate.ANY;
+		private ItemPredicate offhand = ItemPredicate.ANY;
+
+		public static EntityEquipmentPredicate.Builder equipment() {
+			return new EntityEquipmentPredicate.Builder();
+		}
+
+		public EntityEquipmentPredicate.Builder head(ItemPredicate itemPredicate) {
+			this.head = itemPredicate;
+			return this;
+		}
+
+		public EntityEquipmentPredicate.Builder chest(ItemPredicate itemPredicate) {
+			this.chest = itemPredicate;
+			return this;
+		}
+
+		public EntityEquipmentPredicate.Builder legs(ItemPredicate itemPredicate) {
+			this.legs = itemPredicate;
+			return this;
+		}
+
+		public EntityEquipmentPredicate.Builder feet(ItemPredicate itemPredicate) {
+			this.feet = itemPredicate;
+			return this;
+		}
+
+		public EntityEquipmentPredicate build() {
+			return new EntityEquipmentPredicate(this.head, this.chest, this.legs, this.feet, this.mainhand, this.offhand);
+		}
+	}
 }

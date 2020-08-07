@@ -1,17 +1,20 @@
 package net.minecraft.world.level.levelgen;
 
 import com.google.common.collect.Maps;
+import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.BitStorage;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -34,32 +37,31 @@ public class Heightmap {
 		ObjectList<Heightmap> objectList = new ObjectArrayList<>(i);
 		ObjectListIterator<Heightmap> objectListIterator = objectList.iterator();
 		int j = chunkAccess.getHighestSectionPosition() + 16;
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		try (BlockPos.PooledMutableBlockPos pooledMutableBlockPos = BlockPos.PooledMutableBlockPos.acquire()) {
-			for (int k = 0; k < 16; k++) {
-				for (int l = 0; l < 16; l++) {
-					for (Heightmap.Types types : set) {
-						objectList.add(chunkAccess.getOrCreateHeightmapUnprimed(types));
-					}
+		for (int k = 0; k < 16; k++) {
+			for (int l = 0; l < 16; l++) {
+				for (Heightmap.Types types : set) {
+					objectList.add(chunkAccess.getOrCreateHeightmapUnprimed(types));
+				}
 
-					for (int m = j - 1; m >= 0; m--) {
-						pooledMutableBlockPos.set(k, m, l);
-						BlockState blockState = chunkAccess.getBlockState(pooledMutableBlockPos);
-						if (blockState.getBlock() != Blocks.AIR) {
-							while (objectListIterator.hasNext()) {
-								Heightmap heightmap = (Heightmap)objectListIterator.next();
-								if (heightmap.isOpaque.test(blockState)) {
-									heightmap.setHeight(k, l, m + 1);
-									objectListIterator.remove();
-								}
+				for (int m = j - 1; m >= 0; m--) {
+					mutableBlockPos.set(k, m, l);
+					BlockState blockState = chunkAccess.getBlockState(mutableBlockPos);
+					if (!blockState.is(Blocks.AIR)) {
+						while (objectListIterator.hasNext()) {
+							Heightmap heightmap = (Heightmap)objectListIterator.next();
+							if (heightmap.isOpaque.test(blockState)) {
+								heightmap.setHeight(k, l, m + 1);
+								objectListIterator.remove();
 							}
-
-							if (objectList.isEmpty()) {
-								break;
-							}
-
-							objectListIterator.back(i);
 						}
+
+						if (objectList.isEmpty()) {
+							break;
+						}
+
+						objectListIterator.back(i);
 					}
 				}
 			}
@@ -119,7 +121,7 @@ public class Heightmap {
 		return i + j * 16;
 	}
 
-	public static enum Types {
+	public static enum Types implements StringRepresentable {
 		WORLD_SURFACE_WG("WORLD_SURFACE_WG", Heightmap.Usage.WORLDGEN, Heightmap.NOT_AIR),
 		WORLD_SURFACE("WORLD_SURFACE", Heightmap.Usage.CLIENT, Heightmap.NOT_AIR),
 		OCEAN_FLOOR_WG("OCEAN_FLOOR_WG", Heightmap.Usage.WORLDGEN, Heightmap.MATERIAL_MOTION_BLOCKING),
@@ -131,6 +133,7 @@ public class Heightmap {
 			blockState -> (blockState.getMaterial().blocksMotion() || !blockState.getFluidState().isEmpty()) && !(blockState.getBlock() instanceof LeavesBlock)
 		);
 
+		public static final Codec<Heightmap.Types> CODEC = StringRepresentable.fromEnum(Heightmap.Types::values, Heightmap.Types::getFromKey);
 		private final String serializationKey;
 		private final Heightmap.Usage usage;
 		private final Predicate<BlockState> isOpaque;
@@ -159,12 +162,18 @@ public class Heightmap {
 			return this.usage != Heightmap.Usage.WORLDGEN;
 		}
 
+		@Nullable
 		public static Heightmap.Types getFromKey(String string) {
 			return (Heightmap.Types)REVERSE_LOOKUP.get(string);
 		}
 
 		public Predicate<BlockState> isOpaque() {
 			return this.isOpaque;
+		}
+
+		@Override
+		public String getSerializedName() {
+			return this.serializationKey;
 		}
 	}
 

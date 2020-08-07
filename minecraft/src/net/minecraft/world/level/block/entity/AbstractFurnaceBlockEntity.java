@@ -2,10 +2,13 @@ package net.minecraft.world.level.block.entity;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import javax.annotation.Nullable;
+import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -28,8 +31,11 @@ import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 public abstract class AbstractFurnaceBlockEntity
 	extends BaseContainerBlockEntity
@@ -84,7 +90,7 @@ public abstract class AbstractFurnaceBlockEntity
 			return 4;
 		}
 	};
-	private final Map<ResourceLocation, Integer> recipesUsed = Maps.<ResourceLocation, Integer>newHashMap();
+	private final Object2IntOpenHashMap<ResourceLocation> recipesUsed = new Object2IntOpenHashMap<>();
 	protected final RecipeType<? extends AbstractCookingRecipe> recipeType;
 
 	protected AbstractFurnaceBlockEntity(BlockEntityType<?> blockEntityType, RecipeType<? extends AbstractCookingRecipe> recipeType) {
@@ -157,14 +163,31 @@ public abstract class AbstractFurnaceBlockEntity
 		return map;
 	}
 
+	private static boolean isNeverAFurnaceFuel(Item item) {
+		return ItemTags.NON_FLAMMABLE_WOOD.contains(item);
+	}
+
 	private static void add(Map<Item, Integer> map, Tag<Item> tag, int i) {
 		for (Item item : tag.getValues()) {
-			map.put(item, i);
+			if (!isNeverAFurnaceFuel(item)) {
+				map.put(item, i);
+			}
 		}
 	}
 
 	private static void add(Map<Item, Integer> map, ItemLike itemLike, int i) {
-		map.put(itemLike.asItem(), i);
+		Item item = itemLike.asItem();
+		if (isNeverAFurnaceFuel(item)) {
+			if (SharedConstants.IS_RUNNING_IN_IDE) {
+				throw (IllegalStateException)Util.pauseInIde(
+					new IllegalStateException(
+						"A developer tried to explicitly make fire resistant item " + item.getName(null).getString() + " a furnace fuel. That will not work!"
+					)
+				);
+			}
+		} else {
+			map.put(item, i);
+		}
 	}
 
 	private boolean isLit() {
@@ -172,20 +195,18 @@ public abstract class AbstractFurnaceBlockEntity
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
 		this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
 		ContainerHelper.loadAllItems(compoundTag, this.items);
 		this.litTime = compoundTag.getShort("BurnTime");
 		this.cookingProgress = compoundTag.getShort("CookTime");
 		this.cookingTotalTime = compoundTag.getShort("CookTimeTotal");
 		this.litDuration = this.getBurnDuration(this.items.get(1));
-		int i = compoundTag.getShort("RecipesUsedSize");
+		CompoundTag compoundTag2 = compoundTag.getCompound("RecipesUsed");
 
-		for (int j = 0; j < i; j++) {
-			ResourceLocation resourceLocation = new ResourceLocation(compoundTag.getString("RecipeLocation" + j));
-			int k = compoundTag.getInt("RecipeAmount" + j);
-			this.recipesUsed.put(resourceLocation, k);
+		for (String string : compoundTag2.getAllKeys()) {
+			this.recipesUsed.put(new ResourceLocation(string), compoundTag2.getInt(string));
 		}
 	}
 
@@ -196,15 +217,9 @@ public abstract class AbstractFurnaceBlockEntity
 		compoundTag.putShort("CookTime", (short)this.cookingProgress);
 		compoundTag.putShort("CookTimeTotal", (short)this.cookingTotalTime);
 		ContainerHelper.saveAllItems(compoundTag, this.items);
-		compoundTag.putShort("RecipesUsedSize", (short)this.recipesUsed.size());
-		int i = 0;
-
-		for (Entry<ResourceLocation, Integer> entry : this.recipesUsed.entrySet()) {
-			compoundTag.putString("RecipeLocation" + i, ((ResourceLocation)entry.getKey()).toString());
-			compoundTag.putInt("RecipeAmount" + i, (Integer)entry.getValue());
-			i++;
-		}
-
+		CompoundTag compoundTag2 = new CompoundTag();
+		this.recipesUsed.forEach((resourceLocation, integer) -> compoundTag2.putInt(resourceLocation.toString(), integer));
+		compoundTag.put("RecipesUsed", compoundTag2);
 		return compoundTag;
 	}
 
@@ -424,7 +439,8 @@ public abstract class AbstractFurnaceBlockEntity
 	@Override
 	public void setRecipeUsed(@Nullable Recipe<?> recipe) {
 		if (recipe != null) {
-			this.recipesUsed.compute(recipe.getId(), (resourceLocation, integer) -> 1 + (integer == null ? 0 : integer));
+			ResourceLocation resourceLocation = recipe.getId();
+			this.recipesUsed.addTo(resourceLocation, 1);
 		}
 	}
 
@@ -435,39 +451,39 @@ public abstract class AbstractFurnaceBlockEntity
 	}
 
 	@Override
-	public void awardAndReset(Player player) {
+	public void awardUsedRecipes(Player player) {
 	}
 
-	public void awardResetAndExperience(Player player) {
-		List<Recipe<?>> list = Lists.<Recipe<?>>newArrayList();
-
-		for (Entry<ResourceLocation, Integer> entry : this.recipesUsed.entrySet()) {
-			player.level.getRecipeManager().byKey((ResourceLocation)entry.getKey()).ifPresent(recipe -> {
-				list.add(recipe);
-				createExperience(player, (Integer)entry.getValue(), ((AbstractCookingRecipe)recipe).getExperience());
-			});
-		}
-
+	public void awardUsedRecipesAndPopExperience(Player player) {
+		List<Recipe<?>> list = this.getRecipesToAwardAndPopExperience(player.level, player.position());
 		player.awardRecipes(list);
 		this.recipesUsed.clear();
 	}
 
-	private static void createExperience(Player player, int i, float f) {
-		if (f == 0.0F) {
-			i = 0;
-		} else if (f < 1.0F) {
-			int j = Mth.floor((float)i * f);
-			if (j < Mth.ceil((float)i * f) && Math.random() < (double)((float)i * f - (float)j)) {
-				j++;
-			}
+	public List<Recipe<?>> getRecipesToAwardAndPopExperience(Level level, Vec3 vec3) {
+		List<Recipe<?>> list = Lists.<Recipe<?>>newArrayList();
 
-			i = j;
+		for (Entry<ResourceLocation> entry : this.recipesUsed.object2IntEntrySet()) {
+			level.getRecipeManager().byKey((ResourceLocation)entry.getKey()).ifPresent(recipe -> {
+				list.add(recipe);
+				createExperience(level, vec3, entry.getIntValue(), ((AbstractCookingRecipe)recipe).getExperience());
+			});
 		}
 
-		while (i > 0) {
-			int j = ExperienceOrb.getExperienceValue(i);
-			i -= j;
-			player.level.addFreshEntity(new ExperienceOrb(player.level, player.getX(), player.getY() + 0.5, player.getZ() + 0.5, j));
+		return list;
+	}
+
+	private static void createExperience(Level level, Vec3 vec3, int i, float f) {
+		int j = Mth.floor((float)i * f);
+		float g = Mth.frac((float)i * f);
+		if (g != 0.0F && Math.random() < (double)g) {
+			j++;
+		}
+
+		while (j > 0) {
+			int k = ExperienceOrb.getExperienceValue(j);
+			j -= k;
+			level.addFreshEntity(new ExperienceOrb(level, vec3.x, vec3.y, vec3.z, k));
 		}
 	}
 

@@ -4,11 +4,10 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -19,8 +18,8 @@ public class TerrainParticle extends TextureSheetParticle {
 	private final float uo;
 	private final float vo;
 
-	public TerrainParticle(Level level, double d, double e, double f, double g, double h, double i, BlockState blockState) {
-		super(level, d, e, f, g, h, i);
+	public TerrainParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, BlockState blockState) {
+		super(clientLevel, d, e, f, g, h, i);
 		this.blockState = blockState;
 		this.setSprite(Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getParticleIcon(blockState));
 		this.gravity = 1.0F;
@@ -39,7 +38,7 @@ public class TerrainParticle extends TextureSheetParticle {
 
 	public TerrainParticle init(BlockPos blockPos) {
 		this.pos = blockPos;
-		if (this.blockState.getBlock() == Blocks.GRASS_BLOCK) {
+		if (this.blockState.is(Blocks.GRASS_BLOCK)) {
 			return this;
 		} else {
 			this.multiplyColor(blockPos);
@@ -49,8 +48,7 @@ public class TerrainParticle extends TextureSheetParticle {
 
 	public TerrainParticle init() {
 		this.pos = new BlockPos(this.x, this.y, this.z);
-		Block block = this.blockState.getBlock();
-		if (block == Blocks.GRASS_BLOCK) {
+		if (this.blockState.is(Blocks.GRASS_BLOCK)) {
 			return this;
 		} else {
 			this.multiplyColor(this.pos);
@@ -98,9 +96,9 @@ public class TerrainParticle extends TextureSheetParticle {
 
 	@Environment(EnvType.CLIENT)
 	public static class Provider implements ParticleProvider<BlockParticleOption> {
-		public Particle createParticle(BlockParticleOption blockParticleOption, Level level, double d, double e, double f, double g, double h, double i) {
+		public Particle createParticle(BlockParticleOption blockParticleOption, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
 			BlockState blockState = blockParticleOption.getState();
-			return !blockState.isAir() && blockState.getBlock() != Blocks.MOVING_PISTON ? new TerrainParticle(level, d, e, f, g, h, i, blockState).init() : null;
+			return !blockState.isAir() && !blockState.is(Blocks.MOVING_PISTON) ? new TerrainParticle(clientLevel, d, e, f, g, h, i, blockState).init() : null;
 		}
 	}
 }

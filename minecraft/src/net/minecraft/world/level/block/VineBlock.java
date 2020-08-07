@@ -1,16 +1,20 @@
 package net.minecraft.world.level.block;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -29,13 +33,14 @@ public class VineBlock extends Block {
 		.stream()
 		.filter(entry -> entry.getKey() != Direction.DOWN)
 		.collect(Util.toMap());
-	protected static final VoxelShape UP_AABB = Block.box(0.0, 15.0, 0.0, 16.0, 16.0, 16.0);
-	protected static final VoxelShape EAST_AABB = Block.box(0.0, 0.0, 0.0, 1.0, 16.0, 16.0);
-	protected static final VoxelShape WEST_AABB = Block.box(15.0, 0.0, 0.0, 16.0, 16.0, 16.0);
-	protected static final VoxelShape SOUTH_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 1.0);
-	protected static final VoxelShape NORTH_AABB = Block.box(0.0, 0.0, 15.0, 16.0, 16.0, 16.0);
+	private static final VoxelShape UP_AABB = Block.box(0.0, 15.0, 0.0, 16.0, 16.0, 16.0);
+	private static final VoxelShape WEST_AABB = Block.box(0.0, 0.0, 0.0, 1.0, 16.0, 16.0);
+	private static final VoxelShape EAST_AABB = Block.box(15.0, 0.0, 0.0, 16.0, 16.0, 16.0);
+	private static final VoxelShape NORTH_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 1.0);
+	private static final VoxelShape SOUTH_AABB = Block.box(0.0, 0.0, 15.0, 16.0, 16.0, 16.0);
+	private final Map<BlockState, VoxelShape> shapesCache;
 
-	public VineBlock(Block.Properties properties) {
+	public VineBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition
@@ -46,32 +51,42 @@ public class VineBlock extends Block {
 				.setValue(SOUTH, Boolean.valueOf(false))
 				.setValue(WEST, Boolean.valueOf(false))
 		);
+		this.shapesCache = ImmutableMap.copyOf(
+			(Map<? extends BlockState, ? extends VoxelShape>)this.stateDefinition
+				.getPossibleStates()
+				.stream()
+				.collect(Collectors.toMap(Function.identity(), VineBlock::calculateShape))
+		);
 	}
 
-	@Override
-	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+	private static VoxelShape calculateShape(BlockState blockState) {
 		VoxelShape voxelShape = Shapes.empty();
 		if ((Boolean)blockState.getValue(UP)) {
-			voxelShape = Shapes.or(voxelShape, UP_AABB);
+			voxelShape = UP_AABB;
 		}
 
 		if ((Boolean)blockState.getValue(NORTH)) {
+			voxelShape = Shapes.or(voxelShape, NORTH_AABB);
+		}
+
+		if ((Boolean)blockState.getValue(SOUTH)) {
 			voxelShape = Shapes.or(voxelShape, SOUTH_AABB);
 		}
 
 		if ((Boolean)blockState.getValue(EAST)) {
-			voxelShape = Shapes.or(voxelShape, WEST_AABB);
-		}
-
-		if ((Boolean)blockState.getValue(SOUTH)) {
-			voxelShape = Shapes.or(voxelShape, NORTH_AABB);
-		}
-
-		if ((Boolean)blockState.getValue(WEST)) {
 			voxelShape = Shapes.or(voxelShape, EAST_AABB);
 		}
 
+		if ((Boolean)blockState.getValue(WEST)) {
+			voxelShape = Shapes.or(voxelShape, WEST_AABB);
+		}
+
 		return voxelShape;
+	}
+
+	@Override
+	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+		return (VoxelShape)this.shapesCache.get(blockState);
 	}
 
 	@Override
@@ -107,7 +122,7 @@ public class VineBlock extends Block {
 			} else {
 				BooleanProperty booleanProperty = (BooleanProperty)PROPERTY_BY_DIRECTION.get(direction);
 				BlockState blockState = blockGetter.getBlockState(blockPos.above());
-				return blockState.getBlock() == this && (Boolean)blockState.getValue(booleanProperty);
+				return blockState.is(this) && (Boolean)blockState.getValue(booleanProperty);
 			}
 		}
 	}
@@ -134,7 +149,7 @@ public class VineBlock extends Block {
 						blockState2 = blockGetter.getBlockState(blockPos2);
 					}
 
-					bl = blockState2.getBlock() == this && (Boolean)blockState2.getValue(booleanProperty);
+					bl = blockState2.is(this) && (Boolean)blockState2.getValue(booleanProperty);
 				}
 
 				blockState = blockState.setValue(booleanProperty, Boolean.valueOf(bl));
@@ -157,23 +172,15 @@ public class VineBlock extends Block {
 	}
 
 	@Override
-	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		BlockState blockState2 = this.getUpdatedState(blockState, serverLevel, blockPos);
-		if (blockState2 != blockState) {
-			if (this.hasFaces(blockState2)) {
-				serverLevel.setBlock(blockPos, blockState2, 2);
-			} else {
-				dropResources(blockState, serverLevel, blockPos);
-				serverLevel.removeBlock(blockPos, false);
-			}
-		} else if (serverLevel.random.nextInt(4) == 0) {
-			Direction direction = Direction.getRandomFace(random);
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		if (serverLevel.random.nextInt(4) == 0) {
+			Direction direction = Direction.getRandom(random);
 			BlockPos blockPos2 = blockPos.above();
 			if (direction.getAxis().isHorizontal() && !(Boolean)blockState.getValue(getPropertyForFace(direction))) {
 				if (this.canSpread(serverLevel, blockPos)) {
 					BlockPos blockPos3 = blockPos.relative(direction);
-					BlockState blockState3 = serverLevel.getBlockState(blockPos3);
-					if (blockState3.isAir()) {
+					BlockState blockState2 = serverLevel.getBlockState(blockPos3);
+					if (blockState2.isAir()) {
 						Direction direction2 = direction.getClockWise();
 						Direction direction3 = direction.getCounterClockWise();
 						boolean bl = (Boolean)blockState.getValue(getPropertyForFace(direction2));
@@ -210,16 +217,16 @@ public class VineBlock extends Block {
 							return;
 						}
 
-						BlockState blockState4 = blockState;
+						BlockState blockState3 = blockState;
 
 						for (Direction direction2 : Direction.Plane.HORIZONTAL) {
 							if (random.nextBoolean() || !isAcceptableNeighbour(serverLevel, blockPos2.relative(direction2), Direction.UP)) {
-								blockState4 = blockState4.setValue(getPropertyForFace(direction2), Boolean.valueOf(false));
+								blockState3 = blockState3.setValue(getPropertyForFace(direction2), Boolean.valueOf(false));
 							}
 						}
 
-						if (this.hasHorizontalConnection(blockState4)) {
-							serverLevel.setBlock(blockPos2, blockState4, 2);
+						if (this.hasHorizontalConnection(blockState3)) {
+							serverLevel.setBlock(blockPos2, blockState3, 2);
 						}
 
 						return;
@@ -228,12 +235,12 @@ public class VineBlock extends Block {
 
 				if (blockPos.getY() > 0) {
 					BlockPos blockPos3 = blockPos.below();
-					BlockState blockState3 = serverLevel.getBlockState(blockPos3);
-					if (blockState3.isAir() || blockState3.getBlock() == this) {
-						BlockState blockState5 = blockState3.isAir() ? this.defaultBlockState() : blockState3;
-						BlockState blockState6 = this.copyRandomFaces(blockState, blockState5, random);
-						if (blockState5 != blockState6 && this.hasHorizontalConnection(blockState6)) {
-							serverLevel.setBlock(blockPos3, blockState6, 2);
+					BlockState blockState2 = serverLevel.getBlockState(blockPos3);
+					if (blockState2.isAir() || blockState2.is(this)) {
+						BlockState blockState4 = blockState2.isAir() ? this.defaultBlockState() : blockState2;
+						BlockState blockState5 = this.copyRandomFaces(blockState, blockState4, random);
+						if (blockState4 != blockState5 && this.hasHorizontalConnection(blockState5)) {
+							serverLevel.setBlock(blockPos3, blockState5, 2);
 						}
 					}
 				}
@@ -266,7 +273,7 @@ public class VineBlock extends Block {
 		int j = 5;
 
 		for (BlockPos blockPos2 : iterable) {
-			if (blockGetter.getBlockState(blockPos2).getBlock() == this) {
+			if (blockGetter.getBlockState(blockPos2).is(this)) {
 				if (--j <= 0) {
 					return false;
 				}
@@ -279,14 +286,14 @@ public class VineBlock extends Block {
 	@Override
 	public boolean canBeReplaced(BlockState blockState, BlockPlaceContext blockPlaceContext) {
 		BlockState blockState2 = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos());
-		return blockState2.getBlock() == this ? this.countFaces(blockState2) < PROPERTY_BY_DIRECTION.size() : super.canBeReplaced(blockState, blockPlaceContext);
+		return blockState2.is(this) ? this.countFaces(blockState2) < PROPERTY_BY_DIRECTION.size() : super.canBeReplaced(blockState, blockPlaceContext);
 	}
 
 	@Nullable
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
 		BlockState blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos());
-		boolean bl = blockState.getBlock() == this;
+		boolean bl = blockState.is(this);
 		BlockState blockState2 = bl ? blockState : this.defaultBlockState();
 
 		for (Direction direction : blockPlaceContext.getNearestLookingDirections()) {

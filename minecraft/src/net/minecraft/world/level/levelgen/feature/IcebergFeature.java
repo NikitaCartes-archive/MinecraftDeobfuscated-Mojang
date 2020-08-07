@@ -1,33 +1,28 @@
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
 import net.minecraft.world.level.material.Material;
 
 public class IcebergFeature extends Feature<BlockStateConfiguration> {
-	public IcebergFeature(Function<Dynamic<?>, ? extends BlockStateConfiguration> function) {
-		super(function);
+	public IcebergFeature(Codec<BlockStateConfiguration> codec) {
+		super(codec);
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
-		Random random,
-		BlockPos blockPos,
-		BlockStateConfiguration blockStateConfiguration
+		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, BlockStateConfiguration blockStateConfiguration
 	) {
-		blockPos = new BlockPos(blockPos.getX(), levelAccessor.getSeaLevel(), blockPos.getZ());
+		blockPos = new BlockPos(blockPos.getX(), chunkGenerator.getSeaLevel(), blockPos.getZ());
 		boolean bl = random.nextDouble() > 0.7;
 		BlockState blockState = blockStateConfiguration.state;
 		double d = random.nextDouble() * 2.0 * Math.PI;
@@ -49,13 +44,13 @@ public class IcebergFeature extends Feature<BlockStateConfiguration> {
 				for (int r = 0; r < l; r++) {
 					int s = bl2 ? this.heightDependentRadiusEllipse(r, l, n) : this.heightDependentRadiusRound(random, r, l, n);
 					if (bl2 || p < s) {
-						this.generateIcebergBlock(levelAccessor, random, blockPos, l, p, r, q, s, o, bl2, j, d, bl, blockState);
+						this.generateIcebergBlock(worldGenLevel, random, blockPos, l, p, r, q, s, o, bl2, j, d, bl, blockState);
 					}
 				}
 			}
 		}
 
-		this.smooth(levelAccessor, blockPos, n, l, bl2, i);
+		this.smooth(worldGenLevel, blockPos, n, l, bl2, i);
 
 		for (int p = -o; p < o; p++) {
 			for (int q = -o; q < o; q++) {
@@ -63,7 +58,7 @@ public class IcebergFeature extends Feature<BlockStateConfiguration> {
 					int s = bl2 ? Mth.ceil((float)o * (1.0F - (float)Math.pow((double)rx, 2.0) / ((float)m * 8.0F))) : o;
 					int t = this.heightDependentRadiusSteep(random, -rx, m, n);
 					if (p < t) {
-						this.generateIcebergBlock(levelAccessor, random, blockPos, m, p, rx, q, t, s, bl2, j, d, bl, blockState);
+						this.generateIcebergBlock(worldGenLevel, random, blockPos, m, p, rx, q, t, s, bl2, j, d, bl, blockState);
 					}
 				}
 			}
@@ -71,7 +66,7 @@ public class IcebergFeature extends Feature<BlockStateConfiguration> {
 
 		boolean bl3 = bl2 ? random.nextDouble() > 0.1 : random.nextDouble() > 0.7;
 		if (bl3) {
-			this.generateCutOut(random, levelAccessor, n, l, blockPos, bl2, i, d, j);
+			this.generateCutOut(random, worldGenLevel, n, l, blockPos, bl2, i, d, j);
 		}
 
 		return true;
@@ -132,7 +127,7 @@ public class IcebergFeature extends Feature<BlockStateConfiguration> {
 	}
 
 	private void removeFloatingSnowLayer(LevelAccessor levelAccessor, BlockPos blockPos) {
-		if (levelAccessor.getBlockState(blockPos.above()).getBlock() == Blocks.SNOW) {
+		if (levelAccessor.getBlockState(blockPos.above()).is(Blocks.SNOW)) {
 			this.setBlock(levelAccessor, blockPos.above(), Blocks.AIR.defaultBlockState());
 		}
 	}
@@ -167,11 +162,10 @@ public class IcebergFeature extends Feature<BlockStateConfiguration> {
 
 	private void setIcebergBlock(BlockPos blockPos, LevelAccessor levelAccessor, Random random, int i, int j, boolean bl, boolean bl2, BlockState blockState) {
 		BlockState blockState2 = levelAccessor.getBlockState(blockPos);
-		Block block = blockState2.getBlock();
-		if (blockState2.getMaterial() == Material.AIR || block == Blocks.SNOW_BLOCK || block == Blocks.ICE || block == Blocks.WATER) {
+		if (blockState2.getMaterial() == Material.AIR || blockState2.is(Blocks.SNOW_BLOCK) || blockState2.is(Blocks.ICE) || blockState2.is(Blocks.WATER)) {
 			boolean bl3 = !bl || random.nextDouble() > 0.05;
 			int k = bl ? 3 : 2;
-			if (bl2 && block != Blocks.WATER && (double)i <= (double)random.nextInt(Math.max(1, j / k)) + (double)j * 0.6 && bl3) {
+			if (bl2 && !blockState2.is(Blocks.WATER) && (double)i <= (double)random.nextInt(Math.max(1, j / k)) + (double)j * 0.6 && bl3) {
 				this.setBlock(levelAccessor, blockPos, Blocks.SNOW_BLOCK.defaultBlockState());
 			} else {
 				this.setBlock(levelAccessor, blockPos, blockState);

@@ -13,7 +13,7 @@ import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -23,14 +23,9 @@ public class RedstoneTorchBlock extends TorchBlock {
 	public static final BooleanProperty LIT = BlockStateProperties.LIT;
 	private static final Map<BlockGetter, List<RedstoneTorchBlock.Toggle>> RECENT_TOGGLES = new WeakHashMap();
 
-	protected RedstoneTorchBlock(Block.Properties properties) {
-		super(properties);
+	protected RedstoneTorchBlock(BlockBehaviour.Properties properties) {
+		super(properties, DustParticleOptions.REDSTONE);
 		this.registerDefaultState(this.stateDefinition.any().setValue(LIT, Boolean.valueOf(true)));
-	}
-
-	@Override
-	public int getTickDelay(LevelReader levelReader) {
-		return 2;
 	}
 
 	@Override
@@ -60,33 +55,30 @@ public class RedstoneTorchBlock extends TorchBlock {
 
 	@Override
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		handleTick(blockState, serverLevel, blockPos, random, this.hasNeighborSignal(serverLevel, blockPos, blockState));
-	}
+		boolean bl = this.hasNeighborSignal(serverLevel, blockPos, blockState);
+		List<RedstoneTorchBlock.Toggle> list = (List<RedstoneTorchBlock.Toggle>)RECENT_TOGGLES.get(serverLevel);
 
-	public static void handleTick(BlockState blockState, Level level, BlockPos blockPos, Random random, boolean bl) {
-		List<RedstoneTorchBlock.Toggle> list = (List<RedstoneTorchBlock.Toggle>)RECENT_TOGGLES.get(level);
-
-		while (list != null && !list.isEmpty() && level.getGameTime() - ((RedstoneTorchBlock.Toggle)list.get(0)).when > 60L) {
+		while (list != null && !list.isEmpty() && serverLevel.getGameTime() - ((RedstoneTorchBlock.Toggle)list.get(0)).when > 60L) {
 			list.remove(0);
 		}
 
 		if ((Boolean)blockState.getValue(LIT)) {
 			if (bl) {
-				level.setBlock(blockPos, blockState.setValue(LIT, Boolean.valueOf(false)), 3);
-				if (isToggledTooFrequently(level, blockPos, true)) {
-					level.levelEvent(1502, blockPos, 0);
-					level.getBlockTicks().scheduleTick(blockPos, level.getBlockState(blockPos).getBlock(), 160);
+				serverLevel.setBlock(blockPos, blockState.setValue(LIT, Boolean.valueOf(false)), 3);
+				if (isToggledTooFrequently(serverLevel, blockPos, true)) {
+					serverLevel.levelEvent(1502, blockPos, 0);
+					serverLevel.getBlockTicks().scheduleTick(blockPos, serverLevel.getBlockState(blockPos).getBlock(), 160);
 				}
 			}
-		} else if (!bl && !isToggledTooFrequently(level, blockPos, false)) {
-			level.setBlock(blockPos, blockState.setValue(LIT, Boolean.valueOf(true)), 3);
+		} else if (!bl && !isToggledTooFrequently(serverLevel, blockPos, false)) {
+			serverLevel.setBlock(blockPos, blockState.setValue(LIT, Boolean.valueOf(true)), 3);
 		}
 	}
 
 	@Override
 	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if ((Boolean)blockState.getValue(LIT) == this.hasNeighborSignal(level, blockPos, blockState) && !level.getBlockTicks().willTickThisTick(blockPos, this)) {
-			level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
+			level.getBlockTicks().scheduleTick(blockPos, this, 2);
 		}
 	}
 
@@ -107,13 +99,8 @@ public class RedstoneTorchBlock extends TorchBlock {
 			double d = (double)blockPos.getX() + 0.5 + (random.nextDouble() - 0.5) * 0.2;
 			double e = (double)blockPos.getY() + 0.7 + (random.nextDouble() - 0.5) * 0.2;
 			double f = (double)blockPos.getZ() + 0.5 + (random.nextDouble() - 0.5) * 0.2;
-			level.addParticle(DustParticleOptions.REDSTONE, d, e, f, 0.0, 0.0, 0.0);
+			level.addParticle(this.flameParticle, d, e, f, 0.0, 0.0, 0.0);
 		}
-	}
-
-	@Override
-	public int getLightEmission(BlockState blockState) {
-		return blockState.getValue(LIT) ? super.getLightEmission(blockState) : 0;
 	}
 
 	@Override

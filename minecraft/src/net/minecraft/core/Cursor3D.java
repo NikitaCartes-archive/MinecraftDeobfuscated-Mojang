@@ -1,74 +1,64 @@
 package net.minecraft.core;
 
 public class Cursor3D {
-	private final int minX;
-	private final int minY;
-	private final int minZ;
-	private final int maxX;
-	private final int maxY;
-	private final int maxZ;
+	private int originX;
+	private int originY;
+	private int originZ;
+	private int width;
+	private int height;
+	private int depth;
+	private int end;
+	private int index;
 	private int x;
 	private int y;
 	private int z;
-	private boolean started;
 
 	public Cursor3D(int i, int j, int k, int l, int m, int n) {
-		this.minX = i;
-		this.minY = j;
-		this.minZ = k;
-		this.maxX = l;
-		this.maxY = m;
-		this.maxZ = n;
+		this.originX = i;
+		this.originY = j;
+		this.originZ = k;
+		this.width = l - i + 1;
+		this.height = m - j + 1;
+		this.depth = n - k + 1;
+		this.end = this.width * this.height * this.depth;
 	}
 
 	public boolean advance() {
-		if (!this.started) {
-			this.x = this.minX;
-			this.y = this.minY;
-			this.z = this.minZ;
-			this.started = true;
-			return true;
-		} else if (this.x == this.maxX && this.y == this.maxY && this.z == this.maxZ) {
+		if (this.index == this.end) {
 			return false;
 		} else {
-			if (this.x < this.maxX) {
-				this.x++;
-			} else if (this.y < this.maxY) {
-				this.x = this.minX;
-				this.y++;
-			} else if (this.z < this.maxZ) {
-				this.x = this.minX;
-				this.y = this.minY;
-				this.z++;
-			}
-
+			this.x = this.index % this.width;
+			int i = this.index / this.width;
+			this.y = i % this.height;
+			this.z = i / this.height;
+			this.index++;
 			return true;
 		}
 	}
 
 	public int nextX() {
-		return this.x;
+		return this.originX + this.x;
 	}
 
 	public int nextY() {
-		return this.y;
+		return this.originY + this.y;
 	}
 
 	public int nextZ() {
-		return this.z;
+		return this.originZ + this.z;
 	}
 
 	public int getNextType() {
 		int i = 0;
-		if (this.x == this.minX || this.x == this.maxX) {
+		if (this.x == 0 || this.x == this.width - 1) {
 			i++;
 		}
 
-		if (this.y == this.minY || this.y == this.maxY) {
+		if (this.y == 0 || this.y == this.height - 1) {
 			i++;
 		}
 
-		if (this.z == this.minZ || this.z == this.maxZ) {
+		if (this.z == 0 || this.z == this.depth - 1) {
 			i++;
 		}
 

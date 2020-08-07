@@ -9,6 +9,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -19,8 +20,7 @@ import net.minecraft.world.item.ItemStack;
 public abstract class Enchantment {
 	private final EquipmentSlot[] slots;
 	private final Enchantment.Rarity rarity;
-	@Nullable
-	public EnchantmentCategory category;
+	public final EnchantmentCategory category;
 	@Nullable
 	protected String descriptionId;
 
@@ -98,18 +98,18 @@ public abstract class Enchantment {
 	}
 
 	public Component getFullname(int i) {
-		Component component = new TranslatableComponent(this.getDescriptionId());
+		MutableComponent mutableComponent = new TranslatableComponent(this.getDescriptionId());
 		if (this.isCurse()) {
-			component.withStyle(ChatFormatting.RED);
+			mutableComponent.withStyle(ChatFormatting.RED);
 		} else {
-			component.withStyle(ChatFormatting.GRAY);
+			mutableComponent.withStyle(ChatFormatting.GRAY);
 		}
 
 		if (i != 1 || this.getMaxLevel() != 1) {
-			component.append(" ").append(new TranslatableComponent("enchantment.level." + i));
+			mutableComponent.append(" ").append(new TranslatableComponent("enchantment.level." + i));
 		}
 
-		return component;
+		return mutableComponent;
 	}
 
 	public boolean canEnchant(ItemStack itemStack) {
@@ -128,6 +128,14 @@ public abstract class Enchantment {
 
 	public boolean isCurse() {
 		return false;
+	}
+
+	public boolean isTradeable() {
+		return true;
+	}
+
+	public boolean isDiscoverable() {
+		return true;
 	}
 
 	public static enum Rarity {

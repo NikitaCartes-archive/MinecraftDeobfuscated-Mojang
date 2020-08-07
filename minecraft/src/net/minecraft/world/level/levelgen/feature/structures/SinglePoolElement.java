@@ -1,18 +1,22 @@
 package net.minecraft.world.level.levelgen.feature.structures;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Deserializer;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.properties.StructureMode;
@@ -20,42 +24,55 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnoreProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.JigsawReplacementProcessor;
-import net.minecraft.world.level.levelgen.structure.templatesystem.NopProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
 public class SinglePoolElement extends StructurePoolElement {
-	protected final ResourceLocation location;
-	protected final ImmutableList<StructureProcessor> processors;
+	private static final Codec<Either<ResourceLocation, StructureTemplate>> TEMPLATE_CODEC = Codec.of(
+		SinglePoolElement::encodeTemplate, ResourceLocation.CODEC.map(Either::left)
+	);
+	public static final Codec<SinglePoolElement> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(templateCodec(), processorsCodec(), projectionCodec()).apply(instance, SinglePoolElement::new)
+	);
+	protected final Either<ResourceLocation, StructureTemplate> template;
+	protected final Supplier<StructureProcessorList> processors;
 
-	@Deprecated
-	public SinglePoolElement(String string, List<StructureProcessor> list) {
-		this(string, list, StructureTemplatePool.Projection.RIGID);
+	private static <T> DataResult<T> encodeTemplate(Either<ResourceLocation, StructureTemplate> either, DynamicOps<T> dynamicOps, T object) {
+		Optional<ResourceLocation> optional = either.left();
+		return !optional.isPresent()
+			? DataResult.error("Can not serialize a runtime pool element")
+			: ResourceLocation.CODEC.encode((ResourceLocation)optional.get(), dynamicOps, object);
 	}
 
-	public SinglePoolElement(String string, List<StructureProcessor> list, StructureTemplatePool.Projection projection) {
+	protected static <E extends SinglePoolElement> RecordCodecBuilder<E, Supplier<StructureProcessorList>> processorsCodec() {
+		return StructureProcessorType.LIST_CODEC.fieldOf("processors").forGetter(singlePoolElement -> singlePoolElement.processors);
+	}
+
+	protected static <E extends SinglePoolElement> RecordCodecBuilder<E, Either<ResourceLocation, StructureTemplate>> templateCodec() {
+		return TEMPLATE_CODEC.fieldOf("location").forGetter(singlePoolElement -> singlePoolElement.template);
+	}
+
+	protected SinglePoolElement(
+		Either<ResourceLocation, StructureTemplate> either, Supplier<StructureProcessorList> supplier, StructureTemplatePool.Projection projection
+	) {
 		super(projection);
-		this.location = new ResourceLocation(string);
-		this.processors = ImmutableList.copyOf(list);
+		this.template = either;
+		this.processors = supplier;
 	}
 
-	@Deprecated
-	public SinglePoolElement(String string) {
-		this(string, ImmutableList.of());
+	public SinglePoolElement(StructureTemplate structureTemplate) {
+		this(Either.right(structureTemplate), () -> ProcessorLists.EMPTY, StructureTemplatePool.Projection.RIGID);
 	}
 
-	public SinglePoolElement(Dynamic<?> dynamic) {
-		super(dynamic);
-		this.location = new ResourceLocation(dynamic.get("location").asString(""));
-		this.processors = ImmutableList.copyOf(
-			dynamic.get("processors").asList(dynamicx -> Deserializer.deserialize(dynamicx, Registry.STRUCTURE_PROCESSOR, "processor_type", NopProcessor.INSTANCE))
-		);
+	private StructureTemplate getTemplate(StructureManager structureManager) {
+		return this.template.map(structureManager::getOrCreate, Function.identity());
 	}
 
 	public List<StructureTemplate.StructureBlockInfo> getDataMarkers(StructureManager structureManager, BlockPos blockPos, Rotation rotation, boolean bl) {
-		StructureTemplate structureTemplate = structureManager.getOrCreate(this.location);
+		StructureTemplate structureTemplate = this.getTemplate(structureManager);
 		List<StructureTemplate.StructureBlockInfo> list = structureTemplate.filterBlocks(
 			blockPos, new StructurePlaceSettings().setRotation(rotation), Blocks.STRUCTURE_BLOCK, bl
 		);
@@ -77,7 +94,7 @@ public class SinglePoolElement extends StructurePoolElement {
 	public List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(
 		StructureManager structureManager, BlockPos blockPos, Rotation rotation, Random random
 	) {
-		StructureTemplate structureTemplate = structureManager.getOrCreate(this.location);
+		StructureTemplate structureTemplate = this.getTemplate(structureManager);
 		List<StructureTemplate.StructureBlockInfo> list = structureTemplate.filterBlocks(
 			blockPos, new StructurePlaceSettings().setRotation(rotation), Blocks.JIGSAW, true
 		);
@@ -87,69 +104,61 @@ public class SinglePoolElement extends StructurePoolElement {
 
 	@Override
 	public BoundingBox getBoundingBox(StructureManager structureManager, BlockPos blockPos, Rotation rotation) {
-		StructureTemplate structureTemplate = structureManager.getOrCreate(this.location);
+		StructureTemplate structureTemplate = this.getTemplate(structureManager);
 		return structureTemplate.getBoundingBox(new StructurePlaceSettings().setRotation(rotation), blockPos);
 	}
 
 	@Override
 	public boolean place(
 		StructureManager structureManager,
-		LevelAccessor levelAccessor,
-		ChunkGenerator<?> chunkGenerator,
+		WorldGenLevel worldGenLevel,
+		StructureFeatureManager structureFeatureManager,
+		ChunkGenerator chunkGenerator,
 		BlockPos blockPos,
+		BlockPos blockPos2,
 		Rotation rotation,
 		BoundingBox boundingBox,
-		Random random
+		Random random,
+		boolean bl
 	) {
-		StructureTemplate structureTemplate = structureManager.getOrCreate(this.location);
-		StructurePlaceSettings structurePlaceSettings = this.getSettings(rotation, boundingBox);
-		if (!structureTemplate.placeInWorld(levelAccessor, blockPos, structurePlaceSettings, 18)) {
+		StructureTemplate structureTemplate = this.getTemplate(structureManager);
+		StructurePlaceSettings structurePlaceSettings = this.getSettings(rotation, boundingBox, bl);
+		if (!structureTemplate.placeInWorld(worldGenLevel, blockPos, blockPos2, structurePlaceSettings, random, 18)) {
 			return false;
 		} else {
 			for (StructureTemplate.StructureBlockInfo structureBlockInfo : StructureTemplate.processBlockInfos(
-				levelAccessor, blockPos, structurePlaceSettings, this.getDataMarkers(structureManager, blockPos, rotation, false)
+				worldGenLevel, blockPos, blockPos2, structurePlaceSettings, this.getDataMarkers(structureManager, blockPos, rotation, false)
 			)) {
-				this.handleDataMarker(levelAccessor, structureBlockInfo, blockPos, rotation, random, boundingBox);
+				this.handleDataMarker(worldGenLevel, structureBlockInfo, blockPos, rotation, random, boundingBox);
 			}
 
 			return true;
 		}
 	}
 
-	protected StructurePlaceSettings getSettings(Rotation rotation, BoundingBox boundingBox) {
+	protected StructurePlaceSettings getSettings(Rotation rotation, BoundingBox boundingBox, boolean bl) {
 		StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings();
 		structurePlaceSettings.setBoundingBox(boundingBox);
 		structurePlaceSettings.setRotation(rotation);
 		structurePlaceSettings.setKnownShape(true);
 		structurePlaceSettings.setIgnoreEntities(false);
-		structurePlaceSettings.addProcessor(BlockIgnoreProcessor.STRUCTURE_AND_AIR);
-		structurePlaceSettings.addProcessor(JigsawReplacementProcessor.INSTANCE);
-		this.processors.forEach(structurePlaceSettings::addProcessor);
+		structurePlaceSettings.addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
+		structurePlaceSettings.setFinalizeEntities(true);
+		if (!bl) {
+			structurePlaceSettings.addProcessor(JigsawReplacementProcessor.INSTANCE);
+		}
+
+		((StructureProcessorList)this.processors.get()).list().forEach(structurePlaceSettings::addProcessor);
 		this.getProjection().getProcessors().forEach(structurePlaceSettings::addProcessor);
 		return structurePlaceSettings;
 	}
 
 	@Override
-	public StructurePoolElementType getType() {
+	public StructurePoolElementType<?> getType() {
 		return StructurePoolElementType.SINGLE;
 	}
 
-	@Override
-	public <T> Dynamic<T> getDynamic(DynamicOps<T> dynamicOps) {
-		return new Dynamic<>(
-			dynamicOps,
-			dynamicOps.createMap(
-				ImmutableMap.of(
-					dynamicOps.createString("location"),
-					dynamicOps.createString(this.location.toString()),
-					dynamicOps.createString("processors"),
-					dynamicOps.createList(this.processors.stream().map(structureProcessor -> structureProcessor.serialize(dynamicOps).getValue()))
-				)
-			)
-		);
-	}
-
 	public String toString() {
-		return "Single[" + this.location + "]";
+		return "Single[" + this.template + "]";
 	}
 }

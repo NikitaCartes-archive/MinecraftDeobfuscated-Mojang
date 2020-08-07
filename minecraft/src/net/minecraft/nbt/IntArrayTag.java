@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -110,17 +111,17 @@ public class IntArrayTag extends CollectionTag<IntTag> {
 	@Override
 	public Component getPrettyDisplay(String string, int i) {
 		Component component = new TextComponent("I").withStyle(SYNTAX_HIGHLIGHTING_NUMBER_TYPE);
-		Component component2 = new TextComponent("[").append(component).append(";");
+		MutableComponent mutableComponent = new TextComponent("[").append(component).append(";");
 
 		for (int j = 0; j < this.data.length; j++) {
-			component2.append(" ").append(new TextComponent(String.valueOf(this.data[j])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER));
+			mutableComponent.append(" ").append(new TextComponent(String.valueOf(this.data[j])).withStyle(SYNTAX_HIGHLIGHTING_NUMBER));
 			if (j != this.data.length - 1) {
-				component2.append(",");
+				mutableComponent.append(",");
 			}
 		}
 
-		component2.append("]");
-		return component2;
+		mutableComponent.append("]");
+		return mutableComponent;
 	}
 
 	public int size() {
@@ -165,6 +166,11 @@ public class IntArrayTag extends CollectionTag<IntTag> {
 		int j = this.data[i];
 		this.data = ArrayUtils.remove(this.data, i);
 		return IntTag.valueOf(j);
+	}
+
+	@Override
+	public byte getElementType() {
+		return 3;
 	}
 
 	public void clear() {

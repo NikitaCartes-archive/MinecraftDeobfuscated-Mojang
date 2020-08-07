@@ -5,10 +5,12 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.EntityType;
@@ -30,6 +32,7 @@ import net.minecraft.world.entity.monster.Illusioner;
 import net.minecraft.world.entity.monster.Pillager;
 import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.monster.Vindicator;
+import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -62,7 +65,7 @@ public class WanderingTrader extends AbstractVillager {
 					this,
 					PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.INVISIBILITY),
 					SoundEvents.WANDERING_TRADER_DISAPPEARED,
-					wanderingTrader -> !this.level.isDay() && !wanderingTrader.isInvisible()
+					wanderingTrader -> this.level.isNight() && !wanderingTrader.isInvisible()
 				)
 			);
 		this.goalSelector
@@ -79,6 +82,7 @@ public class WanderingTrader extends AbstractVillager {
 		this.goalSelector.addGoal(1, new AvoidEntityGoal(this, Vex.class, 8.0F, 0.5, 0.5));
 		this.goalSelector.addGoal(1, new AvoidEntityGoal(this, Pillager.class, 15.0F, 0.5, 0.5));
 		this.goalSelector.addGoal(1, new AvoidEntityGoal(this, Illusioner.class, 12.0F, 0.5, 0.5));
+		this.goalSelector.addGoal(1, new AvoidEntityGoal(this, Zoglin.class, 10.0F, 0.5, 0.5));
 		this.goalSelector.addGoal(1, new PanicGoal(this, 0.5));
 		this.goalSelector.addGoal(1, new LookAtTradingPlayerGoal(this));
 		this.goalSelector.addGoal(2, new WanderingTrader.WanderToPositionGoal(this, 2.0, 0.35));
@@ -90,7 +94,7 @@ public class WanderingTrader extends AbstractVillager {
 
 	@Nullable
 	@Override
-	public AgableMob getBreedOffspring(AgableMob agableMob) {
+	public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
 		return null;
 	}
 
@@ -100,26 +104,22 @@ public class WanderingTrader extends AbstractVillager {
 	}
 
 	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		boolean bl = itemStack.getItem() == Items.NAME_TAG;
-		if (bl) {
-			itemStack.interactEnemy(player, this, interactionHand);
-			return true;
-		} else if (itemStack.getItem() != Items.VILLAGER_SPAWN_EGG && this.isAlive() && !this.isTrading() && !this.isBaby()) {
+		if (itemStack.getItem() != Items.VILLAGER_SPAWN_EGG && this.isAlive() && !this.isTrading() && !this.isBaby()) {
 			if (interactionHand == InteractionHand.MAIN_HAND) {
 				player.awardStat(Stats.TALKED_TO_VILLAGER);
 			}
 
 			if (this.getOffers().isEmpty()) {
-				return super.mobInteract(player, interactionHand);
+				return InteractionResult.sidedSuccess(this.level.isClientSide);
 			} else {
 				if (!this.level.isClientSide) {
 					this.setTradingPlayer(player);
 					this.openTradingScreen(player, this.getDisplayName(), 1);
 				}
 
-				return true;
+				return InteractionResult.sidedSuccess(this.level.isClientSide);
 			}
 		} else {
 			return super.mobInteract(player, interactionHand);

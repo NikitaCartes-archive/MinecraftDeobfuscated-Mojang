@@ -52,11 +52,6 @@ public abstract class NbtComponent extends BaseComponent implements ContextAware
 
 	protected abstract Stream<CompoundTag> getData(CommandSourceStack commandSourceStack) throws CommandSyntaxException;
 
-	@Override
-	public String getContents() {
-		return "";
-	}
-
 	public String getNbtPath() {
 		return this.nbtPathPattern;
 	}
@@ -66,7 +61,7 @@ public abstract class NbtComponent extends BaseComponent implements ContextAware
 	}
 
 	@Override
-	public Component resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
+	public MutableComponent resolve(@Nullable CommandSourceStack commandSourceStack, @Nullable Entity entity, int i) throws CommandSyntaxException {
 		if (commandSourceStack != null && this.compiledNbtPath != null) {
 			Stream<String> stream = this.getData(commandSourceStack).flatMap(compoundTag -> {
 				try {
@@ -75,16 +70,16 @@ public abstract class NbtComponent extends BaseComponent implements ContextAware
 					return Stream.empty();
 				}
 			}).map(Tag::getAsString);
-			return (Component)(this.interpreting
-				? (Component)stream.flatMap(string -> {
+			return (MutableComponent)(this.interpreting
+				? (MutableComponent)stream.flatMap(string -> {
 					try {
-						Component component = Component.Serializer.fromJson(string);
-						return Stream.of(ComponentUtils.updateForEntity(commandSourceStack, component, entity, i));
+						MutableComponent mutableComponent = Component.Serializer.fromJson(string);
+						return Stream.of(ComponentUtils.updateForEntity(commandSourceStack, mutableComponent, entity, i));
 					} catch (Exception var5) {
 						LOGGER.warn("Failed to parse component: " + string, (Throwable)var5);
 						return Stream.of();
 					}
-				}).reduce((component, component2) -> component.append(", ").append(component2)).orElse(new TextComponent(""))
+				}).reduce((mutableComponent, mutableComponent2) -> mutableComponent.append(", ").append(mutableComponent2)).orElse(new TextComponent(""))
 				: new TextComponent(Joiner.on(", ").join(stream.iterator())));
 		} else {
 			return new TextComponent("");
@@ -122,8 +117,7 @@ public abstract class NbtComponent extends BaseComponent implements ContextAware
 			return this.posPattern;
 		}
 
-		@Override
-		public Component copy() {
+		public NbtComponent.BlockNbtComponent plainCopy() {
 			return new NbtComponent.BlockNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.posPattern, this.compiledPos);
 		}
 
@@ -204,8 +198,7 @@ public abstract class NbtComponent extends BaseComponent implements ContextAware
 			return this.selectorPattern;
 		}
 
-		@Override
-		public Component copy() {
+		public NbtComponent.EntityNbtComponent plainCopy() {
 			return new NbtComponent.EntityNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.selectorPattern, this.compiledSelector);
 		}
 
@@ -266,8 +259,7 @@ public abstract class NbtComponent extends BaseComponent implements ContextAware
 			return this.id;
 		}
 
-		@Override
-		public Component copy() {
+		public NbtComponent.StorageNbtComponent plainCopy() {
 			return new NbtComponent.StorageNbtComponent(this.nbtPathPattern, this.compiledNbtPath, this.interpreting, this.id);
 		}
 

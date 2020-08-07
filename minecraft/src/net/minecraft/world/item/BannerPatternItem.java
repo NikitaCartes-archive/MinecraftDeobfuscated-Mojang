@@ -6,6 +6,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BannerPattern;
@@ -29,7 +30,7 @@ public class BannerPatternItem extends Item {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public Component getDisplayName() {
+	public MutableComponent getDisplayName() {
 		return new TranslatableComponent(this.getDescriptionId() + ".desc");
 	}
 }

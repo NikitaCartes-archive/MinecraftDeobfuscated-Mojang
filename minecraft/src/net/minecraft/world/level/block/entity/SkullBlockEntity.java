@@ -12,15 +12,18 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.StringUtil;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class SkullBlockEntity extends BlockEntity implements TickableBlockEntity {
+	@Nullable
+	private static GameProfileCache profileCache;
+	@Nullable
+	private static MinecraftSessionService sessionService;
+	@Nullable
 	private GameProfile owner;
 	private int mouthTickCount;
 	private boolean isMovingMouth;
-	private static GameProfileCache profileCache;
-	private static MinecraftSessionService sessionService;
 
 	public SkullBlockEntity() {
 		super(BlockEntityType.SKULL);
@@ -40,17 +43,17 @@ public class SkullBlockEntity extends BlockEntity implements TickableBlockEntity
 		if (this.owner != null) {
 			CompoundTag compoundTag2 = new CompoundTag();
 			NbtUtils.writeGameProfile(compoundTag2, this.owner);
-			compoundTag.put("Owner", compoundTag2);
+			compoundTag.put("SkullOwner", compoundTag2);
 		}
 
 		return compoundTag;
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
-		if (compoundTag.contains("Owner", 10)) {
-			this.setOwner(NbtUtils.readGameProfile(compoundTag.getCompound("Owner")));
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
+		if (compoundTag.contains("SkullOwner", 10)) {
+			this.setOwner(NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner")));
 		} else if (compoundTag.contains("ExtraType", 8)) {
 			String string = compoundTag.getString("ExtraType");
 			if (!StringUtil.isNullOrEmpty(string)) {
@@ -61,8 +64,8 @@ public class SkullBlockEntity extends BlockEntity implements TickableBlockEntity
 
 	@Override
 	public void tick() {
-		Block block = this.getBlockState().getBlock();
-		if (block == Blocks.DRAGON_HEAD || block == Blocks.DRAGON_WALL_HEAD) {
+		BlockState blockState = this.getBlockState();
+		if (blockState.is(Blocks.DRAGON_HEAD) || blockState.is(Blocks.DRAGON_WALL_HEAD)) {
 			if (this.level.hasNeighborSignal(this.worldPosition)) {
 				this.isMovingMouth = true;
 				this.mouthTickCount++;
@@ -104,7 +107,8 @@ public class SkullBlockEntity extends BlockEntity implements TickableBlockEntity
 		this.setChanged();
 	}
 
-	public static GameProfile updateGameprofile(GameProfile gameProfile) {
+	@Nullable
+	public static GameProfile updateGameprofile(@Nullable GameProfile gameProfile) {
 		if (gameProfile != null && !StringUtil.isNullOrEmpty(gameProfile.getName())) {
 			if (gameProfile.isComplete() && gameProfile.getProperties().containsKey("textures")) {
 				return gameProfile;

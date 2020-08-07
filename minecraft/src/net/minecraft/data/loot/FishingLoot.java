@@ -3,6 +3,8 @@ package net.minecraft.data.loot;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import net.minecraft.Util;
+import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.critereon.FishingHookPredicate;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -11,6 +13,7 @@ import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.ConstantIntValue;
+import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.RandomValueBounds;
@@ -22,6 +25,7 @@ import net.minecraft.world.level.storage.loot.functions.SetItemDamageFunction;
 import net.minecraft.world.level.storage.loot.functions.SetNbtFunction;
 import net.minecraft.world.level.storage.loot.predicates.LocationCheck;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyCondition;
 
 public class FishingLoot implements Consumer<BiConsumer<ResourceLocation, LootTable.Builder>> {
 	public static final LootItemCondition.Builder IN_JUNGLE = LocationCheck.checkLocation(LocationPredicate.Builder.location().setBiome(Biomes.JUNGLE));
@@ -48,7 +52,16 @@ public class FishingLoot implements Consumer<BiConsumer<ResourceLocation, LootTa
 					LootPool.lootPool()
 						.setRolls(ConstantIntValue.exactly(1))
 						.add(LootTableReference.lootTableReference(BuiltInLootTables.FISHING_JUNK).setWeight(10).setQuality(-2))
-						.add(LootTableReference.lootTableReference(BuiltInLootTables.FISHING_TREASURE).setWeight(5).setQuality(2))
+						.add(
+							LootTableReference.lootTableReference(BuiltInLootTables.FISHING_TREASURE)
+								.setWeight(5)
+								.setQuality(2)
+								.when(
+									LootItemEntityPropertyCondition.hasProperties(
+										LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().fishingHook(FishingHookPredicate.inOpenWater(true))
+									)
+								)
+						)
 						.add(LootTableReference.lootTableReference(BuiltInLootTables.FISHING_FISH).setWeight(85).setQuality(-1))
 				)
 		);
@@ -68,6 +81,7 @@ public class FishingLoot implements Consumer<BiConsumer<ResourceLocation, LootTa
 			LootTable.lootTable()
 				.withPool(
 					LootPool.lootPool()
+						.add(LootItem.lootTableItem(Blocks.LILY_PAD).setWeight(17))
 						.add(LootItem.lootTableItem(Items.LEATHER_BOOTS).setWeight(10).apply(SetItemDamageFunction.setDamage(RandomValueBounds.between(0.0F, 0.9F))))
 						.add(LootItem.lootTableItem(Items.LEATHER).setWeight(10))
 						.add(LootItem.lootTableItem(Items.BONE).setWeight(10))
@@ -97,7 +111,6 @@ public class FishingLoot implements Consumer<BiConsumer<ResourceLocation, LootTa
 			LootTable.lootTable()
 				.withPool(
 					LootPool.lootPool()
-						.add(LootItem.lootTableItem(Blocks.LILY_PAD))
 						.add(LootItem.lootTableItem(Items.NAME_TAG))
 						.add(LootItem.lootTableItem(Items.SADDLE))
 						.add(

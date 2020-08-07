@@ -1,6 +1,7 @@
 package net.minecraft.gametest.framework;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -14,8 +15,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.blocks.BlockInput;
@@ -35,8 +38,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import org.apache.commons.io.IOUtils;
 
@@ -47,18 +52,96 @@ public class TestCommand {
 				.then(Commands.literal("runthis").executes(commandContext -> runNearbyTest(commandContext.getSource())))
 				.then(Commands.literal("runthese").executes(commandContext -> runAllNearbyTests(commandContext.getSource())))
 				.then(
+					Commands.literal("runfailed")
+						.executes(commandContext -> runLastFailedTests(commandContext.getSource(), false, 0, 8))
+						.then(
+							Commands.argument("onlyRequiredTests", BoolArgumentType.bool())
+								.executes(commandContext -> runLastFailedTests(commandContext.getSource(), BoolArgumentType.getBool(commandContext, "onlyRequiredTests"), 0, 8))
+								.then(
+									Commands.argument("rotationSteps", IntegerArgumentType.integer())
+										.executes(
+											commandContext -> runLastFailedTests(
+													commandContext.getSource(),
+													BoolArgumentType.getBool(commandContext, "onlyRequiredTests"),
+													IntegerArgumentType.getInteger(commandContext, "rotationSteps"),
+													8
+												)
+										)
+										.then(
+											Commands.argument("testsPerRow", IntegerArgumentType.integer())
+												.executes(
+													commandContext -> runLastFailedTests(
+															commandContext.getSource(),
+															BoolArgumentType.getBool(commandContext, "onlyRequiredTests"),
+															IntegerArgumentType.getInteger(commandContext, "rotationSteps"),
+															IntegerArgumentType.getInteger(commandContext, "testsPerRow")
+														)
+												)
+										)
+								)
+						)
+				)
+				.then(
 					Commands.literal("run")
 						.then(
 							Commands.argument("testName", TestFunctionArgument.testFunctionArgument())
-								.executes(commandContext -> runTest(commandContext.getSource(), TestFunctionArgument.getTestFunction(commandContext, "testName")))
+								.executes(commandContext -> runTest(commandContext.getSource(), TestFunctionArgument.getTestFunction(commandContext, "testName"), 0))
+								.then(
+									Commands.argument("rotationSteps", IntegerArgumentType.integer())
+										.executes(
+											commandContext -> runTest(
+													commandContext.getSource(),
+													TestFunctionArgument.getTestFunction(commandContext, "testName"),
+													IntegerArgumentType.getInteger(commandContext, "rotationSteps")
+												)
+										)
+								)
 						)
 				)
 				.then(
 					Commands.literal("runall")
-						.executes(commandContext -> runAllTests(commandContext.getSource()))
+						.executes(commandContext -> runAllTests(commandContext.getSource(), 0, 8))
 						.then(
 							Commands.argument("testClassName", TestClassNameArgument.testClassName())
-								.executes(commandContext -> runAllTestsInClass(commandContext.getSource(), TestClassNameArgument.getTestClassName(commandContext, "testClassName")))
+								.executes(
+									commandContext -> runAllTestsInClass(commandContext.getSource(), TestClassNameArgument.getTestClassName(commandContext, "testClassName"), 0, 8)
+								)
+								.then(
+									Commands.argument("rotationSteps", IntegerArgumentType.integer())
+										.executes(
+											commandContext -> runAllTestsInClass(
+													commandContext.getSource(),
+													TestClassNameArgument.getTestClassName(commandContext, "testClassName"),
+													IntegerArgumentType.getInteger(commandContext, "rotationSteps"),
+													8
+												)
+										)
+										.then(
+											Commands.argument("testsPerRow", IntegerArgumentType.integer())
+												.executes(
+													commandContext -> runAllTestsInClass(
+															commandContext.getSource(),
+															TestClassNameArgument.getTestClassName(commandContext, "testClassName"),
+															IntegerArgumentType.getInteger(commandContext, "rotationSteps"),
+															IntegerArgumentType.getInteger(commandContext, "testsPerRow")
+														)
+												)
+										)
+								)
+						)
+						.then(
+							Commands.argument("rotationSteps", IntegerArgumentType.integer())
+								.executes(commandContext -> runAllTests(commandContext.getSource(), IntegerArgumentType.getInteger(commandContext, "rotationSteps"), 8))
+								.then(
+									Commands.argument("testsPerRow", IntegerArgumentType.integer())
+										.executes(
+											commandContext -> runAllTests(
+													commandContext.getSource(),
+													IntegerArgumentType.getInteger(commandContext, "rotationSteps"),
+													IntegerArgumentType.getInteger(commandContext, "testsPerRow")
+												)
+										)
+								)
 						)
 				)
 				.then(
@@ -68,6 +151,7 @@ public class TestCommand {
 								.executes(commandContext -> exportTestStructure(commandContext.getSource(), StringArgumentType.getString(commandContext, "testName")))
 						)
 				)
+				.then(Commands.literal("exportthis").executes(commandContext -> exportNearestTestStructure(commandContext.getSource())))
 				.then(
 					Commands.literal("import")
 						.then(
@@ -129,13 +213,13 @@ public class TestCommand {
 	}
 
 	private static int createNewStructure(CommandSourceStack commandSourceStack, String string, int i, int j, int k) {
-		if (i <= 32 && j <= 32 && k <= 32) {
+		if (i <= 48 && j <= 48 && k <= 48) {
 			ServerLevel serverLevel = commandSourceStack.getLevel();
 			BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
 			BlockPos blockPos2 = new BlockPos(
 				blockPos.getX(), commandSourceStack.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY(), blockPos.getZ() + 3
 			);
-			StructureUtils.createNewEmptyStructureBlock(string.toLowerCase(), blockPos2, new BlockPos(i, j, k), 2, serverLevel);
+			StructureUtils.createNewEmptyStructureBlock(string.toLowerCase(), blockPos2, new BlockPos(i, j, k), Rotation.NONE, serverLevel);
 
 			for (int l = 0; l < i; l++) {
 				for (int m = 0; m < k; m++) {
@@ -146,10 +230,10 @@ public class TestCommand {
 				}
 			}
 
-			StructureUtils.addCommandBlockAndButtonToStartTest(blockPos2.offset(1, 0, -1), serverLevel);
+			StructureUtils.addCommandBlockAndButtonToStartTest(blockPos2, new BlockPos(1, 0, -1), Rotation.NONE, serverLevel);
 			return 0;
 		} else {
-			throw new IllegalArgumentException("The structure must be less than 32 blocks big in each axis");
+			throw new IllegalArgumentException("The structure must be less than 48 blocks big in each axis");
 		}
 	}
 
@@ -172,11 +256,11 @@ public class TestCommand {
 			String string3 = structureBlockEntity.getStructurePath();
 			Component component = new TextComponent(string2)
 				.setStyle(
-					new Style()
-						.setBold(true)
-						.setColor(ChatFormatting.GREEN)
-						.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to copy to clipboard")))
-						.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "final BlockPos " + string + " = new BlockPos(" + string2 + ");"))
+					Style.EMPTY
+						.withBold(true)
+						.withColor(ChatFormatting.GREEN)
+						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to copy to clipboard")))
+						.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "final BlockPos " + string + " = new BlockPos(" + string2 + ");"))
 				);
 			commandSourceStack.sendSuccess(new TextComponent("Position relative to " + string3 + ": ").append(component), false);
 			DebugPackets.sendGameTestAddMarker(serverLevel, new BlockPos(blockPos), string2, -2147418368, 10000);
@@ -218,14 +302,16 @@ public class TestCommand {
 		StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPos);
 		String string = structureBlockEntity.getStructurePath();
 		TestFunction testFunction = GameTestRegistry.getTestFunction(string);
-		GameTestInfo gameTestInfo = new GameTestInfo(testFunction, blockPos, serverLevel);
+		GameTestInfo gameTestInfo = new GameTestInfo(testFunction, structureBlockEntity.getRotation(), serverLevel);
 		if (multipleTestTracker != null) {
-			multipleTestTracker.add(gameTestInfo);
+			multipleTestTracker.addTestToTrack(gameTestInfo);
 			gameTestInfo.addListener(new TestCommand.TestSummaryDisplayer(serverLevel, multipleTestTracker));
 		}
 
 		runTestPreparation(testFunction, serverLevel);
-		GameTestRunner.runTest(gameTestInfo, GameTestTicker.singleton);
+		AABB aABB = StructureUtils.getStructureBounds(structureBlockEntity);
+		BlockPos blockPos2 = new BlockPos(aABB.minX, aABB.minY, aABB.minZ);
+		GameTestRunner.runTest(gameTestInfo, blockPos2, GameTestTicker.singleton);
 	}
 
 	private static void showTestSummaryIfAllDone(ServerLevel serverLevel, MultipleTestTracker multipleTestTracker) {
@@ -255,16 +341,16 @@ public class TestCommand {
 		return 1;
 	}
 
-	private static int runTest(CommandSourceStack commandSourceStack, TestFunction testFunction) {
+	private static int runTest(CommandSourceStack commandSourceStack, TestFunction testFunction, int i) {
 		ServerLevel serverLevel = commandSourceStack.getLevel();
 		BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
-		BlockPos blockPos2 = new BlockPos(
-			blockPos.getX(), commandSourceStack.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY(), blockPos.getZ() + 3
-		);
+		int j = commandSourceStack.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY();
+		BlockPos blockPos2 = new BlockPos(blockPos.getX(), j, blockPos.getZ() + 3);
 		GameTestRunner.clearMarkers(serverLevel);
 		runTestPreparation(testFunction, serverLevel);
-		GameTestInfo gameTestInfo = new GameTestInfo(testFunction, blockPos2, serverLevel);
-		GameTestRunner.runTest(gameTestInfo, GameTestTicker.singleton);
+		Rotation rotation = StructureUtils.getRotationForRotationSteps(i);
+		GameTestInfo gameTestInfo = new GameTestInfo(testFunction, rotation, serverLevel);
+		GameTestRunner.runTest(gameTestInfo, blockPos2, GameTestTicker.singleton);
 		return 1;
 	}
 
@@ -275,33 +361,72 @@ public class TestCommand {
 		}
 	}
 
-	private static int runAllTests(CommandSourceStack commandSourceStack) {
+	private static int runAllTests(CommandSourceStack commandSourceStack, int i, int j) {
 		GameTestRunner.clearMarkers(commandSourceStack.getLevel());
-		runTests(commandSourceStack, GameTestRegistry.getAllTestFunctions());
+		Collection<TestFunction> collection = GameTestRegistry.getAllTestFunctions();
+		say(commandSourceStack, "Running all " + collection.size() + " tests...");
+		GameTestRegistry.forgetFailedTests();
+		runTests(commandSourceStack, collection, i, j);
 		return 1;
 	}
 
-	private static int runAllTestsInClass(CommandSourceStack commandSourceStack, String string) {
+	private static int runAllTestsInClass(CommandSourceStack commandSourceStack, String string, int i, int j) {
 		Collection<TestFunction> collection = GameTestRegistry.getTestFunctionsForClassName(string);
 		GameTestRunner.clearMarkers(commandSourceStack.getLevel());
-		runTests(commandSourceStack, collection);
+		say(commandSourceStack, "Running " + collection.size() + " tests from " + string + "...");
+		GameTestRegistry.forgetFailedTests();
+		runTests(commandSourceStack, collection, i, j);
 		return 1;
 	}
 
-	private static void runTests(CommandSourceStack commandSourceStack, Collection<TestFunction> collection) {
+	private static int runLastFailedTests(CommandSourceStack commandSourceStack, boolean bl, int i, int j) {
+		Collection<TestFunction> collection;
+		if (bl) {
+			collection = (Collection<TestFunction>)GameTestRegistry.getLastFailedTests().stream().filter(TestFunction::isRequired).collect(Collectors.toList());
+		} else {
+			collection = GameTestRegistry.getLastFailedTests();
+		}
+
+		if (collection.isEmpty()) {
+			say(commandSourceStack, "No failed tests to rerun");
+			return 0;
+		} else {
+			GameTestRunner.clearMarkers(commandSourceStack.getLevel());
+			say(commandSourceStack, "Rerunning " + collection.size() + " failed tests (" + (bl ? "only required tests" : "including optional tests") + ")");
+			runTests(commandSourceStack, collection, i, j);
+			return 1;
+		}
+	}
+
+	private static void runTests(CommandSourceStack commandSourceStack, Collection<TestFunction> collection, int i, int j) {
 		BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
 		BlockPos blockPos2 = new BlockPos(
 			blockPos.getX(), commandSourceStack.getLevel().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY(), blockPos.getZ() + 3
 		);
 		ServerLevel serverLevel = commandSourceStack.getLevel();
-		say(commandSourceStack, "Running " + collection.size() + " tests...");
-		Collection<GameTestInfo> collection2 = GameTestRunner.runTests(collection, blockPos2, serverLevel, GameTestTicker.singleton);
+		Rotation rotation = StructureUtils.getRotationForRotationSteps(i);
+		Collection<GameTestInfo> collection2 = GameTestRunner.runTests(collection, blockPos2, rotation, serverLevel, GameTestTicker.singleton, j);
 		MultipleTestTracker multipleTestTracker = new MultipleTestTracker(collection2);
-		multipleTestTracker.setListener(new TestCommand.TestSummaryDisplayer(serverLevel, multipleTestTracker));
+		multipleTestTracker.addListener(new TestCommand.TestSummaryDisplayer(serverLevel, multipleTestTracker));
+		multipleTestTracker.addFailureListener(gameTestInfo -> GameTestRegistry.rememberFailedTest(gameTestInfo.getTestFunction()));
 	}
 
 	private static void say(CommandSourceStack commandSourceStack, String string) {
 		commandSourceStack.sendSuccess(new TextComponent(string), false);
+	}
+
+	private static int exportNearestTestStructure(CommandSourceStack commandSourceStack) {
+		BlockPos blockPos = new BlockPos(commandSourceStack.getPosition());
+		ServerLevel serverLevel = commandSourceStack.getLevel();
+		BlockPos blockPos2 = StructureUtils.findNearestStructureBlock(blockPos, 15, serverLevel);
+		if (blockPos2 == null) {
+			say(serverLevel, "Couldn't find any structure block within 15 radius", ChatFormatting.RED);
+			return 0;
+		} else {
+			StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPos2);
+			String string = structureBlockEntity.getStructurePath();
+			return exportTestStructure(commandSourceStack, string);
+		}
 	}
 
 	private static int exportTestStructure(CommandSourceStack commandSourceStack, String string) {
@@ -321,7 +446,7 @@ public class TestCommand {
 				return 1;
 			}
 
-			say(commandSourceStack, "Exported to " + path3.toAbsolutePath());
+			say(commandSourceStack, "Exported " + string + " to " + path3.toAbsolutePath());
 			return 0;
 		}
 	}
@@ -336,18 +461,38 @@ public class TestCommand {
 			String string2 = IOUtils.toString(bufferedReader);
 			Files.createDirectories(path2.getParent());
 			OutputStream outputStream = Files.newOutputStream(path2);
-			NbtIo.writeCompressed(TagParser.parseTag(string2), outputStream);
+			Throwable var8 = null;
+
+			try {
+				NbtIo.writeCompressed(TagParser.parseTag(string2), outputStream);
+			} catch (Throwable var18) {
+				var8 = var18;
+				throw var18;
+			} finally {
+				if (outputStream != null) {
+					if (var8 != null) {
+						try {
+							outputStream.close();
+						} catch (Throwable var17) {
+							var8.addSuppressed(var17);
+						}
+					} else {
+						outputStream.close();
+					}
+				}
+			}
+
 			say(commandSourceStack, "Imported to " + path2.toAbsolutePath());
 			return 0;
-		} catch (CommandSyntaxException | IOException var8) {
+		} catch (CommandSyntaxException | IOException var20) {
 			System.err.println("Failed to load structure " + string);
-			var8.printStackTrace();
+			var20.printStackTrace();
 			return 1;
 		}
 	}
 
 	private static void say(ServerLevel serverLevel, String string, ChatFormatting chatFormatting) {
-		serverLevel.getPlayers(serverPlayer -> true).forEach(serverPlayer -> serverPlayer.sendMessage(new TextComponent(chatFormatting + string)));
+		serverLevel.getPlayers(serverPlayer -> true).forEach(serverPlayer -> serverPlayer.sendMessage(new TextComponent(chatFormatting + string), Util.NIL_UUID));
 	}
 
 	static class TestSummaryDisplayer implements GameTestListener {

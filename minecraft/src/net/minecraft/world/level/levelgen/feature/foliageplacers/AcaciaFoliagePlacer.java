@@ -1,55 +1,56 @@
 package net.minecraft.world.level.levelgen.feature.foliageplacers;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.UniformInt;
 import net.minecraft.world.level.LevelSimulatedRW;
-import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class AcaciaFoliagePlacer extends FoliagePlacer {
-	public AcaciaFoliagePlacer(int i, int j) {
-		super(i, j, FoliagePlacerType.ACACIA_FOLIAGE_PLACER);
-	}
+	public static final Codec<AcaciaFoliagePlacer> CODEC = RecordCodecBuilder.create(
+		instance -> foliagePlacerParts(instance).apply(instance, AcaciaFoliagePlacer::new)
+	);
 
-	public <T> AcaciaFoliagePlacer(Dynamic<T> dynamic) {
-		this(dynamic.get("radius").asInt(0), dynamic.get("radius_random").asInt(0));
+	public AcaciaFoliagePlacer(UniformInt uniformInt, UniformInt uniformInt2) {
+		super(uniformInt, uniformInt2);
 	}
 
 	@Override
-	public void createFoliage(
-		LevelSimulatedRW levelSimulatedRW, Random random, SmallTreeConfiguration smallTreeConfiguration, int i, int j, int k, BlockPos blockPos, Set<BlockPos> set
+	protected FoliagePlacerType<?> type() {
+		return FoliagePlacerType.ACACIA_FOLIAGE_PLACER;
+	}
+
+	@Override
+	protected void createFoliage(
+		LevelSimulatedRW levelSimulatedRW,
+		Random random,
+		TreeConfiguration treeConfiguration,
+		int i,
+		FoliagePlacer.FoliageAttachment foliageAttachment,
+		int j,
+		int k,
+		Set<BlockPos> set,
+		int l,
+		BoundingBox boundingBox
 	) {
-		smallTreeConfiguration.foliagePlacer.placeLeavesRow(levelSimulatedRW, random, smallTreeConfiguration, i, blockPos, 0, k, set);
-		smallTreeConfiguration.foliagePlacer.placeLeavesRow(levelSimulatedRW, random, smallTreeConfiguration, i, blockPos, 1, 1, set);
-		BlockPos blockPos2 = blockPos.above();
-
-		for (int l = -1; l <= 1; l++) {
-			for (int m = -1; m <= 1; m++) {
-				this.placeLeaf(levelSimulatedRW, random, blockPos2.offset(l, 0, m), smallTreeConfiguration, set);
-			}
-		}
-
-		for (int l = 2; l <= k - 1; l++) {
-			this.placeLeaf(levelSimulatedRW, random, blockPos2.east(l), smallTreeConfiguration, set);
-			this.placeLeaf(levelSimulatedRW, random, blockPos2.west(l), smallTreeConfiguration, set);
-			this.placeLeaf(levelSimulatedRW, random, blockPos2.south(l), smallTreeConfiguration, set);
-			this.placeLeaf(levelSimulatedRW, random, blockPos2.north(l), smallTreeConfiguration, set);
-		}
+		boolean bl = foliageAttachment.doubleTrunk();
+		BlockPos blockPos = foliageAttachment.foliagePos().above(l);
+		this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + foliageAttachment.radiusOffset(), set, -1 - j, bl, boundingBox);
+		this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k - 1, set, -j, bl, boundingBox);
+		this.placeLeavesRow(levelSimulatedRW, random, treeConfiguration, blockPos, k + foliageAttachment.radiusOffset() - 1, set, 0, bl, boundingBox);
 	}
 
 	@Override
-	public int foliageRadius(Random random, int i, int j, SmallTreeConfiguration smallTreeConfiguration) {
-		return this.radius + random.nextInt(this.radiusRandom + 1);
+	public int foliageHeight(Random random, int i, TreeConfiguration treeConfiguration) {
+		return 0;
 	}
 
 	@Override
-	protected boolean shouldSkipLocation(Random random, int i, int j, int k, int l, int m) {
-		return Math.abs(j) == m && Math.abs(l) == m && m > 0;
-	}
-
-	@Override
-	public int getTreeRadiusForHeight(int i, int j, int k, int l) {
-		return l == 0 ? 0 : 2;
+	protected boolean shouldSkipLocation(Random random, int i, int j, int k, int l, boolean bl) {
+		return j == 0 ? (i > 1 || k > 1) && i != 0 && k != 0 : i == l && k == l && l > 0;
 	}
 }

@@ -1,45 +1,30 @@
 package com.mojang.realmsclient.gui.screens;
 
-import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.realmsclient.dto.Backup;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map.Entry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.realms.Realms;
-import net.minecraft.realms.RealmsButton;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.realms.RealmsScreen;
-import net.minecraft.realms.RealmsSimpleScrolledSelectionList;
-import net.minecraft.realms.Tezzelator;
 
 @Environment(EnvType.CLIENT)
 public class RealmsBackupInfoScreen extends RealmsScreen {
-	private final RealmsScreen lastScreen;
-	private final int BUTTON_BACK_ID = 0;
+	private final Screen lastScreen;
 	private final Backup backup;
-	private final List<String> keys = Lists.<String>newArrayList();
 	private RealmsBackupInfoScreen.BackupInfoList backupInfoList;
-	String[] difficulties = new String[]{
-		getLocalizedString("options.difficulty.peaceful"),
-		getLocalizedString("options.difficulty.easy"),
-		getLocalizedString("options.difficulty.normal"),
-		getLocalizedString("options.difficulty.hard")
-	};
-	String[] gameModes = new String[]{
-		getLocalizedString("selectWorld.gameMode.survival"),
-		getLocalizedString("selectWorld.gameMode.creative"),
-		getLocalizedString("selectWorld.gameMode.adventure")
-	};
 
-	public RealmsBackupInfoScreen(RealmsScreen realmsScreen, Backup backup) {
-		this.lastScreen = realmsScreen;
+	public RealmsBackupInfoScreen(Screen screen, Backup backup) {
+		this.lastScreen = screen;
 		this.backup = backup;
-		if (backup.changeList != null) {
-			for (Entry<String, String> entry : backup.changeList.entrySet()) {
-				this.keys.add(entry.getKey());
-			}
-		}
 	}
 
 	@Override
@@ -48,27 +33,24 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 
 	@Override
 	public void init() {
-		this.setKeyboardHandlerSendRepeatsToGui(true);
-		this.buttonsAdd(new RealmsButton(0, this.width() / 2 - 100, this.height() / 4 + 120 + 24, getLocalizedString("gui.back")) {
-			@Override
-			public void onPress() {
-				Realms.setScreen(RealmsBackupInfoScreen.this.lastScreen);
-			}
-		});
-		this.backupInfoList = new RealmsBackupInfoScreen.BackupInfoList();
+		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
+		this.addButton(
+			new Button(this.width / 2 - 100, this.height / 4 + 120 + 24, 200, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen))
+		);
+		this.backupInfoList = new RealmsBackupInfoScreen.BackupInfoList(this.minecraft);
 		this.addWidget(this.backupInfoList);
-		this.focusOn(this.backupInfoList);
+		this.magicalSpecialHackyFocus(this.backupInfoList);
 	}
 
 	@Override
 	public void removed() {
-		this.setKeyboardHandlerSendRepeatsToGui(false);
+		this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
 	}
 
 	@Override
 	public boolean keyPressed(int i, int j, int k) {
 		if (i == 256) {
-			Realms.setScreen(this.lastScreen);
+			this.minecraft.setScreen(this.lastScreen);
 			return true;
 		} else {
 			return super.keyPressed(i, j, k);
@@ -76,69 +58,66 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
-		this.drawCenteredString("Changes from last backup", this.width() / 2, 10, 16777215);
-		this.backupInfoList.render(i, j, f);
-		super.render(i, j, f);
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
+		drawCenteredString(poseStack, this.font, "Changes from last backup", this.width / 2, 10, 16777215);
+		this.backupInfoList.render(poseStack, i, j, f);
+		super.render(poseStack, i, j, f);
 	}
 
-	private String checkForSpecificMetadata(String string, String string2) {
+	private Component checkForSpecificMetadata(String string, String string2) {
 		String string3 = string.toLowerCase(Locale.ROOT);
 		if (string3.contains("game") && string3.contains("mode")) {
 			return this.gameModeMetadata(string2);
 		} else {
-			return string3.contains("game") && string3.contains("difficulty") ? this.gameDifficultyMetadata(string2) : string2;
+			return (Component)(string3.contains("game") && string3.contains("difficulty") ? this.gameDifficultyMetadata(string2) : new TextComponent(string2));
 		}
 	}
 
-	private String gameDifficultyMetadata(String string) {
+	private Component gameDifficultyMetadata(String string) {
 		try {
-			return this.difficulties[Integer.parseInt(string)];
+			return RealmsSlotOptionsScreen.DIFFICULTIES[Integer.parseInt(string)];
 		} catch (Exception var3) {
-			return "UNKNOWN";
+			return new TextComponent("UNKNOWN");
 		}
 	}
 
-	private String gameModeMetadata(String string) {
+	private Component gameModeMetadata(String string) {
 		try {
-			return this.gameModes[Integer.parseInt(string)];
+			return RealmsSlotOptionsScreen.GAME_MODES[Integer.parseInt(string)];
 		} catch (Exception var3) {
-			return "UNKNOWN";
+			return new TextComponent("UNKNOWN");
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	class BackupInfoList extends RealmsSimpleScrolledSelectionList {
-		public BackupInfoList() {
-			super(RealmsBackupInfoScreen.this.width(), RealmsBackupInfoScreen.this.height(), 32, RealmsBackupInfoScreen.this.height() - 64, 36);
+	class BackupInfoList extends ObjectSelectionList<RealmsBackupInfoScreen.BackupInfoListEntry> {
+		public BackupInfoList(Minecraft minecraft) {
+			super(minecraft, RealmsBackupInfoScreen.this.width, RealmsBackupInfoScreen.this.height, 32, RealmsBackupInfoScreen.this.height - 64, 36);
+			this.setRenderSelection(false);
+			if (RealmsBackupInfoScreen.this.backup.changeList != null) {
+				RealmsBackupInfoScreen.this.backup
+					.changeList
+					.forEach((string, string2) -> this.addEntry(RealmsBackupInfoScreen.this.new BackupInfoListEntry(string, string2)));
+			}
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	class BackupInfoListEntry extends ObjectSelectionList.Entry<RealmsBackupInfoScreen.BackupInfoListEntry> {
+		private final String key;
+		private final String value;
+
+		public BackupInfoListEntry(String string, String string2) {
+			this.key = string;
+			this.value = string2;
 		}
 
 		@Override
-		public int getItemCount() {
-			return RealmsBackupInfoScreen.this.backup.changeList.size();
-		}
-
-		@Override
-		public boolean isSelectedItem(int i) {
-			return false;
-		}
-
-		@Override
-		public int getMaxPosition() {
-			return this.getItemCount() * 36;
-		}
-
-		@Override
-		public void renderBackground() {
-		}
-
-		@Override
-		public void renderItem(int i, int j, int k, int l, Tezzelator tezzelator, int m, int n) {
-			String string = (String)RealmsBackupInfoScreen.this.keys.get(i);
-			RealmsBackupInfoScreen.this.drawString(string, this.width() / 2 - 40, k, 10526880);
-			String string2 = (String)RealmsBackupInfoScreen.this.backup.changeList.get(string);
-			RealmsBackupInfoScreen.this.drawString(RealmsBackupInfoScreen.this.checkForSpecificMetadata(string, string2), this.width() / 2 - 40, k + 12, 16777215);
+		public void render(PoseStack poseStack, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
+			Font font = RealmsBackupInfoScreen.this.minecraft.font;
+			GuiComponent.drawString(poseStack, font, this.key, k, j, 10526880);
+			GuiComponent.drawString(poseStack, font, RealmsBackupInfoScreen.this.checkForSpecificMetadata(this.key, this.value), k, j + 12, 16777215);
 		}
 	}
 }

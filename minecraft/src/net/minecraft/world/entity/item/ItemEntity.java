@@ -7,7 +7,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
@@ -15,6 +14,7 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
@@ -28,7 +28,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec3;
 
 public class ItemEntity extends Entity {
@@ -38,10 +37,11 @@ public class ItemEntity extends Entity {
 	private int health = 5;
 	private UUID thrower;
 	private UUID owner;
-	public final float bobOffs = (float)(Math.random() * Math.PI * 2.0);
+	public final float bobOffs;
 
 	public ItemEntity(EntityType<? extends ItemEntity> entityType, Level level) {
 		super(entityType, level);
+		this.bobOffs = (float)(Math.random() * Math.PI * 2.0);
 	}
 
 	public ItemEntity(Level level, double d, double e, double f) {
@@ -54,6 +54,15 @@ public class ItemEntity extends Entity {
 	public ItemEntity(Level level, double d, double e, double f, ItemStack itemStack) {
 		this(level, d, e, f);
 		this.setItem(itemStack);
+	}
+
+	@Environment(EnvType.CLIENT)
+	private ItemEntity(ItemEntity itemEntity) {
+		super(itemEntity.getType(), itemEntity.level);
+		this.setItem(itemEntity.getItem().copy());
+		this.copyPosition(itemEntity);
+		this.age = itemEntity.age;
+		this.bobOffs = itemEntity.bobOffs;
 	}
 
 	@Override
@@ -80,8 +89,11 @@ public class ItemEntity extends Entity {
 			this.yo = this.getY();
 			this.zo = this.getZ();
 			Vec3 vec3 = this.getDeltaMovement();
-			if (this.isUnderLiquid(FluidTags.WATER)) {
+			float f = this.getEyeHeight() - 0.11111111F;
+			if (this.isInWater() && this.getFluidHeight(FluidTags.WATER) > (double)f) {
 				this.setUnderwaterMovement();
+			} else if (this.isInLava() && this.getFluidHeight(FluidTags.LAVA) > (double)f) {
+				this.setUnderLavaMovement();
 			} else if (!this.isNoGravity()) {
 				this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
 			}
@@ -91,30 +103,30 @@ public class ItemEntity extends Entity {
 			} else {
 				this.noPhysics = !this.level.noCollision(this);
 				if (this.noPhysics) {
-					this.checkInBlock(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
+					this.moveTowardsClosestSpace(this.getX(), (this.getBoundingBox().minY + this.getBoundingBox().maxY) / 2.0, this.getZ());
 				}
 			}
 
 			if (!this.onGround || getHorizontalDistanceSqr(this.getDeltaMovement()) > 1.0E-5F || (this.tickCount + this.getId()) % 4 == 0) {
 				this.move(MoverType.SELF, this.getDeltaMovement());
-				float f = 0.98F;
+				float g = 0.98F;
 				if (this.onGround) {
-					f = this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.98F;
+					g = this.level.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0, this.getZ())).getBlock().getFriction() * 0.98F;
 				}
 
-				this.setDeltaMovement(this.getDeltaMovement().multiply((double)f, 0.98, (double)f));
+				this.setDeltaMovement(this.getDeltaMovement().multiply((double)g, 0.98, (double)g));
 				if (this.onGround) {
-					this.setDeltaMovement(this.getDeltaMovement().multiply(1.0, -0.5, 1.0));
+					Vec3 vec32 = this.getDeltaMovement();
+					if (vec32.y < 0.0) {
+						this.setDeltaMovement(vec32.multiply(1.0, -0.5, 1.0));
+					}
 				}
 			}
 
 			boolean bl = Mth.floor(this.xo) != Mth.floor(this.getX()) || Mth.floor(this.yo) != Mth.floor(this.getY()) || Mth.floor(this.zo) != Mth.floor(this.getZ());
 			int i = bl ? 2 : 40;
 			if (this.tickCount % i == 0) {
-				if (this.level.getFluidState(new BlockPos(this)).is(FluidTags.LAVA)) {
-					this.setDeltaMovement(
-						(double)((this.random.nextFloat() - this.random.nextFloat()) * 0.2F), 0.2F, (double)((this.random.nextFloat() - this.random.nextFloat()) * 0.2F)
-					);
+				if (this.level.getFluidState(this.blockPosition()).is(FluidTags.LAVA) && !this.fireImmune()) {
 					this.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + this.random.nextFloat() * 0.4F);
 				}
 
@@ -127,7 +139,7 @@ public class ItemEntity extends Entity {
 				this.age++;
 			}
 
-			this.hasImpulse = this.hasImpulse | this.updateInWaterState();
+			this.hasImpulse = this.hasImpulse | this.updateInWaterStateAndDoFluidPushing();
 			if (!this.level.isClientSide) {
 				double d = this.getDeltaMovement().subtract(vec3).lengthSqr();
 				if (d > 0.01) {
@@ -144,6 +156,11 @@ public class ItemEntity extends Entity {
 	private void setUnderwaterMovement() {
 		Vec3 vec3 = this.getDeltaMovement();
 		this.setDeltaMovement(vec3.x * 0.99F, vec3.y + (double)(vec3.y < 0.06F ? 5.0E-4F : 0.0F), vec3.z * 0.99F);
+	}
+
+	private void setUnderLavaMovement() {
+		Vec3 vec3 = this.getDeltaMovement();
+		this.setDeltaMovement(vec3.x * 0.95F, vec3.y + (double)(vec3.y < 0.06F ? 5.0E-4F : 0.0F), vec3.z * 0.95F);
 	}
 
 	private void mergeWithNeighbours() {
@@ -210,8 +227,8 @@ public class ItemEntity extends Entity {
 	}
 
 	@Override
-	protected void burn(int i) {
-		this.hurt(DamageSource.IN_FIRE, (float)i);
+	public boolean fireImmune() {
+		return this.getItem().getItem().isFireResistant() || super.fireImmune();
 	}
 
 	@Override
@@ -219,6 +236,8 @@ public class ItemEntity extends Entity {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else if (!this.getItem().isEmpty() && this.getItem().getItem() == Items.NETHER_STAR && damageSource.isExplosion()) {
+			return false;
+		} else if (!this.getItem().getItem().canBeHurtBy(damageSource)) {
 			return false;
 		} else {
 			this.markHurt();
@@ -237,11 +256,11 @@ public class ItemEntity extends Entity {
 		compoundTag.putShort("Age", (short)this.age);
 		compoundTag.putShort("PickupDelay", (short)this.pickupDelay);
 		if (this.getThrower() != null) {
-			compoundTag.put("Thrower", NbtUtils.createUUIDTag(this.getThrower()));
+			compoundTag.putUUID("Thrower", this.getThrower());
 		}
 
 		if (this.getOwner() != null) {
-			compoundTag.put("Owner", NbtUtils.createUUIDTag(this.getOwner()));
+			compoundTag.putUUID("Owner", this.getOwner());
 		}
 
 		if (!this.getItem().isEmpty()) {
@@ -257,12 +276,12 @@ public class ItemEntity extends Entity {
 			this.pickupDelay = compoundTag.getShort("PickupDelay");
 		}
 
-		if (compoundTag.contains("Owner", 10)) {
-			this.owner = NbtUtils.loadUUIDTag(compoundTag.getCompound("Owner"));
+		if (compoundTag.hasUUID("Owner")) {
+			this.owner = compoundTag.getUUID("Owner");
 		}
 
-		if (compoundTag.contains("Thrower", 10)) {
-			this.thrower = NbtUtils.loadUUIDTag(compoundTag.getCompound("Thrower"));
+		if (compoundTag.hasUUID("Thrower")) {
+			this.thrower = compoundTag.getUUID("Thrower");
 		}
 
 		CompoundTag compoundTag2 = compoundTag.getCompound("Item");
@@ -286,6 +305,7 @@ public class ItemEntity extends Entity {
 				}
 
 				player.awardStat(Stats.ITEM_PICKED_UP.get(item), i);
+				player.onItemPickup(this);
 			}
 		}
 	}
@@ -303,8 +323,8 @@ public class ItemEntity extends Entity {
 
 	@Nullable
 	@Override
-	public Entity changeDimension(DimensionType dimensionType) {
-		Entity entity = super.changeDimension(dimensionType);
+	public Entity changeDimension(ServerLevel serverLevel) {
+		Entity entity = super.changeDimension(serverLevel);
 		if (!this.level.isClientSide && entity instanceof ItemEntity) {
 			((ItemEntity)entity).mergeWithNeighbours();
 		}
@@ -318,6 +338,14 @@ public class ItemEntity extends Entity {
 
 	public void setItem(ItemStack itemStack) {
 		this.getEntityData().set(DATA_ITEM, itemStack);
+	}
+
+	@Override
+	public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
+		super.onSyncedDataUpdated(entityDataAccessor);
+		if (DATA_ITEM.equals(entityDataAccessor)) {
+			this.getItem().setEntityRepresentation(this);
+		}
 	}
 
 	@Nullable
@@ -372,8 +400,18 @@ public class ItemEntity extends Entity {
 		this.age = 5999;
 	}
 
+	@Environment(EnvType.CLIENT)
+	public float getSpin(float f) {
+		return ((float)this.getAge() + f) / 20.0F + this.bobOffs;
+	}
+
 	@Override
 	public Packet<?> getAddEntityPacket() {
 		return new ClientboundAddEntityPacket(this);
+	}
+
+	@Environment(EnvType.CLIENT)
+	public ItemEntity copy() {
+		return new ItemEntity(this);
 	}
 }

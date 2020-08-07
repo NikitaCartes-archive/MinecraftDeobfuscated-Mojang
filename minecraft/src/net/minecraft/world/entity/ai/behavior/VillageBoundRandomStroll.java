@@ -13,7 +13,7 @@ import net.minecraft.world.entity.ai.util.RandomPos;
 import net.minecraft.world.phys.Vec3;
 
 public class VillageBoundRandomStroll extends Behavior<PathfinderMob> {
-	private final float speed;
+	private final float speedModifier;
 	private final int maxXyDist;
 	private final int maxYDist;
 
@@ -23,13 +23,13 @@ public class VillageBoundRandomStroll extends Behavior<PathfinderMob> {
 
 	public VillageBoundRandomStroll(float f, int i, int j) {
 		super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT));
-		this.speed = f;
+		this.speedModifier = f;
 		this.maxXyDist = i;
 		this.maxYDist = j;
 	}
 
 	protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {
-		BlockPos blockPos = new BlockPos(pathfinderMob);
+		BlockPos blockPos = pathfinderMob.blockPosition();
 		if (serverLevel.isVillage(blockPos)) {
 			this.setRandomPos(pathfinderMob);
 		} else {
@@ -44,12 +44,14 @@ public class VillageBoundRandomStroll extends Behavior<PathfinderMob> {
 	}
 
 	private void setTargetedPos(PathfinderMob pathfinderMob, SectionPos sectionPos) {
-		Optional<Vec3> optional = Optional.ofNullable(RandomPos.getPosTowards(pathfinderMob, this.maxXyDist, this.maxYDist, new Vec3(sectionPos.center())));
-		pathfinderMob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, optional.map(vec3 -> new WalkTarget(vec3, this.speed, 0)));
+		Optional<Vec3> optional = Optional.ofNullable(
+			RandomPos.getPosTowards(pathfinderMob, this.maxXyDist, this.maxYDist, Vec3.atBottomCenterOf(sectionPos.center()))
+		);
+		pathfinderMob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, optional.map(vec3 -> new WalkTarget(vec3, this.speedModifier, 0)));
 	}
 
 	private void setRandomPos(PathfinderMob pathfinderMob) {
 		Optional<Vec3> optional = Optional.ofNullable(RandomPos.getLandPos(pathfinderMob, this.maxXyDist, this.maxYDist));
-		pathfinderMob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, optional.map(vec3 -> new WalkTarget(vec3, this.speed, 0)));
+		pathfinderMob.getBrain().setMemory(MemoryModuleType.WALK_TARGET, optional.map(vec3 -> new WalkTarget(vec3, this.speedModifier, 0)));
 	}
 }

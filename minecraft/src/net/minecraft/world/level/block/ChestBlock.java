@@ -23,12 +23,13 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Cat;
+import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -36,6 +37,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.LidBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -109,7 +111,7 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 		}
 	};
 
-	protected ChestBlock(Block.Properties properties, Supplier<BlockEntityType<? extends ChestBlockEntity>> supplier) {
+	protected ChestBlock(BlockBehaviour.Properties properties, Supplier<BlockEntityType<? extends ChestBlockEntity>> supplier) {
 		super(properties, supplier);
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(TYPE, ChestType.SINGLE).setValue(WATERLOGGED, Boolean.valueOf(false))
@@ -138,7 +140,7 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 			levelAccessor.getLiquidTicks().scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
 		}
 
-		if (blockState2.getBlock() == this && direction.getAxis().isHorizontal()) {
+		if (blockState2.is(this) && direction.getAxis().isHorizontal()) {
 			ChestType chestType = blockState2.getValue(TYPE);
 			if (blockState.getValue(TYPE) == ChestType.SINGLE
 				&& chestType != ChestType.SINGLE
@@ -214,7 +216,7 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 	@Nullable
 	private Direction candidatePartnerFacing(BlockPlaceContext blockPlaceContext, Direction direction) {
 		BlockState blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos().relative(direction));
-		return blockState.getBlock() == this && blockState.getValue(TYPE) == ChestType.SINGLE ? blockState.getValue(FACING) : null;
+		return blockState.is(this) && blockState.getValue(TYPE) == ChestType.SINGLE ? blockState.getValue(FACING) : null;
 	}
 
 	@Override
@@ -229,7 +231,7 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState.getBlock() != blockState2.getBlock()) {
+		if (!blockState.is(blockState2.getBlock())) {
 			BlockEntity blockEntity = level.getBlockEntity(blockPos);
 			if (blockEntity instanceof Container) {
 				Containers.dropContents(level, blockPos, (Container)blockEntity);
@@ -251,9 +253,10 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 			if (menuProvider != null) {
 				player.openMenu(menuProvider);
 				player.awardStat(this.getOpenChestStat());
+				PiglinAi.angerNearbyPiglins(player, true);
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		}
 	}
 
@@ -338,7 +341,7 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 		);
 		if (!list.isEmpty()) {
 			for (Cat cat : list) {
-				if (cat.isSitting()) {
+				if (cat.isInSittingPose()) {
 					return true;
 				}
 			}

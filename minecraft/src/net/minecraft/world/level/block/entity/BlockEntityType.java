@@ -1,16 +1,14 @@
 package net.minecraft.world.level.block.entity;
 
 import com.google.common.collect.ImmutableSet;
-import com.mojang.datafixers.DataFixUtils;
 import com.mojang.datafixers.types.Type;
 import java.util.Set;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
-import net.minecraft.SharedConstants;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
@@ -49,7 +47,11 @@ public class BlockEntityType<T extends BlockEntity> {
 			Blocks.BIRCH_WALL_SIGN,
 			Blocks.ACACIA_WALL_SIGN,
 			Blocks.JUNGLE_WALL_SIGN,
-			Blocks.DARK_OAK_WALL_SIGN
+			Blocks.DARK_OAK_WALL_SIGN,
+			Blocks.CRIMSON_SIGN,
+			Blocks.CRIMSON_WALL_SIGN,
+			Blocks.WARPED_SIGN,
+			Blocks.WARPED_WALL_SIGN
 		)
 	);
 	public static final BlockEntityType<SpawnerBlockEntity> MOB_SPAWNER = register(
@@ -194,7 +196,9 @@ public class BlockEntityType<T extends BlockEntity> {
 	public static final BlockEntityType<LecternBlockEntity> LECTERN = register("lectern", BlockEntityType.Builder.of(LecternBlockEntity::new, Blocks.LECTERN));
 	public static final BlockEntityType<BellBlockEntity> BELL = register("bell", BlockEntityType.Builder.of(BellBlockEntity::new, Blocks.BELL));
 	public static final BlockEntityType<JigsawBlockEntity> JIGSAW = register("jigsaw", BlockEntityType.Builder.of(JigsawBlockEntity::new, Blocks.JIGSAW));
-	public static final BlockEntityType<CampfireBlockEntity> CAMPFIRE = register("campfire", BlockEntityType.Builder.of(CampfireBlockEntity::new, Blocks.CAMPFIRE));
+	public static final BlockEntityType<CampfireBlockEntity> CAMPFIRE = register(
+		"campfire", BlockEntityType.Builder.of(CampfireBlockEntity::new, Blocks.CAMPFIRE, Blocks.SOUL_CAMPFIRE)
+	);
 	public static final BlockEntityType<BeehiveBlockEntity> BEEHIVE = register(
 		"beehive", BlockEntityType.Builder.of(BeehiveBlockEntity::new, Blocks.BEE_NEST, Blocks.BEEHIVE)
 	);
@@ -208,23 +212,11 @@ public class BlockEntityType<T extends BlockEntity> {
 	}
 
 	private static <T extends BlockEntity> BlockEntityType<T> register(String string, BlockEntityType.Builder<T> builder) {
-		Type<?> type = null;
-
-		try {
-			type = DataFixers.getDataFixer()
-				.getSchema(DataFixUtils.makeKey(SharedConstants.getCurrentVersion().getWorldVersion()))
-				.getChoiceType(References.BLOCK_ENTITY, string);
-		} catch (IllegalArgumentException var4) {
-			LOGGER.error("No data fixer registered for block entity {}", string);
-			if (SharedConstants.IS_RUNNING_IN_IDE) {
-				throw var4;
-			}
-		}
-
 		if (builder.validBlocks.isEmpty()) {
 			LOGGER.warn("Block entity type {} requires at least one valid block to be defined!", string);
 		}
 
+		Type<?> type = Util.fetchChoiceType(References.BLOCK_ENTITY, string);
 		return Registry.register(Registry.BLOCK_ENTITY_TYPE, string, builder.build(type));
 	}
 

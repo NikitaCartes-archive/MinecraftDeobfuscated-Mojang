@@ -33,15 +33,15 @@ public class PistonHeadRenderer extends BlockEntityRenderer<PistonMovingBlockEnt
 		if (level != null) {
 			BlockPos blockPos = pistonMovingBlockEntity.getBlockPos().relative(pistonMovingBlockEntity.getMovementDirection().getOpposite());
 			BlockState blockState = pistonMovingBlockEntity.getMovedState();
-			if (!blockState.isAir() && !(pistonMovingBlockEntity.getProgress(f) >= 1.0F)) {
+			if (!blockState.isAir()) {
 				ModelBlockRenderer.enableCaching();
 				poseStack.pushPose();
 				poseStack.translate((double)pistonMovingBlockEntity.getXOff(f), (double)pistonMovingBlockEntity.getYOff(f), (double)pistonMovingBlockEntity.getZOff(f));
-				if (blockState.getBlock() == Blocks.PISTON_HEAD && pistonMovingBlockEntity.getProgress(f) <= 4.0F) {
-					blockState = blockState.setValue(PistonHeadBlock.SHORT, Boolean.valueOf(true));
+				if (blockState.is(Blocks.PISTON_HEAD) && pistonMovingBlockEntity.getProgress(f) <= 4.0F) {
+					blockState = blockState.setValue(PistonHeadBlock.SHORT, Boolean.valueOf(pistonMovingBlockEntity.getProgress(f) <= 0.5F));
 					this.renderBlock(blockPos, blockState, poseStack, multiBufferSource, level, false, j);
 				} else if (pistonMovingBlockEntity.isSourcePiston() && !pistonMovingBlockEntity.isExtending()) {
-					PistonType pistonType = blockState.getBlock() == Blocks.STICKY_PISTON ? PistonType.STICKY : PistonType.DEFAULT;
+					PistonType pistonType = blockState.is(Blocks.STICKY_PISTON) ? PistonType.STICKY : PistonType.DEFAULT;
 					BlockState blockState2 = Blocks.PISTON_HEAD
 						.defaultBlockState()
 						.setValue(PistonHeadBlock.TYPE, pistonType)
@@ -64,7 +64,7 @@ public class PistonHeadRenderer extends BlockEntityRenderer<PistonMovingBlockEnt
 	}
 
 	private void renderBlock(BlockPos blockPos, BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, Level level, boolean bl, int i) {
-		RenderType renderType = ItemBlockRenderTypes.getChunkRenderType(blockState);
+		RenderType renderType = ItemBlockRenderTypes.getMovingBlockRenderType(blockState);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(renderType);
 		this.blockRenderer
 			.getModelRenderer()

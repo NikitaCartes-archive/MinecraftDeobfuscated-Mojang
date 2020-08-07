@@ -15,7 +15,7 @@ import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -29,14 +29,9 @@ public class DetectorRailBlock extends BaseRailBlock {
 	public static final EnumProperty<RailShape> SHAPE = BlockStateProperties.RAIL_SHAPE_STRAIGHT;
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
-	public DetectorRailBlock(Block.Properties properties) {
+	public DetectorRailBlock(BlockBehaviour.Properties properties) {
 		super(true, properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(POWERED, Boolean.valueOf(false)).setValue(SHAPE, RailShape.NORTH_SOUTH));
-	}
-
-	@Override
-	public int getTickDelay(LevelReader levelReader) {
-		return 20;
 	}
 
 	@Override
@@ -75,36 +70,38 @@ public class DetectorRailBlock extends BaseRailBlock {
 	}
 
 	private void checkPressed(Level level, BlockPos blockPos, BlockState blockState) {
-		boolean bl = (Boolean)blockState.getValue(POWERED);
-		boolean bl2 = false;
-		List<AbstractMinecart> list = this.getInteractingMinecartOfType(level, blockPos, AbstractMinecart.class, null);
-		if (!list.isEmpty()) {
-			bl2 = true;
-		}
+		if (this.canSurvive(blockState, level, blockPos)) {
+			boolean bl = (Boolean)blockState.getValue(POWERED);
+			boolean bl2 = false;
+			List<AbstractMinecart> list = this.getInteractingMinecartOfType(level, blockPos, AbstractMinecart.class, null);
+			if (!list.isEmpty()) {
+				bl2 = true;
+			}
 
-		if (bl2 && !bl) {
-			BlockState blockState2 = blockState.setValue(POWERED, Boolean.valueOf(true));
-			level.setBlock(blockPos, blockState2, 3);
-			this.updatePowerToConnected(level, blockPos, blockState2, true);
-			level.updateNeighborsAt(blockPos, this);
-			level.updateNeighborsAt(blockPos.below(), this);
-			level.setBlocksDirty(blockPos, blockState, blockState2);
-		}
+			if (bl2 && !bl) {
+				BlockState blockState2 = blockState.setValue(POWERED, Boolean.valueOf(true));
+				level.setBlock(blockPos, blockState2, 3);
+				this.updatePowerToConnected(level, blockPos, blockState2, true);
+				level.updateNeighborsAt(blockPos, this);
+				level.updateNeighborsAt(blockPos.below(), this);
+				level.setBlocksDirty(blockPos, blockState, blockState2);
+			}
 
-		if (!bl2 && bl) {
-			BlockState blockState2 = blockState.setValue(POWERED, Boolean.valueOf(false));
-			level.setBlock(blockPos, blockState2, 3);
-			this.updatePowerToConnected(level, blockPos, blockState2, false);
-			level.updateNeighborsAt(blockPos, this);
-			level.updateNeighborsAt(blockPos.below(), this);
-			level.setBlocksDirty(blockPos, blockState, blockState2);
-		}
+			if (!bl2 && bl) {
+				BlockState blockState2 = blockState.setValue(POWERED, Boolean.valueOf(false));
+				level.setBlock(blockPos, blockState2, 3);
+				this.updatePowerToConnected(level, blockPos, blockState2, false);
+				level.updateNeighborsAt(blockPos, this);
+				level.updateNeighborsAt(blockPos.below(), this);
+				level.setBlocksDirty(blockPos, blockState, blockState2);
+			}
 
-		if (bl2) {
-			level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
-		}
+			if (bl2) {
+				level.getBlockTicks().scheduleTick(blockPos, this, 20);
+			}
 
-		level.updateNeighbourForOutputSignal(blockPos, this);
+			level.updateNeighbourForOutputSignal(blockPos, this);
+		}
 	}
 
 	protected void updatePowerToConnected(Level level, BlockPos blockPos, BlockState blockState, boolean bl) {
@@ -118,9 +115,8 @@ public class DetectorRailBlock extends BaseRailBlock {
 
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState2.getBlock() != blockState.getBlock()) {
-			super.onPlace(blockState, level, blockPos, blockState2, bl);
-			this.checkPressed(level, blockPos, blockState);
+		if (!blockState2.is(blockState.getBlock())) {
+			this.checkPressed(level, blockPos, this.updateState(blockState, level, blockPos, bl));
 		}
 	}
 
@@ -158,14 +154,14 @@ public class DetectorRailBlock extends BaseRailBlock {
 	}
 
 	private AABB getSearchBB(BlockPos blockPos) {
-		float f = 0.2F;
+		double d = 0.2;
 		return new AABB(
-			(double)((float)blockPos.getX() + 0.2F),
+			(double)blockPos.getX() + 0.2,
 			(double)blockPos.getY(),
-			(double)((float)blockPos.getZ() + 0.2F),
-			(double)((float)(blockPos.getX() + 1) - 0.2F),
-			(double)((float)(blockPos.getY() + 1) - 0.2F),
-			(double)((float)(blockPos.getZ() + 1) - 0.2F)
+			(double)blockPos.getZ() + 0.2,
+			(double)(blockPos.getX() + 1) - 0.2,
+			(double)(blockPos.getY() + 1) - 0.2,
+			(double)(blockPos.getZ() + 1) - 0.2
 		);
 	}
 

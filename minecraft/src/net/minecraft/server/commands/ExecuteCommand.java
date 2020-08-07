@@ -26,7 +26,7 @@ import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.DimensionTypeArgument;
+import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.NbtPathArgument;
@@ -106,29 +106,15 @@ public class ExecuteCommand {
 
 					return list;
 				})))
-				.then(
-					Commands.literal("at")
-						.then(
-							Commands.argument("targets", EntityArgument.entities())
-								.fork(
-									literalCommandNode,
-									commandContext -> {
-										List<CommandSourceStack> list = Lists.<CommandSourceStack>newArrayList();
+				.then(Commands.literal("at").then(Commands.argument("targets", EntityArgument.entities()).fork(literalCommandNode, commandContext -> {
+					List<CommandSourceStack> list = Lists.<CommandSourceStack>newArrayList();
 
-										for (Entity entity : EntityArgument.getOptionalEntities(commandContext, "targets")) {
-											list.add(
-												commandContext.getSource()
-													.withLevel((ServerLevel)entity.level)
-													.withPosition(entity.getCommandSenderWorldPosition())
-													.withRotation(entity.getRotationVector())
-											);
-										}
+					for (Entity entity : EntityArgument.getOptionalEntities(commandContext, "targets")) {
+						list.add(commandContext.getSource().withLevel((ServerLevel)entity.level).withPosition(entity.position()).withRotation(entity.getRotationVector()));
+					}
 
-										return list;
-									}
-								)
-						)
-				)
+					return list;
+				})))
 				.then(
 					Commands.literal("store")
 						.then(wrapStores(literalCommandNode, Commands.literal("result"), true))
@@ -147,7 +133,7 @@ public class ExecuteCommand {
 							List<CommandSourceStack> list = Lists.<CommandSourceStack>newArrayList();
 
 							for (Entity entity : EntityArgument.getOptionalEntities(commandContext, "targets")) {
-								list.add(commandContext.getSource().withPosition(entity.getCommandSenderWorldPosition()));
+								list.add(commandContext.getSource().withPosition(entity.position()));
 							}
 
 							return list;
@@ -216,12 +202,8 @@ public class ExecuteCommand {
 				.then(
 					Commands.literal("in")
 						.then(
-							Commands.argument("dimension", DimensionTypeArgument.dimension())
-								.redirect(
-									literalCommandNode,
-									commandContext -> commandContext.getSource()
-											.withLevel(commandContext.getSource().getServer().getLevel(DimensionTypeArgument.getDimension(commandContext, "dimension")))
-								)
+							Commands.argument("dimension", DimensionArgument.dimension())
+								.redirect(literalCommandNode, commandContext -> commandContext.getSource().withLevel(DimensionArgument.getDimension(commandContext, "dimension")))
 						)
 				)
 		);
@@ -631,7 +613,7 @@ public class ExecuteCommand {
 	private static boolean checkCustomPredicate(CommandSourceStack commandSourceStack, LootItemCondition lootItemCondition) {
 		ServerLevel serverLevel = commandSourceStack.getLevel();
 		LootContext.Builder builder = new LootContext.Builder(serverLevel)
-			.withParameter(LootContextParams.BLOCK_POS, new BlockPos(commandSourceStack.getPosition()))
+			.withParameter(LootContextParams.ORIGIN, commandSourceStack.getPosition())
 			.withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity());
 		return lootItemCondition.test(builder.create(LootContextParamSets.COMMAND));
 	}
@@ -709,7 +691,7 @@ public class ExecuteCommand {
 						BlockPos blockPos5 = new BlockPos(m, l, k);
 						BlockPos blockPos6 = blockPos5.offset(blockPos4);
 						BlockState blockState = serverLevel.getBlockState(blockPos5);
-						if (!bl || blockState.getBlock() != Blocks.AIR) {
+						if (!bl || !blockState.is(Blocks.AIR)) {
 							if (blockState != serverLevel.getBlockState(blockPos6)) {
 								return OptionalInt.empty();
 							}

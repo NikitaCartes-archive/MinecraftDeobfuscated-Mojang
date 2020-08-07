@@ -1,20 +1,20 @@
 package net.minecraft.world.level.levelgen.carver;
 
 import com.google.common.collect.ImmutableSet;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.BitSet;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.feature.configurations.ProbabilityFeatureConfiguration;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public class UnderwaterCanyonWorldCarver extends CanyonWorldCarver {
-	public UnderwaterCanyonWorldCarver(Function<Dynamic<?>, ? extends ProbabilityFeatureConfiguration> function) {
-		super(function);
+	public UnderwaterCanyonWorldCarver(Codec<ProbabilityFeatureConfiguration> codec) {
+		super(codec);
 		this.replaceableBlocks = ImmutableSet.of(
 			Blocks.STONE,
 			Blocks.GRANITE,
@@ -77,7 +77,7 @@ public class UnderwaterCanyonWorldCarver extends CanyonWorldCarver {
 		int n,
 		int o,
 		int p,
-		AtomicBoolean atomicBoolean
+		MutableBoolean mutableBoolean
 	) {
 		return UnderwaterCaveWorldCarver.carveBlock(this, chunkAccess, bitSet, random, mutableBlockPos, i, j, k, l, m, n, o, p);
 	}

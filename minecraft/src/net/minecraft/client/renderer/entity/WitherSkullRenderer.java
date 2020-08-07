@@ -7,6 +7,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.SkullModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.projectile.WitherSkull;
@@ -21,7 +22,7 @@ public class WitherSkullRenderer extends EntityRenderer<WitherSkull> {
 		super(entityRenderDispatcher);
 	}
 
-	protected int getBlockLightLevel(WitherSkull witherSkull, float f) {
+	protected int getBlockLightLevel(WitherSkull witherSkull, BlockPos blockPos) {
 		return 15;
 	}
 

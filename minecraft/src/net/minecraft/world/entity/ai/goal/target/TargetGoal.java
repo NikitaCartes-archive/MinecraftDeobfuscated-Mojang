@@ -1,14 +1,12 @@
 package net.minecraft.world.entity.ai.goal.target;
 
 import javax.annotation.Nullable;
-import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
@@ -75,8 +73,7 @@ public abstract class TargetGoal extends Goal {
 	}
 
 	protected double getFollowDistance() {
-		AttributeInstance attributeInstance = this.mob.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE);
-		return attributeInstance == null ? 16.0 : attributeInstance.getValue();
+		return this.mob.getAttributeValue(Attributes.FOLLOW_RANGE);
 	}
 
 	@Override
@@ -97,7 +94,7 @@ public abstract class TargetGoal extends Goal {
 			return false;
 		} else if (!targetingConditions.test(this.mob, livingEntity)) {
 			return false;
-		} else if (!this.mob.isWithinRestriction(new BlockPos(livingEntity))) {
+		} else if (!this.mob.isWithinRestriction(livingEntity.blockPosition())) {
 			return false;
 		} else {
 			if (this.mustReach) {
@@ -124,7 +121,7 @@ public abstract class TargetGoal extends Goal {
 		if (path == null) {
 			return false;
 		} else {
-			Node node = path.last();
+			Node node = path.getEndNode();
 			if (node == null) {
 				return false;
 			} else {

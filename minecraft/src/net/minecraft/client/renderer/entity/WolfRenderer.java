@@ -26,7 +26,7 @@ public class WolfRenderer extends MobRenderer<Wolf, WolfModel<Wolf>> {
 
 	public void render(Wolf wolf, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		if (wolf.isWet()) {
-			float h = wolf.getBrightness() * wolf.getWetShade(g);
+			float h = wolf.getWetShade(g);
 			this.model.setColor(h, h, h);
 		}
 

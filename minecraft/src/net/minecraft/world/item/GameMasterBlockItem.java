@@ -2,6 +2,7 @@ package net.minecraft.world.item;
 
 import javax.annotation.Nullable;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 

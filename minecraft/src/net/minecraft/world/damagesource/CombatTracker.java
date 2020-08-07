@@ -2,16 +2,18 @@ package net.minecraft.world.damagesource;
 
 import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class CombatTracker {
 	private final List<CombatEntry> entries = Lists.<CombatEntry>newArrayList();
@@ -29,12 +31,21 @@ public class CombatTracker {
 
 	public void prepareForDamage() {
 		this.resetPreparedStatus();
-		if (this.mob.onLadder()) {
-			Block block = this.mob.level.getBlockState(new BlockPos(this.mob)).getBlock();
-			if (block == Blocks.LADDER) {
+		Optional<BlockPos> optional = this.mob.getLastClimbablePos();
+		if (optional.isPresent()) {
+			BlockState blockState = this.mob.level.getBlockState((BlockPos)optional.get());
+			if (blockState.is(Blocks.LADDER) || blockState.is(BlockTags.TRAPDOORS)) {
 				this.nextLocation = "ladder";
-			} else if (block == Blocks.VINE) {
+			} else if (blockState.is(Blocks.VINE)) {
 				this.nextLocation = "vines";
+			} else if (blockState.is(Blocks.WEEPING_VINES) || blockState.is(Blocks.WEEPING_VINES_PLANT)) {
+				this.nextLocation = "weeping_vines";
+			} else if (blockState.is(Blocks.TWISTING_VINES) || blockState.is(Blocks.TWISTING_VINES_PLANT)) {
+				this.nextLocation = "twisting_vines";
+			} else if (blockState.is(Blocks.SCAFFOLDING)) {
+				this.nextLocation = "scaffolding";
+			} else {
+				this.nextLocation = "other_climbable";
 			}
 		} else if (this.mob.isInWater()) {
 			this.nextLocation = "water";

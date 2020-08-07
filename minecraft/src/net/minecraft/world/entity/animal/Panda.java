@@ -16,11 +16,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.Entity;
@@ -31,6 +33,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
@@ -47,16 +51,14 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -230,8 +232,8 @@ public class Panda extends Animal {
 
 	@Nullable
 	@Override
-	public AgableMob getBreedOffspring(AgableMob agableMob) {
-		Panda panda = EntityType.PANDA.create(this.level);
+	public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+		Panda panda = EntityType.PANDA.create(serverLevel);
 		if (agableMob instanceof Panda) {
 			panda.setGeneFromParents(this, (Panda)agableMob);
 		}
@@ -261,11 +263,8 @@ public class Panda extends Animal {
 		this.targetSelector.addGoal(1, new Panda.PandaHurtByTargetGoal(this).setAlertOthers(new Class[0]));
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.15F);
-		this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(6.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.15F).add(Attributes.ATTACK_DAMAGE, 6.0);
 	}
 
 	public Panda.Gene getVariant() {
@@ -504,6 +503,7 @@ public class Panda extends Animal {
 	@Override
 	protected void pickUpItem(ItemEntity itemEntity) {
 		if (this.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty() && PANDA_ITEMS.test(itemEntity)) {
+			this.onItemPickup(itemEntity);
 			ItemStack itemStack = itemEntity.getItem();
 			this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
 			this.handDropChances[EquipmentSlot.MAINHAND.getIndex()] = 2.0F;
@@ -521,7 +521,7 @@ public class Panda extends Animal {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
@@ -531,11 +531,10 @@ public class Panda extends Animal {
 		this.setHiddenGene(Panda.Gene.getRandom(this.random));
 		this.setAttributes();
 		if (spawnGroupData == null) {
-			spawnGroupData = new AgableMob.AgableMobGroupData();
-			((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(0.2F);
+			spawnGroupData = new AgableMob.AgableMobGroupData(0.2F);
 		}
 
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	public void setGeneFromParents(Panda panda, @Nullable Panda panda2) {
@@ -570,11 +569,11 @@ public class Panda extends Animal {
 
 	public void setAttributes() {
 		if (this.isWeak()) {
-			this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(10.0);
+			this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(10.0);
 		}
 
 		if (this.isLazy()) {
-			this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.07F);
+			this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.07F);
 		}
 	}
 
@@ -587,15 +586,13 @@ public class Panda extends Animal {
 	}
 
 	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.getItem() instanceof SpawnEggItem) {
-			return super.mobInteract(player, interactionHand);
-		} else if (this.isScared()) {
-			return false;
+		if (this.isScared()) {
+			return InteractionResult.PASS;
 		} else if (this.isOnBack()) {
 			this.setOnBack(false);
-			return true;
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		} else if (this.isFood(itemStack)) {
 			if (this.getTarget() != null) {
 				this.gotBamboo = true;
@@ -609,7 +606,7 @@ public class Panda extends Animal {
 				this.setInLove(player);
 			} else {
 				if (this.level.isClientSide || this.isSitting() || this.isInWater()) {
-					return false;
+					return InteractionResult.PASS;
 				}
 
 				this.tryToSit();
@@ -623,10 +620,9 @@ public class Panda extends Animal {
 				this.usePlayerItem(player, itemStack);
 			}
 
-			player.swing(interactionHand, true);
-			return true;
+			return InteractionResult.SUCCESS;
 		} else {
-			return false;
+			return InteractionResult.PASS;
 		}
 	}
 
@@ -804,15 +800,15 @@ public class Panda extends Animal {
 		}
 
 		private boolean canFindBamboo() {
-			BlockPos blockPos = new BlockPos(this.panda);
+			BlockPos blockPos = this.panda.blockPosition();
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 			for (int i = 0; i < 3; i++) {
 				for (int j = 0; j < 8; j++) {
 					for (int k = 0; k <= j; k = k > 0 ? -k : 1 - k) {
 						for (int l = k < j && k > -j ? j : 0; l <= j; l = l > 0 ? -l : 1 - l) {
-							mutableBlockPos.set(blockPos).move(k, i, l);
-							if (this.level.getBlockState(mutableBlockPos).getBlock() == Blocks.BAMBOO) {
+							mutableBlockPos.setWithOffset(blockPos, k, i, l);
+							if (this.level.getBlockState(mutableBlockPos).is(Blocks.BAMBOO)) {
 								return true;
 							}
 						}
@@ -1012,7 +1008,7 @@ public class Panda extends Animal {
 						j = (int)((float)j + h / Math.abs(h));
 					}
 
-					if (this.panda.level.getBlockState(new BlockPos(this.panda).offset(i, -1, j)).isAir()) {
+					if (this.panda.level.getBlockState(this.panda.blockPosition().offset(i, -1, j)).isAir()) {
 						return true;
 					} else {
 						return this.panda.isPlayful() && this.panda.random.nextInt(60) == 1 ? true : this.panda.random.nextInt(500) == 1;

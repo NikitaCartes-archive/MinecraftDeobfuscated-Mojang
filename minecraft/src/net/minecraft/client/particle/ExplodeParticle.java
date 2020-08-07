@@ -2,15 +2,15 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
 public class ExplodeParticle extends TextureSheetParticle {
 	private final SpriteSet sprites;
 
-	protected ExplodeParticle(Level level, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
-		super(level, d, e, f);
+	protected ExplodeParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
+		super(clientLevel, d, e, f);
 		this.sprites = spriteSet;
 		this.xd = g + (Math.random() * 2.0 - 1.0) * 0.05F;
 		this.yd = h + (Math.random() * 2.0 - 1.0) * 0.05F;
@@ -58,8 +58,8 @@ public class ExplodeParticle extends TextureSheetParticle {
 			this.sprites = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			return new ExplodeParticle(level, d, e, f, g, h, i, this.sprites);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			return new ExplodeParticle(clientLevel, d, e, f, g, h, i, this.sprites);
 		}
 	}
 }

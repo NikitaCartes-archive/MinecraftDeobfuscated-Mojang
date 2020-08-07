@@ -1,5 +1,7 @@
 package net.minecraft.server.level;
 
+import com.google.common.collect.Lists;
+import com.mojang.datafixers.util.Pair;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -12,7 +14,7 @@ import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEquippedItemPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
@@ -25,7 +27,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.ModifiableAttributeMap;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
@@ -65,7 +66,7 @@ public class ServerEntity {
 		this.yRotp = Mth.floor(entity.yRot * 256.0F / 360.0F);
 		this.xRotp = Mth.floor(entity.xRot * 256.0F / 360.0F);
 		this.yHeadRotp = Mth.floor(entity.getYHeadRot() * 256.0F / 360.0F);
-		this.wasOnGround = entity.onGround;
+		this.wasOnGround = entity.isOnGround();
 	}
 
 	public void sendChanges() {
@@ -99,7 +100,7 @@ public class ServerEntity {
 				int j = Mth.floor(this.entity.xRot * 256.0F / 360.0F);
 				boolean bl = Math.abs(i - this.yRotp) >= 1 || Math.abs(j - this.xRotp) >= 1;
 				if (bl) {
-					this.broadcast.accept(new ClientboundMoveEntityPacket.Rot(this.entity.getId(), (byte)i, (byte)j, this.entity.onGround));
+					this.broadcast.accept(new ClientboundMoveEntityPacket.Rot(this.entity.getId(), (byte)i, (byte)j, this.entity.isOnGround()));
 					this.yRotp = i;
 					this.xRotp = j;
 				}
@@ -121,22 +122,20 @@ public class ServerEntity {
 					long m = ClientboundMoveEntityPacket.entityToPacket(vec3.y);
 					long n = ClientboundMoveEntityPacket.entityToPacket(vec3.z);
 					boolean bl5 = l < -32768L || l > 32767L || m < -32768L || m > 32767L || n < -32768L || n > 32767L;
-					if (!bl5 && this.teleportDelay <= 400 && !this.wasRiding && this.wasOnGround == this.entity.onGround) {
-						if ((!bl3 || !bl4) && !(this.entity instanceof AbstractArrow)) {
-							if (bl3) {
-								packet2 = new ClientboundMoveEntityPacket.Pos(this.entity.getId(), (short)((int)l), (short)((int)m), (short)((int)n), this.entity.onGround);
-							} else if (bl4) {
-								packet2 = new ClientboundMoveEntityPacket.Rot(this.entity.getId(), (byte)i, (byte)j, this.entity.onGround);
-							}
-						} else {
-							packet2 = new ClientboundMoveEntityPacket.PosRot(
-								this.entity.getId(), (short)((int)l), (short)((int)m), (short)((int)n), (byte)i, (byte)j, this.entity.onGround
-							);
-						}
-					} else {
-						this.wasOnGround = this.entity.onGround;
+					if (bl5 || this.teleportDelay > 400 || this.wasRiding || this.wasOnGround != this.entity.isOnGround()) {
+						this.wasOnGround = this.entity.isOnGround();
 						this.teleportDelay = 0;
 						packet2 = new ClientboundTeleportEntityPacket(this.entity);
+					} else if ((!bl3 || !bl4) && !(this.entity instanceof AbstractArrow)) {
+						if (bl3) {
+							packet2 = new ClientboundMoveEntityPacket.Pos(this.entity.getId(), (short)((int)l), (short)((int)m), (short)((int)n), this.entity.isOnGround());
+						} else if (bl4) {
+							packet2 = new ClientboundMoveEntityPacket.Rot(this.entity.getId(), (byte)i, (byte)j, this.entity.isOnGround());
+						}
+					} else {
+						packet2 = new ClientboundMoveEntityPacket.PosRot(
+							this.entity.getId(), (short)((int)l), (short)((int)m), (short)((int)n), (byte)i, (byte)j, this.entity.isOnGround()
+						);
 					}
 				}
 
@@ -207,8 +206,7 @@ public class ServerEntity {
 
 		boolean bl = this.trackDelta;
 		if (this.entity instanceof LivingEntity) {
-			ModifiableAttributeMap modifiableAttributeMap = (ModifiableAttributeMap)((LivingEntity)this.entity).getAttributes();
-			Collection<AttributeInstance> collection = modifiableAttributeMap.getSyncableAttributes();
+			Collection<AttributeInstance> collection = ((LivingEntity)this.entity).getAttributes().getSyncableAttributes();
 			if (!collection.isEmpty()) {
 				consumer.accept(new ClientboundUpdateAttributesPacket(this.entity.getId(), collection));
 			}
@@ -224,11 +222,17 @@ public class ServerEntity {
 		}
 
 		if (this.entity instanceof LivingEntity) {
+			List<Pair<EquipmentSlot, ItemStack>> list = Lists.<Pair<EquipmentSlot, ItemStack>>newArrayList();
+
 			for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
 				ItemStack itemStack = ((LivingEntity)this.entity).getItemBySlot(equipmentSlot);
 				if (!itemStack.isEmpty()) {
-					consumer.accept(new ClientboundSetEquippedItemPacket(this.entity.getId(), equipmentSlot, itemStack));
+					list.add(Pair.of(equipmentSlot, itemStack.copy()));
 				}
+			}
+
+			if (!list.isEmpty()) {
+				consumer.accept(new ClientboundSetEquipmentPacket(this.entity.getId(), list));
 			}
 		}
 
@@ -263,8 +267,7 @@ public class ServerEntity {
 		}
 
 		if (this.entity instanceof LivingEntity) {
-			ModifiableAttributeMap modifiableAttributeMap = (ModifiableAttributeMap)((LivingEntity)this.entity).getAttributes();
-			Set<AttributeInstance> set = modifiableAttributeMap.getDirtyAttributes();
+			Set<AttributeInstance> set = ((LivingEntity)this.entity).getAttributes().getDirtyAttributes();
 			if (!set.isEmpty()) {
 				this.broadcastAndSend(new ClientboundUpdateAttributesPacket(this.entity.getId(), set));
 			}

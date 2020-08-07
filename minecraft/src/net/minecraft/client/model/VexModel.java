@@ -36,7 +36,10 @@ public class VexModel extends HumanoidModel<Vex> {
 	public void setupAnim(Vex vex, float f, float g, float h, float i, float j) {
 		super.setupAnim(vex, f, g, h, i, j);
 		if (vex.isCharging()) {
-			if (vex.getMainArm() == HumanoidArm.RIGHT) {
+			if (vex.getMainHandItem().isEmpty()) {
+				this.rightArm.xRot = (float) (Math.PI * 3.0 / 2.0);
+				this.leftArm.xRot = (float) (Math.PI * 3.0 / 2.0);
+			} else if (vex.getMainArm() == HumanoidArm.RIGHT) {
 				this.rightArm.xRot = 3.7699115F;
 			} else {
 				this.leftArm.xRot = 3.7699115F;

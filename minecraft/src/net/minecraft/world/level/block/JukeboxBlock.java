@@ -1,8 +1,11 @@
 package net.minecraft.world.level.block;
 
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -13,6 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -22,9 +26,21 @@ import net.minecraft.world.phys.BlockHitResult;
 public class JukeboxBlock extends BaseEntityBlock {
 	public static final BooleanProperty HAS_RECORD = BlockStateProperties.HAS_RECORD;
 
-	protected JukeboxBlock(Block.Properties properties) {
+	protected JukeboxBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(HAS_RECORD, Boolean.valueOf(false)));
+	}
+
+	@Override
+	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, @Nullable LivingEntity livingEntity, ItemStack itemStack) {
+		super.setPlacedBy(level, blockPos, blockState, livingEntity, itemStack);
+		CompoundTag compoundTag = itemStack.getOrCreateTag();
+		if (compoundTag.contains("BlockEntityTag")) {
+			CompoundTag compoundTag2 = compoundTag.getCompound("BlockEntityTag");
+			if (compoundTag2.contains("RecordItem")) {
+				level.setBlock(blockPos, blockState.setValue(HAS_RECORD, Boolean.valueOf(true)), 2);
+			}
+		}
 	}
 
 	@Override
@@ -35,7 +51,7 @@ public class JukeboxBlock extends BaseEntityBlock {
 			this.dropRecording(level, blockPos);
 			blockState = blockState.setValue(HAS_RECORD, Boolean.valueOf(false));
 			level.setBlock(blockPos, blockState, 2);
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			return InteractionResult.PASS;
 		}
@@ -73,7 +89,7 @@ public class JukeboxBlock extends BaseEntityBlock {
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState.getBlock() != blockState2.getBlock()) {
+		if (!blockState.is(blockState2.getBlock())) {
 			this.dropRecording(level, blockPos);
 			super.onRemove(blockState, level, blockPos, blockState2, bl);
 		}

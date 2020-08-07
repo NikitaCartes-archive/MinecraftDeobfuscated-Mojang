@@ -20,7 +20,7 @@ public class ChunkBiomeFix extends DataFix {
 		Type<?> type = this.getInputSchema().getType(References.CHUNK);
 		OpticFinder<?> opticFinder = type.findField("Level");
 		return this.fixTypeEverywhereTyped("Leaves fix", type, typed -> typed.updateTyped(opticFinder, typedx -> typedx.update(DSL.remainderFinder(), dynamic -> {
-					Optional<IntStream> optional = dynamic.get("Biomes").asIntStreamOpt();
+					Optional<IntStream> optional = dynamic.get("Biomes").asIntStreamOpt().result();
 					if (!optional.isPresent()) {
 						return dynamic;
 					} else {

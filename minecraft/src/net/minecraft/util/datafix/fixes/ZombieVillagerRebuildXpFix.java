@@ -13,9 +13,9 @@ public class ZombieVillagerRebuildXpFix extends NamedEntityFix {
 	@Override
 	protected Typed<?> fix(Typed<?> typed) {
 		return typed.update(DSL.remainderFinder(), dynamic -> {
-			Optional<Number> optional = dynamic.get("Xp").asNumber();
+			Optional<Number> optional = dynamic.get("Xp").asNumber().result();
 			if (!optional.isPresent()) {
-				int i = ((Number)dynamic.get("VillagerData").get("level").asNumber().orElse(1)).intValue();
+				int i = dynamic.get("VillagerData").get("level").asInt(1);
 				return dynamic.set("Xp", dynamic.createInt(VillagerRebuildLevelAndXpFix.getMinXpPerLevel(i)));
 			} else {
 				return dynamic;

@@ -27,4 +27,5 @@ public class References {
 	public static final TypeReference TEAM = () -> "team";
 	public static final TypeReference RECIPE = () -> "recipe";
 	public static final TypeReference BIOME = () -> "biome";
+	public static final TypeReference WORLD_GEN_SETTINGS = () -> "world_gen_settings";
 }

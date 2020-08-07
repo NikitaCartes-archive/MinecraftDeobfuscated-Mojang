@@ -35,7 +35,7 @@ public class FlyingPathNavigation extends PathNavigation {
 
 	@Override
 	public Path createPath(Entity entity, int i) {
-		return this.createPath(new BlockPos(entity), i);
+		return this.createPath(entity.blockPosition(), i);
 	}
 
 	@Override
@@ -47,17 +47,17 @@ public class FlyingPathNavigation extends PathNavigation {
 
 		if (!this.isDone()) {
 			if (this.canUpdatePath()) {
-				this.updatePath();
-			} else if (this.path != null && this.path.getIndex() < this.path.getSize()) {
-				Vec3 vec3 = this.path.getPos(this.mob, this.path.getIndex());
+				this.followThePath();
+			} else if (this.path != null && !this.path.isDone()) {
+				Vec3 vec3 = this.path.getNextEntityPos(this.mob);
 				if (Mth.floor(this.mob.getX()) == Mth.floor(vec3.x) && Mth.floor(this.mob.getY()) == Mth.floor(vec3.y) && Mth.floor(this.mob.getZ()) == Mth.floor(vec3.z)) {
-					this.path.setIndex(this.path.getIndex() + 1);
+					this.path.advance();
 				}
 			}
 
 			DebugPackets.sendPathFindingPacket(this.level, this.mob, this.path, this.maxDistanceToWaypoint);
 			if (!this.isDone()) {
-				Vec3 vec3 = this.path.currentPos(this.mob);
+				Vec3 vec3 = this.path.getNextEntityPos(this.mob);
 				this.mob.getMoveControl().setWantedPosition(vec3.x, vec3.y, vec3.z, this.speedModifier);
 			}
 		}

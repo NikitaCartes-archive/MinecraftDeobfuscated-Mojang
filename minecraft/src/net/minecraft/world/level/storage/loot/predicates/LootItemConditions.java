@@ -1,53 +1,40 @@
 package net.minecraft.world.level.storage.loot.predicates;
 
-import com.google.common.collect.Maps;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
-import com.google.gson.JsonSyntaxException;
-import java.lang.reflect.Type;
-import java.util.Map;
 import java.util.function.Predicate;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
+import net.minecraft.world.level.storage.loot.GsonAdapterFactory;
+import net.minecraft.world.level.storage.loot.Serializer;
 
 public class LootItemConditions {
-	private static final Map<ResourceLocation, LootItemCondition.Serializer<?>> CONDITIONS_BY_NAME = Maps.<ResourceLocation, LootItemCondition.Serializer<?>>newHashMap();
-	private static final Map<Class<? extends LootItemCondition>, LootItemCondition.Serializer<?>> CONDITIONS_BY_CLASS = Maps.<Class<? extends LootItemCondition>, LootItemCondition.Serializer<?>>newHashMap();
+	public static final LootItemConditionType INVERTED = register("inverted", new InvertedLootItemCondition.Serializer());
+	public static final LootItemConditionType ALTERNATIVE = register("alternative", new AlternativeLootItemCondition.Serializer());
+	public static final LootItemConditionType RANDOM_CHANCE = register("random_chance", new LootItemRandomChanceCondition.Serializer());
+	public static final LootItemConditionType RANDOM_CHANCE_WITH_LOOTING = register(
+		"random_chance_with_looting", new LootItemRandomChanceWithLootingCondition.Serializer()
+	);
+	public static final LootItemConditionType ENTITY_PROPERTIES = register("entity_properties", new LootItemEntityPropertyCondition.Serializer());
+	public static final LootItemConditionType KILLED_BY_PLAYER = register("killed_by_player", new LootItemKilledByPlayerCondition.Serializer());
+	public static final LootItemConditionType ENTITY_SCORES = register("entity_scores", new EntityHasScoreCondition.Serializer());
+	public static final LootItemConditionType BLOCK_STATE_PROPERTY = register("block_state_property", new LootItemBlockStatePropertyCondition.Serializer());
+	public static final LootItemConditionType MATCH_TOOL = register("match_tool", new MatchTool.Serializer());
+	public static final LootItemConditionType TABLE_BONUS = register("table_bonus", new BonusLevelTableCondition.Serializer());
+	public static final LootItemConditionType SURVIVES_EXPLOSION = register("survives_explosion", new ExplosionCondition.Serializer());
+	public static final LootItemConditionType DAMAGE_SOURCE_PROPERTIES = register("damage_source_properties", new DamageSourceCondition.Serializer());
+	public static final LootItemConditionType LOCATION_CHECK = register("location_check", new LocationCheck.Serializer());
+	public static final LootItemConditionType WEATHER_CHECK = register("weather_check", new WeatherCheck.Serializer());
+	public static final LootItemConditionType REFERENCE = register("reference", new ConditionReference.Serializer());
+	public static final LootItemConditionType TIME_CHECK = register("time_check", new TimeCheck.Serializer());
 
-	public static <T extends LootItemCondition> void register(LootItemCondition.Serializer<? extends T> serializer) {
-		ResourceLocation resourceLocation = serializer.getName();
-		Class<T> class_ = (Class<T>)serializer.getPredicateClass();
-		if (CONDITIONS_BY_NAME.containsKey(resourceLocation)) {
-			throw new IllegalArgumentException("Can't re-register item condition name " + resourceLocation);
-		} else if (CONDITIONS_BY_CLASS.containsKey(class_)) {
-			throw new IllegalArgumentException("Can't re-register item condition class " + class_.getName());
-		} else {
-			CONDITIONS_BY_NAME.put(resourceLocation, serializer);
-			CONDITIONS_BY_CLASS.put(class_, serializer);
-		}
+	private static LootItemConditionType register(String string, Serializer<? extends LootItemCondition> serializer) {
+		return Registry.register(Registry.LOOT_CONDITION_TYPE, new ResourceLocation(string), new LootItemConditionType(serializer));
 	}
 
-	public static LootItemCondition.Serializer<?> getSerializer(ResourceLocation resourceLocation) {
-		LootItemCondition.Serializer<?> serializer = (LootItemCondition.Serializer<?>)CONDITIONS_BY_NAME.get(resourceLocation);
-		if (serializer == null) {
-			throw new IllegalArgumentException("Unknown loot item condition '" + resourceLocation + "'");
-		} else {
-			return serializer;
-		}
-	}
-
-	public static <T extends LootItemCondition> LootItemCondition.Serializer<T> getSerializer(T lootItemCondition) {
-		LootItemCondition.Serializer<T> serializer = (LootItemCondition.Serializer<T>)CONDITIONS_BY_CLASS.get(lootItemCondition.getClass());
-		if (serializer == null) {
-			throw new IllegalArgumentException("Unknown loot item condition " + lootItemCondition);
-		} else {
-			return serializer;
-		}
+	public static Object createGsonAdapter() {
+		return GsonAdapterFactory.<LootItemCondition, LootItemConditionType>builder(
+				Registry.LOOT_CONDITION_TYPE, "condition", "condition", LootItemCondition::getType
+			)
+			.build();
 	}
 
 	public static <T> Predicate<T> andConditions(Predicate<T>[] predicates) {
@@ -89,49 +76,6 @@ public class LootItemConditions {
 
 					return false;
 				};
-		}
-	}
-
-	static {
-		register(new InvertedLootItemCondition.Serializer());
-		register(new AlternativeLootItemCondition.Serializer());
-		register(new LootItemRandomChanceCondition.Serializer());
-		register(new LootItemRandomChanceWithLootingCondition.Serializer());
-		register(new LootItemEntityPropertyCondition.Serializer());
-		register(new LootItemKilledByPlayerCondition.Serializer());
-		register(new EntityHasScoreCondition.Serializer());
-		register(new LootItemBlockStatePropertyCondition.Serializer());
-		register(new MatchTool.Serializer());
-		register(new BonusLevelTableCondition.Serializer());
-		register(new ExplosionCondition.Serializer());
-		register(new DamageSourceCondition.Serializer());
-		register(new LocationCheck.Serializer());
-		register(new WeatherCheck.Serializer());
-		register(new ConditionReference.Serializer());
-		register(new TimeCheck.Serializer());
-	}
-
-	public static class Serializer implements JsonDeserializer<LootItemCondition>, JsonSerializer<LootItemCondition> {
-		public LootItemCondition deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-			JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "condition");
-			ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "condition"));
-
-			LootItemCondition.Serializer<?> serializer;
-			try {
-				serializer = LootItemConditions.getSerializer(resourceLocation);
-			} catch (IllegalArgumentException var8) {
-				throw new JsonSyntaxException("Unknown condition '" + resourceLocation + "'");
-			}
-
-			return serializer.deserialize(jsonObject, jsonDeserializationContext);
-		}
-
-		public JsonElement serialize(LootItemCondition lootItemCondition, Type type, JsonSerializationContext jsonSerializationContext) {
-			LootItemCondition.Serializer<LootItemCondition> serializer = LootItemConditions.getSerializer(lootItemCondition);
-			JsonObject jsonObject = new JsonObject();
-			jsonObject.addProperty("condition", serializer.getName().toString());
-			serializer.serialize(jsonObject, lootItemCondition, jsonSerializationContext);
-			return jsonObject;
 		}
 	}
 }

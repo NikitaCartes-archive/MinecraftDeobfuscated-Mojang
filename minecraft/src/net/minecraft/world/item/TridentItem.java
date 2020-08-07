@@ -1,8 +1,9 @@
 package net.minecraft.world.item;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.ImmutableMultimap.Builder;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -13,6 +14,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -22,13 +24,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public class TridentItem extends Item {
+public class TridentItem extends Item implements Vanishable {
+	private final Multimap<Attribute, AttributeModifier> defaultModifiers;
+
 	public TridentItem(Item.Properties properties) {
 		super(properties);
-		this.addProperty(
-			new ResourceLocation("throwing"),
-			(itemStack, level, livingEntity) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
-		);
+		Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+		WeaponType.TRIDENT.addCombatAttributes(Tiers.IRON, builder);
+		this.defaultModifiers = builder.build();
 	}
 
 	@Override
@@ -85,7 +88,7 @@ public class TridentItem extends Item {
 						m *= o / n;
 						player.push((double)h, (double)l, (double)m);
 						player.startAutoSpinAttack(20);
-						if (player.onGround) {
+						if (player.isOnGround()) {
 							float p = 1.1999999F;
 							player.move(MoverType.SELF, new Vec3(0.0, 1.1999999F, 0.0));
 						}
@@ -135,13 +138,8 @@ public class TridentItem extends Item {
 	}
 
 	@Override
-	public Multimap<String, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
-		Multimap<String, AttributeModifier> multimap = super.getDefaultAttributeModifiers(equipmentSlot);
-		if (equipmentSlot == EquipmentSlot.MAINHAND) {
-			WeaponType.TRIDENT.addCombatAttributes(Tiers.IRON, multimap);
-		}
-
-		return multimap;
+	public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
+		return equipmentSlot == EquipmentSlot.MAINHAND ? this.defaultModifiers : super.getDefaultAttributeModifiers(equipmentSlot);
 	}
 
 	@Override

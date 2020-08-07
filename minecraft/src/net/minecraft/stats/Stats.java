@@ -35,6 +35,7 @@ public class Stats {
 	public static final ResourceLocation HORSE_ONE_CM = makeCustomStat("horse_one_cm", StatFormatter.DISTANCE);
 	public static final ResourceLocation AVIATE_ONE_CM = makeCustomStat("aviate_one_cm", StatFormatter.DISTANCE);
 	public static final ResourceLocation SWIM_ONE_CM = makeCustomStat("swim_one_cm", StatFormatter.DISTANCE);
+	public static final ResourceLocation STRIDER_ONE_CM = makeCustomStat("strider_one_cm", StatFormatter.DISTANCE);
 	public static final ResourceLocation JUMP = makeCustomStat("jump", StatFormatter.DEFAULT);
 	public static final ResourceLocation DROP = makeCustomStat("drop", StatFormatter.DEFAULT);
 	public static final ResourceLocation DAMAGE_DEALT = makeCustomStat("damage_dealt", StatFormatter.DIVIDE_BY_TEN);
@@ -87,6 +88,8 @@ public class Stats {
 	public static final ResourceLocation RAID_WIN = makeCustomStat("raid_win", StatFormatter.DEFAULT);
 	public static final ResourceLocation INTERACT_WITH_ANVIL = makeCustomStat("interact_with_anvil", StatFormatter.DEFAULT);
 	public static final ResourceLocation INTERACT_WITH_GRINDSTONE = makeCustomStat("interact_with_grindstone", StatFormatter.DEFAULT);
+	public static final ResourceLocation TARGET_HIT = makeCustomStat("target_hit", StatFormatter.DEFAULT);
+	public static final ResourceLocation INTERACT_WITH_SMITHING_TABLE = makeCustomStat("interact_with_smithing_table", StatFormatter.DEFAULT);
 
 	private static ResourceLocation makeCustomStat(String string, StatFormatter statFormatter) {
 		ResourceLocation resourceLocation = new ResourceLocation(string);

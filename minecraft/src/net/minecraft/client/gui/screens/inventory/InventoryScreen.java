@@ -33,6 +33,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 	public InventoryScreen(Player player) {
 		super(player.inventoryMenu, player.inventory, new TranslatableComponent("container.crafting"));
 		this.passEvents = true;
+		this.titleLabelX = 97;
 	}
 
 	@Override
@@ -67,37 +68,36 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 	}
 
 	@Override
-	protected void renderLabels(int i, int j) {
-		this.font.draw(this.title.getColoredString(), 97.0F, 8.0F, 4210752);
+	protected void renderLabels(PoseStack poseStack, int i, int j) {
+		this.font.draw(poseStack, this.title, (float)this.titleLabelX, (float)this.titleLabelY, 4210752);
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
 		this.doRenderEffects = !this.recipeBookComponent.isVisible();
 		if (this.recipeBookComponent.isVisible() && this.widthTooNarrow) {
-			this.renderBg(f, i, j);
-			this.recipeBookComponent.render(i, j, f);
+			this.renderBg(poseStack, f, i, j);
+			this.recipeBookComponent.render(poseStack, i, j, f);
 		} else {
-			this.recipeBookComponent.render(i, j, f);
-			super.render(i, j, f);
-			this.recipeBookComponent.renderGhostRecipe(this.leftPos, this.topPos, false, f);
+			this.recipeBookComponent.render(poseStack, i, j, f);
+			super.render(poseStack, i, j, f);
+			this.recipeBookComponent.renderGhostRecipe(poseStack, this.leftPos, this.topPos, false, f);
 		}
 
-		this.renderTooltip(i, j);
-		this.recipeBookComponent.renderTooltip(this.leftPos, this.topPos, i, j);
+		this.renderTooltip(poseStack, i, j);
+		this.recipeBookComponent.renderTooltip(poseStack, this.leftPos, this.topPos, i, j);
 		this.xMouse = (float)i;
 		this.yMouse = (float)j;
-		this.magicalSpecialHackyFocus(this.recipeBookComponent);
 	}
 
 	@Override
-	protected void renderBg(float f, int i, int j) {
+	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.minecraft.getTextureManager().bind(INVENTORY_LOCATION);
 		int k = this.leftPos;
 		int l = this.topPos;
-		this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
+		this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
 		renderEntityInInventory(k + 51, l + 75, 30, (float)(k + 51) - this.xMouse, (float)(l + 75 - 50) - this.yMouse, this.minecraft.player);
 	}
 
@@ -129,7 +129,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		entityRenderDispatcher.overrideCameraOrientation(quaternion2);
 		entityRenderDispatcher.setRenderShadow(false);
 		MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-		entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0F, 1.0F, poseStack, bufferSource, 15728880);
+		RenderSystem.runAsFancy(() -> entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0F, 1.0F, poseStack, bufferSource, 15728880));
 		bufferSource.endBatch();
 		entityRenderDispatcher.setRenderShadow(true);
 		livingEntity.yBodyRot = m;
@@ -148,6 +148,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 	@Override
 	public boolean mouseClicked(double d, double e, int i) {
 		if (this.recipeBookComponent.mouseClicked(d, e, i)) {
+			this.setFocused(this.recipeBookComponent);
 			return true;
 		} else {
 			return this.widthTooNarrow && this.recipeBookComponent.isVisible() ? false : super.mouseClicked(d, e, i);

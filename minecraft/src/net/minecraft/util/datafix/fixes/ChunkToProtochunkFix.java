@@ -2,12 +2,16 @@ package net.minecraft.util.datafix.fixes;
 
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
+import com.mojang.datafixers.DataFixUtils;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Dynamic;
+import it.unimi.dsi.fastutil.shorts.ShortArrayList;
+import it.unimi.dsi.fastutil.shorts.ShortList;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
@@ -39,15 +43,17 @@ public class ChunkToProtochunkFix extends DataFix {
 						opticFinder,
 						type4,
 						typedx -> {
-							Optional<? extends Stream<? extends Dynamic<?>>> optional = typedx.getOptionalTyped(opticFinder2).map(Typed::write).flatMap(Dynamic::asStreamOpt);
+							Optional<? extends Stream<? extends Dynamic<?>>> optional = typedx.getOptionalTyped(opticFinder2)
+								.flatMap(typedxx -> typedxx.write().result())
+								.flatMap(dynamicx -> dynamicx.asStreamOpt().result());
 							Dynamic<?> dynamic = typedx.get(DSL.remainderFinder());
 							boolean bl = dynamic.get("TerrainPopulated").asBoolean(false)
-								&& (!dynamic.get("LightPopulated").asNumber().isPresent() || dynamic.get("LightPopulated").asBoolean(false));
+								&& (!dynamic.get("LightPopulated").asNumber().result().isPresent() || dynamic.get("LightPopulated").asBoolean(false));
 							dynamic = dynamic.set("Status", dynamic.createString(bl ? "mobs_spawned" : "empty"));
 							dynamic = dynamic.set("hasLegacyStructureData", dynamic.createBoolean(true));
 							Dynamic<?> dynamic3;
 							if (bl) {
-								Optional<ByteBuffer> optional2 = dynamic.get("Biomes").asByteBufferOpt();
+								Optional<ByteBuffer> optional2 = dynamic.get("Biomes").asByteBufferOpt().result();
 								if (optional2.isPresent()) {
 									ByteBuffer byteBuffer = (ByteBuffer)optional2.get();
 									int[] is = new int[256];
@@ -62,24 +68,26 @@ public class ChunkToProtochunkFix extends DataFix {
 								}
 
 								Dynamic<?> dynamic2 = dynamic;
-								List<Dynamic<?>> list = (List<Dynamic<?>>)IntStream.range(0, 16).mapToObj(ix -> dynamic2.createList(Stream.empty())).collect(Collectors.toList());
+								List<ShortList> list = (List<ShortList>)IntStream.range(0, 16).mapToObj(ix -> new ShortArrayList()).collect(Collectors.toList());
 								if (optional.isPresent()) {
-									((Stream)optional.get()).forEach(dynamic2x -> {
-										int ix = dynamic2x.get("x").asInt(0);
-										int j = dynamic2x.get("y").asInt(0);
-										int k = dynamic2x.get("z").asInt(0);
+									((Stream)optional.get()).forEach(dynamicx -> {
+										int ix = dynamicx.get("x").asInt(0);
+										int j = dynamicx.get("y").asInt(0);
+										int k = dynamicx.get("z").asInt(0);
 										short s = packOffsetCoordinates(ix, j, k);
-										list.set(j >> 4, ((Dynamic)list.get(j >> 4)).merge(dynamic2.createShort(s)));
+										((ShortList)list.get(j >> 4)).add(s);
 									});
-									dynamic = dynamic.set("ToBeTicked", dynamic.createList(list.stream()));
+									dynamic = dynamic.set(
+										"ToBeTicked", dynamic.createList(list.stream().map(shortList -> dynamic2.createList(shortList.stream().map(dynamic2::createShort))))
+									);
 								}
 
-								dynamic3 = typedx.set(DSL.remainderFinder(), dynamic).write();
+								dynamic3 = DataFixUtils.orElse(typedx.set(DSL.remainderFinder(), dynamic).write().result(), dynamic);
 							} else {
 								dynamic3 = dynamic;
 							}
 
-							return (Typed)type4.readTyped(dynamic3).getSecond().orElseThrow(() -> new IllegalStateException("Could not read the new chunk"));
+							return (Typed)((Pair)type4.readTyped(dynamic3).result().orElseThrow(() -> new IllegalStateException("Could not read the new chunk"))).getFirst();
 						}
 					)
 			),

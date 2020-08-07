@@ -1,24 +1,28 @@
 package net.minecraft.world.level.block;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.entity.item.FallingBlockEntity;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class ConcretePowderBlock extends FallingBlock {
 	private final BlockState concrete;
 
-	public ConcretePowderBlock(Block block, Block.Properties properties) {
+	public ConcretePowderBlock(Block block, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.concrete = block.defaultBlockState();
 	}
 
 	@Override
-	public void onLand(Level level, BlockPos blockPos, BlockState blockState, BlockState blockState2) {
+	public void onLand(Level level, BlockPos blockPos, BlockState blockState, BlockState blockState2, FallingBlockEntity fallingBlockEntity) {
 		if (shouldSolidify(level, blockPos, blockState2)) {
 			level.setBlock(blockPos, this.concrete, 3);
 		}
@@ -38,12 +42,12 @@ public class ConcretePowderBlock extends FallingBlock {
 
 	private static boolean touchesLiquid(BlockGetter blockGetter, BlockPos blockPos) {
 		boolean bl = false;
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos);
+		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 
 		for (Direction direction : Direction.values()) {
 			BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
 			if (direction != Direction.DOWN || canSolidify(blockState)) {
-				mutableBlockPos.set(blockPos).move(direction);
+				mutableBlockPos.setWithOffset(blockPos, direction);
 				blockState = blockGetter.getBlockState(mutableBlockPos);
 				if (canSolidify(blockState) && !blockState.isFaceSturdy(blockGetter, blockPos, direction.getOpposite())) {
 					bl = true;
@@ -64,5 +68,11 @@ public class ConcretePowderBlock extends FallingBlock {
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		return touchesLiquid(levelAccessor, blockPos) ? this.concrete : super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public int getDustColor(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+		return blockState.getMapColor(blockGetter, blockPos).col;
 	}
 }

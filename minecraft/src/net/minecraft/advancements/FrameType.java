@@ -3,6 +3,8 @@ package net.minecraft.advancements;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public enum FrameType {
 	TASK("task", 0, ChatFormatting.GREEN),
@@ -12,11 +14,13 @@ public enum FrameType {
 	private final String name;
 	private final int texture;
 	private final ChatFormatting chatColor;
+	private final Component displayName;
 
 	private FrameType(String string2, int j, ChatFormatting chatFormatting) {
 		this.name = string2;
 		this.texture = j;
 		this.chatColor = chatFormatting;
+		this.displayName = new TranslatableComponent("advancements.toast." + string2);
 	}
 
 	public String getName() {
@@ -40,5 +44,10 @@ public enum FrameType {
 
 	public ChatFormatting getChatColor() {
 		return this.chatColor;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public Component getDisplayName() {
+		return this.displayName;
 	}
 }

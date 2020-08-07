@@ -10,18 +10,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.SetTag;
 import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagCollection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,7 +31,7 @@ public abstract class TagsProvider<T> implements DataProvider {
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	protected final DataGenerator generator;
 	protected final Registry<T> registry;
-	protected final Map<Tag<T>, Tag.Builder<T>> builders = Maps.<Tag<T>, Tag.Builder<T>>newLinkedHashMap();
+	private final Map<ResourceLocation, Tag.Builder> builders = Maps.<ResourceLocation, Tag.Builder>newLinkedHashMap();
 
 	protected TagsProvider(DataGenerator dataGenerator, Registry<T> registry) {
 		this.generator = dataGenerator;
@@ -43,57 +44,98 @@ public abstract class TagsProvider<T> implements DataProvider {
 	public void run(HashCache hashCache) {
 		this.builders.clear();
 		this.addTags();
-		TagCollection<T> tagCollection = new TagCollection<>(resourceLocation -> Optional.empty(), "", false, "generated");
-		Map<ResourceLocation, Tag.Builder<T>> map = (Map<ResourceLocation, Tag.Builder<T>>)this.builders
-			.entrySet()
-			.stream()
-			.collect(Collectors.toMap(entry -> ((Tag)entry.getKey()).getId(), Entry::getValue));
-		tagCollection.load(map);
-		tagCollection.getAllTags().forEach((resourceLocation, tag) -> {
-			JsonObject jsonObject = tag.serializeToJson(this.registry::getKey);
-			Path path = this.getPath(resourceLocation);
+		Tag<T> tag = SetTag.empty();
+		Function<ResourceLocation, Tag<T>> function = resourceLocation -> this.builders.containsKey(resourceLocation) ? tag : null;
+		Function<ResourceLocation, T> function2 = resourceLocation -> this.registry.getOptional(resourceLocation).orElse(null);
+		this.builders
+			.forEach(
+				(resourceLocation, builder) -> {
+					List<Tag.BuilderEntry> list = (List<Tag.BuilderEntry>)builder.getUnresolvedEntries(function, function2).collect(Collectors.toList());
+					if (!list.isEmpty()) {
+						throw new IllegalArgumentException(
+							String.format(
+								"Couldn't define tag %s as it is missing following references: %s",
+								resourceLocation,
+								list.stream().map(Objects::toString).collect(Collectors.joining(","))
+							)
+						);
+					} else {
+						JsonObject jsonObject = builder.serializeToJson();
+						Path path = this.getPath(resourceLocation);
 
-			try {
-				String string = GSON.toJson((JsonElement)jsonObject);
-				String string2 = SHA1.hashUnencodedChars(string).toString();
-				if (!Objects.equals(hashCache.getHash(path), string2) || !Files.exists(path, new LinkOption[0])) {
-					Files.createDirectories(path.getParent());
-					BufferedWriter bufferedWriter = Files.newBufferedWriter(path);
-					Throwable var9 = null;
+						try {
+							String string = GSON.toJson((JsonElement)jsonObject);
+							String string2 = SHA1.hashUnencodedChars(string).toString();
+							if (!Objects.equals(hashCache.getHash(path), string2) || !Files.exists(path, new LinkOption[0])) {
+								Files.createDirectories(path.getParent());
+								BufferedWriter bufferedWriter = Files.newBufferedWriter(path);
+								Throwable var12 = null;
 
-					try {
-						bufferedWriter.write(string);
-					} catch (Throwable var19) {
-						var9 = var19;
-						throw var19;
-					} finally {
-						if (bufferedWriter != null) {
-							if (var9 != null) {
 								try {
-									bufferedWriter.close();
-								} catch (Throwable var18) {
-									var9.addSuppressed(var18);
+									bufferedWriter.write(string);
+								} catch (Throwable var22) {
+									var12 = var22;
+									throw var22;
+								} finally {
+									if (bufferedWriter != null) {
+										if (var12 != null) {
+											try {
+												bufferedWriter.close();
+											} catch (Throwable var21) {
+												var12.addSuppressed(var21);
+											}
+										} else {
+											bufferedWriter.close();
+										}
+									}
 								}
-							} else {
-								bufferedWriter.close();
 							}
+
+							hashCache.putNew(path, string2);
+						} catch (IOException var24) {
+							LOGGER.error("Couldn't save tags to {}", path, var24);
 						}
 					}
 				}
-
-				hashCache.putNew(path, string2);
-			} catch (IOException var21) {
-				LOGGER.error("Couldn't save tags to {}", path, var21);
-			}
-		});
-		this.useTags(tagCollection);
+			);
 	}
-
-	protected abstract void useTags(TagCollection<T> tagCollection);
 
 	protected abstract Path getPath(ResourceLocation resourceLocation);
 
-	protected Tag.Builder<T> tag(Tag<T> tag) {
-		return (Tag.Builder<T>)this.builders.computeIfAbsent(tag, tagx -> Tag.Builder.tag());
+	protected TagsProvider.TagAppender<T> tag(Tag.Named<T> named) {
+		Tag.Builder builder = this.getOrCreateRawBuilder(named);
+		return new TagsProvider.TagAppender<>(builder, this.registry, "vanilla");
+	}
+
+	protected Tag.Builder getOrCreateRawBuilder(Tag.Named<T> named) {
+		return (Tag.Builder)this.builders.computeIfAbsent(named.getName(), resourceLocation -> new Tag.Builder());
+	}
+
+	public static class TagAppender<T> {
+		private final Tag.Builder builder;
+		private final Registry<T> registry;
+		private final String source;
+
+		private TagAppender(Tag.Builder builder, Registry<T> registry, String string) {
+			this.builder = builder;
+			this.registry = registry;
+			this.source = string;
+		}
+
+		public TagsProvider.TagAppender<T> add(T object) {
+			this.builder.addElement(this.registry.getKey(object), this.source);
+			return this;
+		}
+
+		public TagsProvider.TagAppender<T> addTag(Tag.Named<T> named) {
+			this.builder.addTag(named.getName(), this.source);
+			return this;
+		}
+
+		@SafeVarargs
+		public final TagsProvider.TagAppender<T> add(T... objects) {
+			Stream.of(objects).map(this.registry::getKey).forEach(resourceLocation -> this.builder.addElement(resourceLocation, this.source));
+			return this;
+		}
 	}
 }

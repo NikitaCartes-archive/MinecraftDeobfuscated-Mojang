@@ -3,10 +3,11 @@ package net.minecraft.world.level.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.block.state.properties.RailShape;
@@ -24,10 +25,10 @@ public abstract class BaseRailBlock extends Block {
 	}
 
 	public static boolean isRail(BlockState blockState) {
-		return blockState.is(BlockTags.RAILS);
+		return blockState.is(BlockTags.RAILS) && blockState.getBlock() instanceof BaseRailBlock;
 	}
 
-	protected BaseRailBlock(boolean bl, Block.Properties properties) {
+	protected BaseRailBlock(boolean bl, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.isStraight = bl;
 	}
@@ -38,7 +39,7 @@ public abstract class BaseRailBlock extends Block {
 
 	@Override
 	public VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-		RailShape railShape = blockState.getBlock() == this ? blockState.getValue(this.getShapeProperty()) : null;
+		RailShape railShape = blockState.is(this) ? blockState.getValue(this.getShapeProperty()) : null;
 		return railShape != null && railShape.isAscending() ? HALF_BLOCK_AABB : FLAT_AABB;
 	}
 
@@ -49,52 +50,48 @@ public abstract class BaseRailBlock extends Block {
 
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState2.getBlock() != blockState.getBlock()) {
-			blockState = this.updateDir(level, blockPos, blockState, true);
-			if (this.isStraight) {
-				blockState.neighborChanged(level, blockPos, this, blockPos, bl);
-			}
+		if (!blockState2.is(blockState.getBlock())) {
+			this.updateState(blockState, level, blockPos, bl);
 		}
+	}
+
+	protected BlockState updateState(BlockState blockState, Level level, BlockPos blockPos, boolean bl) {
+		blockState = this.updateDir(level, blockPos, blockState, true);
+		if (this.isStraight) {
+			blockState.neighborChanged(level, blockPos, this, blockPos, bl);
+		}
+
+		return blockState;
 	}
 
 	@Override
 	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
-		if (!level.isClientSide) {
+		if (!level.isClientSide && level.getBlockState(blockPos).is(this)) {
 			RailShape railShape = blockState.getValue(this.getShapeProperty());
-			boolean bl2 = false;
-			BlockPos blockPos3 = blockPos.below();
-			if (!canSupportRigidBlock(level, blockPos3)) {
-				bl2 = true;
-			}
-
-			BlockPos blockPos4 = blockPos.east();
-			if (railShape == RailShape.ASCENDING_EAST && !canSupportRigidBlock(level, blockPos4)) {
-				bl2 = true;
-			} else {
-				BlockPos blockPos5 = blockPos.west();
-				if (railShape == RailShape.ASCENDING_WEST && !canSupportRigidBlock(level, blockPos5)) {
-					bl2 = true;
-				} else {
-					BlockPos blockPos6 = blockPos.north();
-					if (railShape == RailShape.ASCENDING_NORTH && !canSupportRigidBlock(level, blockPos6)) {
-						bl2 = true;
-					} else {
-						BlockPos blockPos7 = blockPos.south();
-						if (railShape == RailShape.ASCENDING_SOUTH && !canSupportRigidBlock(level, blockPos7)) {
-							bl2 = true;
-						}
-					}
-				}
-			}
-
-			if (bl2 && !level.isEmptyBlock(blockPos)) {
-				if (!bl) {
-					dropResources(blockState, level, blockPos);
-				}
-
+			if (shouldBeRemoved(blockPos, level, railShape)) {
+				dropResources(blockState, level, blockPos);
 				level.removeBlock(blockPos, bl);
 			} else {
 				this.updateState(blockState, level, blockPos, block);
+			}
+		}
+	}
+
+	private static boolean shouldBeRemoved(BlockPos blockPos, Level level, RailShape railShape) {
+		if (!canSupportRigidBlock(level, blockPos.below())) {
+			return true;
+		} else {
+			switch (railShape) {
+				case ASCENDING_EAST:
+					return !canSupportRigidBlock(level, blockPos.east());
+				case ASCENDING_WEST:
+					return !canSupportRigidBlock(level, blockPos.west());
+				case ASCENDING_NORTH:
+					return !canSupportRigidBlock(level, blockPos.north());
+				case ASCENDING_SOUTH:
+					return !canSupportRigidBlock(level, blockPos.south());
+				default:
+					return false;
 			}
 		}
 	}

@@ -92,16 +92,12 @@ public class ChunkPos {
 		return this.z & 31;
 	}
 
-	public BlockPos getBlockAt(int i, int j, int k) {
-		return new BlockPos((this.x << 4) + i, j, (this.z << 4) + k);
-	}
-
 	public String toString() {
 		return "[" + this.x + ", " + this.z + "]";
 	}
 
 	public BlockPos getWorldPosition() {
-		return new BlockPos(this.x << 4, 0, this.z << 4);
+		return new BlockPos(this.getMinBlockX(), 0, this.getMinBlockZ());
 	}
 
 	public int getChessboardDistance(ChunkPos chunkPos) {

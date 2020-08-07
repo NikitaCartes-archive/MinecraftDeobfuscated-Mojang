@@ -2,17 +2,17 @@ package net.minecraft.client.particle;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
 public class PlayerCloudParticle extends TextureSheetParticle {
 	private final SpriteSet sprites;
 
-	private PlayerCloudParticle(Level level, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
-		super(level, d, e, f, 0.0, 0.0, 0.0);
+	private PlayerCloudParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
+		super(clientLevel, d, e, f, 0.0, 0.0, 0.0);
 		this.sprites = spriteSet;
 		float j = 2.5F;
 		this.xd *= 0.1F;
@@ -80,8 +80,8 @@ public class PlayerCloudParticle extends TextureSheetParticle {
 			this.sprites = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			return new PlayerCloudParticle(level, d, e, f, g, h, i, this.sprites);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			return new PlayerCloudParticle(clientLevel, d, e, f, g, h, i, this.sprites);
 		}
 	}
 
@@ -93,8 +93,8 @@ public class PlayerCloudParticle extends TextureSheetParticle {
 			this.sprites = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			Particle particle = new PlayerCloudParticle(level, d, e, f, g, h, i, this.sprites);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			Particle particle = new PlayerCloudParticle(clientLevel, d, e, f, g, h, i, this.sprites);
 			particle.setColor(200.0F, 50.0F, 120.0F);
 			particle.setAlpha(0.4F);
 			return particle;

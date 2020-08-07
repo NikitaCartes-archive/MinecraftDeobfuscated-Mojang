@@ -14,8 +14,8 @@ import net.minecraft.server.ServerFunctionManager;
 public class FunctionCommand {
 	public static final SuggestionProvider<CommandSourceStack> SUGGEST_FUNCTION = (commandContext, suggestionsBuilder) -> {
 		ServerFunctionManager serverFunctionManager = commandContext.getSource().getServer().getFunctions();
-		SharedSuggestionProvider.suggestResource(serverFunctionManager.getTags().getAvailableTags(), suggestionsBuilder, "#");
-		return SharedSuggestionProvider.suggestResource(serverFunctionManager.getFunctions().keySet(), suggestionsBuilder);
+		SharedSuggestionProvider.suggestResource(serverFunctionManager.getTagNames(), suggestionsBuilder, "#");
+		return SharedSuggestionProvider.suggestResource(serverFunctionManager.getFunctionNames(), suggestionsBuilder);
 	};
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {

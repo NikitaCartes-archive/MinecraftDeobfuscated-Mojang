@@ -13,7 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 
 public class Husk extends Zombie {
 	public Husk(EntityType<? extends Husk> entityType, Level level) {
@@ -21,10 +21,10 @@ public class Husk extends Zombie {
 	}
 
 	public static boolean checkHuskSpawnRules(
-		EntityType<Husk> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
+		EntityType<Husk> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
-		return checkMonsterSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random)
-			&& (mobSpawnType == MobSpawnType.SPAWNER || levelAccessor.canSeeSky(blockPos));
+		return checkMonsterSpawnRules(entityType, serverLevelAccessor, mobSpawnType, blockPos, random)
+			&& (mobSpawnType == MobSpawnType.SPAWNER || serverLevelAccessor.canSeeSky(blockPos));
 	}
 
 	@Override
@@ -56,7 +56,7 @@ public class Husk extends Zombie {
 	public boolean doHurtTarget(Entity entity) {
 		boolean bl = super.doHurtTarget(entity);
 		if (bl && this.getMainHandItem().isEmpty() && entity instanceof LivingEntity) {
-			float f = this.level.getCurrentDifficultyAt(new BlockPos(this)).getEffectiveDifficulty();
+			float f = this.level.getCurrentDifficultyAt(this.blockPosition()).getEffectiveDifficulty();
 			((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.HUNGER, 140 * (int)f));
 		}
 
@@ -70,8 +70,10 @@ public class Husk extends Zombie {
 
 	@Override
 	protected void doUnderWaterConversion() {
-		this.convertTo(EntityType.ZOMBIE);
-		this.level.levelEvent(null, 1041, new BlockPos(this), 0);
+		this.convertToZombieType(EntityType.ZOMBIE);
+		if (!this.isSilent()) {
+			this.level.levelEvent(null, 1041, this.blockPosition(), 0);
+		}
 	}
 
 	@Override

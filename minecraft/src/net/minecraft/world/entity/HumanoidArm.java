@@ -23,4 +23,9 @@ public enum HumanoidArm {
 	public String toString() {
 		return this.name.getString();
 	}
+
+	@Environment(EnvType.CLIENT)
+	public Component getName() {
+		return this.name;
+	}
 }

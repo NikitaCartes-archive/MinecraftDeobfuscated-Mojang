@@ -1,13 +1,17 @@
 package net.minecraft.client.gui.screens.recipebook;
 
+import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.RecipeBook;
 import net.minecraft.util.Mth;
@@ -18,6 +22,7 @@ import net.minecraft.world.item.crafting.Recipe;
 @Environment(EnvType.CLIENT)
 public class RecipeButton extends AbstractWidget {
 	private static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
+	private static final Component MORE_RECIPES_TOOLTIP = new TranslatableComponent("gui.recipebook.moreRecipes");
 	private RecipeBookMenu<?> menu;
 	private RecipeBook book;
 	private RecipeCollection collection;
@@ -26,14 +31,14 @@ public class RecipeButton extends AbstractWidget {
 	private int currentIndex;
 
 	public RecipeButton() {
-		super(0, 0, 25, 25, "");
+		super(0, 0, 25, 25, TextComponent.EMPTY);
 	}
 
 	public void init(RecipeCollection recipeCollection, RecipeBookPage recipeBookPage) {
 		this.collection = recipeCollection;
 		this.menu = (RecipeBookMenu<?>)recipeBookPage.getMinecraft().player.containerMenu;
 		this.book = recipeBookPage.getRecipeBook();
-		List<Recipe<?>> list = recipeCollection.getRecipes(this.book.isFilteringCraftable(this.menu));
+		List<Recipe<?>> list = recipeCollection.getRecipes(this.book.isFiltering(this.menu));
 
 		for (Recipe<?> recipe : list) {
 			if (this.book.willHighlight(recipe)) {
@@ -54,7 +59,7 @@ public class RecipeButton extends AbstractWidget {
 	}
 
 	@Override
-	public void renderButton(int i, int j, float f) {
+	public void renderButton(PoseStack poseStack, int i, int j, float f) {
 		if (!Screen.hasControlDown()) {
 			this.time += f;
 		}
@@ -67,7 +72,7 @@ public class RecipeButton extends AbstractWidget {
 		}
 
 		int l = 206;
-		if (this.collection.getRecipes(this.book.isFilteringCraftable(this.menu)).size() > 1) {
+		if (this.collection.getRecipes(this.book.isFiltering(this.menu)).size() > 1) {
 			l += 25;
 		}
 
@@ -81,7 +86,7 @@ public class RecipeButton extends AbstractWidget {
 			this.animationTime -= f;
 		}
 
-		this.blit(this.x, this.y, k, l, this.width, this.height);
+		this.blit(poseStack, this.x, this.y, k, l, this.width, this.height);
 		List<Recipe<?>> list = this.getOrderedRecipes();
 		this.currentIndex = Mth.floor(this.time / 30.0F) % list.size();
 		ItemStack itemStack = ((Recipe)list.get(this.currentIndex)).getResultItem();
@@ -91,7 +96,7 @@ public class RecipeButton extends AbstractWidget {
 			m--;
 		}
 
-		minecraft.getItemRenderer().renderAndDecorateItem(itemStack, this.x + m, this.y + m);
+		minecraft.getItemRenderer().renderAndDecorateFakeItem(itemStack, this.x + m, this.y + m);
 		if (bl) {
 			RenderSystem.popMatrix();
 		}
@@ -99,7 +104,7 @@ public class RecipeButton extends AbstractWidget {
 
 	private List<Recipe<?>> getOrderedRecipes() {
 		List<Recipe<?>> list = this.collection.getDisplayRecipes(true);
-		if (!this.book.isFilteringCraftable(this.menu)) {
+		if (!this.book.isFiltering(this.menu)) {
 			list.addAll(this.collection.getDisplayRecipes(false));
 		}
 
@@ -115,11 +120,11 @@ public class RecipeButton extends AbstractWidget {
 		return (Recipe<?>)list.get(this.currentIndex);
 	}
 
-	public List<String> getTooltipText(Screen screen) {
+	public List<Component> getTooltipText(Screen screen) {
 		ItemStack itemStack = ((Recipe)this.getOrderedRecipes().get(this.currentIndex)).getResultItem();
-		List<String> list = screen.getTooltipFromItem(itemStack);
-		if (this.collection.getRecipes(this.book.isFilteringCraftable(this.menu)).size() > 1) {
-			list.add(I18n.get("gui.recipebook.moreRecipes"));
+		List<Component> list = Lists.<Component>newArrayList(screen.getTooltipFromItem(itemStack));
+		if (this.collection.getRecipes(this.book.isFiltering(this.menu)).size() > 1) {
+			list.add(MORE_RECIPES_TOOLTIP);
 		}
 
 		return list;

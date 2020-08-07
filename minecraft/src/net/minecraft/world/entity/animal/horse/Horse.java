@@ -2,17 +2,18 @@ package net.minecraft.world.entity.animal.horse;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Container;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.EntityType;
@@ -20,44 +21,29 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.HorseArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.SoundType;
 
 public class Horse extends AbstractHorse {
 	private static final UUID ARMOR_MODIFIER_UUID = UUID.fromString("556E1665-8B10-40C8-8F9D-CF9B1667F295");
 	private static final EntityDataAccessor<Integer> DATA_ID_TYPE_VARIANT = SynchedEntityData.defineId(Horse.class, EntityDataSerializers.INT);
-	private static final String[] VARIANT_TEXTURES = new String[]{
-		"textures/entity/horse/horse_white.png",
-		"textures/entity/horse/horse_creamy.png",
-		"textures/entity/horse/horse_chestnut.png",
-		"textures/entity/horse/horse_brown.png",
-		"textures/entity/horse/horse_black.png",
-		"textures/entity/horse/horse_gray.png",
-		"textures/entity/horse/horse_darkbrown.png"
-	};
-	private static final String[] VARIANT_HASHES = new String[]{"hwh", "hcr", "hch", "hbr", "hbl", "hgr", "hdb"};
-	private static final String[] MARKING_TEXTURES = new String[]{
-		null,
-		"textures/entity/horse/horse_markings_white.png",
-		"textures/entity/horse/horse_markings_whitefield.png",
-		"textures/entity/horse/horse_markings_whitedots.png",
-		"textures/entity/horse/horse_markings_blackdots.png"
-	};
-	private static final String[] MARKING_HASHES = new String[]{"", "wo_", "wmo", "wdo", "bdo"};
-	@Nullable
-	private String layerTextureHashName;
-	private final String[] layerTextureLayers = new String[2];
 
 	public Horse(EntityType<? extends Horse> entityType, Level level) {
 		super(entityType, level);
+	}
+
+	@Override
+	protected void randomizeAttributes() {
+		this.getAttribute(Attributes.MAX_HEALTH).setBaseValue((double)this.generateRandomMaxHealth());
+		this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(this.generateRandomSpeed());
+		this.getAttribute(Attributes.JUMP_STRENGTH).setBaseValue(this.generateRandomJumpStrength());
 	}
 
 	@Override
@@ -69,7 +55,7 @@ public class Horse extends AbstractHorse {
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		compoundTag.putInt("Variant", this.getVariant());
+		compoundTag.putInt("Variant", this.getTypeVariant());
 		if (!this.inventory.getItem(1).isEmpty()) {
 			compoundTag.put("ArmorItem", this.inventory.getItem(1).save(new CompoundTag()));
 		}
@@ -87,7 +73,7 @@ public class Horse extends AbstractHorse {
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		this.setVariant(compoundTag.getInt("Variant"));
+		this.setTypeVariant(compoundTag.getInt("Variant"));
 		if (compoundTag.contains("ArmorItem", 10)) {
 			ItemStack itemStack = ItemStack.of(compoundTag.getCompound("ArmorItem"));
 			if (!itemStack.isEmpty() && this.isArmor(itemStack)) {
@@ -95,66 +81,47 @@ public class Horse extends AbstractHorse {
 			}
 		}
 
-		this.updateEquipment();
+		this.updateContainerEquipment();
 	}
 
-	public void setVariant(int i) {
+	private void setTypeVariant(int i) {
 		this.entityData.set(DATA_ID_TYPE_VARIANT, i);
-		this.clearLayeredTextureInfo();
 	}
 
-	public int getVariant() {
+	private int getTypeVariant() {
 		return this.entityData.get(DATA_ID_TYPE_VARIANT);
 	}
 
-	private void clearLayeredTextureInfo() {
-		this.layerTextureHashName = null;
+	private void setVariantAndMarkings(Variant variant, Markings markings) {
+		this.setTypeVariant(variant.getId() & 0xFF | markings.getId() << 8 & 0xFF00);
 	}
 
-	@Environment(EnvType.CLIENT)
-	private void rebuildLayeredTextureInfo() {
-		int i = this.getVariant();
-		int j = (i & 0xFF) % 7;
-		int k = ((i & 0xFF00) >> 8) % 5;
-		this.layerTextureLayers[0] = VARIANT_TEXTURES[j];
-		this.layerTextureLayers[1] = MARKING_TEXTURES[k];
-		this.layerTextureHashName = "horse/" + VARIANT_HASHES[j] + MARKING_HASHES[k];
+	public Variant getVariant() {
+		return Variant.byId(this.getTypeVariant() & 0xFF);
 	}
 
-	@Environment(EnvType.CLIENT)
-	public String getLayeredTextureHashName() {
-		if (this.layerTextureHashName == null) {
-			this.rebuildLayeredTextureInfo();
-		}
-
-		return this.layerTextureHashName;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public String[] getLayeredTextureLayers() {
-		if (this.layerTextureHashName == null) {
-			this.rebuildLayeredTextureInfo();
-		}
-
-		return this.layerTextureLayers;
+	public Markings getMarkings() {
+		return Markings.byId((this.getTypeVariant() & 0xFF00) >> 8);
 	}
 
 	@Override
-	protected void updateEquipment() {
-		super.updateEquipment();
-		this.setArmorEquipment(this.inventory.getItem(1));
-		this.setDropChance(EquipmentSlot.CHEST, 0.0F);
+	protected void updateContainerEquipment() {
+		if (!this.level.isClientSide) {
+			super.updateContainerEquipment();
+			this.setArmorEquipment(this.inventory.getItem(1));
+			this.setDropChance(EquipmentSlot.CHEST, 0.0F);
+		}
 	}
 
 	private void setArmorEquipment(ItemStack itemStack) {
 		this.setArmor(itemStack);
 		if (!this.level.isClientSide) {
-			this.getAttribute(SharedMonsterAttributes.ARMOR).removeModifier(ARMOR_MODIFIER_UUID);
+			this.getAttribute(Attributes.ARMOR).removeModifier(ARMOR_MODIFIER_UUID);
 			if (this.isArmor(itemStack)) {
 				int i = ((HorseArmorItem)itemStack.getItem()).getProtection();
 				if (i != 0) {
-					this.getAttribute(SharedMonsterAttributes.ARMOR)
-						.addModifier(new AttributeModifier(ARMOR_MODIFIER_UUID, "Horse armor bonus", (double)i, AttributeModifier.Operation.ADDITION).setSerialize(false));
+					this.getAttribute(Attributes.ARMOR)
+						.addTransientModifier(new AttributeModifier(ARMOR_MODIFIER_UUID, "Horse armor bonus", (double)i, AttributeModifier.Operation.ADDITION));
 				}
 			}
 		}
@@ -179,23 +146,6 @@ public class Horse extends AbstractHorse {
 	}
 
 	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue((double)this.generateRandomMaxHealth());
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(this.generateRandomSpeed());
-		this.getAttribute(JUMP_STRENGTH).setBaseValue(this.generateRandomJumpStrength());
-	}
-
-	@Override
-	public void tick() {
-		super.tick();
-		if (this.level.isClientSide && this.entityData.isDirty()) {
-			this.entityData.clearDirty();
-			this.clearLayeredTextureInfo();
-		}
-	}
-
-	@Override
 	protected SoundEvent getAmbientSound() {
 		super.getAmbientSound();
 		return SoundEvents.HORSE_AMBIENT;
@@ -205,6 +155,12 @@ public class Horse extends AbstractHorse {
 	protected SoundEvent getDeathSound() {
 		super.getDeathSound();
 		return SoundEvents.HORSE_DEATH;
+	}
+
+	@Nullable
+	@Override
+	protected SoundEvent getEatingSound() {
+		return SoundEvents.HORSE_EAT;
 	}
 
 	@Override
@@ -220,54 +176,46 @@ public class Horse extends AbstractHorse {
 	}
 
 	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		boolean bl = !itemStack.isEmpty();
-		if (bl && itemStack.getItem() instanceof SpawnEggItem) {
+		if (!this.isBaby()) {
+			if (this.isTamed() && player.isSecondaryUseActive()) {
+				this.openInventory(player);
+				return InteractionResult.sidedSuccess(this.level.isClientSide);
+			}
+
+			if (this.isVehicle()) {
+				return super.mobInteract(player, interactionHand);
+			}
+		}
+
+		if (!itemStack.isEmpty()) {
+			if (this.isFood(itemStack)) {
+				return this.fedFood(player, itemStack);
+			}
+
+			InteractionResult interactionResult = itemStack.interactLivingEntity(player, this, interactionHand);
+			if (interactionResult.consumesAction()) {
+				return interactionResult;
+			}
+
+			if (!this.isTamed()) {
+				this.makeMad();
+				return InteractionResult.sidedSuccess(this.level.isClientSide);
+			}
+
+			boolean bl = !this.isBaby() && !this.isSaddled() && itemStack.getItem() == Items.SADDLE;
+			if (this.isArmor(itemStack) || bl) {
+				this.openInventory(player);
+				return InteractionResult.sidedSuccess(this.level.isClientSide);
+			}
+		}
+
+		if (this.isBaby()) {
 			return super.mobInteract(player, interactionHand);
 		} else {
-			if (!this.isBaby()) {
-				if (this.isTamed() && player.isSecondaryUseActive()) {
-					this.openInventory(player);
-					return true;
-				}
-
-				if (this.isVehicle()) {
-					return super.mobInteract(player, interactionHand);
-				}
-			}
-
-			if (bl) {
-				if (this.handleEating(player, itemStack)) {
-					if (!player.abilities.instabuild) {
-						itemStack.shrink(1);
-					}
-
-					return true;
-				}
-
-				if (itemStack.interactEnemy(player, this, interactionHand)) {
-					return true;
-				}
-
-				if (!this.isTamed()) {
-					this.makeMad();
-					return true;
-				}
-
-				boolean bl2 = !this.isBaby() && !this.isSaddled() && itemStack.getItem() == Items.SADDLE;
-				if (this.isArmor(itemStack) || bl2) {
-					this.openInventory(player);
-					return true;
-				}
-			}
-
-			if (this.isBaby()) {
-				return super.mobInteract(player, interactionHand);
-			} else {
-				this.doPlayerRide(player);
-				return true;
-			}
+			this.doPlayerRide(player);
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		}
 	}
 
@@ -281,33 +229,34 @@ public class Horse extends AbstractHorse {
 	}
 
 	@Override
-	public AgableMob getBreedOffspring(AgableMob agableMob) {
+	public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
 		AbstractHorse abstractHorse;
 		if (agableMob instanceof Donkey) {
-			abstractHorse = EntityType.MULE.create(this.level);
+			abstractHorse = EntityType.MULE.create(serverLevel);
 		} else {
 			Horse horse = (Horse)agableMob;
-			abstractHorse = EntityType.HORSE.create(this.level);
+			abstractHorse = EntityType.HORSE.create(serverLevel);
 			int i = this.random.nextInt(9);
-			int j;
+			Variant variant;
 			if (i < 4) {
-				j = this.getVariant() & 0xFF;
+				variant = this.getVariant();
 			} else if (i < 8) {
-				j = horse.getVariant() & 0xFF;
+				variant = horse.getVariant();
 			} else {
-				j = this.random.nextInt(7);
+				variant = Util.getRandom(Variant.values(), this.random);
 			}
 
-			int k = this.random.nextInt(5);
-			if (k < 2) {
-				j |= this.getVariant() & 0xFF00;
-			} else if (k < 4) {
-				j |= horse.getVariant() & 0xFF00;
+			int j = this.random.nextInt(5);
+			Markings markings;
+			if (j < 2) {
+				markings = this.getMarkings();
+			} else if (j < 4) {
+				markings = horse.getMarkings();
 			} else {
-				j |= this.random.nextInt(5) << 8 & 0xFF00;
+				markings = Util.getRandom(Markings.values(), this.random);
 			}
 
-			((Horse)abstractHorse).setVariant(j);
+			((Horse)abstractHorse).setVariantAndMarkings(variant, markings);
 		}
 
 		this.setOffspringAttributes(agableMob, abstractHorse);
@@ -315,7 +264,7 @@ public class Horse extends AbstractHorse {
 	}
 
 	@Override
-	public boolean wearsArmor() {
+	public boolean canWearArmor() {
 		return true;
 	}
 
@@ -327,29 +276,30 @@ public class Horse extends AbstractHorse {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		int i;
+		Variant variant;
 		if (spawnGroupData instanceof Horse.HorseGroupData) {
-			i = ((Horse.HorseGroupData)spawnGroupData).variant;
+			variant = ((Horse.HorseGroupData)spawnGroupData).variant;
 		} else {
-			i = this.random.nextInt(7);
-			spawnGroupData = new Horse.HorseGroupData(i);
+			variant = Util.getRandom(Variant.values(), this.random);
+			spawnGroupData = new Horse.HorseGroupData(variant);
 		}
 
-		this.setVariant(i | this.random.nextInt(5) << 8);
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		this.setVariantAndMarkings(variant, Util.getRandom(Markings.values(), this.random));
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	public static class HorseGroupData extends AgableMob.AgableMobGroupData {
-		public final int variant;
+		public final Variant variant;
 
-		public HorseGroupData(int i) {
-			this.variant = i;
+		public HorseGroupData(Variant variant) {
+			super(true);
+			this.variant = variant;
 		}
 	}
 }

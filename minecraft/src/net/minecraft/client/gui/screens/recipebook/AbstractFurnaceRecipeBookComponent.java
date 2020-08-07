@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.screens.recipebook;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -9,7 +10,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
@@ -26,46 +26,9 @@ public abstract class AbstractFurnaceRecipeBookComponent extends RecipeBookCompo
 	private float time;
 
 	@Override
-	protected boolean updateFiltering() {
-		boolean bl = !this.getFilteringCraftable();
-		this.setFilteringCraftable(bl);
-		return bl;
-	}
-
-	protected abstract boolean getFilteringCraftable();
-
-	protected abstract void setFilteringCraftable(boolean bl);
-
-	@Override
-	public boolean isVisible() {
-		return this.isGuiOpen();
-	}
-
-	protected abstract boolean isGuiOpen();
-
-	@Override
-	protected void setVisible(boolean bl) {
-		this.setGuiOpen(bl);
-		if (!bl) {
-			this.recipeBookPage.setInvisible();
-		}
-
-		this.sendUpdateSettings();
-	}
-
-	protected abstract void setGuiOpen(boolean bl);
-
-	@Override
 	protected void initFilterButtonTextures() {
 		this.filterButton.initTextureValues(152, 182, 28, 18, RECIPE_BOOK_LOCATION);
 	}
-
-	@Override
-	protected String getFilterButtonTooltip() {
-		return I18n.get(this.filterButton.isStateTriggered() ? this.getRecipeFilterName() : "gui.recipebook.toggleRecipes.all");
-	}
-
-	protected abstract String getRecipeFilterName();
 
 	@Override
 	public void slotClicked(@Nullable Slot slot) {
@@ -106,8 +69,8 @@ public abstract class AbstractFurnaceRecipeBookComponent extends RecipeBookCompo
 	protected abstract Set<Item> getFuelItems();
 
 	@Override
-	public void renderGhostRecipe(int i, int j, boolean bl, float f) {
-		super.renderGhostRecipe(i, j, bl, f);
+	public void renderGhostRecipe(PoseStack poseStack, int i, int j, boolean bl, float f) {
+		super.renderGhostRecipe(poseStack, i, j, bl, f);
 		if (this.fuelSlot != null) {
 			if (!Screen.hasControlDown()) {
 				this.time += f;
@@ -115,10 +78,10 @@ public abstract class AbstractFurnaceRecipeBookComponent extends RecipeBookCompo
 
 			int k = this.fuelSlot.x + i;
 			int l = this.fuelSlot.y + j;
-			GuiComponent.fill(k, l, k + 16, l + 16, 822018048);
+			GuiComponent.fill(poseStack, k, l, k + 16, l + 16, 822018048);
 			this.minecraft.getItemRenderer().renderAndDecorateItem(this.minecraft.player, this.getFuel().getDefaultInstance(), k, l);
 			RenderSystem.depthFunc(516);
-			GuiComponent.fill(k, l, k + 16, l + 16, 822083583);
+			GuiComponent.fill(poseStack, k, l, k + 16, l + 16, 822083583);
 			RenderSystem.depthFunc(515);
 		}
 	}

@@ -5,7 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
 import net.minecraft.server.ServerInterface;
 import net.minecraft.server.rcon.PktUtils;
 import org.apache.logging.log4j.LogManager;
@@ -14,12 +14,14 @@ import org.apache.logging.log4j.Logger;
 public class RconClient extends GenericThread {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private boolean authed;
-	private Socket client;
+	private final Socket client;
 	private final byte[] buf = new byte[1460];
 	private final String rconPassword;
+	private final ServerInterface serverInterface;
 
 	RconClient(ServerInterface serverInterface, String string, Socket socket) {
-		super(serverInterface, "RCON Client");
+		super("RCON Client " + socket.getInetAddress());
+		this.serverInterface = serverInterface;
 		this.client = socket;
 
 		try {
@@ -29,7 +31,6 @@ public class RconClient extends GenericThread {
 		}
 
 		this.rconPassword = string;
-		this.info("Rcon connection from: " + socket.getInetAddress());
 	}
 
 	public void run() {
@@ -60,8 +61,8 @@ public class RconClient extends GenericThread {
 
 								try {
 									this.sendCmdResponse(l, this.serverInterface.runCommand(string2));
-								} catch (Exception var16) {
-									this.sendCmdResponse(l, "Error executing: " + string2 + " (" + var16.getMessage() + ")");
+								} catch (Exception var15) {
+									this.sendCmdResponse(l, "Error executing: " + string2 + " (" + var15.getMessage() + ")");
 								}
 								break;
 							}
@@ -86,20 +87,21 @@ public class RconClient extends GenericThread {
 				}
 
 				return;
-			} catch (SocketTimeoutException var17) {
-			} catch (IOException var18) {
-			} catch (Exception var19) {
-				LOGGER.error("Exception whilst parsing RCON input", (Throwable)var19);
+			} catch (IOException var16) {
+			} catch (Exception var17) {
+				LOGGER.error("Exception whilst parsing RCON input", (Throwable)var17);
 			}
 		} finally {
 			this.closeSocket();
+			LOGGER.info("Thread {} shutting down", this.name);
+			this.running = false;
 		}
 	}
 
 	private void send(int i, int j, String string) throws IOException {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1248);
 		DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-		byte[] bs = string.getBytes("UTF-8");
+		byte[] bs = string.getBytes(StandardCharsets.UTF_8);
 		dataOutputStream.writeInt(Integer.reverseBytes(bs.length + 10));
 		dataOutputStream.writeInt(Integer.reverseBytes(i));
 		dataOutputStream.writeInt(Integer.reverseBytes(j));
@@ -126,19 +128,16 @@ public class RconClient extends GenericThread {
 
 	@Override
 	public void stop() {
-		super.stop();
+		this.running = false;
 		this.closeSocket();
+		super.stop();
 	}
 
 	private void closeSocket() {
-		if (null != this.client) {
-			try {
-				this.client.close();
-			} catch (IOException var2) {
-				this.warn("IO: " + var2.getMessage());
-			}
-
-			this.client = null;
+		try {
+			this.client.close();
+		} catch (IOException var2) {
+			LOGGER.warn("Failed to close socket", (Throwable)var2);
 		}
 	}
 }

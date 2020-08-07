@@ -35,7 +35,7 @@ public class DragonDeathPhase extends AbstractDragonPhaseInstance {
 		this.time++;
 		if (this.targetLocation == null) {
 			BlockPos blockPos = this.dragon.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, EndPodiumFeature.END_PODIUM_LOCATION);
-			this.targetLocation = new Vec3((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
+			this.targetLocation = Vec3.atBottomCenterOf(blockPos);
 		}
 
 		double d = this.targetLocation.distanceToSqr(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ());

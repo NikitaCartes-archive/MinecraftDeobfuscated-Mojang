@@ -15,18 +15,25 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.Shearable;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.ai.goal.EatBlockGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -37,7 +44,6 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -50,12 +56,12 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
-public class Sheep extends Animal {
+public class Sheep extends Animal implements Shearable {
 	private static final EntityDataAccessor<Byte> DATA_WOOL_ID = SynchedEntityData.defineId(Sheep.class, EntityDataSerializers.BYTE);
 	private static final Map<DyeColor, ItemLike> ITEM_BY_DYE = Util.make(Maps.newEnumMap(DyeColor.class), enumMap -> {
 		enumMap.put(DyeColor.WHITE, Blocks.WHITE_WOOL);
@@ -129,11 +135,8 @@ public class Sheep extends Animal {
 		super.aiStep();
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(8.0);
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23F);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 8.0).add(Attributes.MOVEMENT_SPEED, 0.23F);
 	}
 
 	@Override
@@ -217,41 +220,45 @@ public class Sheep extends Animal {
 	}
 
 	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.getItem() == Items.SHEARS && !this.isSheared() && !this.isBaby()) {
-			this.shear();
-			if (!this.level.isClientSide) {
+		if (itemStack.getItem() == Items.SHEARS) {
+			if (!this.level.isClientSide && this.readyForShearing()) {
+				this.shear(SoundSource.PLAYERS);
 				itemStack.hurtAndBreak(1, player, playerx -> playerx.broadcastBreakEvent(interactionHand));
+				return InteractionResult.SUCCESS;
+			} else {
+				return InteractionResult.CONSUME;
 			}
-
-			return true;
 		} else {
 			return super.mobInteract(player, interactionHand);
 		}
 	}
 
-	public void shear() {
-		if (!this.level.isClientSide) {
-			this.setSheared(true);
-			int i = 1 + this.random.nextInt(3);
+	@Override
+	public void shear(SoundSource soundSource) {
+		this.level.playSound(null, this, SoundEvents.SHEEP_SHEAR, soundSource, 1.0F, 1.0F);
+		this.setSheared(true);
+		int i = 1 + this.random.nextInt(3);
 
-			for (int j = 0; j < i; j++) {
-				ItemEntity itemEntity = this.spawnAtLocation((ItemLike)ITEM_BY_DYE.get(this.getColor()), 1);
-				if (itemEntity != null) {
-					itemEntity.setDeltaMovement(
-						itemEntity.getDeltaMovement()
-							.add(
-								(double)((this.random.nextFloat() - this.random.nextFloat()) * 0.1F),
-								(double)(this.random.nextFloat() * 0.05F),
-								(double)((this.random.nextFloat() - this.random.nextFloat()) * 0.1F)
-							)
-					);
-				}
+		for (int j = 0; j < i; j++) {
+			ItemEntity itemEntity = this.spawnAtLocation((ItemLike)ITEM_BY_DYE.get(this.getColor()), 1);
+			if (itemEntity != null) {
+				itemEntity.setDeltaMovement(
+					itemEntity.getDeltaMovement()
+						.add(
+							(double)((this.random.nextFloat() - this.random.nextFloat()) * 0.1F),
+							(double)(this.random.nextFloat() * 0.05F),
+							(double)((this.random.nextFloat() - this.random.nextFloat()) * 0.1F)
+						)
+				);
 			}
 		}
+	}
 
-		this.playSound(SoundEvents.SHEEP_SHEAR, 1.0F, 1.0F);
+	@Override
+	public boolean readyForShearing() {
+		return this.isAlive() && !this.isSheared() && !this.isBaby();
 	}
 
 	@Override
@@ -325,9 +332,9 @@ public class Sheep extends Animal {
 		}
 	}
 
-	public Sheep getBreedOffspring(AgableMob agableMob) {
+	public Sheep getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
 		Sheep sheep = (Sheep)agableMob;
-		Sheep sheep2 = EntityType.SHEEP.create(this.level);
+		Sheep sheep2 = EntityType.SHEEP.create(serverLevel);
 		sheep2.setColor(this.getOffspringColor(this, sheep));
 		return sheep2;
 	}
@@ -343,14 +350,14 @@ public class Sheep extends Animal {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		this.setColor(getRandomSheepColor(levelAccessor.getRandom()));
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		this.setColor(getRandomSheepColor(serverLevelAccessor.getRandom()));
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	private DyeColor getOffspringColor(Animal animal, Animal animal2) {

@@ -93,7 +93,7 @@ public class GiveGiftToHero extends Behavior<Villager> {
 				this.giftGivenDuringThisRun = true;
 			}
 		} else {
-			BehaviorUtils.walkToEntity(villager, player, 5);
+			BehaviorUtils.setWalkAndLookTargetMemories(villager, player, 0.5F, 5);
 		}
 	}
 
@@ -106,7 +106,7 @@ public class GiveGiftToHero extends Behavior<Villager> {
 
 	private void throwGift(Villager villager, LivingEntity livingEntity) {
 		for (ItemStack itemStack : this.getItemToThrow(villager)) {
-			BehaviorUtils.throwItem(villager, itemStack, livingEntity);
+			BehaviorUtils.throwItem(villager, itemStack, livingEntity.position());
 		}
 	}
 
@@ -118,7 +118,7 @@ public class GiveGiftToHero extends Behavior<Villager> {
 			if (gifts.containsKey(villagerProfession)) {
 				LootTable lootTable = villager.level.getServer().getLootTables().get((ResourceLocation)gifts.get(villagerProfession));
 				LootContext.Builder builder = new LootContext.Builder((ServerLevel)villager.level)
-					.withParameter(LootContextParams.BLOCK_POS, new BlockPos(villager))
+					.withParameter(LootContextParams.ORIGIN, villager.position())
 					.withParameter(LootContextParams.THIS_ENTITY, villager)
 					.withRandom(villager.getRandom());
 				return lootTable.getRandomItems(builder.create(LootContextParamSets.GIFT));
@@ -141,8 +141,8 @@ public class GiveGiftToHero extends Behavior<Villager> {
 	}
 
 	private boolean isWithinThrowingDistance(Villager villager, Player player) {
-		BlockPos blockPos = new BlockPos(player);
-		BlockPos blockPos2 = new BlockPos(villager);
+		BlockPos blockPos = player.blockPosition();
+		BlockPos blockPos2 = villager.blockPosition();
 		return blockPos2.closerThan(blockPos, 5.0);
 	}
 

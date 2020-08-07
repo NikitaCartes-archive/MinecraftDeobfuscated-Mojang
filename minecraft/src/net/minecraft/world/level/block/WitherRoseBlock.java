@@ -14,20 +14,23 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class WitherRoseBlock extends FlowerBlock {
-	public WitherRoseBlock(MobEffect mobEffect, Block.Properties properties) {
+	public WitherRoseBlock(MobEffect mobEffect, BlockBehaviour.Properties properties) {
 		super(mobEffect, 8, properties);
 	}
 
 	@Override
 	protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		Block block = blockState.getBlock();
-		return super.mayPlaceOn(blockState, blockGetter, blockPos) || block == Blocks.NETHERRACK || block == Blocks.SOUL_SAND;
+		return super.mayPlaceOn(blockState, blockGetter, blockPos)
+			|| blockState.is(Blocks.NETHERRACK)
+			|| blockState.is(Blocks.SOUL_SAND)
+			|| blockState.is(Blocks.SOUL_SOIL);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -41,13 +44,7 @@ public class WitherRoseBlock extends FlowerBlock {
 		for (int i = 0; i < 3; i++) {
 			if (random.nextBoolean()) {
 				level.addParticle(
-					ParticleTypes.SMOKE,
-					d + (double)(random.nextFloat() / 5.0F),
-					(double)blockPos.getY() + (0.5 - (double)random.nextFloat()),
-					e + (double)(random.nextFloat() / 5.0F),
-					0.0,
-					0.0,
-					0.0
+					ParticleTypes.SMOKE, d + random.nextDouble() / 5.0, (double)blockPos.getY() + (0.5 - random.nextDouble()), e + random.nextDouble() / 5.0, 0.0, 0.0, 0.0
 				);
 			}
 		}

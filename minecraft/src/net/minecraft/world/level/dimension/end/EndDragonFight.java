@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.data.worldgen.Features;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
@@ -44,15 +45,11 @@ import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.level.block.state.pattern.BlockPatternBuilder;
 import net.minecraft.world.level.block.state.predicate.BlockPredicate;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.EndPodiumFeature;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.SpikeFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.phys.AABB;
 import org.apache.logging.log4j.LogManager;
@@ -82,11 +79,11 @@ public class EndDragonFight {
 	private int respawnTime;
 	private List<EndCrystal> respawnCrystals;
 
-	public EndDragonFight(ServerLevel serverLevel, CompoundTag compoundTag) {
+	public EndDragonFight(ServerLevel serverLevel, long l, CompoundTag compoundTag) {
 		this.level = serverLevel;
 		if (compoundTag.contains("DragonKilled", 99)) {
-			if (compoundTag.hasUUID("DragonUUID")) {
-				this.dragonUUID = compoundTag.getUUID("DragonUUID");
+			if (compoundTag.hasUUID("Dragon")) {
+				this.dragonUUID = compoundTag.getUUID("Dragon");
 			}
 
 			this.dragonKilled = compoundTag.getBoolean("DragonKilled");
@@ -111,7 +108,7 @@ public class EndDragonFight {
 			}
 		} else {
 			this.gateways.addAll(ContiguousSet.create(Range.closedOpen(0, 20), DiscreteDomain.integers()));
-			Collections.shuffle(this.gateways, new Random(serverLevel.getSeed()));
+			Collections.shuffle(this.gateways, new Random(l));
 		}
 
 		this.exitPortalPattern = BlockPatternBuilder.start()
@@ -127,7 +124,7 @@ public class EndDragonFight {
 	public CompoundTag saveData() {
 		CompoundTag compoundTag = new CompoundTag();
 		if (this.dragonUUID != null) {
-			compoundTag.putUUID("DragonUUID", this.dragonUUID);
+			compoundTag.putUUID("Dragon", this.dragonUUID);
 		}
 
 		compoundTag.putBoolean("DragonKilled", this.dragonKilled);
@@ -379,9 +376,7 @@ public class EndDragonFight {
 
 	private void spawnNewGateway(BlockPos blockPos) {
 		this.level.levelEvent(3000, blockPos, 0);
-		Feature.END_GATEWAY
-			.configured(EndGatewayConfiguration.delayedExitSearch())
-			.place(this.level, (ChunkGenerator<? extends ChunkGeneratorSettings>)this.level.getChunkSource().getGenerator(), new Random(), blockPos);
+		Features.END_GATEWAY_DELAYED.place(this.level, this.level.getChunkSource().getGenerator(), new Random(), blockPos);
 	}
 
 	private void spawnExitPortal(boolean bl) {
@@ -389,13 +384,12 @@ public class EndDragonFight {
 		if (this.portalLocation == null) {
 			this.portalLocation = this.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.END_PODIUM_LOCATION).below();
 
-			while (this.level.getBlockState(this.portalLocation).getBlock() == Blocks.BEDROCK && this.portalLocation.getY() > this.level.getSeaLevel()) {
+			while (this.level.getBlockState(this.portalLocation).is(Blocks.BEDROCK) && this.portalLocation.getY() > this.level.getSeaLevel()) {
 				this.portalLocation = this.portalLocation.below();
 			}
 		}
 
-		endPodiumFeature.configured(FeatureConfiguration.NONE)
-			.place(this.level, (ChunkGenerator<? extends ChunkGeneratorSettings>)this.level.getChunkSource().getGenerator(), new Random(), this.portalLocation);
+		endPodiumFeature.configured(FeatureConfiguration.NONE).place(this.level, this.level.getChunkSource().getGenerator(), new Random(), this.portalLocation);
 	}
 
 	private EnderDragon createNewDragon() {
@@ -433,7 +427,7 @@ public class EndDragonFight {
 			this.updateCrystalCount();
 			Entity entity = this.level.getEntity(this.dragonUUID);
 			if (entity instanceof EnderDragon) {
-				((EnderDragon)entity).onCrystalDestroyed(endCrystal, new BlockPos(endCrystal), damageSource);
+				((EnderDragon)entity).onCrystalDestroyed(endCrystal, endCrystal.blockPosition(), damageSource);
 			}
 		}
 	}
@@ -482,7 +476,7 @@ public class EndDragonFight {
 					for (int j = 0; j < this.exitPortalPattern.getHeight(); j++) {
 						for (int k = 0; k < this.exitPortalPattern.getDepth(); k++) {
 							BlockInWorld blockInWorld = blockPatternMatch.getBlock(i, j, k);
-							if (blockInWorld.getState().getBlock() == Blocks.BEDROCK || blockInWorld.getState().getBlock() == Blocks.END_PORTAL) {
+							if (blockInWorld.getState().is(Blocks.BEDROCK) || blockInWorld.getState().is(Blocks.END_PORTAL)) {
 								this.level.setBlockAndUpdate(blockInWorld.getPos(), Blocks.END_STONE.defaultBlockState());
 							}
 						}

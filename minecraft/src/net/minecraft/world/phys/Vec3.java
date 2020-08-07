@@ -15,6 +15,30 @@ public class Vec3 implements Position {
 	public final double y;
 	public final double z;
 
+	@Environment(EnvType.CLIENT)
+	public static Vec3 fromRGB24(int i) {
+		double d = (double)(i >> 16 & 0xFF) / 255.0;
+		double e = (double)(i >> 8 & 0xFF) / 255.0;
+		double f = (double)(i & 0xFF) / 255.0;
+		return new Vec3(d, e, f);
+	}
+
+	public static Vec3 atCenterOf(Vec3i vec3i) {
+		return new Vec3((double)vec3i.getX() + 0.5, (double)vec3i.getY() + 0.5, (double)vec3i.getZ() + 0.5);
+	}
+
+	public static Vec3 atLowerCornerOf(Vec3i vec3i) {
+		return new Vec3((double)vec3i.getX(), (double)vec3i.getY(), (double)vec3i.getZ());
+	}
+
+	public static Vec3 atBottomCenterOf(Vec3i vec3i) {
+		return new Vec3((double)vec3i.getX() + 0.5, (double)vec3i.getY(), (double)vec3i.getZ() + 0.5);
+	}
+
+	public static Vec3 upFromBottomCenterOf(Vec3i vec3i, double d) {
+		return new Vec3((double)vec3i.getX() + 0.5, (double)vec3i.getY() + d, (double)vec3i.getZ() + 0.5);
+	}
+
 	public Vec3(double d, double e, double f) {
 		this.x = d;
 		this.y = e;
@@ -23,10 +47,6 @@ public class Vec3 implements Position {
 
 	public Vec3(Vector3f vector3f) {
 		this((double)vector3f.x(), (double)vector3f.y(), (double)vector3f.z());
-	}
-
-	public Vec3(Vec3i vec3i) {
-		this((double)vec3i.getX(), (double)vec3i.getY(), (double)vec3i.getZ());
 	}
 
 	public Vec3 vectorTo(Vec3 vec3) {
@@ -60,6 +80,10 @@ public class Vec3 implements Position {
 
 	public Vec3 add(double d, double e, double f) {
 		return new Vec3(this.x + d, this.y + e, this.z + f);
+	}
+
+	public boolean closerThan(Position position, double d) {
+		return this.distanceToSqr(position.x(), position.y(), position.z()) < d * d;
 	}
 
 	public double distanceTo(Vec3 vec3) {
@@ -155,6 +179,16 @@ public class Vec3 implements Position {
 	}
 
 	@Environment(EnvType.CLIENT)
+	public Vec3 zRot(float f) {
+		float g = Mth.cos(f);
+		float h = Mth.sin(f);
+		double d = this.x * (double)g + this.y * (double)h;
+		double e = this.y * (double)g - this.x * (double)h;
+		double i = this.z;
+		return new Vec3(d, e, i);
+	}
+
+	@Environment(EnvType.CLIENT)
 	public static Vec3 directionFromRotation(Vec2 vec2) {
 		return directionFromRotation(vec2.x, vec2.y);
 	}
@@ -192,5 +226,11 @@ public class Vec3 implements Position {
 	@Override
 	public final double z() {
 		return this.z;
+	}
+
+	public Vec3 project(Vec3 vec3) {
+		Vec3 vec32 = vec3.normalize();
+		double d = this.dot(vec3);
+		return vec32.multiply(d, d, d);
 	}
 }

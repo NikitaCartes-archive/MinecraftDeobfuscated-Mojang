@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.monster;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -20,6 +21,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -39,7 +41,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -70,7 +72,7 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		compoundTag.put("VillagerData", this.getVillagerData().serialize(NbtOps.INSTANCE));
+		VillagerData.CODEC.encodeStart(NbtOps.INSTANCE, this.getVillagerData()).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("VillagerData", tag));
 		if (this.tradeOffers != null) {
 			compoundTag.put("Offers", this.tradeOffers);
 		}
@@ -91,7 +93,8 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
 		if (compoundTag.contains("VillagerData", 10)) {
-			this.setVillagerData(new VillagerData(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("VillagerData"))));
+			DataResult<VillagerData> dataResult = VillagerData.CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("VillagerData")));
+			dataResult.resultOrPartial(LOGGER::error).ifPresent(this::setVillagerData);
 		}
 
 		if (compoundTag.contains("Offers", 10)) {
@@ -125,19 +128,22 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 	}
 
 	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.getItem() == Items.GOLDEN_APPLE && this.hasEffect(MobEffects.WEAKNESS)) {
-			if (!player.abilities.instabuild) {
-				itemStack.shrink(1);
-			}
+		if (itemStack.getItem() == Items.GOLDEN_APPLE) {
+			if (this.hasEffect(MobEffects.WEAKNESS)) {
+				if (!player.abilities.instabuild) {
+					itemStack.shrink(1);
+				}
 
-			if (!this.level.isClientSide) {
-				this.startConverting(player.getUUID(), this.random.nextInt(2401) + 3600);
-				player.swing(interactionHand, true);
-			}
+				if (!this.level.isClientSide) {
+					this.startConverting(player.getUUID(), this.random.nextInt(2401) + 3600);
+				}
 
-			return true;
+				return InteractionResult.SUCCESS;
+			} else {
+				return InteractionResult.CONSUME;
+			}
 		} else {
 			return super.mobInteract(player, interactionHand);
 		}
@@ -150,7 +156,7 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 
 	@Override
 	public boolean removeWhenFarAway(double d) {
-		return !this.isConverting();
+		return !this.isConverting() && this.villagerXp == 0;
 	}
 
 	public boolean isConverting() {
@@ -189,7 +195,7 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 	}
 
 	private void finishConversion(ServerLevel serverLevel) {
-		Villager villager = EntityType.VILLAGER.create(serverLevel);
+		Villager villager = this.convertTo(EntityType.VILLAGER, false);
 
 		for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
 			ItemStack itemStack = this.getItemBySlot(equipmentSlot);
@@ -205,7 +211,6 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 			}
 		}
 
-		villager.copyPosition(this);
 		villager.setVillagerData(this.getVillagerData());
 		if (this.gossips != null) {
 			villager.setGossips(this.gossips);
@@ -216,24 +221,7 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 		}
 
 		villager.setVillagerXp(this.villagerXp);
-		villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(new BlockPos(villager)), MobSpawnType.CONVERSION, null, null);
-		if (this.isBaby()) {
-			villager.setAge(-24000);
-		}
-
-		this.remove();
-		villager.setNoAi(this.isNoAi());
-		if (this.hasCustomName()) {
-			villager.setCustomName(this.getCustomName());
-			villager.setCustomNameVisible(this.isCustomNameVisible());
-		}
-
-		if (this.isPersistenceRequired()) {
-			villager.setPersistenceRequired();
-		}
-
-		villager.setInvulnerable(this.isInvulnerable());
-		serverLevel.addFreshEntity(villager);
+		villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.CONVERSION, null, null);
 		if (this.conversionStarter != null) {
 			Player player = serverLevel.getPlayerByUUID(this.conversionStarter);
 			if (player instanceof ServerPlayer) {
@@ -243,7 +231,9 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 		}
 
 		villager.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
-		serverLevel.levelEvent(null, 1027, new BlockPos(this), 0);
+		if (!this.isSilent()) {
+			serverLevel.levelEvent(null, 1027, this.blockPosition(), 0);
+		}
 	}
 
 	private int getConversionProgress() {
@@ -312,14 +302,14 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(levelAccessor.getBiome(new BlockPos(this)))));
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(serverLevelAccessor.getBiomeName(this.blockPosition()))));
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	public void setVillagerData(VillagerData villagerData) {

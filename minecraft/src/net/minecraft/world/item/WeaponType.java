@@ -1,9 +1,10 @@
 package net.minecraft.world.item;
 
-import com.google.common.collect.Multimap;
+import com.google.common.collect.ImmutableMultimap.Builder;
 import java.util.UUID;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 
 enum WeaponType {
 	SWORD,
@@ -17,23 +18,14 @@ enum WeaponType {
 	protected static final UUID BASE_ATTACK_SPEED_UUID = UUID.fromString("FA233E1C-4180-4865-B01B-BCCE9785ACA3");
 	protected static final UUID BASE_ATTACK_REACH_UUID = UUID.fromString("26cb07a3-209d-4110-8e10-1010243614c8");
 
-	public void addCombatAttributes(Tier tier, Multimap<String, AttributeModifier> multimap) {
+	public void addCombatAttributes(Tier tier, Builder<Attribute, AttributeModifier> builder) {
 		float f = this.getSpeed(tier);
 		float g = this.getDamage(tier);
 		float h = this.getReach(tier);
-		multimap.put(
-			SharedMonsterAttributes.ATTACK_DAMAGE.getName(),
-			new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", (double)g, AttributeModifier.Operation.ADDITION)
-		);
-		multimap.put(
-			SharedMonsterAttributes.ATTACK_SPEED.getName(),
-			new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", (double)f, AttributeModifier.Operation.ADDITION)
-		);
+		builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", (double)g, AttributeModifier.Operation.ADDITION));
+		builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", (double)f, AttributeModifier.Operation.ADDITION));
 		if (h != 0.0F) {
-			multimap.put(
-				SharedMonsterAttributes.ATTACK_REACH.getName(),
-				new AttributeModifier(BASE_ATTACK_REACH_UUID, "Weapon modifier", (double)h, AttributeModifier.Operation.ADDITION)
-			);
+			builder.put(Attributes.ATTACK_REACH, new AttributeModifier(BASE_ATTACK_REACH_UUID, "Weapon modifier", (double)h, AttributeModifier.Operation.ADDITION));
 		}
 	}
 
@@ -77,8 +69,10 @@ enum WeaponType {
 					return 0.5F;
 				} else if (tier == Tiers.DIAMOND) {
 					return 1.0F;
+				} else if (tier == Tiers.GOLD) {
+					return 1.0F;
 				} else {
-					if (tier == Tiers.GOLD) {
+					if (tier == Tiers.NETHERITE) {
 						return 1.0F;
 					}
 

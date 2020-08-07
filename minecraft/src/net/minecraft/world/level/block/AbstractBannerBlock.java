@@ -11,12 +11,13 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class AbstractBannerBlock extends BaseEntityBlock {
 	private final DyeColor color;
 
-	protected AbstractBannerBlock(DyeColor dyeColor, Block.Properties properties) {
+	protected AbstractBannerBlock(DyeColor dyeColor, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.color = dyeColor;
 	}

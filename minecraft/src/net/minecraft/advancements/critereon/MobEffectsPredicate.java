@@ -26,7 +26,7 @@ public class MobEffectsPredicate {
 	}
 
 	public static MobEffectsPredicate effects() {
-		return new MobEffectsPredicate(Maps.<MobEffect, MobEffectsPredicate.MobEffectInstancePredicate>newHashMap());
+		return new MobEffectsPredicate(Maps.<MobEffect, MobEffectsPredicate.MobEffectInstancePredicate>newLinkedHashMap());
 	}
 
 	public MobEffectsPredicate and(MobEffect mobEffect) {
@@ -64,7 +64,7 @@ public class MobEffectsPredicate {
 	public static MobEffectsPredicate fromJson(@Nullable JsonElement jsonElement) {
 		if (jsonElement != null && !jsonElement.isJsonNull()) {
 			JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "effects");
-			Map<MobEffect, MobEffectsPredicate.MobEffectInstancePredicate> map = Maps.<MobEffect, MobEffectsPredicate.MobEffectInstancePredicate>newHashMap();
+			Map<MobEffect, MobEffectsPredicate.MobEffectInstancePredicate> map = Maps.<MobEffect, MobEffectsPredicate.MobEffectInstancePredicate>newLinkedHashMap();
 
 			for (Entry<String, JsonElement> entry : jsonObject.entrySet()) {
 				ResourceLocation resourceLocation = new ResourceLocation((String)entry.getKey());

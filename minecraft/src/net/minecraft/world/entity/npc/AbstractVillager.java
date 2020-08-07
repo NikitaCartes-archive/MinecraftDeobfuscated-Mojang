@@ -8,13 +8,14 @@ import net.fabricmc.api.Environment;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -31,8 +32,9 @@ import net.minecraft.world.item.trading.Merchant;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.phys.Vec3;
 
 public abstract class AbstractVillager extends AgableMob implements Npc, Merchant {
 	private static final EntityDataAccessor<Integer> DATA_UNHAPPY_COUNTER = SynchedEntityData.defineId(AbstractVillager.class, EntityDataSerializers.INT);
@@ -44,22 +46,23 @@ public abstract class AbstractVillager extends AgableMob implements Npc, Merchan
 
 	public AbstractVillager(EntityType<? extends AbstractVillager> entityType, Level level) {
 		super(entityType, level);
+		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0F);
+		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
 	}
 
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
 		if (spawnGroupData == null) {
-			spawnGroupData = new AgableMob.AgableMobGroupData();
-			((AgableMob.AgableMobGroupData)spawnGroupData).setShouldSpawnBaby(false);
+			spawnGroupData = new AgableMob.AgableMobGroupData(false);
 		}
 
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	public int getUnhappyCounter() {
@@ -166,16 +169,7 @@ public abstract class AbstractVillager extends AgableMob implements Npc, Merchan
 			compoundTag.put("Offers", merchantOffers.createTag());
 		}
 
-		ListTag listTag = new ListTag();
-
-		for (int i = 0; i < this.inventory.getContainerSize(); i++) {
-			ItemStack itemStack = this.inventory.getItem(i);
-			if (!itemStack.isEmpty()) {
-				listTag.add(itemStack.save(new CompoundTag()));
-			}
-		}
-
-		compoundTag.put("Inventory", listTag);
+		compoundTag.put("Inventory", this.inventory.createTag());
 	}
 
 	@Override
@@ -185,21 +179,14 @@ public abstract class AbstractVillager extends AgableMob implements Npc, Merchan
 			this.offers = new MerchantOffers(compoundTag.getCompound("Offers"));
 		}
 
-		ListTag listTag = compoundTag.getList("Inventory", 10);
-
-		for (int i = 0; i < listTag.size(); i++) {
-			ItemStack itemStack = ItemStack.of(listTag.getCompound(i));
-			if (!itemStack.isEmpty()) {
-				this.inventory.addItem(itemStack);
-			}
-		}
+		this.inventory.fromTag(compoundTag.getList("Inventory", 10));
 	}
 
 	@Nullable
 	@Override
-	public Entity changeDimension(DimensionType dimensionType) {
+	public Entity changeDimension(ServerLevel serverLevel) {
 		this.stopTrading();
-		return super.changeDimension(dimensionType);
+		return super.changeDimension(serverLevel);
 	}
 
 	protected void stopTrading() {
@@ -272,5 +259,13 @@ public abstract class AbstractVillager extends AgableMob implements Npc, Merchan
 				merchantOffers.add(merchantOffer);
 			}
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public Vec3 getRopeHoldPosition(float f) {
+		float g = Mth.lerp(f, this.yBodyRotO, this.yBodyRot) * (float) (Math.PI / 180.0);
+		Vec3 vec3 = new Vec3(0.0, this.getBoundingBox().getYsize() - 1.0, 0.2);
+		return this.getPosition(f).add(vec3.yRot(-g));
 	}
 }

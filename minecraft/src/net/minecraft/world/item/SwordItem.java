@@ -1,21 +1,28 @@
 package net.minecraft.world.item;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.ImmutableMultimap.Builder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 
-public class SwordItem extends TieredItem {
+public class SwordItem extends TieredItem implements Vanishable {
+	private final Multimap<Attribute, AttributeModifier> defaultModifiers;
+
 	public SwordItem(Tier tier, Item.Properties properties) {
 		super(tier, properties);
+		Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+		WeaponType.SWORD.addCombatAttributes(this.getTier(), builder);
+		this.defaultModifiers = builder.build();
 	}
 
 	public float getDamage() {
@@ -29,8 +36,7 @@ public class SwordItem extends TieredItem {
 
 	@Override
 	public float getDestroySpeed(ItemStack itemStack, BlockState blockState) {
-		Block block = blockState.getBlock();
-		if (block == Blocks.COBWEB) {
+		if (blockState.is(Blocks.COBWEB)) {
 			return 15.0F;
 		} else {
 			Material material = blockState.getMaterial();
@@ -60,17 +66,12 @@ public class SwordItem extends TieredItem {
 	}
 
 	@Override
-	public boolean canDestroySpecial(BlockState blockState) {
-		return blockState.getBlock() == Blocks.COBWEB;
+	public boolean isCorrectToolForDrops(BlockState blockState) {
+		return blockState.is(Blocks.COBWEB);
 	}
 
 	@Override
-	public Multimap<String, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
-		Multimap<String, AttributeModifier> multimap = super.getDefaultAttributeModifiers(equipmentSlot);
-		if (equipmentSlot == EquipmentSlot.MAINHAND) {
-			WeaponType.SWORD.addCombatAttributes(this.getTier(), multimap);
-		}
-
-		return multimap;
+	public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
+		return equipmentSlot == EquipmentSlot.MAINHAND ? this.defaultModifiers : super.getDefaultAttributeModifiers(equipmentSlot);
 	}
 }

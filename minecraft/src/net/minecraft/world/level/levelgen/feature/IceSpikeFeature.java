@@ -1,35 +1,29 @@
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 public class IceSpikeFeature extends Feature<NoneFeatureConfiguration> {
-	public IceSpikeFeature(Function<Dynamic<?>, ? extends NoneFeatureConfiguration> function) {
-		super(function);
+	public IceSpikeFeature(Codec<NoneFeatureConfiguration> codec) {
+		super(codec);
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
-		Random random,
-		BlockPos blockPos,
-		NoneFeatureConfiguration noneFeatureConfiguration
+		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, NoneFeatureConfiguration noneFeatureConfiguration
 	) {
-		while (levelAccessor.isEmptyBlock(blockPos) && blockPos.getY() > 2) {
+		while (worldGenLevel.isEmptyBlock(blockPos) && blockPos.getY() > 2) {
 			blockPos = blockPos.below();
 		}
 
-		if (levelAccessor.getBlockState(blockPos).getBlock() != Blocks.SNOW_BLOCK) {
+		if (!worldGenLevel.getBlockState(blockPos).is(Blocks.SNOW_BLOCK)) {
 			return false;
 		} else {
 			blockPos = blockPos.above(random.nextInt(4));
@@ -49,17 +43,17 @@ public class IceSpikeFeature extends Feature<NoneFeatureConfiguration> {
 					for (int n = -l; n <= l; n++) {
 						float h = (float)Mth.abs(n) - 0.25F;
 						if ((m == 0 && n == 0 || !(g * g + h * h > f * f)) && (m != -l && m != l && n != -l && n != l || !(random.nextFloat() > 0.75F))) {
-							BlockState blockState = levelAccessor.getBlockState(blockPos.offset(m, k, n));
+							BlockState blockState = worldGenLevel.getBlockState(blockPos.offset(m, k, n));
 							Block block = blockState.getBlock();
 							if (blockState.isAir() || isDirt(block) || block == Blocks.SNOW_BLOCK || block == Blocks.ICE) {
-								this.setBlock(levelAccessor, blockPos.offset(m, k, n), Blocks.PACKED_ICE.defaultBlockState());
+								this.setBlock(worldGenLevel, blockPos.offset(m, k, n), Blocks.PACKED_ICE.defaultBlockState());
 							}
 
 							if (k != 0 && l > 1) {
-								blockState = levelAccessor.getBlockState(blockPos.offset(m, -k, n));
+								blockState = worldGenLevel.getBlockState(blockPos.offset(m, -k, n));
 								block = blockState.getBlock();
 								if (blockState.isAir() || isDirt(block) || block == Blocks.SNOW_BLOCK || block == Blocks.ICE) {
-									this.setBlock(levelAccessor, blockPos.offset(m, -k, n), Blocks.PACKED_ICE.defaultBlockState());
+									this.setBlock(worldGenLevel, blockPos.offset(m, -k, n), Blocks.PACKED_ICE.defaultBlockState());
 								}
 							}
 						}
@@ -83,13 +77,13 @@ public class IceSpikeFeature extends Feature<NoneFeatureConfiguration> {
 					}
 
 					while (blockPos2.getY() > 50) {
-						BlockState blockState2 = levelAccessor.getBlockState(blockPos2);
+						BlockState blockState2 = worldGenLevel.getBlockState(blockPos2);
 						Block block2 = blockState2.getBlock();
 						if (!blockState2.isAir() && !isDirt(block2) && block2 != Blocks.SNOW_BLOCK && block2 != Blocks.ICE && block2 != Blocks.PACKED_ICE) {
 							break;
 						}
 
-						this.setBlock(levelAccessor, blockPos2, Blocks.PACKED_ICE.defaultBlockState());
+						this.setBlock(worldGenLevel, blockPos2, Blocks.PACKED_ICE.defaultBlockState());
 						blockPos2 = blockPos2.below();
 						if (--p <= 0) {
 							blockPos2 = blockPos2.below(random.nextInt(5) + 1);

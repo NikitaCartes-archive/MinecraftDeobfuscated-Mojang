@@ -1,14 +1,18 @@
 package net.minecraft.world.item;
 
+import java.util.Objects;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.biome.Biome;
@@ -33,7 +37,7 @@ public class BoneMealItem extends Item {
 				level.levelEvent(2005, blockPos, 0);
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			BlockState blockState = level.getBlockState(blockPos);
 			boolean bl = blockState.isFaceSturdy(level, blockPos, useOnContext.getClickedFace());
@@ -42,7 +46,7 @@ public class BoneMealItem extends Item {
 					level.levelEvent(2005, blockPos2, 0);
 				}
 
-				return InteractionResult.SUCCESS;
+				return InteractionResult.sidedSuccess(level.isClientSide);
 			} else {
 				return InteractionResult.PASS;
 			}
@@ -70,25 +74,24 @@ public class BoneMealItem extends Item {
 	}
 
 	public static boolean growWaterPlant(ItemStack itemStack, Level level, BlockPos blockPos, @Nullable Direction direction) {
-		if (level.getBlockState(blockPos).getBlock() == Blocks.WATER && level.getFluidState(blockPos).getAmount() == 8) {
+		if (level.getBlockState(blockPos).is(Blocks.WATER) && level.getFluidState(blockPos).getAmount() == 8) {
 			if (!(level instanceof ServerLevel)) {
 				return true;
 			} else {
 				label80:
 				for (int i = 0; i < 128; i++) {
 					BlockPos blockPos2 = blockPos;
-					Biome biome = level.getBiome(blockPos);
 					BlockState blockState = Blocks.SEAGRASS.defaultBlockState();
 
 					for (int j = 0; j < i / 16; j++) {
 						blockPos2 = blockPos2.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1);
-						biome = level.getBiome(blockPos2);
 						if (level.getBlockState(blockPos2).isCollisionShapeFullBlock(level, blockPos2)) {
 							continue label80;
 						}
 					}
 
-					if (biome == Biomes.WARM_OCEAN || biome == Biomes.DEEP_WARM_OCEAN) {
+					Optional<ResourceKey<Biome>> optional = level.getBiomeName(blockPos2);
+					if (Objects.equals(optional, Optional.of(Biomes.WARM_OCEAN)) || Objects.equals(optional, Optional.of(Biomes.DEEP_WARM_OCEAN))) {
 						if (i == 0 && direction != null && direction.getAxis().isHorizontal()) {
 							blockState = BlockTags.WALL_CORALS.getRandomElement(level.random).defaultBlockState().setValue(BaseCoralWallFanBlock.FACING, direction);
 						} else if (random.nextInt(4) == 0) {
@@ -97,16 +100,16 @@ public class BoneMealItem extends Item {
 					}
 
 					if (blockState.getBlock().is(BlockTags.WALL_CORALS)) {
-						for (int jx = 0; !blockState.canSurvive(level, blockPos2) && jx < 4; jx++) {
+						for (int k = 0; !blockState.canSurvive(level, blockPos2) && k < 4; k++) {
 							blockState = blockState.setValue(BaseCoralWallFanBlock.FACING, Direction.Plane.HORIZONTAL.getRandomDirection(random));
 						}
 					}
 
 					if (blockState.canSurvive(level, blockPos2)) {
 						BlockState blockState2 = level.getBlockState(blockPos2);
-						if (blockState2.getBlock() == Blocks.WATER && level.getFluidState(blockPos2).getAmount() == 8) {
+						if (blockState2.is(Blocks.WATER) && level.getFluidState(blockPos2).getAmount() == 8) {
 							level.setBlock(blockPos2, blockState, 3);
-						} else if (blockState2.getBlock() == Blocks.SEAGRASS && random.nextInt(10) == 0) {
+						} else if (blockState2.is(Blocks.SEAGRASS) && random.nextInt(10) == 0) {
 							((BonemealableBlock)Blocks.SEAGRASS).performBonemeal((ServerLevel)level, random, blockPos2, blockState2);
 						}
 					}
@@ -128,19 +131,36 @@ public class BoneMealItem extends Item {
 
 		BlockState blockState = levelAccessor.getBlockState(blockPos);
 		if (!blockState.isAir()) {
+			double d = 0.5;
+			double e;
+			if (blockState.is(Blocks.WATER)) {
+				i *= 3;
+				e = 1.0;
+				d = 3.0;
+			} else if (blockState.isSolidRender(levelAccessor, blockPos)) {
+				blockPos = blockPos.above();
+				i *= 3;
+				d = 3.0;
+				e = 1.0;
+			} else {
+				e = blockState.getShape(levelAccessor, blockPos).max(Direction.Axis.Y);
+			}
+
+			levelAccessor.addParticle(
+				ParticleTypes.HAPPY_VILLAGER, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 0.0, 0.0, 0.0
+			);
+
 			for (int j = 0; j < i; j++) {
-				double d = random.nextGaussian() * 0.02;
-				double e = random.nextGaussian() * 0.02;
 				double f = random.nextGaussian() * 0.02;
-				levelAccessor.addParticle(
-					ParticleTypes.HAPPY_VILLAGER,
-					(double)((float)blockPos.getX() + random.nextFloat()),
-					(double)blockPos.getY() + (double)random.nextFloat() * blockState.getShape(levelAccessor, blockPos).max(Direction.Axis.Y),
-					(double)((float)blockPos.getZ() + random.nextFloat()),
-					d,
-					e,
-					f
-				);
+				double g = random.nextGaussian() * 0.02;
+				double h = random.nextGaussian() * 0.02;
+				double k = 0.5 - d;
+				double l = (double)blockPos.getX() + k + random.nextDouble() * d * 2.0;
+				double m = (double)blockPos.getY() + random.nextDouble() * e;
+				double n = (double)blockPos.getZ() + k + random.nextDouble() * d * 2.0;
+				if (!levelAccessor.getBlockState(new BlockPos(l, m, n).below()).isAir()) {
+					levelAccessor.addParticle(ParticleTypes.HAPPY_VILLAGER, l, m, n, f, g, h);
+				}
 			}
 		}
 	}

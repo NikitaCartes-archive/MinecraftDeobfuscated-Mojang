@@ -18,6 +18,7 @@ public class PickaxeItem extends DiggerItem {
 		Blocks.POWERED_RAIL,
 		Blocks.GOLD_BLOCK,
 		Blocks.GOLD_ORE,
+		Blocks.NETHER_GOLD_ORE,
 		Blocks.ICE,
 		Blocks.IRON_BLOCK,
 		Blocks.IRON_ORE,
@@ -88,7 +89,10 @@ public class PickaxeItem extends DiggerItem {
 		Blocks.PURPLE_SHULKER_BOX,
 		Blocks.RED_SHULKER_BOX,
 		Blocks.WHITE_SHULKER_BOX,
-		Blocks.YELLOW_SHULKER_BOX
+		Blocks.YELLOW_SHULKER_BOX,
+		Blocks.PISTON,
+		Blocks.STICKY_PISTON,
+		Blocks.PISTON_HEAD
 	);
 
 	protected PickaxeItem(Tier tier, Item.Properties properties) {
@@ -96,22 +100,25 @@ public class PickaxeItem extends DiggerItem {
 	}
 
 	@Override
-	public boolean canDestroySpecial(BlockState blockState) {
-		Block block = blockState.getBlock();
+	public boolean isCorrectToolForDrops(BlockState blockState) {
 		int i = this.getTier().getLevel();
-		if (block == Blocks.OBSIDIAN) {
-			return i == 3;
-		} else if (block == Blocks.DIAMOND_BLOCK
-			|| block == Blocks.DIAMOND_ORE
-			|| block == Blocks.EMERALD_ORE
-			|| block == Blocks.EMERALD_BLOCK
-			|| block == Blocks.GOLD_BLOCK
-			|| block == Blocks.GOLD_ORE
-			|| block == Blocks.REDSTONE_ORE) {
+		if (blockState.is(Blocks.OBSIDIAN)
+			|| blockState.is(Blocks.CRYING_OBSIDIAN)
+			|| blockState.is(Blocks.NETHERITE_BLOCK)
+			|| blockState.is(Blocks.RESPAWN_ANCHOR)
+			|| blockState.is(Blocks.ANCIENT_DEBRIS)) {
+			return i >= 3;
+		} else if (blockState.is(Blocks.DIAMOND_BLOCK)
+			|| blockState.is(Blocks.DIAMOND_ORE)
+			|| blockState.is(Blocks.EMERALD_ORE)
+			|| blockState.is(Blocks.EMERALD_BLOCK)
+			|| blockState.is(Blocks.GOLD_BLOCK)
+			|| blockState.is(Blocks.GOLD_ORE)
+			|| blockState.is(Blocks.REDSTONE_ORE)) {
 			return i >= 2;
-		} else if (block != Blocks.IRON_BLOCK && block != Blocks.IRON_ORE && block != Blocks.LAPIS_BLOCK && block != Blocks.LAPIS_ORE) {
+		} else if (!blockState.is(Blocks.IRON_BLOCK) && !blockState.is(Blocks.IRON_ORE) && !blockState.is(Blocks.LAPIS_BLOCK) && !blockState.is(Blocks.LAPIS_ORE)) {
 			Material material = blockState.getMaterial();
-			return material == Material.STONE || material == Material.METAL || material == Material.HEAVY_METAL;
+			return material == Material.STONE || material == Material.METAL || material == Material.HEAVY_METAL || blockState.is(Blocks.NETHER_GOLD_ORE);
 		} else {
 			return i >= 1;
 		}

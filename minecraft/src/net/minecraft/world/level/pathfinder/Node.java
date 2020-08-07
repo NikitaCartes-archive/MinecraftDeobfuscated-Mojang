@@ -28,7 +28,7 @@ public class Node {
 		this.hash = createHash(i, j, k);
 	}
 
-	public Node cloneMove(int i, int j, int k) {
+	public Node cloneAndMove(int i, int j, int k) {
 		Node node = new Node(i, j, k);
 		node.heapIdx = this.heapIdx;
 		node.g = this.g;
@@ -74,7 +74,6 @@ public class Node {
 		return f + g + h;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public BlockPos asBlockPos() {
 		return new BlockPos(this.x, this.y, this.z);
 	}

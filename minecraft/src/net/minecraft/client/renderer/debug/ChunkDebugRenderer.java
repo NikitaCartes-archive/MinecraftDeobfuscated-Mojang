@@ -16,11 +16,12 @@ import net.minecraft.client.multiplayer.ClientChunkCache;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.dimension.DimensionType;
 
 @Environment(EnvType.CLIENT)
 public class ChunkDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
@@ -85,14 +86,7 @@ public class ChunkDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 		private ChunkData(IntegratedServer integratedServer, double d, double e) {
 			ClientLevel clientLevel = ChunkDebugRenderer.this.minecraft.level;
-			DimensionType dimensionType = ChunkDebugRenderer.this.minecraft.level.dimension.getType();
-			ServerLevel serverLevel;
-			if (integratedServer.getLevel(dimensionType) != null) {
-				serverLevel = integratedServer.getLevel(dimensionType);
-			} else {
-				serverLevel = null;
-			}
-
+			ResourceKey<Level> resourceKey = clientLevel.dimension();
 			int i = (int)d >> 4;
 			int j = (int)e >> 4;
 			Builder<ChunkPos, String> builder = ImmutableMap.builder();
@@ -117,17 +111,22 @@ public class ChunkDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 
 			this.clientData = builder.build();
 			this.serverData = integratedServer.submit(() -> {
-				Builder<ChunkPos, String> builderx = ImmutableMap.builder();
-				ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
+				ServerLevel serverLevel = integratedServer.getLevel(resourceKey);
+				if (serverLevel == null) {
+					return ImmutableMap.of();
+				} else {
+					Builder<ChunkPos, String> builderx = ImmutableMap.builder();
+					ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
 
-				for (int kx = i - 12; kx <= i + 12; kx++) {
-					for (int lx = j - 12; lx <= j + 12; lx++) {
-						ChunkPos chunkPosx = new ChunkPos(kx, lx);
-						builderx.put(chunkPosx, "Server: " + serverChunkCache.getChunkDebugData(chunkPosx));
+					for (int kx = i - 12; kx <= i + 12; kx++) {
+						for (int lx = j - 12; lx <= j + 12; lx++) {
+							ChunkPos chunkPosx = new ChunkPos(kx, lx);
+							builderx.put(chunkPosx, "Server: " + serverChunkCache.getChunkDebugData(chunkPosx));
+						}
 					}
-				}
 
-				return builderx.build();
+					return builderx.build();
+				}
 			});
 		}
 	}

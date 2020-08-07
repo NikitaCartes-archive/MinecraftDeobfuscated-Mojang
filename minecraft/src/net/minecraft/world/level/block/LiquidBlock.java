@@ -10,12 +10,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -34,8 +33,9 @@ public class LiquidBlock extends Block implements BucketPickup {
 	public static final IntegerProperty LEVEL = BlockStateProperties.LEVEL;
 	protected final FlowingFluid fluid;
 	private final List<FluidState> stateCache;
+	public static final VoxelShape STABLE_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 8.0, 16.0);
 
-	protected LiquidBlock(FlowingFluid flowingFluid, Block.Properties properties) {
+	protected LiquidBlock(FlowingFluid flowingFluid, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.fluid = flowingFluid;
 		this.stateCache = Lists.<FluidState>newArrayList();
@@ -50,8 +50,22 @@ public class LiquidBlock extends Block implements BucketPickup {
 	}
 
 	@Override
+	public VoxelShape getCollisionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+		return collisionContext.isAbove(STABLE_SHAPE, blockPos, true)
+				&& blockState.getValue(LEVEL) == 0
+				&& collisionContext.canStandOnFluid(blockGetter.getFluidState(blockPos.above()), this.fluid)
+			? STABLE_SHAPE
+			: Shapes.empty();
+	}
+
+	@Override
+	public boolean isRandomlyTicking(BlockState blockState) {
+		return blockState.getFluidState().isRandomlyTicking();
+	}
+
+	@Override
 	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
-		serverLevel.getFluidState(blockPos).randomTick(serverLevel, blockPos, random);
+		blockState.getFluidState().randomTick(serverLevel, blockPos, random);
 	}
 
 	@Override
@@ -92,14 +106,9 @@ public class LiquidBlock extends Block implements BucketPickup {
 	}
 
 	@Override
-	public int getTickDelay(LevelReader levelReader) {
-		return this.fluid.getTickDelay(levelReader);
-	}
-
-	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (this.shouldSpreadLiquid(level, blockPos, blockState)) {
-			level.getLiquidTicks().scheduleTick(blockPos, blockState.getFluidState().getType(), this.getTickDelay(level));
+			level.getLiquidTicks().scheduleTick(blockPos, blockState.getFluidState().getType(), this.fluid.getTickDelay(level));
 		}
 	}
 
@@ -108,7 +117,7 @@ public class LiquidBlock extends Block implements BucketPickup {
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if (blockState.getFluidState().isSource() || blockState2.getFluidState().isSource()) {
-			levelAccessor.getLiquidTicks().scheduleTick(blockPos, blockState.getFluidState().getType(), this.getTickDelay(levelAccessor));
+			levelAccessor.getLiquidTicks().scheduleTick(blockPos, blockState.getFluidState().getType(), this.fluid.getTickDelay(levelAccessor));
 		}
 
 		return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
@@ -117,33 +126,29 @@ public class LiquidBlock extends Block implements BucketPickup {
 	@Override
 	public void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
 		if (this.shouldSpreadLiquid(level, blockPos, blockState)) {
-			level.getLiquidTicks().scheduleTick(blockPos, blockState.getFluidState().getType(), this.getTickDelay(level));
+			level.getLiquidTicks().scheduleTick(blockPos, blockState.getFluidState().getType(), this.fluid.getTickDelay(level));
 		}
 	}
 
-	public boolean shouldSpreadLiquid(Level level, BlockPos blockPos, BlockState blockState) {
+	private boolean shouldSpreadLiquid(Level level, BlockPos blockPos, BlockState blockState) {
 		if (this.fluid.is(FluidTags.LAVA)) {
-			boolean bl = false;
+			boolean bl = level.getBlockState(blockPos.below()).is(Blocks.SOUL_SOIL);
 
 			for (Direction direction : Direction.values()) {
-				if (direction != Direction.DOWN && level.getFluidState(blockPos.relative(direction)).is(FluidTags.WATER)) {
-					bl = true;
-					break;
-				}
-			}
+				if (direction != Direction.DOWN) {
+					BlockPos blockPos2 = blockPos.relative(direction);
+					if (level.getFluidState(blockPos2).is(FluidTags.WATER)) {
+						Block block = level.getFluidState(blockPos).isSource() ? Blocks.OBSIDIAN : Blocks.COBBLESTONE;
+						level.setBlockAndUpdate(blockPos, block.defaultBlockState());
+						this.fizz(level, blockPos);
+						return false;
+					}
 
-			if (bl) {
-				FluidState fluidState = level.getFluidState(blockPos);
-				if (fluidState.isSource()) {
-					level.setBlockAndUpdate(blockPos, Blocks.OBSIDIAN.defaultBlockState());
-					this.fizz(level, blockPos);
-					return false;
-				}
-
-				if (fluidState.getHeight(level, blockPos) >= 0.44444445F) {
-					level.setBlockAndUpdate(blockPos, Blocks.COBBLESTONE.defaultBlockState());
-					this.fizz(level, blockPos);
-					return false;
+					if (bl && level.getBlockState(blockPos2).is(Blocks.BLUE_ICE)) {
+						level.setBlockAndUpdate(blockPos, Blocks.BASALT.defaultBlockState());
+						this.fizz(level, blockPos);
+						return false;
+					}
 				}
 			}
 		}
@@ -167,13 +172,6 @@ public class LiquidBlock extends Block implements BucketPickup {
 			return this.fluid;
 		} else {
 			return Fluids.EMPTY;
-		}
-	}
-
-	@Override
-	public void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-		if (this.fluid.is(FluidTags.LAVA)) {
-			entity.setInLava();
 		}
 	}
 }

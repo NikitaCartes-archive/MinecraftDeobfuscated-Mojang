@@ -3,6 +3,9 @@ package net.minecraft.nbt;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -21,11 +24,16 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class CompoundTag implements Tag {
+	public static final Codec<CompoundTag> CODEC = Codec.PASSTHROUGH.comapFlatMap(dynamic -> {
+		Tag tag = dynamic.convert(NbtOps.INSTANCE).getValue();
+		return tag instanceof CompoundTag ? DataResult.success((CompoundTag)tag) : DataResult.error("Not a compound tag: " + tag);
+	}, compoundTag -> new Dynamic<>(NbtOps.INSTANCE, compoundTag));
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final Pattern SIMPLE_VALUE = Pattern.compile("[A-Za-z0-9._+-]+");
 	public static final TagType<CompoundTag> TYPE = new TagType<CompoundTag>() {
@@ -62,7 +70,7 @@ public class CompoundTag implements Tag {
 	};
 	private final Map<String, Tag> tags;
 
-	private CompoundTag(Map<String, Tag> map) {
+	protected CompoundTag(Map<String, Tag> map) {
 		this.tags = map;
 	}
 
@@ -120,21 +128,16 @@ public class CompoundTag implements Tag {
 	}
 
 	public void putUUID(String string, UUID uUID) {
-		this.putLong(string + "Most", uUID.getMostSignificantBits());
-		this.putLong(string + "Least", uUID.getLeastSignificantBits());
+		this.tags.put(string, NbtUtils.createUUID(uUID));
 	}
 
 	public UUID getUUID(String string) {
-		return new UUID(this.getLong(string + "Most"), this.getLong(string + "Least"));
+		return NbtUtils.loadUUID(this.get(string));
 	}
 
 	public boolean hasUUID(String string) {
-		return this.contains(string + "Most", 99) && this.contains(string + "Least", 99);
-	}
-
-	public void removeUUID(String string) {
-		this.remove(string + "Most");
-		this.remove(string + "Least");
+		Tag tag = this.get(string);
+		return tag != null && tag.getType() == IntArrayTag.TYPE && ((IntArrayTag)tag).getAsIntArray().length == 4;
 	}
 
 	public void putFloat(String string, float f) {
@@ -459,7 +462,7 @@ public class CompoundTag implements Tag {
 		if (this.tags.isEmpty()) {
 			return new TextComponent("{}");
 		} else {
-			Component component = new TextComponent("{");
+			MutableComponent mutableComponent = new TextComponent("{");
 			Collection<String> collection = this.tags.keySet();
 			if (LOGGER.isDebugEnabled()) {
 				List<String> list = Lists.<String>newArrayList(this.tags.keySet());
@@ -468,31 +471,35 @@ public class CompoundTag implements Tag {
 			}
 
 			if (!string.isEmpty()) {
-				component.append("\n");
+				mutableComponent.append("\n");
 			}
 
 			Iterator<String> iterator = collection.iterator();
 
 			while (iterator.hasNext()) {
 				String string2 = (String)iterator.next();
-				Component component2 = new TextComponent(Strings.repeat(string, i + 1))
+				MutableComponent mutableComponent2 = new TextComponent(Strings.repeat(string, i + 1))
 					.append(handleEscapePretty(string2))
 					.append(String.valueOf(':'))
 					.append(" ")
 					.append(((Tag)this.tags.get(string2)).getPrettyDisplay(string, i + 1));
 				if (iterator.hasNext()) {
-					component2.append(String.valueOf(',')).append(string.isEmpty() ? " " : "\n");
+					mutableComponent2.append(String.valueOf(',')).append(string.isEmpty() ? " " : "\n");
 				}
 
-				component.append(component2);
+				mutableComponent.append(mutableComponent2);
 			}
 
 			if (!string.isEmpty()) {
-				component.append("\n").append(Strings.repeat(string, i));
+				mutableComponent.append("\n").append(Strings.repeat(string, i));
 			}
 
-			component.append("}");
-			return component;
+			mutableComponent.append("}");
+			return mutableComponent;
 		}
+	}
+
+	protected Map<String, Tag> entries() {
+		return Collections.unmodifiableMap(this.tags);
 	}
 }

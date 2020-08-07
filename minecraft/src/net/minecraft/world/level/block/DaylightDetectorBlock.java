@@ -11,6 +11,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.DaylightDetectorBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -25,7 +26,7 @@ public class DaylightDetectorBlock extends BaseEntityBlock {
 	public static final BooleanProperty INVERTED = BlockStateProperties.INVERTED;
 	protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 6.0, 16.0);
 
-	public DaylightDetectorBlock(Block.Properties properties) {
+	public DaylightDetectorBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(POWER, Integer.valueOf(0)).setValue(INVERTED, Boolean.valueOf(false)));
 	}
@@ -46,7 +47,7 @@ public class DaylightDetectorBlock extends BaseEntityBlock {
 	}
 
 	public static void updateSignalStrength(BlockState blockState, Level level, BlockPos blockPos) {
-		if (level.dimension.isHasSkyLight()) {
+		if (level.dimensionType().hasSkyLight()) {
 			int i = level.getBrightness(LightLayer.SKY, blockPos) - level.getSkyDarken();
 			float f = level.getSunAngle(1.0F);
 			boolean bl = (Boolean)blockState.getValue(INVERTED);
@@ -76,7 +77,7 @@ public class DaylightDetectorBlock extends BaseEntityBlock {
 				BlockState blockState2 = blockState.cycle(INVERTED);
 				level.setBlock(blockPos, blockState2, 4);
 				updateSignalStrength(blockState2, level, blockPos);
-				return InteractionResult.SUCCESS;
+				return InteractionResult.CONSUME;
 			}
 		} else {
 			return super.use(blockState, level, blockPos, player, interactionHand, blockHitResult);

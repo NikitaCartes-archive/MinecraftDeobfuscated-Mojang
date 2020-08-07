@@ -6,6 +6,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -32,7 +33,7 @@ public class PipeBlock extends Block {
 	});
 	protected final VoxelShape[] shapeByIndex;
 
-	protected PipeBlock(float f, Block.Properties properties) {
+	protected PipeBlock(float f, BlockBehaviour.Properties properties) {
 		super(properties);
 		this.shapeByIndex = this.makeShapes(f);
 	}

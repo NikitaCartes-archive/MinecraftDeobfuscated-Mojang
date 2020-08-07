@@ -26,6 +26,11 @@ public class LootItemBlockStatePropertyCondition implements LootItemCondition {
 	}
 
 	@Override
+	public LootItemConditionType getType() {
+		return LootItemConditions.BLOCK_STATE_PROPERTY;
+	}
+
+	@Override
 	public Set<LootContextParam<?>> getReferencedContextParams() {
 		return ImmutableSet.of(LootContextParams.BLOCK_STATE);
 	}
@@ -58,11 +63,7 @@ public class LootItemBlockStatePropertyCondition implements LootItemCondition {
 		}
 	}
 
-	public static class Serializer extends LootItemCondition.Serializer<LootItemBlockStatePropertyCondition> {
-		protected Serializer() {
-			super(new ResourceLocation("block_state_property"), LootItemBlockStatePropertyCondition.class);
-		}
-
+	public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<LootItemBlockStatePropertyCondition> {
 		public void serialize(
 			JsonObject jsonObject, LootItemBlockStatePropertyCondition lootItemBlockStatePropertyCondition, JsonSerializationContext jsonSerializationContext
 		) {

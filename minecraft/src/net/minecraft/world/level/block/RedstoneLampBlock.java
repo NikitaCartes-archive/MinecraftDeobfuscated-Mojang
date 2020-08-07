@@ -4,10 +4,9 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.BlockPlaceContext;
-import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -15,19 +14,9 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 public class RedstoneLampBlock extends Block {
 	public static final BooleanProperty LIT = RedstoneTorchBlock.LIT;
 
-	public RedstoneLampBlock(Block.Properties properties) {
+	public RedstoneLampBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.defaultBlockState().setValue(LIT, Boolean.valueOf(false)));
-	}
-
-	@Override
-	public int getLightEmission(BlockState blockState) {
-		return blockState.getValue(LIT) ? super.getLightEmission(blockState) : 0;
-	}
-
-	@Override
-	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		super.onPlace(blockState, level, blockPos, blockState2, bl);
 	}
 
 	@Nullable
@@ -60,10 +49,5 @@ public class RedstoneLampBlock extends Block {
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(LIT);
-	}
-
-	@Override
-	public boolean isValidSpawn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, EntityType<?> entityType) {
-		return true;
 	}
 }

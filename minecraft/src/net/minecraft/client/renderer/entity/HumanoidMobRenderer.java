@@ -14,8 +14,12 @@ public class HumanoidMobRenderer<T extends Mob, M extends HumanoidModel<T>> exte
 	private static final ResourceLocation DEFAULT_LOCATION = new ResourceLocation("textures/entity/steve.png");
 
 	public HumanoidMobRenderer(EntityRenderDispatcher entityRenderDispatcher, M humanoidModel, float f) {
+		this(entityRenderDispatcher, humanoidModel, f, 1.0F, 1.0F, 1.0F);
+	}
+
+	public HumanoidMobRenderer(EntityRenderDispatcher entityRenderDispatcher, M humanoidModel, float f, float g, float h, float i) {
 		super(entityRenderDispatcher, humanoidModel, f);
-		this.addLayer(new CustomHeadLayer<>(this));
+		this.addLayer(new CustomHeadLayer<>(this, g, h, i));
 		this.addLayer(new ElytraLayer<>(this));
 		this.addLayer(new ItemInHandLayer<>(this));
 	}

@@ -16,7 +16,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -24,7 +23,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.CrossbowAttackMob;
 import net.minecraft.world.entity.player.Player;
@@ -36,32 +34,12 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-public class CrossbowItem extends ProjectileWeaponItem {
+public class CrossbowItem extends ProjectileWeaponItem implements Vanishable {
 	private boolean startSoundPlayed = false;
 	private boolean midLoadSoundPlayed = false;
 
 	public CrossbowItem(Item.Properties properties) {
 		super(properties);
-		this.addProperty(new ResourceLocation("pull"), (itemStack, level, livingEntity) -> {
-			if (livingEntity == null || itemStack.getItem() != this) {
-				return 0.0F;
-			} else {
-				return isCharged(itemStack) ? 0.0F : (float)(itemStack.getUseDuration() - livingEntity.getUseItemRemainingTicks()) / (float)getChargeDuration(itemStack);
-			}
-		});
-		this.addProperty(
-			new ResourceLocation("pulling"),
-			(itemStack, level, livingEntity) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack && !isCharged(itemStack)
-					? 1.0F
-					: 0.0F
-		);
-		this.addProperty(new ResourceLocation("charged"), (itemStack, level, livingEntity) -> livingEntity != null && isCharged(itemStack) ? 1.0F : 0.0F);
-		this.addProperty(
-			new ResourceLocation("firework"),
-			(itemStack, level, livingEntity) -> livingEntity != null && isCharged(itemStack) && containsChargedProjectile(itemStack, Items.FIREWORK_ROCKET)
-					? 1.0F
-					: 0.0F
-		);
 	}
 
 	@Override
@@ -209,7 +187,7 @@ public class CrossbowItem extends ProjectileWeaponItem {
 		}
 	}
 
-	private static boolean containsChargedProjectile(ItemStack itemStack, Item item) {
+	public static boolean containsChargedProjectile(ItemStack itemStack, Item item) {
 		return getChargedProjectiles(itemStack).stream().anyMatch(itemStackx -> itemStackx.getItem() == item);
 	}
 
@@ -229,7 +207,7 @@ public class CrossbowItem extends ProjectileWeaponItem {
 			boolean bl2 = itemStack2.getItem() == Items.FIREWORK_ROCKET;
 			Projectile projectile;
 			if (bl2) {
-				projectile = new FireworkRocketEntity(level, itemStack2, livingEntity.getX(), livingEntity.getEyeY() - 0.15F, livingEntity.getZ(), true);
+				projectile = new FireworkRocketEntity(level, itemStack2, livingEntity, livingEntity.getX(), livingEntity.getEyeY() - 0.15F, livingEntity.getZ(), true);
 			} else {
 				projectile = getArrow(level, livingEntity, itemStack, itemStack2);
 				if (bl || i != 0.0F) {
@@ -239,7 +217,7 @@ public class CrossbowItem extends ProjectileWeaponItem {
 
 			if (livingEntity instanceof CrossbowAttackMob) {
 				CrossbowAttackMob crossbowAttackMob = (CrossbowAttackMob)livingEntity;
-				crossbowAttackMob.shootProjectile(crossbowAttackMob.getTarget(), itemStack, projectile, i);
+				crossbowAttackMob.shootCrossbowProjectile(crossbowAttackMob.getTarget(), itemStack, projectile, i);
 			} else {
 				Vec3 vec3 = livingEntity.getUpVector(1.0F);
 				Quaternion quaternion = new Quaternion(new Vector3f(vec3), i, true);
@@ -250,7 +228,7 @@ public class CrossbowItem extends ProjectileWeaponItem {
 			}
 
 			itemStack.hurtAndBreak(bl2 ? 3 : 1, livingEntity, livingEntityx -> livingEntityx.broadcastBreakEvent(interactionHand));
-			level.addFreshEntity((Entity)projectile);
+			level.addFreshEntity(projectile);
 			level.playSound(null, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), SoundEvents.CROSSBOW_SHOOT, SoundSource.PLAYERS, 1.0F, f);
 		}
 	}
@@ -400,5 +378,10 @@ public class CrossbowItem extends ProjectileWeaponItem {
 
 	private static float getShootingPower(ItemStack itemStack) {
 		return itemStack.getItem() == Items.CROSSBOW && containsChargedProjectile(itemStack, Items.FIREWORK_ROCKET) ? 1.6F : 3.15F;
+	}
+
+	@Override
+	public int getDefaultProjectileRange() {
+		return 8;
 	}
 }

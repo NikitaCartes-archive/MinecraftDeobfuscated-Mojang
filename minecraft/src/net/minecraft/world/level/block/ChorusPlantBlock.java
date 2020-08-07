@@ -4,17 +4,18 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 
 public class ChorusPlantBlock extends PipeBlock {
-	protected ChorusPlantBlock(Block.Properties properties) {
+	protected ChorusPlantBlock(BlockBehaviour.Properties properties) {
 		super(0.3125F, properties);
 		this.registerDefaultState(
 			this.stateDefinition
@@ -57,8 +58,7 @@ public class ChorusPlantBlock extends PipeBlock {
 			levelAccessor.getBlockTicks().scheduleTick(blockPos, this, 1);
 			return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
 		} else {
-			Block block = blockState2.getBlock();
-			boolean bl = block == this || block == Blocks.CHORUS_FLOWER || direction == Direction.DOWN && block == Blocks.END_STONE;
+			boolean bl = blockState2.getBlock() == this || blockState2.is(Blocks.CHORUS_FLOWER) || direction == Direction.DOWN && blockState2.is(Blocks.END_STONE);
 			return blockState.setValue((Property)PROPERTY_BY_DIRECTION.get(direction), Boolean.valueOf(bl));
 		}
 	}

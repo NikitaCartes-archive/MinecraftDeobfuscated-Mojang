@@ -86,7 +86,7 @@ public class PufferfishBigModel<T extends Entity> extends ListModel<T> {
 			this.topMidFin,
 			this.topBackFin,
 			this.sideFrontFin0,
-			this.sideBackFin1,
+			this.sideFrontFin1,
 			this.bottomFrontFin,
 			this.bottomMidFin,
 			this.bottomBackFin,

@@ -1,7 +1,6 @@
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.google.common.collect.Lists;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
@@ -29,6 +28,7 @@ public class StructurePlaceSettings {
 	private int palette;
 	private final List<StructureProcessor> processors = Lists.<StructureProcessor>newArrayList();
 	private boolean knownShape;
+	private boolean finalizeEntities;
 
 	public StructurePlaceSettings copy() {
 		StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings();
@@ -43,6 +43,7 @@ public class StructurePlaceSettings {
 		structurePlaceSettings.palette = this.palette;
 		structurePlaceSettings.processors.addAll(this.processors);
 		structurePlaceSettings.knownShape = this.knownShape;
+		structurePlaceSettings.finalizeEntities = this.finalizeEntities;
 		return structurePlaceSettings;
 	}
 
@@ -152,9 +153,13 @@ public class StructurePlaceSettings {
 		return this.keepLiquids;
 	}
 
-	public List<StructureTemplate.StructureBlockInfo> getRandomPalette(List<List<StructureTemplate.StructureBlockInfo>> list, @Nullable BlockPos blockPos) {
+	public StructureTemplate.Palette getRandomPalette(List<StructureTemplate.Palette> list, @Nullable BlockPos blockPos) {
 		int i = list.size();
-		return i > 0 ? (List)list.get(this.getRandom(blockPos).nextInt(i)) : Collections.emptyList();
+		if (i == 0) {
+			throw new IllegalStateException("No palettes");
+		} else {
+			return (StructureTemplate.Palette)list.get(this.getRandom(blockPos).nextInt(i));
+		}
 	}
 
 	@Nullable
@@ -166,5 +171,14 @@ public class StructurePlaceSettings {
 			int j = chunkPos.z * 16;
 			return new BoundingBox(i, 0, j, i + 16 - 1, 255, j + 16 - 1);
 		}
+	}
+
+	public StructurePlaceSettings setFinalizeEntities(boolean bl) {
+		this.finalizeEntities = bl;
+		return this;
+	}
+
+	public boolean shouldFinalizeEntities() {
+		return this.finalizeEntities;
 	}
 }

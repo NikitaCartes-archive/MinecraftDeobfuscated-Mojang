@@ -2,6 +2,7 @@ package net.minecraft.client.gui.screens.recipebook;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -12,6 +13,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.recipebook.PlaceRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -41,7 +43,7 @@ public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiE
 			this.isFurnaceMenu = true;
 		}
 
-		boolean bl = minecraft.player.getRecipeBook().isFilteringCraftable((RecipeBookMenu<?>)minecraft.player.containerMenu);
+		boolean bl = minecraft.player.getRecipeBook().isFiltering((RecipeBookMenu<?>)minecraft.player.containerMenu);
 		List<Recipe<?>> list = recipeCollection.getDisplayRecipes(true);
 		List<Recipe<?>> list2 = bl ? Collections.emptyList() : recipeCollection.getDisplayRecipes(false);
 		int m = list.size();
@@ -122,7 +124,7 @@ public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiE
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
+	public void render(PoseStack poseStack, int i, int j, float f) {
 		if (this.isVisible) {
 			this.time += f;
 			RenderSystem.enableBlend();
@@ -137,45 +139,45 @@ public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiE
 			int o = 4;
 			int p = 82;
 			int q = 208;
-			this.nineInchSprite(l, m, 24, 4, 82, 208);
+			this.nineInchSprite(poseStack, l, m, 24, 4, 82, 208);
 			RenderSystem.disableBlend();
 
 			for (OverlayRecipeComponent.OverlayRecipeButton overlayRecipeButton : this.recipeButtons) {
-				overlayRecipeButton.render(i, j, f);
+				overlayRecipeButton.render(poseStack, i, j, f);
 			}
 
 			RenderSystem.popMatrix();
 		}
 	}
 
-	private void nineInchSprite(int i, int j, int k, int l, int m, int n) {
-		this.blit(this.x, this.y, m, n, l, l);
-		this.blit(this.x + l * 2 + i * k, this.y, m + k + l, n, l, l);
-		this.blit(this.x, this.y + l * 2 + j * k, m, n + k + l, l, l);
-		this.blit(this.x + l * 2 + i * k, this.y + l * 2 + j * k, m + k + l, n + k + l, l, l);
+	private void nineInchSprite(PoseStack poseStack, int i, int j, int k, int l, int m, int n) {
+		this.blit(poseStack, this.x, this.y, m, n, l, l);
+		this.blit(poseStack, this.x + l * 2 + i * k, this.y, m + k + l, n, l, l);
+		this.blit(poseStack, this.x, this.y + l * 2 + j * k, m, n + k + l, l, l);
+		this.blit(poseStack, this.x + l * 2 + i * k, this.y + l * 2 + j * k, m + k + l, n + k + l, l, l);
 
 		for (int o = 0; o < i; o++) {
-			this.blit(this.x + l + o * k, this.y, m + l, n, k, l);
-			this.blit(this.x + l + (o + 1) * k, this.y, m + l, n, l, l);
+			this.blit(poseStack, this.x + l + o * k, this.y, m + l, n, k, l);
+			this.blit(poseStack, this.x + l + (o + 1) * k, this.y, m + l, n, l, l);
 
 			for (int p = 0; p < j; p++) {
 				if (o == 0) {
-					this.blit(this.x, this.y + l + p * k, m, n + l, l, k);
-					this.blit(this.x, this.y + l + (p + 1) * k, m, n + l, l, l);
+					this.blit(poseStack, this.x, this.y + l + p * k, m, n + l, l, k);
+					this.blit(poseStack, this.x, this.y + l + (p + 1) * k, m, n + l, l, l);
 				}
 
-				this.blit(this.x + l + o * k, this.y + l + p * k, m + l, n + l, k, k);
-				this.blit(this.x + l + (o + 1) * k, this.y + l + p * k, m + l, n + l, l, k);
-				this.blit(this.x + l + o * k, this.y + l + (p + 1) * k, m + l, n + l, k, l);
-				this.blit(this.x + l + (o + 1) * k - 1, this.y + l + (p + 1) * k - 1, m + l, n + l, l + 1, l + 1);
+				this.blit(poseStack, this.x + l + o * k, this.y + l + p * k, m + l, n + l, k, k);
+				this.blit(poseStack, this.x + l + (o + 1) * k, this.y + l + p * k, m + l, n + l, l, k);
+				this.blit(poseStack, this.x + l + o * k, this.y + l + (p + 1) * k, m + l, n + l, k, l);
+				this.blit(poseStack, this.x + l + (o + 1) * k - 1, this.y + l + (p + 1) * k - 1, m + l, n + l, l + 1, l + 1);
 				if (o == i - 1) {
-					this.blit(this.x + l * 2 + i * k, this.y + l + p * k, m + k + l, n + l, l, k);
-					this.blit(this.x + l * 2 + i * k, this.y + l + (p + 1) * k, m + k + l, n + l, l, l);
+					this.blit(poseStack, this.x + l * 2 + i * k, this.y + l + p * k, m + k + l, n + l, l, k);
+					this.blit(poseStack, this.x + l * 2 + i * k, this.y + l + (p + 1) * k, m + k + l, n + l, l, l);
 				}
 			}
 
-			this.blit(this.x + l + o * k, this.y + l * 2 + j * k, m + l, n + k + l, k, l);
-			this.blit(this.x + l + (o + 1) * k, this.y + l * 2 + j * k, m + l, n + k + l, l, l);
+			this.blit(poseStack, this.x + l + o * k, this.y + l * 2 + j * k, m + l, n + k + l, k, l);
+			this.blit(poseStack, this.x + l + (o + 1) * k, this.y + l * 2 + j * k, m + l, n + k + l, l, l);
 		}
 	}
 
@@ -194,7 +196,7 @@ public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiE
 		protected final List<OverlayRecipeComponent.OverlayRecipeButton.Pos> ingredientPos = Lists.<OverlayRecipeComponent.OverlayRecipeButton.Pos>newArrayList();
 
 		public OverlayRecipeButton(int i, int j, Recipe<?> recipe, boolean bl) {
-			super(i, j, 200, 20, "");
+			super(i, j, 200, 20, TextComponent.EMPTY);
 			this.width = 24;
 			this.height = 24;
 			this.recipe = recipe;
@@ -215,7 +217,7 @@ public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiE
 		}
 
 		@Override
-		public void renderButton(int i, int j, float f) {
+		public void renderButton(PoseStack poseStack, int i, int j, float f) {
 			RenderSystem.enableAlphaTest();
 			OverlayRecipeComponent.this.minecraft.getTextureManager().bind(OverlayRecipeComponent.RECIPE_BOOK_LOCATION);
 			int k = 152;
@@ -228,7 +230,7 @@ public class OverlayRecipeComponent extends GuiComponent implements Widget, GuiE
 				l += 26;
 			}
 
-			this.blit(this.x, this.y, k, l, this.width, this.height);
+			this.blit(poseStack, this.x, this.y, k, l, this.width, this.height);
 
 			for (OverlayRecipeComponent.OverlayRecipeButton.Pos pos : this.ingredientPos) {
 				RenderSystem.pushMatrix();

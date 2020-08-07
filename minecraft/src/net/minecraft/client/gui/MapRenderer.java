@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.material.MaterialColor;
@@ -134,8 +135,8 @@ public class MapRenderer implements AutoCloseable {
 					poseStack.popPose();
 					if (mapDecoration.getName() != null) {
 						Font font = Minecraft.getInstance().font;
-						String string = mapDecoration.getName().getColoredString();
-						float p = (float)font.width(string);
+						Component component = mapDecoration.getName();
+						float p = (float)font.width(component);
 						float q = Mth.clamp(25.0F / p, 0.0F, 6.0F / 9.0F);
 						poseStack.pushPose();
 						poseStack.translate(
@@ -143,7 +144,7 @@ public class MapRenderer implements AutoCloseable {
 						);
 						poseStack.scale(q, q, 1.0F);
 						poseStack.translate(0.0, 0.0, -0.1F);
-						font.drawInBatch(string, 0.0F, 0.0F, -1, false, poseStack.last().pose(), multiBufferSource, false, Integer.MIN_VALUE, i);
+						font.drawInBatch(component, 0.0F, 0.0F, -1, false, poseStack.last().pose(), multiBufferSource, false, Integer.MIN_VALUE, i);
 						poseStack.popPose();
 					}
 

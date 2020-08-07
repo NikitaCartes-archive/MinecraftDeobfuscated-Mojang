@@ -126,11 +126,15 @@ public class ModelBakery {
 	private static final Map<String, String> BUILTIN_MODELS = Maps.<String, String>newHashMap(ImmutableMap.of("missing", MISSING_MODEL_MESH));
 	private static final Splitter COMMA_SPLITTER = Splitter.on(',');
 	private static final Splitter EQUAL_SPLITTER = Splitter.on('=').limit(2);
-	public static final BlockModel GENERATION_MARKER = Util.make(BlockModel.fromString("{}"), blockModel -> blockModel.name = "generation marker");
-	public static final BlockModel BLOCK_ENTITY_MARKER = Util.make(BlockModel.fromString("{}"), blockModel -> blockModel.name = "block entity marker");
+	public static final BlockModel GENERATION_MARKER = Util.make(
+		BlockModel.fromString("{\"gui_light\": \"front\"}"), blockModel -> blockModel.name = "generation marker"
+	);
+	public static final BlockModel BLOCK_ENTITY_MARKER = Util.make(
+		BlockModel.fromString("{\"gui_light\": \"side\"}"), blockModel -> blockModel.name = "block entity marker"
+	);
 	private static final StateDefinition<Block, BlockState> ITEM_FRAME_FAKE_DEFINITION = new StateDefinition.Builder<Block, BlockState>(Blocks.AIR)
 		.add(BooleanProperty.create("map"))
-		.create(BlockState::new);
+		.create(Block::defaultBlockState, BlockState::new);
 	private static final ItemModelGenerator ITEM_MODEL_GENERATOR = new ItemModelGenerator();
 	private static final Map<ResourceLocation, StateDefinition<Block, BlockState>> STATIC_DEFINITIONS = ImmutableMap.of(
 		new ResourceLocation("item_frame"), ITEM_FRAME_FAKE_DEFINITION

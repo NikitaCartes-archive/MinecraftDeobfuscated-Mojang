@@ -54,13 +54,16 @@ public class Snowball extends ThrowableItemProjectile {
 	}
 
 	@Override
-	protected void onHit(HitResult hitResult) {
-		if (hitResult.getType() == HitResult.Type.ENTITY) {
-			Entity entity = ((EntityHitResult)hitResult).getEntity();
-			int i = entity instanceof Blaze ? 3 : 0;
-			entity.hurt(DamageSource.thrown(this, this.getOwner()), (float)i);
-		}
+	protected void onHitEntity(EntityHitResult entityHitResult) {
+		super.onHitEntity(entityHitResult);
+		Entity entity = entityHitResult.getEntity();
+		int i = entity instanceof Blaze ? 3 : 0;
+		entity.hurt(DamageSource.thrown(this, this.getOwner()), (float)i);
+	}
 
+	@Override
+	protected void onHit(HitResult hitResult) {
+		super.onHit(hitResult);
 		if (!this.level.isClientSide) {
 			this.level.broadcastEntityEvent(this, (byte)3);
 			this.remove();

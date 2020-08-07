@@ -4,10 +4,11 @@ import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -16,7 +17,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 public class ObserverBlock extends DirectionalBlock {
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
-	public ObserverBlock(Block.Properties properties) {
+	public ObserverBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.SOUTH).setValue(POWERED, Boolean.valueOf(false)));
 	}
@@ -89,7 +90,7 @@ public class ObserverBlock extends DirectionalBlock {
 
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState.getBlock() != blockState2.getBlock()) {
+		if (!blockState.is(blockState2.getBlock())) {
 			if (!level.isClientSide() && (Boolean)blockState.getValue(POWERED) && !level.getBlockTicks().hasScheduledTick(blockPos, this)) {
 				BlockState blockState3 = blockState.setValue(POWERED, Boolean.valueOf(false));
 				level.setBlock(blockPos, blockState3, 18);
@@ -100,7 +101,7 @@ public class ObserverBlock extends DirectionalBlock {
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (blockState.getBlock() != blockState2.getBlock()) {
+		if (!blockState.is(blockState2.getBlock())) {
 			if (!level.isClientSide && (Boolean)blockState.getValue(POWERED) && level.getBlockTicks().hasScheduledTick(blockPos, this)) {
 				this.updateNeighborsInFront(level, blockPos, blockState.setValue(POWERED, Boolean.valueOf(false)));
 			}

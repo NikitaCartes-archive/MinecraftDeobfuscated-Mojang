@@ -78,20 +78,8 @@ public class SkullBlockRenderer extends BlockEntityRenderer<SkullBlockEntity> {
 		if (direction == null) {
 			poseStack.translate(0.5, 0.0, 0.5);
 		} else {
-			switch (direction) {
-				case NORTH:
-					poseStack.translate(0.5, 0.25, 0.74F);
-					break;
-				case SOUTH:
-					poseStack.translate(0.5, 0.25, 0.26F);
-					break;
-				case WEST:
-					poseStack.translate(0.74F, 0.25, 0.5);
-					break;
-				case EAST:
-				default:
-					poseStack.translate(0.26F, 0.25, 0.5);
-			}
+			float h = 0.25F;
+			poseStack.translate((double)(0.5F - (float)direction.getStepX() * 0.25F), 0.25, (double)(0.5F - (float)direction.getStepZ() * 0.25F));
 		}
 
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
@@ -110,7 +98,7 @@ public class SkullBlockRenderer extends BlockEntityRenderer<SkullBlockEntity> {
 				? RenderType.entityTranslucent(minecraft.getSkinManager().registerTexture((MinecraftProfileTexture)map.get(Type.SKIN), Type.SKIN))
 				: RenderType.entityCutoutNoCull(DefaultPlayerSkin.getDefaultSkin(Player.createPlayerUUID(gameProfile)));
 		} else {
-			return RenderType.entityCutoutNoCull(resourceLocation);
+			return RenderType.entityCutoutNoCullZOffset(resourceLocation);
 		}
 	}
 }

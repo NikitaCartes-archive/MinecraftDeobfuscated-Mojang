@@ -5,17 +5,21 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 
 public class BushBlock extends Block {
-	protected BushBlock(Block.Properties properties) {
+	protected BushBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 
 	protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		Block block = blockState.getBlock();
-		return block == Blocks.GRASS_BLOCK || block == Blocks.DIRT || block == Blocks.COARSE_DIRT || block == Blocks.PODZOL || block == Blocks.FARMLAND;
+		return blockState.is(Blocks.GRASS_BLOCK)
+			|| blockState.is(Blocks.DIRT)
+			|| blockState.is(Blocks.COARSE_DIRT)
+			|| blockState.is(Blocks.PODZOL)
+			|| blockState.is(Blocks.FARMLAND);
 	}
 
 	@Override
@@ -35,7 +39,7 @@ public class BushBlock extends Block {
 
 	@Override
 	public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return true;
+		return blockState.getFluidState().isEmpty();
 	}
 
 	@Override

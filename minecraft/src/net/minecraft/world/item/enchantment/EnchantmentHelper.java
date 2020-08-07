@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
@@ -174,7 +175,7 @@ public class EnchantmentHelper {
 	}
 
 	public static int getChopping(LivingEntity livingEntity) {
-		return getEnchantmentLevel(Enchantments.CHOPPING, livingEntity);
+		return getEnchantmentLevel(Enchantments.CLEAVING, livingEntity);
 	}
 
 	public static int getRespiration(LivingEntity livingEntity) {
@@ -209,6 +210,10 @@ public class EnchantmentHelper {
 		return getEnchantmentLevel(Enchantments.FROST_WALKER, livingEntity) > 0;
 	}
 
+	public static boolean hasSoulSpeed(LivingEntity livingEntity) {
+		return getEnchantmentLevel(Enchantments.SOUL_SPEED, livingEntity) > 0;
+	}
+
 	public static boolean hasBindingCurse(ItemStack itemStack) {
 		return getItemEnchantmentLevel(Enchantments.BINDING_CURSE, itemStack) > 0;
 	}
@@ -231,6 +236,11 @@ public class EnchantmentHelper {
 
 	@Nullable
 	public static Entry<EquipmentSlot, ItemStack> getRandomItemWith(Enchantment enchantment, LivingEntity livingEntity) {
+		return getRandomItemWith(enchantment, livingEntity, itemStack -> true);
+	}
+
+	@Nullable
+	public static Entry<EquipmentSlot, ItemStack> getRandomItemWith(Enchantment enchantment, LivingEntity livingEntity, Predicate<ItemStack> predicate) {
 		Map<EquipmentSlot, ItemStack> map = enchantment.getSlotItems(livingEntity);
 		if (map.isEmpty()) {
 			return null;
@@ -239,7 +249,7 @@ public class EnchantmentHelper {
 
 			for (Entry<EquipmentSlot, ItemStack> entry : map.entrySet()) {
 				ItemStack itemStack = (ItemStack)entry.getValue();
-				if (!itemStack.isEmpty() && getItemEnchantmentLevel(enchantment, itemStack) > 0) {
+				if (!itemStack.isEmpty() && getItemEnchantmentLevel(enchantment, itemStack) > 0 && predicate.test(itemStack)) {
 					list.add(entry);
 				}
 			}
@@ -340,7 +350,7 @@ public class EnchantmentHelper {
 		boolean bl2 = itemStack.getItem() == Items.BOOK;
 
 		for (Enchantment enchantment : Registry.ENCHANTMENT) {
-			if ((!enchantment.isTreasureOnly() || bl) && (enchantment.category.canEnchant(item) || bl2)) {
+			if ((!enchantment.isTreasureOnly() || bl) && enchantment.isDiscoverable() && (enchantment.category.canEnchant(item) || bl2)) {
 				for (int j = enchantment.getMaxLevel(); j > enchantment.getMinLevel() - 1; j--) {
 					if (i >= enchantment.getMinCost(j) && i <= enchantment.getMaxCost(j)) {
 						list.add(new EnchantmentInstance(enchantment, j));

@@ -1,20 +1,31 @@
 package net.minecraft.network.chat;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Streams;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
+import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.locale.Language;
+import net.minecraft.util.FormattedCharSequence;
 
-public abstract class BaseComponent implements Component {
+public abstract class BaseComponent implements MutableComponent {
 	protected final List<Component> siblings = Lists.<Component>newArrayList();
-	private Style style;
+	private FormattedCharSequence visualOrderText = FormattedCharSequence.EMPTY;
+	@Nullable
+	@Environment(EnvType.CLIENT)
+	private Language decomposedWith;
+	private Style style = Style.EMPTY;
 
 	@Override
-	public Component append(Component component) {
-		component.getStyle().inheritFrom(this.getStyle());
+	public MutableComponent append(Component component) {
 		this.siblings.add(component);
 		return this;
+	}
+
+	@Override
+	public String getContents() {
+		return "";
 	}
 
 	@Override
@@ -23,32 +34,36 @@ public abstract class BaseComponent implements Component {
 	}
 
 	@Override
-	public Component setStyle(Style style) {
+	public MutableComponent setStyle(Style style) {
 		this.style = style;
-
-		for (Component component : this.siblings) {
-			component.getStyle().inheritFrom(this.getStyle());
-		}
-
 		return this;
 	}
 
 	@Override
 	public Style getStyle() {
-		if (this.style == null) {
-			this.style = new Style();
-
-			for (Component component : this.siblings) {
-				component.getStyle().inheritFrom(this.style);
-			}
-		}
-
 		return this.style;
 	}
 
+	public abstract BaseComponent plainCopy();
+
 	@Override
-	public Stream<Component> stream() {
-		return Streams.concat(Stream.of(this), this.siblings.stream().flatMap(Component::stream));
+	public final MutableComponent copy() {
+		BaseComponent baseComponent = this.plainCopy();
+		baseComponent.siblings.addAll(this.siblings);
+		baseComponent.setStyle(this.style);
+		return baseComponent;
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public FormattedCharSequence getVisualOrderText() {
+		Language language = Language.getInstance();
+		if (this.decomposedWith != language) {
+			this.visualOrderText = language.getVisualOrder(this);
+			this.decomposedWith = language;
+		}
+
+		return this.visualOrderText;
 	}
 
 	public boolean equals(Object object) {
@@ -58,7 +73,7 @@ public abstract class BaseComponent implements Component {
 			return false;
 		} else {
 			BaseComponent baseComponent = (BaseComponent)object;
-			return this.siblings.equals(baseComponent.siblings) && this.getStyle().equals(baseComponent.getStyle());
+			return this.siblings.equals(baseComponent.siblings) && Objects.equals(this.getStyle(), baseComponent.getStyle());
 		}
 	}
 

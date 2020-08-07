@@ -3,6 +3,7 @@ package net.minecraft.world.level.levelgen.structure;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Random;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -14,7 +15,9 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.Drowned;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.Mirror;
@@ -101,11 +104,11 @@ public class OceanRuinPieces {
 	};
 
 	private static ResourceLocation getSmallWarmRuin(Random random) {
-		return WARM_RUINS[random.nextInt(WARM_RUINS.length)];
+		return Util.getRandom(WARM_RUINS, random);
 	}
 
 	private static ResourceLocation getBigWarmRuin(Random random) {
-		return BIG_WARM_RUINS[random.nextInt(BIG_WARM_RUINS.length)];
+		return Util.getRandom(BIG_WARM_RUINS, random);
 	}
 
 	public static void addPieces(
@@ -146,7 +149,7 @@ public class OceanRuinPieces {
 				BlockPos blockPos4 = (BlockPos)list2.remove(m);
 				int n = blockPos4.getX();
 				int o = blockPos4.getZ();
-				Rotation rotation2 = Rotation.values()[random.nextInt(Rotation.values().length)];
+				Rotation rotation2 = Rotation.getRandom(random);
 				BlockPos blockPos5 = StructureTemplate.transform(new BlockPos(5, 0, 6), Mirror.NONE, rotation2, BlockPos.ZERO).offset(n, 0, o);
 				BoundingBox boundingBox2 = BoundingBox.createProper(n, 0, o, blockPos5.getX(), 0, blockPos5.getZ());
 				if (!boundingBox2.intersects(boundingBox)) {
@@ -243,43 +246,53 @@ public class OceanRuinPieces {
 		}
 
 		@Override
-		protected void handleDataMarker(String string, BlockPos blockPos, LevelAccessor levelAccessor, Random random, BoundingBox boundingBox) {
+		protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, Random random, BoundingBox boundingBox) {
 			if ("chest".equals(string)) {
-				levelAccessor.setBlock(
-					blockPos, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.WATERLOGGED, Boolean.valueOf(levelAccessor.getFluidState(blockPos).is(FluidTags.WATER))), 2
+				serverLevelAccessor.setBlock(
+					blockPos,
+					Blocks.CHEST.defaultBlockState().setValue(ChestBlock.WATERLOGGED, Boolean.valueOf(serverLevelAccessor.getFluidState(blockPos).is(FluidTags.WATER))),
+					2
 				);
-				BlockEntity blockEntity = levelAccessor.getBlockEntity(blockPos);
+				BlockEntity blockEntity = serverLevelAccessor.getBlockEntity(blockPos);
 				if (blockEntity instanceof ChestBlockEntity) {
 					((ChestBlockEntity)blockEntity)
 						.setLootTable(this.isLarge ? BuiltInLootTables.UNDERWATER_RUIN_BIG : BuiltInLootTables.UNDERWATER_RUIN_SMALL, random.nextLong());
 				}
 			} else if ("drowned".equals(string)) {
-				Drowned drowned = EntityType.DROWNED.create(levelAccessor.getLevel());
+				Drowned drowned = EntityType.DROWNED.create(serverLevelAccessor.getLevel());
 				drowned.setPersistenceRequired();
 				drowned.moveTo(blockPos, 0.0F, 0.0F);
-				drowned.finalizeSpawn(levelAccessor, levelAccessor.getCurrentDifficultyAt(blockPos), MobSpawnType.STRUCTURE, null, null);
-				levelAccessor.addFreshEntity(drowned);
-				if (blockPos.getY() > levelAccessor.getSeaLevel()) {
-					levelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2);
+				drowned.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(blockPos), MobSpawnType.STRUCTURE, null, null);
+				serverLevelAccessor.addFreshEntityWithPassengers(drowned);
+				if (blockPos.getY() > serverLevelAccessor.getSeaLevel()) {
+					serverLevelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2);
 				} else {
-					levelAccessor.setBlock(blockPos, Blocks.WATER.defaultBlockState(), 2);
+					serverLevelAccessor.setBlock(blockPos, Blocks.WATER.defaultBlockState(), 2);
 				}
 			}
 		}
 
 		@Override
-		public boolean postProcess(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos) {
+		public boolean postProcess(
+			WorldGenLevel worldGenLevel,
+			StructureFeatureManager structureFeatureManager,
+			ChunkGenerator chunkGenerator,
+			Random random,
+			BoundingBox boundingBox,
+			ChunkPos chunkPos,
+			BlockPos blockPos
+		) {
 			this.placeSettings.clearProcessors().addProcessor(new BlockRotProcessor(this.integrity)).addProcessor(BlockIgnoreProcessor.STRUCTURE_AND_AIR);
-			int i = levelAccessor.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, this.templatePosition.getX(), this.templatePosition.getZ());
+			int i = worldGenLevel.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, this.templatePosition.getX(), this.templatePosition.getZ());
 			this.templatePosition = new BlockPos(this.templatePosition.getX(), i, this.templatePosition.getZ());
-			BlockPos blockPos = StructureTemplate.transform(
+			BlockPos blockPos2 = StructureTemplate.transform(
 					new BlockPos(this.template.getSize().getX() - 1, 0, this.template.getSize().getZ() - 1), Mirror.NONE, this.rotation, BlockPos.ZERO
 				)
 				.offset(this.templatePosition);
 			this.templatePosition = new BlockPos(
-				this.templatePosition.getX(), this.getHeight(this.templatePosition, levelAccessor, blockPos), this.templatePosition.getZ()
+				this.templatePosition.getX(), this.getHeight(this.templatePosition, worldGenLevel, blockPos2), this.templatePosition.getZ()
 			);
-			return super.postProcess(levelAccessor, chunkGenerator, random, boundingBox, chunkPos);
+			return super.postProcess(worldGenLevel, structureFeatureManager, chunkGenerator, random, boundingBox, chunkPos, blockPos);
 		}
 
 		private int getHeight(BlockPos blockPos, BlockGetter blockGetter, BlockPos blockPos2) {

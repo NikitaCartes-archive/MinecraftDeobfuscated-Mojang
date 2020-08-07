@@ -6,15 +6,17 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.PlayerEnderChestContainer;
-import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -22,6 +24,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.entity.EnderChestBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -38,9 +41,9 @@ public class EnderChestBlock extends AbstractChestBlock<EnderChestBlockEntity> i
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	protected static final VoxelShape SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 14.0, 15.0);
-	public static final TranslatableComponent CONTAINER_TITLE = new TranslatableComponent("container.enderchest");
+	private static final Component CONTAINER_TITLE = new TranslatableComponent("container.enderchest");
 
-	protected EnderChestBlock(Block.Properties properties) {
+	protected EnderChestBlock(BlockBehaviour.Properties properties) {
 		super(properties, () -> BlockEntityType.ENDER_CHEST);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, Boolean.valueOf(false)));
 	}
@@ -78,7 +81,7 @@ public class EnderChestBlock extends AbstractChestBlock<EnderChestBlockEntity> i
 		if (playerEnderChestContainer != null && blockEntity instanceof EnderChestBlockEntity) {
 			BlockPos blockPos2 = blockPos.above();
 			if (level.getBlockState(blockPos2).isRedstoneConductor(level, blockPos2)) {
-				return InteractionResult.SUCCESS;
+				return InteractionResult.sidedSuccess(level.isClientSide);
 			} else if (level.isClientSide) {
 				return InteractionResult.SUCCESS;
 			} else {
@@ -86,10 +89,11 @@ public class EnderChestBlock extends AbstractChestBlock<EnderChestBlockEntity> i
 				playerEnderChestContainer.setActiveChest(enderChestBlockEntity);
 				player.openMenu(new SimpleMenuProvider((i, inventory, playerx) -> ChestMenu.threeRows(i, inventory, playerEnderChestContainer), CONTAINER_TITLE));
 				player.awardStat(Stats.OPEN_ENDERCHEST);
-				return InteractionResult.SUCCESS;
+				PiglinAi.angerNearbyPiglins(player, true);
+				return InteractionResult.CONSUME;
 			}
 		} else {
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
 	}
 

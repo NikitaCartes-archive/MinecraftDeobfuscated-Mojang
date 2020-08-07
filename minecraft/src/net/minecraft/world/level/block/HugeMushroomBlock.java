@@ -3,9 +3,10 @@ package net.minecraft.world.level.block;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.item.BlockPlaceContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -20,7 +21,7 @@ public class HugeMushroomBlock extends Block {
 	public static final BooleanProperty DOWN = PipeBlock.DOWN;
 	private static final Map<Direction, BooleanProperty> PROPERTY_BY_DIRECTION = PipeBlock.PROPERTY_BY_DIRECTION;
 
-	public HugeMushroomBlock(Block.Properties properties) {
+	public HugeMushroomBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition
@@ -51,7 +52,7 @@ public class HugeMushroomBlock extends Block {
 	public BlockState updateShape(
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
-		return blockState2.getBlock() == this
+		return blockState2.is(this)
 			? blockState.setValue((Property)PROPERTY_BY_DIRECTION.get(direction), Boolean.valueOf(false))
 			: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
 	}

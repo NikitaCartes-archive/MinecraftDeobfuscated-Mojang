@@ -1,6 +1,9 @@
 package net.minecraft.world.entity.animal;
 
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -9,9 +12,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.IntRange;
 import net.minecraft.util.Mth;
+import net.minecraft.util.TimeUtil;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
@@ -21,8 +28,11 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.FollowParentGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
@@ -32,29 +42,33 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
+import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class PolarBear extends Animal {
+public class PolarBear extends Animal implements NeutralMob {
 	private static final EntityDataAccessor<Boolean> DATA_STANDING_ID = SynchedEntityData.defineId(PolarBear.class, EntityDataSerializers.BOOLEAN);
 	private float clientSideStandAnimationO;
 	private float clientSideStandAnimation;
 	private int warningSoundTicks;
+	private static final IntRange PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
+	private int remainingPersistentAngerTime;
+	private UUID persistentAngerTarget;
 
 	public PolarBear(EntityType<? extends PolarBear> entityType, Level level) {
 		super(entityType, level);
 	}
 
 	@Override
-	public AgableMob getBreedOffspring(AgableMob agableMob) {
-		return EntityType.POLAR_BEAR.create(this.level);
+	public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+		return EntityType.POLAR_BEAR.create(serverLevel);
 	}
 
 	@Override
@@ -74,26 +88,63 @@ public class PolarBear extends Animal {
 		this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
 		this.targetSelector.addGoal(1, new PolarBear.PolarBearHurtByTargetGoal());
 		this.targetSelector.addGoal(2, new PolarBear.PolarBearAttackPlayersGoal());
-		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, Fox.class, 10, true, true, null));
+		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, Player.class, 10, true, false, this::isAngryAt));
+		this.targetSelector.addGoal(4, new NearestAttackableTargetGoal(this, Fox.class, 10, true, true, null));
+		this.targetSelector.addGoal(5, new ResetUniversalAngerTargetGoal<>(this, false));
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(30.0);
-		this.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(20.0);
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25);
-		this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
-		this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(6.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Mob.createMobAttributes()
+			.add(Attributes.MAX_HEALTH, 30.0)
+			.add(Attributes.FOLLOW_RANGE, 20.0)
+			.add(Attributes.MOVEMENT_SPEED, 0.25)
+			.add(Attributes.ATTACK_DAMAGE, 6.0);
 	}
 
 	public static boolean checkPolarBearSpawnRules(
 		EntityType<PolarBear> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
-		Biome biome = levelAccessor.getBiome(blockPos);
-		return biome != Biomes.FROZEN_OCEAN && biome != Biomes.DEEP_FROZEN_OCEAN
+		Optional<ResourceKey<Biome>> optional = levelAccessor.getBiomeName(blockPos);
+		return !Objects.equals(optional, Optional.of(Biomes.FROZEN_OCEAN)) && !Objects.equals(optional, Optional.of(Biomes.DEEP_FROZEN_OCEAN))
 			? checkAnimalSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, random)
-			: levelAccessor.getRawBrightness(blockPos, 0) > 8 && levelAccessor.getBlockState(blockPos.below()).getBlock() == Blocks.ICE;
+			: levelAccessor.getRawBrightness(blockPos, 0) > 8 && levelAccessor.getBlockState(blockPos.below()).is(Blocks.ICE);
+	}
+
+	@Override
+	public void readAdditionalSaveData(CompoundTag compoundTag) {
+		super.readAdditionalSaveData(compoundTag);
+		this.readPersistentAngerSaveData((ServerLevel)this.level, compoundTag);
+	}
+
+	@Override
+	public void addAdditionalSaveData(CompoundTag compoundTag) {
+		super.addAdditionalSaveData(compoundTag);
+		this.addPersistentAngerSaveData(compoundTag);
+	}
+
+	@Override
+	public void startPersistentAngerTimer() {
+		this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.randomValue(this.random));
+	}
+
+	@Override
+	public void setRemainingPersistentAngerTime(int i) {
+		this.remainingPersistentAngerTime = i;
+	}
+
+	@Override
+	public int getRemainingPersistentAngerTime() {
+		return this.remainingPersistentAngerTime;
+	}
+
+	@Override
+	public void setPersistentAngerTarget(@Nullable UUID uUID) {
+		this.persistentAngerTarget = uUID;
+	}
+
+	@Override
+	public UUID getPersistentAngerTarget() {
+		return this.persistentAngerTarget;
 	}
 
 	@Override
@@ -148,6 +199,10 @@ public class PolarBear extends Animal {
 		if (this.warningSoundTicks > 0) {
 			this.warningSoundTicks--;
 		}
+
+		if (!this.level.isClientSide) {
+			this.updatePersistentAnger((ServerLevel)this.level, true);
+		}
 	}
 
 	@Override
@@ -163,7 +218,7 @@ public class PolarBear extends Animal {
 
 	@Override
 	public boolean doHurtTarget(Entity entity) {
-		boolean bl = entity.hurt(DamageSource.mobAttack(this), (float)((int)this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue()));
+		boolean bl = entity.hurt(DamageSource.mobAttack(this), (float)((int)this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
 		if (bl) {
 			this.doEnchantDamageEffects(this, entity);
 		}
@@ -191,18 +246,17 @@ public class PolarBear extends Animal {
 
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
 		if (spawnGroupData == null) {
-			spawnGroupData = new AgableMob.AgableMobGroupData();
-			((AgableMob.AgableMobGroupData)spawnGroupData).setBabySpawnChance(1.0F);
+			spawnGroupData = new AgableMob.AgableMobGroupData(1.0F);
 		}
 
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	class PolarBearAttackPlayersGoal extends NearestAttackableTargetGoal<Player> {
@@ -263,22 +317,22 @@ public class PolarBear extends Animal {
 		@Override
 		protected void checkAndPerformAttack(LivingEntity livingEntity, double d) {
 			double e = this.getAttackReachSqr(livingEntity);
-			if (d <= e && this.attackTime <= 0) {
-				this.attackTime = 20;
+			if (d <= e && this.isTimeToAttack()) {
+				this.resetAttackCooldown();
 				this.mob.doHurtTarget(livingEntity);
 				PolarBear.this.setStanding(false);
 			} else if (d <= e * 2.0) {
-				if (this.attackTime <= 0) {
+				if (this.isTimeToAttack()) {
 					PolarBear.this.setStanding(false);
-					this.attackTime = 20;
+					this.resetAttackCooldown();
 				}
 
-				if (this.attackTime <= 10) {
+				if (this.getTicksUntilNextAttack() <= 10) {
 					PolarBear.this.setStanding(true);
 					PolarBear.this.playWarningSound();
 				}
 			} else {
-				this.attackTime = 20;
+				this.resetAttackCooldown();
 				PolarBear.this.setStanding(false);
 			}
 		}

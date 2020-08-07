@@ -2,19 +2,21 @@ package net.minecraft.world.entity.animal.horse;
 
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobType;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
 
 public class SkeletonHorse extends AbstractHorse {
@@ -26,12 +28,13 @@ public class SkeletonHorse extends AbstractHorse {
 		super(entityType, level);
 	}
 
+	public static AttributeSupplier.Builder createAttributes() {
+		return createBaseHorseAttributes().add(Attributes.MAX_HEALTH, 15.0).add(Attributes.MOVEMENT_SPEED, 0.2F);
+	}
+
 	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(15.0);
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.2F);
-		this.getAttribute(JUMP_STRENGTH).setBaseValue(this.generateRandomJumpStrength());
+	protected void randomizeAttributes() {
+		this.getAttribute(Attributes.JUMP_STRENGTH).setBaseValue(this.generateRandomJumpStrength());
 	}
 
 	@Override
@@ -41,7 +44,7 @@ public class SkeletonHorse extends AbstractHorse {
 	@Override
 	protected SoundEvent getAmbientSound() {
 		super.getAmbientSound();
-		return this.isUnderLiquid(FluidTags.WATER) ? SoundEvents.SKELETON_HORSE_AMBIENT_WATER : SoundEvents.SKELETON_HORSE_AMBIENT;
+		return this.isEyeInFluid(FluidTags.WATER) ? SoundEvents.SKELETON_HORSE_AMBIENT_WATER : SoundEvents.SKELETON_HORSE_AMBIENT;
 	}
 
 	@Override
@@ -100,8 +103,8 @@ public class SkeletonHorse extends AbstractHorse {
 	}
 
 	@Override
-	public double getRideHeight() {
-		return super.getRideHeight() - 0.1875;
+	public double getPassengersRidingOffset() {
+		return super.getPassengersRidingOffset() - 0.1875;
 	}
 
 	@Override
@@ -153,38 +156,37 @@ public class SkeletonHorse extends AbstractHorse {
 
 	@Nullable
 	@Override
-	public AgableMob getBreedOffspring(AgableMob agableMob) {
-		return EntityType.SKELETON_HORSE.create(this.level);
+	public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+		return EntityType.SKELETON_HORSE.create(serverLevel);
 	}
 
 	@Override
-	public boolean mobInteract(Player player, InteractionHand interactionHand) {
+	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.getItem() instanceof SpawnEggItem) {
-			return super.mobInteract(player, interactionHand);
-		} else if (!this.isTamed()) {
-			return false;
+		if (!this.isTamed()) {
+			return InteractionResult.PASS;
 		} else if (this.isBaby()) {
 			return super.mobInteract(player, interactionHand);
 		} else if (player.isSecondaryUseActive()) {
 			this.openInventory(player);
-			return true;
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		} else if (this.isVehicle()) {
 			return super.mobInteract(player, interactionHand);
 		} else {
 			if (!itemStack.isEmpty()) {
 				if (itemStack.getItem() == Items.SADDLE && !this.isSaddled()) {
 					this.openInventory(player);
-					return true;
+					return InteractionResult.sidedSuccess(this.level.isClientSide);
 				}
 
-				if (itemStack.interactEnemy(player, this, interactionHand)) {
-					return true;
+				InteractionResult interactionResult = itemStack.interactLivingEntity(player, this, interactionHand);
+				if (interactionResult.consumesAction()) {
+					return interactionResult;
 				}
 			}
 
 			this.doPlayerRide(player);
-			return true;
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		}
 	}
 }

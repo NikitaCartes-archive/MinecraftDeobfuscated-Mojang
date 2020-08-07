@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.item.ItemStack;
@@ -25,6 +24,11 @@ public class SetContainerContents extends LootItemConditionalFunction {
 	private SetContainerContents(LootItemCondition[] lootItemConditions, List<LootPoolEntryContainer> list) {
 		super(lootItemConditions);
 		this.entries = ImmutableList.copyOf(list);
+	}
+
+	@Override
+	public LootItemFunctionType getType() {
+		return LootItemFunctions.SET_CONTENTS;
 	}
 
 	@Override
@@ -79,10 +83,6 @@ public class SetContainerContents extends LootItemConditionalFunction {
 	}
 
 	public static class Serializer extends LootItemConditionalFunction.Serializer<SetContainerContents> {
-		protected Serializer() {
-			super(new ResourceLocation("set_contents"), SetContainerContents.class);
-		}
-
 		public void serialize(JsonObject jsonObject, SetContainerContents setContainerContents, JsonSerializationContext jsonSerializationContext) {
 			super.serialize(jsonObject, setContainerContents, jsonSerializationContext);
 			jsonObject.add("entries", jsonSerializationContext.serialize(setContainerContents.entries));

@@ -4,7 +4,6 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import javax.annotation.Nullable;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -20,6 +19,11 @@ public class TimeCheck implements LootItemCondition {
 		this.value = randomValueBounds;
 	}
 
+	@Override
+	public LootItemConditionType getType() {
+		return LootItemConditions.TIME_CHECK;
+	}
+
 	public boolean test(LootContext lootContext) {
 		ServerLevel serverLevel = lootContext.getLevel();
 		long l = serverLevel.getDayTime();
@@ -30,11 +34,7 @@ public class TimeCheck implements LootItemCondition {
 		return this.value.matchesValue((int)l);
 	}
 
-	public static class Serializer extends LootItemCondition.Serializer<TimeCheck> {
-		public Serializer() {
-			super(new ResourceLocation("time_check"), TimeCheck.class);
-		}
-
+	public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<TimeCheck> {
 		public void serialize(JsonObject jsonObject, TimeCheck timeCheck, JsonSerializationContext jsonSerializationContext) {
 			jsonObject.addProperty("period", timeCheck.period);
 			jsonObject.add("value", jsonSerializationContext.serialize(timeCheck.value));

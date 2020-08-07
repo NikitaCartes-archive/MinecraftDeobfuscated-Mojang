@@ -1,16 +1,15 @@
 package net.minecraft.world.level.levelgen.surfacebuilders;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
 public class SwampSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfiguration> {
-	public SwampSurfaceBuilder(Function<Dynamic<?>, ? extends SurfaceBuilderBaseConfiguration> function) {
-		super(function);
+	public SwampSurfaceBuilder(Codec<SurfaceBuilderBaseConfiguration> codec) {
+		super(codec);
 	}
 
 	public void apply(
@@ -36,7 +35,7 @@ public class SwampSurfaceBuilder extends SurfaceBuilder<SurfaceBuilderBaseConfig
 			for (int p = k; p >= 0; p--) {
 				mutableBlockPos.set(n, p, o);
 				if (!chunkAccess.getBlockState(mutableBlockPos).isAir()) {
-					if (p == 62 && chunkAccess.getBlockState(mutableBlockPos).getBlock() != blockState2.getBlock()) {
+					if (p == 62 && !chunkAccess.getBlockState(mutableBlockPos).is(blockState2.getBlock())) {
 						chunkAccess.setBlockState(mutableBlockPos, blockState2, false);
 					}
 					break;

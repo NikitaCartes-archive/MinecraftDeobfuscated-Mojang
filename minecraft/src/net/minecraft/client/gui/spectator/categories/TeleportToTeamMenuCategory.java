@@ -2,6 +2,7 @@ package net.minecraft.client.gui.spectator.categories;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import java.util.Random;
 import net.fabricmc.api.EnvType;
@@ -23,6 +24,8 @@ import net.minecraft.world.scores.PlayerTeam;
 
 @Environment(EnvType.CLIENT)
 public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, SpectatorMenuItem {
+	private static final Component TELEPORT_TEXT = new TranslatableComponent("spectatorMenu.team_teleport");
+	private static final Component TELEPORT_PROMPT = new TranslatableComponent("spectatorMenu.team_teleport.prompt");
 	private final List<SpectatorMenuItem> items = Lists.<SpectatorMenuItem>newArrayList();
 
 	public TeleportToTeamMenuCategory() {
@@ -40,7 +43,7 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
 
 	@Override
 	public Component getPrompt() {
-		return new TranslatableComponent("spectatorMenu.team_teleport.prompt");
+		return TELEPORT_PROMPT;
 	}
 
 	@Override
@@ -50,13 +53,13 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
 
 	@Override
 	public Component getName() {
-		return new TranslatableComponent("spectatorMenu.team_teleport");
+		return TELEPORT_TEXT;
 	}
 
 	@Override
-	public void renderIcon(float f, int i) {
+	public void renderIcon(PoseStack poseStack, float f, int i) {
 		Minecraft.getInstance().getTextureManager().bind(SpectatorGui.SPECTATOR_LOCATION);
-		GuiComponent.blit(0, 0, 16.0F, 0.0F, 16, 16, 256, 256);
+		GuiComponent.blit(poseStack, 0, 0, 16.0F, 0.0F, 16, 16, 256, 256);
 	}
 
 	@Override
@@ -107,19 +110,19 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
 		}
 
 		@Override
-		public void renderIcon(float f, int i) {
+		public void renderIcon(PoseStack poseStack, float f, int i) {
 			Integer integer = this.team.getColor().getColor();
 			if (integer != null) {
 				float g = (float)(integer >> 16 & 0xFF) / 255.0F;
 				float h = (float)(integer >> 8 & 0xFF) / 255.0F;
 				float j = (float)(integer & 0xFF) / 255.0F;
-				GuiComponent.fill(1, 1, 15, 15, Mth.color(g * f, h * f, j * f) | i << 24);
+				GuiComponent.fill(poseStack, 1, 1, 15, 15, Mth.color(g * f, h * f, j * f) | i << 24);
 			}
 
 			Minecraft.getInstance().getTextureManager().bind(this.location);
 			RenderSystem.color4f(f, f, f, (float)i / 255.0F);
-			GuiComponent.blit(2, 2, 12, 12, 8.0F, 8.0F, 8, 8, 64, 64);
-			GuiComponent.blit(2, 2, 12, 12, 40.0F, 8.0F, 8, 8, 64, 64);
+			GuiComponent.blit(poseStack, 2, 2, 12, 12, 8.0F, 8.0F, 8, 8, 64, 64);
+			GuiComponent.blit(poseStack, 2, 2, 12, 12, 40.0F, 8.0F, 8, 8, 64, 64);
 		}
 
 		@Override

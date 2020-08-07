@@ -13,6 +13,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -21,6 +22,7 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 public class LeashFenceKnotEntity extends HangingEntity {
 	public LeashFenceKnotEntity(EntityType<? extends LeashFenceKnotEntity> entityType, Level level) {
@@ -88,9 +90,9 @@ public class LeashFenceKnotEntity extends HangingEntity {
 	}
 
 	@Override
-	public boolean interact(Player player, InteractionHand interactionHand) {
+	public InteractionResult interact(Player player, InteractionHand interactionHand) {
 		if (this.level.isClientSide) {
-			return true;
+			return InteractionResult.SUCCESS;
 		} else {
 			boolean bl = false;
 			double d = 7.0;
@@ -115,7 +117,7 @@ public class LeashFenceKnotEntity extends HangingEntity {
 				}
 			}
 
-			return true;
+			return InteractionResult.CONSUME;
 		}
 	}
 
@@ -151,5 +153,11 @@ public class LeashFenceKnotEntity extends HangingEntity {
 	@Override
 	public Packet<?> getAddEntityPacket() {
 		return new ClientboundAddEntityPacket(this, this.getType(), 0, this.getPos());
+	}
+
+	@Environment(EnvType.CLIENT)
+	@Override
+	public Vec3 getRopeHoldPosition(float f) {
+		return this.getPosition(f).add(0.0, 0.2, 0.0);
 	}
 }

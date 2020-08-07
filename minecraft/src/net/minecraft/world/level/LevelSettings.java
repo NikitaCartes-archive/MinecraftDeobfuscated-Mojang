@@ -1,78 +1,81 @@
 package net.minecraft.world.level;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.world.level.storage.LevelData;
+import com.mojang.serialization.Dynamic;
+import net.minecraft.world.Difficulty;
 
 public final class LevelSettings {
-	private final long seed;
+	private final String levelName;
 	private final GameType gameType;
-	private final boolean generateMapFeatures;
 	private final boolean hardcore;
-	private final LevelType levelType;
-	private boolean allowCommands;
-	private boolean startingBonusItems;
-	private JsonElement levelTypeOptions = new JsonObject();
+	private final Difficulty difficulty;
+	private final boolean allowCommands;
+	private final GameRules gameRules;
+	private final DataPackConfig dataPackConfig;
 
-	public LevelSettings(long l, GameType gameType, boolean bl, boolean bl2, LevelType levelType) {
-		this.seed = l;
+	public LevelSettings(String string, GameType gameType, boolean bl, Difficulty difficulty, boolean bl2, GameRules gameRules, DataPackConfig dataPackConfig) {
+		this.levelName = string;
 		this.gameType = gameType;
-		this.generateMapFeatures = bl;
-		this.hardcore = bl2;
-		this.levelType = levelType;
+		this.hardcore = bl;
+		this.difficulty = difficulty;
+		this.allowCommands = bl2;
+		this.gameRules = gameRules;
+		this.dataPackConfig = dataPackConfig;
 	}
 
-	public LevelSettings(LevelData levelData) {
-		this(levelData.getSeed(), levelData.getGameType(), levelData.isGenerateMapFeatures(), levelData.isHardcore(), levelData.getGeneratorType());
+	public static LevelSettings parse(Dynamic<?> dynamic, DataPackConfig dataPackConfig) {
+		GameType gameType = GameType.byId(dynamic.get("GameType").asInt(0));
+		return new LevelSettings(
+			dynamic.get("LevelName").asString(""),
+			gameType,
+			dynamic.get("hardcore").asBoolean(false),
+			(Difficulty)dynamic.get("Difficulty").asNumber().map(number -> Difficulty.byId(number.byteValue())).result().orElse(Difficulty.NORMAL),
+			dynamic.get("allowCommands").asBoolean(gameType == GameType.CREATIVE),
+			new GameRules(dynamic.get("GameRules")),
+			dataPackConfig
+		);
 	}
 
-	public LevelSettings enableStartingBonusItems() {
-		this.startingBonusItems = true;
-		return this;
+	public String levelName() {
+		return this.levelName;
 	}
 
-	@Environment(EnvType.CLIENT)
-	public LevelSettings enableSinglePlayerCommands() {
-		this.allowCommands = true;
-		return this;
-	}
-
-	public LevelSettings setLevelTypeOptions(JsonElement jsonElement) {
-		this.levelTypeOptions = jsonElement;
-		return this;
-	}
-
-	public boolean hasStartingBonusItems() {
-		return this.startingBonusItems;
-	}
-
-	public long getSeed() {
-		return this.seed;
-	}
-
-	public GameType getGameType() {
+	public GameType gameType() {
 		return this.gameType;
 	}
 
-	public boolean isHardcore() {
+	public boolean hardcore() {
 		return this.hardcore;
 	}
 
-	public boolean isGenerateMapFeatures() {
-		return this.generateMapFeatures;
+	public Difficulty difficulty() {
+		return this.difficulty;
 	}
 
-	public LevelType getLevelType() {
-		return this.levelType;
-	}
-
-	public boolean getAllowCommands() {
+	public boolean allowCommands() {
 		return this.allowCommands;
 	}
 
-	public JsonElement getLevelTypeOptions() {
-		return this.levelTypeOptions;
+	public GameRules gameRules() {
+		return this.gameRules;
+	}
+
+	public DataPackConfig getDataPackConfig() {
+		return this.dataPackConfig;
+	}
+
+	public LevelSettings withGameType(GameType gameType) {
+		return new LevelSettings(this.levelName, gameType, this.hardcore, this.difficulty, this.allowCommands, this.gameRules, this.dataPackConfig);
+	}
+
+	public LevelSettings withDifficulty(Difficulty difficulty) {
+		return new LevelSettings(this.levelName, this.gameType, this.hardcore, difficulty, this.allowCommands, this.gameRules, this.dataPackConfig);
+	}
+
+	public LevelSettings withDataPackConfig(DataPackConfig dataPackConfig) {
+		return new LevelSettings(this.levelName, this.gameType, this.hardcore, this.difficulty, this.allowCommands, this.gameRules, dataPackConfig);
+	}
+
+	public LevelSettings copy() {
+		return new LevelSettings(this.levelName, this.gameType, this.hardcore, this.difficulty, this.allowCommands, this.gameRules.copy(), this.dataPackConfig);
 	}
 }

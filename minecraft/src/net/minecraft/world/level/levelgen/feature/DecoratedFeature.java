@@ -1,28 +1,30 @@
 package net.minecraft.world.level.levelgen.feature;
 
-import com.mojang.datafixers.Dynamic;
+import com.mojang.serialization.Codec;
 import java.util.Random;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.DecoratedFeatureConfiguration;
+import net.minecraft.world.level.levelgen.placement.DecorationContext;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 
 public class DecoratedFeature extends Feature<DecoratedFeatureConfiguration> {
-	public DecoratedFeature(Function<Dynamic<?>, ? extends DecoratedFeatureConfiguration> function) {
-		super(function);
+	public DecoratedFeature(Codec<DecoratedFeatureConfiguration> codec) {
+		super(codec);
 	}
 
 	public boolean place(
-		LevelAccessor levelAccessor,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
-		Random random,
-		BlockPos blockPos,
-		DecoratedFeatureConfiguration decoratedFeatureConfiguration
+		WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, DecoratedFeatureConfiguration decoratedFeatureConfiguration
 	) {
-		return decoratedFeatureConfiguration.decorator.place(levelAccessor, chunkGenerator, random, blockPos, decoratedFeatureConfiguration.feature);
+		MutableBoolean mutableBoolean = new MutableBoolean();
+		decoratedFeatureConfiguration.decorator.getPositions(new DecorationContext(worldGenLevel, chunkGenerator), random, blockPos).forEach(blockPosx -> {
+			if (((ConfiguredFeature)decoratedFeatureConfiguration.feature.get()).place(worldGenLevel, chunkGenerator, random, blockPosx)) {
+				mutableBoolean.setTrue();
+			}
+		});
+		return mutableBoolean.isTrue();
 	}
 
 	public String toString() {

@@ -28,11 +28,11 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.network.Connection;
 import net.minecraft.network.PacketDecoder;
 import net.minecraft.network.PacketEncoder;
+import net.minecraft.network.RateKickingConnection;
 import net.minecraft.network.Varint21FrameDecoder;
 import net.minecraft.network.Varint21LengthFieldPrepender;
 import net.minecraft.network.chat.Component;
@@ -86,7 +86,7 @@ public class ServerConnectionListener {
 								protected void initChannel(Channel channel) throws Exception {
 									try {
 										channel.config().setOption(ChannelOption.TCP_NODELAY, true);
-									} catch (ChannelException var3) {
+									} catch (ChannelException var4) {
 									}
 
 									channel.pipeline()
@@ -96,7 +96,8 @@ public class ServerConnectionListener {
 										.addLast("decoder", new PacketDecoder(PacketFlow.SERVERBOUND))
 										.addLast("prepender", new Varint21LengthFieldPrepender())
 										.addLast("encoder", new PacketEncoder(PacketFlow.CLIENTBOUND));
-									Connection connection = new Connection(PacketFlow.SERVERBOUND);
+									int i = ServerConnectionListener.this.server.getRateLimitPacketsPerSecond();
+									Connection connection = (Connection)(i > 0 ? new RateKickingConnection(i) : new Connection(PacketFlow.SERVERBOUND));
 									ServerConnectionListener.this.connections.add(connection);
 									channel.pipeline().addLast("packet_handler", connection);
 									connection.setListener(new ServerHandshakePacketListenerImpl(ServerConnectionListener.this.server, connection));
@@ -152,15 +153,12 @@ public class ServerConnectionListener {
 					if (connection.isConnected()) {
 						try {
 							connection.tick();
-						} catch (Exception var8) {
+						} catch (Exception var7) {
 							if (connection.isMemoryConnection()) {
-								CrashReport crashReport = CrashReport.forThrowable(var8, "Ticking memory connection");
-								CrashReportCategory crashReportCategory = crashReport.addCategory("Ticking connection");
-								crashReportCategory.setDetail("Connection", connection::toString);
-								throw new ReportedException(crashReport);
+								throw new ReportedException(CrashReport.forThrowable(var7, "Ticking memory connection"));
 							}
 
-							LOGGER.warn("Failed to handle packet for {}", connection.getRemoteAddress(), var8);
+							LOGGER.warn("Failed to handle packet for {}", connection.getRemoteAddress(), var7);
 							Component component = new TextComponent("Internal server error");
 							connection.send(new ClientboundDisconnectPacket(component), future -> connection.disconnect(component));
 							connection.setReadOnly();

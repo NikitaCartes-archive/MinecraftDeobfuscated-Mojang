@@ -67,15 +67,20 @@ public abstract class MoveToBlockGoal extends Goal {
 		return 1.0;
 	}
 
+	protected BlockPos getMoveToTarget() {
+		return this.blockPos.above();
+	}
+
 	@Override
 	public void tick() {
-		if (!this.blockPos.above().closerThan(this.mob.position(), this.acceptedDistance())) {
+		BlockPos blockPos = this.getMoveToTarget();
+		if (!blockPos.closerThan(this.mob.position(), this.acceptedDistance())) {
 			this.reachedTarget = false;
 			this.tryTicks++;
 			if (this.shouldRecalculatePath()) {
 				this.mob
 					.getNavigation()
-					.moveTo((double)((float)this.blockPos.getX()) + 0.5, (double)(this.blockPos.getY() + 1), (double)((float)this.blockPos.getZ()) + 0.5, this.speedModifier);
+					.moveTo((double)((float)blockPos.getX()) + 0.5, (double)blockPos.getY(), (double)((float)blockPos.getZ()) + 0.5, this.speedModifier);
 			}
 		} else {
 			this.reachedTarget = true;
@@ -94,14 +99,14 @@ public abstract class MoveToBlockGoal extends Goal {
 	protected boolean findNearestBlock() {
 		int i = this.searchRange;
 		int j = this.verticalSearchRange;
-		BlockPos blockPos = new BlockPos(this.mob);
+		BlockPos blockPos = this.mob.blockPosition();
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 		for (int k = this.verticalSearchStart; k <= j; k = k > 0 ? -k : 1 - k) {
 			for (int l = 0; l < i; l++) {
 				for (int m = 0; m <= l; m = m > 0 ? -m : 1 - m) {
 					for (int n = m < l && m > -l ? l : 0; n <= l; n = n > 0 ? -n : 1 - n) {
-						mutableBlockPos.set(blockPos).move(m, k - 1, n);
+						mutableBlockPos.setWithOffset(blockPos, m, k - 1, n);
 						if (this.mob.isWithinRestriction(mutableBlockPos) && this.isValidTarget(this.mob.level, mutableBlockPos)) {
 							this.blockPos = mutableBlockPos;
 							return true;

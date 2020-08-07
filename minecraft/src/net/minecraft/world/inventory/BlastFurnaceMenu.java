@@ -6,10 +6,10 @@ import net.minecraft.world.item.crafting.RecipeType;
 
 public class BlastFurnaceMenu extends AbstractFurnaceMenu {
 	public BlastFurnaceMenu(int i, Inventory inventory) {
-		super(MenuType.BLAST_FURNACE, RecipeType.BLASTING, i, inventory);
+		super(MenuType.BLAST_FURNACE, RecipeType.BLASTING, RecipeBookType.BLAST_FURNACE, i, inventory);
 	}
 
 	public BlastFurnaceMenu(int i, Inventory inventory, Container container, ContainerData containerData) {
-		super(MenuType.BLAST_FURNACE, RecipeType.BLASTING, i, inventory, container, containerData);
+		super(MenuType.BLAST_FURNACE, RecipeType.BLASTING, RecipeBookType.BLAST_FURNACE, i, inventory, container, containerData);
 	}
 }

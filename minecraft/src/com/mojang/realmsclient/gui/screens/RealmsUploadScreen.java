@@ -3,6 +3,11 @@ package com.mojang.realmsclient.gui.screens;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.RateLimiter;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.realmsclient.Unit;
 import com.mojang.realmsclient.client.FileUpload;
 import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.client.UploadStatus;
@@ -18,15 +23,19 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.realms.Realms;
-import net.minecraft.realms.RealmsButton;
-import net.minecraft.realms.RealmsDefaultVertexFormat;
-import net.minecraft.realms.RealmsLevelSummary;
+import net.minecraft.SharedConstants;
+import net.minecraft.Util;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.realms.NarrationHelper;
 import net.minecraft.realms.RealmsScreen;
-import net.minecraft.realms.Tezzelator;
+import net.minecraft.world.level.storage.LevelSummary;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
@@ -36,83 +45,73 @@ import org.apache.logging.log4j.Logger;
 @Environment(EnvType.CLIENT)
 public class RealmsUploadScreen extends RealmsScreen {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final ReentrantLock UPLOAD_LOCK = new ReentrantLock();
+	private static final String[] DOTS = new String[]{"", ".", ". .", ". . ."};
+	private static final Component VERIFYING_TEXT = new TranslatableComponent("mco.upload.verifying");
 	private final RealmsResetWorldScreen lastScreen;
-	private final RealmsLevelSummary selectedLevel;
+	private final LevelSummary selectedLevel;
 	private final long worldId;
 	private final int slotId;
 	private final UploadStatus uploadStatus;
 	private final RateLimiter narrationRateLimiter;
-	private volatile String errorMessage;
-	private volatile String status;
+	private volatile Component[] errorMessage;
+	private volatile Component status = new TranslatableComponent("mco.upload.preparing");
 	private volatile String progress;
 	private volatile boolean cancelled;
 	private volatile boolean uploadFinished;
 	private volatile boolean showDots = true;
 	private volatile boolean uploadStarted;
-	private RealmsButton backButton;
-	private RealmsButton cancelButton;
-	private int animTick;
-	private static final String[] DOTS = new String[]{"", ".", ". .", ". . ."};
-	private int dotIndex;
+	private Button backButton;
+	private Button cancelButton;
+	private int tickCount;
 	private Long previousWrittenBytes;
 	private Long previousTimeSnapshot;
 	private long bytesPersSecond;
-	private static final ReentrantLock uploadLock = new ReentrantLock();
+	private final Runnable callback;
 
-	public RealmsUploadScreen(long l, int i, RealmsResetWorldScreen realmsResetWorldScreen, RealmsLevelSummary realmsLevelSummary) {
+	public RealmsUploadScreen(long l, int i, RealmsResetWorldScreen realmsResetWorldScreen, LevelSummary levelSummary, Runnable runnable) {
 		this.worldId = l;
 		this.slotId = i;
 		this.lastScreen = realmsResetWorldScreen;
-		this.selectedLevel = realmsLevelSummary;
+		this.selectedLevel = levelSummary;
 		this.uploadStatus = new UploadStatus();
 		this.narrationRateLimiter = RateLimiter.create(0.1F);
+		this.callback = runnable;
 	}
 
 	@Override
 	public void init() {
-		this.setKeyboardHandlerSendRepeatsToGui(true);
-		this.backButton = new RealmsButton(1, this.width() / 2 - 100, this.height() - 42, 200, 20, getLocalizedString("gui.back")) {
-			@Override
-			public void onPress() {
-				RealmsUploadScreen.this.onBack();
-			}
-		};
-		this.buttonsAdd(this.cancelButton = new RealmsButton(0, this.width() / 2 - 100, this.height() - 42, 200, 20, getLocalizedString("gui.cancel")) {
-			@Override
-			public void onPress() {
-				RealmsUploadScreen.this.onCancel();
-			}
-		});
+		this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
+		this.backButton = this.addButton(new Button(this.width / 2 - 100, this.height - 42, 200, 20, CommonComponents.GUI_BACK, button -> this.onBack()));
+		this.backButton.visible = false;
+		this.cancelButton = this.addButton(new Button(this.width / 2 - 100, this.height - 42, 200, 20, CommonComponents.GUI_CANCEL, button -> this.onCancel()));
 		if (!this.uploadStarted) {
 			if (this.lastScreen.slot == -1) {
 				this.upload();
 			} else {
-				this.lastScreen.switchSlot(this);
+				this.lastScreen.switchSlot(() -> {
+					if (!this.uploadStarted) {
+						this.uploadStarted = true;
+						this.minecraft.setScreen(this);
+						this.upload();
+					}
+				});
 			}
-		}
-	}
-
-	@Override
-	public void confirmResult(boolean bl, int i) {
-		if (bl && !this.uploadStarted) {
-			this.uploadStarted = true;
-			Realms.setScreen(this);
-			this.upload();
 		}
 	}
 
 	@Override
 	public void removed() {
-		this.setKeyboardHandlerSendRepeatsToGui(false);
+		this.minecraft.keyboardHandler.setSendRepeatsToGui(false);
 	}
 
 	private void onBack() {
-		this.lastScreen.confirmResult(true, 0);
+		this.callback.run();
 	}
 
 	private void onCancel() {
 		this.cancelled = true;
-		Realms.setScreen(this.lastScreen);
+		this.minecraft.setScreen(this.lastScreen);
 	}
 
 	@Override
@@ -131,147 +130,104 @@ public class RealmsUploadScreen extends RealmsScreen {
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
 		if (!this.uploadFinished && this.uploadStatus.bytesWritten != 0L && this.uploadStatus.bytesWritten == this.uploadStatus.totalBytes) {
-			this.status = getLocalizedString("mco.upload.verifying");
-			this.cancelButton.active(false);
+			this.status = VERIFYING_TEXT;
+			this.cancelButton.active = false;
 		}
 
-		this.drawCenteredString(this.status, this.width() / 2, 50, 16777215);
+		drawCenteredString(poseStack, this.font, this.status, this.width / 2, 50, 16777215);
 		if (this.showDots) {
-			this.drawDots();
+			this.drawDots(poseStack);
 		}
 
 		if (this.uploadStatus.bytesWritten != 0L && !this.cancelled) {
-			this.drawProgressBar();
-			this.drawUploadSpeed();
+			this.drawProgressBar(poseStack);
+			this.drawUploadSpeed(poseStack);
 		}
 
 		if (this.errorMessage != null) {
-			String[] strings = this.errorMessage.split("\\\\n");
-
-			for (int k = 0; k < strings.length; k++) {
-				this.drawCenteredString(strings[k], this.width() / 2, 110 + 12 * k, 16711680);
+			for (int k = 0; k < this.errorMessage.length; k++) {
+				drawCenteredString(poseStack, this.font, this.errorMessage[k], this.width / 2, 110 + 12 * k, 16711680);
 			}
 		}
 
-		super.render(i, j, f);
+		super.render(poseStack, i, j, f);
 	}
 
-	private void drawDots() {
-		int i = this.fontWidth(this.status);
-		if (this.animTick % 10 == 0) {
-			this.dotIndex++;
-		}
-
-		this.drawString(DOTS[this.dotIndex % DOTS.length], this.width() / 2 + i / 2 + 5, 50, 16777215);
+	private void drawDots(PoseStack poseStack) {
+		int i = this.font.width(this.status);
+		this.font.draw(poseStack, DOTS[this.tickCount / 10 % DOTS.length], (float)(this.width / 2 + i / 2 + 5), 50.0F, 16777215);
 	}
 
-	private void drawProgressBar() {
-		double d = this.uploadStatus.bytesWritten.doubleValue() / this.uploadStatus.totalBytes.doubleValue() * 100.0;
-		if (d > 100.0) {
-			d = 100.0;
-		}
-
-		this.progress = String.format(Locale.ROOT, "%.1f", d);
+	private void drawProgressBar(PoseStack poseStack) {
+		double d = Math.min((double)this.uploadStatus.bytesWritten / (double)this.uploadStatus.totalBytes, 1.0);
+		this.progress = String.format(Locale.ROOT, "%.1f", d * 100.0);
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.disableTexture();
-		double e = (double)(this.width() / 2 - 100);
+		double e = (double)(this.width / 2 - 100);
 		double f = 0.5;
-		Tezzelator tezzelator = Tezzelator.instance;
-		tezzelator.begin(7, RealmsDefaultVertexFormat.POSITION_COLOR);
-		tezzelator.vertex(e - 0.5, 95.5, 0.0).color(217, 210, 210, 255).endVertex();
-		tezzelator.vertex(e + 200.0 * d / 100.0 + 0.5, 95.5, 0.0).color(217, 210, 210, 255).endVertex();
-		tezzelator.vertex(e + 200.0 * d / 100.0 + 0.5, 79.5, 0.0).color(217, 210, 210, 255).endVertex();
-		tezzelator.vertex(e - 0.5, 79.5, 0.0).color(217, 210, 210, 255).endVertex();
-		tezzelator.vertex(e, 95.0, 0.0).color(128, 128, 128, 255).endVertex();
-		tezzelator.vertex(e + 200.0 * d / 100.0, 95.0, 0.0).color(128, 128, 128, 255).endVertex();
-		tezzelator.vertex(e + 200.0 * d / 100.0, 80.0, 0.0).color(128, 128, 128, 255).endVertex();
-		tezzelator.vertex(e, 80.0, 0.0).color(128, 128, 128, 255).endVertex();
-		tezzelator.end();
+		Tesselator tesselator = Tesselator.getInstance();
+		BufferBuilder bufferBuilder = tesselator.getBuilder();
+		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
+		bufferBuilder.vertex(e - 0.5, 95.5, 0.0).color(217, 210, 210, 255).endVertex();
+		bufferBuilder.vertex(e + 200.0 * d + 0.5, 95.5, 0.0).color(217, 210, 210, 255).endVertex();
+		bufferBuilder.vertex(e + 200.0 * d + 0.5, 79.5, 0.0).color(217, 210, 210, 255).endVertex();
+		bufferBuilder.vertex(e - 0.5, 79.5, 0.0).color(217, 210, 210, 255).endVertex();
+		bufferBuilder.vertex(e, 95.0, 0.0).color(128, 128, 128, 255).endVertex();
+		bufferBuilder.vertex(e + 200.0 * d, 95.0, 0.0).color(128, 128, 128, 255).endVertex();
+		bufferBuilder.vertex(e + 200.0 * d, 80.0, 0.0).color(128, 128, 128, 255).endVertex();
+		bufferBuilder.vertex(e, 80.0, 0.0).color(128, 128, 128, 255).endVertex();
+		tesselator.end();
 		RenderSystem.enableTexture();
-		this.drawCenteredString(this.progress + " %", this.width() / 2, 84, 16777215);
+		drawCenteredString(poseStack, this.font, this.progress + " %", this.width / 2, 84, 16777215);
 	}
 
-	private void drawUploadSpeed() {
-		if (this.animTick % 20 == 0) {
+	private void drawUploadSpeed(PoseStack poseStack) {
+		if (this.tickCount % 20 == 0) {
 			if (this.previousWrittenBytes != null) {
-				long l = System.currentTimeMillis() - this.previousTimeSnapshot;
+				long l = Util.getMillis() - this.previousTimeSnapshot;
 				if (l == 0L) {
 					l = 1L;
 				}
 
 				this.bytesPersSecond = 1000L * (this.uploadStatus.bytesWritten - this.previousWrittenBytes) / l;
-				this.drawUploadSpeed0(this.bytesPersSecond);
+				this.drawUploadSpeed0(poseStack, this.bytesPersSecond);
 			}
 
 			this.previousWrittenBytes = this.uploadStatus.bytesWritten;
-			this.previousTimeSnapshot = System.currentTimeMillis();
+			this.previousTimeSnapshot = Util.getMillis();
 		} else {
-			this.drawUploadSpeed0(this.bytesPersSecond);
+			this.drawUploadSpeed0(poseStack, this.bytesPersSecond);
 		}
 	}
 
-	private void drawUploadSpeed0(long l) {
+	private void drawUploadSpeed0(PoseStack poseStack, long l) {
 		if (l > 0L) {
-			int i = this.fontWidth(this.progress);
-			String string = "(" + humanReadableByteCount(l) + ")";
-			this.drawString(string, this.width() / 2 + i / 2 + 15, 84, 16777215);
-		}
-	}
-
-	public static String humanReadableByteCount(long l) {
-		int i = 1024;
-		if (l < 1024L) {
-			return l + " B";
-		} else {
-			int j = (int)(Math.log((double)l) / Math.log(1024.0));
-			String string = "KMGTPE".charAt(j - 1) + "";
-			return String.format(Locale.ROOT, "%.1f %sB/s", (double)l / Math.pow(1024.0, (double)j), string);
+			int i = this.font.width(this.progress);
+			String string = "(" + Unit.humanReadable(l) + "/s)";
+			this.font.draw(poseStack, string, (float)(this.width / 2 + i / 2 + 15), 84.0F, 16777215);
 		}
 	}
 
 	@Override
 	public void tick() {
 		super.tick();
-		this.animTick++;
+		this.tickCount++;
 		if (this.status != null && this.narrationRateLimiter.tryAcquire(1)) {
 			List<String> list = Lists.<String>newArrayList();
-			list.add(this.status);
+			list.add(this.status.getString());
 			if (this.progress != null) {
 				list.add(this.progress + "%");
 			}
 
 			if (this.errorMessage != null) {
-				list.add(this.errorMessage);
+				Stream.of(this.errorMessage).map(Component::getString).forEach(list::add);
 			}
 
-			Realms.narrateNow(String.join(System.lineSeparator(), list));
+			NarrationHelper.now(String.join(System.lineSeparator(), list));
 		}
-	}
-
-	public static RealmsUploadScreen.Unit getLargestUnit(long l) {
-		if (l < 1024L) {
-			return RealmsUploadScreen.Unit.B;
-		} else {
-			int i = (int)(Math.log((double)l) / Math.log(1024.0));
-			String string = "KMGTPE".charAt(i - 1) + "";
-
-			try {
-				return RealmsUploadScreen.Unit.valueOf(string + "B");
-			} catch (Exception var5) {
-				return RealmsUploadScreen.Unit.GB;
-			}
-		}
-	}
-
-	public static double convertToUnit(long l, RealmsUploadScreen.Unit unit) {
-		return unit.equals(RealmsUploadScreen.Unit.B) ? (double)l : (double)l / Math.pow(1024.0, (double)unit.ordinal());
-	}
-
-	public static String humanReadableSize(long l, RealmsUploadScreen.Unit unit) {
-		return String.format("%." + (unit.equals(RealmsUploadScreen.Unit.GB) ? "1" : "0") + "f %s", convertToUnit(l, unit), unit.name());
 	}
 
 	private void upload() {
@@ -279,12 +235,13 @@ public class RealmsUploadScreen extends RealmsScreen {
 		new Thread(
 				() -> {
 					File file = null;
-					RealmsClient realmsClient = RealmsClient.createRealmsClient();
+					RealmsClient realmsClient = RealmsClient.create();
 					long l = this.worldId;
 
 					try {
-						if (uploadLock.tryLock(1L, TimeUnit.SECONDS)) {
-							this.status = getLocalizedString("mco.upload.preparing");
+						if (!UPLOAD_LOCK.tryLock(1L, TimeUnit.SECONDS)) {
+							this.status = new TranslatableComponent("mco.upload.close.failure");
+						} else {
 							UploadInfo uploadInfo = null;
 
 							for (int i = 0; i < 20; i++) {
@@ -294,41 +251,43 @@ public class RealmsUploadScreen extends RealmsScreen {
 										return;
 									}
 
-									uploadInfo = realmsClient.upload(l, UploadTokenCache.get(l));
-									break;
+									uploadInfo = realmsClient.requestUploadInfo(l, UploadTokenCache.get(l));
+									if (uploadInfo != null) {
+										break;
+									}
 								} catch (RetryCallException var20) {
 									Thread.sleep((long)(var20.delaySeconds * 1000));
 								}
 							}
 
 							if (uploadInfo == null) {
-								this.status = getLocalizedString("mco.upload.close.failure");
+								this.status = new TranslatableComponent("mco.upload.close.failure");
 							} else {
 								UploadTokenCache.put(l, uploadInfo.getToken());
 								if (!uploadInfo.isWorldClosed()) {
-									this.status = getLocalizedString("mco.upload.close.failure");
+									this.status = new TranslatableComponent("mco.upload.close.failure");
 								} else if (this.cancelled) {
 									this.uploadCancelled();
 								} else {
-									File file2 = new File(Realms.getGameDirectoryPath(), "saves");
+									File file2 = new File(this.minecraft.gameDirectory.getAbsolutePath(), "saves");
 									file = this.tarGzipArchive(new File(file2, this.selectedLevel.getLevelId()));
 									if (this.cancelled) {
 										this.uploadCancelled();
 									} else if (this.verify(file)) {
-										this.status = getLocalizedString("mco.upload.uploading", new Object[]{this.selectedLevel.getLevelName()});
+										this.status = new TranslatableComponent("mco.upload.uploading", this.selectedLevel.getLevelName());
 										FileUpload fileUpload = new FileUpload(
-											file, this.worldId, this.slotId, uploadInfo, Realms.getSessionId(), Realms.getName(), Realms.getMinecraftVersionString(), this.uploadStatus
+											file, this.worldId, this.slotId, uploadInfo, this.minecraft.getUser(), SharedConstants.getCurrentVersion().getName(), this.uploadStatus
 										);
 										fileUpload.upload(uploadResult -> {
 											if (uploadResult.statusCode >= 200 && uploadResult.statusCode < 300) {
 												this.uploadFinished = true;
-												this.status = getLocalizedString("mco.upload.done");
-												this.backButton.setMessage(getLocalizedString("gui.done"));
+												this.status = new TranslatableComponent("mco.upload.done");
+												this.backButton.setMessage(CommonComponents.GUI_DONE);
 												UploadTokenCache.invalidate(l);
 											} else if (uploadResult.statusCode == 400 && uploadResult.errorMessage != null) {
-												this.errorMessage = getLocalizedString("mco.upload.failed", new Object[]{uploadResult.errorMessage});
+												this.setErrorMessage(new TranslatableComponent("mco.upload.failed", uploadResult.errorMessage));
 											} else {
-												this.errorMessage = getLocalizedString("mco.upload.failed", new Object[]{uploadResult.statusCode});
+												this.setErrorMessage(new TranslatableComponent("mco.upload.failed", uploadResult.statusCode));
 											}
 										});
 
@@ -347,35 +306,37 @@ public class RealmsUploadScreen extends RealmsScreen {
 										}
 									} else {
 										long m = file.length();
-										RealmsUploadScreen.Unit unit = getLargestUnit(m);
-										RealmsUploadScreen.Unit unit2 = getLargestUnit(5368709120L);
-										if (humanReadableSize(m, unit).equals(humanReadableSize(5368709120L, unit2)) && unit != RealmsUploadScreen.Unit.B) {
-											RealmsUploadScreen.Unit unit3 = RealmsUploadScreen.Unit.values()[unit.ordinal() - 1];
-											this.errorMessage = getLocalizedString("mco.upload.size.failure.line1", new Object[]{this.selectedLevel.getLevelName()})
-												+ "\\n"
-												+ getLocalizedString("mco.upload.size.failure.line2", new Object[]{humanReadableSize(m, unit3), humanReadableSize(5368709120L, unit3)});
+										Unit unit = Unit.getLargest(m);
+										Unit unit2 = Unit.getLargest(5368709120L);
+										if (Unit.humanReadable(m, unit).equals(Unit.humanReadable(5368709120L, unit2)) && unit != Unit.B) {
+											Unit unit3 = Unit.values()[unit.ordinal() - 1];
+											this.setErrorMessage(
+												new TranslatableComponent("mco.upload.size.failure.line1", this.selectedLevel.getLevelName()),
+												new TranslatableComponent("mco.upload.size.failure.line2", Unit.humanReadable(m, unit3), Unit.humanReadable(5368709120L, unit3))
+											);
 										} else {
-											this.errorMessage = getLocalizedString("mco.upload.size.failure.line1", new Object[]{this.selectedLevel.getLevelName()})
-												+ "\\n"
-												+ getLocalizedString("mco.upload.size.failure.line2", new Object[]{humanReadableSize(m, unit), humanReadableSize(5368709120L, unit2)});
+											this.setErrorMessage(
+												new TranslatableComponent("mco.upload.size.failure.line1", this.selectedLevel.getLevelName()),
+												new TranslatableComponent("mco.upload.size.failure.line2", Unit.humanReadable(m, unit), Unit.humanReadable(5368709120L, unit2))
+											);
 										}
 									}
 								}
 							}
 						}
 					} catch (IOException var21) {
-						this.errorMessage = getLocalizedString("mco.upload.failed", new Object[]{var21.getMessage()});
+						this.setErrorMessage(new TranslatableComponent("mco.upload.failed", var21.getMessage()));
 					} catch (RealmsServiceException var22) {
-						this.errorMessage = getLocalizedString("mco.upload.failed", new Object[]{var22.toString()});
+						this.setErrorMessage(new TranslatableComponent("mco.upload.failed", var22.toString()));
 					} catch (InterruptedException var23) {
 						LOGGER.error("Could not acquire upload lock");
 					} finally {
 						this.uploadFinished = true;
-						if (uploadLock.isHeldByCurrentThread()) {
-							uploadLock.unlock();
+						if (UPLOAD_LOCK.isHeldByCurrentThread()) {
+							UPLOAD_LOCK.unlock();
 							this.showDots = false;
-							this.childrenClear();
-							this.buttonsAdd(this.backButton);
+							this.backButton.visible = true;
+							this.cancelButton.visible = false;
 							if (file != null) {
 								LOGGER.debug("Deleting file " + file.getAbsolutePath());
 								file.delete();
@@ -389,8 +350,12 @@ public class RealmsUploadScreen extends RealmsScreen {
 			.start();
 	}
 
+	private void setErrorMessage(Component... components) {
+		this.errorMessage = components;
+	}
+
 	private void uploadCancelled() {
-		this.status = getLocalizedString("mco.upload.cancelled");
+		this.status = new TranslatableComponent("mco.upload.cancelled");
 		LOGGER.debug("Upload was cancelled");
 	}
 
@@ -437,13 +402,5 @@ public class RealmsUploadScreen extends RealmsScreen {
 				}
 			}
 		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	static enum Unit {
-		B,
-		KB,
-		MB,
-		GB;
 	}
 }

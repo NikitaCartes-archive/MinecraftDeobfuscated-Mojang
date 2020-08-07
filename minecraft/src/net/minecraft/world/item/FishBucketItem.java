@@ -8,7 +8,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -31,8 +33,8 @@ public class FishBucketItem extends BucketItem {
 
 	@Override
 	public void checkExtraContent(Level level, ItemStack itemStack, BlockPos blockPos) {
-		if (!level.isClientSide) {
-			this.spawn(level, itemStack, blockPos);
+		if (level instanceof ServerLevel) {
+			this.spawn((ServerLevel)level, itemStack, blockPos);
 		}
 	}
 
@@ -41,8 +43,8 @@ public class FishBucketItem extends BucketItem {
 		levelAccessor.playSound(player, blockPos, SoundEvents.BUCKET_EMPTY_FISH, SoundSource.NEUTRAL, 1.0F, 1.0F);
 	}
 
-	private void spawn(Level level, ItemStack itemStack, BlockPos blockPos) {
-		Entity entity = this.type.spawn(level, itemStack, null, blockPos, MobSpawnType.BUCKET, true, false);
+	private void spawn(ServerLevel serverLevel, ItemStack itemStack, BlockPos blockPos) {
+		Entity entity = this.type.spawn(serverLevel, itemStack, null, blockPos, MobSpawnType.BUCKET, true, false);
 		if (entity != null) {
 			((AbstractFish)entity).setFromBucket(true);
 		}
@@ -67,13 +69,13 @@ public class FishBucketItem extends BucketItem {
 				}
 
 				list.add(new TranslatableComponent(TropicalFish.getFishTypeName(i)).withStyle(chatFormattings));
-				Component component = new TranslatableComponent(string);
+				MutableComponent mutableComponent = new TranslatableComponent(string);
 				if (!string.equals(string2)) {
-					component.append(", ").append(new TranslatableComponent(string2));
+					mutableComponent.append(", ").append(new TranslatableComponent(string2));
 				}
 
-				component.withStyle(chatFormattings);
-				list.add(component);
+				mutableComponent.withStyle(chatFormattings);
+				list.add(mutableComponent);
 			}
 		}
 	}

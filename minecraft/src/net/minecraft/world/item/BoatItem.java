@@ -60,7 +60,7 @@ public class BoatItem extends Item {
 					}
 
 					player.awardStat(Stats.ITEM_USED.get(this));
-					return InteractionResultHolder.success(itemStack);
+					return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
 				}
 			} else {
 				return InteractionResultHolder.pass(itemStack);

@@ -3,7 +3,6 @@ package net.minecraft.world.level.storage.loot.functions;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.IntLimiter;
@@ -19,6 +18,11 @@ public class LimitCount extends LootItemConditionalFunction {
 	}
 
 	@Override
+	public LootItemFunctionType getType() {
+		return LootItemFunctions.LIMIT_COUNT;
+	}
+
+	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
 		int i = this.limiter.applyAsInt(itemStack.getCount());
 		itemStack.setCount(i);
@@ -30,10 +34,6 @@ public class LimitCount extends LootItemConditionalFunction {
 	}
 
 	public static class Serializer extends LootItemConditionalFunction.Serializer<LimitCount> {
-		protected Serializer() {
-			super(new ResourceLocation("limit_count"), LimitCount.class);
-		}
-
 		public void serialize(JsonObject jsonObject, LimitCount limitCount, JsonSerializationContext jsonSerializationContext) {
 			super.serialize(jsonObject, limitCount, jsonSerializationContext);
 			jsonObject.add("limit", jsonSerializationContext.serialize(limitCount.limiter));

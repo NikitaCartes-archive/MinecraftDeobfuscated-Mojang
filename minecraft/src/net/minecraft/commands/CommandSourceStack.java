@@ -8,16 +8,20 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import java.util.Collection;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BinaryOperator;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -25,6 +29,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
@@ -246,11 +252,14 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 	}
 
 	public CommandSourceStack withLevel(ServerLevel serverLevel) {
-		return serverLevel == this.level
-			? this
-			: new CommandSourceStack(
+		if (serverLevel == this.level) {
+			return this;
+		} else {
+			double d = DimensionType.getTeleportationScale(this.level.dimensionType(), serverLevel.dimensionType());
+			Vec3 vec3 = new Vec3(this.worldPosition.x * d, this.worldPosition.y, this.worldPosition.z * d);
+			return new CommandSourceStack(
 				this.source,
-				this.worldPosition,
+				vec3,
 				this.rotation,
 				serverLevel,
 				this.permissionLevel,
@@ -262,6 +271,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 				this.consumer,
 				this.anchor
 			);
+		}
 	}
 
 	public CommandSourceStack facing(Entity entity, EntityAnchorArgument.Anchor anchor) throws CommandSyntaxException {
@@ -335,7 +345,7 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 
 	public void sendSuccess(Component component, boolean bl) {
 		if (this.source.acceptsSuccess() && !this.silent) {
-			this.source.sendMessage(component);
+			this.source.sendMessage(component, Util.NIL_UUID);
 		}
 
 		if (bl && this.source.shouldInformAdmins() && !this.silent) {
@@ -349,19 +359,19 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 		if (this.server.getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
 			for (ServerPlayer serverPlayer : this.server.getPlayerList().getPlayers()) {
 				if (serverPlayer != this.source && this.server.getPlayerList().isOp(serverPlayer.getGameProfile())) {
-					serverPlayer.sendMessage(component2);
+					serverPlayer.sendMessage(component2, Util.NIL_UUID);
 				}
 			}
 		}
 
 		if (this.source != this.server && this.server.getGameRules().getBoolean(GameRules.RULE_LOGADMINCOMMANDS)) {
-			this.server.sendMessage(component2);
+			this.server.sendMessage(component2, Util.NIL_UUID);
 		}
 	}
 
 	public void sendFailure(Component component) {
 		if (this.source.acceptsFailure() && !this.silent) {
-			this.source.sendMessage(new TextComponent("").append(component).withStyle(ChatFormatting.RED));
+			this.source.sendMessage(new TextComponent("").append(component).withStyle(ChatFormatting.RED), Util.NIL_UUID);
 		}
 	}
 
@@ -394,5 +404,15 @@ public class CommandSourceStack implements SharedSuggestionProvider {
 	@Override
 	public CompletableFuture<Suggestions> customSuggestion(CommandContext<SharedSuggestionProvider> commandContext, SuggestionsBuilder suggestionsBuilder) {
 		return null;
+	}
+
+	@Override
+	public Set<ResourceKey<Level>> levels() {
+		return this.server.levelKeys();
+	}
+
+	@Override
+	public RegistryAccess registryAccess() {
+		return this.server.registryAccess();
 	}
 }

@@ -12,6 +12,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -24,11 +25,15 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -40,8 +45,6 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.ai.util.RandomPos;
-import net.minecraft.world.entity.global.LightningBolt;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -50,6 +53,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.TurtleEggBlock;
@@ -165,23 +169,21 @@ public class Turtle extends Animal {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		LevelAccessor levelAccessor,
+		ServerLevelAccessor serverLevelAccessor,
 		DifficultyInstance difficultyInstance,
 		MobSpawnType mobSpawnType,
 		@Nullable SpawnGroupData spawnGroupData,
 		@Nullable CompoundTag compoundTag
 	) {
-		this.setHomePos(new BlockPos(this));
+		this.setHomePos(this.blockPosition());
 		this.setTravelPos(BlockPos.ZERO);
-		return super.finalizeSpawn(levelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
 	}
 
 	public static boolean checkTurtleSpawnRules(
 		EntityType<Turtle> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
-		return blockPos.getY() < levelAccessor.getSeaLevel() + 4
-			&& levelAccessor.getBlockState(blockPos.below()).getBlock() == Blocks.SAND
-			&& levelAccessor.getRawBrightness(blockPos, 0) > 8;
+		return blockPos.getY() < levelAccessor.getSeaLevel() + 4 && TurtleEggBlock.onSand(levelAccessor, blockPos) && levelAccessor.getRawBrightness(blockPos, 0) > 8;
 	}
 
 	@Override
@@ -197,15 +199,12 @@ public class Turtle extends Animal {
 		this.goalSelector.addGoal(9, new Turtle.TurtleRandomStrollGoal(this, 1.0, 100));
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(30.0);
-		this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.25);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 30.0).add(Attributes.MOVEMENT_SPEED, 0.25);
 	}
 
 	@Override
-	public boolean isPushedByWater() {
+	public boolean isPushedByFluid() {
 		return false;
 	}
 
@@ -280,8 +279,8 @@ public class Turtle extends Animal {
 
 	@Nullable
 	@Override
-	public AgableMob getBreedOffspring(AgableMob agableMob) {
-		return EntityType.TURTLE.create(this.level);
+	public AgableMob getBreedOffspring(ServerLevel serverLevel, AgableMob agableMob) {
+		return EntityType.TURTLE.create(serverLevel);
 	}
 
 	@Override
@@ -294,7 +293,7 @@ public class Turtle extends Animal {
 		if (!this.isGoingHome() && levelReader.getFluidState(blockPos).is(FluidTags.WATER)) {
 			return 10.0F;
 		} else {
-			return levelReader.getBlockState(blockPos.below()).getBlock() == Blocks.SAND ? 10.0F : levelReader.getBrightness(blockPos) - 0.5F;
+			return TurtleEggBlock.onSand(levelReader, blockPos) ? 10.0F : levelReader.getBrightness(blockPos) - 0.5F;
 		}
 	}
 
@@ -302,8 +301,8 @@ public class Turtle extends Animal {
 	public void aiStep() {
 		super.aiStep();
 		if (this.isAlive() && this.isLayingEgg() && this.layEggCounter >= 1 && this.layEggCounter % 5 == 0) {
-			BlockPos blockPos = new BlockPos(this);
-			if (this.level.getBlockState(blockPos.below()).getBlock() == Blocks.SAND) {
+			BlockPos blockPos = this.blockPosition();
+			if (TurtleEggBlock.onSand(this.level, blockPos)) {
 				this.level.levelEvent(2001, blockPos, Block.getId(Blocks.SAND.defaultBlockState()));
 			}
 		}
@@ -337,7 +336,7 @@ public class Turtle extends Animal {
 	}
 
 	@Override
-	public void thunderHit(LightningBolt lightningBolt) {
+	public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
 		this.hurt(DamageSource.LIGHTNING_BOLT, Float.MAX_VALUE);
 	}
 
@@ -424,13 +423,13 @@ public class Turtle extends Animal {
 			}
 
 			if (this.turtle.getNavigation().isDone()) {
-				Vec3 vec3 = new Vec3(blockPos);
+				Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
 				Vec3 vec32 = RandomPos.getPosTowards(this.turtle, 16, 3, vec3, (float) (Math.PI / 10));
 				if (vec32 == null) {
 					vec32 = RandomPos.getPosTowards(this.turtle, 8, 7, vec3);
 				}
 
-				if (vec32 != null && !bl && this.turtle.level.getBlockState(new BlockPos(vec32)).getBlock() != Blocks.WATER) {
+				if (vec32 != null && !bl && !this.turtle.level.getBlockState(new BlockPos(vec32)).is(Blocks.WATER)) {
 					vec32 = RandomPos.getPosTowards(this.turtle, 16, 5, vec3);
 				}
 
@@ -474,8 +473,7 @@ public class Turtle extends Animal {
 
 		@Override
 		protected boolean isValidTarget(LevelReader levelReader, BlockPos blockPos) {
-			Block block = levelReader.getBlockState(blockPos).getBlock();
-			return block == Blocks.WATER;
+			return levelReader.getBlockState(blockPos).is(Blocks.WATER);
 		}
 	}
 
@@ -500,7 +498,7 @@ public class Turtle extends Animal {
 		@Override
 		public void tick() {
 			super.tick();
-			BlockPos blockPos = new BlockPos(this.turtle);
+			BlockPos blockPos = this.turtle.blockPosition();
 			if (!this.turtle.isInWater() && this.isReachedTarget()) {
 				if (this.turtle.layEggCounter < 1) {
 					this.turtle.setLayingEgg(true);
@@ -523,12 +521,7 @@ public class Turtle extends Animal {
 
 		@Override
 		protected boolean isValidTarget(LevelReader levelReader, BlockPos blockPos) {
-			if (!levelReader.isEmptyBlock(blockPos.above())) {
-				return false;
-			} else {
-				Block block = levelReader.getBlockState(blockPos).getBlock();
-				return block == Blocks.SAND;
-			}
+			return !levelReader.isEmptyBlock(blockPos.above()) ? false : TurtleEggBlock.isSand(levelReader, blockPos);
 		}
 	}
 
@@ -567,7 +560,7 @@ public class Turtle extends Animal {
 				float h = (float)(Mth.atan2(f, d) * 180.0F / (float)Math.PI) - 90.0F;
 				this.turtle.yRot = this.rotlerp(this.turtle.yRot, h, 90.0F);
 				this.turtle.yBodyRot = this.turtle.yRot;
-				float i = (float)(this.speedModifier * this.turtle.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue());
+				float i = (float)(this.speedModifier * this.turtle.getAttributeValue(Attributes.MOVEMENT_SPEED));
 				this.turtle.setSpeed(Mth.lerp(0.125F, this.turtle.getSpeed(), i));
 				this.turtle.setDeltaMovement(this.turtle.getDeltaMovement().add(0.0, (double)this.turtle.getSpeed() * e * 0.1, 0.0));
 			} else {
@@ -620,7 +613,7 @@ public class Turtle extends Animal {
 			if (this.mob instanceof Turtle) {
 				Turtle turtle = (Turtle)this.mob;
 				if (turtle.isTravelling()) {
-					return this.level.getBlockState(blockPos).getBlock() == Blocks.WATER;
+					return this.level.getBlockState(blockPos).is(Blocks.WATER);
 				}
 			}
 
@@ -731,7 +724,7 @@ public class Turtle extends Animal {
 		@Override
 		public void tick() {
 			if (this.turtle.getNavigation().isDone()) {
-				Vec3 vec3 = new Vec3(this.turtle.getTravelPos());
+				Vec3 vec3 = Vec3.atBottomCenterOf(this.turtle.getTravelPos());
 				Vec3 vec32 = RandomPos.getPosTowards(this.turtle, 16, 3, vec3, (float) (Math.PI / 10));
 				if (vec32 == null) {
 					vec32 = RandomPos.getPosTowards(this.turtle, 8, 7, vec3);

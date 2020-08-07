@@ -24,14 +24,4 @@ public interface ServerInterface {
 	String getPluginNames();
 
 	String runCommand(String string);
-
-	boolean isDebugging();
-
-	void info(String string);
-
-	void warn(String string);
-
-	void error(String string);
-
-	void debug(String string);
 }

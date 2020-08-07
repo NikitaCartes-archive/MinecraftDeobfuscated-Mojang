@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Objects;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -29,7 +28,7 @@ public class ValidateNearbyPoi extends Behavior<LivingEntity> {
 	@Override
 	protected boolean checkExtraStartConditions(ServerLevel serverLevel, LivingEntity livingEntity) {
 		GlobalPos globalPos = (GlobalPos)livingEntity.getBrain().getMemory(this.memoryType).get();
-		return Objects.equals(serverLevel.getDimension().getType(), globalPos.dimension()) && globalPos.pos().closerThan(livingEntity.position(), 5.0);
+		return serverLevel.dimension() == globalPos.dimension() && globalPos.pos().closerThan(livingEntity.position(), 16.0);
 	}
 
 	@Override
@@ -38,7 +37,7 @@ public class ValidateNearbyPoi extends Behavior<LivingEntity> {
 		GlobalPos globalPos = (GlobalPos)brain.getMemory(this.memoryType).get();
 		BlockPos blockPos = globalPos.pos();
 		ServerLevel serverLevel2 = serverLevel.getServer().getLevel(globalPos.dimension());
-		if (this.poiDoesntExist(serverLevel2, blockPos)) {
+		if (serverLevel2 == null || this.poiDoesntExist(serverLevel2, blockPos)) {
 			brain.eraseMemory(this.memoryType);
 		} else if (this.bedIsOccupied(serverLevel2, blockPos, livingEntity)) {
 			brain.eraseMemory(this.memoryType);

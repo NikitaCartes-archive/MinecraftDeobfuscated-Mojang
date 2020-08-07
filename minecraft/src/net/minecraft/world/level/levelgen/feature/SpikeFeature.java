@@ -3,28 +3,25 @@ package net.minecraft.world.level.levelgen.feature;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.ImmutableMap.Builder;
-import com.mojang.datafixers.Dynamic;
-import com.mojang.datafixers.types.DynamicOps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfiguration;
 import net.minecraft.world.phys.AABB;
 
@@ -33,38 +30,32 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 		.expireAfterWrite(5L, TimeUnit.MINUTES)
 		.build(new SpikeFeature.SpikeCacheLoader());
 
-	public SpikeFeature(Function<Dynamic<?>, ? extends SpikeConfiguration> function) {
-		super(function);
+	public SpikeFeature(Codec<SpikeConfiguration> codec) {
+		super(codec);
 	}
 
-	public static List<SpikeFeature.EndSpike> getSpikesForLevel(LevelAccessor levelAccessor) {
-		Random random = new Random(levelAccessor.getSeed());
+	public static List<SpikeFeature.EndSpike> getSpikesForLevel(WorldGenLevel worldGenLevel) {
+		Random random = new Random(worldGenLevel.getSeed());
 		long l = random.nextLong() & 65535L;
 		return SPIKE_CACHE.getUnchecked(l);
 	}
 
-	public boolean place(
-		LevelAccessor levelAccessor,
-		ChunkGenerator<? extends ChunkGeneratorSettings> chunkGenerator,
-		Random random,
-		BlockPos blockPos,
-		SpikeConfiguration spikeConfiguration
-	) {
+	public boolean place(WorldGenLevel worldGenLevel, ChunkGenerator chunkGenerator, Random random, BlockPos blockPos, SpikeConfiguration spikeConfiguration) {
 		List<SpikeFeature.EndSpike> list = spikeConfiguration.getSpikes();
 		if (list.isEmpty()) {
-			list = getSpikesForLevel(levelAccessor);
+			list = getSpikesForLevel(worldGenLevel);
 		}
 
 		for (SpikeFeature.EndSpike endSpike : list) {
 			if (endSpike.isCenterWithinChunk(blockPos)) {
-				this.placeSpike(levelAccessor, random, spikeConfiguration, endSpike);
+				this.placeSpike(worldGenLevel, random, spikeConfiguration, endSpike);
 			}
 		}
 
 		return true;
 	}
 
-	private void placeSpike(LevelAccessor levelAccessor, Random random, SpikeConfiguration spikeConfiguration, SpikeFeature.EndSpike endSpike) {
+	private void placeSpike(ServerLevelAccessor serverLevelAccessor, Random random, SpikeConfiguration spikeConfiguration, SpikeFeature.EndSpike endSpike) {
 		int i = endSpike.getRadius();
 
 		for (BlockPos blockPos : BlockPos.betweenClosed(
@@ -73,9 +64,9 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 		)) {
 			if (blockPos.distSqr((double)endSpike.getCenterX(), (double)blockPos.getY(), (double)endSpike.getCenterZ(), false) <= (double)(i * i + 1)
 				&& blockPos.getY() < endSpike.getHeight()) {
-				this.setBlock(levelAccessor, blockPos, Blocks.OBSIDIAN.defaultBlockState());
+				this.setBlock(serverLevelAccessor, blockPos, Blocks.OBSIDIAN.defaultBlockState());
 			} else if (blockPos.getY() > 65) {
-				this.setBlock(levelAccessor, blockPos, Blocks.AIR.defaultBlockState());
+				this.setBlock(serverLevelAccessor, blockPos, Blocks.AIR.defaultBlockState());
 			}
 		}
 
@@ -100,28 +91,34 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 								.setValue(IronBarsBlock.SOUTH, Boolean.valueOf(bl4 && n != 2))
 								.setValue(IronBarsBlock.WEST, Boolean.valueOf(bl5 && m != -2))
 								.setValue(IronBarsBlock.EAST, Boolean.valueOf(bl5 && m != 2));
-							this.setBlock(levelAccessor, mutableBlockPos.set(endSpike.getCenterX() + m, endSpike.getHeight() + o, endSpike.getCenterZ() + n), blockState);
+							this.setBlock(serverLevelAccessor, mutableBlockPos.set(endSpike.getCenterX() + m, endSpike.getHeight() + o, endSpike.getCenterZ() + n), blockState);
 						}
 					}
 				}
 			}
 		}
 
-		EndCrystal endCrystal = EntityType.END_CRYSTAL.create(levelAccessor.getLevel());
+		EndCrystal endCrystal = EntityType.END_CRYSTAL.create(serverLevelAccessor.getLevel());
 		endCrystal.setBeamTarget(spikeConfiguration.getCrystalBeamTarget());
 		endCrystal.setInvulnerable(spikeConfiguration.isCrystalInvulnerable());
 		endCrystal.moveTo(
-			(double)((float)endSpike.getCenterX() + 0.5F),
-			(double)(endSpike.getHeight() + 1),
-			(double)((float)endSpike.getCenterZ() + 0.5F),
-			random.nextFloat() * 360.0F,
-			0.0F
+			(double)endSpike.getCenterX() + 0.5, (double)(endSpike.getHeight() + 1), (double)endSpike.getCenterZ() + 0.5, random.nextFloat() * 360.0F, 0.0F
 		);
-		levelAccessor.addFreshEntity(endCrystal);
-		this.setBlock(levelAccessor, new BlockPos(endSpike.getCenterX(), endSpike.getHeight(), endSpike.getCenterZ()), Blocks.BEDROCK.defaultBlockState());
+		serverLevelAccessor.addFreshEntity(endCrystal);
+		this.setBlock(serverLevelAccessor, new BlockPos(endSpike.getCenterX(), endSpike.getHeight(), endSpike.getCenterZ()), Blocks.BEDROCK.defaultBlockState());
 	}
 
 	public static class EndSpike {
+		public static final Codec<SpikeFeature.EndSpike> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						Codec.INT.fieldOf("centerX").orElse(0).forGetter(endSpike -> endSpike.centerX),
+						Codec.INT.fieldOf("centerZ").orElse(0).forGetter(endSpike -> endSpike.centerZ),
+						Codec.INT.fieldOf("radius").orElse(0).forGetter(endSpike -> endSpike.radius),
+						Codec.INT.fieldOf("height").orElse(0).forGetter(endSpike -> endSpike.height),
+						Codec.BOOL.fieldOf("guarded").orElse(false).forGetter(endSpike -> endSpike.guarded)
+					)
+					.apply(instance, SpikeFeature.EndSpike::new)
+		);
 		private final int centerX;
 		private final int centerZ;
 		private final int radius;
@@ -164,26 +161,6 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 
 		public AABB getTopBoundingBox() {
 			return this.topBoundingBox;
-		}
-
-		public <T> Dynamic<T> serialize(DynamicOps<T> dynamicOps) {
-			Builder<T, T> builder = ImmutableMap.builder();
-			builder.put(dynamicOps.createString("centerX"), dynamicOps.createInt(this.centerX));
-			builder.put(dynamicOps.createString("centerZ"), dynamicOps.createInt(this.centerZ));
-			builder.put(dynamicOps.createString("radius"), dynamicOps.createInt(this.radius));
-			builder.put(dynamicOps.createString("height"), dynamicOps.createInt(this.height));
-			builder.put(dynamicOps.createString("guarded"), dynamicOps.createBoolean(this.guarded));
-			return new Dynamic<>(dynamicOps, dynamicOps.createMap(builder.build()));
-		}
-
-		public static <T> SpikeFeature.EndSpike deserialize(Dynamic<T> dynamic) {
-			return new SpikeFeature.EndSpike(
-				dynamic.get("centerX").asInt(0),
-				dynamic.get("centerZ").asInt(0),
-				dynamic.get("radius").asInt(0),
-				dynamic.get("height").asInt(0),
-				dynamic.get("guarded").asBoolean(false)
-			);
 		}
 	}
 

@@ -9,12 +9,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -32,7 +33,7 @@ public class TripWireHookBlock extends Block {
 	protected static final VoxelShape WEST_AABB = Block.box(10.0, 0.0, 5.0, 16.0, 10.0, 11.0);
 	protected static final VoxelShape EAST_AABB = Block.box(0.0, 0.0, 5.0, 6.0, 10.0, 11.0);
 
-	public TripWireHookBlock(Block.Properties properties) {
+	public TripWireHookBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
 			this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(POWERED, Boolean.valueOf(false)).setValue(ATTACHED, Boolean.valueOf(false))
@@ -59,7 +60,7 @@ public class TripWireHookBlock extends Block {
 		Direction direction = blockState.getValue(FACING);
 		BlockPos blockPos2 = blockPos.relative(direction.getOpposite());
 		BlockState blockState2 = levelReader.getBlockState(blockPos2);
-		return direction.getAxis().isHorizontal() && blockState2.isFaceSturdy(levelReader, blockPos2, direction) && !blockState2.isSignalSource();
+		return direction.getAxis().isHorizontal() && blockState2.isFaceSturdy(levelReader, blockPos2, direction);
 	}
 
 	@Override
@@ -109,14 +110,14 @@ public class TripWireHookBlock extends Block {
 		for (int k = 1; k < 42; k++) {
 			BlockPos blockPos2 = blockPos.relative(direction, k);
 			BlockState blockState3 = level.getBlockState(blockPos2);
-			if (blockState3.getBlock() == Blocks.TRIPWIRE_HOOK) {
+			if (blockState3.is(Blocks.TRIPWIRE_HOOK)) {
 				if (blockState3.getValue(FACING) == direction.getOpposite()) {
 					j = k;
 				}
 				break;
 			}
 
-			if (blockState3.getBlock() != Blocks.TRIPWIRE && k != i) {
+			if (!blockState3.is(Blocks.TRIPWIRE) && k != i) {
 				blockStates[k] = null;
 				bl5 = false;
 			} else {
@@ -129,7 +130,7 @@ public class TripWireHookBlock extends Block {
 				bl6 |= bl7 && bl8;
 				blockStates[k] = blockState3;
 				if (k == i) {
-					level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
+					level.getBlockTicks().scheduleTick(blockPos, this, 10);
 					bl5 &= bl7;
 				}
 			}
@@ -191,7 +192,7 @@ public class TripWireHookBlock extends Block {
 
 	@Override
 	public void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (!bl && blockState.getBlock() != blockState2.getBlock()) {
+		if (!bl && !blockState.is(blockState2.getBlock())) {
 			boolean bl2 = (Boolean)blockState.getValue(ATTACHED);
 			boolean bl3 = (Boolean)blockState.getValue(POWERED);
 			if (bl2 || bl3) {

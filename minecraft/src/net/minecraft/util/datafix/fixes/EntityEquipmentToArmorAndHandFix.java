@@ -3,7 +3,6 @@ package net.minecraft.util.datafix.fixes;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
@@ -11,6 +10,7 @@ import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.datafixers.util.Unit;
+import com.mojang.serialization.Dynamic;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +44,10 @@ public class EntityEquipmentToArmorAndHandFix extends DataFix {
 				Optional<List<IS>> optional = typed.getOptional(opticFinder2);
 				if (optional.isPresent()) {
 					List<IS> list = (List<IS>)optional.get();
-					IS object = (IS)type.read(dynamic.emptyMap()).getSecond().orElseThrow(() -> new IllegalStateException("Could not parse newly created empty itemstack."));
+					IS object = (IS)((Pair)type.read(dynamic.emptyMap())
+							.result()
+							.orElseThrow(() -> new IllegalStateException("Could not parse newly created empty itemstack.")))
+						.getFirst();
 					if (!list.isEmpty()) {
 						either = Either.left(Lists.<IS>newArrayList((IS[])(new Object[]{list.get(0), object})));
 					}
@@ -61,21 +64,25 @@ public class EntityEquipmentToArmorAndHandFix extends DataFix {
 				}
 
 				Dynamic<?> dynamic2 = dynamic;
-				Optional<? extends Stream<? extends Dynamic<?>>> optional2 = dynamic.get("DropChances").asStreamOpt();
+				Optional<? extends Stream<? extends Dynamic<?>>> optional2 = dynamic.get("DropChances").asStreamOpt().result();
 				if (optional2.isPresent()) {
 					Iterator<? extends Dynamic<?>> iterator = Stream.concat((Stream)optional2.get(), Stream.generate(() -> dynamic2.createInt(0))).iterator();
 					float f = ((Dynamic)iterator.next()).asFloat(0.0F);
-					if (!dynamic.get("HandDropChances").get().isPresent()) {
-						Dynamic<?> dynamic3 = dynamic.emptyMap().merge(dynamic.createFloat(f)).merge(dynamic.createFloat(0.0F));
+					if (!dynamic.get("HandDropChances").result().isPresent()) {
+						Dynamic<?> dynamic3 = dynamic.createList(Stream.of(f, 0.0F).map(dynamic::createFloat));
 						dynamic = dynamic.set("HandDropChances", dynamic3);
 					}
 
-					if (!dynamic.get("ArmorDropChances").get().isPresent()) {
-						Dynamic<?> dynamic3 = dynamic.emptyMap()
-							.merge(dynamic.createFloat(((Dynamic)iterator.next()).asFloat(0.0F)))
-							.merge(dynamic.createFloat(((Dynamic)iterator.next()).asFloat(0.0F)))
-							.merge(dynamic.createFloat(((Dynamic)iterator.next()).asFloat(0.0F)))
-							.merge(dynamic.createFloat(((Dynamic)iterator.next()).asFloat(0.0F)));
+					if (!dynamic.get("ArmorDropChances").result().isPresent()) {
+						Dynamic<?> dynamic3 = dynamic.createList(
+							Stream.of(
+									((Dynamic)iterator.next()).asFloat(0.0F),
+									((Dynamic)iterator.next()).asFloat(0.0F),
+									((Dynamic)iterator.next()).asFloat(0.0F),
+									((Dynamic)iterator.next()).asFloat(0.0F)
+								)
+								.map(dynamic::createFloat)
+						);
 						dynamic = dynamic.set("ArmorDropChances", dynamic3);
 					}
 

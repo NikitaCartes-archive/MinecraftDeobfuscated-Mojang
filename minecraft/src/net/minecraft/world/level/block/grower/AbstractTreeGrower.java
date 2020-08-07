@@ -3,30 +3,30 @@ package net.minecraft.world.level.block.grower;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.ChunkGeneratorSettings;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.SmallTreeConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 
 public abstract class AbstractTreeGrower {
 	@Nullable
-	protected abstract ConfiguredFeature<SmallTreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl);
+	protected abstract ConfiguredFeature<TreeConfiguration, ?> getConfiguredFeature(Random random, boolean bl);
 
-	public boolean growTree(LevelAccessor levelAccessor, ChunkGenerator<?> chunkGenerator, BlockPos blockPos, BlockState blockState, Random random) {
-		ConfiguredFeature<SmallTreeConfiguration, ?> configuredFeature = this.getConfiguredFeature(random, this.hasFlowers(levelAccessor, blockPos));
+	public boolean growTree(ServerLevel serverLevel, ChunkGenerator chunkGenerator, BlockPos blockPos, BlockState blockState, Random random) {
+		ConfiguredFeature<TreeConfiguration, ?> configuredFeature = this.getConfiguredFeature(random, this.hasFlowers(serverLevel, blockPos));
 		if (configuredFeature == null) {
 			return false;
 		} else {
-			levelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 4);
+			serverLevel.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 4);
 			configuredFeature.config.setFromSapling();
-			if (configuredFeature.place(levelAccessor, (ChunkGenerator<? extends ChunkGeneratorSettings>)chunkGenerator, random, blockPos)) {
+			if (configuredFeature.place(serverLevel, chunkGenerator, random, blockPos)) {
 				return true;
 			} else {
-				levelAccessor.setBlock(blockPos, blockState, 4);
+				serverLevel.setBlock(blockPos, blockState, 4);
 				return false;
 			}
 		}

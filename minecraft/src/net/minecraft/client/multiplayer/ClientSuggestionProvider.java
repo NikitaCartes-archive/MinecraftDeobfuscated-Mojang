@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
@@ -16,8 +17,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -116,6 +120,16 @@ public class ClientSuggestionProvider implements SharedSuggestionProvider {
 		} else {
 			return SharedSuggestionProvider.super.getAbsoluteCoordinates();
 		}
+	}
+
+	@Override
+	public Set<ResourceKey<Level>> levels() {
+		return this.connection.levels();
+	}
+
+	@Override
+	public RegistryAccess registryAccess() {
+		return this.connection.registryAccess();
 	}
 
 	public void completeCustomSuggestions(int i, Suggestions suggestions) {

@@ -1,20 +1,25 @@
 package net.minecraft.core;
 
 import com.google.common.base.MoreObjects;
+import com.mojang.serialization.Codec;
+import java.util.stream.IntStream;
 import javax.annotation.concurrent.Immutable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.util.Mth;
 
 @Immutable
 public class Vec3i implements Comparable<Vec3i> {
+	public static final Codec<Vec3i> CODEC = Codec.INT_STREAM
+		.comapFlatMap(
+			intStream -> Util.fixedSize(intStream, 3).map(is -> new Vec3i(is[0], is[1], is[2])),
+			vec3i -> IntStream.of(new int[]{vec3i.getX(), vec3i.getY(), vec3i.getZ()})
+		);
 	public static final Vec3i ZERO = new Vec3i(0, 0, 0);
-	@Deprecated
-	private final int x;
-	@Deprecated
-	private final int y;
-	@Deprecated
-	private final int z;
+	private int x;
+	private int y;
+	private int z;
 
 	public Vec3i(int i, int j, int k) {
 		this.x = i;
@@ -63,6 +68,26 @@ public class Vec3i implements Comparable<Vec3i> {
 
 	public int getZ() {
 		return this.z;
+	}
+
+	protected void setX(int i) {
+		this.x = i;
+	}
+
+	protected void setY(int i) {
+		this.y = i;
+	}
+
+	protected void setZ(int i) {
+		this.z = i;
+	}
+
+	public Vec3i above() {
+		return this.above(1);
+	}
+
+	public Vec3i above(int i) {
+		return this.relative(Direction.UP, i);
 	}
 
 	public Vec3i below() {
@@ -114,6 +139,10 @@ public class Vec3i implements Comparable<Vec3i> {
 		float g = (float)Math.abs(vec3i.getY() - this.getY());
 		float h = (float)Math.abs(vec3i.getZ() - this.getZ());
 		return (int)(f + g + h);
+	}
+
+	public int get(Direction.Axis axis) {
+		return axis.choose(this.x, this.y, this.z);
 	}
 
 	public String toString() {

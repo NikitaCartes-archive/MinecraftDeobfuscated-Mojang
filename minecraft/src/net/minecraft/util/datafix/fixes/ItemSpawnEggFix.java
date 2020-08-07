@@ -3,15 +3,16 @@ package net.minecraft.util.datafix.fixes;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.DataFixUtils;
-import com.mojang.datafixers.Dynamic;
 import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Dynamic;
 import java.util.Objects;
 import java.util.Optional;
+import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class ItemSpawnEggFix extends DataFix {
 	private static final String[] ID_TO_ENTITY = DataFixUtils.make(new String[256], strings -> {
@@ -92,11 +93,12 @@ public class ItemSpawnEggFix extends DataFix {
 	public TypeRewriteRule makeRule() {
 		Schema schema = this.getInputSchema();
 		Type<?> type = schema.getType(References.ITEM_STACK);
-		OpticFinder<Pair<String, String>> opticFinder = DSL.fieldFinder("id", DSL.named(References.ITEM_NAME.typeName(), DSL.namespacedString()));
+		OpticFinder<Pair<String, String>> opticFinder = DSL.fieldFinder("id", DSL.named(References.ITEM_NAME.typeName(), NamespacedSchema.namespacedString()));
 		OpticFinder<String> opticFinder2 = DSL.fieldFinder("id", DSL.string());
 		OpticFinder<?> opticFinder3 = type.findField("tag");
 		OpticFinder<?> opticFinder4 = opticFinder3.type().findField("EntityTag");
 		OpticFinder<?> opticFinder5 = DSL.typeFinder(schema.getTypeRaw(References.ENTITY));
+		Type<?> type2 = this.getOutputSchema().getTypeRaw(References.ENTITY);
 		return this.fixTypeEverywhereTyped(
 			"ItemSpawnEggFix",
 			type,
@@ -115,12 +117,11 @@ public class ItemSpawnEggFix extends DataFix {
 						Typed<?> typed3 = typed.getOrCreateTyped(opticFinder3);
 						Typed<?> typed4 = typed3.getOrCreateTyped(opticFinder4);
 						Typed<?> typed5 = typed4.getOrCreateTyped(opticFinder5);
-						Dynamic<?> dynamic2 = typed5.write().set("id", dynamic.createString(string));
-						Typed<?> typed6 = (Typed<?>)this.getOutputSchema()
-							.getTypeRaw(References.ENTITY)
-							.readTyped(dynamic2)
-							.getSecond()
-							.orElseThrow(() -> new IllegalStateException("Could not parse new entity"));
+						Typed<?> typed6 = (Typed<?>)((Pair)typed5.write()
+								.flatMap(dynamic2 -> type2.readTyped(dynamic2.set("id", dynamic.createString(string))))
+								.result()
+								.orElseThrow(() -> new IllegalStateException("Could not parse new entity")))
+							.getFirst();
 						typed2 = typed.set(opticFinder3, typed3.set(opticFinder4, typed4.set(opticFinder5, typed6)));
 					}
 

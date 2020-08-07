@@ -1,5 +1,6 @@
 package net.minecraft.world.level.chunk;
 
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -152,7 +153,7 @@ public class LevelChunkSection {
 		return 2 + this.states.getSerializedSize();
 	}
 
-	public boolean maybeHas(BlockState blockState) {
-		return this.states.maybeHas(blockState);
+	public boolean maybeHas(Predicate<BlockState> predicate) {
+		return this.states.maybeHas(predicate);
 	}
 }

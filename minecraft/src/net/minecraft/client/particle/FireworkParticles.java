@@ -4,8 +4,10 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
@@ -16,7 +18,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.FireworkRocketItem;
-import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
 public class FireworkParticles {
@@ -28,8 +29,8 @@ public class FireworkParticles {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
-			FireworkParticles.OverlayParticle overlayParticle = new FireworkParticles.OverlayParticle(level, d, e, f);
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			FireworkParticles.OverlayParticle overlayParticle = new FireworkParticles.OverlayParticle(clientLevel, d, e, f);
 			overlayParticle.pickSprite(this.sprite);
 			return overlayParticle;
 		}
@@ -37,8 +38,8 @@ public class FireworkParticles {
 
 	@Environment(EnvType.CLIENT)
 	public static class OverlayParticle extends TextureSheetParticle {
-		private OverlayParticle(Level level, double d, double e, double f) {
-			super(level, d, e, f);
+		private OverlayParticle(ClientLevel clientLevel, double d, double e, double f) {
+			super(clientLevel, d, e, f);
 			this.lifetime = 4;
 		}
 
@@ -69,8 +70,8 @@ public class FireworkParticles {
 		private float fadeB;
 		private boolean hasFade;
 
-		private SparkParticle(Level level, double d, double e, double f, double g, double h, double i, ParticleEngine particleEngine, SpriteSet spriteSet) {
-			super(level, d, e, f, spriteSet, -0.004F);
+		private SparkParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, ParticleEngine particleEngine, SpriteSet spriteSet) {
+			super(clientLevel, d, e, f, spriteSet, -0.004F);
 			this.xd = g;
 			this.yd = h;
 			this.zd = i;
@@ -126,9 +127,9 @@ public class FireworkParticles {
 			this.sprites = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, Level level, double d, double e, double f, double g, double h, double i) {
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
 			FireworkParticles.SparkParticle sparkParticle = new FireworkParticles.SparkParticle(
-				level, d, e, f, g, h, i, Minecraft.getInstance().particleEngine, this.sprites
+				clientLevel, d, e, f, g, h, i, Minecraft.getInstance().particleEngine, this.sprites
 			);
 			sparkParticle.setAlpha(0.99F);
 			return sparkParticle;
@@ -142,8 +143,10 @@ public class FireworkParticles {
 		private ListTag explosions;
 		private boolean twinkleDelay;
 
-		public Starter(Level level, double d, double e, double f, double g, double h, double i, ParticleEngine particleEngine, @Nullable CompoundTag compoundTag) {
-			super(level, d, e, f);
+		public Starter(
+			ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, ParticleEngine particleEngine, @Nullable CompoundTag compoundTag
+		) {
+			super(clientLevel, d, e, f);
 			this.xd = g;
 			this.yd = h;
 			this.zd = i;
@@ -283,7 +286,7 @@ public class FireworkParticles {
 			int j = this.random.nextInt(is.length);
 			sparkParticle.setColor(is[j]);
 			if (js.length > 0) {
-				sparkParticle.setFadeColor(js[this.random.nextInt(js.length)]);
+				sparkParticle.setFadeColor(Util.getRandom(js, this.random));
 			}
 		}
 

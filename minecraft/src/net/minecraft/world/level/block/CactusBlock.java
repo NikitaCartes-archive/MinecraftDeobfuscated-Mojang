@@ -11,6 +11,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -25,7 +26,7 @@ public class CactusBlock extends Block {
 	protected static final VoxelShape COLLISION_SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 15.0, 15.0);
 	protected static final VoxelShape OUTLINE_SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 16.0, 15.0);
 
-	protected CactusBlock(Block.Properties properties) {
+	protected CactusBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(AGE, Integer.valueOf(0)));
 	}
@@ -34,25 +35,28 @@ public class CactusBlock extends Block {
 	public void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
 		if (!blockState.canSurvive(serverLevel, blockPos)) {
 			serverLevel.destroyBlock(blockPos, true);
-		} else {
-			BlockPos blockPos2 = blockPos.above();
-			if (serverLevel.isEmptyBlock(blockPos2)) {
-				int i = 1;
+		}
+	}
 
-				while (serverLevel.getBlockState(blockPos.below(i)).getBlock() == this) {
-					i++;
-				}
+	@Override
+	public void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Random random) {
+		BlockPos blockPos2 = blockPos.above();
+		if (serverLevel.isEmptyBlock(blockPos2)) {
+			int i = 1;
 
-				if (i < 3) {
-					int j = (Integer)blockState.getValue(AGE);
-					if (j == 15) {
-						serverLevel.setBlockAndUpdate(blockPos2, this.defaultBlockState());
-						BlockState blockState2 = blockState.setValue(AGE, Integer.valueOf(0));
-						serverLevel.setBlock(blockPos, blockState2, 4);
-						blockState2.neighborChanged(serverLevel, blockPos2, this, blockPos, false);
-					} else {
-						serverLevel.setBlock(blockPos, blockState.setValue(AGE, Integer.valueOf(j + 1)), 4);
-					}
+			while (serverLevel.getBlockState(blockPos.below(i)).is(this)) {
+				i++;
+			}
+
+			if (i < 3) {
+				int j = (Integer)blockState.getValue(AGE);
+				if (j == 15) {
+					serverLevel.setBlockAndUpdate(blockPos2, this.defaultBlockState());
+					BlockState blockState2 = blockState.setValue(AGE, Integer.valueOf(0));
+					serverLevel.setBlock(blockPos, blockState2, 4);
+					blockState2.neighborChanged(serverLevel, blockPos2, this, blockPos, false);
+				} else {
+					serverLevel.setBlock(blockPos, blockState.setValue(AGE, Integer.valueOf(j + 1)), 4);
 				}
 			}
 		}
@@ -89,8 +93,9 @@ public class CactusBlock extends Block {
 			}
 		}
 
-		Block block = levelReader.getBlockState(blockPos.below()).getBlock();
-		return (block == Blocks.CACTUS || block == Blocks.SAND || block == Blocks.RED_SAND) && !levelReader.getBlockState(blockPos.above()).getMaterial().isLiquid();
+		BlockState blockState3 = levelReader.getBlockState(blockPos.below());
+		return (blockState3.is(Blocks.CACTUS) || blockState3.is(Blocks.SAND) || blockState3.is(Blocks.RED_SAND))
+			&& !levelReader.getBlockState(blockPos.above()).getMaterial().isLiquid();
 	}
 
 	@Override

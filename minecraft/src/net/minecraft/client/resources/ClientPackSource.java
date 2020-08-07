@@ -2,17 +2,17 @@ package net.minecraft.client.resources;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.platform.NativeImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -23,12 +23,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ProgressScreen;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.FileResourcePack;
-import net.minecraft.server.packs.VanillaPack;
+import net.minecraft.server.packs.FilePackResources;
+import net.minecraft.server.packs.FolderPackResources;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.VanillaPackResources;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackCompatibility;
+import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.RepositorySource;
-import net.minecraft.server.packs.repository.UnopenedPack;
 import net.minecraft.util.HttpUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -41,51 +44,43 @@ import org.apache.logging.log4j.Logger;
 public class ClientPackSource implements RepositorySource {
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final Pattern SHA1 = Pattern.compile("^[a-fA-F0-9]{40}$");
-	private final VanillaPack vanillaPack;
+	private final VanillaPackResources vanillaPack;
 	private final File serverPackDir;
 	private final ReentrantLock downloadLock = new ReentrantLock();
 	private final AssetIndex assetIndex;
 	@Nullable
 	private CompletableFuture<?> currentDownload;
 	@Nullable
-	private UnopenedResourcePack serverPack;
+	private Pack serverPack;
 
 	public ClientPackSource(File file, AssetIndex assetIndex) {
 		this.serverPackDir = file;
 		this.assetIndex = assetIndex;
-		this.vanillaPack = new DefaultClientResourcePack(assetIndex);
+		this.vanillaPack = new DefaultClientPackResources(assetIndex);
 	}
 
 	@Override
-	public <T extends UnopenedPack> void loadPacks(Map<String, T> map, UnopenedPack.UnopenedPackConstructor<T> unopenedPackConstructor) {
-		T unopenedPack = UnopenedPack.create("vanilla", true, () -> this.vanillaPack, unopenedPackConstructor, UnopenedPack.Position.BOTTOM);
-		if (unopenedPack != null) {
-			map.put("vanilla", unopenedPack);
+	public void loadPacks(Consumer<Pack> consumer, Pack.PackConstructor packConstructor) {
+		Pack pack = Pack.create("vanilla", true, () -> this.vanillaPack, packConstructor, Pack.Position.BOTTOM, PackSource.BUILT_IN);
+		if (pack != null) {
+			consumer.accept(pack);
 		}
 
 		if (this.serverPack != null) {
-			map.put("server", this.serverPack);
+			consumer.accept(this.serverPack);
 		}
 
-		File file = this.assetIndex.getFile(new ResourceLocation("resourcepacks/programmer_art.zip"));
-		if (file != null && file.isFile()) {
-			T unopenedPack2 = UnopenedPack.create("programer_art", false, () -> new FileResourcePack(file) {
-					@Override
-					public String getName() {
-						return "Programmer Art";
-					}
-				}, unopenedPackConstructor, UnopenedPack.Position.TOP);
-			if (unopenedPack2 != null) {
-				map.put("programer_art", unopenedPack2);
-			}
+		Pack pack2 = this.createProgrammerArtPack(packConstructor);
+		if (pack2 != null) {
+			consumer.accept(pack2);
 		}
 	}
 
-	public VanillaPack getVanillaPack() {
+	public VanillaPackResources getVanillaPack() {
 		return this.vanillaPack;
 	}
 
-	public static Map<String, String> getDownloadHeaders() {
+	private static Map<String, String> getDownloadHeaders() {
 		Map<String, String> map = Maps.<String, String>newHashMap();
 		map.put("X-Minecraft-Username", Minecraft.getInstance().getUser().getName());
 		map.put("X-Minecraft-UUID", Minecraft.getInstance().getUser().getUuid());
@@ -120,7 +115,7 @@ public class ClientPackSource implements RepositorySource {
 			this.currentDownload = completableFuture.thenCompose(
 					object -> !this.checkHash(string4, file)
 							? Util.failedFuture(new RuntimeException("Hash check failure for file " + file + ", see log"))
-							: this.setServerPack(file)
+							: this.setServerPack(file, PackSource.SERVER)
 				)
 				.whenComplete((void_, throwable) -> {
 					if (throwable != null) {
@@ -222,79 +217,67 @@ public class ClientPackSource implements RepositorySource {
 		}
 	}
 
-	public CompletableFuture<Void> setServerPack(File file) {
-		PackMetadataSection packMetadataSection = null;
-		NativeImage nativeImage = null;
-		String string = null;
+	public CompletableFuture<Void> setServerPack(File file, PackSource packSource) {
+		PackMetadataSection packMetadataSection;
+		try (FilePackResources filePackResources = new FilePackResources(file)) {
+			packMetadataSection = filePackResources.getMetadataSection(PackMetadataSection.SERIALIZER);
+		} catch (IOException var17) {
+			return Util.failedFuture(new IOException(String.format("Invalid resourcepack at %s", file), var17));
+		}
 
-		try {
-			FileResourcePack fileResourcePack = new FileResourcePack(file);
-			Throwable var6 = null;
+		LOGGER.info("Applying server pack {}", file);
+		this.serverPack = new Pack(
+			"server",
+			true,
+			() -> new FilePackResources(file),
+			new TranslatableComponent("resourcePack.server.name"),
+			packMetadataSection.getDescription(),
+			PackCompatibility.forFormat(packMetadataSection.getPackFormat()),
+			Pack.Position.TOP,
+			true,
+			packSource
+		);
+		return Minecraft.getInstance().delayTextureReload();
+	}
 
-			try {
-				packMetadataSection = fileResourcePack.getMetadataSection(PackMetadataSection.SERIALIZER);
+	@Nullable
+	private Pack createProgrammerArtPack(Pack.PackConstructor packConstructor) {
+		Pack pack = null;
+		File file = this.assetIndex.getFile(new ResourceLocation("resourcepacks/programmer_art.zip"));
+		if (file != null && file.isFile()) {
+			pack = createProgrammerArtPack(packConstructor, () -> createProgrammerArtZipPack(file));
+		}
 
-				try {
-					InputStream inputStream = fileResourcePack.getRootResource("pack.png");
-					Throwable var8 = null;
-
-					try {
-						nativeImage = NativeImage.read(inputStream);
-					} catch (Throwable var35) {
-						var8 = var35;
-						throw var35;
-					} finally {
-						if (inputStream != null) {
-							if (var8 != null) {
-								try {
-									inputStream.close();
-								} catch (Throwable var34) {
-									var8.addSuppressed(var34);
-								}
-							} else {
-								inputStream.close();
-							}
-						}
-					}
-				} catch (IllegalArgumentException | IOException var37) {
-					LOGGER.info("Could not read pack.png: {}", var37.getMessage());
-				}
-			} catch (Throwable var38) {
-				var6 = var38;
-				throw var38;
-			} finally {
-				if (fileResourcePack != null) {
-					if (var6 != null) {
-						try {
-							fileResourcePack.close();
-						} catch (Throwable var33) {
-							var6.addSuppressed(var33);
-						}
-					} else {
-						fileResourcePack.close();
-					}
-				}
+		if (pack == null && SharedConstants.IS_RUNNING_IN_IDE) {
+			File file2 = this.assetIndex.getRootFile("../resourcepacks/programmer_art");
+			if (file2 != null && file2.isDirectory()) {
+				pack = createProgrammerArtPack(packConstructor, () -> createProgrammerArtDirPack(file2));
 			}
-		} catch (IOException var40) {
-			string = var40.getMessage();
 		}
 
-		if (string != null) {
-			return Util.failedFuture(new RuntimeException(String.format("Invalid resourcepack at %s: %s", file, string)));
-		} else {
-			LOGGER.info("Applying server pack {}", file);
-			this.serverPack = new UnopenedResourcePack(
-				"server",
-				true,
-				() -> new FileResourcePack(file),
-				new TranslatableComponent("resourcePack.server.name"),
-				packMetadataSection.getDescription(),
-				PackCompatibility.forFormat(packMetadataSection.getPackFormat()),
-				UnopenedPack.Position.TOP,
-				true,
-				nativeImage
-			);
-			return Minecraft.getInstance().delayTextureReload();
-		}
+		return pack;
+	}
+
+	@Nullable
+	private static Pack createProgrammerArtPack(Pack.PackConstructor packConstructor, Supplier<PackResources> supplier) {
+		return Pack.create("programer_art", false, supplier, packConstructor, Pack.Position.TOP, PackSource.BUILT_IN);
+	}
+
+	private static FolderPackResources createProgrammerArtDirPack(File file) {
+		return new FolderPackResources(file) {
+			@Override
+			public String getName() {
+				return "Programmer Art";
+			}
+		};
+	}
+
+	private static PackResources createProgrammerArtZipPack(File file) {
+		return new FilePackResources(file) {
+			@Override
+			public String getName() {
+				return "Programmer Art";
+			}
+		};
 	}
 }

@@ -6,12 +6,13 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.data.worldgen.biome.Biomes;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,7 +25,7 @@ public class EmptyLevelChunk extends LevelChunk {
 	private static final Biome[] BIOMES = Util.make(new Biome[ChunkBiomeContainer.BIOMES_SIZE], biomes -> Arrays.fill(biomes, Biomes.PLAINS));
 
 	public EmptyLevelChunk(Level level, ChunkPos chunkPos) {
-		super(level, chunkPos, new ChunkBiomeContainer(BIOMES));
+		super(level, chunkPos, new ChunkBiomeContainer(level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), BIOMES));
 	}
 
 	@Override

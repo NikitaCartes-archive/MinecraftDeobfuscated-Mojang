@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.player.Player;
 public class PlayerMenuItem implements SpectatorMenuItem {
 	private final GameProfile profile;
 	private final ResourceLocation location;
+	private final TextComponent name;
 
 	public PlayerMenuItem(GameProfile gameProfile) {
 		this.profile = gameProfile;
@@ -30,6 +32,8 @@ public class PlayerMenuItem implements SpectatorMenuItem {
 		} else {
 			this.location = DefaultPlayerSkin.getDefaultSkin(Player.createPlayerUUID(gameProfile));
 		}
+
+		this.name = new TextComponent(gameProfile.getName());
 	}
 
 	@Override
@@ -39,15 +43,15 @@ public class PlayerMenuItem implements SpectatorMenuItem {
 
 	@Override
 	public Component getName() {
-		return new TextComponent(this.profile.getName());
+		return this.name;
 	}
 
 	@Override
-	public void renderIcon(float f, int i) {
+	public void renderIcon(PoseStack poseStack, float f, int i) {
 		Minecraft.getInstance().getTextureManager().bind(this.location);
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, (float)i / 255.0F);
-		GuiComponent.blit(2, 2, 12, 12, 8.0F, 8.0F, 8, 8, 64, 64);
-		GuiComponent.blit(2, 2, 12, 12, 40.0F, 8.0F, 8, 8, 64, 64);
+		GuiComponent.blit(poseStack, 2, 2, 12, 12, 8.0F, 8.0F, 8, 8, 64, 64);
+		GuiComponent.blit(poseStack, 2, 2, 12, 12, 40.0F, 8.0F, 8, 8, 64, 64);
 	}
 
 	@Override

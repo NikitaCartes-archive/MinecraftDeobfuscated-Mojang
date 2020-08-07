@@ -21,11 +21,6 @@ import org.apache.logging.log4j.Logger;
 
 public class ServerRecipeBook extends RecipeBook {
 	private static final Logger LOGGER = LogManager.getLogger();
-	private final RecipeManager manager;
-
-	public ServerRecipeBook(RecipeManager recipeManager) {
-		this.manager = recipeManager;
-	}
 
 	public int addRecipes(Collection<Recipe<?>> collection, ServerPlayer serverPlayer) {
 		List<ResourceLocation> list = Lists.<ResourceLocation>newArrayList();
@@ -64,20 +59,12 @@ public class ServerRecipeBook extends RecipeBook {
 	}
 
 	private void sendRecipes(ClientboundRecipePacket.State state, ServerPlayer serverPlayer, List<ResourceLocation> list) {
-		serverPlayer.connection
-			.send(
-				new ClientboundRecipePacket(
-					state, list, Collections.emptyList(), this.guiOpen, this.filteringCraftable, this.furnaceGuiOpen, this.furnaceFilteringCraftable
-				)
-			);
+		serverPlayer.connection.send(new ClientboundRecipePacket(state, list, Collections.emptyList(), this.getBookSettings()));
 	}
 
 	public CompoundTag toNbt() {
 		CompoundTag compoundTag = new CompoundTag();
-		compoundTag.putBoolean("isGuiOpen", this.guiOpen);
-		compoundTag.putBoolean("isFilteringCraftable", this.filteringCraftable);
-		compoundTag.putBoolean("isFurnaceGuiOpen", this.furnaceGuiOpen);
-		compoundTag.putBoolean("isFurnaceFilteringCraftable", this.furnaceFilteringCraftable);
+		this.getBookSettings().write(compoundTag);
 		ListTag listTag = new ListTag();
 
 		for (ResourceLocation resourceLocation : this.known) {
@@ -95,41 +82,33 @@ public class ServerRecipeBook extends RecipeBook {
 		return compoundTag;
 	}
 
-	public void fromNbt(CompoundTag compoundTag) {
-		this.guiOpen = compoundTag.getBoolean("isGuiOpen");
-		this.filteringCraftable = compoundTag.getBoolean("isFilteringCraftable");
-		this.furnaceGuiOpen = compoundTag.getBoolean("isFurnaceGuiOpen");
-		this.furnaceFilteringCraftable = compoundTag.getBoolean("isFurnaceFilteringCraftable");
+	public void fromNbt(CompoundTag compoundTag, RecipeManager recipeManager) {
+		this.setBookSettings(RecipeBookSettings.read(compoundTag));
 		ListTag listTag = compoundTag.getList("recipes", 8);
-		this.loadRecipes(listTag, this::add);
+		this.loadRecipes(listTag, this::add, recipeManager);
 		ListTag listTag2 = compoundTag.getList("toBeDisplayed", 8);
-		this.loadRecipes(listTag2, this::addHighlight);
+		this.loadRecipes(listTag2, this::addHighlight, recipeManager);
 	}
 
-	private void loadRecipes(ListTag listTag, Consumer<Recipe<?>> consumer) {
+	private void loadRecipes(ListTag listTag, Consumer<Recipe<?>> consumer, RecipeManager recipeManager) {
 		for (int i = 0; i < listTag.size(); i++) {
 			String string = listTag.getString(i);
 
 			try {
 				ResourceLocation resourceLocation = new ResourceLocation(string);
-				Optional<? extends Recipe<?>> optional = this.manager.byKey(resourceLocation);
+				Optional<? extends Recipe<?>> optional = recipeManager.byKey(resourceLocation);
 				if (!optional.isPresent()) {
 					LOGGER.error("Tried to load unrecognized recipe: {} removed now.", resourceLocation);
 				} else {
 					consumer.accept(optional.get());
 				}
-			} catch (ResourceLocationException var7) {
+			} catch (ResourceLocationException var8) {
 				LOGGER.error("Tried to load improperly formatted recipe: {} removed now.", string);
 			}
 		}
 	}
 
 	public void sendInitialRecipeBook(ServerPlayer serverPlayer) {
-		serverPlayer.connection
-			.send(
-				new ClientboundRecipePacket(
-					ClientboundRecipePacket.State.INIT, this.known, this.highlight, this.guiOpen, this.filteringCraftable, this.furnaceGuiOpen, this.furnaceFilteringCraftable
-				)
-			);
+		serverPlayer.connection.send(new ClientboundRecipePacket(ClientboundRecipePacket.State.INIT, this.known, this.highlight, this.getBookSettings()));
 	}
 }

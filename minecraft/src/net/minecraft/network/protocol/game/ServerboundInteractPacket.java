@@ -16,30 +16,35 @@ public class ServerboundInteractPacket implements Packet<ServerGamePacketListene
 	private ServerboundInteractPacket.Action action;
 	private Vec3 location;
 	private InteractionHand hand;
+	private boolean usingSecondaryAction;
 
 	public ServerboundInteractPacket() {
 		this.entityId = 0;
 		this.action = ServerboundInteractPacket.Action.AIR_SWING;
 	}
 
-	public ServerboundInteractPacket(Entity entity) {
+	@Environment(EnvType.CLIENT)
+	public ServerboundInteractPacket(Entity entity, boolean bl) {
 		this.entityId = entity.getId();
 		this.action = ServerboundInteractPacket.Action.ATTACK;
+		this.usingSecondaryAction = bl;
 	}
 
 	@Environment(EnvType.CLIENT)
-	public ServerboundInteractPacket(Entity entity, InteractionHand interactionHand) {
+	public ServerboundInteractPacket(Entity entity, InteractionHand interactionHand, boolean bl) {
 		this.entityId = entity.getId();
 		this.action = ServerboundInteractPacket.Action.INTERACT;
 		this.hand = interactionHand;
+		this.usingSecondaryAction = bl;
 	}
 
 	@Environment(EnvType.CLIENT)
-	public ServerboundInteractPacket(Entity entity, InteractionHand interactionHand, Vec3 vec3) {
+	public ServerboundInteractPacket(Entity entity, InteractionHand interactionHand, Vec3 vec3, boolean bl) {
 		this.entityId = entity.getId();
 		this.action = ServerboundInteractPacket.Action.INTERACT_AT;
 		this.hand = interactionHand;
 		this.location = vec3;
+		this.usingSecondaryAction = bl;
 	}
 
 	@Override
@@ -53,6 +58,8 @@ public class ServerboundInteractPacket implements Packet<ServerGamePacketListene
 		if (this.action == ServerboundInteractPacket.Action.INTERACT || this.action == ServerboundInteractPacket.Action.INTERACT_AT) {
 			this.hand = friendlyByteBuf.readEnum(InteractionHand.class);
 		}
+
+		this.usingSecondaryAction = friendlyByteBuf.readBoolean();
 	}
 
 	@Override
@@ -68,6 +75,8 @@ public class ServerboundInteractPacket implements Packet<ServerGamePacketListene
 		if (this.action == ServerboundInteractPacket.Action.INTERACT || this.action == ServerboundInteractPacket.Action.INTERACT_AT) {
 			friendlyByteBuf.writeEnum(this.hand);
 		}
+
+		friendlyByteBuf.writeBoolean(this.usingSecondaryAction);
 	}
 
 	public void handle(ServerGamePacketListener serverGamePacketListener) {
@@ -83,12 +92,17 @@ public class ServerboundInteractPacket implements Packet<ServerGamePacketListene
 		return this.action;
 	}
 
+	@Nullable
 	public InteractionHand getHand() {
 		return this.hand;
 	}
 
 	public Vec3 getLocation() {
 		return this.location;
+	}
+
+	public boolean isUsingSecondaryAction() {
+		return this.usingSecondaryAction;
 	}
 
 	public static enum Action {

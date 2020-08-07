@@ -13,25 +13,29 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomSwimmingGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
-import net.minecraft.world.entity.monster.SharedMonsterAttributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public abstract class AbstractFish extends WaterAnimal {
@@ -47,21 +51,19 @@ public abstract class AbstractFish extends WaterAnimal {
 		return entityDimensions.height * 0.65F;
 	}
 
-	@Override
-	protected void registerAttributes() {
-		super.registerAttributes();
-		this.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(3.0);
+	public static AttributeSupplier.Builder createAttributes() {
+		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 3.0);
 	}
 
 	@Override
 	public boolean requiresCustomPersistence() {
-		return this.fromBucket();
+		return super.requiresCustomPersistence() || this.fromBucket();
 	}
 
 	public static boolean checkFishSpawnRules(
 		EntityType<? extends AbstractFish> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, Random random
 	) {
-		return levelAccessor.getBlockState(blockPos).getBlock() == Blocks.WATER && levelAccessor.getBlockState(blockPos.above()).getBlock() == Blocks.WATER;
+		return levelAccessor.getBlockState(blockPos).is(Blocks.WATER) && levelAccessor.getBlockState(blockPos.above()).is(Blocks.WATER);
 	}
 
 	@Override
@@ -142,7 +144,7 @@ public abstract class AbstractFish extends WaterAnimal {
 	}
 
 	@Override
-	protected boolean mobInteract(Player player, InteractionHand interactionHand) {
+	protected InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (itemStack.getItem() == Items.WATER_BUCKET && this.isAlive()) {
 			this.playSound(SoundEvents.BUCKET_FILL_FISH, 1.0F, 1.0F);
@@ -160,7 +162,7 @@ public abstract class AbstractFish extends WaterAnimal {
 			}
 
 			this.remove();
-			return true;
+			return InteractionResult.sidedSuccess(this.level.isClientSide);
 		} else {
 			return super.mobInteract(player, interactionHand);
 		}
@@ -185,6 +187,10 @@ public abstract class AbstractFish extends WaterAnimal {
 		return SoundEvents.FISH_SWIM;
 	}
 
+	@Override
+	protected void playStepSound(BlockPos blockPos, BlockState blockState) {
+	}
+
 	static class FishMoveControl extends MoveControl {
 		private final AbstractFish fish;
 
@@ -195,22 +201,26 @@ public abstract class AbstractFish extends WaterAnimal {
 
 		@Override
 		public void tick() {
-			if (this.fish.isUnderLiquid(FluidTags.WATER)) {
+			if (this.fish.isEyeInFluid(FluidTags.WATER)) {
 				this.fish.setDeltaMovement(this.fish.getDeltaMovement().add(0.0, 0.005, 0.0));
 			}
 
 			if (this.operation == MoveControl.Operation.MOVE_TO && !this.fish.getNavigation().isDone()) {
+				float f = (float)(this.speedModifier * this.fish.getAttributeValue(Attributes.MOVEMENT_SPEED));
+				this.fish.setSpeed(Mth.lerp(0.125F, this.fish.getSpeed(), f));
 				double d = this.wantedX - this.fish.getX();
 				double e = this.wantedY - this.fish.getY();
-				double f = this.wantedZ - this.fish.getZ();
-				double g = (double)Mth.sqrt(d * d + e * e + f * f);
-				e /= g;
-				float h = (float)(Mth.atan2(f, d) * 180.0F / (float)Math.PI) - 90.0F;
-				this.fish.yRot = this.rotlerp(this.fish.yRot, h, 90.0F);
-				this.fish.yBodyRot = this.fish.yRot;
-				float i = (float)(this.speedModifier * this.fish.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue());
-				this.fish.setSpeed(Mth.lerp(0.125F, this.fish.getSpeed(), i));
-				this.fish.setDeltaMovement(this.fish.getDeltaMovement().add(0.0, (double)this.fish.getSpeed() * e * 0.1, 0.0));
+				double g = this.wantedZ - this.fish.getZ();
+				if (e != 0.0) {
+					double h = (double)Mth.sqrt(d * d + e * e + g * g);
+					this.fish.setDeltaMovement(this.fish.getDeltaMovement().add(0.0, (double)this.fish.getSpeed() * (e / h) * 0.1, 0.0));
+				}
+
+				if (d != 0.0 || g != 0.0) {
+					float i = (float)(Mth.atan2(g, d) * 180.0F / (float)Math.PI) - 90.0F;
+					this.fish.yRot = this.rotlerp(this.fish.yRot, i, 90.0F);
+					this.fish.yBodyRot = this.fish.yRot;
+				}
 			} else {
 				this.fish.setSpeed(0.0F);
 			}

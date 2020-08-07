@@ -60,11 +60,6 @@ public class Mth {
 		return d < (double)l ? l - 1L : l;
 	}
 
-	@Environment(EnvType.CLIENT)
-	public static int absFloor(double d) {
-		return (int)(d >= 0.0 ? d : -d + 1.0);
-	}
-
 	public static float abs(float f) {
 		return Math.abs(f);
 	}
@@ -254,25 +249,6 @@ public class Mth {
 		return NumberUtils.toInt(string, i);
 	}
 
-	@Environment(EnvType.CLIENT)
-	public static int getInt(String string, int i, int j) {
-		return Math.max(j, getInt(string, i));
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static double getDouble(String string, double d) {
-		try {
-			return Double.parseDouble(string);
-		} catch (Throwable var4) {
-			return d;
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static double getDouble(String string, double d, double e) {
-		return Math.max(e, getDouble(string, d));
-	}
-
 	public static int smallestEncompassingPowerOfTwo(int i) {
 		int j = i - 1;
 		j |= j >> 1;
@@ -283,7 +259,7 @@ public class Mth {
 		return j + 1;
 	}
 
-	private static boolean isPowerOfTwo(int i) {
+	public static boolean isPowerOfTwo(int i) {
 		return i != 0 && (i & i - 1) == 0;
 	}
 
@@ -322,7 +298,6 @@ public class Mth {
 		return (l << 8) + k;
 	}
 
-	@Environment(EnvType.CLIENT)
 	public static float frac(float f) {
 		return f - (float)floor(f);
 	}
@@ -351,7 +326,7 @@ public class Mth {
 		return createInsecureUUID(RANDOM);
 	}
 
-	public static double pct(double d, double e, double f) {
+	public static double inverseLerp(double d, double e, double f) {
 		return (d - e) / (f - e);
 	}
 
@@ -565,6 +540,15 @@ public class Mth {
 		}
 
 		return (float)d;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static float triangleWave(float f, float g) {
+		return (Math.abs(f % g - g * 0.5F) - g * 0.25F) / (g * 0.25F);
+	}
+
+	public static float square(float f) {
+		return f * f;
 	}
 
 	static {

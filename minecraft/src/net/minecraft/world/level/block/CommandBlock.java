@@ -9,15 +9,15 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -32,7 +32,7 @@ public class CommandBlock extends BaseEntityBlock {
 	public static final DirectionProperty FACING = DirectionalBlock.FACING;
 	public static final BooleanProperty CONDITIONAL = BlockStateProperties.CONDITIONAL;
 
-	public CommandBlock(Block.Properties properties) {
+	public CommandBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(CONDITIONAL, Boolean.valueOf(false)));
 	}
@@ -56,7 +56,7 @@ public class CommandBlock extends BaseEntityBlock {
 				if (!bl3 && !commandBlockEntity.isAutomatic() && commandBlockEntity.getMode() != CommandBlockEntity.Mode.SEQUENCE) {
 					if (bl2) {
 						commandBlockEntity.markConditionMet();
-						level.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(level));
+						level.getBlockTicks().scheduleTick(blockPos, this, 1);
 					}
 				}
 			}
@@ -81,7 +81,7 @@ public class CommandBlock extends BaseEntityBlock {
 				}
 
 				if (commandBlockEntity.isPowered() || commandBlockEntity.isAutomatic()) {
-					serverLevel.getBlockTicks().scheduleTick(blockPos, this, this.getTickDelay(serverLevel));
+					serverLevel.getBlockTicks().scheduleTick(blockPos, this, 1);
 				}
 			} else if (mode == CommandBlockEntity.Mode.REDSTONE) {
 				if (bl2) {
@@ -106,18 +106,13 @@ public class CommandBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public int getTickDelay(LevelReader levelReader) {
-		return 1;
-	}
-
-	@Override
 	public InteractionResult use(
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
 		if (blockEntity instanceof CommandBlockEntity && player.canUseGameMasterBlocks()) {
 			player.openCommandBlock((CommandBlockEntity)blockEntity);
-			return InteractionResult.SUCCESS;
+			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			return InteractionResult.PASS;
 		}
@@ -184,7 +179,7 @@ public class CommandBlock extends BaseEntityBlock {
 	}
 
 	private static void executeChain(Level level, BlockPos blockPos, Direction direction) {
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(blockPos);
+		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 		GameRules gameRules = level.getGameRules();
 		int i = gameRules.getInt(GameRules.RULE_MAX_COMMAND_CHAIN_LENGTH);
 
@@ -192,7 +187,7 @@ public class CommandBlock extends BaseEntityBlock {
 			mutableBlockPos.move(direction);
 			BlockState blockState = level.getBlockState(mutableBlockPos);
 			Block block = blockState.getBlock();
-			if (block != Blocks.CHAIN_COMMAND_BLOCK) {
+			if (!blockState.is(Blocks.CHAIN_COMMAND_BLOCK)) {
 				break;
 			}
 

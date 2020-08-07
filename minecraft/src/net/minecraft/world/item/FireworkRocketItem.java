@@ -19,6 +19,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -35,13 +36,18 @@ public class FireworkRocketItem extends Item {
 			Vec3 vec3 = useOnContext.getClickLocation();
 			Direction direction = useOnContext.getClickedFace();
 			FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(
-				level, vec3.x + (double)direction.getStepX() * 0.15, vec3.y + (double)direction.getStepY() * 0.15, vec3.z + (double)direction.getStepZ() * 0.15, itemStack
+				level,
+				useOnContext.getPlayer(),
+				vec3.x + (double)direction.getStepX() * 0.15,
+				vec3.y + (double)direction.getStepY() * 0.15,
+				vec3.z + (double)direction.getStepZ() * 0.15,
+				itemStack
 			);
 			level.addFreshEntity(fireworkRocketEntity);
 			itemStack.shrink(1);
 		}
 
-		return InteractionResult.SUCCESS;
+		return InteractionResult.sidedSuccess(level.isClientSide);
 	}
 
 	@Override
@@ -55,7 +61,7 @@ public class FireworkRocketItem extends Item {
 				}
 			}
 
-			return InteractionResultHolder.success(player.getItemInHand(interactionHand));
+			return InteractionResultHolder.sidedSuccess(player.getItemInHand(interactionHand), level.isClientSide());
 		} else {
 			return InteractionResultHolder.pass(player.getItemInHand(interactionHand));
 		}

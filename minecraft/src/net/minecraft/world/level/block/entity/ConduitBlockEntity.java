@@ -10,7 +10,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -50,10 +49,10 @@ public class ConduitBlockEntity extends BlockEntity implements TickableBlockEnti
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
-		if (compoundTag.contains("target_uuid")) {
-			this.destroyTargetUUID = NbtUtils.loadUUIDTag(compoundTag.getCompound("target_uuid"));
+	public void load(BlockState blockState, CompoundTag compoundTag) {
+		super.load(blockState, compoundTag);
+		if (compoundTag.hasUUID("Target")) {
+			this.destroyTargetUUID = compoundTag.getUUID("Target");
 		} else {
 			this.destroyTargetUUID = null;
 		}
@@ -63,7 +62,7 @@ public class ConduitBlockEntity extends BlockEntity implements TickableBlockEnti
 	public CompoundTag save(CompoundTag compoundTag) {
 		super.save(compoundTag);
 		if (this.destroyTarget != null) {
-			compoundTag.put("target_uuid", NbtUtils.createUUIDTag(this.destroyTarget.getUUID()));
+			compoundTag.putUUID("Target", this.destroyTarget.getUUID());
 		}
 
 		return compoundTag;
@@ -135,7 +134,7 @@ public class ConduitBlockEntity extends BlockEntity implements TickableBlockEnti
 						BlockState blockState = this.level.getBlockState(blockPos2);
 
 						for (Block block : VALID_BLOCKS) {
-							if (blockState.getBlock() == block) {
+							if (blockState.is(block)) {
 								this.effectBlocks.add(blockPos2);
 							}
 						}
@@ -160,7 +159,7 @@ public class ConduitBlockEntity extends BlockEntity implements TickableBlockEnti
 		List<Player> list = this.level.getEntitiesOfClass(Player.class, aABB);
 		if (!list.isEmpty()) {
 			for (Player player : list) {
-				if (this.worldPosition.closerThan(new BlockPos(player), (double)j) && player.isInWaterOrRain()) {
+				if (this.worldPosition.closerThan(player.blockPosition(), (double)j) && player.isInWaterOrRain()) {
 					player.addEffect(new MobEffectInstance(MobEffects.CONDUIT_POWER, 260, 0, true, true));
 				}
 			}
@@ -181,7 +180,7 @@ public class ConduitBlockEntity extends BlockEntity implements TickableBlockEnti
 			if (!list.isEmpty()) {
 				this.destroyTarget = (LivingEntity)list.get(this.level.random.nextInt(list.size()));
 			}
-		} else if (!this.destroyTarget.isAlive() || !this.worldPosition.closerThan(new BlockPos(this.destroyTarget), 8.0)) {
+		} else if (!this.destroyTarget.isAlive() || !this.worldPosition.closerThan(this.destroyTarget.blockPosition(), 8.0)) {
 			this.destroyTarget = null;
 		}
 

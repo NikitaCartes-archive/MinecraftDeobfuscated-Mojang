@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.ImageButton;
@@ -38,6 +39,7 @@ public class CraftingScreen extends AbstractContainerScreen<CraftingMenu> implem
 			this.leftPos = this.recipeBookComponent.updateScreenPosition(this.widthTooNarrow, this.width, this.imageWidth);
 			((ImageButton)button).setPosition(this.leftPos + 5, this.height / 2 - 49);
 		}));
+		this.titleLabelX = 29;
 	}
 
 	@Override
@@ -47,35 +49,28 @@ public class CraftingScreen extends AbstractContainerScreen<CraftingMenu> implem
 	}
 
 	@Override
-	public void render(int i, int j, float f) {
-		this.renderBackground();
+	public void render(PoseStack poseStack, int i, int j, float f) {
+		this.renderBackground(poseStack);
 		if (this.recipeBookComponent.isVisible() && this.widthTooNarrow) {
-			this.renderBg(f, i, j);
-			this.recipeBookComponent.render(i, j, f);
+			this.renderBg(poseStack, f, i, j);
+			this.recipeBookComponent.render(poseStack, i, j, f);
 		} else {
-			this.recipeBookComponent.render(i, j, f);
-			super.render(i, j, f);
-			this.recipeBookComponent.renderGhostRecipe(this.leftPos, this.topPos, true, f);
+			this.recipeBookComponent.render(poseStack, i, j, f);
+			super.render(poseStack, i, j, f);
+			this.recipeBookComponent.renderGhostRecipe(poseStack, this.leftPos, this.topPos, true, f);
 		}
 
-		this.renderTooltip(i, j);
-		this.recipeBookComponent.renderTooltip(this.leftPos, this.topPos, i, j);
-		this.magicalSpecialHackyFocus(this.recipeBookComponent);
+		this.renderTooltip(poseStack, i, j);
+		this.recipeBookComponent.renderTooltip(poseStack, this.leftPos, this.topPos, i, j);
 	}
 
 	@Override
-	protected void renderLabels(int i, int j) {
-		this.font.draw(this.title.getColoredString(), 28.0F, 6.0F, 4210752);
-		this.font.draw(this.inventory.getDisplayName().getColoredString(), 8.0F, (float)(this.imageHeight - 96 + 2), 4210752);
-	}
-
-	@Override
-	protected void renderBg(float f, int i, int j) {
+	protected void renderBg(PoseStack poseStack, float f, int i, int j) {
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 		this.minecraft.getTextureManager().bind(CRAFTING_TABLE_LOCATION);
 		int k = this.leftPos;
 		int l = (this.height - this.imageHeight) / 2;
-		this.blit(k, l, 0, 0, this.imageWidth, this.imageHeight);
+		this.blit(poseStack, k, l, 0, 0, this.imageWidth, this.imageHeight);
 	}
 
 	@Override
@@ -86,6 +81,7 @@ public class CraftingScreen extends AbstractContainerScreen<CraftingMenu> implem
 	@Override
 	public boolean mouseClicked(double d, double e, int i) {
 		if (this.recipeBookComponent.mouseClicked(d, e, i)) {
+			this.setFocused(this.recipeBookComponent);
 			return true;
 		} else {
 			return this.widthTooNarrow && this.recipeBookComponent.isVisible() ? true : super.mouseClicked(d, e, i);

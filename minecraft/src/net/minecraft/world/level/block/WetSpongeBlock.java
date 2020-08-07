@@ -9,16 +9,17 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class WetSpongeBlock extends Block {
-	protected WetSpongeBlock(Block.Properties properties) {
+	protected WetSpongeBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 
 	@Override
 	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		if (level.getDimension().isUltraWarm()) {
+		if (level.dimensionType().ultraWarm()) {
 			level.setBlock(blockPos, Blocks.SPONGE.defaultBlockState(), 3);
 			level.levelEvent(2009, blockPos, 0);
 			level.playSound(null, blockPos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 1.0F, (1.0F + level.getRandom().nextFloat() * 0.2F) * 0.7F);
@@ -28,7 +29,7 @@ public class WetSpongeBlock extends Block {
 	@Environment(EnvType.CLIENT)
 	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
-		Direction direction = Direction.getRandomFace(random);
+		Direction direction = Direction.getRandom(random);
 		if (direction != Direction.UP) {
 			BlockPos blockPos2 = blockPos.relative(direction);
 			BlockState blockState2 = level.getBlockState(blockPos2);
