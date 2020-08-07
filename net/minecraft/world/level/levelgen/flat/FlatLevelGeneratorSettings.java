@@ -21,10 +21,10 @@ import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.Features;
 import net.minecraft.data.worldgen.StructureFeatures;
-import net.minecraft.data.worldgen.biome.Biomes;
 import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.GenerationStep;
@@ -42,7 +42,7 @@ import org.apache.logging.log4j.Logger;
 
 public class FlatLevelGeneratorSettings {
     private static final Logger LOGGER = LogManager.getLogger();
-    public static final Codec<FlatLevelGeneratorSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.biomes), ((MapCodec)StructureSettings.CODEC.fieldOf("structures")).forGetter(FlatLevelGeneratorSettings::structureSettings), ((MapCodec)FlatLayerInfo.CODEC.listOf().fieldOf("layers")).forGetter(FlatLevelGeneratorSettings::getLayersInfo), ((MapCodec)Codec.BOOL.fieldOf("lakes")).orElse(false).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.addLakes), ((MapCodec)Codec.BOOL.fieldOf("features")).orElse(false).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.decoration), ((MapCodec)Biome.CODEC.fieldOf("biome")).orElseGet(Util.prefix("Unknown biome, defaulting to plains", LOGGER::error), () -> () -> Biomes.PLAINS).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.biome)).apply((Applicative<FlatLevelGeneratorSettings, ?>)instance, FlatLevelGeneratorSettings::new)).stable();
+    public static final Codec<FlatLevelGeneratorSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(RegistryLookupCodec.create(Registry.BIOME_REGISTRY).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.biomes), ((MapCodec)StructureSettings.CODEC.fieldOf("structures")).forGetter(FlatLevelGeneratorSettings::structureSettings), ((MapCodec)FlatLayerInfo.CODEC.listOf().fieldOf("layers")).forGetter(FlatLevelGeneratorSettings::getLayersInfo), ((MapCodec)Codec.BOOL.fieldOf("lakes")).orElse(false).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.addLakes), ((MapCodec)Codec.BOOL.fieldOf("features")).orElse(false).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.decoration), Biome.CODEC.optionalFieldOf("biome").orElseGet(Optional::empty).forGetter(flatLevelGeneratorSettings -> Optional.of(flatLevelGeneratorSettings.biome))).apply((Applicative<FlatLevelGeneratorSettings, ?>)instance, FlatLevelGeneratorSettings::new)).stable();
     private static final Map<StructureFeature<?>, ConfiguredStructureFeature<?, ?>> STRUCTURE_FEATURES = Util.make(Maps.newHashMap(), hashMap -> {
         hashMap.put(StructureFeature.MINESHAFT, StructureFeatures.MINESHAFT);
         hashMap.put(StructureFeature.VILLAGE, StructureFeatures.VILLAGE_PLAINS);
@@ -64,13 +64,13 @@ public class FlatLevelGeneratorSettings {
     private final Registry<Biome> biomes;
     private final StructureSettings structureSettings;
     private final List<FlatLayerInfo> layersInfo = Lists.newArrayList();
-    private Supplier<Biome> biome = () -> Biomes.PLAINS;
+    private Supplier<Biome> biome;
     private final BlockState[] layers = new BlockState[256];
     private boolean voidGen;
     private boolean decoration = false;
     private boolean addLakes = false;
 
-    public FlatLevelGeneratorSettings(Registry<Biome> registry, StructureSettings structureSettings, List<FlatLayerInfo> list, boolean bl, boolean bl2, Supplier<Biome> supplier) {
+    public FlatLevelGeneratorSettings(Registry<Biome> registry, StructureSettings structureSettings, List<FlatLayerInfo> list, boolean bl, boolean bl2, Optional<Supplier<Biome>> optional) {
         this(structureSettings, registry);
         if (bl) {
             this.setAddLakes();
@@ -80,12 +80,18 @@ public class FlatLevelGeneratorSettings {
         }
         this.layersInfo.addAll(list);
         this.updateLayers();
-        this.biome = supplier;
+        if (!optional.isPresent()) {
+            LOGGER.error("Unknown biome, defaulting to plains");
+            this.biome = () -> registry.getOrThrow(Biomes.PLAINS);
+        } else {
+            this.biome = optional.get();
+        }
     }
 
     public FlatLevelGeneratorSettings(StructureSettings structureSettings, Registry<Biome> registry) {
         this.biomes = registry;
         this.structureSettings = structureSettings;
+        this.biome = () -> registry.getOrThrow(Biomes.PLAINS);
     }
 
     @Environment(value=EnvType.CLIENT)
@@ -100,7 +106,7 @@ public class FlatLevelGeneratorSettings {
             flatLevelGeneratorSettings.layersInfo.add(new FlatLayerInfo(flatLayerInfo.getHeight(), flatLayerInfo.getBlockState().getBlock()));
             flatLevelGeneratorSettings.updateLayers();
         }
-        flatLevelGeneratorSettings.setBiome(this.biome.get());
+        flatLevelGeneratorSettings.setBiome(this.biome);
         if (this.decoration) {
             flatLevelGeneratorSettings.setDecoration();
         }
@@ -131,7 +137,7 @@ public class FlatLevelGeneratorSettings {
         for (Map.Entry<StructureFeature<?>, StructureFeatureConfiguration> entry : this.structureSettings.structureConfig().entrySet()) {
             builder.addStructureStart(biomeGenerationSettings.withBiomeConfig(STRUCTURE_FEATURES.get(entry.getKey())));
         }
-        boolean bl2 = bl = (!this.voidGen || this.biomes.getResourceKey(biome).equals(Optional.of(net.minecraft.world.level.biome.Biomes.THE_VOID))) && this.decoration;
+        boolean bl2 = bl = (!this.voidGen || this.biomes.getResourceKey(biome).equals(Optional.of(Biomes.THE_VOID))) && this.decoration;
         if (bl) {
             List<List<Supplier<ConfiguredFeature<?, ?>>>> list = biomeGenerationSettings.features();
             for (i = 0; i < list.size(); ++i) {
@@ -160,8 +166,9 @@ public class FlatLevelGeneratorSettings {
         return this.biome.get();
     }
 
-    public void setBiome(Biome biome) {
-        this.biome = () -> biome;
+    @Environment(value=EnvType.CLIENT)
+    public void setBiome(Supplier<Biome> supplier) {
+        this.biome = supplier;
     }
 
     public List<FlatLayerInfo> getLayersInfo() {
@@ -193,7 +200,7 @@ public class FlatLevelGeneratorSettings {
     public static FlatLevelGeneratorSettings getDefault(Registry<Biome> registry) {
         StructureSettings structureSettings = new StructureSettings(Optional.of(StructureSettings.DEFAULT_STRONGHOLD), Maps.newHashMap(ImmutableMap.of(StructureFeature.VILLAGE, StructureSettings.DEFAULTS.get(StructureFeature.VILLAGE))));
         FlatLevelGeneratorSettings flatLevelGeneratorSettings = new FlatLevelGeneratorSettings(structureSettings, registry);
-        flatLevelGeneratorSettings.setBiome(Biomes.PLAINS);
+        flatLevelGeneratorSettings.biome = () -> registry.getOrThrow(Biomes.PLAINS);
         flatLevelGeneratorSettings.getLayersInfo().add(new FlatLayerInfo(1, Blocks.BEDROCK));
         flatLevelGeneratorSettings.getLayersInfo().add(new FlatLayerInfo(2, Blocks.DIRT));
         flatLevelGeneratorSettings.getLayersInfo().add(new FlatLayerInfo(1, Blocks.GRASS_BLOCK));

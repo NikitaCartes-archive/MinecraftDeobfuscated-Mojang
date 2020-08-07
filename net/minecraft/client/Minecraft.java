@@ -159,6 +159,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.KeybindComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -528,18 +529,22 @@ WindowEventHandler {
     private void rollbackResourcePacks(Throwable throwable) {
         if (this.resourcePackRepository.getSelectedIds().size() > 1) {
             TextComponent component = throwable instanceof SimpleReloadableResourceManager.ResourcePackLoadingFailure ? new TextComponent(((SimpleReloadableResourceManager.ResourcePackLoadingFailure)throwable).getPack().getName()) : null;
-            LOGGER.info("Caught error loading resourcepacks, removing all selected resourcepacks", throwable);
-            this.resourcePackRepository.setSelected(Collections.emptyList());
-            this.options.resourcePacks.clear();
-            this.options.incompatibleResourcePacks.clear();
-            this.options.save();
-            this.reloadResourcePacks().thenRun(() -> {
-                ToastComponent toastComponent = this.getToasts();
-                SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.PACK_LOAD_FAILURE, new TranslatableComponent("resourcePack.load_fail"), component);
-            });
+            this.clearResourcePacksOnError(throwable, component);
         } else {
             Util.throwAsRuntime(throwable);
         }
+    }
+
+    public void clearResourcePacksOnError(Throwable throwable, @Nullable Component component) {
+        LOGGER.info("Caught error loading resourcepacks, removing all selected resourcepacks", throwable);
+        this.resourcePackRepository.setSelected(Collections.emptyList());
+        this.options.resourcePacks.clear();
+        this.options.incompatibleResourcePacks.clear();
+        this.options.save();
+        this.reloadResourcePacks().thenRun(() -> {
+            ToastComponent toastComponent = this.getToasts();
+            SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastIds.PACK_LOAD_FAILURE, new TranslatableComponent("resourcePack.load_fail"), component);
+        });
     }
 
     public void run() {

@@ -89,6 +89,7 @@ import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -457,6 +458,16 @@ AutoCloseable {
             String string = exception instanceof JsonSyntaxException ? "parse" : "load";
             String string2 = "Failed to " + string + " shader: " + resourceLocation;
             TransparencyShaderException transparencyShaderException = new TransparencyShaderException(string2, exception);
+            if (this.minecraft.getResourcePackRepository().getSelectedIds().size() > 1) {
+                TextComponent component;
+                try {
+                    component = new TextComponent(this.minecraft.getResourceManager().getResource(resourceLocation).getSourceName());
+                } catch (IOException iOException) {
+                    component = null;
+                }
+                this.minecraft.options.graphicsMode = GraphicsStatus.FANCY;
+                this.minecraft.clearResourcePacksOnError(transparencyShaderException, component);
+            }
             CrashReport crashReport = this.minecraft.fillReport(new CrashReport(string2, transparencyShaderException));
             this.minecraft.options.graphicsMode = GraphicsStatus.FANCY;
             this.minecraft.options.save();

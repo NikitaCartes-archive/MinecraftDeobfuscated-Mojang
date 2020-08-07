@@ -328,6 +328,11 @@ IdMap<T> {
         return Optional.ofNullable(this.get(resourceLocation));
     }
 
+    @Environment(value=EnvType.CLIENT)
+    public Optional<T> getOptional(@Nullable ResourceKey<T> resourceKey) {
+        return Optional.ofNullable(this.get(resourceKey));
+    }
+
     public T getOrThrow(ResourceKey<T> resourceKey) {
         T object = this.get(resourceKey);
         if (object == null) {

@@ -112,6 +112,7 @@ extends WritableRegistry<T> {
                 throw new IllegalStateException("ID mismatch");
             }
             this.toId.removeInt(object2);
+            this.lifecycles.remove(object2);
         }
         return this.registerMapping(i, resourceKey, object, lifecycle, false);
     }

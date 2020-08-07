@@ -5,11 +5,10 @@ package net.minecraft.client.renderer;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
-import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec3;
@@ -17,12 +16,12 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(value=EnvType.CLIENT)
 public abstract class DimensionSpecialEffects {
-    private static final Object2ObjectMap<ResourceKey<DimensionType>, DimensionSpecialEffects> EFFECTS = Util.make(new Object2ObjectArrayMap(), object2ObjectArrayMap -> {
+    private static final Object2ObjectMap<ResourceLocation, DimensionSpecialEffects> EFFECTS = Util.make(new Object2ObjectArrayMap(), object2ObjectArrayMap -> {
         OverworldEffects overworldEffects = new OverworldEffects();
         object2ObjectArrayMap.defaultReturnValue(overworldEffects);
-        object2ObjectArrayMap.put(DimensionType.OVERWORLD_LOCATION, overworldEffects);
-        object2ObjectArrayMap.put(DimensionType.NETHER_LOCATION, new NetherEffects());
-        object2ObjectArrayMap.put(DimensionType.END_LOCATION, new EndEffects());
+        object2ObjectArrayMap.put(DimensionType.OVERWORLD_EFFECTS, overworldEffects);
+        object2ObjectArrayMap.put(DimensionType.NETHER_EFFECTS, new NetherEffects());
+        object2ObjectArrayMap.put(DimensionType.END_EFFECTS, new EndEffects());
     });
     private final float[] sunriseCol = new float[4];
     private final float cloudLevel;
@@ -39,8 +38,8 @@ public abstract class DimensionSpecialEffects {
         this.constantAmbientLight = bl3;
     }
 
-    public static DimensionSpecialEffects forType(Optional<ResourceKey<DimensionType>> optional) {
-        return (DimensionSpecialEffects)EFFECTS.get(optional.orElse(DimensionType.OVERWORLD_LOCATION));
+    public static DimensionSpecialEffects forType(DimensionType dimensionType) {
+        return (DimensionSpecialEffects)EFFECTS.get(dimensionType.effectsLocation());
     }
 
     @Nullable

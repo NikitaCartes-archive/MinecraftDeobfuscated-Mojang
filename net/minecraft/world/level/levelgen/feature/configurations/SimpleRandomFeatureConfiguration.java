@@ -13,7 +13,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfigur
 
 public class SimpleRandomFeatureConfiguration
 implements FeatureConfiguration {
-    public static final Codec<SimpleRandomFeatureConfiguration> CODEC = ((MapCodec)ConfiguredFeature.CODEC.listOf().fieldOf("features")).xmap(SimpleRandomFeatureConfiguration::new, simpleRandomFeatureConfiguration -> simpleRandomFeatureConfiguration.features).codec();
+    public static final Codec<SimpleRandomFeatureConfiguration> CODEC = ((MapCodec)ConfiguredFeature.LIST_CODEC.fieldOf("features")).xmap(SimpleRandomFeatureConfiguration::new, simpleRandomFeatureConfiguration -> simpleRandomFeatureConfiguration.features).codec();
     public final List<Supplier<ConfiguredFeature<?, ?>>> features;
 
     public SimpleRandomFeatureConfiguration(List<Supplier<ConfiguredFeature<?, ?>>> list) {

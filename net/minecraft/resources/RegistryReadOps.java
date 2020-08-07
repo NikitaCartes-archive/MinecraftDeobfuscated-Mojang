@@ -62,7 +62,7 @@ extends DelegatingOps<T> {
         this.jsonOps = dynamicOps == JsonOps.INSTANCE ? this : new RegistryReadOps<JsonElement>(JsonOps.INSTANCE, resourceAccess, registryHolder, identityHashMap);
     }
 
-    protected <E> DataResult<Pair<java.util.function.Supplier<E>, T>> decodeElement(T object, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec) {
+    protected <E> DataResult<Pair<java.util.function.Supplier<E>, T>> decodeElement(T object, ResourceKey<? extends Registry<E>> resourceKey, Codec<E> codec, boolean bl) {
         Optional optional = this.registryHolder.registry(resourceKey);
         if (!optional.isPresent()) {
             return DataResult.error("Unknown registry: " + resourceKey);
@@ -70,6 +70,9 @@ extends DelegatingOps<T> {
         WritableRegistry writableRegistry = optional.get();
         DataResult dataResult = ResourceLocation.CODEC.decode(this.delegate, object);
         if (!dataResult.result().isPresent()) {
+            if (!bl) {
+                return DataResult.error("Inline definitions not allowed here");
+            }
             return codec.decode(this, object).map(pair -> pair.mapFirst(object -> () -> object));
         }
         Pair pair2 = dataResult.result().get();
@@ -99,7 +102,6 @@ extends DelegatingOps<T> {
     }
 
     private <E> DataResult<java.util.function.Supplier<E>> readAndRegisterElement(ResourceKey<? extends Registry<E>> resourceKey, WritableRegistry<E> writableRegistry, Codec<E> codec, ResourceLocation resourceLocation) {
-        DataResult<Object> dataResult3;
         ResourceKey resourceKey2 = ResourceKey.create(resourceKey, resourceLocation);
         ReadCache<E> readCache = this.readCache(resourceKey);
         DataResult dataResult = (DataResult)((ReadCache)readCache).values.get(resourceKey2);
@@ -114,18 +116,15 @@ extends DelegatingOps<T> {
             return object;
         });
         ((ReadCache)readCache).values.put(resourceKey2, DataResult.success(supplier));
-        DataResult<Pair<Object, OptionalInt>> dataResult2 = this.resources.parseElement(this.jsonOps, resourceKey, resourceKey2, codec);
-        if (dataResult2.result().isPresent()) {
-            Pair pair = dataResult2.result().get();
-            writableRegistry.registerOrOverride(pair.getSecond(), resourceKey2, pair.getFirst(), dataResult2.lifecycle());
-            dataResult3 = dataResult2.map(Pair::getFirst);
-        } else {
-            Object object2 = writableRegistry.get(resourceKey2);
-            dataResult3 = object2 != null ? DataResult.success(object2, Lifecycle.stable()) : dataResult2.map(Pair::getFirst);
+        DataResult<Pair<java.util.function.Supplier, OptionalInt>> dataResult2 = this.resources.parseElement(this.jsonOps, resourceKey, resourceKey2, codec);
+        Optional optional = dataResult2.result();
+        if (optional.isPresent()) {
+            Pair pair2 = optional.get();
+            writableRegistry.registerOrOverride(pair2.getSecond(), resourceKey2, pair2.getFirst(), dataResult2.lifecycle());
         }
-        DataResult<java.util.function.Supplier<E>> dataResult4 = dataResult3.map(object -> () -> object);
-        ((ReadCache)readCache).values.put(resourceKey2, dataResult4);
-        return dataResult4;
+        DataResult<java.util.function.Supplier<Object>> dataResult3 = !optional.isPresent() && writableRegistry.get(resourceKey2) != null ? DataResult.success(() -> writableRegistry.get(resourceKey2), Lifecycle.stable()) : dataResult2.map(pair -> () -> writableRegistry.get(resourceKey2));
+        ((ReadCache)readCache).values.put(resourceKey2, dataResult3);
+        return dataResult3;
     }
 
     private <E> ReadCache<E> readCache(ResourceKey<? extends Registry<E>> resourceKey2) {

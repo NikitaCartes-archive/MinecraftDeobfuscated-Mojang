@@ -16,7 +16,7 @@ import net.minecraft.world.level.biome.BiomeSource;
 
 public class CheckerboardColumnBiomeSource
 extends BiomeSource {
-    public static final Codec<CheckerboardColumnBiomeSource> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Biome.CODEC.listOf().fieldOf("biomes")).forGetter(checkerboardColumnBiomeSource -> checkerboardColumnBiomeSource.allowedBiomes), ((MapCodec)Codec.intRange(0, 62).fieldOf("scale")).orElse(2).forGetter(checkerboardColumnBiomeSource -> checkerboardColumnBiomeSource.size)).apply((Applicative<CheckerboardColumnBiomeSource, ?>)instance, CheckerboardColumnBiomeSource::new));
+    public static final Codec<CheckerboardColumnBiomeSource> CODEC = RecordCodecBuilder.create(instance -> instance.group(((MapCodec)Biome.LIST_CODEC.fieldOf("biomes")).forGetter(checkerboardColumnBiomeSource -> checkerboardColumnBiomeSource.allowedBiomes), ((MapCodec)Codec.intRange(0, 62).fieldOf("scale")).orElse(2).forGetter(checkerboardColumnBiomeSource -> checkerboardColumnBiomeSource.size)).apply((Applicative<CheckerboardColumnBiomeSource, ?>)instance, CheckerboardColumnBiomeSource::new));
     private final List<Supplier<Biome>> allowedBiomes;
     private final int bitShift;
     private final int size;

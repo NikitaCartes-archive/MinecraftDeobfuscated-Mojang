@@ -3,6 +3,7 @@
  */
 package net.minecraft.world.level.chunk.storage;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -40,7 +41,8 @@ implements AutoCloseable {
     private final ByteBuffer header = ByteBuffer.allocateDirect(8192);
     private final IntBuffer offsets;
     private final IntBuffer timestamps;
-    private final RegionBitmap usedSectors = new RegionBitmap();
+    @VisibleForTesting
+    protected final RegionBitmap usedSectors = new RegionBitmap();
 
     public RegionFile(File file, File file2, boolean bl) throws IOException {
         this(file.toPath(), file2.toPath(), RegionFileVersion.VERSION_DEFLATE, bl);
@@ -64,12 +66,28 @@ implements AutoCloseable {
             if (i != 8192) {
                 LOGGER.warn("Region file {} has truncated header: {}", (Object)path, (Object)i);
             }
+            long l = Files.size(path);
             for (int j = 0; j < 1024; ++j) {
                 int k = this.offsets.get(j);
                 if (k == 0) continue;
-                int l = RegionFile.getSectorNumber(k);
-                int m = RegionFile.getNumSectors(k);
-                this.usedSectors.force(l, m);
+                int m = RegionFile.getSectorNumber(k);
+                int n = RegionFile.getNumSectors(k);
+                if (m < 2) {
+                    LOGGER.warn("Region file {} has invalid sector at index: {}; sector {} overlaps with header", (Object)path, (Object)j, (Object)m);
+                    this.offsets.put(j, 0);
+                    continue;
+                }
+                if (n == 0) {
+                    LOGGER.warn("Region file {} has an invalid sector at index: {}; size has to be > 0", (Object)path, (Object)j);
+                    this.offsets.put(j, 0);
+                    continue;
+                }
+                if ((long)m * 4096L > l) {
+                    LOGGER.warn("Region file {} has an invalid sector at index: {}; sector {} is out of bounds", (Object)path, (Object)j, (Object)m);
+                    this.offsets.put(j, 0);
+                    continue;
+                }
+                this.usedSectors.force(m, n);
             }
         }
     }
@@ -160,7 +178,7 @@ implements AutoCloseable {
     }
 
     private static int getSectorNumber(int i) {
-        return i >> 8;
+        return i >> 8 & 0xFFFFFF;
     }
 
     private static int sizeToSectors(int i) {
