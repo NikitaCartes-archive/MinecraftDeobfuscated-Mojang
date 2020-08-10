@@ -61,31 +61,32 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 		private final PackSelectionModel.Entry pack;
 		private final FormattedCharSequence nameDisplayCache;
 		private final MultiLineLabel descriptionDisplayCache;
+		private final FormattedCharSequence incompatibleNameDisplayCache;
+		private final MultiLineLabel incompatibleDescriptionDisplayCache;
 
 		public PackEntry(Minecraft minecraft, TransferableSelectionList transferableSelectionList, Screen screen, PackSelectionModel.Entry entry) {
 			this.minecraft = minecraft;
 			this.screen = screen;
 			this.pack = entry;
 			this.parent = transferableSelectionList;
-			Component component;
-			Component component2;
-			if (entry.getCompatibility().isCompatible()) {
-				component = entry.getTitle();
-				component2 = entry.getExtendedDescription();
-			} else {
-				component = TransferableSelectionList.INCOMPATIBLE_TITLE;
-				component2 = entry.getCompatibility().getDescription();
-			}
+			this.nameDisplayCache = cacheName(minecraft, entry.getTitle());
+			this.descriptionDisplayCache = cacheDescription(minecraft, entry.getExtendedDescription());
+			this.incompatibleNameDisplayCache = cacheName(minecraft, TransferableSelectionList.INCOMPATIBLE_TITLE);
+			this.incompatibleDescriptionDisplayCache = cacheDescription(minecraft, entry.getCompatibility().getDescription());
+		}
 
+		private static FormattedCharSequence cacheName(Minecraft minecraft, Component component) {
 			int i = minecraft.font.width(component);
 			if (i > 157) {
 				FormattedText formattedText = FormattedText.composite(minecraft.font.substrByWidth(component, 157 - minecraft.font.width("...")), FormattedText.of("..."));
-				this.nameDisplayCache = Language.getInstance().getVisualOrder(formattedText);
+				return Language.getInstance().getVisualOrder(formattedText);
 			} else {
-				this.nameDisplayCache = component.getVisualOrderText();
+				return component.getVisualOrderText();
 			}
+		}
 
-			this.descriptionDisplayCache = MultiLineLabel.create(minecraft.font, component2, 157, 2);
+		private static MultiLineLabel cacheDescription(Minecraft minecraft, Component component) {
+			return MultiLineLabel.create(minecraft.font, component, 157, 2);
 		}
 
 		@Override
@@ -99,12 +100,19 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 			this.minecraft.getTextureManager().bind(this.pack.getIconTexture());
 			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 			GuiComponent.blit(poseStack, k, j, 0.0F, 0.0F, 32, 32, 32, 32);
+			FormattedCharSequence formattedCharSequence = this.nameDisplayCache;
+			MultiLineLabel multiLineLabel = this.descriptionDisplayCache;
 			if (this.showHoverOverlay() && (this.minecraft.options.touchscreen || bl)) {
 				this.minecraft.getTextureManager().bind(TransferableSelectionList.ICON_OVERLAY_LOCATION);
 				GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
 				RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 				int p = n - k;
 				int q = o - j;
+				if (!this.pack.getCompatibility().isCompatible()) {
+					formattedCharSequence = this.incompatibleNameDisplayCache;
+					multiLineLabel = this.incompatibleDescriptionDisplayCache;
+				}
+
 				if (this.pack.canSelect()) {
 					if (p < 32) {
 						GuiComponent.blit(poseStack, k, j, 0.0F, 32.0F, 32, 32, 256, 256);
@@ -138,8 +146,8 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 				}
 			}
 
-			this.minecraft.font.drawShadow(poseStack, this.nameDisplayCache, (float)(k + 32 + 2), (float)(j + 1), 16777215);
-			this.descriptionDisplayCache.renderLeftAligned(poseStack, k + 32 + 2, j + 12, 10, 8421504);
+			this.minecraft.font.drawShadow(poseStack, formattedCharSequence, (float)(k + 32 + 2), (float)(j + 1), 16777215);
+			multiLineLabel.renderLeftAligned(poseStack, k + 32 + 2, j + 12, 10, 8421504);
 		}
 
 		private boolean showHoverOverlay() {

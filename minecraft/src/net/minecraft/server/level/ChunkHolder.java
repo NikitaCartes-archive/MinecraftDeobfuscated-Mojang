@@ -180,7 +180,7 @@ public class ChunkHolder {
 			this.resendLight |= i >= 64;
 			if (this.skyChangedLightSectionFilter != 0 || this.blockChangedLightSectionFilter != 0) {
 				this.broadcast(
-					new ClientboundLightUpdatePacket(levelChunk.getPos(), this.lightEngine, this.skyChangedLightSectionFilter, this.blockChangedLightSectionFilter, false),
+					new ClientboundLightUpdatePacket(levelChunk.getPos(), this.lightEngine, this.skyChangedLightSectionFilter, this.blockChangedLightSectionFilter, true),
 					!this.resendLight
 				);
 				this.skyChangedLightSectionFilter = 0;

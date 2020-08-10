@@ -52,9 +52,7 @@ public class PackSelectionModel {
 
 	public void findNewPacks() {
 		this.repository.reload();
-		this.selected.clear();
-		this.selected.addAll(this.repository.getSelectedPacks());
-		Collections.reverse(this.selected);
+		this.selected.retainAll(this.repository.getAvailablePacks());
 		this.unselected.clear();
 		this.unselected.addAll(this.repository.getAvailablePacks());
 		this.unselected.removeAll(this.selected);
