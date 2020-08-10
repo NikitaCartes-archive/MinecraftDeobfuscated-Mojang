@@ -67,29 +67,31 @@ extends ObjectSelectionList<PackEntry> {
         private final PackSelectionModel.Entry pack;
         private final FormattedCharSequence nameDisplayCache;
         private final MultiLineLabel descriptionDisplayCache;
+        private final FormattedCharSequence incompatibleNameDisplayCache;
+        private final MultiLineLabel incompatibleDescriptionDisplayCache;
 
         public PackEntry(Minecraft minecraft, TransferableSelectionList transferableSelectionList, Screen screen, PackSelectionModel.Entry entry) {
-            Component component2;
-            Component component;
             this.minecraft = minecraft;
             this.screen = screen;
             this.pack = entry;
             this.parent = transferableSelectionList;
-            if (entry.getCompatibility().isCompatible()) {
-                component = entry.getTitle();
-                component2 = entry.getExtendedDescription();
-            } else {
-                component = INCOMPATIBLE_TITLE;
-                component2 = entry.getCompatibility().getDescription();
-            }
+            this.nameDisplayCache = PackEntry.cacheName(minecraft, entry.getTitle());
+            this.descriptionDisplayCache = PackEntry.cacheDescription(minecraft, entry.getExtendedDescription());
+            this.incompatibleNameDisplayCache = PackEntry.cacheName(minecraft, INCOMPATIBLE_TITLE);
+            this.incompatibleDescriptionDisplayCache = PackEntry.cacheDescription(minecraft, entry.getCompatibility().getDescription());
+        }
+
+        private static FormattedCharSequence cacheName(Minecraft minecraft, Component component) {
             int i = minecraft.font.width(component);
             if (i > 157) {
                 FormattedText formattedText = FormattedText.composite(minecraft.font.substrByWidth(component, 157 - minecraft.font.width("...")), FormattedText.of("..."));
-                this.nameDisplayCache = Language.getInstance().getVisualOrder(formattedText);
-            } else {
-                this.nameDisplayCache = component.getVisualOrderText();
+                return Language.getInstance().getVisualOrder(formattedText);
             }
-            this.descriptionDisplayCache = MultiLineLabel.create(minecraft.font, (FormattedText)component2, 157, 2);
+            return component.getVisualOrderText();
+        }
+
+        private static MultiLineLabel cacheDescription(Minecraft minecraft, Component component) {
+            return MultiLineLabel.create(minecraft.font, (FormattedText)component, 157, 2);
         }
 
         @Override
@@ -102,12 +104,18 @@ extends ObjectSelectionList<PackEntry> {
             this.minecraft.getTextureManager().bind(this.pack.getIconTexture());
             RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
             GuiComponent.blit(poseStack, k, j, 0.0f, 0.0f, 32, 32, 32, 32);
+            FormattedCharSequence formattedCharSequence = this.nameDisplayCache;
+            MultiLineLabel multiLineLabel = this.descriptionDisplayCache;
             if (this.showHoverOverlay() && (this.minecraft.options.touchscreen || bl)) {
                 this.minecraft.getTextureManager().bind(ICON_OVERLAY_LOCATION);
                 GuiComponent.fill(poseStack, k, j, k + 32, j + 32, -1601138544);
                 RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
                 int p = n - k;
                 int q = o - j;
+                if (!this.pack.getCompatibility().isCompatible()) {
+                    formattedCharSequence = this.incompatibleNameDisplayCache;
+                    multiLineLabel = this.incompatibleDescriptionDisplayCache;
+                }
                 if (this.pack.canSelect()) {
                     if (p < 32) {
                         GuiComponent.blit(poseStack, k, j, 0.0f, 32.0f, 32, 32, 256, 256);
@@ -138,8 +146,8 @@ extends ObjectSelectionList<PackEntry> {
                     }
                 }
             }
-            this.minecraft.font.drawShadow(poseStack, this.nameDisplayCache, (float)(k + 32 + 2), (float)(j + 1), 0xFFFFFF);
-            this.descriptionDisplayCache.renderLeftAligned(poseStack, k + 32 + 2, j + 12, 10, 0x808080);
+            this.minecraft.font.drawShadow(poseStack, formattedCharSequence, (float)(k + 32 + 2), (float)(j + 1), 0xFFFFFF);
+            multiLineLabel.renderLeftAligned(poseStack, k + 32 + 2, j + 12, 10, 0x808080);
         }
 
         private boolean showHoverOverlay() {

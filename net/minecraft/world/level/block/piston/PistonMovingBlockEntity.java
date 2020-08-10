@@ -239,7 +239,7 @@ implements TickableBlockEntity {
     }
 
     public void finalTick() {
-        if (this.progressO < 1.0f && this.level != null) {
+        if (this.level != null && (this.progressO < 1.0f || this.level.isClientSide)) {
             this.progressO = this.progress = 1.0f;
             this.level.removeBlockEntity(this.worldPosition);
             this.setRemoved();
