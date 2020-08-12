@@ -128,6 +128,7 @@ public class ServerPlayerGameMode {
 		} else if (blockPos.getY() >= i) {
 			this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, false, "too high"));
 		} else {
+			this.player.resetAttackStrengthTicker(false);
 			if (action == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK) {
 				if (!this.level.mayInteract(this.player, blockPos)) {
 					this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, this.level.getBlockState(blockPos), action, false, "may not interact"));

@@ -76,6 +76,8 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			playerModel.head.visible = true;
 			playerModel.hat.visible = true;
 		} else {
+			ItemStack itemStack = abstractClientPlayer.getMainHandItem();
+			ItemStack itemStack2 = abstractClientPlayer.getOffhandItem();
 			playerModel.setAllVisible(true);
 			playerModel.hat.visible = abstractClientPlayer.isModelPartShown(PlayerModelPart.HAT);
 			playerModel.jacket.visible = abstractClientPlayer.isModelPartShown(PlayerModelPart.JACKET);
@@ -84,8 +86,8 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			playerModel.leftSleeve.visible = abstractClientPlayer.isModelPartShown(PlayerModelPart.LEFT_SLEEVE);
 			playerModel.rightSleeve.visible = abstractClientPlayer.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE);
 			playerModel.crouching = abstractClientPlayer.isCrouching();
-			HumanoidModel.ArmPose armPose = getArmPose(abstractClientPlayer, InteractionHand.MAIN_HAND);
-			HumanoidModel.ArmPose armPose2 = getArmPose(abstractClientPlayer, InteractionHand.OFF_HAND);
+			HumanoidModel.ArmPose armPose = getArmPose(abstractClientPlayer, itemStack, itemStack2, InteractionHand.MAIN_HAND);
+			HumanoidModel.ArmPose armPose2 = getArmPose(abstractClientPlayer, itemStack, itemStack2, InteractionHand.OFF_HAND);
 			if (armPose.isTwoHanded()) {
 				armPose2 = abstractClientPlayer.getOffhandItem().isEmpty() ? HumanoidModel.ArmPose.EMPTY : HumanoidModel.ArmPose.ITEM;
 			}
@@ -100,34 +102,42 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		}
 	}
 
-	private static HumanoidModel.ArmPose getArmPose(AbstractClientPlayer abstractClientPlayer, InteractionHand interactionHand) {
-		ItemStack itemStack = abstractClientPlayer.getItemInHand(interactionHand);
-		if (itemStack.isEmpty()) {
-			return HumanoidModel.ArmPose.EMPTY;
-		} else {
-			if (abstractClientPlayer.getUsedItemHand() == interactionHand && abstractClientPlayer.getUseItemRemainingTicks() > 0) {
-				UseAnim useAnim = itemStack.getUseAnimation();
+	private static HumanoidModel.ArmPose getArmPose(
+		AbstractClientPlayer abstractClientPlayer, ItemStack itemStack, ItemStack itemStack2, InteractionHand interactionHand
+	) {
+		HumanoidModel.ArmPose armPose = HumanoidModel.ArmPose.EMPTY;
+		ItemStack itemStack3 = interactionHand == InteractionHand.MAIN_HAND ? itemStack : itemStack2;
+		if (!itemStack3.isEmpty()) {
+			armPose = HumanoidModel.ArmPose.ITEM;
+			boolean bl = abstractClientPlayer.isUsingItem() && itemStack3 == abstractClientPlayer.getUseItem();
+			boolean bl2 = !bl && interactionHand == InteractionHand.OFF_HAND && abstractClientPlayer.isBlocking();
+			if (!bl && !bl2) {
+				boolean bl3 = itemStack.getItem() == Items.CROSSBOW;
+				boolean bl4 = CrossbowItem.isCharged(itemStack);
+				boolean bl5 = itemStack2.getItem() == Items.CROSSBOW;
+				boolean bl6 = CrossbowItem.isCharged(itemStack2);
+				if (bl3 && bl4) {
+					armPose = HumanoidModel.ArmPose.CROSSBOW_HOLD;
+				}
+
+				if (bl5 && bl6 && itemStack.getItem().getUseAnimation(itemStack) == UseAnim.NONE) {
+					armPose = HumanoidModel.ArmPose.CROSSBOW_HOLD;
+				}
+			} else {
+				UseAnim useAnim = itemStack3.getUseAnimation();
 				if (useAnim == UseAnim.BLOCK) {
-					return HumanoidModel.ArmPose.BLOCK;
+					armPose = HumanoidModel.ArmPose.BLOCK;
+				} else if (useAnim == UseAnim.BOW) {
+					armPose = HumanoidModel.ArmPose.BOW_AND_ARROW;
+				} else if (useAnim == UseAnim.SPEAR) {
+					armPose = HumanoidModel.ArmPose.THROW_SPEAR;
+				} else if (useAnim == UseAnim.CROSSBOW && interactionHand == abstractClientPlayer.getUsedItemHand()) {
+					armPose = HumanoidModel.ArmPose.CROSSBOW_CHARGE;
 				}
-
-				if (useAnim == UseAnim.BOW) {
-					return HumanoidModel.ArmPose.BOW_AND_ARROW;
-				}
-
-				if (useAnim == UseAnim.SPEAR) {
-					return HumanoidModel.ArmPose.THROW_SPEAR;
-				}
-
-				if (useAnim == UseAnim.CROSSBOW && interactionHand == abstractClientPlayer.getUsedItemHand()) {
-					return HumanoidModel.ArmPose.CROSSBOW_CHARGE;
-				}
-			} else if (!abstractClientPlayer.swinging && itemStack.getItem() == Items.CROSSBOW && CrossbowItem.isCharged(itemStack)) {
-				return HumanoidModel.ArmPose.CROSSBOW_HOLD;
 			}
-
-			return HumanoidModel.ArmPose.ITEM;
 		}
+
+		return armPose;
 	}
 
 	public ResourceLocation getTextureLocation(AbstractClientPlayer abstractClientPlayer) {

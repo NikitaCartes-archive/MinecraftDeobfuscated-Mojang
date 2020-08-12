@@ -13,7 +13,7 @@ public class KeyboardInput extends Input {
 	}
 
 	@Override
-	public void tick(boolean bl) {
+	public void tick(boolean bl, boolean bl2) {
 		this.up = this.options.keyUp.isDown();
 		this.down = this.options.keyDown.isDown();
 		this.left = this.options.keyLeft.isDown();
@@ -22,7 +22,10 @@ public class KeyboardInput extends Input {
 		this.leftImpulse = this.left == this.right ? 0.0F : (this.left ? 1.0F : -1.0F);
 		this.jumping = this.options.keyJump.isDown();
 		this.shiftKeyDown = this.options.keyShift.isDown();
-		if (bl) {
+		if (bl2) {
+			this.leftImpulse = (float)((double)this.leftImpulse * 0.2);
+			this.forwardImpulse = (float)((double)this.forwardImpulse * 0.2);
+		} else if (bl) {
 			this.leftImpulse = (float)((double)this.leftImpulse * 0.3);
 			this.forwardImpulse = (float)((double)this.forwardImpulse * 0.3);
 		}

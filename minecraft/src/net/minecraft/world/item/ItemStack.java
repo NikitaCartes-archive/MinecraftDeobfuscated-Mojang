@@ -52,7 +52,6 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -577,13 +576,18 @@ public final class ItemStack {
 						double d = attributeModifier.getAmount();
 						boolean bl = false;
 						if (player != null) {
-							if (attributeModifier.getId() == Item.BASE_ATTACK_DAMAGE_UUID) {
-								d += player.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
-								d += (double)EnchantmentHelper.getDamageBonus(this, MobType.UNDEFINED);
+							if (attributeModifier.getId() == WeaponType.BASE_ATTACK_DAMAGE_UUID) {
+								d += player.getAttribute(Attributes.ATTACK_DAMAGE).getBaseValue();
+								d += (double)EnchantmentHelper.getDamageBonus(this, null);
 								bl = true;
-							} else if (attributeModifier.getId() == Item.BASE_ATTACK_SPEED_UUID) {
-								d += player.getAttributeBaseValue(Attributes.ATTACK_SPEED);
+							} else if (attributeModifier.getId() == WeaponType.BASE_ATTACK_SPEED_UUID) {
+								d += player.getAttribute(Attributes.ATTACK_SPEED).getBaseValue() - 1.5;
 								bl = true;
+							} else if (attributeModifier.getId() == WeaponType.BASE_ATTACK_REACH_UUID) {
+								d += player.getAttribute(Attributes.ATTACK_REACH).getBaseValue();
+								bl = true;
+							} else if (((Attribute)entry.getKey()).equals(Attributes.KNOCKBACK_RESISTANCE)) {
+								d += player.getAttribute(Attributes.KNOCKBACK_RESISTANCE).getBaseValue();
 							}
 						}
 

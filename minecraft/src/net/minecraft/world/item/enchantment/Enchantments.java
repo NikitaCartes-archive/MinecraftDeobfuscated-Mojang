@@ -38,7 +38,8 @@ public class Enchantments {
 		"looting", new LootBonusEnchantment(Enchantment.Rarity.RARE, EnchantmentCategory.WEAPON, EquipmentSlot.MAINHAND)
 	);
 	public static final Enchantment SWEEPING_EDGE = register("sweeping", new SweepingEdgeEnchantment(Enchantment.Rarity.RARE, EquipmentSlot.MAINHAND));
-	public static final Enchantment BLOCK_EFFICIENCY = register("efficiency", new DiggingEnchantment(Enchantment.Rarity.COMMON, EquipmentSlot.MAINHAND));
+	public static final Enchantment CLEAVING = register("cleaving", new CleavingEnchantment(Enchantment.Rarity.RARE, EquipmentSlot.MAINHAND));
+	public static final Enchantment DIGGING_EFFICIENCY = register("efficiency", new DiggingEnchantment(Enchantment.Rarity.COMMON, EquipmentSlot.MAINHAND));
 	public static final Enchantment SILK_TOUCH = register("silk_touch", new UntouchingEnchantment(Enchantment.Rarity.VERY_RARE, EquipmentSlot.MAINHAND));
 	public static final Enchantment UNBREAKING = register("unbreaking", new DigDurabilityEnchantment(Enchantment.Rarity.UNCOMMON, EquipmentSlot.MAINHAND));
 	public static final Enchantment BLOCK_FORTUNE = register(

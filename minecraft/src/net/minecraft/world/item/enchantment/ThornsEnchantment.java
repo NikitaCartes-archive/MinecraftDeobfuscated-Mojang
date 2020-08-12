@@ -30,8 +30,8 @@ public class ThornsEnchantment extends Enchantment {
 	}
 
 	@Override
-	public boolean canEnchant(ItemStack itemStack) {
-		return itemStack.getItem() instanceof ArmorItem ? true : super.canEnchant(itemStack);
+	public boolean canEnchant(ItemStack itemStack, boolean bl) {
+		return itemStack.getItem() instanceof ArmorItem ? true : super.canEnchant(itemStack, bl);
 	}
 
 	@Override

@@ -56,8 +56,8 @@ public class ShovelItem extends DiggerItem {
 		ImmutableMap.of(Blocks.GRASS_BLOCK, Blocks.GRASS_PATH.defaultBlockState())
 	);
 
-	public ShovelItem(Tier tier, float f, float g, Item.Properties properties) {
-		super(f, g, tier, DIGGABLES, properties);
+	public ShovelItem(Tier tier, Item.Properties properties) {
+		super(tier, DIGGABLES, properties);
 	}
 
 	@Override
@@ -101,5 +101,10 @@ public class ShovelItem extends DiggerItem {
 				return InteractionResult.PASS;
 			}
 		}
+	}
+
+	@Override
+	protected WeaponType getWeaponType() {
+		return WeaponType.SHOVEL;
 	}
 }

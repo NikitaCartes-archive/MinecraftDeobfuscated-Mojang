@@ -1191,8 +1191,14 @@ public class ServerGamePacketListenerImpl implements ServerGamePacketListener {
 		this.player.resetLastActionTime();
 		this.player.setShiftKeyDown(serverboundInteractPacket.isUsingSecondaryAction());
 		if (entity != null) {
-			double d = 36.0;
-			if (this.player.distanceToSqr(entity) < 36.0) {
+			boolean bl = this.player.canSee(entity);
+			float f = this.player.getCurrentAttackReach(1.0F) + 0.25F + entity.getBbWidth() * 0.5F;
+			double d = (double)(f * f);
+			if (!bl) {
+				d = 9.0;
+			}
+
+			if (this.player.distanceToSqr(entity) < d) {
 				InteractionHand interactionHand = serverboundInteractPacket.getHand();
 				ItemStack itemStack = interactionHand != null ? this.player.getItemInHand(interactionHand).copy() : ItemStack.EMPTY;
 				Optional<InteractionResult> optional = Optional.empty();
@@ -1208,6 +1214,8 @@ public class ServerGamePacketListenerImpl implements ServerGamePacketListener {
 					}
 
 					this.player.attack(entity);
+				} else if (serverboundInteractPacket.getAction() == ServerboundInteractPacket.Action.AIR_SWING) {
+					this.player.attackAir();
 				}
 
 				if (optional.isPresent() && ((InteractionResult)optional.get()).consumesAction()) {
@@ -1217,6 +1225,8 @@ public class ServerGamePacketListenerImpl implements ServerGamePacketListener {
 					}
 				}
 			}
+		} else {
+			this.player.attackAir();
 		}
 	}
 

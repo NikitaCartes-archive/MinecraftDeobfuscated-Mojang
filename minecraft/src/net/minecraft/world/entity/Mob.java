@@ -49,7 +49,6 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
@@ -1355,7 +1354,7 @@ public abstract class Mob extends LivingEntity {
 		float f = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
 		float g = (float)this.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
 		if (entity instanceof LivingEntity) {
-			f += EnchantmentHelper.getDamageBonus(this.getMainHandItem(), ((LivingEntity)entity).getMobType());
+			f += EnchantmentHelper.getDamageBonus(this.getMainHandItem(), (LivingEntity)entity);
 			g += (float)EnchantmentHelper.getKnockbackBonus(this);
 		}
 
@@ -1372,26 +1371,11 @@ public abstract class Mob extends LivingEntity {
 				this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
 			}
 
-			if (entity instanceof Player) {
-				Player player = (Player)entity;
-				this.maybeDisableShield(player, this.getMainHandItem(), player.isUsingItem() ? player.getUseItem() : ItemStack.EMPTY);
-			}
-
 			this.doEnchantDamageEffects(this, entity);
 			this.setLastHurtMob(entity);
 		}
 
 		return bl;
-	}
-
-	private void maybeDisableShield(Player player, ItemStack itemStack, ItemStack itemStack2) {
-		if (!itemStack.isEmpty() && !itemStack2.isEmpty() && itemStack.getItem() instanceof AxeItem && itemStack2.getItem() == Items.SHIELD) {
-			float f = 0.25F + (float)EnchantmentHelper.getBlockEfficiency(this) * 0.05F;
-			if (this.random.nextFloat() < f) {
-				player.getCooldowns().addCooldown(Items.SHIELD, 100);
-				this.level.broadcastEntityEvent(player, (byte)30);
-			}
-		}
 	}
 
 	protected boolean isSunBurnTick() {

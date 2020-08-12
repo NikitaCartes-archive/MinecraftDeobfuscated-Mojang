@@ -43,7 +43,6 @@ public class ThrownTrident extends AbstractArrow {
 		this.entityData.set(ID_FOIL, itemStack.hasFoil());
 	}
 
-	@Environment(EnvType.CLIENT)
 	public ThrownTrident(Level level, double d, double e, double f) {
 		super(EntityType.TRIDENT, d, e, f, level);
 	}
@@ -53,6 +52,12 @@ public class ThrownTrident extends AbstractArrow {
 		super.defineSynchedData();
 		this.entityData.define(ID_LOYALTY, (byte)0);
 		this.entityData.define(ID_FOIL, false);
+	}
+
+	public void setTridentItem(ItemStack itemStack) {
+		if (itemStack.getItem() == Items.TRIDENT || itemStack.isEmpty()) {
+			this.tridentItem = itemStack.copy();
+		}
 	}
 
 	@Override
@@ -118,7 +123,7 @@ public class ThrownTrident extends AbstractArrow {
 		float f = 8.0F;
 		if (entity instanceof LivingEntity) {
 			LivingEntity livingEntity = (LivingEntity)entity;
-			f += EnchantmentHelper.getDamageBonus(this.tridentItem, livingEntity.getMobType());
+			f += EnchantmentHelper.getDamageBonus(this.tridentItem, livingEntity);
 		}
 
 		Entity entity2 = this.getOwner();
@@ -206,5 +211,15 @@ public class ThrownTrident extends AbstractArrow {
 	@Override
 	public boolean shouldRender(double d, double e, double f) {
 		return true;
+	}
+
+	@Override
+	protected void outOfWorld() {
+		int i = this.entityData.get(ID_LOYALTY);
+		if (i > 0) {
+			this.setNoPhysics(true);
+		} else {
+			super.outOfWorld();
+		}
 	}
 }

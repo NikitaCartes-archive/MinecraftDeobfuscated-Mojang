@@ -227,4 +227,10 @@ public class Vec3 implements Position {
 	public final double z() {
 		return this.z;
 	}
+
+	public Vec3 project(Vec3 vec3) {
+		Vec3 vec32 = vec3.normalize();
+		double d = this.dot(vec3);
+		return vec32.multiply(d, d, d);
+	}
 }

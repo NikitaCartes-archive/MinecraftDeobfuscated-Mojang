@@ -26,8 +26,8 @@ public class DigDurabilityEnchantment extends Enchantment {
 	}
 
 	@Override
-	public boolean canEnchant(ItemStack itemStack) {
-		return itemStack.isDamageableItem() ? true : super.canEnchant(itemStack);
+	public boolean canEnchant(ItemStack itemStack, boolean bl) {
+		return itemStack.isDamageableItem() ? true : super.canEnchant(itemStack, bl);
 	}
 
 	public static boolean shouldIgnoreDurabilityDrop(ItemStack itemStack, int i, Random random) {

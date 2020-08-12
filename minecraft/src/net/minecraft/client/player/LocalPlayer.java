@@ -117,6 +117,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 	private boolean wasFallFlying;
 	private int waterVisionTime;
 	private boolean showDeathScreen = true;
+	private boolean wasShieldBlocking;
 
 	public LocalPlayer(
 		Minecraft minecraft,
@@ -200,6 +201,12 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 			for (AmbientSoundHandler ambientSoundHandler : this.ambientSoundHandlers) {
 				ambientSoundHandler.tick();
+			}
+
+			boolean bl = this.isBlocking();
+			if (bl != this.wasShieldBlocking) {
+				this.wasShieldBlocking = bl;
+				this.minecraft.gameRenderer.itemInHandRenderer.itemUsed(InteractionHand.OFF_HAND);
 			}
 		}
 	}
@@ -321,12 +328,12 @@ public class LocalPlayer extends AbstractClientPlayer {
 			if (g <= 0.0F) {
 				this.setHealth(f);
 				if (g < 0.0F) {
-					this.invulnerableTime = 10;
+					this.invulnerableTime = 5;
 				}
 			} else {
 				this.lastHurt = g;
 				this.setHealth(this.getHealth());
-				this.invulnerableTime = 20;
+				this.invulnerableTime = 10;
 				this.actuallyHurt(DamageSource.GENERIC, g);
 				this.hurtDuration = 10;
 				this.hurtTime = this.hurtDuration;
@@ -636,22 +643,21 @@ public class LocalPlayer extends AbstractClientPlayer {
 		boolean bl = this.input.jumping;
 		boolean bl2 = this.input.shiftKeyDown;
 		boolean bl3 = this.hasEnoughImpulseToStartSprinting();
+		boolean bl4 = (this.isUsingItem() || this.isBlocking()) && !this.isPassenger();
 		this.crouching = !this.abilities.flying
 			&& !this.isSwimming()
 			&& this.canEnterPose(Pose.CROUCHING)
 			&& (this.isShiftKeyDown() || !this.isSleeping() && !this.canEnterPose(Pose.STANDING));
-		this.input.tick(this.isMovingSlowly());
+		this.input.tick(this.isMovingSlowly(), bl4);
 		this.minecraft.getTutorial().onInput(this.input);
-		if (this.isUsingItem() && !this.isPassenger()) {
-			this.input.leftImpulse *= 0.2F;
-			this.input.forwardImpulse *= 0.2F;
+		if (bl4) {
 			this.sprintTriggerTime = 0;
 		}
 
-		boolean bl4 = false;
+		boolean bl5 = false;
 		if (this.autoJumpTime > 0) {
 			this.autoJumpTime--;
-			bl4 = true;
+			bl5 = true;
 			this.input.jumping = true;
 		}
 
@@ -666,13 +672,13 @@ public class LocalPlayer extends AbstractClientPlayer {
 			this.sprintTriggerTime = 0;
 		}
 
-		boolean bl5 = (float)this.getFoodData().getFoodLevel() > 6.0F || this.abilities.mayfly;
+		boolean bl6 = this.getFoodData().isEnoughToSprint() || this.abilities.mayfly;
 		if ((this.onGround || this.isUnderWater())
 			&& !bl2
 			&& !bl3
 			&& this.hasEnoughImpulseToStartSprinting()
 			&& !this.isSprinting()
-			&& bl5
+			&& bl6
 			&& !this.isUsingItem()
 			&& !this.hasEffect(MobEffects.BLINDNESS)) {
 			if (this.sprintTriggerTime <= 0 && !this.minecraft.options.keySprint.isDown()) {
@@ -685,7 +691,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 		if (!this.isSprinting()
 			&& (!this.isInWater() || this.isUnderWater())
 			&& this.hasEnoughImpulseToStartSprinting()
-			&& bl5
+			&& bl6
 			&& !this.isUsingItem()
 			&& !this.hasEffect(MobEffects.BLINDNESS)
 			&& this.minecraft.options.keySprint.isDown()) {
@@ -693,38 +699,38 @@ public class LocalPlayer extends AbstractClientPlayer {
 		}
 
 		if (this.isSprinting()) {
-			boolean bl6 = !this.input.hasForwardImpulse() || !bl5;
-			boolean bl7 = bl6 || this.horizontalCollision || this.isInWater() && !this.isUnderWater();
+			boolean bl7 = !this.input.hasForwardImpulse() || !bl6;
+			boolean bl8 = bl7 || this.horizontalCollision || this.isInWater() && !this.isUnderWater();
 			if (this.isSwimming()) {
-				if (!this.onGround && !this.input.shiftKeyDown && bl6 || !this.isInWater()) {
+				if (!this.onGround && !this.input.shiftKeyDown && bl7 || !this.isInWater()) {
 					this.setSprinting(false);
 				}
-			} else if (bl7) {
+			} else if (bl8) {
 				this.setSprinting(false);
 			}
 		}
 
-		boolean bl6 = false;
+		boolean bl7 = false;
 		if (this.abilities.mayfly) {
 			if (this.minecraft.gameMode.isAlwaysFlying()) {
 				if (!this.abilities.flying) {
 					this.abilities.flying = true;
-					bl6 = true;
+					bl7 = true;
 					this.onUpdateAbilities();
 				}
-			} else if (!bl && this.input.jumping && !bl4) {
+			} else if (!bl && this.input.jumping && !bl5) {
 				if (this.jumpTriggerTime == 0) {
 					this.jumpTriggerTime = 7;
 				} else if (!this.isSwimming()) {
 					this.abilities.flying = !this.abilities.flying;
-					bl6 = true;
+					bl7 = true;
 					this.onUpdateAbilities();
 					this.jumpTriggerTime = 0;
 				}
 			}
 		}
 
-		if (this.input.jumping && !bl6 && !bl && !this.abilities.flying && !this.isPassenger() && !this.onClimbable()) {
+		if (this.input.jumping && !bl7 && !bl && !this.abilities.flying && !this.isPassenger() && !this.onClimbable()) {
 			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
 			if (itemStack.getItem() == Items.ELYTRA && ElytraItem.isFlyEnabled(itemStack) && this.tryToStartFallFlying()) {
 				this.connection.send(new ServerboundPlayerCommandPacket(this, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
@@ -1039,5 +1045,10 @@ public class LocalPlayer extends AbstractClientPlayer {
 		} else {
 			return super.getRopeHoldPosition(f);
 		}
+	}
+
+	@Override
+	public boolean hasEnabledShieldOnCrouch() {
+		return this.minecraft.options.useShieldOnCrouch;
 	}
 }

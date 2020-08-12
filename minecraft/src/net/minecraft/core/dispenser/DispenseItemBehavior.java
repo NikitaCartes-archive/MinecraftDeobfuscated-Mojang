@@ -31,6 +31,7 @@ import net.minecraft.world.entity.projectile.SpectralArrow;
 import net.minecraft.world.entity.projectile.ThrownEgg;
 import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
 import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BoneMealItem;
@@ -96,6 +97,19 @@ public interface DispenseItemBehavior {
 				AbstractArrow abstractArrow = new SpectralArrow(level, position.x(), position.y(), position.z());
 				abstractArrow.pickup = AbstractArrow.Pickup.ALLOWED;
 				return abstractArrow;
+			}
+		});
+		DispenserBlock.registerBehavior(Items.TRIDENT, new AbstractProjectileDispenseBehavior() {
+			@Override
+			protected Projectile getProjectile(Level level, Position position, ItemStack itemStack) {
+				ThrownTrident thrownTrident = new ThrownTrident(level, position.x(), position.y(), position.z());
+				thrownTrident.pickup = AbstractArrow.Pickup.ALLOWED;
+				if (itemStack.hurt(1, level.getRandom(), null)) {
+					itemStack.shrink(1);
+				}
+
+				thrownTrident.setTridentItem(itemStack);
+				return thrownTrident;
 			}
 		});
 		DispenserBlock.registerBehavior(Items.EGG, new AbstractProjectileDispenseBehavior() {

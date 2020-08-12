@@ -19,6 +19,8 @@ public class ServerboundInteractPacket implements Packet<ServerGamePacketListene
 	private boolean usingSecondaryAction;
 
 	public ServerboundInteractPacket() {
+		this.entityId = 0;
+		this.action = ServerboundInteractPacket.Action.AIR_SWING;
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -106,6 +108,7 @@ public class ServerboundInteractPacket implements Packet<ServerGamePacketListene
 	public static enum Action {
 		INTERACT,
 		ATTACK,
-		INTERACT_AT;
+		INTERACT_AT,
+		AIR_SWING;
 	}
 }

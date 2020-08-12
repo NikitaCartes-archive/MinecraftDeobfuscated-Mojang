@@ -102,8 +102,10 @@ public abstract class Projectile extends Entity {
 		float l = -Mth.sin((f + h) * (float) (Math.PI / 180.0));
 		float m = Mth.cos(g * (float) (Math.PI / 180.0)) * Mth.cos(f * (float) (Math.PI / 180.0));
 		this.shoot((double)k, (double)l, (double)m, i, j);
-		Vec3 vec3 = entity.getDeltaMovement();
-		this.setDeltaMovement(this.getDeltaMovement().add(vec3.x, entity.isOnGround() ? 0.0 : vec3.y, vec3.z));
+		Vec3 vec3 = this.getDeltaMovement();
+		Vec3 vec32 = entity.isOnGround() ? entity.getDeltaMovement() : entity.getDeltaMovement().multiply(1.0, 0.0, 1.0);
+		Vec3 vec33 = vec32.project(vec3);
+		this.setDeltaMovement(vec3.add(vec33));
 	}
 
 	protected void onHit(HitResult hitResult) {

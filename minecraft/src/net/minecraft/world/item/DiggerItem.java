@@ -9,28 +9,21 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class DiggerItem extends TieredItem implements Vanishable {
+public abstract class DiggerItem extends TieredItem implements Vanishable {
 	private final Set<Block> blocks;
 	protected final float speed;
-	private final float attackDamageBaseline;
 	private final Multimap<Attribute, AttributeModifier> defaultModifiers;
 
-	protected DiggerItem(float f, float g, Tier tier, Set<Block> set, Item.Properties properties) {
+	protected DiggerItem(Tier tier, Set<Block> set, Item.Properties properties) {
 		super(tier, properties);
 		this.blocks = set;
 		this.speed = tier.getSpeed();
-		this.attackDamageBaseline = f + tier.getAttackDamageBonus();
 		Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
-		builder.put(
-			Attributes.ATTACK_DAMAGE,
-			new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Tool modifier", (double)this.attackDamageBaseline, AttributeModifier.Operation.ADDITION)
-		);
-		builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Tool modifier", (double)g, AttributeModifier.Operation.ADDITION));
+		this.getWeaponType().addCombatAttributes(this.getTier(), builder);
 		this.defaultModifiers = builder.build();
 	}
 
@@ -54,12 +47,14 @@ public class DiggerItem extends TieredItem implements Vanishable {
 		return true;
 	}
 
+	protected abstract WeaponType getWeaponType();
+
 	@Override
 	public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
 		return equipmentSlot == EquipmentSlot.MAINHAND ? this.defaultModifiers : super.getDefaultAttributeModifiers(equipmentSlot);
 	}
 
 	public float getAttackDamage() {
-		return this.attackDamageBaseline;
+		return this.getWeaponType().getDamage(this.getTier());
 	}
 }

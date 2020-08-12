@@ -21,7 +21,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Item;
@@ -116,9 +115,9 @@ public class EnchantmentHelper {
 		return mutableInt.intValue();
 	}
 
-	public static float getDamageBonus(ItemStack itemStack, MobType mobType) {
+	public static float getDamageBonus(ItemStack itemStack, LivingEntity livingEntity) {
 		MutableFloat mutableFloat = new MutableFloat();
-		runIterationOnItem((enchantment, i) -> mutableFloat.add(enchantment.getDamageBonus(i, mobType)), itemStack);
+		runIterationOnItem((enchantment, i) -> mutableFloat.add(enchantment.getDamageBonus(i, livingEntity)), itemStack);
 		return mutableFloat.floatValue();
 	}
 
@@ -175,6 +174,10 @@ public class EnchantmentHelper {
 		return getEnchantmentLevel(Enchantments.FIRE_ASPECT, livingEntity);
 	}
 
+	public static int getChopping(LivingEntity livingEntity) {
+		return getEnchantmentLevel(Enchantments.CLEAVING, livingEntity);
+	}
+
 	public static int getRespiration(LivingEntity livingEntity) {
 		return getEnchantmentLevel(Enchantments.RESPIRATION, livingEntity);
 	}
@@ -183,8 +186,8 @@ public class EnchantmentHelper {
 		return getEnchantmentLevel(Enchantments.DEPTH_STRIDER, livingEntity);
 	}
 
-	public static int getBlockEfficiency(LivingEntity livingEntity) {
-		return getEnchantmentLevel(Enchantments.BLOCK_EFFICIENCY, livingEntity);
+	public static int getDiggingEfficiency(LivingEntity livingEntity) {
+		return getEnchantmentLevel(Enchantments.DIGGING_EFFICIENCY, livingEntity);
 	}
 
 	public static int getFishingLuckBonus(ItemStack itemStack) {
@@ -347,7 +350,7 @@ public class EnchantmentHelper {
 		boolean bl2 = itemStack.getItem() == Items.BOOK;
 
 		for (Enchantment enchantment : Registry.ENCHANTMENT) {
-			if ((!enchantment.isTreasureOnly() || bl) && enchantment.isDiscoverable() && (enchantment.category.canEnchant(item) || bl2)) {
+			if ((!enchantment.isTreasureOnly() || bl) && enchantment.isDiscoverable() && (enchantment.category.canEnchant(item, false) || bl2)) {
 				for (int j = enchantment.getMaxLevel(); j > enchantment.getMinLevel() - 1; j--) {
 					if (i >= enchantment.getMinCost(j) && i <= enchantment.getMaxCost(j)) {
 						list.add(new EnchantmentInstance(enchantment, j));

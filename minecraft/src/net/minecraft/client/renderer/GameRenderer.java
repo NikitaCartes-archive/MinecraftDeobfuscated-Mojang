@@ -31,7 +31,6 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
@@ -39,7 +38,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.Spider;
@@ -249,45 +247,37 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 			if (this.minecraft.level != null) {
 				this.minecraft.getProfiler().push("pick");
 				this.minecraft.crosshairPickEntity = null;
+				float g = this.minecraft.gameMode.getMaxInteractionRange();
+				Vec3 vec3 = entity.getViewVector(1.0F);
+				Vec3 vec32 = entity.getEyePosition(f);
+				Vec3 vec33 = vec32.add(vec3.x * (double)g, vec3.y * (double)g, vec3.z * (double)g);
+				float h = 1.0F;
+				AABB aABB = entity.getBoundingBox().expandTowards(vec3.scale((double)g)).inflate(1.0, 1.0, 1.0);
+				EntityHitResult entityHitResult = ProjectileUtil.getEntityHitResult(
+					entity, vec32, vec33, aABB, entityx -> !entityx.isSpectator() && entityx.isPickable(), (double)(g * g)
+				);
+				boolean bl = entityHitResult != null;
 				double d = (double)this.minecraft.gameMode.getPickRange();
-				this.minecraft.hitResult = entity.pick(d, f, false);
-				Vec3 vec3 = entity.getEyePosition(f);
-				boolean bl = false;
-				int i = 3;
-				double e = d;
-				if (this.minecraft.gameMode.hasFarPickRange()) {
-					e = 6.0;
-					d = e;
+				if (entityHitResult != null && (double)entityHitResult.getInteractionDistance() < d) {
+					d = (double)entityHitResult.getInteractionDistance();
+				} else if (d > (double)g) {
+					d = (double)g;
+				}
+
+				HitResult hitResult = null;
+				if (bl) {
+					hitResult = entity.pickCollisions(d, f);
 				} else {
-					if (d > 3.0) {
-						bl = true;
-					}
-
-					d = d;
+					hitResult = entity.pick(d, f, false);
 				}
 
-				e *= e;
-				if (this.minecraft.hitResult != null) {
-					e = this.minecraft.hitResult.getLocation().distanceToSqr(vec3);
-				}
-
-				Vec3 vec32 = entity.getViewVector(1.0F);
-				Vec3 vec33 = vec3.add(vec32.x * d, vec32.y * d, vec32.z * d);
-				float g = 1.0F;
-				AABB aABB = entity.getBoundingBox().expandTowards(vec32.scale(d)).inflate(1.0, 1.0, 1.0);
-				EntityHitResult entityHitResult = ProjectileUtil.getEntityHitResult(entity, vec3, vec33, aABB, entityx -> !entityx.isSpectator() && entityx.isPickable(), e);
-				if (entityHitResult != null) {
-					Entity entity2 = entityHitResult.getEntity();
-					Vec3 vec34 = entityHitResult.getLocation();
-					double h = vec3.distanceToSqr(vec34);
-					if (bl && h > 9.0) {
-						this.minecraft.hitResult = BlockHitResult.miss(vec34, Direction.getNearest(vec32.x, vec32.y, vec32.z), new BlockPos(vec34));
-					} else if (h < e || this.minecraft.hitResult == null) {
-						this.minecraft.hitResult = entityHitResult;
-						if (entity2 instanceof LivingEntity || entity2 instanceof ItemFrame) {
-							this.minecraft.crosshairPickEntity = entity2;
-						}
-					}
+				if (hitResult != null && hitResult.getType() != HitResult.Type.MISS) {
+					this.minecraft.hitResult = hitResult;
+				} else if (entityHitResult != null) {
+					this.minecraft.hitResult = entityHitResult;
+					this.minecraft.crosshairPickEntity = entityHitResult.getEntity();
+				} else {
+					this.minecraft.hitResult = hitResult;
 				}
 
 				this.minecraft.getProfiler().pop();

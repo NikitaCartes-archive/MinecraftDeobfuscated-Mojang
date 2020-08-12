@@ -21,7 +21,10 @@ public class Attributes {
 		"generic.attack_knockback", new RangedAttribute("attribute.name.generic.attack_knockback", 0.0, 0.0, 5.0)
 	);
 	public static final Attribute ATTACK_SPEED = register(
-		"generic.attack_speed", new RangedAttribute("attribute.name.generic.attack_speed", 4.0, 0.0, 1024.0).setSyncable(true)
+		"generic.attack_speed", new RangedAttribute("attribute.name.generic.attack_speed", 4.0, 0.1F, 1024.0).setSyncable(true)
+	);
+	public static final Attribute ATTACK_REACH = register(
+		"generic.attack_reach", new RangedAttribute("attribute.name.generic.attack_reach", 3.0, 0.0, 6.0).setSyncable(true)
 	);
 	public static final Attribute ARMOR = register("generic.armor", new RangedAttribute("attribute.name.generic.armor", 0.0, 0.0, 30.0).setSyncable(true));
 	public static final Attribute ARMOR_TOUGHNESS = register(

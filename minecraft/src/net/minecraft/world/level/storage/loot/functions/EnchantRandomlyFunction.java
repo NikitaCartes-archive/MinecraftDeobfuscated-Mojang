@@ -52,7 +52,7 @@ public class EnchantRandomlyFunction extends LootItemConditionalFunction {
 			List<Enchantment> list = (List<Enchantment>)Registry.ENCHANTMENT
 				.stream()
 				.filter(Enchantment::isDiscoverable)
-				.filter(enchantmentx -> bl || enchantmentx.canEnchant(itemStack))
+				.filter(enchantmentx -> bl || enchantmentx.canEnchant(itemStack, false))
 				.collect(Collectors.toList());
 			if (list.isEmpty()) {
 				LOGGER.warn("Couldn't find a compatible enchantment for {}", itemStack);

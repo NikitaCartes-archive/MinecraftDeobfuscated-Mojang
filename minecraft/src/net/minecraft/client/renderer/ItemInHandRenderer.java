@@ -336,7 +336,9 @@ public class ItemInHandRenderer {
 			);
 		} else {
 			boolean bl2 = humanoidArm == HumanoidArm.RIGHT;
-			if (abstractClientPlayer.isUsingItem() && abstractClientPlayer.getUseItemRemainingTicks() > 0 && abstractClientPlayer.getUsedItemHand() == interactionHand) {
+			boolean bl3 = abstractClientPlayer.isUsingItem() && abstractClientPlayer.getUsedItemHand() == interactionHand;
+			boolean bl4 = !bl3 && interactionHand == InteractionHand.OFF_HAND && abstractClientPlayer.isBlocking();
+			if (bl3 || bl4) {
 				int q = bl2 ? 1 : -1;
 				switch (itemStack.getUseAnimation()) {
 					case NONE:
@@ -356,22 +358,22 @@ public class ItemInHandRenderer {
 						poseStack.mulPose(Vector3f.XP.rotationDegrees(-13.935F));
 						poseStack.mulPose(Vector3f.YP.rotationDegrees((float)q * 35.3F));
 						poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)q * -9.785F));
-						float rx = (float)itemStack.getUseDuration() - ((float)this.minecraft.player.getUseItemRemainingTicks() - f + 1.0F);
-						float lxx = rx / 20.0F;
-						lxx = (lxx * lxx + lxx * 2.0F) / 3.0F;
-						if (lxx > 1.0F) {
-							lxx = 1.0F;
+						float mxx = (float)itemStack.getUseDuration() - ((float)this.minecraft.player.getUseItemRemainingTicks() - f + 1.0F);
+						float nx = mxx / 20.0F;
+						nx = (nx * nx + nx * 2.0F) / 3.0F;
+						if (nx > 1.0F) {
+							nx = 1.0F;
 						}
 
-						if (lxx > 0.1F) {
-							float mx = Mth.sin((rx - 0.1F) * 1.3F);
-							float n = lxx - 0.1F;
-							float o = mx * n;
-							poseStack.translate((double)(o * 0.0F), (double)(o * 0.004F), (double)(o * 0.0F));
+						if (nx > 0.1F) {
+							float o = Mth.sin((mxx - 0.1F) * 1.3F);
+							float p = nx - 0.1F;
+							float r = o * p;
+							poseStack.translate((double)(r * 0.0F), (double)(r * 0.004F), (double)(r * 0.0F));
 						}
 
-						poseStack.translate((double)(lxx * 0.0F), (double)(lxx * 0.0F), (double)(lxx * 0.04F));
-						poseStack.scale(1.0F, 1.0F, 1.0F + lxx * 0.2F);
+						poseStack.translate((double)(nx * 0.0F), (double)(nx * 0.0F), (double)(nx * 0.04F));
+						poseStack.scale(1.0F, 1.0F, 1.0F + nx * 0.2F);
 						poseStack.mulPose(Vector3f.YN.rotationDegrees((float)q * 45.0F));
 						break;
 					case SPEAR:
@@ -380,21 +382,21 @@ public class ItemInHandRenderer {
 						poseStack.mulPose(Vector3f.XP.rotationDegrees(-55.0F));
 						poseStack.mulPose(Vector3f.YP.rotationDegrees((float)q * 35.3F));
 						poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)q * -9.785F));
-						float r = (float)itemStack.getUseDuration() - ((float)this.minecraft.player.getUseItemRemainingTicks() - f + 1.0F);
-						float lx = r / 10.0F;
-						if (lx > 1.0F) {
-							lx = 1.0F;
+						float mx = (float)itemStack.getUseDuration() - ((float)this.minecraft.player.getUseItemRemainingTicks() - f + 1.0F);
+						float n = mx / 10.0F;
+						if (n > 1.0F) {
+							n = 1.0F;
 						}
 
-						if (lx > 0.1F) {
-							float mx = Mth.sin((r - 0.1F) * 1.3F);
-							float n = lx - 0.1F;
-							float o = mx * n;
-							poseStack.translate((double)(o * 0.0F), (double)(o * 0.004F), (double)(o * 0.0F));
+						if (n > 0.1F) {
+							float o = Mth.sin((mx - 0.1F) * 1.3F);
+							float p = n - 0.1F;
+							float r = o * p;
+							poseStack.translate((double)(r * 0.0F), (double)(r * 0.004F), (double)(r * 0.0F));
 						}
 
-						poseStack.translate(0.0, 0.0, (double)(lx * 0.2F));
-						poseStack.scale(1.0F, 1.0F, 1.0F + lx * 0.2F);
+						poseStack.translate(0.0, 0.0, (double)(n * 0.2F));
+						poseStack.scale(1.0F, 1.0F, 1.0F + n * 0.2F);
 						poseStack.mulPose(Vector3f.YN.rotationDegrees((float)q * 45.0F));
 				}
 			} else if (abstractClientPlayer.isAutoSpinAttack()) {
@@ -404,11 +406,11 @@ public class ItemInHandRenderer {
 				poseStack.mulPose(Vector3f.YP.rotationDegrees((float)q * 65.0F));
 				poseStack.mulPose(Vector3f.ZP.rotationDegrees((float)q * -85.0F));
 			} else {
-				float s = -0.4F * Mth.sin(Mth.sqrt(h) * (float) Math.PI);
-				float rxx = 0.2F * Mth.sin(Mth.sqrt(h) * (float) (Math.PI * 2));
-				float lxxx = -0.2F * Mth.sin(h * (float) Math.PI);
-				int t = bl2 ? 1 : -1;
-				poseStack.translate((double)((float)t * s), (double)rxx, (double)lxxx);
+				float lx = -0.4F * Mth.sin(Mth.sqrt(h) * (float) Math.PI);
+				float mxxx = 0.2F * Mth.sin(Mth.sqrt(h) * (float) (Math.PI * 2));
+				float nxx = -0.2F * Mth.sin(h * (float) Math.PI);
+				int s = bl2 ? 1 : -1;
+				poseStack.translate((double)((float)s * lx), (double)mxxx, (double)nxx);
 				this.applyItemArmTransform(poseStack, humanoidArm, i);
 				this.applyItemArmAttackTransform(poseStack, humanoidArm, h);
 			}
@@ -445,7 +447,8 @@ public class ItemInHandRenderer {
 			this.mainHandHeight = Mth.clamp(this.mainHandHeight - 0.4F, 0.0F, 1.0F);
 			this.offHandHeight = Mth.clamp(this.offHandHeight - 0.4F, 0.0F, 1.0F);
 		} else {
-			float f = localPlayer.getAttackStrengthScale(1.0F);
+			float f = localPlayer.getAttackStrengthScale(1.0F) * 0.5F;
+			f = f * f * f * 0.25F + 0.75F;
 			this.mainHandHeight = this.mainHandHeight + Mth.clamp((this.mainHandItem == itemStack ? f * f * f : 0.0F) - this.mainHandHeight, -0.4F, 0.4F);
 			this.offHandHeight = this.offHandHeight + Mth.clamp((float)(this.offHandItem == itemStack2 ? 1 : 0) - this.offHandHeight, -0.4F, 0.4F);
 		}
@@ -462,8 +465,10 @@ public class ItemInHandRenderer {
 	public void itemUsed(InteractionHand interactionHand) {
 		if (interactionHand == InteractionHand.MAIN_HAND) {
 			this.mainHandHeight = 0.0F;
+			this.oMainHandHeight = 0.0F;
 		} else {
 			this.offHandHeight = 0.0F;
+			this.oOffHandHeight = 0.0F;
 		}
 	}
 }

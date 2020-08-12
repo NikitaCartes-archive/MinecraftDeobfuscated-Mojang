@@ -20,7 +20,8 @@ public class AccessibilityOptionsScreen extends SimpleOptionsSubScreen {
 		Option.TOGGLE_CROUCH,
 		Option.TOGGLE_SPRINT,
 		Option.SCREEN_EFFECTS_SCALE,
-		Option.FOV_EFFECTS_SCALE
+		Option.FOV_EFFECTS_SCALE,
+		Option.USE_SHIELD_ON_CROUCH
 	};
 
 	public AccessibilityOptionsScreen(Screen screen, Options options) {

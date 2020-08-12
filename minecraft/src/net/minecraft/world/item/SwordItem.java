@@ -9,7 +9,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -17,22 +16,17 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 
 public class SwordItem extends TieredItem implements Vanishable {
-	private final float attackDamage;
 	private final Multimap<Attribute, AttributeModifier> defaultModifiers;
 
-	public SwordItem(Tier tier, int i, float f, Item.Properties properties) {
+	public SwordItem(Tier tier, Item.Properties properties) {
 		super(tier, properties);
-		this.attackDamage = (float)i + tier.getAttackDamageBonus();
 		Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
-		builder.put(
-			Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", (double)this.attackDamage, AttributeModifier.Operation.ADDITION)
-		);
-		builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", (double)f, AttributeModifier.Operation.ADDITION));
+		WeaponType.SWORD.addCombatAttributes(this.getTier(), builder);
 		this.defaultModifiers = builder.build();
 	}
 
 	public float getDamage() {
-		return this.attackDamage;
+		return WeaponType.SWORD.getDamage(this.getTier());
 	}
 
 	@Override

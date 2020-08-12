@@ -32,6 +32,7 @@ public class SnowballItem extends Item {
 			itemStack.shrink(1);
 		}
 
+		player.getCooldowns().addCooldown(this, 4);
 		return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
 	}
 }

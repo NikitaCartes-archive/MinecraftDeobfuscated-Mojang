@@ -1291,6 +1291,14 @@ public abstract class Entity implements Nameable, CommandSource {
 		return this.level.clip(new ClipContext(vec3, vec33, ClipContext.Block.OUTLINE, bl ? ClipContext.Fluid.ANY : ClipContext.Fluid.NONE, this));
 	}
 
+	@Environment(EnvType.CLIENT)
+	public HitResult pickCollisions(double d, float f) {
+		Vec3 vec3 = this.getEyePosition(f);
+		Vec3 vec32 = this.getViewVector(f);
+		Vec3 vec33 = vec3.add(vec32.x * d, vec32.y * d, vec32.z * d);
+		return this.level.clip(new ClipContext(vec3, vec33, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
+	}
+
 	public boolean isPickable() {
 		return false;
 	}
@@ -1700,7 +1708,8 @@ public abstract class Entity implements Nameable, CommandSource {
 	}
 
 	public float getPickRadius() {
-		return 0.0F;
+		float f = Math.max(this.getBbWidth(), this.getBbHeight());
+		return f < 0.9F ? (0.9F - f) * 0.5F : 0.0F;
 	}
 
 	public Vec3 getLookAngle() {

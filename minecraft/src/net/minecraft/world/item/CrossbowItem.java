@@ -56,7 +56,7 @@ public class CrossbowItem extends ProjectileWeaponItem implements Vanishable {
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (isCharged(itemStack)) {
-			performShooting(level, player, interactionHand, itemStack, getShootingPower(itemStack), 1.0F);
+			performShooting(level, player, interactionHand, itemStack, getShootingPower(itemStack), 0.25F);
 			setCharged(itemStack, false);
 			return InteractionResultHolder.consume(itemStack);
 		} else if (!player.getProjectile(itemStack).isEmpty()) {

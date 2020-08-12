@@ -14,6 +14,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
@@ -284,11 +285,17 @@ public class ItemProperties {
 				return (bl || bl2) && livingEntity instanceof Player && ((Player)livingEntity).fishing != null ? 1.0F : 0.0F;
 			}
 		});
-		register(
-			Items.SHIELD,
-			new ResourceLocation("blocking"),
-			(itemStack, clientLevel, livingEntity) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
-		);
+		register(Items.SHIELD, new ResourceLocation("blocking"), (itemStack, clientLevel, livingEntity) -> {
+			if (livingEntity != null && livingEntity.isBlocking()) {
+				if (livingEntity.getUseItem() == itemStack) {
+					return 1.0F;
+				} else {
+					return !livingEntity.isUsingItem() && livingEntity.getItemInHand(InteractionHand.OFF_HAND) == itemStack ? 1.0F : 0.0F;
+				}
+			} else {
+				return 0.0F;
+			}
+		});
 		register(
 			Items.TRIDENT,
 			new ResourceLocation("throwing"),

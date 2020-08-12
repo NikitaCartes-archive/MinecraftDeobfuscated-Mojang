@@ -95,8 +95,8 @@ public class PickaxeItem extends DiggerItem {
 		Blocks.PISTON_HEAD
 	);
 
-	protected PickaxeItem(Tier tier, int i, float f, Item.Properties properties) {
-		super((float)i, f, tier, DIGGABLES, properties);
+	protected PickaxeItem(Tier tier, Item.Properties properties) {
+		super(tier, DIGGABLES, properties);
 	}
 
 	@Override
@@ -130,5 +130,10 @@ public class PickaxeItem extends DiggerItem {
 		return material != Material.METAL && material != Material.HEAVY_METAL && material != Material.STONE
 			? super.getDestroySpeed(itemStack, blockState)
 			: this.speed;
+	}
+
+	@Override
+	protected WeaponType getWeaponType() {
+		return WeaponType.PICKAXE;
 	}
 }

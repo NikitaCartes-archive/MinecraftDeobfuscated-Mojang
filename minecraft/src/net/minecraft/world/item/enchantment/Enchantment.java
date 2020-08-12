@@ -15,7 +15,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.item.ItemStack;
 
 public abstract class Enchantment {
@@ -74,7 +73,7 @@ public abstract class Enchantment {
 		return 0;
 	}
 
-	public float getDamageBonus(int i, MobType mobType) {
+	public float getDamageBonus(int i, LivingEntity livingEntity) {
 		return 0.0F;
 	}
 
@@ -113,8 +112,8 @@ public abstract class Enchantment {
 		return mutableComponent;
 	}
 
-	public boolean canEnchant(ItemStack itemStack) {
-		return this.category.canEnchant(itemStack.getItem());
+	public boolean canEnchant(ItemStack itemStack, boolean bl) {
+		return this.category.canEnchant(itemStack.getItem(), bl);
 	}
 
 	public void doPostAttack(LivingEntity livingEntity, Entity entity, int i) {

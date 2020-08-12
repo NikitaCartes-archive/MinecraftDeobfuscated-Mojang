@@ -47,8 +47,8 @@ public class HoeItem extends DiggerItem {
 		)
 	);
 
-	protected HoeItem(Tier tier, int i, float f, Item.Properties properties) {
-		super((float)i, f, tier, DIGGABLES, properties);
+	public HoeItem(Tier tier, Item.Properties properties) {
+		super(tier, DIGGABLES, properties);
 	}
 
 	@Override
@@ -72,5 +72,10 @@ public class HoeItem extends DiggerItem {
 		}
 
 		return InteractionResult.PASS;
+	}
+
+	@Override
+	protected WeaponType getWeaponType() {
+		return WeaponType.HOE;
 	}
 }
