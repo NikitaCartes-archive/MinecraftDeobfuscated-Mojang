@@ -1195,7 +1195,7 @@ public class ServerGamePacketListenerImpl implements ServerGamePacketListener {
 			float f = this.player.getCurrentAttackReach(1.0F) + 0.25F + entity.getBbWidth() * 0.5F;
 			double d = (double)(f * f);
 			if (!bl) {
-				d = 9.0;
+				d = 6.25;
 			}
 
 			if (this.player.distanceToSqr(entity) < d) {
@@ -1225,7 +1225,7 @@ public class ServerGamePacketListenerImpl implements ServerGamePacketListener {
 					}
 				}
 			}
-		} else {
+		} else if (this.player.gameMode.getGameModeForPlayer() != GameType.SPECTATOR) {
 			this.player.attackAir();
 		}
 	}

@@ -769,7 +769,7 @@ public abstract class Player extends LivingEntity {
 			this.setShoulderEntityRight(compoundTag.getCompound("ShoulderEntityRight"));
 		}
 
-		this.getAttribute(Attributes.ATTACK_REACH).setBaseValue(3.0);
+		this.getAttribute(Attributes.ATTACK_REACH).setBaseValue(2.5);
 		this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(2.0);
 	}
 

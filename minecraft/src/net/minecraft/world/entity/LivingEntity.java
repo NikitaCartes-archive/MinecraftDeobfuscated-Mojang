@@ -1324,12 +1324,19 @@ public abstract class LivingEntity extends Entity {
 	}
 
 	public void knockback(float f, double d, double e) {
+		double g = this.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
+		if (this.isBlocking()) {
+			g = Math.min(1.0, g + 0.5);
+		}
+
 		f = (float)((double)f * (1.0 - this.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE)));
 		if (!(f <= 0.0F)) {
 			this.hasImpulse = true;
 			Vec3 vec3 = this.getDeltaMovement();
 			Vec3 vec32 = new Vec3(d, 0.0, e).normalize().scale((double)f);
-			this.setDeltaMovement(vec3.x / 2.0 - vec32.x, this.onGround ? Math.min(0.4, (double)f) : Math.min(0.4, vec3.y + (double)f * 0.5), vec3.z / 2.0 - vec32.z);
+			this.setDeltaMovement(
+				vec3.x / 2.0 - vec32.x, this.onGround ? Math.min(0.4, (double)f * 0.75) : Math.min(0.4, vec3.y + (double)f * 0.5), vec3.z / 2.0 - vec32.z
+			);
 		}
 	}
 
@@ -2663,7 +2670,7 @@ public abstract class LivingEntity extends Entity {
 
 	@Override
 	protected void markHurt() {
-		this.hurtMarked = this.random.nextDouble() >= this.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
+		this.hurtMarked = true;
 	}
 
 	@Override
