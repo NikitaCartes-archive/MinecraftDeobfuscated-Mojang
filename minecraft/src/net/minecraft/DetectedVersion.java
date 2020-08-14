@@ -27,9 +27,9 @@ public class DetectedVersion implements GameVersion {
 
 	private DetectedVersion() {
 		this.id = UUID.randomUUID().toString().replaceAll("-", "");
-		this.name = "1.16.2 - Combat Test 7b";
+		this.name = "1.16.2 - Combat Test 7c";
 		this.stable = true;
-		this.worldVersion = 2703;
+		this.worldVersion = 2704;
 		this.protocolVersion = 802;
 		this.packVersion = 6;
 		this.buildTime = new Date();

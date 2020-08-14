@@ -1192,7 +1192,7 @@ public class ServerGamePacketListenerImpl implements ServerGamePacketListener {
 		this.player.setShiftKeyDown(serverboundInteractPacket.isUsingSecondaryAction());
 		if (entity != null) {
 			boolean bl = this.player.canSee(entity);
-			float f = this.player.getCurrentAttackReach(1.0F) + 0.25F + entity.getBbWidth() * 0.5F;
+			float f = this.player.getCurrentAttackReach(1.0F) + 0.5F + entity.getBbWidth() * 0.5F;
 			double d = (double)(f * f);
 			if (!bl) {
 				d = 6.25;

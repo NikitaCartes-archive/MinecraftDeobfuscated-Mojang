@@ -361,7 +361,7 @@ public class MultiPlayerGameMode {
 
 	public void swingInAir(Player player) {
 		this.ensureHasSentCarriedItem();
-		this.connection.send(new ServerboundInteractPacket());
+		this.connection.send(new ServerboundInteractPacket(player.isShiftKeyDown()));
 		if (this.localPlayerMode != GameType.SPECTATOR) {
 			player.attackAir();
 			player.resetAttackStrengthTicker(false);

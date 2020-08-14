@@ -24,6 +24,12 @@ public class ServerboundInteractPacket implements Packet<ServerGamePacketListene
 	}
 
 	@Environment(EnvType.CLIENT)
+	public ServerboundInteractPacket(boolean bl) {
+		this();
+		this.usingSecondaryAction = bl;
+	}
+
+	@Environment(EnvType.CLIENT)
 	public ServerboundInteractPacket(Entity entity, boolean bl) {
 		this.entityId = entity.getId();
 		this.action = ServerboundInteractPacket.Action.ATTACK;
