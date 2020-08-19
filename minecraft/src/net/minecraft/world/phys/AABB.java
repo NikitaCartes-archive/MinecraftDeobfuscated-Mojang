@@ -282,6 +282,38 @@ public class AABB {
 		}
 	}
 
+	public Vec3 getNearestPointTo(Vec3 vec3) {
+		if (vec3.x < this.minX && vec3.y < this.minY && vec3.z < this.minZ) {
+			return new Vec3(this.minX, this.minY, this.minZ);
+		} else if (vec3.x < this.minX && vec3.y < this.minY && vec3.z > this.maxZ) {
+			return new Vec3(this.minX, this.minY, this.maxZ);
+		} else if (vec3.x < this.minX && vec3.y > this.maxY && vec3.z < this.minZ) {
+			return new Vec3(this.minX, this.maxY, this.minZ);
+		} else if (vec3.x < this.minX && vec3.y > this.maxY && vec3.z > this.maxZ) {
+			return new Vec3(this.minX, this.maxY, this.maxZ);
+		} else if (vec3.x > this.maxX && vec3.y < this.minY && vec3.z < this.minZ) {
+			return new Vec3(this.maxX, this.minY, this.minZ);
+		} else if (vec3.x > this.maxX && vec3.y < this.minY && vec3.z > this.maxZ) {
+			return new Vec3(this.maxX, this.minY, this.maxZ);
+		} else if (vec3.x > this.maxX && vec3.y > this.maxY && vec3.z < this.minZ) {
+			return new Vec3(this.maxX, this.maxY, this.minZ);
+		} else if (vec3.x > this.maxX && vec3.y > this.maxY && vec3.z > this.maxZ) {
+			return new Vec3(this.maxX, this.maxY, this.maxZ);
+		} else if (vec3.x < this.minX) {
+			return new Vec3(this.minX, vec3.y, vec3.z);
+		} else if (vec3.y < this.minY) {
+			return new Vec3(vec3.x, this.minY, vec3.z);
+		} else if (vec3.z < this.minZ) {
+			return new Vec3(vec3.x, vec3.y, this.minZ);
+		} else if (vec3.x > this.maxX) {
+			return new Vec3(this.maxX, vec3.y, vec3.z);
+		} else if (vec3.y > this.maxY) {
+			return new Vec3(vec3.x, this.maxY, vec3.z);
+		} else {
+			return vec3.z > this.maxZ ? new Vec3(vec3.x, vec3.y, this.maxZ) : vec3;
+		}
+	}
+
 	@Nullable
 	public static BlockHitResult clip(Iterable<AABB> iterable, Vec3 vec3, Vec3 vec32, BlockPos blockPos) {
 		double[] ds = new double[]{1.0};

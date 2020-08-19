@@ -174,20 +174,24 @@ public class Arrow extends AbstractArrow {
 		super.doPostHurtEffects(livingEntity);
 
 		for (MobEffectInstance mobEffectInstance : this.potion.getEffects()) {
-			livingEntity.addEffect(
-				new MobEffectInstance(
-					mobEffectInstance.getEffect(),
-					Math.max(mobEffectInstance.getDuration() / 8, 1),
-					mobEffectInstance.getAmplifier(),
-					mobEffectInstance.isAmbient(),
-					mobEffectInstance.isVisible()
-				)
-			);
+			if (mobEffectInstance.getEffect().isInstantenous()) {
+				mobEffectInstance.getEffect().applyInstantenousEffect(this, this.getOwner(), livingEntity, mobEffectInstance.getAmplifier(), 0.125);
+			} else {
+				livingEntity.addEffect(
+					new MobEffectInstance(
+						mobEffectInstance.getEffect(),
+						Math.max((int)((float)mobEffectInstance.getDuration() * 0.125F), 1),
+						mobEffectInstance.getAmplifier(),
+						mobEffectInstance.isAmbient(),
+						mobEffectInstance.isVisible()
+					)
+				);
+			}
 		}
 
 		if (!this.effects.isEmpty()) {
-			for (MobEffectInstance mobEffectInstance : this.effects) {
-				livingEntity.addEffect(mobEffectInstance);
+			for (MobEffectInstance mobEffectInstancex : this.effects) {
+				livingEntity.addEffect(mobEffectInstancex);
 			}
 		}
 	}

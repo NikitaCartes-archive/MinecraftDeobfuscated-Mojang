@@ -63,6 +63,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Parrot;
@@ -108,6 +109,7 @@ import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.Team;
 
 public abstract class Player extends LivingEntity {
+	protected static final UUID MAGIC_ATTACK_DAMAGE_UUID = UUID.fromString("13C4E5B5-0F72-4359-AB1C-625F9DF5AA2B");
 	public static final EntityDimensions STANDING_DIMENSIONS = EntityDimensions.scalable(0.6F, 1.8F);
 	private static final Map<Pose, EntityDimensions> POSES = ImmutableMap.<Pose, EntityDimensions>builder()
 		.put(Pose.STANDING, STANDING_DIMENSIONS)
@@ -1075,16 +1077,25 @@ public abstract class Player extends LivingEntity {
 		if (entity.isAttackable()) {
 			if (!entity.skipAttackInteraction(this)) {
 				if (this.isAttackAvailable(1.0F)) {
-					float f = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
-					float g;
+					float f;
 					if (entity instanceof LivingEntity) {
-						g = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), (LivingEntity)entity);
+						f = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), (LivingEntity)entity);
 					} else {
-						g = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), null);
+						f = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), null);
+					}
+
+					if (f > 0.0F) {
+						this.getAttribute(Attributes.ATTACK_DAMAGE)
+							.addTransientModifier(new AttributeModifier(MAGIC_ATTACK_DAMAGE_UUID, "Magic modifier", (double)f, AttributeModifier.Operation.ADDITION));
+					}
+
+					float g = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
+					if (f > 0.0F) {
+						this.getAttribute(Attributes.ATTACK_DAMAGE).removeModifier(MAGIC_ATTACK_DAMAGE_UUID);
 					}
 
 					float h = this.getCurrentAttackReach(1.0F);
-					if (f > 0.0F || g > 0.0F) {
+					if (g > 0.0F || f > 0.0F) {
 						boolean bl = !this.onClimbable() && !this.isInWater() && !this.hasEffect(MobEffects.BLINDNESS) && !this.isPassenger() && entity instanceof LivingEntity;
 						boolean bl2 = false;
 						int i = 0;
@@ -1097,10 +1108,13 @@ public abstract class Player extends LivingEntity {
 
 						boolean bl3 = bl && this.fallDistance > 0.0F && !this.onGround;
 						if (bl3) {
-							f *= 1.5F;
+							if (this.getAttackStrengthScale(1.0F) > 1.95F) {
+								g *= 1.5F;
+							} else {
+								g *= 1.25F;
+							}
 						}
 
-						f += g;
 						boolean bl4 = !bl3 && !bl2 && this.checkSweepAttack();
 						float j = 0.0F;
 						boolean bl5 = false;
@@ -1114,7 +1128,7 @@ public abstract class Player extends LivingEntity {
 						}
 
 						Vec3 vec3 = entity.getDeltaMovement();
-						boolean bl6 = entity.hurt(DamageSource.playerAttack(this).setCritSpecial(bl3), f);
+						boolean bl6 = entity.hurt(DamageSource.playerAttack(this).setCritSpecial(bl3), g);
 						if (bl6) {
 							if (i > 0) {
 								if (entity instanceof LivingEntity) {
@@ -1134,7 +1148,7 @@ public abstract class Player extends LivingEntity {
 
 							if (bl4) {
 								AABB aABB = entity.getBoundingBox().inflate(1.0, 0.25, 1.0);
-								this.sweepAttack(aABB, h, f, entity);
+								this.sweepAttack(aABB, h, g, entity);
 							}
 
 							if (entity instanceof ServerPlayer && entity.hurtMarked) {
@@ -1156,7 +1170,7 @@ public abstract class Player extends LivingEntity {
 								}
 							}
 
-							if (g > 0.0F) {
+							if (f > 0.0F) {
 								this.magicCrit(entity);
 							}
 

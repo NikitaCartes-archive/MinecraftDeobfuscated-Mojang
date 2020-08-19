@@ -1010,6 +1010,9 @@ public abstract class LivingEntity extends Entity {
 			if (entity != null) {
 				if (entity instanceof LivingEntity) {
 					this.setLastHurtByMob((LivingEntity)entity);
+					if (this.isUsingItem() && (this.getUseItem().getUseAnimation() == UseAnim.EAT || this.getUseItem().getUseAnimation() == UseAnim.DRINK)) {
+						this.stopUsingItem();
+					}
 				}
 
 				if (entity instanceof Player) {
@@ -1184,7 +1187,7 @@ public abstract class LivingEntity extends Entity {
 				Vec3 vec32 = this.getViewVector(1.0F);
 				Vec3 vec33 = vec3.vectorTo(this.position()).normalize();
 				vec33 = new Vec3(vec33.x, 0.0, vec33.z);
-				if (vec33.dot(vec32) * (float) Math.PI < 0.87266463F) {
+				if (vec32.y > -0.99 && vec32.y < 0.99 && vec33.dot(vec32) * (float) Math.PI < 0.87266463F) {
 					return true;
 				}
 			}

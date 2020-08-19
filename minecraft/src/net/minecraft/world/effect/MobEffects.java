@@ -36,8 +36,8 @@ public class MobEffects {
 	public static final MobEffect DAMAGE_BOOST = register(
 		5,
 		"strength",
-		new AttackDamageMobEffect(MobEffectCategory.BENEFICIAL, 9643043, 3.0)
-			.addAttributeModifier(Attributes.ATTACK_DAMAGE, "648D7064-6A60-4F59-8ABE-C2C23A6DD7A9", 0.0, AttributeModifier.Operation.ADDITION)
+		new AttackDamageMobEffect(MobEffectCategory.BENEFICIAL, 9643043, 0.2F)
+			.addAttributeModifier(Attributes.ATTACK_DAMAGE, "648D7064-6A60-4F59-8ABE-C2C23A6DD7A9", 0.0, AttributeModifier.Operation.MULTIPLY_TOTAL)
 	);
 	public static final MobEffect HEAL = register(6, "instant_health", new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 16262179));
 	public static final MobEffect HARM = register(7, "instant_damage", new InstantenousMobEffect(MobEffectCategory.HARMFUL, 4393481));
@@ -54,8 +54,8 @@ public class MobEffects {
 	public static final MobEffect WEAKNESS = register(
 		18,
 		"weakness",
-		new AttackDamageMobEffect(MobEffectCategory.HARMFUL, 4738376, -4.0)
-			.addAttributeModifier(Attributes.ATTACK_DAMAGE, "22653B89-116E-49DC-9B6B-9971489B5BE5", 0.0, AttributeModifier.Operation.ADDITION)
+		new AttackDamageMobEffect(MobEffectCategory.HARMFUL, 4738376, -0.2)
+			.addAttributeModifier(Attributes.ATTACK_DAMAGE, "22653B89-116E-49DC-9B6B-9971489B5BE5", 0.0, AttributeModifier.Operation.MULTIPLY_TOTAL)
 	);
 	public static final MobEffect POISON = register(19, "poison", new MobEffect(MobEffectCategory.HARMFUL, 5149489));
 	public static final MobEffect WITHER = register(20, "wither", new MobEffect(MobEffectCategory.HARMFUL, 3484199));

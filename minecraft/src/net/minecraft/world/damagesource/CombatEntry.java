@@ -46,4 +46,27 @@ public class CombatEntry {
 	public float getFallDistance() {
 		return this.source == DamageSource.OUT_OF_WORLD ? Float.MAX_VALUE : this.fallDistance;
 	}
+
+	public String toString() {
+		Component component = this.getAttackerName();
+		String string = "null";
+		if (component != null) {
+			string = component.getString();
+		}
+
+		return "@ "
+			+ this.time
+			+ ", "
+			+ this.damage
+			+ " dmg ("
+			+ this.health
+			+ " hp), by "
+			+ string
+			+ " ("
+			+ this.getSource().toString()
+			+ "), @ "
+			+ this.location
+			+ ", fell "
+			+ this.fallDistance;
+	}
 }

@@ -1,5 +1,7 @@
 package net.minecraft.world.phys;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 
@@ -8,6 +10,7 @@ public class BlockHitResult extends HitResult {
 	private final BlockPos blockPos;
 	private final boolean miss;
 	private final boolean inside;
+	private boolean isLedgeEdge;
 
 	public static BlockHitResult miss(Vec3 vec3, Direction direction, BlockPos blockPos) {
 		return new BlockHitResult(true, vec3, direction, blockPos, false);
@@ -23,6 +26,7 @@ public class BlockHitResult extends HitResult {
 		this.direction = direction;
 		this.blockPos = blockPos;
 		this.inside = bl2;
+		this.isLedgeEdge = false;
 	}
 
 	public BlockHitResult withDirection(Direction direction) {
@@ -48,5 +52,15 @@ public class BlockHitResult extends HitResult {
 
 	public boolean isInside() {
 		return this.inside;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public void setIsLedgeEdge() {
+		this.isLedgeEdge = true;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public boolean isLedgeEdge() {
+		return this.isLedgeEdge;
 	}
 }

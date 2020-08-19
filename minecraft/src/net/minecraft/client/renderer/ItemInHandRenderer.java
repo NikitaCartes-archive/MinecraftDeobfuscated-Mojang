@@ -20,6 +20,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -367,7 +368,7 @@ public class ItemInHandRenderer {
 
 						if (nx > 0.1F) {
 							float o = Mth.sin((mxx - 0.1F) * 1.3F);
-							float p = nx - 0.1F;
+							float p = BowItem.getFatigueForTime((int)mxx) - 0.1F;
 							float r = o * p;
 							poseStack.translate((double)(r * 0.0F), (double)(r * 0.004F), (double)(r * 0.0F));
 						}
