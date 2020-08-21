@@ -1111,7 +1111,7 @@ public abstract class Player extends LivingEntity {
 							if (this.getAttackStrengthScale(1.0F) > 1.95F) {
 								g *= 1.5F;
 							} else {
-								g *= 1.25F;
+								g *= 1.5F;
 							}
 						}
 

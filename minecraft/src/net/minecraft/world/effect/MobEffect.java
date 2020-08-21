@@ -63,7 +63,7 @@ public class MobEffect {
 				livingEntity.hurt(DamageSource.MAGIC, (float)(6 << i));
 			}
 		} else {
-			livingEntity.heal((float)Math.max(4 << i, 0));
+			livingEntity.heal((float)Math.max(6 << i, 0));
 		}
 	}
 
@@ -80,7 +80,7 @@ public class MobEffect {
 				this.applyEffectTick(livingEntity, i);
 			}
 		} else {
-			int j = (int)(d * (double)(4 << i) + 0.5);
+			int j = (int)(d * (double)(6 << i) + 0.5);
 			livingEntity.heal((float)j);
 		}
 	}

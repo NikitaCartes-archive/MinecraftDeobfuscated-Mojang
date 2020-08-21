@@ -1232,7 +1232,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			if (bl && this.hitResult != null && this.hitResult.getType() == HitResult.Type.BLOCK) {
 				BlockHitResult blockHitResult = (BlockHitResult)this.hitResult;
 				BlockPos blockPos = blockHitResult.getBlockPos();
-				if (!this.level.getBlockState(blockPos).isAir() && !blockHitResult.isLedgeEdge()) {
+				if (!this.level.getBlockState(blockPos).isAir()) {
 					Direction direction = blockHitResult.getDirection();
 					if (this.gameMode.continueDestroyBlock(blockPos, direction)) {
 						this.particleEngine.crack(blockPos, direction);
@@ -1282,7 +1282,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 						case BLOCK:
 							BlockHitResult blockHitResult = (BlockHitResult)this.hitResult;
 							BlockPos blockPos = blockHitResult.getBlockPos();
-							if (!this.level.getBlockState(blockPos).isAir() && !blockHitResult.isLedgeEdge()) {
+							if (!this.level.getBlockState(blockPos).isAir()) {
 								this.gameMode.startDestroyBlock(blockPos, blockHitResult.getDirection());
 								break;
 							}

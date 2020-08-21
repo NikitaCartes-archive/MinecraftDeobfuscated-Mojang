@@ -35,7 +35,7 @@ public class MilkBucketItem extends Item {
 
 	@Override
 	public int getUseDuration(ItemStack itemStack) {
-		return 32;
+		return 20;
 	}
 
 	@Override

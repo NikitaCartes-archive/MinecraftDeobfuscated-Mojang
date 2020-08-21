@@ -1185,10 +1185,13 @@ public abstract class LivingEntity extends Entity {
 			Vec3 vec3 = damageSource.getSourcePosition();
 			if (vec3 != null) {
 				Vec3 vec32 = this.getViewVector(1.0F);
-				Vec3 vec33 = vec3.vectorTo(this.position()).normalize();
-				vec33 = new Vec3(vec33.x, 0.0, vec33.z);
-				if (vec32.y > -0.99 && vec32.y < 0.99 && vec33.dot(vec32) * (float) Math.PI < 0.87266463F) {
-					return true;
+				if (vec32.y > -0.99 && vec32.y < 0.99) {
+					vec32 = new Vec3(vec32.x, 0.0, vec32.z).normalize();
+					Vec3 vec33 = vec3.vectorTo(this.position());
+					vec33 = new Vec3(vec33.x, 0.0, vec33.z).normalize();
+					if (vec33.dot(vec32) * (float) Math.PI < -0.87266463F) {
+						return true;
+					}
 				}
 			}
 		}

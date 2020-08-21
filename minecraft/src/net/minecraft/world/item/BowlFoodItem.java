@@ -14,4 +14,9 @@ public class BowlFoodItem extends Item {
 		ItemStack itemStack2 = super.finishUsingItem(itemStack, level, livingEntity);
 		return livingEntity instanceof Player && ((Player)livingEntity).abilities.instabuild ? itemStack2 : new ItemStack(Items.BOWL);
 	}
+
+	@Override
+	public int getUseDuration(ItemStack itemStack) {
+		return 20;
+	}
 }

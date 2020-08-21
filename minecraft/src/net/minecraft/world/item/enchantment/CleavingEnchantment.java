@@ -25,7 +25,7 @@ public class CleavingEnchantment extends Enchantment {
 
 	@Override
 	public float getDamageBonus(int i, LivingEntity livingEntity) {
-		return (float)i;
+		return (float)(1 + i);
 	}
 
 	@Override

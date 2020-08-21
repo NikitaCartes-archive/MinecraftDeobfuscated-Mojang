@@ -44,7 +44,6 @@ import net.minecraft.world.entity.monster.Spider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
@@ -278,13 +277,6 @@ public class GameRenderer implements ResourceManagerReloadListener, AutoCloseabl
 					this.minecraft.hitResult = entityHitResult;
 					this.minecraft.crosshairPickEntity = entityHitResult.getEntity();
 				} else {
-					if (entity.isOnGround() && vec3.y < -0.7) {
-						Vec3 vec34 = entity.getPosition(f).add(0.0, -0.1, 0.0);
-						Vec3 vec35 = vec34.add(vec3.x, 0.0, vec3.z);
-						hitResult = entity.level.clip(new ClipContext(vec35, vec34, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity));
-						((BlockHitResult)hitResult).setIsLedgeEdge();
-					}
-
 					this.minecraft.hitResult = hitResult;
 				}
 

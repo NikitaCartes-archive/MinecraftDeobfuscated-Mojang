@@ -47,7 +47,7 @@ public class HoneyBottleItem extends Item {
 
 	@Override
 	public int getUseDuration(ItemStack itemStack) {
-		return 40;
+		return 20;
 	}
 
 	@Override
