@@ -84,6 +84,7 @@ import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -963,7 +964,7 @@ public abstract class LivingEntity extends Entity {
 			boolean bl = false;
 			float h = 0.0F;
 			if (f > 0.0F && this.isDamageSourceBlocked(damageSource)) {
-				h = Math.min(5.0F, f);
+				h = Math.min(ShieldItem.getShieldBlockDamageValue(this.getBlockingItem()), f);
 				if (!damageSource.isProjectile() && !damageSource.isExplosion()) {
 					Entity entity = damageSource.getDirectEntity();
 					if (entity instanceof LivingEntity) {
@@ -1331,11 +1332,12 @@ public abstract class LivingEntity extends Entity {
 
 	public void knockback(float f, double d, double e) {
 		double g = this.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
-		if (this.isBlocking()) {
-			g = Math.min(1.0, g + 0.5);
+		ItemStack itemStack = this.getBlockingItem();
+		if (!itemStack.isEmpty()) {
+			g = Math.min(1.0, g + (double)ShieldItem.getShieldKnockbackResistanceValue(itemStack));
 		}
 
-		f = (float)((double)f * (1.0 - this.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE)));
+		f = (float)((double)f * (1.0 - g));
 		if (!(f <= 0.0F)) {
 			this.hasImpulse = true;
 			Vec3 vec3 = this.getDeltaMovement();
@@ -2904,19 +2906,23 @@ public abstract class LivingEntity extends Entity {
 	}
 
 	public boolean isBlocking() {
+		return !this.getBlockingItem().isEmpty();
+	}
+
+	public ItemStack getBlockingItem() {
 		if (this.isUsingItem() && !this.useItem.isEmpty()) {
 			Item item = this.useItem.getItem();
 			if (item.getUseAnimation(this.useItem) == UseAnim.BLOCK) {
-				return true;
+				return this.useItem;
 			}
-		} else if ((this.isCrouching() || this.isPassenger()) && this.hasEnabledShieldOnCrouch()) {
+		} else if ((this.isOnGround() && this.isCrouching() || this.isPassenger()) && this.hasEnabledShieldOnCrouch()) {
 			ItemStack itemStack = this.getItemInHand(InteractionHand.OFF_HAND);
 			if (!itemStack.isEmpty() && itemStack.getItem().getUseAnimation(itemStack) == UseAnim.BLOCK && !this.isItemOnCooldown(itemStack)) {
-				return true;
+				return itemStack;
 			}
 		}
 
-		return false;
+		return ItemStack.EMPTY;
 	}
 
 	public boolean hasEnabledShieldOnCrouch() {
