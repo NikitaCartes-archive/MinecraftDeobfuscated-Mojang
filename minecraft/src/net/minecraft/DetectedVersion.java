@@ -27,13 +27,13 @@ public class DetectedVersion implements GameVersion {
 
 	private DetectedVersion() {
 		this.id = UUID.randomUUID().toString().replaceAll("-", "");
-		this.name = "1.16.2";
-		this.stable = true;
-		this.worldVersion = 2578;
-		this.protocolVersion = 751;
+		this.name = "1.16.3-rc1";
+		this.stable = false;
+		this.worldVersion = 2579;
+		this.protocolVersion = 752;
 		this.packVersion = 6;
 		this.buildTime = new Date();
-		this.releaseTarget = "1.16.2";
+		this.releaseTarget = "1.16.3";
 	}
 
 	private DetectedVersion(JsonObject jsonObject) {
