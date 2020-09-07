@@ -70,7 +70,7 @@ extends Behavior<Mob> {
 
     @Override
     protected void stop(ServerLevel serverLevel, Mob mob, long l) {
-        if (mob.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET) && !this.reachedTarget(mob, mob.getBrain().getMemory(MemoryModuleType.WALK_TARGET).get())) {
+        if (mob.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET) && !this.reachedTarget(mob, mob.getBrain().getMemory(MemoryModuleType.WALK_TARGET).get()) && mob.getNavigation().isStuck()) {
             this.remainingCooldown = serverLevel.getRandom().nextInt(40);
         }
         mob.getNavigation().stop();

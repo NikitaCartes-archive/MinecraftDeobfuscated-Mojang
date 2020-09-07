@@ -48,6 +48,7 @@ public abstract class PathNavigation {
     private int reachRange;
     private float maxVisitedNodesMultiplier = 1.0f;
     private final PathFinder pathFinder;
+    private boolean isStuck;
 
     public PathNavigation(Mob mob, Level level) {
         this.mob = mob;
@@ -240,7 +241,10 @@ public abstract class PathNavigation {
     protected void doStuckDetection(Vec3 vec3) {
         if (this.tick - this.lastStuckCheck > 100) {
             if (vec3.distanceToSqr(this.lastStuckCheckPos) < 2.25) {
+                this.isStuck = true;
                 this.stop();
+            } else {
+                this.isStuck = false;
             }
             this.lastStuckCheck = this.tick;
             this.lastStuckCheckPos = vec3;
@@ -255,17 +259,22 @@ public abstract class PathNavigation {
                 double d2 = this.timeoutLimit = this.mob.getSpeed() > 0.0f ? d / (double)this.mob.getSpeed() * 1000.0 : 0.0;
             }
             if (this.timeoutLimit > 0.0 && (double)this.timeoutTimer > this.timeoutLimit * 3.0) {
-                this.resetStuckTimeout();
-                this.stop();
+                this.timeoutPath();
             }
             this.lastTimeoutCheck = Util.getMillis();
         }
+    }
+
+    private void timeoutPath() {
+        this.resetStuckTimeout();
+        this.stop();
     }
 
     private void resetStuckTimeout() {
         this.timeoutCachedNode = Vec3i.ZERO;
         this.timeoutTimer = 0L;
         this.timeoutLimit = 0.0;
+        this.isStuck = false;
     }
 
     public boolean isDone() {
@@ -331,6 +340,10 @@ public abstract class PathNavigation {
         if (blockPos.closerThan(vec3, (double)(this.path.getNodeCount() - this.path.getNextNodeIndex()))) {
             this.recomputePath();
         }
+    }
+
+    public boolean isStuck() {
+        return this.isStuck;
     }
 }
 
