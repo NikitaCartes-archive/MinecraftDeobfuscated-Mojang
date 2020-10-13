@@ -76,6 +76,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
+import net.minecraft.client.gui.components.toasts.TutorialToast;
 import net.minecraft.client.gui.font.FontManager;
 import net.minecraft.client.gui.screens.BackupConfirmScreen;
 import net.minecraft.client.gui.screens.ChatScreen;
@@ -100,6 +101,8 @@ import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
+import net.minecraft.client.gui.screens.social.PlayerSocialManager;
+import net.minecraft.client.gui.screens.social.SocialInteractionsScreen;
 import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
@@ -255,6 +258,7 @@ WindowEventHandler {
     public static final ResourceLocation UNIFORM_FONT;
     public static final ResourceLocation ALT_FONT;
     private static final CompletableFuture<Unit> RESOURCE_RELOAD_INITIAL_TASK;
+    private static final Component SOCIAL_INTERACTIONS_NOT_AVAILABLE;
     private final File resourcePackDirectory;
     private final PropertyMap profileProperties;
     private final TextureManager textureManager;
@@ -311,6 +315,7 @@ WindowEventHandler {
     private final ToastComponent toast;
     private final Game game = new Game(this);
     private final Tutorial tutorial;
+    private final PlayerSocialManager playerSocialManager;
     public static byte[] reserve;
     @Nullable
     public MultiPlayerGameMode gameMode;
@@ -357,6 +362,8 @@ WindowEventHandler {
     private final Queue<Runnable> progressTasks = Queues.newConcurrentLinkedQueue();
     @Nullable
     private CompletableFuture<Void> pendingReload;
+    @Nullable
+    private TutorialToast socialInteractionsToast;
     private ProfilerFiller profiler = InactiveProfiler.INSTANCE;
     private int fpsPieRenderTicks;
     private final ContinuousProfiler fpsPieProfiler = new ContinuousProfiler(Util.timeSource, () -> this.fpsPieRenderTicks);
@@ -456,6 +463,7 @@ WindowEventHandler {
         this.renderBuffers = new RenderBuffers();
         this.gameRenderer = new GameRenderer(this, this.resourceManager, this.renderBuffers);
         this.resourceManager.registerReloadListener(this.gameRenderer);
+        this.playerSocialManager = new PlayerSocialManager(this);
         this.blockRenderer = new BlockRenderDispatcher(this.modelManager.getBlockModelShaper(), this.blockColors);
         this.resourceManager.registerReloadListener(this.blockRenderer);
         this.levelRenderer = new LevelRenderer(this, this.renderBuffers);
@@ -1300,6 +1308,14 @@ WindowEventHandler {
         this.soundManager.tick(this.pause);
         if (this.level != null) {
             if (!this.pause) {
+                if (!this.options.joinedFirstServer && this.isMultiplayerServer()) {
+                    TranslatableComponent component = new TranslatableComponent("tutorial.socialInteractions.title");
+                    TranslatableComponent component2 = new TranslatableComponent("tutorial.socialInteractions.description", Tutorial.key("socialInteractions"));
+                    this.socialInteractionsToast = new TutorialToast(TutorialToast.Icons.SOCIAL_INTERACTIONS, component, component2, true);
+                    this.tutorial.addTimedToast(this.socialInteractionsToast, 160);
+                    this.options.joinedFirstServer = true;
+                    this.options.save();
+                }
                 this.tutorial.tick();
                 try {
                     this.level.tick(() -> true);
@@ -1331,6 +1347,10 @@ WindowEventHandler {
         this.profiler.pop();
     }
 
+    private boolean isMultiplayerServer() {
+        return !this.isLocalServer || this.singleplayerServer != null && this.singleplayerServer.isPublished();
+    }
+
     private void handleKeybinds() {
         boolean bl3;
         while (this.options.keyTogglePerspective.consumeClick()) {
@@ -1357,6 +1377,18 @@ WindowEventHandler {
                 continue;
             }
             this.player.inventory.selected = i;
+        }
+        while (this.options.keySocialInteractions.consumeClick()) {
+            if (!this.isMultiplayerServer()) {
+                this.player.displayClientMessage(SOCIAL_INTERACTIONS_NOT_AVAILABLE, true);
+                NarratorChatListener.INSTANCE.sayNow(SOCIAL_INTERACTIONS_NOT_AVAILABLE.getString());
+                continue;
+            }
+            if (this.socialInteractionsToast != null) {
+                this.tutorial.removeTimedToast(this.socialInteractionsToast);
+                this.socialInteractionsToast = null;
+            }
+            this.setScreen(new SocialInteractionsScreen());
         }
         while (this.options.keyInventory.consumeClick()) {
             if (this.gameMode.isServerControlledInventory()) {
@@ -1669,7 +1701,7 @@ WindowEventHandler {
         if (!this.allowsChat()) {
             return (this.player == null || !uUID.equals(this.player.getUUID())) && !uUID.equals(Util.NIL_UUID);
         }
-        return false;
+        return this.playerSocialManager.isHidden(uUID);
     }
 
     public boolean allowsChat() {
@@ -2168,6 +2200,10 @@ WindowEventHandler {
         return this.overlay;
     }
 
+    public PlayerSocialManager getPlayerSocialManager() {
+        return this.playerSocialManager;
+    }
+
     public boolean renderOnThread() {
         return false;
     }
@@ -2211,6 +2247,7 @@ WindowEventHandler {
         UNIFORM_FONT = new ResourceLocation("uniform");
         ALT_FONT = new ResourceLocation("alt");
         RESOURCE_RELOAD_INITIAL_TASK = CompletableFuture.completedFuture(Unit.INSTANCE);
+        SOCIAL_INTERACTIONS_NOT_AVAILABLE = new TranslatableComponent("multiplayer.socialInteractions.not_available");
         reserve = new byte[0xA00000];
     }
 

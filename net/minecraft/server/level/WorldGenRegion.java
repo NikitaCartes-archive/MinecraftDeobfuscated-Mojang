@@ -27,6 +27,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
@@ -70,6 +71,7 @@ implements WorldGenLevel {
     private final BiomeManager biomeManager;
     private final ChunkPos firstPos;
     private final ChunkPos lastPos;
+    private final StructureFeatureManager structureFeatureManager;
 
     public WorldGenRegion(ServerLevel serverLevel, List<ChunkAccess> list) {
         int i = Mth.floor(Math.sqrt(list.size()));
@@ -89,6 +91,7 @@ implements WorldGenLevel {
         this.biomeManager = new BiomeManager(this, BiomeManager.obfuscateSeed(this.seed), serverLevel.dimensionType().getBiomeZoomer());
         this.firstPos = list.get(0).getPos();
         this.lastPos = list.get(list.size() - 1).getPos();
+        this.structureFeatureManager = serverLevel.structureFeatureManager().forWorldGenRegion(this);
     }
 
     public int getCenterX() {
@@ -372,7 +375,7 @@ implements WorldGenLevel {
 
     @Override
     public Stream<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature) {
-        return this.level.startsForFeature(sectionPos, structureFeature);
+        return this.structureFeatureManager.startsForFeature(sectionPos, structureFeature);
     }
 }
 

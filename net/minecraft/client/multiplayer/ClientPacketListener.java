@@ -1421,6 +1421,7 @@ implements ClientGamePacketListener {
         PacketUtils.ensureRunningOnSameThread(clientboundPlayerInfoPacket, this, this.minecraft);
         for (ClientboundPlayerInfoPacket.PlayerUpdate playerUpdate : clientboundPlayerInfoPacket.getEntries()) {
             if (clientboundPlayerInfoPacket.getAction() == ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER) {
+                this.minecraft.getPlayerSocialManager().removePlayer(playerUpdate.getProfile().getId());
                 this.playerInfoMap.remove(playerUpdate.getProfile().getId());
                 continue;
             }
@@ -1428,6 +1429,7 @@ implements ClientGamePacketListener {
             if (clientboundPlayerInfoPacket.getAction() == ClientboundPlayerInfoPacket.Action.ADD_PLAYER) {
                 playerInfo = new PlayerInfo(playerUpdate);
                 this.playerInfoMap.put(playerInfo.getProfile().getId(), playerInfo);
+                this.minecraft.getPlayerSocialManager().addPlayer(playerInfo);
             }
             if (playerInfo == null) continue;
             switch (clientboundPlayerInfoPacket.getAction()) {
@@ -2026,6 +2028,10 @@ implements ClientGamePacketListener {
 
     public Collection<PlayerInfo> getOnlinePlayers() {
         return this.playerInfoMap.values();
+    }
+
+    public Collection<UUID> getOnlinePlayerIds() {
+        return this.playerInfoMap.keySet();
     }
 
     @Nullable

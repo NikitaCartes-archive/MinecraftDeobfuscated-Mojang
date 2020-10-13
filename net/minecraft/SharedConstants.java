@@ -38,6 +38,10 @@ public class SharedConstants {
         return CURRENT_VERSION;
     }
 
+    public static int getProtocolVersion() {
+        return 0x40000001;
+    }
+
     static {
         ILLEGAL_FILE_CHARACTERS = new char[]{'/', '\n', '\r', '\t', '\u0000', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':'};
         ResourceLeakDetector.setLevel(NETTY_LEAK_DETECTION);

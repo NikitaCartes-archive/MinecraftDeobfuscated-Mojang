@@ -211,7 +211,7 @@ GuiEventListener {
     }
 
     public void setMessage(Component component) {
-        if (!Objects.equals(component, this.message)) {
+        if (!Objects.equals(component.getString(), this.message.getString())) {
             this.queueNarration(250);
         }
         this.message = component;

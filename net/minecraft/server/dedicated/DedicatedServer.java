@@ -40,7 +40,10 @@ import net.minecraft.server.dedicated.DedicatedServerSettings;
 import net.minecraft.server.dedicated.ServerWatchdog;
 import net.minecraft.server.gui.MinecraftServerGui;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
+import net.minecraft.server.network.TextFilter;
+import net.minecraft.server.network.TextFilterClient;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.OldUsersConverter;
@@ -77,11 +80,14 @@ implements ServerInterface {
     private final DedicatedServerSettings settings;
     @Nullable
     private MinecraftServerGui gui;
+    @Nullable
+    private final TextFilterClient textFilterClient;
 
     public DedicatedServer(Thread thread, RegistryAccess.RegistryHolder registryHolder, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, ServerResources serverResources, WorldData worldData, DedicatedServerSettings dedicatedServerSettings, DataFixer dataFixer, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, GameProfileCache gameProfileCache, ChunkProgressListenerFactory chunkProgressListenerFactory) {
         super(thread, registryHolder, levelStorageAccess, worldData, packRepository, Proxy.NO_PROXY, dataFixer, serverResources, minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
         this.settings = dedicatedServerSettings;
         this.rconConsoleSource = new RconConsoleSource(this);
+        this.textFilterClient = TextFilterClient.createFromConfig(dedicatedServerSettings.getProperties().textFilteringConfig);
     }
 
     @Override
@@ -264,6 +270,9 @@ implements ServerInterface {
 
     @Override
     public void onServerExit() {
+        if (this.textFilterClient != null) {
+            this.textFilterClient.close();
+        }
         if (this.gui != null) {
             this.gui.close();
         }
@@ -529,6 +538,15 @@ implements ServerInterface {
     @Override
     public boolean forceSynchronousWrites() {
         return this.settings.getProperties().syncChunkWrites;
+    }
+
+    @Override
+    @Nullable
+    public TextFilter createTextFilterForPlayer(ServerPlayer serverPlayer) {
+        if (this.textFilterClient != null) {
+            return this.textFilterClient.createContext(serverPlayer.getGameProfile());
+        }
+        return null;
     }
 
     @Override

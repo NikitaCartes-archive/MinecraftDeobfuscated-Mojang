@@ -97,6 +97,7 @@ public class Options {
     public boolean useNativeTransport = true;
     public AttackIndicatorStatus attackIndicator = AttackIndicatorStatus.CROSSHAIR;
     public TutorialSteps tutorialStep = TutorialSteps.MOVEMENT;
+    public boolean joinedFirstServer = false;
     public int biomeBlendRadius = 2;
     public double mouseWheelSensitivity = 1.0;
     public boolean rawMouseInput = true;
@@ -138,6 +139,7 @@ public class Options {
     public final KeyMapping keyChat = new KeyMapping("key.chat", 84, "key.categories.multiplayer");
     public final KeyMapping keyPlayerList = new KeyMapping("key.playerlist", 258, "key.categories.multiplayer");
     public final KeyMapping keyCommand = new KeyMapping("key.command", 47, "key.categories.multiplayer");
+    public final KeyMapping keySocialInteractions = new KeyMapping("key.socialInteractions", 80, "key.categories.multiplayer");
     public final KeyMapping keyScreenshot = new KeyMapping("key.screenshot", 291, "key.categories.misc");
     public final KeyMapping keyTogglePerspective = new KeyMapping("key.togglePerspective", 294, "key.categories.misc");
     public final KeyMapping keySmoothCamera = new KeyMapping("key.smoothCamera", InputConstants.UNKNOWN.getValue(), "key.categories.misc");
@@ -147,7 +149,7 @@ public class Options {
     public final KeyMapping[] keyHotbarSlots = new KeyMapping[]{new KeyMapping("key.hotbar.1", 49, "key.categories.inventory"), new KeyMapping("key.hotbar.2", 50, "key.categories.inventory"), new KeyMapping("key.hotbar.3", 51, "key.categories.inventory"), new KeyMapping("key.hotbar.4", 52, "key.categories.inventory"), new KeyMapping("key.hotbar.5", 53, "key.categories.inventory"), new KeyMapping("key.hotbar.6", 54, "key.categories.inventory"), new KeyMapping("key.hotbar.7", 55, "key.categories.inventory"), new KeyMapping("key.hotbar.8", 56, "key.categories.inventory"), new KeyMapping("key.hotbar.9", 57, "key.categories.inventory")};
     public final KeyMapping keySaveHotbarActivator = new KeyMapping("key.saveToolbarActivator", 67, "key.categories.creative");
     public final KeyMapping keyLoadHotbarActivator = new KeyMapping("key.loadToolbarActivator", 88, "key.categories.creative");
-    public final KeyMapping[] keyMappings = ArrayUtils.addAll(new KeyMapping[]{this.keyAttack, this.keyUse, this.keyUp, this.keyLeft, this.keyDown, this.keyRight, this.keyJump, this.keyShift, this.keySprint, this.keyDrop, this.keyInventory, this.keyChat, this.keyPlayerList, this.keyPickItem, this.keyCommand, this.keyScreenshot, this.keyTogglePerspective, this.keySmoothCamera, this.keyFullscreen, this.keySpectatorOutlines, this.keySwapOffhand, this.keySaveHotbarActivator, this.keyLoadHotbarActivator, this.keyAdvancements}, this.keyHotbarSlots);
+    public final KeyMapping[] keyMappings = ArrayUtils.addAll(new KeyMapping[]{this.keyAttack, this.keyUse, this.keyUp, this.keyLeft, this.keyDown, this.keyRight, this.keyJump, this.keyShift, this.keySprint, this.keyDrop, this.keyInventory, this.keyChat, this.keyPlayerList, this.keyPickItem, this.keyCommand, this.keySocialInteractions, this.keyScreenshot, this.keyTogglePerspective, this.keySmoothCamera, this.keyFullscreen, this.keySpectatorOutlines, this.keySwapOffhand, this.keySaveHotbarActivator, this.keyLoadHotbarActivator, this.keyAdvancements}, this.keyHotbarSlots);
     protected Minecraft minecraft;
     private final File optionsFile;
     public Difficulty difficulty = Difficulty.NORMAL;
@@ -449,6 +451,9 @@ public class Options {
                     if ("skipMultiplayerWarning".equals(string2)) {
                         this.skipMultiplayerWarning = "true".equals(string22);
                     }
+                    if ("joinedFirstServer".equals(string2)) {
+                        this.joinedFirstServer = "true".equals(string22);
+                    }
                     if ("syncChunkWrites".equals(string2)) {
                         this.syncWrites = "true".equals(string22);
                     }
@@ -576,6 +581,7 @@ public class Options {
             printWriter.println("rawMouseInput:" + Option.RAW_MOUSE_INPUT.get(this));
             printWriter.println("glDebugVerbosity:" + this.glDebugVerbosity);
             printWriter.println("skipMultiplayerWarning:" + this.skipMultiplayerWarning);
+            printWriter.println("joinedFirstServer:" + this.joinedFirstServer);
             printWriter.println("syncChunkWrites:" + this.syncWrites);
             for (KeyMapping keyMapping : this.keyMappings) {
                 printWriter.println("key_" + keyMapping.getName() + ":" + keyMapping.saveString());

@@ -60,6 +60,7 @@ extends Settings<DedicatedServerProperties> {
     public final boolean enableJmxMonitoring;
     public final boolean enableStatus;
     public final int entityBroadcastRangePercentage;
+    public final String textFilteringConfig;
     public final Settings.MutableValue<Integer> playerIdleTimeout;
     public final Settings.MutableValue<Boolean> whiteList;
     public final WorldGenSettings worldGenSettings;
@@ -87,6 +88,7 @@ extends Settings<DedicatedServerProperties> {
         this.enableJmxMonitoring = this.get("enable-jmx-monitoring", false);
         this.enableStatus = this.get("enable-status", true);
         this.entityBroadcastRangePercentage = this.get("entity-broadcast-range-percentage", integer -> Mth.clamp(integer, 10, 1000), 100);
+        this.textFilteringConfig = this.get("text-filtering-config", "");
         this.playerIdleTimeout = this.getMutable("player-idle-timeout", 0);
         this.whiteList = this.getMutable("white-list", false);
         this.worldGenSettings = WorldGenSettings.create(registryAccess, properties);

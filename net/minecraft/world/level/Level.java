@@ -497,7 +497,6 @@ AutoCloseable {
         return explosion;
     }
 
-    @Environment(value=EnvType.CLIENT)
     public String gatherChunkSourceStats() {
         return this.getChunkSource().gatherStats();
     }

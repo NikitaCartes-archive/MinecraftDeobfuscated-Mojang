@@ -207,7 +207,8 @@ extends Screen {
             this.book.addTagElement("author", StringTag.valueOf(this.owner.getGameProfile().getName()));
             this.book.addTagElement("title", StringTag.valueOf(this.title.trim()));
         }
-        this.minecraft.getConnection().send(new ServerboundEditBookPacket(this.book, bl, this.hand));
+        int i = this.hand == InteractionHand.MAIN_HAND ? this.owner.inventory.selected : 40;
+        this.minecraft.getConnection().send(new ServerboundEditBookPacket(this.book, bl, i));
     }
 
     private void appendPageToBook() {

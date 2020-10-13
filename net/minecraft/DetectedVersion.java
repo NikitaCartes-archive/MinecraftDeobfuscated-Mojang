@@ -8,6 +8,7 @@ import com.mojang.bridge.game.GameVersion;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.UUID;
+import net.minecraft.SharedConstants;
 import net.minecraft.util.GsonHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,13 +28,13 @@ implements GameVersion {
 
     private DetectedVersion() {
         this.id = UUID.randomUUID().toString().replaceAll("-", "");
-        this.name = "1.16.3";
-        this.stable = true;
-        this.worldVersion = 2580;
-        this.protocolVersion = 753;
+        this.name = "1.16.4-pre1";
+        this.stable = false;
+        this.worldVersion = 2581;
+        this.protocolVersion = SharedConstants.getProtocolVersion();
         this.packVersion = 6;
         this.buildTime = new Date();
-        this.releaseTarget = "1.16.3";
+        this.releaseTarget = "1.16.4";
     }
 
     private DetectedVersion(JsonObject jsonObject) {

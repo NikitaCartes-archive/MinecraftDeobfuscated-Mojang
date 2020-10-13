@@ -325,9 +325,9 @@ public class RealmsClient {
         request.cookie("version", SharedConstants.getCurrentVersion().getName());
         try {
             int i = request.responseCode();
-            if (i == 503) {
+            if (i == 503 || i == 277) {
                 int j = request.getRetryAfterHeader();
-                throw new RetryCallException(j);
+                throw new RetryCallException(j, i);
             }
             String string = request.text();
             if (i < 200 || i >= 300) {
