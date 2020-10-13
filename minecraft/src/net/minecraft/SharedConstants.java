@@ -39,6 +39,10 @@ public class SharedConstants {
 		return CURRENT_VERSION;
 	}
 
+	public static int getProtocolVersion() {
+		return 1073741825;
+	}
+
 	static {
 		ResourceLeakDetector.setLevel(NETTY_LEAK_DETECTION);
 		CommandSyntaxException.ENABLE_COMMAND_STACK_TRACES = false;

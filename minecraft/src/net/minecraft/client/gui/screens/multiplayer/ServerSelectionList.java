@@ -54,8 +54,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 	private static final Component SCANNING_LABEL = new TranslatableComponent("lanServer.scanning");
 	private static final Component CANT_RESOLVE_TEXT = new TranslatableComponent("multiplayer.status.cannot_resolve").withStyle(ChatFormatting.DARK_RED);
 	private static final Component CANT_CONNECT_TEXT = new TranslatableComponent("multiplayer.status.cannot_connect").withStyle(ChatFormatting.DARK_RED);
-	private static final Component CLIENT_OUT_OF_DATE_TOOLTIP = new TranslatableComponent("multiplayer.status.client_out_of_date");
-	private static final Component SERVER_OUT_OF_DATE_TOOLTIP = new TranslatableComponent("multiplayer.status.server_out_of_date");
+	private static final Component INCOMPATIBLE_TOOLTIP = new TranslatableComponent("multiplayer.status.incompatible");
 	private static final Component NO_CONNECTION_TOOLTIP = new TranslatableComponent("multiplayer.status.no_connection");
 	private static final Component PINGING_TOOLTIP = new TranslatableComponent("multiplayer.status.pinging");
 	private final JoinMultiplayerScreen screen;
@@ -249,9 +248,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 				});
 			}
 
-			boolean bl2 = this.serverData.protocol > SharedConstants.getCurrentVersion().getProtocolVersion();
-			boolean bl3 = this.serverData.protocol < SharedConstants.getCurrentVersion().getProtocolVersion();
-			boolean bl4 = bl2 || bl3;
+			boolean bl2 = this.serverData.protocol != SharedConstants.getCurrentVersion().getProtocolVersion();
 			this.minecraft.font.draw(poseStack, this.serverData.name, (float)(k + 32 + 3), (float)(j + 1), 16777215);
 			List<FormattedCharSequence> list = this.minecraft.font.split(this.serverData.motd, l - 32 - 2);
 
@@ -259,16 +256,16 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 				this.minecraft.font.draw(poseStack, (FormattedCharSequence)list.get(p), (float)(k + 32 + 3), (float)(j + 12 + 9 * p), 8421504);
 			}
 
-			Component component = (Component)(bl4 ? this.serverData.version.copy().withStyle(ChatFormatting.DARK_RED) : this.serverData.status);
+			Component component = (Component)(bl2 ? this.serverData.version.copy().withStyle(ChatFormatting.DARK_RED) : this.serverData.status);
 			int q = this.minecraft.font.width(component);
 			this.minecraft.font.draw(poseStack, component, (float)(k + l - q - 15 - 2), (float)(j + 1), 8421504);
 			int r = 0;
 			int s;
 			List<Component> list2;
 			Component component2;
-			if (bl4) {
+			if (bl2) {
 				s = 5;
-				component2 = bl2 ? ServerSelectionList.CLIENT_OUT_OF_DATE_TOOLTIP : ServerSelectionList.SERVER_OUT_OF_DATE_TOOLTIP;
+				component2 = ServerSelectionList.INCOMPATIBLE_TOOLTIP;
 				list2 = this.serverData.playerList;
 			} else if (this.serverData.pinged && this.serverData.ping != -2L) {
 				if (this.serverData.ping < 0L) {

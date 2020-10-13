@@ -72,7 +72,8 @@ public class TutorialToast implements Toast {
 		MOUSE(1, 0),
 		TREE(2, 0),
 		RECIPE_BOOK(0, 1),
-		WOODEN_PLANKS(1, 1);
+		WOODEN_PLANKS(1, 1),
+		SOCIAL_INTERACTIONS(2, 1);
 
 		private final int x;
 		private final int y;

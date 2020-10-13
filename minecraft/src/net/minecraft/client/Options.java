@@ -83,6 +83,7 @@ public class Options {
 	public boolean useNativeTransport = true;
 	public AttackIndicatorStatus attackIndicator = AttackIndicatorStatus.CROSSHAIR;
 	public TutorialSteps tutorialStep = TutorialSteps.MOVEMENT;
+	public boolean joinedFirstServer = false;
 	public int biomeBlendRadius = 2;
 	public double mouseWheelSensitivity = 1.0;
 	public boolean rawMouseInput = true;
@@ -124,6 +125,7 @@ public class Options {
 	public final KeyMapping keyChat = new KeyMapping("key.chat", 84, "key.categories.multiplayer");
 	public final KeyMapping keyPlayerList = new KeyMapping("key.playerlist", 258, "key.categories.multiplayer");
 	public final KeyMapping keyCommand = new KeyMapping("key.command", 47, "key.categories.multiplayer");
+	public final KeyMapping keySocialInteractions = new KeyMapping("key.socialInteractions", 80, "key.categories.multiplayer");
 	public final KeyMapping keyScreenshot = new KeyMapping("key.screenshot", 291, "key.categories.misc");
 	public final KeyMapping keyTogglePerspective = new KeyMapping("key.togglePerspective", 294, "key.categories.misc");
 	public final KeyMapping keySmoothCamera = new KeyMapping("key.smoothCamera", InputConstants.UNKNOWN.getValue(), "key.categories.misc");
@@ -160,6 +162,7 @@ public class Options {
 			this.keyPlayerList,
 			this.keyPickItem,
 			this.keyCommand,
+			this.keySocialInteractions,
 			this.keyScreenshot,
 			this.keyTogglePerspective,
 			this.keySmoothCamera,
@@ -554,6 +557,10 @@ public class Options {
 						this.skipMultiplayerWarning = "true".equals(string2);
 					}
 
+					if ("joinedFirstServer".equals(string)) {
+						this.joinedFirstServer = "true".equals(string2);
+					}
+
 					if ("syncChunkWrites".equals(string)) {
 						this.syncWrites = "true".equals(string2);
 					}
@@ -690,6 +697,7 @@ public class Options {
 				printWriter.println("rawMouseInput:" + Option.RAW_MOUSE_INPUT.get(this));
 				printWriter.println("glDebugVerbosity:" + this.glDebugVerbosity);
 				printWriter.println("skipMultiplayerWarning:" + this.skipMultiplayerWarning);
+				printWriter.println("joinedFirstServer:" + this.joinedFirstServer);
 				printWriter.println("syncChunkWrites:" + this.syncWrites);
 
 				for (KeyMapping keyMapping : this.keyMappings) {

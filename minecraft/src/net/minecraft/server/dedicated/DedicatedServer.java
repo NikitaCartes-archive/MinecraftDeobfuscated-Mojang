@@ -35,7 +35,10 @@ import net.minecraft.server.ServerInterface;
 import net.minecraft.server.ServerResources;
 import net.minecraft.server.gui.MinecraftServerGui;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
+import net.minecraft.server.network.TextFilter;
+import net.minecraft.server.network.TextFilterClient;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.OldUsersConverter;
@@ -68,6 +71,8 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	private final DedicatedServerSettings settings;
 	@Nullable
 	private MinecraftServerGui gui;
+	@Nullable
+	private final TextFilterClient textFilterClient;
 
 	public DedicatedServer(
 		Thread thread,
@@ -99,6 +104,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 		);
 		this.settings = dedicatedServerSettings;
 		this.rconConsoleSource = new RconConsoleSource(this);
+		this.textFilterClient = TextFilterClient.createFromConfig(dedicatedServerSettings.getProperties().textFilteringConfig);
 	}
 
 	@Override
@@ -296,6 +302,10 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 
 	@Override
 	public void onServerExit() {
+		if (this.textFilterClient != null) {
+			this.textFilterClient.close();
+		}
+
 		if (this.gui != null) {
 			this.gui.close();
 		}
@@ -573,5 +583,11 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	@Override
 	public boolean forceSynchronousWrites() {
 		return this.settings.getProperties().syncChunkWrites;
+	}
+
+	@Nullable
+	@Override
+	public TextFilter createTextFilterForPlayer(ServerPlayer serverPlayer) {
+		return this.textFilterClient != null ? this.textFilterClient.createContext(serverPlayer.getGameProfile()) : null;
 	}
 }

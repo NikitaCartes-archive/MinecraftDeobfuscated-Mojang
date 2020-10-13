@@ -99,7 +99,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 	@Override
 	public boolean mouseClicked(double d, double e, int i) {
 		if (this.hoverWarning && this.warningURL != null) {
-			Util.getPlatform().openUri("https://beta.minecraft.net/realms/adventure-maps-in-1-9");
+			Util.getPlatform().openUri("https://www.minecraft.net/realms/adventure-maps-in-1-9");
 			return true;
 		} else {
 			return super.mouseClicked(d, e, i);
@@ -240,7 +240,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 											if (RealmsSelectWorldTemplateScreen.this.worldTemplateObjectSelectionList.isEmpty()) {
 												String string = I18n.get("mco.template.select.none", "%link");
 												TextRenderingUtils.LineSegment lineSegment = TextRenderingUtils.LineSegment.link(
-													I18n.get("mco.template.select.none.linkTitle"), "https://minecraft.net/realms/content-creator/"
+													I18n.get("mco.template.select.none.linkTitle"), "https://aka.ms/MinecraftRealmsContentCreator"
 												);
 												RealmsSelectWorldTemplateScreen.this.noTemplatesMessage = TextRenderingUtils.decompose(string, lineSegment);
 											}

@@ -39,6 +39,8 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 	protected int headerHeight;
 	private boolean scrolling;
 	private E selected;
+	private boolean renderBackground = true;
+	private boolean renderTopAndBottom = true;
 
 	public AbstractSelectionList(Minecraft minecraft, int i, int j, int k, int l, int m) {
 		this.minecraft = minecraft;
@@ -74,6 +76,14 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 
 	public void setSelected(@Nullable E entry) {
 		this.selected = entry;
+	}
+
+	public void setRenderBackground(boolean bl) {
+		this.renderBackground = bl;
+	}
+
+	public void setRenderTopAndBottom(boolean bl) {
+		this.renderTopAndBottom = bl;
 	}
 
 	@Nullable
@@ -162,27 +172,30 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		int l = k + 6;
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		this.minecraft.getTextureManager().bind(GuiComponent.BACKGROUND_LOCATION);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		float g = 32.0F;
-		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-		bufferBuilder.vertex((double)this.x0, (double)this.y1, 0.0)
-			.uv((float)this.x0 / 32.0F, (float)(this.y1 + (int)this.getScrollAmount()) / 32.0F)
-			.color(32, 32, 32, 255)
-			.endVertex();
-		bufferBuilder.vertex((double)this.x1, (double)this.y1, 0.0)
-			.uv((float)this.x1 / 32.0F, (float)(this.y1 + (int)this.getScrollAmount()) / 32.0F)
-			.color(32, 32, 32, 255)
-			.endVertex();
-		bufferBuilder.vertex((double)this.x1, (double)this.y0, 0.0)
-			.uv((float)this.x1 / 32.0F, (float)(this.y0 + (int)this.getScrollAmount()) / 32.0F)
-			.color(32, 32, 32, 255)
-			.endVertex();
-		bufferBuilder.vertex((double)this.x0, (double)this.y0, 0.0)
-			.uv((float)this.x0 / 32.0F, (float)(this.y0 + (int)this.getScrollAmount()) / 32.0F)
-			.color(32, 32, 32, 255)
-			.endVertex();
-		tesselator.end();
+		if (this.renderBackground) {
+			this.minecraft.getTextureManager().bind(GuiComponent.BACKGROUND_LOCATION);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+			float g = 32.0F;
+			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+			bufferBuilder.vertex((double)this.x0, (double)this.y1, 0.0)
+				.uv((float)this.x0 / 32.0F, (float)(this.y1 + (int)this.getScrollAmount()) / 32.0F)
+				.color(32, 32, 32, 255)
+				.endVertex();
+			bufferBuilder.vertex((double)this.x1, (double)this.y1, 0.0)
+				.uv((float)this.x1 / 32.0F, (float)(this.y1 + (int)this.getScrollAmount()) / 32.0F)
+				.color(32, 32, 32, 255)
+				.endVertex();
+			bufferBuilder.vertex((double)this.x1, (double)this.y0, 0.0)
+				.uv((float)this.x1 / 32.0F, (float)(this.y0 + (int)this.getScrollAmount()) / 32.0F)
+				.color(32, 32, 32, 255)
+				.endVertex();
+			bufferBuilder.vertex((double)this.x0, (double)this.y0, 0.0)
+				.uv((float)this.x0 / 32.0F, (float)(this.y0 + (int)this.getScrollAmount()) / 32.0F)
+				.color(32, 32, 32, 255)
+				.endVertex();
+			tesselator.end();
+		}
+
 		int m = this.getRowLeft();
 		int n = this.y0 + 4 - (int)this.getScrollAmount();
 		if (this.renderHeader) {
@@ -190,57 +203,60 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		}
 
 		this.renderList(poseStack, m, n, i, j, f);
-		this.minecraft.getTextureManager().bind(GuiComponent.BACKGROUND_LOCATION);
-		RenderSystem.enableDepthTest();
-		RenderSystem.depthFunc(519);
-		float h = 32.0F;
-		int o = -100;
-		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-		bufferBuilder.vertex((double)this.x0, (double)this.y0, -100.0).uv(0.0F, (float)this.y0 / 32.0F).color(64, 64, 64, 255).endVertex();
-		bufferBuilder.vertex((double)(this.x0 + this.width), (double)this.y0, -100.0)
-			.uv((float)this.width / 32.0F, (float)this.y0 / 32.0F)
-			.color(64, 64, 64, 255)
-			.endVertex();
-		bufferBuilder.vertex((double)(this.x0 + this.width), 0.0, -100.0).uv((float)this.width / 32.0F, 0.0F).color(64, 64, 64, 255).endVertex();
-		bufferBuilder.vertex((double)this.x0, 0.0, -100.0).uv(0.0F, 0.0F).color(64, 64, 64, 255).endVertex();
-		bufferBuilder.vertex((double)this.x0, (double)this.height, -100.0).uv(0.0F, (float)this.height / 32.0F).color(64, 64, 64, 255).endVertex();
-		bufferBuilder.vertex((double)(this.x0 + this.width), (double)this.height, -100.0)
-			.uv((float)this.width / 32.0F, (float)this.height / 32.0F)
-			.color(64, 64, 64, 255)
-			.endVertex();
-		bufferBuilder.vertex((double)(this.x0 + this.width), (double)this.y1, -100.0)
-			.uv((float)this.width / 32.0F, (float)this.y1 / 32.0F)
-			.color(64, 64, 64, 255)
-			.endVertex();
-		bufferBuilder.vertex((double)this.x0, (double)this.y1, -100.0).uv(0.0F, (float)this.y1 / 32.0F).color(64, 64, 64, 255).endVertex();
-		tesselator.end();
-		RenderSystem.depthFunc(515);
-		RenderSystem.disableDepthTest();
-		RenderSystem.enableBlend();
-		RenderSystem.blendFuncSeparate(
-			GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE
-		);
-		RenderSystem.disableAlphaTest();
-		RenderSystem.shadeModel(7425);
-		RenderSystem.disableTexture();
-		int p = 4;
-		bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-		bufferBuilder.vertex((double)this.x0, (double)(this.y0 + 4), 0.0).uv(0.0F, 1.0F).color(0, 0, 0, 0).endVertex();
-		bufferBuilder.vertex((double)this.x1, (double)(this.y0 + 4), 0.0).uv(1.0F, 1.0F).color(0, 0, 0, 0).endVertex();
-		bufferBuilder.vertex((double)this.x1, (double)this.y0, 0.0).uv(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
-		bufferBuilder.vertex((double)this.x0, (double)this.y0, 0.0).uv(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
-		bufferBuilder.vertex((double)this.x0, (double)this.y1, 0.0).uv(0.0F, 1.0F).color(0, 0, 0, 255).endVertex();
-		bufferBuilder.vertex((double)this.x1, (double)this.y1, 0.0).uv(1.0F, 1.0F).color(0, 0, 0, 255).endVertex();
-		bufferBuilder.vertex((double)this.x1, (double)(this.y1 - 4), 0.0).uv(1.0F, 0.0F).color(0, 0, 0, 0).endVertex();
-		bufferBuilder.vertex((double)this.x0, (double)(this.y1 - 4), 0.0).uv(0.0F, 0.0F).color(0, 0, 0, 0).endVertex();
-		tesselator.end();
+		if (this.renderTopAndBottom) {
+			this.minecraft.getTextureManager().bind(GuiComponent.BACKGROUND_LOCATION);
+			RenderSystem.enableDepthTest();
+			RenderSystem.depthFunc(519);
+			float h = 32.0F;
+			int o = -100;
+			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+			bufferBuilder.vertex((double)this.x0, (double)this.y0, -100.0).uv(0.0F, (float)this.y0 / 32.0F).color(64, 64, 64, 255).endVertex();
+			bufferBuilder.vertex((double)(this.x0 + this.width), (double)this.y0, -100.0)
+				.uv((float)this.width / 32.0F, (float)this.y0 / 32.0F)
+				.color(64, 64, 64, 255)
+				.endVertex();
+			bufferBuilder.vertex((double)(this.x0 + this.width), 0.0, -100.0).uv((float)this.width / 32.0F, 0.0F).color(64, 64, 64, 255).endVertex();
+			bufferBuilder.vertex((double)this.x0, 0.0, -100.0).uv(0.0F, 0.0F).color(64, 64, 64, 255).endVertex();
+			bufferBuilder.vertex((double)this.x0, (double)this.height, -100.0).uv(0.0F, (float)this.height / 32.0F).color(64, 64, 64, 255).endVertex();
+			bufferBuilder.vertex((double)(this.x0 + this.width), (double)this.height, -100.0)
+				.uv((float)this.width / 32.0F, (float)this.height / 32.0F)
+				.color(64, 64, 64, 255)
+				.endVertex();
+			bufferBuilder.vertex((double)(this.x0 + this.width), (double)this.y1, -100.0)
+				.uv((float)this.width / 32.0F, (float)this.y1 / 32.0F)
+				.color(64, 64, 64, 255)
+				.endVertex();
+			bufferBuilder.vertex((double)this.x0, (double)this.y1, -100.0).uv(0.0F, (float)this.y1 / 32.0F).color(64, 64, 64, 255).endVertex();
+			tesselator.end();
+			RenderSystem.depthFunc(515);
+			RenderSystem.disableDepthTest();
+			RenderSystem.enableBlend();
+			RenderSystem.blendFuncSeparate(
+				GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE
+			);
+			RenderSystem.disableAlphaTest();
+			RenderSystem.shadeModel(7425);
+			RenderSystem.disableTexture();
+			int p = 4;
+			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+			bufferBuilder.vertex((double)this.x0, (double)(this.y0 + 4), 0.0).uv(0.0F, 1.0F).color(0, 0, 0, 0).endVertex();
+			bufferBuilder.vertex((double)this.x1, (double)(this.y0 + 4), 0.0).uv(1.0F, 1.0F).color(0, 0, 0, 0).endVertex();
+			bufferBuilder.vertex((double)this.x1, (double)this.y0, 0.0).uv(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)this.x0, (double)this.y0, 0.0).uv(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)this.x0, (double)this.y1, 0.0).uv(0.0F, 1.0F).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)this.x1, (double)this.y1, 0.0).uv(1.0F, 1.0F).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)this.x1, (double)(this.y1 - 4), 0.0).uv(1.0F, 0.0F).color(0, 0, 0, 0).endVertex();
+			bufferBuilder.vertex((double)this.x0, (double)(this.y1 - 4), 0.0).uv(0.0F, 0.0F).color(0, 0, 0, 0).endVertex();
+			tesselator.end();
+		}
+
 		int q = this.getMaxScroll();
 		if (q > 0) {
-			int r = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
-			r = Mth.clamp(r, 32, this.y1 - this.y0 - 8);
-			int s = (int)this.getScrollAmount() * (this.y1 - this.y0 - r) / q + this.y0;
-			if (s < this.y0) {
-				s = this.y0;
+			int o = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
+			o = Mth.clamp(o, 32, this.y1 - this.y0 - 8);
+			int p = (int)this.getScrollAmount() * (this.y1 - this.y0 - o) / q + this.y0;
+			if (p < this.y0) {
+				p = this.y0;
 			}
 
 			bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
@@ -248,14 +264,14 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 			bufferBuilder.vertex((double)l, (double)this.y1, 0.0).uv(1.0F, 1.0F).color(0, 0, 0, 255).endVertex();
 			bufferBuilder.vertex((double)l, (double)this.y0, 0.0).uv(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
 			bufferBuilder.vertex((double)k, (double)this.y0, 0.0).uv(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
-			bufferBuilder.vertex((double)k, (double)(s + r), 0.0).uv(0.0F, 1.0F).color(128, 128, 128, 255).endVertex();
-			bufferBuilder.vertex((double)l, (double)(s + r), 0.0).uv(1.0F, 1.0F).color(128, 128, 128, 255).endVertex();
-			bufferBuilder.vertex((double)l, (double)s, 0.0).uv(1.0F, 0.0F).color(128, 128, 128, 255).endVertex();
-			bufferBuilder.vertex((double)k, (double)s, 0.0).uv(0.0F, 0.0F).color(128, 128, 128, 255).endVertex();
-			bufferBuilder.vertex((double)k, (double)(s + r - 1), 0.0).uv(0.0F, 1.0F).color(192, 192, 192, 255).endVertex();
-			bufferBuilder.vertex((double)(l - 1), (double)(s + r - 1), 0.0).uv(1.0F, 1.0F).color(192, 192, 192, 255).endVertex();
-			bufferBuilder.vertex((double)(l - 1), (double)s, 0.0).uv(1.0F, 0.0F).color(192, 192, 192, 255).endVertex();
-			bufferBuilder.vertex((double)k, (double)s, 0.0).uv(0.0F, 0.0F).color(192, 192, 192, 255).endVertex();
+			bufferBuilder.vertex((double)k, (double)(p + o), 0.0).uv(0.0F, 1.0F).color(128, 128, 128, 255).endVertex();
+			bufferBuilder.vertex((double)l, (double)(p + o), 0.0).uv(1.0F, 1.0F).color(128, 128, 128, 255).endVertex();
+			bufferBuilder.vertex((double)l, (double)p, 0.0).uv(1.0F, 0.0F).color(128, 128, 128, 255).endVertex();
+			bufferBuilder.vertex((double)k, (double)p, 0.0).uv(0.0F, 0.0F).color(128, 128, 128, 255).endVertex();
+			bufferBuilder.vertex((double)k, (double)(p + o - 1), 0.0).uv(0.0F, 1.0F).color(192, 192, 192, 255).endVertex();
+			bufferBuilder.vertex((double)(l - 1), (double)(p + o - 1), 0.0).uv(1.0F, 1.0F).color(192, 192, 192, 255).endVertex();
+			bufferBuilder.vertex((double)(l - 1), (double)p, 0.0).uv(1.0F, 0.0F).color(192, 192, 192, 255).endVertex();
+			bufferBuilder.vertex((double)k, (double)p, 0.0).uv(0.0F, 0.0F).color(192, 192, 192, 255).endVertex();
 			tesselator.end();
 		}
 
@@ -295,7 +311,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		this.scrollAmount = Mth.clamp(d, 0.0, (double)this.getMaxScroll());
 	}
 
-	private int getMaxScroll() {
+	public int getMaxScroll() {
 		return Math.max(0, this.getMaxPosition() - (this.y1 - this.y0 - 4));
 	}
 
@@ -465,7 +481,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		}
 	}
 
-	protected int getRowLeft() {
+	public int getRowLeft() {
 		return this.x0 + this.width / 2 - this.getRowWidth() / 2 + 2;
 	}
 

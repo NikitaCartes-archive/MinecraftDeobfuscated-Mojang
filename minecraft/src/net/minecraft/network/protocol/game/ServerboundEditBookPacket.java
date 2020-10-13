@@ -5,36 +5,35 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 
 public class ServerboundEditBookPacket implements Packet<ServerGamePacketListener> {
 	private ItemStack book;
 	private boolean signing;
-	private InteractionHand hand;
+	private int slot;
 
 	public ServerboundEditBookPacket() {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public ServerboundEditBookPacket(ItemStack itemStack, boolean bl, InteractionHand interactionHand) {
+	public ServerboundEditBookPacket(ItemStack itemStack, boolean bl, int i) {
 		this.book = itemStack.copy();
 		this.signing = bl;
-		this.hand = interactionHand;
+		this.slot = i;
 	}
 
 	@Override
 	public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
 		this.book = friendlyByteBuf.readItem();
 		this.signing = friendlyByteBuf.readBoolean();
-		this.hand = friendlyByteBuf.readEnum(InteractionHand.class);
+		this.slot = friendlyByteBuf.readVarInt();
 	}
 
 	@Override
 	public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
 		friendlyByteBuf.writeItem(this.book);
 		friendlyByteBuf.writeBoolean(this.signing);
-		friendlyByteBuf.writeEnum(this.hand);
+		friendlyByteBuf.writeVarInt(this.slot);
 	}
 
 	public void handle(ServerGamePacketListener serverGamePacketListener) {
@@ -49,7 +48,7 @@ public class ServerboundEditBookPacket implements Packet<ServerGamePacketListene
 		return this.signing;
 	}
 
-	public InteractionHand getHand() {
-		return this.hand;
+	public int getSlot() {
+		return this.slot;
 	}
 }

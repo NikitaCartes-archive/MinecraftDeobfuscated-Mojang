@@ -159,7 +159,7 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 	}
 
 	private Component daysLeftPresentation(int i) {
-		if (i == -1 && this.serverData.expired) {
+		if (i < 0 && this.serverData.expired) {
 			return SUBSCRIPTION_EXPIRED_TEXT;
 		} else if (i <= 1) {
 			return SUBSCRIPTION_LESS_THAN_A_DAY_TEXT;
