@@ -1,145 +1,113 @@
 package net.minecraft.util;
 
-import java.io.UnsupportedEncodingException;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.EncodedKeySpec;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class Crypt {
-	private static final Logger LOGGER = LogManager.getLogger();
-
 	@Environment(EnvType.CLIENT)
-	public static SecretKey generateSecretKey() {
+	public static SecretKey generateSecretKey() throws CryptException {
 		try {
 			KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
 			keyGenerator.init(128);
 			return keyGenerator.generateKey();
-		} catch (NoSuchAlgorithmException var1) {
-			throw new Error(var1);
+		} catch (Exception var1) {
+			throw new CryptException(var1);
 		}
 	}
 
-	public static KeyPair generateKeyPair() {
+	public static KeyPair generateKeyPair() throws CryptException {
 		try {
 			KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
 			keyPairGenerator.initialize(1024);
 			return keyPairGenerator.generateKeyPair();
-		} catch (NoSuchAlgorithmException var1) {
-			var1.printStackTrace();
-			LOGGER.error("Key pair generation failed!");
-			return null;
+		} catch (Exception var1) {
+			throw new CryptException(var1);
 		}
 	}
 
-	public static byte[] digestData(String string, PublicKey publicKey, SecretKey secretKey) {
+	public static byte[] digestData(String string, PublicKey publicKey, SecretKey secretKey) throws CryptException {
 		try {
-			return digestData("SHA-1", string.getBytes("ISO_8859_1"), secretKey.getEncoded(), publicKey.getEncoded());
-		} catch (UnsupportedEncodingException var4) {
-			var4.printStackTrace();
-			return null;
+			return digestData(string.getBytes("ISO_8859_1"), secretKey.getEncoded(), publicKey.getEncoded());
+		} catch (Exception var4) {
+			throw new CryptException(var4);
 		}
 	}
 
-	private static byte[] digestData(String string, byte[]... bs) {
-		try {
-			MessageDigest messageDigest = MessageDigest.getInstance(string);
+	private static byte[] digestData(byte[]... bs) throws Exception {
+		MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
 
-			for (byte[] cs : bs) {
-				messageDigest.update(cs);
-			}
-
-			return messageDigest.digest();
-		} catch (NoSuchAlgorithmException var7) {
-			var7.printStackTrace();
-			return null;
+		for (byte[] cs : bs) {
+			messageDigest.update(cs);
 		}
+
+		return messageDigest.digest();
 	}
 
-	public static PublicKey byteToPublicKey(byte[] bs) {
+	@Environment(EnvType.CLIENT)
+	public static PublicKey byteToPublicKey(byte[] bs) throws CryptException {
 		try {
 			EncodedKeySpec encodedKeySpec = new X509EncodedKeySpec(bs);
 			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 			return keyFactory.generatePublic(encodedKeySpec);
-		} catch (NoSuchAlgorithmException var3) {
-		} catch (InvalidKeySpecException var4) {
+		} catch (Exception var3) {
+			throw new CryptException(var3);
 		}
-
-		LOGGER.error("Public key reconstitute failed!");
-		return null;
 	}
 
-	public static SecretKey decryptByteToSecretKey(PrivateKey privateKey, byte[] bs) {
-		return new SecretKeySpec(decryptUsingKey(privateKey, bs), "AES");
+	public static SecretKey decryptByteToSecretKey(PrivateKey privateKey, byte[] bs) throws CryptException {
+		byte[] cs = decryptUsingKey(privateKey, bs);
+
+		try {
+			return new SecretKeySpec(cs, "AES");
+		} catch (Exception var4) {
+			throw new CryptException(var4);
+		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static byte[] encryptUsingKey(Key key, byte[] bs) {
+	public static byte[] encryptUsingKey(Key key, byte[] bs) throws CryptException {
 		return cipherData(1, key, bs);
 	}
 
-	public static byte[] decryptUsingKey(Key key, byte[] bs) {
+	public static byte[] decryptUsingKey(Key key, byte[] bs) throws CryptException {
 		return cipherData(2, key, bs);
 	}
 
-	private static byte[] cipherData(int i, Key key, byte[] bs) {
+	private static byte[] cipherData(int i, Key key, byte[] bs) throws CryptException {
 		try {
 			return setupCipher(i, key.getAlgorithm(), key).doFinal(bs);
-		} catch (IllegalBlockSizeException var4) {
-			var4.printStackTrace();
-		} catch (BadPaddingException var5) {
-			var5.printStackTrace();
+		} catch (Exception var4) {
+			throw new CryptException(var4);
 		}
-
-		LOGGER.error("Cipher data failed!");
-		return null;
 	}
 
-	private static Cipher setupCipher(int i, String string, Key key) {
-		try {
-			Cipher cipher = Cipher.getInstance(string);
-			cipher.init(i, key);
-			return cipher;
-		} catch (InvalidKeyException var4) {
-			var4.printStackTrace();
-		} catch (NoSuchAlgorithmException var5) {
-			var5.printStackTrace();
-		} catch (NoSuchPaddingException var6) {
-			var6.printStackTrace();
-		}
-
-		LOGGER.error("Cipher creation failed!");
-		return null;
+	private static Cipher setupCipher(int i, String string, Key key) throws Exception {
+		Cipher cipher = Cipher.getInstance(string);
+		cipher.init(i, key);
+		return cipher;
 	}
 
-	public static Cipher getCipher(int i, Key key) {
+	public static Cipher getCipher(int i, Key key) throws CryptException {
 		try {
 			Cipher cipher = Cipher.getInstance("AES/CFB8/NoPadding");
 			cipher.init(i, key, new IvParameterSpec(key.getEncoded()));
 			return cipher;
-		} catch (GeneralSecurityException var3) {
-			throw new RuntimeException(var3);
+		} catch (Exception var3) {
+			throw new CryptException(var3);
 		}
 	}
 }

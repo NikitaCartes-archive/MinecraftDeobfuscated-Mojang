@@ -93,6 +93,8 @@ import net.minecraft.server.players.ServerOpListEntry;
 import net.minecraft.server.players.UserWhiteList;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagContainer;
+import net.minecraft.util.Crypt;
+import net.minecraft.util.CryptException;
 import net.minecraft.util.FrameTimer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.ProgressListener;
@@ -1007,8 +1009,14 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return this.singleplayerName != null;
 	}
 
-	public void setKeyPair(KeyPair keyPair) {
-		this.keyPair = keyPair;
+	protected void initializeKeyPair() {
+		LOGGER.info("Generating keypair");
+
+		try {
+			this.keyPair = Crypt.generateKeyPair();
+		} catch (CryptException var2) {
+			throw new IllegalStateException("Failed to generate key pair", var2);
+		}
 	}
 
 	public void setDifficulty(Difficulty difficulty, boolean bl) {

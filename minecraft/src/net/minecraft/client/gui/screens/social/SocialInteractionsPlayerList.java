@@ -38,13 +38,13 @@ public class SocialInteractionsPlayerList extends ContainerObjectSelectionList<P
 			(int)((double)this.getRowLeft() * d),
 			(int)((double)(this.height - this.y1) * d),
 			(int)((double)(this.getScrollbarPosition() + 6) * d),
-			(int)((double)(this.height - (this.height - this.y1) - this.y0) * d)
+			(int)((double)(this.height - (this.height - this.y1) - this.y0 - 4) * d)
 		);
 		super.render(poseStack, i, j, f);
 		RenderSystem.disableScissor();
 	}
 
-	public void showPage(SocialInteractionsScreen.Page page, Collection<UUID> collection, double d) {
+	public void updatePlayerList(Collection<UUID> collection, double d) {
 		this.players.clear();
 
 		for (UUID uUID : collection) {
@@ -53,7 +53,7 @@ public class SocialInteractionsPlayerList extends ContainerObjectSelectionList<P
 				this.players
 					.add(
 						new PlayerEntry(
-							this.minecraft, this.socialInteractionsScreen, playerInfo.getProfile().getId(), playerInfo.getProfile().getName(), playerInfo.getSkinLocation(), page
+							this.minecraft, this.socialInteractionsScreen, playerInfo.getProfile().getId(), playerInfo.getProfile().getName(), playerInfo::getSkinLocation
 						)
 					);
 			}
@@ -90,10 +90,10 @@ public class SocialInteractionsPlayerList extends ContainerObjectSelectionList<P
 			}
 		}
 
-		if ((page == SocialInteractionsScreen.Page.ALL || this.minecraft.getPlayerSocialManager().isHidden(uUID))
+		if ((page == SocialInteractionsScreen.Page.ALL || this.minecraft.getPlayerSocialManager().shouldHideMessageFrom(uUID))
 			&& (Strings.isNullOrEmpty(this.filter) || playerInfo.getProfile().getName().toLowerCase(Locale.ROOT).startsWith(this.filter))) {
 			PlayerEntry playerEntry2 = new PlayerEntry(
-				this.minecraft, this.socialInteractionsScreen, playerInfo.getProfile().getId(), playerInfo.getProfile().getName(), playerInfo.getSkinLocation(), page
+				this.minecraft, this.socialInteractionsScreen, playerInfo.getProfile().getId(), playerInfo.getProfile().getName(), playerInfo::getSkinLocation
 			);
 			this.addEntry(playerEntry2);
 			this.players.add(playerEntry2);

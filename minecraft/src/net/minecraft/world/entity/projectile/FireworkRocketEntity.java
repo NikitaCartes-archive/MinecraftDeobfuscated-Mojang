@@ -135,7 +135,8 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 			}
 		} else {
 			if (!this.isShotAtAngle()) {
-				this.setDeltaMovement(this.getDeltaMovement().multiply(1.15, 1.0, 1.15).add(0.0, 0.04, 0.0));
+				double f = this.horizontalCollision ? 1.0 : 1.15;
+				this.setDeltaMovement(this.getDeltaMovement().multiply(f, 1.0, f).add(0.0, 0.04, 0.0));
 			}
 
 			Vec3 vec3 = this.getDeltaMovement();

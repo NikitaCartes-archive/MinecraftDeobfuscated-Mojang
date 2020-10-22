@@ -6,7 +6,10 @@ import com.google.gson.JsonElement;
 import com.mojang.authlib.AuthenticationService;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
+import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
+import com.mojang.authlib.minecraft.OfflineSocialInteractions;
+import com.mojang.authlib.minecraft.SocialInteractionsService;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.blaze3d.pipeline.RenderTarget;
@@ -289,6 +292,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private final SplashManager splashManager;
 	private final GpuWarnlistManager gpuWarnlistManager;
 	private final MinecraftSessionService minecraftSessionService;
+	private final SocialInteractionsService socialInteractionsService;
 	private final SkinManager skinManager;
 	private final ModelManager modelManager;
 	private final BlockRenderDispatcher blockRenderer;
@@ -367,7 +371,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			Minecraft::createClientPackAdapter, this.clientPackSource, new FolderRepositorySource(this.resourcePackDirectory, PackSource.DEFAULT)
 		);
 		this.proxy = gameConfig.user.proxy;
-		this.minecraftSessionService = new YggdrasilAuthenticationService(this.proxy, UUID.randomUUID().toString()).createMinecraftSessionService();
+		YggdrasilAuthenticationService yggdrasilAuthenticationService = new YggdrasilAuthenticationService(this.proxy);
+		this.minecraftSessionService = yggdrasilAuthenticationService.createMinecraftSessionService();
+		this.socialInteractionsService = this.createSocialInteractions(yggdrasilAuthenticationService, gameConfig);
 		this.user = gameConfig.user.user;
 		LOGGER.info("Setting user: {}", this.user.getName());
 		LOGGER.debug("(Session ID is {})", this.user.getSessionId());
@@ -378,7 +384,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.singleplayerServer = null;
 		String string;
 		int i;
-		if (this.allowsMultiplayer && gameConfig.server.hostname != null) {
+		if (this.allowsMultiplayer() && gameConfig.server.hostname != null) {
 			string = gameConfig.server.hostname;
 			i = gameConfig.server.port;
 		} else {
@@ -416,8 +422,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			InputStream inputStream = this.getClientPackSource().getVanillaPack().getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("icons/icon_16x16.png"));
 			InputStream inputStream2 = this.getClientPackSource().getVanillaPack().getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("icons/icon_32x32.png"));
 			this.window.setIcon(inputStream, inputStream2);
-		} catch (IOException var8) {
-			LOGGER.error("Couldn't set icon", (Throwable)var8);
+		} catch (IOException var9) {
+			LOGGER.error("Couldn't set icon", (Throwable)var9);
 		}
 
 		this.window.setFramerateLimit(this.options.framerateLimit);
@@ -462,7 +468,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.renderBuffers = new RenderBuffers();
 		this.gameRenderer = new GameRenderer(this, this.resourceManager, this.renderBuffers);
 		this.resourceManager.registerReloadListener(this.gameRenderer);
-		this.playerSocialManager = new PlayerSocialManager(this);
+		this.playerSocialManager = new PlayerSocialManager(this, this.socialInteractionsService);
 		this.blockRenderer = new BlockRenderDispatcher(this.modelManager.getBlockModelShaper(), this.blockColors);
 		this.resourceManager.registerReloadListener(this.blockRenderer);
 		this.levelRenderer = new LevelRenderer(this, this.renderBuffers);
@@ -538,6 +544,15 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}
 
 		return stringBuilder.toString();
+	}
+
+	private SocialInteractionsService createSocialInteractions(YggdrasilAuthenticationService yggdrasilAuthenticationService, GameConfig gameConfig) {
+		try {
+			return yggdrasilAuthenticationService.createSocialInteractionsService(gameConfig.user.user.getAccessToken());
+		} catch (AuthenticationException var4) {
+			LOGGER.error("Failed to verify authentication", (Throwable)var4);
+			return new OfflineSocialInteractions();
+		}
 	}
 
 	public boolean isProbablyModded() {
@@ -1694,7 +1709,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			try {
 				levelStorageAccess.saveDataTag(registryHolder, worldData);
 				serverStem.serverResources().updateGlobals();
-				YggdrasilAuthenticationService yggdrasilAuthenticationService = new YggdrasilAuthenticationService(this.proxy, UUID.randomUUID().toString());
+				YggdrasilAuthenticationService yggdrasilAuthenticationService = new YggdrasilAuthenticationService(this.proxy);
 				MinecraftSessionService minecraftSessionService = yggdrasilAuthenticationService.createMinecraftSessionService();
 				GameProfileRepository gameProfileRepository = yggdrasilAuthenticationService.createProfileRepository();
 				GameProfileCache gameProfileCache = new GameProfileCache(gameProfileRepository, new File(this.gameDirectory, MinecraftServer.USERID_CACHE_FILE.getName()));
@@ -1854,7 +1869,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.level = clientLevel;
 		this.updateLevelInEngines(clientLevel);
 		if (!this.isLocalServer) {
-			AuthenticationService authenticationService = new YggdrasilAuthenticationService(this.proxy, UUID.randomUUID().toString());
+			AuthenticationService authenticationService = new YggdrasilAuthenticationService(this.proxy);
 			MinecraftSessionService minecraftSessionService = authenticationService.createMinecraftSessionService();
 			GameProfileRepository gameProfileRepository = authenticationService.createProfileRepository();
 			GameProfileCache gameProfileCache = new GameProfileCache(gameProfileRepository, new File(this.gameDirectory, MinecraftServer.USERID_CACHE_FILE.getName()));
@@ -1929,17 +1944,17 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public boolean allowsMultiplayer() {
-		return this.allowsMultiplayer;
+		return this.allowsMultiplayer && this.socialInteractionsService.serversAllowed();
 	}
 
 	public boolean isBlocked(UUID uUID) {
 		return this.allowsChat()
-			? this.playerSocialManager.isHidden(uUID)
+			? this.playerSocialManager.shouldHideMessageFrom(uUID)
 			: (this.player == null || !uUID.equals(this.player.getUUID())) && !uUID.equals(Util.NIL_UUID);
 	}
 
 	public boolean allowsChat() {
-		return this.allowsChat;
+		return this.allowsChat && this.socialInteractionsService.chatAllowed();
 	}
 
 	public final boolean isDemo() {

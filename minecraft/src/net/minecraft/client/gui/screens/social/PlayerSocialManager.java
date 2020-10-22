@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.screens.social;
 
 import com.google.common.collect.Sets;
+import com.mojang.authlib.minecraft.SocialInteractionsService;
 import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
@@ -13,9 +14,11 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 public class PlayerSocialManager {
 	private final Minecraft minecraft;
 	private final Set<UUID> hiddenPlayers = Sets.<UUID>newHashSet();
+	private final SocialInteractionsService service;
 
-	public PlayerSocialManager(Minecraft minecraft) {
+	public PlayerSocialManager(Minecraft minecraft, SocialInteractionsService socialInteractionsService) {
 		this.minecraft = minecraft;
+		this.service = socialInteractionsService;
 	}
 
 	public void hidePlayer(UUID uUID) {
@@ -26,8 +29,16 @@ public class PlayerSocialManager {
 		this.hiddenPlayers.remove(uUID);
 	}
 
+	public boolean shouldHideMessageFrom(UUID uUID) {
+		return this.isHidden(uUID) || this.isBlocked(uUID);
+	}
+
 	public boolean isHidden(UUID uUID) {
 		return this.hiddenPlayers.contains(uUID);
+	}
+
+	public boolean isBlocked(UUID uUID) {
+		return this.service.isBlockedPlayer(uUID);
 	}
 
 	public Set<UUID> getHiddenPlayers() {

@@ -27,7 +27,13 @@ public class ServerHandshakePacketListenerImpl implements ServerHandshakePacketL
 			case LOGIN:
 				this.connection.setProtocol(ConnectionProtocol.LOGIN);
 				if (clientIntentionPacket.getProtocolVersion() != SharedConstants.getCurrentVersion().getProtocolVersion()) {
-					Component component = new TranslatableComponent("multiplayer.disconnect.incompatible", SharedConstants.getCurrentVersion().getName());
+					Component component;
+					if (clientIntentionPacket.getProtocolVersion() < 754) {
+						component = new TranslatableComponent("multiplayer.disconnect.outdated_client", SharedConstants.getCurrentVersion().getName());
+					} else {
+						component = new TranslatableComponent("multiplayer.disconnect.incompatible", SharedConstants.getCurrentVersion().getName());
+					}
+
 					this.connection.send(new ClientboundLoginDisconnectPacket(component));
 					this.connection.disconnect(component);
 				} else {

@@ -9,6 +9,7 @@ import java.math.BigInteger;
 import java.security.PublicKey;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -31,6 +32,7 @@ import net.minecraft.network.protocol.login.ServerboundKeyPacket;
 import net.minecraft.realms.DisconnectedRealmsScreen;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.util.Crypt;
+import net.minecraft.util.CryptException;
 import net.minecraft.util.HttpUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -54,10 +56,21 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 
 	@Override
 	public void handleHello(ClientboundHelloPacket clientboundHelloPacket) {
-		SecretKey secretKey = Crypt.generateSecretKey();
-		PublicKey publicKey = clientboundHelloPacket.getPublicKey();
-		String string = new BigInteger(Crypt.digestData(clientboundHelloPacket.getServerId(), publicKey, secretKey)).toString(16);
-		ServerboundKeyPacket serverboundKeyPacket = new ServerboundKeyPacket(secretKey, publicKey, clientboundHelloPacket.getNonce());
+		Cipher cipher;
+		Cipher cipher2;
+		String string;
+		ServerboundKeyPacket serverboundKeyPacket;
+		try {
+			SecretKey secretKey = Crypt.generateSecretKey();
+			PublicKey publicKey = clientboundHelloPacket.getPublicKey();
+			string = new BigInteger(Crypt.digestData(clientboundHelloPacket.getServerId(), publicKey, secretKey)).toString(16);
+			cipher = Crypt.getCipher(2, secretKey);
+			cipher2 = Crypt.getCipher(1, secretKey);
+			serverboundKeyPacket = new ServerboundKeyPacket(secretKey, publicKey, clientboundHelloPacket.getNonce());
+		} catch (CryptException var8) {
+			throw new IllegalStateException("Protocol error", var8);
+		}
+
 		this.updateStatus.accept(new TranslatableComponent("connect.authorizing"));
 		HttpUtil.DOWNLOAD_EXECUTOR.submit((Runnable)(() -> {
 			Component component = this.authenticateServer(string);
@@ -71,7 +84,7 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 			}
 
 			this.updateStatus.accept(new TranslatableComponent("connect.encrypting"));
-			this.connection.send(serverboundKeyPacket, future -> this.connection.setEncryptionKey(secretKey));
+			this.connection.send(serverboundKeyPacket, future -> this.connection.setEncryptionKey(cipher, cipher2));
 		}));
 	}
 

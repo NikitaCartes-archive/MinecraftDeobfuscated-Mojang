@@ -23,7 +23,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
-import net.minecraft.util.Crypt;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.Snooper;
 import net.minecraft.world.level.GameType;
@@ -81,8 +80,7 @@ public class IntegratedServer extends MinecraftServer {
 		this.setUsesAuthentication(true);
 		this.setPvpAllowed(true);
 		this.setFlightAllowed(true);
-		LOGGER.info("Generating keypair");
-		this.setKeyPair(Crypt.generateKeyPair());
+		this.initializeKeyPair();
 		this.loadLevel();
 		this.setMotd(this.getSingleplayerName() + " - " + this.getWorldData().getLevelName());
 		return true;

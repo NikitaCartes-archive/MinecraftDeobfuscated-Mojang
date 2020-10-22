@@ -252,6 +252,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 
 		int q = this.getMaxScroll();
 		if (q > 0) {
+			RenderSystem.disableTexture();
 			int o = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
 			o = Mth.clamp(o, 32, this.y1 - this.y0 - 8);
 			int p = (int)this.getScrollAmount() * (this.y1 - this.y0 - o) / q + this.y0;
@@ -483,6 +484,10 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 
 	public int getRowLeft() {
 		return this.x0 + this.width / 2 - this.getRowWidth() / 2 + 2;
+	}
+
+	public int getRowRight() {
+		return this.getRowLeft() + this.getRowWidth();
 	}
 
 	protected int getRowTop(int i) {

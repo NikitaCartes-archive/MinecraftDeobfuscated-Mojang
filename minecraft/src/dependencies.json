@@ -3,9 +3,9 @@
 		"name": "Java 8"
 	},
 	{
-		"sha1sum": "5bd0ce00c1e1f483641f85bccb02d1956dd77ec0",
-		"name": "authlib-1.6.25.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/authlib/1.6.25/authlib-1.6.25.jar"
+		"sha1sum": "58d76f2a7f7ae4d5d79d74460a6d4eba0de7c116",
+		"name": "authlib-2.0.26.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/authlib/2.0.26/authlib-2.0.26.jar"
 	},
 	{
 		"sha1sum": "c6b7dc51dd44379cc751b7504816006e9be4b1e6",

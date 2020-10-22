@@ -32,11 +32,15 @@ public abstract class SimpleOptionsSubScreen extends OptionsSubScreen {
 		this.list = new OptionsList(this.minecraft, this.width, this.height, 32, this.height - 32, 25);
 		this.list.addSmall(this.smallOptions);
 		this.children.add(this.list);
-		this.addButton(new Button(this.width / 2 - 100, this.height - 27, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
+		this.createFooter();
 		this.narratorButton = this.list.findOption(Option.NARRATOR);
 		if (this.narratorButton != null) {
 			this.narratorButton.active = NarratorChatListener.INSTANCE.isActive();
 		}
+	}
+
+	protected void createFooter() {
+		this.addButton(new Button(this.width / 2 - 100, this.height - 27, 200, 20, CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)));
 	}
 
 	@Override

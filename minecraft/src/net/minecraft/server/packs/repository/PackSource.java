@@ -1,5 +1,6 @@
 package net.minecraft.server.packs.repository;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -17,6 +18,6 @@ public interface PackSource {
 
 	static PackSource decorating(String string) {
 		Component component = new TranslatableComponent(string);
-		return component2 -> new TranslatableComponent("pack.nameAndSource", component2, component);
+		return component2 -> new TranslatableComponent("pack.nameAndSource", component2, component).withStyle(ChatFormatting.GRAY);
 	}
 }
