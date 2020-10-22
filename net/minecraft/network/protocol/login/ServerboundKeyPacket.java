@@ -13,6 +13,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.login.ServerLoginPacketListener;
 import net.minecraft.util.Crypt;
+import net.minecraft.util.CryptException;
 
 public class ServerboundKeyPacket
 implements Packet<ServerLoginPacketListener> {
@@ -23,7 +24,7 @@ implements Packet<ServerLoginPacketListener> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public ServerboundKeyPacket(SecretKey secretKey, PublicKey publicKey, byte[] bs) {
+    public ServerboundKeyPacket(SecretKey secretKey, PublicKey publicKey, byte[] bs) throws CryptException {
         this.keybytes = Crypt.encryptUsingKey(publicKey, secretKey.getEncoded());
         this.nonce = Crypt.encryptUsingKey(publicKey, bs);
     }
@@ -45,14 +46,11 @@ implements Packet<ServerLoginPacketListener> {
         serverLoginPacketListener.handleKey(this);
     }
 
-    public SecretKey getSecretKey(PrivateKey privateKey) {
+    public SecretKey getSecretKey(PrivateKey privateKey) throws CryptException {
         return Crypt.decryptByteToSecretKey(privateKey, this.keybytes);
     }
 
-    public byte[] getNonce(PrivateKey privateKey) {
-        if (privateKey == null) {
-            return this.nonce;
-        }
+    public byte[] getNonce(PrivateKey privateKey) throws CryptException {
         return Crypt.decryptUsingKey(privateKey, this.nonce);
     }
 }

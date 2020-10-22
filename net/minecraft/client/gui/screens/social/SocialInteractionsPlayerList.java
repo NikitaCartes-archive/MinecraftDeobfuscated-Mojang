@@ -40,17 +40,17 @@ extends ContainerObjectSelectionList<PlayerEntry> {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         double d = this.minecraft.getWindow().getGuiScale();
-        RenderSystem.enableScissor((int)((double)this.getRowLeft() * d), (int)((double)(this.height - this.y1) * d), (int)((double)(this.getScrollbarPosition() + 6) * d), (int)((double)(this.height - (this.height - this.y1) - this.y0) * d));
+        RenderSystem.enableScissor((int)((double)this.getRowLeft() * d), (int)((double)(this.height - this.y1) * d), (int)((double)(this.getScrollbarPosition() + 6) * d), (int)((double)(this.height - (this.height - this.y1) - this.y0 - 4) * d));
         super.render(poseStack, i, j, f);
         RenderSystem.disableScissor();
     }
 
-    public void showPage(SocialInteractionsScreen.Page page, Collection<UUID> collection, double d) {
+    public void updatePlayerList(Collection<UUID> collection, double d) {
         this.players.clear();
         for (UUID uUID : collection) {
             PlayerInfo playerInfo = this.minecraft.player.connection.getPlayerInfo(uUID);
             if (playerInfo == null) continue;
-            this.players.add(new PlayerEntry(this.minecraft, this.socialInteractionsScreen, playerInfo.getProfile().getId(), playerInfo.getProfile().getName(), playerInfo.getSkinLocation(), page));
+            this.players.add(new PlayerEntry(this.minecraft, this.socialInteractionsScreen, playerInfo.getProfile().getId(), playerInfo.getProfile().getName(), playerInfo::getSkinLocation));
         }
         this.updateFilteredPlayers();
         this.players.sort((playerEntry, playerEntry2) -> playerEntry.getPlayerName().compareToIgnoreCase(playerEntry2.getPlayerName()));
@@ -80,8 +80,8 @@ extends ContainerObjectSelectionList<PlayerEntry> {
             playerEntry.setRemoved(false);
             return;
         }
-        if ((page == SocialInteractionsScreen.Page.ALL || this.minecraft.getPlayerSocialManager().isHidden(uUID)) && (Strings.isNullOrEmpty(this.filter) || playerInfo.getProfile().getName().toLowerCase(Locale.ROOT).startsWith(this.filter))) {
-            PlayerEntry playerEntry2 = new PlayerEntry(this.minecraft, this.socialInteractionsScreen, playerInfo.getProfile().getId(), playerInfo.getProfile().getName(), playerInfo.getSkinLocation(), page);
+        if ((page == SocialInteractionsScreen.Page.ALL || this.minecraft.getPlayerSocialManager().shouldHideMessageFrom(uUID)) && (Strings.isNullOrEmpty(this.filter) || playerInfo.getProfile().getName().toLowerCase(Locale.ROOT).startsWith(this.filter))) {
+            PlayerEntry playerEntry2 = new PlayerEntry(this.minecraft, this.socialInteractionsScreen, playerInfo.getProfile().getId(), playerInfo.getProfile().getName(), playerInfo::getSkinLocation);
             this.addEntry(playerEntry2);
             this.players.add(playerEntry2);
         }

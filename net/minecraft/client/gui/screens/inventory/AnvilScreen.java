@@ -33,6 +33,12 @@ extends ItemCombinerScreen<AnvilMenu> {
     }
 
     @Override
+    public void tick() {
+        super.tick();
+        this.name.tick();
+    }
+
+    @Override
     protected void subInit() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         int i = (this.width - this.imageWidth) / 2;

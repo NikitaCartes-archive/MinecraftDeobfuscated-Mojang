@@ -8,18 +8,23 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.social.PlayerSocialManager;
 import net.minecraft.client.gui.screens.social.SocialInteractionsPlayerList;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -30,20 +35,26 @@ extends Screen {
     protected static final ResourceLocation SOCIAL_INTERACTIONS_LOCATION = new ResourceLocation("textures/gui/social_interactions.png");
     private static final Component TAB_ALL = new TranslatableComponent("gui.socialInteractions.tab_all");
     private static final Component TAB_HIDDEN = new TranslatableComponent("gui.socialInteractions.tab_hidden");
-    private static final Component TAB_ALL_SELECTED = TAB_ALL.plainCopy().withStyle(ChatFormatting.GRAY);
-    private static final Component TAB_HIDDEN_SELECTED = TAB_HIDDEN.plainCopy().withStyle(ChatFormatting.GRAY);
+    private static final Component TAB_BLOCKED = new TranslatableComponent("gui.socialInteractions.tab_blocked");
+    private static final Component TAB_ALL_SELECTED = TAB_ALL.plainCopy().withStyle(ChatFormatting.UNDERLINE);
+    private static final Component TAB_HIDDEN_SELECTED = TAB_HIDDEN.plainCopy().withStyle(ChatFormatting.UNDERLINE);
+    private static final Component TAB_BLOCKED_SELECTED = TAB_BLOCKED.plainCopy().withStyle(ChatFormatting.UNDERLINE);
     private static final Component SEARCH_HINT = new TranslatableComponent("gui.socialInteractions.search_hint").withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY);
+    private static final Component EMPTY_SEARCH = new TranslatableComponent("gui.socialInteractions.search_empty").withStyle(ChatFormatting.GRAY);
     private static final Component EMPTY_HIDDEN = new TranslatableComponent("gui.socialInteractions.empty_hidden").withStyle(ChatFormatting.GRAY);
+    private static final Component EMPTY_BLOCKED = new TranslatableComponent("gui.socialInteractions.empty_blocked").withStyle(ChatFormatting.GRAY);
+    private static final Component BLOCKING_HINT = new TranslatableComponent("gui.socialInteractions.blocking_hint");
     private SocialInteractionsPlayerList socialInteractionsPlayerList;
     private EditBox searchBox;
     private String lastSearch = "";
     private Page page = Page.ALL;
     private Button allButton;
     private Button hiddenButton;
+    private Button blockedButton;
+    private Button blockingHintButton;
     @Nullable
     private Component serverLabel;
     private int playerCount;
-    private boolean showHiddenExclaim;
     private boolean initialized;
     @Nullable
     private Runnable postRenderRunnable;
@@ -54,7 +65,7 @@ extends Screen {
     }
 
     private int windowHeight() {
-        return Math.max(0, this.height - 128 - 16);
+        return Math.max(52, this.height - 128 - 16);
     }
 
     private int backgroundUnits() {
@@ -75,6 +86,12 @@ extends Screen {
     }
 
     @Override
+    public void tick() {
+        super.tick();
+        this.searchBox.tick();
+    }
+
+    @Override
     protected void init() {
         this.minecraft.keyboardHandler.setSendRepeatsToGui(true);
         if (this.initialized) {
@@ -82,11 +99,33 @@ extends Screen {
         } else {
             this.socialInteractionsPlayerList = new SocialInteractionsPlayerList(this, this.minecraft, this.width, this.height, 88, this.listEnd(), 36);
         }
-        this.allButton = this.addButton(new Button(this.socialInteractionsPlayerList.getRowLeft() + this.socialInteractionsPlayerList.getRowWidth() / 4 - 30, 45, 60, 20, TAB_ALL, button -> this.showPage(Page.ALL)));
-        this.hiddenButton = this.addButton(new Button(this.socialInteractionsPlayerList.getRowLeft() + this.socialInteractionsPlayerList.getRowWidth() / 4 * 3 - 30, 45, 60, 20, TAB_HIDDEN, button -> this.showPage(Page.HIDDEN)));
+        int i = this.socialInteractionsPlayerList.getRowWidth() / 3;
+        int j = this.socialInteractionsPlayerList.getRowLeft();
+        int k = this.socialInteractionsPlayerList.getRowRight();
+        int l = this.font.width(BLOCKING_HINT) + 40;
+        int m = 64 + 16 * this.backgroundUnits();
+        int n = (this.width - l) / 2;
+        this.allButton = this.addButton(new Button(j, 45, i, 20, TAB_ALL, button -> this.showPage(Page.ALL)));
+        this.hiddenButton = this.addButton(new Button((j + k - i) / 2 + 1, 45, i, 20, TAB_HIDDEN, button -> this.showPage(Page.HIDDEN)));
+        this.blockedButton = this.addButton(new Button(k - i + 1, 45, i, 20, TAB_BLOCKED, button -> this.showPage(Page.BLOCKED)));
+        this.blockingHintButton = this.addButton(new Button(n, m, l, 20, BLOCKING_HINT, button -> this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
+            if (bl) {
+                Util.getPlatform().openUri("https://aka.ms/javablocking");
+            }
+            this.minecraft.setScreen(this);
+        }, "https://aka.ms/javablocking", true))));
         String string = this.searchBox != null ? this.searchBox.getValue() : "";
-        this.searchBox = new EditBox(this.font, this.marginX() + 28, 78, 220, 16, SEARCH_HINT);
-        this.searchBox.setMaxLength(50);
+        this.searchBox = new EditBox(this.font, this.marginX() + 28, 78, 196, 16, SEARCH_HINT){
+
+            @Override
+            protected MutableComponent createNarrationMessage() {
+                if (!SocialInteractionsScreen.this.searchBox.getValue().isEmpty() && SocialInteractionsScreen.this.socialInteractionsPlayerList.isEmpty()) {
+                    return super.createNarrationMessage().append(", ").append(EMPTY_SEARCH);
+                }
+                return super.createNarrationMessage();
+            }
+        };
+        this.searchBox.setMaxLength(16);
         this.searchBox.setBordered(false);
         this.searchBox.setVisible(true);
         this.searchBox.setTextColor(0xFFFFFF);
@@ -99,10 +138,11 @@ extends Screen {
     }
 
     private void showPage(Page page) {
-        Collection<Object> collection;
+        Collection<UUID> collection;
         this.page = page;
         this.allButton.setMessage(TAB_ALL);
         this.hiddenButton.setMessage(TAB_HIDDEN);
+        this.blockedButton.setMessage(TAB_BLOCKED);
         switch (page) {
             case ALL: {
                 this.allButton.setMessage(TAB_ALL_SELECTED);
@@ -112,9 +152,12 @@ extends Screen {
             case HIDDEN: {
                 this.hiddenButton.setMessage(TAB_HIDDEN_SELECTED);
                 collection = this.minecraft.getPlayerSocialManager().getHiddenPlayers();
-                this.showHiddenExclaim = false;
-                if (!collection.isEmpty()) break;
-                NarratorChatListener.INSTANCE.sayNow(EMPTY_HIDDEN.getString());
+                break;
+            }
+            case BLOCKED: {
+                this.blockedButton.setMessage(TAB_BLOCKED_SELECTED);
+                PlayerSocialManager playerSocialManager = this.minecraft.getPlayerSocialManager();
+                collection = this.minecraft.player.connection.getOnlinePlayerIds().stream().filter(playerSocialManager::isBlocked).collect(Collectors.toSet());
                 break;
             }
             default: {
@@ -122,7 +165,16 @@ extends Screen {
             }
         }
         this.page = page;
-        this.socialInteractionsPlayerList.showPage(page, collection, this.socialInteractionsPlayerList.getScrollAmount());
+        this.socialInteractionsPlayerList.updatePlayerList(collection, this.socialInteractionsPlayerList.getScrollAmount());
+        if (!this.searchBox.getValue().isEmpty() && this.socialInteractionsPlayerList.isEmpty() && !this.searchBox.isFocused()) {
+            NarratorChatListener.INSTANCE.sayNow(EMPTY_SEARCH.getString());
+        } else if (collection.isEmpty()) {
+            if (page == Page.HIDDEN) {
+                NarratorChatListener.INSTANCE.sayNow(EMPTY_HIDDEN.getString());
+            } else if (page == Page.BLOCKED) {
+                NarratorChatListener.INSTANCE.sayNow(EMPTY_BLOCKED.getString());
+            }
+        }
     }
 
     @Override
@@ -153,19 +205,26 @@ extends Screen {
         }
         if (!this.socialInteractionsPlayerList.isEmpty()) {
             this.socialInteractionsPlayerList.render(poseStack, i, j, f);
-        } else if (this.page == Page.HIDDEN) {
-            SocialInteractionsScreen.drawCenteredString(poseStack, this.minecraft.font, EMPTY_HIDDEN, this.width / 2, (78 + this.listEnd()) / 2, -1);
+        } else if (!this.searchBox.getValue().isEmpty()) {
+            SocialInteractionsScreen.drawCenteredString(poseStack, this.minecraft.font, EMPTY_SEARCH, this.width / 2, (78 + this.listEnd()) / 2, -1);
+        } else {
+            switch (this.page) {
+                case HIDDEN: {
+                    SocialInteractionsScreen.drawCenteredString(poseStack, this.minecraft.font, EMPTY_HIDDEN, this.width / 2, (78 + this.listEnd()) / 2, -1);
+                    break;
+                }
+                case BLOCKED: {
+                    SocialInteractionsScreen.drawCenteredString(poseStack, this.minecraft.font, EMPTY_BLOCKED, this.width / 2, (78 + this.listEnd()) / 2, -1);
+                }
+            }
         }
         if (!this.searchBox.isFocused() && this.searchBox.getValue().isEmpty()) {
             SocialInteractionsScreen.drawString(poseStack, this.minecraft.font, SEARCH_HINT, this.searchBox.x, this.searchBox.y, -1);
         } else {
             this.searchBox.render(poseStack, i, j, f);
         }
+        this.blockingHintButton.visible = this.page == Page.BLOCKED;
         super.render(poseStack, i, j, f);
-        if (this.showHiddenExclaim) {
-            this.minecraft.getTextureManager().bind(SOCIAL_INTERACTIONS_LOCATION);
-            this.blit(poseStack, this.hiddenButton.x + this.hiddenButton.getWidth() - 8, 44, 249, 14, 6, 22);
-        }
         if (this.postRenderRunnable != null) {
             this.postRenderRunnable.run();
         }
@@ -173,6 +232,9 @@ extends Screen {
 
     @Override
     public boolean mouseClicked(double d, double e, int i) {
+        if (this.searchBox.isFocused()) {
+            this.searchBox.mouseClicked(d, e, i);
+        }
         return super.mouseClicked(d, e, i) || this.socialInteractionsPlayerList.mouseClicked(d, e, i);
     }
 
@@ -203,18 +265,14 @@ extends Screen {
         if (this.playerCount != i) {
             String string = "";
             ServerData serverData = minecraft.getCurrentServer();
-            if (serverData != null) {
-                string = serverData.name;
-            } else if (minecraft.isLocalServer()) {
+            if (minecraft.isLocalServer()) {
                 string = minecraft.getSingleplayerServer().getMotd();
+            } else if (serverData != null) {
+                string = serverData.name;
             }
-            this.serverLabel = new TranslatableComponent("gui.socialInteractions.server_label", string, i);
+            this.serverLabel = i > 1 ? new TranslatableComponent("gui.socialInteractions.server_label.multiple", string, i) : new TranslatableComponent("gui.socialInteractions.server_label.single", string, i);
             this.playerCount = i;
         }
-    }
-
-    public void onHiddenOrShown() {
-        this.showHiddenExclaim = this.page != Page.HIDDEN && this.minecraft.getPlayerSocialManager().getHiddenPlayers().size() > 0;
     }
 
     public void onAddPlayer(PlayerInfo playerInfo) {
@@ -232,7 +290,8 @@ extends Screen {
     @Environment(value=EnvType.CLIENT)
     public static enum Page {
         ALL,
-        HIDDEN;
+        HIDDEN,
+        BLOCKED;
 
     }
 }

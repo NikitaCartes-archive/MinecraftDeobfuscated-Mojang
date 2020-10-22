@@ -790,13 +790,13 @@ extends GuiComponent {
             t -= 10;
         }
         this.minecraft.getProfiler().popPush("air");
-        z = player.getAirSupply();
-        aa = player.getMaxAirSupply();
-        if (player.isEyeInFluid(FluidTags.WATER) || z < aa) {
+        z = player.getMaxAirSupply();
+        aa = Math.min(player.getAirSupply(), z);
+        if (player.isEyeInFluid(FluidTags.WATER) || aa < z) {
             ab = this.getVisibleVehicleHeartRows(y) - 1;
             t -= ab * 10;
-            ac = Mth.ceil((double)(z - 2) * 10.0 / (double)aa);
-            ad = Mth.ceil((double)z * 10.0 / (double)aa) - ac;
+            ac = Mth.ceil((double)(aa - 2) * 10.0 / (double)z);
+            ad = Mth.ceil((double)aa * 10.0 / (double)z) - ac;
             for (int ae = 0; ae < ac + ad; ++ae) {
                 if (ae < ac) {
                     this.blit(poseStack, n - ae * 8 - 9, t, 16, 18, 9, 9);

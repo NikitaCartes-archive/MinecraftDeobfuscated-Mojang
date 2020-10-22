@@ -11,33 +11,34 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.login.ClientLoginPacketListener;
 import net.minecraft.util.Crypt;
+import net.minecraft.util.CryptException;
 
 public class ClientboundHelloPacket
 implements Packet<ClientLoginPacketListener> {
     private String serverId;
-    private PublicKey publicKey;
+    private byte[] publicKey;
     private byte[] nonce;
 
     public ClientboundHelloPacket() {
     }
 
-    public ClientboundHelloPacket(String string, PublicKey publicKey, byte[] bs) {
+    public ClientboundHelloPacket(String string, byte[] bs, byte[] cs) {
         this.serverId = string;
-        this.publicKey = publicKey;
-        this.nonce = bs;
+        this.publicKey = bs;
+        this.nonce = cs;
     }
 
     @Override
     public void read(FriendlyByteBuf friendlyByteBuf) throws IOException {
         this.serverId = friendlyByteBuf.readUtf(20);
-        this.publicKey = Crypt.byteToPublicKey(friendlyByteBuf.readByteArray());
+        this.publicKey = friendlyByteBuf.readByteArray();
         this.nonce = friendlyByteBuf.readByteArray();
     }
 
     @Override
     public void write(FriendlyByteBuf friendlyByteBuf) throws IOException {
         friendlyByteBuf.writeUtf(this.serverId);
-        friendlyByteBuf.writeByteArray(this.publicKey.getEncoded());
+        friendlyByteBuf.writeByteArray(this.publicKey);
         friendlyByteBuf.writeByteArray(this.nonce);
     }
 
@@ -52,8 +53,8 @@ implements Packet<ClientLoginPacketListener> {
     }
 
     @Environment(value=EnvType.CLIENT)
-    public PublicKey getPublicKey() {
-        return this.publicKey;
+    public PublicKey getPublicKey() throws CryptException {
+        return Crypt.byteToPublicKey(this.publicKey);
     }
 
     @Environment(value=EnvType.CLIENT)

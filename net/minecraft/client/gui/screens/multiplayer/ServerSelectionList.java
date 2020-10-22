@@ -171,7 +171,7 @@ extends ObjectSelectionList<Entry> {
             for (int p = 0; p < Math.min(list.size(), 2); ++p) {
                 this.minecraft.font.draw(poseStack, list.get(p), (float)(k + 32 + 3), (float)(j + 12 + this.minecraft.font.lineHeight * p), 0x808080);
             }
-            Component component = bl2 ? this.serverData.version.copy().withStyle(ChatFormatting.DARK_RED) : this.serverData.status;
+            Component component = bl2 ? this.serverData.version.copy().withStyle(ChatFormatting.RED) : this.serverData.status;
             int q = this.minecraft.font.width(component);
             this.minecraft.font.draw(poseStack, component, (float)(k + l - q - 15 - 2), (float)(j + 1), 0x808080);
             int r = 0;

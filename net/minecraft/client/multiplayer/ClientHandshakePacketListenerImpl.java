@@ -11,6 +11,7 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import java.math.BigInteger;
 import java.security.PublicKey;
 import java.util.function.Consumer;
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -34,6 +35,7 @@ import net.minecraft.network.protocol.login.ServerboundKeyPacket;
 import net.minecraft.realms.DisconnectedRealmsScreen;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.util.Crypt;
+import net.minecraft.util.CryptException;
 import net.minecraft.util.HttpUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -59,10 +61,20 @@ implements ClientLoginPacketListener {
 
     @Override
     public void handleHello(ClientboundHelloPacket clientboundHelloPacket) {
-        SecretKey secretKey = Crypt.generateSecretKey();
-        PublicKey publicKey = clientboundHelloPacket.getPublicKey();
-        String string = new BigInteger(Crypt.digestData(clientboundHelloPacket.getServerId(), publicKey, secretKey)).toString(16);
-        ServerboundKeyPacket serverboundKeyPacket = new ServerboundKeyPacket(secretKey, publicKey, clientboundHelloPacket.getNonce());
+        ServerboundKeyPacket serverboundKeyPacket;
+        Cipher cipher2;
+        Cipher cipher;
+        String string;
+        try {
+            SecretKey secretKey = Crypt.generateSecretKey();
+            PublicKey publicKey = clientboundHelloPacket.getPublicKey();
+            string = new BigInteger(Crypt.digestData(clientboundHelloPacket.getServerId(), publicKey, secretKey)).toString(16);
+            cipher = Crypt.getCipher(2, secretKey);
+            cipher2 = Crypt.getCipher(1, secretKey);
+            serverboundKeyPacket = new ServerboundKeyPacket(secretKey, publicKey, clientboundHelloPacket.getNonce());
+        } catch (CryptException cryptException) {
+            throw new IllegalStateException("Protocol error", cryptException);
+        }
         this.updateStatus.accept(new TranslatableComponent("connect.authorizing"));
         HttpUtil.DOWNLOAD_EXECUTOR.submit(() -> {
             Component component = this.authenticateServer(string);
@@ -75,7 +87,7 @@ implements ClientLoginPacketListener {
                 }
             }
             this.updateStatus.accept(new TranslatableComponent("connect.encrypting"));
-            this.connection.send(serverboundKeyPacket, future -> this.connection.setEncryptionKey(secretKey));
+            this.connection.send(serverboundKeyPacket, future -> this.connection.setEncryptionKey(cipher, cipher2));
         });
     }
 

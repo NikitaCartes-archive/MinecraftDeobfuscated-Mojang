@@ -51,7 +51,6 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.rcon.RconConsoleSource;
 import net.minecraft.server.rcon.thread.QueryThreadGs4;
 import net.minecraft.server.rcon.thread.RconThread;
-import net.minecraft.util.Crypt;
 import net.minecraft.util.Mth;
 import net.minecraft.util.monitoring.jmx.MinecraftServerStatistics;
 import net.minecraft.world.Snooper;
@@ -139,8 +138,7 @@ implements ServerInterface {
         if (this.getPort() < 0) {
             this.setPort(dedicatedServerProperties.serverPort);
         }
-        LOGGER.info("Generating keypair");
-        this.setKeyPair(Crypt.generateKeyPair());
+        this.initializeKeyPair();
         LOGGER.info("Starting Minecraft server on {}:{}", (Object)(this.getLocalIp().isEmpty() ? "*" : this.getLocalIp()), (Object)this.getPort());
         try {
             this.getConnection().startTcpServerListener(inetAddress, this.getPort());

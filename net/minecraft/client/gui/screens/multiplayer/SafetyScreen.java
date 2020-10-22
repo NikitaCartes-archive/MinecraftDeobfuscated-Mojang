@@ -38,7 +38,7 @@ extends Screen {
     protected void init() {
         super.init();
         this.message = MultiLineLabel.create(this.font, (FormattedText)CONTENT, this.width - 50);
-        int i = (this.message.getLineCount() + 1) * this.font.lineHeight;
+        int i = (this.message.getLineCount() + 1) * this.font.lineHeight * 2;
         this.addButton(new Button(this.width / 2 - 155, 100 + i, 150, 20, CommonComponents.GUI_PROCEED, button -> {
             if (this.stopShowing.selected()) {
                 this.minecraft.options.skipMultiplayerWarning = true;
@@ -60,7 +60,7 @@ extends Screen {
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderDirtBackground(0);
         SafetyScreen.drawCenteredString(poseStack, this.font, TITLE, this.width / 2, 30, 0xFFFFFF);
-        this.message.renderCentered(poseStack, this.width / 2, 70);
+        this.message.renderLeftAligned(poseStack, 25, 70, this.font.lineHeight * 2, 0xFFFFFF);
         super.render(poseStack, i, j, f);
     }
 }

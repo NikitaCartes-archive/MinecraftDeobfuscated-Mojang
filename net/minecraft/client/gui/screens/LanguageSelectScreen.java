@@ -6,6 +6,7 @@ package net.minecraft.client.gui.screens;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Option;
 import net.minecraft.client.Options;
@@ -26,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 @Environment(value=EnvType.CLIENT)
 public class LanguageSelectScreen
 extends OptionsSubScreen {
-    private static final Component WARNING_LABEL = new TextComponent("(").append(new TranslatableComponent("options.languageWarning")).append(")");
+    private static final Component WARNING_LABEL = new TextComponent("(").append(new TranslatableComponent("options.languageWarning")).append(")").withStyle(ChatFormatting.GRAY);
     private LanguageSelectionList packSelectionList;
     private final LanguageManager languageManager;
     private OptionButton forceUnicodeButton;

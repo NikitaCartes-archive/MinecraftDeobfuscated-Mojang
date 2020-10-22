@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.network.Connection;
@@ -30,6 +31,7 @@ import net.minecraft.network.protocol.login.ServerboundKeyPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Crypt;
+import net.minecraft.util.CryptException;
 import net.minecraft.world.entity.player.Player;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
@@ -127,7 +129,7 @@ implements ServerLoginPacketListener {
         this.gameProfile = serverboundHelloPacket.getGameProfile();
         if (this.server.usesAuthentication() && !this.connection.isMemoryConnection()) {
             this.state = State.KEY;
-            this.connection.send(new ClientboundHelloPacket("", this.server.getKeyPair().getPublic(), this.nonce));
+            this.connection.send(new ClientboundHelloPacket("", this.server.getKeyPair().getPublic().getEncoded(), this.nonce));
         } else {
             this.state = State.READY_TO_ACCEPT;
         }
@@ -135,21 +137,28 @@ implements ServerLoginPacketListener {
 
     @Override
     public void handleKey(ServerboundKeyPacket serverboundKeyPacket) {
+        String string;
         Validate.validState(this.state == State.KEY, "Unexpected key packet", new Object[0]);
         PrivateKey privateKey = this.server.getKeyPair().getPrivate();
-        if (!Arrays.equals(this.nonce, serverboundKeyPacket.getNonce(privateKey))) {
-            throw new IllegalStateException("Invalid nonce!");
+        try {
+            if (!Arrays.equals(this.nonce, serverboundKeyPacket.getNonce(privateKey))) {
+                throw new IllegalStateException("Protocol error");
+            }
+            this.secretKey = serverboundKeyPacket.getSecretKey(privateKey);
+            Cipher cipher = Crypt.getCipher(2, this.secretKey);
+            Cipher cipher2 = Crypt.getCipher(1, this.secretKey);
+            string = new BigInteger(Crypt.digestData("", this.server.getKeyPair().getPublic(), this.secretKey)).toString(16);
+            this.state = State.AUTHENTICATING;
+            this.connection.setEncryptionKey(cipher, cipher2);
+        } catch (CryptException cryptException) {
+            throw new IllegalStateException("Protocol error", cryptException);
         }
-        this.secretKey = serverboundKeyPacket.getSecretKey(privateKey);
-        this.state = State.AUTHENTICATING;
-        this.connection.setEncryptionKey(this.secretKey);
         Thread thread = new Thread("User Authenticator #" + UNIQUE_THREAD_ID.incrementAndGet()){
 
             @Override
             public void run() {
                 GameProfile gameProfile = ServerLoginPacketListenerImpl.this.gameProfile;
                 try {
-                    String string = new BigInteger(Crypt.digestData("", ServerLoginPacketListenerImpl.this.server.getKeyPair().getPublic(), ServerLoginPacketListenerImpl.this.secretKey)).toString(16);
                     ServerLoginPacketListenerImpl.this.gameProfile = ServerLoginPacketListenerImpl.this.server.getSessionService().hasJoinedServer(new GameProfile(null, gameProfile.getName()), string, this.getAddress());
                     if (ServerLoginPacketListenerImpl.this.gameProfile != null) {
                         LOGGER.info("UUID of player {} is {}", (Object)ServerLoginPacketListenerImpl.this.gameProfile.getName(), (Object)ServerLoginPacketListenerImpl.this.gameProfile.getId());

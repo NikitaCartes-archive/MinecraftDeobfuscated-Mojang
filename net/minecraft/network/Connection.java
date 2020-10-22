@@ -32,7 +32,7 @@ import io.netty.util.concurrent.GenericFutureListener;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.util.Queue;
-import javax.crypto.SecretKey;
+import javax.crypto.Cipher;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.CipherDecoder;
@@ -54,7 +54,6 @@ import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.server.RunningOnDifferentThreadException;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
-import net.minecraft.util.Crypt;
 import net.minecraft.util.LazyLoadedValue;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.Validate;
@@ -301,10 +300,10 @@ extends SimpleChannelInboundHandler<Packet<?>> {
         return connection;
     }
 
-    public void setEncryptionKey(SecretKey secretKey) {
+    public void setEncryptionKey(Cipher cipher, Cipher cipher2) {
         this.encrypted = true;
-        this.channel.pipeline().addBefore("splitter", "decrypt", new CipherDecoder(Crypt.getCipher(2, secretKey)));
-        this.channel.pipeline().addBefore("prepender", "encrypt", new CipherEncoder(Crypt.getCipher(1, secretKey)));
+        this.channel.pipeline().addBefore("splitter", "decrypt", new CipherDecoder(cipher));
+        this.channel.pipeline().addBefore("prepender", "encrypt", new CipherEncoder(cipher2));
     }
 
     @Environment(value=EnvType.CLIENT)

@@ -234,6 +234,7 @@ implements Widget {
             tesselator.end();
         }
         if ((q = this.getMaxScroll()) > 0) {
+            RenderSystem.disableTexture();
             o = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
             o = Mth.clamp(o, 32, this.y1 - this.y0 - 8);
             p = (int)this.getScrollAmount() * (this.y1 - this.y0 - o) / q + this.y0;
@@ -450,6 +451,10 @@ implements Widget {
 
     public int getRowLeft() {
         return this.x0 + this.width / 2 - this.getRowWidth() / 2 + 2;
+    }
+
+    public int getRowRight() {
+        return this.getRowLeft() + this.getRowWidth();
     }
 
     protected int getRowTop(int i) {

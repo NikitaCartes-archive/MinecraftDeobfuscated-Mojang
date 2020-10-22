@@ -8,7 +8,10 @@ import com.google.common.collect.Queues;
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
+import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
+import com.mojang.authlib.minecraft.OfflineSocialInteractions;
+import com.mojang.authlib.minecraft.SocialInteractionsService;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.blaze3d.pipeline.RenderTarget;
@@ -307,6 +310,7 @@ WindowEventHandler {
     private final SplashManager splashManager;
     private final GpuWarnlistManager gpuWarnlistManager;
     private final MinecraftSessionService minecraftSessionService;
+    private final SocialInteractionsService socialInteractionsService;
     private final SkinManager skinManager;
     private final ModelManager modelManager;
     private final BlockRenderDispatcher blockRenderer;
@@ -385,7 +389,9 @@ WindowEventHandler {
         this.clientPackSource = new ClientPackSource(new File(this.gameDirectory, "server-resource-packs"), gameConfig.location.getAssetIndex());
         this.resourcePackRepository = new PackRepository(Minecraft::createClientPackAdapter, this.clientPackSource, new FolderRepositorySource(this.resourcePackDirectory, PackSource.DEFAULT));
         this.proxy = gameConfig.user.proxy;
-        this.minecraftSessionService = new YggdrasilAuthenticationService(this.proxy, UUID.randomUUID().toString()).createMinecraftSessionService();
+        YggdrasilAuthenticationService yggdrasilAuthenticationService = new YggdrasilAuthenticationService(this.proxy);
+        this.minecraftSessionService = yggdrasilAuthenticationService.createMinecraftSessionService();
+        this.socialInteractionsService = this.createSocialInteractions(yggdrasilAuthenticationService, gameConfig);
         this.user = gameConfig.user.user;
         LOGGER.info("Setting user: {}", (Object)this.user.getName());
         LOGGER.debug("(Session ID is {})", (Object)this.user.getSessionId());
@@ -394,7 +400,7 @@ WindowEventHandler {
         this.allowsChat = !gameConfig.game.disableChat;
         this.is64bit = Minecraft.checkIs64Bit();
         this.singleplayerServer = null;
-        if (this.allowsMultiplayer && gameConfig.server.hostname != null) {
+        if (this.allowsMultiplayer() && gameConfig.server.hostname != null) {
             string = gameConfig.server.hostname;
             i = gameConfig.server.port;
         } else {
@@ -463,7 +469,7 @@ WindowEventHandler {
         this.renderBuffers = new RenderBuffers();
         this.gameRenderer = new GameRenderer(this, this.resourceManager, this.renderBuffers);
         this.resourceManager.registerReloadListener(this.gameRenderer);
-        this.playerSocialManager = new PlayerSocialManager(this);
+        this.playerSocialManager = new PlayerSocialManager(this, this.socialInteractionsService);
         this.blockRenderer = new BlockRenderDispatcher(this.modelManager.getBlockModelShaper(), this.blockColors);
         this.resourceManager.registerReloadListener(this.blockRenderer);
         this.levelRenderer = new LevelRenderer(this, this.renderBuffers);
@@ -528,6 +534,15 @@ WindowEventHandler {
             }
         }
         return stringBuilder.toString();
+    }
+
+    private SocialInteractionsService createSocialInteractions(YggdrasilAuthenticationService yggdrasilAuthenticationService, GameConfig gameConfig) {
+        try {
+            return yggdrasilAuthenticationService.createSocialInteractionsService(gameConfig.user.user.getAccessToken());
+        } catch (AuthenticationException authenticationException) {
+            LOGGER.error("Failed to verify authentication", (Throwable)authenticationException);
+            return new OfflineSocialInteractions();
+        }
     }
 
     public boolean isProbablyModded() {
@@ -1519,7 +1534,7 @@ WindowEventHandler {
         try {
             levelStorageAccess.saveDataTag(registryHolder, worldData);
             serverStem.serverResources().updateGlobals();
-            YggdrasilAuthenticationService yggdrasilAuthenticationService = new YggdrasilAuthenticationService(this.proxy, UUID.randomUUID().toString());
+            YggdrasilAuthenticationService yggdrasilAuthenticationService = new YggdrasilAuthenticationService(this.proxy);
             MinecraftSessionService minecraftSessionService = yggdrasilAuthenticationService.createMinecraftSessionService();
             GameProfileRepository gameProfileRepository = yggdrasilAuthenticationService.createProfileRepository();
             GameProfileCache gameProfileCache = new GameProfileCache(gameProfileRepository, new File(this.gameDirectory, MinecraftServer.USERID_CACHE_FILE.getName()));
@@ -1624,7 +1639,7 @@ WindowEventHandler {
         this.level = clientLevel;
         this.updateLevelInEngines(clientLevel);
         if (!this.isLocalServer) {
-            YggdrasilAuthenticationService authenticationService = new YggdrasilAuthenticationService(this.proxy, UUID.randomUUID().toString());
+            YggdrasilAuthenticationService authenticationService = new YggdrasilAuthenticationService(this.proxy);
             MinecraftSessionService minecraftSessionService = authenticationService.createMinecraftSessionService();
             GameProfileRepository gameProfileRepository = authenticationService.createProfileRepository();
             GameProfileCache gameProfileCache = new GameProfileCache(gameProfileRepository, new File(this.gameDirectory, MinecraftServer.USERID_CACHE_FILE.getName()));
@@ -1694,18 +1709,18 @@ WindowEventHandler {
     }
 
     public boolean allowsMultiplayer() {
-        return this.allowsMultiplayer;
+        return this.allowsMultiplayer && this.socialInteractionsService.serversAllowed();
     }
 
     public boolean isBlocked(UUID uUID) {
         if (!this.allowsChat()) {
             return (this.player == null || !uUID.equals(this.player.getUUID())) && !uUID.equals(Util.NIL_UUID);
         }
-        return this.playerSocialManager.isHidden(uUID);
+        return this.playerSocialManager.shouldHideMessageFrom(uUID);
     }
 
     public boolean allowsChat() {
-        return this.allowsChat;
+        return this.allowsChat && this.socialInteractionsService.chatAllowed();
     }
 
     public final boolean isDemo() {

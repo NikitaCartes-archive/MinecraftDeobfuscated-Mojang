@@ -33,7 +33,7 @@ implements ServerHandshakePacketListener {
             case LOGIN: {
                 this.connection.setProtocol(ConnectionProtocol.LOGIN);
                 if (clientIntentionPacket.getProtocolVersion() != SharedConstants.getCurrentVersion().getProtocolVersion()) {
-                    TranslatableComponent component = new TranslatableComponent("multiplayer.disconnect.incompatible", SharedConstants.getCurrentVersion().getName());
+                    TranslatableComponent component = clientIntentionPacket.getProtocolVersion() < 754 ? new TranslatableComponent("multiplayer.disconnect.outdated_client", SharedConstants.getCurrentVersion().getName()) : new TranslatableComponent("multiplayer.disconnect.incompatible", SharedConstants.getCurrentVersion().getName());
                     this.connection.send(new ClientboundLoginDisconnectPacket(component));
                     this.connection.disconnect(component);
                     break;

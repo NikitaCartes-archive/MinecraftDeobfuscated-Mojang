@@ -344,7 +344,7 @@ implements Enemy {
             if (!(entity instanceof LivingEntity)) continue;
             double f = entity.getX() - d;
             double g = entity.getZ() - e;
-            double h = f * f + g * g;
+            double h = Math.max(f * f + g * g, 0.1);
             entity.push(f / h * 4.0, 0.2f, g / h * 4.0);
             if (this.phaseManager.getCurrentPhase().isSitting() || ((LivingEntity)entity).getLastHurtByMobTimestamp() >= entity.tickCount - 2) continue;
             entity.hurt(DamageSource.mobAttack(this), 5.0f);

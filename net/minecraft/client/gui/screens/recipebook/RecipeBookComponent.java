@@ -208,6 +208,7 @@ PlaceRecipe<Ingredient> {
             this.updateStackedContents();
             this.timesInventoryChanged = this.minecraft.player.inventory.getTimesChanged();
         }
+        this.searchBox.tick();
     }
 
     private void updateStackedContents() {
