@@ -59,7 +59,7 @@ extends Screen {
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
         this.renderDirtBackground(0);
-        SafetyScreen.drawCenteredString(poseStack, this.font, TITLE, this.width / 2, 30, 0xFFFFFF);
+        SafetyScreen.drawString(poseStack, this.font, TITLE, 25, 30, 0xFFFFFF);
         this.message.renderLeftAligned(poseStack, 25, 70, this.font.lineHeight * 2, 0xFFFFFF);
         super.render(poseStack, i, j, f);
     }

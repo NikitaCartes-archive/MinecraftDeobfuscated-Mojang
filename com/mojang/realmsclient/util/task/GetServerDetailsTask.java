@@ -103,7 +103,7 @@ extends LongRunningTask {
                                     return null;
                                 };
                                 try {
-                                    ((CompletableFuture)Minecraft.getInstance().getClientPackSource().downloadAndSelectResourcePack(realmsServerAddress.resourcePackUrl, realmsServerAddress.resourcePackHash).thenRun(() -> this.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new ConnectTask(this.lastScreen, realmsServerAddress2))))).exceptionally(function);
+                                    ((CompletableFuture)Minecraft.getInstance().getClientPackSource().downloadAndSelectResourcePack(realmsServerAddress.resourcePackUrl, realmsServerAddress.resourcePackHash).thenRun(() -> this.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new ConnectTask(this.lastScreen, this.server, realmsServerAddress2))))).exceptionally(function);
                                 } catch (Exception exception) {
                                     function.apply(exception);
                                 }
@@ -117,7 +117,7 @@ extends LongRunningTask {
                         }
                     }, RealmsLongConfirmationScreen.Type.Info, component, component2, true));
                 } else {
-                    this.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new ConnectTask(this.lastScreen, realmsServerAddress2)));
+                    this.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new ConnectTask(this.lastScreen, this.server, realmsServerAddress2)));
                 }
             } else {
                 this.error(new TranslatableComponent("mco.errorMessage.connectionFailure"));

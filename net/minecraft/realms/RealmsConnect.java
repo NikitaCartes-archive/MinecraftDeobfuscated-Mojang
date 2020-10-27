@@ -3,6 +3,7 @@
  */
 package net.minecraft.realms;
 
+import com.mojang.realmsclient.dto.RealmsServer;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import net.fabricmc.api.EnvType;
@@ -33,7 +34,7 @@ public class RealmsConnect {
         this.onlineScreen = screen;
     }
 
-    public void connect(final String string, final int i) {
+    public void connect(final RealmsServer realmsServer, final String string, final int i) {
         final Minecraft minecraft = Minecraft.getInstance();
         minecraft.setConnectedToRealms(true);
         NarrationHelper.now(I18n.get("mco.connect.success", new Object[0]));
@@ -60,6 +61,7 @@ public class RealmsConnect {
                         return;
                     }
                     RealmsConnect.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getGameProfile()));
+                    minecraft.setCurrentServer(realmsServer.toServerData(string));
                 } catch (UnknownHostException unknownHostException) {
                     minecraft.getClientPackSource().clearServerPack();
                     if (RealmsConnect.this.aborted) {

@@ -28,6 +28,7 @@ import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ServerData;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -251,6 +252,10 @@ extends ValueObject {
 
     public String getWorldName(int i) {
         return this.name + " (" + this.slots.get(i).getSlotName(i) + ")";
+    }
+
+    public ServerData toServerData(String string) {
+        return new ServerData(this.name, string, false);
     }
 
     public /* synthetic */ Object clone() throws CloneNotSupportedException {

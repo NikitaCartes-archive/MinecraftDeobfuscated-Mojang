@@ -86,7 +86,7 @@ implements ServerInterface {
         super(thread, registryHolder, levelStorageAccess, worldData, packRepository, Proxy.NO_PROXY, dataFixer, serverResources, minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
         this.settings = dedicatedServerSettings;
         this.rconConsoleSource = new RconConsoleSource(this);
-        this.textFilterClient = TextFilterClient.createFromConfig(dedicatedServerSettings.getProperties().textFilteringConfig);
+        this.textFilterClient = null;
     }
 
     @Override

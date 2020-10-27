@@ -30,9 +30,6 @@ implements ChatListener {
 
     @Override
     public void handle(ChatType chatType, Component component, UUID uUID) {
-        if (Minecraft.getInstance().isBlocked(uUID)) {
-            return;
-        }
         NarratorStatus narratorStatus = NarratorChatListener.getStatus();
         if (narratorStatus == NarratorStatus.OFF || !this.narrator.active()) {
             return;

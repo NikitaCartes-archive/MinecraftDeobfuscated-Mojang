@@ -3,7 +3,6 @@
  */
 package net.minecraft.server.network;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
@@ -15,8 +14,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -24,7 +21,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.SharedConstants;
@@ -32,10 +28,8 @@ import net.minecraft.Util;
 import net.minecraft.server.network.TextFilter;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.thread.ProcessorMailbox;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.Nullable;
 
 public class TextFilterClient
 implements AutoCloseable {
@@ -54,41 +48,6 @@ implements AutoCloseable {
     private final String serverId;
     private final IgnoreStrategy chatIgnoreStrategy;
     private final ExecutorService workerPool;
-
-    private TextFilterClient(URI uRI, String string, int i, String string2, IgnoreStrategy ignoreStrategy, int j) throws MalformedURLException {
-        this.authKey = string;
-        this.ruleId = i;
-        this.serverId = string2;
-        this.chatIgnoreStrategy = ignoreStrategy;
-        this.chatEndpoint = uRI.resolve("/v1/chat").toURL();
-        this.joinEndpoint = uRI.resolve("/v1/join").toURL();
-        this.leaveEndpoint = uRI.resolve("/v1/leave").toURL();
-        this.workerPool = Executors.newFixedThreadPool(j, THREAD_FACTORY);
-    }
-
-    @Nullable
-    public static TextFilterClient createFromConfig(String string) {
-        if (Strings.isNullOrEmpty(string)) {
-            return null;
-        }
-        try {
-            JsonObject jsonObject = GsonHelper.parse(string);
-            URI uRI = new URI(GsonHelper.getAsString(jsonObject, "apiServer"));
-            String string2 = GsonHelper.getAsString(jsonObject, "apiKey");
-            if (string2.isEmpty()) {
-                throw new IllegalArgumentException("Missing API key");
-            }
-            int i = GsonHelper.getAsInt(jsonObject, "ruleId", 1);
-            String string3 = GsonHelper.getAsString(jsonObject, "serverId", "");
-            int j = GsonHelper.getAsInt(jsonObject, "hashesToDrop", -1);
-            int k = GsonHelper.getAsInt(jsonObject, "maxConcurrentRequests", 7);
-            IgnoreStrategy ignoreStrategy = IgnoreStrategy.select(j);
-            return new TextFilterClient(uRI, new Base64().encodeToString(string2.getBytes(StandardCharsets.US_ASCII)), i, string3, ignoreStrategy, k);
-        } catch (Exception exception) {
-            LOGGER.warn("Failed to parse chat filter config {}", (Object)string, (Object)exception);
-            return null;
-        }
-    }
 
     private void processJoinOrLeave(GameProfile gameProfile, URL uRL, Executor executor) {
         JsonObject jsonObject = new JsonObject();
@@ -213,22 +172,6 @@ implements AutoCloseable {
     public static interface IgnoreStrategy {
         public static final IgnoreStrategy NEVER_IGNORE = (string, i) -> false;
         public static final IgnoreStrategy IGNORE_FULLY_FILTERED = (string, i) -> string.length() == i;
-
-        public static IgnoreStrategy ignoreOverThreshold(int i) {
-            return (string, j) -> j >= i;
-        }
-
-        public static IgnoreStrategy select(int i) {
-            switch (i) {
-                case -1: {
-                    return NEVER_IGNORE;
-                }
-                case 0: {
-                    return IGNORE_FULLY_FILTERED;
-                }
-            }
-            return IgnoreStrategy.ignoreOverThreshold(i);
-        }
 
         public boolean shouldIgnore(String var1, int var2);
     }

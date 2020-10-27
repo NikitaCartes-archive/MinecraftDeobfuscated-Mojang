@@ -126,5 +126,14 @@ public class StringDecomposer {
         });
         return stringBuilder.toString();
     }
+
+    public static String getPlainText(FormattedText formattedText) {
+        StringBuilder stringBuilder = new StringBuilder();
+        StringDecomposer.iterateFormatted(formattedText, Style.EMPTY, (int i, Style style, int j) -> {
+            stringBuilder.appendCodePoint(j);
+            return true;
+        });
+        return stringBuilder.toString();
+    }
 }
 

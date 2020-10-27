@@ -60,7 +60,7 @@ extends ContainerObjectSelectionList<PlayerEntry> {
 
     private void updateFilteredPlayers() {
         if (this.filter != null) {
-            this.players.removeIf(playerEntry -> !playerEntry.getPlayerName().toLowerCase(Locale.ROOT).startsWith(this.filter));
+            this.players.removeIf(playerEntry -> !playerEntry.getPlayerName().toLowerCase(Locale.ROOT).contains(this.filter));
             this.replaceEntries(this.players);
         }
     }
@@ -80,7 +80,7 @@ extends ContainerObjectSelectionList<PlayerEntry> {
             playerEntry.setRemoved(false);
             return;
         }
-        if ((page == SocialInteractionsScreen.Page.ALL || this.minecraft.getPlayerSocialManager().shouldHideMessageFrom(uUID)) && (Strings.isNullOrEmpty(this.filter) || playerInfo.getProfile().getName().toLowerCase(Locale.ROOT).startsWith(this.filter))) {
+        if ((page == SocialInteractionsScreen.Page.ALL || this.minecraft.getPlayerSocialManager().shouldHideMessageFrom(uUID)) && (Strings.isNullOrEmpty(this.filter) || playerInfo.getProfile().getName().toLowerCase(Locale.ROOT).contains(this.filter))) {
             PlayerEntry playerEntry2 = new PlayerEntry(this.minecraft, this.socialInteractionsScreen, playerInfo.getProfile().getId(), playerInfo.getProfile().getName(), playerInfo::getSkinLocation);
             this.addEntry(playerEntry2);
             this.players.add(playerEntry2);

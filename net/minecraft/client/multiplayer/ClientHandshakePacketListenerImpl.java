@@ -6,6 +6,7 @@ package net.minecraft.client.multiplayer;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
+import com.mojang.authlib.exceptions.InsufficientPrivilegesException;
 import com.mojang.authlib.exceptions.InvalidCredentialsException;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import java.math.BigInteger;
@@ -99,6 +100,8 @@ implements ClientLoginPacketListener {
             return new TranslatableComponent("disconnect.loginFailedInfo", new TranslatableComponent("disconnect.loginFailedInfo.serversUnavailable"));
         } catch (InvalidCredentialsException invalidCredentialsException) {
             return new TranslatableComponent("disconnect.loginFailedInfo", new TranslatableComponent("disconnect.loginFailedInfo.invalidSession"));
+        } catch (InsufficientPrivilegesException insufficientPrivilegesException) {
+            return new TranslatableComponent("disconnect.loginFailedInfo", new TranslatableComponent("disconnect.loginFailedInfo.insufficientPrivileges"));
         } catch (AuthenticationException authenticationException) {
             return new TranslatableComponent("disconnect.loginFailedInfo", authenticationException.getMessage());
         }
