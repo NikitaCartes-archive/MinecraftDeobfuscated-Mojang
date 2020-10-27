@@ -109,6 +109,7 @@ public class Options {
 	public boolean toggleCrouch;
 	public boolean toggleSprint;
 	public boolean skipMultiplayerWarning;
+	public boolean hideMatchedNames = true;
 	public final KeyMapping keyUp = new KeyMapping("key.forward", 87, "key.categories.movement");
 	public final KeyMapping keyLeft = new KeyMapping("key.left", 65, "key.categories.movement");
 	public final KeyMapping keyDown = new KeyMapping("key.back", 83, "key.categories.movement");
@@ -557,6 +558,10 @@ public class Options {
 						this.skipMultiplayerWarning = "true".equals(string2);
 					}
 
+					if ("hideMatchedNames".equals(string)) {
+						this.hideMatchedNames = "true".equals(string2);
+					}
+
 					if ("joinedFirstServer".equals(string)) {
 						this.joinedFirstServer = "true".equals(string2);
 					}
@@ -697,6 +702,7 @@ public class Options {
 				printWriter.println("rawMouseInput:" + Option.RAW_MOUSE_INPUT.get(this));
 				printWriter.println("glDebugVerbosity:" + this.glDebugVerbosity);
 				printWriter.println("skipMultiplayerWarning:" + this.skipMultiplayerWarning);
+				printWriter.println("hideMatchedNames:" + this.hideMatchedNames);
 				printWriter.println("joinedFirstServer:" + this.joinedFirstServer);
 				printWriter.println("syncChunkWrites:" + this.syncWrites);
 

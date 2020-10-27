@@ -51,6 +51,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
+import net.minecraft.util.StringDecomposer;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.effect.MobEffect;
@@ -74,6 +75,7 @@ import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
+import org.apache.commons.lang3.StringUtils;
 
 @Environment(EnvType.CLIENT)
 public class Gui extends GuiComponent {
@@ -1112,9 +1114,19 @@ public class Gui extends GuiComponent {
 		}
 	}
 
+	public UUID guessChatUUID(Component component) {
+		String string = StringDecomposer.getPlainText(component);
+		String string2 = StringUtils.substringBetween(string, "<", ">");
+		return string2 == null ? Util.NIL_UUID : this.minecraft.getPlayerSocialManager().getDiscoveredUUID(string2);
+	}
+
 	public void handleChat(ChatType chatType, Component component, UUID uUID) {
-		for (ChatListener chatListener : (List)this.chatListeners.get(chatType)) {
-			chatListener.handle(chatType, component, uUID);
+		if (!this.minecraft.isBlocked(uUID)) {
+			if (!this.minecraft.options.hideMatchedNames || !this.minecraft.isBlocked(this.guessChatUUID(component))) {
+				for (ChatListener chatListener : (List)this.chatListeners.get(chatType)) {
+					chatListener.handle(chatType, component, uUID);
+				}
+			}
 		}
 	}
 

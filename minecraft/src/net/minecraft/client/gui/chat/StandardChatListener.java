@@ -17,12 +17,10 @@ public class StandardChatListener implements ChatListener {
 
 	@Override
 	public void handle(ChatType chatType, Component component, UUID uUID) {
-		if (!this.minecraft.isBlocked(uUID)) {
-			if (chatType != ChatType.CHAT) {
-				this.minecraft.gui.getChat().addMessage(component);
-			} else {
-				this.minecraft.gui.getChat().enqueueMessage(component);
-			}
+		if (chatType != ChatType.CHAT) {
+			this.minecraft.gui.getChat().addMessage(component);
+		} else {
+			this.minecraft.gui.getChat().enqueueMessage(component);
 		}
 	}
 }

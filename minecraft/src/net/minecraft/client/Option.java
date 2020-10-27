@@ -333,11 +333,15 @@ public abstract class Option {
 				new TranslatableComponent(options.backgroundForChatOnly ? "options.accessibility.text_background.chat" : "options.accessibility.text_background.everywhere")
 			)
 	);
+	private static final Component CHAT_TOOLTIP_HIDE_MATCHED_NAMES = new TranslatableComponent("options.hideMatchedNames.tooltip");
 	public static final BooleanOption AUTO_JUMP = new BooleanOption(
 		"options.autoJump", options -> options.autoJump, (options, boolean_) -> options.autoJump = boolean_
 	);
 	public static final BooleanOption AUTO_SUGGESTIONS = new BooleanOption(
 		"options.autoSuggestCommands", options -> options.autoSuggestions, (options, boolean_) -> options.autoSuggestions = boolean_
+	);
+	public static final BooleanOption HIDE_MATCHED_NAMES = new BooleanOption(
+		"options.hideMatchedNames", CHAT_TOOLTIP_HIDE_MATCHED_NAMES, options -> options.hideMatchedNames, (options, boolean_) -> options.hideMatchedNames = boolean_
 	);
 	public static final BooleanOption CHAT_COLOR = new BooleanOption(
 		"options.chat.color", options -> options.chatColors, (options, boolean_) -> options.chatColors = boolean_

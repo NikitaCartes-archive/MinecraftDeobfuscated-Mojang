@@ -1,6 +1,5 @@
 package net.minecraft.server.network;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
@@ -12,8 +11,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -21,15 +18,12 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.thread.ProcessorMailbox;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -49,43 +43,6 @@ public class TextFilterClient implements AutoCloseable {
 	private final String serverId;
 	private final TextFilterClient.IgnoreStrategy chatIgnoreStrategy;
 	private final ExecutorService workerPool;
-
-	private TextFilterClient(URI uRI, String string, int i, String string2, TextFilterClient.IgnoreStrategy ignoreStrategy, int j) throws MalformedURLException {
-		this.authKey = string;
-		this.ruleId = i;
-		this.serverId = string2;
-		this.chatIgnoreStrategy = ignoreStrategy;
-		this.chatEndpoint = uRI.resolve("/v1/chat").toURL();
-		this.joinEndpoint = uRI.resolve("/v1/join").toURL();
-		this.leaveEndpoint = uRI.resolve("/v1/leave").toURL();
-		this.workerPool = Executors.newFixedThreadPool(j, THREAD_FACTORY);
-	}
-
-	@Nullable
-	public static TextFilterClient createFromConfig(String string) {
-		if (Strings.isNullOrEmpty(string)) {
-			return null;
-		} else {
-			try {
-				JsonObject jsonObject = GsonHelper.parse(string);
-				URI uRI = new URI(GsonHelper.getAsString(jsonObject, "apiServer"));
-				String string2 = GsonHelper.getAsString(jsonObject, "apiKey");
-				if (string2.isEmpty()) {
-					throw new IllegalArgumentException("Missing API key");
-				} else {
-					int i = GsonHelper.getAsInt(jsonObject, "ruleId", 1);
-					String string3 = GsonHelper.getAsString(jsonObject, "serverId", "");
-					int j = GsonHelper.getAsInt(jsonObject, "hashesToDrop", -1);
-					int k = GsonHelper.getAsInt(jsonObject, "maxConcurrentRequests", 7);
-					TextFilterClient.IgnoreStrategy ignoreStrategy = TextFilterClient.IgnoreStrategy.select(j);
-					return new TextFilterClient(uRI, new Base64().encodeToString(string2.getBytes(StandardCharsets.US_ASCII)), i, string3, ignoreStrategy, k);
-				}
-			} catch (Exception var9) {
-				LOGGER.warn("Failed to parse chat filter config {}", string, var9);
-				return null;
-			}
-		}
-	}
 
 	private void processJoinOrLeave(GameProfile gameProfile, URL uRL, Executor executor) {
 		JsonObject jsonObject = new JsonObject();
@@ -280,21 +237,6 @@ public class TextFilterClient implements AutoCloseable {
 	public interface IgnoreStrategy {
 		TextFilterClient.IgnoreStrategy NEVER_IGNORE = (string, i) -> false;
 		TextFilterClient.IgnoreStrategy IGNORE_FULLY_FILTERED = (string, i) -> string.length() == i;
-
-		static TextFilterClient.IgnoreStrategy ignoreOverThreshold(int i) {
-			return (string, j) -> j >= i;
-		}
-
-		static TextFilterClient.IgnoreStrategy select(int i) {
-			switch (i) {
-				case -1:
-					return NEVER_IGNORE;
-				case 0:
-					return IGNORE_FULLY_FILTERED;
-				default:
-					return ignoreOverThreshold(i);
-			}
-		}
 
 		boolean shouldIgnore(String string, int i);
 	}

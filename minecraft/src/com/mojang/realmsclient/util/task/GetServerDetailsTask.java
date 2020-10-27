@@ -110,7 +110,9 @@ public class GetServerDetailsTask extends LongRunningTask {
 											Minecraft.getInstance()
 												.getClientPackSource()
 												.downloadAndSelectResourcePack(realmsServerAddress2.resourcePackUrl, realmsServerAddress2.resourcePackHash)
-												.thenRun(() -> this.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new ConnectTask(this.lastScreen, realmsServerAddress2))))
+												.thenRun(
+													() -> this.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new ConnectTask(this.lastScreen, this.server, realmsServerAddress2)))
+												)
 												.exceptionally(function);
 										} catch (Exception var8x) {
 											function.apply(var8x);
@@ -131,7 +133,7 @@ public class GetServerDetailsTask extends LongRunningTask {
 						)
 					);
 				} else {
-					this.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new ConnectTask(this.lastScreen, realmsServerAddress2)));
+					this.setScreen(new RealmsLongRunningMcoTaskScreen(this.lastScreen, new ConnectTask(this.lastScreen, this.server, realmsServerAddress2)));
 				}
 			} else {
 				this.error(new TranslatableComponent("mco.errorMessage.connectionFailure"));

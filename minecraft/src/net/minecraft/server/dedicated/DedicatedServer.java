@@ -103,7 +103,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 		);
 		this.settings = dedicatedServerSettings;
 		this.rconConsoleSource = new RconConsoleSource(this);
-		this.textFilterClient = TextFilterClient.createFromConfig(dedicatedServerSettings.getProperties().textFilteringConfig);
+		this.textFilterClient = null;
 	}
 
 	@Override

@@ -23,6 +23,7 @@ public class ChatOptionsScreen extends SimpleOptionsSubScreen {
 		Option.CHAT_HEIGHT_UNFOCUSED,
 		Option.NARRATOR,
 		Option.AUTO_SUGGESTIONS,
+		Option.HIDE_MATCHED_NAMES,
 		Option.REDUCED_DEBUG_INFO
 	};
 

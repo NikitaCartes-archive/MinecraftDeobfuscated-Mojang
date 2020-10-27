@@ -17,8 +17,6 @@ public class OverlayChatListener implements ChatListener {
 
 	@Override
 	public void handle(ChatType chatType, Component component, UUID uUID) {
-		if (!this.minecraft.isBlocked(uUID)) {
-			this.minecraft.gui.setOverlayMessage(component, false);
-		}
+		this.minecraft.gui.setOverlayMessage(component, false);
 	}
 }
